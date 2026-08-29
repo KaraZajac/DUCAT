@@ -81,4 +81,5 @@
     <string name="split_back_to_them">Proposta: %1$s de volta para %3$s, %2$s para você.</string>
     <string name="split_fee_yours">A taxa da rede sai da sua parte, por isso chega um pouco menos.</string>
     <string name="split_fee_theirs">A taxa da rede sai da parte de %1$s, por isso a sua chega exata.</string>
+    <string name="bond_cosigned_stuck">Você assinou, mas o dinheiro não se moveu — ainda está no depósito. O telefone deles pode ter sumido antes de transmitir.</string>
 </resources>

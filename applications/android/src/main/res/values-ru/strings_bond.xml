@@ -83,4 +83,5 @@
     <string name="split_back_to_them">Предложено: %1$s обратно %3$s, %2$s — тебе.</string>
     <string name="split_fee_yours">Комиссия сети берётся из вашей доли, поэтому придёт чуть меньше.</string>
     <string name="split_fee_theirs">Комиссия сети берётся из доли %1$s, поэтому ваша придёт ровно.</string>
+    <string name="bond_cosigned_stuck">Вы подписали, но деньги не сдвинулись — они всё ещё в эскроу. Их телефон мог отключиться до трансляции.</string>
 </resources>

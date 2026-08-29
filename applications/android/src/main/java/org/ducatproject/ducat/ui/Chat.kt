@@ -3628,6 +3628,51 @@ private fun RideBondBanner(contact: Contact) {
                     text = stringResource(R.string.bond_called_off),
                 )
                 stage == "released" || stage == "release_cosigned" -> {
+                    // The settle probe's verdict outranks the stage: signed
+                    // is not settled, and a co-signer whose proposer died
+                    // before broadcasting was reading "Fare released ✓" over
+                    // money still in the escrow — for days. When the probe
+                    // has seen the money still there, say so and offer the
+                    // way out: the same split, proposed again, their consent
+                    // screen, whoever signs ends it.
+                    val stuckAt = ride.optLong("stillFundedAt")
+                    if (stage == "release_cosigned" && stuckAt > 0) {
+                        BondLine(
+                            spin = false,
+                            text = stringResource(R.string.bond_cosigned_stuck),
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        OutlinedButton(
+                            onClick = {
+                                busy = true; error = null
+                                scope.launch {
+                                    val r = withContext(Dispatchers.IO) {
+                                        runCatching {
+                                            val back = ride.optLong("pendingRiderBack", -1L)
+                                            if (back >= 0) {
+                                                org.ducatproject.ducat.Ceremony
+                                                    .proposeRideSplit(context, idHex, back)
+                                            } else {
+                                                org.ducatproject.ducat.Ceremony
+                                                    .proposeRideRelease(context, idHex)
+                                            }
+                                        }
+                                    }
+                                    r.onFailure {
+                                        org.ducatproject.ducat.DucatLog.w(
+                                            "Chat", "re-propose: ${it.message}",
+                                        )
+                                        error = trouble(context, it)
+                                    }
+                                    busy = false
+                                }
+                            },
+                            enabled = !busy,
+                            modifier = Modifier.fillMaxWidth().height(40.dp),
+                        ) { Text(stringResource(R.string.bond_ask_again)) }
+                        BondNote(stringResource(R.string.bond_ask_again_note))
+                        return@Column
+                    }
                     BondLine(
                         spin = false,
                         done = true,

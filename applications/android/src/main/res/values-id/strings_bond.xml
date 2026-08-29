@@ -80,4 +80,5 @@
     <string name="split_back_to_them">Usulan: %1$s kembali ke %3$s, %2$s untuk Anda.</string>
     <string name="split_fee_yours">Biaya jaringan diambil dari bagian Anda, jadi yang sampai sedikit lebih kecil.</string>
     <string name="split_fee_theirs">Biaya jaringan diambil dari bagian %1$s, jadi bagian Anda sampai persis.</string>
+    <string name="bond_cosigned_stuck">Anda sudah menandatangani, tetapi uangnya belum bergerak — masih di escrow. Ponsel mereka mungkin mati sebelum menyiarkan.</string>
 </resources>

@@ -85,4 +85,5 @@
     <string name="split_back_to_them">المقترح: %1$s تعود إلى %3$s، و%2$s إليك.</string>
     <string name="split_fee_yours">‏رسوم الشبكة تُخصم من حصتك، لذا يصل أقل قليلاً من ذلك.</string>
     <string name="split_fee_theirs">‏رسوم الشبكة تُخصم من حصة %1$s، لذا تصل حصتك كاملة.</string>
+    <string name="bond_cosigned_stuck">لقد وقّعت، لكن المال لم يتحرك — لا يزال في الضمان. ربما توقف هاتفهم قبل البث.</string>
 </resources>

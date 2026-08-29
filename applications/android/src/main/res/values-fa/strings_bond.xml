@@ -81,4 +81,5 @@
     <string name="split_back_to_them">پیشنهاد: %1$s به %3$s برمی‌گردد، %2$s به شما.</string>
     <string name="split_fee_yours">‏کارمزد شبکه از سهم شما کم می‌شود، پس کمی کمتر از آن می‌رسد.</string>
     <string name="split_fee_theirs">‏کارمزد شبکه از سهم %1$s کم می‌شود، پس سهم شما دقیقاً می‌رسد.</string>
+    <string name="bond_cosigned_stuck">شما امضا کردید، اما پول حرکت نکرده — هنوز در امانی است. شاید گوشی آن‌ها پیش از پخش خاموش شده باشد.</string>
 </resources>

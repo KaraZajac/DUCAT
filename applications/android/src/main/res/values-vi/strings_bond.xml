@@ -80,4 +80,5 @@
     <string name="split_back_to_them">Đề xuất: %1$s trả lại cho %3$s, %2$s cho bạn.</string>
     <string name="split_fee_yours">Phí mạng trừ vào phần của bạn, nên số đến sẽ ít hơn một chút.</string>
     <string name="split_fee_theirs">Phí mạng trừ vào phần của %1$s, nên phần của bạn đến đúng bằng đó.</string>
+    <string name="bond_cosigned_stuck">Bạn đã ký, nhưng tiền chưa di chuyển — vẫn nằm trong ký quỹ. Điện thoại của họ có thể đã tắt trước khi phát.</string>
 </resources>

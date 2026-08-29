@@ -1077,7 +1077,17 @@ object Ceremony {
                     it.optInt("kind") == KIND_BOND &&
                     !isArbiter(it)
             }
-            .filter { it.optString("stage") == "done" }
+            // Any stage a live release can be proposed from — not only
+            // "done". A co-signer whose proposer vanished after taking the
+            // signature sat at release_cosigned over a funded escrow with no
+            // door out: proposing again is the designed recovery
+            // (onFrostRound accepts a fresh round 0 over a co-signed one for
+            // exactly this), and it was reachable from every stage except
+            // the one that needed it. Found live, with 0.0078 XMR parked.
+            .filter {
+                it.optString("stage") in
+                    setOf("done", "releasing", "release_pending", "release_cosigned")
+            }
             .maxByOrNull { it.optLong("created") }
             ?.optString("id")
             ?: throw IllegalStateException("no finished bond with this contact")
@@ -1618,8 +1628,18 @@ object Ceremony {
         // `released` one line down is the reasoning here: the party who did
         // not take the action is the one who has to be told.
         "aborted", "released", "release_cosigned" -> {
-            val at = o.optLong("settledAt")
-            at > 0L && System.currentTimeMillis() / 1000 - at < SETTLED_SHOWN_SECS
+            // Signed is only settled while the money agrees. The settle
+            // probe stamps stillFundedAt when a co-signed escrow provably
+            // still holds the pot; while that stands, this is live money
+            // needing a person, not history observing its day of display.
+            if (o.optString("stage") == "release_cosigned" &&
+                o.optLong("stillFundedAt") > 0L
+            ) {
+                true
+            } else {
+                val at = o.optLong("settledAt")
+                at > 0L && System.currentTimeMillis() / 1000 - at < SETTLED_SHOWN_SECS
+            }
         }
         else -> true
     }
@@ -2059,13 +2079,28 @@ object Ceremony {
     private val settleProbes = java.util.concurrent.ConcurrentHashMap<String, Long>()
     private const val SETTLE_PROBE_GAP_MS = 10L * 60 * 1000
 
+    /** A released record earns doubt only in a window: after the chain has
+     *  had ample time to mine it, and not so long after that history gets
+     *  re-scanned forever. */
+    private const val RELEASED_DOUBT_MIN_SECS = 30L * 60
+    private const val RELEASED_DOUBT_MAX_SECS = 7L * 24 * 3600
+    private const val RELEASED_PROBE_GAP_MS = 6L * 3600 * 1000
+
     fun checkSettled(context: Context): Int {
         val wallet = WalletStore(context)
         val ours by lazy { wallet.ourTxids() }
         val entries by lazy { wallet.entries() }
         var found = 0
         for (o in all(context)) {
-            if (isFinished(o) || !holdsShare(o)) continue
+            // release_cosigned counts as finished everywhere else — the deal
+            // needs nothing more from this device — but it is the one
+            // "finished" state whose money this device cannot watch leave,
+            // so the settle scan alone keeps an eye on it. Everything else
+            // terminal stays skipped.
+            if ((isFinished(o) &&
+                    o.optString("stage") !in setOf("release_cosigned", "released")) ||
+                !holdsShare(o)
+            ) continue
             val idHex = o.optString("id")
             if (idHex.isBlank()) continue
             // A completing marker means THIS device called frostComplete and
@@ -2083,7 +2118,9 @@ object Ceremony {
                     uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
                 }.getOrNull() ?: continue
                 if (bal == 0L) {
-                    mutate(context, idHex) { cur -> settle(cur, "released") }
+                    mutate(context, idHex) { cur ->
+                        settle(cur, "released").put("stillFundedAt", 0L)
+                    }
                     soldOne(context, o)
                     ContactStore.bump()
                     DucatLog.i(TAG, "escrow $idHex: our release landed — recovered after a death mid-broadcast")
@@ -2104,6 +2141,47 @@ object Ceremony {
             // finished days ago and the co-signing phone read "the release
             // is theirs to broadcast" for the rest of its life.
             val stage = o.optString("stage")
+            // "Released" is a claim about the chain, and the chain can take
+            // it back: a broadcast the node accepted can fall out of the
+            // mempool unmined, and this record then says settled over a pot
+            // that never moved. Seen live — txid recorded, escrow still
+            // holding 0.0078 XMR a day later, and the phone refusing every
+            // fresh proposal because "broadcast money does not renegotiate".
+            // Recent released records get one sanity probe on a slow clock;
+            // a full escrow demotes the record to "releasing" so the
+            // ordinary retry machinery can run again.
+            if (stage == "released") {
+                val settledAt = o.optLong("settledAt")
+                val ageSecs = System.currentTimeMillis() / 1000 - settledAt
+                if (settledAt <= 0 || ageSecs < RELEASED_DOUBT_MIN_SECS ||
+                    ageSecs > RELEASED_DOUBT_MAX_SECS
+                ) continue
+                val now = System.currentTimeMillis()
+                if (now - (settleProbes[idHex] ?: 0L) < RELEASED_PROBE_GAP_MS) continue
+                settleProbes[idHex] = now
+                val keys = hexToBytes(o.optString("keys")) ?: continue
+                val nodeUrl = node(context) ?: continue
+                val from = o.optLong("scanFrom").takeIf { it > 0 }
+                    ?: WalletStore(context).restoreHeight().toLong()
+                val bal = runCatching {
+                    uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
+                }.getOrNull() ?: continue
+                if (bal > 0L) {
+                    mutate(context, idHex) { cur ->
+                        cur.put("stage", "releasing")
+                        cur.put("stillFundedAt", now)
+                        cur.put("wantReleaseAt", System.currentTimeMillis())
+                    }
+                    ContactStore.bump()
+                    DucatLog.w(
+                        TAG,
+                        "escrow $idHex: recorded released but still holds " +
+                            "${formatXmr(bal)} XMR — the broadcast never mined; reopening",
+                    )
+                    found += 1
+                }
+                continue
+            }
             if (stage == "releasing" || stage == "release_cosigned") {
                 // Polite about the network: an escrow scan per pass per
                 // stuck record adds up, and this state should be rare.
@@ -2115,15 +2193,29 @@ object Ceremony {
                 val nodeUrl = node(context) ?: continue
                 val from = o.optLong("scanFrom").takeIf { it > 0 }
                     ?: WalletStore(context).restoreHeight().toLong()
+                // Every read failure here is otherwise a silent null and the
+                // record stays stuck with nothing in the log to say why.
                 val bal = runCatching {
                     uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
+                }.onFailure {
+                    DucatLog.w(TAG, "escrow $idHex: settle probe from $from failed — ${it.message}")
                 }.getOrNull() ?: continue
+                DucatLog.i(TAG, "escrow $idHex: settle probe at stage $stage — balance ${formatXmr(bal)} XMR")
                 if (bal == 0L) {
                     mutate(context, idHex) { cur -> settle(cur, "released") }
                     soldOne(context, o)
                     ContactStore.bump()
                     DucatLog.i(TAG, "escrow $idHex: released by the other side — the empty escrow says so")
                     found += 1
+                } else if (stage == "release_cosigned") {
+                    // The opposite verdict, written down: this device signed,
+                    // the money never moved, and the screen calling the fare
+                    // released is wrong. The banner reads this stamp and
+                    // grows the way out (propose the agreed split again).
+                    mutate(context, idHex) { cur ->
+                        cur.put("stillFundedAt", System.currentTimeMillis())
+                    }
+                    ContactStore.bump()
                 }
                 continue
             }

@@ -80,4 +80,5 @@
     <string name="split_back_to_them">ข้อเสนอ: %1$s คืนให้ %3$s %2$s ให้คุณ</string>
     <string name="split_fee_yours">ค่าธรรมเนียมเครือข่ายหักจากส่วนของคุณ จึงได้รับน้อยกว่านั้นเล็กน้อย</string>
     <string name="split_fee_theirs">ค่าธรรมเนียมเครือข่ายหักจากส่วนของ %1$s ส่วนของคุณจึงมาถึงครบ</string>
+    <string name="bond_cosigned_stuck">คุณลงนามแล้ว แต่เงินยังไม่ขยับ — ยังอยู่ในเอสโครว์ โทรศัพท์ของอีกฝ่ายอาจดับก่อนออกอากาศ</string>
 </resources>

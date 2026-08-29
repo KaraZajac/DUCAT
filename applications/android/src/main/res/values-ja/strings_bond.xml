@@ -80,4 +80,5 @@
     <string name="split_back_to_them">提案：%1$s が %3$s に戻り、%2$s があなたに。</string>
     <string name="split_fee_yours">ネットワーク手数料はあなたの取り分から引かれるので、届くのは少し少なくなります。</string>
     <string name="split_fee_theirs">ネットワーク手数料は%1$sの取り分から引かれるので、あなたの分はそのまま届きます。</string>
+    <string name="bond_cosigned_stuck">署名しましたが、お金は動いていません — まだエスクローにあります。相手の端末が送信前に落ちたのかもしれません。</string>
 </resources>

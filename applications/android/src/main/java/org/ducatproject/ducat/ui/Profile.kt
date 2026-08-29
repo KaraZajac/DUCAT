@@ -352,7 +352,17 @@ private fun BondSection(
     val ceremony by produceState<org.json.JSONObject?>(null, version, busy) {
         value = withContext(Dispatchers.IO) {
             org.ducatproject.ducat.Ceremony.all(context)
-                .filter { it.optString("peer") == c.personaHex }
+                .filter {
+                    it.optString("peer") == c.personaHex &&
+                        // Bonds only. Unfiltered, this section wore a ride
+                        // escrow's stage as the bond's: a stranded fare
+                        // showed "Co-signed — theirs to broadcast" here,
+                        // and the Return button then failed against a bond
+                        // that never existed. A ride's state lives in its
+                        // thread's banner, which has the machinery for it.
+                        it.optInt("kind") == org.ducatproject.ducat.Ceremony.KIND_BOND &&
+                        !org.ducatproject.ducat.Ceremony.isArbiter(it)
+                }
                 // Newest by its own clock — prefs iteration order is nobody's
                 // promise, and lastOrNull() was betting on it.
                 .maxByOrNull { it.optLong("created") }
@@ -483,7 +493,16 @@ private fun BondSection(
                                 org.ducatproject.ducat.Ceremony.releaseBond(context, c)
                             }
                         }
-                        r.onFailure { error = moneyFailure(context, it) }
+                        r.onFailure {
+                            // The screen speaks in sentences; the log keeps
+                            // the exception, or the sentence is all anyone
+                            // ever learns.
+                            org.ducatproject.ducat.DucatLog.w(
+                                "Profile",
+                                "release: ${it.javaClass.simpleName}: ${it.message}",
+                            )
+                            error = moneyFailure(context, it)
+                        }
                         busy = false
                     }
                 },
@@ -558,8 +577,51 @@ private fun BondSection(
         }
         "releasing" -> Text(stringResource(R.string.profile_bond_releasing),
             style = MaterialTheme.typography.bodyMedium)
-        "release_cosigned" -> Text(stringResource(R.string.profile_bond_cosigned),
-            style = MaterialTheme.typography.bodyMedium)
+        "release_cosigned" -> {
+            Text(stringResource(R.string.profile_bond_cosigned),
+                style = MaterialTheme.typography.bodyMedium)
+            // The door the stranded co-signer needs: their proposer may be
+            // gone for good, and proposing again is the designed recovery —
+            // this device's own sweep, their consent screen, whoever signs
+            // ends it. The settle probe retires this branch by itself when
+            // the escrow really did empty.
+            Spacer(Modifier.height(8.dp))
+            Button(
+                enabled = !busy,
+                onClick = {
+                    busy = true; error = null
+                    scope.launch {
+                        val r = withContext(Dispatchers.IO) {
+                            runCatching {
+                                org.ducatproject.ducat.Ceremony.releaseBond(context, c)
+                            }
+                        }
+                        r.onFailure {
+                            // The screen speaks in sentences; the log keeps
+                            // the exception, or the sentence is all anyone
+                            // ever learns.
+                            org.ducatproject.ducat.DucatLog.w(
+                                "Profile",
+                                "release: ${it.javaClass.simpleName}: ${it.message}",
+                            )
+                            error = moneyFailure(context, it)
+                        }
+                        busy = false
+                    }
+                },
+            ) {
+                if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                else Text(stringResource(R.string.profile_bond_release))
+            }
+            error?.let {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    stringResource(R.string.profile_bond_failed, it),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        }
         "released" -> {
             Text(stringResource(R.string.profile_bond_released),
                 style = MaterialTheme.typography.bodyMedium,
