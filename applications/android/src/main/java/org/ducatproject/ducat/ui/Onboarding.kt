@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -93,7 +94,13 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
     val context = LocalContext.current
     var restoring by remember { mutableStateOf(false) }
     Column(
-        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
+        // imePadding before the scroll: with the keyboard up the column
+        // shrinks to the space above it and becomes scrollable, instead of
+        // painting the backup step's Done button underneath the keys — where
+        // a first-run user, on the one screen they cannot skip, watched a
+        // "stuck" page (found on a fresh device, 2026-08-28).
+        Modifier.fillMaxSize().imePadding()
+            .verticalScroll(rememberScrollState()).padding(24.dp),
     ) {
         // A restore is a shorter flow and has to be counted as one — see below.
         Progress(state.step, restoring || state.backupConfirmed)

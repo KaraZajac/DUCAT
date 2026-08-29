@@ -9,6 +9,11 @@ theme is the light default unless the name says otherwise.
 
 | File | What it shows |
 |---|---|
+| `onboarding-1.png` | First run, step 1: create your identity — a keypair, no account |
+| `onboarding-2.png` | Step 2: the wallet, generated and held on the phone |
+| `onboarding-3.png` | Step 3: the PIN, with the no-reset warning stated plainly |
+| `onboarding-4.png` | Step 4: how strangers trust each other — both stake, finishing returns it |
+| `onboarding-5.png` | Step 5: the backup — created, and honestly "not a backup yet" until it leaves the phone |
 | `home.png` | Personal home: balance in XMR and USD, sync state, spendable-notes counter, the mode tiles, recent movements |
 | `home-dark.png` | The same home in the Mocha (dark) theme |
 | `home-arabic.png` | The same home in Arabic — full RTL mirror, Eastern Arabic numerals |
