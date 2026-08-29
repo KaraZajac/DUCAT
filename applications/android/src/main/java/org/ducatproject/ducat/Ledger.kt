@@ -249,8 +249,19 @@ object Ledger {
                             (knownHex == null || it.r.contactHex == knownHex)
                     }
                     .filter {
-                        e.timestamp == 0L || it.r.timestamp == 0L ||
-                            kotlin.math.abs(it.r.timestamp - e.timestamp) <= 86_400
+                        // With a known counterparty the contact match above
+                        // already pins the receipt; without one, time is the
+                        // only anchor there is, and waiving it for a missing
+                        // timestamp let a receipt staple itself to anonymous
+                        // money for ever — any same-priced transaction, years
+                        // apart, first come first labelled.
+                        if (knownHex != null) {
+                            e.timestamp == 0L || it.r.timestamp == 0L ||
+                                kotlin.math.abs(it.r.timestamp - e.timestamp) <= 86_400
+                        } else {
+                            e.timestamp != 0L && it.r.timestamp != 0L &&
+                                kotlin.math.abs(it.r.timestamp - e.timestamp) <= 86_400
+                        }
                     }
                     .minByOrNull { kotlin.math.abs(it.r.timestamp - e.timestamp) }
                 if (l != null) {
@@ -518,10 +529,21 @@ object Ledger {
         val unattributedIdx = out.indices
             .filter { out[it].unexplained }
             .sortedByDescending { out[it].sortHeight }
-        val paired = minOf(pendingRecords.size, unattributedIdx.size)
-        for (i in 0 until paired) {
-            val s = pendingRecords[i]
-            out[unattributedIdx[i]] = out[unattributedIdx[i]].copy(
+            .toMutableList()
+        // Newest record to newest spend, but only where the arithmetic
+        // permits: the observed spend is a whole note leaving, and a note
+        // cannot have paid a bill bigger than itself plus nothing — the
+        // amount and the fee both came out of it. Purely positional pairing
+        // put a small tip's label on a large rent payment whenever two were
+        // in flight, and the sums beside the name belonged to neither.
+        val leftover = ArrayList<SentPayment>()
+        for (s in pendingRecords) {
+            val slot = unattributedIdx.indexOfFirst {
+                out[it].amountPxmr >= s.amountPxmr + s.feePxmr
+            }
+            if (slot < 0) { leftover += s; continue }
+            val i = unattributedIdx.removeAt(slot)
+            out[i] = out[i].copy(
                 txid = s.txidHex,
                 timestamp = s.timestamp,
                 // What was paid, not what left the spendable pool. Monero
@@ -544,7 +566,7 @@ object Ledger {
             )
         }
 
-        for (s in pendingRecords.drop(paired)) {
+        for (s in leftover) {
             out += Event(
                 txid = s.txidHex,
                 height = 0,
