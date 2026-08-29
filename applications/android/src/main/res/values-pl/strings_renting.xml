@@ -119,4 +119,5 @@
     <string name="rent_n_left">zostało: %1$d</string>
     <string name="rent_one_fewer">O jedną mniej</string>
     <string name="rent_one_more">O jedną więcej</string>
+    <string name="rent_posting_board">Trwa umieszczanie na tablicy w pobliżu — w spokojnej sieci może to potrwać minutę.</string>
 </resources>

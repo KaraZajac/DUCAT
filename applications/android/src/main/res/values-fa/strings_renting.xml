@@ -119,4 +119,5 @@
     <string name="rent_n_left">%1$d باقی مانده</string>
     <string name="rent_one_fewer">یکی کمتر</string>
     <string name="rent_one_more">یکی بیشتر</string>
+    <string name="rent_posting_board">در حال انتشار روی تابلوی نزدیک شما — در شبکه‌ای خلوت ممکن است یک دقیقه طول بکشد.</string>
 </resources>

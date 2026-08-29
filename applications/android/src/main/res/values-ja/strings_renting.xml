@@ -119,4 +119,5 @@
     <string name="rent_n_left">残り %1$d</string>
     <string name="rent_one_fewer">一つ減らす</string>
     <string name="rent_one_more">一つ増やす</string>
+    <string name="rent_posting_board">近くの掲示板に掲載しています — 静かなネットワークでは1分ほどかかることがあります。</string>
 </resources>

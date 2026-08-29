@@ -119,4 +119,5 @@
     <string name="rent_n_left">sisa %1$d</string>
     <string name="rent_one_fewer">Kurangi satu</string>
     <string name="rent_one_more">Tambah satu</string>
+    <string name="rent_posting_board">Sedang dipasang di papan dekat Anda — di jaringan yang sepi ini bisa memakan waktu satu menit.</string>
 </resources>

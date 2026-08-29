@@ -300,10 +300,7 @@ private fun Progress(step: Step, restored: Boolean) {
     Column {
         Text(stringResource(R.string.onb_progress_title), style = MaterialTheme.typography.headlineSmall)
         Spacer(Modifier.height(8.dp))
-        LinearProgressIndicator(
-            progress = { n.toFloat() / total },
-            modifier = Modifier.fillMaxWidth(),
-        )
+        DucatBar(progress = n.toFloat() / total)
         Spacer(Modifier.height(4.dp))
         Text(
             if (step == Step.Done) stringResource(R.string.onb_progress_done)

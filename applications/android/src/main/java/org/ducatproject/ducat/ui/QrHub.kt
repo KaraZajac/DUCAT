@@ -243,7 +243,7 @@ private fun MyCode(uri: String?, busy: Boolean, error: String?, onCopy: () -> Un
 
         when {
             busy || uri == null -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                CircularProgressIndicator()
+                CatSpinner(Modifier.size(40.dp), tint = MaterialTheme.colorScheme.primary)
                 Spacer(Modifier.height(12.dp))
                 Text(
                     stringResource(R.string.qrhub_publishing),

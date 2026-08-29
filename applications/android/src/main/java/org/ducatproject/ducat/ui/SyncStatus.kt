@@ -66,9 +66,9 @@ fun SyncStatus(b: Balances, modifier: Modifier = Modifier) {
             )
         }
         Spacer(Modifier.height(6.dp))
-        LinearProgressIndicator(
-            progress = { b.progress },
-            modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
+        DucatBar(
+            progress = b.progress,
+            modifier = Modifier.fillMaxWidth().height(4.dp),
             color = MaterialTheme.ducat.changePending,
         )
         Spacer(Modifier.height(6.dp))

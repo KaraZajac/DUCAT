@@ -119,4 +119,5 @@
     <string name="rent_n_left">noch %1$d</string>
     <string name="rent_one_fewer">Eins weniger</string>
     <string name="rent_one_more">Eins mehr</string>
+    <string name="rent_posting_board">Wird am Brett in deiner Nähe angeschlagen — in einem ruhigen Netz kann das eine Minute dauern.</string>
 </resources>

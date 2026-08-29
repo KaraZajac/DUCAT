@@ -119,4 +119,5 @@
     <string name="rent_n_left">%1$d left</string>
     <string name="rent_one_fewer">One fewer</string>
     <string name="rent_one_more">One more</string>
+    <string name="rent_posting_board">Going up on the board near you — this can take a minute on a quiet network.</string>
 </resources>

@@ -302,10 +302,7 @@ private fun WalletSync(nodeHeight: Long) {
         }
 
         else -> Column {
-            LinearProgressIndicator(
-                progress = { b.progress },
-                modifier = Modifier.fillMaxWidth().height(6.dp),
-            )
+            DucatBar(progress = b.progress)
             Spacer(Modifier.height(8.dp))
             Row {
                 Text(

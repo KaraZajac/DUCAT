@@ -875,6 +875,20 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
             Spacer(Modifier.width(8.dp))
             TextButton(onClick = onDone) { Text(stringResource(R.string.rent_cancel)) }
         }
+        if (posting) {
+            // A board write is a DHT publish and an empty cell takes its
+            // twenty-one seconds — long enough that a button spinner alone
+            // reads as a hang. The comet plus the sentence say what is
+            // actually happening and that leaving it alone is fine.
+            Spacer(Modifier.height(8.dp))
+            DucatBar(progress = null)
+            Spacer(Modifier.height(6.dp))
+            Text(
+                stringResource(R.string.rent_posting_board),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         if (fix == null) {
             val allowed = locationAllowed(context)
             Spacer(Modifier.height(6.dp))

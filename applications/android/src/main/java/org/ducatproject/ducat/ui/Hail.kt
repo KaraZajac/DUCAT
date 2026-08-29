@@ -484,7 +484,14 @@ fun HailCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(8.dp))
-            LinearProgressIndicator(Modifier.fillMaxWidth())
+            // The number above, drawn: the hail's remaining life draining
+            // left, on the same clock as the sentence. The indeterminate
+            // sweep this used to be said "busy", which the standing hail is
+            // not — it is waiting, and this is how much wait is left.
+            DucatBar(
+                progress = (left.toFloat() /
+                    org.ducatproject.ducat.Hailing.TTL_SECS).coerceIn(0f, 1f),
+            )
             Spacer(Modifier.height(10.dp))
             OutlinedButton(
                 onClick = {
@@ -507,7 +514,9 @@ fun HailCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(8.dp))
-            LinearProgressIndicator(Modifier.fillMaxWidth())
+            // Genuinely unmeasurable — a person is deciding — so the comet,
+            // not a fill pretending to know.
+            DucatBar(progress = null)
             Spacer(Modifier.height(10.dp))
             OutlinedButton(
                 // Sends nothing on purpose: the slot is already cleared and
@@ -2263,6 +2272,21 @@ fun HailSheet(
                                 )
                             } else Text(stringResource(R.string.hail_post_button))
                         }
+                    }
+                    if (busy) {
+                        // The three stages under the words that name them:
+                        // card cut, notice stamped, slot search. The last is
+                        // proof of work and can run ten seconds on an unlucky
+                        // draw, so the bar parks near full and shimmers there
+                        // rather than lying about the draw's luck.
+                        Spacer(Modifier.height(8.dp))
+                        DucatBar(
+                            progress = when (step) {
+                                org.ducatproject.ducat.Hailing.Step.STAMP -> 0.45f
+                                org.ducatproject.ducat.Hailing.Step.SLOT -> 0.8f
+                                else -> 0.15f
+                            },
+                        )
                     }
 
                     error?.let {

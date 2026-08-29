@@ -407,6 +407,16 @@ private fun RentSearchScreen(
                         // 9 areas checked" beside a spinner, which reads as
                         // finished-but-hung. Say what it is doing instead.
                         progress?.let { (done, total) ->
+                            Spacer(Modifier.height(8.dp))
+                            // The bar under the words: measured while the ring
+                            // is being read, and when the count tops out with
+                            // work left (the ladder climb) it hands over to
+                            // the indeterminate sweep instead of standing at
+                            // full pretending to be finished.
+                            DucatBar(
+                                progress = if (done >= total) null
+                                else done.toFloat() / total.coerceAtLeast(1),
+                            )
                             Spacer(Modifier.height(6.dp))
                             Text(
                                 if (done >= total) {
@@ -438,14 +448,27 @@ private fun RentSearchScreen(
                         if (searching) {
                             item {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    CircularProgressIndicator(
-                                        Modifier.size(12.dp), strokeWidth = 2.dp,
+                                    CatSpinner(
+                                        Modifier.size(14.dp),
+                                        tint = MaterialTheme.colorScheme.primary,
                                     )
                                     Spacer(Modifier.width(8.dp))
                                     Text(
                                         stringResource(R.string.rent_still_looking),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                                // The same bar as the empty state, kept while
+                                // results are already up: what is underfoot
+                                // landed first, and this is the rest of the
+                                // ring still arriving.
+                                progress?.let { (done, total) ->
+                                    Spacer(Modifier.height(6.dp))
+                                    DucatBar(
+                                        progress = if (done >= total) null
+                                        else done.toFloat() / total.coerceAtLeast(1),
+                                        modifier = Modifier.fillMaxWidth().height(4.dp),
                                     )
                                 }
                                 Spacer(Modifier.height(8.dp))

@@ -119,4 +119,5 @@
     <string name="rent_n_left">осталось: %1$d</string>
     <string name="rent_one_fewer">На одну меньше</string>
     <string name="rent_one_more">На одну больше</string>
+    <string name="rent_posting_board">Размещается на доске рядом с вами — в тихой сети это может занять минуту.</string>
 </resources>

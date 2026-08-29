@@ -664,7 +664,7 @@ private fun PresentScreen(
         when (stage) {
             Sale.Waiting -> when {
                 cardUri == null && error == null -> {
-                    CircularProgressIndicator()
+                    CatSpinner(Modifier.size(40.dp), tint = MaterialTheme.colorScheme.primary)
                     Spacer(Modifier.height(10.dp))
                     Text(stringResource(R.string.pos_getting_code_ready),
                         style = MaterialTheme.typography.bodySmall,

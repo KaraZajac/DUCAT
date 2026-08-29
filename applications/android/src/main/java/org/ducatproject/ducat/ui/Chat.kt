@@ -286,6 +286,10 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     var replyTo by rememberSaveable { mutableStateOf<Long?>(null) }
     var replyToOwn by rememberSaveable { mutableStateOf(false) }
     var sending by remember { mutableStateOf(false) }
+    // (done, total) chunks of an attachment on its way to the network —
+    // null for text sends and during the resize/seal prep. Written from the
+    // IO coroutine; snapshot state takes cross-thread writes.
+    var sendProgress by remember { mutableStateOf<Pair<Int, Int>?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     val listState = rememberLazyListState()
 
@@ -455,6 +459,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                 )
                             }
                         sending = false
+                        sendProgress = null
                     }
                     // A picture (§16.15): resized, sealed under a fresh key,
                     // parked in its own record, referenced from the message.
@@ -466,8 +471,14 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         if (uri != null) {
                             sending = true
                             scope.launch(Dispatchers.IO) {
-                                afterSend(runCatching { sendPicture(context, c, mine, uri) },
-                                    context.getString(R.string.chat_what_picture))
+                                afterSend(
+                                    runCatching {
+                                        sendPicture(context, c, mine, uri) { d, t ->
+                                            sendProgress = d to t
+                                        }
+                                    },
+                                    context.getString(R.string.chat_what_picture),
+                                )
                             }
                         }
                     }
@@ -477,8 +488,14 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         if (uri != null) {
                             sending = true
                             scope.launch(Dispatchers.IO) {
-                                afterSend(runCatching { sendFile(context, c, mine, uri) },
-                                    context.getString(R.string.chat_what_file))
+                                afterSend(
+                                    runCatching {
+                                        sendFile(context, c, mine, uri) { d, t ->
+                                            sendProgress = d to t
+                                        }
+                                    },
+                                    context.getString(R.string.chat_what_file),
+                                )
                             }
                         }
                     }
@@ -499,8 +516,14 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         if (ok && uri != null) {
                             sending = true
                             scope.launch(Dispatchers.IO) {
-                                afterSend(runCatching { sendPicture(context, c, mine, uri) },
-                                    context.getString(R.string.chat_what_picture))
+                                afterSend(
+                                    runCatching {
+                                        sendPicture(context, c, mine, uri) { d, t ->
+                                            sendProgress = d to t
+                                        }
+                                    },
+                                    context.getString(R.string.chat_what_picture),
+                                )
                             }
                         }
                     }
@@ -581,6 +604,21 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                             }
                         }
                     }
+                    // An attachment in flight, measured: a photo is up to
+                    // 28 sequential record writes and the send button's
+                    // little circle cannot say which one it is on. Text
+                    // sends never set this, so nothing flashes for them.
+                    androidx.compose.animation.AnimatedVisibility(
+                        visible = sendProgress != null,
+                    ) {
+                        sendProgress?.let { (d, t) ->
+                            DucatBar(
+                                progress = d.toFloat() / t.coerceAtLeast(1),
+                                modifier = Modifier.fillMaxWidth()
+                                    .padding(horizontal = 12.dp).height(4.dp),
+                            )
+                        }
+                    }
                     Row(
                         Modifier.padding(12.dp).fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
@@ -657,7 +695,9 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                                                         sendVoice(
                                                                             context, c, mine,
                                                                             take.file,
-                                                                        )
+                                                                        ) { d, t ->
+                                                                            sendProgress = d to t
+                                                                        }
                                                                     },
                                                                     context.getString(
                                                                         R.string.chat_what_voice_memo
@@ -2173,6 +2213,7 @@ private fun sendPicture(
     c: Contact,
     mine: String,
     uri: android.net.Uri,
+    onChunk: (Int, Int) -> Unit = { _, _ -> },
 ) {
     // Ours, but picked from wherever the phone keeps pictures — which is where
     // anything shared into it lands too, so the same ceiling applies.
@@ -2195,7 +2236,7 @@ private fun sendPicture(
     val bytes = plain ?: throw IllegalArgumentException(
         context.getString(R.string.chat_picture_too_big)
     )
-    sendAttachmentBytes(context, c, mine, bytes, "image/jpeg", null, "📷")
+    sendAttachmentBytes(context, c, mine, bytes, "image/jpeg", null, "📷", onChunk)
 }
 
 /**
@@ -2215,6 +2256,10 @@ private fun sendAttachmentBytes(
     mime: String,
     name: String?,
     body: String,
+    /** Called after each chunk lands on the network: (done, total). A photo
+     *  is up to 28 sequential DHT writes — half a minute on a slow link —
+     *  and this is the only place that knows how far along it is. */
+    onChunk: (Int, Int) -> Unit = { _, _ -> },
 ) {
     val rng = java.security.SecureRandom()
     val key = ByteArray(32).also(rng::nextBytes)
@@ -2228,6 +2273,7 @@ private fun sendAttachmentBytes(
     for (i in 0 until chunks) {
         val end = minOf((i + 1) * 32_768, ct.size)
         uniffi.ducat_mobile.nodeDhtSet(rec.key, i.toUInt(), ct.copyOfRange(i * 32_768, end))
+        onChunk(i + 1, chunks)
     }
 
     val ref = uniffi.ducat_mobile.AttachmentRef(
@@ -2238,9 +2284,14 @@ private fun sendAttachmentBytes(
         mime = mime,
         name = name,
     )
-    Mailbox.send(context, c, body, mine, attachment = ref)
+    // Cache before the send, not after: the bubble composes the moment the
+    // message lands in the thread, and with the write on the far side of
+    // Mailbox.send the sender's own picture said "downloading…" for a
+    // breath. The file is named by ciphertext hash, so one orphaned by a
+    // failed send is inert and invisible.
     Mailbox.attachmentFile(context, hash.joinToString("") { "%02x".format(it) })
         .writeBytes(bytes)
+    Mailbox.send(context, c, body, mine, attachment = ref)
 }
 
 /** The record cap: 32 subkeys of 32 KiB, minus the AEAD tag's 16 bytes. */
@@ -2252,6 +2303,7 @@ private fun sendVoice(
     c: Contact,
     mine: String,
     memo: java.io.File,
+    onChunk: (Int, Int) -> Unit = { _, _ -> },
 ) {
     try {
         val bytes = memo.readBytes()
@@ -2271,6 +2323,7 @@ private fun sendVoice(
             if (wav) "audio/wav" else "audio/mp4",
             if (wav) "Voice memo.wav" else "Voice memo.m4a",
             "🎤",
+            onChunk,
         )
     } finally {
         memo.delete()
@@ -2283,6 +2336,7 @@ private fun sendFile(
     c: Contact,
     mine: String,
     uri: android.net.Uri,
+    onChunk: (Int, Int) -> Unit = { _, _ -> },
 ) {
     val resolver = context.contentResolver
     val name = resolver.query(uri, null, null, null, null)?.use { cur ->
@@ -2297,7 +2351,7 @@ private fun sendFile(
         )
     }
     val mime = resolver.getType(uri) ?: "application/octet-stream"
-    sendAttachmentBytes(context, c, mine, bytes, mime, name, "📎 $name")
+    sendAttachmentBytes(context, c, mine, bytes, mime, name, "📎 $name", onChunk)
 }
 
 /**
@@ -3092,19 +3146,18 @@ private fun RideBondBanner(contact: Contact) {
                     // lost track of the escrow" would be arguing with it.
                     if (!lost) {
                         org.ducatproject.ducat.Ceremony.buildProgress(ride)?.let { p ->
-                            val eased by animateFloatAsState(
-                                targetValue = p,
-                                animationSpec = tween(700, easing = FastOutSlowInEasing),
-                                label = "build",
-                            )
                             Spacer(Modifier.height(6.dp))
-                            LinearProgressIndicator(
-                                progress = { eased },
-                                modifier = Modifier.fillMaxWidth().height(3.dp),
-                                trackColor = MaterialTheme.colorScheme.onSecondaryContainer
+                            // DucatBar animates its own fill and keeps a
+                            // shimmer moving over what is done — the frames
+                            // arrive a minute apart, and a bar that visibly
+                            // lives between them is the difference between
+                            // "slow" and "hung" to the person watching it.
+                            DucatBar(
+                                progress = p,
+                                modifier = Modifier.fillMaxWidth().height(4.dp),
+                                color = MaterialTheme.colorScheme.primary,
+                                track = MaterialTheme.colorScheme.onSecondaryContainer
                                     .copy(alpha = 0.18f),
-                                strokeCap = StrokeCap.Round,
-                                drawStopIndicator = {},
                             )
                         }
                     }

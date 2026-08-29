@@ -437,7 +437,7 @@ internal fun PairPanel(
                 color = MaterialTheme.colorScheme.error,
                 textAlign = TextAlign.Center,
             )
-            cardUri == null -> CircularProgressIndicator()
+            cardUri == null -> CatSpinner(Modifier.size(40.dp), tint = MaterialTheme.colorScheme.primary)
             else -> QrBlock(cardUri)
         }
         Spacer(Modifier.height(12.dp))

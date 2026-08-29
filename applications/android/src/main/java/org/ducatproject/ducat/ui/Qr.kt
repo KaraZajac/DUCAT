@@ -66,7 +66,9 @@ fun QrBlock(text: String) {
         val b = bitmap
         when {
             b == null -> Box(Modifier.size(260.dp), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
+                // The box stays white in every theme so codes scan; the
+                // spinner takes a fixed ink for the same reason.
+                CatSpinner(Modifier.size(40.dp), tint = Color(0xFF444444))
             }
             b.isFailure -> Text(
                 stringResource(R.string.qr_too_much_data),

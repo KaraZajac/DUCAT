@@ -119,4 +119,5 @@
     <string name="rent_n_left">ne restano %1$d</string>
     <string name="rent_one_fewer">Uno in meno</string>
     <string name="rent_one_more">Uno in più</string>
+    <string name="rent_posting_board">Pubblicazione sulla bacheca vicino a te — su una rete tranquilla può richiedere un minuto.</string>
 </resources>
