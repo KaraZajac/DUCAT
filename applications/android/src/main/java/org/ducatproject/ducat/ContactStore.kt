@@ -2052,7 +2052,13 @@ class WalletStore(context: Context) {
             put("note", note ?: JSONObject.NULL)
             put("ts", System.currentTimeMillis() / 1000)
         })
-        prefs.edit().putString("send_intents", arr.toString()).apply()
+        // commit(), not apply(): this claim is only worth anything if it is
+        // on disk before moneroSend runs. apply() hands the write to a
+        // background queue that a process death simply skips — proven by a
+        // kill test that logged "sending", relayed nothing, and left no
+        // intent behind. The synchronous write costs this IO thread a
+        // moment; losing the claim costs the double-pay guard its eyes.
+        prefs.edit().putString("send_intents", arr.toString()).commit()
         return id
     }
 
@@ -2123,7 +2129,8 @@ class WalletStore(context: Context) {
             }
             e.putString("wallet_outputs", outs.toString())
         }
-        e.apply()
+        // Durable like the intent it retires: money state, same rule.
+        e.commit()
         ContactStore.bump()
     }
 
@@ -2135,7 +2142,7 @@ class WalletStore(context: Context) {
             val o = intents.getJSONObject(i)
             if (o.getString("id") != id) keep.put(o)
         }
-        prefs.edit().putString("send_intents", keep.toString()).apply()
+        prefs.edit().putString("send_intents", keep.toString()).commit()
     }
 
     /**

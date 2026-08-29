@@ -73,11 +73,21 @@ object Ceremony {
      * code does to a ceremony, and worth knowing before the first caller
      * tries to.
      */
-    private fun save(context: Context, id: String, o: JSONObject) = synchronized(lock) {
+    private fun save(
+        context: Context,
+        id: String,
+        o: JSONObject,
+        /** True for a claim that must be on disk BEFORE an irreversible
+         *  action runs (a broadcast, a spend). apply() hands the write to a
+         *  background queue a process death skips, which un-writes exactly
+         *  the marker the recovery path would have read. */
+        durable: Boolean = false,
+    ) = synchronized(lock) {
         val merged = mergeOnto(loadedAs[o], prefs(context).getString("c_$id", null), o)
         if (merged !== o) DucatLog.i(TAG, "ceremony $id: merged onto a record that moved")
         val text = merged.toString()
-        prefs(context).edit().putString("c_$id", text).apply()
+        val e = prefs(context).edit().putString("c_$id", text)
+        if (durable) e.commit() else e.apply()
         loadedAs[o] = text
     }
 
@@ -1235,7 +1245,7 @@ object Ceremony {
                     // rescued. The marker survives the death and widens that
                     // gate below.
                     o.put("completingAt", System.currentTimeMillis())
-                    save(context, idHex, o)
+                    save(context, idHex, o, durable = true)
                     val txid = uniffi.ducat_mobile.frostComplete(
                         id, i.toUShort(), senderIdx.toUShort(), payload, nodeUrl,
                     )

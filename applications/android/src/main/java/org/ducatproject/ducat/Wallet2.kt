@@ -478,8 +478,16 @@ object Wallet {
         val perNote = if (all > 1) (feeAll - feeOne) / (all - 1) else 0
 
         val tip = WalletStore(context).tip()
+        // Same intent exclusion as plan(), or this promises what plan will
+        // refuse: with a note pinned by an in-flight send, the sheet said
+        // "Up to USD 35.82" over a plan that could reach 25.
+        val inFlight = WalletStore(context).sendIntents()
+            .flatMap { it.keyImages }.toSet()
         val worth = WalletStore(context).entries()
-            .filter { !it.spent && it.blob.isNotEmpty() && tip > 0 && it.height + LOCK_BLOCKS <= tip }
+            .filter {
+                !it.spent && it.blob.isNotEmpty() && tip > 0 &&
+                    it.height + LOCK_BLOCKS <= tip && it.keyImage !in inFlight
+            }
             .sortedByDescending { it.amountPxmr }
             .filter { it.amountPxmr > perNote }
             .ifEmpty { return 0 }
@@ -565,11 +573,6 @@ object Wallet {
         if (!plan.enough) {
             throw NotEnough(plan.totalInPxmr, amountPxmr + plan.feePxmr)
         }
-        DucatLog.i(
-            TAG,
-            "sending ${formatXmr(amountPxmr)} XMR using ${plan.notes.size} note(s) " +
-                "to ${toAddress.take(12)}…",
-        )
         // The claim before the money moves — the escrow's own rule, applied
         // to every send. moneroSend builds, signs and RELAYS in one call;
         // recording only on its return meant a death in the gap left a
@@ -580,6 +583,13 @@ object Wallet {
         // (refreshSpent) may decide the send never happened.
         val intent = store.recordSendIntent(
             toAddress, amountPxmr, plan.notes.map { it.keyImage }, contactHex, note,
+        )
+        // After the intent, deliberately: "sending" in the log now proves
+        // the claim was on disk first, which is what the kill test reads.
+        DucatLog.i(
+            TAG,
+            "sending ${formatXmr(amountPxmr)} XMR using ${plan.notes.size} note(s) " +
+                "to ${toAddress.take(12)}…",
         )
         val r = try {
             uniffi.ducat_mobile.moneroSend(
