@@ -1044,7 +1044,11 @@ fun DriveScreen() {
                     Mailbox.poll(context)
                     ContactStore(context).thread(po.personaHex).firstOrNull {
                         !it.outgoing && it.reSeq == po.seq &&
-                            it.timestamp >= po.sentAt - 60 &&
+                            // The rider's clock, against our sentAt. Sixty
+                            // seconds of grace lost real accepts from phones
+                            // honestly a minute apart — the driver waited on
+                            // "their word" that had already arrived.
+                            it.timestamp >= po.sentAt - HAIL_SKEW_SECS &&
                             (it.kind == 7 || (it.kind == 5 && !it.reOwn))
                     }
                 }.getOrNull()
@@ -1606,6 +1610,11 @@ fun DriveScreen() {
  * fresh one-time card, which restarts the mailbox, so an earlier ride's
  * accept in the same thread can carry the very same reSeq.
  */
+/** Cross-device skew grace: an inbound stamp is the sender's clock, and
+ *  phones disagree by minutes as a matter of course. Same figure as the
+ *  chat's resolver (Chat.kt), for the same reason. */
+private const val HAIL_SKEW_SECS = 900L
+
 internal fun offerStillOpen(
     thread: List<org.ducatproject.ducat.StoredMessage>,
     seq: Long,
@@ -1615,9 +1624,14 @@ internal fun offerStillOpen(
     val o = thread
         .filter { !it.outgoing && it.kind == 6 && it.seq == seq }
         .maxByOrNull { it.timestamp } ?: return null
-    if (o.timestamp < nowSecs - ttlSecs) return null
+    // The offer's stamp is the driver's clock; ours is the deadline's. A
+    // driver honestly minutes slow must not read as expired — and our own
+    // answer honestly stamped "before" a fast driver's offer must still
+    // count as an answer, or a settled fare comes back from the dead.
+    if (o.timestamp < nowSecs - ttlSecs - HAIL_SKEW_SECS) return null
     val answered = thread.any {
-        it.outgoing && it.reSeq == o.seq && it.timestamp >= o.timestamp &&
+        it.outgoing && it.reSeq == o.seq &&
+            it.timestamp >= o.timestamp - HAIL_SKEW_SECS &&
             (it.kind == 7 || it.kind == 5)
     }
     return o.takeIf { !answered }
@@ -1638,11 +1652,15 @@ internal fun offerAwaiting(
     nowSecs: Long,
     ttlSecs: Long,
 ): org.ducatproject.ducat.StoredMessage? = thread
-    .filter { !it.outgoing && it.kind == 6 && it.timestamp >= nowSecs - ttlSecs }
+    .filter {
+        !it.outgoing && it.kind == 6 &&
+            it.timestamp >= nowSecs - ttlSecs - HAIL_SKEW_SECS
+    }
     .sortedByDescending { it.timestamp }
     .firstOrNull { o ->
         thread.none {
-            it.outgoing && it.reSeq == o.seq && it.timestamp >= o.timestamp &&
+            it.outgoing && it.reSeq == o.seq &&
+                it.timestamp >= o.timestamp - HAIL_SKEW_SECS &&
                 (it.kind == 7 || it.kind == 5)
         }
     }

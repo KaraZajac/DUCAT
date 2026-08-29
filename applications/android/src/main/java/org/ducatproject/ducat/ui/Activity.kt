@@ -54,11 +54,20 @@ fun ActivityScreen() {
     // rows: building the ledger costs what the ledger is long, and a tab
     // that blocks composition while it reads is a frozen app, not a tab.
     var events by remember { mutableStateOf<List<Ledger.Event>>(emptyList()) }
+    // openRequests walks every thread and re-walks each for its bills — the
+    // same history-sized work as the ledger one line up, and it was left on
+    // the main thread when that line moved. Same cure. The tip is one
+    // stored long; reading it through Wallet.balances decoded every output
+    // the wallet has ever owned to keep a single field.
+    var pending by remember { mutableStateOf<List<Ledger.OpenRequest>>(emptyList()) }
+    var tip by remember { mutableStateOf(0L) }
     LaunchedEffect(version) {
-        events = withContext(Dispatchers.IO) { Ledger.build(context) }
+        withContext(Dispatchers.IO) {
+            events = Ledger.build(context)
+            pending = Ledger.openRequests(context)
+            tip = org.ducatproject.ducat.WalletStore(context).tip()
+        }
     }
-    val pending = remember(version) { Ledger.openRequests(context) }
-    val tip = remember(version) { Wallet.balances(context).tip }
     var open by remember { mutableStateOf<Ledger.Event?>(null) }
 
     // Ask the chain about anything still unclassified as soon as this screen is
