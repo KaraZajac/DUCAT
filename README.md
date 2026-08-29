@@ -103,7 +103,13 @@ to each person and a sentence in the group everyone can check the arithmetic
 against, and each request flips Paid ✓ as its §16.14 reference lands. A
 standing rent or dues becomes a **recurring bill** — the *asking* repeats on a
 schedule; every payment is still approved by hand, because a request carries
-no authority. Encryption is
+no authority.
+
+<p align="center">
+  <img src="images/group-chat.png" width="260" alt="A group: five people over pairwise threads, replies and reactions, nobody to forge as">
+  &nbsp;
+  <img src="images/chat-search.png" width="260" alt="Searching what people said: name hits first, then messages — receipts included">
+</p> Encryption is
 X3DH-shaped with one-time prekeys and forward secrecy — and when the app has to
 fall back to the signed prekey it shows you an open lock rather than hiding it.
 
@@ -156,7 +162,17 @@ things and hours on the same boards the rentals use — list once, found by
 whoever is nearby, settled through the same stakes.
 
 <p align="center">
+  <img src="images/bar-tab.png" width="260" alt="Bar tabs: open tabs, billed and waiting, one bill at close">
+  &nbsp;
+  <img src="images/kiosk.png" width="260" alt="Kiosk mode, customer side: tap what you want, tax shown before you commit">
+  &nbsp;
+  <img src="images/donations.png" width="260" alt="A standing donation code, its linkability cost stated on screen">
+</p>
+
+<p align="center">
   <img src="docs/screenshots/taxi.png" width="300" alt="Taxi mode: watch a stand, choose how wide an area, fares and meter tabs">
+  &nbsp;
+  <img src="images/taxi-meter.png" width="300" alt="The meter: rate typed once, a pickup code, terms land in the chat when it starts">
 </p>
 
 **Taxi** mode is a driver's whole day: choose how wide an area to watch, take a
@@ -188,6 +204,16 @@ booking is real.
 Searching reads your board and the ring around it, showing what it finds as each
 board answers. What comes back is enough to decide on — make, model, year,
 gearbox, fuel, price and the stake — plus a card to open a conversation with.
+
+<p align="center">
+  <img src="images/marketplace.png" width="260" alt="Marketplace: a record player found on the board, price and stakes, Ask about it">
+  &nbsp;
+  <img src="images/hire-help.png" width="260" alt="Hire help: a bike tune-up found nearby, priced per hour">
+</p>
+
+The same boards carry **things for sale** and **somebody's time** — a record
+player and a bike repair are found the way a car is, asked about the same way,
+and settled through the same stakes.
 
 ## Why a stranger can trust you
 
@@ -247,7 +273,13 @@ a staleness nudge when contacts outgrow the last export, redacted
 crash-surviving logs, and a torch on the scanner — because codes get scanned
 across dark bars. It speaks twenty languages — every screen reads from
 resources, plurals are composed rather than concatenated, and Arabic and Farsi
-prove the mirror.
+prove the mirror. A dark theme, because bars are dark.
+
+<p align="center">
+  <img src="images/home-arabic.png" width="260" alt="Home in Arabic: full right-to-left mirror, Eastern Arabic numerals">
+  &nbsp;
+  <img src="images/chat-dark.png" width="260" alt="A money-carrying conversation in the Mocha dark theme">
+</p>
 
 Receipts are records, not messages: every receipt lives in its own store,
 survives thread and contact deletion, and rides the backup. The memo travels in
