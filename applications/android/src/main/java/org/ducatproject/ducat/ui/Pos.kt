@@ -203,12 +203,17 @@ fun PosScreen() {
                             Text(
                                 item.description,
                                 style = MaterialTheme.typography.bodyLarge,
+                                maxLines = 2,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                                 modifier = Modifier.weight(1f),
                             )
                             AmountBoth(item.amountPxmr)
                             IconButton(
                                 onClick = { basket = basket.filterIndexed { j, _ -> j != i } },
-                                modifier = Modifier.size(32.dp),
+                                // 40dp, not 32: the explicit size overrides
+                                // the 48dp the component reserves, and this
+                                // removes a rung-up line mid-sale.
+                                modifier = Modifier.size(40.dp),
                             ) {
                                 Icon(Icons.Filled.Close, stringResource(R.string.pos_remove),
                                     Modifier.size(16.dp))
@@ -645,6 +650,7 @@ private fun PresentScreen(
                 items.forEach { i ->
                     Row(Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
                         Text(i.description, Modifier.weight(1f),
+                            maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                             style = MaterialTheme.typography.bodyMedium)
                         Text(Amounts.show(context, i.amountPxmr).primary,
                             style = MaterialTheme.typography.bodyMedium,

@@ -31,4 +31,5 @@
         <item quantity="other">circa %1$d ore</item>
     </plurals>
     <string name="balance_rate_stale">Quella cifra usa un cambio di %1$s fa.</string>
+    <string name="balance_flip_unit">Mostra nell\'altra unità</string>
 </resources>

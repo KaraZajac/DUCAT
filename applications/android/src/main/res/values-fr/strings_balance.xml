@@ -31,4 +31,5 @@
         <item quantity="other">environ %1$d heures</item>
     </plurals>
     <string name="balance_rate_stale">Ce chiffre utilise un taux de change vieux de %1$s.</string>
+    <string name="balance_flip_unit">Afficher dans l\'autre unité</string>
 </resources>

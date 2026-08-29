@@ -28,4 +28,5 @@
         <item quantity="other">khoảng %1$d giờ</item>
     </plurals>
     <string name="balance_rate_stale">Con số này dùng tỷ giá từ %1$s trước.</string>
+    <string name="balance_flip_unit">Hiển thị bằng đơn vị khác</string>
 </resources>

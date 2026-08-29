@@ -37,4 +37,5 @@
         <item quantity="other">приблизно %1$d години</item>
     </plurals>
     <string name="balance_rate_stale">Ця сума порахована за курсом %1$s тому.</string>
+    <string name="balance_flip_unit">Показати в іншій одиниці</string>
 </resources>

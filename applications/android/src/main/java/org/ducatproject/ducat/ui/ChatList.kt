@@ -18,6 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import android.content.Context
@@ -328,6 +330,8 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                     // the one that therefore reaches the list.
                     val last = rowLast[c.personaHex]
                     val unread = c.personaHex in rowUnread
+                    val unreadLabel = stringResource(R.string.chatlist_unread)
+                    val deleteLabel = stringResource(R.string.chatlist_delete_long)
                     ListItem(
                         colors = ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
                         headlineContent = {
@@ -392,11 +396,19 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                         },
                         // Delete moved to long-press: a trash can on every row
                         // is one mis-tap from losing a thread, and the dialog
-                        // it opened was the only thing between.
-                        modifier = Modifier.combinedClickable(
-                            onClick = { onOpenChat(c) },
-                            onLongClick = { confirm = c },
-                        ),
+                        // it opened was the only thing between. The long-press
+                        // label and the unread state are for screen readers —
+                        // the dot is 9dp of colour, and colour is the one
+                        // channel a reader does not carry.
+                        modifier = Modifier
+                            .semantics {
+                                if (unread) stateDescription = unreadLabel
+                            }
+                            .combinedClickable(
+                                onClick = { onOpenChat(c) },
+                                onLongClickLabel = deleteLabel,
+                                onLongClick = { confirm = c },
+                            ),
                     )
                 }
             }

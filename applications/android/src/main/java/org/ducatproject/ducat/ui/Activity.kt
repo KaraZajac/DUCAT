@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -299,13 +300,20 @@ fun ActivityScreen() {
                     },
                     headlineContent = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
+                            // Weighted and clipped, or a 32-character name
+                            // measures first, the spacer collapses, and the
+                            // amount — the row's whole point — renders at
+                            // zero width.
                             Text(
                                 if (r.theyAsked)
                                     stringResource(R.string.activity_they_ask, r.counterparty)
                                 else stringResource(R.string.activity_you_asked, r.counterparty),
                                 style = MaterialTheme.typography.bodyMedium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f),
                             )
-                            Spacer(Modifier.weight(1f))
+                            Spacer(Modifier.width(8.dp))
                             Text(shown.primary, fontWeight = FontWeight.SemiBold)
                         }
                     },

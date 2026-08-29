@@ -309,7 +309,12 @@ private fun MyListingCard(
                     null, Modifier.size(18.dp),
                 )
                 Spacer(Modifier.width(8.dp))
-                Text(o.optString("title"), style = MaterialTheme.typography.titleSmall)
+                Text(
+                    isolate(o.optString("title")),
+                    style = MaterialTheme.typography.titleSmall,
+                    maxLines = 2,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                )
             }
             Spacer(Modifier.height(4.dp))
             // "each side stakes USD 0.00" is not a fact, it is a leftover.

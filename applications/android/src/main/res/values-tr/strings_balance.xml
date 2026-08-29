@@ -31,4 +31,5 @@
         <item quantity="other">yaklaşık %1$d saat</item>
     </plurals>
     <string name="balance_rate_stale">Bu rakam %1$s önceki kuru kullanıyor.</string>
+    <string name="balance_flip_unit">Diğer birimde göster</string>
 </resources>

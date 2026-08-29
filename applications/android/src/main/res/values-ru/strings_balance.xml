@@ -37,4 +37,5 @@
         <item quantity="other">около %1$d часа</item>
     </plurals>
     <string name="balance_rate_stale">Эта сумма посчитана по курсу %1$s назад.</string>
+    <string name="balance_flip_unit">Показать в другой единице</string>
 </resources>

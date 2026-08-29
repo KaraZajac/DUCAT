@@ -24,4 +24,6 @@
     <string name="chatlist_time_minutes">%1$d dk</string>
     <string name="chatlist_time_hours">%1$d sa</string>
     <string name="chatlist_search_hint">Mesajlarda ara</string>
+    <string name="chatlist_delete_long">sohbeti sil</string>
+    <string name="chatlist_unread">Okunmadı</string>
 </resources>

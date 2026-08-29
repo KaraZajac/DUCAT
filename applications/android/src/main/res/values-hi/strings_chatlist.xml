@@ -24,4 +24,6 @@
     <string name="chatlist_time_minutes">%1$d मि</string>
     <string name="chatlist_time_hours">%1$d घं</string>
     <string name="chatlist_search_hint">संदेश खोजें</string>
+    <string name="chatlist_delete_long">बातचीत हटाएँ</string>
+    <string name="chatlist_unread">अपठित</string>
 </resources>

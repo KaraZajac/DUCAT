@@ -24,4 +24,6 @@
     <string name="chatlist_time_minutes">%1$dm</string>
     <string name="chatlist_time_hours">%1$du</string>
     <string name="chatlist_search_hint">Berichten zoeken</string>
+    <string name="chatlist_delete_long">gesprek verwijderen</string>
+    <string name="chatlist_unread">Ongelezen</string>
 </resources>

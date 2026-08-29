@@ -24,4 +24,6 @@
     <string name="chatlist_time_minutes">%1$d min</string>
     <string name="chatlist_time_hours">%1$d h</string>
     <string name="chatlist_search_hint">Rechercher des messages</string>
+    <string name="chatlist_delete_long">supprimer la conversation</string>
+    <string name="chatlist_unread">Non lu</string>
 </resources>

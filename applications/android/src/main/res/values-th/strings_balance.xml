@@ -28,4 +28,5 @@
         <item quantity="other">ประมาณ %1$d ชั่วโมง</item>
     </plurals>
     <string name="balance_rate_stale">ตัวเลขนี้ใช้อัตราแลกเปลี่ยนเมื่อ %1$s ที่แล้ว</string>
+    <string name="balance_flip_unit">แสดงในอีกหน่วยหนึ่ง</string>
 </resources>

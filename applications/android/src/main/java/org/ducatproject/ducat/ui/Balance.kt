@@ -66,8 +66,14 @@ fun BalanceCard(
             style = MaterialTheme.typography.displayLarge,
             // Tapping the amount flips the unit. The balance is where
             // someone asks "how much is that really", so it is where the
-            // answer should be one tap away.
-            modifier = Modifier.clickable(enabled = shown.secondary != null) {
+            // answer should be one tap away. The label is the only way a
+            // screen reader can know the gesture exists — sighted users
+            // find it by trying, which a reader cannot.
+            modifier = Modifier.clickable(
+                enabled = shown.secondary != null,
+                onClickLabel = stringResource(R.string.balance_flip_unit),
+                role = androidx.compose.ui.semantics.Role.Button,
+            ) {
                 org.ducatproject.ducat.Amounts.setPreferFiat(
                     ctx, !org.ducatproject.ducat.Amounts.preferFiat(ctx),
                 )

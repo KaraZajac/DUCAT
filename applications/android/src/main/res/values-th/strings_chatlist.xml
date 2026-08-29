@@ -24,4 +24,6 @@
     <string name="chatlist_time_minutes">%1$d นาที</string>
     <string name="chatlist_time_hours">%1$d ชม.</string>
     <string name="chatlist_search_hint">ค้นหาข้อความ</string>
+    <string name="chatlist_delete_long">ลบการสนทนา</string>
+    <string name="chatlist_unread">ยังไม่ได้อ่าน</string>
 </resources>

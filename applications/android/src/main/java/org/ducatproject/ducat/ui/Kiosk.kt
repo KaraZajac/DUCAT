@@ -229,7 +229,8 @@ private fun Ordering(
             Column(Modifier.padding(16.dp)) {
                 basket.forEach { line ->
                     Row(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-                        Text(line.description, Modifier.weight(1f))
+                        Text(line.description, Modifier.weight(1f),
+                            maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                         Text(Amounts.show(context, line.amountPxmr).primary)
                     }
                 }
@@ -719,9 +720,13 @@ private fun StaffOrders() {
                         containerColor = androidx.compose.ui.graphics.Color.Transparent,
                     ),
                     supportingContent = {
+                        // Two lines, then an ellipsis: a six-drink order is
+                        // still one row on the screen a counter scans fast.
                         Text(
                             o.lines.joinToString(", ") { it.description }
                                 .ifBlank { stringResource(R.string.kiosk_order) },
+                            maxLines = 2,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                         )
                     },
                     trailingContent = {

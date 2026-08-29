@@ -114,6 +114,8 @@ fun ItemsScreen() {
                     headlineContent = {
                         Text(
                             item.name,
+                            maxLines = 2,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                             color = if (item.soldOut) {
                                 MaterialTheme.colorScheme.onSurfaceVariant
                             } else {

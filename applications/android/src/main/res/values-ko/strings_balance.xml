@@ -28,4 +28,5 @@
         <item quantity="other">약 %1$d시간</item>
     </plurals>
     <string name="balance_rate_stale">이 금액은 %1$s 전 환율을 씁니다.</string>
+    <string name="balance_flip_unit">다른 단위로 표시</string>
 </resources>

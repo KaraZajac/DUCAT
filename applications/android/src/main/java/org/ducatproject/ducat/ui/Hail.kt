@@ -1400,7 +1400,8 @@ fun DriveScreen() {
                         ) {
                             Column(Modifier.padding(10.dp)) {
                                 Text(n.dest, style = MaterialTheme.typography.titleSmall,
-                                    maxLines = 1)
+                                    maxLines = 1,
+                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                                 Text(
                                     // primary, not secondary. `show` puts the
                                     // unit this wallet reads money in first and

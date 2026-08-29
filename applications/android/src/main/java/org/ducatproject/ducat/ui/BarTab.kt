@@ -543,6 +543,7 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text(line.description, Modifier.weight(1f),
+                                maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                                 style = MaterialTheme.typography.bodyLarge)
                             Text(Amounts.show(context, line.amountPxmr).primary,
                                 style = MaterialTheme.typography.bodyMedium,
@@ -562,8 +563,14 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                                             )
                                         }
                                     },
-                                    modifier = Modifier.size(30.dp),
-                                ) { Icon(Icons.Filled.Close, stringResource(R.string.bartab_remove_line), Modifier.size(14.dp)) }
+                                    // 40dp, not the 30 it wore: an explicit
+                                    // size overrides the 48dp the component
+                                    // reserves, and this tap deletes a line
+                                    // of a live tab — the one button in the
+                                    // row that must not be the hardest to
+                                    // hit.
+                                    modifier = Modifier.size(40.dp),
+                                ) { Icon(Icons.Filled.Close, stringResource(R.string.bartab_remove_line), Modifier.size(16.dp)) }
                             }
                         }
                     }

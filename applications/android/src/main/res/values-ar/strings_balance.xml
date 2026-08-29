@@ -43,4 +43,5 @@
         <item quantity="other">%1$d ساعة تقريبًا</item>
     </plurals>
     <string name="balance_rate_stale">يستخدم هذا الرقم سعر صرف عمره %1$s.</string>
+    <string name="balance_flip_unit">عرض بالوحدة الأخرى</string>
 </resources>

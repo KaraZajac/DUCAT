@@ -24,4 +24,6 @@
     <string name="chatlist_time_minutes">%1$d د</string>
     <string name="chatlist_time_hours">%1$d س</string>
     <string name="chatlist_search_hint">البحث في الرسائل</string>
+    <string name="chatlist_delete_long">حذف المحادثة</string>
+    <string name="chatlist_unread">غير مقروءة</string>
 </resources>

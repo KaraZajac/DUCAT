@@ -28,4 +28,5 @@
         <item quantity="other">sekitar %1$d jam</item>
     </plurals>
     <string name="balance_rate_stale">Angka itu memakai kurs dari %1$s lalu.</string>
+    <string name="balance_flip_unit">Tampilkan dalam satuan lain</string>
 </resources>

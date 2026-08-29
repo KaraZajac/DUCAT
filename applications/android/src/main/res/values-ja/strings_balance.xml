@@ -28,4 +28,5 @@
         <item quantity="other">約%1$d時間</item>
     </plurals>
     <string name="balance_rate_stale">この金額は %1$s 前のレートによるものです。</string>
+    <string name="balance_flip_unit">別の単位で表示</string>
 </resources>

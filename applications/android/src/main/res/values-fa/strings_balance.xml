@@ -31,4 +31,5 @@
         <item quantity="other">حدود %1$d ساعت</item>
     </plurals>
     <string name="balance_rate_stale">این عدد از نرخ تبدیلی مربوط به %1$s پیش استفاده می‌کند.</string>
+    <string name="balance_flip_unit">نمایش به واحد دیگر</string>
 </resources>

@@ -730,6 +730,8 @@ private fun ListingCard(info: RentalInfo, busy: Boolean, onAsk: () -> Unit) {
                 Text(
                     isolate(info.title),
                     style = MaterialTheme.typography.titleSmall,
+                    maxLines = 2,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f, fill = false),
                 )
                 // How long this listing's author has been on this phone's

@@ -31,4 +31,5 @@
         <item quantity="other">ongeveer %1$d uur</item>
     </plurals>
     <string name="balance_rate_stale">Dat bedrag gebruikt een wisselkoers van %1$s geleden.</string>
+    <string name="balance_flip_unit">In de andere eenheid tonen</string>
 </resources>

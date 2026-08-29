@@ -100,6 +100,7 @@ fun MoneroPanel() {
                         Text("✓", color = MaterialTheme.ducat.settled)
                         Spacer(Modifier.width(8.dp))
                         Text(s.url, fontFamily = FontFamily.Monospace,
+                             maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                              style = MaterialTheme.typography.bodySmall)
                     }
                     Spacer(Modifier.height(8.dp))

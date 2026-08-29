@@ -24,4 +24,6 @@
     <string name="chatlist_time_minutes">%1$d分</string>
     <string name="chatlist_time_hours">%1$d時間</string>
     <string name="chatlist_search_hint">メッセージを検索</string>
+    <string name="chatlist_delete_long">会話を削除</string>
+    <string name="chatlist_unread">未読</string>
 </resources>
