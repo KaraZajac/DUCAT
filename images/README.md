@@ -4,6 +4,12 @@ Screenshots of DUCAT running on a phone — captured from the live app, not
 mocked up. This directory is the website's gallery; the README's own set
 lives in `docs/screenshots/` and is a subset of the same captures.
 
+It stays at the repo root because the README cites it from here. The site
+lives in `docs/` and is published from `docs/dist/`, which `docs/package.json`
+assembles by copying this directory in — so the page serves these at
+`/images/…` without a second copy in git. New captures go here; nothing else
+needs changing.
+
 All shots are 1080×2400 unless noted. Names say what the screen is; the
 theme is the light default unless the name says otherwise.
 

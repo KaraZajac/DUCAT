@@ -53,6 +53,7 @@
     </a>
     <div class="nav-links">
       <a href="#wallet">Wallet</a>
+      <a href="#people">People</a>
       <a href="#commerce">Commerce</a>
       <a href="#trust">Trust</a>
       <a href="#spec">Spec</a>
@@ -86,7 +87,7 @@
 
     <div class="stats-row" id="stats-row">
       <span class="stat-chip stat-hi"><span class="num" data-target="328">0</span> conformance vectors</span>
-      <span class="stat-chip"><span class="num" data-target="2">0</span> independent implementations</span>
+      <span class="stat-chip"><span class="num" data-target="9">0</span> operating modes</span>
       <span class="stat-chip"><span class="num" data-target="20">0</span> languages</span>
       <span class="stat-chip stat-hi"><span class="num">0</span> servers</span>
     </div>
@@ -170,8 +171,44 @@
   </div>
 </section>
 
+<!-- ============================ ONBOARDING ============================ -->
+<section class="section section-alt" id="setup">
+  <div class="container">
+    <div class="section-head centered reveal">
+      <span class="section-tag">First run</span>
+      <h2>Five steps, no account,<br>about a minute</h2>
+      <p class="lead">Every screenshot on this page is the app running on a phone, not a
+      mockup. Nothing here asks you to sign up, because there is nobody to sign up with.</p>
+    </div>
+    <div class="phone-row reveal">
+      <figure class="phone">
+        <img src="images/onboarding-1.png" alt="Step 1 of 5: create your identity — a keypair made on this phone, no account" loading="lazy" width="1080" height="2400">
+        <figcaption><strong>1 · Identity</strong> — a keypair, not a signup</figcaption>
+      </figure>
+      <figure class="phone">
+        <img src="images/onboarding-3.png" alt="Step 3 of 5: choose a PIN, with the no-reset warning stated plainly" loading="lazy" width="1080" height="2400">
+        <figcaption><strong>3 · A PIN</strong> — and no way to reset it, said plainly</figcaption>
+      </figure>
+      <figure class="phone">
+        <img src="images/onboarding-4.png" alt="Step 4 of 5: how strangers trust each other — both sides stake, finishing returns it" loading="lazy" width="1080" height="2400">
+        <figcaption><strong>4 · Trust</strong> — explained before your first deal</figcaption>
+      </figure>
+      <figure class="phone">
+        <img src="images/onboarding-5.png" alt="Step 5 of 5: the backup, honestly not a backup yet until it leaves the phone" loading="lazy" width="1080" height="2400">
+        <figcaption><strong>5 · Backup</strong> — "not a backup yet" until it leaves the phone</figcaption>
+      </figure>
+    </div>
+    <div class="feature-copy reveal" style="max-width:760px;margin:0 auto;text-align:center;">
+      <p>Your identity is a keypair made on the device — no email, no phone number, nobody
+      to register with, <strong>which is also why nobody can restore it for you</strong>.
+      The last step is the backup, because a wallet you cannot restore is the one way a
+      person actually loses money here.</p>
+    </div>
+  </div>
+</section>
+
 <!-- ============================ WALLET ============================ -->
-<section class="section section-alt" id="wallet">
+<section class="section" id="wallet">
   <div class="container">
     <div class="section-head reveal">
       <span class="section-tag">Settlement</span>
@@ -181,27 +218,73 @@
     </div>
     <div class="phone-row reveal">
       <figure class="phone">
-        <img src="screenshots/home.png" alt="Home: balance in XMR and USD, synced, with a low-notes warning" loading="lazy" width="420" height="933">
-        <figcaption><strong>The balance,</strong> and a warning before it bites</figcaption>
+        <img src="images/home.png" alt="Personal home: balance in XMR and USD, sync state, spendable-notes counter, mode tiles and recent movements" loading="lazy" width="1080" height="2400">
+        <figcaption><strong>The balance,</strong> and the notes behind it</figcaption>
       </figure>
       <figure class="phone">
-        <img src="screenshots/pay.png" alt="Paying: amount, fiat, fee breakdown, what is left after, speed" loading="lazy" width="420" height="933">
+        <img src="images/pay.png" alt="Paying or requesting: amount in fiat or XMR, fee arithmetic, what is left afterwards" loading="lazy" width="1080" height="2400">
         <figcaption><strong>The whole arithmetic</strong> before you commit</figcaption>
       </figure>
       <figure class="phone">
-        <img src="screenshots/activity.png" alt="Activity: a statement with counterparty, receipts and running balance" loading="lazy" width="420" height="933">
+        <img src="images/activity.png" alt="The statement: running balance, receipt search, CSV export" loading="lazy" width="1080" height="2400">
         <figcaption><strong>A statement</strong> rebuilt from the chain</figcaption>
+      </figure>
+      <figure class="phone">
+        <img src="images/send-receive.png" alt="Picking who to pay: contacts listed with their key fingerprints" loading="lazy" width="1080" height="2400">
+        <figcaption><strong>Who you're paying,</strong> by key fingerprint</figcaption>
       </figure>
     </div>
     <div class="feature-copy reveal" style="max-width:780px;margin:0 auto;">
       <p>Paying shows the amount, the estimated network fee, the total, <strong>what you
       have left afterwards</strong>, how many notes it spends and roughly how long it will
       take — and lets you pick a speed. History is rebuilt from the chain: sends identified
-      by key image, change never shown as income, every row carrying the running balance.</p>
+      by key image, change never shown as income, every row carrying the running balance,
+      and the whole statement exportable as CSV.</p>
       <p>Monero spends discrete notes rather than a balance, so a wallet holding one big
       note can be unable to pay twice in a row. The app counts the notes it can spend and
       tells you to break one <span class="accent">before</span> you are standing at a
       counter, rather than failing there.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ PEOPLE ============================ -->
+<section class="section section-alt" id="people">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="section-tag">People</span>
+      <h2>Conversations that carry money</h2>
+      <p class="lead">A contact is a keypair, not an identifier. One scan opens a
+      mailbox-based conversation that works while either side is offline — and those
+      threads carry commerce, not just text.</p>
+    </div>
+    <div class="phone-row reveal">
+      <figure class="phone">
+        <img src="images/my-card.png" alt="Your card: a claim-once QR that opens a conversation, good for one person" loading="lazy" width="1080" height="2400">
+        <figcaption><strong>Your card</strong> — good for one person</figcaption>
+      </figure>
+      <figure class="phone">
+        <img src="images/chat-thread.png" alt="A conversation carrying money: itemised bill with a tax line, the receipt, a settled-escrow banner" loading="lazy" width="1080" height="2400">
+        <figcaption><strong>A bill, a payment, a receipt</strong> — in the thread</figcaption>
+      </figure>
+      <figure class="phone">
+        <img src="images/group-chat.png" alt="A group conversation: fan-out over pairwise threads, with replies and reactions" loading="lazy" width="1080" height="2400">
+        <figcaption><strong>Groups</strong> — fanned over pairwise threads</figcaption>
+      </figure>
+      <figure class="phone">
+        <img src="images/chat-search.png" alt="Searching what people said, with name hits ranked above message hits" loading="lazy" width="1080" height="2400">
+        <figcaption><strong>Search</strong> what people actually said</figcaption>
+      </figure>
+    </div>
+    <div class="feature-copy reveal" style="max-width:780px;margin:0 auto;">
+      <p>You hand someone a card — by QR, <code>ducat:</code> link, or an NFC tap — and it
+      is <strong>good for one person</strong>: once claimed it stops working, so a
+      screenshot that ends up somewhere else is not a way in.</p>
+      <p>A group is the same machinery carrying words instead of money: fan-out into the
+      existing pairwise threads, <strong>no group key and no shared record</strong>, so
+      forward secrecy and deniability are exactly what they were. The roster is
+      grow-only — removal would need a consensus a peer-to-peer group cannot have — and
+      the app says so plainly rather than implying a moderation it does not have.</p>
     </div>
   </div>
 </section>
@@ -212,27 +295,56 @@
     <div class="section-head reveal">
       <span class="section-tag">Proximity commerce</span>
       <h2>Your phone is the whole business</h2>
-      <p class="lead">Pick a mode and the entire app hands over — its own tabs, nothing of
-      the wallet's. Almost none of it needed a new wire object, which is the spec's
-      proudest sentence.</p>
+      <p class="lead">Pick one of nine modes and the entire app hands over — its own tabs,
+      nothing of the wallet's. Almost none of it needed a new wire object, which is the
+      spec's proudest sentence.</p>
     </div>
 
     <div class="phone-row reveal">
       <figure class="phone">
-        <img src="screenshots/modes.png" alt="Operating modes: personal, point of sale, bar tab, taxi, donations, renting" loading="lazy" width="420" height="933">
-        <figcaption><strong>Six modes,</strong> one protocol</figcaption>
+        <img src="images/modes.png" alt="Operating modes: personal, point of sale, bar tab, taxi, donations, marketplace, renting, hire help, kiosk" loading="lazy" width="1080" height="2400">
+        <figcaption><strong>Nine modes,</strong> one protocol</figcaption>
       </figure>
       <figure class="phone">
-        <img src="screenshots/pos.png" alt="Point of sale: two items rung up, running total in XMR and USD" loading="lazy" width="420" height="933">
-        <figcaption><strong>Point of sale</strong> rings up items</figcaption>
+        <img src="images/pos.png" alt="Point of sale: items rung up with a computed sales-tax line" loading="lazy" width="1080" height="2400">
+        <figcaption><strong>Point of sale</strong> — with the tax computed</figcaption>
       </figure>
       <figure class="phone">
-        <img src="screenshots/pos-code.png" alt="One code to scan; the itemised bill arrives on the customer's phone" loading="lazy" width="420" height="933">
+        <img src="images/pos-charge.png" alt="One code for the customer to scan; the itemised bill lands on their phone" loading="lazy" width="1080" height="2400">
         <figcaption><strong>One code</strong> — the bill lands as they scan</figcaption>
       </figure>
     </div>
 
-    <div class="feature-split reveal" style="margin-top:3rem;">
+    <div class="phone-row reveal">
+      <figure class="phone">
+        <img src="images/bar-tab.png" alt="Bar tabs: open tabs, billed-and-waiting, closed with one bill" loading="lazy" width="1080" height="2400">
+        <figcaption><strong>Bar tabs</strong> — settle from the bus home</figcaption>
+      </figure>
+      <figure class="phone">
+        <img src="images/kiosk.png" alt="Kiosk mode, customer side: tap what you want, tax shown before you commit" loading="lazy" width="1080" height="2400">
+        <figcaption><strong>Kiosk</strong> — the customer orders for themselves</figcaption>
+      </figure>
+      <figure class="phone">
+        <img src="images/kiosk-staff.png" alt="Kiosk staff panel behind a PIN: orders, menu, and the tax rate" loading="lazy" width="1080" height="2400">
+        <figcaption><strong>Staff panel</strong> behind a PIN</figcaption>
+      </figure>
+      <figure class="phone">
+        <img src="images/donations.png" alt="A standing donation code, with its linkability cost stated on screen" loading="lazy" width="1080" height="2400">
+        <figcaption><strong>Donations</strong> — with the cost named</figcaption>
+      </figure>
+    </div>
+
+    <div class="feature-copy reveal" style="max-width:820px;margin:2rem auto 0;">
+      <p>A <strong>point of sale</strong> rings up items or takes a typed total, computes
+      the sales tax for its region, and shows one code; the bill arrives on the customer's
+      phone the moment they scan it, and a receipt goes back when they pay. A <strong>bar
+      tab</strong> pings every drink to the customer and closes with one bill. A
+      <strong>kiosk</strong> hands the phone to the customer entirely, with a staff panel
+      behind a PIN. A <strong>donation box</strong> is a standing address any Monero wallet
+      can give to — with its linkability cost stated on the screen rather than in a policy.</p>
+    </div>
+
+    <div class="feature-split reveal" style="margin-top:3.5rem;">
       <div class="feature-copy">
         <span class="section-tag">Dispatch</span>
         <h3>A ride, with nobody dispatching it</h3>
@@ -251,53 +363,61 @@
       </div>
       <div class="phone-row" style="margin:0;">
         <figure class="phone">
-          <img src="screenshots/hail.png" alt="Hail a ride: route on a map, distance, time, price, and what a rideshare would charge" loading="lazy" width="420" height="933">
+          <img src="images/hail.png" alt="Hailing a ride: route, distance, time, and the fare against what a rideshare would charge" loading="lazy" width="1080" height="2400">
           <figcaption><strong>The hail,</strong> priced against the rideshare</figcaption>
         </figure>
         <figure class="phone">
-          <img src="screenshots/taxi.png" alt="Taxi mode: watch a stand, choose how wide an area, fares and meter tabs" loading="lazy" width="420" height="933">
-          <figcaption><strong>Taxi mode</strong> is a driver's whole day</figcaption>
+          <img src="images/taxi-meter.png" alt="The taxi meter: rate typed once, a pickup code, terms landing in the chat at start" loading="lazy" width="1080" height="2400">
+          <figcaption><strong>The meter,</strong> with terms in the thread</figcaption>
         </figure>
       </div>
     </div>
 
-    <div class="feature-split flip reveal" style="margin-top:3rem;">
+    <div class="feature-split flip reveal" style="margin-top:3.5rem;">
       <div class="feature-copy">
-        <span class="section-tag">Renting</span>
-        <h3>A room or a car, listed to the neighbourhood</h3>
-        <p>Listings work like hails, on coarser boards — about five kilometres across,
-        because people will travel to collect a set of keys. The form is split in two and
-        the app tells you which half is which: the public part goes on a board anyone
-        nearby can read, and <strong>the address, the keys and the plate never leave your
-        phone until a booking is real</strong>.</p>
-        <p>Searching reads your board and the ring around it, drawing results as each
-        board answers — a car parked near you is on screen in under six seconds.</p>
+        <span class="section-tag">Boards</span>
+        <h3>Sell it, rent it, or offer an hour of your time</h3>
+        <p>The same board machinery carries more than rides. A <strong>marketplace</strong>
+        listing, a <strong>rental</strong>, or an hour of <strong>skilled help</strong>
+        all post to a bulletin board addressed by the neighbourhood, and a stranger nearby
+        reads it without either of you touching a platform.</p>
+        <p>Listings sit on coarser boards than hails — about five kilometres across,
+        because people will travel to collect a set of keys. Searching reads your board and
+        the ring around it, drawing results as each one answers, so something parked near
+        you is on screen in <strong>under six seconds</strong> while "nothing listed around
+        here" takes about forty and counts the areas off as it goes.</p>
       </div>
       <div class="phone-row" style="margin:0;">
         <figure class="phone">
-          <img src="screenshots/renting-form.png" alt="Listing a vehicle: the public half that goes on the board" loading="lazy" width="420" height="933">
-          <figcaption><strong>The public half</strong></figcaption>
+          <img src="images/marketplace.png" alt="Marketplace browse: a listing found on the board, with price, stakes and an Ask about it button" loading="lazy" width="1080" height="2400">
+          <figcaption><strong>Marketplace</strong></figcaption>
         </figure>
         <figure class="phone">
-          <img src="screenshots/renting-private.png" alt="Only for whoever books it: the address and handover details never go on the board" loading="lazy" width="420" height="933">
-          <figcaption><strong>The private half</strong></figcaption>
+          <img src="images/hire-help.png" alt="Hire help browse: a skill offered nearby, priced per hour" loading="lazy" width="1080" height="2400">
+          <figcaption><strong>Hire help</strong></figcaption>
         </figure>
       </div>
     </div>
 
     <div class="phone-row reveal" style="margin-top:3rem;">
       <figure class="phone">
-        <img src="screenshots/card.png" alt="Share your card: good for one person, QR, copy link, expires in 24 hours" loading="lazy" width="420" height="933">
-        <figcaption><strong>A card,</strong> good for one person</figcaption>
+        <img src="images/renting-form.png" alt="Listing a vehicle to rent: the public half that goes on the board" loading="lazy" width="1080" height="2400">
+        <figcaption><strong>The public half</strong> — what the board can read</figcaption>
       </figure>
       <figure class="phone">
-        <img src="screenshots/chat-tab.png" alt="A café conversation: itemised bill marked paid, the payment, the receipt" loading="lazy" width="420" height="933">
-        <figcaption><strong>A conversation</strong> that carried a bill, a payment, a receipt</figcaption>
+        <img src="images/renting-private.png" alt="Only for whoever books it: the address and handover details never go on the board" loading="lazy" width="1080" height="2400">
+        <figcaption><strong>The private half</strong> — never on the board</figcaption>
       </figure>
       <figure class="phone">
-        <img src="screenshots/profile-privacy.png" alt="Profile: the linkability cost of letting contacts pay you directly, stated in orange" loading="lazy" width="420" height="933">
-        <figcaption><strong>Costs named</strong> at the moment you choose</figcaption>
+        <img src="images/rent-search.png" alt="Finding gear nearby: a live listing with price per day and the stake" loading="lazy" width="1080" height="2400">
+        <figcaption><strong>Finding it</strong> — price, stake, and a way to ask</figcaption>
       </figure>
+    </div>
+    <div class="feature-copy reveal" style="max-width:820px;margin:1.5rem auto 0;">
+      <p>The listing form is split in two and the app tells you which half is which:
+      everything in the first part <strong>goes on a public board anyone nearby can
+      read</strong>, and the address, where the keys are, and the plate go in the second,
+      which never leaves your phone until a booking is real.</p>
     </div>
   </div>
 </section>
@@ -358,8 +478,53 @@
   </div>
 </section>
 
+<!-- ============================ BEHAVES LIKE AN APP ============================ -->
+<section class="section" id="craft">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="section-tag">Craft</span>
+      <h2>And it behaves like an app</h2>
+      <p class="lead">A privacy tool that is unpleasant to use gets used once. This one
+      names what things cost you, speaks twenty languages, and has a dark theme that isn't
+      an afterthought.</p>
+    </div>
+    <div class="phone-row reveal">
+      <figure class="phone">
+        <img src="images/profile-privacy.png" alt="Profile: the linkability cost of letting contacts pay you directly, stated where you choose it" loading="lazy" width="1080" height="2400">
+        <figcaption><strong>Costs named</strong> at the moment you choose</figcaption>
+      </figure>
+      <figure class="phone">
+        <img src="images/home-dark.png" alt="The same home screen in the Mocha dark theme" loading="lazy" width="1080" height="2400">
+        <figcaption><strong>Mocha</strong> — the dark theme, done properly</figcaption>
+      </figure>
+      <figure class="phone">
+        <img src="images/home-arabic.png" alt="The same home screen in Arabic: a full right-to-left mirror with Eastern Arabic numerals" loading="lazy" width="1080" height="2400">
+        <figcaption><strong>Arabic</strong> — a full RTL mirror</figcaption>
+      </figure>
+      <figure class="phone">
+        <img src="images/settings-business.png" alt="The business half of settings: fares region, sales-tax rate, privacy, backup" loading="lazy" width="1080" height="2400">
+        <figcaption><strong>The business half</strong> of settings</figcaption>
+      </figure>
+    </div>
+    <div class="feature-copy reveal" style="max-width:820px;margin:0 auto;">
+      <p>Convenience has a price in a privacy system, and the app names it at the moment you
+      choose rather than in a policy nobody reads. Letting contacts pay you directly means
+      reusing one address — so it says that anyone watching the chain can tell the same
+      person was paid each time, <strong>including people who only ever paid you
+      once</strong>, and points at the alternative. The same habit runs through: a mempool
+      sighting is shown as <em>seen, never settled</em>; a profile is always presented as
+      the <strong>claim</strong> it is.</p>
+      <p>It speaks twenty languages — every screen reads from resources, plurals are
+      composed rather than concatenated, and <strong>Arabic and Farsi prove the
+      mirror</strong>. Receipts are records, not messages: every receipt lives in its own
+      store, survives thread and contact deletion, and rides the encrypted backup — which
+      carries the <em>people</em> as well as the money.</p>
+    </div>
+  </div>
+</section>
+
 <!-- ============================ HONESTY ============================ -->
-<section class="section" id="honesty">
+<section class="section section-alt" id="honesty">
   <div class="container">
     <div class="section-head reveal">
       <span class="section-tag">Receipts, not promises</span>
@@ -406,7 +571,7 @@
 </section>
 
 <!-- ============================ SPEC ============================ -->
-<section class="section section-alt" id="spec">
+<section class="section" id="spec">
   <div class="container">
     <div class="section-head reveal">
       <span class="section-tag">The artifact</span>
@@ -444,14 +609,14 @@
 </section>
 
 <!-- ============================ DOWNLOADS ============================ -->
-<section class="section" id="downloads">
+<section class="section section-alt" id="downloads">
   <div class="container">
     <div class="section-head centered reveal">
       <span class="section-tag">Try it</span>
-      <h2>Five steps, no account,<br>about a minute</h2>
-      <p class="lead">Your identity is a keypair made on the device. The last onboarding
-      step is the backup, because a wallet you cannot restore is the one way a person
-      actually loses money here.</p>
+      <h2>Get it on a phone</h2>
+      <p class="lead">Nothing to install first — each build carries its own Rust library
+      and JVM. The desktop app compiles the same protocol sources verbatim, and has played
+      bar counter, driver, and standing escrow arbiter.</p>
     </div>
 
     <div class="dl-grid reveal">
@@ -467,8 +632,7 @@
       </div>
       <div class="dl-card">
         <h3><span class="dl-os">🐧</span> Linux</h3>
-        <p>DUCAT Desk — the same application on a bigger screen, and a shopkeeper's window.
-        Carries its own Rust library and JVM.</p>
+        <p>DUCAT Desk — the same application on a bigger screen, and a shopkeeper's window.</p>
         <div class="dl-links">
           <a href="https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-linux-x64.deb">.deb</a>
           <a href="https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-linux-x64.rpm">.rpm</a>
@@ -477,8 +641,7 @@
       </div>
       <div class="dl-card">
         <h3><span class="dl-os">🪟</span> Windows</h3>
-        <p>Unsigned — Windows will warn on first open. It has played bar counter, driver,
-        and standing escrow arbiter.</p>
+        <p>Unsigned — Windows will warn on first open.</p>
         <div class="dl-links">
           <a href="https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-windows-x64.msi">.msi</a>
           <a href="https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-windows-x64.zip">portable .zip</a>
@@ -495,8 +658,7 @@
         </div>
       </div>
     </div>
-    <p class="dl-note reveal"><strong>Debug-signed, stagenet only — not for real money.</strong>
-    Every screenshot on this page is the app running on a phone, not a mockup.</p>
+    <p class="dl-note reveal"><strong>Debug-signed, stagenet only — not for real money.</strong></p>
   </div>
 </section>
 
@@ -529,8 +691,8 @@
       <h4>This page</h4>
       <ul>
         <li><a href="#wallet">Wallet</a></li>
+        <li><a href="#people">People</a></li>
         <li><a href="#commerce">Commerce</a></li>
-        <li><a href="#trust">Trust</a></li>
         <li><a href="#downloads">Downloads</a></li>
       </ul>
     </div>
