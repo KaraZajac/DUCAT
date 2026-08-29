@@ -43,4 +43,7 @@
     <string name="activity_escrow_out_untitled">Zwolnione z depozytu</string>
     <string name="activity_export">Eksportuj jako CSV</string>
     <string name="activity_export_share">Twój wyciąg</string>
+    <string name="activity_donations_filter">Darowizny</string>
+    <string name="activity_donation_chip">Darowizna</string>
+    <string name="activity_donated_total">Przekazano %1$s</string>
 </resources>

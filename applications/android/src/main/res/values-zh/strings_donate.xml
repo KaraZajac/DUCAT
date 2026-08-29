@@ -6,4 +6,8 @@
     <string name="donate_any_wallet">任何 Monero 钱包都能在这里捐 — 谁都不需要这个应用。</string>
     <string name="donate_since_opening">自开启以来</string>
     <string name="donate_reuse_warning">这一个收款码被所有捐款人重复使用，所以在 Monero 的公开账本上，捐给它的款项彼此可以关联起来。而印出来的码只取决于最后经手的人是否诚实 — 在张贴的地方核对它确实是你的。</string>
+    <string name="donate_receipt_note">捐赠收据 — 谢谢</string>
+    <string name="donate_tab_ducat">用 DUCAT 应用</string>
+    <string name="donate_tab_monero">任意 Monero 钱包</string>
+    <string name="donate_card_hint">用 DUCAT 扫码：会打开一个对话，捐款到账后收据就送到那里 — 可留作报税凭证。每次扫码后二维码自动更新。</string>
 </resources>

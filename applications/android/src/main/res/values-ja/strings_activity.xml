@@ -38,4 +38,7 @@
     <string name="activity_escrow_out_untitled">エスクローから解放</string>
     <string name="activity_export">CSVで書き出す</string>
     <string name="activity_export_share">取引明細</string>
+    <string name="activity_donations_filter">寄付</string>
+    <string name="activity_donation_chip">寄付</string>
+    <string name="activity_donated_total">寄付合計 %1$s</string>
 </resources>

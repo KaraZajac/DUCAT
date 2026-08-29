@@ -19,21 +19,23 @@ import org.ducatproject.ducat.R
 import org.ducatproject.ducat.WalletStore
 
 /**
- * The donation box (§15.11, which defers to §15.9).
+ * The donation box (§15.11, which defers to §15.9) — two stances, honestly
+ * divided by what stands behind the code.
  *
- * Deliberately **not** a contact card, and the spec forbids building it as
- * one: a donation target is a standing, public, receive-only address — it
- * takes money and establishes no relationship. That is `TapStatic`'s stance,
- * and it inherits §15.9's admitted limits, which this screen states instead
- * of hiding:
+ * The **static** target is `TapStatic` and stays deliberately not a contact
+ * card: a sticker has no phone behind it, a claim-once card would die at its
+ * first scan, and §15.9's limits apply in full — the address is reused (every
+ * donor linkable to every other on the public ledger) and a swapped sticker
+ * verifies. What it buys is the property print needs: any Monero wallet on
+ * earth can pay it, no DUCAT on the donor's phone.
  *
- * - the address is reused, so on the public ledger every donor to this code
- *   is linkable to every other;
- * - a wholly swapped code verifies — a printed sticker is only as honest as
- *   whoever last touched it.
- *
- * What it gets in exchange is the property donations actually need: **any
- * Monero wallet on earth can pay it**, with no DUCAT on the donor's phone.
+ * The **live screen** is a phone, which is the thing §15.9's rule actually
+ * asks for — so it may additionally offer a claim-once card with purpose
+ * `donate`, recut the moment it is claimed, exactly as the bar tab and the
+ * kiosk cut theirs. That one establishes the relationship on purpose: the
+ * donation lands in a thread, and §15.11's vendor rule sends the receipt
+ * back automatically — the donor's tax record, which a bare transfer can
+ * never give them.
  */
 @Composable
 fun DonateScreen() {
@@ -59,6 +61,46 @@ fun DonateScreen() {
     // Both identifiers, not just the key image. An output that landed just
     // before the box was opened has not always derived its key image yet, and
     // recording only that let it turn up later looking like a new donation.
+    // Which rail is showing. DUCAT first: the receipt is the reason this
+    // screen grew a second code, and the Monero one is a tap away.
+    var rail by rememberSaveable { mutableStateOf(0) }
+    // The claim-once card, recut on claim — the bar's OpenTab pattern with
+    // no tab at the end of it. Each claim opens a thread; the reconciler
+    // (Donations) sends the receipt when the money is seen.
+    var cardUri by remember { mutableStateOf<String?>(null) }
+    var cardInbox by remember { mutableStateOf<String?>(null) }
+    var cardError by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(rail, cardUri) {
+        if (rail != 0 || cardUri != null) return@LaunchedEffect
+        val r = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            runCatching {
+                org.ducatproject.ducat.Mailbox.issueCard(
+                    context, MyProfile(context).name(),
+                    60uL * 60uL * 12uL, purpose = "donate",
+                )
+            }
+        }
+        r.onSuccess { cardUri = it.uri; cardInbox = it.inboxKey }
+            .onFailure { cardError = moneyFailure(context, it) }
+    }
+    LaunchedEffect(cardInbox) {
+        val inbox = cardInbox ?: return@LaunchedEffect
+        while (true) {
+            kotlinx.coroutines.delay(2_000)
+            val claimed = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                runCatching {
+                    org.ducatproject.ducat.Mailbox.collectClaims(context)
+                    ContactStore(context).claimantOf(inbox) != null
+                }.getOrDefault(false)
+            }
+            if (claimed) {
+                // Spent — cut the next donor's code.
+                cardUri = null; cardInbox = null
+                break
+            }
+        }
+    }
+
     val atOpen = rememberSaveable {
         WalletStore(context).entries()
             .flatMap { listOf(it.keyImage, it.txHashHex) }
@@ -98,14 +140,48 @@ fun DonateScreen() {
             return@Column
         }
 
-        QrBlock("monero:$address")
-        Spacer(Modifier.height(10.dp))
-        Text(
-            stringResource(R.string.donate_any_wallet),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FilterChip(
+                selected = rail == 0,
+                onClick = { rail = 0 },
+                label = { Text(stringResource(R.string.donate_tab_ducat)) },
+            )
+            FilterChip(
+                selected = rail == 1,
+                onClick = { rail = 1 },
+                label = { Text(stringResource(R.string.donate_tab_monero)) },
+            )
+        }
+        Spacer(Modifier.height(12.dp))
+        if (rail == 0) {
+            when {
+                cardUri != null -> QrBlock(cardUri!!)
+                cardError != null -> Text(
+                    cardError!!, color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                else -> CatSpinner(
+                    Modifier.size(40.dp),
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+            }
+            Spacer(Modifier.height(10.dp))
+            Text(
+                stringResource(R.string.donate_card_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+        } else {
+            QrBlock("monero:$address")
+            Spacer(Modifier.height(10.dp))
+            Text(
+                stringResource(R.string.donate_any_wallet),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+        }
 
         if (since > 0) {
             Spacer(Modifier.height(20.dp))
@@ -125,8 +201,9 @@ fun DonateScreen() {
 
         Spacer(Modifier.height(24.dp))
         // §15.9's costs, on the screen where the target is shown rather than
-        // in a document nobody at a gig has read.
-        Surface(
+        // in a document nobody at a gig has read. Static rail only: the card
+        // rail reuses nothing and links nobody.
+        if (rail == 1) Surface(
             color = MaterialTheme.colorScheme.surfaceVariant,
             shape = MaterialTheme.shapes.large,
         ) {

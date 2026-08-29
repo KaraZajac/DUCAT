@@ -77,4 +77,5 @@
     <string name="pay_repeat_weekly">Haftalık</string>
     <string name="pay_repeat_monthly">Aylık</string>
     <string name="pay_recur_notify">Yinelenen hesap gönderildi — %1$s</string>
+    <string name="pay_donation_hint">Bu bir bağış — makbuzunuz ulaştığında bu sohbete gelecek ve ekstreniz onu Bağışlar altında listeleyecek.</string>
 </resources>

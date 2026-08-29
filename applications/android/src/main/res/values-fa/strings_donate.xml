@@ -6,4 +6,8 @@
     <string name="donate_any_wallet">هر کیف پول Monero می‌تواند اینجا کمک کند — کسی به این برنامه نیاز ندارد.</string>
     <string name="donate_since_opening">از ابتدای باز شدن</string>
     <string name="donate_reuse_warning">این یک کد را همهٔ اهداکنندگان استفاده می‌کنند، پس روی دفتر کل عمومی Monero کمک‌های آن به همدیگر قابل‌پیوندند. و یک کد چاپ‌شده فقط به اندازهٔ آخرین کسی که به آن دست زده صادق است — هر جا منتشرش می‌کنی، مطمئن شو مال خودت است.</string>
+    <string name="donate_receipt_note">رسید اهدا — سپاسگزاریم</string>
+    <string name="donate_tab_ducat">با برنامه DUCAT</string>
+    <string name="donate_tab_monero">هر کیف پول مونرو</string>
+    <string name="donate_card_hint">با DUCAT اسکن کنید: گفتگویی باز می‌شود و رسید شما پس از رسیدن اهدا همان‌جا می‌آید — سندی که می‌توانید برای مالیات نگه دارید. کد پس از هر اسکن نو می‌شود.</string>
 </resources>

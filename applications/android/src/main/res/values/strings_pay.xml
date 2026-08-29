@@ -77,4 +77,5 @@
     <string name="pay_repeat_weekly">Weekly</string>
     <string name="pay_repeat_monthly">Monthly</string>
     <string name="pay_recur_notify">Recurring bill sent — %1$s</string>
+    <string name="pay_donation_hint">This is a donation — your receipt will land in this chat once it arrives, and your statement will file it under Donations.</string>
 </resources>

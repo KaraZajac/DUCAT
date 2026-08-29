@@ -1439,6 +1439,25 @@ data class Contact(
     val plate: String? = null,
     /** How far into our log they say they have read (§16.16). Their claim. */
     val theirReadUpTo: Long? = null,
+    /**
+     * What THEIR card said it was for when we claimed it — §16.9's purpose
+     * (217), kept because presentation still needs it long after the
+     * handshake: paying unprompted into a thread born from their `donate`
+     * card is a donation, and the statement files it as one. Claimant-side
+     * memory of a wire field, never wire itself.
+     */
+    val cardPurpose: String? = null,
+    /**
+     * What OUR card said when they claimed it — the other direction, kept
+     * apart on purpose. One shared field receipted backwards: a donor who
+     * claimed a charity's card started thanking the charity for its own old
+     * payments. This side drives the automatic donation receipt, and only
+     * this side may.
+     */
+    val myCardPurpose: String? = null,
+    /** When [myCardPurpose] was last established — the fence that keeps the
+     *  receipt loop off traffic that predates the donate relationship. */
+    val myCardPurposeAt: Long = 0,
     /** Our next outgoing sequence number, and the link it must carry (§16.10). */
     val outSeq: Long = 0,
     val outPrevLink: ByteArray? = null,
@@ -1494,6 +1513,9 @@ data class Contact(
         put("car_color", carColor ?: JSONObject.NULL)
         put("plate", plate ?: JSONObject.NULL)
         put("their_read", theirReadUpTo ?: JSONObject.NULL)
+        put("card_purpose", cardPurpose ?: JSONObject.NULL)
+        put("my_card_purpose", myCardPurpose ?: JSONObject.NULL)
+        put("my_card_purpose_at", myCardPurposeAt)
         put("out_seq", outSeq)
         put("out_prev", outPrevLink?.let { b64(it) } ?: JSONObject.NULL)
         put("in_seq", inSeq)
@@ -1516,6 +1538,9 @@ data class Contact(
             carColor = o.optStringOrNull("car_color"),
             plate = o.optStringOrNull("plate"),
             theirReadUpTo = if (o.isNull("their_read")) null else o.optLong("their_read"),
+            cardPurpose = o.optStringOrNull("card_purpose"),
+            myCardPurpose = o.optStringOrNull("my_card_purpose"),
+            myCardPurposeAt = o.optLong("my_card_purpose_at", 0L),
             myOutbox = o.optString("my_outbox", ""),
             myOutboxOwnerPublic = unb64(o.optString("my_outbox_pub", "")),
             myOutboxOwnerSecret = unb64(o.optString("my_outbox_sec", "")),
@@ -2055,6 +2080,7 @@ class WalletStore(context: Context) {
         keyImages: List<String>,
         contactHex: String?,
         note: String?,
+        donation: Boolean = false,
     ): String {
         val id = java.util.UUID.randomUUID().toString()
         val arr = JSONArray(prefs.getString("send_intents", "[]"))
@@ -2064,6 +2090,8 @@ class WalletStore(context: Context) {
             put("contact", contactHex ?: JSONObject.NULL)
             put("note", note ?: JSONObject.NULL)
             put("ts", System.currentTimeMillis() / 1000)
+            // Rides the intent so a crash-recovered record keeps the flag.
+            if (donation) put("donate", true)
         })
         // commit(), not apply(): this claim is only worth anything if it is
         // on disk before moneroSend runs. apply() hands the write to a
@@ -2129,6 +2157,7 @@ class WalletStore(context: Context) {
             put("contact", it0.opt("contact") ?: JSONObject.NULL)
             put("note", it0.opt("note") ?: JSONObject.NULL)
             put("ts", System.currentTimeMillis() / 1000)
+            if (it0.optBoolean("donate", false)) put("donate", true)
         })
         val outsRaw = prefs.getString("wallet_outputs", null)
         val e = prefs.edit()
@@ -2184,6 +2213,7 @@ class WalletStore(context: Context) {
                 contactHex = if (o.isNull("contact")) null else o.optString("contact"),
                 note = if (o.isNull("note")) null else o.optString("note"),
                 timestamp = o.optLong("ts", 0),
+                donation = o.optBoolean("donate", false),
             )
         }
     }
@@ -2600,4 +2630,7 @@ data class SentPayment(
     val contactHex: String?,
     val note: String?,
     val timestamp: Long,
+    /** An unprompted payment into a thread born from a `donate` card — the
+     *  statement's tax-time filter. Client-local presentation, never wire. */
+    val donation: Boolean = false,
 )

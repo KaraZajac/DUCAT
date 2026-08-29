@@ -77,4 +77,5 @@
     <string name="pay_repeat_weekly">هفتگی</string>
     <string name="pay_repeat_monthly">ماهانه</string>
     <string name="pay_recur_notify">صورت‌حساب دوره‌ای ارسال شد — %1$s</string>
+    <string name="pay_donation_hint">این یک اهداست — رسید شما پس از رسیدن در همین گفتگو می‌آید و صورت‌حساب آن را زیر «اهداها» ثبت می‌کند.</string>
 </resources>

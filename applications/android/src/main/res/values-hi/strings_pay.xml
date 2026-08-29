@@ -77,4 +77,5 @@
     <string name="pay_repeat_weekly">साप्ताहिक</string>
     <string name="pay_repeat_monthly">मासिक</string>
     <string name="pay_recur_notify">आवर्ती बिल भेजा गया — %1$s</string>
+    <string name="pay_donation_hint">यह एक दान है — पहुँचते ही रसीद इसी चैट में आएगी, और आपका विवरण इसे दान के अंतर्गत दर्ज करेगा।</string>
 </resources>

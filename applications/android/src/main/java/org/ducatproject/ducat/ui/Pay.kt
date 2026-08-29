@@ -927,6 +927,19 @@ private fun AmountStep(
             }
         }
 
+        if (!asking && (target as? PayTarget.ToContact)?.contact?.cardPurpose == "donate" &&
+            answersSeq == null
+        ) {
+            Spacer(Modifier.height(8.dp))
+            // Say what the rail buys before the money moves: the receipt is
+            // the reason this thread exists, and the statement will file the
+            // payment under Donations.
+            Text(
+                stringResource(R.string.pay_donation_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
         if (!asking && target is PayTarget.ToContact && target.contact.theirAddress == null &&
             prefillAmountPxmr == 0L
         ) {
@@ -999,11 +1012,19 @@ private fun AmountStep(
                                     context.getString(R.string.pay_no_address_error)
                                 )
                             val contact = (target as? PayTarget.ToContact)?.contact
+                            // A donation is an unprompted payment into a
+                            // thread born from a `donate` card: not answering
+                            // a bill, to a contact whose card said donate.
+                            // The flag is presentation — it makes the
+                            // statement's tax-time filter true, nothing more.
+                            val isDonation = answersSeq == null &&
+                                contact?.cardPurpose == "donate"
                             val res = Wallet.send(
                                 context, node, to, amount,
                                 contactHex = contact?.personaHex,
                                 note = note.ifBlank { null },
                                 priority = priority,
+                                donation = isDonation,
                             )
                             // Tell them, in the thread. §16.13's notice is
                             // advisory — they verify by finding the output — but

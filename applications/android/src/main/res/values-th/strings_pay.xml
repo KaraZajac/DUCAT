@@ -77,4 +77,5 @@
     <string name="pay_repeat_weekly">รายสัปดาห์</string>
     <string name="pay_repeat_monthly">รายเดือน</string>
     <string name="pay_recur_notify">ส่งบิลประจำแล้ว — %1$s</string>
+    <string name="pay_donation_hint">นี่คือการบริจาค — ใบเสร็จจะมาถึงแชตนี้เมื่อเงินเข้า และรายการเดินบัญชีจะบันทึกไว้ในหมวดการบริจาค</string>
 </resources>

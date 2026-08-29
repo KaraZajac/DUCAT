@@ -136,13 +136,19 @@ fun ActivityScreen() {
     // characters is past where that happens by accident and well short of
     // what somebody pasting part of a txid would type.
     val ids = q.length >= 6
-    val shownEvents = if (q.isEmpty()) events else haystacks
+    // Tax time in one tap: only the payments that went into donate-card
+    // threads, with what they add up to. The chip only exists once there is
+    // a donation to show — a filter for money nobody has given is clutter.
+    var donationsOnly by rememberSaveable { mutableStateOf(false) }
+    val searched = if (q.isEmpty()) events else haystacks
         .filter { (_, text, id) -> text.contains(q) || (ids && id.contains(q)) }
         .map { it.first }
-    val shownPending = if (q.isEmpty()) pending else pending.filter {
-        it.counterparty.lowercase().contains(q) ||
-            Amounts.show(context, it.amountPxmr).primary.lowercase().contains(q)
-    }
+    val shownEvents = if (donationsOnly) searched.filter { it.donation } else searched
+    val shownPending = if (donationsOnly) emptyList() else
+        if (q.isEmpty()) pending else pending.filter {
+            it.counterparty.lowercase().contains(q) ||
+                Amounts.show(context, it.amountPxmr).primary.lowercase().contains(q)
+        }
 
     if (events.isEmpty()) {
         Column(
@@ -224,6 +230,35 @@ fun ActivityScreen() {
                 stringResource(R.string.activity_export),
             )
         }
+    }
+    if (events.any { it.donation }) {
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            FilterChip(
+                selected = donationsOnly,
+                onClick = { donationsOnly = !donationsOnly },
+                label = { Text(stringResource(R.string.activity_donations_filter)) },
+            )
+            if (donationsOnly) {
+                Spacer(Modifier.weight(1f))
+                // What the filtered rows add up to — the figure the tax form
+                // wants, beside the rows that justify it. Amounts, not fees:
+                // the fee bought carriage, not the cause.
+                Text(
+                    stringResource(
+                        R.string.activity_donated_total,
+                        Amounts.show(
+                            context, shownEvents.sumOf { it.amountPxmr },
+                        ).primary,
+                    ),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.ducat.settled,
+                )
+            }
+        }
+        Spacer(Modifier.height(4.dp))
     }
     if (q.isNotEmpty() && shownEvents.isEmpty() && shownPending.isEmpty()) {
         Text(
@@ -392,6 +427,14 @@ private fun EventRow(e: Ledger.Event, onClick: () -> Unit) {
                             stringResource(R.string.activity_receipt_chip),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.ducat.settled,
+                        )
+                    }
+                    if (e.donation) {
+                        Spacer(Modifier.width(6.dp))
+                        Text(
+                            stringResource(R.string.activity_donation_chip),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary,
                         )
                     }
                 }

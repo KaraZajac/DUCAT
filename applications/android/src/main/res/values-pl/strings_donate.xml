@@ -6,4 +6,8 @@
     <string name="donate_any_wallet">Wpłacić może tu każdy portfel Monero — nikt nie potrzebuje tej aplikacji.</string>
     <string name="donate_since_opening">Od otwarcia</string>
     <string name="donate_reuse_warning">Ten jeden kod jest używany przez wszystkich darczyńców, więc w publicznym rejestrze Monero wpłaty na niego dają się ze sobą powiązać. A wydrukowany kod jest tak uczciwy, jak ostatnia osoba, która go dotknęła — sprawdzaj, czy tam, gdzie go umieszczasz, wciąż jest twój.</string>
+    <string name="donate_receipt_note">Pokwitowanie darowizny — dziękujemy</string>
+    <string name="donate_tab_ducat">Aplikacją DUCAT</string>
+    <string name="donate_tab_monero">Dowolny portfel Monero</string>
+    <string name="donate_card_hint">Zeskanuj aplikacją DUCAT: otworzy się rozmowa, a pokwitowanie trafi tam, gdy darowizna dotrze — dokument do celów podatkowych. Kod odnawia się po każdym skanie.</string>
 </resources>

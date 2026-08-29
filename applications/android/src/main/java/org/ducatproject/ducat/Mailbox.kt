@@ -402,6 +402,14 @@ object Mailbox {
             carModel = theirs.profile.carModel,
             carColor = theirs.profile.carColor,
             plate = theirs.profile.plate,
+            // What this card said it was for — kept, because a thread born
+            // from a `donate` card is the thread whose unprompted payments
+            // are donations. An unpurposed card keeps whatever the last
+            // purposed one established. The other direction's memory rides
+            // through untouched: claiming their card says nothing about ours.
+            cardPurpose = theirs.purpose ?: prior?.cardPurpose,
+            myCardPurpose = prior?.myCardPurpose,
+            myCardPurposeAt = prior?.myCardPurposeAt ?: 0L,
             myRing = NEW_RING.toInt(),
         )
         store.add(c)
@@ -550,6 +558,20 @@ object Mailbox {
                         carModel = theirs.profile.carModel,
                         carColor = theirs.profile.carColor,
                         plate = theirs.profile.plate,
+                        // Two directions, two fields. What THEIR card said
+                        // survives from the prior record — this claim is of
+                        // OUR card and says nothing about theirs. What our
+                        // card said goes in its own field, with the moment it
+                        // was established: the receipt loop must never reach
+                        // back past it.
+                        cardPurpose = prior?.cardPurpose,
+                        myCardPurpose = issued.purpose.takeIf { it.isNotBlank() }
+                            ?: prior?.myCardPurpose,
+                        myCardPurposeAt =
+                            if (issued.purpose.isNotBlank() &&
+                                issued.purpose != prior?.myCardPurpose
+                            ) System.currentTimeMillis() / 1000
+                            else prior?.myCardPurposeAt ?: 0L,
                         myRing = NEW_RING.toInt(),
                     )
                 )

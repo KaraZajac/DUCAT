@@ -6,4 +6,8 @@
     <string name="donate_any_wallet">कोई भी Monero वॉलेट यहाँ दे सकता है — किसी को इस ऐप की ज़रूरत नहीं।</string>
     <string name="donate_since_opening">खुलने से अब तक</string>
     <string name="donate_reuse_warning">यह एक ही कोड हर दान देने वाला दोहराता है, इसलिए Monero के सार्वजनिक बहीखाते पर इसके दान आपस में जोड़े जा सकते हैं। और छपा हुआ कोड उतना ही ईमानदार है जितना उसे आख़िरी बार छूने वाला — जहाँ भी लगाएँ, जाँच लें कि वह आपका ही है।</string>
+    <string name="donate_receipt_note">दान रसीद — धन्यवाद</string>
+    <string name="donate_tab_ducat">DUCAT ऐप से</string>
+    <string name="donate_tab_monero">कोई भी Monero वॉलेट</string>
+    <string name="donate_card_hint">DUCAT से स्कैन करें: एक बातचीत खुलती है, और दान पहुँचते ही आपकी रसीद वहीं आ जाती है — टैक्स के लिए रखने लायक रिकॉर्ड। हर स्कैन के बाद कोड नया हो जाता है।</string>
 </resources>

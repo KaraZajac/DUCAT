@@ -37,4 +37,7 @@
     <string name="activity_escrow_out_untitled">从托管释放</string>
     <string name="activity_export">导出为 CSV</string>
     <string name="activity_export_share">你的对账单</string>
+    <string name="activity_donations_filter">捐赠</string>
+    <string name="activity_donation_chip">捐赠</string>
+    <string name="activity_donated_total">已捐赠 %1$s</string>
 </resources>

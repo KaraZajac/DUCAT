@@ -6,4 +6,8 @@
     <string name="donate_any_wallet">Пожертвовать сюда может любой кошелёк Monero — это приложение никому не нужно.</string>
     <string name="donate_since_opening">С момента открытия</string>
     <string name="donate_reuse_warning">Этот код один на всех, поэтому в публичном реестре Monero пожертвования на него можно связать между собой. А напечатанный код честен ровно настолько, насколько честен последний, кто его касался, — проверяй, что там, где ты его размещаешь, висит именно твой.</string>
+    <string name="donate_receipt_note">Квитанция о пожертвовании — спасибо</string>
+    <string name="donate_tab_ducat">Через приложение DUCAT</string>
+    <string name="donate_tab_monero">Любой кошелёк Monero</string>
+    <string name="donate_card_hint">Отсканируйте в DUCAT: откроется переписка, и квитанция придёт туда, как только пожертвование поступит — документ, который можно сохранить для налогов. Код обновляется после каждого сканирования.</string>
 </resources>

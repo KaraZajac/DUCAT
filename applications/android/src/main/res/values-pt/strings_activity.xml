@@ -39,4 +39,7 @@
     <string name="activity_escrow_out_untitled">Libertado de um depósito em garantia</string>
     <string name="activity_export">Exportar como CSV</string>
     <string name="activity_export_share">O seu extrato</string>
+    <string name="activity_donations_filter">Doações</string>
+    <string name="activity_donation_chip">Doação</string>
+    <string name="activity_donated_total">%1$s doado</string>
 </resources>

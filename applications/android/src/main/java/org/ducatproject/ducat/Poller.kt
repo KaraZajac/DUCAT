@@ -248,6 +248,9 @@ class Poller(private val context: Context) {
                 // the thread. Here rather than on a screen, because the payment
                 // lands when it lands and the vendor is busy (§15.11).
                 runCatching { TabStore.reconcile(context) }
+                // Donation threads get their receipts on the same clock the
+                // tabs do — see Donations for why the payer wants the record.
+                runCatching { Donations.reconcile(context) }
                     .onFailure { DucatLog.w(TAG, "tabs: ${it.message}") }
                 // The mempool, only while a bill is out and unsighted — the
                 // scan costs a round trip per pool transaction, and a till

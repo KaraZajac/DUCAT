@@ -77,4 +77,5 @@
     <string name="pay_repeat_weekly">Hàng tuần</string>
     <string name="pay_repeat_monthly">Hàng tháng</string>
     <string name="pay_recur_notify">Đã gửi hóa đơn định kỳ — %1$s</string>
+    <string name="pay_donation_hint">Đây là khoản quyên góp — biên nhận sẽ đến cuộc trò chuyện này khi tiền tới, và sao kê sẽ xếp nó vào mục Quyên góp.</string>
 </resources>

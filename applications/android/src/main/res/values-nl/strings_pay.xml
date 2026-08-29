@@ -77,4 +77,5 @@
     <string name="pay_repeat_weekly">Wekelijks</string>
     <string name="pay_repeat_monthly">Maandelijks</string>
     <string name="pay_recur_notify">Terugkerende rekening verzonden — %1$s</string>
+    <string name="pay_donation_hint">Dit is een donatie — je bewijs landt in deze chat zodra het binnen is, en je overzicht zet het onder Donaties.</string>
 </resources>

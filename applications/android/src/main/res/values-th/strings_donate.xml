@@ -6,4 +6,8 @@
     <string name="donate_any_wallet">กระเป๋า Monero ใดก็บริจาคที่นี่ได้ — ไม่มีใครต้องใช้แอปนี้</string>
     <string name="donate_since_opening">ตั้งแต่เปิดรับ</string>
     <string name="donate_reuse_warning">โค้ดเดียวนี้ถูกใช้ซ้ำโดยผู้บริจาคทุกคน ดังนั้นบนบัญชีสาธารณะของ Monero การบริจาคที่เข้ามาจะเชื่อมโยงถึงกันได้ และโค้ดที่พิมพ์ติดไว้ก็ซื่อตรงเท่ากับคนสุดท้ายที่แตะต้องมันเท่านั้น — ตรวจดูว่าเป็นของคุณจริงในที่ที่คุณติดประกาศ</string>
+    <string name="donate_receipt_note">ใบเสร็จการบริจาค — ขอบคุณ</string>
+    <string name="donate_tab_ducat">ด้วยแอป DUCAT</string>
+    <string name="donate_tab_monero">กระเป๋า Monero ใดก็ได้</string>
+    <string name="donate_card_hint">สแกนด้วย DUCAT: จะเปิดการสนทนา และใบเสร็จจะมาถึงที่นั่นทันทีที่เงินบริจาคเข้า — หลักฐานเก็บไว้ยื่นภาษีได้ โค้ดจะต่ออายุใหม่หลังการสแกนทุกครั้ง</string>
 </resources>

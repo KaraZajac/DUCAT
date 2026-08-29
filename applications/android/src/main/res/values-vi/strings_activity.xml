@@ -38,4 +38,7 @@
     <string name="activity_escrow_out_untitled">Được giải phóng từ ký quỹ</string>
     <string name="activity_export">Xuất CSV</string>
     <string name="activity_export_share">Sao kê của bạn</string>
+    <string name="activity_donations_filter">Quyên góp</string>
+    <string name="activity_donation_chip">Quyên góp</string>
+    <string name="activity_donated_total">Đã quyên góp %1$s</string>
 </resources>

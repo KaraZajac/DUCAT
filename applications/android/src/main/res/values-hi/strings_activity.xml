@@ -39,4 +39,7 @@
     <string name="activity_escrow_out_untitled">एक एस्क्रो से जारी</string>
     <string name="activity_export">CSV निर्यात करें</string>
     <string name="activity_export_share">आपका विवरण</string>
+    <string name="activity_donations_filter">दान</string>
+    <string name="activity_donation_chip">दान</string>
+    <string name="activity_donated_total">%1$s दान किया</string>
 </resources>

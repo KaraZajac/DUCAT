@@ -6,4 +6,8 @@
     <string name="donate_any_wallet">Dompet Monero mana pun bisa memberi di sini — tidak perlu aplikasi ini.</string>
     <string name="donate_since_opening">Sejak dibuka</string>
     <string name="donate_reuse_warning">Kode yang satu ini dipakai ulang oleh setiap donatur, jadi di buku besar publik Monero, donasi ke sana bisa saling dikaitkan. Dan kode yang dicetak hanya sejujur orang terakhir yang menyentuhnya — pastikan itu milikmu di tempat kamu memasangnya.</string>
+    <string name="donate_receipt_note">Kuitansi donasi — terima kasih</string>
+    <string name="donate_tab_ducat">Dengan aplikasi DUCAT</string>
+    <string name="donate_tab_monero">Dompet Monero apa pun</string>
+    <string name="donate_card_hint">Pindai dengan DUCAT: percakapan terbuka, dan kuitansi Anda tiba di sana begitu donasi masuk — catatan yang bisa disimpan untuk pajak. Kode diperbarui setelah setiap pemindaian.</string>
 </resources>

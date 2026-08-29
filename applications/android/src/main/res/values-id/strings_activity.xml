@@ -38,4 +38,7 @@
     <string name="activity_escrow_out_untitled">Dilepaskan dari sebuah escrow</string>
     <string name="activity_export">Ekspor sebagai CSV</string>
     <string name="activity_export_share">Laporan Anda</string>
+    <string name="activity_donations_filter">Donasi</string>
+    <string name="activity_donation_chip">Donasi</string>
+    <string name="activity_donated_total">%1$s didonasikan</string>
 </resources>

@@ -77,4 +77,5 @@
     <string name="pay_repeat_weekly">Mingguan</string>
     <string name="pay_repeat_monthly">Bulanan</string>
     <string name="pay_recur_notify">Tagihan berulang terkirim — %1$s</string>
+    <string name="pay_donation_hint">Ini donasi — kuitansi akan tiba di obrolan ini begitu diterima, dan laporan Anda mencatatnya di bawah Donasi.</string>
 </resources>

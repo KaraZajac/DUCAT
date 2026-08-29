@@ -6,4 +6,8 @@
     <string name="donate_any_wallet">Ví Monero nào cũng gửi được vào đây — không ai cần ứng dụng này.</string>
     <string name="donate_since_opening">Kể từ khi mở</string>
     <string name="donate_reuse_warning">Một mã này được mọi người ủng hộ dùng chung, nên trên sổ cái công khai của Monero, các khoản ủng hộ vào đó có thể liên kết được với nhau. Và một mã in ra chỉ trung thực bằng người cuối cùng chạm vào nó — hãy kiểm tra nó đúng là của bạn ở nơi bạn dán.</string>
+    <string name="donate_receipt_note">Biên nhận quyên góp — cảm ơn bạn</string>
+    <string name="donate_tab_ducat">Bằng ứng dụng DUCAT</string>
+    <string name="donate_tab_monero">Bất kỳ ví Monero nào</string>
+    <string name="donate_card_hint">Quét bằng DUCAT: một cuộc trò chuyện mở ra, và biên nhận sẽ đến đó ngay khi khoản quyên góp tới — chứng từ bạn có thể giữ để khai thuế. Mã tự làm mới sau mỗi lần quét.</string>
 </resources>

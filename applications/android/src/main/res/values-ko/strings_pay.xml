@@ -77,4 +77,5 @@
     <string name="pay_repeat_weekly">매주</string>
     <string name="pay_repeat_monthly">매월</string>
     <string name="pay_recur_notify">정기 청구서를 보냈습니다 — %1$s</string>
+    <string name="pay_donation_hint">이것은 기부입니다 — 도착하면 영수증이 이 채팅에 오고, 명세서에는 기부 항목으로 기록됩니다.</string>
 </resources>

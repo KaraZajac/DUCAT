@@ -6,4 +6,8 @@
     <string name="donate_any_wallet">أي محفظة Monero يمكنها التبرع هنا — لا يحتاج أحد إلى هذا التطبيق.</string>
     <string name="donate_since_opening">منذ الافتتاح</string>
     <string name="donate_reuse_warning">هذا الرمز الواحد يعاد استخدامه من كل متبرع، فتكون التبرعات إليه قابلة للربط ببعضها على سجل Monero العلني. والرمز المطبوع صادق بقدر صدق آخر من لمسه — تحقق أنه رمزك حيثما تنشره.</string>
+    <string name="donate_receipt_note">إيصال تبرع — شكرًا لك</string>
+    <string name="donate_tab_ducat">بتطبيق DUCAT</string>
+    <string name="donate_tab_monero">أي محفظة مونيرو</string>
+    <string name="donate_card_hint">امسح بتطبيق DUCAT: يفتح محادثة، ويصلك فيها الإيصال فور وصول التبرع — سجلّ يمكنك الاحتفاظ به للضرائب. يتجدد الرمز بعد كل مسح.</string>
 </resources>

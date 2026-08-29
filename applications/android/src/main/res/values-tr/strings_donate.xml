@@ -6,4 +6,8 @@
     <string name="donate_any_wallet">Buraya her Monero cüzdanı bağış yapabilir — kimsenin bu uygulamaya ihtiyacı yok.</string>
     <string name="donate_since_opening">Açılıştan beri</string>
     <string name="donate_reuse_warning">Bu tek kod her bağışçı tarafından yeniden kullanılır; bu yüzden Monero\'nun herkese açık defterinde ona yapılan bağışlar birbirine bağlanabilir. Basılı bir kod da ancak ona en son dokunan kadar dürüsttür — astığın her yerde kodun senin olduğunu kontrol et.</string>
+    <string name="donate_receipt_note">Bağış makbuzu — teşekkürler</string>
+    <string name="donate_tab_ducat">DUCAT uygulamasıyla</string>
+    <string name="donate_tab_monero">Herhangi bir Monero cüzdanı</string>
+    <string name="donate_card_hint">DUCAT ile tarayın: bir sohbet açılır ve bağış ulaştığında makbuzunuz oraya gelir — vergi için saklayabileceğiniz bir kayıt. Kod her taramadan sonra yenilenir.</string>
 </resources>

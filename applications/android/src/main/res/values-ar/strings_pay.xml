@@ -77,4 +77,5 @@
     <string name="pay_repeat_weekly">أسبوعيًا</string>
     <string name="pay_repeat_monthly">شهريًا</string>
     <string name="pay_recur_notify">أُرسلت فاتورة دورية — %1$s</string>
+    <string name="pay_donation_hint">هذا تبرع — سيصلك الإيصال في هذه المحادثة فور وصوله، وسيُدرجه كشف حسابك ضمن التبرعات.</string>
 </resources>

@@ -77,4 +77,5 @@
     <string name="pay_repeat_weekly">Щотижня</string>
     <string name="pay_repeat_monthly">Щомісяця</string>
     <string name="pay_recur_notify">Регулярний рахунок надіслано — %1$s</string>
+    <string name="pay_donation_hint">Це пожертва — квитанція надійде в цей чат після отримання, а виписка запише її в «Пожертви».</string>
 </resources>

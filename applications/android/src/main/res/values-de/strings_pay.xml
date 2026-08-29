@@ -77,4 +77,5 @@
     <string name="pay_repeat_weekly">Wöchentlich</string>
     <string name="pay_repeat_monthly">Monatlich</string>
     <string name="pay_recur_notify">Wiederkehrende Rechnung gesendet — %1$s</string>
+    <string name="pay_donation_hint">Das ist eine Spende — deine Quittung landet in diesem Chat, sobald sie ankommt, und dein Kontoauszug führt sie unter Spenden.</string>
 </resources>

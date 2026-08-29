@@ -39,4 +39,7 @@
     <string name="activity_escrow_out_untitled">آزادشده از یک امانی</string>
     <string name="activity_export">خروجی CSV</string>
     <string name="activity_export_share">صورتحساب شما</string>
+    <string name="activity_donations_filter">اهداها</string>
+    <string name="activity_donation_chip">اهدا</string>
+    <string name="activity_donated_total">%1$s اهدا شده</string>
 </resources>

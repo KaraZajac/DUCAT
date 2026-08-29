@@ -6,4 +6,8 @@
     <string name="donate_any_wallet">어떤 Monero 지갑으로든 후원할 수 있어요 — 이 앱이 없어도 돼요.</string>
     <string name="donate_since_opening">개설 이후</string>
     <string name="donate_reuse_warning">이 코드 하나를 모든 후원자가 함께 쓰기 때문에, Monero의 공개 장부에서는 여기로 온 후원끼리 서로 연결돼 보여요. 그리고 인쇄된 코드는 마지막으로 손댄 사람만큼만 정직해요 — 게시하는 곳마다 내 코드가 맞는지 확인하세요.</string>
+    <string name="donate_receipt_note">기부 영수증 — 감사합니다</string>
+    <string name="donate_tab_ducat">DUCAT 앱으로</string>
+    <string name="donate_tab_monero">모든 Monero 지갑</string>
+    <string name="donate_card_hint">DUCAT으로 스캔하세요: 대화가 열리고 기부가 도착하면 영수증이 그곳에 도착합니다 — 세금 신고용으로 보관할 수 있는 기록입니다. 코드는 스캔할 때마다 새로 발급됩니다.</string>
 </resources>

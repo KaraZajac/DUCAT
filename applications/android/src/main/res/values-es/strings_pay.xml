@@ -77,4 +77,5 @@
     <string name="pay_repeat_weekly">Semanal</string>
     <string name="pay_repeat_monthly">Mensual</string>
     <string name="pay_recur_notify">Cuenta recurrente enviada — %1$s</string>
+    <string name="pay_donation_hint">Esto es una donación: tu recibo llegará a este chat en cuanto se reciba, y tu estado de cuenta lo archivará en Donaciones.</string>
 </resources>

@@ -39,4 +39,7 @@
     <string name="activity_escrow_out_untitled">Vrijgegeven uit een escrow</string>
     <string name="activity_export">Exporteren als CSV</string>
     <string name="activity_export_share">Je overzicht</string>
+    <string name="activity_donations_filter">Donaties</string>
+    <string name="activity_donation_chip">Donatie</string>
+    <string name="activity_donated_total">%1$s gedoneerd</string>
 </resources>

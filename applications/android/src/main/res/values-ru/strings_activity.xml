@@ -43,4 +43,7 @@
     <string name="activity_escrow_out_untitled">Выпущено из эскроу</string>
     <string name="activity_export">Экспорт в CSV</string>
     <string name="activity_export_share">Ваша выписка</string>
+    <string name="activity_donations_filter">Пожертвования</string>
+    <string name="activity_donation_chip">Пожертвование</string>
+    <string name="activity_donated_total">Пожертвовано %1$s</string>
 </resources>

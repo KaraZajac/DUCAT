@@ -6,4 +6,8 @@
     <string name="donate_any_wallet">どのMoneroウォレットからでもここへ寄付できます — このアプリは誰にも要りません。</string>
     <string name="donate_since_opening">開始からの合計</string>
     <string name="donate_reuse_warning">このコードはすべての寄付者に使い回されるため、Moneroの公開台帳上では、ここへの寄付同士が結び付けられます。また、印刷されたコードの信頼性は、最後に触れた人次第です — 掲示した先で自分のものか確認してください。</string>
+    <string name="donate_receipt_note">寄付の領収書 — ありがとうございます</string>
+    <string name="donate_tab_ducat">DUCATアプリで</string>
+    <string name="donate_tab_monero">任意のMoneroウォレット</string>
+    <string name="donate_card_hint">DUCATでスキャンすると会話が開き、寄付が届き次第そこに領収書が届きます — 税務用に保管できる記録です。コードはスキャンのたびに新しくなります。</string>
 </resources>

@@ -565,6 +565,8 @@ object Wallet {
         note: String? = null,
         // The speed the user picked, which was previously shown and ignored.
         priority: Int = 1,
+        /** An unprompted payment into a donate-card thread; see SentPayment. */
+        donation: Boolean = false,
     ): uniffi.ducat_mobile.SendResult {
         val store = WalletStore(context)
         val spend = store.spendKeyHex()
@@ -583,6 +585,7 @@ object Wallet {
         // (refreshSpent) may decide the send never happened.
         val intent = store.recordSendIntent(
             toAddress, amountPxmr, plan.notes.map { it.keyImage }, contactHex, note,
+            donation,
         )
         // After the intent, deliberately: "sending" in the log now proves
         // the claim was on disk first, which is what the kill test reads.

@@ -40,4 +40,7 @@
     <string name="activity_escrow_out_untitled">Released from an escrow</string>
     <string name="activity_export">Export as CSV</string>
     <string name="activity_export_share">Your statement</string>
+    <string name="activity_donations_filter">Donations</string>
+    <string name="activity_donation_chip">Donation</string>
+    <string name="activity_donated_total">%1$s donated</string>
 </resources>

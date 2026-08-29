@@ -154,8 +154,10 @@ a receipt goes back when they pay. A **bar tab** pings every drink to the
 customer and closes with one bill they can settle from the bus home. A
 **kiosk** faces the other way — customers tap what they want on a screen that
 belongs to them for a minute, staff live behind a PIN — and a **donation box**
-is a standing address any Monero wallet can give to, with its linkability cost
-stated on screen. A shop's sales-tax rate is one number in settings; the till,
+offers both rails: a DUCAT code that opens a conversation and sends the donor
+a receipt once the money arrives — tax paperwork, filed under Donations in
+their statement — and a standing address any Monero wallet can give to, with
+its linkability cost stated on screen. A shop's sales-tax rate is one number in settings; the till,
 the tab and the kiosk compute the line and the receipts carry it, because a
 business using this has books to keep. **Marketplace** and **hire help** put
 things and hours on the same boards the rentals use — list once, found by

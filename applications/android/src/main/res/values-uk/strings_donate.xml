@@ -6,4 +6,8 @@
     <string name="donate_any_wallet">Пожертвувати сюди може будь-який гаманець Monero — цей застосунок нікому не потрібен.</string>
     <string name="donate_since_opening">Від відкриття</string>
     <string name="donate_reuse_warning">Цей єдиний код використовують усі жертводавці, тож у публічному реєстрі Monero пожертви на нього можна пов\'язати між собою. А надрукований код чесний рівно настільки, наскільки чесний той, хто торкався його останнім — перевіряй, що всюди, де він висить, це саме твій код.</string>
+    <string name="donate_receipt_note">Квитанція про пожертву — дякуємо</string>
+    <string name="donate_tab_ducat">Через застосунок DUCAT</string>
+    <string name="donate_tab_monero">Будь-який гаманець Monero</string>
+    <string name="donate_card_hint">Відскануйте в DUCAT: відкриється розмова, і квитанція надійде туди, щойно пожертва дійде — документ, який можна зберегти для податків. Код оновлюється після кожного сканування.</string>
 </resources>

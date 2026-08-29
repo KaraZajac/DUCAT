@@ -6,4 +6,8 @@
     <string name="donate_any_wallet">Cualquier billetera Monero puede donar aquí — nadie necesita esta app.</string>
     <string name="donate_since_opening">Desde la apertura</string>
     <string name="donate_reuse_warning">Este único código lo reutilizan todos los donantes, así que en el libro público de Monero las donaciones que recibe pueden vincularse entre sí. Y un código impreso es tan honesto como la última persona que lo tocó — revisa que sea el tuyo allí donde lo publiques.</string>
+    <string name="donate_receipt_note">Recibo de donación — gracias</string>
+    <string name="donate_tab_ducat">Con la app DUCAT</string>
+    <string name="donate_tab_monero">Cualquier billetera Monero</string>
+    <string name="donate_card_hint">Escanea con DUCAT: abre una conversación y allí llega tu recibo en cuanto llega la donación — un comprobante que puedes guardar para impuestos. El código se renueva tras cada escaneo.</string>
 </resources>

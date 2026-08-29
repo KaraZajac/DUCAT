@@ -77,4 +77,5 @@
     <string name="pay_repeat_weekly">毎週</string>
     <string name="pay_repeat_monthly">毎月</string>
     <string name="pay_recur_notify">定期請求を送信しました — %1$s</string>
+    <string name="pay_donation_hint">これは寄付です — 到着次第このチャットに領収書が届き、明細では「寄付」に分類されます。</string>
 </resources>

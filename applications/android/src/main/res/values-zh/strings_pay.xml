@@ -77,4 +77,5 @@
     <string name="pay_repeat_weekly">每周</string>
     <string name="pay_repeat_monthly">每月</string>
     <string name="pay_recur_notify">已发送周期账单 — %1$s</string>
+    <string name="pay_donation_hint">这是一笔捐赠 — 到账后收据会送到此对话，账单会将其归入捐赠类。</string>
 </resources>

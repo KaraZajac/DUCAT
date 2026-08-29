@@ -6,4 +6,8 @@
     <string name="donate_any_wallet">Jede Monero-Wallet kann hier geben — niemand braucht diese App.</string>
     <string name="donate_since_opening">Seit dem Öffnen</string>
     <string name="donate_reuse_warning">Diesen einen Code verwenden alle Spender, auf Moneros öffentlichem Ledger sind die Spenden daran also untereinander verknüpfbar. Und ein ausgedruckter Code ist nur so ehrlich wie die letzte Person, die ihn angefasst hat — prüfe dort, wo du ihn aushängst, dass es deiner ist.</string>
+    <string name="donate_receipt_note">Spendenquittung — danke</string>
+    <string name="donate_tab_ducat">Mit der DUCAT-App</string>
+    <string name="donate_tab_monero">Jede Monero-Wallet</string>
+    <string name="donate_card_hint">Mit DUCAT scannen: Es öffnet sich eine Unterhaltung, und dort landet deine Quittung, sobald die Spende ankommt — ein Beleg fürs Finanzamt. Der Code erneuert sich nach jedem Scan.</string>
 </resources>

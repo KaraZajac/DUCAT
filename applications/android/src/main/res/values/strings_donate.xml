@@ -6,4 +6,8 @@
     <string name="donate_any_wallet">Any Monero wallet can give here — nobody needs this app.</string>
     <string name="donate_since_opening">Since opening</string>
     <string name="donate_reuse_warning">This one code is reused by every donor, so on Monero\'s public ledger the donations to it are linkable to each other. And a printed code is only as honest as whoever last touched it — check it is yours where you post it.</string>
+    <string name="donate_receipt_note">Donation receipt — thank you</string>
+    <string name="donate_tab_ducat">With the DUCAT app</string>
+    <string name="donate_tab_monero">Any Monero wallet</string>
+    <string name="donate_card_hint">Scan with DUCAT: it opens a conversation, and your receipt lands there once the donation arrives — a record you can keep for taxes. The code renews itself after every scan.</string>
 </resources>

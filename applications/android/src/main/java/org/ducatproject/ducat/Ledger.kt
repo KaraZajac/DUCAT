@@ -75,6 +75,8 @@ object Ledger {
          * a better answer than a raw address. Null when it is neither.
          */
         val escrow: String? = null,
+        /** This send was a donation (see SentPayment.donation). */
+        val donation: Boolean = false,
         val source: Source,
         val note: String?,
         /** Our outputs created by this transaction. Includes change. */
@@ -425,6 +427,7 @@ object Ledger {
                     address = rec?.toAddress,
                     source = if (rec != null) Source.OurRecord else Source.Unknown,
                     note = rec?.note,
+                    donation = rec?.donation == true,
                     ours = group,
                     consumed = consumed,
                     chain = chain,
@@ -559,6 +562,7 @@ object Ledger {
                 source = Source.OurRecord,
                 note = s.note,
                 contactHex = s.contactHex,
+                donation = s.donation,
                 // It is ours and in flight, not a mystery: the row says
                 // "sending" rather than accusing the wallet of losing track.
                 unexplained = false,
@@ -583,6 +587,7 @@ object Ledger {
                 address = s.toAddress,
                 source = Source.OurRecord,
                 note = s.note,
+                donation = s.donation,
                 ours = emptyList(),
                 consumed = emptyList(),
                 chain = null,
@@ -713,7 +718,7 @@ object Ledger {
         val fmt = java.time.format.DateTimeFormatter.ISO_INSTANT
         val sb = StringBuilder()
         sb.append("date_utc,direction,counterparty,note,items,amount_xmr,fee_xmr,")
-        sb.append("net_xmr,tax_xmr,txid,height,balance_after_xmr\n")
+        sb.append("net_xmr,tax_xmr,donation,txid,height,balance_after_xmr\n")
         // Oldest first: a statement reads forward, and the running balance
         // column only adds up in the order the money moved.
         for (e in build(context).asReversed()) {
@@ -729,6 +734,9 @@ object Ledger {
             sb.append(xmr(e.feePxmr)).append(',')
             sb.append(xmr(e.netPxmr)).append(',')
             sb.append(xmr(e.taxPxmr ?: 0L)).append(',')
+            // The tax-time filter, in the export the accountant actually
+            // reads: yes when this send went into a donate-card thread.
+            sb.append(if (e.donation) "yes" else "").append(',')
             sb.append(esc(e.txid)).append(',')
             sb.append(e.height).append(',')
             sb.append(xmr(e.balanceAfterPxmr)).append('\n')

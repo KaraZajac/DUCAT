@@ -77,4 +77,5 @@
     <string name="pay_repeat_weekly">Hebdomadaire</string>
     <string name="pay_repeat_monthly">Mensuelle</string>
     <string name="pay_recur_notify">Facture récurrente envoyée — %1$s</string>
+    <string name="pay_donation_hint">Ceci est un don — votre reçu arrivera dans cette conversation dès réception, et votre relevé le classera dans Dons.</string>
 </resources>

@@ -39,4 +39,7 @@
     <string name="activity_escrow_out_untitled">Aus einer Treuhand freigegeben</string>
     <string name="activity_export">Als CSV exportieren</string>
     <string name="activity_export_share">Dein Kontoauszug</string>
+    <string name="activity_donations_filter">Spenden</string>
+    <string name="activity_donation_chip">Spende</string>
+    <string name="activity_donated_total">%1$s gespendet</string>
 </resources>
