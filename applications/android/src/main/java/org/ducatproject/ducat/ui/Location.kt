@@ -46,8 +46,13 @@ fun grabFix(
         android.location.LocationManager.NETWORK_PROVIDER,
     ).mapNotNull { p ->
         runCatching { lm.getLastKnownLocation(p) }.getOrNull()
-    }.maxByOrNull { it.time }
-    if (recent != null && System.currentTimeMillis() - recent.time < 10 * 60 * 1000) {
+    }.minByOrNull { fixAgeNanos(it) }
+    // Age by the boot clock, not the wall clock (`Location.time` is whatever
+    // the provider stamped): a phone whose clock was set back saw every fix
+    // as future-dated and fresh for ever, and one set forward cold-started
+    // GPS over a position thirty seconds old. Two-sided on purpose — a
+    // negative age is a stamp from a clock nobody should trust.
+    if (recent != null && fixAgeNanos(recent) in 0..10L * 60 * 1_000_000_000) {
         return send(recent)
     }
     try {
@@ -73,7 +78,7 @@ fun grabFix(
                         android.location.LocationManager.NETWORK_PROVIDER,
                     ).mapNotNull { p ->
                         runCatching { lm.getLastKnownLocation(p) }.getOrNull()
-                    }.maxByOrNull { it.time },
+                    }.minByOrNull { fixAgeNanos(it) },
                 )
             }
         } else {
@@ -83,3 +88,7 @@ fun grabFix(
         done(null)
     }
 }
+
+/** Nanoseconds since this fix, on the clock that only runs forward. */
+private fun fixAgeNanos(l: android.location.Location): Long =
+    android.os.SystemClock.elapsedRealtimeNanos() - l.elapsedRealtimeNanos
