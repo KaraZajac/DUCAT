@@ -49,4 +49,7 @@
     <string name="profile_bond_arbiter_note">เมื่อมีผู้ชี้ขาด กุญแจสองในสามดอกก็ย้ายเงินฝากได้: โทรศัพท์หายก็ไม่ติดค้าง และข้อพิพาทมีทางออก ผู้ชี้ขาดเพียงลำพังเอาอะไรไปไม่ได้</string>
     <string name="profile_bond_just_us">แค่เราสองคน</string>
     <string name="profile_bond_with_arbiter">ผู้ชี้ขาด: %1$s</string>
+    <string name="profile_sign_pending_amt">มีข้อเสนอปิดยอด: %1$s คืนให้ผู้วางเงิน ที่เหลือเป็นของพวกเขา ลายเซ็นของคุณคือสิ่งที่ปลดล็อก</string>
+    <string name="profile_sign_pending_all">ขอคืนเงินมัดจำ ลายเซ็นของคุณคือสิ่งที่ปลดล็อก</string>
+    <string name="profile_sign_release">เซ็นปล่อยเงิน</string>
 </resources>

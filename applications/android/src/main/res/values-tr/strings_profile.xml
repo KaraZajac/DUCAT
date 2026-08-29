@@ -49,4 +49,7 @@
     <string name="profile_bond_arbiter_note">Hakemle üç anahtardan ikisi yeter: kayıp bir telefon hiçbir şeyi kilitlemez, bir anlaşmazlığın gideceği yer olur. Hakem tek başına hiçbir şey alamaz.</string>
     <string name="profile_bond_just_us">Sadece ikimiz</string>
     <string name="profile_bond_with_arbiter">Hakem: %1$s</string>
+    <string name="profile_sign_pending_amt">Bir kapanış önerdiler: %1$s yatırana döner, kalanı onlara. İmzanız serbest bırakır.</string>
+    <string name="profile_sign_pending_all">Depozitonun iadesini istediler. İmzanız serbest bırakır.</string>
+    <string name="profile_sign_release">Serbest bırakmayı imzala</string>
 </resources>

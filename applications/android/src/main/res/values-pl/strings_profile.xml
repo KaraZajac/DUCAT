@@ -49,4 +49,7 @@
     <string name="profile_bond_arbiter_note">Z arbitrem wystarczą dwa z trzech kluczy: zgubiony telefon niczego nie blokuje, a spór ma dokąd pójść. Sam arbiter nic nie zabierze.</string>
     <string name="profile_bond_just_us">Tylko my dwoje</string>
     <string name="profile_bond_with_arbiter">Arbiter: %1$s</string>
+    <string name="profile_sign_pending_amt">Proponują rozliczenie: %1$s wraca do wpłacającego, reszta dla nich. Twój podpis je uwalnia.</string>
+    <string name="profile_sign_pending_all">Proszą o zwrot kaucji. Twój podpis ją uwalnia.</string>
+    <string name="profile_sign_release">Podpisz zwolnienie</string>
 </resources>

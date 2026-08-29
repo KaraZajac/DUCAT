@@ -49,4 +49,7 @@
     <string name="profile_bond_arbiter_note">With an arbiter, any two of the three keys can move the deposit — a lost phone strands nothing, and a dispute has somewhere to go. The arbiter alone can take nothing.</string>
     <string name="profile_bond_just_us">Just the two of us</string>
     <string name="profile_bond_with_arbiter">Arbiter: %1$s</string>
+    <string name="profile_sign_pending_amt">They proposed a settlement: %1$s back to the funder, the rest to them. Your signature is what releases it.</string>
+    <string name="profile_sign_pending_all">They asked for the deposit back. Your signature is what releases it.</string>
+    <string name="profile_sign_release">Sign the release</string>
 </resources>

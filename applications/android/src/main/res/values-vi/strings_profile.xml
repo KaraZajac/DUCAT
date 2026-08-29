@@ -49,4 +49,7 @@
     <string name="profile_bond_arbiter_note">Có trọng tài, hai trong ba khóa là đủ để chuyển khoản tiền: mất điện thoại không kẹt gì, tranh chấp có nơi phân xử. Một mình trọng tài không lấy được gì.</string>
     <string name="profile_bond_just_us">Chỉ hai chúng tôi</string>
     <string name="profile_bond_with_arbiter">Trọng tài: %1$s</string>
+    <string name="profile_sign_pending_amt">Họ đề xuất tất toán: %1$s trả về bên đặt cọc, phần còn lại cho họ. Chữ ký của bạn sẽ giải phóng nó.</string>
+    <string name="profile_sign_pending_all">Họ đề nghị hoàn lại tiền cọc. Chữ ký của bạn sẽ giải phóng nó.</string>
+    <string name="profile_sign_release">Ký giải phóng</string>
 </resources>

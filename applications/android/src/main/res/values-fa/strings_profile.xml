@@ -49,4 +49,7 @@
     <string name="profile_bond_arbiter_note">با داور، دو کلید از سه کلید برای جابه‌جایی سپرده کافی است: گم‌شدن گوشی چیزی را قفل نمی‌کند و اختلاف جایی برای رفتن دارد. داور به‌تنهایی نمی‌تواند چیزی بردارد.</string>
     <string name="profile_bond_just_us">فقط ما دو نفر</string>
     <string name="profile_bond_with_arbiter">داور: %1$s</string>
+    <string name="profile_sign_pending_amt">تسویه‌ای پیشنهاد شده: %1$s به سپرده‌گذار بازمی‌گردد و بقیه برای آن‌هاست. امضای شما آن را آزاد می‌کند.</string>
+    <string name="profile_sign_pending_all">بازگشت سپرده را خواسته‌اند. امضای شما آن را آزاد می‌کند.</string>
+    <string name="profile_sign_release">امضای آزادسازی</string>
 </resources>

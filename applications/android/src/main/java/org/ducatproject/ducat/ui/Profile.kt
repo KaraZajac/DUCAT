@@ -349,7 +349,9 @@ private fun BondSection(
     val ceremony = remember(version, busy) {
         org.ducatproject.ducat.Ceremony.all(context)
             .filter { it.optString("peer") == c.personaHex }
-            .lastOrNull()
+            // Newest by its own clock — prefs iteration order is nobody's
+            // promise, and lastOrNull() was betting on it.
+            .maxByOrNull { it.optLong("created") }
     }
 
     fun post(arbiter: org.ducatproject.ducat.Contact?) {
@@ -484,6 +486,62 @@ private fun BondSection(
                 if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
                 else Text(stringResource(R.string.profile_bond_release))
             }
+            error?.let {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    stringResource(R.string.profile_bond_failed, it),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        }
+        // The half of the ceremony this section never had: a proposal
+        // WAITING on this device. Without it, an arbiter asked to rule —
+        // or a bond partner asked to countersign the deposit's return —
+        // reached a screen showing only the escrow's address, and the
+        // whole 2-of-3 recovery path was a corridor with no door at the
+        // end: the share existed, frostCosign worked, nothing called it.
+        "release_pending" -> {
+            var pinAsk by remember { mutableStateOf(false) }
+            val back = ceremony?.optLong("pendingRiderBack", -1L) ?: -1L
+            Text(
+                if (back >= 0) {
+                    stringResource(
+                        R.string.profile_sign_pending_amt,
+                        org.ducatproject.ducat.Amounts.show(context, back).primary,
+                    )
+                } else {
+                    stringResource(R.string.profile_sign_pending_all)
+                },
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Spacer(Modifier.height(8.dp))
+            Button(
+                enabled = !busy,
+                onClick = { pinAsk = true },
+            ) {
+                if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                else Text(stringResource(R.string.profile_sign_release))
+            }
+            PinGate(
+                open = pinAsk,
+                onDismiss = { pinAsk = false },
+                onPassed = {
+                    pinAsk = false
+                    busy = true; error = null
+                    scope.launch {
+                        val r = withContext(Dispatchers.IO) {
+                            runCatching {
+                                org.ducatproject.ducat.Ceremony.approveRideRelease(
+                                    context, ceremony!!.optString("id"),
+                                )
+                            }
+                        }
+                        r.onFailure { error = moneyFailure(context, it) }
+                        busy = false
+                    }
+                },
+            )
             error?.let {
                 Spacer(Modifier.height(4.dp))
                 Text(

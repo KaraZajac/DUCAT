@@ -49,4 +49,7 @@
     <string name="profile_bond_arbiter_note">Met een arbiter volstaan twee van de drie sleutels om de borg te verplaatsen: een verloren telefoon zet niets vast en een geschil kan ergens heen. De arbiter alleen kan niets pakken.</string>
     <string name="profile_bond_just_us">Alleen wij tweeën</string>
     <string name="profile_bond_with_arbiter">Arbiter: %1$s</string>
+    <string name="profile_sign_pending_amt">Voorgestelde afwikkeling: %1$s terug naar de inlegger, de rest naar hen. Uw handtekening geeft het vrij.</string>
+    <string name="profile_sign_pending_all">Ze vragen de borg terug. Uw handtekening geeft die vrij.</string>
+    <string name="profile_sign_release">Vrijgave ondertekenen</string>
 </resources>

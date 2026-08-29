@@ -49,4 +49,7 @@
     <string name="profile_bond_arbiter_note">Con un árbitro, dos de las tres llaves bastan para mover el depósito: un teléfono perdido no bloquea nada y una disputa tiene adónde ir. El árbitro solo no puede llevarse nada.</string>
     <string name="profile_bond_just_us">Solo nosotros dos</string>
     <string name="profile_bond_with_arbiter">Árbitro: %1$s</string>
+    <string name="profile_sign_pending_amt">Proponen un cierre: %1$s vuelve a quien depositó, el resto para ellos. Tu firma es lo que lo libera.</string>
+    <string name="profile_sign_pending_all">Piden la devolución del depósito. Tu firma es lo que lo libera.</string>
+    <string name="profile_sign_release">Firmar la liberación</string>
 </resources>

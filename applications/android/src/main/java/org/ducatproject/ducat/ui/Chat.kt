@@ -3646,7 +3646,7 @@ private fun RideBondBanner(contact: Contact) {
             // The retry itself was never in memory: the poller works from
             // `wantRelease` on the escrow, which is why it fires with the
             // phone away. This reads the same field the poller does.
-            if (error == null && ride.has("wantRelease")) {
+            if (error == null && ride.optLong("wantReleaseAt") > 0) {
                 Spacer(Modifier.height(4.dp))
                 Text(
                     stringResource(R.string.bond_release_asked),

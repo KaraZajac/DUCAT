@@ -49,4 +49,7 @@
     <string name="profile_bond_arbiter_note">С арбитром достаточно двух ключей из трёх: потерянный телефон ничего не блокирует, а у спора есть выход. Один арбитр забрать ничего не может.</string>
     <string name="profile_bond_just_us">Только мы вдвоём</string>
     <string name="profile_bond_with_arbiter">Арбитр: %1$s</string>
+    <string name="profile_sign_pending_amt">Предложен расчёт: %1$s возвращается внёсшему, остальное им. Ваша подпись выпускает средства.</string>
+    <string name="profile_sign_pending_all">Просят вернуть депозит. Ваша подпись выпускает средства.</string>
+    <string name="profile_sign_release">Подписать выпуск</string>
 </resources>

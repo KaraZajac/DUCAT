@@ -49,4 +49,7 @@
     <string name="profile_bond_arbiter_note">З арбітром досить двох ключів із трьох: загублений телефон нічого не блокує, а суперечка має куди піти. Сам арбітр нічого забрати не може.</string>
     <string name="profile_bond_just_us">Лише ми двоє</string>
     <string name="profile_bond_with_arbiter">Арбітр: %1$s</string>
+    <string name="profile_sign_pending_amt">Запропоновано розрахунок: %1$s повертається вкладнику, решта їм. Ваш підпис звільняє кошти.</string>
+    <string name="profile_sign_pending_all">Просять повернути депозит. Ваш підпис звільняє кошти.</string>
+    <string name="profile_sign_release">Підписати звільнення</string>
 </resources>

@@ -49,4 +49,7 @@
     <string name="profile_bond_arbiter_note">Mit einem Schiedshalter genügen zwei der drei Schlüssel, um die Einlage zu bewegen: ein verlorenes Telefon blockiert nichts, und ein Streit hat eine Anlaufstelle. Allein kann der Schiedshalter nichts nehmen.</string>
     <string name="profile_bond_just_us">Nur wir beide</string>
     <string name="profile_bond_with_arbiter">Schiedshalter: %1$s</string>
+    <string name="profile_sign_pending_amt">Vorgeschlagene Abwicklung: %1$s zurück an die einzahlende Seite, der Rest an sie. Ihre Unterschrift gibt es frei.</string>
+    <string name="profile_sign_pending_all">Sie bitten um die Rückgabe der Kaution. Ihre Unterschrift gibt sie frei.</string>
+    <string name="profile_sign_release">Freigabe unterschreiben</string>
 </resources>

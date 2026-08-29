@@ -49,4 +49,7 @@
     <string name="profile_bond_arbiter_note">立会人がいると、3本の鍵のうち2本で保証金を動かせます。電話をなくしても詰まらず、争いにも行き先があります。立会人単独では何も持ち出せません。</string>
     <string name="profile_bond_just_us">ふたりだけ</string>
     <string name="profile_bond_with_arbiter">立会人: %1$s</string>
+    <string name="profile_sign_pending_amt">清算の提案です。%1$s は預けた側へ戻り、残りは相手へ。あなたの署名で解放されます。</string>
+    <string name="profile_sign_pending_all">保証金の返還を求めています。あなたの署名で解放されます。</string>
+    <string name="profile_sign_release">解放に署名する</string>
 </resources>

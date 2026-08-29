@@ -49,4 +49,7 @@
     <string name="profile_bond_arbiter_note">Dengan penengah, dua dari tiga kunci cukup untuk memindahkan simpanan: ponsel hilang tidak mengunci apa pun, dan sengketa punya tempat mengadu. Penengah sendirian tidak bisa mengambil apa-apa.</string>
     <string name="profile_bond_just_us">Hanya kami berdua</string>
     <string name="profile_bond_with_arbiter">Penengah: %1$s</string>
+    <string name="profile_sign_pending_amt">Mereka mengusulkan penyelesaian: %1$s kembali ke penyetor, sisanya untuk mereka. Tanda tangan Anda yang melepaskannya.</string>
+    <string name="profile_sign_pending_all">Mereka meminta deposit dikembalikan. Tanda tangan Anda yang melepaskannya.</string>
+    <string name="profile_sign_release">Tanda tangani pelepasan</string>
 </resources>

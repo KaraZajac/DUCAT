@@ -49,4 +49,7 @@
     <string name="profile_bond_arbiter_note">मध्यस्थ के साथ तीन में से कोई दो चाबियाँ जमा को हिला सकती हैं: खोया फ़ोन कुछ नहीं अटकाता और विवाद के पास जाने की जगह होती है। अकेला मध्यस्थ कुछ नहीं ले सकता।</string>
     <string name="profile_bond_just_us">सिर्फ़ हम दोनों</string>
     <string name="profile_bond_with_arbiter">मध्यस्थ: %1$s</string>
+    <string name="profile_sign_pending_amt">उन्होंने निपटान प्रस्तावित किया: %1$s जमाकर्ता को वापस, बाक़ी उन्हें। आपका हस्ताक्षर ही इसे जारी करता है।</string>
+    <string name="profile_sign_pending_all">उन्होंने जमा वापस माँगी है। आपका हस्ताक्षर ही इसे जारी करता है।</string>
+    <string name="profile_sign_release">रिलीज़ पर हस्ताक्षर करें</string>
 </resources>

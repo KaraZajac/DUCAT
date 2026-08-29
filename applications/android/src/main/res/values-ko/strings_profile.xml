@@ -49,4 +49,7 @@
     <string name="profile_bond_arbiter_note">중재인이 있으면 세 키 중 두 개로 보증금을 움직일 수 있어요. 폰을 잃어도 묶이지 않고, 분쟁도 갈 곳이 생겨요. 중재인 혼자서는 아무것도 가져갈 수 없어요.</string>
     <string name="profile_bond_just_us">우리 둘만</string>
     <string name="profile_bond_with_arbiter">중재인: %1$s</string>
+    <string name="profile_sign_pending_amt">정산 제안: %1$s는 예치자에게 돌아가고 나머지는 상대에게. 회원님의 서명으로 해제됩니다.</string>
+    <string name="profile_sign_pending_all">보증금 반환을 요청했습니다. 회원님의 서명으로 해제됩니다.</string>
+    <string name="profile_sign_release">해제에 서명</string>
 </resources>

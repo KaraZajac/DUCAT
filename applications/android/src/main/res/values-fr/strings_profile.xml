@@ -49,4 +49,7 @@
     <string name="profile_bond_arbiter_note">Avec un arbitre, deux des trois clés suffisent à déplacer le dépôt : un téléphone perdu ne bloque rien et un litige a un recours. L\'arbitre seul ne peut rien prendre.</string>
     <string name="profile_bond_just_us">Juste nous deux</string>
     <string name="profile_bond_with_arbiter">Arbitre : %1$s</string>
+    <string name="profile_sign_pending_amt">Règlement proposé : %1$s revient au déposant, le reste à eux. Votre signature le libère.</string>
+    <string name="profile_sign_pending_all">Ils demandent le retour du dépôt. Votre signature le libère.</string>
+    <string name="profile_sign_release">Signer la libération</string>
 </resources>

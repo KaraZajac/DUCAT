@@ -49,4 +49,7 @@
     <string name="profile_bond_arbiter_note">مع المحكّم يكفي مفتاحان من ثلاثة لتحريك الوديعة: الهاتف الضائع لا يجمّد شيئًا، وللنزاع جهة يذهب إليها. والمحكّم وحده لا يستطيع أخذ شيء.</string>
     <string name="profile_bond_just_us">نحن الاثنان فقط</string>
     <string name="profile_bond_with_arbiter">المحكّم: %1$s</string>
+    <string name="profile_sign_pending_amt">اقترحوا تسوية: يعود %1$s إلى المودع والباقي لهم. توقيعك هو ما يحررها.</string>
+    <string name="profile_sign_pending_all">يطلبون استرداد الوديعة. توقيعك هو ما يحررها.</string>
+    <string name="profile_sign_release">توقيع الإفراج</string>
 </resources>

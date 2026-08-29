@@ -1055,9 +1055,20 @@ object Ceremony {
      */
     fun releaseBond(context: Context, contact: Contact): String {
         val mineHex = PersonaStore(context).personaHex()
+        // Bonds only, and never through an arbiter's record. Unfiltered,
+        // this picked ANY done ceremony with the peer — an arbiter shown
+        // "Return the deposit" over a live ride escrow would propose a full
+        // sweep of the pot to its own wallet, and a principal could clobber
+        // a ride's stage the same way. Newest by created, because
+        // prefs.all's iteration order is nobody's promise.
         val idHex = all(context)
-            .filter { it.optString("peer") == contact.personaHex }
-            .lastOrNull { it.optString("stage") == "done" }
+            .filter {
+                it.optString("peer") == contact.personaHex &&
+                    it.optInt("kind") == KIND_BOND &&
+                    !isArbiter(it)
+            }
+            .filter { it.optString("stage") == "done" }
+            .maxByOrNull { it.optLong("created") }
             ?.optString("id")
             ?: throw IllegalStateException("no finished bond with this contact")
         val o = load(context, idHex)!!
@@ -1131,6 +1142,15 @@ object Ceremony {
                     (o.optInt("kind") != KIND_BOND &&
                         stage in listOf("releasing", "release_pending", "release_cosigned"))) &&
                     round.toInt() == 0 -> {
+                    // The arbiter holds a share, not an opinion — and not a
+                    // pen. Rulings are a principal's proposal that the
+                    // arbiter co-signs; a "proposal" ORIGINATING from the
+                    // arbiter's index is nobody asking for their own money
+                    // and is refused unheard.
+                    if (o.optInt("arbiterIdx") != 0 && senderIdx == o.optInt("arbiterIdx")) {
+                        DucatLog.w(TAG, "bond $idHex: proposal from the arbiter refused")
+                        return
+                    }
                     // Money moving, so the other side's yes is a screen and
                     // not an automatic signature — §15.5's confirm rule
                     // surviving into escrow. Park the proposal;
@@ -1179,7 +1199,18 @@ object Ceremony {
                     DucatLog.i(TAG, "escrow $idHex: release proposed — waiting for the yes")
                     return@runCatching
                 }
-                stage == "releasing" && round.toInt() == 1 -> {
+                // Not only at "releasing": two counter-offers crossing on
+                // the wire put both phones at release_pending, and the
+                // co-signature each then sent hit this dispatch's else and
+                // was discarded — after which both banners read "Fare
+                // released" over money still in the escrow, forever. The
+                // engine's proposer session survives those stage moves (it
+                // is keyed by ceremony, not stage), so a round 1 answering
+                // *our* proposal completes fine from any of the three; one
+                // answering nothing falls into the same lost-round recovery
+                // below as always.
+                stage in listOf("releasing", "release_pending", "release_cosigned") &&
+                    round.toInt() == 1 -> {
                     // Only the co-signer we actually asked: in a 2-of-3 an
                     // unsolicited "co-signature" from the third party must
                     // not complete a transaction nobody proposed to them.
@@ -1189,12 +1220,24 @@ object Ceremony {
                     }
                     val nodeUrl = node(context)
                         ?: throw NoNode()
+                    // The claim before the money moves — fundRide's own rule.
+                    // frostComplete BROADCASTS; writing "released" only after
+                    // it meant a death in the gap left the money gone and the
+                    // record saying "releasing", and the completing party is
+                    // the payee, whom checkSettled's funder-only gate never
+                    // rescued. The marker survives the death and widens that
+                    // gate below.
+                    o.put("completingAt", System.currentTimeMillis())
+                    save(context, idHex, o)
                     val txid = uniffi.ducat_mobile.frostComplete(
                         id, i.toUShort(), senderIdx.toUShort(), payload, nodeUrl,
                     )
                     settle(o, "released"); o.put("txid", txid)
-                    soldOne(context, o)
                     save(context, idHex, o)
+                    // Inventory after the stage is durable, never before: a
+                    // death between soldOne and the save re-ran this branch's
+                    // recovery and decremented the stock twice for one sale.
+                    soldOne(context, o)
                     ContactStore.bump()
                     DucatLog.i(TAG, "bond $idHex released — txid $txid")
                 }
@@ -1690,6 +1733,41 @@ object Ceremony {
             DucatLog.w(TAG, "escrow $idHex: abort ignored — it holds money")
             return
         }
+        // Those three markers are what THIS device has seen, and on a
+        // one-sided ride the non-funding side sees nothing until it happens
+        // to open the thread (checkRideFunding's only caller is the
+        // banner). A counterparty's abort arriving in that blind window
+        // flipped a funded escrow to a terminal "aborted" with every button
+        // gone — the driver could never again ask for the fare they had
+        // earned. So: a release in progress refuses outright (a release
+        // requires funding by construction), and at "done" the escrow's own
+        // balance is asked before anybody's word is believed. Only a
+        // confirmed-empty address may die on a message.
+        val stage = o.optString("stage")
+        if (holdsShare(o)) {
+            if (stage in listOf("releasing", "release_pending", "release_cosigned")) {
+                DucatLog.w(TAG, "escrow $idHex: abort ignored — a release is in progress")
+                return
+            }
+            if (stage == "done") {
+                val keys = hexToBytes(o.optString("keys"))
+                val nodeUrl = node(context)
+                val from = o.optLong("scanFrom").takeIf { it > 0 }
+                    ?: WalletStore(context).restoreHeight().toLong()
+                val bal = if (keys == null || nodeUrl == null) null else runCatching {
+                    uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
+                }.getOrNull()
+                if (bal == null || bal > 0L) {
+                    DucatLog.w(
+                        TAG,
+                        "escrow $idHex: abort ignored — " +
+                            if (bal == null) "could not confirm the address is empty"
+                            else "the address holds ${formatXmr(bal)} XMR",
+                    )
+                    return
+                }
+            }
+        }
         hexToBytes(o.optString("id"))?.let {
             runCatching { uniffi.ducat_mobile.ceremonyAbort(it, o.optInt("i").toUShort()) }
         }
@@ -1954,6 +2032,29 @@ object Ceremony {
             if (isFinished(o) || !holdsShare(o)) continue
             val idHex = o.optString("id")
             if (idHex.isBlank()) continue
+            // A completing marker means THIS device called frostComplete and
+            // may have died between the broadcast and the write — the one
+            // gap the funder-only scan below never rescued, because the
+            // completing party is the payee. The escrow's own balance is the
+            // truth that survives the death: empty after we tried to spend
+            // it means the release happened, whatever the record says.
+            if (o.optLong("completingAt") > 0 && o.optString("stage") == "releasing") {
+                val keys = hexToBytes(o.optString("keys")) ?: continue
+                val nodeUrl = node(context) ?: continue
+                val from = o.optLong("scanFrom").takeIf { it > 0 }
+                    ?: WalletStore(context).restoreHeight().toLong()
+                val bal = runCatching {
+                    uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
+                }.getOrNull() ?: continue
+                if (bal == 0L) {
+                    mutate(context, idHex) { cur -> settle(cur, "released") }
+                    soldOne(context, o)
+                    ContactStore.bump()
+                    DucatLog.i(TAG, "escrow $idHex: our release landed — recovered after a death mid-broadcast")
+                    found += 1
+                }
+                continue
+            }
             if (o.optInt("i") != o.optInt("funderIdx")) continue
             val minor = wallet.minorOf("ride_$idHex") ?: continue
             // Not one of ours: the funding transaction and its change are
@@ -2125,7 +2226,7 @@ object Ceremony {
         // exactly this number, gives up after an hour, and clears the moment
         // a proposal lands (just below).
         mutate(context, idHex) { cur ->
-            if (cur.has("wantRelease")) cur
+            if (cur.optLong("wantReleaseAt") > 0) cur
             else cur.put("wantRelease", riderBackPxmr)
                 .put("wantReleaseAt", System.currentTimeMillis())
         }
@@ -2155,10 +2256,14 @@ object Ceremony {
             amountPxmr = back,
         )
         o.put("stage", "releasing")
-        // Asked for, and got there. Whatever [wantRelease] was holding on
-        // behalf of the person who pressed the button is now spent.
-        o.remove("wantRelease")
-        o.remove("wantReleaseAt")
+        // Asked for, and got there — the intent is spent. Cleared by VALUE,
+        // and cleared on the SNAPSHOT so the save below carries the zero:
+        // remove() never survived save's merge (fields are added and
+        // changed there, never removed — the store's own doc), so every
+        // successful proposal left a live-looking intent on the record for
+        // good, and the banner went on promising "it will try again"
+        // beside deals already settled.
+        o.put("wantReleaseAt", 0L)
         o.put("cosignerIdx", indexOf(
             o.getJSONArray("roster").let { arr -> (0 until arr.length()).map { arr.getString(it) } },
             peerHex,
@@ -2192,15 +2297,19 @@ object Ceremony {
         val now = System.currentTimeMillis()
         var n = 0
         for (o in all(context)) {
-            if (o.optString("stage") != "done") continue
-            if (!o.has("wantRelease")) continue
+            // Every stage a proposal is legal from — the same list
+            // proposeRideSplit accepts. Gating on "done" alone meant a
+            // counter-offer that failed at release_pending recorded an
+            // intent nobody would ever act on: the press was silently lost.
+            if (o.optString("stage") !in
+                listOf("done", "releasing", "release_pending", "release_cosigned")
+            ) continue
             val idHex = o.optString("id")
             if (idHex.isBlank()) continue
             val asked = o.optLong("wantReleaseAt")
-            if (asked <= 0 || now - asked > RELEASE_PATIENCE_MS) {
-                mutate(context, idHex) { cur ->
-                    cur.remove("wantRelease"); cur.remove("wantReleaseAt"); cur
-                }
+            if (asked <= 0) continue
+            if (now - asked > RELEASE_PATIENCE_MS) {
+                mutate(context, idHex) { cur -> cur.put("wantReleaseAt", 0L) }
                 DucatLog.i(TAG, "escrow $idHex: gave up retrying the release")
                 continue
             }
@@ -2326,10 +2435,13 @@ object Ceremony {
             kind = 9, round = 1, ceremonyId = id, payload = ans.payload,
         )
         settle(o, "release_cosigned")
-        soldOne(context, o)
-        o.remove("pendingPayload")
-        o.remove("pendingToMe")
+        // remove() never survives save's merge; a value-clear does. And the
+        // inventory moves only after the stage is durable — a death between
+        // soldOne and the save re-ran this path and decremented twice.
+        o.put("pendingPayload", "")
+        o.put("pendingToMe", -1L)
         save(context, idHex, o)
+        soldOne(context, o)
         ContactStore.bump()
         DucatLog.i(TAG, "ride $idHex: rider approved the release (fee ${ans.feePxmr})")
     }
