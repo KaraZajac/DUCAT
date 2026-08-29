@@ -13,6 +13,11 @@ private const val TAG = "DucatWallet"
 /** Monero's lock: an output cannot be spent for ten blocks after it lands. */
 const val LOCK_BLOCKS: Long = 10
 
+    // How long an unresolved send intent may hold notes hostage before an
+    // all-unspent chain answer is believed to mean "never relayed". Longer
+    // than any node timeout plus mempool life for a tx that will never mine.
+    private const val INTENT_GIVE_UP_SECS = 30L * 60
+
 /** One scan step. Each block is a request to someone else's node, so a step is
  *  a few seconds of work rather than "until finished". */
 private const val WINDOW: UInt = 200u
@@ -267,9 +272,34 @@ object Wallet {
             //
             // recordSpent leaves out whatever it is not told about, so telling
             // it only about the ones the chain confirms is the whole fix.
-            store.recordSpent(
-                entries.map { it.keyImage }.zip(spent).filter { (_, gone) -> gone }.toMap(),
-            )
+            val chainSpent = entries.map { it.keyImage }.zip(spent)
+                .filter { (_, gone) -> gone }.map { (ki, _) -> ki }.toSet()
+            store.recordSpent(chainSpent.associateWith { true })
+            val chainAnswered = entries.map { it.keyImage }.toSet()
+            // Dangling send intents get their verdict here, from the chain,
+            // never from a thrown exception (a timeout can post-date the
+            // relay). Inputs the chain shows spent mean the send happened
+            // and the process died before recording it: convert the intent
+            // into the record it was standing in for — txid died with the
+            // process, but the balance and the double-pay guard stay honest.
+            // An intent well past any relay window whose inputs the chain
+            // still shows UNSPENT never made it out: drop it and the notes
+            // come home.
+            val now = System.currentTimeMillis() / 1000
+            for (intent in store.sendIntents()) {
+                val kis = intent.keyImages.toSet()
+                when {
+                    kis.any { it in chainSpent } -> {
+                        DucatLog.w(TAG, "send intent ${intent.id} resolved by chain — recording without txid")
+                        store.resolveSendIntent(intent.id, "", 0L)
+                    }
+                    now - intent.ts > INTENT_GIVE_UP_SECS &&
+                        kis.isNotEmpty() && kis.all { it in chainAnswered && it !in chainSpent } -> {
+                        DucatLog.w(TAG, "send intent ${intent.id} never relayed — releasing its notes")
+                        store.dropSendIntent(intent.id)
+                    }
+                }
+            }
         } catch (e: Exception) {
             DucatLog.w(TAG, "spent check: ${e.message}")
         }
@@ -286,7 +316,11 @@ object Wallet {
         // of it, so every send failed with "not enough unlocked" against a
         // balance that plainly said otherwise. Understating is the safe
         // direction; promising is not.
-        val unspent = store.entries().filter { !it.spent && it.blob.isNotEmpty() }
+        // Same rule for notes pinned by an in-flight send intent: plan will
+        // not offer them, so the balance must not promise them.
+        val inFlight = store.sendIntents().flatMap { it.keyImages }.toSet()
+        val unspent = store.entries()
+            .filter { !it.spent && it.blob.isNotEmpty() && it.keyImage !in inFlight }
         val unlocked = unspent.filter { tip > 0 && it.height + LOCK_BLOCKS <= tip }
         val locked = unspent - unlocked.toSet()
         // The nearest unlock, because "in about N minutes" needs the soonest
@@ -350,8 +384,17 @@ object Wallet {
      */
     fun plan(context: Context, amountPxmr: Long, priority: Int = 1): SendPlan {
         val tip = WalletStore(context).tip()
+        // Notes named by an in-flight send intent are committed money until
+        // the chain rules otherwise — offering them again is how a double
+        // spend gets built politely.
+        val inFlight = WalletStore(context).sendIntents()
+            .flatMap { it.keyImages }.toSet()
         val usable = WalletStore(context).entries()
-            .filter { !it.spent && it.blob.isNotEmpty() && tip > 0 && it.height + LOCK_BLOCKS <= tip }
+            .filter {
+                !it.spent && it.blob.isNotEmpty() && tip > 0 &&
+                    it.height + LOCK_BLOCKS <= tip &&
+                    it.keyImage !in inFlight
+            }
             .sortedByDescending { it.amountPxmr }
         val picked = mutableListOf<WalletEntry>()
         var total = 0L
@@ -527,6 +570,17 @@ object Wallet {
             "sending ${formatXmr(amountPxmr)} XMR using ${plan.notes.size} note(s) " +
                 "to ${toAddress.take(12)}…",
         )
+        // The claim before the money moves — the escrow's own rule, applied
+        // to every send. moneroSend builds, signs and RELAYS in one call;
+        // recording only on its return meant a death in the gap left a
+        // payment on chain with no local trace, which is precisely the
+        // blindness the double-pay guard cannot survive. The intent also
+        // pins these notes out of the next plan. A throw below does NOT
+        // clear it: a timeout can post-date the relay, so only the chain
+        // (refreshSpent) may decide the send never happened.
+        val intent = store.recordSendIntent(
+            toAddress, amountPxmr, plan.notes.map { it.keyImage }, contactHex, note,
+        )
         val r = try {
             uniffi.ducat_mobile.moneroSend(
                 nodeUrl, spend, plan.notes.map { it.blob }, toAddress,
@@ -552,18 +606,11 @@ object Wallet {
             "sent ${r.txidHex.take(16)}… fee ${formatXmr(r.feePxmr.toLong())} XMR, " +
                 "accepted by ${r.acceptedBy} node(s)",
         )
-        // Recorded here, not on the next scan: the outputs a payment creates
-        // belong to the recipient, so nothing the wallet scans will ever show
-        // that this happened. Without it the balance drops for no visible
-        // reason.
-        store.recordSent(
-            r.txidHex, amountPxmr, r.feePxmr.toLong(), toAddress, contactHex, note,
-        )
-        // Mark the inputs spent immediately rather than waiting for a rescan.
-        // The daemon will confirm it, but until then a second send must not be
-        // offered the same notes — that builds a double spend the network will
-        // reject and the user will not understand.
-        store.recordSpent(plan.notes.associate { it.keyImage to true })
+        // The record, the spent inputs and the intent's removal, one commit —
+        // recorded here rather than on the next scan, because the outputs a
+        // payment creates belong to the recipient and nothing this wallet
+        // scans will ever show it happened.
+        store.resolveSendIntent(intent, r.txidHex, r.feePxmr.toLong())
         return r
     }
 }

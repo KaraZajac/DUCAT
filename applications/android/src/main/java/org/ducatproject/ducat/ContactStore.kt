@@ -2020,23 +2020,122 @@ class WalletStore(context: Context) {
      * creates belong to somebody else — so without recording it here, sending
      * money leaves no trace and the balance simply drops.
      */
-    fun recordSent(
-        txidHex: String,
-        amountPxmr: Long,
-        feePxmr: Long,
+    /**
+     * A send that may be in flight: written BEFORE the broadcast, resolved
+     * after.
+     *
+     * moneroSend builds, signs and relays in one call, and recording only on
+     * its return left two gaps a process death turned into money bugs: a
+     * payment on chain with no local trace (so the escrow guard that asks
+     * "did I already pay this address?" said no, and the user paid twice),
+     * and inputs not yet marked spent (so the next plan offered the same
+     * notes and built a double spend). The intent closes both from the safe
+     * side: notes named in a live intent are never offered again, and the
+     * guard treats an intent like a send until the chain says otherwise.
+     * refreshSpent resolves stragglers — key images the chain shows spent
+     * mean the send happened; a stale intent whose notes the chain shows
+     * untouched means it never did, and the notes come home.
+     */
+    fun recordSendIntent(
         toAddress: String,
+        amountPxmr: Long,
+        keyImages: List<String>,
         contactHex: String?,
         note: String?,
-    ) {
-        val arr = JSONArray(prefs.getString("wallet_sends", "[]"))
+    ): String {
+        val id = java.util.UUID.randomUUID().toString()
+        val arr = JSONArray(prefs.getString("send_intents", "[]"))
         arr.put(JSONObject().apply {
-            put("txid", txidHex); put("amt", amountPxmr); put("fee", feePxmr)
-            put("to", toAddress); put("contact", contactHex ?: JSONObject.NULL)
+            put("id", id); put("to", toAddress); put("amt", amountPxmr)
+            put("kis", JSONArray(keyImages))
+            put("contact", contactHex ?: JSONObject.NULL)
             put("note", note ?: JSONObject.NULL)
             put("ts", System.currentTimeMillis() / 1000)
         })
-        prefs.edit().putString("wallet_sends", arr.toString()).apply()
+        prefs.edit().putString("send_intents", arr.toString()).apply()
+        return id
+    }
+
+    data class SendIntent(
+        val id: String,
+        val toAddress: String,
+        val amountPxmr: Long,
+        val keyImages: List<String>,
+        val contactHex: String?,
+        val note: String?,
+        val ts: Long,
+    )
+
+    fun sendIntents(): List<SendIntent> {
+        val arr = JSONArray(prefs.getString("send_intents", "[]"))
+        return (0 until arr.length()).map { i ->
+            val o = arr.getJSONObject(i)
+            SendIntent(
+                id = o.getString("id"),
+                toAddress = o.getString("to"),
+                amountPxmr = o.getLong("amt"),
+                keyImages = o.getJSONArray("kis").let { k ->
+                    (0 until k.length()).map { k.getString(it) }
+                },
+                contactHex = o.optString("contact").takeIf { it.isNotBlank() && it != "null" },
+                note = o.optString("note").takeIf { it.isNotBlank() && it != "null" },
+                ts = o.getLong("ts"),
+            )
+        }
+    }
+
+    /**
+     * The send happened: the record, the spent inputs and the intent's
+     * removal land in ONE commit, so no death can separate them again.
+     * An empty txid is the refreshSpent recovery path — the chain proved
+     * the notes moved but the hash died with the process; the row still
+     * keeps the balance honest, and says so in its note.
+     */
+    fun resolveSendIntent(id: String, txidHex: String, feePxmr: Long) {
+        val intents = JSONArray(prefs.getString("send_intents", "[]"))
+        var found: JSONObject? = null
+        val keep = JSONArray()
+        for (i in 0 until intents.length()) {
+            val o = intents.getJSONObject(i)
+            if (o.getString("id") == id) found = o else keep.put(o)
+        }
+        val it0 = found ?: return
+        val kis = it0.getJSONArray("kis").let { k ->
+            (0 until k.length()).map { k.getString(it) }.toSet()
+        }
+        val sends = JSONArray(prefs.getString("wallet_sends", "[]"))
+        sends.put(JSONObject().apply {
+            put("txid", txidHex); put("amt", it0.getLong("amt")); put("fee", feePxmr)
+            put("to", it0.getString("to"))
+            put("contact", it0.opt("contact") ?: JSONObject.NULL)
+            put("note", it0.opt("note") ?: JSONObject.NULL)
+            put("ts", System.currentTimeMillis() / 1000)
+        })
+        val outsRaw = prefs.getString("wallet_outputs", null)
+        val e = prefs.edit()
+            .putString("send_intents", keep.toString())
+            .putString("wallet_sends", sends.toString())
+        if (outsRaw != null) {
+            val outs = JSONArray(outsRaw)
+            for (i in 0 until outs.length()) {
+                val o = outs.getJSONObject(i)
+                if (o.getString("ki") in kis) o.put("spent", true)
+            }
+            e.putString("wallet_outputs", outs.toString())
+        }
+        e.apply()
         ContactStore.bump()
+    }
+
+    /** The send provably never happened — the notes come home. */
+    fun dropSendIntent(id: String) {
+        val intents = JSONArray(prefs.getString("send_intents", "[]"))
+        val keep = JSONArray()
+        for (i in 0 until intents.length()) {
+            val o = intents.getJSONObject(i)
+            if (o.getString("id") != id) keep.put(o)
+        }
+        prefs.edit().putString("send_intents", keep.toString()).apply()
     }
 
     /**

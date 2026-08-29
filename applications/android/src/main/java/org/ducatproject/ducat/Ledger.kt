@@ -402,7 +402,7 @@ object Ledger {
                 out += Event(
                     txid = txid,
                     height = height,
-                    // `recordSent` already stores seconds; dividing again put a
+                    // the send record already stores seconds; dividing again put a
                     // payment made this morning three weeks after the epoch.
                     timestamp = if (ts > 0) ts else (rec?.timestamp ?: 0L),
                     direction = Direction.Sent,

@@ -1921,13 +1921,27 @@ object Ceremony {
             if (held == SENDING) {
                 val sent = WalletStore(context).sends().firstOrNull { it.toAddress == addr }
                 if (sent != null) {
-                    cur.put(mine, sent.txidHex)
+                    // A row recovered from a send intent carries no txid —
+                    // the hash died with the process — but blank here would
+                    // read as "never paid" next time. Any non-empty mark
+                    // keeps the guard honest.
+                    cur.put(mine, sent.txidHex.ifEmpty { "recovered" })
                     DucatLog.w(TAG, "escrow $idHex: recovered a send nobody recorded")
                     throw AlreadyPaid()
                 }
                 DucatLog.i(TAG, "escrow $idHex: retaking a claim left by a send that never went")
             } else {
                 if (held.isNotEmpty()) throw AlreadyPaid()
+            }
+            // A live send intent to this address is a payment whose fate the
+            // chain has not yet ruled on — the wallet wrote it before
+            // broadcasting and only refreshSpent may retire it. Paying again
+            // over the top of one is the exact double-fund this whole guard
+            // exists to stop; the intent resolves within a refresh either
+            // way, so refusing now costs a retry, not the money.
+            if (WalletStore(context).sendIntents().any { it.toAddress == addr }) {
+                DucatLog.w(TAG, "escrow $idHex: a send intent to this escrow is unresolved — refusing to pay again")
+                throw AlreadyPaid()
             }
             cur.put(mine, SENDING)
         }
