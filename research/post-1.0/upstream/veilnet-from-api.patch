@@ -1,0 +1,164 @@
+From f51b7d8750c4d468393e345faa887bf1faae8d088e5f23f15217c311d44b7360 Mon Sep 17 00:00:00 2001
+From: Kara <kara@soulstone.org>
+Date: Sun, 30 Aug 2026 18:04:47 -0400
+Subject: [PATCH] connection: from_api, for riding an already-running node
+
+An application with its own Veilid node must not start a second one to
+share files. from_api builds a Connection over an existing VeilidAPI
+and returns it with a feeder closure: the host owns the update
+callback it registered at api_startup, so it forwards every
+VeilidUpdate into the feeder and the connection's handler chain sees
+the same stream it would have owned. Attachment state is seeded from
+get_state() so require_attachment on an already-attached node returns
+instead of waiting for a change that may never come.
+
+The connection knows it is borrowed (owned: false): reset waits for
+attachment instead of detaching and reattaching a node it does not
+own, and close skips shutdown. Covered by a test that closes a
+borrowed connection and verifies the API is still usable.
+---
+ src/connection/veilid/connection.rs | 90 ++++++++++++++++++++++++++++-
+ 1 file changed, 87 insertions(+), 3 deletions(-)
+
+diff --git a/src/connection/veilid/connection.rs b/src/connection/veilid/connection.rs
+index be440cf..54fd043 100644
+--- a/src/connection/veilid/connection.rs
++++ b/src/connection/veilid/connection.rs
+@@ -26,6 +26,11 @@ pub struct Connection {
+     state_dir: Option<TempDir>,
+     update_chain: Arc<Mutex<HandlerChain>>,
+     attachment_state_rx: watch::Receiver<VeilidStateAttachment>,
++    /// Whether this
++    /// connection started the node it rides. A borrowed node — an
++    /// application's own, shared with its mailbox and boards — must never
++    /// be detached, reattached or shut down by the swarm's recovery paths.
++    owned: bool,
+ }
+ 
+ impl Connection {
+@@ -64,9 +69,49 @@ impl Connection {
+             state_dir: None,
+             update_chain,
+             attachment_state_rx,
++            owned: true,
+         })
+     }
+ 
++    /// Ride a node that is
++    /// already running — an application that has its own Veilid node must
++    /// not start a second one for the swarm.
++    ///
++    /// Returns the connection and a **feeder**: the host owns the update
++    /// callback (it registered it at `api_startup`), so it forwards every
++    /// `VeilidUpdate` it receives into the feeder and this connection's
++    /// handler chain sees the same stream it would have owned. The current
++    /// attachment state is seeded from `get_state()` so `require_attachment`
++    /// on an already-attached node returns instead of waiting for the next
++    /// state change that may never come.
++    pub async fn from_api(
++        api: veilid_core::VeilidAPI,
++    ) -> Result<(Connection, Box<dyn Fn(VeilidUpdate) + Send + Sync>)> {
++        let update_chain = Arc::new(Mutex::new(HandlerChain::new()));
++        let update_source = Arc::new(UpdateDispatch::new(update_chain.clone()));
++        let (attachment_monitor, attachment_state_rx) = StateAttachmentWatcher::new();
++        update_chain
++            .lock()
++            .unwrap()
++            .add(Box::new(attachment_monitor));
++        let seed = api.get_state().await?;
++        update_source.update(VeilidUpdate::Attachment(seed.attachment));
++        let feeder: Box<dyn Fn(VeilidUpdate) + Send + Sync> = {
++            let us = update_source.clone();
++            Box::new(move |u: VeilidUpdate| us.update(u))
++        };
++        Ok((
++            Connection {
++                routing_context: api.routing_context()?,
++                state_dir: None,
++                update_chain,
++                attachment_state_rx,
++                owned: false,
++            },
++            feeder,
++        ))
++    }
++
+     pub fn config(state_dir: &Path, program_name: Option<String>) -> VeilidConfig {
+         VeilidConfig {
+             program_name: program_name.unwrap_or("veilnet-app".to_string()),
+@@ -133,8 +178,14 @@ impl crate::connection::Connection for Connection {
+     /// The operation will wait for full attachment before returning.
+     #[instrument(skip_all)]
+     async fn reset(&mut self) -> Result<()> {
+-        self.routing_context.api().detach().await?;
+-        self.routing_context.api().attach().await?;
++        // A borrowed node's attachment belongs to its
++        // owner — the mailbox poller is riding it too. Recovery on a
++        // borrowed connection waits for the owner's node to be well again
++        // rather than bouncing it out from under everything else.
++        if self.owned {
++            self.routing_context.api().detach().await?;
++            self.routing_context.api().attach().await?;
++        }
+         self.require_attachment().await?;
+         Ok(())
+     }
+@@ -144,7 +195,11 @@ impl crate::connection::Connection for Connection {
+     /// This gracefully shuts down the attachment monitor and releases
+     /// any temporary storage. The connection cannot be used after closing.
+     async fn close(self) -> Result<()> {
+-        self.routing_context.api().shutdown().await;
++        // Shutting down a borrowed node would take the
++        // whole application's network with it.
++        if self.owned {
++            self.routing_context.api().shutdown().await;
++        }
+         Ok(())
+     }
+ }
+@@ -162,6 +217,8 @@ impl Clone for Connection {
+ 
+             // Clone uses the parent's attachment state watch channel.
+             attachment_state_rx: self.attachment_state_rx.clone(),
++
++            owned: self.owned,
+         }
+     }
+ }
+@@ -171,6 +228,33 @@ mod tests {
+     use super::*;
+     use std::path::Path;
+ 
++    /// A borrowed connection may be closed
++    /// and reset without the node underneath noticing — the application
++    /// that owns it (its mailbox, its boards) keeps a working API either
++    /// way. This is the guard that lets the swarm share the phone's node.
++    #[tokio::test]
++    async fn from_api_borrows_without_owning() {
++        let temp = tempfile::TempDir::new().expect("temp dir");
++        let api = crate::connection::testing::create_test_api(temp.path())
++            .await
++            .expect("test api");
++        let (conn, feeder) = Connection::from_api(api.clone())
++            .await
++            .expect("from_api");
++        // The feeder path is the host's update callback in miniature.
++        feeder(VeilidUpdate::Attachment(
++            api.get_state().await.expect("state").attachment,
++        ));
++        // Closing the borrowed connection must NOT shut the node down.
++        use crate::connection::Connection as _;
++        conn.close().await.expect("close");
++        assert!(
++            api.get_state().await.is_ok(),
++            "closing a borrowed connection took the owner's node with it"
++        );
++        api.shutdown().await;
++    }
++
+     #[test]
+     fn test_namespace_generation() {
+         let config = Connection::config(Path::new("/tmp"), None);
+-- 
+2.55.0
+
