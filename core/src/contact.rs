@@ -691,6 +691,12 @@ pub enum MessageKind {
     /// need a consensus a peer-to-peer group cannot have, so the set is
     /// grow-only and every view converges by union, in any order.
     GroupRoster = 12,
+    /// §16.20: a publication period's content key, handed down the paid
+    /// thread — with the shelf itself (record + standing head key) on the
+    /// first delivery. The message that turns a settled bill into readable
+    /// content; it carries a capability, never content, so the thread stays
+    /// small while the shelf holds the weight.
+    PublicationKey = 13,
 }
 
 impl MessageKind {
@@ -709,6 +715,7 @@ impl MessageKind {
             10 => MessageKind::CeremonyAbort,
             11 => MessageKind::PositionRef,
             12 => MessageKind::GroupRoster,
+            13 => MessageKind::PublicationKey,
             _ => return None,
         })
     }
@@ -832,6 +839,9 @@ pub struct Message {
     /// A live-position stream, by reference (§15.12). Present only on a
     /// `PositionRef`.
     pub position: Option<PositionRef>,
+    /// §16.20: a publication period's key. Present only on a
+    /// `PublicationKey`, where it is mandatory.
+    pub publication: Option<PublicationKey>,
     /// §16.19: which group this message belongs to — 16 random bytes minted
     /// at creation. Present with [`Self::group_seq`] or not at all.
     pub group_id: Option<Vec<u8>>,
@@ -863,6 +873,23 @@ pub struct PositionRef {
     /// XChaCha20-Poly1305 key for the stream, one per ride, never reused —
     /// reuse would make the key a long-lived identifier linking rides.
     pub stream_key: [u8; 32],
+}
+
+/// A publication period's key, with the shelf on first delivery (§16.20).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct PublicationKey {
+    /// The publisher's own label for the period — "2026-09", "issue-12".
+    /// What the reader files the key under; never parsed for meaning.
+    pub period_id: String,
+    /// The period's content key. Opaque here: the publisher derives it
+    /// (core::publish), the reader only holds and uses it.
+    pub period_key: [u8; 32],
+    /// The publication's root record — present with [`Self::head_key`] on
+    /// the first delivery, optional after (the reader already has it).
+    pub record_key: Option<String>,
+    /// The standing key that opens the shelf's index for the life of the
+    /// subscription. Travels with the record or not at all.
+    pub head_key: Option<[u8; 32]>,
 }
 
 /// A sealed blob parked in a DHT record (§16.15).
@@ -966,6 +993,16 @@ impl Message {
         if let Some(p) = &self.position {
             m.insert(f::MSG_POS_RECORD, Value::Text(p.record_key.clone()));
             m.insert(f::MSG_POS_STREAM, Value::Bytes(p.stream_key.to_vec()));
+        }
+        if let Some(p) = &self.publication {
+            m.insert(f::MSG_PUB_PERIOD, Value::Text(p.period_id.clone()));
+            m.insert(f::MSG_PUB_KEY, Value::Bytes(p.period_key.to_vec()));
+            if let Some(rk) = &p.record_key {
+                m.insert(f::MSG_PUB_RECORD, Value::Text(rk.clone()));
+            }
+            if let Some(hk) = &p.head_key {
+                m.insert(f::MSG_PUB_HEAD, Value::Bytes(hk.to_vec()));
+            }
         }
         Value::Map(m)
     }
@@ -1116,6 +1153,48 @@ impl Message {
                     }
                 }
             },
+            publication: {
+                let period_id = r.opt_text(f::MSG_PUB_PERIOD, crate::publish::MAX_PERIOD_ID)?;
+                let period_key = r.opt_bytes(f::MSG_PUB_KEY, Some(32))?;
+                let record_key = r.opt_text(f::MSG_PUB_RECORD, MAX_RECORD_KEY_CHARS)?;
+                let head_key = r.opt_bytes(f::MSG_PUB_HEAD, Some(32))?;
+                match (period_id, period_key, record_key, head_key) {
+                    (None, None, None, None) => None,
+                    // The period pair is the kind's whole point: a key with
+                    // no name cannot be filed, a name with no key opens
+                    // nothing.
+                    (Some(period_id), Some(period_key), record_key, head_key) => {
+                        // Emptiness is already refused below the field layer:
+                        // opt_text treats present-but-empty as a second
+                        // encoding of "omitted" (§18.1) and rejects it.
+                        // The shelf reference is one thing: the record and
+                        // the head key that opens its index, together or
+                        // not at all.
+                        let shelf = match (record_key, head_key) {
+                            (None, None) => (None, None),
+                            (Some(rk), Some(hk)) => (Some(rk), Some(hk)),
+                            _ => {
+                                return Err(Reject::with_detail(
+                                    RejectCode::Malformed,
+                                    "a publication shelf carries its record and its head key together",
+                                ))
+                            }
+                        };
+                        Some(PublicationKey {
+                            period_id,
+                            period_key: period_key.try_into().unwrap(),
+                            record_key: shelf.0,
+                            head_key: shelf.1.map(|h: Vec<u8>| h.try_into().unwrap()),
+                        })
+                    }
+                    _ => {
+                        return Err(Reject::with_detail(
+                            RejectCode::Malformed,
+                            "a publication key carries its period id and its key together",
+                        ))
+                    }
+                }
+            },
         };
         r.finish()?;
         // A payment with no amount is a payment screen with a blank on it, and
@@ -1132,7 +1211,8 @@ impl Message {
             | (MessageKind::Retract, Some(_))
             | (MessageKind::DkgRound, Some(_))
             | (MessageKind::CeremonyAbort, Some(_))
-            | (MessageKind::GroupRoster, Some(_)) => {
+            | (MessageKind::GroupRoster, Some(_))
+            | (MessageKind::PublicationKey, Some(_)) => {
                 return Err(Reject::with_detail(
                     RejectCode::Malformed,
                     "this message kind must not carry an amount",
@@ -1367,6 +1447,25 @@ impl Message {
                 return Err(Reject::with_detail(
                     RejectCode::Malformed,
                     "only a position message carries a stream reference",
+                ))
+            }
+            _ => {}
+        }
+        // §16.20's rule, the same closed world: the key IS the kind. A
+        // publication message with nothing to hand over is an empty gesture,
+        // and a period key on any other kind is a capability smuggled where
+        // no reader is looking for one.
+        match (out.kind, out.publication.is_some()) {
+            (MessageKind::PublicationKey, false) => {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "a publication message carries the period's key",
+                ))
+            }
+            (k, true) if k != MessageKind::PublicationKey => {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "only a publication message carries a period key",
                 ))
             }
             _ => {}
@@ -2462,7 +2561,7 @@ mod position_ref_tests {
             position: Some(PositionRef {
                 record_key: "VLD0:positionrecord".into(),
                 stream_key: [0x5au8; 32],
-            }),
+            }), publication: None,
             group_id: None, group_seq: None,
             group_re_sender: None, group_re_seq: None,
         }

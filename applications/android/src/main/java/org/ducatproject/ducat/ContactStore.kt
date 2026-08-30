@@ -858,6 +858,14 @@ class ContactStore(context: Context) {
         // restoring an old backup simply finds these absent. No wire change.
         securePrefs(appContext, "ducat_listings").getString("listings", null)
             ?.let { o.put("listings_raw", it) }
+        // §16.20's two cabinets: the publisher's master secrets (without
+        // which no back-catalogue key can ever be cut again) and the
+        // subscriber's filed period keys (what the money already bought).
+        // Inside the sealed blob like everything secret here.
+        securePrefs(appContext, "ducat_publications").getString("pubs", null)
+            ?.let { o.put("publications_raw", it) }
+        securePrefs(appContext, "ducat_publications").getString("subs", null)
+            ?.let { o.put("subscriptions_raw", it) }
         securePrefs(appContext, "ducat_catalogue").getString("items", null)
             ?.let { o.put("catalogue_raw", it) }
         // Groups, for the same reason as the ceremony shares above: they
@@ -925,6 +933,14 @@ class ContactStore(context: Context) {
                 o.optString("listings_raw").takeIf { it.isNotEmpty() }?.let {
                     securePrefs(appContext, "ducat_listings").edit()
                         .putString("listings", it).apply()
+                }
+                o.optString("publications_raw").takeIf { it.isNotEmpty() }?.let {
+                    securePrefs(appContext, "ducat_publications").edit()
+                        .putString("pubs", it).apply()
+                }
+                o.optString("subscriptions_raw").takeIf { it.isNotEmpty() }?.let {
+                    securePrefs(appContext, "ducat_publications").edit()
+                        .putString("subs", it).apply()
                 }
                 o.optString("catalogue_raw").takeIf { it.isNotEmpty() }?.let {
                     securePrefs(appContext, "ducat_catalogue").edit()
@@ -1683,6 +1699,11 @@ data class StoredMessage(
      * person had said. §16.11's retraction already had the shape for this.
      */
     val deadLetter: Boolean = false,
+    /** §16.20: a publication period's key. On kind 13 only. */
+    val pubPeriodId: String? = null,
+    val pubPeriodKey: ByteArray? = null,
+    val pubRecord: String? = null,
+    val pubHeadKey: ByteArray? = null,
 ) {
     fun toJson(): JSONObject = JSONObject().apply {
         put("out", outgoing); put("seq", seq); put("body", body)
@@ -1711,6 +1732,12 @@ data class StoredMessage(
         groupId?.let { put("grp", it); put("gseq", groupSeq) }
         groupReSender?.let { put("gre_s", it) }
         groupReSeq?.let { put("gre_q", it) }
+        pubPeriodId?.let {
+            put("pub_period", it)
+            put("pub_key", Base64.encodeToString(pubPeriodKey, Base64.NO_WRAP))
+            pubRecord?.let { r -> put("pub_rec", r) }
+            pubHeadKey?.let { h -> put("pub_head", Base64.encodeToString(h, Base64.NO_WRAP)) }
+        }
         if (deadLetter) put("dead", true)
     }
 
@@ -1753,6 +1780,10 @@ data class StoredMessage(
             groupSeq = o.optLong("gseq", 0L),
             groupReSender = o.optString("gre_s", "").ifBlank { null },
             groupReSeq = if (o.has("gre_q")) o.getLong("gre_q") else null,
+            pubPeriodId = o.optStringOrNull("pub_period"),
+            pubPeriodKey = o.optStringOrNull("pub_key")?.let { Base64.decode(it, Base64.NO_WRAP) },
+            pubRecord = o.optStringOrNull("pub_rec"),
+            pubHeadKey = o.optStringOrNull("pub_head")?.let { Base64.decode(it, Base64.NO_WRAP) },
         )
     }
 }

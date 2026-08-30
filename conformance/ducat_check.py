@@ -955,6 +955,11 @@ MSG_ATT_RECORD, MSG_ATT_KEY, MSG_ATT_NONCE = 194, 195, 196
 MSG_ATT_LEN, MSG_ATT_HASH, MSG_ATT_MIME, MSG_ATT_NAME = 197, 198, 199, 200
 # §15.12 — the live-position reference (kind 11): record + stream key.
 MSG_POS_RECORD, MSG_POS_STREAM = 218, 219
+# §16.20 — a publication period's key (kind 13): the period pair is the
+# kind's whole point; the shelf pair (record + standing head key) rides the
+# first delivery. Each pair together or not at all.
+MSG_PUB_RECORD, MSG_PUB_HEAD = 257, 258
+MSG_PUB_PERIOD, MSG_PUB_KEY = 259, 260
 # §16.19 — small groups: the group, the sender's own counter in it, and the
 # group reference (target's sender + their counter). The pairwise seq cannot
 # name a group message: the fanned-out copies land at different seqs.
@@ -1692,7 +1697,7 @@ def parse_message(buf):
             raise Reject("Malformed", "kind is not an integer")
         if kind == 0:
             raise Reject("Malformed", "text is encoded by omitting the kind")
-        if kind not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12):
+        if kind not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13):
             raise Reject("Malformed", "unknown message kind")
     else:
         kind = 0
@@ -1787,6 +1792,27 @@ def parse_message(buf):
     else:
         raise Reject("Malformed",
                      "a position reference carries its record and its key together")
+
+    # §16.20 — the period pair together or not at all; likewise the shelf.
+    pub_period = _take_text(b, MSG_PUB_PERIOD, 64, "period id", False)
+    pub_key = b.pop(MSG_PUB_KEY, (None, None))[1]
+    pub_record = _take_text(b, MSG_PUB_RECORD, MAX_RECORD_KEY_CHARS, "publication record", False)
+    pub_head = b.pop(MSG_PUB_HEAD, (None, None))[1]
+    if pub_period is None and pub_key is None and pub_record is None and pub_head is None:
+        out["publication"] = None
+    elif pub_period is not None and pub_key is not None:
+        if len(pub_key) != 32:
+            raise Reject("Malformed", "a period key is 32 bytes")
+        if (pub_record is None) != (pub_head is None):
+            raise Reject("Malformed",
+                         "a publication shelf carries its record and its head key together")
+        if pub_head is not None and len(pub_head) != 32:
+            raise Reject("Malformed", "a head key is 32 bytes")
+        out["publication"] = {"period": pub_period, "key": pub_key,
+                              "record": pub_record, "head": pub_head}
+    else:
+        raise Reject("Malformed",
+                     "a publication key carries its period id and its key together")
     _finish(b)
 
     # A payment with no amount is a screen with a blank where the number goes;
@@ -1794,7 +1820,7 @@ def parse_message(buf):
     # A FROST round (9) is the exception: a release proposal MAY state the
     # amount the funder gets back — the consent screen shows it beside the
     # signed payload (§15.12's settlement); a statement, not authority.
-    if kind in (0, 4, 5, 8, 10, 12) and out["amount"] is not None:
+    if kind in (0, 4, 5, 8, 10, 12, 13) and out["amount"] is not None:
         raise Reject("Malformed", "this kind must not carry an amount")
     if kind in (1, 2, 3) and out["amount"] is None:
         raise Reject("Malformed", "a payment message must carry an amount")
@@ -1868,6 +1894,11 @@ def parse_message(buf):
         raise Reject("Malformed", "a position message carries a reference to the stream")
     if kind != 11 and out["position"] is not None:
         raise Reject("Malformed", "only a position message carries a stream reference")
+    # §16.20's closed world: the key IS the kind.
+    if kind == 13 and out["publication"] is None:
+        raise Reject("Malformed", "a publication message carries the period's key")
+    if kind != 13 and out["publication"] is not None:
+        raise Reject("Malformed", "only a publication message carries a period key")
     if kind in (0, 5, 6, 7, 8, 9, 10) and (out["items"] or out["tax"] is not None):
         raise Reject("Malformed", "this message kind has no bill to itemise")
     # An eta is a ride offer's courtesy figure, bounded by honesty: a day.
@@ -2166,6 +2197,14 @@ def run_message_payment(cases, r):
             if pos is not None:
                 fields.append((MSG_POS_RECORD, ("text", pos["record"])))
                 fields.append((MSG_POS_STREAM, ("bytes", pos["stream"])))
+            pub = m.get("publication")
+            if pub is not None:
+                if pub["record"] is not None:
+                    fields.append((MSG_PUB_RECORD, ("text", pub["record"])))
+                if pub["head"] is not None:
+                    fields.append((MSG_PUB_HEAD, ("bytes", pub["head"])))
+                fields.append((MSG_PUB_PERIOD, ("text", pub["period"])))
+                fields.append((MSG_PUB_KEY, ("bytes", pub["key"])))
             return encode(("map", fields))
         out = expect_reject(r, "contact", c, go)
         if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:

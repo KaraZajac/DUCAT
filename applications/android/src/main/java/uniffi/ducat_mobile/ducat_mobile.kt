@@ -1156,7 +1156,7 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_rental_encode(`info`: RustBuffer.ByValue,`personaSecret`: RustBuffer.ByValue,`listingId`: RustBuffer.ByValue,`board`: RustBuffer.ByValue,`subkey`: Int,`beaconHeight`: Long,`beaconHashHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_seal_message(`bundleBytes`: RustBuffer.ByValue,`seq`: Long,`prevLink`: RustBuffer.ByValue,`body`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,`kind`: Byte,`amountPxmr`: RustBuffer.ByValue,`txid`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,`items`: RustBuffer.ByValue,`taxPxmr`: RustBuffer.ByValue,`reSeq`: RustBuffer.ByValue,`reOwn`: Byte,`attachment`: RustBuffer.ByValue,`etaSecs`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`round`: RustBuffer.ByValue,`ceremonyId`: RustBuffer.ByValue,`positionRecord`: RustBuffer.ByValue,`positionStreamKey`: RustBuffer.ByValue,`groupId`: RustBuffer.ByValue,`groupSeq`: RustBuffer.ByValue,`groupReSender`: RustBuffer.ByValue,`groupReSeq`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_seal_message(`bundleBytes`: RustBuffer.ByValue,`seq`: Long,`prevLink`: RustBuffer.ByValue,`body`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,`kind`: Byte,`amountPxmr`: RustBuffer.ByValue,`txid`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,`items`: RustBuffer.ByValue,`taxPxmr`: RustBuffer.ByValue,`reSeq`: RustBuffer.ByValue,`reOwn`: Byte,`attachment`: RustBuffer.ByValue,`etaSecs`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`round`: RustBuffer.ByValue,`ceremonyId`: RustBuffer.ByValue,`positionRecord`: RustBuffer.ByValue,`positionStreamKey`: RustBuffer.ByValue,`groupId`: RustBuffer.ByValue,`groupSeq`: RustBuffer.ByValue,`groupReSender`: RustBuffer.ByValue,`groupReSeq`: RustBuffer.ByValue,`pubPeriodId`: RustBuffer.ByValue,`pubPeriodKey`: RustBuffer.ByValue,`pubRecord`: RustBuffer.ByValue,`pubHeadKey`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_sealed_prekey_id(`sealedBytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
@@ -1842,7 +1842,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_rental_encode() != 60190.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_seal_message() != 2630.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_seal_message() != 33208.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_sealed_prekey_id() != 10001.toShort()) {
@@ -3430,6 +3430,10 @@ data class OpenedMessage (
      */
     var `position`: PositionRefOut?, 
     /**
+     * §16.20: a publication period's key. Present only on kind 13.
+     */
+    var `publication`: PublicationKeyOut?, 
+    /**
      * §16.19: the group this message belongs to, and its name there.
      */
     var `groupId`: kotlin.ByteArray?, 
@@ -3467,6 +3471,7 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterOptionalULong.read(buf),
             FfiConverterOptionalByteArray.read(buf),
             FfiConverterOptionalTypePositionRefOut.read(buf),
+            FfiConverterOptionalTypePublicationKeyOut.read(buf),
             FfiConverterOptionalByteArray.read(buf),
             FfiConverterOptionalULong.read(buf),
             FfiConverterOptionalByteArray.read(buf),
@@ -3495,6 +3500,7 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterOptionalULong.allocationSize(value.`round`) +
             FfiConverterOptionalByteArray.allocationSize(value.`ceremonyId`) +
             FfiConverterOptionalTypePositionRefOut.allocationSize(value.`position`) +
+            FfiConverterOptionalTypePublicationKeyOut.allocationSize(value.`publication`) +
             FfiConverterOptionalByteArray.allocationSize(value.`groupId`) +
             FfiConverterOptionalULong.allocationSize(value.`groupSeq`) +
             FfiConverterOptionalByteArray.allocationSize(value.`groupReSender`) +
@@ -3522,6 +3528,7 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterOptionalULong.write(value.`round`, buf)
             FfiConverterOptionalByteArray.write(value.`ceremonyId`, buf)
             FfiConverterOptionalTypePositionRefOut.write(value.`position`, buf)
+            FfiConverterOptionalTypePublicationKeyOut.write(value.`publication`, buf)
             FfiConverterOptionalByteArray.write(value.`groupId`, buf)
             FfiConverterOptionalULong.write(value.`groupSeq`, buf)
             FfiConverterOptionalByteArray.write(value.`groupReSender`, buf)
@@ -4065,6 +4072,49 @@ public object FfiConverterTypeProfile: FfiConverterRustBuffer<Profile> {
             FfiConverterOptionalString.write(value.`carModel`, buf)
             FfiConverterOptionalString.write(value.`carColor`, buf)
             FfiConverterOptionalString.write(value.`plate`, buf)
+    }
+}
+
+
+
+/**
+ * A publication key as it crosses the bridge (§16.20).
+ */
+data class PublicationKeyOut (
+    var `periodId`: kotlin.String, 
+    var `periodKey`: kotlin.ByteArray, 
+    var `recordKey`: kotlin.String?, 
+    var `headKey`: kotlin.ByteArray?
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypePublicationKeyOut: FfiConverterRustBuffer<PublicationKeyOut> {
+    override fun read(buf: ByteBuffer): PublicationKeyOut {
+        return PublicationKeyOut(
+            FfiConverterString.read(buf),
+            FfiConverterByteArray.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: PublicationKeyOut) = (
+            FfiConverterString.allocationSize(value.`periodId`) +
+            FfiConverterByteArray.allocationSize(value.`periodKey`) +
+            FfiConverterOptionalString.allocationSize(value.`recordKey`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`headKey`)
+    )
+
+    override fun write(value: PublicationKeyOut, buf: ByteBuffer) {
+            FfiConverterString.write(value.`periodId`, buf)
+            FfiConverterByteArray.write(value.`periodKey`, buf)
+            FfiConverterOptionalString.write(value.`recordKey`, buf)
+            FfiConverterOptionalByteArray.write(value.`headKey`, buf)
     }
 }
 
@@ -5833,6 +5883,38 @@ public object FfiConverterOptionalTypePositionRefOut: FfiConverterRustBuffer<Pos
         } else {
             buf.put(1)
             FfiConverterTypePositionRefOut.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalTypePublicationKeyOut: FfiConverterRustBuffer<PublicationKeyOut?> {
+    override fun read(buf: ByteBuffer): PublicationKeyOut? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypePublicationKeyOut.read(buf)
+    }
+
+    override fun allocationSize(value: PublicationKeyOut?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypePublicationKeyOut.allocationSize(value)
+        }
+    }
+
+    override fun write(value: PublicationKeyOut?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypePublicationKeyOut.write(value, buf)
         }
     }
 }
@@ -7965,11 +8047,11 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
         /**
          * Seal one message in a thread.
          */
-    @Throws(ContactException::class) fun `sealMessage`(`bundleBytes`: kotlin.ByteArray, `seq`: kotlin.ULong, `prevLink`: kotlin.ByteArray, `body`: kotlin.String, `threadAad`: kotlin.ByteArray, `kind`: kotlin.UByte, `amountPxmr`: kotlin.ULong?, `txid`: kotlin.ByteArray?, `payto`: kotlin.String?, `items`: List<BillLine>, `taxPxmr`: kotlin.ULong?, `reSeq`: kotlin.ULong?, `reOwn`: kotlin.Boolean, `attachment`: AttachmentRef?, `etaSecs`: kotlin.ULong?, `payload`: kotlin.ByteArray?, `round`: kotlin.ULong?, `ceremonyId`: kotlin.ByteArray?, `positionRecord`: kotlin.String?, `positionStreamKey`: kotlin.ByteArray?, `groupId`: kotlin.ByteArray?, `groupSeq`: kotlin.ULong?, `groupReSender`: kotlin.ByteArray?, `groupReSeq`: kotlin.ULong?): SealedOut {
+    @Throws(ContactException::class) fun `sealMessage`(`bundleBytes`: kotlin.ByteArray, `seq`: kotlin.ULong, `prevLink`: kotlin.ByteArray, `body`: kotlin.String, `threadAad`: kotlin.ByteArray, `kind`: kotlin.UByte, `amountPxmr`: kotlin.ULong?, `txid`: kotlin.ByteArray?, `payto`: kotlin.String?, `items`: List<BillLine>, `taxPxmr`: kotlin.ULong?, `reSeq`: kotlin.ULong?, `reOwn`: kotlin.Boolean, `attachment`: AttachmentRef?, `etaSecs`: kotlin.ULong?, `payload`: kotlin.ByteArray?, `round`: kotlin.ULong?, `ceremonyId`: kotlin.ByteArray?, `positionRecord`: kotlin.String?, `positionStreamKey`: kotlin.ByteArray?, `groupId`: kotlin.ByteArray?, `groupSeq`: kotlin.ULong?, `groupReSender`: kotlin.ByteArray?, `groupReSeq`: kotlin.ULong?, `pubPeriodId`: kotlin.String?, `pubPeriodKey`: kotlin.ByteArray?, `pubRecord`: kotlin.String?, `pubHeadKey`: kotlin.ByteArray?): SealedOut {
             return FfiConverterTypeSealedOut.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_seal_message(
-        FfiConverterByteArray.lower(`bundleBytes`),FfiConverterULong.lower(`seq`),FfiConverterByteArray.lower(`prevLink`),FfiConverterString.lower(`body`),FfiConverterByteArray.lower(`threadAad`),FfiConverterUByte.lower(`kind`),FfiConverterOptionalULong.lower(`amountPxmr`),FfiConverterOptionalByteArray.lower(`txid`),FfiConverterOptionalString.lower(`payto`),FfiConverterSequenceTypeBillLine.lower(`items`),FfiConverterOptionalULong.lower(`taxPxmr`),FfiConverterOptionalULong.lower(`reSeq`),FfiConverterBoolean.lower(`reOwn`),FfiConverterOptionalTypeAttachmentRef.lower(`attachment`),FfiConverterOptionalULong.lower(`etaSecs`),FfiConverterOptionalByteArray.lower(`payload`),FfiConverterOptionalULong.lower(`round`),FfiConverterOptionalByteArray.lower(`ceremonyId`),FfiConverterOptionalString.lower(`positionRecord`),FfiConverterOptionalByteArray.lower(`positionStreamKey`),FfiConverterOptionalByteArray.lower(`groupId`),FfiConverterOptionalULong.lower(`groupSeq`),FfiConverterOptionalByteArray.lower(`groupReSender`),FfiConverterOptionalULong.lower(`groupReSeq`),_status)
+        FfiConverterByteArray.lower(`bundleBytes`),FfiConverterULong.lower(`seq`),FfiConverterByteArray.lower(`prevLink`),FfiConverterString.lower(`body`),FfiConverterByteArray.lower(`threadAad`),FfiConverterUByte.lower(`kind`),FfiConverterOptionalULong.lower(`amountPxmr`),FfiConverterOptionalByteArray.lower(`txid`),FfiConverterOptionalString.lower(`payto`),FfiConverterSequenceTypeBillLine.lower(`items`),FfiConverterOptionalULong.lower(`taxPxmr`),FfiConverterOptionalULong.lower(`reSeq`),FfiConverterBoolean.lower(`reOwn`),FfiConverterOptionalTypeAttachmentRef.lower(`attachment`),FfiConverterOptionalULong.lower(`etaSecs`),FfiConverterOptionalByteArray.lower(`payload`),FfiConverterOptionalULong.lower(`round`),FfiConverterOptionalByteArray.lower(`ceremonyId`),FfiConverterOptionalString.lower(`positionRecord`),FfiConverterOptionalByteArray.lower(`positionStreamKey`),FfiConverterOptionalByteArray.lower(`groupId`),FfiConverterOptionalULong.lower(`groupSeq`),FfiConverterOptionalByteArray.lower(`groupReSender`),FfiConverterOptionalULong.lower(`groupReSeq`),FfiConverterOptionalString.lower(`pubPeriodId`),FfiConverterOptionalByteArray.lower(`pubPeriodKey`),FfiConverterOptionalString.lower(`pubRecord`),FfiConverterOptionalByteArray.lower(`pubHeadKey`),_status)
 }
     )
     }

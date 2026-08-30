@@ -216,6 +216,22 @@ pub mod f {
     /// A fresh 32-byte key for that stream, one per ride, never reused.
     pub const MSG_POS_STREAM: u64 = 219;
 
+    // PUBLICATION_KEY (§16.20, kind 13) — a paid thread handing over what a
+    // period of a publication costs the network nothing to copy: the key.
+    // The shelf reference (record + standing head key) rides the FIRST
+    // delivery and is optional after; the period pair is the kind's whole
+    // point and is mandatory on it.
+    /// The publication's root record — its shelf.
+    pub const MSG_PUB_RECORD: u64 = 257;
+    /// The standing head key that opens the shelf's index, for the life of
+    /// the subscription. Travels with the record or not at all.
+    pub const MSG_PUB_HEAD: u64 = 258;
+    /// The publisher's own label for the period ("2026-09"). ≤64 bytes.
+    pub const MSG_PUB_PERIOD: u64 = 259;
+    /// That period's content key. Opaque 32 bytes to the reader — §16.20
+    /// derives it on the publisher's side; the reader just holds it.
+    pub const MSG_PUB_KEY: u64 = 260;
+
     // RENTAL_NOTICE (§16.18) — a listing on a public board. The second
     // object that lives in the open, and the one that stays there for days
     // rather than minutes, so what it may carry is drawn tighter than a

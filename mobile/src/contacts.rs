@@ -652,6 +652,13 @@ pub fn seal_message(
     group_seq: Option<u64>,
     group_re_sender: Option<Vec<u8>>,
     group_re_seq: Option<u64>,
+    // §16.20: a publication period's key on a kind-13 message. The period
+    // pair together or not at all; the shelf pair likewise; core refuses
+    // every other arrangement.
+    pub_period_id: Option<String>,
+    pub_period_key: Option<Vec<u8>>,
+    pub_record: Option<String>,
+    pub_head_key: Option<Vec<u8>>,
 ) -> Result<SealedOut, ContactError> {
     if body.is_empty() || body.chars().count() > MAX_MESSAGE_CHARS {
         return Err(ContactError::Refused(format!(
@@ -684,6 +691,36 @@ pub fn seal_message(
             ))
         }
     };
+    let publication = match (pub_period_id, pub_period_key) {
+        (Some(period_id), Some(k)) => {
+            let period_key: [u8; 32] = k.try_into().map_err(|_| {
+                ContactError::Refused("a period key is 32 bytes".into())
+            })?;
+            let head_key = match (&pub_record, pub_head_key) {
+                (Some(_), Some(h)) => Some(h.try_into().map_err(|_| {
+                    ContactError::Refused("a head key is 32 bytes".into())
+                })?),
+                (None, None) => None,
+                _ => {
+                    return Err(ContactError::Refused(
+                        "a publication shelf carries its record and its head key together".into(),
+                    ))
+                }
+            };
+            Some(ducat_core::contact::PublicationKey {
+                period_id,
+                period_key,
+                record_key: pub_record,
+                head_key,
+            })
+        }
+        (None, None) => None,
+        _ => {
+            return Err(ContactError::Refused(
+                "a publication key carries its period id and its key together".into(),
+            ))
+        }
+    };
     let msg = Message {
         version: 1, suite: 1, seq, prev, body, timestamp: now(),
         kind: match kind {
@@ -699,6 +736,7 @@ pub fn seal_message(
             10 => MessageKind::CeremonyAbort,
             11 => MessageKind::PositionRef,
             12 => MessageKind::GroupRoster,
+            13 => MessageKind::PublicationKey,
             _ => MessageKind::Text,
         },
         amount_pxmr,
@@ -729,6 +767,7 @@ pub fn seal_message(
             name: a.name,
         }),
         position,
+        publication,
         group_id,
         group_seq,
         group_re_sender,
@@ -867,6 +906,8 @@ pub struct OpenedMessage {
     pub ceremony_id: Option<Vec<u8>>,
     /// §15.12: a live-position stream reference. Present only on kind 11.
     pub position: Option<PositionRefOut>,
+    /// §16.20: a publication period's key. Present only on kind 13.
+    pub publication: Option<PublicationKeyOut>,
     /// §16.19: the group this message belongs to, and its name there.
     pub group_id: Option<Vec<u8>>,
     pub group_seq: Option<u64>,
@@ -879,6 +920,15 @@ pub struct OpenedMessage {
 pub struct PositionRefOut {
     pub record_key: String,
     pub stream_key: Vec<u8>,
+}
+
+/// A publication key as it crosses the bridge (§16.20).
+#[derive(uniffi::Record, Clone)]
+pub struct PublicationKeyOut {
+    pub period_id: String,
+    pub period_key: Vec<u8>,
+    pub record_key: Option<String>,
+    pub head_key: Option<Vec<u8>>,
 }
 
 /// A group roster as it crosses the bridge (§16.19).
@@ -1037,6 +1087,12 @@ pub fn open_message(
         position: msg.position.as_ref().map(|p| PositionRefOut {
             record_key: p.record_key.clone(),
             stream_key: p.stream_key.to_vec(),
+        }),
+        publication: msg.publication.as_ref().map(|p| PublicationKeyOut {
+            period_id: p.period_id.clone(),
+            period_key: p.period_key.to_vec(),
+            record_key: p.record_key.clone(),
+            head_key: p.head_key.map(|h| h.to_vec()),
         }),
     })
 }

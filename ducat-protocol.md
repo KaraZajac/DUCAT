@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 1.0.0-rc1 — Feature freeze**
+**Draft 1.1.0-dev1 — Publications track (branch; 1.0.0-rc1 is the frozen line)**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Canonical home: **ducatproject.org**
 
@@ -27,6 +27,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **1.1.0-dev1** — **A publication period's key rides the paid thread (§16.20, kind 13, fields 257–260).** The post-1.0 track's first wire object, developed on its own branch while 1.0.0-rc1 stands frozen. A publisher seals content into DHT records — the shelf — and sells periods of it; what a paying reader receives is never the content but the **capability**: `PUBLICATION_KEY` carries the period's id and its 32-byte content key (together or not at all — a key with no name cannot be filed, a name with no key opens nothing), plus, on first delivery, the shelf itself: the publication's root record and the standing head key that opens its index (likewise together or not at all). The closed world holds in both directions — a kind-13 with nothing to hand over is `MALFORMED`, and a period key on any other kind is a capability smuggled where no reader is looking for one; an amount on it is refused the way Text refuses one. The period id is a label (≤64 chars), pinned at both edges — 64 accepted, 65 refused, and the empty spelling refused below the field layer as a second encoding of omission (§18.1). Twelve new vectors; 340 cases, both implementations agreeing. Client-side, the key is derived, not stored: one master secret and `derive_key`/keyed-BLAKE3 per period, so a back-catalogue sale is a re-derivation and a restore restores every key ever issued (core::publish, pinned by unit test pending its own vector kind).
 - **1.0.0-rc1** — **The feature line freezes.** No wire change; 328 vectors unchanged, both implementations agreeing. This candidate names what 1.0.0 means and what still stands between this document and that number. Frozen in: everything below — the tap, the mailbox, cards and profiles, bills/receipts/settlement, the escrow ladder from bond to ruling, boards with stamps and generations, listings across five kinds, groups, references, live position. Declared limitations rather than gaps: **refunds** — there is no path to return money after settlement (`cancel` withdraws an unpaid bill, `markPaidOutside` records another rail; neither is a refund), and building one starts with a design question about what the payer's record should show, deferred past 1.0 deliberately; **the co-signer's blind fee** — a FROST co-signer sees the fee it reads from the bytes but not the payment list, until monero-wallet exposes a payments accessor on `SignableTransaction`. Three gates before the number: the field day (the NFC tap has never met hardware; real GPS; the OEM restore picker), the adversarial review this document has said since §2.5 it has never had — scope: the §17.9 ceremonies, the §16.12 mailbox, the board and §16.18.1 beacon surfaces, newest least-reviewed first — and O21's reader, a second implementer working from this text alone. 1.0.0 is this document with those three receipts attached and the word "draft" removed, not a feature away.
 - **0.90** — **Small groups over pairwise threads (§16.19), and messages that name what they answer (§16.14).** Two changes, one field family. First the reference: every message has carried `re_seq`/`re_own` since reactions, and the closed-world rule around them widens — a `TEXT` naming a message is a reply, a `PAYMENT_SENT` names the request it settles, a `RECEIPT` names the request it receipts, and everything outside the allow-list stays `MALFORMED`. The money half is the point: with no back-reference the only thread from a payment to its bill was the amount, so two identical requests answered by one payment both read as paid; the reference replaces that inference with a statement, still advisory — §17.5 verifies by finding the output; the reference settles *which* request the sender says it was for, a question the chain cannot answer. Nothing of the target travels: a reference is a sequence number, so a withdrawn message cannot be brought back by the reply that followed it, and a reader resolves against the thread it holds — where it cannot, it says so and renders the reply anyway. Then groups, as §17.9's roster pattern carrying words instead of DKG rounds: fan-out into existing pairwise threads, no group key, no shared record, no new network object naming the N — every thread property (forward secrecy per pair, prekey partitioning, deniability) unchanged because sealing is unchanged, at the stated cost of N−1 writes per message, which bounds the feature at *small* and is the shape rather than a limitation. Four fields (253–256): a group message is named by `(sender, group_seq)` because the fanned copies land at different pairwise seqs, so in-group targeting uses the group reference and a pairwise `re_seq` there is `MALFORMED`. The roster (kind 12, list in payload) is a **grow-only set** — anyone in the group adds, nobody is ever removed, and that trade is deliberate: removal needs a consensus a peer-to-peer group cannot have, while a grow-only set converges by union in any order with no governance at all; admission has the one tooth — a roster for a known group is accepted only from an existing member, so learning the id does not admit you. The mesh requirement (everyone holds everyone) is checked with no coordinator: contact edges are mutual, each end checks its own, and every local check passing *is* the mesh being complete — so receiving is never gated, sending is refused while the sender's own mesh is incomplete with the missing names said aloud, and partial delivery is structurally impossible rather than detected. Money stays pairwise. A client MUST disclose the shape plainly: trusted people, add-only, no history for newcomers (not policy — there is no store to have one), unforgeable member-to-member, and leaving is local. 328 vectors, both implementations agreeing.
 - **0.89** — **Live position after the accept, built (§15.12).** The disclosure ladder's last rung — spec'd ahead of code in 0.88 — now exists. A `POSITION_REF` (kind 11, fields 218–219) is an ordinary sealed message handing over a DHT record and a fresh 32-byte stream key; both halves travel together or not at all, and the reference is a `PositionRef`'s whole content — refused on any other kind, and a position kind with no reference is refused too. The stream itself is not messages: it is one record overwritten in place, a *now* with no past, so a chat history cannot double as a movement log (§5.2.3's surveillance database rebuilt inside the E2EE is exactly what that shape refuses). Each update is a fixed-length frame — a monotonic counter, position in §15.12's 1e-7-degree integers, an optional heading, the capture time — padded to a constant 64 bytes and sealed XChaCha20-Poly1305 under the stream key with the **record key as associated data**, so a value lifted from one ride's record cannot authenticate in another's, which is what stops a fresh key from silently linking rides. Every frame is the same length with a heading or without, so the ciphertext sequence leaks its cadence and nothing else; the padding MUST be zero, closing a covert channel under the same key. A receiver drops a counter *lower* than the highest it has accepted (in-ride replay) but treats an *equal* one as the same frame read twice — the slot holds one value between writes, and calling that "no position" reports a working stream as dead; the frame's own capture time is what ages. It renders staleness as staleness rather than a guessed dot, lets go when the slot reads empty after at least one frame (the sender's own stop), and MUST NOT retain the counterparty's track past the ride. Two new vector kinds — `position.frame` pins the sealed frame's fixed length, its record binding and its range/padding refusals; the message shape rides `message.payment`. The gate that a reference MUST NOT precede a `RideAccept`, and the stop rules (receipt / `RETRACT re_own` / expiry), are the sender's and reader's — the decoder sees one message and cannot hold thread state. 314 vectors, both implementations agreeing.
@@ -1177,7 +1178,7 @@ Ship Phase 1–2 as a working federation at a single seed market before touching
 - **O18.** **Cancellation fees erode the permissionless lane.** §7.3 makes no-show fees enforceable only against collateral. The pressure this creates — providers preferring bonded counterparties precisely because cancellation *costs* them something — pushes the network toward the collateralized lane and quietly hollows out the slow permissionless one A4 depends on (§17.6). Whether the unbonded lane survives contact with real no-show rates is an empirical question no amount of spec work answers.
 - **O19.** **iOS cannot present over NFC, permanently.** Apple's HCE entitlement is conditioned on EEA establishment, organization enrollment, and financial-regulatory standing (§15.3.2) — structurally incompatible with A4, and not a hurdle an open protocol clears. The best-UX medium is therefore available to roughly half the supply side, and QR carries the rest. This is outside DUCAT's control and will not improve through protocol design; it is stated so no one plans around a tap that cannot exist.
 - **O20. (closed in 0.48, §18.7.)** Transport identifiers assigned. The NFC AID is `F0 44 55 43 41 54` (`0xF0` ‖ `"DUCAT"`), and the "pending real RID registration" caveat was mistaken — ISO/IEC 7816-5 reserves the `0xF…` range for **proprietary identifiers requiring no registration at all**, which is what Android HCE documents for exactly this case. There was nothing to wait for. BLE takes one random 128-bit service UUID and three characteristics sharing a base; the Bluetooth SIG registers only 16-bit UUIDs, and the 128-bit space exists so anyone can allocate without asking. **Residue, and it is a real one:** no registry means no uniqueness guarantee, so nothing prevents another vendor choosing the same AID bytes — mitigated by using the full name rather than the four-character contraction, since AIDs may run to 16 bytes and the 5-byte minimum was never a maximum. The L2CAP PSM stays deliberately unassigned: LE CoC PSMs are allocated dynamically by the local stack, so a spec pinning one would pin a value it does not control; it is published in a characteristic and read.
-- **O21. Conformance suite exists, schema published, second implementation runs it (§18.9.1, §18.11).** 328 vectors, every case carrying a `kind` that is the sole discriminator, validated against a **hand-written** `schema.json` — hand-written because a schema emitted by the generator would agree with the generator's mistakes, and it earned that by catching two defects on its first run. A second implementation written from Part V agreed on 101 cases and disagreed on 3, **all three defects in this document**, of which the important one was negative integers being *unspecified* — the reference accepted them, the second implementation refused them, and both were conformant, a divergence no vector set could detect because there was no correct answer to test against. 104/104 after correction. Most of the second implementation's effort went into the harness rather than the protocol; that friction is now removed (§18.11). **Still not closed, and what remains cannot be engineered away: an implementer who has never read `core/`.** Everything accidental has been cleared out of their way — a normative case schema, one event encoding instead of five, `why` required on every case, and two commands that validate any change. The gap is authorship.
+- **O21. Conformance suite exists, schema published, second implementation runs it (§18.9.1, §18.11).** 340 vectors, every case carrying a `kind` that is the sole discriminator, validated against a **hand-written** `schema.json` — hand-written because a schema emitted by the generator would agree with the generator's mistakes, and it earned that by catching two defects on its first run. A second implementation written from Part V agreed on 101 cases and disagreed on 3, **all three defects in this document**, of which the important one was negative integers being *unspecified* — the reference accepted them, the second implementation refused them, and both were conformant, a divergence no vector set could detect because there was no correct answer to test against. 104/104 after correction. Most of the second implementation's effort went into the harness rather than the protocol; that friction is now removed (§18.11). **Still not closed, and what remains cannot be engineered away: an implementer who has never read `core/`.** Everything accidental has been cleared out of their way — a normative case schema, one event encoding instead of five, `why` required on every case, and two commands that validate any change. The gap is authorship.
 - **O22. (closed in 0.44, §4.3.3.)** An escrow participant who loses their device. Resolved once the question was asked correctly: a share cannot be *reconstructed* — measured, `prepare_multisig` draws 88 characters of fresh randomness beyond what the wallet keys determine — but it does not need to be, because it is already a 2,286-byte file that a virgin `wallet-rpc` will open directly. The recovery ask therefore moved from **the counterparty's signature**, which no protocol can compel from an adversary, to **the other participants re-sharing multisig info**, which endorses no outcome and is a step every participant performs routinely. **Residue:** a stale bundle still cannot recover an escrow opened after it, so this now depends on a client prompting for re-export at ceremony completion — a UX obligation rather than a protocol impossibility. And an end-to-end spend from a restored share is still undemonstrated (§4.3.3's last limit).
 ---
 *End of Part I. The remaining parts specify the three mechanisms Part I leans on hardest: the tap that opens every transaction, the identity that optionally survives one, and the settlement that makes it fast enough to matter.*
@@ -2409,6 +2410,68 @@ A client MUST disclose, at creation and on first opening a group one was added t
 
 Ordering across senders is arrival order, and two phones may disagree about interleaving; per-sender order is exact (`group_seq` is monotonic). The group reference is what makes that honest: a reply names its target outright, so adjacency stops carrying meaning it cannot bear.
 
+## 16.20 Publications: membership is the paid thread
+
+The subscription machinery (§16.13's recurring bills) meets content. A
+**publication** is sealed content on the DHT plus a paying relationship per
+reader — no platform, no member list anywhere except the publisher's own
+threads, and no credential to leak because none exists.
+
+**The shelf.** A publication's content lives in DHT records the publisher
+writes — chunks sealed XChaCha20-Poly1305 under a per-period content key,
+with the landing site (record key **and** subkey index) as associated data,
+so a chunk moved between records or shuffled between slots fails to open
+rather than decrypting out of order. The publication's root record — the
+shelf — holds an index sealed under a standing **head key**; the index is
+how a reader finds the period records. To an observer holding neither key,
+the shelf and every chunk are noise: content addressing here does not
+testify about what is being shared.
+
+**The keys derive; they are not stored.** The publisher holds one 32-byte
+master secret. A period's content key is `keyed_hash(derive_key("DUCAT
+publication period v1", master), period_id)` — both steps BLAKE3, the
+transport's own hash. Selling a back-catalogue period to a new member is a
+re-derivation, not an archive lookup, and restoring the phone restores
+every key ever issued because it restores the one secret they all come
+from. A **period id** is the publisher's label ("2026-09", "issue-12"), at
+most 64 characters, never parsed for meaning by the reader.
+
+**The handover (kind 13, `PUBLICATION_KEY`, fields 257–260).** When a
+reader's payment for a period settles, the publisher's reconcile loop —
+the same one that already auto-sends receipts (§15.11), with the same
+mark-before-send discipline — sends the period's key down the thread:
+
+| field | content | rule |
+|---|---|---|
+| 259 | `period_id`, text ≤64 | with 260 or not at all |
+| 260 | `period_key`, 32 bytes | with 259 or not at all |
+| 257 | `record_key` — the shelf | first delivery; with 258 or not at all |
+| 258 | `head_key`, 32 bytes | with 257 or not at all |
+
+The pairs travel whole or not at all: a half is `MALFORMED`. The key IS
+the kind — a `PUBLICATION_KEY` without the period pair is `MALFORMED`, and
+any of these fields on another kind is `MALFORMED`. No amount rides it
+(the bill travelled separately and settled before this message existed).
+The body MAY carry a note in the publisher's language, like any message.
+
+**What this deliberately is not.** The message hands over a capability,
+never content — the thread stays small while the shelf holds the weight,
+which is what lets a publisher's device serve hundreds of readers with two
+tiny messages per reader per period while the network serves the bytes.
+Keys, once handed over, are the reader's: there is no revocation, and a
+missed payment costs the *next* period's key, never one already paid for —
+cancelling is stopping, exactly as §16.13's recurring bills promise. A
+reader who shares a key outside the club can — as they could the content
+itself; the protocol prices copying at its true cost, zero, and leaves the
+social contract where it lives.
+
+**Client rules.** A publisher MUST derive period keys as above (two
+implementations inventing different schedules would strand every restored
+back-catalogue); a reader MUST treat `period_id` as an opaque label and
+`period_key` as opaque bytes; a reader SHOULD file keys by (publisher
+persona, period id) and keep them across thread deletion — the receipt
+outlives the small talk, and so does what it paid for.
+
 ## 17.1 The core insight: bond once, ride hundreds of times
 
 The objection to Monero multisig (8.2) was that it's multi-round and brittle — hostile to a 3-second curbside exchange. A **consumer bond is not per-transaction**. The user loads a float once; the awkward multisig setup happens once, in a calm, retryable onboarding flow where failure means "tap retry," not "I'm standing in the rain." That single bonded float then backs hundreds of rides.
@@ -2891,7 +2954,9 @@ Part V numbers four objects (`TapPresent`, `FullOffer`, `ACCEPT`, `RECEIPT`) and
 | 248 | `quantity` on `RENTAL_NOTICE` (§16.18) | **Assigned** |
 | 253–254 | group id and the sender's group counter (§16.19) | **Assigned** |
 | 255–256 | group reference: target's sender and their counter (§16.19) | **Assigned** |
-| 257+ | Unallocated | — |
+| 257–258 | publication shelf: root record and standing head key (§16.20) | **Assigned** |
+| 259–260 | publication period: id and content key (§16.20) | **Assigned** |
+| 261+ | Unallocated | — |
 
 The `96+ Unallocated` row above was stale from 0.14 onward: 96–103 had been in use since `TERMS` and `MANDATE` shipped, and a second implementer allocating from 96 would have collided head-on. Registries decay silently unless something checks them, which is the argument for the type-code rule below.
 

@@ -95,6 +95,7 @@ val sharedLogic = listOf(
     // the shared export carries it, so the desk must hold the same number.
     "org/ducatproject/ducat/Tax.kt",
     "org/ducatproject/ducat/Recurring.kt",
+    "org/ducatproject/ducat/Publications.kt",
     "org/ducatproject/ducat/ui/GroupChat.kt",
     "org/ducatproject/ducat/ui/SettledMark.kt",
     "org/ducatproject/ducat/ui/CatSpinner.kt",

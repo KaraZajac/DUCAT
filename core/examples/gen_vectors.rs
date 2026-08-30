@@ -1471,9 +1471,9 @@ fn contact_cases() -> Vec<J> {
         }));
     }
 
-    let m0 = Message { version: 1, suite: 1, seq: 0, prev: [0u8; 32], body: "hey".into(), timestamp: 1_700_000_000, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None };
-    let m1 = Message { version: 1, suite: 1, seq: 1, prev: m0.link(), body: "you around?".into(), timestamp: 1_700_000_060, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None };
-    let m2 = Message { version: 1, suite: 1, seq: 2, prev: m1.link(), body: "here's the 20 back".into(), timestamp: 1_700_000_120, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None };
+    let m0 = Message { version: 1, suite: 1, seq: 0, prev: [0u8; 32], body: "hey".into(), timestamp: 1_700_000_000, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, publication: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None };
+    let m1 = Message { version: 1, suite: 1, seq: 1, prev: m0.link(), body: "you around?".into(), timestamp: 1_700_000_060, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, publication: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None };
+    let m2 = Message { version: 1, suite: 1, seq: 2, prev: m1.link(), body: "here's the 20 back".into(), timestamp: 1_700_000_120, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, publication: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None };
 
     let mut chain = |name: &str, why: &str, msgs: &[&Message], fail_at: Option<(usize, RejectCode, &str)>| {
         v.push(json!({
@@ -1518,7 +1518,7 @@ fn contact_cases() -> Vec<J> {
         version: 1, suite: 1, seq: 0, prev: [0u8; 32],
         body: "for the coffee".into(), timestamp: 1_700_000_000,
         kind: MessageKind::PaymentRequest, amount_pxmr: Some(21_000_000_000), txid: None,
-        payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
+        payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, publication: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
     };
     money("payment_request", "Asking a contact for an exact amount. It carries no authority — the payer still decides at §15.5's confirm screen.", &base_pay, None);
     money("payment_sent",
@@ -1854,9 +1854,85 @@ fn contact_cases() -> Vec<J> {
         Some((RejectCode::Malformed, "only a position message carries a stream reference")));
     money("position_kind_without_a_reference",
         "A PositionRef whose reference is absent hands over nothing.",
-        &Message { kind: MessageKind::PositionRef, position: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
+        &Message { kind: MessageKind::PositionRef, position: None, publication: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
                    body: "empty".into(), ..base_pay.clone() },
         Some((RejectCode::Malformed, "a position message carries a reference to the stream")));
+    // §16.20 — a publication period's key down the paid thread (kind 13).
+    let pub_full = Message {
+        kind: MessageKind::PublicationKey, amount_pxmr: None,
+        body: "september".into(),
+        publication: Some(ducat_core::contact::PublicationKey {
+            period_id: "2026-09".into(),
+            period_key: [0x42u8; 32],
+            record_key: Some("VLD0:AbCdEfGhIjKlMnOpQrStUvWxYz0123456789aBcDeF".into()),
+            head_key: Some([0x24u8; 32]),
+        }),
+        ..base_pay.clone()
+    };
+    money("publication_key_first",
+        "The first delivery: this period's key, plus the shelf — the publication's root record and the standing head key that opens its index. A capability, never content; the thread stays small while the shelf holds the weight.",
+        &pub_full, None);
+    let pub_minimal = Message {
+        publication: Some(ducat_core::contact::PublicationKey {
+            period_id: "2026-10".into(),
+            period_key: [0x43u8; 32],
+            record_key: None,
+            head_key: None,
+        }),
+        ..pub_full.clone()
+    };
+    money("publication_key_period_only",
+        "Every delivery after the first: the reader already holds the shelf, so only the period pair travels.",
+        &pub_minimal, None);
+    money("publication_key_on_a_text",
+        "The period key IS the kind. On any other kind it is a capability smuggled where no reader is looking for one.",
+        &Message { kind: MessageKind::Text, body: "hi".into(), ..pub_minimal.clone() },
+        Some((RejectCode::Malformed, "only a publication message carries a period key")));
+    money("publication_kind_without_a_key",
+        "A publication message with nothing to hand over is an empty gesture.",
+        &Message { kind: MessageKind::PublicationKey, position: None, publication: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
+                   body: "empty".into(), ..base_pay.clone() },
+        Some((RejectCode::Malformed, "a publication message carries the period's key")));
+    // Both edges of the period id: the empty spelling is a second encoding
+    // of "omitted" and refused below the field layer; one past the cap is
+    // refused at it; the cap itself is accepted — pinned from both sides.
+    let empty = Message {
+        publication: Some(ducat_core::contact::PublicationKey {
+            period_id: "".into(), period_key: [0x43u8; 32],
+            record_key: None, head_key: None,
+        }),
+        ..pub_minimal.clone()
+    };
+    money("publication_empty_period_id",
+        "A present-but-empty period id is a second encoding of omission (§18.1).",
+        &empty,
+        Some((RejectCode::Malformed, "text field is present but empty; omit the key instead")));
+    let oversize = Message {
+        publication: Some(ducat_core::contact::PublicationKey {
+            period_id: "x".repeat(65), period_key: [0x43u8; 32],
+            record_key: None, head_key: None,
+        }),
+        ..pub_minimal.clone()
+    };
+    money("publication_period_id_too_long",
+        "A period id is a label, not a channel: 64 characters is the cap, and 65 is refused.",
+        &oversize,
+        Some((RejectCode::Malformed, "text exceeds 64 characters")));
+    let at_cap = Message {
+        publication: Some(ducat_core::contact::PublicationKey {
+            period_id: "x".repeat(64), period_key: [0x43u8; 32],
+            record_key: None, head_key: None,
+        }),
+        ..pub_minimal.clone()
+    };
+    money("publication_period_id_at_cap",
+        "Sixty-four exactly is accepted — the cap is pinned from both sides.",
+        &at_cap, None);
+    money("publication_key_with_an_amount",
+        "A key handover with an amount on it is a number nothing will honour — the bill travelled separately (§16.13) and settled before this message existed.",
+        &Message { amount_pxmr: Some(21_000_000_000), ..pub_minimal.clone() },
+        Some((RejectCode::Malformed, "this message kind must not carry an amount")));
+
     // The half-reference cannot be built from the struct (both fields or none),
     // so it is made by deleting one from the encoding — same trick as the
     // half-attachment below.
@@ -1877,7 +1953,43 @@ fn contact_cases() -> Vec<J> {
             "why": "A key pointing at no record points nowhere.",
             "payment_hex": hex(&v3.encode()),
             "expect": { "ok": false, "reject": "MALFORMED", "hint": "a position reference carries its record and its key together" } }));
+        use ducat_core::wire::f;
+        let mut half = pub_minimal.to_value();
+        if let ducat_core::cbor::Value::Map(ref mut m) = half {
+            m.remove(&f::MSG_PUB_KEY);
+        }
+        v.push(json!({ "name": "publication_period_without_key",
+            "why": "A period name with no key opens nothing. The period pair travels together or not at all.",
+            "payment_hex": hex(&half.encode()),
+            "expect": { "ok": false, "reject": "MALFORMED", "hint": "a publication key carries its period id and its key together" } }));
+        let mut half = pub_minimal.to_value();
+        if let ducat_core::cbor::Value::Map(ref mut m) = half {
+            m.remove(&f::MSG_PUB_PERIOD);
+        }
+        v.push(json!({ "name": "publication_key_without_period",
+            "why": "A key with no name cannot be filed.",
+            "payment_hex": hex(&half.encode()),
+            "expect": { "ok": false, "reject": "MALFORMED", "hint": "a publication key carries its period id and its key together" } }));
+        let mut half = pub_full.to_value();
+        if let ducat_core::cbor::Value::Map(ref mut m) = half {
+            m.remove(&f::MSG_PUB_HEAD);
+        }
+        v.push(json!({ "name": "publication_shelf_without_head_key",
+            "why": "A shelf whose index cannot be opened was not handed over. Record and head key travel together or not at all.",
+            "payment_hex": hex(&half.encode()),
+            "expect": { "ok": false, "reject": "MALFORMED", "hint": "a publication shelf carries its record and its head key together" } }));
+        let mut half = pub_full.to_value();
+        if let ducat_core::cbor::Value::Map(ref mut m) = half {
+            m.remove(&f::MSG_PUB_RECORD);
+        }
+        v.push(json!({ "name": "publication_head_key_without_record",
+            "why": "A head key for no shelf opens nothing.",
+            "payment_hex": hex(&half.encode()),
+            "expect": { "ok": false, "reject": "MALFORMED", "hint": "a publication shelf carries its record and its head key together" } }));
+    
     }
+
+
 
     // The stream itself (§15.12): the encrypted value written to the record's
     // subkey each cadence. A fixed-length primitive, not CBOR — so the

@@ -737,6 +737,12 @@ object Mailbox {
         groupSeq: Long? = null,
         groupReSender: ByteArray? = null,
         groupReSeq: Long? = null,
+        /** §16.20: a period's key on a kind-13 message — the period pair
+         *  together, the shelf pair together, core refuses every half. */
+        pubPeriodId: String? = null,
+        pubPeriodKey: ByteArray? = null,
+        pubRecord: String? = null,
+        pubHeadKey: ByteArray? = null,
     ): Contact {
         val store = ContactStore(context)
         // Who speaks is the contact's to say, not the caller's: the thread
@@ -800,6 +806,7 @@ object Mailbox {
             payload, round?.toULong(), ceremonyId,
             positionRecord, positionStreamKey,
             groupId, groupSeq?.toULong(), groupReSender, groupReSeq?.toULong(),
+            pubPeriodId, pubPeriodKey, pubRecord, pubHeadKey,
         )
         // Everything local lands before anything remote. The failure orders
         // are not symmetric: a published slot and head with the counter lost
@@ -826,6 +833,8 @@ object Mailbox {
                 groupSeq = groupSeq ?: 0L,
                 groupReSender = groupReSender?.toHexString(),
                 groupReSeq = groupReSeq,
+                pubPeriodId = pubPeriodId, pubPeriodKey = pubPeriodKey,
+                pubRecord = pubRecord, pubHeadKey = pubHeadKey,
                 // Not yet. The write is three lines below, and until it lands
                 // this row is a message that has not left the phone — which
                 // looked identical to one that had.
@@ -1798,6 +1807,10 @@ object Mailbox {
                 groupSeq = opened.groupSeq?.toLong() ?: 0L,
                 groupReSender = opened.groupReSender?.toHexString(),
                 groupReSeq = opened.groupReSeq?.toLong(),
+                pubPeriodId = opened.publication?.periodId,
+                pubPeriodKey = opened.publication?.periodKey,
+                pubRecord = opened.publication?.recordKey,
+                pubHeadKey = opened.publication?.headKey,
             )
             // The one funnel every arrival passes through, so the notification
             // cannot be forgotten by a new screen: if it was stored, it was
@@ -1874,6 +1887,14 @@ object Mailbox {
                 runCatching {
                     Groups.absorbRoster(context, c.personaHex, opened.groupId, opened.payload)
                 }.onFailure { DucatLog.w(TAG, "group roster: ${it.message}") }
+            }
+            // §16.20: a period key filed the moment it arrives — by
+            // (publisher, period), in its own store, so deleting the
+            // conversation never deletes what it paid for.
+            if (arrived.kind == 13) {
+                runCatching {
+                    Publications.absorbKey(context, c.personaHex, arrived)
+                }.onFailure { DucatLog.w(TAG, "publication key: ${it.message}") }
             }
             // §15.12: a live-position stream offered. **Only after an accept.**
             //
