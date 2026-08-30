@@ -643,6 +643,14 @@ tasks.register<JavaExec>("pubswarmtest") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// Money through the gate, live on stagenet: bill → chain → reconcile →
+// swarm, two desks, no operator. See PubSettleTest.kt for the env contract.
+tasks.register<JavaExec>("pubsettletest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.PubSettleTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // The publisher's ledger without a network: roster, issue log, re-seed
 // semantics. `DUCAT_LEDGER_STATE=<dir> ./gradlew :desktop:publedgertest`.
 tasks.register<JavaExec>("publedgertest") {
