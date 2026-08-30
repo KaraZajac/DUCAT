@@ -642,6 +642,14 @@ tasks.register<JavaExec>("pubswarmtest") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// The publisher's ledger without a network: roster, issue log, re-seed
+// semantics. `DUCAT_LEDGER_STATE=<dir> ./gradlew :desktop:publedgertest`.
+tasks.register<JavaExec>("publedgertest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.PublisherLedgerTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // The till driven blind against a real phone: card → claim → greeting →
 // bill → payment watched onto the chain → receipt. `./gradlew :desktop:tilltest`.
 tasks.register<JavaExec>("tilltest") {

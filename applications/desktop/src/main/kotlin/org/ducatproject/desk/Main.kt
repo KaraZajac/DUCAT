@@ -417,6 +417,7 @@ private fun runDesk(deskDir: File) = application {
                                 Room.Activity -> ActivityRoom()
                                 Room.Wallet -> WalletRoom(onTopUp = { receiveOpen = true })
                                 Room.Ride -> RideRoom()
+                                Room.Publish -> PublishRoom()
                                 Room.Me -> MeRoom()
                                 Room.Codes -> CodesRoom(
                                     onOpenChat = {

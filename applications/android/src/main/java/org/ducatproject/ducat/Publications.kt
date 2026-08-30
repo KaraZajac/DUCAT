@@ -174,4 +174,104 @@ object Publications {
             ?.optJSONObject(periodId) ?: return null
         return ship.getString("key") to ship.getString("digest")
     }
+
+    // --- the publisher's ledger of who and what ---------------------------
+    //
+    // The roster is the operator's own list — §16.20 has no subscription
+    // object on the wire, deliberately: who gets a period is a decision made
+    // at the desk (settlement observed, a comp, a trial), not a protocol
+    // fact. The issue log exists because serving dies with the process: a
+    // relaunch must know what was shipped, to whom, and from which file, or
+    // the operator is re-deriving their own history from chat threads.
+
+    private fun editPub(context: Context, pubId: String, f: (JSONObject) -> Unit): Boolean {
+        synchronized(lock) {
+            val p = prefs(context)
+            val all = p.getString("pubs", null)?.let { JSONObject(it) } ?: return false
+            val pub = all.optJSONObject(pubId) ?: return false
+            f(pub)
+            all.put(pubId, pub)
+            p.edit().putString("pubs", all.toString()).apply()
+        }
+        ContactStore.bump()
+        return true
+    }
+
+    private fun readPub(context: Context, pubId: String): JSONObject? =
+        prefs(context).getString("pubs", null)?.let { JSONObject(it) }?.optJSONObject(pubId)
+
+    /** Who this publication goes to, by persona hex. */
+    fun subscribers(context: Context, pubId: String): List<String> {
+        val arr = readPub(context, pubId)?.optJSONArray("subs") ?: return emptyList()
+        return (0 until arr.length()).map { arr.getString(it) }
+    }
+
+    fun setSubscriber(context: Context, pubId: String, personaHex: String, on: Boolean) {
+        editPub(context, pubId) { pub ->
+            val now = pub.optJSONArray("subs")?.let { a ->
+                (0 until a.length()).map { a.getString(it) }
+            }.orEmpty().toMutableSet()
+            if (on) now.add(personaHex) else now.remove(personaHex)
+            pub.put("subs", org.json.JSONArray(now.toList()))
+        }
+    }
+
+    /** One shipped period, as the log remembers it. */
+    data class Issue(
+        val periodId: String,
+        val file: String,
+        val swarmKey: String,
+        val swarmDigestHex: String,
+        val sentTo: Set<String>,
+    )
+
+    /** The issue log, newest period first. */
+    fun issues(context: Context, pubId: String): List<Issue> {
+        val iss = readPub(context, pubId)?.optJSONObject("issues") ?: return emptyList()
+        return iss.keys().asSequence().map { period ->
+            val o = iss.getJSONObject(period)
+            val sent = o.optJSONArray("sent")?.let { a ->
+                (0 until a.length()).map { a.getString(it) }.toSet()
+            } ?: emptySet()
+            Issue(
+                periodId = period,
+                file = o.optString("file"),
+                swarmKey = o.optString("key"),
+                swarmDigestHex = o.optString("digest"),
+                sentTo = sent,
+            )
+        }.sortedByDescending { it.periodId }.toList()
+    }
+
+    /** File a freshly seeded period. Re-recording a period replaces its
+     *  shipment (a re-seed after relaunch mints a fresh share) and keeps
+     *  the sent list — those sends happened. */
+    fun recordIssue(
+        context: Context,
+        pubId: String,
+        periodId: String,
+        file: String,
+        swarmKey: String,
+        swarmDigestHex: String,
+    ): Boolean = editPub(context, pubId) { pub ->
+        val iss = pub.optJSONObject("issues") ?: JSONObject()
+        val o = iss.optJSONObject(periodId) ?: JSONObject()
+        o.put("file", file).put("key", swarmKey).put("digest", swarmDigestHex)
+        iss.put(periodId, o)
+        pub.put("issues", iss)
+    }
+
+    fun markSent(context: Context, pubId: String, periodId: String, personaHex: String) {
+        editPub(context, pubId) { pub ->
+            val iss = pub.optJSONObject("issues") ?: return@editPub
+            val o = iss.optJSONObject(periodId) ?: return@editPub
+            val sent = o.optJSONArray("sent")?.let { a ->
+                (0 until a.length()).map { a.getString(it) }
+            }.orEmpty().toMutableSet()
+            sent.add(personaHex)
+            o.put("sent", org.json.JSONArray(sent.toList()))
+            iss.put(periodId, o)
+            pub.put("issues", iss)
+        }
+    }
 }
