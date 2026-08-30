@@ -349,9 +349,14 @@ internal fun PosAddLine(onAdd: (String, Long) -> Unit) {
         Amounts.toPxmr(xmr)?.takeIf { it > 0 }
     }
 
+    // Top-aligned, not centred: the counter under the item field makes
+    // that composable taller than its neighbours, and centring unequal
+    // heights is exactly how the two boxes ended up drawn at different
+    // levels. With the tops pinned the boxes align; the buttons are
+    // padded by hand to sit on the 56dp box's centre line.
     Row(
         Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.Top,
     ) {
         OutlinedTextField(
             value = desc,
@@ -367,6 +372,9 @@ internal fun PosAddLine(onAdd: (String, Long) -> Unit) {
             onValueChange = { amount = it.filter { c -> Amounts.isNumberChar(c) } },
             label = { Text(if (fiat) cur else "XMR") },
             singleLine = true,
+            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal,
+            ),
             modifier = Modifier.weight(1f),
         )
         if (rate != null) {
@@ -380,6 +388,7 @@ internal fun PosAddLine(onAdd: (String, Long) -> Unit) {
                     amount = p?.let { pxmrToField(it, fiat, rate) } ?: ""
                 },
                 contentPadding = PaddingValues(horizontal = 6.dp),
+                modifier = Modifier.padding(top = 8.dp),
             ) {
                 Text(
                     stringResource(R.string.pos_in_unit, if (fiat) "XMR" else cur),
@@ -390,6 +399,7 @@ internal fun PosAddLine(onAdd: (String, Long) -> Unit) {
         FilledIconButton(
             onClick = { onAdd(desc.trim(), pxmr!!); desc = ""; amount = "" },
             enabled = desc.isNotBlank() && pxmr != null,
+            modifier = Modifier.padding(top = 8.dp),
         ) { Icon(Icons.Filled.Add, stringResource(R.string.pos_add_line)) }
     }
 }
@@ -450,6 +460,9 @@ private fun TaxRow(taxPxmr: Long, onSet: (Long) -> Unit) {
             label = { Text(if (fiat) cur else "XMR") },
             placeholder = { Text(Amounts.count(0)) },
             singleLine = true,
+            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal,
+            ),
             modifier = Modifier.width(150.dp),
         )
         if (rate != null) {
@@ -463,7 +476,7 @@ private fun TaxRow(taxPxmr: Long, onSet: (Long) -> Unit) {
                 contentPadding = PaddingValues(horizontal = 6.dp),
             ) {
                 Text(
-                    if (fiat) "\u2192XMR" else "\u2192$cur",
+                    stringResource(R.string.pos_in_unit, if (fiat) "XMR" else cur),
                     style = MaterialTheme.typography.labelMedium,
                 )
             }

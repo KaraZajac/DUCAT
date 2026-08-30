@@ -653,17 +653,9 @@ private fun StaffPanel(onClose: () -> Unit, startOn: Int = 0) {
             return@Column
         }
         Box(Modifier.weight(1f)) { StaffOrders() }
-        // The rate, behind the PIN with the rest of the shop work. A kiosk
-        // is set up once and left alone, so the till's own tax switch must
-        // be reachable from inside the locked mode — the customer never
-        // sees this panel, and the operator never has to leave the mode
-        // (through the customer-facing screen) to change a number the law
-        // changed.
-        HorizontalDivider(Modifier.padding(vertical = 8.dp))
-        Column(Modifier.padding(horizontal = 16.dp)) {
-            TaxSetting()
-            Spacer(Modifier.height(16.dp))
-        }
+        // The tax switch used to sit here too; it lives on ItemsScreen now,
+        // which is this sheet's own Items tab — one copy per surface, still
+        // behind the PIN, and the same place the till and the bar find it.
     }
 }
 

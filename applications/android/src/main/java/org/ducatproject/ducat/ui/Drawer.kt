@@ -1011,6 +1011,9 @@ internal fun TaxSetting() {
                     },
                     label = { Text(stringResource(R.string.settings_tax_percent)) },
                     singleLine = true,
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                        keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal,
+                    ),
                     modifier = Modifier.width(140.dp),
                 )
             }

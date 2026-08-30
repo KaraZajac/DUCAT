@@ -54,7 +54,10 @@ fun ItemsScreen() {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(12.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        // Top-aligned for the same reason as the till's add-line row: the
+        // counter under the name field makes it taller, and centring the
+        // unequal pair drew the two boxes at different levels.
+        Row(verticalAlignment = Alignment.Top) {
             OutlinedTextField(
                 value = name,
                 onValueChange = { if (it.length <= 40) name = it },
@@ -81,7 +84,7 @@ fun ItemsScreen() {
                     name = ""; price = ""
                 },
                 enabled = name.isNotBlank() && price.isNotBlank(),
-                modifier = Modifier.height(52.dp),
+                modifier = Modifier.padding(top = 2.dp).height(52.dp),
             ) { Text(stringResource(R.string.items_add)) }
         }
         Spacer(Modifier.height(12.dp))
@@ -102,8 +105,9 @@ fun ItemsScreen() {
                 stringResource(R.string.items_none),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
             )
-        } else LazyColumn(Modifier.fillMaxSize()) {
+        } else LazyColumn(Modifier.weight(1f)) {
             items(items) { item ->
                 ListItem(
                     // Transparent, as everywhere else: a ListItem defaults to
@@ -150,6 +154,15 @@ fun ItemsScreen() {
                 HorizontalDivider()
             }
         }
+
+        // The rate lives with the menu, in every mode that charges it. The
+        // till and the bar tab have no staff sheet, and Settings sits a mode
+        // switch away — the number the law changes belongs beside the prices
+        // it changes. The kiosk gets this for free: its staff Items tab is
+        // this same screen.
+        HorizontalDivider(Modifier.padding(vertical = 8.dp))
+        TaxSetting()
+        Spacer(Modifier.height(8.dp))
     }
 }
 
