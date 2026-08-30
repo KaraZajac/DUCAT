@@ -14,4 +14,5 @@
     <string name="qrhub_one_per_code">एक कोड, एक व्यक्ति। जैसे ही कोई इसे ले लेता है, अगला अपने-आप बन जाता है — कुछ करना नहीं।</string>
     <string name="qrhub_name_travels">आपका नाम और तस्वीर इसके साथ जाते हैं। बाकी जो आप साझा करते हैं, वह बाद में आता है — उसी कनेक्शन से जो यह खोलता है।</string>
     <string name="qrhub_copied">लिंक कॉपी हो गया</string>
+    <string name="qrhub_showing_as">%1$s के रूप में दिखा रहे हैं</string>
 </resources>

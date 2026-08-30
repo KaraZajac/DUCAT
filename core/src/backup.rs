@@ -87,6 +87,10 @@ mod k {
     pub const PREKEY_ONE_TIME: u64 = 24;
     pub const PREKEY_NEXT_ID: u64 = 25;
     pub const APP_STATE: u64 = 26;
+    // The persona roster (post-1.0 compartments). PERSONA_SECRET stays the
+    // primary — an old client restoring a new bundle gets that persona and
+    // ignores this key, which is the graceful half of the failure.
+    pub const PERSONAS: u64 = 27;
     pub const ESCROW_ID: u64 = 0;
     // Sub-keys of one CONTACTS entry.
     pub const C_PERSONA: u64 = 0;
@@ -102,6 +106,14 @@ mod k {
     pub const C_OUT_SEQ: u64 = 10;
     pub const C_IN_PREV: u64 = 11;
     pub const C_OUT_PREV: u64 = 12;
+    /// Which of the bundle's personas owns this contact (hex). Absent for
+    /// bundles from the single-persona era; readers resolve to the primary.
+    pub const C_OWNER: u64 = 13;
+    // Sub-keys of one PERSONAS entry.
+    pub const P_SECRET: u64 = 0;
+    pub const P_NAME: u64 = 1;
+    pub const P_COLOR: u64 = 2;
+    pub const P_CREATED: u64 = 3;
     pub const ESCROW_KEY_FILE: u64 = 1;
     pub const ESCROW_RESTORE_HEIGHT: u64 = 2;
 }
@@ -241,6 +253,10 @@ pub struct Backup {
      * is refused as out of order.
      */
     pub contacts: Vec<BackupContact>,
+    /// The whole persona roster, primary included, in roster order. Empty
+    /// from the single-persona era; `persona_secret` remains the primary in
+    /// every bundle either way.
+    pub personas: Vec<BackupPersona>,
     /**
      * Our prekey store (§16.11), and the trade is stated rather than implied:
      * **a backup holding one-time secrets can rewind forward secrecy to the
@@ -281,6 +297,8 @@ pub struct BackupContact {
     pub out_seq: u64,
     pub in_prev: Option<Vec<u8>>,
     pub out_prev: Option<Vec<u8>>,
+    /// Hex of the owning persona; None from the single-persona era.
+    pub owner: Option<String>,
 }
 
 impl BackupContact {
@@ -311,6 +329,9 @@ impl BackupContact {
         if let Some(p) = &self.out_prev {
             m.insert(k::C_OUT_PREV, Value::Bytes(p.clone()));
         }
+        if let Some(o) = &self.owner {
+            m.insert(k::C_OWNER, Value::Text(o.clone()));
+        }
         Value::Map(m)
     }
 
@@ -337,6 +358,51 @@ impl BackupContact {
             out_seq: m.get(&k::C_OUT_SEQ).and_then(|v| v.as_uint()).unwrap_or(0),
             in_prev: bytes(k::C_IN_PREV),
             out_prev: bytes(k::C_OUT_PREV),
+            owner: text(k::C_OWNER),
+        })
+    }
+}
+
+/// One of the phone's own personas (post-1.0 compartments). The secret is
+/// the identity; the rest is the face the switcher shows.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct BackupPersona {
+    pub secret: Vec<u8>,
+    pub name: Option<String>,
+    pub color: u64,
+    pub created: u64,
+}
+
+impl BackupPersona {
+    fn to_value(&self) -> Value {
+        let mut m = BTreeMap::new();
+        m.insert(k::P_SECRET, Value::Bytes(self.secret.clone()));
+        if let Some(n) = &self.name {
+            m.insert(k::P_NAME, Value::Text(n.clone()));
+        }
+        if self.color > 0 {
+            m.insert(k::P_COLOR, Value::Uint(self.color));
+        }
+        if self.created > 0 {
+            m.insert(k::P_CREATED, Value::Uint(self.created));
+        }
+        Value::Map(m)
+    }
+
+    fn from_value(v: &Value) -> Result<Self, Reject> {
+        let m = match v {
+            Value::Map(m) => m,
+            _ => return Err(Reject::new(RejectCode::Malformed)),
+        };
+        Ok(BackupPersona {
+            secret: m
+                .get(&k::P_SECRET)
+                .and_then(|v| v.as_bytes())
+                .map(|b| b.to_vec())
+                .ok_or_else(|| Reject::new(RejectCode::Malformed))?,
+            name: m.get(&k::P_NAME).and_then(|v| v.as_text()).map(|s| s.to_string()),
+            color: m.get(&k::P_COLOR).and_then(|v| v.as_uint()).unwrap_or(0),
+            created: m.get(&k::P_CREATED).and_then(|v| v.as_uint()).unwrap_or(0),
         })
     }
 }
@@ -372,6 +438,12 @@ impl Backup {
             m.insert(
                 k::CONTACTS,
                 Value::Array(self.contacts.iter().map(|c| c.to_value()).collect()),
+            );
+        }
+        if !self.personas.is_empty() {
+            m.insert(
+                k::PERSONAS,
+                Value::Array(self.personas.iter().map(|p| p.to_value()).collect()),
             );
         }
         if let Some(sk) = &self.prekey_signed_secret {
@@ -514,6 +586,13 @@ impl Backup {
                 Some(Value::Array(a)) => a
                     .iter()
                     .map(BackupContact::from_value)
+                    .collect::<Result<Vec<_>, _>>()?,
+                _ => Vec::new(),
+            },
+            personas: match m.get(&k::PERSONAS) {
+                Some(Value::Array(a)) => a
+                    .iter()
+                    .map(BackupPersona::from_value)
                     .collect::<Result<Vec<_>, _>>()?,
                 _ => Vec::new(),
             },

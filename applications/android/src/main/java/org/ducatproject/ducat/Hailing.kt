@@ -97,6 +97,8 @@ object Hailing {
         val cardUri: String,
         val expiry: Long,
         val notice: ByteArray,
+        /** The persona that posted — every re-sign speaks as it. */
+        val owner: String = "",
         /**
          * True when this corner was deserted — nobody else was standing on
          * the board we landed on. §15.12's density rule: that is exactly when
@@ -149,8 +151,13 @@ object Hailing {
         onStep: (Step) -> Unit = {},
     ): Standing {
         onStep(Step.CARD)
+        // One doorway decision for the whole post: the card, the notice's
+        // signature, and every later re-sign speak as the same persona.
+        val personas = PersonaStore(context)
+        val ownerHex = personas.worn()
         val card = Mailbox.issueCard(
             context, MyProfile(context).name(), (ttlSecs * 2).toULong(), purpose = "hail",
+            asPersonaHex = ownerHex,
         )
         val expiry = System.currentTimeMillis() / 1000 + ttlSecs
         val info = uniffi.ducat_mobile.HailInfo(
@@ -162,7 +169,7 @@ object Hailing {
             originCell = originCell,
             destCell = destCell,
         )
-        val persona = PersonaStore(context).secret()
+        val persona = personas.secretFor(ownerHex) ?: personas.secret()
         // The card's inbox key names this hail: unique to it, the same for the
         // second pin on the containing cell (same author, correctly), and gone
         // when the hail is. The notice is signed for the slot it goes into, so
@@ -227,12 +234,14 @@ object Hailing {
                 board = board, subkey = sub,
                 inboxKey = card.inboxKey, cardUri = card.uri,
                 expiry = expiry, notice = bytes,
+                owner = ownerHex,
             ),
         )
         DucatLog.i(TAG, "hail posted at $board subkey $sub")
         return Standing(
             board = board, subkey = sub, inboxKey = card.inboxKey, cardUri = card.uri,
             expiry = expiry, notice = bytes,
+            owner = ownerHex,
             aloneHere = board == base && placedTaken.isEmpty(),
             originCell = originCell,
         )
@@ -263,7 +272,9 @@ object Hailing {
         // and the slot they were sealed for.
         val info = runCatching { hailDecode(s.notice, s.board, s.subkey, 0uL) }.getOrNull()
             ?: return null
-        val persona = PersonaStore(context).secret()
+        val personas = PersonaStore(context)
+        val persona = s.owner.takeIf { it.isNotBlank() }?.let { personas.secretFor(it) }
+            ?: personas.secret()
         val second = runCatching {
             val wideTip = Beacons.tip(context).toULong()
             val busy = standRead(wide).mapNotNull { n ->
@@ -290,6 +301,7 @@ object Hailing {
                 inboxKey = s.inboxKey, cardUri = s.cardUri,
                 expiry = s.expiry, notice = s.notice,
                 board2 = second.first, subkey2 = second.second,
+                owner = s.owner,
             ),
         )
         DucatLog.i(TAG, "hail reach: 5-cell copy at ${second.first}")

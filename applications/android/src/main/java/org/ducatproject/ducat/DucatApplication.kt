@@ -84,6 +84,14 @@ class DucatApplication : Application() {
                 securePrefs(this@DucatApplication, "ducat_contacts")
                 securePrefs(this@DucatApplication, "ducat_ceremonies")
             }
+            // Stamp the single-persona era's contacts with their owner —
+            // idempotent behind its flag, and the flag is cleared by a
+            // restore so an old bundle's contacts get stamped on the next
+            // launch too.
+            runCatching {
+                ContactStore(this@DucatApplication)
+                    .migrateOwners(PersonaStore(this@DucatApplication).personaHex())
+            }
             // Tried and measured on the emulator: UDP-on reads but its set
             // fanout dies inside QEMU user-net; UDP-off gets zero peers at
             // all. SLIRP cannot carry a Veilid node either way, so the flag

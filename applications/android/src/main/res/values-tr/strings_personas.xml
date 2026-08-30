@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="personas_title">Kişilikler</string>
+    <string name="personas_body">Bu telefonun kim olduğu. Her kişilik, kendi kişileriyle kendi anahtarıdır — dükkân arkadaşlarını asla öğrenmez, arkadaşların dükkânı asla görmez. Yeni ilişkiler o an taktığın kişiliğe eklenir.</string>
+    <string name="personas_primary">Kişisel</string>
+    <string name="personas_worn">Takılı</string>
+    <string name="personas_add">Kişilik ekle</string>
+    <string name="personas_name_label">Ad</string>
+    <string name="personas_name_support">Bu yanının adı — Dükkân, Pazar, Gezinme.</string>
+    <string name="personas_cap">Sınır dört: bölmeler ancak bir elin parmakları kadarken işe yarar.</string>
+    <string name="personas_no_delete">Bir kişilik silinemez — kişileri yalnızca onun anahtarına yanıt verir. Kullanmayı bırak, sessizce dursun.</string>
+    <string name="personas_save">Kaydet</string>
+    <string name="personas_cancel">Vazgeç</string>
+</resources>

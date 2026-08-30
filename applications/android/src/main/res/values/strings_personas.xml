@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="personas_title">Personas</string>
+    <string name="personas_body">Who this phone is. Each persona is its own key with its own contacts — the shop never learns your friends, and your friends never meet the shop. New relationships join whichever one you are wearing.</string>
+    <string name="personas_primary">Personal</string>
+    <string name="personas_worn">Wearing</string>
+    <string name="personas_add">Add a persona</string>
+    <string name="personas_name_label">Name</string>
+    <string name="personas_name_support">What this side of you is called — Shop, Market, Browsing.</string>
+    <string name="personas_cap">Four is the limit: compartments only work when they fit on one hand.</string>
+    <string name="personas_no_delete">A persona cannot be deleted — its contacts answer to its key alone. Stop using it and it goes quiet.</string>
+    <string name="personas_save">Save</string>
+    <string name="personas_cancel">Cancel</string>
+</resources>

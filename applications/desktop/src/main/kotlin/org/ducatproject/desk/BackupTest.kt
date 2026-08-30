@@ -96,6 +96,7 @@ private fun appState() {
         appState = blob,
         escrowCount = 0u,
         escrowShares = emptyList(),
+            personas = emptyList(),
         created = 0uL,
     )
     ContactStore(dst).restoreFromBackup(restored)
@@ -165,6 +166,7 @@ private fun appState() {
             appState = poisoned,
             escrowCount = 0u,
             escrowShares = emptyList(),
+            personas = emptyList(),
             created = 0uL,
         ),
     )
@@ -224,6 +226,7 @@ private fun escrowShares() {
             prekeyNextId = 1uL,
             appState = null,
             escrowShares = shares,
+            personas = emptyList(),
         ),
         "correcthorsebattery",
         persona,
@@ -264,6 +267,7 @@ private fun escrowShares() {
                 prekeyNextId = 0uL,
                 appState = null,
                 escrowShares = emptyList(),
+            personas = emptyList(),
             ),
             "correcthorsebattery",
             persona,

@@ -74,6 +74,7 @@ fun DrawerContent(onPick: (Section) -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+        PersonaSwitcher(Modifier.padding(horizontal = 16.dp).padding(bottom = 12.dp))
         HorizontalDivider()
         Spacer(Modifier.height(8.dp))
         Section.entries.forEach { s ->
@@ -216,6 +217,8 @@ fun SettingsScreen(
         FareRegion()
         Spacer(Modifier.height(24.dp))
         TaxSetting()
+        Spacer(Modifier.height(24.dp))
+        PersonasSetting()
         Spacer(Modifier.height(24.dp))
         RecurringSetting()
 

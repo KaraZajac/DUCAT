@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="personas_title">Persona</string>
+    <string name="personas_body">Siapa telepon ini. Setiap persona adalah kuncinya sendiri dengan kontaknya sendiri — toko tidak pernah tahu teman-temanmu, dan temanmu tidak pernah melihat toko. Hubungan baru masuk ke persona yang sedang kamu kenakan.</string>
+    <string name="personas_primary">Pribadi</string>
+    <string name="personas_worn">Dikenakan</string>
+    <string name="personas_add">Tambah persona</string>
+    <string name="personas_name_label">Nama</string>
+    <string name="personas_name_support">Nama sisi dirimu ini — Toko, Pasar, Jelajah.</string>
+    <string name="personas_cap">Empat adalah batasnya: sekat hanya berguna selama muat di satu tangan.</string>
+    <string name="personas_no_delete">Persona tidak bisa dihapus — kontaknya hanya menjawab kuncinya. Berhenti memakainya, dan ia sekadar diam.</string>
+    <string name="personas_save">Simpan</string>
+    <string name="personas_cancel">Batal</string>
+</resources>

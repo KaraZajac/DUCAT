@@ -14,4 +14,5 @@
     <string name="qrhub_one_per_code">Один код — одна людина. Щойно хтось бере цей, наступний створюється автоматично — робити нічого не треба.</string>
     <string name="qrhub_name_travels">З нею їдуть твоє ім\'я і фото. Усе інше, чим ти ділишся, приходить пізніше, через з\'єднання, яке вона відкриває.</string>
     <string name="qrhub_copied">Посилання скопійовано</string>
+    <string name="qrhub_showing_as">Показано як %1$s</string>
 </resources>

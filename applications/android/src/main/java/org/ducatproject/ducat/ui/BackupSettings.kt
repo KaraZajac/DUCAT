@@ -134,6 +134,10 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
                                             // came to be left out of the one this
                                             // is assembled from.
                                             Ceremony.backupShares(context),
+                                            // The compartments, primary first —
+                                            // a restore is becoming this phone,
+                                            // every hat included.
+                                            PersonaStore(context).backupPersonas(),
                                         ),
                                         passphrase,
                                         personaSecret!!,
@@ -258,6 +262,7 @@ internal fun applyBackup(
     // send is signed with ours, so a device that recovered the threads and
     // kept its own keypair is a stranger to everyone in them.
     PersonaStore(context).restoreSecret(r.personaSecret)
+    PersonaStore(context).restoreRoster(r.personas)
     // Settings come back too. A restore that keeps the money and drops the name
     // and the privacy choice has quietly changed both, and the user has no way
     // to notice — publishing especially, where the wrong direction is a silent

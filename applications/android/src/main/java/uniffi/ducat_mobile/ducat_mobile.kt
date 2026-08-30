@@ -931,6 +931,14 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1129,6 +1137,14 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_protocol_version(uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_prune_prekey(`bundleBytes`: RustBuffer.ByValue,`id`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_publication_master_create(uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_publication_open_chunk(`key`: RustBuffer.ByValue,`recordKey`: RustBuffer.ByValue,`subkey`: Int,`value`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_publication_period_key(`master`: RustBuffer.ByValue,`periodId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_publication_seal_chunk(`key`: RustBuffer.ByValue,`recordKey`: RustBuffer.ByValue,`subkey`: Int,`nonce`: RustBuffer.ByValue,`plaintext`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_random_bytes(`n`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1462,6 +1478,14 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_prune_prekey(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_publication_master_create(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_publication_open_chunk(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_publication_period_key(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_publication_seal_chunk(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_random_bytes(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_read_contact_card(
@@ -1789,6 +1813,18 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_prune_prekey() != 19780.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_publication_master_create() != 16605.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_publication_open_chunk() != 2941.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_publication_period_key() != 40459.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_publication_seal_chunk() != 46507.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_random_bytes() != 387.toShort()) {
@@ -2231,7 +2267,13 @@ data class BackupInput (
      * convenience: on the two-party rung a lost share is an escrow that can
      * never be released, by anyone, ever.
      */
-    var `escrowShares`: List<EscrowShareEntry>
+    var `escrowShares`: List<EscrowShareEntry>, 
+    /**
+     * The whole persona roster, primary first (post-1.0 compartments).
+     * Empty from a single-persona client; the primary always also travels
+     * as the top-level persona secret, so old readers lose nothing.
+     */
+    var `personas`: List<PersonaBackup>
 ) {
     
     companion object
@@ -2254,6 +2296,7 @@ public object FfiConverterTypeBackupInput: FfiConverterRustBuffer<BackupInput> {
             FfiConverterULong.read(buf),
             FfiConverterOptionalByteArray.read(buf),
             FfiConverterSequenceTypeEscrowShareEntry.read(buf),
+            FfiConverterSequenceTypePersonaBackup.read(buf),
         )
     }
 
@@ -2268,7 +2311,8 @@ public object FfiConverterTypeBackupInput: FfiConverterRustBuffer<BackupInput> {
             FfiConverterSequenceTypePrekeyEntry.allocationSize(value.`prekeyOneTime`) +
             FfiConverterULong.allocationSize(value.`prekeyNextId`) +
             FfiConverterOptionalByteArray.allocationSize(value.`appState`) +
-            FfiConverterSequenceTypeEscrowShareEntry.allocationSize(value.`escrowShares`)
+            FfiConverterSequenceTypeEscrowShareEntry.allocationSize(value.`escrowShares`) +
+            FfiConverterSequenceTypePersonaBackup.allocationSize(value.`personas`)
     )
 
     override fun write(value: BackupInput, buf: ByteBuffer) {
@@ -2283,6 +2327,7 @@ public object FfiConverterTypeBackupInput: FfiConverterRustBuffer<BackupInput> {
             FfiConverterULong.write(value.`prekeyNextId`, buf)
             FfiConverterOptionalByteArray.write(value.`appState`, buf)
             FfiConverterSequenceTypeEscrowShareEntry.write(value.`escrowShares`, buf)
+            FfiConverterSequenceTypePersonaBackup.write(value.`personas`, buf)
     }
 }
 
@@ -2398,7 +2443,11 @@ data class ContactBackup (
     var `inSeq`: kotlin.ULong, 
     var `outSeq`: kotlin.ULong, 
     var `inPrev`: kotlin.ByteArray?, 
-    var `outPrev`: kotlin.ByteArray?
+    var `outPrev`: kotlin.ByteArray?, 
+    /**
+     * Hex of the owning persona; None from the single-persona era.
+     */
+    var `owner`: kotlin.String?
 ) {
     
     companion object
@@ -2423,6 +2472,7 @@ public object FfiConverterTypeContactBackup: FfiConverterRustBuffer<ContactBacku
             FfiConverterULong.read(buf),
             FfiConverterOptionalByteArray.read(buf),
             FfiConverterOptionalByteArray.read(buf),
+            FfiConverterOptionalString.read(buf),
         )
     }
 
@@ -2439,7 +2489,8 @@ public object FfiConverterTypeContactBackup: FfiConverterRustBuffer<ContactBacku
             FfiConverterULong.allocationSize(value.`inSeq`) +
             FfiConverterULong.allocationSize(value.`outSeq`) +
             FfiConverterOptionalByteArray.allocationSize(value.`inPrev`) +
-            FfiConverterOptionalByteArray.allocationSize(value.`outPrev`)
+            FfiConverterOptionalByteArray.allocationSize(value.`outPrev`) +
+            FfiConverterOptionalString.allocationSize(value.`owner`)
     )
 
     override fun write(value: ContactBackup, buf: ByteBuffer) {
@@ -2456,6 +2507,7 @@ public object FfiConverterTypeContactBackup: FfiConverterRustBuffer<ContactBacku
             FfiConverterULong.write(value.`outSeq`, buf)
             FfiConverterOptionalByteArray.write(value.`inPrev`, buf)
             FfiConverterOptionalByteArray.write(value.`outPrev`, buf)
+            FfiConverterOptionalString.write(value.`owner`, buf)
     }
 }
 
@@ -3687,6 +3739,50 @@ public object FfiConverterTypePeerDetails: FfiConverterRustBuffer<PeerDetails> {
 
 
 /**
+ * One of this phone's own personas, across the bridge (§4.3, post-1.0
+ * compartments).
+ */
+data class PersonaBackup (
+    var `secret`: kotlin.ByteArray, 
+    var `name`: kotlin.String?, 
+    var `color`: kotlin.ULong, 
+    var `created`: kotlin.ULong
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypePersonaBackup: FfiConverterRustBuffer<PersonaBackup> {
+    override fun read(buf: ByteBuffer): PersonaBackup {
+        return PersonaBackup(
+            FfiConverterByteArray.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: PersonaBackup) = (
+            FfiConverterByteArray.allocationSize(value.`secret`) +
+            FfiConverterOptionalString.allocationSize(value.`name`) +
+            FfiConverterULong.allocationSize(value.`color`) +
+            FfiConverterULong.allocationSize(value.`created`)
+    )
+
+    override fun write(value: PersonaBackup, buf: ByteBuffer) {
+            FfiConverterByteArray.write(value.`secret`, buf)
+            FfiConverterOptionalString.write(value.`name`, buf)
+            FfiConverterULong.write(value.`color`, buf)
+            FfiConverterULong.write(value.`created`, buf)
+    }
+}
+
+
+
+/**
  * A payment sighted in the mempool: real bytes, zero confirmations.
  */
 data class PoolHit (
@@ -4255,6 +4351,12 @@ data class RestoredBackup (
      */
     var `escrowShares`: List<EscrowShareEntry>, 
     /**
+     * The persona roster, when the bundle carries one (post-1.0
+     * compartments). Empty for older bundles: the top-level persona secret
+     * is the only identity, exactly as it always was.
+     */
+    var `personas`: List<PersonaBackup>, 
+    /**
      * When the bundle was written, in seconds since the epoch — the thing that
      * makes "how old is this backup" answerable.
      *
@@ -4291,6 +4393,7 @@ public object FfiConverterTypeRestoredBackup: FfiConverterRustBuffer<RestoredBac
             FfiConverterOptionalByteArray.read(buf),
             FfiConverterUInt.read(buf),
             FfiConverterSequenceTypeEscrowShareEntry.read(buf),
+            FfiConverterSequenceTypePersonaBackup.read(buf),
             FfiConverterULong.read(buf),
         )
     }
@@ -4309,6 +4412,7 @@ public object FfiConverterTypeRestoredBackup: FfiConverterRustBuffer<RestoredBac
             FfiConverterOptionalByteArray.allocationSize(value.`appState`) +
             FfiConverterUInt.allocationSize(value.`escrowCount`) +
             FfiConverterSequenceTypeEscrowShareEntry.allocationSize(value.`escrowShares`) +
+            FfiConverterSequenceTypePersonaBackup.allocationSize(value.`personas`) +
             FfiConverterULong.allocationSize(value.`created`)
     )
 
@@ -4326,6 +4430,7 @@ public object FfiConverterTypeRestoredBackup: FfiConverterRustBuffer<RestoredBac
             FfiConverterOptionalByteArray.write(value.`appState`, buf)
             FfiConverterUInt.write(value.`escrowCount`, buf)
             FfiConverterSequenceTypeEscrowShareEntry.write(value.`escrowShares`, buf)
+            FfiConverterSequenceTypePersonaBackup.write(value.`personas`, buf)
             FfiConverterULong.write(value.`created`, buf)
     }
 }
@@ -6074,6 +6179,34 @@ public object FfiConverterSequenceTypeOwnedOutput: FfiConverterRustBuffer<List<O
 /**
  * @suppress
  */
+public object FfiConverterSequenceTypePersonaBackup: FfiConverterRustBuffer<List<PersonaBackup>> {
+    override fun read(buf: ByteBuffer): List<PersonaBackup> {
+        val len = buf.getInt()
+        return List<PersonaBackup>(len) {
+            FfiConverterTypePersonaBackup.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<PersonaBackup>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypePersonaBackup.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<PersonaBackup>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypePersonaBackup.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterSequenceTypePoolHit: FfiConverterRustBuffer<List<PoolHit>> {
     override fun read(buf: ByteBuffer): List<PoolHit> {
         val len = buf.getInt()
@@ -7676,6 +7809,61 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_prune_prekey(
         FfiConverterByteArray.lower(`bundleBytes`),FfiConverterUInt.lower(`id`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * A fresh publication master secret (§16.20 track). One per publication;
+         * every period's content key derives from it, so this is the only key a
+         * publisher stores or backs up.
+         */ fun `publicationMasterCreate`(): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_publication_master_create(
+        _status)
+}
+    )
+    }
+    
+
+        /**
+         * Open a chunk read from a record's slot; the landing site is the AAD, so
+         * pass where it was actually read from.
+         */
+    @Throws(ContactException::class) fun `publicationOpenChunk`(`key`: kotlin.ByteArray, `recordKey`: kotlin.String, `subkey`: kotlin.UInt, `value`: kotlin.ByteArray): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_publication_open_chunk(
+        FfiConverterByteArray.lower(`key`),FfiConverterString.lower(`recordKey`),FfiConverterUInt.lower(`subkey`),FfiConverterByteArray.lower(`value`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * One period's content key, derived — deterministic over (master, id), so
+         * a restored device and a paying member both arrive at the same key.
+         */
+    @Throws(ContactException::class) fun `publicationPeriodKey`(`master`: kotlin.ByteArray, `periodId`: kotlin.String): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_publication_period_key(
+        FfiConverterByteArray.lower(`master`),FfiConverterString.lower(`periodId`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Seal one publication chunk for one (record, subkey) landing site.
+         */
+    @Throws(ContactException::class) fun `publicationSealChunk`(`key`: kotlin.ByteArray, `recordKey`: kotlin.String, `subkey`: kotlin.UInt, `nonce`: kotlin.ByteArray, `plaintext`: kotlin.ByteArray): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_publication_seal_chunk(
+        FfiConverterByteArray.lower(`key`),FfiConverterString.lower(`recordKey`),FfiConverterUInt.lower(`subkey`),FfiConverterByteArray.lower(`nonce`),FfiConverterByteArray.lower(`plaintext`),_status)
 }
     )
     }

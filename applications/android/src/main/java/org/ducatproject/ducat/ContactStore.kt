@@ -697,6 +697,23 @@ class ContactStore(context: Context) {
         prefs.edit().putBoolean("receipts_migrated_v1", true).apply()
     } }
 
+    /**
+     * One-time stamp of [Contact.owner] onto the single-persona era.
+     *
+     * An empty owner already *resolves* to the primary persona (see
+     * [PersonaStore.ownerHexOf]), so nothing breaks without this — the stamp
+     * exists so the data says what the code assumes, before a second persona
+     * ever appears. Restore clears the flag rather than stamping inline: a
+     * restored old bundle re-arrives owner-less, and the next startup pass
+     * writes it down again.
+     */
+    fun migrateOwners(primaryHex: String) { synchronized(lock) {
+        if (prefs.getBoolean("owners_migrated_v1", false)) return
+        val stamped = all().map { if (it.owner.isBlank()) it.copy(owner = primaryHex) else it }
+        if (stamped.isNotEmpty()) save(stamped)
+        prefs.edit().putBoolean("owners_migrated_v1", true).apply()
+    } }
+
     // --- backup (§4.3) ----------------------------------------------------
 
     /**
@@ -723,6 +740,7 @@ class ContactStore(context: Context) {
             outSeq = c.outSeq.toULong(),
             inPrev = c.inPrevLink,
             outPrev = c.outPrevLink,
+            owner = c.owner.ifBlank { null },
         )
     }
 
@@ -892,7 +910,13 @@ class ContactStore(context: Context) {
                     }
                 }
                 o.optString("contacts_raw").takeIf { it.isNotEmpty() }
-                    ?.let { e.putString("contacts", it) }
+                    ?.let {
+                        e.putString("contacts", it)
+                        // A bundle from the single-persona era carries no
+                        // owner stamps; clearing the flag re-runs the
+                        // one-shot pass on the next launch.
+                        e.putBoolean("owners_migrated_v1", false)
+                    }
                 // Separate stores, separate editors — but written inside the
                 // same restore so nothing observes contacts back and the shop
                 // still empty. The poller's next pass re-posts each listing
@@ -945,6 +969,7 @@ class ContactStore(context: Context) {
                     outSeq = c.outSeq.toLong(),
                     inPrevLink = c.inPrev,
                     outPrevLink = c.outPrev,
+                    owner = c.owner ?: existing?.owner ?: "",
                 )
             )
         }
@@ -989,12 +1014,14 @@ class ContactStore(context: Context) {
         purpose: String,
         /** Seconds the network copy lives, so pruning can follow it. */
         validSecs: Long = 0,
+        /** The persona that cut it — whoever answers is theirs (doorway rule). */
+        owner: String = "",
     ) = synchronized(lock) {
         val arr = prefs.getString("issued_cards", null)?.let { JSONArray(it) } ?: JSONArray()
         arr.put(JSONObject().apply {
             put("inbox", inboxKey); put("wpub", b64(writerPublic)); put("wsec", b64(writerSecret))
             put("outbox", outboxKey); put("opub", b64(outboxOwnerPublic)); put("osec", b64(outboxOwnerSecret))
-            put("uri", uri); put("purpose", purpose)
+            put("uri", uri); put("purpose", purpose); put("owner", owner)
             put("made", System.currentTimeMillis()); put("ttl", validSecs)
             put("answered_by", JSONObject.NULL)
         })
@@ -1015,6 +1042,7 @@ class ContactStore(context: Context) {
                 outboxOwnerSecret = unb64(o.getString("osec")),
                 uri = o.optString("uri", ""),
                 purpose = o.optString("purpose", "profile"),
+                owner = o.optString("owner", ""),
                 answeredBy = if (o.isNull("answered_by")) null else o.optString("answered_by"),
             )
         }
@@ -1109,9 +1137,24 @@ class ContactStore(context: Context) {
      * every time somebody opens the code screen would litter the network and
      * hand out a different code each glance.
      */
-    fun currentCardUri(): String? =
-        issuedCards().lastOrNull { it.purpose == "profile" && it.answeredBy == null }
-            ?.uri?.takeIf { it.isNotEmpty() }
+    fun currentCardUri(): String? = currentCardUri(null)
+
+    /**
+     * The standing code for one persona — the worn one when [ownerHex] is
+     * null. A card whose owner is blank predates the compartments and
+     * belongs to the primary; matching it by emptiness rather than
+     * rewriting the registry keeps old cards valid across the upgrade.
+     */
+    fun currentCardUri(ownerHex: String?): String? {
+        val ctx = appContext
+        val personas = PersonaStore(ctx)
+        val want = ownerHex ?: personas.worn()
+        val primary = personas.personaHex()
+        return issuedCards().lastOrNull {
+            it.purpose == "profile" && it.answeredBy == null &&
+                (it.owner == want || (it.owner.isBlank() && want == primary))
+        }?.uri?.takeIf { it.isNotEmpty() }
+    }
 
     /** Our own published bundle and its secrets. */
     /**
@@ -1471,6 +1514,18 @@ data class Contact(
      * way to tidy the list. Hidden here, deleted in Contacts.
      */
     val chatVisible: Boolean = true,
+    /**
+     * Which of OUR personas this relationship belongs to — the hex of the
+     * persona that issued or claimed the card it began with (§16.9; the
+     * post-1.0 doorway rule). Bound once, at the doorway, and inherited by
+     * every message, bill and ceremony after: there is deliberately no way
+     * to answer a thread as somebody else. Empty means "the primary
+     * persona" — the value every contact from the single-persona era
+     * carries until the one-shot stamp writes it explicitly, and the value
+     * a restored old backup arrives with. Resolve through
+     * [PersonaStore.ownerHexOf], never by reading this raw.
+     */
+    val owner: String = "",
 ) {
     /** §7.5: the petname wins. A self-asserted name is a fallback, never a name. */
     /**
@@ -1521,6 +1576,7 @@ data class Contact(
         put("in_seq", inSeq)
         put("in_prev", inPrevLink?.let { b64(it) } ?: JSONObject.NULL)
         put("chat_visible", chatVisible)
+        put("owner", owner)
     }
 
     companion object {
@@ -1553,6 +1609,7 @@ data class Contact(
             inSeq = o.optLong("in_seq"),
             inPrevLink = o.optStringOrNull("in_prev")?.let { unb64(it) },
             chatVisible = o.optBoolean("chat_visible", true),
+            owner = o.optString("owner", ""),
         )
     }
 }
@@ -1740,6 +1797,8 @@ data class IssuedCardState(
     val uri: String = "",
     /** "profile" (the standing code) or "sale" (a till/tab/ride handshake). */
     val purpose: String = "profile",
+    /** Which of our personas cut this card; empty = the primary era. */
+    val owner: String = "",
     val answeredBy: String? = null,
 )
 
@@ -1899,19 +1958,174 @@ object ContactNaming {
     }
 }
 
+/**
+ * One of our own identities: a keypair wearing a face for the switcher.
+ * `name` is empty for the primary until somebody names it — the UI supplies
+ * the word, the store never invents one (the [ContactNaming.unnamed]
+ * lesson, applied to ourselves).
+ */
+data class Persona(
+    val hex: String,
+    val name: String,
+    /** ARGB accent the UI tints the bar with; 0 means the theme default. */
+    val color: Int,
+    val createdAt: Long,
+)
+
+/**
+ * The personas this phone IS — a roster now, one entry for the whole
+ * single-persona era (post-1.0 track: compartments).
+ *
+ * The design rules, stated where the code enforces them:
+ * - **Few by construction.** [MAX_PERSONAS] is small because compartments
+ *   only work when they fit on one hand; a persona per site or per contact
+ *   is the same as none, and Monero already makes the *payments*
+ *   unlinkable.
+ * - **No deletion.** A persona's contacts are bound to it at their doorway
+ *   and cannot be re-homed (the other side sealed to that key). Deleting a
+ *   persona would strand every relationship it owns behind a key that no
+ *   longer answers — so the roster only grows, like a group's.
+ * - **The primary is entry zero, forever.** [secret]/[personaHex] keep
+ *   meaning "the primary" so the single-persona call sites keep their
+ *   meaning; the legacy `persona_secret` key is kept in step for it, so a
+ *   downgrade still finds the identity where it always was.
+ */
 class PersonaStore(context: Context) {
     private val prefs = securePrefs(context, "ducat_contacts")
 
-    /** Our own persona, in the same hex form contacts are keyed by. */
-    fun personaHex(): String =
-        uniffi.ducat_mobile.personaPublicHex(secret())
+    companion object {
+        /** Compartments that fit on one hand. */
+        const val MAX_PERSONAS = 4
+        private val lock = Any()
 
-    fun secret(): ByteArray {
-        prefs.getString("persona_secret", null)?.let { return unb64(it) }
-        val fresh = uniffi.ducat_mobile.createPersonaSecret()
-        prefs.edit().putString("persona_secret", b64(fresh)).apply()
-        return fresh
+        /** Parsed roster, keyed by the raw JSON it came from — the store is
+         *  EncryptedSharedPreferences and every read decrypts. */
+        @Volatile
+        private var cached: Pair<String, List<Pair<ByteArray, Persona>>>? = null
     }
+
+    private fun parse(raw: String): List<Pair<ByteArray, Persona>> {
+        cached?.takeIf { it.first == raw }?.let { return it.second }
+        val arr = JSONArray(raw)
+        val list = (0 until arr.length()).map { i ->
+            val o = arr.getJSONObject(i)
+            val secret = unb64(o.getString("secret"))
+            secret to Persona(
+                hex = uniffi.ducat_mobile.personaPublicHex(secret),
+                name = o.optString("name", ""),
+                color = o.optInt("color", 0),
+                createdAt = o.optLong("created", 0L),
+            )
+        }
+        cached = raw to list
+        return list
+    }
+
+    private fun writeLocked(entries: List<Pair<ByteArray, Persona>>) {
+        val arr = JSONArray()
+        for ((secret, p) in entries) {
+            arr.put(
+                JSONObject()
+                    .put("secret", b64(secret))
+                    .put("name", p.name)
+                    .put("color", p.color)
+                    .put("created", p.createdAt),
+            )
+        }
+        val raw = arr.toString()
+        // The legacy key rides along as the primary, so the Rust backup
+        // export and any downgraded build keep finding the identity.
+        prefs.edit()
+            .putString("personas", raw)
+            .putString("persona_secret", b64(entries.first().first))
+            .apply()
+        cached = raw to entries.map { it.first to it.second }
+    }
+
+    /** The roster, migrating the single-persona era on first touch. */
+    private fun rosterLocked(): List<Pair<ByteArray, Persona>> {
+        prefs.getString("personas", null)?.let { return parse(it) }
+        val secret = prefs.getString("persona_secret", null)?.let(::unb64)
+            ?: uniffi.ducat_mobile.createPersonaSecret()
+        val entry = secret to Persona(
+            hex = uniffi.ducat_mobile.personaPublicHex(secret),
+            name = "",
+            color = 0,
+            createdAt = System.currentTimeMillis() / 1000,
+        )
+        writeLocked(listOf(entry))
+        return listOf(entry)
+    }
+
+    fun all(): List<Persona> = synchronized(lock) { rosterLocked().map { it.second } }
+
+    fun allHexes(): Set<String> = all().mapTo(mutableSetOf()) { it.hex }
+
+    /** The primary persona's secret — entry zero, minted on first ever call. */
+    fun secret(): ByteArray = synchronized(lock) { rosterLocked().first().first }
+
+    /** The primary persona, in the same hex form contacts are keyed by. */
+    fun personaHex(): String = synchronized(lock) { rosterLocked().first().second.hex }
+
+    fun secretFor(hex: String): ByteArray? =
+        synchronized(lock) { rosterLocked().firstOrNull { it.second.hex == hex }?.first }
+
+    /** Mint a new compartment, or null at the cap. */
+    fun create(name: String, color: Int): Persona? = synchronized(lock) {
+        val entries = rosterLocked()
+        if (entries.size >= MAX_PERSONAS) return null
+        val secret = uniffi.ducat_mobile.createPersonaSecret()
+        val p = Persona(
+            hex = uniffi.ducat_mobile.personaPublicHex(secret),
+            name = name,
+            color = color,
+            createdAt = System.currentTimeMillis() / 1000,
+        )
+        writeLocked(entries + (secret to p))
+        p
+    }
+
+    fun rename(hex: String, name: String) = synchronized(lock) {
+        writeLocked(rosterLocked().map { (s, p) -> s to if (p.hex == hex) p.copy(name = name) else p })
+    }
+
+    fun setColor(hex: String, color: Int) = synchronized(lock) {
+        writeLocked(rosterLocked().map { (s, p) -> s to if (p.hex == hex) p.copy(color = color) else p })
+    }
+
+    // --- the worn persona --------------------------------------------------
+    //
+    // Which compartment the phone is currently BEING — what the doorways
+    // default to and what the scoped screens show. Pure UI state; nothing
+    // on the wire reads it, and a thread never consults it after birth.
+
+    fun worn(): String {
+        val w = prefs.getString("worn_persona", null)
+        return if (w != null && allHexes().contains(w)) w else personaHex()
+    }
+
+    fun setWorn(hex: String) {
+        if (!allHexes().contains(hex)) return
+        prefs.edit().putString("worn_persona", hex).apply()
+        ContactStore.bump()
+    }
+
+    // --- resolution --------------------------------------------------------
+
+    /**
+     * The persona a contact belongs to. Empty owner means the primary —
+     * the single-persona era's contacts, and anything restored from an old
+     * backup, resolve there without a migration having to touch them first.
+     */
+    fun ownerHexOf(c: Contact): String = c.owner.ifBlank { personaHex() }
+
+    /**
+     * The secret that answers for a contact. A roster never shrinks, so a
+     * stored owner always resolves; the primary is the safety net for the
+     * empty-owner era, not a silent fallback for a missing persona.
+     */
+    fun ownerSecretOf(c: Contact): ByteArray =
+        c.owner.takeIf { it.isNotBlank() }?.let { secretFor(it) } ?: secret()
 
     /**
      * Become the identity in a backup.
@@ -1920,12 +2134,49 @@ class PersonaStore(context: Context) {
      * somebody's address book: contacts are keyed by *their* persona, but every
      * message this device sends is signed by ours, so a device that recovered
      * the threads and kept its own keypair is a stranger to everyone in them.
-     * Nothing called this before it existed — `personaSecret` travelled in the
-     * bundle, was read, and was never used.
+     * Replaces the primary; [restoreRoster] carries the rest when the bundle
+     * has them.
      */
     fun restoreSecret(secret: ByteArray) {
         if (secret.isEmpty()) return
-        prefs.edit().putString("persona_secret", b64(secret)).apply()
+        synchronized(lock) {
+            val entries = rosterLocked()
+            val head = secret to entries.first().second.copy(
+                hex = uniffi.ducat_mobile.personaPublicHex(secret),
+            )
+            writeLocked(listOf(head) + entries.drop(1))
+        }
+    }
+
+    /** The roster for the typed backup leg, primary first. */
+    fun backupPersonas(): List<uniffi.ducat_mobile.PersonaBackup> = synchronized(lock) {
+        rosterLocked().map { (secret, p) ->
+            uniffi.ducat_mobile.PersonaBackup(
+                secret = secret,
+                name = p.name.ifBlank { null },
+                color = p.color.toULong() and 0xFFFFFFFFuL,
+                created = p.createdAt.toULong(),
+            )
+        }
+    }
+
+    /**
+     * Restore the whole roster from a typed bundle. Wholesale replacement —
+     * a restore is becoming that phone, compartments and all. An empty list
+     * (an old bundle) leaves whatever [restoreSecret] already installed.
+     */
+    fun restoreRoster(entries: List<uniffi.ducat_mobile.PersonaBackup>) {
+        if (entries.isEmpty()) return
+        synchronized(lock) {
+            writeLocked(entries.map { e ->
+                e.secret to Persona(
+                    hex = uniffi.ducat_mobile.personaPublicHex(e.secret),
+                    name = e.name ?: "",
+                    color = e.color.toInt(),
+                    createdAt = e.created.toLong(),
+                )
+            })
+        }
     }
 }
 

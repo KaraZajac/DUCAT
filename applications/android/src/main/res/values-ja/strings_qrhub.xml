@@ -14,4 +14,5 @@
     <string name="qrhub_one_per_code">1つのコードにつき1人です。誰かがこのコードを使うと、次のコードが自動で作られます — 操作は要りません。</string>
     <string name="qrhub_name_travels">名前と写真はカードと一緒に渡ります。それ以外に共有するものは、カードが開いた接続を通じて後から届きます。</string>
     <string name="qrhub_copied">リンクをコピーしました</string>
+    <string name="qrhub_showing_as">%1$sとして表示中</string>
 </resources>

@@ -191,9 +191,14 @@ object Mailbox {
         validSecs: ULong,
         /** "profile" for the standing code, "sale" for a till/tab/ride handshake. */
         purpose: String = "profile",
+        /** Which of our personas cuts this card — the doorway choice. Null
+         *  means the worn one, which is what every existing caller meant. */
+        asPersonaHex: String? = null,
     ): IssuedHandle {
         val store = ContactStore(context)
-        val persona = PersonaStore(context).secret()
+        val personas = PersonaStore(context)
+        val ownerHex = asPersonaHex ?: personas.worn()
+        val persona = personas.secretFor(ownerHex) ?: personas.secret()
 
         val writer = generateWriterKeys()
         val inbox = nodeDhtCreateShared(writer.public)
@@ -245,6 +250,7 @@ object Mailbox {
             inbox.key, writer.public, writer.secret,
             outbox.key, outbox.ownerPublic, outbox.ownerSecret,
             card.uri, purpose, validSecs.toLong(),
+            owner = ownerHex,
         )
         DucatLog.i(TAG, "issued card: inbox=${inbox.key.take(24)}… outbox=${outbox.key.take(24)}…")
         // The inbox key rides along because it is the card's identity: a flow
@@ -281,9 +287,15 @@ object Mailbox {
         /** True only when accepting a hail: the one claim where the car —
          *  model, colour, plate — belongs in the details we publish. */
         asDriver: Boolean = false,
+        /** Which of our personas answers — the doorway choice. Null means
+         *  the worn one; a re-claim of somebody already known ignores both
+         *  and keeps the persona the relationship was born under, because a
+         *  hat worn at scan time must not silently move a friendship into
+         *  the shop. */
+        asPersonaHex: String? = null,
     ): Contact {
         val store = ContactStore(context)
-        val persona = PersonaStore(context).secret()
+        val personas = PersonaStore(context)
 
         nodeDhtOpen(scanned.inboxKey, scanned.writerPublic, scanned.writerSecret)
 
@@ -315,9 +327,17 @@ object Mailbox {
         //
         // Claiming also burns the card's single reply slot, so a seller who
         // did this destroyed the code a real buyer was about to scan.
-        if (theirs.persona.toHexString() == PersonaStore(context).personaHex()) {
+        if (personas.allHexes().contains(theirs.persona.toHexString())) {
             throw OwnCard()
         }
+
+        // The answering persona, settled BEFORE the reply seals: the reply
+        // publishes our persona key, so a prior relationship's owner must
+        // win over the worn hat here, not after the network has been told.
+        val prior = store.all().firstOrNull { it.personaHex == theirs.persona.toHexString() }
+        val ownerHex = prior?.let { personas.ownerHexOf(it) }
+            ?: asPersonaHex ?: personas.worn()
+        val persona = personas.secretFor(ownerHex) ?: personas.secret()
 
         val outbox = createLog(context)
         val prekeys = generatePrekeys(
@@ -373,7 +393,6 @@ object Mailbox {
         // Our own outbox is genuinely new — it was created three lines up —
         // so zero is right for the sending side. Their log is only new if the
         // card names a different one, which is exactly the test below.
-        val prior = store.all().firstOrNull { it.personaHex == theirs.persona.toHexString() }
         val sameLog = prior != null && prior.theirOutbox == theirs.outboxKey
         // A card carries a persona and nothing signed over it, so it may not
         // move an address that is already working. See foldCardAddress.
@@ -411,6 +430,7 @@ object Mailbox {
             myCardPurpose = prior?.myCardPurpose,
             myCardPurposeAt = prior?.myCardPurposeAt ?: 0L,
             myRing = NEW_RING.toInt(),
+            owner = ownerHex,
         )
         store.add(c)
         if (heldPayto != null && heldPayto != prior?.pendingAddress) {
@@ -531,6 +551,10 @@ object Mailbox {
                 // The same rule as claimCard, from the issuer's side: keep the
                 // counters for whichever log has not changed underneath them.
                 val prior = store.all().firstOrNull { it.personaHex == personaHex }
+                // Prior relationship keeps its persona; a new one belongs to
+                // whichever persona cut the card that was answered.
+                val ownerHex = prior?.owner?.ifBlank { null }
+                    ?: issued.owner.ifBlank { PersonaStore(context).personaHex() }
                 val sameOurs = prior != null && prior.myOutbox == issued.outboxKey
                 val sameTheirs = prior != null && prior.theirOutbox == theirs.outboxKey
                 val (payto, heldPayto) = foldCardAddress(prior, theirs.payto)
@@ -573,6 +597,7 @@ object Mailbox {
                             ) System.currentTimeMillis() / 1000
                             else prior?.myCardPurposeAt ?: 0L,
                         myRing = NEW_RING.toInt(),
+                        owner = ownerHex,
                     )
                 )
                 if (heldPayto != null && heldPayto != prior?.pendingAddress) {
@@ -591,7 +616,15 @@ object Mailbox {
                 // handshake was for that sale, and pre-issuing another would
                 // mint records nobody will ever scan.
                 if (issued.purpose == "profile") {
-                    runCatching { issueCard(context, NameStore(context).get(), 60uL * 60uL * 24uL) }
+                    // The replacement code belongs to the same persona whose
+                    // code was just taken — the QR hub may be showing another
+                    // hat entirely by now.
+                    runCatching {
+                        issueCard(
+                            context, NameStore(context).get(), 60uL * 60uL * 24uL,
+                            asPersonaHex = issued.owner.ifBlank { null },
+                        )
+                    }
                         .onSuccess { DucatLog.i(TAG, "a fresh profile code is ready") }
                         .onFailure { DucatLog.w(TAG, "could not pre-issue: ${it.message}") }
                 }
@@ -670,7 +703,6 @@ object Mailbox {
         context: Context,
         c: Contact,
         body: String,
-        minePersonaHex: String,
         kind: Int = 0,
         amountPxmr: Long? = null,
         payto: String? = null,
@@ -707,6 +739,11 @@ object Mailbox {
         groupReSeq: Long? = null,
     ): Contact {
         val store = ContactStore(context)
+        // Who speaks is the contact's to say, not the caller's: the thread
+        // was bound to a persona at its doorway, and deriving the sender
+        // here — instead of taking it as a parameter — makes answering as
+        // somebody else not merely wrong but inexpressible.
+        val minePersonaHex = PersonaStore(context).ownerHexOf(c)
         // **The caller's copy of this contact is a snapshot, and counters move.**
         //
         // Everything numbered on the way out — the sequence, the previous
@@ -1287,11 +1324,11 @@ object Mailbox {
         // take-downs); each poll is a retry until the slot is verifiably
         // not ours or the notice has expired out of everyone's sweeps.
         runCatching { org.ducatproject.ducat.ui.sweepHailTombstones(context) }
-        val mine = PersonaStore(context).personaHex()
+        val personas = PersonaStore(context)
         var got = 0
         for (c in store.all()) {
             got += try {
-                pollOne(context, store, c, mine)
+                pollOne(context, store, c, personas.ownerHexOf(c))
             } catch (e: Exception) {
                 if (isOffline(e)) {
                     // Offline fails every contact identically; one line says it.

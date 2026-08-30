@@ -353,7 +353,6 @@ object Orders {
         Mailbox.send(
             context, contact,
             context.getString(R.string.kiosk_ready_message, order.number),
-            PersonaStore(context).personaHex(),
         )
         update(context, order.copy(readyAt = System.currentTimeMillis() / 1000))
         DucatLog.i(TAG, "order #${order.number} called as ready")

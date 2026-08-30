@@ -518,8 +518,6 @@ private fun RentSearchScreen(
                                                             R.string.rent_asking_about,
                                                             isolate(info.title),
                                                         ),
-                                                        org.ducatproject.ducat
-                                                            .PersonaStore(context).personaHex(),
                                                     )
                                                 }
                                                 c

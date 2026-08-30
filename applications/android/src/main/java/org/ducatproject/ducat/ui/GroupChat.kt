@@ -89,11 +89,11 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
             }.toSet()
     }
     val missing = remember(version, idHex) { Groups.missing(context, idHex) }
-    val mine = remember { PersonaStore(context).personaHex() }
+    val mine = remember { PersonaStore(context).allHexes() }
     val contacts = remember(version) { ContactStore(context).all() }
     val youLabel = stringResource(R.string.group_you)
     fun nameOf(hex: String): String = when {
-        hex == mine -> youLabel
+        hex in mine -> youLabel
         else -> contacts.firstOrNull { it.personaHex == hex }?.displayName()
             ?: "${hex.take(8)}…"
     }
@@ -575,11 +575,11 @@ private fun SplitSheet(idHex: String, group: Groups.Group, onDone: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val store = remember { ContactStore(context) }
-    val mine = remember { PersonaStore(context).personaHex() }
+    val mine = remember { PersonaStore(context).allHexes() }
     val contacts = remember { store.all() }
     val youLabel = stringResource(R.string.group_you)
     fun nameOf(hex: String): String = when {
-        hex == mine -> youLabel
+        hex in mine -> youLabel
         else -> contacts.firstOrNull { it.personaHex == hex }?.displayName()
             ?: "${hex.take(8)}…"
     }
@@ -609,7 +609,7 @@ private fun SplitSheet(idHex: String, group: Groups.Group, onDone: () -> Unit) {
         xmr.multiply(java.math.BigDecimal(1_000_000_000_000L)).toLong().takeIf { it > 0 }
     }
     val share = if (pxmr != null && checked.isNotEmpty()) pxmr / checked.size else null
-    val debtors = checked.filter { it != mine }
+    val debtors = checked.filter { it !in mine }
 
     // Resolved here because plurals are composition-only: the sentence the
     // group hears, e.g. "dinner — USD 20.00 · 3 ways — USD 6.67 each".
@@ -711,7 +711,6 @@ private fun SplitSheet(idHex: String, group: Groups.Group, onDone: () -> Unit) {
                                     org.ducatproject.ducat.Mailbox.send(
                                         context, c,
                                         note.ifBlank { defaultNote },
-                                        mine,
                                         kind = 1, amountPxmr = shareNow,
                                         payto = org.ducatproject.ducat.WalletStore(context)
                                             .addressFor(d),

@@ -547,7 +547,7 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                 val decline: () -> Result<Unit> = {
                     runCatching {
                         Mailbox.send(
-                            context, c, body, mine,
+                            context, c, body,
                             kind = 5, reSeq = m.seq, reOwn = false,
                         )
                         Unit

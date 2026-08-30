@@ -27,6 +27,7 @@ import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.SafeImage
 import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.ContactStore
+import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.R
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.draw.clip
@@ -96,7 +97,16 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
     var rowUnread by remember { mutableStateOf<Set<String>>(emptySet()) }
     LaunchedEffect(version, all) {
         val (sorted, lasts, unread) = withContext(kotlinx.coroutines.Dispatchers.IO) {
-            val visible = all.filter { it.chatVisible }
+            // The worn compartment's conversations only, once a second
+            // persona exists — the switcher in the drawer is how the others
+            // are reached. One hat, one list; the single-persona era sees
+            // no change because every owner resolves to the primary.
+            val personas = PersonaStore(context)
+            val worn = personas.worn()
+            val scoped = if (personas.all().size > 1) {
+                all.filter { personas.ownerHexOf(it) == worn }
+            } else all
+            val visible = scoped.filter { it.chatVisible }
             // By the last message a person could have read, not the last
             // one the protocol wrote. Calling off an escrow sends a kind
             // 10, and that alone lifted a dormant arbiter to the top of

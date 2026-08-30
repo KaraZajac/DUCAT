@@ -14,4 +14,5 @@
     <string name="qrhub_one_per_code">Her koda bir kişi. Biri bunu aldığı anda sıradaki kendiliğinden oluşturulur — yapman gereken bir şey yok.</string>
     <string name="qrhub_name_travels">Adın ve resmin kartla birlikte gider. Paylaştığın geri kalan her şey sonradan, kartın açtığı bağlantı üzerinden ulaşır.</string>
     <string name="qrhub_copied">Bağlantı kopyalandı</string>
+    <string name="qrhub_showing_as">%1$s olarak gösteriliyor</string>
 </resources>

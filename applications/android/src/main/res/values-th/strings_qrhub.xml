@@ -14,4 +14,5 @@
     <string name="qrhub_one_per_code">หนึ่งคนต่อหนึ่งโค้ด ทันทีที่มีคนรับโค้ดนี้ไป โค้ดถัดไปจะถูกสร้างขึ้นอัตโนมัติ — ไม่ต้องทำอะไรเลย</string>
     <string name="qrhub_name_travels">ชื่อและรูปของคุณเดินทางไปกับมัน อย่างอื่นที่คุณแชร์จะตามไปทีหลัง ผ่านการเชื่อมต่อที่มันเปิดขึ้น</string>
     <string name="qrhub_copied">คัดลอกลิงก์แล้ว</string>
+    <string name="qrhub_showing_as">กำลังแสดงเป็น %1$s</string>
 </resources>

@@ -14,4 +14,5 @@
     <string name="qrhub_one_per_code">شخص واحد لكل رمز. ما إن يأخذ أحدهم هذا حتى يُنشأ التالي تلقائيًا — لا شيء عليك فعله.</string>
     <string name="qrhub_name_travels">اسمك وصورتك يسافران معها. وكل ما تشاركه غير ذلك يصل لاحقًا، عبر الاتصال الذي تفتحه.</string>
     <string name="qrhub_copied">نُسخ الرابط</string>
+    <string name="qrhub_showing_as">معروض بصفة %1$s</string>
 </resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="personas_title">पर्सोना</string>
+    <string name="personas_body">यह फ़ोन कौन है। हर पर्सोना की अपनी कुंजी और अपने संपर्क हैं — दुकान को आपके दोस्तों का कभी पता नहीं चलता, और दोस्तों को दुकान कभी नहीं दिखती। नए रिश्ते उसी में जुड़ते हैं जिसे आपने पहन रखा है।</string>
+    <string name="personas_primary">निजी</string>
+    <string name="personas_worn">पहनी हुई</string>
+    <string name="personas_add">पर्सोना जोड़ें</string>
+    <string name="personas_name_label">नाम</string>
+    <string name="personas_name_support">आपके इस पहलू का नाम — दुकान, बाज़ार, ब्राउज़िंग।</string>
+    <string name="personas_cap">चार ही सीमा है: खाने तभी काम करते हैं जब एक हाथ पर गिने जा सकें।</string>
+    <string name="personas_no_delete">पर्सोना मिटाया नहीं जा सकता — उसके संपर्क सिर्फ़ उसी की कुंजी को जवाब देते हैं। इस्तेमाल बंद कर दें, वह बस शांत हो जाएगा।</string>
+    <string name="personas_save">सहेजें</string>
+    <string name="personas_cancel">रद्द करें</string>
+</resources>

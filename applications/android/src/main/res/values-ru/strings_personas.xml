@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="personas_title">Персоны</string>
+    <string name="personas_body">Кто этот телефон. Каждая персона — свой ключ со своими контактами: магазин никогда не узнает твоих друзей, а друзья не увидят магазин. Новые связи попадают в ту, что сейчас надета.</string>
+    <string name="personas_primary">Личная</string>
+    <string name="personas_worn">Надета</string>
+    <string name="personas_add">Добавить персону</string>
+    <string name="personas_name_label">Имя</string>
+    <string name="personas_name_support">Как зовётся эта твоя сторона — Магазин, Рынок, Сёрфинг.</string>
+    <string name="personas_cap">Четыре — предел: отсеки работают, только пока умещаются на одной руке.</string>
+    <string name="personas_no_delete">Персону нельзя удалить — её контакты отвечают только её ключу. Перестань ею пользоваться, и она просто затихнет.</string>
+    <string name="personas_save">Сохранить</string>
+    <string name="personas_cancel">Отмена</string>
+</resources>

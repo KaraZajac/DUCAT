@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="personas_title">身份</string>
+    <string name="personas_body">这部手机是谁。每个身份都是独立的密钥和独立的联系人——店铺永远不会认识你的朋友，朋友也永远看不到店铺。新的关系会进入你当前戴着的身份。</string>
+    <string name="personas_primary">个人</string>
+    <string name="personas_worn">当前</string>
+    <string name="personas_add">添加身份</string>
+    <string name="personas_name_label">名称</string>
+    <string name="personas_name_support">你这一面的名字——店铺、市集、浏览。</string>
+    <string name="personas_cap">上限是四个：分隔只有在一只手数得过来时才有意义。</string>
+    <string name="personas_no_delete">身份无法删除——它的联系人只认它的密钥。不再使用，它就安静下来。</string>
+    <string name="personas_save">保存</string>
+    <string name="personas_cancel">取消</string>
+</resources>

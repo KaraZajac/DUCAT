@@ -93,8 +93,21 @@ object Groups {
      * invitation. Members must already be contacts — the screen only offers
      * contacts, and the send below would have nowhere to write otherwise.
      */
+    /**
+     * Which of our personas a roster names. A group is joined AS somebody —
+     * the persona whose pairwise edges carry it — and with more than one
+     * persona on the phone, "me" is a per-group fact read from the roster,
+     * not a global. Falls back to the primary for a roster that predates
+     * the compartments (it can only name the primary anyway).
+     */
+    private fun myHexIn(context: Context, members: List<String>): String {
+        val ours = PersonaStore(context).allHexes()
+        return members.firstOrNull { it in ours } ?: PersonaStore(context).personaHex()
+    }
+
     fun create(context: Context, name: String, memberHexes: List<String>): Group {
-        val mine = PersonaStore(context).personaHex()
+        // The doorway: a group made now belongs to the worn persona.
+        val mine = PersonaStore(context).worn()
         val id = ByteArray(16).also { java.security.SecureRandom().nextBytes(it) }
         val members = (memberHexes + mine).distinct()
         val g = Group(id.toHexString(), name, members, 0L, disclosed = false)
@@ -137,8 +150,8 @@ object Groups {
         }
         val known = get(context, idHex)
         if (known == null) {
-            val mine = PersonaStore(context).personaHex()
-            if (mine !in members) {
+            val ours = PersonaStore(context).allHexes()
+            if (members.none { it in ours }) {
                 // A roster for a group we are not in is somebody else's list.
                 DucatLog.w(TAG, "roster for a group we are not in — ignored")
                 return
@@ -177,7 +190,7 @@ object Groups {
      * changes included.
      */
     private fun sendRoster(context: Context, g: Group) {
-        val mine = PersonaStore(context).personaHex()
+        val mine = myHexIn(context, g.members)
         val payload = uniffi.ducat_mobile.groupRosterEncode(
             g.name, g.members.map { hexToBytes(it)!! },
         )
@@ -189,7 +202,7 @@ object Groups {
             val c = store.all().firstOrNull { it.personaHex == m } ?: continue
             runCatching {
                 Mailbox.send(
-                    context, c, "group: ${g.name}", mine,
+                    context, c, "group: ${g.name}",
                     kind = 12,
                     payload = payload,
                     groupId = hexToBytes(g.idHex),
@@ -214,7 +227,7 @@ object Groups {
     /** The local mesh check: members we do not hold as contacts. */
     fun missing(context: Context, idHex: String): List<String> {
         val g = get(context, idHex) ?: return emptyList()
-        val mine = PersonaStore(context).personaHex()
+        val mine = myHexIn(context, g.members)
         val contacts = ContactStore(context).all().map { it.personaHex }.toSet()
         return g.members.filter { it != mine && it !in contacts }
     }
@@ -243,7 +256,7 @@ object Groups {
         if (gaps.isNotEmpty()) {
             throw IllegalStateException("the group's mesh is incomplete")
         }
-        val mine = PersonaStore(context).personaHex()
+        val mine = myHexIn(context, g.members)
         val seq = g.myGroupSeq + 1
         upsert(context, g.copy(myGroupSeq = seq))
         val store = ContactStore(context)
@@ -252,7 +265,7 @@ object Groups {
             val c = store.all().firstOrNull { it.personaHex == m } ?: continue
             runCatching {
                 Mailbox.send(
-                    context, c, body, mine,
+                    context, c, body,
                     kind = kind,
                     groupId = hexToBytes(idHex),
                     groupSeq = seq,
@@ -297,7 +310,8 @@ object Groups {
     fun retryOutbox(context: Context) {
         val arr = retries(context)
         if (arr.length() == 0) return
-        val mine = PersonaStore(context).personaHex()
+        val personas = PersonaStore(context)
+        val ours = personas.allHexes()
         val store = ContactStore(context)
         val keep = JSONArray()
         for (i in 0 until arr.length()) {
@@ -307,7 +321,7 @@ object Groups {
                 val g = get(context, o.getString("g"))
                 val ok = c != null && g != null && runCatching {
                     Mailbox.send(
-                        context, c, "group: ${g.name}", mine,
+                        context, c, "group: ${g.name}",
                         kind = 12,
                         payload = uniffi.ducat_mobile.groupRosterEncode(
                             g.name, g.members.map { hexToBytes(it)!! },
@@ -321,7 +335,7 @@ object Groups {
             }
             val ok = c != null && runCatching {
                 Mailbox.send(
-                    context, c, o.getString("b"), mine,
+                    context, c, o.getString("b"),
                     kind = o.optInt("k"),
                     groupId = hexToBytes(o.getString("g")),
                     groupSeq = o.getLong("s"),
@@ -349,7 +363,7 @@ object Groups {
     fun thread(context: Context, idHex: String): List<Row> {
         val g = get(context, idHex) ?: return emptyList()
         val store = ContactStore(context)
-        val mine = PersonaStore(context).personaHex()
+        val mine = myHexIn(context, g.members)
         val seen = HashSet<Pair<String, Long>>()
         val out = ArrayList<Row>()
         for (m in g.members.filter { it != mine }) {

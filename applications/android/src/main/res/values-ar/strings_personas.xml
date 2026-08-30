@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="personas_title">الشخصيات</string>
+    <string name="personas_body">من يكون هذا الهاتف. كل شخصية مفتاحها الخاص وجهات اتصالها الخاصة — المتجر لا يعرف أصدقاءك أبدًا، وأصدقاؤك لا يرون المتجر أبدًا. العلاقات الجديدة تنضم إلى الشخصية التي ترتديها الآن.</string>
+    <string name="personas_primary">شخصية</string>
+    <string name="personas_worn">المرتداة</string>
+    <string name="personas_add">إضافة شخصية</string>
+    <string name="personas_name_label">الاسم</string>
+    <string name="personas_name_support">اسم هذا الجانب منك — متجر، سوق، تصفح.</string>
+    <string name="personas_cap">أربع هو الحد: الحجرات لا تنفع إلا وهي تُعد على يد واحدة.</string>
+    <string name="personas_no_delete">لا يمكن حذف الشخصية — جهات اتصالها لا تجيب إلا مفتاحها. توقف عن استخدامها فتصمت وحسب.</string>
+    <string name="personas_save">حفظ</string>
+    <string name="personas_cancel">إلغاء</string>
+</resources>

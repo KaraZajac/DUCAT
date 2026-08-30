@@ -447,7 +447,6 @@ internal fun cancelTabWithRetract(
                 R.string.bartab_bill_cancelled_msg,
                 Amounts.show(context, tab.settledTotal).primary,
             ),
-            org.ducatproject.ducat.PersonaStore(context).personaHex(),
             kind = 5, reSeq = billSeq, reOwn = true,
         )
     }.onFailure { DucatLog.w(TAG, "cancel retract: ${it.message}") }
@@ -524,7 +523,6 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                                 Amounts.show(context, a).primary,
                                 Amounts.show(context, updated.totalPxmr).primary,
                             ),
-                            org.ducatproject.ducat.PersonaStore(context).personaHex(),
                         )
                     }.onFailure { DucatLog.w(TAG, "drink notice: ${it.message}") }
                 }

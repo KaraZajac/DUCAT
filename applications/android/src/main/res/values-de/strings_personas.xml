@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="personas_title">Personas</string>
+    <string name="personas_body">Wer dieses Telefon ist. Jede Persona ist ein eigener Schlüssel mit eigenen Kontakten — der Laden erfährt nie von deinen Freunden, und deine Freunde sehen nie den Laden. Neue Beziehungen landen bei der, die du gerade trägst.</string>
+    <string name="personas_primary">Persönlich</string>
+    <string name="personas_worn">Getragen</string>
+    <string name="personas_add">Persona hinzufügen</string>
+    <string name="personas_name_label">Name</string>
+    <string name="personas_name_support">Wie diese Seite von dir heißt — Laden, Markt, Stöbern.</string>
+    <string name="personas_cap">Vier sind das Limit: Schubladen funktionieren nur, wenn sie an eine Hand passen.</string>
+    <string name="personas_no_delete">Eine Persona lässt sich nicht löschen — ihre Kontakte antworten nur ihrem Schlüssel. Nutze sie nicht mehr, und sie wird einfach still.</string>
+    <string name="personas_save">Speichern</string>
+    <string name="personas_cancel">Abbrechen</string>
+</resources>

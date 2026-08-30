@@ -265,7 +265,6 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     val store = remember { ContactStore(context) }
     val scope = rememberCoroutineScope()
     var c by remember { mutableStateOf(contact) }
-    val mine = remember { PersonaStore(context).personaHex() }
     // Starts empty and fills from IO below: decoding a whole thread is work
     // that scales with how long two people have known each other, and the
     // ledger ANR (2026-08-27) established what that costs on the main
@@ -387,7 +386,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         error = null
                         scope.launch {
                             val result = withContext(Dispatchers.IO) {
-                                runCatching { sendOne(context, c, body, mine, replyTo, replyToOwn) }
+                                runCatching { sendOne(context, c, body, replyTo, replyToOwn) }
                             }
                             sending = false
                             result.onSuccess { updated ->
@@ -473,7 +472,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                             scope.launch(Dispatchers.IO) {
                                 afterSend(
                                     runCatching {
-                                        sendPicture(context, c, mine, uri) { d, t ->
+                                        sendPicture(context, c, uri) { d, t ->
                                             sendProgress = d to t
                                         }
                                     },
@@ -490,7 +489,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                             scope.launch(Dispatchers.IO) {
                                 afterSend(
                                     runCatching {
-                                        sendFile(context, c, mine, uri) { d, t ->
+                                        sendFile(context, c, uri) { d, t ->
                                             sendProgress = d to t
                                         }
                                     },
@@ -518,7 +517,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                             scope.launch(Dispatchers.IO) {
                                 afterSend(
                                     runCatching {
-                                        sendPicture(context, c, mine, uri) { d, t ->
+                                        sendPicture(context, c, uri) { d, t ->
                                             sendProgress = d to t
                                         }
                                     },
@@ -557,7 +556,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                             } else {
                                 scope.launch(Dispatchers.IO) {
                                     afterSend(
-                                        runCatching { Mailbox.send(context, c, place, mine) },
+                                        runCatching { Mailbox.send(context, c, place) },
                                         context.getString(R.string.chat_what_location),
                                     )
                                 }
@@ -693,7 +692,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                                                 afterSend(
                                                                     runCatching {
                                                                         sendVoice(
-                                                                            context, c, mine,
+                                                                            context, c,
                                                                             take.file,
                                                                         ) { d, t ->
                                                                             sendProgress = d to t
@@ -850,7 +849,6 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                                 context.getString(
                                                     R.string.chat_intro_card_body, card.uri
                                                 ),
-                                                mine,
                                             )
                                         },
                                         context.getString(R.string.chat_what_card),
@@ -862,7 +860,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                 scope.launch(Dispatchers.IO) {
                                     afterSend(
                                         runCatching {
-                                            Mailbox.send(context, c, contactCard(chosen), mine)
+                                            Mailbox.send(context, c, contactCard(chosen))
                                         },
                                         context.getString(R.string.chat_what_contact),
                                     )
@@ -1154,7 +1152,6 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                 R.string.chat_decline_bill,
                                 Amounts.show(context, b.amountPxmr).primary,
                             ),
-                            mine,
                             kind = 5, reSeq = b.seq, reOwn = false,
                         )
                     }
@@ -1226,7 +1223,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                             scope.launch(Dispatchers.IO) {
                                                 runCatching {
                                                     Mailbox.send(
-                                                        context, c, emo, mine,
+                                                        context, c, emo,
                                                         kind = 4,
                                                         reSeq = m.seq,
                                                         reOwn = m.outgoing,
@@ -1281,7 +1278,6 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                         Mailbox.send(
                                             context, c,
                                             context.getString(R.string.chat_unsent),
-                                            mine,
                                             kind = 5, reSeq = m.seq, reOwn = true,
                                         )
                                     }.onFailure {
@@ -1314,7 +1310,6 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                                 R.string.bartab_bill_cancelled_msg,
                                                 Amounts.show(context, m.amountPxmr).primary,
                                             ),
-                                            mine,
                                             kind = 5, reSeq = m.seq, reOwn = true,
                                         )
                                     }.onFailure {
@@ -1520,11 +1515,10 @@ private fun sendOne(
     context: android.content.Context,
     c: Contact,
     body: String,
-    minePersonaHex: String,
     /** §16.14: the message this answers, if it answers one. */
     reSeq: Long? = null,
     reOwn: Boolean = false,
-): Contact = Mailbox.send(context, c, body, minePersonaHex, reSeq = reSeq, reOwn = reOwn)
+): Contact = Mailbox.send(context, c, body, reSeq = reSeq, reOwn = reOwn)
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -2219,7 +2213,6 @@ private fun Bill(m: StoredMessage, fg: androidx.compose.ui.graphics.Color) {
 private fun sendPicture(
     context: android.content.Context,
     c: Contact,
-    mine: String,
     uri: android.net.Uri,
     onChunk: (Int, Int) -> Unit = { _, _ -> },
 ) {
@@ -2244,7 +2237,7 @@ private fun sendPicture(
     val bytes = plain ?: throw IllegalArgumentException(
         context.getString(R.string.chat_picture_too_big)
     )
-    sendAttachmentBytes(context, c, mine, bytes, "image/jpeg", null, "📷", onChunk)
+    sendAttachmentBytes(context, c, bytes, "image/jpeg", null, "📷", onChunk)
 }
 
 /**
@@ -2259,7 +2252,6 @@ private fun sendPicture(
 private fun sendAttachmentBytes(
     context: android.content.Context,
     c: Contact,
-    mine: String,
     bytes: ByteArray,
     mime: String,
     name: String?,
@@ -2299,7 +2291,7 @@ private fun sendAttachmentBytes(
     // failed send is inert and invisible.
     Mailbox.attachmentFile(context, hash.joinToString("") { "%02x".format(it) })
         .writeBytes(bytes)
-    Mailbox.send(context, c, body, mine, attachment = ref)
+    Mailbox.send(context, c, body, attachment = ref)
 }
 
 /** The record cap: 32 subkeys of 32 KiB, minus the AEAD tag's 16 bytes. */
@@ -2309,7 +2301,6 @@ private const val MAX_FILE_BYTES = 32 * 32_768 - 16
 private fun sendVoice(
     context: android.content.Context,
     c: Contact,
-    mine: String,
     memo: java.io.File,
     onChunk: (Int, Int) -> Unit = { _, _ -> },
 ) {
@@ -2327,7 +2318,7 @@ private fun sendVoice(
         // memo recorded on either one play on the other.
         val wav = memo.extension.equals("wav", ignoreCase = true)
         sendAttachmentBytes(
-            context, c, mine, bytes,
+            context, c, bytes,
             if (wav) "audio/wav" else "audio/mp4",
             if (wav) "Voice memo.wav" else "Voice memo.m4a",
             "🎤",
@@ -2342,7 +2333,6 @@ private fun sendVoice(
 private fun sendFile(
     context: android.content.Context,
     c: Contact,
-    mine: String,
     uri: android.net.Uri,
     onChunk: (Int, Int) -> Unit = { _, _ -> },
 ) {
@@ -2359,7 +2349,7 @@ private fun sendFile(
         )
     }
     val mime = resolver.getType(uri) ?: "application/octet-stream"
-    sendAttachmentBytes(context, c, mine, bytes, mime, name, "📎 $name", onChunk)
+    sendAttachmentBytes(context, c, bytes, mime, name, "📎 $name", onChunk)
 }
 
 /**
@@ -3436,8 +3426,6 @@ private fun RideBondBanner(contact: Contact) {
                                             runCatching {
                                                 Mailbox.send(
                                                     context, contact, details,
-                                                    org.ducatproject.ducat
-                                                        .PersonaStore(context).personaHex(),
                                                 )
                                             }
                                         }.onFailure { error = trouble(context, it) }

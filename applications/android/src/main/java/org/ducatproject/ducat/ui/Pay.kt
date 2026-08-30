@@ -879,7 +879,6 @@ private fun AmountStep(
                                     Mailbox.send(
                                         context, target.contact,
                                         note.ifBlank { context.getString(R.string.pay_payment_request) },
-                                        PersonaStore(context).personaHex(),
                                         kind = 1, amountPxmr = amt,
                                         payto = WalletStore(context)
                                             .addressFor(target.contact.personaHex),
@@ -1036,7 +1035,6 @@ private fun AmountStep(
                                     Mailbox.send(
                                         context, c,
                                         note.ifBlank { context.getString(R.string.pay_payment) },
-                                        PersonaStore(context).personaHex(),
                                         kind = 2, amountPxmr = amount,
                                         // Which request this settles. `reOwn`
                                         // is false: the bill is in *their*

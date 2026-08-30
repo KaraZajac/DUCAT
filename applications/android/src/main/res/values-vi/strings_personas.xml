@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="personas_title">Nhân dạng</string>
+    <string name="personas_body">Chiếc điện thoại này là ai. Mỗi nhân dạng là một khóa riêng với danh bạ riêng — cửa hàng không bao giờ biết bạn bè của bạn, và bạn bè không bao giờ thấy cửa hàng. Quan hệ mới sẽ vào nhân dạng bạn đang mang.</string>
+    <string name="personas_primary">Cá nhân</string>
+    <string name="personas_worn">Đang mang</string>
+    <string name="personas_add">Thêm nhân dạng</string>
+    <string name="personas_name_label">Tên</string>
+    <string name="personas_name_support">Tên của phía này của bạn — Cửa hàng, Chợ, Duyệt web.</string>
+    <string name="personas_cap">Bốn là giới hạn: các ngăn chỉ hữu ích khi đếm được trên một bàn tay.</string>
+    <string name="personas_no_delete">Không thể xóa nhân dạng — danh bạ của nó chỉ trả lời khóa của nó. Ngừng dùng, nó chỉ lặng im.</string>
+    <string name="personas_save">Lưu</string>
+    <string name="personas_cancel">Hủy</string>
+</resources>

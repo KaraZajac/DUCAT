@@ -162,6 +162,10 @@ object Listings {
             // to count down from without a migration the first time they sell.
             put("quantity", quantity.coerceIn(1L, MAX_QUANTITY))
             put("created", System.currentTimeMillis() / 1000)
+            // The doorway decision: this listing — its cards, its notice
+            // signatures, every enquiry it opens — belongs to the persona
+            // worn when it was written, forever.
+            put("owner", PersonaStore(context).worn())
             if (priceTyped != null && priceCurrency != null) {
                 put("priceTyped", priceTyped)
                 put("priceCurrency", priceCurrency)
@@ -304,11 +308,18 @@ object Listings {
         val o = reprice(context, get(context, id) ?: return false)
         val cell = o.optString("cell")
         if (cell.isBlank()) throw IllegalStateException("this listing has no area yet")
+        val personas = PersonaStore(context)
+        // The stored owner wins; a pre-persona listing adopts the primary
+        // and has it written down from here on.
+        val ownerHex = o.optString("owner").ifBlank {
+            personas.personaHex().also { hex -> o.put("owner", hex); put(context, o) }
+        }
         val card = Mailbox.issueCard(
             context, MyProfile(context).name(), TTL_SECONDS.toULong(), purpose = "rental",
+            asPersonaHex = ownerHex,
         )
         val notice = publicNotice(o, card.uri)
-        val persona = PersonaStore(context).secret()
+        val persona = personas.secretFor(ownerHex) ?: personas.secret()
         val now = System.currentTimeMillis() / 1000
 
         // A notice is signed for the slot it goes into and carries the proof of

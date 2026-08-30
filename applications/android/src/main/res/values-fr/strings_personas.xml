@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="personas_title">Personas</string>
+    <string name="personas_body">Qui est ce téléphone. Chaque persona est sa propre clé avec ses propres contacts — la boutique ne connaît jamais tes amis, et tes amis ne voient jamais la boutique. Les nouvelles relations rejoignent celle que tu portes.</string>
+    <string name="personas_primary">Personnel</string>
+    <string name="personas_worn">Portée</string>
+    <string name="personas_add">Ajouter une persona</string>
+    <string name="personas_name_label">Nom</string>
+    <string name="personas_name_support">Le nom de cette facette — Boutique, Marché, Navigation.</string>
+    <string name="personas_cap">Quatre au maximum : les compartiments ne fonctionnent que s\'ils tiennent sur une main.</string>
+    <string name="personas_no_delete">Une persona ne peut pas être supprimée — ses contacts ne répondent qu\'à sa clé. Cesse de l\'utiliser et elle se tait, simplement.</string>
+    <string name="personas_save">Enregistrer</string>
+    <string name="personas_cancel">Annuler</string>
+</resources>

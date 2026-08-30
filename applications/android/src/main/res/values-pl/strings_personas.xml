@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="personas_title">Persony</string>
+    <string name="personas_body">Kim jest ten telefon. Każda persona to osobny klucz z własnymi kontaktami — sklep nigdy nie pozna twoich znajomych, a znajomi nie zobaczą sklepu. Nowe relacje trafiają do tej, którą masz na sobie.</string>
+    <string name="personas_primary">Osobista</string>
+    <string name="personas_worn">Noszona</string>
+    <string name="personas_add">Dodaj personę</string>
+    <string name="personas_name_label">Nazwa</string>
+    <string name="personas_name_support">Jak nazywa się ta twoja strona — Sklep, Targ, Przeglądanie.</string>
+    <string name="personas_cap">Cztery to granica: przegródki działają tylko, gdy mieszczą się na jednej ręce.</string>
+    <string name="personas_no_delete">Persony nie da się usunąć — jej kontakty odpowiadają tylko jej kluczowi. Przestań jej używać, a po prostu ucichnie.</string>
+    <string name="personas_save">Zapisz</string>
+    <string name="personas_cancel">Anuluj</string>
+</resources>

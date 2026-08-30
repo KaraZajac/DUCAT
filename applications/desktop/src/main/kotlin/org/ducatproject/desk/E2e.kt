@@ -43,8 +43,7 @@ fun main() {
         } else {
             val c = Mailbox.claimCard(context, scanned, null)
             println("E2E_CLAIMED ${c.displayName()} ${c.personaHex}")
-            Mailbox.send(context, c, "hello from the desk",
-                PersonaStore(context).personaHex())
+            Mailbox.send(context, c, "hello from the desk")
             println("E2E_GREETED")
         }
     } else if (ContactStore(context).all().isEmpty()) {
@@ -84,7 +83,7 @@ fun main() {
                 // would otherwise volley "desk heard" at each other forever.
                 if (m.kind == 0 && !m.body.startsWith("[") && !m.body.startsWith("desk heard")) {
                     runCatching {
-                        Mailbox.send(context, c, "desk heard: ${m.body}", mine)
+                        Mailbox.send(context, c, "desk heard: ${m.body}")
                         println("E2E_REPLIED ${m.seq}")
                     }.onFailure { println("e2e: send error ${it.message}") }
                 }

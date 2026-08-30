@@ -149,7 +149,9 @@ private fun migrateDown(context: android.content.Context, p: PostedHail): Posted
     // for where it is going. Recovered by opening our own copy, which is the
     // only thing here that knows both the bytes and the slot they were for.
     val info = runCatching { hailDecode(p.notice, p.cell, p.subkey, 0uL) }.getOrNull() ?: return null
-    val persona = org.ducatproject.ducat.PersonaStore(context).secret()
+    val personas = org.ducatproject.ducat.PersonaStore(context)
+    val persona = p.owner.takeIf { it.isNotBlank() }?.let { personas.secretFor(it) }
+        ?: personas.secret()
     return runCatching {
         for (shard in 0u until myShard) {
             val name = uniffi.ducat_mobile.standShardName(base, shard)
@@ -310,6 +312,7 @@ fun HailCard(
                             board = moved.cell, subkey = moved.subkey,
                             inboxKey = moved.inboxKey, cardUri = moved.card,
                             expiry = moved.expiry, notice = moved.notice,
+                            owner = moved.owner,
                         )
                     )
                     DucatLog.i(TAG, "hail moved down to ${moved.cell} slot ${moved.subkey}")
@@ -603,7 +606,6 @@ fun HailCard(
                     runCatchingCancellable {
                         Mailbox.send(
                             context, d, context.getString(R.string.hail_accept_message),
-                            org.ducatproject.ducat.PersonaStore(context).personaHex(),
                             kind = 7, amountPxmr = offer.amountPxmr,
                             reSeq = offer.seq,
                         )
@@ -654,7 +656,6 @@ fun HailCard(
                     runCatchingCancellable {
                         Mailbox.send(
                             context, d, context.getString(R.string.hail_decline_message),
-                            org.ducatproject.ducat.PersonaStore(context).personaHex(),
                             kind = 5, reSeq = offer.seq, reOwn = false,
                         )
                     }.onFailure { DucatLog.w(TAG, "ride decline: ${it.message}") }
@@ -695,10 +696,12 @@ private data class PostedHail(
     /** The 5-cell copy, when the corner was deserted (§15.12). */
     val cell2: String? = null,
     val subkey2: UInt = 0u,
+    /** The persona that posted — a migration re-signs as the same one. */
+    val owner: String = "",
 )
 
 private fun RideStore.PostedRide.asPosted() =
-    PostedHail(board, subkey, inboxKey, cardUri, expiry, notice, board2, subkey2)
+    PostedHail(board, subkey, inboxKey, cardUri, expiry, notice, board2, subkey2, owner)
 
 /**
  * The driver's offer in flight: persona, our seq, the fare.
@@ -1003,7 +1006,6 @@ fun DriveScreen() {
                             val offerSeq = rider.outSeq
                             Mailbox.send(
                                 context, rider, msg,
-                                org.ducatproject.ducat.PersonaStore(context).personaHex(),
                                 kind = 6, amountPxmr = farePxmr, etaSecs = etaSecs,
                             )
                             DriveOffer(

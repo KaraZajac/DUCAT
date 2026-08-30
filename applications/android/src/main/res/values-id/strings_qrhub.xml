@@ -14,4 +14,5 @@
     <string name="qrhub_one_per_code">Satu orang per kode. Begitu seseorang mengambil yang ini, yang berikutnya dibuat otomatis — tidak ada yang perlu dilakukan.</string>
     <string name="qrhub_name_travels">Nama dan fotomu ikut bersamanya. Hal lain yang kamu bagikan menyusul kemudian, lewat koneksi yang dibukanya.</string>
     <string name="qrhub_copied">Tautan disalin</string>
+    <string name="qrhub_showing_as">Ditampilkan sebagai %1$s</string>
 </resources>

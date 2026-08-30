@@ -528,6 +528,62 @@ pub fn position_open(
     })
 }
 
+/// A fresh publication master secret (§16.20 track). One per publication;
+/// every period's content key derives from it, so this is the only key a
+/// publisher stores or backs up.
+#[uniffi::export]
+pub fn publication_master_create() -> Vec<u8> {
+    use rand_core::{OsRng, RngCore};
+    let mut k = [0u8; 32];
+    OsRng.fill_bytes(&mut k);
+    k.to_vec()
+}
+
+/// One period's content key, derived — deterministic over (master, id), so
+/// a restored device and a paying member both arrive at the same key.
+#[uniffi::export]
+pub fn publication_period_key(master: Vec<u8>, period_id: String) -> Result<Vec<u8>, ContactError> {
+    let m: [u8; 32] = master
+        .try_into()
+        .map_err(|_| ContactError::Refused("a publication master is 32 bytes".into()))?;
+    Ok(ducat_core::publish::period_key(&m, &period_id)
+        .map_err(refuse)?
+        .to_vec())
+}
+
+/// Seal one publication chunk for one (record, subkey) landing site.
+#[uniffi::export]
+pub fn publication_seal_chunk(
+    key: Vec<u8>,
+    record_key: String,
+    subkey: u32,
+    nonce: Vec<u8>,
+    plaintext: Vec<u8>,
+) -> Result<Vec<u8>, ContactError> {
+    let k: [u8; 32] = key
+        .try_into()
+        .map_err(|_| ContactError::Refused("a period key is 32 bytes".into()))?;
+    let n: [u8; ducat_core::publish::NONCE_LEN] = nonce
+        .try_into()
+        .map_err(|_| ContactError::Refused("a publication nonce is 24 bytes".into()))?;
+    Ok(ducat_core::publish::seal_chunk(&k, &record_key, subkey, &n, &plaintext))
+}
+
+/// Open a chunk read from a record's slot; the landing site is the AAD, so
+/// pass where it was actually read from.
+#[uniffi::export]
+pub fn publication_open_chunk(
+    key: Vec<u8>,
+    record_key: String,
+    subkey: u32,
+    value: Vec<u8>,
+) -> Result<Vec<u8>, ContactError> {
+    let k: [u8; 32] = key
+        .try_into()
+        .map_err(|_| ContactError::Refused("a period key is 32 bytes".into()))?;
+    ducat_core::publish::open_chunk(&k, &record_key, subkey, &value).map_err(refuse)
+}
+
 /// Seal attachment bytes; returns the ciphertext to park in a record.
 /// The key and nonce are the caller's to generate fresh — never reuse either.
 #[uniffi::export]

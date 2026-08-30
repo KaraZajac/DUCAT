@@ -30,6 +30,10 @@ class RideStore(context: Context) {
          *  deserted (§15.12's density rule). Same card; claim-once referees. */
         val board2: String? = null,
         val subkey2: UInt = 0u,
+        /** Which of our personas posted it — every re-sign (migration, wide
+         *  copy) must speak as the same one the embedded card belongs to.
+         *  Empty = the primary, the single-persona era's value. */
+        val owner: String = "",
     )
 
     fun save(r: PostedRide) {
@@ -43,6 +47,7 @@ class RideStore(context: Context) {
                 r.notice, android.util.Base64.NO_WRAP))
             .putString("board2", r.board2)
             .putInt("subkey2", r.subkey2.toInt())
+            .putString("ride_owner", r.owner)
             .apply()
     }
 
@@ -58,13 +63,14 @@ class RideStore(context: Context) {
                 ?: ByteArray(0),
             board2 = prefs.getString("board2", null),
             subkey2 = prefs.getInt("subkey2", 0).toUInt(),
+            owner = prefs.getString("ride_owner", "") ?: "",
         )
     }
 
     fun clear() = prefs.edit()
         .remove("board").remove("subkey").remove("inbox")
         .remove("card").remove("expiry").remove("notice")
-        .remove("board2").remove("subkey2")
+        .remove("board2").remove("subkey2").remove("ride_owner")
         .apply()
 
     // --- tombstones -------------------------------------------------------

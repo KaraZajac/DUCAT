@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="personas_title">ペルソナ</string>
+    <string name="personas_body">この電話が誰であるか。ペルソナごとに鍵も連絡先も別々です — 店が友人を知ることはなく、友人が店を見ることもありません。新しい関係は、いま身につけているペルソナに加わります。</string>
+    <string name="personas_primary">個人</string>
+    <string name="personas_worn">着用中</string>
+    <string name="personas_add">ペルソナを追加</string>
+    <string name="personas_name_label">名前</string>
+    <string name="personas_name_support">この一面の名前 — 店、マーケット、ブラウズなど。</string>
+    <string name="personas_cap">上限は4つ。仕切りは片手で数えられるうちしか機能しません。</string>
+    <string name="personas_no_delete">ペルソナは削除できません — その連絡先は、その鍵にしか応じません。使うのをやめれば、ただ静かになります。</string>
+    <string name="personas_save">保存</string>
+    <string name="personas_cancel">キャンセル</string>
+</resources>

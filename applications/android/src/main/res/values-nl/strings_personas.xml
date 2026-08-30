@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="personas_title">Persona\'s</string>
+    <string name="personas_body">Wie deze telefoon is. Elke persona is een eigen sleutel met eigen contacten — de winkel leert je vrienden nooit kennen, en je vrienden zien de winkel nooit. Nieuwe relaties komen bij degene die je draagt.</string>
+    <string name="personas_primary">Persoonlijk</string>
+    <string name="personas_worn">Gedragen</string>
+    <string name="personas_add">Persona toevoegen</string>
+    <string name="personas_name_label">Naam</string>
+    <string name="personas_name_support">Hoe deze kant van je heet — Winkel, Markt, Surfen.</string>
+    <string name="personas_cap">Vier is het maximum: vakjes werken alleen als ze op één hand passen.</string>
+    <string name="personas_no_delete">Een persona kan niet worden verwijderd — haar contacten antwoorden alleen haar sleutel. Stop met gebruiken en ze wordt gewoon stil.</string>
+    <string name="personas_save">Opslaan</string>
+    <string name="personas_cancel">Annuleren</string>
+</resources>

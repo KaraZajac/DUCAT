@@ -25,6 +25,7 @@ import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.MyProfile
+import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.R
 
 private const val TAG = "QrHub"
@@ -79,22 +80,36 @@ fun QrHub(
     // a null means the claim landed and the replacement is a moment behind,
     // and blanking the screen for that moment would be its own little lie.
     val cardsV by ContactStore.changes.collectAsState()
-    LaunchedEffect(cardsV) {
-        ContactStore(context).currentCardUri()
-            ?.takeIf { it != uri }
-            ?.let { uri = it }
-    }
+    val personas = remember { PersonaStore(context) }
+    val worn = remember(cardsV) { personas.worn() }
 
-    // Made without being asked for. A card takes seconds to publish — two DHT
-    // records — and the moment someone wants it is the moment they are holding
-    // a phone out to somebody. Waiting until then puts the wait in front of the
-    // person it is for.
-    LaunchedEffect(Unit) {
-        if (uri != null) return@LaunchedEffect
+    // One effect for both lives of the code. The registry answers scoped to
+    // the worn persona now, so switching hats re-reads; a hat that has NEVER
+    // had a standing code gets one minted here (the first-run case, per
+    // persona) — but a code that just got *claimed* is left alone, because
+    // collectClaims pre-issues the replacement and a second mint here would
+    // put two cards up for one hat. "Never had" and "just claimed" are told
+    // apart by whether any profile card for this hat exists at all.
+    LaunchedEffect(cardsV, worn) {
+        val store = ContactStore(context)
+        val current = store.currentCardUri()
+        if (current != null) {
+            if (current != uri) uri = current
+            return@LaunchedEffect
+        }
+        val primary = personas.personaHex()
+        val everHad = store.issuedCards().any {
+            it.purpose == "profile" &&
+                (it.owner == worn || (it.owner.isBlank() && worn == primary))
+        }
+        if (everHad) return@LaunchedEffect
         busy = true
         val r = withContext(Dispatchers.IO) {
             runCatching {
-                Mailbox.issueCard(context, MyProfile(context).name(), 60uL * 60uL * 24uL)
+                Mailbox.issueCard(
+                    context, MyProfile(context).name(), 60uL * 60uL * 24uL,
+                    asPersonaHex = worn,
+                )
             }
         }
         busy = false
@@ -200,6 +215,31 @@ fun QrHub(
                             },
                         )
                     } else {
+                        // Which hat the code belongs to, said above it —
+                        // this is the screen held out to a person, and the
+                        // one place wearing the wrong hat would bind a
+                        // stranger to the wrong compartment.
+                        val roster = remember(cardsV) { personas.all() }
+                        if (roster.size > 1) {
+                            val wornP = roster.firstOrNull { it.hex == worn }
+                            if (wornP != null) {
+                                Row(
+                                    Modifier.fillMaxWidth().padding(bottom = 6.dp),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    PersonaDot(wornP)
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(
+                                        stringResource(
+                                            R.string.qrhub_showing_as, personaLabel(wornP),
+                                        ),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            }
+                        }
                         MyCode(
                             uri = uri,
                             busy = busy,

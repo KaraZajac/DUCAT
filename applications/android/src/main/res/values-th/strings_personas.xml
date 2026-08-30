@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="personas_title">ตัวตน</string>
+    <string name="personas_body">โทรศัพท์เครื่องนี้คือใคร แต่ละตัวตนมีคีย์และรายชื่อของตัวเอง — ร้านไม่มีวันรู้จักเพื่อนของคุณ และเพื่อนไม่มีวันเห็นร้าน ความสัมพันธ์ใหม่จะเข้าตัวตนที่คุณสวมอยู่</string>
+    <string name="personas_primary">ส่วนตัว</string>
+    <string name="personas_worn">สวมอยู่</string>
+    <string name="personas_add">เพิ่มตัวตน</string>
+    <string name="personas_name_label">ชื่อ</string>
+    <string name="personas_name_support">ชื่อของด้านนี้ของคุณ — ร้านค้า ตลาด ท่องเว็บ</string>
+    <string name="personas_cap">สี่คือขีดจำกัด: ช่องแบ่งมีประโยชน์ก็ต่อเมื่อนับได้ด้วยมือเดียว</string>
+    <string name="personas_no_delete">ลบตัวตนไม่ได้ — รายชื่อของมันตอบเฉพาะคีย์ของมัน เลิกใช้แล้วมันก็แค่เงียบไป</string>
+    <string name="personas_save">บันทึก</string>
+    <string name="personas_cancel">ยกเลิก</string>
+</resources>

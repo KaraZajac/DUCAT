@@ -109,7 +109,20 @@ object Notify {
             10 -> context.getString(R.string.notify_escrow_called_off, from)
             else -> m.body
         }
-        post(context, from, what, openChat = personaHex)
+        // Which compartment this reached, said in the title once a second
+        // persona exists: three shops on one phone cannot share an
+        // undifferentiated "Sam paid you".
+        val personas = PersonaStore(context)
+        val title = if (personas.all().size > 1) {
+            val owner = ContactStore(context).all()
+                .firstOrNull { it.personaHex == personaHex }
+                ?.let { personas.ownerHexOf(it) }
+            val label = personas.all().firstOrNull { it.hex == owner }
+                ?.name?.ifBlank { null }
+                ?: context.getString(R.string.personas_primary)
+            "$label · $from"
+        } else from
+        post(context, title, what, openChat = personaHex)
     }
 
     /**

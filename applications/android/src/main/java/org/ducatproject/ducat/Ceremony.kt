@@ -667,7 +667,7 @@ object Ceremony {
                 ?: throw IllegalStateException("everyone in a bond must be your contact")
             Mailbox.send(
                 context, peer, "bond: building a shared deposit",
-                mineHex, kind = 8, round = 0, ceremonyId = id, payload = frame,
+                kind = 8, round = 0, ceremonyId = id, payload = frame,
             )
         }
         val o = JSONObject().apply {
@@ -808,7 +808,7 @@ object Ceremony {
                 }
                 Mailbox.send(
                     context, peer, "bond: building a shared deposit",
-                    mineHex, kind = 8, round = 0, ceremonyId = id, payload = frame,
+                    kind = 8, round = 0, ceremonyId = id, payload = frame,
                 )
             }
             o = JSONObject().apply {
@@ -913,7 +913,7 @@ object Ceremony {
                     val peer = contactFor(context, peerHex) ?: continue
                     Mailbox.send(
                         context, peer, "bond: your share",
-                        mineHex, kind = 8, round = 1, ceremonyId = id, payload = s.bytes,
+                        kind = 8, round = 1, ceremonyId = id, payload = s.bytes,
                     )
                 }
                 o.put("sent1", sent1)
@@ -961,7 +961,7 @@ object Ceremony {
                     runCatching {
                         Mailbox.send(
                             context, peer, "bond: the wallet I formed",
-                            mineHex, kind = 8, round = 2, ceremonyId = id,
+                            kind = 8, round = 2, ceremonyId = id,
                             payload = addr.toByteArray(),
                         )
                     }.onFailure {
@@ -1101,7 +1101,7 @@ object Ceremony {
         )
         Mailbox.send(
             context, contact, "bond: returning the deposit",
-            mineHex, kind = 9, round = 0, ceremonyId = id, payload = prop.payload,
+            kind = 9, round = 0, ceremonyId = id, payload = prop.payload,
         )
         o.put("stage", "releasing")
         o.put("cosignerIdx", cosignerIdx)
@@ -1422,7 +1422,7 @@ object Ceremony {
                 runCatching {
                     Mailbox.send(
                         context, peer, "bond: building a shared deposit",
-                        mineHex, kind = 8, round = 0, ceremonyId = id, payload = frame,
+                        kind = 8, round = 0, ceremonyId = id, payload = frame,
                     )
                 }.onSuccess { n++ }
                     .onFailure { DucatLog.w(TAG, "escrow $idHex: round 0 again — ${it.message}") }
@@ -1432,7 +1432,7 @@ object Ceremony {
                     runCatching {
                         Mailbox.send(
                             context, peer, "bond: your share",
-                            mineHex, kind = 8, round = 1, ceremonyId = id, payload = share,
+                            kind = 8, round = 1, ceremonyId = id, payload = share,
                         )
                     }.onSuccess { n++ }
                         .onFailure { DucatLog.w(TAG, "escrow $idHex: round 1 again — ${it.message}") }
@@ -1692,7 +1692,7 @@ object Ceremony {
                 // thread like the other ceremony traffic, and the reader's
                 // own phone writes the sentence they see.
                 Mailbox.send(
-                    context, peer, "ceremony: called off", mineHex,
+                    context, peer, "ceremony: called off",
                     kind = 10, ceremonyId = id,
                 )
             }.onFailure { DucatLog.w(TAG, "abort $idHex: ${it.message}") }
@@ -2376,7 +2376,6 @@ object Ceremony {
         Mailbox.send(
             context, peer,
             if (toArbiter) "ride: asking the arbiter to rule" else "ride: proposed a split",
-            PersonaStore(context).personaHex(),
             kind = 9, round = 0, ceremonyId = id, payload = prop.payload,
             amountPxmr = back,
         )
@@ -2556,7 +2555,6 @@ object Ceremony {
         )
         Mailbox.send(
             context, proposer, "fare released — thank you for the ride",
-            PersonaStore(context).personaHex(),
             kind = 9, round = 1, ceremonyId = id, payload = ans.payload,
         )
         settle(o, "release_cosigned")

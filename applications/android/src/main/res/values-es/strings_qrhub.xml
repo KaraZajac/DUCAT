@@ -14,4 +14,5 @@
     <string name="qrhub_one_per_code">Una persona por código. En cuanto alguien toma este, el siguiente se crea automáticamente — no hay nada que hacer.</string>
     <string name="qrhub_name_travels">Tu nombre y tu foto viajan con ella. Todo lo demás que compartas llega después, por la conexión que abre.</string>
     <string name="qrhub_copied">Enlace copiado</string>
+    <string name="qrhub_showing_as">Mostrando como %1$s</string>
 </resources>

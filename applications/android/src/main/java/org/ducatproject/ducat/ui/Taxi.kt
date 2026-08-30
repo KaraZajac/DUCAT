@@ -217,7 +217,6 @@ private fun NewRideScreen(rides: RideStore) {
                             Amounts.show(context, basePxmr!!).primary,
                             Amounts.show(context, perMinPxmr!!).primary,
                         ),
-                        PersonaStore(context).personaHex(),
                     )
                 }.onSuccess {
                     prefs.edit().putString("taxi_base_text", base)

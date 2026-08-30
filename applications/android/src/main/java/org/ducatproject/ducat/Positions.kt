@@ -183,7 +183,6 @@ object Positions {
             Mailbox.send(
                 context, contact,
                 context.getString(R.string.pos_shared_message),
-                PersonaStore(context).personaHex(),
                 kind = 11,
                 positionRecord = rec.key,
                 positionStreamKey = streamKey,

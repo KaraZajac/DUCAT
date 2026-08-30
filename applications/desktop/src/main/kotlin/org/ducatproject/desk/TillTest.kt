@@ -86,14 +86,12 @@ fun main() {
             runCatching {
                 Mailbox.send(
                     context, c, "Welcome to the Corner Café ☕",
-                    PersonaStore(context).personaHex(),
                 )
             }.onFailure { println("TILL_WARN greeting: ${it.message}") }
             runCatching {
                 val fresh = store.all().first { it.personaHex == c.personaHex }
                 val sent = Mailbox.send(
                     context, fresh, "Table 3",
-                    PersonaStore(context).personaHex(),
                     kind = 1, amountPxmr = billPxmr,
                     payto = WalletStore(context).address(),
                     items = listOf(
@@ -149,7 +147,6 @@ fun main() {
                     val paid = store.thread(paired!!).first { !it.outgoing && it.kind == 2 }
                     Mailbox.send(
                         context, fresh, "Receipt — thank you",
-                        PersonaStore(context).personaHex(),
                         kind = 3, amountPxmr = paid.amountPxmr,
                         items = listOf(
                             BillItem("Espresso", 300_000_000L),

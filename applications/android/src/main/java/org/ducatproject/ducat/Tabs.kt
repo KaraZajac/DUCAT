@@ -294,7 +294,6 @@ class TabStore(private val context: Context) {
                     else -> R.string.bill_note_tab
                 },
             ),
-            PersonaStore(context).personaHex(),
             kind = 1, amountPxmr = total,
             payto = payto,
             items = tab.lines, taxPxmr = tab.taxPxmr,
@@ -352,7 +351,6 @@ class TabStore(private val context: Context) {
         runCatching {
             Mailbox.send(
                 context, contact, context.getString(R.string.receipt_note_oob),
-                PersonaStore(context).personaHex(),
                 kind = 3, amountPxmr = tab.settledTotal,
                 // §16.14: the request this receipts. `reOwn`, because the
                 // party issuing a receipt is the party that sent the bill.
@@ -389,7 +387,6 @@ class TabStore(private val context: Context) {
                     R.string.bill_note_cancelled,
                     Amounts.show(context, tab.settledTotal).primary,
                 ),
-                PersonaStore(context).personaHex(),
             )
         }.onFailure { DucatLog.w(TAG, "cancel notice: ${it.message}") }
         DucatLog.i(TAG, "${tab.origin} tab cancelled (${formatXmr(tab.settledTotal)} XMR)")
@@ -658,7 +655,6 @@ class TabStore(private val context: Context) {
                 runCatching {
                     Mailbox.send(
                         context, contact, context.getString(R.string.receipt_note),
-                        PersonaStore(context).personaHex(),
                         kind = 3, amountPxmr = hit.amountPxmr,
                         items = receiptLines, taxPxmr = tab.taxPxmr,
                         txidHex = hit.txHashHex.ifEmpty { null },
