@@ -128,6 +128,22 @@ routes (IP-private swarming; I2P proved the concept viable), everything
 ciphertext under the period key so non-members can donate bandwidth for
 content they cannot read.
 
+**Decision revised 2026-08-30 (kara):** vendor stigmerge's code with
+full credit and convert it to BLAKE3, rather than rebuilding from a
+reading of it. Done the same day: `mobile/vendor/{stigmerge-fileindex,
+stigmerge-peer, veilnet}` at upstream git `8f26b50f` / veilnet 0.4.5,
+MPL-2.0 preserved, `mobile/vendor/STIGMERGE-NOTICE.md` records origin
+and modifications. Three changes so far: piece/payload/index hashing is
+BLAKE3 (shares deliberately wire-incompatible with public stigmerge
+swarms — ours are club-scoped and sealed), `veilnet::Connection` grew
+`from_api` (ride the app's running node; borrowed connections cannot
+detach, reattach or shut it down — pinned by test), and Cargo.tomls
+went concrete. All 91 vendored tests pass converted. Next: the node
+update-feeder hookup in mobile/src/node.rs (route-keyed AppCall demux),
+then seed/fetch bridge functions, then Kotlin. When the bridge links
+these crates, grow the two nativeFreshness guards' rustDirs to include
+mobile/vendor.
+
 **Prior art evaluated 2026-08-29:** `stigmerge` (né distrans) by cmars —
 MPL-2.0, veilid-core 0.5.6-compatible (ours resolves 0.5.7), engine
 generic over a `veilnet::Connection` trait (five methods, injectable),

@@ -1,0 +1,56 @@
+# Vendored from https://github.com/cmars/stigmerge (see ../STIGMERGE-NOTICE.md).
+# Cargo.toml rewritten from the upstream workspace form to concrete versions;
+# veilnet resolves to the vendored copy beside this one.
+[package]
+name = "stigmerge_peer"
+version = "0.6.3-ducat"
+edition = "2021"
+license = "MPL-2.0"
+description = "stigmerge p2p agent components (vendored for DUCAT, BLAKE3 pieces)"
+build = "build.rs"
+
+[lib]
+name = "stigmerge_peer"
+path = "src/lib.rs"
+
+[dependencies]
+anyhow = { version = "1.0", features = ["std", "backtrace"] }
+backoff = { version = "0.4", features = ["tokio"] }
+blake3 = "1"
+capnp = "0.21"
+dashmap = "6.1.0"
+flume = { version = "0.11", features = ["async"] }
+hex = "0.4"
+path-absolutize = "3.1"
+stigmerge_fileindex = { path = "../stigmerge-fileindex" }
+thiserror = "2.0"
+tokio = { version = "1.40", features = ["full"] }
+tokio-util = "0.7"
+tracing = { version = "0.1", features = ["log", "attributes"] }
+veilid-core = "0.5"
+veilnet = { path = "../veilnet" }
+
+[features]
+refactor = []
+
+[target.'cfg(unix)'.dependencies]
+sha2 = { version = "0.10", features = ["asm"] }
+
+[target.'cfg(windows)'.dependencies]
+sha2 = "0.10"
+
+[build-dependencies]
+capnpc = "0.21"
+hex = "0.4"
+
+[target.'cfg(unix)'.build-dependencies]
+sha2 = { version = "0.10", features = ["asm"] }
+
+[target.'cfg(windows)'.build-dependencies]
+sha2 = "0.10"
+
+[dev-dependencies]
+tempfile = "3.13"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+clap = { version = "4.5", features = ["derive", "env"] }
+veilnet = { path = "../veilnet", features = ["testing"] }
