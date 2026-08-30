@@ -1,0 +1,39 @@
+From e136d42588bf460460133485b8f7b63fe874edfa Mon Sep 17 00:00:00 2001
+From: Kara <kara@soulstone.org>
+Date: Sun, 30 Aug 2026 17:59:31 -0400
+Subject: [PATCH] fetcher: send Status::Done when the index completes
+
+Status::Done is sent on the want_length == 0 path (everything already
+on disk at startup), but a fetch that actually downloads its pieces
+returns State::Done from the ValidPiece handler without ever sending
+Status::Done. Anything consuming subscribe_status() as the completion
+signal waits forever on a fetch that has finished.
+
+Found embedding stigmerge-peer in another application whose
+orchestration waited on the status channel; the fetched file was
+byte-perfect while the process sat waiting.
+---
+ stigmerge-peer/src/fetcher.rs | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/stigmerge-peer/src/fetcher.rs b/stigmerge-peer/src/fetcher.rs
+index de31afa..982325f 100644
+--- a/stigmerge-peer/src/fetcher.rs
++++ b/stigmerge-peer/src/fetcher.rs
+@@ -417,6 +417,13 @@ impl<C: Connection + Clone + Send + Sync + 'static> Fetcher<C> {
+                                 }
+                             });
+                             if index_complete {
++                                // Status::Done is already sent on the
++                                // nothing-to-fetch path above; a fetch that
++                                // actually downloaded pieces returned
++                                // State::Done without ever saying so on the
++                                // status channel, so consumers of
++                                // subscribe_status waited forever.
++                                self.status_tx.send_replace(Status::Done);
+                                 task_cancel.cancel();
+                                 return Ok(State::Done);
+                             }
+-- 
+2.55.0
+

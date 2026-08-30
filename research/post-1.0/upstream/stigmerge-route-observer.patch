@@ -1,0 +1,114 @@
+From 50b07216d86ce3785132e2f710ebe8bb981cbeda Mon Sep 17 00:00:00 2001
+From: Kara <kara@soulstone.org>
+Date: Sun, 30 Aug 2026 17:59:46 -0400
+Subject: [PATCH] share_announcer: report allocated routes to an optional
+ observer
+
+An application embedding stigmerge-peer beside its own Veilid protocol
+owns the node's single update callback and has to demultiplex inbound
+AppCalls: block requests arriving on announcer routes belong to the
+seeder, everything else to the host protocol, and answering the wrong
+one consumes the other's single reply slot. The host can only split
+that traffic if it knows which routes are the announcer's.
+
+route_registry::set_observer installs a callback the announcer notifies
+on every route it creates or retires (initial announce, rotation, and
+release). Without an observer installed nothing changes.
+
+Proven in the field by an application running seeds and fetches on the
+same node as its own messaging protocol.
+---
+ stigmerge-peer/src/lib.rs             |  1 +
+ stigmerge-peer/src/route_registry.rs  | 39 +++++++++++++++++++++++++++
+ stigmerge-peer/src/share_announcer.rs |  3 +++
+ 3 files changed, 43 insertions(+)
+ create mode 100644 stigmerge-peer/src/route_registry.rs
+
+diff --git a/stigmerge-peer/src/lib.rs b/stigmerge-peer/src/lib.rs
+index fb4e7ac..19751d3 100644
+--- a/stigmerge-peer/src/lib.rs
++++ b/stigmerge-peer/src/lib.rs
+@@ -12,6 +12,7 @@ pub mod piece_map;
+ pub mod piece_verifier;
+ pub mod proto;
+ pub mod record;
++pub mod route_registry;
+ 
+ pub mod share_announcer;
+ pub mod share_resolver;
+diff --git a/stigmerge-peer/src/route_registry.rs b/stigmerge-peer/src/route_registry.rs
+new file mode 100644
+index 0000000..e373f36
+--- /dev/null
++++ b/stigmerge-peer/src/route_registry.rs
+@@ -0,0 +1,39 @@
++//! An observer for the private routes the share announcer allocates.
++//!
++//! The seeder answers block requests over private routes this crate
++//! creates. An application embedding stigmerge-peer next to its own
++//! Veilid protocol owns the node's single update callback and must
++//! demultiplex inbound `AppCall`s: calls arriving on announcer routes
++//! belong to the seeder, everything else to the host protocol — and
++//! answering the wrong one consumes the other's single reply slot. The
++//! host can only route what it can see, so the announcer reports every
++//! route it creates or retires here.
++//!
++//! A no-op unless an observer is installed, which is the existing
++//! behaviour for the CLI and for any embedder that does not need it.
++
++use std::sync::RwLock;
++
++use veilid_core::RouteId;
++
++type Observer = Box<dyn Fn(&RouteId, bool) + Send + Sync>;
++
++static OBSERVER: RwLock<Option<Observer>> = RwLock::new(None);
++
++/// Install the observer. Called once by the embedding application; `true`
++/// means the route was created, `false` that it was retired.
++pub fn set_observer(f: Observer) {
++    *OBSERVER.write().unwrap() = Some(f);
++}
++
++pub(crate) fn added(route_id: &RouteId) {
++    if let Some(f) = OBSERVER.read().unwrap().as_ref() {
++        f(route_id, true);
++    }
++}
++
++pub(crate) fn removed(route_id: &RouteId) {
++    if let Some(f) = OBSERVER.read().unwrap().as_ref() {
++        f(route_id, false);
++    }
++}
+diff --git a/stigmerge-peer/src/share_announcer.rs b/stigmerge-peer/src/share_announcer.rs
+index 176f928..5a56883 100644
+--- a/stigmerge-peer/src/share_announcer.rs
++++ b/stigmerge-peer/src/share_announcer.rs
+@@ -130,6 +130,7 @@ impl ShareAnnounce {
+                 )
+                 .await?;
+             let index_bytes = index.encode()?;
++            crate::route_registry::added(&route_blob.route_id);
+             (
+                 Header::from_index(&index, index_bytes.as_slice(), route_blob.blob.as_slice()),
+                 route_blob.route_id,
+@@ -181,6 +182,7 @@ impl ShareAnnounce {
+             {
+                 debug!(?err, route_id = ?self.route_id, "release prior private route");
+             }
++            crate::route_registry::removed(&self.route_id);
+ 
+             // Establish a new route
+             let route_blob = routing_context
+@@ -193,6 +195,7 @@ impl ShareAnnounce {
+                 .await?;
+             // Update header with new route data
+             self.header.set_route_data(route_blob.blob);
++            crate::route_registry::added(&route_blob.route_id);
+             self.route_id = route_blob.route_id.clone();
+             route_blob.route_id
+         };
+-- 
+2.55.0
+
