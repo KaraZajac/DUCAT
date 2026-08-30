@@ -5,9 +5,9 @@
 //! connection over the running [`crate::node`] API, the route registry
 //! feeding the node's AppCall demux, and two verbs — seed and fetch.
 //!
-//! Deliberately not exposed over uniffi yet: the first proof runs process
-//! to process (mobile/examples/swarmtest.rs), the client face comes once
-//! the throughput number is real.
+//! Exposed over uniffi since the two-process proof (100 MiB, ~3 Mbit/s,
+//! BLAKE3-identical — see STIGMERGE-NOTICE.md): the clients speak these
+//! verbs now, and mobile/examples/swarmtest.rs stays as the harness.
 
 use std::sync::{Mutex, OnceLock};
 
@@ -66,15 +66,41 @@ fn ensure_conn() -> Result<VeilidConnection, SwarmError> {
 }
 
 /// What a seed hands out: the share key a fetcher bootstraps from, and
-/// the index digest that authenticates what they will be handed.
+/// the index digest that authenticates what they will be handed. These
+/// two travel together on the §16.20 thread — a key without its digest
+/// bootstraps into whatever answers, which is not a fetch, it is an ask.
+#[derive(uniffi::Record, Clone)]
 pub struct SwarmShare {
     pub share_key: String,
     pub index_digest_hex: String,
 }
 
+/// Where a fetch is, for a screen that polls: bytes landed, bytes
+/// wanted. Zero/zero before the first status arrives.
+#[derive(uniffi::Record, Clone, Default)]
+pub struct SwarmProgress {
+    pub position: i64,
+    pub length: u64,
+    pub done: bool,
+}
+
+static PROGRESS: Mutex<SwarmProgress> = Mutex::new(SwarmProgress {
+    position: 0,
+    length: 0,
+    done: false,
+});
+
+/// The current fetch's progress. One fetch at a time is the client
+/// contract for now; a screen polls this the way wallet sync is polled.
+#[uniffi::export]
+pub fn swarm_fetch_progress() -> SwarmProgress {
+    PROGRESS.lock().unwrap().clone()
+}
+
 /// Seed a file into the swarm. Returns once the share is announced and
 /// every local piece is verified available; serving continues in the
 /// background until [`swarm_stop`].
+#[uniffi::export]
 pub fn swarm_seed(path: String) -> Result<SwarmShare, SwarmError> {
     let conn = ensure_conn()?;
     let (_, rt) = crate::node::swarm_handles()
@@ -119,6 +145,7 @@ pub fn swarm_seed(path: String) -> Result<SwarmShare, SwarmError> {
 /// Stop serving. A fetcher mid-download loses this source and keeps any
 /// other peer it has met — every peer is a seeder, which is the shape's
 /// whole point.
+#[uniffi::export]
 pub fn swarm_stop() {
     if let Some(c) = seeding_slot().lock().unwrap().take() {
         c.cancel();
@@ -129,7 +156,9 @@ pub fn swarm_stop() {
 /// Returns the byte count. The caller supplies the digest it was promised
 /// (it rode the same message as the share key, §16.20's manifest rule) —
 /// a share whose index does not match is not the content, whatever its
-/// key says.
+/// key says. Blocking by design: the Kotlin side calls it on IO, the way
+/// attachment chunk fetches already block there.
+#[uniffi::export]
 pub fn swarm_fetch(
     share_key: String,
     index_digest_hex: String,
@@ -161,14 +190,25 @@ pub fn swarm_fetch(
         let cancel = CancellationToken::new();
         share.start(cancel.clone()).await.map_err(fail)?;
 
+        *PROGRESS.lock().unwrap() = SwarmProgress::default();
         let mut total: u64 = 0;
         loop {
             match events.recv().await.map_err(fail)? {
-                Event::FetcherStatus(stigmerge_peer::fetcher::Status::Done) => break,
+                Event::FetcherStatus(stigmerge_peer::fetcher::Status::Done) => {
+                    let mut p = PROGRESS.lock().unwrap();
+                    p.done = true;
+                    break;
+                }
                 Event::FetcherStatus(stigmerge_peer::fetcher::Status::FetchProgress {
+                    fetch_position,
                     fetch_length,
                     ..
-                }) => total = fetch_length,
+                }) => {
+                    total = fetch_length;
+                    let mut p = PROGRESS.lock().unwrap();
+                    p.position = fetch_position;
+                    p.length = fetch_length;
+                }
                 _ => {}
             }
         }

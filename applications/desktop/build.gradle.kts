@@ -96,6 +96,7 @@ val sharedLogic = listOf(
     "org/ducatproject/ducat/Tax.kt",
     "org/ducatproject/ducat/Recurring.kt",
     "org/ducatproject/ducat/Publications.kt",
+    "org/ducatproject/ducat/Swarm.kt",
     "org/ducatproject/ducat/ui/GroupChat.kt",
     "org/ducatproject/ducat/ui/SettledMark.kt",
     "org/ducatproject/ducat/ui/CatSpinner.kt",
@@ -136,7 +137,7 @@ val sharedLogic = listOf(
 // stopped the build with a sentence.
 val deskNativeFreshness = tasks.register("deskNativeFreshness") {
     val lib = File(rootProject.projectDir.parentFile, "target/release/libducat_mobile.so")
-    val rustDirs = listOf("core/src", "mobile/src")
+    val rustDirs = listOf("core/src", "mobile/src", "mobile/vendor")
         .map { File(rootProject.projectDir.parentFile, it) }
     doLast {
         if (!lib.isFile) return@doLast
@@ -621,6 +622,14 @@ tasks.register<JavaExec>("arbiter") {
 tasks.register<JavaExec>("ringtest") {
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "org.ducatproject.desk.RingTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
+// The swarm through the client's own path — see SwarmTest.kt for the env
+// contract. `DUCAT_SWARM_ROLE=seed … ./gradlew :desktop:swarmtest`.
+tasks.register<JavaExec>("swarmtest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.SwarmTestKt"
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 

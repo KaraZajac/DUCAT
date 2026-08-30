@@ -173,7 +173,7 @@ dependencies {
  */
 val nativeFreshness = tasks.register("nativeFreshness") {
     val libDir = File(projectDir, "src/main/jniLibs").absolutePath
-    val rustDirs = listOf("core/src", "mobile/src")
+    val rustDirs = listOf("core/src", "mobile/src", "mobile/vendor")
         .map { File(rootProject.projectDir.parentFile, it).absolutePath }
     doLast {
         val libs = File(libDir).walkTopDown()

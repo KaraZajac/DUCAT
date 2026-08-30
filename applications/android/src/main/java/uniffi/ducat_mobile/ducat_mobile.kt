@@ -939,6 +939,14 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1176,6 +1184,14 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_stand_watch(`cell`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Byte
+    fun uniffi_ducat_mobile_fn_func_swarm_fetch(`shareKey`: RustBuffer.ByValue,`indexDigestHex`: RustBuffer.ByValue,`root`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Long
+    fun uniffi_ducat_mobile_fn_func_swarm_fetch_progress(uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_swarm_seed(`path`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_swarm_stop(uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
     fun uniffi_ducat_mobile_fn_func_thread_aad(`mineHex`: RustBuffer.ByValue,`theirsHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_vault_key(`passphrase`: RustBuffer.ByValue,`salt`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -1515,6 +1531,14 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_checksum_func_stand_record_key(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_stand_watch(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_swarm_fetch(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_swarm_fetch_progress(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_swarm_seed(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_swarm_stop(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_thread_aad(
     ): Short
@@ -1870,6 +1894,18 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_stand_watch() != 52290.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_swarm_fetch() != 24856.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_swarm_fetch_progress() != 6128.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_swarm_seed() != 29515.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_swarm_stop() != 49903.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_thread_aad() != 26627.toShort()) {
@@ -4781,6 +4817,84 @@ public object FfiConverterTypeStandNotice: FfiConverterRustBuffer<StandNotice> {
     override fun write(value: StandNotice, buf: ByteBuffer) {
             FfiConverterUInt.write(value.`subkey`, buf)
             FfiConverterByteArray.write(value.`data`, buf)
+    }
+}
+
+
+
+/**
+ * Where a fetch is, for a screen that polls: bytes landed, bytes
+ * wanted. Zero/zero before the first status arrives.
+ */
+data class SwarmProgress (
+    var `position`: kotlin.Long, 
+    var `length`: kotlin.ULong, 
+    var `done`: kotlin.Boolean
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeSwarmProgress: FfiConverterRustBuffer<SwarmProgress> {
+    override fun read(buf: ByteBuffer): SwarmProgress {
+        return SwarmProgress(
+            FfiConverterLong.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterBoolean.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: SwarmProgress) = (
+            FfiConverterLong.allocationSize(value.`position`) +
+            FfiConverterULong.allocationSize(value.`length`) +
+            FfiConverterBoolean.allocationSize(value.`done`)
+    )
+
+    override fun write(value: SwarmProgress, buf: ByteBuffer) {
+            FfiConverterLong.write(value.`position`, buf)
+            FfiConverterULong.write(value.`length`, buf)
+            FfiConverterBoolean.write(value.`done`, buf)
+    }
+}
+
+
+
+/**
+ * What a seed hands out: the share key a fetcher bootstraps from, and
+ * the index digest that authenticates what they will be handed. These
+ * two travel together on the §16.20 thread — a key without its digest
+ * bootstraps into whatever answers, which is not a fetch, it is an ask.
+ */
+data class SwarmShare (
+    var `shareKey`: kotlin.String, 
+    var `indexDigestHex`: kotlin.String
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeSwarmShare: FfiConverterRustBuffer<SwarmShare> {
+    override fun read(buf: ByteBuffer): SwarmShare {
+        return SwarmShare(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: SwarmShare) = (
+            FfiConverterString.allocationSize(value.`shareKey`) +
+            FfiConverterString.allocationSize(value.`indexDigestHex`)
+    )
+
+    override fun write(value: SwarmShare, buf: ByteBuffer) {
+            FfiConverterString.write(value.`shareKey`, buf)
+            FfiConverterString.write(value.`indexDigestHex`, buf)
     }
 }
 
@@ -8254,6 +8368,65 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
 }
     )
     }
+    
+
+        /**
+         * Fetch a share into `root`, blocking until every piece has verified.
+         * Returns the byte count. The caller supplies the digest it was promised
+         * (it rode the same message as the share key, §16.20's manifest rule) —
+         * a share whose index does not match is not the content, whatever its
+         * key says. Blocking by design: the Kotlin side calls it on IO, the way
+         * attachment chunk fetches already block there.
+         */
+    @Throws(SwarmException::class) fun `swarmFetch`(`shareKey`: kotlin.String, `indexDigestHex`: kotlin.String, `root`: kotlin.String): kotlin.ULong {
+            return FfiConverterULong.lift(
+    uniffiRustCallWithError(SwarmException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_swarm_fetch(
+        FfiConverterString.lower(`shareKey`),FfiConverterString.lower(`indexDigestHex`),FfiConverterString.lower(`root`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * The current fetch's progress. One fetch at a time is the client
+         * contract for now; a screen polls this the way wallet sync is polled.
+         */ fun `swarmFetchProgress`(): SwarmProgress {
+            return FfiConverterTypeSwarmProgress.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_swarm_fetch_progress(
+        _status)
+}
+    )
+    }
+    
+
+        /**
+         * Seed a file into the swarm. Returns once the share is announced and
+         * every local piece is verified available; serving continues in the
+         * background until [`swarm_stop`].
+         */
+    @Throws(SwarmException::class) fun `swarmSeed`(`path`: kotlin.String): SwarmShare {
+            return FfiConverterTypeSwarmShare.lift(
+    uniffiRustCallWithError(SwarmException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_swarm_seed(
+        FfiConverterString.lower(`path`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Stop serving. A fetcher mid-download loses this source and keeps any
+         * other peer it has met — every peer is a seeder, which is the shape's
+         * whole point.
+         */ fun `swarmStop`()
+        = 
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_swarm_stop(
+        _status)
+}
+    
     
 
         /**
