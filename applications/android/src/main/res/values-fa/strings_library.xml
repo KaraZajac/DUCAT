@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_library">کتابخانه</string>
+    <string name="library_empty">هنوز چیزی اینجا نیست. وقتی ناشری شماره‌ای برایت بفرستد، اینجا بایگانی می‌شود — و حتی اگر گفتگو حذف شود می‌ماند.</string>
+    <string name="library_issue">شمارهٔ %1$s</string>
+    <string name="library_on_device">روی این دستگاه · %1$s</string>
+    <string name="library_no_shipment">کلید بایگانی شده — هنوز دانلودی ارائه نشده</string>
+    <string name="library_download">دانلود</string>
+    <string name="library_progress">%1$s از %2$s</string>
+    <string name="library_starting">در حال شروع…</string>
+    <string name="library_failed">دانلود ناموفق بود: %1$s</string>
+    <string name="library_gone">دیگر در مخاطبانت نیست</string>
+    <string name="chat_issue_sent_you">شماره‌ای برایت فرستاد</string>
+    <string name="chat_issue_you_sent">شماره‌ای فرستادی</string>
+    <string name="chatlist_preview_issue">شمارهٔ تازه: %1$s</string>
+    <string name="notify_new_issue">%1$s شمارهٔ تازه‌ای فرستاد</string>
+</resources>

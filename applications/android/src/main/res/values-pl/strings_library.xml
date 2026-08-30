@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_library">Biblioteka</string>
+    <string name="library_empty">Jeszcze nic tu nie ma. Gdy wydawca prześle ci wydanie, zostanie tu zachowane — nawet jeśli usuniesz czat.</string>
+    <string name="library_issue">Wydanie %1$s</string>
+    <string name="library_on_device">Na tym urządzeniu · %1$s</string>
+    <string name="library_no_shipment">Klucz zachowany — pobieranie jeszcze niedostępne</string>
+    <string name="library_download">Pobierz</string>
+    <string name="library_progress">%1$s z %2$s</string>
+    <string name="library_starting">Rozpoczynanie…</string>
+    <string name="library_failed">Pobieranie nie powiodło się: %1$s</string>
+    <string name="library_gone">nie ma go już w twoich kontaktach</string>
+    <string name="chat_issue_sent_you">Przysłano ci wydanie</string>
+    <string name="chat_issue_you_sent">Wysłano wydanie</string>
+    <string name="chatlist_preview_issue">Nowe wydanie: %1$s</string>
+    <string name="notify_new_issue">Nowe wydanie od %1$s</string>
+</resources>

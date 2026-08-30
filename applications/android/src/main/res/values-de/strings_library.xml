@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_library">Bibliothek</string>
+    <string name="library_empty">Noch nichts hier. Wenn dir ein Herausgeber eine Ausgabe schickt, wird sie hier abgelegt — und bleibt, auch wenn der Chat gelöscht wird.</string>
+    <string name="library_issue">Ausgabe %1$s</string>
+    <string name="library_on_device">Auf diesem Gerät · %1$s</string>
+    <string name="library_no_shipment">Schlüssel abgelegt — noch kein Download angeboten</string>
+    <string name="library_download">Herunterladen</string>
+    <string name="library_progress">%1$s von %2$s</string>
+    <string name="library_starting">Startet…</string>
+    <string name="library_failed">Download fehlgeschlagen: %1$s</string>
+    <string name="library_gone">nicht mehr in deinen Kontakten</string>
+    <string name="chat_issue_sent_you">Hat dir eine Ausgabe geschickt</string>
+    <string name="chat_issue_you_sent">Du hast eine Ausgabe geschickt</string>
+    <string name="chatlist_preview_issue">Neue Ausgabe: %1$s</string>
+    <string name="notify_new_issue">%1$s hat eine neue Ausgabe geschickt</string>
+</resources>

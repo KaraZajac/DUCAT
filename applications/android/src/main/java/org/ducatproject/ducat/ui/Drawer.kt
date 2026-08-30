@@ -43,6 +43,7 @@ enum class Section(val labelRes: Int) {
     Status(R.string.section_status),
     Profile(R.string.section_profile),
     Contacts(R.string.section_contacts),
+    Library(R.string.section_library),
     Logs(R.string.section_logs),
     Settings(R.string.section_settings),
     Modes(R.string.section_modes),
@@ -96,6 +97,7 @@ private fun iconFor(s: Section) = when (s) {
     Section.Status -> Icons.Filled.Lan
     Section.Profile -> Icons.Filled.Person
     Section.Contacts -> Icons.Filled.People
+    Section.Library -> Icons.Filled.LocalLibrary
     Section.Logs -> Icons.Filled.Description
     Section.Settings -> Icons.Filled.Settings
     Section.Modes -> Icons.Filled.Tune
@@ -128,6 +130,8 @@ fun SectionScreen(
         Section.Profile -> ProfileSection()
 
         Section.Contacts -> ContactsAdminSection(onOpenChat)
+
+        Section.Library -> LibrarySection()
 
         Section.Logs -> LogsScreen()
 

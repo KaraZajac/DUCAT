@@ -66,6 +66,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.PlayArrow
@@ -1747,6 +1748,46 @@ private fun Bubble(
                         }
                     } else {
                         LinkableText(m.body, fg)
+                    }
+                }
+            } else if (m.kind == 13) {
+                // A publication key (§16.20). The protocol wrote the fields;
+                // the note is the only human part. The issue itself lives in
+                // the drawer's Library once fetched — this bubble is the
+                // paper trail of the handover, so no amount row and no
+                // buttons: the cabinet filed it the moment it arrived.
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.MenuBook,
+                            null,
+                            Modifier.size(14.dp),
+                            tint = fg.copy(alpha = 0.8f),
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            stringResource(
+                                if (m.outgoing) R.string.chat_issue_you_sent
+                                else R.string.chat_issue_sent_you,
+                            ),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = fg.copy(alpha = 0.8f),
+                        )
+                    }
+                    m.pubPeriodId?.let {
+                        Text(
+                            stringResource(R.string.library_issue, it),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = fg,
+                        )
+                    }
+                    if (m.body.isNotBlank()) {
+                        Spacer(Modifier.height(2.dp))
+                        Text(
+                            isolate(m.body),
+                            color = fg,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
                     }
                 }
             } else {

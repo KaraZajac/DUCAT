@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_library">Библиотека</string>
+    <string name="library_empty">Пока здесь пусто. Когда издатель пришлёт тебе выпуск, он сохранится здесь — и останется, даже если чат удалён.</string>
+    <string name="library_issue">Выпуск %1$s</string>
+    <string name="library_on_device">На этом устройстве · %1$s</string>
+    <string name="library_no_shipment">Ключ сохранён — загрузка пока не предложена</string>
+    <string name="library_download">Скачать</string>
+    <string name="library_progress">%1$s из %2$s</string>
+    <string name="library_starting">Запуск…</string>
+    <string name="library_failed">Загрузка не удалась: %1$s</string>
+    <string name="library_gone">больше не в твоих контактах</string>
+    <string name="chat_issue_sent_you">Тебе прислали выпуск</string>
+    <string name="chat_issue_you_sent">Выпуск отправлен</string>
+    <string name="chatlist_preview_issue">Новый выпуск: %1$s</string>
+    <string name="notify_new_issue">Новый выпуск от %1$s</string>
+</resources>

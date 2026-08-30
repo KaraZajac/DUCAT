@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_library">Biblioteca</string>
+    <string name="library_empty">Ainda não há nada aqui. Quando um editor te enviar uma edição, ela fica guardada aqui — e permanece mesmo que o chat seja apagado.</string>
+    <string name="library_issue">Edição %1$s</string>
+    <string name="library_on_device">Neste dispositivo · %1$s</string>
+    <string name="library_no_shipment">Chave guardada — nenhum download disponível ainda</string>
+    <string name="library_download">Baixar</string>
+    <string name="library_progress">%1$s de %2$s</string>
+    <string name="library_starting">Iniciando…</string>
+    <string name="library_failed">Falha no download: %1$s</string>
+    <string name="library_gone">não está mais nos seus contatos</string>
+    <string name="chat_issue_sent_you">Te enviou uma edição</string>
+    <string name="chat_issue_you_sent">Você enviou uma edição</string>
+    <string name="chatlist_preview_issue">Nova edição: %1$s</string>
+    <string name="notify_new_issue">%1$s enviou uma nova edição</string>
+</resources>

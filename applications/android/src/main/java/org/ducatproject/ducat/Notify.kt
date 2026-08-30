@@ -107,6 +107,9 @@ object Notify {
             8 -> context.getString(R.string.notify_escrow_setup, from)
             9 -> context.getString(R.string.notify_escrow_settle, from)
             10 -> context.getString(R.string.notify_escrow_called_off, from)
+            // A publication key (§16.20): the body is the publisher's note or
+            // nothing at all, and an empty notification reads as broken.
+            13 -> context.getString(R.string.notify_new_issue, from)
             else -> m.body
         }
         // Which compartment this reached, said in the title once a second

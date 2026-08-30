@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_library">Perpustakaan</string>
+    <string name="library_empty">Belum ada apa-apa di sini. Saat penerbit mengirimimu edisi, edisi itu disimpan di sini — dan tetap ada meski chat dihapus.</string>
+    <string name="library_issue">Edisi %1$s</string>
+    <string name="library_on_device">Di perangkat ini · %1$s</string>
+    <string name="library_no_shipment">Kunci tersimpan — belum ada unduhan yang ditawarkan</string>
+    <string name="library_download">Unduh</string>
+    <string name="library_progress">%1$s dari %2$s</string>
+    <string name="library_starting">Memulai…</string>
+    <string name="library_failed">Unduhan gagal: %1$s</string>
+    <string name="library_gone">tidak lagi ada di kontakmu</string>
+    <string name="chat_issue_sent_you">Mengirimimu edisi</string>
+    <string name="chat_issue_you_sent">Kamu mengirim edisi</string>
+    <string name="chatlist_preview_issue">Edisi baru: %1$s</string>
+    <string name="notify_new_issue">%1$s mengirim edisi baru</string>
+</resources>

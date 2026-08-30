@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_library">ライブラリ</string>
+    <string name="library_empty">まだ何もありません。発行者から号が届くと、ここに保管されます — チャットを削除しても残ります。</string>
+    <string name="library_issue">%1$s号</string>
+    <string name="library_on_device">この端末に保存済み · %1$s</string>
+    <string name="library_no_shipment">鍵は保管済み — ダウンロードはまだ提供されていません</string>
+    <string name="library_download">ダウンロード</string>
+    <string name="library_progress">%2$s 中 %1$s</string>
+    <string name="library_starting">開始しています…</string>
+    <string name="library_failed">ダウンロードに失敗しました: %1$s</string>
+    <string name="library_gone">連絡先に存在しません</string>
+    <string name="chat_issue_sent_you">号が届きました</string>
+    <string name="chat_issue_you_sent">号を送りました</string>
+    <string name="chatlist_preview_issue">新しい号: %1$s</string>
+    <string name="notify_new_issue">%1$sから新しい号が届きました</string>
+</resources>

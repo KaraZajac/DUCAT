@@ -177,50 +177,112 @@ pub fn swarm_fetch(
         .parse()
         .map_err(|_| SwarmError::Failed("that is not a share key".into()))?;
     rt.block_on(async move {
-        let mut share = Share::new(
-            conn,
-            Mode::Fetch {
-                root: std::path::PathBuf::from(root),
-                want_index_digest: Some(want),
-                share_keys: vec![key],
-            },
-        )
-        .map_err(fail)?;
-        let mut events = share.subscribe_events();
-        let cancel = CancellationToken::new();
-        share.start(cancel.clone()).await.map_err(fail)?;
-
-        *PROGRESS.lock().unwrap() = SwarmProgress::default();
-        let mut total: u64 = 0;
+        // Two live-met failures, retried rather than surfaced:
+        //
+        // TryAgain — a node that only just attached refuses route allocation
+        // ("allocated route failed to test"); veilid means exactly what it
+        // says, so say it back with a retry rather than a failure the person
+        // has to be for us.
+        //
+        // A stall — the block stream going quiet mid-transfer (a seeder's
+        // route rotating under it, first seen 5.2 MB into a phone fetch).
+        // The fetcher waits politely for ever; we do not. Tear down and
+        // re-bootstrap: the share record names the seeder's current route,
+        // and the pieces already on disk verify rather than re-download.
+        let mut waited = 0u64;
+        let mut stalls = 0u32;
         loop {
-            match events.recv().await.map_err(fail)? {
-                Event::FetcherStatus(stigmerge_peer::fetcher::Status::Done) => {
-                    let mut p = PROGRESS.lock().unwrap();
-                    p.done = true;
-                    break;
+            match fetch_once(conn.clone(), root.clone(), want, key.clone()).await {
+                Err(SwarmError::Failed(e)) if e.contains("TryAgain") && waited < 40 => {
+                    tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+                    waited += 5;
                 }
-                Event::FetcherStatus(stigmerge_peer::fetcher::Status::FetchProgress {
-                    fetch_position,
-                    fetch_length,
-                    ..
-                }) => {
-                    total = fetch_length;
-                    let mut p = PROGRESS.lock().unwrap();
-                    p.position = fetch_position;
-                    p.length = fetch_length;
+                Err(SwarmError::Failed(e)) if e.contains("went quiet") && stalls < 6 => {
+                    stalls += 1;
                 }
-                _ => {}
+                other => return other,
             }
         }
-        // Done: stop our tasks (we are not staying to seed in this call —
-        // the caller decides that with a seed of its own) and let them wind
-        // down without holding the fetch hostage to their shutdown order.
+    })
+}
+
+async fn fetch_once(
+    conn: VeilidConnection,
+    root: String,
+    want: [u8; 32],
+    key: veilid_core::RecordKey,
+) -> Result<u64, SwarmError> {
+    let mut share = Share::new(
+        conn,
+        Mode::Fetch {
+            root: std::path::PathBuf::from(root),
+            want_index_digest: Some(want),
+            share_keys: vec![key],
+        },
+    )
+    .map_err(fail)?;
+    let mut events = share.subscribe_events();
+    let cancel = CancellationToken::new();
+    if let Err(e) = share.start(cancel.clone()).await {
+        // Half-started tasks die with the token; the join is parked so a
+        // slow shutdown cannot hold the retry hostage.
         cancel.cancel();
         tokio::spawn(async move {
             let _ = share.join().await;
         });
-        Ok(total)
-    })
+        return Err(fail(e));
+    }
+
+    *PROGRESS.lock().unwrap() = SwarmProgress::default();
+    let mut total: u64 = 0;
+    loop {
+        // The watchdog: verification of what is already on disk emits
+        // progress, so a healthy fetch — resumed or fresh — always has
+        // something to say inside this window. Silence means the stream
+        // died under a peer that will wait for ever, and the caller's
+        // answer to that is a re-bootstrap, not more waiting.
+        let ev = tokio::time::timeout(
+            std::time::Duration::from_secs(90),
+            events.recv(),
+        )
+        .await;
+        let ev = match ev {
+            Err(_) => {
+                cancel.cancel();
+                tokio::spawn(async move {
+                    let _ = share.join().await;
+                });
+                return Err(SwarmError::Failed("the swarm went quiet".into()));
+            }
+            Ok(r) => r.map_err(fail)?,
+        };
+        match ev {
+            Event::FetcherStatus(stigmerge_peer::fetcher::Status::Done) => {
+                let mut p = PROGRESS.lock().unwrap();
+                p.done = true;
+                break;
+            }
+            Event::FetcherStatus(stigmerge_peer::fetcher::Status::FetchProgress {
+                fetch_position,
+                fetch_length,
+                ..
+            }) => {
+                total = fetch_length;
+                let mut p = PROGRESS.lock().unwrap();
+                p.position = fetch_position;
+                p.length = fetch_length;
+            }
+            _ => {}
+        }
+    }
+    // Done: stop our tasks (we are not staying to seed in this call — the
+    // caller decides that with a seed of its own) and let them wind down
+    // without holding the fetch hostage to their shutdown order.
+    cancel.cancel();
+    tokio::spawn(async move {
+        let _ = share.join().await;
+    });
+    Ok(total)
 }
 
 fn hex_of(b: &[u8]) -> String {

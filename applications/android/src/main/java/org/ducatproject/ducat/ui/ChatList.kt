@@ -630,6 +630,9 @@ internal fun previewOf(context: Context, m: StoredMessage): String = when {
             Amounts.show(context, m.amountPxmr).primary,
         )
     m.kind == 4 -> context.getString(R.string.chatlist_preview_reacted, isolate(m.body))
+    m.kind == 13 -> context.getString(
+        R.string.chatlist_preview_issue, isolate(m.pubPeriodId ?: ""),
+    ).trim()
     m.attHash != null -> context.getString(R.string.chatlist_preview_photo)
     else -> isolate(m.body)
 }

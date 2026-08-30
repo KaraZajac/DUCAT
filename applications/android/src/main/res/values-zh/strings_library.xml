@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_library">书架</string>
+    <string name="library_empty">这里还没有内容。出版者给你发来期刊后会存放在这里 — 即使删除聊天也会保留。</string>
+    <string name="library_issue">第 %1$s 期</string>
+    <string name="library_on_device">已在此设备 · %1$s</string>
+    <string name="library_no_shipment">密钥已存档 — 暂无可下载内容</string>
+    <string name="library_download">下载</string>
+    <string name="library_progress">%1$s / %2$s</string>
+    <string name="library_starting">正在开始…</string>
+    <string name="library_failed">下载失败：%1$s</string>
+    <string name="library_gone">已不在你的联系人中</string>
+    <string name="chat_issue_sent_you">给你发来一期</string>
+    <string name="chat_issue_you_sent">你发出了一期</string>
+    <string name="chatlist_preview_issue">新的一期：%1$s</string>
+    <string name="notify_new_issue">%1$s 发来了新的一期</string>
+</resources>
