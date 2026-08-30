@@ -231,6 +231,13 @@ pub mod f {
     /// That period's content key. Opaque 32 bytes to the reader — §16.20
     /// derives it on the publisher's side; the reader just holds it.
     pub const MSG_PUB_KEY: u64 = 260;
+    /// A heavy period's swarm shipment (§16.20): the share key a fetcher
+    /// bootstraps from…
+    pub const MSG_PUB_SWARM_KEY: u64 = 261;
+    /// …and the index digest that authenticates what answers. Together or
+    /// not at all: a key without its digest bootstraps into whatever
+    /// replies, which is not a fetch, it is an ask.
+    pub const MSG_PUB_SWARM_DIGEST: u64 = 262;
 
     // RENTAL_NOTICE (§16.18) — a listing on a public board. The second
     // object that lives in the open, and the one that stays there for days

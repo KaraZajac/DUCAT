@@ -659,6 +659,9 @@ pub fn seal_message(
     pub_period_key: Option<Vec<u8>>,
     pub_record: Option<String>,
     pub_head_key: Option<Vec<u8>>,
+    // §16.20's shipment: the swarm pair, together or not at all.
+    pub_swarm_key: Option<String>,
+    pub_swarm_digest: Option<Vec<u8>>,
 ) -> Result<SealedOut, ContactError> {
     if body.is_empty() || body.chars().count() > MAX_MESSAGE_CHARS {
         return Err(ContactError::Refused(format!(
@@ -707,11 +710,24 @@ pub fn seal_message(
                     ))
                 }
             };
+            let swarm_digest = match (&pub_swarm_key, pub_swarm_digest) {
+                (Some(_), Some(d)) => Some(d.try_into().map_err(|_| {
+                    ContactError::Refused("an index digest is 32 bytes".into())
+                })?),
+                (None, None) => None,
+                _ => {
+                    return Err(ContactError::Refused(
+                        "a swarm share carries its key and its index digest together".into(),
+                    ))
+                }
+            };
             Some(ducat_core::contact::PublicationKey {
                 period_id,
                 period_key,
                 record_key: pub_record,
                 head_key,
+                swarm_key: pub_swarm_key,
+                swarm_digest,
             })
         }
         (None, None) => None,
@@ -929,6 +945,8 @@ pub struct PublicationKeyOut {
     pub period_key: Vec<u8>,
     pub record_key: Option<String>,
     pub head_key: Option<Vec<u8>>,
+    pub swarm_key: Option<String>,
+    pub swarm_digest: Option<Vec<u8>>,
 }
 
 /// A group roster as it crosses the bridge (§16.19).
@@ -1093,6 +1111,8 @@ pub fn open_message(
             period_key: p.period_key.to_vec(),
             record_key: p.record_key.clone(),
             head_key: p.head_key.map(|h| h.to_vec()),
+            swarm_key: p.swarm_key.clone(),
+            swarm_digest: p.swarm_digest.map(|d| d.to_vec()),
         }),
     })
 }

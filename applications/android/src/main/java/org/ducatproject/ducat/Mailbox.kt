@@ -743,6 +743,10 @@ object Mailbox {
         pubPeriodKey: ByteArray? = null,
         pubRecord: String? = null,
         pubHeadKey: ByteArray? = null,
+        /** §16.20's shipment: hex digest beside its share key, both or
+         *  neither — core refuses every half. */
+        pubSwarmKey: String? = null,
+        pubSwarmDigestHex: String? = null,
     ): Contact {
         val store = ContactStore(context)
         // Who speaks is the contact's to say, not the caller's: the thread
@@ -807,6 +811,7 @@ object Mailbox {
             positionRecord, positionStreamKey,
             groupId, groupSeq?.toULong(), groupReSender, groupReSeq?.toULong(),
             pubPeriodId, pubPeriodKey, pubRecord, pubHeadKey,
+            pubSwarmKey, pubSwarmDigestHex?.let { hexToBytes(it) },
         )
         // Everything local lands before anything remote. The failure orders
         // are not symmetric: a published slot and head with the counter lost
@@ -835,6 +840,7 @@ object Mailbox {
                 groupReSeq = groupReSeq,
                 pubPeriodId = pubPeriodId, pubPeriodKey = pubPeriodKey,
                 pubRecord = pubRecord, pubHeadKey = pubHeadKey,
+                pubSwarmKey = pubSwarmKey, pubSwarmDigest = pubSwarmDigestHex,
                 // Not yet. The write is three lines below, and until it lands
                 // this row is a message that has not left the phone — which
                 // looked identical to one that had.
@@ -1811,6 +1817,8 @@ object Mailbox {
                 pubPeriodKey = opened.publication?.periodKey,
                 pubRecord = opened.publication?.recordKey,
                 pubHeadKey = opened.publication?.headKey,
+                pubSwarmKey = opened.publication?.swarmKey,
+                pubSwarmDigest = opened.publication?.swarmDigest?.toHexString(),
             )
             // The one funnel every arrival passes through, so the notification
             // cannot be forgotten by a new screen: if it was stored, it was

@@ -960,6 +960,9 @@ MSG_POS_RECORD, MSG_POS_STREAM = 218, 219
 # first delivery. Each pair together or not at all.
 MSG_PUB_RECORD, MSG_PUB_HEAD = 257, 258
 MSG_PUB_PERIOD, MSG_PUB_KEY = 259, 260
+# A heavy period's swarm shipment: bootstrap key + authenticating index
+# digest, together or not at all, and only aboard a publication key.
+MSG_PUB_SWARM_KEY, MSG_PUB_SWARM_DIGEST = 261, 262
 # §16.19 — small groups: the group, the sender's own counter in it, and the
 # group reference (target's sender + their counter). The pairwise seq cannot
 # name a group message: the fanned-out copies land at different seqs.
@@ -1798,7 +1801,16 @@ def parse_message(buf):
     pub_key = b.pop(MSG_PUB_KEY, (None, None))[1]
     pub_record = _take_text(b, MSG_PUB_RECORD, MAX_RECORD_KEY_CHARS, "publication record", False)
     pub_head = b.pop(MSG_PUB_HEAD, (None, None))[1]
+    swarm_key = _take_text(b, MSG_PUB_SWARM_KEY, MAX_RECORD_KEY_CHARS, "swarm share key", False)
+    swarm_digest = b.pop(MSG_PUB_SWARM_DIGEST, (None, None))[1]
+    if (swarm_key is None) != (swarm_digest is None):
+        raise Reject("Malformed",
+                     "a swarm share carries its key and its index digest together")
+    if swarm_digest is not None and len(swarm_digest) != 32:
+        raise Reject("Malformed", "an index digest is 32 bytes")
     if pub_period is None and pub_key is None and pub_record is None and pub_head is None:
+        if swarm_key is not None:
+            raise Reject("Malformed", "a swarm share rides a publication key")
         out["publication"] = None
     elif pub_period is not None and pub_key is not None:
         if len(pub_key) != 32:
@@ -1809,7 +1821,8 @@ def parse_message(buf):
         if pub_head is not None and len(pub_head) != 32:
             raise Reject("Malformed", "a head key is 32 bytes")
         out["publication"] = {"period": pub_period, "key": pub_key,
-                              "record": pub_record, "head": pub_head}
+                              "record": pub_record, "head": pub_head,
+                              "swarm_key": swarm_key, "swarm_digest": swarm_digest}
     else:
         raise Reject("Malformed",
                      "a publication key carries its period id and its key together")
@@ -2205,6 +2218,10 @@ def run_message_payment(cases, r):
                     fields.append((MSG_PUB_HEAD, ("bytes", pub["head"])))
                 fields.append((MSG_PUB_PERIOD, ("text", pub["period"])))
                 fields.append((MSG_PUB_KEY, ("bytes", pub["key"])))
+                if pub["swarm_key"] is not None:
+                    fields.append((MSG_PUB_SWARM_KEY, ("text", pub["swarm_key"])))
+                if pub["swarm_digest"] is not None:
+                    fields.append((MSG_PUB_SWARM_DIGEST, ("bytes", pub["swarm_digest"])))
             return encode(("map", fields))
         out = expect_reject(r, "contact", c, go)
         if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:

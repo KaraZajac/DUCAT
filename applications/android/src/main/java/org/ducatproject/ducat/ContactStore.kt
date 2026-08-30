@@ -1704,6 +1704,9 @@ data class StoredMessage(
     val pubPeriodKey: ByteArray? = null,
     val pubRecord: String? = null,
     val pubHeadKey: ByteArray? = null,
+    /** §16.20's shipment: a heavy period's swarm share, key + digest. */
+    val pubSwarmKey: String? = null,
+    val pubSwarmDigest: String? = null,
 ) {
     fun toJson(): JSONObject = JSONObject().apply {
         put("out", outgoing); put("seq", seq); put("body", body)
@@ -1737,6 +1740,8 @@ data class StoredMessage(
             put("pub_key", Base64.encodeToString(pubPeriodKey, Base64.NO_WRAP))
             pubRecord?.let { r -> put("pub_rec", r) }
             pubHeadKey?.let { h -> put("pub_head", Base64.encodeToString(h, Base64.NO_WRAP)) }
+            pubSwarmKey?.let { k -> put("pub_swarm", k) }
+            pubSwarmDigest?.let { d -> put("pub_swarm_dig", d) }
         }
         if (deadLetter) put("dead", true)
     }
@@ -1784,6 +1789,8 @@ data class StoredMessage(
             pubPeriodKey = o.optStringOrNull("pub_key")?.let { Base64.decode(it, Base64.NO_WRAP) },
             pubRecord = o.optStringOrNull("pub_rec"),
             pubHeadKey = o.optStringOrNull("pub_head")?.let { Base64.decode(it, Base64.NO_WRAP) },
+            pubSwarmKey = o.optStringOrNull("pub_swarm"),
+            pubSwarmDigest = o.optStringOrNull("pub_swarm_dig"),
         )
     }
 }

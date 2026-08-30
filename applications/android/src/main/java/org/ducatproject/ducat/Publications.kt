@@ -52,6 +52,14 @@ object Publications {
             // reason as the key.
             m.pubRecord?.let { mine.put("record", it) }
             m.pubHeadKey?.let { mine.put("head", b64(it)) }
+            // The shipment files under its period: the fetch needs exactly
+            // this pair, and nothing else may substitute for the digest.
+            if (m.pubSwarmKey != null && m.pubSwarmDigest != null) {
+                val ships = mine.optJSONObject("ships") ?: JSONObject()
+                ships.put(period, JSONObject()
+                    .put("key", m.pubSwarmKey).put("digest", m.pubSwarmDigest))
+                mine.put("ships", ships)
+            }
             all.put(publisherHex, mine)
             p.edit().putString("subs", all.toString()).apply()
         }
@@ -138,6 +146,9 @@ object Publications {
         record: String?,
         headKey: ByteArray?,
         note: String,
+        /** A heavy period's shipment (§16.20): swarm share key + digest. */
+        swarmKey: String? = null,
+        swarmDigestHex: String? = null,
     ): Boolean {
         val key = periodKey(context, pubId, periodId) ?: return false
         val firstTime = ContactStore(context).thread(c.personaHex)
@@ -150,7 +161,17 @@ object Publications {
                 pubPeriodKey = key,
                 pubRecord = if (firstTime) record else null,
                 pubHeadKey = if (firstTime) headKey else null,
+                pubSwarmKey = swarmKey,
+                pubSwarmDigestHex = swarmDigestHex,
             )
         }.isSuccess
+    }
+
+    /** A period's filed shipment, if one arrived: (shareKey, digestHex). */
+    fun shipment(context: Context, publisherHex: String, periodId: String): Pair<String, String>? {
+        val all = prefs(context).getString("subs", null)?.let { JSONObject(it) } ?: return null
+        val ship = all.optJSONObject(publisherHex)?.optJSONObject("ships")
+            ?.optJSONObject(periodId) ?: return null
+        return ship.getString("key") to ship.getString("digest")
     }
 }

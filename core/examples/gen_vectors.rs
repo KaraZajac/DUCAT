@@ -1866,6 +1866,8 @@ fn contact_cases() -> Vec<J> {
             period_key: [0x42u8; 32],
             record_key: Some("VLD0:AbCdEfGhIjKlMnOpQrStUvWxYz0123456789aBcDeF".into()),
             head_key: Some([0x24u8; 32]),
+            swarm_key: None,
+            swarm_digest: None,
         }),
         ..base_pay.clone()
     };
@@ -1878,6 +1880,8 @@ fn contact_cases() -> Vec<J> {
             period_key: [0x43u8; 32],
             record_key: None,
             head_key: None,
+            swarm_key: None,
+            swarm_digest: None,
         }),
         ..pub_full.clone()
     };
@@ -1900,6 +1904,8 @@ fn contact_cases() -> Vec<J> {
         publication: Some(ducat_core::contact::PublicationKey {
             period_id: "".into(), period_key: [0x43u8; 32],
             record_key: None, head_key: None,
+            swarm_key: None,
+            swarm_digest: None,
         }),
         ..pub_minimal.clone()
     };
@@ -1911,6 +1917,8 @@ fn contact_cases() -> Vec<J> {
         publication: Some(ducat_core::contact::PublicationKey {
             period_id: "x".repeat(65), period_key: [0x43u8; 32],
             record_key: None, head_key: None,
+            swarm_key: None,
+            swarm_digest: None,
         }),
         ..pub_minimal.clone()
     };
@@ -1922,6 +1930,8 @@ fn contact_cases() -> Vec<J> {
         publication: Some(ducat_core::contact::PublicationKey {
             period_id: "x".repeat(64), period_key: [0x43u8; 32],
             record_key: None, head_key: None,
+            swarm_key: None,
+            swarm_digest: None,
         }),
         ..pub_minimal.clone()
     };
@@ -1932,6 +1942,20 @@ fn contact_cases() -> Vec<J> {
         "A key handover with an amount on it is a number nothing will honour — the bill travelled separately (§16.13) and settled before this message existed.",
         &Message { amount_pxmr: Some(21_000_000_000), ..pub_minimal.clone() },
         Some((RejectCode::Malformed, "this message kind must not carry an amount")));
+    let pub_shipment = Message {
+        publication: Some(ducat_core::contact::PublicationKey {
+            period_id: "2026-11".into(),
+            period_key: [0x44u8; 32],
+            record_key: None,
+            head_key: None,
+            swarm_key: Some("VLD0:SwArMkEyAbCdEfGhIjKlMnOpQrStUvWxYz012345".into()),
+            swarm_digest: Some([0x55u8; 32]),
+        }),
+        ..pub_minimal.clone()
+    };
+    money("publication_key_with_shipment",
+        "A heavy period ships by swarm: the share key to bootstrap from and the index digest that authenticates what answers ride beside the period's key, so the whole month arrives on one message — capability and truck, never content.",
+        &pub_shipment, None);
 
     // The half-reference cannot be built from the struct (both fields or none),
     // so it is made by deleting one from the encoding — same trick as the
@@ -1986,6 +2010,40 @@ fn contact_cases() -> Vec<J> {
             "why": "A head key for no shelf opens nothing.",
             "payment_hex": hex(&half.encode()),
             "expect": { "ok": false, "reject": "MALFORMED", "hint": "a publication shelf carries its record and its head key together" } }));
+        let mut half = pub_shipment.to_value();
+        if let ducat_core::cbor::Value::Map(ref mut m) = half {
+            m.remove(&f::MSG_PUB_SWARM_DIGEST);
+        }
+        v.push(json!({ "name": "publication_swarm_without_digest",
+            "why": "A bootstrap key without the digest that authenticates its answers is an ask, not a fetch.",
+            "payment_hex": hex(&half.encode()),
+            "expect": { "ok": false, "reject": "MALFORMED", "hint": "a swarm share carries its key and its index digest together" } }));
+        let mut half = pub_shipment.to_value();
+        if let ducat_core::cbor::Value::Map(ref mut m) = half {
+            m.remove(&f::MSG_PUB_SWARM_KEY);
+        }
+        v.push(json!({ "name": "publication_swarm_without_key",
+            "why": "A digest with nothing to fetch authenticates nothing.",
+            "payment_hex": hex(&half.encode()),
+            "expect": { "ok": false, "reject": "MALFORMED", "hint": "a swarm share carries its key and its index digest together" } }));
+        let mut stray = pub_shipment.to_value();
+        if let ducat_core::cbor::Value::Map(ref mut m) = stray {
+            m.remove(&f::MSG_PUB_PERIOD);
+            m.remove(&f::MSG_PUB_KEY);
+        }
+        v.push(json!({ "name": "publication_swarm_without_publication",
+            "why": "The shipment describes a period; away from the period's key it describes a shipment of nothing.",
+            "payment_hex": hex(&stray.encode()),
+            "expect": { "ok": false, "reject": "MALFORMED", "hint": "a swarm share rides a publication key" } }));
+        let mut short = pub_shipment.to_value();
+        if let ducat_core::cbor::Value::Map(ref mut m) = short {
+            m.insert(ducat_core::wire::f::MSG_PUB_SWARM_DIGEST,
+                     ducat_core::cbor::Value::Bytes(vec![0x55u8; 31]));
+        }
+        v.push(json!({ "name": "publication_swarm_digest_short",
+            "why": "An index digest is 32 bytes; 31 is not a shorter digest, it is a different claim.",
+            "payment_hex": hex(&short.encode()),
+            "expect": { "ok": false, "reject": "MALFORMED", "hint": "field 262 must be 32 bytes, got 31" } }));
     
     }
 

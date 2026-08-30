@@ -890,6 +890,11 @@ pub struct PublicationKey {
     /// The standing key that opens the shelf's index for the life of the
     /// subscription. Travels with the record or not at all.
     pub head_key: Option<[u8; 32]>,
+    /// A heavy period ships by swarm (§16.20): the share key to bootstrap
+    /// from, with the index digest that authenticates what answers —
+    /// together or not at all, and only aboard a publication key.
+    pub swarm_key: Option<String>,
+    pub swarm_digest: Option<[u8; 32]>,
 }
 
 /// A sealed blob parked in a DHT record (§16.15).
@@ -1002,6 +1007,12 @@ impl Message {
             }
             if let Some(hk) = &p.head_key {
                 m.insert(f::MSG_PUB_HEAD, Value::Bytes(hk.to_vec()));
+            }
+            if let Some(sk) = &p.swarm_key {
+                m.insert(f::MSG_PUB_SWARM_KEY, Value::Text(sk.clone()));
+            }
+            if let Some(sd) = &p.swarm_digest {
+                m.insert(f::MSG_PUB_SWARM_DIGEST, Value::Bytes(sd.to_vec()));
             }
         }
         Value::Map(m)
@@ -1158,8 +1169,30 @@ impl Message {
                 let period_key = r.opt_bytes(f::MSG_PUB_KEY, Some(32))?;
                 let record_key = r.opt_text(f::MSG_PUB_RECORD, MAX_RECORD_KEY_CHARS)?;
                 let head_key = r.opt_bytes(f::MSG_PUB_HEAD, Some(32))?;
+                let swarm_key = r.opt_text(f::MSG_PUB_SWARM_KEY, MAX_RECORD_KEY_CHARS)?;
+                let swarm_digest = r.opt_bytes(f::MSG_PUB_SWARM_DIGEST, Some(32))?;
+                // The swarm pair is one thing, and it rides a publication:
+                // a bootstrap key without the digest that authenticates its
+                // answers is an ask, not a fetch — and either of them away
+                // from a period key describes a shipment of nothing.
+                let swarm = match (swarm_key, swarm_digest) {
+                    (None, None) => None,
+                    (Some(k), Some(d)) => Some((k, d)),
+                    _ => {
+                        return Err(Reject::with_detail(
+                            RejectCode::Malformed,
+                            "a swarm share carries its key and its index digest together",
+                        ))
+                    }
+                };
                 match (period_id, period_key, record_key, head_key) {
-                    (None, None, None, None) => None,
+                    (None, None, None, None) if swarm.is_none() => None,
+                    (None, None, None, None) => {
+                        return Err(Reject::with_detail(
+                            RejectCode::Malformed,
+                            "a swarm share rides a publication key",
+                        ))
+                    }
                     // The period pair is the kind's whole point: a key with
                     // no name cannot be filed, a name with no key opens
                     // nothing.
@@ -1185,6 +1218,8 @@ impl Message {
                             period_key: period_key.try_into().unwrap(),
                             record_key: shelf.0,
                             head_key: shelf.1.map(|h: Vec<u8>| h.try_into().unwrap()),
+                            swarm_key: swarm.as_ref().map(|(k, _)| k.clone()),
+                            swarm_digest: swarm.map(|(_, d)| d.try_into().unwrap()),
                         })
                     }
                     _ => {

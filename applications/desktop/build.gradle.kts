@@ -633,6 +633,14 @@ tasks.register<JavaExec>("swarmtest") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// The whole 1.2+1.3 vertical: card claim → kind-13 manifest (period key +
+// shipment) → swarm fetch by the FILED pair. See PubSwarmTest.kt.
+tasks.register<JavaExec>("pubswarmtest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.PubSwarmTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // The till driven blind against a real phone: card → claim → greeting →
 // bill → payment watched onto the chain → receipt. `./gradlew :desktop:tilltest`.
 tasks.register<JavaExec>("tilltest") {
