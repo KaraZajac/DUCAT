@@ -112,18 +112,24 @@ fun main() {
 
     // 7. The clipboard, which "Copy" and the share sheet both end in.
     //
-    // **Put back whatever was there.** This is the only check in the suite
-    // that reaches out of its own process into something the person running
-    // it is also using, and a clipboard does not stop at this machine: a
-    // desktop paired over KDE Connect (or GSConnect, or Phone Link) syncs it
-    // to a phone. On 2026-08-24 that is exactly what happened — every full
-    // desk sweep pushed the string below onto a paired Xperia, so the owner's
-    // next paste, on their phone, was "ducat-shim-test".
+    // **Opt-in, because the clipboard is not ours.** This is the only check
+    // in the suite that reaches out of its own process into something the
+    // person running it is also using, and a clipboard does not stop at this
+    // machine: a desktop paired over KDE Connect (or GSConnect, or Phone
+    // Link) syncs it to a phone. On 2026-08-24 that is exactly what happened
+    // — every full desk sweep pushed the string below onto a paired Xperia —
+    // and save-and-restore was the first fix. It was not enough: restoring
+    // an *empty* clipboard writes "", which sync tools drop, so the phone
+    // kept the test string; and a phone keyboard's clipboard history keeps
+    // every intermediate value regardless. On 2026-08-30 the string was
+    // still turning up on the same owner's phone, four times in one build
+    // day.
     //
-    // Note this check is vacuous on CI, where there is no display and `back`
-    // is null. The only machine it tests anything on is a real desktop, which
-    // is the same machine it was damaging; save-and-restore is what lets it
-    // keep the coverage without owning somebody's clipboard.
+    // The check is also vacuous on CI (no display, `back` is null), so the
+    // only machine it ever tested anything on was the one it polluted. Five
+    // lines of AWT are not worth owning somebody's paste buffer: the leg now
+    // runs only when DUCAT_SHIM_CLIPBOARD=1 is set deliberately.
+    if (System.getenv("DUCAT_SHIM_CLIPBOARD") == "1") {
     val clipHeld = runCatching {
         java.awt.Toolkit.getDefaultToolkit().systemClipboard
             .getData(java.awt.datatransfer.DataFlavor.stringFlavor) as? String
@@ -146,6 +152,9 @@ fun main() {
         (java.awt.Toolkit.getDefaultToolkit().systemClipboard
             .getData(java.awt.datatransfer.DataFlavor.stringFlavor) as? String) != "ducat-shim-test"
     }.getOrDefault(true))
+    } else {
+        println("SHIM      clipboard leg skipped (set DUCAT_SHIM_CLIPBOARD=1 to run it)")
+    }
 
     // 8. Voice memos, if this machine has a microphone at all.
     val mic = runCatching {
