@@ -12,6 +12,11 @@ pub mod piece_map;
 pub mod piece_verifier;
 pub mod proto;
 pub mod record;
+pub mod route_registry;
+// DUCAT modification: the CLI crate's orchestration layer, vendored as a
+// module so an embedding application drives seeds and fetches the same
+// way the upstream CLI does (see ../STIGMERGE-NOTICE.md).
+pub mod share;
 
 pub mod share_announcer;
 pub mod share_resolver;

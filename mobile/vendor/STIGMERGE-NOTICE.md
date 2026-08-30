@@ -43,9 +43,33 @@ Recorded per the MPL's Exhibit A expectations and plain courtesy:
    **This makes shares wire-incompatible with upstream stigmerge
    swarms**, deliberately: DUCAT swarms are club-scoped, sealed under
    §16.20 period keys, and never meet the public network's.
-3. Whatever the adaptation to DUCAT's already-running Veilid node needs
-   in `veilnet` (a constructor over an existing `VeilidAPI` rather than
-   `api_startup`), kept small and a candidate to offer upstream.
+3. **`veilnet::Connection::from_api`** — ride an already-running node.
+   The host keeps the update callback and forwards into a returned
+   feeder; borrowed connections (`owned = false`) cannot detach,
+   reattach or shut the node down, pinned by test. Upstream candidate.
+4. **A route observer** (`stigmerge-peer/src/route_registry.rs`), called
+   by the share announcer on every private-route create/retire, so an
+   embedding host can demultiplex inbound `AppCall`s between the seeder
+   and its own protocol. A no-op unless installed. Upstream candidate.
+5. **The CLI's orchestration layer vendored as a module**
+   (`stigmerge-peer/src/share.rs`, from `stigmerge/src/share.rs`), so an
+   embedding application drives seeds and fetches exactly as the CLI
+   does; its `want_index_digest` takes a `Digest` rather than decoding
+   hex.
+6. **`Status::Done` is actually sent.** Upstream's fetcher returned its
+   internal `State::Done` on `index_complete` without ever emitting
+   `Status::Done` on the status channel — so every consumer waiting on
+   the documented signal, upstream's own CLI included, waited forever on
+   a finished fetch. One line at the completion site. Upstream's issues
+   #401/#402 may be this. **The clearest upstream patch of the lot.**
+
+Proven live 2026-08-30, two DUCAT nodes on real Veilid: 25 MiB in 97.5 s
+and 100 MiB in 279.9 s (~3 Mbit/s through private routes), payload
+BLAKE3 identical on both ends, clean exits
+(`mobile/examples/swarmtest.rs`). Known cost, inherited and accepted for
+now: the actors keep both runtimes warm while serving (~2 cores between
+gossip and Veilid) — upstream's own roadmap names load-shedding, and a
+phone-side seeder will need it before it ships on batteries.
 
 The CLI (`stigmerge` itself), the Docker/Nix packaging, and the examples
 are not vendored — only the two library crates and their tests.

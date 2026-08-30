@@ -5475,6 +5475,65 @@ public object FfiConverterTypePassphraseStrength: FfiConverterRustBuffer<Passphr
 
 
 
+
+
+sealed class SwarmException: kotlin.Exception() {
+    
+    class Failed(
+        
+        val v1: kotlin.String
+        ) : SwarmException() {
+        override val message
+            get() = "v1=${ v1 }"
+    }
+    
+
+    companion object ErrorHandler : UniffiRustCallStatusErrorHandler<SwarmException> {
+        override fun lift(error_buf: RustBuffer.ByValue): SwarmException = FfiConverterTypeSwarmError.lift(error_buf)
+    }
+
+    
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeSwarmError : FfiConverterRustBuffer<SwarmException> {
+    override fun read(buf: ByteBuffer): SwarmException {
+        
+
+        return when(buf.getInt()) {
+            1 -> SwarmException.Failed(
+                FfiConverterString.read(buf),
+                )
+            else -> throw RuntimeException("invalid error enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: SwarmException): ULong {
+        return when(value) {
+            is SwarmException.Failed -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+                + FfiConverterString.allocationSize(value.v1)
+            )
+        }
+    }
+
+    override fun write(value: SwarmException, buf: ByteBuffer) {
+        when(value) {
+            is SwarmException.Failed -> {
+                buf.putInt(1)
+                FfiConverterString.write(value.v1, buf)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+
+}
+
+
+
 /**
  * A second node's answer about one transaction.
  *

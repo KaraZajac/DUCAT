@@ -1329,6 +1329,7 @@ dependencies = [
 name = "ducat-mobile"
 version = "0.1.0"
 dependencies = [
+ "blake3",
  "ciphersuite",
  "curve25519-dalek 4.1.3",
  "dkg-pedpop",
@@ -1342,11 +1343,15 @@ dependencies = [
  "rand_core 0.6.4",
  "serde_json",
  "sha2 0.10.9",
+ "stigmerge_fileindex",
+ "stigmerge_peer",
  "thiserror 1.0.69",
  "tokio",
+ "tokio-util",
  "uniffi",
  "ureq",
  "veilid-core",
+ "veilnet",
  "zeroize",
 ]
 

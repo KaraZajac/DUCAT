@@ -417,6 +417,13 @@ impl<C: Connection + Clone + Send + Sync + 'static> Fetcher<C> {
                                 }
                             });
                             if index_complete {
+                                // DUCAT modification (see ../STIGMERGE-NOTICE.md):
+                                // say so on the status channel. State::Done was
+                                // returned without Status::Done ever being sent,
+                                // so every consumer waiting on the documented
+                                // signal — upstream's own CLI included — waited
+                                // forever on a fetch that had finished.
+                                self.status_tx.send_replace(Status::Done);
                                 task_cancel.cancel();
                                 return Ok(State::Done);
                             }

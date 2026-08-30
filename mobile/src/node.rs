@@ -74,6 +74,52 @@ const MAX_PENDING: usize = 64;
 
 static INBOX: OnceLock<Mutex<VecDeque<(u64, Vec<u8>)>>> = OnceLock::new();
 
+// --- the swarm's share of the node (post-1.0 1.3) --------------------------
+//
+// stigmerge rides this node through veilnet's borrowed connection. The
+// update callback below is the ONE place Veilid speaks to this process, so
+// the swarm's view of the network is fed from here: every non-AppCall
+// update is forwarded to its feeder, and AppCalls are demultiplexed by the
+// route they arrived on — the seeder answers block requests on routes the
+// announcer registered, the mailbox answers everything else, and neither
+// can steal the other's single reply slot.
+static SWARM_FEEDER: OnceLock<Mutex<Option<Box<dyn Fn(VeilidUpdate) + Send + Sync>>>> =
+    OnceLock::new();
+static SWARM_ROUTES: OnceLock<Mutex<std::collections::HashSet<RouteId>>> = OnceLock::new();
+
+fn swarm_feeder() -> &'static Mutex<Option<Box<dyn Fn(VeilidUpdate) + Send + Sync>>> {
+    SWARM_FEEDER.get_or_init(|| Mutex::new(None))
+}
+
+fn swarm_routes() -> &'static Mutex<std::collections::HashSet<RouteId>> {
+    SWARM_ROUTES.get_or_init(|| Mutex::new(std::collections::HashSet::new()))
+}
+
+pub(crate) fn swarm_install_feeder(f: Box<dyn Fn(VeilidUpdate) + Send + Sync>) {
+    *swarm_feeder().lock().unwrap() = Some(f);
+}
+
+pub(crate) fn swarm_route_changed(route_id: &RouteId, added: bool) {
+    let mut r = swarm_routes().lock().unwrap();
+    if added {
+        r.insert(route_id.clone());
+    } else {
+        r.remove(route_id);
+    }
+}
+
+fn feed_swarm(update: VeilidUpdate) {
+    if let Some(f) = swarm_feeder().lock().unwrap().as_ref() {
+        f(update);
+    }
+}
+
+/// The running API and its runtime handle, for the swarm module.
+pub(crate) fn swarm_handles() -> Option<(VeilidAPI, tokio::runtime::Handle)> {
+    let guard = slot().lock().ok()?;
+    guard.as_ref().map(|n| (n.api.clone(), n.runtime.handle().clone()))
+}
+
 fn inbox() -> &'static Mutex<VecDeque<(u64, Vec<u8>)>> {
     INBOX.get_or_init(|| Mutex::new(VecDeque::new()))
 }
@@ -245,6 +291,18 @@ pub fn node_start(storage_dir: String, udp: bool) -> Result<(), NodeError> {
         let cb: UpdateCallback = std::sync::Arc::new(|update| {
             match update {
                 VeilidUpdate::AppCall(call) => {
+                    // The swarm's block requests arrive on routes its
+                    // announcer registered; those calls are the seeder's
+                    // EXCLUSIVELY — a call has one reply slot, and two
+                    // answerers means whoever loses answered nothing.
+                    let to_swarm = call
+                        .route_id()
+                        .map(|r| swarm_routes().lock().unwrap().contains(r))
+                        .unwrap_or(false);
+                    if to_swarm {
+                        feed_swarm(VeilidUpdate::AppCall(call));
+                        return;
+                    }
                     let mut q = inbox().lock().unwrap();
                     if q.len() >= MAX_PENDING {
                         q.pop_front();
@@ -257,6 +315,11 @@ pub fn node_start(storage_dir: String, udp: bool) -> Result<(), NodeError> {
                 // app, and an event that merely *wakes* it cannot introduce a
                 // second, subtly different way for a message to arrive.
                 VeilidUpdate::ValueChange(vc) => {
+                    // The swarm's watches see it too — this arm consumes the
+                    // update for the mailbox's doorbell, and a consumed
+                    // update the swarm never saw would be a watch that never
+                    // fires over there.
+                    feed_swarm(VeilidUpdate::ValueChange(vc.clone()));
                     // Which record, not merely that something moved. A driver
                     // watching eighteen boards used to be told only "one of
                     // them changed" and had to read all eighteen to find out
@@ -287,7 +350,12 @@ pub fn node_start(storage_dir: String, udp: bool) -> Result<(), NodeError> {
                     }
                     q.push_back(format!("{} {}", l.log_level, l.message));
                 }
-                _ => {}
+                // Everything that is not an AppCall also goes to the swarm's
+                // feeder: its connection needs attachment state to know the
+                // network is up, route changes to rebuild dead routes, and
+                // value changes for the records it watches. The feeder is a
+                // handler chain that ignores what it has no handler for.
+                other => feed_swarm(other),
             }
         });
         let api = api_startup_json(cb, cfg.to_string())

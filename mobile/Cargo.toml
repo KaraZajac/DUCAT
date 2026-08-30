@@ -19,6 +19,12 @@ zeroize = "1"
 thiserror = "1"
 veilid-core = "0.5"
 tokio = { version = "1", features = ["rt-multi-thread"] }
+tokio-util = "0.7"
+blake3 = "1"
+# The swarm engine — vendored, credited, converted; see vendor/STIGMERGE-NOTICE.md.
+stigmerge_peer = { path = "vendor/stigmerge-peer" }
+stigmerge_fileindex = { path = "vendor/stigmerge-fileindex" }
+veilnet = { path = "vendor/veilnet" }
 serde_json = "1"
 curve25519-dalek = { version = "4", features = ["precomputed-tables"] }
 uniffi = { version = "0.28", features = ["cli"] }
