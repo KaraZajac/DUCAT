@@ -9,7 +9,7 @@
 // announcer reports every route it creates or retires here.
 //
 // A no-op unless an observer is installed, which is exactly the upstream
-// behaviour. Offered upstream as a feature candidate.
+// behaviour. A local delta we carry (research/post-1.0/upstream/).
 
 use std::sync::RwLock;
 
