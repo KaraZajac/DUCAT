@@ -14,4 +14,5 @@
     <string name="chat_issue_you_sent">호를 보냈어요</string>
     <string name="chatlist_preview_issue">새 호: %1$s</string>
     <string name="notify_new_issue">%1$s님이 새 호를 보냈어요</string>
+    <string name="library_note_new_issue">새 호가 나왔어요.</string>
 </resources>

@@ -14,4 +14,5 @@
     <string name="chat_issue_you_sent">Wysłano wydanie</string>
     <string name="chatlist_preview_issue">Nowe wydanie: %1$s</string>
     <string name="notify_new_issue">Nowe wydanie od %1$s</string>
+    <string name="library_note_new_issue">Ukazało się nowe wydanie.</string>
 </resources>

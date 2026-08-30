@@ -14,4 +14,5 @@
     <string name="chat_issue_you_sent">Bir sayı gönderdin</string>
     <string name="chatlist_preview_issue">Yeni sayı: %1$s</string>
     <string name="notify_new_issue">%1$s yeni bir sayı gönderdi</string>
+    <string name="library_note_new_issue">Yeni sayı çıktı.</string>
 </resources>

@@ -14,4 +14,5 @@
     <string name="chat_issue_you_sent">你发出了一期</string>
     <string name="chatlist_preview_issue">新的一期：%1$s</string>
     <string name="notify_new_issue">%1$s 发来了新的一期</string>
+    <string name="library_note_new_issue">新的一期已经发布。</string>
 </resources>

@@ -14,4 +14,5 @@
     <string name="chat_issue_you_sent">شماره‌ای فرستادی</string>
     <string name="chatlist_preview_issue">شمارهٔ تازه: %1$s</string>
     <string name="notify_new_issue">%1$s شمارهٔ تازه‌ای فرستاد</string>
+    <string name="library_note_new_issue">شمارهٔ تازه‌ای منتشر شد.</string>
 </resources>

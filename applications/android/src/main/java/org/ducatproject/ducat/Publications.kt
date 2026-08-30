@@ -153,9 +153,18 @@ object Publications {
         val key = periodKey(context, pubId, periodId) ?: return false
         val firstTime = ContactStore(context).thread(c.personaHex)
             .none { it.outgoing && it.kind == 13 }
+        // The wire refuses an empty body on every kind, so a note-less
+        // period rides a protocol-written line — in the SENDER's language,
+        // the bill placeholder's own rule. Every automated send (the
+        // settle reconcile, send-to-remaining, re-seed) is note-less by
+        // nature; without this they all failed with "1 to 2000 characters",
+        // silently, forever. Found live by pubsettletest.
+        val body = note.trim().ifBlank {
+            context.getString(R.string.library_note_new_issue)
+        }
         return runCatching {
             Mailbox.send(
-                context, c, note,
+                context, c, body,
                 kind = 13,
                 pubPeriodId = periodId,
                 pubPeriodKey = key,
@@ -164,6 +173,10 @@ object Publications {
                 pubSwarmKey = swarmKey,
                 pubSwarmDigestHex = swarmDigestHex,
             )
+        }.onFailure {
+            // Named, not swallowed: a failing send retried silently forever
+            // looks exactly like a reconcile that never ran.
+            DucatLog.w("Publications", "sendPeriod '$periodId': ${it.message}")
         }.isSuccess
     }
 

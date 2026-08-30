@@ -14,4 +14,5 @@
     <string name="chat_issue_you_sent">Kamu mengirim edisi</string>
     <string name="chatlist_preview_issue">Edisi baru: %1$s</string>
     <string name="notify_new_issue">%1$s mengirim edisi baru</string>
+    <string name="library_note_new_issue">Edisi baru sudah terbit.</string>
 </resources>

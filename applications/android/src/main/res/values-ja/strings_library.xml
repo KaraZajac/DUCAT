@@ -14,4 +14,5 @@
     <string name="chat_issue_you_sent">号を送りました</string>
     <string name="chatlist_preview_issue">新しい号: %1$s</string>
     <string name="notify_new_issue">%1$sから新しい号が届きました</string>
+    <string name="library_note_new_issue">新しい号が出ました。</string>
 </resources>

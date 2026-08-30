@@ -14,4 +14,5 @@
     <string name="chat_issue_you_sent">أرسلت عددًا</string>
     <string name="chatlist_preview_issue">عدد جديد: %1$s</string>
     <string name="notify_new_issue">أرسل %1$s عددًا جديدًا</string>
+    <string name="library_note_new_issue">صدر عدد جديد.</string>
 </resources>

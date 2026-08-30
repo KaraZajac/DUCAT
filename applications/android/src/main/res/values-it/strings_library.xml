@@ -14,4 +14,5 @@
     <string name="chat_issue_you_sent">Hai mandato un numero</string>
     <string name="chatlist_preview_issue">Nuovo numero: %1$s</string>
     <string name="notify_new_issue">%1$s ha mandato un nuovo numero</string>
+    <string name="library_note_new_issue">È uscito un nuovo numero.</string>
 </resources>
