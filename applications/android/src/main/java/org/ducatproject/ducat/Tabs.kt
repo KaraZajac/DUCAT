@@ -291,6 +291,8 @@ class TabStore(private val context: Context) {
                     // shop's customer saw above a flat white they had already
                     // paid for at the counter.
                     "pos" -> R.string.bill_note_sale
+                    // A subscription period billed by the Publish room.
+                    Publications.ORIGIN -> R.string.bill_note_issue
                     else -> R.string.bill_note_tab
                 },
             ),

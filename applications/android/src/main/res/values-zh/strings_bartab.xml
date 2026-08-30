@@ -54,4 +54,5 @@
     <string name="bill_note_cancelled">%1$s 的这笔账单已取消，无需付款。</string>
     <string name="bill_note_sale">你的账单</string>
     <string name="bartab_tip_line">小费 — 谢谢</string>
+    <string name="bill_note_issue">订阅</string>
 </resources>

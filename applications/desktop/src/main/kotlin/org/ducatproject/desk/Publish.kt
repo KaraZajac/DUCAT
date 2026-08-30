@@ -13,10 +13,13 @@ import androidx.compose.ui.unit.dp
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.Publications
 import org.ducatproject.ducat.Swarm
+import org.ducatproject.ducat.TabStore
+import org.ducatproject.ducat.formatXmr
 
 /**
  * The publisher's room: where a month leaves the building.
@@ -125,13 +128,11 @@ fun PublishRoom() {
             HorizontalDivider()
             Spacer(Modifier.height(20.dp))
 
-            // --- shipping a new issue -------------------------------------
-            Text("New issue", style = MaterialTheme.typography.titleMedium)
+            // --- the period, priced and billed ----------------------------
+            Text("This period", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(8.dp))
             val now = remember { java.time.YearMonth.now().toString() }
             var period by remember(pubId) { mutableStateOf(now) }
-            var path by remember(pubId) { mutableStateOf("") }
-            var note by remember(pubId) { mutableStateOf("") }
             var busy by remember { mutableStateOf<String?>(null) }
             var lastWord by remember { mutableStateOf<String?>(null) }
             OutlinedTextField(
@@ -139,6 +140,65 @@ fun PublishRoom() {
                 label = { Text("Period (e.g. $now)") }, singleLine = true,
             )
             Spacer(Modifier.height(6.dp))
+            // A price makes the room run §15.11's reconcile: bill the
+            // roster, and whoever the chain shows as paid gets the issue on
+            // the poll clock — no price means a free publication, sent to
+            // the whole roster on seed.
+            val storedPrice = remember(version, pubId) { Publications.priceOf(context, pubId) }
+            var priceText by remember(pubId) {
+                mutableStateOf(if (storedPrice > 0) formatXmr(storedPrice) else "")
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                OutlinedTextField(
+                    priceText, { priceText = it },
+                    label = { Text("Price per period (XMR, blank = free)") },
+                    singleLine = true,
+                )
+                Spacer(Modifier.width(8.dp))
+                TextButton(onClick = {
+                    val pxmr = if (priceText.isBlank()) 0L
+                    else Amounts.parse(priceText)?.let { Amounts.toPxmr(it) } ?: -1L
+                    if (pxmr >= 0) Publications.setPrice(context, pubId, pxmr)
+                }) { Text("Set") }
+            }
+            if (storedPrice > 0) {
+                val billed = remember(version, pubId, period, busy) {
+                    Publications.billedFor(context, pubId, period.trim())
+                }
+                val paidCount = remember(version, billed) {
+                    val tabs = TabStore(context)
+                    billed.values.count { tabs.get(it)?.state?.startsWith("paid") == true }
+                }
+                Text(
+                    "Billed ${billed.size} · paid $paidCount. Paid subscribers get " +
+                        "the issue automatically once it is seeded.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(6.dp))
+                Button(
+                    enabled = busy == null && roster.isNotEmpty() && period.isNotBlank(),
+                    onClick = {
+                        busy = "Billing…"
+                        scope.launch(Dispatchers.IO) {
+                            try {
+                                val n = Publications.billPeriod(context, pubId, period.trim())
+                                lastWord = "Billed $n subscriber(s) for ${period.trim()} at " +
+                                    "${formatXmr(storedPrice)} XMR."
+                            } finally {
+                                busy = null
+                            }
+                        }
+                    },
+                ) { Text("Bill roster") }
+                Spacer(Modifier.height(16.dp))
+            }
+
+            // --- shipping the issue ---------------------------------------
+            Text("New issue", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(8.dp))
+            var path by remember(pubId) { mutableStateOf("") }
+            var note by remember(pubId) { mutableStateOf("") }
             OutlinedTextField(
                 path, { path = it },
                 label = { Text("File to ship (path)") }, singleLine = true,
@@ -166,25 +226,37 @@ fun PublishRoom() {
                                 context, pubId, p, f,
                                 share.shareKey, share.indexDigestHex,
                             )
-                            busy = "Sending…"
-                            var sent = 0
-                            val readers = ContactStore(context).all()
-                                .filter { it.personaHex in Publications.subscribers(context, pubId) }
-                            for (c in readers) {
-                                val ok = Publications.sendPeriod(
-                                    context, c, pubId, p,
-                                    record = null, headKey = null,
-                                    note = note.trim(),
-                                    swarmKey = share.shareKey,
-                                    swarmDigestHex = share.indexDigestHex,
-                                )
-                                if (ok) {
-                                    Publications.markSent(context, pubId, p, c.personaHex)
-                                    sent++
+                            if (storedPrice > 0) {
+                                // Paid publication: the reconcile owns
+                                // delivery. Run it now for anyone already
+                                // settled; the poll clock catches the rest.
+                                busy = "Sending to the paid…"
+                                Publications.reconcileSettled(context)
+                                val got = Publications.issues(context, pubId)
+                                    .firstOrNull { it.periodId == p }?.sentTo?.size ?: 0
+                                lastWord = "Issue $p seeded; sent to $got already-paid " +
+                                    "subscriber(s). Others get it when their payment lands."
+                            } else {
+                                busy = "Sending…"
+                                var sent = 0
+                                val readers = ContactStore(context).all()
+                                    .filter { it.personaHex in Publications.subscribers(context, pubId) }
+                                for (c in readers) {
+                                    val ok = Publications.sendPeriod(
+                                        context, c, pubId, p,
+                                        record = null, headKey = null,
+                                        note = note.trim(),
+                                        swarmKey = share.shareKey,
+                                        swarmDigestHex = share.indexDigestHex,
+                                    )
+                                    if (ok) {
+                                        Publications.markSent(context, pubId, p, c.personaHex)
+                                        sent++
+                                    }
                                 }
+                                lastWord = "Issue $p: seeded and sent to $sent of ${readers.size}. " +
+                                    "Serving from this desk while it runs."
                             }
-                            lastWord = "Issue $p: seeded and sent to $sent of ${readers.size}. " +
-                                "Serving from this desk while it runs."
                         } catch (e: Throwable) {
                             DucatLog.w("Publish", "issue $p failed: ${e.message}")
                             lastWord = "Failed: ${e.message}"
@@ -193,7 +265,7 @@ fun PublishRoom() {
                         }
                     }
                 },
-            ) { Text(busy ?: "Seed + send") }
+            ) { Text(busy ?: if (storedPrice > 0) "Seed issue" else "Seed + send") }
             lastWord?.let {
                 Spacer(Modifier.height(6.dp))
                 Text(it, style = MaterialTheme.typography.bodySmall)
@@ -216,16 +288,27 @@ fun PublishRoom() {
             }
             issues.forEach { issue ->
                 Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                    val issueBilled = remember(version, pubId, issue.periodId) {
+                        Publications.billedFor(context, pubId, issue.periodId)
+                    }
+                    val issuePaid = remember(version, issueBilled) {
+                        val tabs = TabStore(context)
+                        issueBilled.values.count { tabs.get(it)?.state?.startsWith("paid") == true }
+                    }
                     Column(Modifier.weight(1f)) {
                         Text("Issue ${issue.periodId}", style = MaterialTheme.typography.bodyLarge)
                         Text(
-                            "sent to ${issue.sentTo.size} · ${File(issue.file).name}",
+                            (if (issueBilled.isNotEmpty()) "billed ${issueBilled.size} · paid $issuePaid · " else "") +
+                                "sent ${issue.sentTo.size} · ${File(issue.file).name}",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                     val missing = roster - issue.sentTo
-                    if (missing.isNotEmpty()) {
+                    // A paid publication never offers a blanket send — the
+                    // reconcile delivers to the settled; this button would
+                    // hand the issue to whoever has not paid.
+                    if (missing.isNotEmpty() && storedPrice == 0L) {
                         TextButton(enabled = busy == null, onClick = {
                             busy = "Sending…"
                             scope.launch(Dispatchers.IO) {

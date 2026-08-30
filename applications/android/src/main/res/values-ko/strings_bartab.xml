@@ -54,4 +54,5 @@
     <string name="bill_note_cancelled">%1$s 청구는 취소되었습니다 — 결제하실 것이 없습니다.</string>
     <string name="bill_note_sale">결제 금액</string>
     <string name="bartab_tip_line">팁 — 감사합니다</string>
+    <string name="bill_note_issue">구독</string>
 </resources>

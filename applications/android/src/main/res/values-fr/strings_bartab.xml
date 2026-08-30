@@ -55,4 +55,5 @@
     <string name="bill_note_cancelled">L\'addition de %1$s est annulée — rien à payer.</string>
     <string name="bill_note_sale">Votre ticket</string>
     <string name="bartab_tip_line">Pourboire — merci</string>
+    <string name="bill_note_issue">Abonnement</string>
 </resources>

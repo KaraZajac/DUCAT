@@ -55,4 +55,5 @@
     <string name="bill_note_cancelled">صورت‌حساب %1$s لغو شد — چیزی برای پرداخت نیست.</string>
     <string name="bill_note_sale">صورتحساب شما</string>
     <string name="bartab_tip_line">انعام — سپاسگزاریم</string>
+    <string name="bill_note_issue">اشتراک</string>
 </resources>

@@ -105,6 +105,7 @@ val sharedLogic = listOf(
     "org/ducatproject/ducat/ui/Personas.kt",
     "org/ducatproject/ducat/Enquiries.kt",
     "org/ducatproject/ducat/Stakes.kt",
+    "org/ducatproject/ducat/Donations.kt",
     "org/ducatproject/ducat/Places.kt",
     // §15.12's per-country fare table, which Places.kt prices from.
     "org/ducatproject/ducat/FareRates.kt",

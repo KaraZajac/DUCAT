@@ -55,4 +55,5 @@
     <string name="bill_note_cancelled">De rekening van %1$s is ingetrokken — niets te betalen.</string>
     <string name="bill_note_sale">Je rekening</string>
     <string name="bartab_tip_line">Fooi — bedankt</string>
+    <string name="bill_note_issue">Abonnement</string>
 </resources>

@@ -57,4 +57,5 @@
     <string name="bill_note_cancelled">Rachunek na %1$s został anulowany — nie ma nic do zapłaty.</string>
     <string name="bill_note_sale">Twój rachunek</string>
     <string name="bartab_tip_line">Napiwek — dziękujemy</string>
+    <string name="bill_note_issue">Prenumerata</string>
 </resources>

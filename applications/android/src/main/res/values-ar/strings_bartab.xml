@@ -59,4 +59,5 @@
     <string name="bill_note_cancelled">أُلغيت الفاتورة البالغة %1$s — لا شيء للدفع.</string>
     <string name="bill_note_sale">فاتورتك</string>
     <string name="bartab_tip_line">إكرامية — شكرًا</string>
+    <string name="bill_note_issue">الاشتراك</string>
 </resources>

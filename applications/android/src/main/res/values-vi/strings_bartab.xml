@@ -54,4 +54,5 @@
     <string name="bill_note_cancelled">Hoá đơn %1$s đã được huỷ — không phải trả gì.</string>
     <string name="bill_note_sale">Hóa đơn của bạn</string>
     <string name="bartab_tip_line">Tiền boa — cảm ơn</string>
+    <string name="bill_note_issue">Gói đăng ký</string>
 </resources>

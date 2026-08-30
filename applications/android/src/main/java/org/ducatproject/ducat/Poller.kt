@@ -252,6 +252,11 @@ class Poller(private val context: Context) {
                 // tabs do — see Donations for why the payer wants the record.
                 runCatching { Donations.reconcile(context) }
                     .onFailure { DucatLog.w(TAG, "tabs: ${it.message}") }
+                // Paid subscribers get their issue on the same clock too:
+                // the tab just went "paid" above, and §15.11 says delivery
+                // follows settlement, not the operator's attention.
+                runCatching { Publications.reconcileSettled(context) }
+                    .onFailure { DucatLog.w(TAG, "issues: ${it.message}") }
                 // The mempool, only while a bill is out and unsighted — the
                 // scan costs a round trip per pool transaction, and a till
                 // with nothing billed has nothing to look for.

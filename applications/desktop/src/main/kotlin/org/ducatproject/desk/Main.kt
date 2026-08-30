@@ -24,15 +24,18 @@ import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.Balances
 import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.ContactStore
+import org.ducatproject.ducat.Donations
 import org.ducatproject.ducat.Groups
 import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.MyProfile
 import org.ducatproject.ducat.NameStore
 import org.ducatproject.ducat.NodeStore
 import org.ducatproject.ducat.PersonaStore
+import org.ducatproject.ducat.Publications
 import org.ducatproject.ducat.Rates
 import org.ducatproject.ducat.Recurring
 import org.ducatproject.ducat.StoredMessage
+import org.ducatproject.ducat.TabStore
 import org.ducatproject.ducat.Wallet
 import org.ducatproject.ducat.WalletStore
 import org.ducatproject.ducat.formatXmr
@@ -294,6 +297,15 @@ private fun runDesk(deskDir: File) = application {
                         runCatching { Groups.retryOutbox(context) }
                         runCatching { Recurring.runDue(context) }
                         runCatching { Mailbox.verifyLastWrites(context) }
+                        // The same settle clock the phone's Poller runs: a
+                        // desk hosting the till and bar rooms was billing
+                        // through TabStore and never reconciling, so paid
+                        // sales sat unreceipted until the phone did it. And
+                        // the Publish room's whole promise — pay and the
+                        // issue arrives — rides this line.
+                        runCatching { TabStore.reconcile(context) }
+                        runCatching { Donations.reconcile(context) }
+                        runCatching { Publications.reconcileSettled(context) }
                         // The wallet keeps pace beside the mailbox: a few
                         // scan windows a tick, so a syncing desk converges
                         // without starving the poll.

@@ -261,6 +261,130 @@ object Publications {
         pub.put("issues", iss)
     }
 
+    /** Tab origin for subscription bills — display machinery only, like
+     *  "bar" and "taxi"; settlement is TabStore's, untouched. */
+    const val ORIGIN = "pub"
+
+    /** The asking price per period, in piconero. Zero = not set. */
+    fun priceOf(context: Context, pubId: String): Long =
+        readPub(context, pubId)?.optLong("price", 0L) ?: 0L
+
+    fun setPrice(context: Context, pubId: String, pxmr: Long) {
+        editPub(context, pubId) { it.put("price", pxmr) }
+    }
+
+    /** Tabs billed for a period: personaHex → tab id. */
+    fun billedFor(context: Context, pubId: String, periodId: String): Map<String, String> {
+        val o = readPub(context, pubId)?.optJSONObject("issues")
+            ?.optJSONObject(periodId)?.optJSONObject("billed") ?: return emptyMap()
+        return o.keys().asSequence().associateWith { o.getString(it) }
+    }
+
+    fun recordBilled(context: Context, pubId: String, periodId: String, personaHex: String, tabId: String) {
+        editPub(context, pubId) { pub ->
+            val iss = pub.optJSONObject("issues") ?: JSONObject()
+            val o = iss.optJSONObject(periodId) ?: JSONObject()
+            val billed = o.optJSONObject("billed") ?: JSONObject()
+            billed.put(personaHex, tabId)
+            o.put("billed", billed)
+            iss.put(periodId, o)
+            pub.put("issues", iss)
+        }
+    }
+
+    /**
+     * Bill the roster for a period: one ordinary tab per subscriber, on the
+     * same rails as a bar tab — key-image snapshot, subaddress match, the
+     * receipt from TabStore.reconcile when the chain shows the money.
+     * Idempotent per (period, subscriber); returns how many bills went out.
+     */
+    fun billPeriod(context: Context, pubId: String, periodId: String): Int {
+        val price = priceOf(context, pubId)
+        if (price <= 0L) return 0
+        val title = publications(context).firstOrNull { it.first == pubId }?.second ?: return 0
+        val already = billedFor(context, pubId, periodId).keys
+        val store = TabStore(context)
+        val contacts = ContactStore(context).all().associateBy { it.personaHex }
+        var sent = 0
+        for (hex in subscribers(context, pubId)) {
+            if (hex in already || contacts[hex] == null) continue
+            val opened = store.open(hex, ORIGIN)
+            val lined = store.mutate(opened.id) {
+                it.copy(lines = listOf(BillItem("$title — $periodId", price)))
+            } ?: continue
+            runCatching { store.settle(lined) }
+                .onSuccess {
+                    recordBilled(context, pubId, periodId, hex, opened.id)
+                    sent++
+                }
+                .onFailure {
+                    // The bill never left; the open tab must not lie in wait
+                    // for an unrelated payment of the same figure.
+                    store.delete(opened.id)
+                    DucatLog.w("Publications", "bill to ${hex.take(8)}… failed: ${it.message}")
+                }
+        }
+        return sent
+    }
+
+    /** A settled subscriber owed their issue. */
+    data class Due(val pubId: String, val periodId: String, val personaHex: String)
+
+    /**
+     * Who has paid and not yet been sent the period — computed from the
+     * publisher's own ledger and the tab's settled state, never from the
+     * payer's messages (§16.13: a notice is a claim; the tab goes "paid"
+     * on the chain's word). Only periods with a recorded shipment are due:
+     * pay-then-ship holds the send until the seed exists, and the next
+     * reconcile pass delivers.
+     */
+    fun dueSettled(context: Context): List<Due> {
+        val tabs = TabStore(context)
+        val out = mutableListOf<Due>()
+        for ((pubId, _) in publications(context)) {
+            for (issue in issues(context, pubId)) {
+                if (issue.swarmKey.isBlank()) continue
+                for ((hex, tabId) in billedFor(context, pubId, issue.periodId)) {
+                    if (hex in issue.sentTo) continue
+                    val t = tabs.get(tabId) ?: continue
+                    if (t.state.startsWith("paid")) {
+                        out.add(Due(pubId, issue.periodId, hex))
+                    }
+                }
+            }
+        }
+        return out
+    }
+
+    /**
+     * The settle→send glue (§15.11's reconcile discipline): runs on the
+     * poll clock beside TabStore.reconcile, so a payment landing while the
+     * operator sleeps still delivers the issue. Idempotent through
+     * [markSent]; a failed send stays due and the next pass retries.
+     */
+    fun reconcileSettled(context: Context) {
+        val due = dueSettled(context)
+        if (due.isEmpty()) return
+        val contacts = ContactStore(context).all().associateBy { it.personaHex }
+        for (d in due) {
+            val c = contacts[d.personaHex] ?: continue
+            val issue = issues(context, d.pubId).firstOrNull { it.periodId == d.periodId } ?: continue
+            val ok = sendPeriod(
+                context, c, d.pubId, d.periodId,
+                record = null, headKey = null, note = "",
+                swarmKey = issue.swarmKey,
+                swarmDigestHex = issue.swarmDigestHex,
+            )
+            if (ok) {
+                markSent(context, d.pubId, d.periodId, d.personaHex)
+                DucatLog.i(
+                    "Publications",
+                    "settled → sent '${d.periodId}' to ${d.personaHex.take(8)}…",
+                )
+            }
+        }
+    }
+
     fun markSent(context: Context, pubId: String, periodId: String, personaHex: String) {
         editPub(context, pubId) { pub ->
             val iss = pub.optJSONObject("issues") ?: return@editPub

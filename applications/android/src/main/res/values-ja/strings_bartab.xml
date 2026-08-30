@@ -54,4 +54,5 @@
     <string name="bill_note_cancelled">%1$s のご請求は取り消しました。お支払いは不要です。</string>
     <string name="bill_note_sale">お会計</string>
     <string name="bartab_tip_line">チップ — ありがとうございます</string>
+    <string name="bill_note_issue">定期購読</string>
 </resources>
