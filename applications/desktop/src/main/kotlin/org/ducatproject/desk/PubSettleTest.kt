@@ -105,6 +105,7 @@ fun main() {
             Publications.setPrice(context, pubId, PRICE_PXMR)
 
             var billed = Publications.billedFor(context, pubId, PERIOD).isNotEmpty()
+            var tick = 0
             var paidSeen = false
             var seeded = false
             val start = System.currentTimeMillis()
@@ -124,7 +125,21 @@ fun main() {
                 }
 
                 if (billed) {
-                    runCatching { scan(context) }
+                    // Named, not swallowed: a node-pick that fails forever
+                    // otherwise looks exactly like a scan in progress.
+                    val n = node(context)
+                    if (n == null) System.err.println("no monero node this tick")
+                    else runCatching {
+                        var steps = 0
+                        while (steps < 3 && Wallet.scanStep(context, n)) steps++
+                    }.onFailure { System.err.println("scan: ${it.message}") }
+                    if (tick++ % 10 == 0) {
+                        val b = Wallet.balances(context)
+                        System.err.println(
+                            "scan ${b.scannedTo}/${b.tip} node=${n ?: "-"} " +
+                                "spendable=${formatXmr(b.spendablePxmr)} locked=${formatXmr(b.lockedPxmr)}",
+                        )
+                    }
                     // The exact lines the desk window's tick runs — the test
                     // proves the wiring, not a private copy of it.
                     runCatching { TabStore.reconcile(context) }
@@ -175,9 +190,14 @@ fun main() {
             NameStore(context).get() ?: NameStore(context).put("Reader")
             wallet(context)
 
-            val scanned = uniffi.ducat_mobile.readContactCard(cardUri)
-            val publisher = Mailbox.claimCard(context, scanned, "the gazette")
-            System.err.println("claimed ${publisher.personaHex.take(8)}…")
+            // A restart arrives holding a claimed thread and possibly an
+            // expired card: the durable contact is the truth, the claim is
+            // only for the first run.
+            val publisher = ContactStore(context).all().firstOrNull()
+                ?: Mailbox.claimCard(
+                    context, uniffi.ducat_mobile.readContactCard(cardUri), "the gazette",
+                )
+            System.err.println("publisher ${publisher.personaHex.take(8)}…")
 
             var billSeq: Long? = null
             var billAmount = 0L

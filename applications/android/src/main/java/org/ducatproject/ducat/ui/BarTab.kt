@@ -81,7 +81,7 @@ fun BarTabScreen(
                 val thread = contacts.thread(t.personaHex)
                 thread.lastOrNull {
                     it.outgoing && it.kind == 1 &&
-                        if (t.billSeq > 0) it.seq == t.billSeq
+                        if (t.billSeq >= 0) it.seq == t.billSeq
                         else it.amountPxmr == t.settledTotal
                 }?.takeIf { (it.seq to it.timestamp) in billAnswers(thread).refused }
                     ?.let { t.id }
@@ -431,7 +431,7 @@ internal fun cancelTabWithRetract(
     val contact = contacts.all().firstOrNull { it.personaHex == tab.personaHex }
     // The stored seq when the tab has one; the amount match only for tabs
     // billed before settle recorded it.
-    val billSeq = tab.billSeq.takeIf { it > 0 }
+    val billSeq = tab.billSeq.takeIf { it >= 0 }
         ?: contacts.thread(tab.personaHex)
             .lastOrNull { it.outgoing && it.kind == 1 && it.amountPxmr == tab.settledTotal }
             ?.seq
@@ -653,7 +653,7 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                         // stored, amount only for tabs that predate it.
                         thread.lastOrNull {
                             it.outgoing && it.kind == 1 &&
-                                if (tab.billSeq > 0) it.seq == tab.billSeq
+                                if (tab.billSeq >= 0) it.seq == tab.billSeq
                                 else it.amountPxmr == tab.settledTotal
                         }?.let { (it.seq to it.timestamp) in billAnswers(thread).refused } ?: false
                     }
