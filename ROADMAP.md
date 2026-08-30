@@ -3,6 +3,33 @@
 What stands between draft 0.85 and a release that strangers can trust with
 money. Ordered by what blocks 1.0, not by effort.
 
+## The freeze (2026-08-30, spec 1.0.0-rc1)
+
+The feature line is closed. Everything below this section is either done or
+deliberately deferred; nothing new lands on the wire before 1.0.0. What
+remains between rc1 and the number is validation, not construction, and two
+of the three gates are calendar-shaped — start them first:
+
+1. **The adversarial review** (the long pole — commission now). Scope as
+   §2.5 has always implied: the §17.9 ceremonies, the §16.12 mailbox and
+   card surfaces, the boards and the §16.18.1 beacon (newest, least
+   reviewed). `docs/review-brief.md` is the package to hand over.
+2. **The field day** (needs two NFC handsets). `docs/field-day.md` is the
+   run sheet; the tap, real GPS, and the OEM restore picker are the only
+   parts of the system no emulator has exercised.
+3. **O21's reader** — an implementer who builds from the document alone.
+   Recruit alongside the reviewer; the same kind of person often fits both.
+
+Decided at the freeze, recorded in the rc1 changelog entry: **refunds** are
+a documented limitation for 1.0 (the design question — what the payer's
+Activity should show when money comes back — stays open, deliberately
+unanswered rather than answered badly), and the **co-signer's blind
+payment list** waits on monero-wallet 0.2.0's accessor rather than a fork.
+
+The post-1.0 track (personas, the sign-in doorway, publications with
+period keys, the swarm engine) is sketched in `research/post-1.0/` and
+stays off master until rc1 ships.
+
 ## Protocol correctness — must fix before 1.0
 
 - ~~**Per-contact prekey partitioning (§16.11).**~~ **Done, 0.86** — each

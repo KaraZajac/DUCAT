@@ -152,8 +152,13 @@ for k in sorted(schema_kinds):
         bad("vectors", f"{k} is in the schema but §18.9.1's table does not list it")
 
 # --- 7. Draft version matches the newest changelog entry -------------------
-hdr = re.search(r"\*\*Draft (\d+\.\d+)", SPEC)
-first = re.search(r"^- \*\*(\d+\.\d+)\*\* —", SPEC, re.M)
+# The version grammar grew at the freeze: 1.0.0-rc1 speaks semver with a
+# release-candidate tag, and the three artifacts must agree on the exact
+# string, suffix included — an rc that compares equal to its own final
+# release would defeat the point of being one.
+_VER = r"(\d+\.\d+(?:\.\d+)?(?:-rc\d+)?)"
+hdr = re.search(r"\*\*Draft " + _VER, SPEC)
+first = re.search(r"^- \*\*" + _VER + r"\*\* —", SPEC, re.M)
 if hdr and first and hdr.group(1) != first.group(1):
     bad("version", f"header says {hdr.group(1)}, newest changelog entry is {first.group(1)}")
 # ...and the published artifact says the same. `protocol_draft` was a string

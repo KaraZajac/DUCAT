@@ -291,7 +291,7 @@ to a banknote.
 ## The repository
 
 ```
-ducat-protocol.md   the spec — draft 0.90, changelog first
+ducat-protocol.md   the spec — 1.0.0-rc1 (feature freeze), changelog first
 core/               reference implementation (Rust)
 vectors/            328 conformance cases + schema — the published artifact
 conformance/        four checkers: schema, second implementation, spec audit,

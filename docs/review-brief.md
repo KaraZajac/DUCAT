@@ -25,10 +25,10 @@ threshold escrow (FROST) for bonded rides and reservations.
 
 | What | Where | Why you would read it |
 |---|---|---|
-| The specification | [`ducat-protocol.md`](../ducat-protocol.md) | The normative document. Draft 0.89. Changelog first. |
+| The specification | [`ducat-protocol.md`](../ducat-protocol.md) | The normative document. 1.0.0-rc1, feature-frozen. Changelog first. |
 | Reference implementation | [`core/`](../core) | Rust. The vectors are generated from it. |
 | Conformance vectors | [`vectors/v1/`](../vectors/v1) | 328 cases + schema — the published artifact. |
-| Second implementation | [`conformance/ducat_check.py`](../conformance/ducat_check.py) | An independent reading of the spec, in Python. It agrees on all 314. |
+| Second implementation | [`conformance/ducat_check.py`](../conformance/ducat_check.py) | An independent reading of the spec, in Python. It agrees on all 328. |
 | Spec audit | [`conformance/audit_spec.py`](../conformance/audit_spec.py) | Catches prose that stopped describing the code. |
 | Clients | [`applications/`](../applications) | Android + desktop, one shared implementation. |
 | Wire bridge | [`mobile/`](../mobile) | UniFFI wrapper. Adds no logic, by rule. |

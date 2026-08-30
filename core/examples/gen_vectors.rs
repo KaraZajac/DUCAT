@@ -37,10 +37,14 @@ fn protocol_draft() -> String {
         .join("ducat-protocol.md");
     let text = std::fs::read_to_string(spec).expect("the spec is beside the crate");
     let at = text.find("**Draft ").expect("the spec states its draft");
+    // Up to the first whitespace, so "1.0.0-rc1" survives whole — a digit
+    // split dropped the rc suffix, and an rc that publishes itself as the
+    // final version is lying about the one thing an rc exists to say.
     text[at + "**Draft ".len()..]
-        .split(|c: char| !(c.is_ascii_digit() || c == '.'))
+        .split_whitespace()
         .next()
         .expect("a draft number follows")
+        .trim_end_matches("**")
         .to_string()
 }
 
