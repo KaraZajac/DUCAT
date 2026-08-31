@@ -33,6 +33,14 @@ fn blake3_file(path: &std::path::Path) -> String {
 }
 
 fn main() {
+    // Diagnosis runs set RUST_LOG (e.g. stigmerge_peer=debug); silence
+    // otherwise, exactly as before.
+    if std::env::var("RUST_LOG").is_ok() {
+        let _ = tracing_subscriber::fmt()
+            .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+            .with_writer(std::io::stderr)
+            .try_init();
+    }
     let args: Vec<String> = std::env::args().collect();
     match args.get(1).map(String::as_str) {
         Some("seed") => {
@@ -47,6 +55,49 @@ fn main() {
             println!("SWARMTEST_SHARE {} {}", share.share_key, share.index_digest_hex);
             println!("SWARMTEST_PAYLOAD {payload}");
             eprintln!("serving; kill me when the fetch is done");
+            loop {
+                std::thread::sleep(std::time::Duration::from_secs(5));
+            }
+        }
+        // Diagnosis stances: a bare node, and a seed that stops serving —
+        // for finding where the idle-serve CPU actually lives.
+        Some("idle") => {
+            node_start(args[2].clone(), true).expect("node start");
+            wait_ready();
+            println!("SWARMTEST_IDLE");
+            loop {
+                std::thread::sleep(std::time::Duration::from_secs(5));
+            }
+        }
+        // Held-open record vs closed record: where does an idle node's
+        // extra burn live?
+        Some("recidle") | Some("recclosed") => {
+            let close = args[1] == "recclosed";
+            node_start(args[2].clone(), true).expect("node start");
+            wait_ready();
+            let rec = ducat_mobile::node::node_dht_create(32).expect("create");
+            for i in 0..8u32 {
+                ducat_mobile::node::node_dht_set(rec.key.clone(), i, vec![0xAB; 32_000])
+                    .expect("set");
+            }
+            if close {
+                ducat_mobile::node::node_dht_close(rec.key.clone()).expect("close");
+            }
+            println!("SWARMTEST_REC {} closed={close}", rec.key);
+            loop {
+                std::thread::sleep(std::time::Duration::from_secs(5));
+            }
+        }
+        Some("seedstop") => {
+            let state = args[2].clone();
+            let file = std::path::PathBuf::from(&args[3]);
+            node_start(state, true).expect("node start");
+            wait_ready();
+            let share = swarm_seed(file.to_string_lossy().into()).expect("seed");
+            println!("SWARMTEST_SHARE {} {}", share.share_key, share.index_digest_hex);
+            std::thread::sleep(std::time::Duration::from_secs(5));
+            ducat_mobile::swarm::swarm_stop();
+            println!("SWARMTEST_STOPPED");
             loop {
                 std::thread::sleep(std::time::Duration::from_secs(5));
             }

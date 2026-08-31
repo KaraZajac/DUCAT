@@ -51,3 +51,7 @@ path = "src/bin/uniffi-bindgen.rs"
 # a mismatch here is a silent ABI difference rather than a compile error.
 [target.'cfg(target_os = "android")'.dependencies]
 jni = "0.22.4"
+
+[dev-dependencies]
+# Examples only: lets the swarm/ping harnesses speak when RUST_LOG asks.
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }

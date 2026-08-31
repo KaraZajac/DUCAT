@@ -277,6 +277,29 @@ pub fn node_start(storage_dir: String, udp: bool) -> Result<(), NodeError> {
         if !udp {
             cfg["network"]["protocol"]["udp"]["enabled"] = serde_json::json!(false);
         }
+        // Diagnosis knob (2026-08-31, load-shedding hunt): the consensus bar
+        // a DHT set must clear before veilid stops re-fanning it out every
+        // second from the offline-subkey-write queue. Env-gated, harness use
+        // only; unset means veilid's default.
+        if let Some(n) = std::env::var("DUCAT_SET_VALUE_COUNT")
+            .ok()
+            .and_then(|v| v.parse::<u64>().ok())
+        {
+            cfg["network"]["dht"]["set_value_count"] = serde_json::json!(n);
+        }
+        // A wallet is a client, not a backbone (2026-08-31, the load-shedding
+        // find): with inbound reachability veilid volunteers this device as a
+        // relay, DHT host, route hop, signaler and dial-info validator for
+        // strangers — measured on an idle desk as ~200 messages/second of
+        // other people's keepalives, every one crypto-verified, ~half a core
+        // for ever. Shedding the server roles keeps everything the app itself
+        // does (APPM stays: our mailbox answers calls; watches, reads and
+        // writes are outbound and unaffected). A deliberately run
+        // infrastructure node re-enables with DUCAT_FULL_NODE=1.
+        if std::env::var("DUCAT_FULL_NODE").ok().as_deref() != Some("1") {
+            cfg["capabilities"]["disable"] =
+                serde_json::json!(["ROUT", "TUNL", "SGNL", "RLAY", "DIAL", "DHTV"]);
+        }
         // NOTE (2026-08-16): veilid-core 0.5.7's config has no "logging"
         // section — api-level logging is wired through a tracing layer, not
         // the JSON config — so the `node_logs` ring below stays empty until
