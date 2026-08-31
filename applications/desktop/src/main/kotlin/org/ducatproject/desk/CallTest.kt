@@ -115,6 +115,60 @@ fun main() {
         .apply { mkdirs() }
 
     when (role) {
+        // The answerphone: for a HUMAN (or emulator) caller — answers any
+        // ring, streams the tone one way, counts what arrives without
+        // judging it (a real microphone is not a deterministic sine).
+        "answerphone" -> {
+            val context = up(dir)
+            NameStore(context).get() ?: NameStore(context).put("Answerphone")
+            val card = Mailbox.issueCard(context, "Answerphone", 60uL * 60uL)
+            println("CALL_CARD ${card.uri}")
+            System.out.flush()
+            val deadline = System.currentTimeMillis() + 1_800_000
+            while (System.currentTimeMillis() < deadline) {
+                runCatching { Mailbox.collectClaims(context) }
+                runCatching { Mailbox.poll(context) }
+                val store = ContactStore(context)
+                val caller = store.all().firstOrNull()
+                val offer = caller?.let { c ->
+                    store.thread(c.personaHex).lastOrNull { !it.outgoing && it.kind == 14 }
+                }
+                if (caller != null && offer?.callRoute != null && offer.callId != null) {
+                    println("CALL_RINGING")
+                    System.out.flush()
+                    val mine = nodeCallRoute()
+                    val fresh = store.all().first { it.personaHex == caller.personaHex }
+                    Mailbox.send(
+                        context, fresh, "answer",
+                        kind = 15, callRoute = mine,
+                        callId = hexToBytes(offer.callId),
+                    )
+                    println("CALL_ANSWERED")
+                    System.out.flush()
+                    val route = hexToBytes(offer.callRoute)
+                    var rx = 0
+                    val rxT = Thread {
+                        val end = System.currentTimeMillis() + 90_000
+                        while (System.currentTimeMillis() < end) {
+                            if (nodeCallRecv(50u) != null) rx++
+                        }
+                    }.apply { start() }
+                    val t0 = System.currentTimeMillis()
+                    for (seq in 0 until 3000) {
+                        val due = t0 + seq * FRAME_MS
+                        val wait = due - System.currentTimeMillis()
+                        if (wait > 0) Thread.sleep(wait)
+                        runCatching { nodeCallSend(route, frameBytes(seq)) }
+                    }
+                    rxT.join()
+                    nodeCallClose()
+                    println("ANSWERPHONE_STATS sent=3000 recv=$rx")
+                    return
+                }
+                Thread.sleep(2_000)
+            }
+            error("CALL_FAIL nobody rang the answerphone")
+        }
         "callee" -> {
             val context = up(dir)
             NameStore(context).get() ?: NameStore(context).put("Callee")

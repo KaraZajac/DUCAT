@@ -9,4 +9,13 @@
     <string name="chatlist_preview_call_answered">پاسخ به تماس</string>
     <string name="notify_call">%1$s در حال تماس است</string>
     <string name="notify_call_answered">%1$s به تماست پاسخ داد</string>
+    <string name="call_button">تماس</string>
+    <string name="call_calling">در حال تماس…</string>
+    <string name="call_incoming">تماس ورودی DUCAT</string>
+    <string name="call_frames">↓%1$d ↑%2$d قاب</string>
+    <string name="call_answer_btn">پاسخ</string>
+    <string name="call_end_btn">قطع</string>
+    <string name="call_body_ring">در حال تماس با تو</string>
+    <string name="call_body_answer">پاسخ داده شد</string>
+    <string name="call_body_decline">الان نمی‌توانم صحبت کنم.</string>
 </resources>

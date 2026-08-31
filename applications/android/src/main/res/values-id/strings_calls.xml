@@ -9,4 +9,13 @@
     <string name="chatlist_preview_call_answered">Panggilan dijawab</string>
     <string name="notify_call">%1$s menelepon</string>
     <string name="notify_call_answered">%1$s menjawab teleponmu</string>
+    <string name="call_button">Telepon</string>
+    <string name="call_calling">Memanggil…</string>
+    <string name="call_incoming">Panggilan DUCAT masuk</string>
+    <string name="call_frames">↓%1$d ↑%2$d bingkai</string>
+    <string name="call_answer_btn">Jawab</string>
+    <string name="call_end_btn">Tutup</string>
+    <string name="call_body_ring">Meneleponmu</string>
+    <string name="call_body_answer">Dijawab</string>
+    <string name="call_body_decline">Sedang tidak bisa bicara.</string>
 </resources>

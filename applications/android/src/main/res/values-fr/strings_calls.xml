@@ -9,4 +9,13 @@
     <string name="chatlist_preview_call_answered">Appel décroché</string>
     <string name="notify_call">%1$s appelle</string>
     <string name="notify_call_answered">%1$s a répondu à ton appel</string>
+    <string name="call_button">Appeler</string>
+    <string name="call_calling">Appel…</string>
+    <string name="call_incoming">Appel DUCAT entrant</string>
+    <string name="call_frames">↓%1$d ↑%2$d trames</string>
+    <string name="call_answer_btn">Répondre</string>
+    <string name="call_end_btn">Raccrocher</string>
+    <string name="call_body_ring">T\u2019appelle</string>
+    <string name="call_body_answer">Répondu</string>
+    <string name="call_body_decline">Je ne peux pas parler là.</string>
 </resources>

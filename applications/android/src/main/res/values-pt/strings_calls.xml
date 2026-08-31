@@ -9,4 +9,13 @@
     <string name="chatlist_preview_call_answered">Atendeu uma ligação</string>
     <string name="notify_call">%1$s está ligando</string>
     <string name="notify_call_answered">%1$s atendeu sua ligação</string>
+    <string name="call_button">Ligar</string>
+    <string name="call_calling">Ligando…</string>
+    <string name="call_incoming">Chamada DUCAT recebida</string>
+    <string name="call_frames">↓%1$d ↑%2$d quadros</string>
+    <string name="call_answer_btn">Atender</string>
+    <string name="call_end_btn">Desligar</string>
+    <string name="call_body_ring">Ligando para você</string>
+    <string name="call_body_answer">Atendida</string>
+    <string name="call_body_decline">Não posso falar agora.</string>
 </resources>

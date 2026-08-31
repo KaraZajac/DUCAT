@@ -9,4 +9,13 @@
     <string name="chatlist_preview_call_answered">Anruf angenommen</string>
     <string name="notify_call">%1$s ruft an</string>
     <string name="notify_call_answered">%1$s hat deinen Anruf angenommen</string>
+    <string name="call_button">Anrufen</string>
+    <string name="call_calling">Rufe an…</string>
+    <string name="call_incoming">Eingehender DUCAT-Anruf</string>
+    <string name="call_frames">↓%1$d ↑%2$d Frames</string>
+    <string name="call_answer_btn">Annehmen</string>
+    <string name="call_end_btn">Auflegen</string>
+    <string name="call_body_ring">Ruft dich an</string>
+    <string name="call_body_answer">Angenommen</string>
+    <string name="call_body_decline">Kann gerade nicht sprechen.</string>
 </resources>

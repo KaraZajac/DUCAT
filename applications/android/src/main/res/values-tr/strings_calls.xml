@@ -9,4 +9,13 @@
     <string name="chatlist_preview_call_answered">Arama cevaplandı</string>
     <string name="notify_call">%1$s arıyor</string>
     <string name="notify_call_answered">%1$s aramana cevap verdi</string>
+    <string name="call_button">Ara</string>
+    <string name="call_calling">Aranıyor…</string>
+    <string name="call_incoming">Gelen DUCAT araması</string>
+    <string name="call_frames">↓%1$d ↑%2$d kare</string>
+    <string name="call_answer_btn">Yanıtla</string>
+    <string name="call_end_btn">Kapat</string>
+    <string name="call_body_ring">Seni arıyor</string>
+    <string name="call_body_answer">Yanıtlandı</string>
+    <string name="call_body_decline">Şu an konuşamıyorum.</string>
 </resources>

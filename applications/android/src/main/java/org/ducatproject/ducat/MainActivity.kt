@@ -123,6 +123,8 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
         // The half of DeviceLock that knows what an Activity is. Installed
         // here because the shared sources cannot name it — see DeviceLock.
         DeviceLock.backend = org.ducatproject.ducat.platform.DeviceLockAndroid
+        // §16.21's ears and mouth, same pattern for the same reason.
+        Calls.audio = org.ducatproject.ducat.platform.CallAudioAndroid
         readIntent(intent)
         val prefs = ThemePreference(this)
         setContent {
@@ -445,6 +447,17 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
             },
             text = { Text(androidx.compose.ui.res.stringResource(why)) },
         )
+    }
+
+    // §16.21: a live call outranks every other screen — a telephone that
+    // hides its own call behind a till is not a telephone. The observer
+    // rides the store's own change signal, so a ring lands the moment the
+    // poller files it.
+    val callV by ContactStore.changes.collectAsState()
+    LaunchedEffect(callV) { Calls.noticed(context) }
+    if (Calls.state != Calls.State.Idle) {
+        org.ducatproject.ducat.ui.CallScreen()
+        return
     }
 
     // The mode owns the whole scaffold (§15.11): a till is a different app

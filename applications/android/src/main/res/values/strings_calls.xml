@@ -9,4 +9,13 @@
     <string name="chatlist_preview_call_answered">Answered a call</string>
     <string name="notify_call">%1$s is calling</string>
     <string name="notify_call_answered">%1$s answered your call</string>
+    <string name="call_button">Call</string>
+    <string name="call_calling">Calling…</string>
+    <string name="call_incoming">Incoming DUCAT call</string>
+    <string name="call_frames">↓%1$d ↑%2$d frames</string>
+    <string name="call_answer_btn">Answer</string>
+    <string name="call_end_btn">Hang up</string>
+    <string name="call_body_ring">Calling you</string>
+    <string name="call_body_answer">Answered</string>
+    <string name="call_body_decline">Can\u2019t talk right now.</string>
 </resources>

@@ -9,4 +9,13 @@
     <string name="chatlist_preview_call_answered">कॉल उठाया</string>
     <string name="notify_call">%1$s कॉल कर रहे हैं</string>
     <string name="notify_call_answered">%1$s ने तुम्हारा कॉल उठाया</string>
+    <string name="call_button">कॉल</string>
+    <string name="call_calling">कॉल हो रहा…</string>
+    <string name="call_incoming">आती DUCAT कॉल</string>
+    <string name="call_frames">↓%1$d ↑%2$d फ्रेम</string>
+    <string name="call_answer_btn">उठाओ</string>
+    <string name="call_end_btn">काटो</string>
+    <string name="call_body_ring">तुम्हें कॉल कर रहे</string>
+    <string name="call_body_answer">उठाया</string>
+    <string name="call_body_decline">अभी बात नहीं कर सकते।</string>
 </resources>

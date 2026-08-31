@@ -9,4 +9,13 @@
     <string name="chatlist_preview_call_answered">已接听</string>
     <string name="notify_call">%1$s 来电中</string>
     <string name="notify_call_answered">%1$s 接听了你的通话</string>
+    <string name="call_button">拨打</string>
+    <string name="call_calling">拨打中…</string>
+    <string name="call_incoming">DUCAT 来电</string>
+    <string name="call_frames">↓%1$d ↑%2$d 帧</string>
+    <string name="call_answer_btn">接听</string>
+    <string name="call_end_btn">挂断</string>
+    <string name="call_body_ring">正在呼叫你</string>
+    <string name="call_body_answer">已接听</string>
+    <string name="call_body_decline">现在不方便通话。</string>
 </resources>

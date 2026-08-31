@@ -9,4 +9,13 @@
     <string name="chatlist_preview_call_answered">通話応答</string>
     <string name="notify_call">%1$sから着信</string>
     <string name="notify_call_answered">%1$sが応答しました</string>
+    <string name="call_button">発信</string>
+    <string name="call_calling">呼び出し中…</string>
+    <string name="call_incoming">DUCAT着信</string>
+    <string name="call_frames">↓%1$d ↑%2$d フレーム</string>
+    <string name="call_answer_btn">応答</string>
+    <string name="call_end_btn">切る</string>
+    <string name="call_body_ring">呼び出しています</string>
+    <string name="call_body_answer">応答しました</string>
+    <string name="call_body_decline">いま話せません。</string>
 </resources>

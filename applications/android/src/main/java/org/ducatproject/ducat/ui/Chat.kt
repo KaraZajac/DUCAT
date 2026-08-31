@@ -364,6 +364,22 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     }
                 },
                 actions = {
+                    // §16.21: the thread is where a call starts — same door,
+                    // same counterpart, one tap. Only once keys exist, and
+                    // with the memo button's own permission gate.
+                    if (c.theirBundle != null) {
+                        val callPerm = androidx.activity.compose.rememberLauncherForActivityResult(
+                            androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
+                        ) { ok -> if (ok) org.ducatproject.ducat.Calls.place(context, c) }
+                        IconButton(onClick = {
+                            // Launch unconditionally: an already-granted
+                            // permission answers straight back, so this is
+                            // both the ask and the fast path in one line.
+                            callPerm.launch(android.Manifest.permission.RECORD_AUDIO)
+                        }) {
+                            Icon(Icons.Filled.Call, stringResource(R.string.call_button))
+                        }
+                    }
                     IconButton(onClick = { settingsOpen = true }) {
                         Icon(Icons.Filled.MoreVert, stringResource(R.string.chat_conversation_settings))
                     }

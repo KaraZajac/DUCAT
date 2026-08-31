@@ -9,4 +9,13 @@
     <string name="chatlist_preview_call_answered">Đã trả lời cuộc gọi</string>
     <string name="notify_call">%1$s đang gọi</string>
     <string name="notify_call_answered">%1$s đã trả lời cuộc gọi của bạn</string>
+    <string name="call_button">Gọi</string>
+    <string name="call_calling">Đang gọi…</string>
+    <string name="call_incoming">Cuộc gọi DUCAT đến</string>
+    <string name="call_frames">↓%1$d ↑%2$d khung</string>
+    <string name="call_answer_btn">Trả lời</string>
+    <string name="call_end_btn">Gác máy</string>
+    <string name="call_body_ring">Đang gọi cho bạn</string>
+    <string name="call_body_answer">Đã trả lời</string>
+    <string name="call_body_decline">Giờ tôi chưa nói chuyện được.</string>
 </resources>

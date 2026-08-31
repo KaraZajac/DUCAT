@@ -9,4 +9,13 @@
     <string name="chatlist_preview_call_answered">รับสายแล้ว</string>
     <string name="notify_call">%1$s กำลังโทร</string>
     <string name="notify_call_answered">%1$s รับสายของคุณ</string>
+    <string name="call_button">โทร</string>
+    <string name="call_calling">กำลังโทร…</string>
+    <string name="call_incoming">สายเรียกเข้า DUCAT</string>
+    <string name="call_frames">↓%1$d ↑%2$d เฟรม</string>
+    <string name="call_answer_btn">รับสาย</string>
+    <string name="call_end_btn">วางสาย</string>
+    <string name="call_body_ring">กำลังโทรหาคุณ</string>
+    <string name="call_body_answer">รับแล้ว</string>
+    <string name="call_body_decline">ตอนนี้คุยไม่สะดวก</string>
 </resources>

@@ -9,4 +9,13 @@
     <string name="chatlist_preview_call_answered">Дзвінок прийнято</string>
     <string name="notify_call">%1$s дзвонить</string>
     <string name="notify_call_answered">%1$s прийняв(ла) твій дзвінок</string>
+    <string name="call_button">Подзвонити</string>
+    <string name="call_calling">Виклик…</string>
+    <string name="call_incoming">Вхідний дзвінок DUCAT</string>
+    <string name="call_frames">↓%1$d ↑%2$d кадрів</string>
+    <string name="call_answer_btn">Відповісти</string>
+    <string name="call_end_btn">Покласти</string>
+    <string name="call_body_ring">Дзвонить тобі</string>
+    <string name="call_body_answer">Прийнято</string>
+    <string name="call_body_decline">Зараз не можу говорити.</string>
 </resources>

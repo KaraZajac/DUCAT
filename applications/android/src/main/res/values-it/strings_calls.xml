@@ -9,4 +9,13 @@
     <string name="chatlist_preview_call_answered">Chiamata risposta</string>
     <string name="notify_call">%1$s sta chiamando</string>
     <string name="notify_call_answered">%1$s ha risposto alla tua chiamata</string>
+    <string name="call_button">Chiama</string>
+    <string name="call_calling">Chiamata…</string>
+    <string name="call_incoming">Chiamata DUCAT in arrivo</string>
+    <string name="call_frames">↓%1$d ↑%2$d frame</string>
+    <string name="call_answer_btn">Rispondi</string>
+    <string name="call_end_btn">Riaggancia</string>
+    <string name="call_body_ring">Ti sta chiamando</string>
+    <string name="call_body_answer">Risposto</string>
+    <string name="call_body_decline">Ora non posso parlare.</string>
 </resources>

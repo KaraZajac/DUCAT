@@ -9,4 +9,13 @@
     <string name="chatlist_preview_call_answered">Oproep aangenomen</string>
     <string name="notify_call">%1$s belt</string>
     <string name="notify_call_answered">%1$s nam je oproep aan</string>
+    <string name="call_button">Bellen</string>
+    <string name="call_calling">Bellen…</string>
+    <string name="call_incoming">Inkomende DUCAT-oproep</string>
+    <string name="call_frames">↓%1$d ↑%2$d frames</string>
+    <string name="call_answer_btn">Opnemen</string>
+    <string name="call_end_btn">Ophangen</string>
+    <string name="call_body_ring">Belt je</string>
+    <string name="call_body_answer">Opgenomen</string>
+    <string name="call_body_decline">Kan nu even niet praten.</string>
 </resources>

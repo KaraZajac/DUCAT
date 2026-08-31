@@ -9,4 +9,13 @@
     <string name="chatlist_preview_call_answered">Contestó una llamada</string>
     <string name="notify_call">%1$s está llamando</string>
     <string name="notify_call_answered">%1$s contestó tu llamada</string>
+    <string name="call_button">Llamar</string>
+    <string name="call_calling">Llamando…</string>
+    <string name="call_incoming">Llamada DUCAT entrante</string>
+    <string name="call_frames">↓%1$d ↑%2$d tramas</string>
+    <string name="call_answer_btn">Contestar</string>
+    <string name="call_end_btn">Colgar</string>
+    <string name="call_body_ring">Te está llamando</string>
+    <string name="call_body_answer">Contestada</string>
+    <string name="call_body_decline">Ahora no puedo hablar.</string>
 </resources>
