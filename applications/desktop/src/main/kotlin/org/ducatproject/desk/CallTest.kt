@@ -66,6 +66,20 @@ private fun tonePcm(seq: Int): ByteArray {
     return out
 }
 
+// §16.21 control frames (dev5): sentinel seq, type, id, ANSWER's route.
+private fun controlFrame(type: Int, id: ByteArray, route: ByteArray? = null): ByteArray {
+    val out = ByteArray(17 + (route?.size ?: 0))
+    for (i in 0..3) out[i] = 0xFF.toByte()
+    out[8] = type.toByte()
+    id.copyInto(out, 9)
+    route?.copyInto(out, 17)
+    return out
+}
+
+private fun isControl(f: ByteArray) = f.size >= 17 &&
+    f[0] == 0xFF.toByte() && f[1] == 0xFF.toByte() &&
+    f[2] == 0xFF.toByte() && f[3] == 0xFF.toByte()
+
 /** Header on, packet behind: one wire frame. */
 private fun framed(seq: Int, pkt: ByteArray): ByteArray {
     val out = ByteArray(8 + pkt.size)
@@ -118,6 +132,7 @@ private fun media(theirRoute: ByteArray, initiator: Boolean): Boolean {
                 }
             }
             val f = nodeCallRecv(50u) ?: continue
+            if (isControl(f)) continue // dev5 control, not sound
             arrivals.add(System.currentTimeMillis())
             if (f.size <= 8) { badFrames++; continue }
             val seq = ((f[0].toInt() and 0xFF) shl 24) or ((f[1].toInt() and 0xFF) shl 16) or
@@ -233,21 +248,33 @@ fun main() {
                         Thread.sleep(2_000)
                         continue
                     }
+                    val route = hexToBytes(offer.callRoute)
+                    val id = hexToBytes(offer.callId)
+                    // Through the door first (dev5): the caller connects in
+                    // a route trip; the sealed answer below is the record.
+                    repeat(2) { runCatching { nodeCallSend(route, controlFrame(1, id, mine)) } }
                     val fresh = store.all().first { it.personaHex == caller.personaHex }
                     Mailbox.send(
                         context, fresh, "answer",
                         kind = 15, callRoute = mine,
-                        callId = hexToBytes(offer.callId),
+                        callId = id,
                     )
                     println("CALL_ANSWERED")
                     System.out.flush()
-                    val route = hexToBytes(offer.callRoute)
                     var rx = 0
                     var decoded = 0
+                    var bye = false
                     val rxT = Thread {
                         val end = System.currentTimeMillis() + 90_000
-                        while (System.currentTimeMillis() < end) {
+                        while (System.currentTimeMillis() < end && !bye) {
                             val f = nodeCallRecv(50u) ?: continue
+                            if (isControl(f)) {
+                                if (f[8].toInt() == 3 && f.copyOfRange(9, 17).contentEquals(id)) {
+                                    println("ANSWERPHONE_BYE")
+                                    bye = true
+                                }
+                                continue
+                            }
                             rx++
                             if (f.size > 8 &&
                                 runCatching { callDecode(f.copyOfRange(8, f.size)) }.isSuccess
@@ -263,6 +290,7 @@ fun main() {
                     while (rx == 0 && System.currentTimeMillis() < hold) Thread.sleep(20)
                     val t0 = System.currentTimeMillis()
                     for (seq in 0 until 3000) {
+                        if (bye) break
                         val due = t0 + seq * FRAME_MS
                         val wait = due - System.currentTimeMillis()
                         if (wait > 0) Thread.sleep(wait)
@@ -302,7 +330,29 @@ fun main() {
             System.out.flush()
             val waitSecs = (System.getenv("DUCAT_CB_WAIT") ?: "90").toLong()
             val deadline = System.currentTimeMillis() + waitSecs * 1000
+            var doorRoute: ByteArray? = null
+            var doorDeclined = false
             while (System.currentTimeMillis() < deadline) {
+                // dev5: the phone's ANSWER or DECLINE arrives at the door
+                // long before the mailbox copy.
+                var f = nodeCallRecv(0u)
+                while (f != null) {
+                    if (isControl(f) && f.copyOfRange(9, 17).contentEquals(id)) {
+                        when (f[8].toInt()) {
+                            1 -> if (f.size > 17) doorRoute = f.copyOfRange(17, f.size)
+                            2 -> doorDeclined = true
+                        }
+                    }
+                    f = nodeCallRecv(0u)
+                }
+                if (doorDeclined) {
+                    println("CALLBACK_DECLINED door")
+                    return
+                }
+                if (doorRoute != null) {
+                    println("CALL_ANSWERED door")
+                    System.out.flush()
+                }
                 runCatching { Mailbox.poll(context) }
                 val thread = ContactStore(context).thread(callee.personaHex)
                 val answer = thread.lastOrNull {
@@ -316,10 +366,12 @@ fun main() {
                     println("CALLBACK_DECLINED")
                     return
                 }
-                if (answer?.callRoute != null) {
-                    println("CALL_ANSWERED")
-                    System.out.flush()
-                    val route = hexToBytes(answer.callRoute)
+                if (doorRoute != null || answer?.callRoute != null) {
+                    if (doorRoute == null) {
+                        println("CALL_ANSWERED")
+                        System.out.flush()
+                    }
+                    val route = doorRoute ?: hexToBytes(answer!!.callRoute!!)
                     var rx = 0
                     val rxT = Thread {
                         val end = System.currentTimeMillis() + 60_000

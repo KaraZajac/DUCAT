@@ -86,6 +86,24 @@ object Calls {
         return out
     }
 
+    // §16.21 control frames: seq sentinel, type, call id, ANSWER's route.
+    private const val CTRL_ANSWER = 1
+    private const val CTRL_DECLINE = 2
+    private const val CTRL_BYE = 3
+
+    private fun controlFrame(type: Int, id: ByteArray, route: ByteArray? = null): ByteArray {
+        val out = ByteArray(8 + 1 + 8 + (route?.size ?: 0))
+        for (i in 0..3) out[i] = 0xFF.toByte() // the sentinel; ms stays zero
+        out[8] = type.toByte()
+        id.copyInto(out, 9)
+        route?.copyInto(out, 17)
+        return out
+    }
+
+    private fun isControl(f: ByteArray) = f.size >= 17 &&
+        f[0] == 0xFF.toByte() && f[1] == 0xFF.toByte() &&
+        f[2] == 0xFF.toByte() && f[3] == 0xFF.toByte()
+
     sealed interface State {
         data object Idle : State
         data class Outgoing(val contactHex: String) : State
@@ -104,6 +122,10 @@ object Calls {
     var txFrames by mutableStateOf(0)
         private set
 
+    /** Bumped as each call begins; a delayed teardown from the last call
+     *  must never close the routes of the next one. */
+    private val epoch = java.util.concurrent.atomic.AtomicInteger()
+
     private var myCallId: ByteArray? = null
     private var theirRoute: ByteArray? = null
     private var pump: Thread? = null
@@ -115,6 +137,7 @@ object Calls {
         val app = context.applicationContext
         val st = State.Outgoing(c.personaHex)
         state = st
+        epoch.incrementAndGet()
         audio?.ring(app, incoming = false)
         Thread {
             runCatching {
@@ -137,6 +160,33 @@ object Calls {
         // once outlasted the whole ring; the thread dies with the state.
         Thread {
             while (state === st) {
+                // The open door may answer before the mailbox does
+                // (§16.21 control frames): the callee's ANSWER or DECLINE
+                // arrives on the route the offer carried out.
+                var f = uniffi.ducat_mobile.nodeCallRecv(0u)
+                while (f != null && state === st) {
+                    if (isControl(f) && myCallId != null &&
+                        f.copyOfRange(9, 17).contentEquals(myCallId)
+                    ) {
+                        when (f[8].toInt()) {
+                            CTRL_ANSWER -> if (f.size > 17) {
+                                DucatLog.i("Calls", "answered at the door")
+                                goActive(
+                                    st.contactHex,
+                                    f.copyOfRange(17, f.size),
+                                    initiator = true,
+                                )
+                            }
+                            CTRL_DECLINE -> {
+                                DucatLog.i("Calls", "declined at the door")
+                                endInternal()
+                            }
+                        }
+                    }
+                    if (state !== st) break
+                    f = uniffi.ducat_mobile.nodeCallRecv(0u)
+                }
+                if (state !== st) break
                 runCatching { Mailbox.pollContact(app, c) }
                 noticed(app)
                 Thread.sleep(2_000)
@@ -162,14 +212,25 @@ object Calls {
         val app = context.applicationContext
         Thread {
             runCatching {
+                epoch.incrementAndGet()
                 val mine = uniffi.ducat_mobile.nodeCallRoute()
+                val id = hexToBytes(offer.callId!!)
+                myCallId = id
+                // Through the door first — the caller connects in a route
+                // trip; the sealed kind-15 below remains the record.
+                val door = hexToBytes(offer.callRoute!!)
+                repeat(2) {
+                    runCatching {
+                        uniffi.ducat_mobile.nodeCallSend(door, controlFrame(CTRL_ANSWER, id, mine))
+                    }
+                }
                 Mailbox.send(
                     app, c, app.getString(R.string.call_body_answer),
                     kind = 15,
                     callRoute = mine,
-                    callId = hexToBytes(offer.callId!!),
+                    callId = id,
                 )
-                goActive(c.personaHex, hexToBytes(offer.callRoute!!), initiator = false)
+                goActive(c.personaHex, door, initiator = false)
             }.onFailure {
                 DucatLog.w("Calls", "answer: ${it.message}")
                 endInternal()
@@ -184,6 +245,15 @@ object Calls {
         state = State.Idle
         Thread {
             runCatching {
+                val door = offer.callRoute?.let { hexToBytes(it) }
+                val id = offer.callId?.let { hexToBytes(it) }
+                if (door != null && id != null) {
+                    repeat(2) {
+                        runCatching {
+                            uniffi.ducat_mobile.nodeCallSend(door, controlFrame(CTRL_DECLINE, id))
+                        }
+                    }
+                }
                 Mailbox.send(
                     app, c, app.getString(R.string.call_body_decline),
                     kind = 5, reSeq = offer.seq, reOwn = false,
@@ -303,7 +373,15 @@ object Calls {
             var lastSeq = -1L
             while (running) {
                 val f = uniffi.ducat_mobile.nodeCallRecv(50u)
-                if (f != null && f.size > 8) {
+                if (f != null && isControl(f)) {
+                    lastHeard = System.currentTimeMillis()
+                    if (f[8].toInt() == CTRL_BYE && myCallId != null &&
+                        f.copyOfRange(9, 17).contentEquals(myCallId)
+                    ) {
+                        DucatLog.i("Calls", "BYE — they hung up")
+                        endInternal()
+                    }
+                } else if (f != null && f.size > 8) {
                     lastHeard = System.currentTimeMillis()
                     val seq = ((f[0].toLong() and 0xFF) shl 24) or
                         ((f[1].toLong() and 0xFF) shl 16) or
@@ -330,17 +408,37 @@ object Calls {
     }
 
     private fun endInternal() {
+        val sayBye = running
+        val route = theirRoute
+        val id = myCallId
         running = false
         runCatching {
             DucatLog.i("Calls", "sends ok/failed: ${uniffi.ducat_mobile.nodeCallSendReport()}")
         }
         audio?.quiet()
         audio?.stop()
-        runCatching { uniffi.ducat_mobile.nodeCallClose() }
         myCallId = null
         theirRoute = null
         pump = null
         state = State.Idle
+        // The goodbye and the teardown leave together, off this thread —
+        // hangUp arrives on a UI click. BYE goes out three times because
+        // it is fire-and-forget; the far side's watchdog remains the
+        // answer for a peer that crashed instead of saying it.
+        val ep = epoch.get()
+        Thread {
+            if (sayBye && route != null && id != null) {
+                repeat(3) {
+                    runCatching {
+                        uniffi.ducat_mobile.nodeCallSend(route, controlFrame(CTRL_BYE, id))
+                    }
+                }
+                Thread.sleep(250) // let the queue drain before close purges it
+            }
+            if (epoch.get() == ep) {
+                runCatching { uniffi.ducat_mobile.nodeCallClose() }
+            }
+        }.apply { isDaemon = true }.start()
     }
 
     private fun hexToBytes(hex: String): ByteArray =

@@ -144,3 +144,30 @@ WT_STALL to the end).
 Incoming calls now ride the same lane: the offer lands in ~1 s, the
 thread bumps, the shell notices, the bell rings. Stage C (control
 frames on the call route) is what remains of the telephone's v2.
+
+
+## Stage C landed (2026-08-31 night): the answer takes the open door
+
+Spec 1.1.0-dev5: control frames on the call route — sentinel seq
+`0xFFFFFFFF`, type byte (1 ANSWER carrying the callee's route, 2
+DECLINE, 3 BYE), the call id; honored only against a live call's id on
+its own route; the sealed kind-15/Retract still follows by mailbox as
+the canonical record. Engine: the ring-poller drains the door while
+Outgoing; answer/decline fire their frames before their mailbox words;
+teardown says BYE three times off-thread (an epoch guard keeps a
+delayed close from killing the next call's routes) and the silence
+watchdog stays for crashes.
+
+**The whole telephone, measured live, same day both ways:**
+
+| leg                        | morning        | tonight |
+|----------------------------|----------------|---------|
+| dial → far end's bell      | 105 s (missed) | **2 s** |
+| answer tap → caller voice  | + mailbox trip | **≤4 s**|
+| decline tap → caller stops | mailbox trip   | **2 s** |
+| hang-up → far end knows    | 10 s watchdog  | **~2 s**|
+| plain message delivery     | 85–105 s       | **0.0–0.5 s** |
+
+Dial-to-voice measured 9.6 s end to end, dominated by the offer's own
+mailbox leg (the one leg that cannot ride a route, since the offer IS
+the route delivery — the lane's watches are what got it under ten).
