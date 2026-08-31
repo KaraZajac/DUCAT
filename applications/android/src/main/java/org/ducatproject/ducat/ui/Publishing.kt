@@ -113,6 +113,32 @@ fun PublishingSection() {
             ) { Text(stringResource(R.string.pub_create)) }
         }
 
+        // Scan-to-subscribe: a publish-purpose card, QR'd. Each opening
+        // mints a fresh week-long card bound to this publication; every
+        // claim of any still-valid one enrolls the claimant.
+        var subCode by remember { mutableStateOf<String?>(null) }
+        subCode?.let { uri ->
+            androidx.compose.material3.AlertDialog(
+                onDismissRequest = { subCode = null },
+                confirmButton = {
+                    TextButton(onClick = { subCode = null }) {
+                        Text(stringResource(R.string.pub_code_done))
+                    }
+                },
+                title = { Text(stringResource(R.string.pub_sub_code)) },
+                text = {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        QrBlock(uri)
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            stringResource(R.string.pub_sub_code_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                },
+            )
+        }
+
         val pubId = selected
         if (pubId == null) {
             if (pubs.isEmpty()) {
@@ -152,6 +178,27 @@ fun PublishingSection() {
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    Spacer(Modifier.height(6.dp))
+                    OutlinedButton(
+                        enabled = busy == null,
+                        onClick = {
+                            scope.launch(Dispatchers.IO) {
+                                runCatching {
+                                    val card = org.ducatproject.ducat.Mailbox.issueCard(
+                                        context,
+                                        pubs.firstOrNull { it.first == pubId }?.second,
+                                        7uL * 24uL * 60uL * 60uL,
+                                        purpose = "publish",
+                                    )
+                                    Publications.bindCard(context, pubId, card.inboxKey)
+                                    subCode = card.uri
+                                }.onFailure {
+                                    DucatLog.w("Publishing", "code: ${it.message}")
+                                    lastWord = it.message
+                                }
+                            }
+                        },
+                    ) { Text(stringResource(R.string.pub_sub_code)) }
                 }
             }
 

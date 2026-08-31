@@ -27,4 +27,7 @@
     <string name="pub_rail_shelf">trên kệ — mạng giữ giúp</string>
     <string name="pub_rail_swarm">theo bầy — phục vụ khi ứng dụng mở</string>
     <string name="pub_reseed">Seed lại</string>
+    <string name="pub_sub_code">Mã đăng ký</string>
+    <string name="pub_code_done">Xong</string>
+    <string name="pub_sub_code_hint">Quét để đăng ký. Nhận thẻ là vào danh sách — ấn phẩm miễn phí trao ngay số mới nhất, bản trả phí gửi hóa đơn.</string>
 </resources>

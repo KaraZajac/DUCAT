@@ -15,4 +15,10 @@
     <string name="chatlist_preview_issue">ฉบับใหม่: %1$s</string>
     <string name="notify_new_issue">%1$s ส่งฉบับใหม่มาให้</string>
     <string name="library_note_new_issue">ฉบับใหม่ออกแล้ว</string>
+    <string name="library_unsubscribe">เลิกติดตาม</string>
+    <string name="library_unsub_confirm">หยุดรับจาก %1$s? ฉบับที่มีอยู่ยังเป็นของคุณ</string>
+    <string name="library_unsub_keep">คงการสมัครไว้</string>
+    <string name="library_resubscribe">สมัครใหม่</string>
+    <string name="library_unsubscribed">เลิกแล้ว — ไม่เก็บฉบับใหม่</string>
+    <string name="library_unsub_note">เลิกติดตามแล้ว</string>
 </resources>

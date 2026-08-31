@@ -27,4 +27,7 @@
     <string name="pub_rail_shelf">روی قفسه — شبکه نگه می‌دارد</string>
     <string name="pub_rail_swarm">با ازدحام — تا وقتی برنامه باز است</string>
     <string name="pub_reseed">بذر دوباره</string>
+    <string name="pub_sub_code">کد اشتراک</string>
+    <string name="pub_code_done">تمام</string>
+    <string name="pub_sub_code_hint">برای اشتراک اسکن کن. پذیرش، به فهرست می‌افزاید — نشریهٔ رایگان تازه‌ترین شماره را همان‌جا می‌دهد و پولی صورتحساب می‌فرستد.</string>
 </resources>

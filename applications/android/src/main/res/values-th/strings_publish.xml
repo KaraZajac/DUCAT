@@ -27,4 +27,7 @@
     <string name="pub_rail_shelf">บนชั้น — เครือข่ายเก็บไว้</string>
     <string name="pub_rail_swarm">แบบฝูง — ให้บริการขณะแอปเปิด</string>
     <string name="pub_reseed">ซีดอีกครั้ง</string>
+    <string name="pub_sub_code">รหัสสมัครสมาชิก</string>
+    <string name="pub_code_done">เสร็จ</string>
+    <string name="pub_sub_code_hint">สแกนเพื่อสมัคร รับสิทธิ์แล้วเข้ารายชื่อทันที — สิ่งพิมพ์ฟรีส่งฉบับล่าสุดให้เลย ส่วนแบบเสียเงินจะส่งบิล</string>
 </resources>

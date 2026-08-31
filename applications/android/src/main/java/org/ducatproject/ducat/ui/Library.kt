@@ -36,6 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import java.io.File
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.Publications
@@ -221,25 +222,101 @@ fun LibrarySection() {
         val grouped = rows.groupBy { it.publisherHex }
         grouped.forEach { (pub, issues) ->
             item(key = "h:$pub") {
-                Column(Modifier.padding(top = 6.dp)) {
-                    Text(
-                        issues.first().publisherName ?: "${pub.take(12)}…",
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    if (issues.first().publisherName == null) {
-                        // The cabinet outlives the thread; say so rather than
-                        // showing a bare key with no explanation.
-                        Text(
-                            stringResource(R.string.library_gone),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
+                PublisherHeader(pub, issues.first().publisherName)
+            }
+            // An unsubscribed shelf keeps what it holds and shows nothing
+            // new — the rows return with Resubscribe, nothing re-fetched.
+            if (!Publications.isMuted(context, pub)) {
+                items(issues, key = { "i:$pub:${it.period}" }) { row ->
+                    IssueLine(row, fetching, progress)
                 }
             }
-            items(issues, key = { "i:$pub:${it.period}" }) { row ->
-                IssueLine(row, fetching, progress)
+        }
+    }
+}
+
+@Composable
+private fun PublisherHeader(publisherHex: String, publisherName: String?) {
+    val context = LocalContext.current
+    val muted = Publications.isMuted(context, publisherHex)
+    var confirm by remember { mutableStateOf(false) }
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+
+    if (confirm) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { confirm = false },
+            title = { Text(stringResource(R.string.library_unsubscribe)) },
+            text = {
+                Text(
+                    stringResource(
+                        R.string.library_unsub_confirm,
+                        publisherName ?: "${publisherHex.take(12)}…",
+                    ),
+                )
+            },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    confirm = false
+                    Publications.setMuted(context, publisherHex, true)
+                    // The courtesy note, protocol-written in OUR language
+                    // (the bill placeholder's rule): the publisher is told
+                    // in words, and their roster is theirs to tidy.
+                    val note = context.getString(R.string.library_unsub_note)
+                    scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                        runCatching {
+                            org.ducatproject.ducat.ContactStore(context).all()
+                                .firstOrNull { it.personaHex == publisherHex }
+                                ?.let { org.ducatproject.ducat.Mailbox.send(context, it, note) }
+                        }.onFailure {
+                            DucatLog.w("Library", "unsub note: ${it.message}")
+                        }
+                    }
+                }) { Text(stringResource(R.string.library_unsubscribe)) }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = { confirm = false }) {
+                    Text(stringResource(R.string.library_unsub_keep))
+                }
+            },
+        )
+    }
+
+    Row(
+        Modifier.fillMaxWidth().padding(top = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(
+                publisherName ?: "${publisherHex.take(12)}…",
+                style = MaterialTheme.typography.titleMedium,
+            )
+            if (publisherName == null) {
+                // The cabinet outlives the thread; say so rather than
+                // showing a bare key with no explanation.
+                Text(
+                    stringResource(R.string.library_gone),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
+            if (muted) {
+                Text(
+                    stringResource(R.string.library_unsubscribed),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        androidx.compose.material3.TextButton(onClick = {
+            if (muted) Publications.setMuted(context, publisherHex, false)
+            else confirm = true
+        }) {
+            Text(
+                stringResource(
+                    if (muted) R.string.library_resubscribe
+                    else R.string.library_unsubscribe,
+                ),
+            )
         }
     }
 }

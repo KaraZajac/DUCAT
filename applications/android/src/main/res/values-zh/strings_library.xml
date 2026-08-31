@@ -15,4 +15,10 @@
     <string name="chatlist_preview_issue">新的一期：%1$s</string>
     <string name="notify_new_issue">%1$s 发来了新的一期</string>
     <string name="library_note_new_issue">新的一期已经发布。</string>
+    <string name="library_unsubscribe">退订</string>
+    <string name="library_unsub_confirm">不再接收%1$s的内容?你已持有的各期仍归你。</string>
+    <string name="library_unsub_keep">保留订阅</string>
+    <string name="library_resubscribe">重新订阅</string>
+    <string name="library_unsubscribed">已退订 — 不再存档新的期数</string>
+    <string name="library_unsub_note">已退订。</string>
 </resources>

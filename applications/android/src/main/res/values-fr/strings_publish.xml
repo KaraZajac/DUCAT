@@ -27,4 +27,7 @@
     <string name="pub_rail_shelf">sur l\u2019étagère — le réseau le garde</string>
     <string name="pub_rail_swarm">par essaim — sert tant que l\u2019app tourne</string>
     <string name="pub_reseed">Ressemer</string>
+    <string name="pub_sub_code">Code d\u2019abonnement</string>
+    <string name="pub_code_done">Terminé</string>
+    <string name="pub_sub_code_hint">Scanner pour s\u2019abonner. La réclamation inscrit sur la liste — une publication gratuite remet aussitôt le dernier numéro, une payante envoie la facture.</string>
 </resources>

@@ -15,4 +15,10 @@
     <string name="chatlist_preview_issue">새 호: %1$s</string>
     <string name="notify_new_issue">%1$s님이 새 호를 보냈어요</string>
     <string name="library_note_new_issue">새 호가 나왔어요.</string>
+    <string name="library_unsubscribe">구독 해지</string>
+    <string name="library_unsub_confirm">%1$s에게서 그만 받을까요? 이미 가진 호는 그대로 남습니다.</string>
+    <string name="library_unsub_keep">구독 유지</string>
+    <string name="library_resubscribe">다시 구독</string>
+    <string name="library_unsubscribed">해지됨 — 새 호는 보관되지 않아요</string>
+    <string name="library_unsub_note">구독을 해지했습니다.</string>
 </resources>

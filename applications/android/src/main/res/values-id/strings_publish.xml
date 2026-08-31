@@ -27,4 +27,7 @@
     <string name="pub_rail_shelf">di rak — dijaga jaringan</string>
     <string name="pub_rail_swarm">lewat kawanan — melayani selama aplikasi hidup</string>
     <string name="pub_reseed">Seed ulang</string>
+    <string name="pub_sub_code">Kode langganan</string>
+    <string name="pub_code_done">Selesai</string>
+    <string name="pub_sub_code_hint">Pindai untuk berlangganan. Klaim memasukkanmu ke daftar — terbitan gratis langsung memberi edisi terbaru, yang berbayar mengirim tagihan.</string>
 </resources>

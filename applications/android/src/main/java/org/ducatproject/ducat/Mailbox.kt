@@ -600,6 +600,14 @@ object Mailbox {
                         owner = ownerHex,
                     )
                 )
+                // A publish-purpose claim is a subscription (§16.20's
+                // scan-to-subscribe): enroll, and let Publications decide
+                // whether the newcomer gets the latest issue or a bill.
+                if (issued.purpose == "publish") {
+                    runCatching {
+                        Publications.enrollFromCard(context, issued.inboxKey, personaHex)
+                    }.onFailure { DucatLog.w(TAG, "enroll: ${it.message}") }
+                }
                 if (heldPayto != null && heldPayto != prior?.pendingAddress) {
                     // firstOrNull, not first: all() drops contacts with no
                     // outbox on either side, and this record was written from

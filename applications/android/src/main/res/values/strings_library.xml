@@ -18,4 +18,10 @@
     <string name="chatlist_preview_issue">New issue: %1$s</string>
     <string name="notify_new_issue">%1$s sent a new issue</string>
     <string name="library_note_new_issue">A new issue is out.</string>
+    <string name="library_unsubscribe">Unsubscribe</string>
+    <string name="library_unsub_confirm">Stop receiving from %1$s? Issues you already hold stay yours.</string>
+    <string name="library_unsub_keep">Keep subscription</string>
+    <string name="library_resubscribe">Resubscribe</string>
+    <string name="library_unsubscribed">Unsubscribed — new issues are not filed</string>
+    <string name="library_unsub_note">Unsubscribed.</string>
 </resources>

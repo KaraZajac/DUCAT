@@ -15,4 +15,10 @@
     <string name="chatlist_preview_issue">Nova edição: %1$s</string>
     <string name="notify_new_issue">%1$s enviou uma nova edição</string>
     <string name="library_note_new_issue">Saiu uma nova edição.</string>
+    <string name="library_unsubscribe">Cancelar assinatura</string>
+    <string name="library_unsub_confirm">Parar de receber de %1$s? As edições que você já tem continuam suas.</string>
+    <string name="library_unsub_keep">Manter assinatura</string>
+    <string name="library_resubscribe">Assinar de novo</string>
+    <string name="library_unsubscribed">Assinatura cancelada — novas edições não são arquivadas</string>
+    <string name="library_unsub_note">Assinatura cancelada.</string>
 </resources>

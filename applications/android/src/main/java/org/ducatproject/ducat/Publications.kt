@@ -40,6 +40,13 @@ object Publications {
     fun absorbKey(context: Context, publisherHex: String, m: StoredMessage) {
         val period = m.pubPeriodId ?: return
         val key = m.pubPeriodKey ?: return
+        // An unsubscribed reader stops FILING, not holding: what was paid
+        // for stays theirs (§16.20 — no revocation), but a publisher who
+        // keeps sending into a closed door does not quietly reopen it.
+        if (isMuted(context, publisherHex)) {
+            DucatLog.i("Publications", "muted ${publisherHex.take(8)}… — key not filed")
+            return
+        }
         synchronized(lock) {
             val p = prefs(context)
             val all = p.getString("subs", null)?.let { JSONObject(it) } ?: JSONObject()
@@ -84,6 +91,24 @@ object Publications {
             map,
         )
     }
+
+    /** The reader's door, closed or open. Muting stops new keys from being
+     *  filed and hides the shelf's future — held periods stay held. */
+    fun setMuted(context: Context, publisherHex: String, muted: Boolean) {
+        synchronized(lock) {
+            val p = prefs(context)
+            val all = p.getString("subs", null)?.let { JSONObject(it) } ?: JSONObject()
+            val mine = all.optJSONObject(publisherHex) ?: JSONObject()
+            if (muted) mine.put("muted", true) else mine.remove("muted")
+            all.put(publisherHex, mine)
+            p.edit().putString("subs", all.toString()).apply()
+        }
+        ContactStore.bump()
+    }
+
+    fun isMuted(context: Context, publisherHex: String): Boolean =
+        prefs(context).getString("subs", null)?.let { JSONObject(it) }
+            ?.optJSONObject(publisherHex)?.optBoolean("muted", false) ?: false
 
     /** Publishers this phone holds keys from, newest filing first not
      *  promised — a cabinet, not a feed. */
@@ -592,6 +617,57 @@ object Publications {
                     DucatLog.w("Publications", "tend '$period': ${it.message}")
                 }
             }
+        }
+    }
+
+    // --- scan-to-subscribe (§16.20 meets §16.9's cards) -------------------
+    //
+    // A publish-purpose card IS the subscription form: the Publishing
+    // screen mints one per publication and remembers which shelf it opens;
+    // when somebody claims it, collectClaims enrolls them — and a free
+    // publication hands the newcomer the latest issue on the spot, because
+    // scanning should feel like getting the paper, not applying for it. A
+    // priced one bills them the newest period through the same TabStore
+    // rails, and the settle reconcile delivers when the chain says so.
+
+    /** Remember which publication a minted publish-card opens. */
+    fun bindCard(context: Context, pubId: String, inboxKey: String) {
+        synchronized(lock) {
+            val p = prefs(context)
+            val map = p.getString("subcards", null)?.let { JSONObject(it) } ?: JSONObject()
+            map.put(inboxKey, pubId)
+            p.edit().putString("subcards", map.toString()).apply()
+        }
+    }
+
+    /** The claim side of the card above; called from the claims funnel. */
+    fun enrollFromCard(context: Context, inboxKey: String, subscriberHex: String) {
+        val pubId = prefs(context).getString("subcards", null)
+            ?.let { JSONObject(it) }?.optString(inboxKey)?.ifBlank { null } ?: return
+        setSubscriber(context, pubId, subscriberHex, true)
+        DucatLog.i(
+            "Publications",
+            "card claim enrolled ${subscriberHex.take(8)}… into '$pubId'",
+        )
+        val c = ContactStore(context).all()
+            .firstOrNull { it.personaHex == subscriberHex } ?: return
+        if (priceOf(context, pubId) > 0L) {
+            // Bill the newcomer for the newest period (or this month when
+            // nothing has shipped yet). billPeriod skips the already-billed,
+            // so only the new arrival gets paper.
+            val period = issues(context, pubId).firstOrNull()?.periodId
+                ?: java.time.YearMonth.now().toString()
+            billPeriod(context, pubId, period)
+        } else {
+            val latest = issues(context, pubId).firstOrNull() ?: return
+            val shelf = shelfOf(context, pubId)
+            val ok = sendPeriod(
+                context, c, pubId, latest.periodId,
+                record = shelf?.first, headKey = shelf?.second, note = "",
+                swarmKey = latest.swarmKey.takeIf { it.isNotBlank() },
+                swarmDigestHex = latest.swarmDigestHex.takeIf { it.isNotBlank() },
+            )
+            if (ok) markSent(context, pubId, latest.periodId, subscriberHex)
         }
     }
 

@@ -27,4 +27,7 @@
     <string name="pub_rail_shelf">在书架上 — 由网络保存</string>
     <string name="pub_rail_swarm">蜂群分发 — 应用运行时提供</string>
     <string name="pub_reseed">重新做种</string>
+    <string name="pub_sub_code">订阅码</string>
+    <string name="pub_code_done">完成</string>
+    <string name="pub_sub_code_hint">扫码即订阅。认领后加入名单 — 免费刊物当场送上最新一期,付费的则寄来账单。</string>
 </resources>

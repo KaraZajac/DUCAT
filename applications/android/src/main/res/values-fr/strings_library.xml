@@ -15,4 +15,10 @@
     <string name="chatlist_preview_issue">Nouveau numéro : %1$s</string>
     <string name="notify_new_issue">%1$s a envoyé un nouveau numéro</string>
     <string name="library_note_new_issue">Un nouveau numéro est paru.</string>
+    <string name="library_unsubscribe">Se désabonner</string>
+    <string name="library_unsub_confirm">Ne plus rien recevoir de %1$s ? Les numéros déjà en ta possession restent à toi.</string>
+    <string name="library_unsub_keep">Garder l\u2019abonnement</string>
+    <string name="library_resubscribe">Se réabonner</string>
+    <string name="library_unsubscribed">Désabonné — les nouveaux numéros ne sont plus classés</string>
+    <string name="library_unsub_note">Désabonné.</string>
 </resources>

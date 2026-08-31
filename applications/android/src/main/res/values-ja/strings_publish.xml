@@ -27,4 +27,7 @@
     <string name="pub_rail_shelf">棚の上 — ネットワークが保持</string>
     <string name="pub_rail_swarm">スウォーム — アプリ起動中のみ配信</string>
     <string name="pub_reseed">再シード</string>
+    <string name="pub_sub_code">購読コード</string>
+    <string name="pub_code_done">完了</string>
+    <string name="pub_sub_code_hint">スキャンで購読。受け取ると名簿に加わります — 無料の出版物はその場で最新号を、有料なら請求書を送ります。</string>
 </resources>

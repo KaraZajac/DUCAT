@@ -95,5 +95,43 @@ fun main() {
         "PUBLEDGER_FAIL shipment recorded should release the hold"
     }
 
-    println("PUBLEDGER_OK ${Publications.issues(context, pub).size} issues, roster survives re-seed, settle gates the send")
+    // --- scan-to-subscribe bookkeeping + the reader's door ------------
+    // A bound card's claim enrolls even before any thread exists; a muted
+    // publisher's keys bounce off absorbKey while held periods stay.
+    val carol = "cc".repeat(32)
+    Publications.bindCard(context, pub, "VLD0:subcard-inbox")
+    Publications.enrollFromCard(context, "VLD0:subcard-inbox", carol)
+    check(carol in Publications.subscribers(context, pub)) {
+        "PUBLEDGER_FAIL card claim did not enroll"
+    }
+    Publications.enrollFromCard(context, "VLD0:unbound-inbox", "dd".repeat(32))
+    check("dd".repeat(32) !in Publications.subscribers(context, pub)) {
+        "PUBLEDGER_FAIL an unbound card must not enroll"
+    }
+
+    val press = "ee".repeat(32)
+    val issueMsg = org.ducatproject.ducat.StoredMessage(
+        seq = 0, timestamp = 1L, outgoing = false, kind = 13, body = "",
+        pubPeriodId = "2026-11", pubPeriodKey = ByteArray(32) { 9 },
+    )
+    Publications.absorbKey(context, press, issueMsg)
+    check(Publications.subscription(context, press)?.third?.get("2026-11") != null) {
+        "PUBLEDGER_FAIL open door did not file"
+    }
+    Publications.setMuted(context, press, true)
+    val second = issueMsg.copy(pubPeriodId = "2026-12")
+    Publications.absorbKey(context, press, second)
+    check(Publications.subscription(context, press)?.third?.get("2026-12") == null) {
+        "PUBLEDGER_FAIL a muted door filed anyway"
+    }
+    check(Publications.subscription(context, press)?.third?.get("2026-11") != null) {
+        "PUBLEDGER_FAIL muting must not evict held periods"
+    }
+    Publications.setMuted(context, press, false)
+    Publications.absorbKey(context, press, second)
+    check(Publications.subscription(context, press)?.third?.get("2026-12") != null) {
+        "PUBLEDGER_FAIL a reopened door did not file"
+    }
+
+    println("PUBLEDGER_OK ${Publications.issues(context, pub).size} issues, roster survives re-seed, settle gates the send, card enrolls, mute holds")
 }

@@ -27,4 +27,7 @@
     <string name="pub_rail_shelf">op de plank — het netwerk bewaart het</string>
     <string name="pub_rail_swarm">per zwerm — serveert zolang de app draait</string>
     <string name="pub_reseed">Opnieuw seeden</string>
+    <string name="pub_sub_code">Abonneercode</string>
+    <string name="pub_code_done">Klaar</string>
+    <string name="pub_sub_code_hint">Scan om te abonneren. Claimen zet je op de lijst — een gratis publicatie geeft meteen de nieuwste editie, een betaalde stuurt de rekening.</string>
 </resources>

@@ -27,4 +27,7 @@
     <string name="pub_rail_shelf">على الرف — تحفظه الشبكة</string>
     <string name="pub_rail_swarm">بالسرب — يُقدَّم ما دام التطبيق يعمل</string>
     <string name="pub_reseed">إعادة البذر</string>
+    <string name="pub_sub_code">رمز الاشتراك</string>
+    <string name="pub_code_done">تم</string>
+    <string name="pub_sub_code_hint">امسح لتشترك. المطالبة تضيفك إلى القائمة — المنشور المجاني يسلّم أحدث عدد فورًا، والمدفوع يرسل الفاتورة.</string>
 </resources>

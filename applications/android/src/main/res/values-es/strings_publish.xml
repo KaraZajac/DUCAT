@@ -27,4 +27,7 @@
     <string name="pub_rail_shelf">en el estante — lo guarda la red</string>
     <string name="pub_rail_swarm">por enjambre — sirve mientras la app corre</string>
     <string name="pub_reseed">Volver a sembrar</string>
+    <string name="pub_sub_code">Código de suscripción</string>
+    <string name="pub_code_done">Listo</string>
+    <string name="pub_sub_code_hint">Escanea para suscribirte. Reclamarlo te une a la lista — una publicación gratis entrega el último número al momento; una de pago envía la factura.</string>
 </resources>

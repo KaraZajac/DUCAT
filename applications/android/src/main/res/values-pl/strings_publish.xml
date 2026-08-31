@@ -27,4 +27,7 @@
     <string name="pub_rail_shelf">na półce — trzyma sieć</string>
     <string name="pub_rail_swarm">rojem — serwuje, póki apka działa</string>
     <string name="pub_reseed">Wysiej ponownie</string>
+    <string name="pub_sub_code">Kod subskrypcji</string>
+    <string name="pub_code_done">Gotowe</string>
+    <string name="pub_sub_code_hint">Zeskanuj, by zasubskrybować. Realizacja wpisuje na listę — darmowa publikacja od razu wydaje najnowszy numer, płatna wysyła rachunek.</string>
 </resources>

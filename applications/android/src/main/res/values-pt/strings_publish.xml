@@ -27,4 +27,7 @@
     <string name="pub_rail_shelf">na estante — a rede segura</string>
     <string name="pub_rail_swarm">por enxame — serve enquanto o app roda</string>
     <string name="pub_reseed">Semear de novo</string>
+    <string name="pub_sub_code">Código de assinatura</string>
+    <string name="pub_code_done">Pronto</string>
+    <string name="pub_sub_code_hint">Escaneie para assinar. O resgate entra na lista — uma publicação grátis entrega a última edição na hora; uma paga envia a conta.</string>
 </resources>

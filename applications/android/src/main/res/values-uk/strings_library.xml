@@ -15,4 +15,10 @@
     <string name="chatlist_preview_issue">Новий випуск: %1$s</string>
     <string name="notify_new_issue">Новий випуск від %1$s</string>
     <string name="library_note_new_issue">Вийшов новий випуск.</string>
+    <string name="library_unsubscribe">Відписатися</string>
+    <string name="library_unsub_confirm">Більше не отримувати від %1$s? Випуски, які вже маєш, лишаються твоїми.</string>
+    <string name="library_unsub_keep">Лишити підписку</string>
+    <string name="library_resubscribe">Підписатися знову</string>
+    <string name="library_unsubscribed">Відписано — нові випуски не зберігаються</string>
+    <string name="library_unsub_note">Відписка.</string>
 </resources>

@@ -27,4 +27,7 @@
     <string name="pub_rail_shelf">sullo scaffale — lo tiene la rete</string>
     <string name="pub_rail_swarm">via sciame — serve finché l\u2019app gira</string>
     <string name="pub_reseed">Ri-semina</string>
+    <string name="pub_sub_code">Codice abbonamento</string>
+    <string name="pub_code_done">Fatto</string>
+    <string name="pub_sub_code_hint">Scansiona per abbonarti. Riscattarlo iscrive alla lista — una pubblicazione gratuita consegna subito l\u2019ultimo numero, una a pagamento manda il conto.</string>
 </resources>

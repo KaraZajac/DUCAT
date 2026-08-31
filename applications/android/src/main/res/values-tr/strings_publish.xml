@@ -27,4 +27,7 @@
     <string name="pub_rail_shelf">rafta — ağ saklıyor</string>
     <string name="pub_rail_swarm">sürüyle — uygulama açıkken sunulur</string>
     <string name="pub_reseed">Yeniden tohumla</string>
+    <string name="pub_sub_code">Abonelik kodu</string>
+    <string name="pub_code_done">Bitti</string>
+    <string name="pub_sub_code_hint">Abone olmak için tara. Alan listeye girer — ücretsiz yayın son sayıyı anında verir, ücretli fatura yollar.</string>
 </resources>

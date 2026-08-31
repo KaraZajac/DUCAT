@@ -15,4 +15,10 @@
     <string name="chatlist_preview_issue">Số mới: %1$s</string>
     <string name="notify_new_issue">%1$s đã gửi một số mới</string>
     <string name="library_note_new_issue">Số mới đã ra.</string>
+    <string name="library_unsubscribe">Hủy đăng ký</string>
+    <string name="library_unsub_confirm">Ngừng nhận từ %1$s? Các số bạn đã có vẫn là của bạn.</string>
+    <string name="library_unsub_keep">Giữ đăng ký</string>
+    <string name="library_resubscribe">Đăng ký lại</string>
+    <string name="library_unsubscribed">Đã hủy — số mới không được lưu</string>
+    <string name="library_unsub_note">Đã hủy đăng ký.</string>
 </resources>

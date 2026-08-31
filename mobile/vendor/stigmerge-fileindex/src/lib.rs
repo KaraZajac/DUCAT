@@ -577,7 +577,7 @@ impl PayloadSlice {
 /// Repreent the layout of the indexed content payload.
 #[derive(Debug, PartialEq, Clone, Default)]
 pub struct PayloadSpec {
-    /// SHA256 digest of the complete payload.
+    /// BLAKE3 digest of the complete payload.
     digest: [u8; 32],
 
     /// Length of the complete payload.
@@ -624,7 +624,7 @@ struct ScanResult {
 /// A piece of the content payload which is verifiable with a content digest.
 #[derive(Debug, PartialEq, Clone)]
 pub struct PayloadPiece {
-    /// SHA256 digest of the complete piece.
+    /// BLAKE3 digest of the complete piece.
     digest: [u8; 32],
 
     /// Length of the piece.

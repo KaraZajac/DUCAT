@@ -27,4 +27,7 @@
     <string name="pub_rail_shelf">ताक पर — नेटवर्क सँभालता है</string>
     <string name="pub_rail_swarm">झुंड से — ऐप चलते तक</string>
     <string name="pub_reseed">फिर सीड करो</string>
+    <string name="pub_sub_code">सदस्यता कोड</string>
+    <string name="pub_code_done">हो गया</string>
+    <string name="pub_sub_code_hint">सदस्यता के लिए स्कैन करो। लेते ही सूची में — मुफ़्त प्रकाशन तुरंत ताज़ा अंक देता है, सशुल्क बिल भेजता है।</string>
 </resources>

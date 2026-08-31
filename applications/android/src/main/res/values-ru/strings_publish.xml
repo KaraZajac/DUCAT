@@ -27,4 +27,7 @@
     <string name="pub_rail_shelf">на полке — хранит сеть</string>
     <string name="pub_rail_swarm">роем — раздаётся, пока приложение работает</string>
     <string name="pub_reseed">Раздать снова</string>
+    <string name="pub_sub_code">Код подписки</string>
+    <string name="pub_code_done">Готово</string>
+    <string name="pub_sub_code_hint">Отсканируй, чтобы подписаться. Предъявление вносит в список — бесплатное издание сразу отдаёт свежий выпуск, платное присылает счёт.</string>
 </resources>

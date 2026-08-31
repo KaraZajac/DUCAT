@@ -27,4 +27,7 @@
     <string name="pub_rail_shelf">на полиці — тримає мережа</string>
     <string name="pub_rail_swarm">роєм — роздається, поки застосунок працює</string>
     <string name="pub_reseed">Роздати знову</string>
+    <string name="pub_sub_code">Код підписки</string>
+    <string name="pub_code_done">Готово</string>
+    <string name="pub_sub_code_hint">Відскануй, щоб підписатися. Пред\u2019явлення додає до списку — безплатне видання одразу віддає свіжий випуск, платне надсилає рахунок.</string>
 </resources>

@@ -27,4 +27,7 @@
     <string name="pub_rail_shelf">선반 위 — 네트워크가 보관</string>
     <string name="pub_rail_swarm">스웜 — 앱이 켜진 동안 제공</string>
     <string name="pub_reseed">다시 시드</string>
+    <string name="pub_sub_code">구독 코드</string>
+    <string name="pub_code_done">완료</string>
+    <string name="pub_sub_code_hint">스캔하면 구독됩니다. 등록하면 명단에 오르고 — 무료 간행물은 그 자리에서 최신 호를, 유료는 청구서를 보냅니다.</string>
 </resources>

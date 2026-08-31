@@ -15,4 +15,10 @@
     <string name="chatlist_preview_issue">Yeni sayı: %1$s</string>
     <string name="notify_new_issue">%1$s yeni bir sayı gönderdi</string>
     <string name="library_note_new_issue">Yeni sayı çıktı.</string>
+    <string name="library_unsubscribe">Abonelikten çık</string>
+    <string name="library_unsub_confirm">%1$s göndermeyi bıraksın mı? Elindeki sayılar senin kalır.</string>
+    <string name="library_unsub_keep">Aboneliği koru</string>
+    <string name="library_resubscribe">Yeniden abone ol</string>
+    <string name="library_unsubscribed">Çıkıldı — yeni sayılar saklanmıyor</string>
+    <string name="library_unsub_note">Abonelikten çıkıldı.</string>
 </resources>

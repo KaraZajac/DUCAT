@@ -15,4 +15,10 @@
     <string name="chatlist_preview_issue">Neue Ausgabe: %1$s</string>
     <string name="notify_new_issue">%1$s hat eine neue Ausgabe geschickt</string>
     <string name="library_note_new_issue">Eine neue Ausgabe ist da.</string>
+    <string name="library_unsubscribe">Abbestellen</string>
+    <string name="library_unsub_confirm">Nichts mehr von %1$s erhalten? Ausgaben, die du hast, bleiben deine.</string>
+    <string name="library_unsub_keep">Abo behalten</string>
+    <string name="library_resubscribe">Wieder abonnieren</string>
+    <string name="library_unsubscribed">Abbestellt — neue Ausgaben werden nicht abgelegt</string>
+    <string name="library_unsub_note">Abbestellt.</string>
 </resources>

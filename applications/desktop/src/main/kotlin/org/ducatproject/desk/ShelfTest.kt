@@ -87,6 +87,80 @@ fun main() {
             println("SHELF_PUBLISHER_GONE deliberately")
             System.out.flush()
         }
+        // The whole scan-to-subscribe arc, desk as the press: a free
+        // publication, one issue on the shelf, and a publish-purpose card
+        // whose CLAIM is the subscription — the shared enroll code hands
+        // the newcomer the latest issue with nobody touching anything.
+        // Further issues ship when the runner touches $STATE/again[N],
+        // so the mute/resubscribe halves can be proven in one sitting.
+        "press" -> {
+            val file = File(
+                System.getenv("DUCAT_PUB_FILE") ?: error("SHELF_FAIL set DUCAT_PUB_FILE"),
+            )
+            val context = up(dir)
+            NameStore(context).get() ?: NameStore(context).put("Night Press")
+            val pubId = Publications.publications(context)
+                .firstOrNull { it.second == "The Night Press" }?.first
+                ?: Publications.create(context, "The Night Press")
+            if (Publications.issues(context, pubId).isEmpty()) {
+                check(Publications.shelveIssue(context, pubId, "2026-08", file)) {
+                    "SHELF_FAIL first shelving refused"
+                }
+            }
+            val card = Mailbox.issueCard(
+                context, "Night Press", 7uL * 24uL * 60uL * 60uL, purpose = "publish",
+            )
+            Publications.bindCard(context, pubId, card.inboxKey)
+            println("PRESS_CARD ${card.uri}")
+            System.out.flush()
+
+            var sentMark = 0
+            var nextIssue = 9
+            val deadline = System.currentTimeMillis() + 40 * 60_000L
+            while (System.currentTimeMillis() < deadline) {
+                runCatching { Mailbox.collectClaims(context) }
+                runCatching { Mailbox.poll(context) }
+                val issues = Publications.issues(context, pubId)
+                val sentTotal = issues.sumOf { it.sentTo.size }
+                if (sentTotal > sentMark) {
+                    sentMark = sentTotal
+                    println("PRESS_SENT total=$sentTotal newest=${issues.first().periodId}")
+                    System.out.flush()
+                }
+                // A touched marker file is the operator saying "next month".
+                val trigger = File(dir, "again$nextIssue")
+                if (trigger.exists()) {
+                    trigger.delete()
+                    val period = "2026-%02d".format(nextIssue)
+                    check(Publications.shelveIssue(context, pubId, period, file)) {
+                        "SHELF_FAIL shelving $period refused"
+                    }
+                    val shelf = Publications.shelfOf(context, pubId)!!
+                    for (hex in Publications.subscribers(context, pubId)) {
+                        val c = ContactStore(context).all()
+                            .firstOrNull { it.personaHex == hex } ?: continue
+                        if (Publications.sendPeriod(
+                                context, c, pubId, period,
+                                record = shelf.first, headKey = shelf.second, note = "",
+                            )
+                        ) {
+                            Publications.markSent(context, pubId, period, hex)
+                        }
+                    }
+                    println("PRESS_SHIPPED $period")
+                    System.out.flush()
+                    nextIssue++
+                }
+                // The reader's courtesy note, surfaced for the runner.
+                ContactStore(context).all().firstOrNull()?.let { c ->
+                    ContactStore(context).thread(c.personaHex)
+                        .lastOrNull { !it.outgoing && it.kind == 0 }
+                        ?.let { println("PRESS_HEARD ${it.body.take(40)}") }
+                }
+                Thread.sleep(3_000)
+            }
+            error("SHELF_FAIL press timed out")
+        }
         // The desk as pure reader for a PHONE publisher: issue the card
         // (easy to hand to an emulator as a link), wait for the claim, then
         // wait for the manifest and fetch off the shelf. The phone drives

@@ -27,4 +27,7 @@
     <string name="pub_rail_shelf">on the shelf — held by the network</string>
     <string name="pub_rail_swarm">by swarm — serves while the app runs</string>
     <string name="pub_reseed">Seed again</string>
+    <string name="pub_sub_code">Subscriber code</string>
+    <string name="pub_code_done">Done</string>
+    <string name="pub_sub_code_hint">Scan to subscribe. A claim joins the roster — a free publication hands over the latest issue on the spot; a priced one sends the bill.</string>
 </resources>

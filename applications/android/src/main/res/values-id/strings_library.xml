@@ -15,4 +15,10 @@
     <string name="chatlist_preview_issue">Edisi baru: %1$s</string>
     <string name="notify_new_issue">%1$s mengirim edisi baru</string>
     <string name="library_note_new_issue">Edisi baru sudah terbit.</string>
+    <string name="library_unsubscribe">Berhenti langganan</string>
+    <string name="library_unsub_confirm">Berhenti menerima dari %1$s? Edisi yang sudah kamu pegang tetap milikmu.</string>
+    <string name="library_unsub_keep">Pertahankan</string>
+    <string name="library_resubscribe">Langganan lagi</string>
+    <string name="library_unsubscribed">Berhenti — edisi baru tidak disimpan</string>
+    <string name="library_unsub_note">Berhenti berlangganan.</string>
 </resources>
