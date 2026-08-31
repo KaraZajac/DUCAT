@@ -11,4 +11,7 @@
     <string name="personas_no_delete">페르소나는 삭제할 수 없어요 — 그 연락처들은 그 키에만 응답해요. 그만 쓰면 조용해질 뿐이에요.</string>
     <string name="personas_save">저장</string>
     <string name="personas_cancel">취소</string>
+    <string name="personas_mode_answers">%1$s(으)로 응답</string>
+    <string name="personas_mode_answers_worn">현재 착용한 페르소나로 응답</string>
+    <string name="personas_contacts_scope">%1$s의 연락처 — 나머지는 메뉴에서 페르소나를 바꿔 확인.</string>
 </resources>

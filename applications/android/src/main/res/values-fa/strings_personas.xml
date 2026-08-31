@@ -11,4 +11,7 @@
     <string name="personas_no_delete">شخصیت را نمی‌توان حذف کرد — مخاطبانش فقط به کلید خودش پاسخ می‌دهند. دیگر به کارش نبر، خودش خاموش می‌شود.</string>
     <string name="personas_save">ذخیره</string>
     <string name="personas_cancel">لغو</string>
+    <string name="personas_mode_answers">به نام %1$s پاسخ می‌دهد</string>
+    <string name="personas_mode_answers_worn">به نام شخصیت فعلی پاسخ می‌دهد</string>
+    <string name="personas_contacts_scope">مخاطبان %1$s — برای بقیه، شخصیت را از منو عوض کن.</string>
 </resources>

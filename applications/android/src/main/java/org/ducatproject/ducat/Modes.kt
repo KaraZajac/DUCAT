@@ -29,6 +29,7 @@ enum class Mode { None, Pos, BarTab, Taxi, Donate, Renting, Kiosk, Marketplace, 
 
 class ModeStore(context: Context) {
     private val prefs = securePrefs(context, "ducat_contacts")
+    private val app = context.applicationContext
 
     fun current(): Mode =
         runCatching { Mode.valueOf(prefs.getString("mode_current", null) ?: "None") }
@@ -57,9 +58,30 @@ class ModeStore(context: Context) {
             // door out of a decision somebody already made.
             .putBoolean("mode_browsing", browsing && m != Mode.None)
             .apply()
+        // A mode with a bound persona puts that hat on as the shift starts
+        // — the shop answers as the shop, whatever was worn on the walk in.
+        // Entry-time only, and only for a real shift: browsing changes
+        // nothing, and the switcher can still change hats mid-shift (the
+        // binding is a default, not a cage). setWorn ignores a persona
+        // that no longer exists, so a stale binding degrades to "as worn".
+        if (!browsing) {
+            boundPersona(m)?.let { PersonaStore(app).setWorn(it) }
+        }
         ContactStore.bump()
     }
 
     /** Whether the current mode was opened to look, rather than to work. */
     fun browsing(): Boolean = prefs.getBoolean("mode_browsing", false)
+
+    /** The persona this mode answers as, or null for "whatever is worn". */
+    fun boundPersona(m: Mode): String? =
+        prefs.getString("mode_persona_${m.name}", null)
+
+    fun bindPersona(m: Mode, hex: String?) {
+        prefs.edit().apply {
+            if (hex == null) remove("mode_persona_${m.name}")
+            else putString("mode_persona_${m.name}", hex)
+        }.apply()
+        ContactStore.bump()
+    }
 }

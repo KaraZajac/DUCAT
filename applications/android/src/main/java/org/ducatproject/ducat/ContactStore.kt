@@ -793,10 +793,21 @@ class ContactStore(context: Context) {
      */
     private fun backupKey(k: String): Boolean =
         k.startsWith("thread_") || k.startsWith("disappear_") ||
-            k.startsWith("usedtheirs_") || k.startsWith("sub_")
+            k.startsWith("usedtheirs_") || k.startsWith("sub_") ||
+            // §1.1a: which shop the till answers as, per mode. Identity
+            // plumbing, not stance — mode_current itself stays out, so a
+            // restored phone wakes as a wallet, not mid-shift.
+            k.startsWith("mode_persona_")
 
     private val appStateKeys =
-        listOf("tabs_v1", "publish_address", "receipts_v1", "claimed_kis_v1", "issued_cards")
+        listOf(
+            "tabs_v1", "publish_address", "receipts_v1", "claimed_kis_v1", "issued_cards",
+            // The hat that was on. Found missing by backuptest's persona
+            // round: the roster restored and the phone woke wearing the
+            // primary, which for a shop that lives in its second persona
+            // is answering customers as the owner's private self.
+            "worn_persona",
+        )
 
     fun backupAppState(): ByteArray {
         val o = JSONObject()

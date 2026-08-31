@@ -11,4 +11,7 @@
     <string name="personas_no_delete">Une persona ne peut pas être supprimée — ses contacts ne répondent qu\'à sa clé. Cesse de l\'utiliser et elle se tait, simplement.</string>
     <string name="personas_save">Enregistrer</string>
     <string name="personas_cancel">Annuler</string>
+    <string name="personas_mode_answers">Répond en tant que %1$s</string>
+    <string name="personas_mode_answers_worn">Répond avec le personnage porté</string>
+    <string name="personas_contacts_scope">Contacts de %1$s — change de personnage dans le menu pour voir les autres.</string>
 </resources>

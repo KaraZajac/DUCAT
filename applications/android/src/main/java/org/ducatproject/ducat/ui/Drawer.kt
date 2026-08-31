@@ -665,9 +665,26 @@ private fun ContactsAdminSection(onOpenChat: (Contact) -> Unit) {
     // claim, or a forget made anywhere else must show here without leaving
     // and reopening the section.
     val version by ContactStore.changes.collectAsState()
-    var contacts by remember(version) { mutableStateOf(store.all()) }
+    // The worn compartment's contacts, the chat list's own rule (§1.1a):
+    // one hat, one list, and the single-persona era sees no change. The
+    // caption below is why the list can be shorter than the phone's whole
+    // address book without reading as data loss.
+    val personas = remember { PersonaStore(context) }
+    val scoped = remember(version) { personas.all().size > 1 }
+    fun scopedAll(): List<Contact> = store.all().let { all ->
+        if (personas.all().size > 1) {
+            val worn = personas.worn()
+            all.filter { personas.ownerHexOf(it) == worn }
+        } else all
+    }
+    var contacts by remember(version) { mutableStateOf(scopedAll()) }
     var confirm by remember { mutableStateOf<Contact?>(null) }
     var profileOf by remember { mutableStateOf<Contact?>(null) }
+    val wornName = remember(version) {
+        personas.all().firstOrNull { it.hex == personas.worn() }
+            ?.name?.ifBlank { null }
+            ?: context.getString(R.string.personas_primary)
+    }
 
     profileOf?.let { p ->
         // A full-screen overlay, not a nested screen: nesting put a second
@@ -676,7 +693,7 @@ private fun ContactsAdminSection(onOpenChat: (Contact) -> Unit) {
         // carries exactly one header, covers the bar beneath instead of
         // stacking, and hands its dismissal to the back button for free.
         androidx.compose.ui.window.Dialog(
-            onDismissRequest = { profileOf = null; contacts = store.all() },
+            onDismissRequest = { profileOf = null; contacts = scopedAll() },
             properties = androidx.compose.ui.window.DialogProperties(
                 usePlatformDefaultWidth = false,
             ),
@@ -687,7 +704,7 @@ private fun ContactsAdminSection(onOpenChat: (Contact) -> Unit) {
             ) {
                 ContactProfile(
                     contact = p,
-                    onBack = { profileOf = null; contacts = store.all() },
+                    onBack = { profileOf = null; contacts = scopedAll() },
                     onOpenChat = { profileOf = null; onOpenChat(it) },
                 )
             }
@@ -696,11 +713,21 @@ private fun ContactsAdminSection(onOpenChat: (Contact) -> Unit) {
 
     if (contacts.isEmpty()) {
         Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
-            Text(
-                stringResource(R.string.drawer_no_contacts),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    stringResource(R.string.drawer_no_contacts),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                if (scoped) {
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        stringResource(R.string.personas_contacts_scope, wornName),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
         }
         return
     }
@@ -710,6 +737,16 @@ private fun ContactsAdminSection(onOpenChat: (Contact) -> Unit) {
     var menuFor by remember { mutableStateOf<String?>(null) }
 
     LazyColumn(Modifier.fillMaxSize()) {
+        if (scoped) {
+            item(key = "scope-note") {
+                Text(
+                    stringResource(R.string.personas_contacts_scope, wornName),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                )
+            }
+        }
         items(contacts, key = { it.personaHex }) { c ->
             Box {
                 ListItem(
@@ -937,9 +974,55 @@ fun ModesScreen() {
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
+                            // Which hat the shift starts in (§15.11 meets the
+                            // roster): a bar answering as the bar however the
+                            // phone arrived. Only once a second persona
+                            // exists — one persona has nothing to choose.
+                            ModePersonaBinding(mode)
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ModePersonaBinding(mode: org.ducatproject.ducat.Mode) {
+    val context = LocalContext.current
+    val version by ContactStore.changes.collectAsState()
+    val personas = remember { PersonaStore(context) }
+    val roster = remember(version) { personas.all() }
+    if (roster.size < 2) return
+    val modes = remember { org.ducatproject.ducat.ModeStore(context) }
+    val bound = remember(version) { modes.boundPersona(mode) }
+    var open by remember { mutableStateOf(false) }
+
+    val nameOf: (String) -> String = { hex ->
+        roster.firstOrNull { it.hex == hex }?.name?.ifBlank { null }
+            ?: context.getString(R.string.personas_primary)
+    }
+    Box {
+        Text(
+            if (bound != null) {
+                stringResource(R.string.personas_mode_answers, nameOf(bound))
+            } else {
+                stringResource(R.string.personas_mode_answers_worn)
+            },
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.clickable { open = true }.padding(top = 4.dp),
+        )
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.personas_mode_answers_worn)) },
+                onClick = { modes.bindPersona(mode, null); open = false },
+            )
+            roster.forEach { p ->
+                DropdownMenuItem(
+                    text = { Text(nameOf(p.hex)) },
+                    onClick = { modes.bindPersona(mode, p.hex); open = false },
+                )
             }
         }
     }

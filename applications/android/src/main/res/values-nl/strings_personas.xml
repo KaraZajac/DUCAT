@@ -11,4 +11,7 @@
     <string name="personas_no_delete">Een persona kan niet worden verwijderd — haar contacten antwoorden alleen haar sleutel. Stop met gebruiken en ze wordt gewoon stil.</string>
     <string name="personas_save">Opslaan</string>
     <string name="personas_cancel">Annuleren</string>
+    <string name="personas_mode_answers">Antwoordt als %1$s</string>
+    <string name="personas_mode_answers_worn">Antwoordt als de gedragen persona</string>
+    <string name="personas_contacts_scope">Contacten van %1$s — wissel van persona in het menu voor de rest.</string>
 </resources>

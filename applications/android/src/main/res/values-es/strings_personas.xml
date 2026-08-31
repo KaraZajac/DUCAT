@@ -11,4 +11,7 @@
     <string name="personas_no_delete">Una persona no se puede borrar: sus contactos responden solo a su clave. Deja de usarla y simplemente queda en silencio.</string>
     <string name="personas_save">Guardar</string>
     <string name="personas_cancel">Cancelar</string>
+    <string name="personas_mode_answers">Responde como %1$s</string>
+    <string name="personas_mode_answers_worn">Responde como la persona en uso</string>
+    <string name="personas_contacts_scope">Contactos de %1$s — cambia de persona en el menú para ver el resto.</string>
 </resources>

@@ -11,4 +11,7 @@
     <string name="personas_no_delete">Bir kişilik silinemez — kişileri yalnızca onun anahtarına yanıt verir. Kullanmayı bırak, sessizce dursun.</string>
     <string name="personas_save">Kaydet</string>
     <string name="personas_cancel">Vazgeç</string>
+    <string name="personas_mode_answers">%1$s olarak yanıtlar</string>
+    <string name="personas_mode_answers_worn">Takılı personayla yanıtlar</string>
+    <string name="personas_contacts_scope">%1$s kişileri — kalanlar için menüden persona değiştir.</string>
 </resources>

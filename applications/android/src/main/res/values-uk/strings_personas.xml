@@ -11,4 +11,7 @@
     <string name="personas_no_delete">Персону не можна видалити — її контакти відповідають лише її ключу. Перестань нею користуватися, і вона просто затихне.</string>
     <string name="personas_save">Зберегти</string>
     <string name="personas_cancel">Скасувати</string>
+    <string name="personas_mode_answers">Відповідає як %1$s</string>
+    <string name="personas_mode_answers_worn">Відповідає як поточна персона</string>
+    <string name="personas_contacts_scope">Контакти %1$s — решта після зміни персони в меню.</string>
 </resources>

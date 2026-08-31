@@ -11,4 +11,7 @@
     <string name="personas_no_delete">Persona tidak bisa dihapus — kontaknya hanya menjawab kuncinya. Berhenti memakainya, dan ia sekadar diam.</string>
     <string name="personas_save">Simpan</string>
     <string name="personas_cancel">Batal</string>
+    <string name="personas_mode_answers">Menjawab sebagai %1$s</string>
+    <string name="personas_mode_answers_worn">Menjawab sebagai persona yang dipakai</string>
+    <string name="personas_contacts_scope">Kontak %1$s — ganti persona di menu untuk melihat lainnya.</string>
 </resources>

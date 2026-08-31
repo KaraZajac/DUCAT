@@ -37,6 +37,95 @@ import uniffi.ducat_mobile.importBackup
 fun main() {
     appState()
     escrowShares()
+    personaRound()
+}
+
+/**
+ * The compartments, through the whole real path: the export exactly as the
+ * backup screen assembles it, the import exactly as applyBackup replays it.
+ * A restore is becoming that phone — every hat, which hat was worn, which
+ * till answers as which shop, and which contact lives behind which wall.
+ */
+private fun personaRound() {
+    val srcDir = kotlin.io.path.createTempDirectory("ducat-bk-per-src").toFile()
+    val dstDir = kotlin.io.path.createTempDirectory("ducat-bk-per-dst").toFile()
+    val src = DeskContext(srcDir)
+    val dst = DeskContext(dstDir)
+
+    val pSrc = org.ducatproject.ducat.PersonaStore(src)
+    val primary = pSrc.personaHex()
+    val shop = pSrc.create("Shop", 3) ?: error("BACKUPTEST_FAIL persona create refused")
+    pSrc.setWorn(shop.hex)
+    org.ducatproject.ducat.ModeStore(src)
+        .bindPersona(org.ducatproject.ducat.Mode.Pos, shop.hex)
+
+    // One contact behind the shop's wall, one from the single-persona era
+    // (blank owner must keep resolving to the primary, §1.1a's migration).
+    val store = org.ducatproject.ducat.ContactStore(src)
+    store.add(
+        org.ducatproject.ducat.Contact(
+            personaHex = "ab".repeat(32), petname = "Sam", assertedName = null,
+            myOutbox = "VLD0:test-shop-out", theirOutbox = "VLD0:test-shop-in",
+            owner = shop.hex,
+        ),
+    )
+    store.add(
+        org.ducatproject.ducat.Contact(
+            personaHex = "cd".repeat(32), petname = "Old friend", assertedName = null,
+            myOutbox = "VLD0:test-old-out", theirOutbox = "VLD0:test-old-in",
+        ),
+    )
+
+    // A real key: applyBackup derives an address from it, and an arbitrary
+    // 32 bytes is not a scalar.
+    val wallet = uniffi.ducat_mobile.createWallet(tipHeight = 0uL, stagenet = true)
+    val blob = exportBackup(
+        BackupInput(
+            spendKeyHex = wallet.spendKeyHex,
+            restoreHeight = 2187000uL,
+            displayName = "per",
+            publishPayto = false,
+            profile = Profile(null, null, null, null, null, null, null, null),
+            contacts = store.backupContacts(),
+            prekeySignedSecret = null,
+            prekeyOneTime = emptyList(),
+            prekeyNextId = 1uL,
+            appState = store.backupAppState(),
+            escrowShares = emptyList(),
+            personas = pSrc.backupPersonas(),
+        ),
+        "correcthorsebattery",
+        pSrc.secret(),
+    )
+
+    org.ducatproject.ducat.ui.applyBackup(dst, blob, "correcthorsebattery")
+
+    val pDst = org.ducatproject.ducat.PersonaStore(dst)
+    val roster = pDst.all()
+    check(roster.size == 2 && roster[0].hex == primary && roster[1].hex == shop.hex) {
+        "BACKUPTEST_FAIL roster came back as ${roster.map { it.hex.take(8) }}"
+    }
+    check(roster[1].name == "Shop") { "BACKUPTEST_FAIL shop lost its name: '${roster[1].name}'" }
+    check(pDst.personaHex() == primary) { "BACKUPTEST_FAIL primary is ${pDst.personaHex().take(8)}" }
+    check(pDst.worn() == shop.hex) { "BACKUPTEST_FAIL worn came back as ${pDst.worn().take(8)}" }
+    check(
+        org.ducatproject.ducat.ModeStore(dst)
+            .boundPersona(org.ducatproject.ducat.Mode.Pos) == shop.hex,
+    ) { "BACKUPTEST_FAIL the till forgot its shop" }
+
+    val back = org.ducatproject.ducat.ContactStore(dst).all()
+    val sam = back.firstOrNull { it.petname == "Sam" }
+        ?: error("BACKUPTEST_FAIL Sam did not survive")
+    check(pDst.ownerHexOf(sam) == shop.hex) {
+        "BACKUPTEST_FAIL Sam's wall fell: owner=${sam.owner.take(8)}"
+    }
+    val old = back.firstOrNull { it.petname == "Old friend" }
+        ?: error("BACKUPTEST_FAIL the old friend did not survive")
+    check(pDst.ownerHexOf(old) == primary) {
+        "BACKUPTEST_FAIL a blank owner stopped resolving to the primary"
+    }
+
+    println("BACKUPTEST_OK personas: roster=2 worn=shop binding=till→shop walls=held")
 }
 
 private fun appState() {

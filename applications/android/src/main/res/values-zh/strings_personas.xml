@@ -11,4 +11,7 @@
     <string name="personas_no_delete">身份无法删除——它的联系人只认它的密钥。不再使用，它就安静下来。</string>
     <string name="personas_save">保存</string>
     <string name="personas_cancel">取消</string>
+    <string name="personas_mode_answers">以%1$s身份应答</string>
+    <string name="personas_mode_answers_worn">以当前身份应答</string>
+    <string name="personas_contacts_scope">正在显示%1$s的联系人 — 在菜单中切换身份查看其余。</string>
 </resources>

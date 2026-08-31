@@ -11,4 +11,7 @@
     <string name="personas_no_delete">ペルソナは削除できません — その連絡先は、その鍵にしか応じません。使うのをやめれば、ただ静かになります。</string>
     <string name="personas_save">保存</string>
     <string name="personas_cancel">キャンセル</string>
+    <string name="personas_mode_answers">%1$sとして応答</string>
+    <string name="personas_mode_answers_worn">現在のペルソナで応答</string>
+    <string name="personas_contacts_scope">%1$sの連絡先を表示中 — 他はメニューでペルソナを切り替え。</string>
 </resources>

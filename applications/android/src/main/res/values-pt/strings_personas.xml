@@ -11,4 +11,7 @@
     <string name="personas_no_delete">Uma persona não pode ser apagada — seus contatos respondem só à sua chave. Pare de usá-la e ela simplesmente silencia.</string>
     <string name="personas_save">Salvar</string>
     <string name="personas_cancel">Cancelar</string>
+    <string name="personas_mode_answers">Responde como %1$s</string>
+    <string name="personas_mode_answers_worn">Responde como a persona em uso</string>
+    <string name="personas_contacts_scope">Contatos de %1$s — troque de persona no menu para ver o resto.</string>
 </resources>

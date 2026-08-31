@@ -11,4 +11,7 @@
     <string name="personas_no_delete">A persona cannot be deleted — its contacts answer to its key alone. Stop using it and it goes quiet.</string>
     <string name="personas_save">Save</string>
     <string name="personas_cancel">Cancel</string>
+    <string name="personas_mode_answers">Answers as %1$s</string>
+    <string name="personas_mode_answers_worn">Answers as whoever is worn</string>
+    <string name="personas_contacts_scope">Showing %1$s\u2019s contacts — switch personas in the drawer for the rest.</string>
 </resources>

@@ -11,4 +11,7 @@
     <string name="personas_no_delete">Persony nie da się usunąć — jej kontakty odpowiadają tylko jej kluczowi. Przestań jej używać, a po prostu ucichnie.</string>
     <string name="personas_save">Zapisz</string>
     <string name="personas_cancel">Anuluj</string>
+    <string name="personas_mode_answers">Odpowiada jako %1$s</string>
+    <string name="personas_mode_answers_worn">Odpowiada jako noszona persona</string>
+    <string name="personas_contacts_scope">Kontakty: %1$s — resztę zobaczysz po zmianie persony w menu.</string>
 </resources>

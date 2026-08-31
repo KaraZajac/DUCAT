@@ -11,4 +11,7 @@
     <string name="personas_no_delete">Eine Persona lässt sich nicht löschen — ihre Kontakte antworten nur ihrem Schlüssel. Nutze sie nicht mehr, und sie wird einfach still.</string>
     <string name="personas_save">Speichern</string>
     <string name="personas_cancel">Abbrechen</string>
+    <string name="personas_mode_answers">Antwortet als %1$s</string>
+    <string name="personas_mode_answers_worn">Antwortet als aktuell getragene Persona</string>
+    <string name="personas_contacts_scope">Kontakte von %1$s — für die übrigen die Persona im Menü wechseln.</string>
 </resources>

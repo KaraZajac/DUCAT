@@ -11,4 +11,7 @@
     <string name="personas_no_delete">पर्सोना मिटाया नहीं जा सकता — उसके संपर्क सिर्फ़ उसी की कुंजी को जवाब देते हैं। इस्तेमाल बंद कर दें, वह बस शांत हो जाएगा।</string>
     <string name="personas_save">सहेजें</string>
     <string name="personas_cancel">रद्द करें</string>
+    <string name="personas_mode_answers">%1$s के रूप में जवाब देगा</string>
+    <string name="personas_mode_answers_worn">जो भी पहना है उसी रूप में</string>
+    <string name="personas_contacts_scope">%1$s के संपर्क — बाकी के लिए मेनू से पर्सोना बदलो।</string>
 </resources>

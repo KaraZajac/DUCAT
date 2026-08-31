@@ -11,4 +11,7 @@
     <string name="personas_no_delete">Una persona non si può eliminare — i suoi contatti rispondono solo alla sua chiave. Smetti di usarla e semplicemente tace.</string>
     <string name="personas_save">Salva</string>
     <string name="personas_cancel">Annulla</string>
+    <string name="personas_mode_answers">Risponde come %1$s</string>
+    <string name="personas_mode_answers_worn">Risponde come la persona indossata</string>
+    <string name="personas_contacts_scope">Contatti di %1$s — cambia persona dal menu per vedere gli altri.</string>
 </resources>

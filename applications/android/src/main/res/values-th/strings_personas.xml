@@ -11,4 +11,7 @@
     <string name="personas_no_delete">ลบตัวตนไม่ได้ — รายชื่อของมันตอบเฉพาะคีย์ของมัน เลิกใช้แล้วมันก็แค่เงียบไป</string>
     <string name="personas_save">บันทึก</string>
     <string name="personas_cancel">ยกเลิก</string>
+    <string name="personas_mode_answers">ตอบในนาม %1$s</string>
+    <string name="personas_mode_answers_worn">ตอบในนามเพอร์โซนาที่ใช้อยู่</string>
+    <string name="personas_contacts_scope">รายชื่อของ %1$s — เปลี่ยนเพอร์โซนาในเมนูเพื่อดูที่เหลือ</string>
 </resources>

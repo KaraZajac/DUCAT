@@ -11,4 +11,7 @@
     <string name="personas_no_delete">Không thể xóa nhân dạng — danh bạ của nó chỉ trả lời khóa của nó. Ngừng dùng, nó chỉ lặng im.</string>
     <string name="personas_save">Lưu</string>
     <string name="personas_cancel">Hủy</string>
+    <string name="personas_mode_answers">Trả lời với tư cách %1$s</string>
+    <string name="personas_mode_answers_worn">Trả lời theo persona đang dùng</string>
+    <string name="personas_contacts_scope">Danh bạ của %1$s — đổi persona trong menu để xem phần còn lại.</string>
 </resources>
