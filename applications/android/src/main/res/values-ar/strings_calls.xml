@@ -12,7 +12,7 @@
     <string name="call_button">اتصال</string>
     <string name="call_calling">جارٍ الاتصال…</string>
     <string name="call_incoming">مكالمة DUCAT واردة</string>
-    <string name="call_frames">↓%1$d ↑%2$d إطارًا</string>
+    <string name="call_frames">⁦↓%1$d ↑%2$d⁩ إطارًا</string>
     <string name="call_answer_btn">ردّ</string>
     <string name="call_end_btn">إنهاء</string>
     <string name="call_body_ring">يتصل بك</string>
