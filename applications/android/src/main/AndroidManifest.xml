@@ -22,6 +22,8 @@
 
     <!-- Voice memos: hold the mic icon in a chat. Asked for on first use. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- The incoming-call buzz (§16.21); normal permission, granted at install. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-feature android:name="android.hardware.microphone" android:required="false" />
 
     <!-- One deliberate "where I am" message. Never a stream, never in the

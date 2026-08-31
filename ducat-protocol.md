@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 1.1.0-dev3 — Publications track (branch; 1.0.0-rc1 is the frozen line)**
+**Draft 1.1.0-dev4 — Publications track (branch; 1.0.0-rc1 is the frozen line)**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Canonical home: **ducatproject.org**
 
@@ -27,6 +27,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **1.1.0-dev4** — **Call media is Opus, and constant-rate on principle (§16.21).** Client format v1 replaces the provisional PCM: 8-byte header then one Opus packet — 16 kHz mono, 20 ms, hard CBR at 24 kbit/s, 60 bytes every frame, DTX forbidden. CBR is stated as a privacy rule: encrypted VBR voice leaks speech through packet sizes (phrase spotting, phoneme reconstruction), so a frame leaves the same size whether the speaker talks or holds their breath. No wire objects, kinds, or fields changed; vector count stays 355.
 - **1.1.0-dev3** — **A call is a door handed down the thread (§16.21, kinds 14–15, fields 263–264).** `CALL_OFFER` carries a fresh private-route blob (1–1200 bytes) and an eight-byte call id; `CALL_ANSWER` carries the callee's own route and quotes the id. The pair travels whole or not at all, the door IS the kind (an offer with no route rings nothing; a route on any other kind is `MALFORMED`), and no amount rides either. Media never touches the mailbox: it flows as Veilid app-messages on the offered routes — client format v0 is an 8-byte header (`seq` u32be ‖ `ms` u32be) and a codec frame, PCM16 mono 16 kHz in 20 ms frames until an Opus dependency lands, provisional like the shelf's record layout. Declining is §16.13's Retract naming the offer; hanging up is stopping; a missed call is simply a message read later — ringing was never a separate channel. Grounded in measurement, not hope: p50 route RTT 187 ms and 500-of-500 frames delivered at the 50 Hz voice cadence with 65 ms jitter (research/post-1.0/CALLS.md). Ten new vectors pin the pair's edges and move the unknown-kind sentinel to the new edge (16); 355 cases, both implementations agreeing.
 - **1.1.0-dev2** — **A heavy period ships by swarm (§16.20, fields 261–262).** The kind-13 manifest grows the shipment pair: the swarm share key a fetcher bootstraps from, and the index digest that authenticates what answers — together or not at all (a key without its digest bootstraps into whatever replies, which is not a fetch, it is an ask), and only aboard a publication key (away from the period pair the shipment describes nothing). The engine underneath is vendored from cmars's stigmerge with credit and three upstream-candidate patches (mobile/vendor/STIGMERGE-NOTICE.md), converted to BLAKE3 pieces, riding the same node as the mailbox with inbound calls demultiplexed by route; proven live twice — 100 MiB between two nodes at ~3 Mbit/s process-to-process, then 25 MiB desk-to-desk at ~6.7 Mbit/s through the clients' own Kotlin path — payload BLAKE3 identical at both ends in every run. Five new vectors pin the pair's edges; 345 cases, both implementations agreeing.
 - **1.1.0-dev1** — **A publication period's key rides the paid thread (§16.20, kind 13, fields 257–260).** The post-1.0 track's first wire object, developed on its own branch while 1.0.0-rc1 stands frozen. A publisher seals content into DHT records — the shelf — and sells periods of it; what a paying reader receives is never the content but the **capability**: `PUBLICATION_KEY` carries the period's id and its 32-byte content key (together or not at all — a key with no name cannot be filed, a name with no key opens nothing), plus, on first delivery, the shelf itself: the publication's root record and the standing head key that opens its index (likewise together or not at all). The closed world holds in both directions — a kind-13 with nothing to hand over is `MALFORMED`, and a period key on any other kind is a capability smuggled where no reader is looking for one; an amount on it is refused the way Text refuses one. The period id is a label (≤64 chars), pinned at both edges — 64 accepted, 65 refused, and the empty spelling refused below the field layer as a second encoding of omission (§18.1). Twelve new vectors; 340 cases, both implementations agreeing. Client-side, the key is derived, not stored: one master secret and `derive_key`/keyed-BLAKE3 per period, so a back-catalogue sale is a re-derivation and a restore restores every key ever issued (core::publish, pinned by unit test pending its own vector kind).
@@ -2504,15 +2505,18 @@ held open where no call is happening; no amount rides either kind.
 
 **Media.** Frames flow as Veilid app-messages on the exchanged routes,
 one route per direction, allocated for this call and released when it
-ends — a call's route is never the mailbox's. Client format v0
-(provisional, like the shelf's record layout): an 8-byte header — frame
-sequence (u32be) and sender-relative milliseconds (u32be) — then one
-codec frame. v0 codec is PCM16 mono 16 kHz in 20 ms frames (640 bytes,
-~256 kbit/s, a tenth of measured route throughput); Opus at 24 kbit/s is
-the intended replacement and changes nothing above this paragraph. The
-measured ground (research/post-1.0/CALLS.md): p50 RTT 187 ms through
-default private routes, 500 of 500 frames delivered at 50 Hz, 65 ms
-jitter — mouth-to-ear lands near 260 ms with full cover.
+ends — a call's route is never the mailbox's. Client format v1: an
+8-byte header — frame sequence (u32be) and sender-relative milliseconds
+(u32be) — then one Opus packet, 16 kHz mono, 20 ms per frame, **hard
+CBR at 24 kbit/s** (a 60-byte packet, every frame). Constant bitrate is
+a privacy rule, not a tuning choice: encrypted variable-bitrate voice
+leaks speech through packet sizes alone — phrase spotting and phoneme
+reconstruction are published attacks — so a frame must leave the same
+size whether the speaker is talking or holding their breath. For the
+same reason endpoints MUST NOT enable DTX. The measured ground
+(research/post-1.0/CALLS.md): p50 RTT 187 ms through default private
+routes, 500 of 500 frames delivered at 50 Hz, 65 ms jitter —
+mouth-to-ear lands near 260 ms with full cover.
 
 **Ending things.** Declining is §16.13's Retract naming the offer's
 sequence — the same word the till uses to take back a bill. Hanging up

@@ -73,3 +73,32 @@ Ten seconds is not an hour: NAT rebinding, route rotation frequency
 under sustained 50 pps, and phone CPU (Opus is cheap; Veilid crypto per
 small message is the question) need a longer soak on real handsets. The
 harness is kept precisely so the soak is one command when the time comes.
+
+
+## 2026-08-31: Opus landed, CBR on principle
+
+`unsafe-libopus` (xiph's libopus c2rust-translated, BSD-3-Clause, pure
+cargo — no cmake, no C cross toolchain) lives in the mobile crate; the
+codec is Rust statics beside the call lane, shared by phone and desk,
+reset on `nodeCallClose`. 16 kHz mono, 20 ms, **hard CBR 24 kbit/s = 60
+bytes every packet** (unit test pins it), DTX off: VBR voice leaks speech
+through packet sizes even under encryption (Wright et al., phonotactic
+reconstruction), so frame size must not depend on what is said. Wire
+frame = 8B header + 60B packet = 68B — 27 kbit/s against PCM's 259.
+
+Measured desk↔desk (750 frames each way, live veilid): clean-route runs
+are 750/750 both directions, jitter 3.6/4.3 ms, encode ~0.9 ms/frame.
+Route allocations vary: one run drew a route dropping 47% one way while
+the other direction ran perfect — hence Opus PLC on gaps ≤5 (decoder
+stays continuous, post-gap frames decode clean) and test verdicts at
+≤15% loss / ≤2% off-tone. Engine sync rule that the loss hunt surfaced:
+the ANSWERING side must hold transmit until it first hears the caller —
+its answer travels by mailbox-seconds, and frames sent into that gap
+overflow the far ring and then play back late by the whole gap. And
+`nodeCallSend` must not block the mic thread: a blocking send paced by
+route RTT capped capture at ~14 fps, which got blamed on the emulator's
+microphone. Now fire-and-forget with a 32-in-flight cap, freshest wins.
+
+Still open: mid-call route re-allocation when quality goes bad (the 47%
+run would have deserved one); FEC once PLC has field time; a real
+jitter buffer if handsets show reorder beyond the ±5 window.

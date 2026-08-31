@@ -12,6 +12,7 @@
 
 use ducat_core::{bond, float, verify};
 
+pub mod callcodec;
 pub mod ceremony;
 pub mod contacts;
 pub mod monero;

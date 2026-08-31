@@ -648,6 +648,17 @@ tasks.register<JavaExec>("pubswarmtest") {
 
 // A live call between two desks: offer/answer on the thread, fifteen
 // seconds of verified full-duplex PCM on the exchanged routes.
+// Writes the runtime classpath to build/cp.txt so test roles can run as
+// plain `java` processes — two gradle invocations serialize on the project
+// lock, and a callee that waits forever would starve its own caller.
+tasks.register("cpfile") {
+    doLast {
+        val f = layout.buildDirectory.file("cp.txt").get().asFile
+        f.parentFile.mkdirs()
+        f.writeText(sourceSets["main"].runtimeClasspath.asPath)
+    }
+}
+
 tasks.register<JavaExec>("calltest") {
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "org.ducatproject.desk.CallTestKt"

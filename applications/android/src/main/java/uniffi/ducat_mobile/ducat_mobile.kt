@@ -955,6 +955,12 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -987,6 +993,12 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_bundle_one_time_count(`bundleBytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
     fun uniffi_ducat_mobile_fn_func_bundle_one_time_ids(`bundleBytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_call_conceal(uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_call_decode(`packet`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_call_encode(`pcm`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_capacity_bucket(`capacityPxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): Long
@@ -1344,6 +1356,12 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_bundle_one_time_ids(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_call_conceal(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_call_decode(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_call_encode(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_capacity_bucket(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_capacity_leak_bits(
@@ -1614,6 +1632,15 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_bundle_one_time_ids() != 16903.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_ducat_mobile_checksum_func_call_conceal() != 6119.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_call_decode() != 24578.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_call_encode() != 31022.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ducat_mobile_checksum_func_capacity_bucket() != 17889.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -1782,7 +1809,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_node_call_route() != 28389.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_node_call_send() != 18040.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_node_call_send() != 9393.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_changed_keys() != 44940.toShort()) {
@@ -6814,6 +6841,47 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
     
 
         /**
+         * One concealment frame: what Opus guesses the lost 20 ms sounded like,
+         * keeping the decoder's state continuous across a gap so the frames
+         * after it decode clean instead of smeared.
+         */
+    @Throws(NodeException::class) fun `callConceal`(): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(NodeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_call_conceal(
+        _status)
+}
+    )
+    }
+    
+
+        /**
+         * One Opus packet in, 640 bytes of PCM16LE out.
+         */
+    @Throws(NodeException::class) fun `callDecode`(`packet`: kotlin.ByteArray): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(NodeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_call_decode(
+        FfiConverterByteArray.lower(`packet`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * 640 bytes of PCM16LE in, one Opus packet out (60 bytes, always).
+         */
+    @Throws(NodeException::class) fun `callEncode`(`pcm`: kotlin.ByteArray): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(NodeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_call_encode(
+        FfiConverterByteArray.lower(`pcm`),_status)
+}
+    )
+    }
+    
+
+        /**
          * The largest ladder value not exceeding `capacity_pxmr`.
          *
          * Rounds **down**, always: rounding to nearest would let a bond claim capacity
@@ -7700,7 +7768,13 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
 
         /**
          * One media frame to the far door. The blob is imported once and cached;
-         * fire-and-forget, like the voice cadence needs.
+         * fire-and-forget, like the voice cadence needs: the frame is handed to
+         * the runtime and the caller's thread goes straight back to the
+         * microphone — a send that blocked for a route round-trip capped the
+         * capture thread at ~14 frames a second, which was measured on a phone
+         * and blamed on the microphone. At most [CALL_INFLIGHT_MAX] frames ride
+         * at once; past that the freshest frame wins and the stale one is
+         * dropped, which is what voice wants.
          */
     @Throws(NodeException::class) fun `nodeCallSend`(`routeBlob`: kotlin.ByteArray, `frame`: kotlin.ByteArray)
         = 

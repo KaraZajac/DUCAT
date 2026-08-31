@@ -652,31 +652,48 @@ pub fn node_call_route() -> Result<Vec<u8>, NodeError> {
 }
 
 /// One media frame to the far door. The blob is imported once and cached;
-/// fire-and-forget, like the voice cadence needs.
+/// fire-and-forget, like the voice cadence needs: the frame is handed to
+/// the runtime and the caller's thread goes straight back to the
+/// microphone — a send that blocked for a route round-trip capped the
+/// capture thread at ~14 frames a second, which was measured on a phone
+/// and blamed on the microphone. At most [CALL_INFLIGHT_MAX] frames ride
+/// at once; past that the freshest frame wins and the stale one is
+/// dropped, which is what voice wants.
 #[uniffi::export]
 pub fn node_call_send(route_blob: Vec<u8>, frame: Vec<u8>) -> Result<(), NodeError> {
     let (api, rt) = handles()?;
-    rt.block_on(async {
-        let route = {
-            let cached = call_targets().lock().unwrap().get(&route_blob).cloned();
-            match cached {
-                Some(r) => r,
-                None => {
-                    let r = api
-                        .import_remote_private_route(route_blob.clone())
-                        .map_err(|e| NodeError::Failed(format!("import route: {e}")))?;
-                    call_targets().lock().unwrap().insert(route_blob.clone(), r.clone());
-                    r
-                }
+    let route = {
+        let cached = call_targets().lock().unwrap().get(&route_blob).cloned();
+        match cached {
+            Some(r) => r,
+            None => {
+                let r = api
+                    .import_remote_private_route(route_blob.clone())
+                    .map_err(|e| NodeError::Failed(format!("import route: {e}")))?;
+                call_targets().lock().unwrap().insert(route_blob.clone(), r.clone());
+                r
             }
-        };
-        let rc = api
-            .routing_context()
-            .map_err(|e| NodeError::Failed(format!("routing context: {e}")))?;
-        rc.app_message(Target::RouteId(route), frame)
-            .await
-            .map_err(|e| NodeError::Failed(format!("app_message: {e}")))
-    })
+        }
+    };
+    let rc = api
+        .routing_context()
+        .map_err(|e| NodeError::Failed(format!("routing context: {e}")))?;
+    if call_inflight().fetch_add(1, std::sync::atomic::Ordering::SeqCst) >= CALL_INFLIGHT_MAX {
+        call_inflight().fetch_sub(1, std::sync::atomic::Ordering::SeqCst);
+        return Err(NodeError::Failed("call send backlog".into()));
+    }
+    rt.spawn(async move {
+        let _ = rc.app_message(Target::RouteId(route), frame).await;
+        call_inflight().fetch_sub(1, std::sync::atomic::Ordering::SeqCst);
+    });
+    Ok(())
+}
+
+const CALL_INFLIGHT_MAX: i32 = 32;
+
+fn call_inflight() -> &'static std::sync::atomic::AtomicI32 {
+    static N: std::sync::atomic::AtomicI32 = std::sync::atomic::AtomicI32::new(0);
+    &N
 }
 
 /// The next inbound frame, or None after `timeout_ms` of silence. Simple
@@ -700,6 +717,7 @@ pub fn node_call_recv(timeout_ms: u32) -> Option<Vec<u8>> {
 /// and the import cache. A call's routes never outlive the call.
 #[uniffi::export]
 pub fn node_call_close() {
+    crate::callcodec::reset();
     let routes: Vec<RouteId> = call_routes().lock().unwrap().drain().collect();
     if let Ok((api, rt)) = handles() {
         rt.block_on(async {

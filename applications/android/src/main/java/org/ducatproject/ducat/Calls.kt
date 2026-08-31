@@ -16,9 +16,10 @@ import androidx.compose.runtime.setValue
  * machine still answers and hangs up, which is what the desk's test roles
  * use.
  *
- * v0 media matches the spec's provisional format: an 8-byte header (seq
- * u32be ‖ ms u32be) then 20 ms of PCM16 mono 16 kHz — 640 payload bytes,
- * 50 frames a second, a tenth of what the routes were measured to carry.
+ * Media matches the spec: an 8-byte header (seq u32be ‖ ms u32be) then one
+ * Opus packet — 16 kHz mono, 20 ms a frame, hard CBR so every frame leaves
+ * the same size whether the speaker talks or holds their breath. The codec
+ * itself lives in Rust with the node, shared by phone and desk.
  */
 object Calls {
     /** 20 ms of PCM16 mono at 16 kHz. */
@@ -37,6 +38,45 @@ object Calls {
         fun play(frame: ByteArray)
 
         fun stop()
+
+        /**
+         * Ring: loud on the ringer stream for an incoming call, soft in the
+         * earpiece as ringback while placing one. Hosts without a bell
+         * inherit silence.
+         */
+        fun ring(context: Context, incoming: Boolean) {}
+
+        fun quiet() {}
+    }
+
+    /**
+     * One 3-second cycle of the British ring — 400 Hz + 450 Hz mixed, on
+     * for 0.4 s, off 0.2, on 0.4, then two seconds of rest. PCM16LE mono
+     * 16 kHz, ready to loop; 5 ms cosine ramps keep the edges clickless.
+     */
+    fun ukRing(amplitude: Double): ByteArray {
+        val sr = 16_000
+        val out = ByteArray(3 * sr * 2)
+        val bursts = listOf(0.0 to 0.4, 0.6 to 1.0)
+        for (i in 0 until 3 * sr) {
+            val t = i.toDouble() / sr
+            var env = 0.0
+            for ((a, b) in bursts) {
+                if (t >= a && t < b) {
+                    val edge = kotlin.math.min(t - a, b - t)
+                    env = if (edge >= 0.005) 1.0 else {
+                        (1 - kotlin.math.cos(kotlin.math.PI * edge / 0.005)) / 2
+                    }
+                }
+            }
+            if (env == 0.0) continue
+            val tone = kotlin.math.sin(2 * kotlin.math.PI * 400 * t) +
+                kotlin.math.sin(2 * kotlin.math.PI * 450 * t)
+            val v = (tone * 0.5 * env * amplitude * 32767).toInt()
+            out[i * 2] = (v and 0xFF).toByte()
+            out[i * 2 + 1] = ((v shr 8) and 0xFF).toByte()
+        }
+        return out
     }
 
     sealed interface State {
@@ -66,7 +106,9 @@ object Calls {
     fun place(context: Context, c: Contact) {
         if (state != State.Idle) return
         val app = context.applicationContext
-        state = State.Outgoing(c.personaHex)
+        val st = State.Outgoing(c.personaHex)
+        state = st
+        audio?.ring(app, incoming = false)
         Thread {
             runCatching {
                 val mine = uniffi.ducat_mobile.nodeCallRoute()
@@ -78,6 +120,18 @@ object Calls {
                 )
             }.onFailure {
                 DucatLog.w("Calls", "place: ${it.message}")
+                endInternal()
+            }
+        }.apply { isDaemon = true }.start()
+        expireRing(st, RING_WINDOW_SECS)
+    }
+
+    /** Nobody picked up inside the window: stop being a ringing phone. */
+    private fun expireRing(ringing: State, afterSecs: Long) {
+        Thread {
+            Thread.sleep(afterSecs * 1000)
+            if (state === ringing) {
+                DucatLog.i("Calls", "ring window over")
                 endInternal()
             }
         }.apply { isDaemon = true }.start()
@@ -96,7 +150,7 @@ object Calls {
                     callRoute = mine,
                     callId = hexToBytes(offer.callId!!),
                 )
-                goActive(c.personaHex, hexToBytes(offer.callRoute!!))
+                goActive(c.personaHex, hexToBytes(offer.callRoute!!), initiator = false)
             }.onFailure {
                 DucatLog.w("Calls", "answer: ${it.message}")
                 endInternal()
@@ -107,6 +161,7 @@ object Calls {
     /** Decline is §16.13's Retract naming the offer — the till's own word. */
     fun decline(context: Context, c: Contact, offer: StoredMessage) {
         val app = context.applicationContext
+        audio?.quiet()
         state = State.Idle
         Thread {
             runCatching {
@@ -136,7 +191,7 @@ object Calls {
                         it.callId == myCallId!!.toHexLower()
                 }
                 if (answer?.callRoute != null) {
-                    goActive(s.contactHex, hexToBytes(answer.callRoute))
+                    goActive(s.contactHex, hexToBytes(answer.callRoute), initiator = true)
                 }
             }
             State.Idle -> {
@@ -153,7 +208,11 @@ object Calls {
                                     )
                             }
                     } ?: continue
-                    state = State.Incoming(c.personaHex, offer.seq)
+                    val st = State.Incoming(c.personaHex, offer.seq)
+                    state = st
+                    audio?.ring(context.applicationContext, incoming = true)
+                    // Ring only as long as the offer stays fresh.
+                    expireRing(st, (RING_WINDOW_SECS - (now - offer.timestamp)).coerceIn(1, RING_WINDOW_SECS))
                     return
                 }
             }
@@ -161,39 +220,69 @@ object Calls {
         }
     }
 
-    private fun goActive(contactHex: String, route: ByteArray) {
+    private fun goActive(contactHex: String, route: ByteArray, initiator: Boolean) {
+        audio?.quiet()
         theirRoute = route
         rxFrames = 0
         txFrames = 0
         running = true
+        // Anything queued before this call began is a previous life's sound.
+        while (uniffi.ducat_mobile.nodeCallRecv(0u) != null) { /* drain */ }
         state = State.Active(contactHex, System.currentTimeMillis())
-        // The mouth: capture frames, stamp the header, out the door.
+        // The mouth: capture, encode, stamp the header, out the door. The
+        // side that ANSWERED holds its tongue until it first hears the
+        // caller: its answer takes mailbox-seconds to arrive, and frames
+        // sent into that gap pile up at the far end and play back late —
+        // the caller transmits at once, because the answer in hand proves
+        // the path is live.
         val seq = java.util.concurrent.atomic.AtomicInteger(0)
         val t0 = System.currentTimeMillis()
         audio?.start { frame ->
             if (!running) return@start
+            if (!initiator && rxFrames == 0) return@start
+            val pkt = runCatching { uniffi.ducat_mobile.callEncode(frame) }
+                .getOrNull() ?: return@start
             val n = seq.getAndIncrement()
             val ms = (System.currentTimeMillis() - t0).toInt()
-            val out = ByteArray(8 + frame.size)
+            val out = ByteArray(8 + pkt.size)
             out[0] = (n ushr 24).toByte(); out[1] = (n ushr 16).toByte()
             out[2] = (n ushr 8).toByte(); out[3] = n.toByte()
             out[4] = (ms ushr 24).toByte(); out[5] = (ms ushr 16).toByte()
             out[6] = (ms ushr 8).toByte(); out[7] = ms.toByte()
-            frame.copyInto(out, 8)
+            pkt.copyInto(out, 8)
             runCatching { uniffi.ducat_mobile.nodeCallSend(route, out) }
                 .onSuccess { txFrames++ }
         }
-        // The ear: drain the ring, drop the header, play. Ten seconds of
-        // silence is the other side gone — the swarm's own watchdog reflex,
-        // on a faster clock.
+        // The ear: drain the ring, drop the header, decode IN ORDER, play.
+        // The decoder is stateful, so a frame from the past would smear the
+        // present: stale arrivals are dropped, and a small gap is bridged
+        // with Opus's own concealment — its guess at the lost 20 ms — which
+        // also keeps the frames after the gap decoding clean. Ten seconds
+        // of silence is the other side gone — the swarm's own watchdog
+        // reflex, on a faster clock.
         pump = Thread {
             var lastHeard = System.currentTimeMillis()
+            var lastSeq = -1L
             while (running) {
                 val f = uniffi.ducat_mobile.nodeCallRecv(50u)
                 if (f != null && f.size > 8) {
                     lastHeard = System.currentTimeMillis()
+                    val seq = ((f[0].toLong() and 0xFF) shl 24) or
+                        ((f[1].toLong() and 0xFF) shl 16) or
+                        ((f[2].toLong() and 0xFF) shl 8) or (f[3].toLong() and 0xFF)
+                    if (seq <= lastSeq) continue // late echo of a concealed gap
+                    val gap = seq - lastSeq - 1
+                    if (lastSeq >= 0 && gap in 1..5) {
+                        repeat(gap.toInt()) {
+                            runCatching { uniffi.ducat_mobile.callConceal() }
+                                .onSuccess { audio?.play(it) }
+                        }
+                    }
+                    lastSeq = seq
                     rxFrames++
-                    audio?.play(f.copyOfRange(8, f.size))
+                    runCatching {
+                        uniffi.ducat_mobile.callDecode(f.copyOfRange(8, f.size))
+                    }.onSuccess { audio?.play(it) }
                 } else if (System.currentTimeMillis() - lastHeard > 10_000) {
                     DucatLog.i("Calls", "silence — the far side hung up")
                     endInternal()
@@ -204,6 +293,7 @@ object Calls {
 
     private fun endInternal() {
         running = false
+        audio?.quiet()
         audio?.stop()
         runCatching { uniffi.ducat_mobile.nodeCallClose() }
         myCallId = null
