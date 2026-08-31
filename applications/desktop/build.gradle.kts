@@ -643,6 +643,14 @@ tasks.register<JavaExec>("pubswarmtest") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// The shelf's sharpest edge: publisher shelves, mails the manifest, and
+// EXITS — a reader arriving later still gets the bytes off the network.
+tasks.register<JavaExec>("shelftest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.ShelfTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // Money through the gate, live on stagenet: bill → chain → reconcile →
 // swarm, two desks, no operator. See PubSettleTest.kt for the env contract.
 tasks.register<JavaExec>("pubsettletest") {

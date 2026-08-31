@@ -64,9 +64,21 @@ import org.ducatproject.ducat.Swarm
 object LibraryFetch {
     data class Job(val publisherHex: String, val period: String)
 
+    /** How this issue travels (§16.20): a live swarm share, or the shelf —
+     *  DHT records that answer even when the publisher's desk is dark. */
+    sealed interface Source {
+        data class Swarm(val shareKey: String, val digestHex: String) : Source
+        data object Shelf : Source
+    }
+
     var current by mutableStateOf<Job?>(null)
         private set
     var lastError by mutableStateOf<Pair<Job, String>?>(null)
+        private set
+
+    /** The shelf path's own ticker; the swarm path reports through
+     *  [Swarm.fetchProgress] as before. */
+    var shelfProgress by mutableStateOf<Swarm.Progress?>(null)
         private set
 
     fun dirFor(context: Context, publisherHex: String, period: String): File =
@@ -81,23 +93,34 @@ object LibraryFetch {
         return files.sumOf { it.length() }
     }
 
-    fun start(context: Context, job: Job, shareKey: String, digestHex: String) {
+    fun start(context: Context, job: Job, source: Source) {
         synchronized(this) {
             if (current != null) return
             current = job
         }
         lastError = null
+        shelfProgress = null
         val app = context.applicationContext
         Thread {
             val done = dirFor(app, job.publisherHex, job.period)
             // Fetch lands in a .part sibling and moves into place whole, so
             // "the directory exists" always means "every piece verified".
-            // The .part survives a failure on purpose: the engine checks
-            // pieces on disk, so a retry resumes instead of starting over.
+            // The .part survives a failure on purpose: the swarm engine
+            // checks pieces on disk, so a retry resumes instead of starting
+            // over; the shelf just rewrites, its issues being small.
             val part = File(done.parentFile, done.name + ".part")
             try {
                 part.mkdirs()
-                Swarm.fetch(shareKey, digestHex, part.absolutePath)
+                when (source) {
+                    is Source.Swarm ->
+                        Swarm.fetch(source.shareKey, source.digestHex, part.absolutePath)
+                    Source.Shelf ->
+                        Publications.fetchShelf(
+                            app, job.publisherHex, job.period, part,
+                        ) { pos, len ->
+                            shelfProgress = Swarm.Progress(pos, len, pos >= len && len > 0)
+                        }
+                }
                 done.deleteRecursively()
                 check(part.renameTo(done)) { "could not move the download into place" }
             } catch (e: Throwable) {
@@ -109,6 +132,7 @@ object LibraryFetch {
                 lastError = job to (e.message ?: e.javaClass.simpleName)
             } finally {
                 current = null
+                shelfProgress = null
                 ContactStore.bump()
             }
         }.apply { isDaemon = true; name = "library-fetch" }.start()
@@ -119,7 +143,7 @@ private data class IssueRow(
     val publisherHex: String,
     val publisherName: String?,
     val period: String,
-    val shipment: Pair<String, String>?,
+    val source: LibraryFetch.Source?,
     val bytes: Long?,
 )
 
@@ -136,12 +160,21 @@ fun LibrarySection() {
         Publications.subscribedPublishers(context).flatMap { pub ->
             val sub = Publications.subscription(context, pub)
                 ?: return@flatMap emptyList()
+            // The shelf pair filed once covers every period; a shipment is
+            // per-period. Prefer the swarm when both exist — it is the
+            // publisher saying this month went by truck.
+            val hasShelf = sub.first != null && sub.second != null
             sub.third.keys.sortedDescending().map { period ->
+                val ship = Publications.shipment(context, pub, period)
                 IssueRow(
                     publisherHex = pub,
                     publisherName = names[pub],
                     period = period,
-                    shipment = Publications.shipment(context, pub, period),
+                    source = when {
+                        ship != null -> LibraryFetch.Source.Swarm(ship.first, ship.second)
+                        hasShelf -> LibraryFetch.Source.Shelf
+                        else -> null
+                    },
                     bytes = LibraryFetch.fetchedBytes(context, pub, period),
                 )
             }
@@ -150,12 +183,13 @@ fun LibrarySection() {
         )
     }
 
-    // The running fetch's progress, from the same poll the desk proof used.
+    // The running fetch's progress: the shelf path reports its own; the
+    // swarm path through the same poll the desk proof used.
     var progress by remember { mutableStateOf<Swarm.Progress?>(null) }
     LaunchedEffect(fetching) {
         progress = null
         while (fetching != null) {
-            progress = Swarm.fetchProgress()
+            progress = LibraryFetch.shelfProgress ?: Swarm.fetchProgress()
             delay(500)
         }
     }
@@ -267,7 +301,7 @@ private fun IssueLine(
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                row.shipment == null -> Text(
+                row.source == null -> Text(
                     stringResource(R.string.library_no_shipment),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -281,14 +315,13 @@ private fun IssueLine(
                 )
             }
         }
-        if (row.bytes == null && row.shipment != null && fetching == null) {
+        if (row.bytes == null && row.source != null && fetching == null) {
             Spacer(Modifier.width(12.dp))
             FilledTonalButton(onClick = {
                 LibraryFetch.start(
                     context,
                     LibraryFetch.Job(row.publisherHex, row.period),
-                    row.shipment.first,
-                    row.shipment.second,
+                    row.source,
                 )
             }) {
                 Text(stringResource(R.string.library_download))

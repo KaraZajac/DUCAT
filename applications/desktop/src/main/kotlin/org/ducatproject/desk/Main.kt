@@ -306,6 +306,7 @@ private fun runDesk(deskDir: File) = application {
                         runCatching { TabStore.reconcile(context) }
                         runCatching { Donations.reconcile(context) }
                         runCatching { Publications.reconcileSettled(context) }
+                        runCatching { Publications.tendShelf(context) }
                         // The wallet keeps pace beside the mailbox: a few
                         // scan windows a tick, so a syncing desk converges
                         // without starving the poll.

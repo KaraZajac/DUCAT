@@ -217,15 +217,29 @@ fun PublishRoom() {
                 onClick = {
                     val f = path.trim()
                     val p = period.trim()
-                    busy = "Seeding…"
+                    busy = "Publishing…"
                     lastWord = null
                     scope.launch(Dispatchers.IO) {
                         try {
-                            val share = Swarm.seed(f)
-                            Publications.recordIssue(
-                                context, pubId, p, f,
-                                share.shareKey, share.indexDigestHex,
-                            )
+                            // The rail rule: a month the shelf can hold goes
+                            // onto DHT records and survives this desk going
+                            // dark; a heavier one seeds the swarm and serves
+                            // while the desk runs. The manifest says which.
+                            if (File(f).length() <= Publications.SHELF_CAP_BYTES) {
+                                busy = "Shelving…"
+                                check(
+                                    Publications.shelveIssue(context, pubId, p, File(f)) { i, n ->
+                                        busy = "Shelving $i/$n"
+                                    },
+                                ) { "the shelf would not take it" }
+                            } else {
+                                busy = "Seeding…"
+                                val share = Swarm.seed(f)
+                                Publications.recordIssue(
+                                    context, pubId, p, f,
+                                    share.shareKey, share.indexDigestHex,
+                                )
+                            }
                             if (storedPrice > 0) {
                                 // Paid publication: the reconcile owns
                                 // delivery. Run it now for anyone already
@@ -239,23 +253,31 @@ fun PublishRoom() {
                             } else {
                                 busy = "Sending…"
                                 var sent = 0
+                                val issue = Publications.issues(context, pubId)
+                                    .first { it.periodId == p }
+                                val shelf = Publications.shelfOf(context, pubId)
                                 val readers = ContactStore(context).all()
                                     .filter { it.personaHex in Publications.subscribers(context, pubId) }
                                 for (c in readers) {
                                     val ok = Publications.sendPeriod(
                                         context, c, pubId, p,
-                                        record = null, headKey = null,
+                                        record = shelf?.first, headKey = shelf?.second,
                                         note = note.trim(),
-                                        swarmKey = share.shareKey,
-                                        swarmDigestHex = share.indexDigestHex,
+                                        swarmKey = issue.swarmKey.takeIf { it.isNotBlank() },
+                                        swarmDigestHex = issue.swarmDigestHex.takeIf { it.isNotBlank() },
                                     )
                                     if (ok) {
                                         Publications.markSent(context, pubId, p, c.personaHex)
                                         sent++
                                     }
                                 }
-                                lastWord = "Issue $p: seeded and sent to $sent of ${readers.size}. " +
-                                    "Serving from this desk while it runs."
+                                lastWord = if (issue.shelfRec.isNotBlank()) {
+                                    "Issue $p: shelved and sent to $sent of ${readers.size}. " +
+                                        "The network holds it now — this desk can sleep."
+                                } else {
+                                    "Issue $p: seeded and sent to $sent of ${readers.size}. " +
+                                        "Serving from this desk while it runs."
+                                }
                             }
                         } catch (e: Throwable) {
                             DucatLog.w("Publish", "issue $p failed: ${e.message}")
@@ -332,7 +354,9 @@ fun PublishRoom() {
                             }
                         }) { Text("Send to ${missing.size} more") }
                     }
-                    TextButton(
+                    // A shelved issue needs no re-seed — the records outlive
+                    // the desk; only a swarm month dies with the process.
+                    if (issue.swarmKey.isNotBlank()) TextButton(
                         enabled = busy == null && File(issue.file).isFile,
                         onClick = {
                             busy = "Seeding…"

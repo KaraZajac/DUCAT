@@ -229,13 +229,17 @@ object Publications {
         }
     }
 
-    /** One shipped period, as the log remembers it. */
+    /** One shipped period, as the log remembers it — by either rail. */
     data class Issue(
         val periodId: String,
         val file: String,
         val swarmKey: String,
         val swarmDigestHex: String,
         val sentTo: Set<String>,
+        /** The shelf rail (§16.20): this period's own DHT record. */
+        val shelfRec: String = "",
+        val shelfChunks: Int = 0,
+        val shelfBytes: Long = 0,
     )
 
     /** The issue log, newest period first. */
@@ -252,6 +256,9 @@ object Publications {
                 swarmKey = o.optString("key"),
                 swarmDigestHex = o.optString("digest"),
                 sentTo = sent,
+                shelfRec = o.optString("rec"),
+                shelfChunks = o.optInt("rec_chunks", 0),
+                shelfBytes = o.optLong("rec_bytes", 0L),
             )
         }.sortedByDescending { it.periodId }.toList()
     }
@@ -340,6 +347,254 @@ object Publications {
         return sent
     }
 
+    // --- the shelf: the rail that outlives the process --------------------
+    //
+    // §16.20's first delivery rail: the publication's root record holds an
+    // index sealed under the standing head key; each period gets a record
+    // of its own, every chunk sealed to its landing site (record key +
+    // subkey as AAD, core::publish). A reader with the manifest's pair can
+    // fetch at 3am with the publisher's desk dark — the network holds the
+    // bytes, the thread only ever carried the capability.
+    //
+    // Layout (client v1, one implementation family; the spec pins the
+    // sealing and deliberately not yet these bytes):
+    //   root record, 1 subkey. Subkey 0 = seal_chunk(head, root, 0, nonce,
+    //     index-JSON {"v":1,"periods":{id:{"rec","chunks","bytes","name"}}})
+    //     — rewritten whole; the publisher is the only writer.
+    //   period record, `chunks` subkeys. Subkey i = seal_chunk(periodKey,
+    //     rec, i, nonce, plaintext[i]) — 32 KiB values, Veilid's 32-subkey
+    //     cap, so the shelf carries up to ~1 MiB; heavier months go by
+    //     swarm and the manifest says which truck came.
+
+    /** Plaintext per chunk: a 32 KiB value less nonce (24) and tag (16). */
+    const val SHELF_CHUNK_PLAIN = 32_768 - 40
+    private const val SHELF_MAX_CHUNKS = 32
+
+    /** What one period record can hold; the Publish room's rail rule. */
+    const val SHELF_CAP_BYTES = SHELF_CHUNK_PLAIN.toLong() * SHELF_MAX_CHUNKS
+
+    /** The standing shelf (root record + head key), minted on first use.
+     *  Owner keys are kept so restarts and tending can keep writing. */
+    fun shelfOf(context: Context, pubId: String): Pair<String, ByteArray>? {
+        val pub = readPub(context, pubId) ?: return null
+        val rec = pub.optString("root_rec").ifBlank { null }
+        val head = pub.optString("head").ifBlank { null }
+        if (rec != null && head != null) return rec to unb64(head)
+        return null
+    }
+
+    private fun ensureShelf(context: Context, pubId: String): Pair<String, ByteArray>? {
+        shelfOf(context, pubId)?.let { return it }
+        val head = ByteArray(32).also { java.security.SecureRandom().nextBytes(it) }
+        val rec = runCatching { uniffi.ducat_mobile.nodeDhtCreate(1u) }.getOrElse {
+            DucatLog.w("Publications", "shelf root: ${it.message}")
+            return null
+        }
+        editPub(context, pubId) { pub ->
+            pub.put("head", b64(head))
+            pub.put("root_rec", rec.key)
+            pub.put("root_pub", b64(rec.ownerPublic))
+            pub.put("root_sec", b64(rec.ownerSecret))
+        }
+        return rec.key to head
+    }
+
+    private fun sealTo(
+        key: ByteArray,
+        recordKey: String,
+        subkey: Int,
+        plain: ByteArray,
+    ): ByteArray {
+        val nonce = ByteArray(24).also { java.security.SecureRandom().nextBytes(it) }
+        return uniffi.ducat_mobile.publicationSealChunk(
+            key, recordKey, subkey.toUInt(), nonce, plain,
+        )
+    }
+
+    /** Open the root for writing (restart-safe: read-first, per the
+     *  local-copy rule veilid holds writers to), then rewrite the index. */
+    private fun writeIndex(context: Context, pubId: String, mutate: (JSONObject) -> Unit): Boolean {
+        val pub = readPub(context, pubId) ?: return false
+        val root = pub.optString("root_rec").ifBlank { null } ?: return false
+        val head = pub.optString("head").ifBlank { null }?.let { unb64(it) } ?: return false
+        val ownPub = pub.optString("root_pub").ifBlank { null }?.let { unb64(it) } ?: return false
+        val ownSec = pub.optString("root_sec").ifBlank { null }?.let { unb64(it) } ?: return false
+        return runCatching {
+            uniffi.ducat_mobile.nodeDhtOpen(root, ownPub, ownSec)
+            val existing = runCatching { uniffi.ducat_mobile.nodeDhtGet(root, 0u, true) }.getOrNull()
+            val index = existing?.let {
+                runCatching {
+                    JSONObject(String(
+                        uniffi.ducat_mobile.publicationOpenChunk(head, root, 0u, it),
+                        Charsets.UTF_8,
+                    ))
+                }.getOrNull()
+            } ?: JSONObject().put("v", 1).put("periods", JSONObject())
+            mutate(index)
+            uniffi.ducat_mobile.nodeDhtSet(
+                root, 0u,
+                sealTo(head, root, 0, index.toString().toByteArray(Charsets.UTF_8)),
+            )
+            true
+        }.onFailure {
+            DucatLog.w("Publications", "index write: ${it.message}")
+        }.getOrDefault(false)
+    }
+
+    /**
+     * Shelve one period: its own record, every chunk sealed to where it
+     * lands, the index updated last — so a reader who finds the period in
+     * the index finds every chunk already in place.
+     */
+    fun shelveIssue(
+        context: Context,
+        pubId: String,
+        periodId: String,
+        file: java.io.File,
+        onChunk: (Int, Int) -> Unit = { _, _ -> },
+    ): Boolean {
+        val bytes = file.readBytes()
+        if (bytes.isEmpty() || bytes.size > SHELF_CAP_BYTES) {
+            DucatLog.w("Publications", "shelve: ${bytes.size} bytes is not shelf-sized")
+            return false
+        }
+        val key = periodKey(context, pubId, periodId) ?: return false
+        if (ensureShelf(context, pubId) == null) return false
+        val chunks = (bytes.size + SHELF_CHUNK_PLAIN - 1) / SHELF_CHUNK_PLAIN
+        val rec = runCatching { uniffi.ducat_mobile.nodeDhtCreate(chunks.toUInt()) }.getOrElse {
+            DucatLog.w("Publications", "shelve: ${it.message}")
+            return false
+        }
+        return runCatching {
+            for (i in 0 until chunks) {
+                val end = minOf((i + 1) * SHELF_CHUNK_PLAIN, bytes.size)
+                uniffi.ducat_mobile.nodeDhtSet(
+                    rec.key, i.toUInt(),
+                    sealTo(key, rec.key, i, bytes.copyOfRange(i * SHELF_CHUNK_PLAIN, end)),
+                )
+                onChunk(i + 1, chunks)
+            }
+            check(
+                writeIndex(context, pubId) { index ->
+                    index.getJSONObject("periods").put(
+                        periodId,
+                        JSONObject()
+                            .put("rec", rec.key)
+                            .put("chunks", chunks)
+                            .put("bytes", bytes.size)
+                            .put("name", file.name),
+                    )
+                },
+            ) { "the index would not write" }
+            synchronized(lock) {
+                val p = prefs(context)
+                val all = p.getString("pubs", null)?.let { JSONObject(it) } ?: return@synchronized
+                val pub = all.optJSONObject(pubId) ?: return@synchronized
+                val iss = pub.optJSONObject("issues") ?: JSONObject()
+                val o = iss.optJSONObject(periodId) ?: JSONObject()
+                o.put("file", file.absolutePath)
+                    .put("rec", rec.key)
+                    .put("rec_chunks", chunks)
+                    .put("rec_bytes", bytes.size)
+                    .put("rec_pub", b64(rec.ownerPublic))
+                    .put("rec_sec", b64(rec.ownerSecret))
+                iss.put(periodId, o)
+                pub.put("issues", iss)
+                all.put(pubId, pub)
+                p.edit().putString("pubs", all.toString()).apply()
+            }
+            ContactStore.bump()
+            true
+        }.onFailure {
+            DucatLog.w("Publications", "shelve '$periodId': ${it.message}")
+        }.getOrDefault(false)
+    }
+
+    /**
+     * The reader's half, shared by the Library and the desk: index by the
+     * head key, chunks by the period key, every open naming the landing
+     * site it actually read from. Returns the written file.
+     */
+    fun fetchShelf(
+        context: Context,
+        publisherHex: String,
+        periodId: String,
+        outDir: java.io.File,
+        onProgress: (Long, Long) -> Unit = { _, _ -> },
+    ): java.io.File {
+        val sub = subscription(context, publisherHex)
+            ?: throw IllegalStateException("no subscription filed")
+        val root = sub.first ?: throw IllegalStateException("no shelf on file")
+        val head = sub.second ?: throw IllegalStateException("no head key on file")
+        val periodKey = sub.third[periodId]
+            ?: throw IllegalStateException("no key for '$periodId'")
+
+        uniffi.ducat_mobile.nodeDhtOpen(root, null, null)
+        val rawIndex = uniffi.ducat_mobile.nodeDhtGet(root, 0u, true)
+            ?: throw IllegalStateException("the shelf's index is not on the network")
+        val index = JSONObject(String(
+            uniffi.ducat_mobile.publicationOpenChunk(head, root, 0u, rawIndex),
+            Charsets.UTF_8,
+        ))
+        val entry = index.optJSONObject("periods")?.optJSONObject(periodId)
+            ?: throw IllegalStateException("'$periodId' is not on the shelf yet")
+        val rec = entry.getString("rec")
+        val chunks = entry.getInt("chunks")
+        val total = entry.getLong("bytes")
+        val name = entry.optString("name").ifBlank { "issue.bin" }
+
+        uniffi.ducat_mobile.nodeDhtOpen(rec, null, null)
+        outDir.mkdirs()
+        val out = java.io.File(outDir, name)
+        java.io.FileOutputStream(out).use { fos ->
+            var done = 0L
+            for (i in 0 until chunks) {
+                onProgress(done, total)
+                val value = uniffi.ducat_mobile.nodeDhtGet(rec, i.toUInt(), true)
+                    ?: throw IllegalStateException("chunk $i is missing from the shelf")
+                val plain = uniffi.ducat_mobile.publicationOpenChunk(
+                    periodKey, rec, i.toUInt(), value,
+                )
+                fos.write(plain)
+                done += plain.size
+            }
+            onProgress(done, total)
+        }
+        return out
+    }
+
+    /**
+     * Keep the catalogue breathing: rewrite the index and touch each
+     * period record so no TTL quietly eats a back-catalogue. Bounded to
+     * once an hour; rides the poll clock beside the reconcilers.
+     */
+    fun tendShelf(context: Context) {
+        val p = prefs(context)
+        val last = p.getLong("shelf_tended", 0L)
+        val now = System.currentTimeMillis()
+        if (now - last < 60 * 60_000L) return
+        p.edit().putLong("shelf_tended", now).apply()
+        for ((pubId, _) in publications(context)) {
+            if (shelfOf(context, pubId) == null) continue
+            writeIndex(context, pubId) { /* a rewrite is the point */ }
+            val pub = readPub(context, pubId) ?: continue
+            val iss = pub.optJSONObject("issues") ?: continue
+            for (period in iss.keys().asSequence().toList()) {
+                val o = iss.getJSONObject(period)
+                val rec = o.optString("rec").ifBlank { null } ?: continue
+                val rp = o.optString("rec_pub").ifBlank { null }?.let { unb64(it) } ?: continue
+                val rs = o.optString("rec_sec").ifBlank { null }?.let { unb64(it) } ?: continue
+                runCatching {
+                    uniffi.ducat_mobile.nodeDhtOpen(rec, rp, rs)
+                    val v = uniffi.ducat_mobile.nodeDhtGet(rec, 0u, true) ?: return@runCatching
+                    uniffi.ducat_mobile.nodeDhtSet(rec, 0u, v)
+                }.onFailure {
+                    DucatLog.w("Publications", "tend '$period': ${it.message}")
+                }
+            }
+        }
+    }
+
     /** A settled subscriber owed their issue. */
     data class Due(val pubId: String, val periodId: String, val personaHex: String)
 
@@ -356,7 +611,9 @@ object Publications {
         val out = mutableListOf<Due>()
         for ((pubId, _) in publications(context)) {
             for (issue in issues(context, pubId)) {
-                if (issue.swarmKey.isBlank()) continue
+                // Due only once SOME rail exists — pay-then-ship holds
+                // until the bytes are reachable, by shelf or by swarm.
+                if (issue.swarmKey.isBlank() && issue.shelfRec.isBlank()) continue
                 for ((hex, tabId) in billedFor(context, pubId, issue.periodId)) {
                     if (hex in issue.sentTo) continue
                     val t = tabs.get(tabId) ?: continue
@@ -382,11 +639,15 @@ object Publications {
         for (d in due) {
             val c = contacts[d.personaHex] ?: continue
             val issue = issues(context, d.pubId).firstOrNull { it.periodId == d.periodId } ?: continue
+            // The shelf pair rides the thread's first manifest (sendPeriod
+            // gates it); the shipment rides only when this period went by
+            // swarm. Both rails on one manifest is the spec's own shape.
+            val shelf = shelfOf(context, d.pubId)
             val ok = sendPeriod(
                 context, c, d.pubId, d.periodId,
-                record = null, headKey = null, note = "",
-                swarmKey = issue.swarmKey,
-                swarmDigestHex = issue.swarmDigestHex,
+                record = shelf?.first, headKey = shelf?.second, note = "",
+                swarmKey = issue.swarmKey.takeIf { it.isNotBlank() },
+                swarmDigestHex = issue.swarmDigestHex.takeIf { it.isNotBlank() },
             )
             if (ok) {
                 markSent(context, d.pubId, d.periodId, d.personaHex)
