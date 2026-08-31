@@ -1756,9 +1756,9 @@ data class StoredMessage(
             pubHeadKey?.let { h -> put("pub_head", Base64.encodeToString(h, Base64.NO_WRAP)) }
             pubSwarmKey?.let { k -> put("pub_swarm", k) }
             pubSwarmDigest?.let { d -> put("pub_swarm_dig", d) }
-            callRoute?.let { r -> put("call_route", r) }
-            callId?.let { i -> put("call_id", i) }
         }
+        callRoute?.let { r -> put("call_route", r) }
+        callId?.let { i -> put("call_id", i) }
         if (deadLetter) put("dead", true)
     }
 
