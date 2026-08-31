@@ -95,3 +95,27 @@ different product than one that takes two minutes).
   call rings in seconds; issue/settle arrival timed).
 - **C. Control frames**: spec dev5 + engine + harness; full telephone
   matrix again (target: tap-Answer → voice under a second).
+
+
+## Stage A findings (2026-08-31, live)
+
+- **One-shot arming dies quietly.** A desk watcher that armed once
+  (`WT_ARMED true`) heard nothing for twenty minutes while fifteen
+  writes landed — no error surfaced anywhere. The phone, which
+  re-stamps every watch each poller pass, rang reliably the whole time.
+  Policy: **re-arm every pass**; veilid treats it as desired-state and
+  only renegotiates on change. Arming health is now narrated
+  ("watches: N armed, M not") because a failed arm is otherwise
+  indistinguishable from a working watch until a message is late.
+- **Arms fail until the record is open** — first pass after launch reads
+  "2 armed, 18 not", and the sweep's opens turn it into "20 armed,
+  0 not" one pass later. Restart re-arm therefore works with no extra
+  code: the sweep opens, the stamp arms.
+- **The ring was never the bottleneck — the response was.** Watches were
+  already firing before this work; the poller answered a ring with the
+  full pass (wallet scan included), so ring→message equalled pass
+  duration (85–105 s measured). The fast lane answers with a targeted
+  `pollContact` instead: **ring→message 1.2 s measured** on the phone.
+- **Changed-keys arrive with duplicates** (one per touched subkey) — the
+  fast lane sets-dedupes before deciding it handled everything; when it
+  did, the heavy pass waits for its heartbeat (the battery win).

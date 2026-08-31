@@ -358,14 +358,29 @@ class Poller(private val context: Context) {
                 // (their next message moves it) and every unanswered card's
                 // inbox (a claim writes it). Re-armed each pass because
                 // watches expire and the network only promises best effort —
-                // the sweep below is still the guarantee.
+                // the sweep below is still the guarantee. Cheap to repeat:
+                // veilid keeps desired-state and only renegotiates on change.
+                // Health is narrated when it changes, because a silently
+                // failed arm reads identically to a working watch until a
+                // message is late (push v2, PUSH.md).
                 runCatching {
                     val store = ContactStore(context)
+                    var up = 0
+                    var down = 0
                     store.all().forEach {
                         runCatching { uniffi.ducat_mobile.nodeDhtWatch(it.theirOutbox) }
+                            .onSuccess { ok -> if (ok) up++ else down++ }
+                            .onFailure { down++ }
                     }
                     store.issuedCards().filter { it.answeredBy == null }.forEach {
                         runCatching { uniffi.ducat_mobile.nodeDhtWatch(it.inboxKey) }
+                            .onSuccess { ok -> if (ok) up++ else down++ }
+                            .onFailure { down++ }
+                    }
+                    if (up != watchesUp || down != watchesDown) {
+                        watchesUp = up
+                        watchesDown = down
+                        DucatLog.i(TAG, "watches: $up armed, $down not")
                     }
                 }.onFailure { DucatLog.w(TAG, "watch: ${it.message}") }
 
@@ -378,12 +393,9 @@ class Poller(private val context: Context) {
                 if (rang) {
                     // Which records, drained here for the same reason the flag
                     // is consumed here: these are events, and whoever asks
-                    // gets them. Handed on rather than used — this loop polls
-                    // everything anyway; the stand sweep is the one that can
-                    // save eighteen board reads by knowing which one moved.
+                    // gets them.
                     val moved = runCatching { uniffi.ducat_mobile.nodeChangedKeys() }
                         .getOrDefault(emptyList())
-                    DucatLog.i(TAG, "a watched record changed — polling now")
                     // Pass the ring on. `node_wait_change` *consumes* the flag
                     // — whoever wakes first clears it — so there can only be
                     // one caller of it in the process, and this is it. Anything
@@ -392,10 +404,57 @@ class Poller(private val context: Context) {
                     // listens here instead of racing the poller for its
                     // wake-ups and delaying somebody's messages to do it.
                     NetworkRings.note(moved)
+                    // The fast lane (push v2, PUSH.md): read exactly what
+                    // moved, now. The full pass above can take minutes on a
+                    // slow day, and it used to be the only road from "the
+                    // network rang" to "the message is on screen" — a call
+                    // offer once aged past its whole ring window in transit.
+                    // If everything that rang was ours to read here, the ring
+                    // is answered and the pass can wait for its heartbeat;
+                    // anything else that moved (a board, a rail, a stream)
+                    // still gets the full sweep it always got.
+                    val rangKeys = moved.toSet() // several subkeys, one record
+                    if (rangKeys.isNotEmpty()) {
+                        val t0 = System.currentTimeMillis()
+                        val store = ContactStore(context)
+                        var got = 0
+                        val handled = mutableSetOf<String>()
+                        for (c in store.all()) {
+                            if (c.theirOutbox in rangKeys) {
+                                handled.add(c.theirOutbox)
+                                got += runCatching { Mailbox.pollContact(context, c) }
+                                    .getOrDefault(0)
+                            }
+                        }
+                        val cardKeys = store.issuedCards()
+                            .filter { it.answeredBy == null }
+                            .map { it.inboxKey }
+                            .filter { it in rangKeys }
+                        if (cardKeys.isNotEmpty()) {
+                            handled.addAll(cardKeys)
+                            runCatching { Mailbox.collectClaims(context) }
+                            runCatching { Listings.linkClaims(context) }
+                        }
+                        val strangers = rangKeys - handled
+                        DucatLog.i(
+                            TAG,
+                            "fast lane: ${rangKeys.size} record(s) rang, $got message(s) in " +
+                                "${System.currentTimeMillis() - t0} ms" +
+                                if (strangers.isEmpty()) "" else
+                                    " — ${strangers.size} not ours (${strangers.first().take(12)}…)",
+                        )
+                        // Everything that rang was read here: the ring is
+                        // answered, the heavy pass can wait for its heartbeat.
+                        if (strangers.isEmpty()) rang = false
+                    }
                 }
             }
         }
     }
+
+    /** Watch health as last narrated — only changes are logged. */
+    private var watchesUp = -1
+    private var watchesDown = -1
 
     private companion object {
         /** One wait chunk. Short in both tiers so a ring or a return to the
