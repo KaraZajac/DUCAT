@@ -119,3 +119,28 @@ different product than one that takes two minutes).
 - **Changed-keys arrive with duplicates** (one per touched subkey) — the
   fast lane sets-dedupes before deciding it handled everything; when it
   did, the heavy pass waits for its heartbeat (the battery win).
+
+
+## Stage B landed (2026-08-31 evening): the lane is a thread
+
+The fast lane inside the sweep loop had a ceiling: it could not preempt
+a running pass, so a ring during a slow sweep still waited for the
+sweep (53 s measured). The lane is now its own thread — the process's
+single `node_wait_change` consumer — and the sweep is a plain timer
+(10 s chunks foreground, 3 min heartbeat pocketed), demoted to what it
+always claimed to be: the correctness pass behind the push. Concurrent
+readers of one contact are serialized in Mailbox with per-contact locks
+and freshest-counters (unserialized they double-append; serialized but
+stale they re-read).
+
+Measured, writer ticking a real phone: **[5.2, 0.2, 0.5, 0.1, 0.4,
+0.1, 0.4, 0.0] seconds** — first tick raced the boot sweep, everything
+after arrived sub-second, foreground and background identical, the lane
+answering each ring in 200–580 ms. The morning's baseline on this exact
+path was 85–105 s. Watches held through a 20-minute quiet gap
+(re-stamped each pass; the one-shot desk watcher stayed dead all run —
+WT_STALL to the end).
+
+Incoming calls now ride the same lane: the offer lands in ~1 s, the
+thread bumps, the shell notices, the bell rings. Stage C (control
+frames on the call route) is what remains of the telephone's v2.

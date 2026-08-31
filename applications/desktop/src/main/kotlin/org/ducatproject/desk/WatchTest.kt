@@ -70,16 +70,19 @@ fun main() {
                 println("WT_SENT n=$n at=${System.currentTimeMillis()}")
                 System.out.flush()
             }
-            repeat(15) {
+            val rounds = (System.getenv("DUCAT_WT_ROUNDS") ?: "15").toInt()
+            repeat(rounds) {
                 tick()
                 Thread.sleep(20_000)
             }
-            println("WT_QUIET 20 minutes — the renewal gap")
-            System.out.flush()
-            Thread.sleep(20 * 60_000)
-            repeat(3) {
-                tick()
-                Thread.sleep(20_000)
+            if (rounds >= 15) {
+                println("WT_QUIET 20 minutes — the renewal gap")
+                System.out.flush()
+                Thread.sleep(20 * 60_000)
+                repeat(3) {
+                    tick()
+                    Thread.sleep(20_000)
+                }
             }
             println("WT_WRITER_DONE")
         }

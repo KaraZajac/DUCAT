@@ -47,35 +47,17 @@ class Poller(private val context: Context) {
     }
 
     fun start(scope: CoroutineScope) {
+        scope.launch(Dispatchers.IO) { lane(scope) }
         scope.launch(Dispatchers.IO) {
-            // The pace follows the screen (the roadmap's battery tier): while
-            // someone is looking, every wake below runs the full sweep — the
-            // hot path is exactly what it always was. In a pocket, a wake
-            // sweeps only when a watch rang (a message deserves its
-            // notification promptly) or on a heartbeat, so a quiet phone does
-            // roughly one sweep every three minutes instead of five a minute.
-            // The wait stays short in both tiers: a ring or a return to the
-            // foreground is answered within one chunk, never one sleep.
-            var rang = true // the first pass sweeps: boot is "what did we miss"
-            var quietWakes = 0
+            // The sweep is a timer, nothing more: fast in the foreground,
+            // a heartbeat in a pocket. Messages no longer ride it — the
+            // lane thread answers rings the moment they land, mid-pass or
+            // not — so the sweep is back to being what it always claimed:
+            // the correctness pass behind the push.
             while (isActive) {
-                val fg = AppVisibility.foreground
-                if (!fg && !rang && quietWakes < BG_HEARTBEAT_WAKES) {
-                    quietWakes++
-                    rang = withContext(Dispatchers.IO) {
-                        runCatching { uniffi.ducat_mobile.nodeWaitChange(WAIT_MS) }
-                            .getOrDefault(false)
-                    }
-                    continue
+                if (!AppVisibility.foreground) {
+                    DucatLog.i(TAG, "background heartbeat sweep")
                 }
-                if (!fg) {
-                    DucatLog.i(
-                        TAG,
-                        if (rang) "background sweep — a watch rang"
-                        else "background heartbeat sweep",
-                    )
-                }
-                quietWakes = 0
 
                 // The transport's own narration (attach progress, dial
                 // failures), which otherwise has nowhere to go on a phone.
@@ -171,6 +153,11 @@ class Poller(private val context: Context) {
                 }.onFailure { DucatLog.w(TAG, "retention: ${it.message}") }
 
                 runCatching {
+                    // Messages first: somebody may be waiting on one, and the
+                    // card sweep ahead of this cost a renewal tick 54 seconds
+                    // once — claims keep, people don't.
+                    val n = Mailbox.poll(context)
+                    if (n > 0) DucatLog.i(TAG, "collected $n message(s)")
                     // Answers to a card we handed out land in its inbox, and
                     // that only becomes a contact once somebody looks.
                     Mailbox.collectClaims(context)
@@ -179,8 +166,6 @@ class Poller(private val context: Context) {
                     // Here rather than inside the mailbox, which has no
                     // business knowing that renting exists.
                     runCatching { Listings.linkClaims(context) }
-                    val n = Mailbox.poll(context)
-                    if (n > 0) DucatLog.i(TAG, "collected $n message(s)")
                 }.onFailure { DucatLog.w(TAG, "poll: ${it.message}") }
 
                 // The chain, in windows. Kept on the same loop as messages
@@ -387,68 +372,67 @@ class Poller(private val context: Context) {
                 // Sleep until the network rings or the interval passes —
                 // instant messages when watches hold, the old cadence when
                 // they do not.
-                rang = withContext(Dispatchers.IO) {
-                    runCatching { uniffi.ducat_mobile.nodeWaitChange(WAIT_MS) }.getOrDefault(false)
-                }
-                if (rang) {
-                    // Which records, drained here for the same reason the flag
-                    // is consumed here: these are events, and whoever asks
-                    // gets them.
-                    val moved = runCatching { uniffi.ducat_mobile.nodeChangedKeys() }
-                        .getOrDefault(emptyList())
-                    // Pass the ring on. `node_wait_change` *consumes* the flag
-                    // — whoever wakes first clears it — so there can only be
-                    // one caller of it in the process, and this is it. Anything
-                    // else that wants to know the network rang (the driver's
-                    // stand sweep, which would otherwise poll blind on a timer)
-                    // listens here instead of racing the poller for its
-                    // wake-ups and delaying somebody's messages to do it.
-                    NetworkRings.note(moved)
-                    // The fast lane (push v2, PUSH.md): read exactly what
-                    // moved, now. The full pass above can take minutes on a
-                    // slow day, and it used to be the only road from "the
-                    // network rang" to "the message is on screen" — a call
-                    // offer once aged past its whole ring window in transit.
-                    // If everything that rang was ours to read here, the ring
-                    // is answered and the pass can wait for its heartbeat;
-                    // anything else that moved (a board, a rail, a stream)
-                    // still gets the full sweep it always got.
-                    val rangKeys = moved.toSet() // several subkeys, one record
-                    if (rangKeys.isNotEmpty()) {
-                        val t0 = System.currentTimeMillis()
-                        val store = ContactStore(context)
-                        var got = 0
-                        val handled = mutableSetOf<String>()
-                        for (c in store.all()) {
-                            if (c.theirOutbox in rangKeys) {
-                                handled.add(c.theirOutbox)
-                                got += runCatching { Mailbox.pollContact(context, c) }
-                                    .getOrDefault(0)
-                            }
-                        }
-                        val cardKeys = store.issuedCards()
-                            .filter { it.answeredBy == null }
-                            .map { it.inboxKey }
-                            .filter { it in rangKeys }
-                        if (cardKeys.isNotEmpty()) {
-                            handled.addAll(cardKeys)
-                            runCatching { Mailbox.collectClaims(context) }
-                            runCatching { Listings.linkClaims(context) }
-                        }
-                        val strangers = rangKeys - handled
-                        DucatLog.i(
-                            TAG,
-                            "fast lane: ${rangKeys.size} record(s) rang, $got message(s) in " +
-                                "${System.currentTimeMillis() - t0} ms" +
-                                if (strangers.isEmpty()) "" else
-                                    " — ${strangers.size} not ours (${strangers.first().take(12)}…)",
-                        )
-                        // Everything that rang was read here: the ring is
-                        // answered, the heavy pass can wait for its heartbeat.
-                        if (strangers.isEmpty()) rang = false
-                    }
+                // Pace: the screen gets a pass every chunk, the pocket
+                // every heartbeat — and a return to the foreground is
+                // answered within one chunk, never one sleep.
+                var waited = 0L
+                while (isActive) {
+                    delay(CHUNK_MS)
+                    waited += CHUNK_MS
+                    if (AppVisibility.foreground || waited >= HEARTBEAT_MS) break
                 }
             }
+        }
+    }
+
+    /**
+     * The push lane (PUSH.md): the one consumer of `node_wait_change` in
+     * the process — the flag is consumed by whoever wakes first, so there
+     * can only be one, and it is this thread, whose whole job is to turn a
+     * ring into a targeted read in about a second. It runs beside the
+     * sweep, not inside it: the old loop answered rings between passes,
+     * which meant a ring during a slow pass waited for the pass — measured
+     * at 53 s where this lane measures ~1 s. Boards, rails and streams get
+     * their ring through [NetworkRings], exactly as before.
+     */
+    private fun lane(scope: CoroutineScope) {
+        while (scope.isActive) {
+            val rang = runCatching { uniffi.ducat_mobile.nodeWaitChange(WAIT_MS) }
+                .getOrDefault(false)
+            if (!rang) continue
+            val moved = runCatching { uniffi.ducat_mobile.nodeChangedKeys() }
+                .getOrDefault(emptyList())
+            NetworkRings.note(moved)
+            val rangKeys = moved.toSet() // several subkeys, one record
+            if (rangKeys.isEmpty()) continue
+            val t0 = System.currentTimeMillis()
+            val store = ContactStore(context)
+            var got = 0
+            val handled = mutableSetOf<String>()
+            for (c in store.all()) {
+                if (c.theirOutbox in rangKeys) {
+                    handled.add(c.theirOutbox)
+                    got += runCatching { Mailbox.pollContact(context, c) }
+                        .getOrDefault(0)
+                }
+            }
+            val cardKeys = store.issuedCards()
+                .filter { it.answeredBy == null }
+                .map { it.inboxKey }
+                .filter { it in rangKeys }
+            if (cardKeys.isNotEmpty()) {
+                handled.addAll(cardKeys)
+                runCatching { Mailbox.collectClaims(context) }
+                runCatching { Listings.linkClaims(context) }
+            }
+            val strangers = rangKeys - handled
+            DucatLog.i(
+                TAG,
+                "lane: ${rangKeys.size} record(s) rang, $got message(s) in " +
+                    "${System.currentTimeMillis() - t0} ms" +
+                    if (strangers.isEmpty()) "" else
+                        " — ${strangers.size} for the sweep (${strangers.first().take(12)}…)",
+            )
         }
     }
 
@@ -457,14 +441,15 @@ class Poller(private val context: Context) {
     private var watchesDown = -1
 
     private companion object {
-        /** One wait chunk. Short in both tiers so a ring or a return to the
-         *  foreground is answered within a chunk, never within a sleep. */
+        /** One lane wait. Its length is invisible to latency — a ring
+         *  interrupts it — it only sets how often an idle lane loops. */
         const val WAIT_MS = 10_000u
 
-        /** Quiet background wakes between heartbeat sweeps: 18 × 10 s ≈ 3
-         *  minutes. Watches make messages instant regardless; the heartbeat
-         *  is the guarantee behind them, exactly like the sweep itself. */
-        const val BG_HEARTBEAT_WAKES = 18
+        /** Sweep pacing: a chunk between foreground passes, a heartbeat
+         *  between pocket ones. The lane makes messages instant in both
+         *  tiers; the heartbeat is the guarantee behind it. */
+        const val CHUNK_MS = 10_000L
+        const val HEARTBEAT_MS = 180_000L
 
         /**
          * How often a downed node is offered another start. Long enough that a

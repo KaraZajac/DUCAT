@@ -1423,7 +1423,20 @@ object Mailbox {
     fun isOffline(e: Throwable) =
         e.message?.contains("TryAgain", ignoreCase = true) == true
 
-    private fun pollOne(context: Context, store: ContactStore, c: Contact, minePersonaHex: String): Int {
+    /** One reader per contact at a time — and each reader starts from the
+     *  freshest counters. The push lane and the sweep may ask for the same
+     *  contact in the same breath: unserialized, both would read the same
+     *  new sequence numbers; serialized-but-stale, the second would re-read
+     *  what the first just advanced past. */
+    private val pollLocks = java.util.concurrent.ConcurrentHashMap<String, Any>()
+
+    private fun pollOne(context: Context, store: ContactStore, c: Contact, minePersonaHex: String): Int =
+        synchronized(pollLocks.getOrPut(c.personaHex) { Any() }) {
+            val fresh = store.all().firstOrNull { it.personaHex == c.personaHex } ?: return 0
+            pollOneLocked(context, store, fresh, minePersonaHex)
+        }
+
+    private fun pollOneLocked(context: Context, store: ContactStore, c: Contact, minePersonaHex: String): Int {
         nodeDhtOpen(c.theirOutbox, null, null)
         val headRaw = nodeDhtGet(c.theirOutbox, 0u, true) ?: return 0
         val head = parseLogHead(headRaw)
