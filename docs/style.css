@@ -1006,3 +1006,60 @@ figure.phone { margin: 0; }
   text-decoration: none;
 }
 .onion-line a:hover { opacity: 1; text-decoration: underline; }
+
+/* ---- Language switcher --------------------------------------------------
+   Plain links, no JS. Tor Browser at its Safest level runs no script, and a
+   reader who needs a language other than English is exactly the person who may
+   be browsing that way. Each language names itself: a switcher that says
+   "German" in English is no use to someone who does not read English. */
+.langs {
+  margin: 0 0 1.5rem;
+}
+.langs ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.3rem 0.9rem;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+.langs a {
+  color: var(--text-dim);
+  text-decoration: none;
+}
+.langs a:hover {
+  color: var(--accent);
+}
+.langs a[aria-current] {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ---- Right-to-left (Arabic, Farsi) --------------------------------------
+   The layout is flex and grid throughout, so it mirrors on its own once
+   dir="rtl" is set. Only the absolutely positioned list markers and the accent
+   bar carry a physical side and have to be moved. The mesh blobs are
+   decorative background and are deliberately left where they are. */
+[dir="rtl"] .feature-list li {
+  padding-left: 0;
+  padding-right: 1.6rem;
+}
+[dir="rtl"] .feature-list li::before {
+  left: auto;
+  right: 0.2rem;
+}
+[dir="rtl"] .check-list li {
+  padding-left: 0;
+  padding-right: 1.9rem;
+}
+[dir="rtl"] .check-list li::before {
+  left: auto;
+  right: 0.25rem;
+}
+[dir="rtl"] .proof-col::before {
+  left: auto;
+  right: 0;
+}
