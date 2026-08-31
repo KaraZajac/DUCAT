@@ -57,6 +57,21 @@ object Calls {
     }
 
     /**
+     * The platform's way of opening the app for a ring nobody is looking
+     * at, injected like [Audio] and for the same reason: these sources
+     * compile on the desk, and notifications do not.
+     */
+    interface Shell {
+        /** A call is ringing and no screen shows it: take the screen. */
+        fun takeover(context: Context, from: String) {}
+
+        /** The ring ended however it ended: give the screen back. */
+        fun release(context: Context) {}
+    }
+
+    var shell: Shell? = null
+
+    /**
      * One 3-second cycle of the British ring — 400 Hz + 450 Hz mixed, on
      * for 0.4 s, off 0.2, on 0.4, then two seconds of rest. PCM16LE mono
      * 16 kHz, ready to loop; 5 ms cosine ramps keep the edges clickless.
@@ -126,6 +141,10 @@ object Calls {
      *  must never close the routes of the next one. */
     private val epoch = java.util.concurrent.atomic.AtomicInteger()
 
+    /** The application context, kept from the last entry point — the
+     *  teardown paths need to quiet a notification with no caller handy. */
+    @Volatile private var appCtx: Context? = null
+
     private var myCallId: ByteArray? = null
     private var theirRoute: ByteArray? = null
     private var pump: Thread? = null
@@ -135,6 +154,7 @@ object Calls {
     fun place(context: Context, c: Contact) {
         if (state != State.Idle) return
         val app = context.applicationContext
+        appCtx = app
         val st = State.Outgoing(c.personaHex)
         state = st
         epoch.incrementAndGet()
@@ -242,6 +262,7 @@ object Calls {
     fun decline(context: Context, c: Contact, offer: StoredMessage) {
         val app = context.applicationContext
         audio?.quiet()
+        runCatching { shell?.release(app) }
         state = State.Idle
         Thread {
             runCatching {
@@ -270,6 +291,7 @@ object Calls {
      * fresh answer quoting our id makes an outgoing call active.
      */
     fun noticed(context: Context) {
+        appCtx = context.applicationContext
         val store = ContactStore(context)
         val now = System.currentTimeMillis() / 1000
         when (val s = state) {
@@ -319,6 +341,12 @@ object Calls {
                     val st = State.Incoming(c.personaHex, offer.seq)
                     state = st
                     audio?.ring(context.applicationContext, incoming = true)
+                    // Nobody may be looking at the app: the ring must open
+                    // it — the full-screen ask on a dark phone, a banner on
+                    // a lit one. The shell decides; the desk has none.
+                    runCatching {
+                        shell?.takeover(context.applicationContext, c.displayName())
+                    }
                     // Ring only as long as the offer stays fresh.
                     expireRing(st, (RING_WINDOW_SECS - (now - offer.timestamp)).coerceIn(1, RING_WINDOW_SECS))
                     return
@@ -330,6 +358,7 @@ object Calls {
 
     private fun goActive(contactHex: String, route: ByteArray, initiator: Boolean) {
         audio?.quiet()
+        appCtx?.let { ctx -> runCatching { shell?.release(ctx) } }
         theirRoute = route
         rxFrames = 0
         txFrames = 0
@@ -416,6 +445,7 @@ object Calls {
             DucatLog.i("Calls", "sends ok/failed: ${uniffi.ducat_mobile.nodeCallSendReport()}")
         }
         audio?.quiet()
+        appCtx?.let { ctx -> runCatching { shell?.release(ctx) } }
         audio?.stop()
         myCallId = null
         theirRoute = null

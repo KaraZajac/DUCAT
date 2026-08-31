@@ -18,4 +18,6 @@
     <string name="call_body_ring">T\u2019appelle</string>
     <string name="call_body_answer">Répondu</string>
     <string name="call_body_decline">Je ne peux pas parler là.</string>
+    <string name="notify_call_channel">Appels entrants</string>
+    <string name="notify_call_incoming">Appel entrant</string>
 </resources>

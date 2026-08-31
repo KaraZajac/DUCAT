@@ -18,4 +18,6 @@
     <string name="call_body_ring">Ruft dich an</string>
     <string name="call_body_answer">Angenommen</string>
     <string name="call_body_decline">Kann gerade nicht sprechen.</string>
+    <string name="notify_call_channel">Eingehende Anrufe</string>
+    <string name="notify_call_incoming">Eingehender Anruf</string>
 </resources>

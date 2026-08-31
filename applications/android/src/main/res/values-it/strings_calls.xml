@@ -18,4 +18,6 @@
     <string name="call_body_ring">Ti sta chiamando</string>
     <string name="call_body_answer">Risposto</string>
     <string name="call_body_decline">Ora non posso parlare.</string>
+    <string name="notify_call_channel">Chiamate in arrivo</string>
+    <string name="notify_call_incoming">Chiamata in arrivo</string>
 </resources>

@@ -157,7 +157,10 @@ class Poller(private val context: Context) {
                     // card sweep ahead of this cost a renewal tick 54 seconds
                     // once — claims keep, people don't.
                     val n = Mailbox.poll(context)
-                    if (n > 0) DucatLog.i(TAG, "collected $n message(s)")
+                    if (n > 0) {
+                        DucatLog.i(TAG, "collected $n message(s)")
+                        runCatching { Calls.noticed(context) }
+                    }
                     // Answers to a card we handed out land in its inbox, and
                     // that only becomes a contact once somebody looks.
                     Mailbox.collectClaims(context)
@@ -425,6 +428,9 @@ class Poller(private val context: Context) {
                 runCatching { Mailbox.collectClaims(context) }
                 runCatching { Listings.linkClaims(context) }
             }
+            // A message that just landed may be a ringing offer, and no
+            // screen is around to notice it for us.
+            if (got > 0) runCatching { Calls.noticed(context) }
             val strangers = rangKeys - handled
             DucatLog.i(
                 TAG,

@@ -18,4 +18,6 @@
     <string name="call_body_ring">กำลังโทรหาคุณ</string>
     <string name="call_body_answer">รับแล้ว</string>
     <string name="call_body_decline">ตอนนี้คุยไม่สะดวก</string>
+    <string name="notify_call_channel">สายเรียกเข้า</string>
+    <string name="notify_call_incoming">สายเรียกเข้า</string>
 </resources>

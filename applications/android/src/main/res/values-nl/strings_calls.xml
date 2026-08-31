@@ -18,4 +18,6 @@
     <string name="call_body_ring">Belt je</string>
     <string name="call_body_answer">Opgenomen</string>
     <string name="call_body_decline">Kan nu even niet praten.</string>
+    <string name="notify_call_channel">Inkomende oproepen</string>
+    <string name="notify_call_incoming">Inkomende oproep</string>
 </resources>

@@ -18,4 +18,6 @@
     <string name="call_body_ring">Ligando para você</string>
     <string name="call_body_answer">Atendida</string>
     <string name="call_body_decline">Não posso falar agora.</string>
+    <string name="notify_call_channel">Chamadas recebidas</string>
+    <string name="notify_call_incoming">Chamada recebida</string>
 </resources>

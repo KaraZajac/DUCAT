@@ -132,6 +132,70 @@ object Notify {
         post(context, title, what, openChat = personaHex)
     }
 
+    // ----- §16.21: the takeover an incoming call is owed -----
+
+    private const val CALL_CHANNEL = "ducat_call"
+
+    /** One ring at a time, so one fixed id — cancel is exact. */
+    private const val CALL_NOTIFICATION_ID = 77
+
+    /**
+     * The full-screen ask: on a lit, unlocked phone a heads-up banner; on a
+     * dark or locked one, Android launches the activity itself — which shows
+     * [org.ducatproject.ducat.ui.CallScreen], because a live call outranks
+     * every screen. The channel is deliberately silent and still: the bell
+     * and the buzz are the engine's own (the British ring), and a channel
+     * sound would ring twice. The lock screen learns there is a call, not
+     * from whom — same rule as money.
+     */
+    fun ringIncoming(context: Context, from: String) {
+        if (android.os.Build.VERSION.SDK_INT >= 33 &&
+            context.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) !=
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) return
+        val mgr = context.getSystemService(NotificationManager::class.java) ?: return
+        mgr.createNotificationChannel(
+            NotificationChannel(
+                CALL_CHANNEL, context.getString(R.string.notify_call_channel),
+                NotificationManager.IMPORTANCE_HIGH,
+            ).apply {
+                setSound(null, null)
+                enableVibration(false)
+            }
+        )
+        val open = PendingIntent.getActivity(
+            context, ++reqCode,
+            Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            },
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+        val fact = NotificationCompat.Builder(context, CALL_CHANNEL)
+            .setSmallIcon(R.drawable.ic_cat_notify)
+            .setContentTitle(context.getString(R.string.app_name))
+            .setContentText(context.getString(R.string.notify_call_incoming))
+            .build()
+        val full = NotificationCompat.Builder(context, CALL_CHANNEL)
+            .setSmallIcon(R.drawable.ic_cat_notify)
+            .setContentTitle(from)
+            .setContentText(context.getString(R.string.notify_call_incoming))
+            .setCategory(NotificationCompat.CATEGORY_CALL)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setOngoing(true)
+            .setContentIntent(open)
+            .setFullScreenIntent(open, true)
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+            .setPublicVersion(fact)
+            .build()
+        mgr.notify(CALL_NOTIFICATION_ID, full)
+    }
+
+    /** The ring ended — answered, declined, expired, or withdrawn. */
+    fun quietIncoming(context: Context) {
+        context.getSystemService(NotificationManager::class.java)
+            ?.cancel(CALL_NOTIFICATION_ID)
+    }
+
     /**
      * An amount as this phone reads money.
      *

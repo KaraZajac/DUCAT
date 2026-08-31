@@ -125,6 +125,15 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
         DeviceLock.backend = org.ducatproject.ducat.platform.DeviceLockAndroid
         // §16.21's ears and mouth, same pattern for the same reason.
         Calls.audio = org.ducatproject.ducat.platform.CallAudioAndroid
+        Calls.shell = object : Calls.Shell {
+            override fun takeover(context: android.content.Context, from: String) {
+                // A lit, watched app already shows CallScreen by itself.
+                if (!AppVisibility.foreground) Notify.ringIncoming(context, from)
+            }
+            override fun release(context: android.content.Context) {
+                Notify.quietIncoming(context)
+            }
+        }
         readIntent(intent)
         val prefs = ThemePreference(this)
         setContent {
@@ -455,7 +464,20 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
     // poller files it.
     val callV by ContactStore.changes.collectAsState()
     LaunchedEffect(callV) { Calls.noticed(context) }
-    if (Calls.state != Calls.State.Idle) {
+    // While a call exists, this activity may be woken by the full-screen
+    // ask on a dark, locked phone — it must show over the keyguard and
+    // light the screen, and must stop doing either the moment the call
+    // ends: these flags on an idle wallet would put balances above locks.
+    val inCall = Calls.state != Calls.State.Idle
+    LaunchedEffect(inCall) {
+        (context as? android.app.Activity)?.let {
+            if (android.os.Build.VERSION.SDK_INT >= 27) {
+                it.setShowWhenLocked(inCall)
+                it.setTurnScreenOn(inCall)
+            }
+        }
+    }
+    if (inCall) {
         org.ducatproject.ducat.ui.CallScreen()
         return
     }

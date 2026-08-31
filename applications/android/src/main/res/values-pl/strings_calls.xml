@@ -18,4 +18,6 @@
     <string name="call_body_ring">Dzwoni do ciebie</string>
     <string name="call_body_answer">Odebrano</string>
     <string name="call_body_decline">Nie mogę teraz rozmawiać.</string>
+    <string name="notify_call_channel">Połączenia przychodzące</string>
+    <string name="notify_call_incoming">Połączenie przychodzące</string>
 </resources>

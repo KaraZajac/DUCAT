@@ -18,4 +18,6 @@
     <string name="call_body_ring">전화 거는 중</string>
     <string name="call_body_answer">받았어요</string>
     <string name="call_body_decline">지금은 통화하기 어려워요.</string>
+    <string name="notify_call_channel">수신 전화</string>
+    <string name="notify_call_incoming">수신 전화</string>
 </resources>

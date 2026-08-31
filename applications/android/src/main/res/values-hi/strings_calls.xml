@@ -18,4 +18,6 @@
     <string name="call_body_ring">तुम्हें कॉल कर रहे</string>
     <string name="call_body_answer">उठाया</string>
     <string name="call_body_decline">अभी बात नहीं कर सकते।</string>
+    <string name="notify_call_channel">इनकमिंग कॉल</string>
+    <string name="notify_call_incoming">इनकमिंग कॉल</string>
 </resources>

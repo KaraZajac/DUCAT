@@ -18,4 +18,6 @@
     <string name="call_body_ring">Te está llamando</string>
     <string name="call_body_answer">Contestada</string>
     <string name="call_body_decline">Ahora no puedo hablar.</string>
+    <string name="notify_call_channel">Llamadas entrantes</string>
+    <string name="notify_call_incoming">Llamada entrante</string>
 </resources>

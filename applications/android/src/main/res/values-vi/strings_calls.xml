@@ -18,4 +18,6 @@
     <string name="call_body_ring">Đang gọi cho bạn</string>
     <string name="call_body_answer">Đã trả lời</string>
     <string name="call_body_decline">Giờ tôi chưa nói chuyện được.</string>
+    <string name="notify_call_channel">Cuộc gọi đến</string>
+    <string name="notify_call_incoming">Cuộc gọi đến</string>
 </resources>

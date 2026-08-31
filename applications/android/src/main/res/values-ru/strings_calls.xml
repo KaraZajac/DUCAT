@@ -18,4 +18,6 @@
     <string name="call_body_ring">Звонит тебе</string>
     <string name="call_body_answer">Принят</string>
     <string name="call_body_decline">Сейчас не могу говорить.</string>
+    <string name="notify_call_channel">Входящие вызовы</string>
+    <string name="notify_call_incoming">Входящий вызов</string>
 </resources>

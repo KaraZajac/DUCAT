@@ -18,4 +18,6 @@
     <string name="call_body_ring">Meneleponmu</string>
     <string name="call_body_answer">Dijawab</string>
     <string name="call_body_decline">Sedang tidak bisa bicara.</string>
+    <string name="notify_call_channel">Panggilan masuk</string>
+    <string name="notify_call_incoming">Panggilan masuk</string>
 </resources>

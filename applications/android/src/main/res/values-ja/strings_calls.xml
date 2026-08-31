@@ -18,4 +18,6 @@
     <string name="call_body_ring">呼び出しています</string>
     <string name="call_body_answer">応答しました</string>
     <string name="call_body_decline">いま話せません。</string>
+    <string name="notify_call_channel">着信</string>
+    <string name="notify_call_incoming">着信</string>
 </resources>

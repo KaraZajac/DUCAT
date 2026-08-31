@@ -18,4 +18,6 @@
     <string name="call_body_ring">Calling you</string>
     <string name="call_body_answer">Answered</string>
     <string name="call_body_decline">Can\u2019t talk right now.</string>
+    <string name="notify_call_channel">Incoming calls</string>
+    <string name="notify_call_incoming">Incoming call</string>
 </resources>

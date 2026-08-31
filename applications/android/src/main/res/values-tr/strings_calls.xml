@@ -18,4 +18,6 @@
     <string name="call_body_ring">Seni arıyor</string>
     <string name="call_body_answer">Yanıtlandı</string>
     <string name="call_body_decline">Şu an konuşamıyorum.</string>
+    <string name="notify_call_channel">Gelen aramalar</string>
+    <string name="notify_call_incoming">Gelen arama</string>
 </resources>

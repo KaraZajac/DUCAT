@@ -18,4 +18,6 @@
     <string name="call_body_ring">در حال تماس با تو</string>
     <string name="call_body_answer">پاسخ داده شد</string>
     <string name="call_body_decline">الان نمی‌توانم صحبت کنم.</string>
+    <string name="notify_call_channel">تماس‌های ورودی</string>
+    <string name="notify_call_incoming">تماس ورودی</string>
 </resources>
