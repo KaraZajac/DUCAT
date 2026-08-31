@@ -42,4 +42,23 @@
     <string name="activity_donations_filter">اهداها</string>
     <string name="activity_donation_chip">اهدا</string>
     <string name="activity_donated_total">%1$s اهدا شده</string>
+    <string name="activity_period_today">امروز</string>
+    <string name="activity_period_7d">۷ روز</string>
+    <string name="activity_period_month">این ماه</string>
+    <string name="activity_period_all">همه</string>
+    <string name="activity_sum_in">ورودی</string>
+    <string name="activity_sum_out">خروجی</string>
+    <string name="activity_sum_net">خالص</string>
+    <string name="activity_sum_fees">کارمزد</string>
+    <string name="activity_business">کسب‌وکار</string>
+    <string name="activity_sales">فروش</string>
+    <string name="activity_tax_collected">مالیات وصول‌شده</string>
+    <string name="activity_outstanding">معوق</string>
+    <string name="activity_export_csv">فایل CSV</string>
+    <string name="activity_export_json">فایل JSON</string>
+    <string name="activity_door_pos">صندوق</string>
+    <string name="activity_door_bar">حساب‌ها</string>
+    <string name="activity_door_taxi">سفرها</string>
+    <string name="activity_door_donate">قلک</string>
+    <string name="activity_door_pub">شماره‌ها</string>
 </resources>

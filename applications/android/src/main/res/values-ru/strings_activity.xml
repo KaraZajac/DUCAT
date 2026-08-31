@@ -46,4 +46,23 @@
     <string name="activity_donations_filter">Пожертвования</string>
     <string name="activity_donation_chip">Пожертвование</string>
     <string name="activity_donated_total">Пожертвовано %1$s</string>
+    <string name="activity_period_today">Сегодня</string>
+    <string name="activity_period_7d">7 дней</string>
+    <string name="activity_period_month">Этот месяц</string>
+    <string name="activity_period_all">Все</string>
+    <string name="activity_sum_in">Приход</string>
+    <string name="activity_sum_out">Расход</string>
+    <string name="activity_sum_net">Итог</string>
+    <string name="activity_sum_fees">Комиссии</string>
+    <string name="activity_business">Бизнес</string>
+    <string name="activity_sales">Продажи</string>
+    <string name="activity_tax_collected">Налог собран</string>
+    <string name="activity_outstanding">Не оплачено</string>
+    <string name="activity_export_csv">Файл CSV</string>
+    <string name="activity_export_json">Файл JSON</string>
+    <string name="activity_door_pos">касса</string>
+    <string name="activity_door_bar">счета</string>
+    <string name="activity_door_taxi">поездки</string>
+    <string name="activity_door_donate">банка</string>
+    <string name="activity_door_pub">выпуски</string>
 </resources>

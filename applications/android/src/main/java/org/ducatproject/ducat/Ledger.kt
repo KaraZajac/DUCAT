@@ -708,6 +708,90 @@ object Ledger {
      * - Tax is its own column — the till stamps it per sale (see [Tax]) and
      *   this is the half a business actually files.
      */
+    /**
+     * One period, added up — the glanceable answer above the statement.
+     *
+     * Pure over [build]'s rows so the desk can test the arithmetic without
+     * a wallet. Pending rows are excluded exactly as the export excludes
+     * them: a summary that counts money the chain has not confirmed is a
+     * forecast wearing a statement's clothes.
+     */
+    data class Summary(
+        val inPxmr: Long,
+        val outPxmr: Long,
+        val netPxmr: Long,
+        val feesPxmr: Long,
+        val inCount: Int,
+        val outCount: Int,
+        /** Tax carried on receipted money IN — what a till owes onward. */
+        val taxCollectedPxmr: Long,
+        /** Sent into donate-card threads within the period. */
+        val donationsPxmr: Long,
+    )
+
+    fun summarize(events: List<Event>, fromTs: Long, toTs: Long): Summary {
+        var inP = 0L; var outP = 0L; var fees = 0L; var net = 0L
+        var inC = 0; var outC = 0; var tax = 0L; var don = 0L
+        for (e in events) {
+            if (e.pending || e.provisional) continue
+            if (e.timestamp < fromTs || e.timestamp >= toTs) continue
+            if (e.direction == Direction.Received) {
+                inP += e.amountPxmr; inC++
+                tax += e.taxPxmr ?: 0L
+            } else {
+                outP += e.amountPxmr; outC++
+                fees += e.feePxmr
+                if (e.donation) don += e.amountPxmr
+            }
+            net += e.netPxmr
+        }
+        return Summary(inP, outP, net, fees, inC, outC, tax, don)
+    }
+
+    /**
+     * The business lens over the same period: what the tills, tabs, fares,
+     * jars and presses brought in, by door — plus what is still out.
+     *
+     * Tabs are the business's own sales ledger (origin, persona, tip and
+     * tax all live there), so this reads them rather than re-deriving trade
+     * from the wallet. Revenue counts tabs the chain has answered ("paid"
+     * or "settled"); outstanding is every billed tab still waiting.
+     */
+    data class DoorTake(val count: Int, val takePxmr: Long, val tipPxmr: Long)
+
+    data class BusinessSummary(
+        val byOrigin: Map<String, DoorTake>,
+        val taxCollectedPxmr: Long,
+        val outstandingCount: Int,
+        val outstandingPxmr: Long,
+    ) {
+        val salesCount: Int get() = byOrigin.values.sumOf { it.count }
+        val salesPxmr: Long get() = byOrigin.values.sumOf { it.takePxmr }
+    }
+
+    fun summarizeBusiness(tabs: List<RunningTab>, fromTs: Long, toTs: Long): BusinessSummary {
+        val by = LinkedHashMap<String, DoorTake>()
+        var tax = 0L
+        var outC = 0; var outP = 0L
+        for (t in tabs) {
+            when (t.state) {
+                "paid", "settled" -> {
+                    val at = if (t.settledAt > 0) t.settledAt / 1000 else t.openedAt / 1000
+                    if (at < fromTs || at >= toTs) continue
+                    val d = by[t.origin] ?: DoorTake(0, 0, 0)
+                    by[t.origin] = DoorTake(
+                        d.count + 1, d.takePxmr + t.takePxmr, d.tipPxmr + t.tipPxmr,
+                    )
+                    tax += t.taxPxmr ?: 0L
+                }
+                "open" -> if (t.billSeq >= 0) {
+                    outC++; outP += t.totalPxmr
+                }
+            }
+        }
+        return BusinessSummary(by, tax, outC, outP)
+    }
+
     fun exportCsv(context: android.content.Context): String {
         fun xmr(pxmr: Long): String =
             java.math.BigDecimal(pxmr).movePointLeft(12).toPlainString()
@@ -742,6 +826,62 @@ object Ledger {
             sb.append(xmr(e.balanceAfterPxmr)).append('\n')
         }
         return sb.toString()
+    }
+
+    /**
+     * The same statement as [exportCsv], for machines: one object per
+     * event, oldest first, amounts as XMR strings (fixed-point decimal —
+     * a double would shave piconero off a balance and call it rounding).
+     * Same fiat rule as the CSV: none. Timestamps are ISO-8601 UTC.
+     */
+    fun exportJson(context: android.content.Context): String {
+        fun xmr(pxmr: Long): String =
+            java.math.BigDecimal(pxmr).movePointLeft(12).toPlainString()
+        val fmt = java.time.format.DateTimeFormatter.ISO_INSTANT
+        val events = JSONArray()
+        for (e in build(context).asReversed()) {
+            if (e.pending) continue
+            events.put(JSONObject().apply {
+                put("date_utc", fmt.format(java.time.Instant.ofEpochSecond(e.timestamp)))
+                put("direction", if (e.direction == Direction.Sent) "out" else "in")
+                e.counterparty?.let { put("counterparty", it) }
+                e.note?.let { put("note", it) }
+                if (e.items.isNotEmpty()) {
+                    put("items", JSONArray().also { a ->
+                        e.items.forEach {
+                            a.put(
+                                JSONObject()
+                                    .put("description", it.description)
+                                    .put("amount_xmr", xmr(it.amountPxmr)),
+                            )
+                        }
+                    })
+                }
+                put("amount_xmr", xmr(e.amountPxmr))
+                put("fee_xmr", xmr(e.feePxmr))
+                put("net_xmr", xmr(e.netPxmr))
+                e.taxPxmr?.let { put("tax_xmr", xmr(it)) }
+                if (e.donation) put("donation", true)
+                e.escrow?.let { put("escrow", it.ifBlank { "unnamed" }) }
+                if (e.receipted) {
+                    put("receipted", true)
+                    e.receiptBy?.let { put("receipt_by", it) }
+                    if (e.receiptAt > 0) {
+                        put("receipt_at_utc", fmt.format(java.time.Instant.ofEpochSecond(e.receiptAt)))
+                    }
+                }
+                put("txid", e.txid)
+                put("height", e.height)
+                if (e.locked) put("locked", true)
+                put("balance_after_xmr", xmr(e.balanceAfterPxmr))
+            })
+        }
+        return JSONObject()
+            .put("format", "ducat-ledger")
+            .put("version", 1)
+            .put("generated_utc", fmt.format(java.time.Instant.now()))
+            .put("events", events)
+            .toString(2)
     }
 }
 

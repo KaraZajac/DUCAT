@@ -41,4 +41,23 @@
     <string name="activity_donations_filter">寄付</string>
     <string name="activity_donation_chip">寄付</string>
     <string name="activity_donated_total">寄付合計 %1$s</string>
+    <string name="activity_period_today">今日</string>
+    <string name="activity_period_7d">7日間</string>
+    <string name="activity_period_month">今月</string>
+    <string name="activity_period_all">すべて</string>
+    <string name="activity_sum_in">入金</string>
+    <string name="activity_sum_out">出金</string>
+    <string name="activity_sum_net">差引</string>
+    <string name="activity_sum_fees">手数料</string>
+    <string name="activity_business">ビジネス</string>
+    <string name="activity_sales">売上</string>
+    <string name="activity_tax_collected">徴収した税</string>
+    <string name="activity_outstanding">未回収</string>
+    <string name="activity_export_csv">CSVファイル</string>
+    <string name="activity_export_json">JSONファイル</string>
+    <string name="activity_door_pos">レジ</string>
+    <string name="activity_door_bar">ツケ</string>
+    <string name="activity_door_taxi">乗車</string>
+    <string name="activity_door_donate">募金箱</string>
+    <string name="activity_door_pub">号</string>
 </resources>

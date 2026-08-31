@@ -41,4 +41,23 @@
     <string name="activity_donations_filter">기부</string>
     <string name="activity_donation_chip">기부</string>
     <string name="activity_donated_total">%1$s 기부함</string>
+    <string name="activity_period_today">오늘</string>
+    <string name="activity_period_7d">7일</string>
+    <string name="activity_period_month">이번 달</string>
+    <string name="activity_period_all">전체</string>
+    <string name="activity_sum_in">입금</string>
+    <string name="activity_sum_out">출금</string>
+    <string name="activity_sum_net">순액</string>
+    <string name="activity_sum_fees">수수료</string>
+    <string name="activity_business">비즈니스</string>
+    <string name="activity_sales">매출</string>
+    <string name="activity_tax_collected">징수한 세금</string>
+    <string name="activity_outstanding">미수금</string>
+    <string name="activity_export_csv">CSV 파일</string>
+    <string name="activity_export_json">JSON 파일</string>
+    <string name="activity_door_pos">계산대</string>
+    <string name="activity_door_bar">외상</string>
+    <string name="activity_door_taxi">운행</string>
+    <string name="activity_door_donate">모금함</string>
+    <string name="activity_door_pub">호</string>
 </resources>

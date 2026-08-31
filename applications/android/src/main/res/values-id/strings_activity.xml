@@ -41,4 +41,23 @@
     <string name="activity_donations_filter">Donasi</string>
     <string name="activity_donation_chip">Donasi</string>
     <string name="activity_donated_total">%1$s didonasikan</string>
+    <string name="activity_period_today">Hari ini</string>
+    <string name="activity_period_7d">7 hari</string>
+    <string name="activity_period_month">Bulan ini</string>
+    <string name="activity_period_all">Semua</string>
+    <string name="activity_sum_in">Masuk</string>
+    <string name="activity_sum_out">Keluar</string>
+    <string name="activity_sum_net">Bersih</string>
+    <string name="activity_sum_fees">Biaya</string>
+    <string name="activity_business">Usaha</string>
+    <string name="activity_sales">Penjualan</string>
+    <string name="activity_tax_collected">Pajak terkumpul</string>
+    <string name="activity_outstanding">Belum dibayar</string>
+    <string name="activity_export_csv">Berkas CSV</string>
+    <string name="activity_export_json">Berkas JSON</string>
+    <string name="activity_door_pos">kasir</string>
+    <string name="activity_door_bar">bon</string>
+    <string name="activity_door_taxi">perjalanan</string>
+    <string name="activity_door_donate">celengan</string>
+    <string name="activity_door_pub">edisi</string>
 </resources>

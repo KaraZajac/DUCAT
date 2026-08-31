@@ -42,4 +42,23 @@
     <string name="activity_donations_filter">Donaties</string>
     <string name="activity_donation_chip">Donatie</string>
     <string name="activity_donated_total">%1$s gedoneerd</string>
+    <string name="activity_period_today">Vandaag</string>
+    <string name="activity_period_7d">7 dagen</string>
+    <string name="activity_period_month">Deze maand</string>
+    <string name="activity_period_all">Alles</string>
+    <string name="activity_sum_in">In</string>
+    <string name="activity_sum_out">Uit</string>
+    <string name="activity_sum_net">Netto</string>
+    <string name="activity_sum_fees">Kosten</string>
+    <string name="activity_business">Zaak</string>
+    <string name="activity_sales">Verkopen</string>
+    <string name="activity_tax_collected">Belasting geïnd</string>
+    <string name="activity_outstanding">Openstaand</string>
+    <string name="activity_export_csv">CSV-bestand</string>
+    <string name="activity_export_json">JSON-bestand</string>
+    <string name="activity_door_pos">kassa</string>
+    <string name="activity_door_bar">rekeningen</string>
+    <string name="activity_door_taxi">ritten</string>
+    <string name="activity_door_donate">pot</string>
+    <string name="activity_door_pub">edities</string>
 </resources>

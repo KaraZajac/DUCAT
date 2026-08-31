@@ -46,4 +46,23 @@
     <string name="activity_donations_filter">Darowizny</string>
     <string name="activity_donation_chip">Darowizna</string>
     <string name="activity_donated_total">Przekazano %1$s</string>
+    <string name="activity_period_today">Dzisiaj</string>
+    <string name="activity_period_7d">7 dni</string>
+    <string name="activity_period_month">Ten miesiąc</string>
+    <string name="activity_period_all">Wszystko</string>
+    <string name="activity_sum_in">Wpływy</string>
+    <string name="activity_sum_out">Wydatki</string>
+    <string name="activity_sum_net">Netto</string>
+    <string name="activity_sum_fees">Opłaty</string>
+    <string name="activity_business">Firma</string>
+    <string name="activity_sales">Sprzedaż</string>
+    <string name="activity_tax_collected">Podatek pobrany</string>
+    <string name="activity_outstanding">Zaległe</string>
+    <string name="activity_export_csv">Plik CSV</string>
+    <string name="activity_export_json">Plik JSON</string>
+    <string name="activity_door_pos">kasa</string>
+    <string name="activity_door_bar">rachunki</string>
+    <string name="activity_door_taxi">kursy</string>
+    <string name="activity_door_donate">słoik</string>
+    <string name="activity_door_pub">wydania</string>
 </resources>

@@ -41,4 +41,23 @@
     <string name="activity_donations_filter">การบริจาค</string>
     <string name="activity_donation_chip">บริจาค</string>
     <string name="activity_donated_total">บริจาคแล้ว %1$s</string>
+    <string name="activity_period_today">วันนี้</string>
+    <string name="activity_period_7d">7 วัน</string>
+    <string name="activity_period_month">เดือนนี้</string>
+    <string name="activity_period_all">ทั้งหมด</string>
+    <string name="activity_sum_in">รับ</string>
+    <string name="activity_sum_out">จ่าย</string>
+    <string name="activity_sum_net">สุทธิ</string>
+    <string name="activity_sum_fees">ค่าธรรมเนียม</string>
+    <string name="activity_business">ธุรกิจ</string>
+    <string name="activity_sales">ยอดขาย</string>
+    <string name="activity_tax_collected">ภาษีที่เก็บ</string>
+    <string name="activity_outstanding">ค้างชำระ</string>
+    <string name="activity_export_csv">ไฟล์ CSV</string>
+    <string name="activity_export_json">ไฟล์ JSON</string>
+    <string name="activity_door_pos">เครื่องเก็บเงิน</string>
+    <string name="activity_door_bar">บัญชีค้าง</string>
+    <string name="activity_door_taxi">เที่ยวรถ</string>
+    <string name="activity_door_donate">กระปุก</string>
+    <string name="activity_door_pub">ฉบับ</string>
 </resources>

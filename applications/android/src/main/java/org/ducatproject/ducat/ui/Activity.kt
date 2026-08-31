@@ -62,11 +62,13 @@ fun ActivityScreen() {
     // the wallet has ever owned to keep a single field.
     var pending by remember { mutableStateOf<List<Ledger.OpenRequest>>(emptyList()) }
     var tip by remember { mutableStateOf(0L) }
+    var tabs by remember { mutableStateOf<List<org.ducatproject.ducat.RunningTab>>(emptyList()) }
     LaunchedEffect(version) {
         withContext(Dispatchers.IO) {
             events = Ledger.build(context)
             pending = Ledger.openRequests(context)
             tip = org.ducatproject.ducat.WalletStore(context).tip()
+            tabs = org.ducatproject.ducat.TabStore(context).all()
         }
     }
     var open by remember { mutableStateOf<Ledger.Event?>(null) }
@@ -141,10 +143,37 @@ fun ActivityScreen() {
     // threads, with what they add up to. The chip only exists once there is
     // a donation to show — a filter for money nobody has given is clutter.
     var donationsOnly by rememberSaveable { mutableStateOf(false) }
+    // The glanceable answer above the statement: a period, four figures,
+    // and — when there was trade — the business's own line. The tiles are
+    // filters, not decoration: In shows only money in, Out only money out,
+    // so the summary and its evidence stay one screen.
+    var period by rememberSaveable { mutableStateOf(2) } // 0 today, 1 7d, 2 month, 3 all
+    var dirOnly by rememberSaveable { mutableStateOf(0) } // 0 both, 1 in, 2 out
+    val zone = java.time.ZoneId.systemDefault()
+    val fromTs = when (period) {
+        0 -> java.time.LocalDate.now(zone).atStartOfDay(zone).toEpochSecond()
+        1 -> System.currentTimeMillis() / 1000 - 7 * 86_400
+        2 -> java.time.LocalDate.now(zone).withDayOfMonth(1).atStartOfDay(zone).toEpochSecond()
+        else -> 0L
+    }
+    val summary = remember(events, fromTs) {
+        Ledger.summarize(events, fromTs, Long.MAX_VALUE)
+    }
+    val biz = remember(tabs, fromTs) {
+        Ledger.summarizeBusiness(tabs, fromTs, Long.MAX_VALUE)
+    }
     val searched = if (q.isEmpty()) events else haystacks
         .filter { (_, text, id) -> text.contains(q) || (ids && id.contains(q)) }
         .map { it.first }
-    val shownEvents = if (donationsOnly) searched.filter { it.donation } else searched
+    val ranged = searched.filter { it.pending || it.timestamp >= fromTs }
+        .filter {
+            when (dirOnly) {
+                1 -> it.direction == Ledger.Direction.Received
+                2 -> it.direction == Ledger.Direction.Sent
+                else -> true
+            }
+        }
+    val shownEvents = if (donationsOnly) ranged.filter { it.donation } else ranged
     val shownPending = if (donationsOnly) emptyList() else
         if (q.isEmpty()) pending else pending.filter {
             it.counterparty.lowercase().contains(q) ||
@@ -197,14 +226,17 @@ fun ActivityScreen() {
         // the share sheet — see Ledger.exportCsv for what a row carries and
         // why there is deliberately no fiat column.
         val scope = androidx.compose.runtime.rememberCoroutineScope()
-        IconButton(onClick = {
+        var exportMenu by remember { mutableStateOf(false) }
+        fun share(json: Boolean) {
             scope.launch {
                 withContext(Dispatchers.IO) {
                     runCatching {
-                        val csv = Ledger.exportCsv(context)
+                        val body = if (json) Ledger.exportJson(context) else Ledger.exportCsv(context)
                         val dir = java.io.File(context.filesDir, "backups").apply { mkdirs() }
-                        val f = java.io.File(dir, "ducat-statement.csv")
-                        f.writeText(csv)
+                        val f = java.io.File(
+                            dir, if (json) "ducat-statement.json" else "ducat-statement.csv",
+                        )
+                        f.writeText(body)
                         f
                     }
                 }.onSuccess { f ->
@@ -213,7 +245,7 @@ fun ActivityScreen() {
                             context, "${context.packageName}.backups", f,
                         )
                         val send = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                            type = "text/csv"
+                            type = if (json) "application/json" else "text/csv"
                             putExtra(android.content.Intent.EXTRA_STREAM, uri)
                             addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
                         }
@@ -225,12 +257,132 @@ fun ActivityScreen() {
                     }
                 }
             }
-        }) {
-            Icon(
-                Icons.Filled.IosShare,
-                stringResource(R.string.activity_export),
+        }
+        Box {
+            IconButton(onClick = { exportMenu = true }) {
+                Icon(
+                    Icons.Filled.IosShare,
+                    stringResource(R.string.activity_export),
+                )
+            }
+            DropdownMenu(expanded = exportMenu, onDismissRequest = { exportMenu = false }) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.activity_export_csv)) },
+                    onClick = { exportMenu = false; share(json = false) },
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.activity_export_json)) },
+                    onClick = { exportMenu = false; share(json = true) },
+                )
+            }
+        }
+    }
+    Row(
+        Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        listOf(
+            R.string.activity_period_today, R.string.activity_period_7d,
+            R.string.activity_period_month, R.string.activity_period_all,
+        ).forEachIndexed { i, res ->
+            FilterChip(
+                selected = period == i,
+                onClick = { period = i },
+                label = { Text(stringResource(res), style = MaterialTheme.typography.labelSmall) },
             )
         }
+    }
+    Row(
+        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        @Composable
+        fun tile(label: Int, pxmr: Long, filter: Int, tint: androidx.compose.ui.graphics.Color?) {
+            val active = dirOnly == filter && filter != 0
+            Surface(
+                onClick = {
+                    if (filter != 0) dirOnly = if (dirOnly == filter) 0 else filter
+                },
+                enabled = filter != 0,
+                shape = MaterialTheme.shapes.medium,
+                color = if (active) {
+                    MaterialTheme.colorScheme.secondaryContainer
+                } else {
+                    MaterialTheme.colorScheme.surfaceVariant
+                },
+                modifier = Modifier.weight(1f),
+            ) {
+                Column(Modifier.padding(horizontal = 8.dp, vertical = 6.dp)) {
+                    Text(
+                        stringResource(label),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        Amounts.show(context, pxmr).primary,
+                        style = MaterialTheme.typography.labelMedium,
+                        maxLines = 1,
+                        color = tint ?: MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+            }
+        }
+        tile(R.string.activity_sum_in, summary.inPxmr, 1, MaterialTheme.ducat.settled)
+        tile(R.string.activity_sum_out, summary.outPxmr, 2, null)
+        tile(R.string.activity_sum_net, summary.netPxmr, 0, null)
+        tile(R.string.activity_sum_fees, summary.feesPxmr, 0, null)
+    }
+    if (biz.salesCount > 0 || biz.outstandingCount > 0 || biz.taxCollectedPxmr > 0) {
+        Surface(
+            shape = MaterialTheme.shapes.medium,
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        ) {
+            Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+                Text(
+                    stringResource(R.string.activity_business),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(2.dp))
+                val doorNames = mapOf(
+                    "pos" to stringResource(R.string.activity_door_pos),
+                    "bar" to stringResource(R.string.activity_door_bar),
+                    "taxi" to stringResource(R.string.activity_door_taxi),
+                    "donate" to stringResource(R.string.activity_door_donate),
+                    "pub" to stringResource(R.string.activity_door_pub),
+                )
+                val doors = biz.byOrigin.entries.joinToString(" · ") { (origin, d) ->
+                    "${doorNames[origin] ?: origin} ${d.count} · " +
+                        Amounts.show(context, d.takePxmr).primary
+                }
+                if (biz.salesCount > 0) {
+                    Text(
+                        "${stringResource(R.string.activity_sales)} ${biz.salesCount} · " +
+                            Amounts.show(context, biz.salesPxmr).primary +
+                            if (doors.isNotEmpty()) "  ($doors)" else "",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+                if (biz.taxCollectedPxmr > 0) {
+                    Text(
+                        "${stringResource(R.string.activity_tax_collected)}: " +
+                            Amounts.show(context, biz.taxCollectedPxmr).primary,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+                if (biz.outstandingCount > 0) {
+                    Text(
+                        "${stringResource(R.string.activity_outstanding)}: " +
+                            "${biz.outstandingCount} · " +
+                            Amounts.show(context, biz.outstandingPxmr).primary,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.tertiary,
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.height(4.dp))
     }
     if (events.any { it.donation }) {
         Row(

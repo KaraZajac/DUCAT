@@ -40,4 +40,23 @@
     <string name="activity_donations_filter">捐赠</string>
     <string name="activity_donation_chip">捐赠</string>
     <string name="activity_donated_total">已捐赠 %1$s</string>
+    <string name="activity_period_today">今天</string>
+    <string name="activity_period_7d">7天</string>
+    <string name="activity_period_month">本月</string>
+    <string name="activity_period_all">全部</string>
+    <string name="activity_sum_in">收入</string>
+    <string name="activity_sum_out">支出</string>
+    <string name="activity_sum_net">净额</string>
+    <string name="activity_sum_fees">手续费</string>
+    <string name="activity_business">生意</string>
+    <string name="activity_sales">销售</string>
+    <string name="activity_tax_collected">已收税款</string>
+    <string name="activity_outstanding">未结</string>
+    <string name="activity_export_csv">CSV 文件</string>
+    <string name="activity_export_json">JSON 文件</string>
+    <string name="activity_door_pos">收银</string>
+    <string name="activity_door_bar">挂账</string>
+    <string name="activity_door_taxi">行程</string>
+    <string name="activity_door_donate">捐款罐</string>
+    <string name="activity_door_pub">期</string>
 </resources>

@@ -50,4 +50,23 @@
     <string name="activity_donations_filter">التبرعات</string>
     <string name="activity_donation_chip">تبرع</string>
     <string name="activity_donated_total">تبرعت بـ %1$s</string>
+    <string name="activity_period_today">اليوم</string>
+    <string name="activity_period_7d">٧ أيام</string>
+    <string name="activity_period_month">هذا الشهر</string>
+    <string name="activity_period_all">الكل</string>
+    <string name="activity_sum_in">وارد</string>
+    <string name="activity_sum_out">صادر</string>
+    <string name="activity_sum_net">الصافي</string>
+    <string name="activity_sum_fees">الرسوم</string>
+    <string name="activity_business">النشاط التجاري</string>
+    <string name="activity_sales">المبيعات</string>
+    <string name="activity_tax_collected">الضريبة المحصلة</string>
+    <string name="activity_outstanding">مستحق</string>
+    <string name="activity_export_csv">ملف CSV</string>
+    <string name="activity_export_json">ملف JSON</string>
+    <string name="activity_door_pos">الصندوق</string>
+    <string name="activity_door_bar">الحسابات</string>
+    <string name="activity_door_taxi">المشاوير</string>
+    <string name="activity_door_donate">الحصالة</string>
+    <string name="activity_door_pub">الأعداد</string>
 </resources>
