@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_publishing">การจัดพิมพ์</string>
+    <string name="pub_intro">ฉบับที่ผนึกไว้บนเครือข่าย ขายเป็นงวด — ผู้อ่านจ่ายในแชท กุญแจเปิดเดือนนั้น</string>
+    <string name="pub_new_name">สิ่งพิมพ์ใหม่</string>
+    <string name="pub_create">สร้าง</string>
+    <string name="pub_none_yet">ตั้งชื่อสิ่งพิมพ์เพื่อเริ่ม กุญแจหลักดอกเดียวสร้างกุญแจทุกงวด — กู้คืนแล้วได้แคตตาล็อกทั้งหมด</string>
+    <string name="pub_price_label">ราคาต่องวด (XMR เว้นว่าง = ฟรี)</string>
+    <string name="pub_price_set">ตั้งค่า</string>
+    <string name="pub_paid_note">แบบเสียเงิน: ใครที่เชนยืนยันว่าจ่ายแล้ว จะได้รับทุกฉบับอัตโนมัติ</string>
+    <string name="pub_free_note">ฟรี: ทุกฉบับส่งให้ทั้งรายชื่อเมื่อจัดพิมพ์</string>
+    <string name="pub_roster_title">สมาชิก</string>
+    <string name="pub_roster_empty">ยังไม่มีรายชื่อติดต่อในเพอร์โซนานี้ — ให้ใครสักคนรับการ์ดของคุณก่อน</string>
+    <string name="pub_period_label">งวด (เช่น 2026-09)</string>
+    <string name="pub_note_label">ข้อความถึงสมาชิก (ไม่บังคับ)</string>
+    <string name="pub_choose_file">เลือกไฟล์</string>
+    <string name="pub_file_chosen">%1$s · %2$s</string>
+    <string name="pub_publish">จัดพิมพ์ฉบับนี้</string>
+    <string name="pub_publishing">กำลังจัดพิมพ์…</string>
+    <string name="pub_out_paid">ฉบับ %1$s ออกแล้ว — สมาชิกที่จ่ายจะได้รับเมื่อการชำระยืนยัน</string>
+    <string name="pub_out_free">ส่งฉบับ %1$s ให้สมาชิก %2$d ราย</string>
+    <string name="pub_bill">เรียกเก็บทั้งรายชื่อ</string>
+    <string name="pub_billed_word">เรียกเก็บ %1$d ราย</string>
+    <string name="pub_billed_counts">เรียกเก็บ %1$d · จ่ายแล้ว %2$d</string>
+    <string name="pub_issues_title">ฉบับที่ส่งแล้ว</string>
+    <string name="pub_issue_row">ส่งแล้ว %1$d · %2$s</string>
+    <string name="pub_rail_shelf">บนชั้น — เครือข่ายเก็บไว้</string>
+    <string name="pub_rail_swarm">แบบฝูง — ให้บริการขณะแอปเปิด</string>
+    <string name="pub_reseed">ซีดอีกครั้ง</string>
+</resources>

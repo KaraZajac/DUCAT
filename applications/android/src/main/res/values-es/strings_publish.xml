@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_publishing">Publicar</string>
+    <string name="pub_intro">Números sellados en la red, vendidos por período — el lector paga en el hilo y la clave abre el mes.</string>
+    <string name="pub_new_name">Nueva publicación</string>
+    <string name="pub_create">Crear</string>
+    <string name="pub_none_yet">Ponle nombre a una publicación. Una clave maestra deriva la de cada período — una restauración recupera todo el catálogo.</string>
+    <string name="pub_price_label">Precio por período (XMR, vacío = gratis)</string>
+    <string name="pub_price_set">Fijar</string>
+    <string name="pub_paid_note">De pago: quien la cadena muestre como pagado recibe cada número automáticamente.</string>
+    <string name="pub_free_note">Gratis: cada número va a toda la lista al publicar.</string>
+    <string name="pub_roster_title">Suscriptores</string>
+    <string name="pub_roster_empty">Aún no hay contactos con esta persona — primero alguien reclama tu tarjeta.</string>
+    <string name="pub_period_label">Período (p. ej. 2026-09)</string>
+    <string name="pub_note_label">Nota para suscriptores (opcional)</string>
+    <string name="pub_choose_file">Elegir archivo</string>
+    <string name="pub_file_chosen">%1$s · %2$s</string>
+    <string name="pub_publish">Publicar número</string>
+    <string name="pub_publishing">Publicando…</string>
+    <string name="pub_out_paid">El número %1$s ya salió — los suscriptores lo reciben al confirmarse su pago.</string>
+    <string name="pub_out_free">Número %1$s enviado a %2$d suscriptor(es).</string>
+    <string name="pub_bill">Cobrar a la lista</string>
+    <string name="pub_billed_word">Factura enviada a %1$d suscriptor(es).</string>
+    <string name="pub_billed_counts">facturados %1$d · pagados %2$d</string>
+    <string name="pub_issues_title">Números enviados</string>
+    <string name="pub_issue_row">enviado a %1$d · %2$s</string>
+    <string name="pub_rail_shelf">en el estante — lo guarda la red</string>
+    <string name="pub_rail_swarm">por enjambre — sirve mientras la app corre</string>
+    <string name="pub_reseed">Volver a sembrar</string>
+</resources>

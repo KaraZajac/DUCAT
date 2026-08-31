@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_publishing">发行</string>
+    <string name="pub_intro">封存在网络上的期刊,按期出售 — 读者在对话里付款,密钥打开当月内容。</string>
+    <string name="pub_new_name">新刊物</string>
+    <string name="pub_create">创建</string>
+    <string name="pub_none_yet">给刊物起个名字开始。一把主密钥派生每期密钥 — 恢复即找回整个书目。</string>
+    <string name="pub_price_label">每期价格(XMR,留空=免费)</string>
+    <string name="pub_price_set">设定</string>
+    <string name="pub_paid_note">付费:链上显示已结清的读者会自动收到每一期。</string>
+    <string name="pub_free_note">免费:发行时发给整个名单。</string>
+    <string name="pub_roster_title">订阅者</string>
+    <string name="pub_roster_empty">此身份下还没有联系人 — 先让人认领你的名片。</string>
+    <string name="pub_period_label">期号(如 2026-09)</string>
+    <string name="pub_note_label">给订阅者的话(可选)</string>
+    <string name="pub_choose_file">选择文件</string>
+    <string name="pub_file_chosen">%1$s · %2$s</string>
+    <string name="pub_publish">发行本期</string>
+    <string name="pub_publishing">发行中…</string>
+    <string name="pub_out_paid">第 %1$s 期已发行 — 付费订阅者的付款确认后即送达。</string>
+    <string name="pub_out_free">第 %1$s 期已发给 %2$d 位订阅者。</string>
+    <string name="pub_bill">向名单开账单</string>
+    <string name="pub_billed_word">已向 %1$d 位订阅者开账单。</string>
+    <string name="pub_billed_counts">已开单 %1$d · 已付 %2$d</string>
+    <string name="pub_issues_title">已发行</string>
+    <string name="pub_issue_row">已发 %1$d · %2$s</string>
+    <string name="pub_rail_shelf">在书架上 — 由网络保存</string>
+    <string name="pub_rail_swarm">蜂群分发 — 应用运行时提供</string>
+    <string name="pub_reseed">重新做种</string>
+</resources>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_publishing">Publikowanie</string>
+    <string name="pub_intro">Zapieczętowane wydania w sieci, sprzedawane okresami — czytelnik płaci w wątku, klucz otwiera miesiąc.</string>
+    <string name="pub_new_name">Nowa publikacja</string>
+    <string name="pub_create">Utwórz</string>
+    <string name="pub_none_yet">Nazwij publikację. Jeden klucz główny wyprowadza klucz każdego okresu — przywrócenie odzyska cały katalog.</string>
+    <string name="pub_price_label">Cena za okres (XMR, puste = za darmo)</string>
+    <string name="pub_price_set">Ustaw</string>
+    <string name="pub_paid_note">Płatne: kogo łańcuch pokazuje jako opłaconego, ten dostaje każde wydanie automatycznie.</string>
+    <string name="pub_free_note">Darmowe: każde wydanie idzie do całej listy przy publikacji.</string>
+    <string name="pub_roster_title">Prenumeratorzy</string>
+    <string name="pub_roster_empty">Brak kontaktów w tej personie — najpierw ktoś zrealizuje twoją kartę.</string>
+    <string name="pub_period_label">Okres (np. 2026-09)</string>
+    <string name="pub_note_label">Notka dla prenumeratorów (opcjonalna)</string>
+    <string name="pub_choose_file">Wybierz plik</string>
+    <string name="pub_file_chosen">%1$s · %2$s</string>
+    <string name="pub_publish">Opublikuj wydanie</string>
+    <string name="pub_publishing">Publikowanie…</string>
+    <string name="pub_out_paid">Wydanie %1$s wyszło — płacący dostaną je, gdy zapłata się potwierdzi.</string>
+    <string name="pub_out_free">Wydanie %1$s wysłane do %2$d prenumeratora(ów).</string>
+    <string name="pub_bill">Rozlicz listę</string>
+    <string name="pub_billed_word">Rachunki dla %1$d prenumeratora(ów).</string>
+    <string name="pub_billed_counts">rachunki %1$d · opłacone %2$d</string>
+    <string name="pub_issues_title">Wysłane wydania</string>
+    <string name="pub_issue_row">wysłano %1$d · %2$s</string>
+    <string name="pub_rail_shelf">na półce — trzyma sieć</string>
+    <string name="pub_rail_swarm">rojem — serwuje, póki apka działa</string>
+    <string name="pub_reseed">Wysiej ponownie</string>
+</resources>

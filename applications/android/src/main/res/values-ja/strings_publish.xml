@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_publishing">発行</string>
+    <string name="pub_intro">ネットワーク上の封印された号を期間ごとに販売 — 読者はスレッドで支払い、鍵がその月を開きます。</string>
+    <string name="pub_new_name">新しい出版物</string>
+    <string name="pub_create">作成</string>
+    <string name="pub_none_yet">出版物に名前を付けて始めましょう。ひとつのマスター鍵が各期間の鍵を導出 — 復元でカタログ全体が戻ります。</string>
+    <string name="pub_price_label">期間あたりの価格(XMR、空欄=無料)</string>
+    <string name="pub_price_set">設定</string>
+    <string name="pub_paid_note">有料: チェーンが支払い済みと示す読者に、各号が自動で届きます。</string>
+    <string name="pub_free_note">無料: 発行時に名簿全員へ届きます。</string>
+    <string name="pub_roster_title">購読者</string>
+    <string name="pub_roster_empty">このペルソナの連絡先はまだありません — まず誰かがカードを受け取ります。</string>
+    <string name="pub_period_label">期間(例: 2026-09)</string>
+    <string name="pub_note_label">購読者への一言(任意)</string>
+    <string name="pub_choose_file">ファイルを選ぶ</string>
+    <string name="pub_file_chosen">%1$s · %2$s</string>
+    <string name="pub_publish">号を発行</string>
+    <string name="pub_publishing">発行中…</string>
+    <string name="pub_out_paid">%1$s号を発行しました — 支払いが確定した購読者から順に届きます。</string>
+    <string name="pub_out_free">%1$s号を%2$d人の購読者へ送りました。</string>
+    <string name="pub_bill">名簿に請求</string>
+    <string name="pub_billed_word">%1$d人に請求しました。</string>
+    <string name="pub_billed_counts">請求 %1$d · 支払済 %2$d</string>
+    <string name="pub_issues_title">発行済みの号</string>
+    <string name="pub_issue_row">送付 %1$d · %2$s</string>
+    <string name="pub_rail_shelf">棚の上 — ネットワークが保持</string>
+    <string name="pub_rail_swarm">スウォーム — アプリ起動中のみ配信</string>
+    <string name="pub_reseed">再シード</string>
+</resources>

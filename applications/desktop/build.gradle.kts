@@ -111,6 +111,7 @@ val sharedLogic = listOf(
     "org/ducatproject/ducat/FareRates.kt",
     "org/ducatproject/ducat/ui/Drawer.kt",
     "org/ducatproject/ducat/ui/Library.kt",
+    "org/ducatproject/ducat/ui/Publishing.kt",
     "org/ducatproject/ducat/ui/Shells.kt",
     "org/ducatproject/ducat/ui/Hail.kt",
     "org/ducatproject/ducat/ui/Taxi.kt",
@@ -144,7 +145,7 @@ val deskNativeFreshness = tasks.register("deskNativeFreshness") {
     doLast {
         if (!lib.isFile) return@doLast
         val newest = rustDirs.filter { it.isDirectory }
-            .flatMap { it.walkTopDown().filter { f -> f.isFile }.toList() }
+            .flatMap { it.walkTopDown().filter { f -> f.isFile && (f.extension == "rs" || f.extension == "toml") }.toList() }
             .maxByOrNull { it.lastModified() } ?: return@doLast
         if (newest.lastModified() > lib.lastModified()) {
             throw GradleException(

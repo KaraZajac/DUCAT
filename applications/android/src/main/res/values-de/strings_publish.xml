@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_publishing">Veröffentlichen</string>
+    <string name="pub_intro">Versiegelte Ausgaben im Netz, pro Periode verkauft — Leser bezahlen im Thread, der Schlüssel öffnet den Monat.</string>
+    <string name="pub_new_name">Neue Publikation</string>
+    <string name="pub_create">Anlegen</string>
+    <string name="pub_none_yet">Gib einer Publikation einen Namen. Ein Hauptschlüssel leitet jeden Periodenschlüssel ab — eine Wiederherstellung bringt den ganzen Katalog zurück.</string>
+    <string name="pub_price_label">Preis pro Periode (XMR, leer = gratis)</string>
+    <string name="pub_price_set">Setzen</string>
+    <string name="pub_paid_note">Bezahlt: Wen die Chain als beglichen zeigt, bekommt jede Ausgabe automatisch.</string>
+    <string name="pub_free_note">Gratis: Jede Ausgabe geht beim Veröffentlichen an die ganze Liste.</string>
+    <string name="pub_roster_title">Abonnenten</string>
+    <string name="pub_roster_empty">Noch keine Kontakte unter dieser Persona — erst löst jemand deine Karte ein.</string>
+    <string name="pub_period_label">Periode (z. B. 2026-09)</string>
+    <string name="pub_note_label">Notiz an Abonnenten (optional)</string>
+    <string name="pub_choose_file">Datei wählen</string>
+    <string name="pub_file_chosen">%1$s · %2$s</string>
+    <string name="pub_publish">Ausgabe veröffentlichen</string>
+    <string name="pub_publishing">Wird veröffentlicht…</string>
+    <string name="pub_out_paid">Ausgabe %1$s ist draußen — zahlende Abonnenten erhalten sie, sobald ihre Zahlung bestätigt ist.</string>
+    <string name="pub_out_free">Ausgabe %1$s an %2$d Abonnent(en) gesendet.</string>
+    <string name="pub_bill">Liste abrechnen</string>
+    <string name="pub_billed_word">%1$d Abonnent(en) in Rechnung gestellt.</string>
+    <string name="pub_billed_counts">berechnet %1$d · bezahlt %2$d</string>
+    <string name="pub_issues_title">Verschickte Ausgaben</string>
+    <string name="pub_issue_row">gesendet %1$d · %2$s</string>
+    <string name="pub_rail_shelf">im Regal — das Netz hält sie</string>
+    <string name="pub_rail_swarm">per Schwarm — dient, solange die App läuft</string>
+    <string name="pub_reseed">Neu seeden</string>
+</resources>

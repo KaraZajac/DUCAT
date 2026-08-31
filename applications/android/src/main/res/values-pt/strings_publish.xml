@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_publishing">Publicar</string>
+    <string name="pub_intro">Edições seladas na rede, vendidas por período — o leitor paga no fio e a chave abre o mês.</string>
+    <string name="pub_new_name">Nova publicação</string>
+    <string name="pub_create">Criar</string>
+    <string name="pub_none_yet">Dê nome a uma publicação. Uma chave-mestra deriva a de cada período — uma restauração devolve o catálogo inteiro.</string>
+    <string name="pub_price_label">Preço por período (XMR, vazio = grátis)</string>
+    <string name="pub_price_set">Definir</string>
+    <string name="pub_paid_note">Paga: quem a chain mostrar como quitado recebe cada edição automaticamente.</string>
+    <string name="pub_free_note">Grátis: cada edição vai para toda a lista ao publicar.</string>
+    <string name="pub_roster_title">Assinantes</string>
+    <string name="pub_roster_empty">Ainda não há contatos nesta persona — antes alguém resgata seu cartão.</string>
+    <string name="pub_period_label">Período (ex.: 2026-09)</string>
+    <string name="pub_note_label">Nota aos assinantes (opcional)</string>
+    <string name="pub_choose_file">Escolher arquivo</string>
+    <string name="pub_file_chosen">%1$s · %2$s</string>
+    <string name="pub_publish">Publicar edição</string>
+    <string name="pub_publishing">Publicando…</string>
+    <string name="pub_out_paid">A edição %1$s saiu — assinantes pagantes recebem quando o pagamento confirma.</string>
+    <string name="pub_out_free">Edição %1$s enviada a %2$d assinante(s).</string>
+    <string name="pub_bill">Cobrar a lista</string>
+    <string name="pub_billed_word">%1$d assinante(s) cobrado(s).</string>
+    <string name="pub_billed_counts">cobrados %1$d · pagos %2$d</string>
+    <string name="pub_issues_title">Edições enviadas</string>
+    <string name="pub_issue_row">enviado a %1$d · %2$s</string>
+    <string name="pub_rail_shelf">na estante — a rede segura</string>
+    <string name="pub_rail_swarm">por enxame — serve enquanto o app roda</string>
+    <string name="pub_reseed">Semear de novo</string>
+</resources>

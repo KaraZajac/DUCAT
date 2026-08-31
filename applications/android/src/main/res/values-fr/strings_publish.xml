@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_publishing">Publier</string>
+    <string name="pub_intro">Des numéros scellés sur le réseau, vendus à la période — le lecteur paie dans le fil, la clé ouvre le mois.</string>
+    <string name="pub_new_name">Nouvelle publication</string>
+    <string name="pub_create">Créer</string>
+    <string name="pub_none_yet">Nomme une publication pour commencer. Une clé maîtresse dérive celle de chaque période — une restauration ramène tout le catalogue.</string>
+    <string name="pub_price_label">Prix par période (XMR, vide = gratuit)</string>
+    <string name="pub_price_set">Fixer</string>
+    <string name="pub_paid_note">Payant : qui la chaîne montre comme réglé reçoit chaque numéro automatiquement.</string>
+    <string name="pub_free_note">Gratuit : chaque numéro part à toute la liste à la publication.</string>
+    <string name="pub_roster_title">Abonnés</string>
+    <string name="pub_roster_empty">Pas encore de contacts sous ce personnage — quelqu\u2019un réclame d\u2019abord ta carte.</string>
+    <string name="pub_period_label">Période (p. ex. 2026-09)</string>
+    <string name="pub_note_label">Note aux abonnés (facultatif)</string>
+    <string name="pub_choose_file">Choisir un fichier</string>
+    <string name="pub_file_chosen">%1$s · %2$s</string>
+    <string name="pub_publish">Publier le numéro</string>
+    <string name="pub_publishing">Publication…</string>
+    <string name="pub_out_paid">Le numéro %1$s est sorti — les abonnés payants le reçoivent quand leur paiement se confirme.</string>
+    <string name="pub_out_free">Numéro %1$s envoyé à %2$d abonné(s).</string>
+    <string name="pub_bill">Facturer la liste</string>
+    <string name="pub_billed_word">%1$d abonné(s) facturé(s).</string>
+    <string name="pub_billed_counts">facturés %1$d · payés %2$d</string>
+    <string name="pub_issues_title">Numéros expédiés</string>
+    <string name="pub_issue_row">envoyé à %1$d · %2$s</string>
+    <string name="pub_rail_shelf">sur l\u2019étagère — le réseau le garde</string>
+    <string name="pub_rail_swarm">par essaim — sert tant que l\u2019app tourne</string>
+    <string name="pub_reseed">Ressemer</string>
+</resources>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_publishing">Publiceren</string>
+    <string name="pub_intro">Verzegelde edities op het netwerk, per periode verkocht — de lezer betaalt in de thread, de sleutel opent de maand.</string>
+    <string name="pub_new_name">Nieuwe publicatie</string>
+    <string name="pub_create">Aanmaken</string>
+    <string name="pub_none_yet">Geef een publicatie een naam. Eén hoofdsleutel leidt elke periodesleutel af — een herstel brengt de hele catalogus terug.</string>
+    <string name="pub_price_label">Prijs per periode (XMR, leeg = gratis)</string>
+    <string name="pub_price_set">Instellen</string>
+    <string name="pub_paid_note">Betaald: wie de chain als voldaan toont, krijgt elke editie automatisch.</string>
+    <string name="pub_free_note">Gratis: elke editie gaat bij publicatie naar de hele lijst.</string>
+    <string name="pub_roster_title">Abonnees</string>
+    <string name="pub_roster_empty">Nog geen contacten onder deze persona — eerst claimt iemand je kaart.</string>
+    <string name="pub_period_label">Periode (bv. 2026-09)</string>
+    <string name="pub_note_label">Notitie aan abonnees (optioneel)</string>
+    <string name="pub_choose_file">Bestand kiezen</string>
+    <string name="pub_file_chosen">%1$s · %2$s</string>
+    <string name="pub_publish">Editie publiceren</string>
+    <string name="pub_publishing">Publiceren…</string>
+    <string name="pub_out_paid">Editie %1$s is uit — betalende abonnees krijgen haar zodra hun betaling bevestigt.</string>
+    <string name="pub_out_free">Editie %1$s naar %2$d abonnee(s) gestuurd.</string>
+    <string name="pub_bill">Lijst factureren</string>
+    <string name="pub_billed_word">%1$d abonnee(s) gefactureerd.</string>
+    <string name="pub_billed_counts">gefactureerd %1$d · betaald %2$d</string>
+    <string name="pub_issues_title">Verzonden edities</string>
+    <string name="pub_issue_row">verzonden %1$d · %2$s</string>
+    <string name="pub_rail_shelf">op de plank — het netwerk bewaart het</string>
+    <string name="pub_rail_swarm">per zwerm — serveert zolang de app draait</string>
+    <string name="pub_reseed">Opnieuw seeden</string>
+</resources>

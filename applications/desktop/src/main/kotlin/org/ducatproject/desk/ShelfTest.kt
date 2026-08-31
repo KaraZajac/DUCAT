@@ -87,6 +87,48 @@ fun main() {
             println("SHELF_PUBLISHER_GONE deliberately")
             System.out.flush()
         }
+        // The desk as pure reader for a PHONE publisher: issue the card
+        // (easy to hand to an emulator as a link), wait for the claim, then
+        // wait for the manifest and fetch off the shelf. The phone drives
+        // its own Publishing screen; this end only reads.
+        "reader" -> {
+            val out = File(System.getenv("DUCAT_PUB_OUT") ?: error("SHELF_FAIL set DUCAT_PUB_OUT"))
+            val context = up(dir)
+            NameStore(context).get() ?: NameStore(context).put("Desk Reader")
+            val card = Mailbox.issueCard(context, "Desk Reader", 60uL * 60uL)
+            println("SHELF_CARD ${card.uri}")
+            System.out.flush()
+
+            var publisher: org.ducatproject.ducat.Contact? = null
+            val deadline = System.currentTimeMillis() + 900_000
+            while (System.currentTimeMillis() < deadline) {
+                runCatching { Mailbox.collectClaims(context) }
+                runCatching { Mailbox.poll(context) }
+                if (publisher == null) {
+                    publisher = ContactStore(context).all().firstOrNull()
+                    if (publisher != null) {
+                        println("SHELF_CLAIMED ${publisher.displayName()}")
+                        System.out.flush()
+                    }
+                }
+                publisher?.let { p ->
+                    val sub = Publications.subscription(context, p.personaHex)
+                    val period = sub?.third?.keys?.maxOrNull()
+                    if (sub?.first != null && sub.second != null && period != null) {
+                        System.err.println("capability filed: shelf + key for $period")
+                        val t0 = System.currentTimeMillis()
+                        val got = Publications.fetchShelf(
+                            context, p.personaHex, period, out,
+                        ) { pos, len -> System.err.println("shelf $pos/$len") }
+                        val secs = (System.currentTimeMillis() - t0) / 1000.0
+                        println("SHELF_OK ${got.length()} $secs ${got.absolutePath}")
+                        return
+                    }
+                }
+                Thread.sleep(3_000)
+            }
+            error("SHELF_FAIL nothing arrived from the phone")
+        }
         "subscribe" -> {
             val cardUri = System.getenv("DUCAT_PUB_CARD") ?: error("SHELF_FAIL set DUCAT_PUB_CARD")
             val out = File(System.getenv("DUCAT_PUB_OUT") ?: error("SHELF_FAIL set DUCAT_PUB_OUT"))

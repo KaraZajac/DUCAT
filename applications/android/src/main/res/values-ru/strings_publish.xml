@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_publishing">Публикация</string>
+    <string name="pub_intro">Запечатанные выпуски в сети, продаются по периодам — читатель платит в переписке, ключ открывает месяц.</string>
+    <string name="pub_new_name">Новая публикация</string>
+    <string name="pub_create">Создать</string>
+    <string name="pub_none_yet">Назови публикацию. Один мастер-ключ порождает ключ каждого периода — восстановление вернёт весь каталог.</string>
+    <string name="pub_price_label">Цена за период (XMR, пусто = бесплатно)</string>
+    <string name="pub_price_set">Задать</string>
+    <string name="pub_paid_note">Платно: кого цепочка показывает оплатившим, тот получает каждый выпуск автоматически.</string>
+    <string name="pub_free_note">Бесплатно: каждый выпуск уходит всему списку при публикации.</string>
+    <string name="pub_roster_title">Подписчики</string>
+    <string name="pub_roster_empty">Под этой персоной пока нет контактов — сначала кто-то предъявит твою карточку.</string>
+    <string name="pub_period_label">Период (напр. 2026-09)</string>
+    <string name="pub_note_label">Заметка подписчикам (необязательно)</string>
+    <string name="pub_choose_file">Выбрать файл</string>
+    <string name="pub_file_chosen">%1$s · %2$s</string>
+    <string name="pub_publish">Опубликовать выпуск</string>
+    <string name="pub_publishing">Публикуется…</string>
+    <string name="pub_out_paid">Выпуск %1$s вышел — платные подписчики получат его по мере подтверждения оплат.</string>
+    <string name="pub_out_free">Выпуск %1$s отправлен %2$d подписчику(ам).</string>
+    <string name="pub_bill">Выставить счета</string>
+    <string name="pub_billed_word">Счета выставлены: %1$d.</string>
+    <string name="pub_billed_counts">счетов %1$d · оплачено %2$d</string>
+    <string name="pub_issues_title">Отправленные выпуски</string>
+    <string name="pub_issue_row">отправлено %1$d · %2$s</string>
+    <string name="pub_rail_shelf">на полке — хранит сеть</string>
+    <string name="pub_rail_swarm">роем — раздаётся, пока приложение работает</string>
+    <string name="pub_reseed">Раздать снова</string>
+</resources>

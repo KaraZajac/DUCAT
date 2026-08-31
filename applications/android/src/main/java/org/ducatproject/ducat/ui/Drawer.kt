@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -44,6 +45,7 @@ enum class Section(val labelRes: Int) {
     Profile(R.string.section_profile),
     Contacts(R.string.section_contacts),
     Library(R.string.section_library),
+    Publishing(R.string.section_publishing),
     Logs(R.string.section_logs),
     Settings(R.string.section_settings),
     Modes(R.string.section_modes),
@@ -98,6 +100,7 @@ private fun iconFor(s: Section) = when (s) {
     Section.Profile -> Icons.Filled.Person
     Section.Contacts -> Icons.Filled.People
     Section.Library -> Icons.Filled.LocalLibrary
+    Section.Publishing -> Icons.AutoMirrored.Filled.MenuBook
     Section.Logs -> Icons.Filled.Description
     Section.Settings -> Icons.Filled.Settings
     Section.Modes -> Icons.Filled.Tune
@@ -132,6 +135,8 @@ fun SectionScreen(
         Section.Contacts -> ContactsAdminSection(onOpenChat)
 
         Section.Library -> LibrarySection()
+
+        Section.Publishing -> PublishingSection()
 
         Section.Logs -> LogsScreen()
 

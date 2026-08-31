@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_publishing">النشر</string>
+    <string name="pub_intro">أعداد مختومة على الشبكة تُباع بالفترة — يدفع القارئ في المحادثة والمفتاح يفتح الشهر.</string>
+    <string name="pub_new_name">منشور جديد</string>
+    <string name="pub_create">إنشاء</string>
+    <string name="pub_none_yet">سمِّ منشورًا للبدء. مفتاح رئيسي واحد يشتق مفتاح كل فترة — والاستعادة تعيد الفهرس كله.</string>
+    <string name="pub_price_label">السعر لكل فترة (XMR، فارغ = مجاني)</string>
+    <string name="pub_price_set">تعيين</string>
+    <string name="pub_paid_note">مدفوع: من تُظهره السلسلة مسدِّدًا يستلم كل عدد تلقائيًا.</string>
+    <string name="pub_free_note">مجاني: كل عدد يذهب للقائمة كلها عند النشر.</string>
+    <string name="pub_roster_title">المشتركون</string>
+    <string name="pub_roster_empty">لا جهات اتصال تحت هذه الشخصية بعد — يطالب أحدهم ببطاقتك أولًا.</string>
+    <string name="pub_period_label">الفترة (مثل 2026-09)</string>
+    <string name="pub_note_label">ملاحظة للمشتركين (اختياري)</string>
+    <string name="pub_choose_file">اختر ملفًا</string>
+    <string name="pub_file_chosen">%1$s · %2$s</string>
+    <string name="pub_publish">انشر العدد</string>
+    <string name="pub_publishing">جارٍ النشر…</string>
+    <string name="pub_out_paid">صدر العدد %1$s — يستلمه المشتركون المدفوعون مع تأكيد دفعاتهم.</string>
+    <string name="pub_out_free">أُرسل العدد %1$s إلى %2$d مشتركًا.</string>
+    <string name="pub_bill">فوترة القائمة</string>
+    <string name="pub_billed_word">فُوتر %1$d مشتركًا.</string>
+    <string name="pub_billed_counts">مفوتر %1$d · مدفوع %2$d</string>
+    <string name="pub_issues_title">الأعداد المرسلة</string>
+    <string name="pub_issue_row">أُرسل %1$d · %2$s</string>
+    <string name="pub_rail_shelf">على الرف — تحفظه الشبكة</string>
+    <string name="pub_rail_swarm">بالسرب — يُقدَّم ما دام التطبيق يعمل</string>
+    <string name="pub_reseed">إعادة البذر</string>
+</resources>

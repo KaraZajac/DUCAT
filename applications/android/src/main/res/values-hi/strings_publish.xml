@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_publishing">प्रकाशन</string>
+    <string name="pub_intro">नेटवर्क पर सील बंद अंक, अवधि के हिसाब से बिक्री — पाठक थ्रेड में भुगतान करता है, कुंजी महीना खोलती है।</string>
+    <string name="pub_new_name">नया प्रकाशन</string>
+    <string name="pub_create">बनाओ</string>
+    <string name="pub_none_yet">शुरू करने के लिए प्रकाशन का नाम रखो। एक मास्टर कुंजी हर अवधि की कुंजी निकालती है — बहाली से पूरा संग्रह लौट आता है।</string>
+    <string name="pub_price_label">प्रति अवधि दाम (XMR, खाली = मुफ़्त)</string>
+    <string name="pub_price_set">तय करो</string>
+    <string name="pub_paid_note">सशुल्क: चेन जिसे चुकता दिखाए, उसे हर अंक अपने आप मिलता है।</string>
+    <string name="pub_free_note">मुफ़्त: प्रकाशित करते ही हर अंक पूरी सूची को जाता है।</string>
+    <string name="pub_roster_title">सदस्य</string>
+    <string name="pub_roster_empty">इस पर्सोना में अभी कोई संपर्क नहीं — पहले कोई तुम्हारा कार्ड ले।</string>
+    <string name="pub_period_label">अवधि (जैसे 2026-09)</string>
+    <string name="pub_note_label">सदस्यों के लिए नोट (वैकल्पिक)</string>
+    <string name="pub_choose_file">फ़ाइल चुनो</string>
+    <string name="pub_file_chosen">%1$s · %2$s</string>
+    <string name="pub_publish">अंक प्रकाशित करो</string>
+    <string name="pub_publishing">प्रकाशित हो रहा…</string>
+    <string name="pub_out_paid">अंक %1$s निकल गया — भुगतान पक्का होते ही सदस्य पाते हैं।</string>
+    <string name="pub_out_free">अंक %1$s %2$d सदस्य(ओं) को भेजा।</string>
+    <string name="pub_bill">सूची को बिल भेजो</string>
+    <string name="pub_billed_word">%1$d सदस्य(ओं) को बिल गया।</string>
+    <string name="pub_billed_counts">बिल %1$d · चुकता %2$d</string>
+    <string name="pub_issues_title">भेजे गए अंक</string>
+    <string name="pub_issue_row">भेजा %1$d · %2$s</string>
+    <string name="pub_rail_shelf">ताक पर — नेटवर्क सँभालता है</string>
+    <string name="pub_rail_swarm">झुंड से — ऐप चलते तक</string>
+    <string name="pub_reseed">फिर सीड करो</string>
+</resources>

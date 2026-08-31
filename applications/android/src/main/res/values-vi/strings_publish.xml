@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_publishing">Xuất bản</string>
+    <string name="pub_intro">Các số được niêm phong trên mạng, bán theo kỳ — người đọc trả trong cuộc trò chuyện, chìa khóa mở tháng đó.</string>
+    <string name="pub_new_name">Ấn phẩm mới</string>
+    <string name="pub_create">Tạo</string>
+    <string name="pub_none_yet">Đặt tên ấn phẩm để bắt đầu. Một khóa chủ sinh ra khóa của từng kỳ — khôi phục là lấy lại cả danh mục.</string>
+    <string name="pub_price_label">Giá mỗi kỳ (XMR, bỏ trống = miễn phí)</string>
+    <string name="pub_price_set">Đặt</string>
+    <string name="pub_paid_note">Trả phí: ai được chuỗi xác nhận đã trả sẽ tự động nhận từng số.</string>
+    <string name="pub_free_note">Miễn phí: mỗi số gửi cho cả danh sách khi xuất bản.</string>
+    <string name="pub_roster_title">Người đăng ký</string>
+    <string name="pub_roster_empty">Persona này chưa có liên hệ — trước hết cần ai đó nhận thẻ của bạn.</string>
+    <string name="pub_period_label">Kỳ (vd. 2026-09)</string>
+    <string name="pub_note_label">Lời nhắn tới người đăng ký (tùy chọn)</string>
+    <string name="pub_choose_file">Chọn tệp</string>
+    <string name="pub_file_chosen">%1$s · %2$s</string>
+    <string name="pub_publish">Xuất bản số này</string>
+    <string name="pub_publishing">Đang xuất bản…</string>
+    <string name="pub_out_paid">Số %1$s đã ra — người đăng ký trả phí sẽ nhận khi thanh toán xác nhận.</string>
+    <string name="pub_out_free">Đã gửi số %1$s tới %2$d người đăng ký.</string>
+    <string name="pub_bill">Gửi hóa đơn cả danh sách</string>
+    <string name="pub_billed_word">Đã gửi hóa đơn cho %1$d người.</string>
+    <string name="pub_billed_counts">đã gửi đơn %1$d · đã trả %2$d</string>
+    <string name="pub_issues_title">Các số đã gửi</string>
+    <string name="pub_issue_row">đã gửi %1$d · %2$s</string>
+    <string name="pub_rail_shelf">trên kệ — mạng giữ giúp</string>
+    <string name="pub_rail_swarm">theo bầy — phục vụ khi ứng dụng mở</string>
+    <string name="pub_reseed">Seed lại</string>
+</resources>

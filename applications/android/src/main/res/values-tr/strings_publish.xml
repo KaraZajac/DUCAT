@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_publishing">Yayıncılık</string>
+    <string name="pub_intro">Ağda mühürlü sayılar, dönem dönem satılır — okur sohbette öder, anahtar o ayı açar.</string>
+    <string name="pub_new_name">Yeni yayın</string>
+    <string name="pub_create">Oluştur</string>
+    <string name="pub_none_yet">Başlamak için yayına ad ver. Tek ana anahtar her dönemin anahtarını türetir — geri yükleme tüm kataloğu getirir.</string>
+    <string name="pub_price_label">Dönem başı fiyat (XMR, boş = ücretsiz)</string>
+    <string name="pub_price_set">Ayarla</string>
+    <string name="pub_paid_note">Ücretli: Zincirin ödendi gösterdiği herkes her sayıyı otomatik alır.</string>
+    <string name="pub_free_note">Ücretsiz: Her sayı yayında tüm listeye gider.</string>
+    <string name="pub_roster_title">Aboneler</string>
+    <string name="pub_roster_empty">Bu personada henüz kişi yok — önce biri kartını alsın.</string>
+    <string name="pub_period_label">Dönem (örn. 2026-09)</string>
+    <string name="pub_note_label">Abonelere not (isteğe bağlı)</string>
+    <string name="pub_choose_file">Dosya seç</string>
+    <string name="pub_file_chosen">%1$s · %2$s</string>
+    <string name="pub_publish">Sayıyı yayımla</string>
+    <string name="pub_publishing">Yayımlanıyor…</string>
+    <string name="pub_out_paid">%1$s sayısı çıktı — ödemesi kesinleşen aboneler otomatik alır.</string>
+    <string name="pub_out_free">%1$s sayısı %2$d aboneye gönderildi.</string>
+    <string name="pub_bill">Listeye fatura kes</string>
+    <string name="pub_billed_word">%1$d aboneye fatura kesildi.</string>
+    <string name="pub_billed_counts">faturalı %1$d · ödendi %2$d</string>
+    <string name="pub_issues_title">Gönderilen sayılar</string>
+    <string name="pub_issue_row">gönderildi %1$d · %2$s</string>
+    <string name="pub_rail_shelf">rafta — ağ saklıyor</string>
+    <string name="pub_rail_swarm">sürüyle — uygulama açıkken sunulur</string>
+    <string name="pub_reseed">Yeniden tohumla</string>
+</resources>

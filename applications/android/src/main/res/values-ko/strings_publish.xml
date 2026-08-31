@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_publishing">발행</string>
+    <string name="pub_intro">네트워크에 봉인된 호를 기간 단위로 판매 — 독자는 대화에서 지불하고, 키가 그 달을 엽니다.</string>
+    <string name="pub_new_name">새 간행물</string>
+    <string name="pub_create">만들기</string>
+    <string name="pub_none_yet">간행물 이름을 지어 시작하세요. 마스터 키 하나가 각 기간의 키를 파생 — 복원하면 카탈로그 전체가 돌아옵니다.</string>
+    <string name="pub_price_label">기간당 가격 (XMR, 비우면 무료)</string>
+    <string name="pub_price_set">설정</string>
+    <string name="pub_paid_note">유료: 체인이 결제 완료로 보여주는 독자에게 각 호가 자동으로 갑니다.</string>
+    <string name="pub_free_note">무료: 발행 시 명단 전체에게 갑니다.</string>
+    <string name="pub_roster_title">구독자</string>
+    <string name="pub_roster_empty">이 페르소나에 아직 연락처가 없어요 — 먼저 누군가 카드를 등록해야 해요.</string>
+    <string name="pub_period_label">기간 (예: 2026-09)</string>
+    <string name="pub_note_label">구독자에게 한마디 (선택)</string>
+    <string name="pub_choose_file">파일 선택</string>
+    <string name="pub_file_chosen">%1$s · %2$s</string>
+    <string name="pub_publish">호 발행</string>
+    <string name="pub_publishing">발행 중…</string>
+    <string name="pub_out_paid">%1$s호가 나왔어요 — 결제가 확정된 구독자부터 받습니다.</string>
+    <string name="pub_out_free">%1$s호를 구독자 %2$d명에게 보냈어요.</string>
+    <string name="pub_bill">명단에 청구</string>
+    <string name="pub_billed_word">%1$d명에게 청구했어요.</string>
+    <string name="pub_billed_counts">청구 %1$d · 결제 %2$d</string>
+    <string name="pub_issues_title">발행된 호</string>
+    <string name="pub_issue_row">발송 %1$d · %2$s</string>
+    <string name="pub_rail_shelf">선반 위 — 네트워크가 보관</string>
+    <string name="pub_rail_swarm">스웜 — 앱이 켜진 동안 제공</string>
+    <string name="pub_reseed">다시 시드</string>
+</resources>

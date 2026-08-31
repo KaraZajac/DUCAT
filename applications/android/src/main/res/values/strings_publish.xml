@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_publishing">Publishing</string>
+    <string name="pub_intro">Sealed issues on the network, sold by the period — readers pay the thread, the key opens the month.</string>
+    <string name="pub_new_name">New publication</string>
+    <string name="pub_create">Create</string>
+    <string name="pub_none_yet">Name a publication to start. One master key derives every period\u2019s key — a restore restores the whole catalogue.</string>
+    <string name="pub_price_label">Price per period (XMR, blank = free)</string>
+    <string name="pub_price_set">Set</string>
+    <string name="pub_paid_note">Paid: whoever the chain shows as settled gets each issue automatically.</string>
+    <string name="pub_free_note">Free: each issue goes to the whole roster when you publish.</string>
+    <string name="pub_roster_title">Subscribers</string>
+    <string name="pub_roster_empty">No contacts under this persona yet — a subscriber claims your card first.</string>
+    <string name="pub_period_label">Period (e.g. 2026-09)</string>
+    <string name="pub_note_label">Note to subscribers (optional)</string>
+    <string name="pub_choose_file">Choose file</string>
+    <string name="pub_file_chosen">%1$s · %2$s</string>
+    <string name="pub_publish">Publish issue</string>
+    <string name="pub_publishing">Publishing…</string>
+    <string name="pub_out_paid">Issue %1$s is out — paid subscribers receive it as their payments settle.</string>
+    <string name="pub_out_free">Issue %1$s sent to %2$d subscriber(s).</string>
+    <string name="pub_bill">Bill roster</string>
+    <string name="pub_billed_word">Billed %1$d subscriber(s).</string>
+    <string name="pub_billed_counts">billed %1$d · paid %2$d</string>
+    <string name="pub_issues_title">Shipped issues</string>
+    <string name="pub_issue_row">sent %1$d · %2$s</string>
+    <string name="pub_rail_shelf">on the shelf — held by the network</string>
+    <string name="pub_rail_swarm">by swarm — serves while the app runs</string>
+    <string name="pub_reseed">Seed again</string>
+</resources>

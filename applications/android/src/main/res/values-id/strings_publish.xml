@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_publishing">Penerbitan</string>
+    <string name="pub_intro">Edisi tersegel di jaringan, dijual per periode — pembaca membayar di thread, kuncinya membuka bulan itu.</string>
+    <string name="pub_new_name">Terbitan baru</string>
+    <string name="pub_create">Buat</string>
+    <string name="pub_none_yet">Beri nama terbitan untuk mulai. Satu kunci induk menurunkan kunci tiap periode — pemulihan mengembalikan seluruh katalog.</string>
+    <string name="pub_price_label">Harga per periode (XMR, kosong = gratis)</string>
+    <string name="pub_price_set">Atur</string>
+    <string name="pub_paid_note">Berbayar: siapa pun yang chain tunjukkan lunas menerima tiap edisi otomatis.</string>
+    <string name="pub_free_note">Gratis: tiap edisi dikirim ke seluruh daftar saat terbit.</string>
+    <string name="pub_roster_title">Pelanggan</string>
+    <string name="pub_roster_empty">Belum ada kontak di persona ini — seseorang mengklaim kartumu dulu.</string>
+    <string name="pub_period_label">Periode (mis. 2026-09)</string>
+    <string name="pub_note_label">Catatan untuk pelanggan (opsional)</string>
+    <string name="pub_choose_file">Pilih berkas</string>
+    <string name="pub_file_chosen">%1$s · %2$s</string>
+    <string name="pub_publish">Terbitkan edisi</string>
+    <string name="pub_publishing">Menerbitkan…</string>
+    <string name="pub_out_paid">Edisi %1$s sudah terbit — pelanggan berbayar menerimanya begitu pembayaran terkonfirmasi.</string>
+    <string name="pub_out_free">Edisi %1$s terkirim ke %2$d pelanggan.</string>
+    <string name="pub_bill">Tagih daftar</string>
+    <string name="pub_billed_word">Menagih %1$d pelanggan.</string>
+    <string name="pub_billed_counts">ditagih %1$d · lunas %2$d</string>
+    <string name="pub_issues_title">Edisi terkirim</string>
+    <string name="pub_issue_row">terkirim %1$d · %2$s</string>
+    <string name="pub_rail_shelf">di rak — dijaga jaringan</string>
+    <string name="pub_rail_swarm">lewat kawanan — melayani selama aplikasi hidup</string>
+    <string name="pub_reseed">Seed ulang</string>
+</resources>

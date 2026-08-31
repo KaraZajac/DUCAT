@@ -180,7 +180,7 @@ val nativeFreshness = tasks.register("nativeFreshness") {
             .filter { it.name == "libducat_mobile.so" }.toList()
         if (libs.isEmpty()) return@doLast
         val sources = rustDirs.map(::File).filter { it.isDirectory }
-            .flatMap { it.walkTopDown().filter { f -> f.isFile }.toList() }
+            .flatMap { it.walkTopDown().filter { f -> f.isFile && (f.extension == "rs" || f.extension == "toml") }.toList() }
         val newest = sources.maxByOrNull { it.lastModified() } ?: return@doLast
         val oldestLib = libs.minByOrNull { it.lastModified() } ?: return@doLast
         if (newest.lastModified() > oldestLib.lastModified()) {
