@@ -105,6 +105,7 @@ object Calls {
     private const val CTRL_ANSWER = 1
     private const val CTRL_DECLINE = 2
     private const val CTRL_BYE = 3
+    private const val CTRL_RENEW = 4
 
     private fun controlFrame(type: Int, id: ByteArray, route: ByteArray? = null): ByteArray {
         val out = ByteArray(8 + 1 + 8 + (route?.size ?: 0))
@@ -377,6 +378,10 @@ object Calls {
         audio?.start { frame ->
             if (!running) return@start
             if (!initiator && rxFrames == 0) return@start
+            // The FIELD, not the parameter: a RENEW re-aims mid-call, and a
+            // closure that captured the launch-time route would keep
+            // whispering into the dead door for ever.
+            val door = theirRoute ?: return@start
             val pkt = runCatching { uniffi.ducat_mobile.callEncode(frame) }
                 .getOrNull() ?: return@start
             val n = seq.getAndIncrement()
@@ -387,7 +392,7 @@ object Calls {
             out[4] = (ms ushr 24).toByte(); out[5] = (ms ushr 16).toByte()
             out[6] = (ms ushr 8).toByte(); out[7] = ms.toByte()
             pkt.copyInto(out, 8)
-            runCatching { uniffi.ducat_mobile.nodeCallSend(route, out) }
+            runCatching { uniffi.ducat_mobile.nodeCallSend(door, out) }
                 .onSuccess { txFrames++ }
         }
         // The ear: drain the ring, drop the header, decode IN ORDER, play.
@@ -400,17 +405,62 @@ object Calls {
         pump = Thread {
             var lastHeard = System.currentTimeMillis()
             var lastSeq = -1L
+            // The bad-draw watch (§16.21 RENEW): some routes lose most of a
+            // direction while the reverse runs clean. When arrivals starve
+            // against the 50 Hz cadence, allocate a fresh door and hand it
+            // over on the direction that still works.
+            var winStart = System.currentTimeMillis()
+            var winCount = 0
+            var lastRenew = 0L
             while (running) {
                 val f = uniffi.ducat_mobile.nodeCallRecv(50u)
-                if (f != null && isControl(f)) {
-                    lastHeard = System.currentTimeMillis()
-                    if (f[8].toInt() == CTRL_BYE && myCallId != null &&
-                        f.copyOfRange(9, 17).contentEquals(myCallId)
+                val nowMs = System.currentTimeMillis()
+                if (nowMs - winStart >= 6_000) {
+                    if (rxFrames > 100 && winCount < 90 &&
+                        nowMs - lastRenew > 15_000 && running
                     ) {
-                        DucatLog.i("Calls", "BYE — they hung up")
-                        endInternal()
+                        lastRenew = nowMs
+                        val id = myCallId
+                        val door = theirRoute
+                        if (id != null && door != null) {
+                            Thread {
+                                runCatching {
+                                    val fresh = uniffi.ducat_mobile.nodeCallRoute()
+                                    DucatLog.i(
+                                        "Calls",
+                                        "starving (${winCount / 6}/s) — renewing our door",
+                                    )
+                                    repeat(3) {
+                                        runCatching {
+                                            uniffi.ducat_mobile.nodeCallSend(
+                                                door, controlFrame(CTRL_RENEW, id, fresh),
+                                            )
+                                        }
+                                    }
+                                }
+                            }.apply { isDaemon = true }.start()
+                        }
+                    }
+                    winStart = nowMs
+                    winCount = 0
+                }
+                if (f != null && isControl(f)) {
+                    lastHeard = nowMs
+                    val ctlId = f.copyOfRange(9, 17)
+                    if (myCallId != null && ctlId.contentEquals(myCallId)) {
+                        when (f[8].toInt()) {
+                            CTRL_BYE -> {
+                                DucatLog.i("Calls", "BYE — they hung up")
+                                endInternal()
+                            }
+                            CTRL_RENEW -> if (f.size > 17) {
+                                theirRoute = f.copyOfRange(17, f.size)
+                                DucatLog.i("Calls", "re-aimed at their new door")
+                            }
+                        }
                     }
                 } else if (f != null && f.size > 8) {
+                    winCount++
                     lastHeard = System.currentTimeMillis()
                     val seq = ((f[0].toLong() and 0xFF) shl 24) or
                         ((f[1].toLong() and 0xFF) shl 16) or

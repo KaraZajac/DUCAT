@@ -117,6 +117,9 @@ pub(crate) fn swarm_route_changed(route_id: &RouteId, added: bool) {
 // voice is real-time, so when the ring is full the OLDEST frame drops —
 // late audio is worse than lost audio.
 static CALL_ROUTES: OnceLock<Mutex<std::collections::HashSet<RouteId>>> = OnceLock::new();
+/// blob -> id for routes THIS node allocated, so one can be released
+/// mid-call (a RENEW retires its predecessor deliberately in tests).
+static CALL_MINE: OnceLock<Mutex<std::collections::HashMap<Vec<u8>, RouteId>>> = OnceLock::new();
 static CALL_RX: OnceLock<Mutex<VecDeque<Vec<u8>>>> = OnceLock::new();
 static CALL_TARGETS: OnceLock<Mutex<std::collections::HashMap<Vec<u8>, RouteId>>> =
     OnceLock::new();
@@ -130,6 +133,9 @@ fn call_rx() -> &'static Mutex<VecDeque<Vec<u8>>> {
 }
 fn call_targets() -> &'static Mutex<std::collections::HashMap<Vec<u8>, RouteId>> {
     CALL_TARGETS.get_or_init(|| Mutex::new(std::collections::HashMap::new()))
+}
+fn call_mine() -> &'static Mutex<std::collections::HashMap<Vec<u8>, RouteId>> {
+    CALL_MINE.get_or_init(|| Mutex::new(std::collections::HashMap::new()))
 }
 
 fn feed_swarm(update: VeilidUpdate) {
@@ -649,7 +655,8 @@ pub fn node_call_route() -> Result<Vec<u8>, NodeError> {
         loop {
             match api.new_private_route().await {
                 Ok(rb) => {
-                    call_routes().lock().unwrap().insert(rb.route_id);
+                    call_routes().lock().unwrap().insert(rb.route_id.clone());
+                    call_mine().lock().unwrap().insert(rb.blob.clone(), rb.route_id);
                     return Ok(rb.blob);
                 }
                 Err(e) if format!("{e}").contains("TryAgain") && waited < 40 => {
@@ -756,6 +763,19 @@ pub fn node_call_send_report() -> String {
     )
 }
 
+/// Release ONE of our own call doors by its blob — what a RENEW's test
+/// harness does to its predecessor, proving the far side really moved.
+#[uniffi::export]
+pub fn node_call_release(route_blob: Vec<u8>) {
+    let id = call_mine().lock().unwrap().remove(&route_blob);
+    if let Some(id) = id {
+        call_routes().lock().unwrap().remove(&id);
+        if let Ok((api, _rt)) = handles() {
+            let _ = api.release_private_route(id);
+        }
+    }
+}
+
 const CALL_QUEUE_MAX: usize = 8;
 
 fn call_queue() -> &'static Mutex<VecDeque<(Vec<u8>, Vec<u8>)>> {
@@ -801,6 +821,7 @@ pub fn node_call_close() {
     call_rx().lock().unwrap().clear();
     call_targets().lock().unwrap().clear();
     call_queue().lock().unwrap().clear();
+    call_mine().lock().unwrap().clear();
 }
 
 // ---------------------------------------------------------------------------

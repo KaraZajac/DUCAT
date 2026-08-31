@@ -12,6 +12,7 @@ import uniffi.ducat_mobile.callDecode
 import uniffi.ducat_mobile.callEncode
 import uniffi.ducat_mobile.nodeCallClose
 import uniffi.ducat_mobile.nodeCallRecv
+import uniffi.ducat_mobile.nodeCallRelease
 import uniffi.ducat_mobile.nodeCallRoute
 import uniffi.ducat_mobile.nodeCallSend
 import uniffi.ducat_mobile.nodeStart
@@ -241,7 +242,7 @@ fun main() {
                     System.out.flush()
                     // One bad answer must not kill the answerphone — the
                     // next poll sees the same offer and tries again.
-                    val mine = runCatching { nodeCallRoute() }
+                    var mine = runCatching { nodeCallRoute() }
                         .onFailure { System.err.println("answer failed: ${it.message}") }
                         .getOrNull()
                     if (mine == null) {
@@ -267,6 +268,11 @@ fun main() {
                     // The soak knob: how much tone to stream (50 fps). The
                     // default is a minute; a soak passes 150000 for fifty.
                     val frames = (System.getenv("DUCAT_AP_FRAMES") ?: "3000").toInt()
+                    // The renewal drill (§16.21 RENEW): after N received
+                    // frames, mint a fresh door, hand it over, and RELEASE
+                    // the old one — so continued arrivals prove the far
+                    // side re-aimed rather than the old route lingering.
+                    val renewAt = (System.getenv("DUCAT_AP_RENEW") ?: "0").toInt()
                     val rxT = Thread {
                         val end = System.currentTimeMillis() + frames * FRAME_MS + 30_000
                         while (System.currentTimeMillis() < end && !bye) {
@@ -279,6 +285,23 @@ fun main() {
                                 continue
                             }
                             rx++
+                            if (renewAt > 0 && rx == renewAt) {
+                                runCatching {
+                                    val fresh = nodeCallRoute()
+                                    repeat(3) {
+                                        runCatching {
+                                            nodeCallSend(route, controlFrame(4, id, fresh))
+                                        }
+                                    }
+                                    Thread.sleep(1_500)
+                                    nodeCallRelease(mine!!)
+                                    mine = fresh
+                                    println("AP_RENEWED at=$rx")
+                                    System.out.flush()
+                                }.onFailure {
+                                    System.err.println("renew failed: ${it.message}")
+                                }
+                            }
                             if (f.size > 8 &&
                                 runCatching { callDecode(f.copyOfRange(8, f.size)) }.isSuccess
                             ) {

@@ -963,6 +963,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1112,6 +1114,8 @@ internal interface UniffiLib : Library {
     ): Unit
     fun uniffi_ducat_mobile_fn_func_node_call_recv(`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_node_call_release(`routeBlob`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
     fun uniffi_ducat_mobile_fn_func_node_call_route(uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_call_send(`routeBlob`: RustBuffer.ByValue,`frame`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -1476,6 +1480,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_call_recv(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_call_release(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_node_call_route(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_call_send(
@@ -1810,6 +1816,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_call_recv() != 13639.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_call_release() != 8944.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_call_route() != 28389.toShort()) {
@@ -7758,6 +7767,18 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
 }
     )
     }
+    
+
+        /**
+         * Release ONE of our own call doors by its blob — what a RENEW's test
+         * harness does to its predecessor, proving the far side really moved.
+         */ fun `nodeCallRelease`(`routeBlob`: kotlin.ByteArray)
+        = 
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_call_release(
+        FfiConverterByteArray.lower(`routeBlob`),_status)
+}
+    
     
 
         /**

@@ -159,8 +159,19 @@ fun ActivityScreen() {
     val summary = remember(events, fromTs) {
         Ledger.summarize(events, fromTs, Long.MAX_VALUE)
     }
-    val biz = remember(tabs, fromTs) {
+    // Three shops on one phone must not share an undifferentiated take:
+    // when the roster has more than one persona, the business line can be
+    // narrowed to one. Wallet tiles stay whole-wallet — there is one purse.
+    val personas = remember { org.ducatproject.ducat.PersonaStore(context).all() }
+    var bizPersona by rememberSaveable { mutableStateOf<String?>(null) }
+    val bizAll = remember(tabs, fromTs) {
         Ledger.summarizeBusiness(tabs, fromTs, Long.MAX_VALUE)
+    }
+    val biz = remember(tabs, fromTs, bizPersona) {
+        if (bizPersona == null) bizAll
+        else Ledger.summarizeBusiness(
+            tabs.filter { it.personaHex == bizPersona }, fromTs, Long.MAX_VALUE,
+        )
     }
     val searched = if (q.isEmpty()) events else haystacks
         .filter { (_, text, id) -> text.contains(q) || (ids && id.contains(q)) }
@@ -332,18 +343,49 @@ fun ActivityScreen() {
         tile(R.string.activity_sum_net, summary.netPxmr, 0, null)
         tile(R.string.activity_sum_fees, summary.feesPxmr, 0, null)
     }
-    if (biz.salesCount > 0 || biz.outstandingCount > 0 || biz.taxCollectedPxmr > 0) {
+    if (bizAll.salesCount > 0 || bizAll.outstandingCount > 0 || bizAll.taxCollectedPxmr > 0) {
         Surface(
             shape = MaterialTheme.shapes.medium,
             color = MaterialTheme.colorScheme.surfaceVariant,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         ) {
             Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
-                Text(
-                    stringResource(R.string.activity_business),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        stringResource(R.string.activity_business),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    if (personas.size > 1) {
+                        Spacer(Modifier.weight(1f))
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            FilterChip(
+                                selected = bizPersona == null,
+                                onClick = { bizPersona = null },
+                                label = {
+                                    Text(
+                                        stringResource(R.string.activity_period_all),
+                                        style = MaterialTheme.typography.labelSmall,
+                                    )
+                                },
+                            )
+                            personas.forEach { pers ->
+                                FilterChip(
+                                    selected = bizPersona == pers.hex,
+                                    onClick = { bizPersona = pers.hex },
+                                    label = {
+                                        Text(
+                                            pers.name.ifBlank {
+                                                stringResource(R.string.personas_primary)
+                                            },
+                                            style = MaterialTheme.typography.labelSmall,
+                                        )
+                                    },
+                                )
+                            }
+                        }
+                    }
+                }
                 Spacer(Modifier.height(2.dp))
                 val doorNames = mapOf(
                     "pos" to stringResource(R.string.activity_door_pos),
