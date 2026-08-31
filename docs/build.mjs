@@ -137,7 +137,13 @@ for (const code of order) {
 
   // canonical + alternates
   const canonical = code === "en" ? `${SITE}/` : `${SITE}/${code}/`;
-  out = out.replace(/<link rel="canonical"[^>]*>/, `<link rel="canonical" href="${canonical}">`);
+  // attribute order is whatever the template happens to use, so do not assume
+  // rel comes first — matching on that silently left every translation
+  // declaring itself a duplicate of the English page.
+  out = out.replace(/<link[^>]*rel="canonical"[^>]*>/, `<link rel="canonical" href="${canonical}">`);
+  // og:url shares the problem: left alone, every translation would advertise the
+  // English page as its own address when shared.
+  out = out.replace(/<meta[^>]*property="og:url"[^>]*>/, `<meta property="og:url" content="${canonical}">`);
   out = out.replace("</head>", `${alternates(prefix)}\n</head>`);
 
   // switcher goes wherever the template asks for it
