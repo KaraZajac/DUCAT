@@ -961,6 +961,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1114,6 +1116,8 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_call_send(`routeBlob`: RustBuffer.ByValue,`frame`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Unit
+    fun uniffi_ducat_mobile_fn_func_node_call_send_report(uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_changed_keys(uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_dht_close(`key`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -1476,6 +1480,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_call_send(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_call_send_report(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_node_changed_keys(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_dht_close(
@@ -1809,7 +1815,10 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_node_call_route() != 28389.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_node_call_send() != 9393.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_node_call_send() != 62733.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_call_send_report() != 64076.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_changed_keys() != 44940.toShort()) {
@@ -7767,14 +7776,15 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
     
 
         /**
-         * One media frame to the far door. The blob is imported once and cached;
-         * fire-and-forget, like the voice cadence needs: the frame is handed to
-         * the runtime and the caller's thread goes straight back to the
-         * microphone — a send that blocked for a route round-trip capped the
-         * capture thread at ~14 frames a second, which was measured on a phone
-         * and blamed on the microphone. At most [CALL_INFLIGHT_MAX] frames ride
-         * at once; past that the freshest frame wins and the stale one is
-         * dropped, which is what voice wants.
+         * One media frame out the far door — without blocking the microphone and
+         * without flooding the route. The frame goes on a short queue served by a
+         * single sender task: one app-message in flight at a time, which a phone's
+         * relayed, NAT-shadowed connection can actually sustain (32 concurrent
+         * sends thrashed route resolution — "could not get remote private route" —
+         * and delivered 2%). On a slow route the queue keeps the freshest
+         * [CALL_QUEUE_MAX] frames and the receiver's concealment bridges the gaps;
+         * a blocked capture thread was the original sin (it capped a phone at
+         * ~14 fps and got blamed on the microphone).
          */
     @Throws(NodeException::class) fun `nodeCallSend`(`routeBlob`: kotlin.ByteArray, `frame`: kotlin.ByteArray)
         = 
@@ -7783,6 +7793,19 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
         FfiConverterByteArray.lower(`routeBlob`),FfiConverterByteArray.lower(`frame`),_status)
 }
     
+    
+
+        /**
+         * What became of the fire-and-forget frames: "confirmed/failed last-error".
+         * Confirmation is veilid's send completing, not the far end hearing it.
+         */ fun `nodeCallSendReport`(): kotlin.String {
+            return FfiConverterString.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_call_send_report(
+        _status)
+}
+    )
+    }
     
 
         /**

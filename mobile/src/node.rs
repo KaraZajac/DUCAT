@@ -322,7 +322,7 @@ pub fn node_start(storage_dir: String, udp: bool) -> Result<(), NodeError> {
         // infrastructure node re-enables with DUCAT_FULL_NODE=1.
         if std::env::var("DUCAT_FULL_NODE").ok().as_deref() != Some("1") {
             cfg["capabilities"]["disable"] =
-                serde_json::json!(["ROUT", "TUNL", "SGNL", "RLAY", "DIAL", "DHTV"]);
+                serde_json::json!(["ROUT", "TUNL", "RLAY", "DHTV"]);
         }
         // NOTE (2026-08-16): veilid-core 0.5.7's config has no "logging"
         // section — api-level logging is wired through a tracing layer, not
@@ -642,58 +642,130 @@ pub fn node_reply(id: u64, message: Vec<u8>) -> Result<(), NodeError> {
 pub fn node_call_route() -> Result<Vec<u8>, NodeError> {
     let (api, rt) = handles()?;
     rt.block_on(async {
-        let rb = api
-            .new_private_route()
-            .await
-            .map_err(|e| NodeError::Failed(format!("call route: {e}")))?;
-        call_routes().lock().unwrap().insert(rb.route_id);
-        Ok(rb.blob)
+        // A node that only just attached refuses allocation with TryAgain
+        // ("allocated route failed to test") — the same young-node reflex
+        // the swarm meets. A ring is worth forty patient seconds.
+        let mut waited = 0u32;
+        loop {
+            match api.new_private_route().await {
+                Ok(rb) => {
+                    call_routes().lock().unwrap().insert(rb.route_id);
+                    return Ok(rb.blob);
+                }
+                Err(e) if format!("{e}").contains("TryAgain") && waited < 40 => {
+                    waited += 2;
+                    tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+                }
+                Err(e) => return Err(NodeError::Failed(format!("call route: {e}"))),
+            }
+        }
     })
 }
 
-/// One media frame to the far door. The blob is imported once and cached;
-/// fire-and-forget, like the voice cadence needs: the frame is handed to
-/// the runtime and the caller's thread goes straight back to the
-/// microphone — a send that blocked for a route round-trip capped the
-/// capture thread at ~14 frames a second, which was measured on a phone
-/// and blamed on the microphone. At most [CALL_INFLIGHT_MAX] frames ride
-/// at once; past that the freshest frame wins and the stale one is
-/// dropped, which is what voice wants.
+/// One media frame out the far door — without blocking the microphone and
+/// without flooding the route. The frame goes on a short queue served by a
+/// single sender task: one app-message in flight at a time, which a phone's
+/// relayed, NAT-shadowed connection can actually sustain (32 concurrent
+/// sends thrashed route resolution — "could not get remote private route" —
+/// and delivered 2%). On a slow route the queue keeps the freshest
+/// [CALL_QUEUE_MAX] frames and the receiver's concealment bridges the gaps;
+/// a blocked capture thread was the original sin (it capped a phone at
+/// ~14 fps and got blamed on the microphone).
 #[uniffi::export]
 pub fn node_call_send(route_blob: Vec<u8>, frame: Vec<u8>) -> Result<(), NodeError> {
     let (api, rt) = handles()?;
-    let route = {
-        let cached = call_targets().lock().unwrap().get(&route_blob).cloned();
-        match cached {
-            Some(r) => r,
-            None => {
-                let r = api
-                    .import_remote_private_route(route_blob.clone())
-                    .map_err(|e| NodeError::Failed(format!("import route: {e}")))?;
-                call_targets().lock().unwrap().insert(route_blob.clone(), r.clone());
-                r
-            }
+    {
+        let mut q = call_queue().lock().unwrap();
+        while q.len() >= CALL_QUEUE_MAX {
+            q.pop_front(); // freshest wins; voice never waits for the past
         }
-    };
-    let rc = api
-        .routing_context()
-        .map_err(|e| NodeError::Failed(format!("routing context: {e}")))?;
-    if call_inflight().fetch_add(1, std::sync::atomic::Ordering::SeqCst) >= CALL_INFLIGHT_MAX {
-        call_inflight().fetch_sub(1, std::sync::atomic::Ordering::SeqCst);
-        return Err(NodeError::Failed("call send backlog".into()));
+        q.push_back((route_blob, frame));
     }
-    rt.spawn(async move {
-        let _ = rc.app_message(Target::RouteId(route), frame).await;
-        call_inflight().fetch_sub(1, std::sync::atomic::Ordering::SeqCst);
-    });
+    if !call_sender_up().swap(true, std::sync::atomic::Ordering::SeqCst) {
+        rt.spawn(async move {
+            loop {
+                let next = call_queue().lock().unwrap().pop_front();
+                let Some((blob, frame)) = next else {
+                    tokio::time::sleep(std::time::Duration::from_millis(5)).await;
+                    continue;
+                };
+                let route = {
+                    let cached = call_targets().lock().unwrap().get(&blob).cloned();
+                    match cached {
+                        Some(r) => r,
+                        None => match api.import_remote_private_route(blob.clone()) {
+                            Ok(r) => {
+                                call_targets().lock().unwrap().insert(blob.clone(), r.clone());
+                                r
+                            }
+                            Err(e) => {
+                                call_send_errs()
+                                    .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                                *call_send_last().lock().unwrap() = format!("import: {e}");
+                                continue;
+                            }
+                        },
+                    }
+                };
+                let Ok(rc) = api.routing_context() else { continue };
+                match rc.app_message(Target::RouteId(route), frame).await {
+                    Ok(()) => {
+                        call_send_oks().fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                    }
+                    Err(e) => {
+                        call_send_errs().fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                        let msg = format!("{e}");
+                        // A route that stopped resolving may have rotated
+                        // under us: forget it so the next frame re-imports.
+                        if msg.contains("private route") {
+                            call_targets().lock().unwrap().remove(&blob);
+                        }
+                        *call_send_last().lock().unwrap() = msg;
+                    }
+                }
+            }
+        });
+    }
     Ok(())
 }
 
-const CALL_INFLIGHT_MAX: i32 = 32;
-
-fn call_inflight() -> &'static std::sync::atomic::AtomicI32 {
+fn call_send_oks() -> &'static std::sync::atomic::AtomicI32 {
     static N: std::sync::atomic::AtomicI32 = std::sync::atomic::AtomicI32::new(0);
     &N
+}
+
+fn call_send_errs() -> &'static std::sync::atomic::AtomicI32 {
+    static N: std::sync::atomic::AtomicI32 = std::sync::atomic::AtomicI32::new(0);
+    &N
+}
+
+fn call_send_last() -> &'static Mutex<String> {
+    static S: OnceLock<Mutex<String>> = OnceLock::new();
+    S.get_or_init(|| Mutex::new(String::new()))
+}
+
+/// What became of the fire-and-forget frames: "confirmed/failed last-error".
+/// Confirmation is veilid's send completing, not the far end hearing it.
+#[uniffi::export]
+pub fn node_call_send_report() -> String {
+    format!(
+        "{}/{} {}",
+        call_send_oks().load(std::sync::atomic::Ordering::SeqCst),
+        call_send_errs().load(std::sync::atomic::Ordering::SeqCst),
+        call_send_last().lock().unwrap()
+    )
+}
+
+const CALL_QUEUE_MAX: usize = 8;
+
+fn call_queue() -> &'static Mutex<VecDeque<(Vec<u8>, Vec<u8>)>> {
+    static Q: OnceLock<Mutex<VecDeque<(Vec<u8>, Vec<u8>)>>> = OnceLock::new();
+    Q.get_or_init(|| Mutex::new(VecDeque::new()))
+}
+
+fn call_sender_up() -> &'static std::sync::atomic::AtomicBool {
+    static B: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+    &B
 }
 
 /// The next inbound frame, or None after `timeout_ms` of silence. Simple
@@ -728,6 +800,7 @@ pub fn node_call_close() {
     }
     call_rx().lock().unwrap().clear();
     call_targets().lock().unwrap().clear();
+    call_queue().lock().unwrap().clear();
 }
 
 // ---------------------------------------------------------------------------

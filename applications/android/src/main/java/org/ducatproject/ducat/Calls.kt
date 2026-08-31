@@ -26,8 +26,15 @@ object Calls {
     const val FRAME_BYTES = 640
     const val FRAME_MS = 20L
 
-    /** An offer older than this is a missed call, not a ringing one. */
-    const val RING_WINDOW_SECS = 45L
+    /**
+     * An offer older than this is a missed call, not a ringing one. Long
+     * for a telephone because the offer and its answer each ride the
+     * mailbox: two cold DHT trips measured ~25–45 s each on a phone — a
+     * 45 s window expired with the answer already in flight. The v2 fix is
+     * answering back through the offer's own route (CALLS.md); until then
+     * the phone rings the way a long-distance call once did.
+     */
+    const val RING_WINDOW_SECS = 90L
 
     /** The platform's ears and mouth; null on hosts without either. */
     interface Audio {
@@ -114,6 +121,7 @@ object Calls {
                 val mine = uniffi.ducat_mobile.nodeCallRoute()
                 val id = ByteArray(8).also { java.security.SecureRandom().nextBytes(it) }
                 myCallId = id
+                DucatLog.i("Calls", "ringing with id=${id.toHexLower()}")
                 Mailbox.send(
                     app, c, app.getString(R.string.call_body_ring),
                     kind = 14, callRoute = mine, callId = id,
@@ -121,6 +129,17 @@ object Calls {
             }.onFailure {
                 DucatLog.w("Calls", "place: ${it.message}")
                 endInternal()
+            }
+        }.apply { isDaemon = true }.start()
+        // A ringing call cannot wait for the background poll clock: the
+        // answer is mailbox-borne and the window is finite. Poll THIS
+        // contact only — the full sweep reads every contact's records and
+        // once outlasted the whole ring; the thread dies with the state.
+        Thread {
+            while (state === st) {
+                runCatching { Mailbox.pollContact(app, c) }
+                noticed(app)
+                Thread.sleep(2_000)
             }
         }.apply { isDaemon = true }.start()
         expireRing(st, RING_WINDOW_SECS)
@@ -185,13 +204,32 @@ object Calls {
         val now = System.currentTimeMillis() / 1000
         when (val s = state) {
             is State.Outgoing -> {
-                val answer = store.thread(s.contactHex).lastOrNull {
+                val thread = store.thread(s.contactHex)
+                val answer = thread.lastOrNull {
                     !it.outgoing && it.kind == 15 &&
                         it.callId != null && myCallId != null &&
-                        it.callId == myCallId!!.toHexLower()
+                        it.callId == myCallId!!.toHexLower() &&
+                        // A late answer to an expired ring must not open a
+                        // call into a route its owner already tore down.
+                        now - it.timestamp < RING_WINDOW_SECS * 2
                 }
                 if (answer?.callRoute != null) {
+                    DucatLog.i("Calls", "answered: seq=${answer.seq} id=${answer.callId}")
                     goActive(s.contactHex, hexToBytes(answer.callRoute), initiator = true)
+                    return
+                }
+                // Their Retract naming our offer is the §16.13 word for
+                // "no" — stop ringing in their ear and ours.
+                val offer = thread.lastOrNull {
+                    it.outgoing && it.kind == 14 &&
+                        myCallId != null && it.callId == myCallId!!.toHexLower()
+                }
+                if (offer != null && thread.any {
+                        !it.outgoing && it.kind == 5 && it.reSeq == offer.seq && !it.reOwn
+                    }
+                ) {
+                    DucatLog.i("Calls", "declined")
+                    endInternal()
                 }
             }
             State.Idle -> {
@@ -284,7 +322,7 @@ object Calls {
                         uniffi.ducat_mobile.callDecode(f.copyOfRange(8, f.size))
                     }.onSuccess { audio?.play(it) }
                 } else if (System.currentTimeMillis() - lastHeard > 10_000) {
-                    DucatLog.i("Calls", "silence — the far side hung up")
+                    DucatLog.i("Calls", "silence — the far side hung up (rx=$rxFrames tx=$txFrames)")
                     endInternal()
                 }
             }
@@ -293,6 +331,9 @@ object Calls {
 
     private fun endInternal() {
         running = false
+        runCatching {
+            DucatLog.i("Calls", "sends ok/failed: ${uniffi.ducat_mobile.nodeCallSendReport()}")
+        }
         audio?.quiet()
         audio?.stop()
         runCatching { uniffi.ducat_mobile.nodeCallClose() }

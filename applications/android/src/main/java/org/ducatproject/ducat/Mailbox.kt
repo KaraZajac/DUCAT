@@ -1340,6 +1340,19 @@ object Mailbox {
     }
 
     @Synchronized
+    /**
+     * Poll just this contact's thread — a ringing call's fast lane. The
+     * full [poll] sweeps every contact at one-to-many DHT reads each, and a
+     * 90-second ring expired with the answer still queued behind strangers.
+     */
+    fun pollContact(context: Context, c: Contact): Int {
+        val store = ContactStore(context)
+        val fresh = store.all().firstOrNull { it.personaHex == c.personaHex } ?: return 0
+        return runCatching {
+            pollOne(context, store, fresh, PersonaStore(context).ownerHexOf(fresh))
+        }.getOrDefault(0)
+    }
+
     fun poll(context: Context): Int {
         val store = ContactStore(context)
         // Before reading anyone: a restored device is advertising keys it does

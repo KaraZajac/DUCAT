@@ -102,3 +102,48 @@ microphone. Now fire-and-forget with a 32-in-flight cap, freshest wins.
 Still open: mid-call route re-allocation when quality goes bad (the 47%
 run would have deserved one); FEC once PLC has field time; a real
 jitter buffer if handsets show reorder beyond the ±5 window.
+
+
+## 2026-08-31 afternoon: the phone leg, six defects deep
+
+Emulator→desk was delivering 2% while desk→emulator ran clean. The chain
+of real causes, each found by probing the boundary:
+
+1. **The load-shed capability list was the killer.** Shedding SGNL and
+   DIAL (§ load-shedding, yesterday) crippled the NAT-shadowed phone's
+   own outbound media — 100.0% delivery with them restored. Shipped list
+   is now `[ROUT, TUNL, RLAY, DHTV]`: the expensive server roles stay
+   shed, the traversal machinery stays on. Desks never noticed because
+   they are publicly reachable.
+2. **32 concurrent app-message sends thrashed route resolution** ("could
+   not get remote private route", 58% of sends). One serial sender task
+   with an 8-deep drop-oldest queue: zero failures, full 50 fps, and the
+   capture thread still never blocks.
+3. **Route blobs outgrow guesses**: a phone allocated one past the 1200
+   cap the day after the cap was pinned (blobs embed hop peer-info).
+   Cap now 4096, both implementations, edge vectors re-pinned (355).
+4. **A ringing call polled the whole world**: Mailbox.poll sweeps every
+   contact at 1–21 s of DHT reads each; the answer queued behind
+   strangers past the whole window. Ringing now polls that one contact
+   (Mailbox.pollContact) every 2 s.
+5. **45 s is not two mailbox trips**: offer out ~25–45 s cold, answer
+   back the same. Window now 90 s; the v2 design is answering back
+   through the offer's own route (the door is already open) for an
+   instant connect, mailbox kind-15 remaining the record.
+6. **A stale answer opened a ghost call**: a redelivered old kind-15
+   activated a new ring (70 s of tone into a dead route; the silence
+   watchdog saw the far side's own late frames). Answers older than
+   2× the ring window no longer activate.
+
+Test-bench lesson bought with an afternoon: answerphone processes that
+never answered kept looping for their full 30-minute deadline; several
+shared one store and raced sends — per-process seq counters forked the
+outbound chain, and the phone rightly refused the fork ("does not follow
+the one before it"), then dead-lettered and self-healed. One store, one
+process, always kill the last role before launching the next.
+
+Definitive live run (clean thread): finger-dialed, UK ringback in the
+earpiece, answered in-window, phone→desk **3513/3513 frames, 0 send
+failures, 100.0% decoded**; desk→phone 2995 confirmed ≈ 2990 heard
+(99.8%); both hang-up paths exercised. The emulator microphone myth is
+dead: it was the blocking send, then the shed, all along.

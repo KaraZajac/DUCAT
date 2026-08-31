@@ -213,12 +213,26 @@ fun main() {
                 val store = ContactStore(context)
                 val caller = store.all().firstOrNull()
                 val offer = caller?.let { c ->
-                    store.thread(c.personaHex).lastOrNull { !it.outgoing && it.kind == 14 }
+                    store.thread(c.personaHex).lastOrNull {
+                        !it.outgoing && it.kind == 14 &&
+                            // Fresh enough to answer: wider than the engine's
+                            // ring window, because a cold mailbox can spend
+                            // most of a minute delivering the offer itself.
+                            System.currentTimeMillis() / 1000 - it.timestamp < 120
+                    }
                 }
                 if (caller != null && offer?.callRoute != null && offer.callId != null) {
                     println("CALL_RINGING")
                     System.out.flush()
-                    val mine = nodeCallRoute()
+                    // One bad answer must not kill the answerphone — the
+                    // next poll sees the same offer and tries again.
+                    val mine = runCatching { nodeCallRoute() }
+                        .onFailure { System.err.println("answer failed: ${it.message}") }
+                        .getOrNull()
+                    if (mine == null) {
+                        Thread.sleep(2_000)
+                        continue
+                    }
                     val fresh = store.all().first { it.personaHex == caller.personaHex }
                     Mailbox.send(
                         context, fresh, "answer",
@@ -257,7 +271,10 @@ fun main() {
                     }
                     rxT.join()
                     nodeCallClose()
-                    println("ANSWERPHONE_STATS sent=3000 recv=$rx decoded=$decoded")
+                    println(
+                        "ANSWERPHONE_STATS sent=3000 recv=$rx decoded=$decoded " +
+                            "sendReport=${uniffi.ducat_mobile.nodeCallSendReport()}",
+                    )
                     return
                 }
                 Thread.sleep(2_000)

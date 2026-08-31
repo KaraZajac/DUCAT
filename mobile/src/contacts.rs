@@ -703,7 +703,7 @@ pub fn seal_message(
                 .try_into()
                 .map_err(|_| ContactError::Refused("a call id is 8 bytes".into()))?;
             if route.is_empty() || route.len() > ducat_core::contact::MAX_CALL_ROUTE {
-                return Err(ContactError::Refused("a call route is 1 to 1200 bytes".into()));
+                return Err(ContactError::Refused("a call route is 1 to 4096 bytes".into()));
             }
             Some(ducat_core::contact::CallRef { route, id })
         }

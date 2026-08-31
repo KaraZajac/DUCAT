@@ -1998,9 +1998,9 @@ fn contact_cases() -> Vec<J> {
         &Message { amount_pxmr: Some(5), ..call_offer.clone() },
         Some((RejectCode::Malformed, "this message kind must not carry an amount")));
     money("call_route_at_cap",
-        "1200 bytes of route is the cap (a real blob measures 832), and the cap is a member — pinned from the inside.",
+        "4096 bytes of route is the cap (blobs embed hop peer-info and a live phone measured one past 1200), and the cap is a member — pinned from the inside.",
         &Message {
-            call: Some(ducat_core::contact::CallRef { route: vec![0xAB; 1200], id: [0x77u8; 8] }),
+            call: Some(ducat_core::contact::CallRef { route: vec![0xAB; 4096], id: [0x77u8; 8] }),
             ..call_offer.clone()
         }, None);
 
@@ -2117,11 +2117,11 @@ fn contact_cases() -> Vec<J> {
         {
             let mut m = call_base.clone();
             m.insert(ducat_core::wire::f::MSG_CALL_ROUTE,
-                     ducat_core::cbor::Value::Bytes(vec![0xAB; 1201]));
+                     ducat_core::cbor::Value::Bytes(vec![0xAB; 4097]));
             v.push(json!({ "name": "call_route_oversize",
-                "why": "One past the cap, from the outside: 1201 bytes is not a longer route, it is smuggling.",
+                "why": "One past the cap, from the outside: 4097 bytes is not a longer route, it is smuggling.",
                 "payment_hex": hex(&ducat_core::cbor::Value::Map(m).encode()),
-                "expect": { "ok": false, "reject": "MALFORMED", "hint": "a call route is 1 to 1200 bytes" } }));
+                "expect": { "ok": false, "reject": "MALFORMED", "hint": "a call route is 1 to 4096 bytes" } }));
         }
         {
             let mut m = call_base.clone();

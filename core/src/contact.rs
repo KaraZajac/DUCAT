@@ -889,7 +889,7 @@ pub struct PositionRef {
 
 /// Longest a call-route blob may be: a measured default-config blob is
 /// 832 bytes; past this something is being smuggled that is not a route.
-pub const MAX_CALL_ROUTE: usize = 1200;
+pub const MAX_CALL_ROUTE: usize = 4096;
 
 /// A live call's door (§16.21): the private route to stream media to and
 /// the eight random bytes both halves quote so an answer names its offer.
@@ -1269,7 +1269,7 @@ impl Message {
                         if route.is_empty() || route.len() > MAX_CALL_ROUTE {
                             return Err(Reject::with_detail(
                                 RejectCode::Malformed,
-                                "a call route is 1 to 1200 bytes",
+                                "a call route is 1 to 4096 bytes",
                             ));
                         }
                         Some(CallRef { route, id: id.try_into().unwrap() })
