@@ -147,3 +147,17 @@ earpiece, answered in-window, phone→desk **3513/3513 frames, 0 send
 failures, 100.0% decoded**; desk→phone 2995 confirmed ≈ 2990 heard
 (99.8%); both hang-up paths exercised. The emulator microphone myth is
 dead: it was the blocking send, then the shed, all along.
+
+
+## 2026-08-31 night: the fifty-minute call
+
+One call, desk↔phone, left running: 150,000 frames streamed each way
+(the desk's tone against the phone's live microphone), every one of the
+desk's 150,002 sends confirmed with zero failures, and the desk decoded
+**150,109 of 150,109** frames it heard — the phone kept talking a
+moment past the stream's end, until its silence watchdog hung up for
+it, which is the designed ending. The per-tick deficit stayed constant
+at ~409 frames (the connect ramp), i.e. zero steady-state loss for
+fifty minutes; phone memory sawtoothed 169–182 MB and ended at 178 —
+garbage collection, not a leak. Roughly twenty megabytes of voice each
+way through onion routes at a hard-constant 60 bytes a frame.
