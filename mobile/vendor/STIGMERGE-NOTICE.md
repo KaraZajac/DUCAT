@@ -66,10 +66,18 @@ Recorded per the MPL's Exhibit A expectations and plain courtesy:
 Proven live 2026-08-30, two DUCAT nodes on real Veilid: 25 MiB in 97.5 s
 and 100 MiB in 279.9 s (~3 Mbit/s through private routes), payload
 BLAKE3 identical on both ends, clean exits
-(`mobile/examples/swarmtest.rs`). Known cost, inherited and accepted for
-now: the actors keep both runtimes warm while serving (~2 cores between
-gossip and Veilid) — upstream's own roadmap names load-shedding, and a
-phone-side seeder will need it before it ships on batteries.
+(`mobile/examples/swarmtest.rs`).
+
+The "~2 cores while serving" cost first observed with that proof was
+run to ground on 2026-08-31 and is NOT this engine's doing. Most of it
+was veilid volunteering the inbound-capable host as public
+infrastructure (relay/DHT/route-hop — shed in `mobile/src/node.rs`,
+`capabilities.disable`), and most of the remainder is veilid's
+safety-route keepalive, the standing price any DHT-writing DUCAT node
+pays for private routing — the mailbox included. Steady-state on a
+desk, measured minutes after announce: bare node 13% of one core, any
+record-writer 41%, live seeder 48%. Seeding itself costs ~7 points
+over what a phone already spends to be a phone.
 
 The CLI (`stigmerge` itself), the Docker/Nix packaging, and the examples
 are not vendored — only the two library crates and their tests.
