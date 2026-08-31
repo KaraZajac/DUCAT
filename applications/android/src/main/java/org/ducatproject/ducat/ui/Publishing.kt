@@ -320,7 +320,7 @@ fun PublishingSection() {
                             lastWord = null
                             scope.launch(Dispatchers.IO) {
                                 try {
-                                    if (f.length() <= Publications.SHELF_CAP_BYTES) {
+                                    if (f.length() <= Publications.SHELF_MULTI_CAP_BYTES) {
                                         check(
                                             Publications.shelveIssue(context, pubId, p, f),
                                         ) { "the shelf would not take it" }

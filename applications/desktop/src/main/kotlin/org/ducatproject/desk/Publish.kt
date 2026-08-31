@@ -225,7 +225,7 @@ fun PublishRoom() {
                             // onto DHT records and survives this desk going
                             // dark; a heavier one seeds the swarm and serves
                             // while the desk runs. The manifest says which.
-                            if (File(f).length() <= Publications.SHELF_CAP_BYTES) {
+                            if (File(f).length() <= Publications.SHELF_MULTI_CAP_BYTES) {
                                 busy = "Shelving…"
                                 check(
                                     Publications.shelveIssue(context, pubId, p, File(f)) { i, n ->

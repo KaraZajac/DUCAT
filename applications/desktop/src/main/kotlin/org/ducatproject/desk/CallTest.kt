@@ -264,8 +264,11 @@ fun main() {
                     var rx = 0
                     var decoded = 0
                     var bye = false
+                    // The soak knob: how much tone to stream (50 fps). The
+                    // default is a minute; a soak passes 150000 for fifty.
+                    val frames = (System.getenv("DUCAT_AP_FRAMES") ?: "3000").toInt()
                     val rxT = Thread {
-                        val end = System.currentTimeMillis() + 90_000
+                        val end = System.currentTimeMillis() + frames * FRAME_MS + 30_000
                         while (System.currentTimeMillis() < end && !bye) {
                             val f = nodeCallRecv(50u) ?: continue
                             if (isControl(f)) {
@@ -289,18 +292,24 @@ fun main() {
                     val hold = System.currentTimeMillis() + 30_000
                     while (rx == 0 && System.currentTimeMillis() < hold) Thread.sleep(20)
                     val t0 = System.currentTimeMillis()
-                    for (seq in 0 until 3000) {
+                    var sentn = 0
+                    for (seq in 0 until frames) {
                         if (bye) break
                         val due = t0 + seq * FRAME_MS
                         val wait = due - System.currentTimeMillis()
                         if (wait > 0) Thread.sleep(wait)
                         val pkt = runCatching { callEncode(tonePcm(seq)) }.getOrNull() ?: continue
                         runCatching { nodeCallSend(route, framed(seq, pkt)) }
+                        sentn++
+                        if (seq > 0 && seq % 15_000 == 0) {
+                            println("AP_TICK sent=$sentn recv=$rx decoded=$decoded")
+                            System.out.flush()
+                        }
                     }
                     rxT.join()
                     nodeCallClose()
                     println(
-                        "ANSWERPHONE_STATS sent=3000 recv=$rx decoded=$decoded " +
+                        "ANSWERPHONE_STATS sent=$sentn recv=$rx decoded=$decoded " +
                             "sendReport=${uniffi.ducat_mobile.nodeCallSendReport()}",
                     )
                     return

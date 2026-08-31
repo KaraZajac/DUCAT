@@ -395,8 +395,14 @@ object Publications {
     const val SHELF_CHUNK_PLAIN = 32_768 - 40
     private const val SHELF_MAX_CHUNKS = 32
 
-    /** What one period record can hold; the Publish room's rail rule. */
+    /** What one period record can hold. */
     const val SHELF_CAP_BYTES = SHELF_CHUNK_PLAIN.toLong() * SHELF_MAX_CHUNKS
+
+    /** The shelf's own ceiling: eight records a period (~8 MiB). Heavier
+     *  months go by swarm — the shelf is for what must survive the
+     *  publisher's absence, not for moving film reels. */
+    const val SHELF_MAX_RECORDS = 8
+    const val SHELF_MULTI_CAP_BYTES = SHELF_CAP_BYTES * SHELF_MAX_RECORDS
 
     /** The standing shelf (root record + head key), minted on first use.
      *  Owner keys are kept so restarts and tending can keep writing. */
@@ -479,36 +485,55 @@ object Publications {
         onChunk: (Int, Int) -> Unit = { _, _ -> },
     ): Boolean {
         val bytes = file.readBytes()
-        if (bytes.isEmpty() || bytes.size > SHELF_CAP_BYTES) {
+        if (bytes.isEmpty() || bytes.size > SHELF_MULTI_CAP_BYTES) {
             DucatLog.w("Publications", "shelve: ${bytes.size} bytes is not shelf-sized")
             return false
         }
         val key = periodKey(context, pubId, periodId) ?: return false
         if (ensureShelf(context, pubId) == null) return false
-        val chunks = (bytes.size + SHELF_CHUNK_PLAIN - 1) / SHELF_CHUNK_PLAIN
-        val rec = runCatching { uniffi.ducat_mobile.nodeDhtCreate(chunks.toUInt()) }.getOrElse {
-            DucatLog.w("Publications", "shelve: ${it.message}")
-            return false
+        val totalChunks = (bytes.size + SHELF_CHUNK_PLAIN - 1) / SHELF_CHUNK_PLAIN
+        // A period heavier than one record spans several, a slab each —
+        // every chunk still sealed to exactly the record and subkey it
+        // lands on, so nothing moves between shelves unnoticed.
+        val slabs = ArrayList<IntRange>()
+        var at = 0
+        while (at < totalChunks) {
+            val n = minOf(SHELF_MAX_CHUNKS, totalChunks - at)
+            slabs.add(at until at + n)
+            at += n
+        }
+        val recs = slabs.map { slab ->
+            runCatching { uniffi.ducat_mobile.nodeDhtCreate(slab.count().toUInt()) }.getOrElse {
+                DucatLog.w("Publications", "shelve: ${it.message}")
+                return false
+            }
         }
         return runCatching {
-            for (i in 0 until chunks) {
-                val end = minOf((i + 1) * SHELF_CHUNK_PLAIN, bytes.size)
-                uniffi.ducat_mobile.nodeDhtSet(
-                    rec.key, i.toUInt(),
-                    sealTo(key, rec.key, i, bytes.copyOfRange(i * SHELF_CHUNK_PLAIN, end)),
-                )
-                onChunk(i + 1, chunks)
+            var done = 0
+            for ((r, slab) in recs.zip(slabs)) {
+                for ((sub, i) in slab.withIndex()) {
+                    val end = minOf((i + 1) * SHELF_CHUNK_PLAIN, bytes.size)
+                    uniffi.ducat_mobile.nodeDhtSet(
+                        r.key, sub.toUInt(),
+                        sealTo(key, r.key, sub, bytes.copyOfRange(i * SHELF_CHUNK_PLAIN, end)),
+                    )
+                    done++
+                    onChunk(done, totalChunks)
+                }
             }
             check(
                 writeIndex(context, pubId) { index ->
-                    index.getJSONObject("periods").put(
-                        periodId,
-                        JSONObject()
-                            .put("rec", rec.key)
-                            .put("chunks", chunks)
-                            .put("bytes", bytes.size)
-                            .put("name", file.name),
-                    )
+                    val entry = JSONObject()
+                        .put("chunks", totalChunks)
+                        .put("bytes", bytes.size)
+                        .put("name", file.name)
+                    if (recs.size == 1) {
+                        // The one-record shape stays exactly what v1 wrote.
+                        entry.put("rec", recs[0].key)
+                    } else {
+                        entry.put("recs", org.json.JSONArray(recs.map { it.key }))
+                    }
+                    index.getJSONObject("periods").put(periodId, entry)
                 },
             ) { "the index would not write" }
             synchronized(lock) {
@@ -518,11 +543,14 @@ object Publications {
                 val iss = pub.optJSONObject("issues") ?: JSONObject()
                 val o = iss.optJSONObject(periodId) ?: JSONObject()
                 o.put("file", file.absolutePath)
-                    .put("rec", rec.key)
-                    .put("rec_chunks", chunks)
+                    .put("rec", recs[0].key)
+                    .put("rec_chunks", totalChunks)
                     .put("rec_bytes", bytes.size)
-                    .put("rec_pub", b64(rec.ownerPublic))
-                    .put("rec_sec", b64(rec.ownerSecret))
+                    .put("rec_pub", b64(recs[0].ownerPublic))
+                    .put("rec_sec", b64(recs[0].ownerSecret))
+                    .put("recs", org.json.JSONArray(recs.map { it.key }))
+                    .put("recs_pub", org.json.JSONArray(recs.map { b64(it.ownerPublic) }))
+                    .put("recs_sec", org.json.JSONArray(recs.map { b64(it.ownerSecret) }))
                 iss.put(periodId, o)
                 pub.put("issues", iss)
                 all.put(pubId, pub)
@@ -563,26 +591,37 @@ object Publications {
         ))
         val entry = index.optJSONObject("periods")?.optJSONObject(periodId)
             ?: throw IllegalStateException("'$periodId' is not on the shelf yet")
-        val rec = entry.getString("rec")
         val chunks = entry.getInt("chunks")
         val total = entry.getLong("bytes")
         val name = entry.optString("name").ifBlank { "issue.bin" }
+        // One record or several (client layout v2): an ordered list of
+        // records, each holding up to the record cap of chunks, subkeys
+        // starting at zero on every shelf.
+        val recs = entry.optJSONArray("recs")
+            ?.let { arr -> List(arr.length()) { arr.getString(it) } }
+            ?: listOf(entry.getString("rec"))
 
-        uniffi.ducat_mobile.nodeDhtOpen(rec, null, null)
         outDir.mkdirs()
         val out = java.io.File(outDir, name)
         java.io.FileOutputStream(out).use { fos ->
             var done = 0L
-            for (i in 0 until chunks) {
-                onProgress(done, total)
-                val value = uniffi.ducat_mobile.nodeDhtGet(rec, i.toUInt(), true)
-                    ?: throw IllegalStateException("chunk $i is missing from the shelf")
-                val plain = uniffi.ducat_mobile.publicationOpenChunk(
-                    periodKey, rec, i.toUInt(), value,
-                )
-                fos.write(plain)
-                done += plain.size
+            var left = chunks
+            for (rec in recs) {
+                val here = minOf(SHELF_MAX_CHUNKS, left)
+                uniffi.ducat_mobile.nodeDhtOpen(rec, null, null)
+                for (i in 0 until here) {
+                    onProgress(done, total)
+                    val value = uniffi.ducat_mobile.nodeDhtGet(rec, i.toUInt(), true)
+                        ?: throw IllegalStateException("chunk $i is missing from the shelf")
+                    val plain = uniffi.ducat_mobile.publicationOpenChunk(
+                        periodKey, rec, i.toUInt(), value,
+                    )
+                    fos.write(plain)
+                    done += plain.size
+                }
+                left -= here
             }
+            check(left == 0) { "the index promised more chunks than its shelves hold" }
             onProgress(done, total)
         }
         return out
@@ -606,15 +645,27 @@ object Publications {
             val iss = pub.optJSONObject("issues") ?: continue
             for (period in iss.keys().asSequence().toList()) {
                 val o = iss.getJSONObject(period)
-                val rec = o.optString("rec").ifBlank { null } ?: continue
-                val rp = o.optString("rec_pub").ifBlank { null }?.let { unb64(it) } ?: continue
-                val rs = o.optString("rec_sec").ifBlank { null }?.let { unb64(it) } ?: continue
-                runCatching {
-                    uniffi.ducat_mobile.nodeDhtOpen(rec, rp, rs)
-                    val v = uniffi.ducat_mobile.nodeDhtGet(rec, 0u, true) ?: return@runCatching
-                    uniffi.ducat_mobile.nodeDhtSet(rec, 0u, v)
-                }.onFailure {
-                    DucatLog.w("Publications", "tend '$period': ${it.message}")
+                // v2 keeps every record's keys in parallel arrays; v1 rows
+                // carry exactly one of each. Touch them all — a TTL eats a
+                // back-catalogue one shelf at a time otherwise.
+                val recs = o.optJSONArray("recs")
+                    ?.let { a -> List(a.length()) { a.getString(it) } }
+                    ?: listOf(o.optString("rec").ifBlank { null } ?: continue)
+                val pubs = o.optJSONArray("recs_pub")
+                    ?.let { a -> List(a.length()) { unb64(a.getString(it)) } }
+                    ?: listOf(o.optString("rec_pub").ifBlank { null }?.let { unb64(it) } ?: continue)
+                val secs = o.optJSONArray("recs_sec")
+                    ?.let { a -> List(a.length()) { unb64(a.getString(it)) } }
+                    ?: listOf(o.optString("rec_sec").ifBlank { null }?.let { unb64(it) } ?: continue)
+                for (j in recs.indices) {
+                    runCatching {
+                        uniffi.ducat_mobile.nodeDhtOpen(recs[j], pubs[j], secs[j])
+                        val v = uniffi.ducat_mobile.nodeDhtGet(recs[j], 0u, true)
+                            ?: return@runCatching
+                        uniffi.ducat_mobile.nodeDhtSet(recs[j], 0u, v)
+                    }.onFailure {
+                        DucatLog.w("Publications", "tend '$period': ${it.message}")
+                    }
                 }
             }
         }
