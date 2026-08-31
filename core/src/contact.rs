@@ -697,6 +697,14 @@ pub enum MessageKind {
     /// content; it carries a capability, never content, so the thread stays
     /// small while the shelf holds the weight.
     PublicationKey = 13,
+    /// "Pick up — here is the door" (§16.21). The offer carries a fresh
+    /// private-route blob and a call id; media flows as app messages on
+    /// that route, never through the mailbox. Ringing is a message, so
+    /// missed calls are simply messages you read later.
+    CallOffer = 14,
+    /// The other half: the callee's own route and the echoed id. Declining
+    /// is §16.13's Retract naming the offer, hanging up is stopping.
+    CallAnswer = 15,
 }
 
 impl MessageKind {
@@ -716,6 +724,8 @@ impl MessageKind {
             11 => MessageKind::PositionRef,
             12 => MessageKind::GroupRoster,
             13 => MessageKind::PublicationKey,
+            14 => MessageKind::CallOffer,
+            15 => MessageKind::CallAnswer,
             _ => return None,
         })
     }
@@ -842,6 +852,8 @@ pub struct Message {
     /// §16.20: a publication period's key. Present only on a
     /// `PublicationKey`, where it is mandatory.
     pub publication: Option<PublicationKey>,
+    /// §16.21: the door a call offer or answer opens.
+    pub call: Option<CallRef>,
     /// §16.19: which group this message belongs to — 16 random bytes minted
     /// at creation. Present with [`Self::group_seq`] or not at all.
     pub group_id: Option<Vec<u8>>,
@@ -873,6 +885,18 @@ pub struct PositionRef {
     /// XChaCha20-Poly1305 key for the stream, one per ride, never reused —
     /// reuse would make the key a long-lived identifier linking rides.
     pub stream_key: [u8; 32],
+}
+
+/// Longest a call-route blob may be: veilid route blobs run a few hundred
+/// bytes; past this something is being smuggled that is not a route.
+pub const MAX_CALL_ROUTE: usize = 512;
+
+/// A live call's door (§16.21): the private route to stream media to and
+/// the eight random bytes both halves quote so an answer names its offer.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CallRef {
+    pub route: Vec<u8>,
+    pub id: [u8; 8],
 }
 
 /// A publication period's key, with the shelf on first delivery (§16.20).
@@ -1014,6 +1038,10 @@ impl Message {
             if let Some(sd) = &p.swarm_digest {
                 m.insert(f::MSG_PUB_SWARM_DIGEST, Value::Bytes(sd.to_vec()));
             }
+        }
+        if let Some(c) = &self.call {
+            m.insert(f::MSG_CALL_ROUTE, Value::Bytes(c.route.clone()));
+            m.insert(f::MSG_CALL_ID, Value::Bytes(c.id.to_vec()));
         }
         Value::Map(m)
     }
@@ -1230,6 +1258,32 @@ impl Message {
                     }
                 }
             },
+            call: {
+                let route = r.opt_bytes(f::MSG_CALL_ROUTE, None)?;
+                let id = r.opt_bytes(f::MSG_CALL_ID, Some(8))?;
+                match (route, id) {
+                    (None, None) => None,
+                    (Some(route), Some(id)) => {
+                        // A route is a real blob with a real ceiling: empty
+                        // opens no door, oversize is not a route.
+                        if route.is_empty() || route.len() > MAX_CALL_ROUTE {
+                            return Err(Reject::with_detail(
+                                RejectCode::Malformed,
+                                "a call route is 1 to 512 bytes",
+                            ));
+                        }
+                        Some(CallRef { route, id: id.try_into().unwrap() })
+                    }
+                    // Both or neither: a door with no name cannot be
+                    // answered, a name with no door opens nothing.
+                    _ => {
+                        return Err(Reject::with_detail(
+                            RejectCode::Malformed,
+                            "a call carries its route and its id together",
+                        ))
+                    }
+                }
+            },
         };
         r.finish()?;
         // A payment with no amount is a payment screen with a blank on it, and
@@ -1247,7 +1301,9 @@ impl Message {
             | (MessageKind::DkgRound, Some(_))
             | (MessageKind::CeremonyAbort, Some(_))
             | (MessageKind::GroupRoster, Some(_))
-            | (MessageKind::PublicationKey, Some(_)) => {
+            | (MessageKind::PublicationKey, Some(_))
+            | (MessageKind::CallOffer, Some(_))
+            | (MessageKind::CallAnswer, Some(_)) => {
                 return Err(Reject::with_detail(
                     RejectCode::Malformed,
                     "this message kind must not carry an amount",
@@ -1501,6 +1557,25 @@ impl Message {
                 return Err(Reject::with_detail(
                     RejectCode::Malformed,
                     "only a publication message carries a period key",
+                ))
+            }
+            _ => {}
+        }
+        // §16.21, the same closed world again: the door IS the kind. An
+        // offer or answer with no route rings nothing, and a route on any
+        // other kind is a door held open where no call is happening.
+        let call_kind = matches!(out.kind, MessageKind::CallOffer | MessageKind::CallAnswer);
+        match (call_kind, out.call.is_some()) {
+            (true, false) => {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "a call message carries its route and id",
+                ))
+            }
+            (false, true) => {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "only a call message carries a call route",
                 ))
             }
             _ => {}
@@ -2597,6 +2672,7 @@ mod position_ref_tests {
                 record_key: "VLD0:positionrecord".into(),
                 stream_key: [0x5au8; 32],
             }), publication: None,
+        call: None,
             group_id: None, group_seq: None,
             group_re_sender: None, group_re_seq: None,
         }

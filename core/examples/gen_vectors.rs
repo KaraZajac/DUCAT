@@ -1471,9 +1471,12 @@ fn contact_cases() -> Vec<J> {
         }));
     }
 
-    let m0 = Message { version: 1, suite: 1, seq: 0, prev: [0u8; 32], body: "hey".into(), timestamp: 1_700_000_000, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, publication: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None };
-    let m1 = Message { version: 1, suite: 1, seq: 1, prev: m0.link(), body: "you around?".into(), timestamp: 1_700_000_060, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, publication: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None };
-    let m2 = Message { version: 1, suite: 1, seq: 2, prev: m1.link(), body: "here's the 20 back".into(), timestamp: 1_700_000_120, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, publication: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None };
+    let m0 = Message { version: 1, suite: 1, seq: 0, prev: [0u8; 32], body: "hey".into(), timestamp: 1_700_000_000, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, publication: None,
+        call: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None };
+    let m1 = Message { version: 1, suite: 1, seq: 1, prev: m0.link(), body: "you around?".into(), timestamp: 1_700_000_060, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, publication: None,
+        call: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None };
+    let m2 = Message { version: 1, suite: 1, seq: 2, prev: m1.link(), body: "here's the 20 back".into(), timestamp: 1_700_000_120, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, publication: None,
+        call: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None };
 
     let mut chain = |name: &str, why: &str, msgs: &[&Message], fail_at: Option<(usize, RejectCode, &str)>| {
         v.push(json!({
@@ -1518,7 +1521,8 @@ fn contact_cases() -> Vec<J> {
         version: 1, suite: 1, seq: 0, prev: [0u8; 32],
         body: "for the coffee".into(), timestamp: 1_700_000_000,
         kind: MessageKind::PaymentRequest, amount_pxmr: Some(21_000_000_000), txid: None,
-        payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, publication: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
+        payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, publication: None,
+        call: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
     };
     money("payment_request", "Asking a contact for an exact amount. It carries no authority — the payer still decides at §15.5's confirm screen.", &base_pay, None);
     money("payment_sent",
@@ -1854,7 +1858,8 @@ fn contact_cases() -> Vec<J> {
         Some((RejectCode::Malformed, "only a position message carries a stream reference")));
     money("position_kind_without_a_reference",
         "A PositionRef whose reference is absent hands over nothing.",
-        &Message { kind: MessageKind::PositionRef, position: None, publication: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
+        &Message { kind: MessageKind::PositionRef, position: None, publication: None,
+        call: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
                    body: "empty".into(), ..base_pay.clone() },
         Some((RejectCode::Malformed, "a position message carries a reference to the stream")));
     // §16.20 — a publication period's key down the paid thread (kind 13).
@@ -1869,6 +1874,7 @@ fn contact_cases() -> Vec<J> {
             swarm_key: None,
             swarm_digest: None,
         }),
+        call: None,
         ..base_pay.clone()
     };
     money("publication_key_first",
@@ -1883,6 +1889,7 @@ fn contact_cases() -> Vec<J> {
             swarm_key: None,
             swarm_digest: None,
         }),
+        call: None,
         ..pub_full.clone()
     };
     money("publication_key_period_only",
@@ -1894,7 +1901,8 @@ fn contact_cases() -> Vec<J> {
         Some((RejectCode::Malformed, "only a publication message carries a period key")));
     money("publication_kind_without_a_key",
         "A publication message with nothing to hand over is an empty gesture.",
-        &Message { kind: MessageKind::PublicationKey, position: None, publication: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
+        &Message { kind: MessageKind::PublicationKey, position: None, publication: None,
+        call: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
                    body: "empty".into(), ..base_pay.clone() },
         Some((RejectCode::Malformed, "a publication message carries the period's key")));
     // Both edges of the period id: the empty spelling is a second encoding
@@ -1907,6 +1915,7 @@ fn contact_cases() -> Vec<J> {
             swarm_key: None,
             swarm_digest: None,
         }),
+        call: None,
         ..pub_minimal.clone()
     };
     money("publication_empty_period_id",
@@ -1920,6 +1929,7 @@ fn contact_cases() -> Vec<J> {
             swarm_key: None,
             swarm_digest: None,
         }),
+        call: None,
         ..pub_minimal.clone()
     };
     money("publication_period_id_too_long",
@@ -1933,6 +1943,7 @@ fn contact_cases() -> Vec<J> {
             swarm_key: None,
             swarm_digest: None,
         }),
+        call: None,
         ..pub_minimal.clone()
     };
     money("publication_period_id_at_cap",
@@ -1951,11 +1962,47 @@ fn contact_cases() -> Vec<J> {
             swarm_key: Some("VLD0:SwArMkEyAbCdEfGhIjKlMnOpQrStUvWxYz012345".into()),
             swarm_digest: Some([0x55u8; 32]),
         }),
+        call: None,
         ..pub_minimal.clone()
     };
     money("publication_key_with_shipment",
         "A heavy period ships by swarm: the share key to bootstrap from and the index digest that authenticates what answers ride beside the period's key, so the whole month arrives on one message — capability and truck, never content.",
         &pub_shipment, None);
+
+    // §16.21 — a call is a door handed down the thread (kinds 14–15).
+    let call_offer = Message {
+        kind: MessageKind::CallOffer, amount_pxmr: None,
+        body: "ring".into(),
+        call: Some(ducat_core::contact::CallRef {
+            route: vec![0xAB; 200],
+            id: [0x77u8; 8],
+        }),
+        ..base_pay.clone()
+    };
+    money("call_offer",
+        "Kind 14: the offer carries a fresh private-route blob and a call id — the door and its name, both.",
+        &call_offer, None);
+    money("call_answer",
+        "Kind 15: the callee's own route, quoting the id — an answer names its call even when two offers cross.",
+        &Message { kind: MessageKind::CallAnswer, ..call_offer.clone() }, None);
+    money("call_offer_missing_pair",
+        "An offer with no route rings nothing — the door IS the kind.",
+        &Message { call: None, ..call_offer.clone() },
+        Some((RejectCode::Malformed, "a call message carries its route and id")));
+    money("call_route_on_a_text",
+        "A route on any other kind is a door held open where no call is happening.",
+        &Message { kind: MessageKind::Text, ..call_offer.clone() },
+        Some((RejectCode::Malformed, "only a call message carries a call route")));
+    money("call_offer_with_amount",
+        "No money rides a doorbell: the bill travelled separately, like a publication's.",
+        &Message { amount_pxmr: Some(5), ..call_offer.clone() },
+        Some((RejectCode::Malformed, "this message kind must not carry an amount")));
+    money("call_route_at_cap",
+        "512 bytes of route is the cap, and the cap is a member — pinned from the inside.",
+        &Message {
+            call: Some(ducat_core::contact::CallRef { route: vec![0xAB; 512], id: [0x77u8; 8] }),
+            ..call_offer.clone()
+        }, None);
 
     // The half-reference cannot be built from the struct (both fields or none),
     // so it is made by deleting one from the encoding — same trick as the
@@ -2046,6 +2093,47 @@ fn contact_cases() -> Vec<J> {
             "expect": { "ok": false, "reject": "MALFORMED", "hint": "field 262 must be 32 bytes, got 31" } }));
     
     }
+
+    // §16.21's forged halves: encode won't build these, which is exactly
+    // why they need vectors.
+    {
+        let ducat_core::cbor::Value::Map(call_base) = call_offer.to_value() else { unreachable!() };
+        {
+            let mut m = call_base.clone();
+            m.remove(&ducat_core::wire::f::MSG_CALL_ID);
+            v.push(json!({ "name": "call_route_without_id",
+                "why": "Half a door: a route with no id cannot be answered by name.",
+                "payment_hex": hex(&ducat_core::cbor::Value::Map(m).encode()),
+                "expect": { "ok": false, "reject": "MALFORMED", "hint": "a call carries its route and its id together" } }));
+        }
+        {
+            let mut m = call_base.clone();
+            m.remove(&ducat_core::wire::f::MSG_CALL_ROUTE);
+            v.push(json!({ "name": "call_id_without_route",
+                "why": "The other half: a name with no door opens nothing.",
+                "payment_hex": hex(&ducat_core::cbor::Value::Map(m).encode()),
+                "expect": { "ok": false, "reject": "MALFORMED", "hint": "a call carries its route and its id together" } }));
+        }
+        {
+            let mut m = call_base.clone();
+            m.insert(ducat_core::wire::f::MSG_CALL_ROUTE,
+                     ducat_core::cbor::Value::Bytes(vec![0xAB; 513]));
+            v.push(json!({ "name": "call_route_oversize",
+                "why": "One past the cap, from the outside: 513 bytes is not a longer route, it is smuggling.",
+                "payment_hex": hex(&ducat_core::cbor::Value::Map(m).encode()),
+                "expect": { "ok": false, "reject": "MALFORMED", "hint": "a call route is 1 to 512 bytes" } }));
+        }
+        {
+            let mut m = call_base.clone();
+            m.insert(ducat_core::wire::f::MSG_CALL_ID,
+                     ducat_core::cbor::Value::Bytes(vec![0x77u8; 7]));
+            v.push(json!({ "name": "call_id_short",
+                "why": "A call id is eight bytes; seven is a different claim, not a shorter one.",
+                "payment_hex": hex(&ducat_core::cbor::Value::Map(m).encode()),
+                "expect": { "ok": false, "reject": "MALFORMED", "hint": "field 264 must be 8 bytes, got 7" } }));
+        }
+    }
+
 
 
 
@@ -2205,9 +2293,9 @@ fn contact_cases() -> Vec<J> {
     // as text shows a payment request as a chat line, or the reverse.
     {
         let ducat_core::cbor::Value::Map(mut m) = base_pay.to_value() else { unreachable!() };
-        m.insert(ducat_core::wire::f::MSG_KIND, ducat_core::cbor::Value::Uint(11));
+        m.insert(ducat_core::wire::f::MSG_KIND, ducat_core::cbor::Value::Uint(16));
         v.push(json!({ "name": "message_unknown_kind",
-            "why": "Kind 11. The set is closed at ten, and a kind decides what every other field on the message *means* — an amount, a target sequence, a ceremony payload. Falling back to text would render a request for money as something to read.",
+            "why": "Kind 16 — one past the newest (15, CALL_ANSWER), because this sentinel must sit at the closed set's EDGE and move with it. A kind decides what every other field on the message *means*; falling back to text would render a request for money as something to read.",
             "payment_hex": hex(&ducat_core::cbor::Value::Map(m).encode()),
             "expect": { "ok": false, "reject": "MALFORMED", "hint": "unknown message kind" } }));
     }

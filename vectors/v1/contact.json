@@ -1339,6 +1339,69 @@
     },
     {
       "expect": {
+        "ok": true,
+        "reencodes_to_hex": "aa001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6472696e6718a01a6553f10018b20e19010758c8abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab190108487777777777777777"
+      },
+      "kind": "message.payment",
+      "name": "call_offer",
+      "payment_hex": "aa001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6472696e6718a01a6553f10018b20e19010758c8abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab190108487777777777777777",
+      "why": "Kind 14: the offer carries a fresh private-route blob and a call id — the door and its name, both."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "aa001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6472696e6718a01a6553f10018b20f19010758c8abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab190108487777777777777777"
+      },
+      "kind": "message.payment",
+      "name": "call_answer",
+      "payment_hex": "aa001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6472696e6718a01a6553f10018b20f19010758c8abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab190108487777777777777777",
+      "why": "Kind 15: the callee's own route, quoting the id — an answer names its call even when two offers cross."
+    },
+    {
+      "expect": {
+        "hint": "a call message carries its route and id",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "call_offer_missing_pair",
+      "payment_hex": "a8001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6472696e6718a01a6553f10018b20e",
+      "why": "An offer with no route rings nothing — the door IS the kind."
+    },
+    {
+      "expect": {
+        "hint": "only a call message carries a call route",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "call_route_on_a_text",
+      "payment_hex": "a9001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6472696e6718a01a6553f10019010758c8abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab190108487777777777777777",
+      "why": "A route on any other kind is a door held open where no call is happening."
+    },
+    {
+      "expect": {
+        "hint": "this message kind must not carry an amount",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "call_offer_with_amount",
+      "payment_hex": "ab001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6472696e6718a01a6553f10018b20e18b30519010758c8abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab190108487777777777777777",
+      "why": "No money rides a doorbell: the bill travelled separately, like a publication's."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "aa001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6472696e6718a01a6553f10018b20e190107590200abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab190108487777777777777777"
+      },
+      "kind": "message.payment",
+      "name": "call_route_at_cap",
+      "payment_hex": "aa001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6472696e6718a01a6553f10018b20e190107590200abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab190108487777777777777777",
+      "why": "512 bytes of route is the cap, and the cap is a member — pinned from the inside."
+    },
+    {
+      "expect": {
         "hint": "a position reference carries its record and its key together",
         "ok": false,
         "reject": "MALFORMED"
@@ -1446,6 +1509,50 @@
       "name": "publication_swarm_digest_short",
       "payment_hex": "ac001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6973657074656d62657218a01a6553f10018b20d19010367323032362d313119010458204444444444444444444444444444444444444444444444444444444444444444190105782d564c44303a537741724d6b45794162436445664768496a4b6c4d6e4f705172537455765778597a303132333435190106581f55555555555555555555555555555555555555555555555555555555555555",
       "why": "An index digest is 32 bytes; 31 is not a shorter digest, it is a different claim."
+    },
+    {
+      "expect": {
+        "hint": "a call carries its route and its id together",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "call_route_without_id",
+      "payment_hex": "a9001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6472696e6718a01a6553f10018b20e19010758c8abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab",
+      "why": "Half a door: a route with no id cannot be answered by name."
+    },
+    {
+      "expect": {
+        "hint": "a call carries its route and its id together",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "call_id_without_route",
+      "payment_hex": "a9001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6472696e6718a01a6553f10018b20e190108487777777777777777",
+      "why": "The other half: a name with no door opens nothing."
+    },
+    {
+      "expect": {
+        "hint": "a call route is 1 to 512 bytes",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "call_route_oversize",
+      "payment_hex": "aa001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6472696e6718a01a6553f10018b20e190107590201ababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab190108487777777777777777",
+      "why": "One past the cap, from the outside: 513 bytes is not a longer route, it is smuggling."
+    },
+    {
+      "expect": {
+        "hint": "field 264 must be 8 bytes, got 7",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "call_id_short",
+      "payment_hex": "aa001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6472696e6718a01a6553f10018b20e19010758c8abababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababababab1901084777777777777777",
+      "why": "A call id is eight bytes; seven is a different claim, not a shorter one."
     },
     {
       "expect": {
@@ -1640,8 +1747,8 @@
       },
       "kind": "message.payment",
       "name": "message_unknown_kind",
-      "payment_hex": "a9001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6e666f722074686520636f6666656518a01a6553f10018b20b18b31b00000004e3b29200",
-      "why": "Kind 11. The set is closed at ten, and a kind decides what every other field on the message *means* — an amount, a target sequence, a ceremony payload. Falling back to text would render a request for money as something to read."
+      "payment_hex": "a9001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6e666f722074686520636f6666656518a01a6553f10018b21018b31b00000004e3b29200",
+      "why": "Kind 16 — one past the newest (15, CALL_ANSWER), because this sentinel must sit at the closed set's EDGE and move with it. A kind decides what every other field on the message *means*; falling back to text would render a request for money as something to read."
     },
     {
       "expect": {

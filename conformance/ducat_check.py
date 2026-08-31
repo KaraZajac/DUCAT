@@ -963,6 +963,9 @@ MSG_PUB_PERIOD, MSG_PUB_KEY = 259, 260
 # A heavy period's swarm shipment: bootstrap key + authenticating index
 # digest, together or not at all, and only aboard a publication key.
 MSG_PUB_SWARM_KEY, MSG_PUB_SWARM_DIGEST = 261, 262
+# §16.21 — a live call's door: route blob and call id, whole or not at all.
+MSG_CALL_ROUTE, MSG_CALL_ID = 263, 264
+MAX_CALL_ROUTE = 512
 # §16.19 — small groups: the group, the sender's own counter in it, and the
 # group reference (target's sender + their counter). The pairwise seq cannot
 # name a group message: the fanned-out copies land at different seqs.
@@ -1700,7 +1703,7 @@ def parse_message(buf):
             raise Reject("Malformed", "kind is not an integer")
         if kind == 0:
             raise Reject("Malformed", "text is encoded by omitting the kind")
-        if kind not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13):
+        if kind not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15):
             raise Reject("Malformed", "unknown message kind")
     else:
         kind = 0
@@ -1826,6 +1829,20 @@ def parse_message(buf):
     else:
         raise Reject("Malformed",
                      "a publication key carries its period id and its key together")
+
+    # §16.21 — the door and its name, together or not at all.
+    call_route = b.pop(MSG_CALL_ROUTE, (None, None))[1]
+    call_id = b.pop(MSG_CALL_ID, (None, None))[1]
+    if (call_route is None) != (call_id is None):
+        raise Reject("Malformed", "a call carries its route and its id together")
+    if call_route is not None:
+        if len(call_route) == 0 or len(call_route) > MAX_CALL_ROUTE:
+            raise Reject("Malformed", "a call route is 1 to 512 bytes")
+        if len(call_id) != 8:
+            raise Reject("Malformed", "a call id is 8 bytes")
+        out["call"] = {"route": call_route, "id": call_id}
+    else:
+        out["call"] = None
     _finish(b)
 
     # A payment with no amount is a screen with a blank where the number goes;
@@ -1833,7 +1850,7 @@ def parse_message(buf):
     # A FROST round (9) is the exception: a release proposal MAY state the
     # amount the funder gets back — the consent screen shows it beside the
     # signed payload (§15.12's settlement); a statement, not authority.
-    if kind in (0, 4, 5, 8, 10, 12, 13) and out["amount"] is not None:
+    if kind in (0, 4, 5, 8, 10, 12, 13, 14, 15) and out["amount"] is not None:
         raise Reject("Malformed", "this kind must not carry an amount")
     if kind in (1, 2, 3) and out["amount"] is None:
         raise Reject("Malformed", "a payment message must carry an amount")
@@ -1912,6 +1929,11 @@ def parse_message(buf):
         raise Reject("Malformed", "a publication message carries the period's key")
     if kind != 13 and out["publication"] is not None:
         raise Reject("Malformed", "only a publication message carries a period key")
+    # §16.21's closed world: the door IS the kind.
+    if kind in (14, 15) and out["call"] is None:
+        raise Reject("Malformed", "a call message carries its route and id")
+    if kind not in (14, 15) and out["call"] is not None:
+        raise Reject("Malformed", "only a call message carries a call route")
     if kind in (0, 5, 6, 7, 8, 9, 10) and (out["items"] or out["tax"] is not None):
         raise Reject("Malformed", "this message kind has no bill to itemise")
     # An eta is a ride offer's courtesy figure, bounded by honesty: a day.
@@ -2222,6 +2244,9 @@ def run_message_payment(cases, r):
                     fields.append((MSG_PUB_SWARM_KEY, ("text", pub["swarm_key"])))
                 if pub["swarm_digest"] is not None:
                     fields.append((MSG_PUB_SWARM_DIGEST, ("bytes", pub["swarm_digest"])))
+            if m.get("call") is not None:
+                fields.append((MSG_CALL_ROUTE, ("bytes", m["call"]["route"])))
+                fields.append((MSG_CALL_ID, ("bytes", m["call"]["id"])))
             return encode(("map", fields))
         out = expect_reject(r, "contact", c, go)
         if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:

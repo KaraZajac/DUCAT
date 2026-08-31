@@ -238,6 +238,10 @@ pub mod f {
     /// not at all: a key without its digest bootstraps into whatever
     /// replies, which is not a fetch, it is an ask.
     pub const MSG_PUB_SWARM_DIGEST: u64 = 262;
+    /// §16.21: a live call's private-route blob…
+    pub const MSG_CALL_ROUTE: u64 = 263;
+    /// …and the id both halves of the call quote.
+    pub const MSG_CALL_ID: u64 = 264;
 
     // RENTAL_NOTICE (§16.18) — a listing on a public board. The second
     // object that lives in the open, and the one that stays there for days
