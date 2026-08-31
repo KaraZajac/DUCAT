@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">Te ligou</string>
+    <string name="chat_call_you_rang">Você ligou</string>
+    <string name="chat_call_answered">Atendeu sua ligação</string>
+    <string name="chat_call_you_answered">Você atendeu</string>
+    <string name="chat_call_missed_note">Uma ligação tocou enquanto você estava fora.</string>
+    <string name="chatlist_preview_call">Ligou</string>
+    <string name="chatlist_preview_call_answered">Atendeu uma ligação</string>
+    <string name="notify_call">%1$s está ligando</string>
+    <string name="notify_call_answered">%1$s atendeu sua ligação</string>
+</resources>

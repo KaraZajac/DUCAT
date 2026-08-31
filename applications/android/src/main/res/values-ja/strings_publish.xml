@@ -5,7 +5,7 @@
     <string name="pub_new_name">新しい出版物</string>
     <string name="pub_create">作成</string>
     <string name="pub_none_yet">出版物に名前を付けて始めましょう。ひとつのマスター鍵が各期間の鍵を導出 — 復元でカタログ全体が戻ります。</string>
-    <string name="pub_price_label">期間あたりの価格(XMR、空欄=無料)</string>
+    <string name="pub_price_label">期間あたりの価格(XMR)</string>
     <string name="pub_price_set">設定</string>
     <string name="pub_paid_note">有料: チェーンが支払い済みと示す読者に、各号が自動で届きます。</string>
     <string name="pub_free_note">無料: 発行時に名簿全員へ届きます。</string>

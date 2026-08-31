@@ -21,4 +21,8 @@
     <string name="library_resubscribe">Assinar de novo</string>
     <string name="library_unsubscribed">Assinatura cancelada — novas edições não são arquivadas</string>
     <string name="library_unsub_note">Assinatura cancelada.</string>
+    <plurals name="main_issues_waiting">
+        <item quantity="one">%1$d edição nova esperando</item>
+        <item quantity="other">%1$d edições novas esperando</item>
+    </plurals>
 </resources>

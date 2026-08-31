@@ -21,4 +21,8 @@
     <string name="library_resubscribe">اشتراک دوباره</string>
     <string name="library_unsubscribed">لغو شد — شماره‌های تازه بایگانی نمی‌شوند</string>
     <string name="library_unsub_note">اشتراک لغو شد.</string>
+    <plurals name="main_issues_waiting">
+        <item quantity="one">%1$d شمارهٔ تازه در انتظار</item>
+        <item quantity="other">%1$d شمارهٔ تازه در انتظار</item>
+    </plurals>
 </resources>

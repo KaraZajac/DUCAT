@@ -5,7 +5,7 @@
     <string name="pub_new_name">Nueva publicación</string>
     <string name="pub_create">Crear</string>
     <string name="pub_none_yet">Ponle nombre a una publicación. Una clave maestra deriva la de cada período — una restauración recupera todo el catálogo.</string>
-    <string name="pub_price_label">Precio por período (XMR, vacío = gratis)</string>
+    <string name="pub_price_label">Precio por período (XMR)</string>
     <string name="pub_price_set">Fijar</string>
     <string name="pub_paid_note">De pago: quien la cadena muestre como pagado recibe cada número automáticamente.</string>
     <string name="pub_free_note">Gratis: cada número va a toda la lista al publicar.</string>

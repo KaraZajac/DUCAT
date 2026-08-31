@@ -21,4 +21,7 @@
     <string name="library_resubscribe">重新订阅</string>
     <string name="library_unsubscribed">已退订 — 不再存档新的期数</string>
     <string name="library_unsub_note">已退订。</string>
+    <plurals name="main_issues_waiting">
+        <item quantity="other">%1$d 期新刊等待中</item>
+    </plurals>
 </resources>

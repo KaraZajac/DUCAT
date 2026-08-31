@@ -67,6 +67,7 @@ import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.PlayArrow
@@ -1748,6 +1749,40 @@ private fun Bubble(
                         }
                     } else {
                         LinkableText(m.body, fg)
+                    }
+                }
+            } else if (m.kind == 14 || m.kind == 15) {
+                // §16.21: ringing was a message all along. Until the phone
+                // grows a call screen, an offer renders as the missed call
+                // it is — the honest state, not a broken money bubble.
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Filled.Call,
+                            null,
+                            Modifier.size(14.dp),
+                            tint = fg.copy(alpha = 0.8f),
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            stringResource(
+                                when {
+                                    m.kind == 14 && m.outgoing -> R.string.chat_call_you_rang
+                                    m.kind == 14 -> R.string.chat_call_rang_you
+                                    m.outgoing -> R.string.chat_call_you_answered
+                                    else -> R.string.chat_call_answered
+                                },
+                            ),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = fg.copy(alpha = 0.8f),
+                        )
+                    }
+                    if (m.kind == 14 && !m.outgoing) {
+                        Text(
+                            stringResource(R.string.chat_call_missed_note),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = fg.copy(alpha = 0.75f),
+                        )
                     }
                 }
             } else if (m.kind == 13) {

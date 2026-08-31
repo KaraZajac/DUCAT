@@ -21,4 +21,8 @@
     <string name="library_resubscribe">Riabbonati</string>
     <string name="library_unsubscribed">Disdetto — i nuovi numeri non vengono archiviati</string>
     <string name="library_unsub_note">Abbonamento disdetto.</string>
+    <plurals name="main_issues_waiting">
+        <item quantity="one">%1$d nuovo numero in attesa</item>
+        <item quantity="other">%1$d nuovi numeri in attesa</item>
+    </plurals>
 </resources>

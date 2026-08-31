@@ -21,4 +21,7 @@
     <string name="library_resubscribe">다시 구독</string>
     <string name="library_unsubscribed">해지됨 — 새 호는 보관되지 않아요</string>
     <string name="library_unsub_note">구독을 해지했습니다.</string>
+    <plurals name="main_issues_waiting">
+        <item quantity="other">새 호 %1$d개 대기 중</item>
+    </plurals>
 </resources>

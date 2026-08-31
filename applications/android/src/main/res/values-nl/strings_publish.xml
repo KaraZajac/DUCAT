@@ -5,7 +5,7 @@
     <string name="pub_new_name">Nieuwe publicatie</string>
     <string name="pub_create">Aanmaken</string>
     <string name="pub_none_yet">Geef een publicatie een naam. Eén hoofdsleutel leidt elke periodesleutel af — een herstel brengt de hele catalogus terug.</string>
-    <string name="pub_price_label">Prijs per periode (XMR, leeg = gratis)</string>
+    <string name="pub_price_label">Prijs per periode (XMR)</string>
     <string name="pub_price_set">Instellen</string>
     <string name="pub_paid_note">Betaald: wie de chain als voldaan toont, krijgt elke editie automatisch.</string>
     <string name="pub_free_note">Gratis: elke editie gaat bij publicatie naar de hele lijst.</string>

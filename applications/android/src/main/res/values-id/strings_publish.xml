@@ -5,7 +5,7 @@
     <string name="pub_new_name">Terbitan baru</string>
     <string name="pub_create">Buat</string>
     <string name="pub_none_yet">Beri nama terbitan untuk mulai. Satu kunci induk menurunkan kunci tiap periode — pemulihan mengembalikan seluruh katalog.</string>
-    <string name="pub_price_label">Harga per periode (XMR, kosong = gratis)</string>
+    <string name="pub_price_label">Harga per periode (XMR)</string>
     <string name="pub_price_set">Atur</string>
     <string name="pub_paid_note">Berbayar: siapa pun yang chain tunjukkan lunas menerima tiap edisi otomatis.</string>
     <string name="pub_free_note">Gratis: tiap edisi dikirim ke seluruh daftar saat terbit.</string>

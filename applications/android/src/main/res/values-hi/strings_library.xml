@@ -21,4 +21,8 @@
     <string name="library_resubscribe">फिर सदस्यता लो</string>
     <string name="library_unsubscribed">छोड़ी गई — नए अंक दर्ज नहीं होते</string>
     <string name="library_unsub_note">सदस्यता छोड़ दी।</string>
+    <plurals name="main_issues_waiting">
+        <item quantity="one">%1$d नया अंक इंतज़ार में</item>
+        <item quantity="other">%1$d नए अंक इंतज़ार में</item>
+    </plurals>
 </resources>

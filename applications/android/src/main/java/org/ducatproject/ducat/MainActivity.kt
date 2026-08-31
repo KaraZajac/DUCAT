@@ -869,6 +869,7 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                                 )
                             },
                             onOpenChat = { overlay = Overlay.Chat(it) },
+                            onLibrary = { overlay = Overlay.Drawer(Section.Library) },
                         )
                     }
                     Tab.Accounts -> AccountsScreen()
@@ -883,6 +884,7 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
 @Composable
 private fun HomeScreen(
     onTopUp: () -> Unit,
+    onLibrary: () -> Unit,
     onSeeActivity: () -> Unit,
     onBackup: () -> Unit,
     onOpenChat: (Contact) -> Unit,
@@ -1083,6 +1085,55 @@ private fun HomeScreen(
             }
         }
     }
+
+    // §16.20 on the front porch: a subscription whose issues arrive while
+    // the phone is pocketed must not depend on someone remembering a
+    // drawer. One card, only when something is actually waiting.
+    val waitingIssues = remember(version) {
+        org.ducatproject.ducat.Publications.subscribedPublishers(context)
+            .filterNot { org.ducatproject.ducat.Publications.isMuted(context, it) }
+            .sumOf { pub ->
+                val sub = org.ducatproject.ducat.Publications.subscription(context, pub)
+                sub?.third?.keys?.count { period ->
+                    org.ducatproject.ducat.ui.LibraryFetch
+                        .fetchedBytes(context, pub, period) == null
+                } ?: 0
+            }
+    }
+    if (waitingIssues > 0) {
+        Spacer(Modifier.height(12.dp))
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            shape = MaterialTheme.shapes.large,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        ) {
+            Row(
+                Modifier.clickable { onLibrary() }.padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        androidx.compose.ui.res.stringResource(R.string.section_library),
+                        style = MaterialTheme.typography.titleSmall,
+                    )
+                    Text(
+                        androidx.compose.ui.res.pluralStringResource(
+                            R.plurals.main_issues_waiting, waitingIssues, waitingIssues,
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
+                Icon(
+                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+
 
     // The nudge that keeps §4.3 true: the bundle carries the relationships
     // now, so every contact made after the last export is one a restore will

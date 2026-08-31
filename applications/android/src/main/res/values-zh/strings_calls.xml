@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">来电</string>
+    <string name="chat_call_you_rang">你拨出了电话</string>
+    <string name="chat_call_answered">接听了你的通话</string>
+    <string name="chat_call_you_answered">你已接听</string>
+    <string name="chat_call_missed_note">你不在时有来电响起。</string>
+    <string name="chatlist_preview_call">来电</string>
+    <string name="chatlist_preview_call_answered">已接听</string>
+    <string name="notify_call">%1$s 来电中</string>
+    <string name="notify_call_answered">%1$s 接听了你的通话</string>
+</resources>

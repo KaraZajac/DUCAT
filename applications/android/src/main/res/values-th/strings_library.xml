@@ -21,4 +21,7 @@
     <string name="library_resubscribe">สมัครใหม่</string>
     <string name="library_unsubscribed">เลิกแล้ว — ไม่เก็บฉบับใหม่</string>
     <string name="library_unsub_note">เลิกติดตามแล้ว</string>
+    <plurals name="main_issues_waiting">
+        <item quantity="other">%1$d ฉบับใหม่รออยู่</item>
+    </plurals>
 </resources>

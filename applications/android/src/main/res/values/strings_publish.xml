@@ -5,7 +5,7 @@
     <string name="pub_new_name">New publication</string>
     <string name="pub_create">Create</string>
     <string name="pub_none_yet">Name a publication to start. One master key derives every period\u2019s key — a restore restores the whole catalogue.</string>
-    <string name="pub_price_label">Price per period (XMR, blank = free)</string>
+    <string name="pub_price_label">Price per period (XMR)</string>
     <string name="pub_price_set">Set</string>
     <string name="pub_paid_note">Paid: whoever the chain shows as settled gets each issue automatically.</string>
     <string name="pub_free_note">Free: each issue goes to the whole roster when you publish.</string>

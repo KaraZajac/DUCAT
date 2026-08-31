@@ -5,7 +5,7 @@
     <string name="pub_new_name">Нова публікація</string>
     <string name="pub_create">Створити</string>
     <string name="pub_none_yet">Назви публікацію. Один майстер-ключ породжує ключ кожного періоду — відновлення поверне весь каталог.</string>
-    <string name="pub_price_label">Ціна за період (XMR, порожньо = безплатно)</string>
+    <string name="pub_price_label">Ціна за період (XMR)</string>
     <string name="pub_price_set">Задати</string>
     <string name="pub_paid_note">Платно: кого ланцюг показує як оплаченого, той отримує кожен випуск автоматично.</string>
     <string name="pub_free_note">Безплатно: кожен випуск іде всьому списку при публікації.</string>

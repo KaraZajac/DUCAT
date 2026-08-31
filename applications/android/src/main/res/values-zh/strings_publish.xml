@@ -5,7 +5,7 @@
     <string name="pub_new_name">新刊物</string>
     <string name="pub_create">创建</string>
     <string name="pub_none_yet">给刊物起个名字开始。一把主密钥派生每期密钥 — 恢复即找回整个书目。</string>
-    <string name="pub_price_label">每期价格(XMR,留空=免费)</string>
+    <string name="pub_price_label">每期价格(XMR)</string>
     <string name="pub_price_set">设定</string>
     <string name="pub_paid_note">付费:链上显示已结清的读者会自动收到每一期。</string>
     <string name="pub_free_note">免费:发行时发给整个名单。</string>

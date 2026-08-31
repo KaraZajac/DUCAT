@@ -21,4 +21,8 @@
     <string name="library_resubscribe">Wieder abonnieren</string>
     <string name="library_unsubscribed">Abbestellt — neue Ausgaben werden nicht abgelegt</string>
     <string name="library_unsub_note">Abbestellt.</string>
+    <plurals name="main_issues_waiting">
+        <item quantity="one">%1$d neue Ausgabe wartet</item>
+        <item quantity="other">%1$d neue Ausgaben warten</item>
+    </plurals>
 </resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">Meneleponmu</string>
+    <string name="chat_call_you_rang">Kamu menelepon</string>
+    <string name="chat_call_answered">Menjawab teleponmu</string>
+    <string name="chat_call_you_answered">Kamu menjawab</string>
+    <string name="chat_call_missed_note">Ada panggilan berdering saat kamu pergi.</string>
+    <string name="chatlist_preview_call">Menelepon</string>
+    <string name="chatlist_preview_call_answered">Panggilan dijawab</string>
+    <string name="notify_call">%1$s menelepon</string>
+    <string name="notify_call_answered">%1$s menjawab teleponmu</string>
+</resources>

@@ -5,7 +5,7 @@
     <string name="pub_new_name">Nouvelle publication</string>
     <string name="pub_create">Créer</string>
     <string name="pub_none_yet">Nomme une publication pour commencer. Une clé maîtresse dérive celle de chaque période — une restauration ramène tout le catalogue.</string>
-    <string name="pub_price_label">Prix par période (XMR, vide = gratuit)</string>
+    <string name="pub_price_label">Prix par période (XMR)</string>
     <string name="pub_price_set">Fixer</string>
     <string name="pub_paid_note">Payant : qui la chaîne montre comme réglé reçoit chaque numéro automatiquement.</string>
     <string name="pub_free_note">Gratuit : chaque numéro part à toute la liste à la publication.</string>

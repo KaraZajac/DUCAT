@@ -21,4 +21,12 @@
     <string name="library_resubscribe">إعادة الاشتراك</string>
     <string name="library_unsubscribed">أُلغي الاشتراك — لا تُحفظ الأعداد الجديدة</string>
     <string name="library_unsub_note">أُلغي الاشتراك.</string>
+    <plurals name="main_issues_waiting">
+        <item quantity="zero">لا أعداد جديدة</item>
+        <item quantity="one">عدد جديد واحد بانتظارك</item>
+        <item quantity="two">عددان جديدان بانتظارك</item>
+        <item quantity="few">%1$d أعداد جديدة بانتظارك</item>
+        <item quantity="many">%1$d عددًا جديدًا بانتظارك</item>
+        <item quantity="other">%1$d عدد جديد بانتظارك</item>
+    </plurals>
 </resources>

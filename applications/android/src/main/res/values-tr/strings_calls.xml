@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">Seni aradı</string>
+    <string name="chat_call_you_rang">Aradın</string>
+    <string name="chat_call_answered">Aramana cevap verdi</string>
+    <string name="chat_call_you_answered">Cevap verdin</string>
+    <string name="chat_call_missed_note">Sen yokken bir arama çaldı.</string>
+    <string name="chatlist_preview_call">Aradı</string>
+    <string name="chatlist_preview_call_answered">Arama cevaplandı</string>
+    <string name="notify_call">%1$s arıyor</string>
+    <string name="notify_call_answered">%1$s aramana cevap verdi</string>
+</resources>

@@ -5,7 +5,7 @@
     <string name="pub_new_name">منشور جديد</string>
     <string name="pub_create">إنشاء</string>
     <string name="pub_none_yet">سمِّ منشورًا للبدء. مفتاح رئيسي واحد يشتق مفتاح كل فترة — والاستعادة تعيد الفهرس كله.</string>
-    <string name="pub_price_label">السعر لكل فترة (XMR، فارغ = مجاني)</string>
+    <string name="pub_price_label">السعر لكل فترة (XMR)</string>
     <string name="pub_price_set">تعيين</string>
     <string name="pub_paid_note">مدفوع: من تُظهره السلسلة مسدِّدًا يستلم كل عدد تلقائيًا.</string>
     <string name="pub_free_note">مجاني: كل عدد يذهب للقائمة كلها عند النشر.</string>

@@ -21,4 +21,8 @@
     <string name="library_resubscribe">Opnieuw abonneren</string>
     <string name="library_unsubscribed">Opgezegd — nieuwe edities worden niet bewaard</string>
     <string name="library_unsub_note">Opgezegd.</string>
+    <plurals name="main_issues_waiting">
+        <item quantity="one">%1$d nieuwe editie wacht</item>
+        <item quantity="other">%1$d nieuwe edities wachten</item>
+    </plurals>
 </resources>

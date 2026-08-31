@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">Đã gọi cho bạn</string>
+    <string name="chat_call_you_rang">Bạn đã gọi</string>
+    <string name="chat_call_answered">Đã trả lời cuộc gọi của bạn</string>
+    <string name="chat_call_you_answered">Bạn đã trả lời</string>
+    <string name="chat_call_missed_note">Có cuộc gọi đổ chuông khi bạn vắng mặt.</string>
+    <string name="chatlist_preview_call">Đã gọi</string>
+    <string name="chatlist_preview_call_answered">Đã trả lời cuộc gọi</string>
+    <string name="notify_call">%1$s đang gọi</string>
+    <string name="notify_call_answered">%1$s đã trả lời cuộc gọi của bạn</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">着信がありました</string>
+    <string name="chat_call_you_rang">発信しました</string>
+    <string name="chat_call_answered">通話に応答しました</string>
+    <string name="chat_call_you_answered">応答しました</string>
+    <string name="chat_call_missed_note">不在の間に着信がありました。</string>
+    <string name="chatlist_preview_call">発信</string>
+    <string name="chatlist_preview_call_answered">通話応答</string>
+    <string name="notify_call">%1$sから着信</string>
+    <string name="notify_call_answered">%1$sが応答しました</string>
+</resources>

@@ -24,4 +24,8 @@
     <string name="library_resubscribe">Resubscribe</string>
     <string name="library_unsubscribed">Unsubscribed — new issues are not filed</string>
     <string name="library_unsub_note">Unsubscribed.</string>
+    <plurals name="main_issues_waiting">
+        <item quantity="one">%1$d new issue waiting</item>
+        <item quantity="other">%1$d new issues waiting</item>
+    </plurals>
 </resources>

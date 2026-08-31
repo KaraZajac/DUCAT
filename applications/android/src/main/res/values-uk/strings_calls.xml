@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">Дзвонив(ла) тобі</string>
+    <string name="chat_call_you_rang">Ти дзвонив(ла)</string>
+    <string name="chat_call_answered">Прийняли твій дзвінок</string>
+    <string name="chat_call_you_answered">Ти відповів(ла)</string>
+    <string name="chat_call_missed_note">Дзвінок пролунав, поки тебе не було.</string>
+    <string name="chatlist_preview_call">Дзвінок</string>
+    <string name="chatlist_preview_call_answered">Дзвінок прийнято</string>
+    <string name="notify_call">%1$s дзвонить</string>
+    <string name="notify_call_answered">%1$s прийняв(ла) твій дзвінок</string>
+</resources>

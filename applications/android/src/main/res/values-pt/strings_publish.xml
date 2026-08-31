@@ -5,7 +5,7 @@
     <string name="pub_new_name">Nova publicação</string>
     <string name="pub_create">Criar</string>
     <string name="pub_none_yet">Dê nome a uma publicação. Uma chave-mestra deriva a de cada período — uma restauração devolve o catálogo inteiro.</string>
-    <string name="pub_price_label">Preço por período (XMR, vazio = grátis)</string>
+    <string name="pub_price_label">Preço por período (XMR)</string>
     <string name="pub_price_set">Definir</string>
     <string name="pub_paid_note">Paga: quem a chain mostrar como quitado recebe cada edição automaticamente.</string>
     <string name="pub_free_note">Grátis: cada edição vai para toda a lista ao publicar.</string>

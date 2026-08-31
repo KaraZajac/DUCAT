@@ -5,7 +5,7 @@
     <string name="pub_new_name">สิ่งพิมพ์ใหม่</string>
     <string name="pub_create">สร้าง</string>
     <string name="pub_none_yet">ตั้งชื่อสิ่งพิมพ์เพื่อเริ่ม กุญแจหลักดอกเดียวสร้างกุญแจทุกงวด — กู้คืนแล้วได้แคตตาล็อกทั้งหมด</string>
-    <string name="pub_price_label">ราคาต่องวด (XMR เว้นว่าง = ฟรี)</string>
+    <string name="pub_price_label">ราคาต่องวด (XMR)</string>
     <string name="pub_price_set">ตั้งค่า</string>
     <string name="pub_paid_note">แบบเสียเงิน: ใครที่เชนยืนยันว่าจ่ายแล้ว จะได้รับทุกฉบับอัตโนมัติ</string>
     <string name="pub_free_note">ฟรี: ทุกฉบับส่งให้ทั้งรายชื่อเมื่อจัดพิมพ์</string>

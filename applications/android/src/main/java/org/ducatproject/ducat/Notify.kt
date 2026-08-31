@@ -110,6 +110,10 @@ object Notify {
             // A publication key (§16.20): the body is the publisher's note or
             // nothing at all, and an empty notification reads as broken.
             13 -> context.getString(R.string.notify_new_issue, from)
+            // §16.21: the ring that arrives while you were away IS the
+            // missed-call notification — no second channel to build.
+            14 -> context.getString(R.string.notify_call, from)
+            15 -> context.getString(R.string.notify_call_answered, from)
             else -> m.body
         }
         // Which compartment this reached, said in the title once a second

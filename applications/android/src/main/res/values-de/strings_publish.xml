@@ -5,7 +5,7 @@
     <string name="pub_new_name">Neue Publikation</string>
     <string name="pub_create">Anlegen</string>
     <string name="pub_none_yet">Gib einer Publikation einen Namen. Ein Hauptschlüssel leitet jeden Periodenschlüssel ab — eine Wiederherstellung bringt den ganzen Katalog zurück.</string>
-    <string name="pub_price_label">Preis pro Periode (XMR, leer = gratis)</string>
+    <string name="pub_price_label">Preis pro Periode (XMR)</string>
     <string name="pub_price_set">Setzen</string>
     <string name="pub_paid_note">Bezahlt: Wen die Chain als beglichen zeigt, bekommt jede Ausgabe automatisch.</string>
     <string name="pub_free_note">Gratis: Jede Ausgabe geht beim Veröffentlichen an die ganze Liste.</string>

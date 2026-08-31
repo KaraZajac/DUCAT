@@ -21,4 +21,7 @@
     <string name="library_resubscribe">Langganan lagi</string>
     <string name="library_unsubscribed">Berhenti — edisi baru tidak disimpan</string>
     <string name="library_unsub_note">Berhenti berlangganan.</string>
+    <plurals name="main_issues_waiting">
+        <item quantity="other">%1$d edisi baru menunggu</item>
+    </plurals>
 </resources>

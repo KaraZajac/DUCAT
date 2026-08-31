@@ -5,7 +5,7 @@
     <string name="pub_new_name">نشریهٔ تازه</string>
     <string name="pub_create">ساختن</string>
     <string name="pub_none_yet">برای شروع نامی بر نشریه بگذار. یک کلید اصلی، کلید هر دوره را می‌سازد — بازیابی، همهٔ آرشیو را برمی‌گرداند.</string>
-    <string name="pub_price_label">قیمت هر دوره (XMR، خالی = رایگان)</string>
+    <string name="pub_price_label">قیمت هر دوره (XMR)</string>
     <string name="pub_price_set">تنظیم</string>
     <string name="pub_paid_note">پولی: هر که زنجیره پرداختش را تأیید کند، هر شماره را خودکار می‌گیرد.</string>
     <string name="pub_free_note">رایگان: هر شماره هنگام انتشار به همهٔ فهرست می‌رود.</string>

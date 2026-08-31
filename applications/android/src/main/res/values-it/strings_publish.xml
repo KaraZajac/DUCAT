@@ -5,7 +5,7 @@
     <string name="pub_new_name">Nuova pubblicazione</string>
     <string name="pub_create">Crea</string>
     <string name="pub_none_yet">Dai un nome a una pubblicazione. Una chiave madre deriva quella di ogni periodo — un ripristino riporta l\u2019intero catalogo.</string>
-    <string name="pub_price_label">Prezzo a periodo (XMR, vuoto = gratis)</string>
+    <string name="pub_price_label">Prezzo a periodo (XMR)</string>
     <string name="pub_price_set">Imposta</string>
     <string name="pub_paid_note">A pagamento: chi la chain mostra come saldato riceve ogni numero automaticamente.</string>
     <string name="pub_free_note">Gratis: ogni numero va a tutta la lista alla pubblicazione.</string>

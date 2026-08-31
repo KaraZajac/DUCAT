@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">اتصل بك</string>
+    <string name="chat_call_you_rang">اتصلت</string>
+    <string name="chat_call_answered">ردّ على مكالمتك</string>
+    <string name="chat_call_you_answered">رددت</string>
+    <string name="chat_call_missed_note">رنّت مكالمة أثناء غيابك.</string>
+    <string name="chatlist_preview_call">مكالمة</string>
+    <string name="chatlist_preview_call_answered">ردّ على مكالمة</string>
+    <string name="notify_call">%1$s يتصل</string>
+    <string name="notify_call_answered">ردّ %1$s على مكالمتك</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">โทรหาคุณ</string>
+    <string name="chat_call_you_rang">คุณโทรออก</string>
+    <string name="chat_call_answered">รับสายของคุณ</string>
+    <string name="chat_call_you_answered">คุณรับสาย</string>
+    <string name="chat_call_missed_note">มีสายเรียกเข้าตอนคุณไม่อยู่</string>
+    <string name="chatlist_preview_call">โทร</string>
+    <string name="chatlist_preview_call_answered">รับสายแล้ว</string>
+    <string name="notify_call">%1$s กำลังโทร</string>
+    <string name="notify_call_answered">%1$s รับสายของคุณ</string>
+</resources>

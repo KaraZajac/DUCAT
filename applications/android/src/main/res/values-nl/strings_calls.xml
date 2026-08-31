@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">Belde je</string>
+    <string name="chat_call_you_rang">Jij belde</string>
+    <string name="chat_call_answered">Nam je oproep aan</string>
+    <string name="chat_call_you_answered">Jij nam op</string>
+    <string name="chat_call_missed_note">Er ging een oproep over terwijl je weg was.</string>
+    <string name="chatlist_preview_call">Gebeld</string>
+    <string name="chatlist_preview_call_answered">Oproep aangenomen</string>
+    <string name="notify_call">%1$s belt</string>
+    <string name="notify_call_answered">%1$s nam je oproep aan</string>
+</resources>

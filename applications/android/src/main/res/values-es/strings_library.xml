@@ -21,4 +21,8 @@
     <string name="library_resubscribe">Suscribirse de nuevo</string>
     <string name="library_unsubscribed">Suscripción cancelada — no se archivan números nuevos</string>
     <string name="library_unsub_note">Suscripción cancelada.</string>
+    <plurals name="main_issues_waiting">
+        <item quantity="one">%1$d número nuevo esperando</item>
+        <item quantity="other">%1$d números nuevos esperando</item>
+    </plurals>
 </resources>

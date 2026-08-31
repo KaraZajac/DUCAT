@@ -21,4 +21,10 @@
     <string name="library_resubscribe">Подписаться снова</string>
     <string name="library_unsubscribed">Отписано — новые выпуски не сохраняются</string>
     <string name="library_unsub_note">Отписка.</string>
+    <plurals name="main_issues_waiting">
+        <item quantity="one">%1$d новый выпуск ждёт</item>
+        <item quantity="few">%1$d новых выпуска ждут</item>
+        <item quantity="many">%1$d новых выпусков ждут</item>
+        <item quantity="other">%1$d нового выпуска ждёт</item>
+    </plurals>
 </resources>

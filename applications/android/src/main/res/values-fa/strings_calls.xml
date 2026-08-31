@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">با تو تماس گرفت</string>
+    <string name="chat_call_you_rang">تماس گرفتی</string>
+    <string name="chat_call_answered">به تماست پاسخ داد</string>
+    <string name="chat_call_you_answered">پاسخ دادی</string>
+    <string name="chat_call_missed_note">در نبودت تماسی زنگ خورد.</string>
+    <string name="chatlist_preview_call">تماس</string>
+    <string name="chatlist_preview_call_answered">پاسخ به تماس</string>
+    <string name="notify_call">%1$s در حال تماس است</string>
+    <string name="notify_call_answered">%1$s به تماست پاسخ داد</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">Ti ha chiamato</string>
+    <string name="chat_call_you_rang">Hai chiamato</string>
+    <string name="chat_call_answered">Ha risposto alla tua chiamata</string>
+    <string name="chat_call_you_answered">Hai risposto</string>
+    <string name="chat_call_missed_note">Una chiamata è squillata mentre eri via.</string>
+    <string name="chatlist_preview_call">Ha chiamato</string>
+    <string name="chatlist_preview_call_answered">Chiamata risposta</string>
+    <string name="notify_call">%1$s sta chiamando</string>
+    <string name="notify_call_answered">%1$s ha risposto alla tua chiamata</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">तुम्हें कॉल किया</string>
+    <string name="chat_call_you_rang">तुमने कॉल किया</string>
+    <string name="chat_call_answered">तुम्हारा कॉल उठाया</string>
+    <string name="chat_call_you_answered">तुमने उठाया</string>
+    <string name="chat_call_missed_note">तुम्हारे न रहने पर कॉल बजा।</string>
+    <string name="chatlist_preview_call">कॉल किया</string>
+    <string name="chatlist_preview_call_answered">कॉल उठाया</string>
+    <string name="notify_call">%1$s कॉल कर रहे हैं</string>
+    <string name="notify_call_answered">%1$s ने तुम्हारा कॉल उठाया</string>
+</resources>

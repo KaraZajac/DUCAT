@@ -21,4 +21,7 @@
     <string name="library_resubscribe">Đăng ký lại</string>
     <string name="library_unsubscribed">Đã hủy — số mới không được lưu</string>
     <string name="library_unsub_note">Đã hủy đăng ký.</string>
+    <plurals name="main_issues_waiting">
+        <item quantity="other">%1$d số mới đang chờ</item>
+    </plurals>
 </resources>

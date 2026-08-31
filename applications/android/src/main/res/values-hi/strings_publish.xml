@@ -5,7 +5,7 @@
     <string name="pub_new_name">नया प्रकाशन</string>
     <string name="pub_create">बनाओ</string>
     <string name="pub_none_yet">शुरू करने के लिए प्रकाशन का नाम रखो। एक मास्टर कुंजी हर अवधि की कुंजी निकालती है — बहाली से पूरा संग्रह लौट आता है।</string>
-    <string name="pub_price_label">प्रति अवधि दाम (XMR, खाली = मुफ़्त)</string>
+    <string name="pub_price_label">प्रति अवधि दाम (XMR)</string>
     <string name="pub_price_set">तय करो</string>
     <string name="pub_paid_note">सशुल्क: चेन जिसे चुकता दिखाए, उसे हर अंक अपने आप मिलता है।</string>
     <string name="pub_free_note">मुफ़्त: प्रकाशित करते ही हर अंक पूरी सूची को जाता है।</string>

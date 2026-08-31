@@ -5,7 +5,7 @@
     <string name="pub_new_name">Ấn phẩm mới</string>
     <string name="pub_create">Tạo</string>
     <string name="pub_none_yet">Đặt tên ấn phẩm để bắt đầu. Một khóa chủ sinh ra khóa của từng kỳ — khôi phục là lấy lại cả danh mục.</string>
-    <string name="pub_price_label">Giá mỗi kỳ (XMR, bỏ trống = miễn phí)</string>
+    <string name="pub_price_label">Giá mỗi kỳ (XMR)</string>
     <string name="pub_price_set">Đặt</string>
     <string name="pub_paid_note">Trả phí: ai được chuỗi xác nhận đã trả sẽ tự động nhận từng số.</string>
     <string name="pub_free_note">Miễn phí: mỗi số gửi cho cả danh sách khi xuất bản.</string>

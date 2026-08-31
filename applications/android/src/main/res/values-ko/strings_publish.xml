@@ -5,7 +5,7 @@
     <string name="pub_new_name">새 간행물</string>
     <string name="pub_create">만들기</string>
     <string name="pub_none_yet">간행물 이름을 지어 시작하세요. 마스터 키 하나가 각 기간의 키를 파생 — 복원하면 카탈로그 전체가 돌아옵니다.</string>
-    <string name="pub_price_label">기간당 가격 (XMR, 비우면 무료)</string>
+    <string name="pub_price_label">기간당 가격 (XMR)</string>
     <string name="pub_price_set">설정</string>
     <string name="pub_paid_note">유료: 체인이 결제 완료로 보여주는 독자에게 각 호가 자동으로 갑니다.</string>
     <string name="pub_free_note">무료: 발행 시 명단 전체에게 갑니다.</string>

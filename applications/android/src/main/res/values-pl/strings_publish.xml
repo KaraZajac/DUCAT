@@ -5,7 +5,7 @@
     <string name="pub_new_name">Nowa publikacja</string>
     <string name="pub_create">Utwórz</string>
     <string name="pub_none_yet">Nazwij publikację. Jeden klucz główny wyprowadza klucz każdego okresu — przywrócenie odzyska cały katalog.</string>
-    <string name="pub_price_label">Cena za okres (XMR, puste = za darmo)</string>
+    <string name="pub_price_label">Cena za okres (XMR)</string>
     <string name="pub_price_set">Ustaw</string>
     <string name="pub_paid_note">Płatne: kogo łańcuch pokazuje jako opłaconego, ten dostaje każde wydanie automatycznie.</string>
     <string name="pub_free_note">Darmowe: każde wydanie idzie do całej listy przy publikacji.</string>

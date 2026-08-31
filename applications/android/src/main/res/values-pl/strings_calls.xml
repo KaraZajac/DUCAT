@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">Dzwonił(a) do ciebie</string>
+    <string name="chat_call_you_rang">Dzwoniłeś(-aś)</string>
+    <string name="chat_call_answered">Odebrano twoje połączenie</string>
+    <string name="chat_call_you_answered">Odebrałeś(-aś)</string>
+    <string name="chat_call_missed_note">Telefon dzwonił, gdy cię nie było.</string>
+    <string name="chatlist_preview_call">Dzwonił(a)</string>
+    <string name="chatlist_preview_call_answered">Odebrano połączenie</string>
+    <string name="notify_call">%1$s dzwoni</string>
+    <string name="notify_call_answered">%1$s odebrał(a) twoje połączenie</string>
+</resources>

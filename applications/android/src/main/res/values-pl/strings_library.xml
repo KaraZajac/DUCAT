@@ -21,4 +21,10 @@
     <string name="library_resubscribe">Subskrybuj ponownie</string>
     <string name="library_unsubscribed">Anulowano — nowe numery nie są zachowywane</string>
     <string name="library_unsub_note">Subskrypcja anulowana.</string>
+    <plurals name="main_issues_waiting">
+        <item quantity="one">%1$d nowe wydanie czeka</item>
+        <item quantity="few">%1$d nowe wydania czekają</item>
+        <item quantity="many">%1$d nowych wydań czeka</item>
+        <item quantity="other">%1$d nowego wydania czeka</item>
+    </plurals>
 </resources>

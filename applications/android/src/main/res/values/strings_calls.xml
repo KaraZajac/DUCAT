@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">Rang you</string>
+    <string name="chat_call_you_rang">You rang</string>
+    <string name="chat_call_answered">Answered your call</string>
+    <string name="chat_call_you_answered">You answered</string>
+    <string name="chat_call_missed_note">A call rang while you were away.</string>
+    <string name="chatlist_preview_call">Called</string>
+    <string name="chatlist_preview_call_answered">Answered a call</string>
+    <string name="notify_call">%1$s is calling</string>
+    <string name="notify_call_answered">%1$s answered your call</string>
+</resources>
