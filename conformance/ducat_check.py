@@ -965,7 +965,7 @@ MSG_PUB_PERIOD, MSG_PUB_KEY = 259, 260
 MSG_PUB_SWARM_KEY, MSG_PUB_SWARM_DIGEST = 261, 262
 # §16.21 — a live call's door: route blob and call id, whole or not at all.
 MSG_CALL_ROUTE, MSG_CALL_ID = 263, 264
-MAX_CALL_ROUTE = 512
+MAX_CALL_ROUTE = 1200
 # §16.19 — small groups: the group, the sender's own counter in it, and the
 # group reference (target's sender + their counter). The pairwise seq cannot
 # name a group message: the fanned-out copies land at different seqs.
@@ -1837,7 +1837,7 @@ def parse_message(buf):
         raise Reject("Malformed", "a call carries its route and its id together")
     if call_route is not None:
         if len(call_route) == 0 or len(call_route) > MAX_CALL_ROUTE:
-            raise Reject("Malformed", "a call route is 1 to 512 bytes")
+            raise Reject("Malformed", "a call route is 1 to 1200 bytes")
         if len(call_id) != 8:
             raise Reject("Malformed", "a call id is 8 bytes")
         out["call"] = {"route": call_route, "id": call_id}

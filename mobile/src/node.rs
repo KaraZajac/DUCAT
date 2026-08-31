@@ -108,6 +108,30 @@ pub(crate) fn swarm_route_changed(route_id: &RouteId, added: bool) {
     }
 }
 
+// ---------------------------------------------------------------------------
+// Live calls (§16.21): media rides app messages on call-only routes.
+//
+// The same demux discipline as the swarm's AppCalls, for the same reason:
+// the node has ONE update stream, and a voice frame must never be mistaken
+// for a mailbox event. Frames land in a bounded ring the client drains;
+// voice is real-time, so when the ring is full the OLDEST frame drops —
+// late audio is worse than lost audio.
+static CALL_ROUTES: OnceLock<Mutex<std::collections::HashSet<RouteId>>> = OnceLock::new();
+static CALL_RX: OnceLock<Mutex<VecDeque<Vec<u8>>>> = OnceLock::new();
+static CALL_TARGETS: OnceLock<Mutex<std::collections::HashMap<Vec<u8>, RouteId>>> =
+    OnceLock::new();
+const CALL_RING_CAP: usize = 256;
+
+fn call_routes() -> &'static Mutex<std::collections::HashSet<RouteId>> {
+    CALL_ROUTES.get_or_init(|| Mutex::new(std::collections::HashSet::new()))
+}
+fn call_rx() -> &'static Mutex<VecDeque<Vec<u8>>> {
+    CALL_RX.get_or_init(|| Mutex::new(VecDeque::new()))
+}
+fn call_targets() -> &'static Mutex<std::collections::HashMap<Vec<u8>, RouteId>> {
+    CALL_TARGETS.get_or_init(|| Mutex::new(std::collections::HashMap::new()))
+}
+
 fn feed_swarm(update: VeilidUpdate) {
     if let Some(f) = swarm_feeder().lock().unwrap().as_ref() {
         f(update);
@@ -378,6 +402,21 @@ pub fn node_start(storage_dir: String, udp: bool) -> Result<(), NodeError> {
                 // network is up, route changes to rebuild dead routes, and
                 // value changes for the records it watches. The feeder is a
                 // handler chain that ignores what it has no handler for.
+                VeilidUpdate::AppMessage(msg) => {
+                    let to_call = msg
+                        .route_id()
+                        .map(|r| call_routes().lock().unwrap().contains(r))
+                        .unwrap_or(false);
+                    if to_call {
+                        let mut ring = call_rx().lock().unwrap();
+                        if ring.len() >= CALL_RING_CAP {
+                            ring.pop_front();
+                        }
+                        ring.push_back(msg.message().to_vec());
+                    } else {
+                        feed_swarm(VeilidUpdate::AppMessage(msg));
+                    }
+                }
                 other => feed_swarm(other),
             }
         });
@@ -594,6 +633,83 @@ pub fn node_reply(id: u64, message: Vec<u8>) -> Result<(), NodeError> {
             .await
             .map_err(|e| NodeError::Failed(format!("reply: {e}")))
     })
+}
+
+/// Allocate this end's door for one live call (§16.21): a fresh private
+/// route whose inbound app messages land in the call ring, not the
+/// mailbox. Returns the blob the offer or answer carries.
+#[uniffi::export]
+pub fn node_call_route() -> Result<Vec<u8>, NodeError> {
+    let (api, rt) = handles()?;
+    rt.block_on(async {
+        let rb = api
+            .new_private_route()
+            .await
+            .map_err(|e| NodeError::Failed(format!("call route: {e}")))?;
+        call_routes().lock().unwrap().insert(rb.route_id);
+        Ok(rb.blob)
+    })
+}
+
+/// One media frame to the far door. The blob is imported once and cached;
+/// fire-and-forget, like the voice cadence needs.
+#[uniffi::export]
+pub fn node_call_send(route_blob: Vec<u8>, frame: Vec<u8>) -> Result<(), NodeError> {
+    let (api, rt) = handles()?;
+    rt.block_on(async {
+        let route = {
+            let cached = call_targets().lock().unwrap().get(&route_blob).cloned();
+            match cached {
+                Some(r) => r,
+                None => {
+                    let r = api
+                        .import_remote_private_route(route_blob.clone())
+                        .map_err(|e| NodeError::Failed(format!("import route: {e}")))?;
+                    call_targets().lock().unwrap().insert(route_blob.clone(), r.clone());
+                    r
+                }
+            }
+        };
+        let rc = api
+            .routing_context()
+            .map_err(|e| NodeError::Failed(format!("routing context: {e}")))?;
+        rc.app_message(Target::RouteId(route), frame)
+            .await
+            .map_err(|e| NodeError::Failed(format!("app_message: {e}")))
+    })
+}
+
+/// The next inbound frame, or None after `timeout_ms` of silence. Simple
+/// short-poll under the hood — a 20 ms cadence needs nothing cleverer.
+#[uniffi::export]
+pub fn node_call_recv(timeout_ms: u32) -> Option<Vec<u8>> {
+    let deadline =
+        std::time::Instant::now() + std::time::Duration::from_millis(timeout_ms as u64);
+    loop {
+        if let Some(f) = call_rx().lock().unwrap().pop_front() {
+            return Some(f);
+        }
+        if std::time::Instant::now() >= deadline {
+            return None;
+        }
+        std::thread::sleep(std::time::Duration::from_millis(2));
+    }
+}
+
+/// Hang up: release every call route this node allocated, drop the ring
+/// and the import cache. A call's routes never outlive the call.
+#[uniffi::export]
+pub fn node_call_close() {
+    let routes: Vec<RouteId> = call_routes().lock().unwrap().drain().collect();
+    if let Ok((api, rt)) = handles() {
+        rt.block_on(async {
+            for r in routes {
+                let _ = api.release_private_route(r);
+            }
+        });
+    }
+    call_rx().lock().unwrap().clear();
+    call_targets().lock().unwrap().clear();
 }
 
 // ---------------------------------------------------------------------------

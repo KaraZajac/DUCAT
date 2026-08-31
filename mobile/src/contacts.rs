@@ -662,6 +662,9 @@ pub fn seal_message(
     // §16.20's shipment: the swarm pair, together or not at all.
     pub_swarm_key: Option<String>,
     pub_swarm_digest: Option<Vec<u8>>,
+    // §16.21's door: the call route and id, together or not at all.
+    call_route: Option<Vec<u8>>,
+    call_id: Option<Vec<u8>>,
 ) -> Result<SealedOut, ContactError> {
     if body.is_empty() || body.chars().count() > MAX_MESSAGE_CHARS {
         return Err(ContactError::Refused(format!(
@@ -691,6 +694,23 @@ pub fn seal_message(
         _ => {
             return Err(ContactError::Refused(
                 "a position reference carries its record and its key together".into(),
+            ))
+        }
+    };
+    let call = match (call_route, call_id) {
+        (Some(route), Some(id)) => {
+            let id: [u8; 8] = id
+                .try_into()
+                .map_err(|_| ContactError::Refused("a call id is 8 bytes".into()))?;
+            if route.is_empty() || route.len() > ducat_core::contact::MAX_CALL_ROUTE {
+                return Err(ContactError::Refused("a call route is 1 to 1200 bytes".into()));
+            }
+            Some(ducat_core::contact::CallRef { route, id })
+        }
+        (None, None) => None,
+        _ => {
+            return Err(ContactError::Refused(
+                "a call carries its route and its id together".into(),
             ))
         }
     };
@@ -753,6 +773,8 @@ pub fn seal_message(
             11 => MessageKind::PositionRef,
             12 => MessageKind::GroupRoster,
             13 => MessageKind::PublicationKey,
+            14 => MessageKind::CallOffer,
+            15 => MessageKind::CallAnswer,
             _ => MessageKind::Text,
         },
         amount_pxmr,
@@ -788,6 +810,7 @@ pub fn seal_message(
         group_seq,
         group_re_sender,
         group_re_seq,
+        call,
     };
     // A message this encoder produces must be one its own decoder accepts —
     // otherwise the malformation ships sealed, and it is the *recipient's*
@@ -924,6 +947,9 @@ pub struct OpenedMessage {
     pub position: Option<PositionRefOut>,
     /// §16.20: a publication period's key. Present only on kind 13.
     pub publication: Option<PublicationKeyOut>,
+    /// §16.21: a live call's door. Present only on kinds 14–15.
+    pub call_route: Option<Vec<u8>>,
+    pub call_id: Option<Vec<u8>>,
     /// §16.19: the group this message belongs to, and its name there.
     pub group_id: Option<Vec<u8>>,
     pub group_seq: Option<u64>,
@@ -1114,6 +1140,8 @@ pub fn open_message(
             swarm_key: p.swarm_key.clone(),
             swarm_digest: p.swarm_digest.map(|d| d.to_vec()),
         }),
+        call_route: msg.call.as_ref().map(|c| c.route.clone()),
+        call_id: msg.call.as_ref().map(|c| c.id.to_vec()),
     })
 }
 

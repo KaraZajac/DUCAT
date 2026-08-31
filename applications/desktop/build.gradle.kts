@@ -644,6 +644,14 @@ tasks.register<JavaExec>("pubswarmtest") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// A live call between two desks: offer/answer on the thread, fifteen
+// seconds of verified full-duplex PCM on the exchanged routes.
+tasks.register<JavaExec>("calltest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.CallTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // The shelf's sharpest edge: publisher shelves, mails the manifest, and
 // EXITS — a reader arriving later still gets the bytes off the network.
 tasks.register<JavaExec>("shelftest") {

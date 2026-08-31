@@ -947,6 +947,14 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1086,6 +1094,14 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_app_call(`routeBlob`: RustBuffer.ByValue,`message`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_node_call_close(uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
+    fun uniffi_ducat_mobile_fn_func_node_call_recv(`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_node_call_route(uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_node_call_send(`routeBlob`: RustBuffer.ByValue,`frame`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
     fun uniffi_ducat_mobile_fn_func_node_changed_keys(uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_dht_close(`key`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -1164,7 +1180,7 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_rental_encode(`info`: RustBuffer.ByValue,`personaSecret`: RustBuffer.ByValue,`listingId`: RustBuffer.ByValue,`board`: RustBuffer.ByValue,`subkey`: Int,`beaconHeight`: Long,`beaconHashHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_seal_message(`bundleBytes`: RustBuffer.ByValue,`seq`: Long,`prevLink`: RustBuffer.ByValue,`body`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,`kind`: Byte,`amountPxmr`: RustBuffer.ByValue,`txid`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,`items`: RustBuffer.ByValue,`taxPxmr`: RustBuffer.ByValue,`reSeq`: RustBuffer.ByValue,`reOwn`: Byte,`attachment`: RustBuffer.ByValue,`etaSecs`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`round`: RustBuffer.ByValue,`ceremonyId`: RustBuffer.ByValue,`positionRecord`: RustBuffer.ByValue,`positionStreamKey`: RustBuffer.ByValue,`groupId`: RustBuffer.ByValue,`groupSeq`: RustBuffer.ByValue,`groupReSender`: RustBuffer.ByValue,`groupReSeq`: RustBuffer.ByValue,`pubPeriodId`: RustBuffer.ByValue,`pubPeriodKey`: RustBuffer.ByValue,`pubRecord`: RustBuffer.ByValue,`pubHeadKey`: RustBuffer.ByValue,`pubSwarmKey`: RustBuffer.ByValue,`pubSwarmDigest`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_seal_message(`bundleBytes`: RustBuffer.ByValue,`seq`: Long,`prevLink`: RustBuffer.ByValue,`body`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,`kind`: Byte,`amountPxmr`: RustBuffer.ByValue,`txid`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,`items`: RustBuffer.ByValue,`taxPxmr`: RustBuffer.ByValue,`reSeq`: RustBuffer.ByValue,`reOwn`: Byte,`attachment`: RustBuffer.ByValue,`etaSecs`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`round`: RustBuffer.ByValue,`ceremonyId`: RustBuffer.ByValue,`positionRecord`: RustBuffer.ByValue,`positionStreamKey`: RustBuffer.ByValue,`groupId`: RustBuffer.ByValue,`groupSeq`: RustBuffer.ByValue,`groupReSender`: RustBuffer.ByValue,`groupReSeq`: RustBuffer.ByValue,`pubPeriodId`: RustBuffer.ByValue,`pubPeriodKey`: RustBuffer.ByValue,`pubRecord`: RustBuffer.ByValue,`pubHeadKey`: RustBuffer.ByValue,`pubSwarmKey`: RustBuffer.ByValue,`pubSwarmDigest`: RustBuffer.ByValue,`callRoute`: RustBuffer.ByValue,`callId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_sealed_prekey_id(`sealedBytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
@@ -1433,6 +1449,14 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_checksum_func_monero_tx_known(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_app_call(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_call_close(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_call_recv(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_call_route(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_call_send(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_changed_keys(
     ): Short
@@ -1749,6 +1773,18 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_node_app_call() != 36150.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_call_close() != 14639.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_call_recv() != 13639.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_call_route() != 28389.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_call_send() != 18040.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ducat_mobile_checksum_func_node_changed_keys() != 44940.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -1866,7 +1902,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_rental_encode() != 60190.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_seal_message() != 40792.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_seal_message() != 36084.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_sealed_prekey_id() != 10001.toShort()) {
@@ -3470,6 +3506,11 @@ data class OpenedMessage (
      */
     var `publication`: PublicationKeyOut?, 
     /**
+     * §16.21: a live call's door. Present only on kinds 14–15.
+     */
+    var `callRoute`: kotlin.ByteArray?, 
+    var `callId`: kotlin.ByteArray?, 
+    /**
      * §16.19: the group this message belongs to, and its name there.
      */
     var `groupId`: kotlin.ByteArray?, 
@@ -3509,6 +3550,8 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterOptionalTypePositionRefOut.read(buf),
             FfiConverterOptionalTypePublicationKeyOut.read(buf),
             FfiConverterOptionalByteArray.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
             FfiConverterOptionalULong.read(buf),
             FfiConverterOptionalByteArray.read(buf),
             FfiConverterOptionalULong.read(buf),
@@ -3537,6 +3580,8 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterOptionalByteArray.allocationSize(value.`ceremonyId`) +
             FfiConverterOptionalTypePositionRefOut.allocationSize(value.`position`) +
             FfiConverterOptionalTypePublicationKeyOut.allocationSize(value.`publication`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`callRoute`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`callId`) +
             FfiConverterOptionalByteArray.allocationSize(value.`groupId`) +
             FfiConverterOptionalULong.allocationSize(value.`groupSeq`) +
             FfiConverterOptionalByteArray.allocationSize(value.`groupReSender`) +
@@ -3565,6 +3610,8 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterOptionalByteArray.write(value.`ceremonyId`, buf)
             FfiConverterOptionalTypePositionRefOut.write(value.`position`, buf)
             FfiConverterOptionalTypePublicationKeyOut.write(value.`publication`, buf)
+            FfiConverterOptionalByteArray.write(value.`callRoute`, buf)
+            FfiConverterOptionalByteArray.write(value.`callId`, buf)
             FfiConverterOptionalByteArray.write(value.`groupId`, buf)
             FfiConverterOptionalULong.write(value.`groupSeq`, buf)
             FfiConverterOptionalByteArray.write(value.`groupReSender`, buf)
@@ -7612,6 +7659,59 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
     
 
         /**
+         * Hang up: release every call route this node allocated, drop the ring
+         * and the import cache. A call's routes never outlive the call.
+         */ fun `nodeCallClose`()
+        = 
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_call_close(
+        _status)
+}
+    
+    
+
+        /**
+         * The next inbound frame, or None after `timeout_ms` of silence. Simple
+         * short-poll under the hood — a 20 ms cadence needs nothing cleverer.
+         */ fun `nodeCallRecv`(`timeoutMs`: kotlin.UInt): kotlin.ByteArray? {
+            return FfiConverterOptionalByteArray.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_call_recv(
+        FfiConverterUInt.lower(`timeoutMs`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Allocate this end's door for one live call (§16.21): a fresh private
+         * route whose inbound app messages land in the call ring, not the
+         * mailbox. Returns the blob the offer or answer carries.
+         */
+    @Throws(NodeException::class) fun `nodeCallRoute`(): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(NodeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_call_route(
+        _status)
+}
+    )
+    }
+    
+
+        /**
+         * One media frame to the far door. The blob is imported once and cached;
+         * fire-and-forget, like the voice cadence needs.
+         */
+    @Throws(NodeException::class) fun `nodeCallSend`(`routeBlob`: kotlin.ByteArray, `frame`: kotlin.ByteArray)
+        = 
+    uniffiRustCallWithError(NodeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_call_send(
+        FfiConverterByteArray.lower(`routeBlob`),FfiConverterByteArray.lower(`frame`),_status)
+}
+    
+    
+
+        /**
          * Take the record keys that have changed since the last call.
          *
          * Draining, because these are events: whoever asks gets them, and asking
@@ -8228,11 +8328,11 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
         /**
          * Seal one message in a thread.
          */
-    @Throws(ContactException::class) fun `sealMessage`(`bundleBytes`: kotlin.ByteArray, `seq`: kotlin.ULong, `prevLink`: kotlin.ByteArray, `body`: kotlin.String, `threadAad`: kotlin.ByteArray, `kind`: kotlin.UByte, `amountPxmr`: kotlin.ULong?, `txid`: kotlin.ByteArray?, `payto`: kotlin.String?, `items`: List<BillLine>, `taxPxmr`: kotlin.ULong?, `reSeq`: kotlin.ULong?, `reOwn`: kotlin.Boolean, `attachment`: AttachmentRef?, `etaSecs`: kotlin.ULong?, `payload`: kotlin.ByteArray?, `round`: kotlin.ULong?, `ceremonyId`: kotlin.ByteArray?, `positionRecord`: kotlin.String?, `positionStreamKey`: kotlin.ByteArray?, `groupId`: kotlin.ByteArray?, `groupSeq`: kotlin.ULong?, `groupReSender`: kotlin.ByteArray?, `groupReSeq`: kotlin.ULong?, `pubPeriodId`: kotlin.String?, `pubPeriodKey`: kotlin.ByteArray?, `pubRecord`: kotlin.String?, `pubHeadKey`: kotlin.ByteArray?, `pubSwarmKey`: kotlin.String?, `pubSwarmDigest`: kotlin.ByteArray?): SealedOut {
+    @Throws(ContactException::class) fun `sealMessage`(`bundleBytes`: kotlin.ByteArray, `seq`: kotlin.ULong, `prevLink`: kotlin.ByteArray, `body`: kotlin.String, `threadAad`: kotlin.ByteArray, `kind`: kotlin.UByte, `amountPxmr`: kotlin.ULong?, `txid`: kotlin.ByteArray?, `payto`: kotlin.String?, `items`: List<BillLine>, `taxPxmr`: kotlin.ULong?, `reSeq`: kotlin.ULong?, `reOwn`: kotlin.Boolean, `attachment`: AttachmentRef?, `etaSecs`: kotlin.ULong?, `payload`: kotlin.ByteArray?, `round`: kotlin.ULong?, `ceremonyId`: kotlin.ByteArray?, `positionRecord`: kotlin.String?, `positionStreamKey`: kotlin.ByteArray?, `groupId`: kotlin.ByteArray?, `groupSeq`: kotlin.ULong?, `groupReSender`: kotlin.ByteArray?, `groupReSeq`: kotlin.ULong?, `pubPeriodId`: kotlin.String?, `pubPeriodKey`: kotlin.ByteArray?, `pubRecord`: kotlin.String?, `pubHeadKey`: kotlin.ByteArray?, `pubSwarmKey`: kotlin.String?, `pubSwarmDigest`: kotlin.ByteArray?, `callRoute`: kotlin.ByteArray?, `callId`: kotlin.ByteArray?): SealedOut {
             return FfiConverterTypeSealedOut.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_seal_message(
-        FfiConverterByteArray.lower(`bundleBytes`),FfiConverterULong.lower(`seq`),FfiConverterByteArray.lower(`prevLink`),FfiConverterString.lower(`body`),FfiConverterByteArray.lower(`threadAad`),FfiConverterUByte.lower(`kind`),FfiConverterOptionalULong.lower(`amountPxmr`),FfiConverterOptionalByteArray.lower(`txid`),FfiConverterOptionalString.lower(`payto`),FfiConverterSequenceTypeBillLine.lower(`items`),FfiConverterOptionalULong.lower(`taxPxmr`),FfiConverterOptionalULong.lower(`reSeq`),FfiConverterBoolean.lower(`reOwn`),FfiConverterOptionalTypeAttachmentRef.lower(`attachment`),FfiConverterOptionalULong.lower(`etaSecs`),FfiConverterOptionalByteArray.lower(`payload`),FfiConverterOptionalULong.lower(`round`),FfiConverterOptionalByteArray.lower(`ceremonyId`),FfiConverterOptionalString.lower(`positionRecord`),FfiConverterOptionalByteArray.lower(`positionStreamKey`),FfiConverterOptionalByteArray.lower(`groupId`),FfiConverterOptionalULong.lower(`groupSeq`),FfiConverterOptionalByteArray.lower(`groupReSender`),FfiConverterOptionalULong.lower(`groupReSeq`),FfiConverterOptionalString.lower(`pubPeriodId`),FfiConverterOptionalByteArray.lower(`pubPeriodKey`),FfiConverterOptionalString.lower(`pubRecord`),FfiConverterOptionalByteArray.lower(`pubHeadKey`),FfiConverterOptionalString.lower(`pubSwarmKey`),FfiConverterOptionalByteArray.lower(`pubSwarmDigest`),_status)
+        FfiConverterByteArray.lower(`bundleBytes`),FfiConverterULong.lower(`seq`),FfiConverterByteArray.lower(`prevLink`),FfiConverterString.lower(`body`),FfiConverterByteArray.lower(`threadAad`),FfiConverterUByte.lower(`kind`),FfiConverterOptionalULong.lower(`amountPxmr`),FfiConverterOptionalByteArray.lower(`txid`),FfiConverterOptionalString.lower(`payto`),FfiConverterSequenceTypeBillLine.lower(`items`),FfiConverterOptionalULong.lower(`taxPxmr`),FfiConverterOptionalULong.lower(`reSeq`),FfiConverterBoolean.lower(`reOwn`),FfiConverterOptionalTypeAttachmentRef.lower(`attachment`),FfiConverterOptionalULong.lower(`etaSecs`),FfiConverterOptionalByteArray.lower(`payload`),FfiConverterOptionalULong.lower(`round`),FfiConverterOptionalByteArray.lower(`ceremonyId`),FfiConverterOptionalString.lower(`positionRecord`),FfiConverterOptionalByteArray.lower(`positionStreamKey`),FfiConverterOptionalByteArray.lower(`groupId`),FfiConverterOptionalULong.lower(`groupSeq`),FfiConverterOptionalByteArray.lower(`groupReSender`),FfiConverterOptionalULong.lower(`groupReSeq`),FfiConverterOptionalString.lower(`pubPeriodId`),FfiConverterOptionalByteArray.lower(`pubPeriodKey`),FfiConverterOptionalString.lower(`pubRecord`),FfiConverterOptionalByteArray.lower(`pubHeadKey`),FfiConverterOptionalString.lower(`pubSwarmKey`),FfiConverterOptionalByteArray.lower(`pubSwarmDigest`),FfiConverterOptionalByteArray.lower(`callRoute`),FfiConverterOptionalByteArray.lower(`callId`),_status)
 }
     )
     }

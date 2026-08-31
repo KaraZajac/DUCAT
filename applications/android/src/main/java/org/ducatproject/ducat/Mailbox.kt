@@ -755,6 +755,9 @@ object Mailbox {
          *  neither — core refuses every half. */
         pubSwarmKey: String? = null,
         pubSwarmDigestHex: String? = null,
+        /** §16.21's door: route blob + 8-byte id, both or neither. */
+        callRoute: ByteArray? = null,
+        callId: ByteArray? = null,
     ): Contact {
         val store = ContactStore(context)
         // Who speaks is the contact's to say, not the caller's: the thread
@@ -820,6 +823,7 @@ object Mailbox {
             groupId, groupSeq?.toULong(), groupReSender, groupReSeq?.toULong(),
             pubPeriodId, pubPeriodKey, pubRecord, pubHeadKey,
             pubSwarmKey, pubSwarmDigestHex?.let { hexToBytes(it) },
+            callRoute, callId,
         )
         // Everything local lands before anything remote. The failure orders
         // are not symmetric: a published slot and head with the counter lost
@@ -849,6 +853,7 @@ object Mailbox {
                 pubPeriodId = pubPeriodId, pubPeriodKey = pubPeriodKey,
                 pubRecord = pubRecord, pubHeadKey = pubHeadKey,
                 pubSwarmKey = pubSwarmKey, pubSwarmDigest = pubSwarmDigestHex,
+                callRoute = callRoute?.toHexString(), callId = callId?.toHexString(),
                 // Not yet. The write is three lines below, and until it lands
                 // this row is a message that has not left the phone — which
                 // looked identical to one that had.
@@ -1827,6 +1832,8 @@ object Mailbox {
                 pubHeadKey = opened.publication?.headKey,
                 pubSwarmKey = opened.publication?.swarmKey,
                 pubSwarmDigest = opened.publication?.swarmDigest?.toHexString(),
+                callRoute = opened.callRoute?.toHexString(),
+                callId = opened.callId?.toHexString(),
             )
             // The one funnel every arrival passes through, so the notification
             // cannot be forgotten by a new screen: if it was stored, it was
