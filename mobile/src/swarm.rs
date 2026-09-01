@@ -225,6 +225,10 @@ pub fn swarm_fetch(
         let mut waited = 0u64;
         let mut stalls = 0u32;
         loop {
+            crate::node::note(format!(
+                "swarm: fetch attempt (stalls {stalls}, waited {waited}s) for {}…",
+                &share_key[..share_key.len().min(20)]
+            ));
             match fetch_once(
                 conn.clone(),
                 root.clone(),
@@ -236,13 +240,20 @@ pub fn swarm_fetch(
             .await
             {
                 Err(SwarmError::Failed(e)) if e.contains("TryAgain") && waited < 40 => {
+                    crate::node::note(format!("swarm: route not ready, retrying — {e}"));
                     tokio::time::sleep(std::time::Duration::from_secs(5)).await;
                     waited += 5;
                 }
                 Err(SwarmError::Failed(e)) if e.contains("went quiet") && stalls < 6 => {
+                    crate::node::note("swarm: went quiet, re-bootstrapping".into());
                     stalls += 1;
                 }
-                other => return other,
+                other => {
+                    if let Err(SwarmError::Failed(e)) = &other {
+                        crate::node::note(format!("swarm: giving up — {e}"));
+                    }
+                    return other;
+                }
             }
         }
     })
@@ -274,8 +285,10 @@ async fn fetch_once(
         tokio::spawn(async move {
             let _ = share.join().await;
         });
+        crate::node::note(format!("swarm: bootstrap refused — {e}"));
         return Err(fail(e));
     }
+    crate::node::note("swarm: bootstrapped, waiting on the stream".into());
 
     progress_map().lock().unwrap().insert(
         progress_key.clone(),
@@ -286,6 +299,7 @@ async fn fetch_once(
         },
     );
     let mut total: u64 = 0;
+    let mut seen: u32 = 0;
     loop {
         // The watchdog: verification of what is already on disk emits
         // progress, so a healthy fetch — resumed or fresh — always has
@@ -299,6 +313,9 @@ async fn fetch_once(
         .await;
         let ev = match ev {
             Err(_) => {
+                crate::node::note(format!(
+                    "swarm: watchdog fired after {seen} event(s)"
+                ));
                 cancel.cancel();
                 tokio::spawn(async move {
                     let _ = share.join().await;
@@ -307,6 +324,11 @@ async fn fetch_once(
             }
             Ok(r) => r.map_err(fail)?,
         };
+        seen += 1;
+        if seen <= 12 || seen % 64 == 0 {
+            let line: String = format!("{ev:?}").chars().take(110).collect();
+            crate::node::note(format!("swarm: ev {seen}: {line}"));
+        }
         match ev {
             Event::FetcherStatus(stigmerge_peer::fetcher::Status::Done) => {
                 if let Some(p) = progress_map().lock().unwrap().get_mut(&progress_key) {

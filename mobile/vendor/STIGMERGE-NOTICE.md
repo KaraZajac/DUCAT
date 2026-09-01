@@ -70,7 +70,14 @@ Recorded per the MPL's Exhibit A expectations and plain courtesy:
    to before, payload digest included; multi-file payload digests are
    the BLAKE3 chain of per-file digests in path order. Pinned by
    `multi_file_tests.rs`. Upstream candidate.
-6. **`Status::Done` is actually sent.** Upstream's fetcher returned its
+   `from_wanted` canonicalizes the fetch root before rooting anything
+   under it (2026-09-01): it canonicalizes each file, and a literal
+   root over a symlinked path — Android's `/data/user/0` is a symlink
+   to `/data/data` — never prefixes its own canonicalized files, so
+   every phone-side fetch failed `strip_prefix` inside "index local
+   share" while identical code passed on a desk. Pinned by
+   `wanted_root_through_a_symlink_indexes`.
+7. **`Status::Done` is actually sent.** Upstream's fetcher returned its
    internal `State::Done` on `index_complete` without ever emitting
    `Status::Done` on the status channel — so every consumer waiting on
    the documented signal, upstream's own CLI included, waited forever on

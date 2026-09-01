@@ -338,10 +338,20 @@ impl Indexer {
         if want.files.is_empty() {
             return Ok(Indexer::default());
         }
+        // The root must be canonical before any file under it is: files are
+        // canonicalized below, and `index()` strips this root off each one.
+        // A literal root over a symlinked path (Android's /data/user/0 is a
+        // symlink to /data/data) never prefixes its own canonicalized files,
+        // and the whole index fails on the mismatch.
+        let _ = tokio::fs::create_dir_all(&want.root).await;
+        let root = match want.root.canonicalize() {
+            Ok(r) => r,
+            Err(_) => return Ok(Indexer::default()),
+        };
         let mut files: Vec<PathBuf> = vec![];
         let mut bases: Vec<usize> = vec![];
         for f in want.files.iter() {
-            let file_path = want.root.join(f.path());
+            let file_path = root.join(f.path());
             let file_len = TryInto::<u64>::try_into(f.contents().length()).unwrap();
             let ready = async {
                 if let Some(parent) = file_path.parent() {
@@ -369,7 +379,7 @@ impl Indexer {
         let (digest_progress_tx, _) = watch::channel(Progress::default());
         let (index_progress_tx, _) = watch::channel(Progress::default());
         Ok(Indexer {
-            root_dir: want.root.to_path_buf(),
+            root_dir: root,
             files,
             bases: Some(bases),
             digest_progress_tx,

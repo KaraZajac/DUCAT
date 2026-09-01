@@ -41,6 +41,10 @@ modular-frost = { version = "0.11.1", features = ["ed25519"] }
 dkg-pedpop = { path = "vendor/dkg-pedpop" }
 ciphersuite = "0.4"
 unsafe-libopus = "0.2.0"
+# The swarm's tracing has to reach the node's log ring on a phone, or a
+# dying fetch says everything to nobody.
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "registry", "fmt"] }
 
 [[bin]]
 name = "uniffi-bindgen"
@@ -54,5 +58,3 @@ path = "src/bin/uniffi-bindgen.rs"
 jni = "0.22.4"
 
 [dev-dependencies]
-# Examples only: lets the swarm/ping harnesses speak when RUST_LOG asks.
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }

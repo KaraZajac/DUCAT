@@ -122,3 +122,44 @@ async fn wanted_side_alignment_survives_missing_files() {
     assert!(fetch_root.join("a.bin").exists());
     assert!(fetch_root.join("b.bin").exists());
 }
+
+/// A fetch root reached through a symlink still indexes. Android's app
+/// storage is exactly this shape — `/data/user/0` is a symlink to
+/// `/data/data` — and an Indexer that canonicalizes its files but not its
+/// root can never strip one from the other: every phone-side fetch died
+/// on "index local share" while the same code passed on a desk.
+#[tokio::test]
+async fn wanted_root_through_a_symlink_indexes() {
+    let seed_dir = TempDir::new().expect("tempdir");
+    let seed_root = seed_dir.path();
+    write_file(seed_root, "a.bin", b'a', 100);
+    write_file(seed_root, "b/c.bin", b'c', 50);
+    let want = Indexer::from_path(seed_root)
+        .await
+        .expect("from_path")
+        .index()
+        .await
+        .expect("index");
+
+    let real_dir = TempDir::new().expect("tempdir");
+    let link_dir = TempDir::new().expect("tempdir");
+    let linked_root = link_dir.path().join("via-link");
+    std::os::unix::fs::symlink(real_dir.path(), &linked_root).expect("symlink");
+
+    let want_rooted = Index::new(
+        linked_root.clone(),
+        want.payload().clone(),
+        want.files().clone(),
+    );
+    let have = Indexer::from_wanted(&want_rooted)
+        .await
+        .expect("from_wanted")
+        .index()
+        .await
+        .expect("index through the symlink");
+    // Nothing on disk yet, so nothing is had — but the index exists and
+    // its files resolve under the real directory.
+    assert_eq!(have.files().len(), 2);
+    assert!(real_dir.path().join("a.bin").exists());
+    assert!(real_dir.path().join("b/c.bin").exists());
+}

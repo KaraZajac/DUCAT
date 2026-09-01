@@ -176,6 +176,17 @@ pub fn node_logs() -> Vec<String> {
     logs().lock().unwrap().drain(..).collect()
 }
 
+/// A line of our own into the same ring — the swarm's fetch loop lives and
+/// dies entirely between two FFI calls, and on a phone that death is
+/// invisible without this.
+pub(crate) fn note(line: String) {
+    let mut q = logs().lock().unwrap();
+    if q.len() >= MAX_LOGS {
+        q.pop_front();
+    }
+    q.push_back(line);
+}
+
 /// Take a clone of what a call needs, and **release the lock before doing any
 /// network work**.
 ///
@@ -231,6 +242,40 @@ pub fn node_start(storage_dir: String, udp: bool) -> Result<(), NodeError> {
     if guard.is_some() {
         return Ok(()); // already running; starting twice would fight over the store
     }
+
+    // The swarm's own narration, into the same ring the node's goes to.
+    // stigmerge speaks through `tracing`, and on a phone that had no
+    // subscriber — a resolver refusing a watch, a route import failing,
+    // every reason a fetch dies, all said clearly and heard by no one.
+    static TRACE: std::sync::Once = std::sync::Once::new();
+    TRACE.call_once(|| {
+        use tracing_subscriber::{fmt, layer::SubscriberExt, EnvFilter};
+        struct Ring;
+        impl std::io::Write for Ring {
+            fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+                let line = String::from_utf8_lossy(buf);
+                let line = line.trim();
+                if !line.is_empty() {
+                    note(line.to_string());
+                }
+                Ok(buf.len())
+            }
+            fn flush(&mut self) -> std::io::Result<()> {
+                Ok(())
+            }
+        }
+        let filter = EnvFilter::try_from_env("DUCAT_TRACE").unwrap_or_else(|_| {
+            EnvFilter::new("off,stigmerge_peer=debug,stigmerge_fileindex=info")
+        });
+        let layer = fmt::layer()
+            .with_writer(|| Ring)
+            .with_ansi(false)
+            .without_time()
+            .with_target(false);
+        let _ = tracing::subscriber::set_global_default(
+            tracing_subscriber::registry().with(filter).with(layer),
+        );
+    });
 
     // Four, because discovery is nine boards at once.
     //
