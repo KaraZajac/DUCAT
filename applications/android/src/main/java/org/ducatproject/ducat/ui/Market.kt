@@ -235,7 +235,13 @@ fun LocalShelf() {
     var progress by remember { mutableStateOf(0 to 9) }
     var noFix by remember { mutableStateOf(false) }
     var refreshing by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
+    // Bumped by Try again: a missing fix is often momentary — location
+    // just switched on, or the phone found the sky — and a dead end with
+    // no door back was the only place in the market you could get stuck.
+    var attempt by remember { mutableStateOf(0) }
+    LaunchedEffect(attempt) {
+        noFix = false
+        looked = false
         grabFix(context) { fix ->
             if (fix == null) {
                 noFix = true
@@ -269,12 +275,17 @@ fun LocalShelf() {
         }
     }
     if (noFix) {
-        Text(
-            stringResource(R.string.market_no_fix),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(24.dp),
-        )
+        Column(Modifier.padding(24.dp)) {
+            Text(
+                stringResource(R.string.market_no_fix),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(onClick = { attempt++ }) {
+                Text(stringResource(R.string.rent_search_retry))
+            }
+        }
         return
     }
     ShelfBody(
