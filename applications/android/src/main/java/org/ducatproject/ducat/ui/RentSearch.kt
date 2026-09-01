@@ -3,6 +3,7 @@ package org.ducatproject.ducat.ui
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -69,7 +70,10 @@ internal fun boardChipLabel(kind: Int): Int = when (kind) {
 private enum class Stall { NoPermission, NoFix, NoNetwork }
 
 @Composable
-@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@OptIn(
+    androidx.compose.foundation.layout.ExperimentalLayoutApi::class,
+    androidx.compose.material3.ExperimentalMaterial3Api::class,
+)
 private fun RentSearchScreen(
     kind: Int,
     onOpenChat: (Contact) -> Unit,
@@ -163,6 +167,13 @@ private fun RentSearchScreen(
     // permission simply not requested yet.
     var attempt by remember { mutableIntStateOf(0) }
     var asked by remember { mutableStateOf(false) }
+    // True from a pull until that search settles — it drives only the
+    // pull indicator, so the auto-search on entry does not double up with
+    // the in-list spinner row.
+    var pulled by remember { mutableStateOf(false) }
+    androidx.compose.runtime.LaunchedEffect(searching) {
+        if (!searching) pulled = false
+    }
     val scope = rememberCoroutineScope()
     val perm = android.Manifest.permission.ACCESS_FINE_LOCATION
     val locPerm = androidx.activity.compose.rememberLauncherForActivityResult(
@@ -443,18 +454,34 @@ private fun RentSearchScreen(
                     // may list a car five minutes from now, and a screen whose
                     // only exit is Cancel makes you start the whole thing over
                     // to find out.
-                    found.none { kindShows(it.kind.toInt()) } -> Column {
-                        Text(
-                            stringResource(R.string.rent_none_found),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        Spacer(Modifier.height(12.dp))
-                        OutlinedButton(onClick = { attempt++ }) {
-                            Text(stringResource(R.string.rent_search_retry))
+                    found.none { kindShows(it.kind.toInt()) } ->
+                        androidx.compose.material3.pulltorefresh.PullToRefreshBox(
+                            isRefreshing = pulled,
+                            onRefresh = { pulled = true; attempt++ },
+                        ) {
+                            Column(
+                                Modifier.fillMaxSize()
+                                    .verticalScroll(
+                                        androidx.compose.foundation
+                                            .rememberScrollState(),
+                                    ),
+                            ) {
+                                Text(
+                                    stringResource(R.string.rent_none_found),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                                Spacer(Modifier.height(12.dp))
+                                OutlinedButton(onClick = { attempt++ }) {
+                                    Text(stringResource(R.string.rent_search_retry))
+                                }
+                            }
                         }
-                    }
-                    else -> LazyColumn(Modifier.fillMaxSize()) {
+                    else -> androidx.compose.material3.pulltorefresh.PullToRefreshBox(
+                        isRefreshing = pulled,
+                        onRefresh = { pulled = true; attempt++ },
+                    ) {
+                        LazyColumn(Modifier.fillMaxSize()) {
                         if (searching) {
                             item {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -557,6 +584,7 @@ private fun RentSearchScreen(
                                 },
                             )
                             Spacer(Modifier.height(10.dp))
+                        }
                         }
                     }
                 }

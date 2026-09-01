@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -96,11 +97,13 @@ private fun MarketRowCard(r: Publications.MarketRow) {
 /** Shared tail: the looking line, the empty state with its invitation,
  *  and the rows. */
 @Composable
+@androidx.compose.material3.ExperimentalMaterial3Api
 private fun ShelfBody(
     rows: List<Publications.MarketRow>,
     looked: Boolean,
     looking: String,
     refreshing: Boolean = false,
+    onRefresh: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     // One column of our own: the callers place this body in containers
@@ -142,7 +145,19 @@ private fun ShelfBody(
                 )
             }
         } else if (rows.isEmpty()) {
-            Column(Modifier.padding(24.dp)) {
+            // Scrollable so the pull gesture works from the empty answer —
+            // which is exactly where somebody most wants to ask again.
+            Column(
+                Modifier.fillMaxSize()
+                    .let { m ->
+                        if (onRefresh != null) {
+                            m.verticalScroll(androidx.compose.foundation.rememberScrollState())
+                        } else {
+                            m
+                        }
+                    }
+                    .padding(24.dp),
+            ) {
                 Text(
                     stringResource(R.string.market_empty),
                     style = MaterialTheme.typography.bodySmall,
@@ -162,6 +177,24 @@ private fun ShelfBody(
                 items(rows.size) { i -> MarketRowCard(rows[i]) }
             }
         }
+    }
+}
+
+/** ShelfBody behind a pull: dragging down asks the shelf again. The
+ *  stale-while-revalidate rows stay on screen while the fresh read runs,
+ *  so a pull is never a blank screen. */
+@androidx.compose.material3.ExperimentalMaterial3Api
+@Composable
+private fun ShelfPull(
+    refreshing: Boolean,
+    onRefresh: () -> Unit,
+    content: @Composable () -> Unit,
+) {
+    androidx.compose.material3.pulltorefresh.PullToRefreshBox(
+        isRefreshing = refreshing,
+        onRefresh = onRefresh,
+    ) {
+        content()
     }
 }
 
@@ -185,13 +218,15 @@ private suspend fun awaitAttached(maxMs: Long): Boolean {
 
 /** The worldwide shelf for one category (§16.18.2). */
 @Composable
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 fun WorldwideShelf(cat: String, myLangOnly: Boolean) {
     val context = LocalContext.current
     val lang = java.util.Locale.getDefault().language.takeIf { it.isNotBlank() }
     var rows by remember { mutableStateOf<List<Publications.MarketRow>>(emptyList()) }
     var looked by remember { mutableStateOf(false) }
     var refreshing by remember { mutableStateOf(false) }
-    LaunchedEffect(cat, myLangOnly) {
+    var attempt by remember { mutableStateOf(0) }
+    LaunchedEffect(cat, myLangOnly, attempt) {
         looked = false
         val wanted = if (myLangOnly) lang else null
         // What this shelf said last time paints now; the live read replaces
@@ -219,15 +254,19 @@ fun WorldwideShelf(cat: String, myLangOnly: Boolean) {
         refreshing = false
         looked = true
     }
-    ShelfBody(
-        rows, looked,
-        stringResource(R.string.market_looking, marketCategoryLabel(cat)),
-        refreshing = refreshing,
-    )
+    ShelfPull(refreshing = refreshing, onRefresh = { attempt++ }) {
+        ShelfBody(
+            rows, looked,
+            stringResource(R.string.market_looking, marketCategoryLabel(cat)),
+            refreshing = refreshing,
+            onRefresh = { attempt++ },
+        )
+    }
 }
 
 /** The local shelf: publications on the neighbourhood's own boards. */
 @Composable
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 fun LocalShelf() {
     val context = LocalContext.current
     var rows by remember { mutableStateOf<List<Publications.MarketRow>>(emptyList()) }
@@ -288,9 +327,12 @@ fun LocalShelf() {
         }
         return
     }
-    ShelfBody(
-        rows, looked,
-        stringResource(R.string.market_looking_local, progress.first, progress.second),
-        refreshing = refreshing,
-    )
+    ShelfPull(refreshing = refreshing, onRefresh = { attempt++ }) {
+        ShelfBody(
+            rows, looked,
+            stringResource(R.string.market_looking_local, progress.first, progress.second),
+            refreshing = refreshing,
+            onRefresh = { attempt++ },
+        )
+    }
 }
