@@ -140,4 +140,6 @@
     <string name="chat_not_sent_yet">अभी भेजा नहीं गया</string>
     <string name="chat_cancel_request">अनुरोध रद्द करें</string>
     <string name="chat_copied">मैसेज कॉपी हो गया</string>
+    <string name="chat_download_file">डाउनलोड</string>
+    <string name="chat_file_too_big_swarm">यह फ़ाइल %1$d MB है — फ़िलहाल फ़ाइलें 64 MB तक</string>
 </resources>

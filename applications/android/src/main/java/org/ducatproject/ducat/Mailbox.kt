@@ -850,7 +850,10 @@ object Mailbox {
                 kind = kind, amountPxmr = amountPxmr ?: 0L, payto = payto,
                 txidHex = txidHex, items = items, taxPxmr = taxPxmr,
                 reSeq = reSeq, reOwn = reOwn,
-                attRecord = attachment?.recordKey, attKey = attachment?.key,
+                attRecord = attachment?.recordKey,
+                attSwarm = attachment?.swarmKey,
+                attSwarmDigest = attachment?.swarmDigest?.toHexString(),
+                attKey = attachment?.key,
                 attNonce = attachment?.nonce, attLen = attachment?.len?.toLong() ?: 0L,
                 attHash = attachment?.ctHash?.toHexString(),
                 attMime = attachment?.mime, attName = attachment?.name,
@@ -1034,6 +1037,58 @@ object Mailbox {
      */
     val fetchProgress =
         kotlinx.coroutines.flow.MutableStateFlow<Triple<String, Int, Int>?>(null)
+
+    /** The ciphertext hash of the swarm attachment being fetched, if any —
+     *  the bubble reads it to show its own bar. Manual per tap: a big file
+     *  downloads when asked, never by surprise on somebody's data plan. */
+    val swarmFetching = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
+
+    /** Fetch one swarm-road attachment (§16.15's big road), blocking.
+     *  Room-checked, hash-verified, unsealed and cached exactly like the
+     *  record road; the transfer itself rides §16.20's engine with
+     *  stay=false — a file sent to a person is for that person. */
+    fun fetchSwarmAttachment(context: Context, m: StoredMessage): Boolean {
+        val hash = m.attHash ?: return false
+        val share = m.attSwarm ?: return false
+        val digest = m.attSwarmDigest ?: return false
+        val key = m.attKey ?: return false
+        val nonce = m.attNonce ?: return false
+        val out = attachmentFile(context, hash)
+        if (out.exists()) return true
+        val dir = attachmentDir(context)
+        val used = dir.listFiles()?.sumOf { it.length() } ?: 0L
+        if (!roomForAttachment(used, dir.usableSpace, m.attLen)) {
+            attachmentTrouble(context, hash, NO_ROOM)
+            return false
+        }
+        if (!swarmFetching.compareAndSet(null, hash)) return false
+        val tmp = java.io.File(context.filesDir, "att_tmp/$hash")
+        return try {
+            tmp.mkdirs()
+            Swarm.fetch(share, digest, tmp.absolutePath, staySeeding = false)
+            val blob = tmp.walkTopDown().filter { it.isFile }
+                .maxByOrNull { it.length() }
+                ?: throw IllegalStateException("the share held no file")
+            val ct = blob.readBytes()
+            val sum = java.security.MessageDigest.getInstance("SHA-256").digest(ct)
+            if (sum.toHexString() != hash) {
+                throw IllegalStateException("ciphertext hash mismatch")
+            }
+            val plain = attachmentOpen(key, nonce, ct)
+            out.writeBytes(plain)
+            clearAttachmentTrouble(context, hash)
+            DucatLog.i(TAG, "fetched swarm attachment ${hash.take(12)}… (${plain.size} bytes)")
+            true
+        } catch (e: Throwable) {
+            DucatLog.w(TAG, "swarm attachment ${hash.take(12)}…: ${e.message}")
+            attachmentTrouble(context, hash, 1)
+            false
+        } finally {
+            tmp.deleteRecursively()
+            swarmFetching.value = null
+            ContactStore.bump()
+        }
+    }
 
     fun fetchOneAttachment(context: Context): Boolean {
         val store = ContactStore(context)
@@ -1852,6 +1907,8 @@ object Mailbox {
                 reOwn = opened.reOwn,
                 etaSecs = opened.etaSecs?.toLong(),
                 attRecord = opened.attachment?.recordKey,
+                attSwarm = opened.attachment?.swarmKey,
+                attSwarmDigest = opened.attachment?.swarmDigest?.toHexString(),
                 attKey = opened.attachment?.key,
                 attNonce = opened.attachment?.nonce,
                 attLen = opened.attachment?.len?.toLong() ?: 0L,

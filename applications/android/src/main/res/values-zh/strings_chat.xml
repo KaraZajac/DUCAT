@@ -139,4 +139,6 @@
     <string name="chat_not_sent_yet">尚未发送</string>
     <string name="chat_cancel_request">撤销请求</string>
     <string name="chat_copied">已复制消息</string>
+    <string name="chat_download_file">下载</string>
+    <string name="chat_file_too_big_swarm">该文件为 %1$d MB——目前文件上限为 64 MB</string>
 </resources>

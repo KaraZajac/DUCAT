@@ -2315,7 +2315,14 @@ public object FfiConverterByteArray: FfiConverterRustBuffer<ByteArray> {
  * An attachment reference, across the bridge (§16.15).
  */
 data class AttachmentRef (
-    var `recordKey`: kotlin.String, 
+    /**
+     * Exactly one transport (§16.15): the record road for small blobs,
+     * or the swarm road (key + digest together) for what a record
+     * cannot hold.
+     */
+    var `recordKey`: kotlin.String?, 
+    var `swarmKey`: kotlin.String?, 
+    var `swarmDigest`: kotlin.ByteArray?, 
     var `key`: kotlin.ByteArray, 
     var `nonce`: kotlin.ByteArray, 
     var `len`: kotlin.ULong, 
@@ -2333,7 +2340,9 @@ data class AttachmentRef (
 public object FfiConverterTypeAttachmentRef: FfiConverterRustBuffer<AttachmentRef> {
     override fun read(buf: ByteBuffer): AttachmentRef {
         return AttachmentRef(
-            FfiConverterString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
             FfiConverterByteArray.read(buf),
             FfiConverterByteArray.read(buf),
             FfiConverterULong.read(buf),
@@ -2344,7 +2353,9 @@ public object FfiConverterTypeAttachmentRef: FfiConverterRustBuffer<AttachmentRe
     }
 
     override fun allocationSize(value: AttachmentRef) = (
-            FfiConverterString.allocationSize(value.`recordKey`) +
+            FfiConverterOptionalString.allocationSize(value.`recordKey`) +
+            FfiConverterOptionalString.allocationSize(value.`swarmKey`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`swarmDigest`) +
             FfiConverterByteArray.allocationSize(value.`key`) +
             FfiConverterByteArray.allocationSize(value.`nonce`) +
             FfiConverterULong.allocationSize(value.`len`) +
@@ -2354,7 +2365,9 @@ public object FfiConverterTypeAttachmentRef: FfiConverterRustBuffer<AttachmentRe
     )
 
     override fun write(value: AttachmentRef, buf: ByteBuffer) {
-            FfiConverterString.write(value.`recordKey`, buf)
+            FfiConverterOptionalString.write(value.`recordKey`, buf)
+            FfiConverterOptionalString.write(value.`swarmKey`, buf)
+            FfiConverterOptionalByteArray.write(value.`swarmDigest`, buf)
             FfiConverterByteArray.write(value.`key`, buf)
             FfiConverterByteArray.write(value.`nonce`, buf)
             FfiConverterULong.write(value.`len`, buf)

@@ -140,4 +140,6 @@
     <string name="chat_not_sent_yet">هنوز ارسال نشده</string>
     <string name="chat_cancel_request">لغو درخواست</string>
     <string name="chat_copied">پیام کپی شد</string>
+    <string name="chat_download_file">دانلود</string>
+    <string name="chat_file_too_big_swarm">این فایل %1$d مگابایت است — فعلاً فایل‌ها تا ۶۴ مگابایت</string>
 </resources>

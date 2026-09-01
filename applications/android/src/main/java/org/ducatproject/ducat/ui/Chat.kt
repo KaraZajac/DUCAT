@@ -1669,6 +1669,59 @@ private fun Bubble(
                     val file = remember(att) { Mailbox.attachmentFile(ctx, att) }
                     val mime = m.attMime ?: "application/octet-stream"
                     when {
+                        !file.exists() && m.attSwarm != null -> {
+                            // The big road: a swarm file downloads when asked,
+                            // never by surprise on somebody's data plan. Name,
+                            // size, one button; the bar is the share's own.
+                            val fetchingHash by Mailbox.swarmFetching.collectAsState()
+                            val fetchingThis = fetchingHash == att
+                            Column {
+                                Text(
+                                    "📎 ${m.attName ?: stringResource(R.string.chat_file_fallback)}",
+                                    color = fg,
+                                )
+                                Text(
+                                    android.text.format.Formatter
+                                        .formatShortFileSize(ctx, m.attLen),
+                                    color = fg.copy(alpha = 0.7f),
+                                    style = MaterialTheme.typography.labelSmall,
+                                )
+                                Spacer(Modifier.height(6.dp))
+                                if (fetchingThis) {
+                                    var p by remember {
+                                        mutableStateOf<org.ducatproject.ducat.Swarm.Progress?>(null)
+                                    }
+                                    LaunchedEffect(att) {
+                                        while (true) {
+                                            p = m.attSwarm
+                                                ?.let { org.ducatproject.ducat.Swarm.fetchProgress(it) }
+                                            kotlinx.coroutines.delay(500)
+                                        }
+                                    }
+                                    val prog = p
+                                    if (prog != null && prog.length > 0) {
+                                        LinearProgressIndicator(
+                                            progress = {
+                                                (prog.position.toFloat() / prog.length.toFloat())
+                                                    .coerceIn(0f, 1f)
+                                            },
+                                            Modifier.fillMaxWidth(),
+                                        )
+                                    } else {
+                                        LinearProgressIndicator(Modifier.fillMaxWidth())
+                                    }
+                                } else {
+                                    val scope2 = rememberCoroutineScope()
+                                    OutlinedButton(onClick = {
+                                        scope2.launch(Dispatchers.IO) {
+                                            Mailbox.fetchSwarmAttachment(ctx, m)
+                                        }
+                                    }) {
+                                        Text(stringResource(R.string.chat_download_file))
+                                    }
+                                }
+                            }
+                        }
                         !file.exists() -> {
                             // "Downloading" is a promise, and it was the only
                             // thing this ever said. A phone with no room left,
@@ -2384,6 +2437,7 @@ private fun sendAttachmentBytes(
 
     val ref = uniffi.ducat_mobile.AttachmentRef(
         recordKey = rec.key,
+        swarmKey = null, swarmDigest = null,
         key = key, nonce = nonce,
         len = bytes.size.toULong(),
         ctHash = hash,
@@ -2449,14 +2503,61 @@ private fun sendFile(
     } ?: context.getString(R.string.chat_file_fallback)
     val bytes = resolver.openInputStream(uri)?.use { it.readBytes() }
         ?: throw IllegalArgumentException(context.getString(R.string.chat_could_not_read_file))
-    if (bytes.size > MAX_FILE_BYTES) {
+    val mime = resolver.getType(uri) ?: "application/octet-stream"
+    if (bytes.size <= MAX_FILE_BYTES) {
+        sendAttachmentBytes(context, c, bytes, mime, name, "📎 $name", onChunk)
+        return
+    }
+    // The big road (§16.15 post-1.0): past one record, the sealed blob
+    // rides a swarm share; key, digest and the seal travel inside the
+    // sealed message, and the swarm on the network is noise to everyone
+    // but this thread. Sealed in memory for now, so bounded here — past
+    // this it is a distribution problem, not a chat one.
+    if (bytes.size > MAX_SWARM_FILE_BYTES) {
         throw IllegalArgumentException(
-            context.getString(R.string.chat_file_too_big, bytes.size / 1024)
+            context.getString(R.string.chat_file_too_big_swarm, bytes.size / 1024 / 1024),
         )
     }
-    val mime = resolver.getType(uri) ?: "application/octet-stream"
-    sendAttachmentBytes(context, c, bytes, mime, name, "📎 $name", onChunk)
+    val rng = java.security.SecureRandom()
+    val key = ByteArray(32).also(rng::nextBytes)
+    val nonce = ByteArray(24).also(rng::nextBytes)
+    onChunk(0, 3)
+    val ct = uniffi.ducat_mobile.attachmentSeal(key, nonce, bytes)
+    val hash = java.security.MessageDigest.getInstance("SHA-256").digest(ct)
+    val hashHex = hash.joinToString("") { "%02x".format(it) }
+    // The outbox blob this phone serves from; the sidecar remembers the
+    // share so a restart can re-serve it (see Poller).
+    val outDir = java.io.File(context.filesDir, "swarm_out/$hashHex").apply { mkdirs() }
+    val blob = java.io.File(outDir, "payload.bin")
+    blob.writeBytes(ct)
+    onChunk(1, 3)
+    val share = org.ducatproject.ducat.Swarm.seed(blob.absolutePath)
+    java.io.File(outDir, "share.json").writeText(
+        org.json.JSONObject()
+            .put("share", share.shareKey)
+            .put("digest", share.indexDigestHex)
+            .put("sent", System.currentTimeMillis() / 1000)
+            .toString(),
+    )
+    onChunk(2, 3)
+    val ref = uniffi.ducat_mobile.AttachmentRef(
+        recordKey = null,
+        swarmKey = share.shareKey,
+        swarmDigest = share.indexDigestHex.chunked(2)
+            .map { it.toInt(16).toByte() }.toByteArray(),
+        key = key, nonce = nonce,
+        len = bytes.size.toULong(),
+        ctHash = hash,
+        mime = mime,
+        name = name,
+    )
+    Mailbox.attachmentFile(context, hashHex).writeBytes(bytes)
+    Mailbox.send(context, c, "📎 $name", attachment = ref)
+    onChunk(3, 3)
 }
+
+/** The big road's client bound: sealed in memory for now. */
+private const val MAX_SWARM_FILE_BYTES = 64 * 1024 * 1024
 
 /**
  * Hold-to-record (§16.15's bytes, Signal's gesture).

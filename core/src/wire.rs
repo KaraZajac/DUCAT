@@ -176,6 +176,14 @@ pub mod f {
     pub const MSG_ATT_HASH: u64 = 198;
     pub const MSG_ATT_MIME: u64 = 199;
     pub const MSG_ATT_NAME: u64 = 200;
+    // §16.15's second transport (post-1.0): the sealed blob rides a swarm
+    // share instead of a DHT record — same key/nonce/len/hash/mime fields,
+    // different road. Exactly one of MSG_ATT_RECORD / MSG_ATT_SWARM.
+    // 276-277 stay unassigned for ever: 276 is the strict-reader probe the
+    // publication_unknown_field vector pins as unknown, and assigning past
+    // a probe is the bond_proof collision (0.60) all over again.
+    pub const MSG_ATT_SWARM: u64 = 278;
+    pub const MSG_ATT_SWARM_DIGEST: u64 = 279;
     // Read watermark and ring size on a log head (§16.16, §16.12).
     pub const HEAD_READ: u64 = 201;
     pub const HEAD_RING: u64 = 202;

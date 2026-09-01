@@ -142,4 +142,6 @@
     <string name="chat_not_sent_yet">jeszcze niewysłane</string>
     <string name="chat_cancel_request">Wycofaj prośbę</string>
     <string name="chat_copied">Skopiowano wiadomość</string>
+    <string name="chat_download_file">Pobierz</string>
+    <string name="chat_file_too_big_swarm">ten plik ma %1$d MB — na razie pliki mogą mieć do 64 MB</string>
 </resources>

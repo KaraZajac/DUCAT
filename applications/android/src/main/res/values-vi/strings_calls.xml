@@ -20,4 +20,7 @@
     <string name="call_body_decline">Giờ tôi chưa nói chuyện được.</string>
     <string name="notify_call_channel">Cuộc gọi đến</string>
     <string name="notify_call_incoming">Cuộc gọi đến</string>
+    <string name="call_no_answer">Không trả lời</string>
+    <string name="call_leave_message">Để lại lời nhắn</string>
+    <string name="call_dismiss">Để sau</string>
 </resources>

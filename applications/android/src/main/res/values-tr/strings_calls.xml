@@ -20,4 +20,7 @@
     <string name="call_body_decline">Şu an konuşamıyorum.</string>
     <string name="notify_call_channel">Gelen aramalar</string>
     <string name="notify_call_incoming">Gelen arama</string>
+    <string name="call_no_answer">Yanıt yok</string>
+    <string name="call_leave_message">Mesaj bırak</string>
+    <string name="call_dismiss">Şimdi değil</string>
 </resources>

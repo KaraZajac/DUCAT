@@ -20,4 +20,7 @@
     <string name="call_body_decline">Kan nu even niet praten.</string>
     <string name="notify_call_channel">Inkomende oproepen</string>
     <string name="notify_call_incoming">Inkomende oproep</string>
+    <string name="call_no_answer">Geen antwoord</string>
+    <string name="call_leave_message">Bericht achterlaten</string>
+    <string name="call_dismiss">Niet nu</string>
 </resources>

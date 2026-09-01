@@ -20,4 +20,7 @@
     <string name="call_body_decline">いま話せません。</string>
     <string name="notify_call_channel">着信</string>
     <string name="notify_call_incoming">着信</string>
+    <string name="call_no_answer">応答なし</string>
+    <string name="call_leave_message">メッセージを残す</string>
+    <string name="call_dismiss">今はしない</string>
 </resources>

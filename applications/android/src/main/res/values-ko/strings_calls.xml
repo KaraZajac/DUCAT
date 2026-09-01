@@ -20,4 +20,7 @@
     <string name="call_body_decline">지금은 통화하기 어려워요.</string>
     <string name="notify_call_channel">수신 전화</string>
     <string name="notify_call_incoming">수신 전화</string>
+    <string name="call_no_answer">응답 없음</string>
+    <string name="call_leave_message">메시지 남기기</string>
+    <string name="call_dismiss">나중에</string>
 </resources>

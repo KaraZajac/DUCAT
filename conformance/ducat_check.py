@@ -989,6 +989,9 @@ MSG_ETA = 213
 MSG_PAYLOAD, MSG_ROUND, MSG_CEREMONY = 214, 215, 216
 MSG_ATT_RECORD, MSG_ATT_KEY, MSG_ATT_NONCE = 194, 195, 196
 MSG_ATT_LEN, MSG_ATT_HASH, MSG_ATT_MIME, MSG_ATT_NAME = 197, 198, 199, 200
+MSG_ATT_SWARM, MSG_ATT_SWARM_DIGEST = 278, 279
+MAX_SWARM_ATTACHMENT_BYTES = 268_435_456
+MAX_SHARE_KEY_CHARS = 128
 # §15.12 — the live-position reference (kind 11): record + stream key.
 MSG_POS_RECORD, MSG_POS_STREAM = 218, 219
 # §16.20 — a publication period's key (kind 13): the period pair is the
@@ -1860,9 +1863,12 @@ def parse_message(buf):
     else:
         out["re_own"] = False
 
-    # §16.15 — attachments: all fields or none.
+    # §16.15 — attachments: one transport (a record, or a swarm share),
+    # and the sealed-blob fields all together or not at all.
     att = {
         "record": _take_text(b, MSG_ATT_RECORD, MAX_RECORD_KEY_CHARS, "record", False),
+        "swarm": _take_text(b, MSG_ATT_SWARM, MAX_SHARE_KEY_CHARS, "share key", False),
+        "swarm_digest": b.pop(MSG_ATT_SWARM_DIGEST, (None, None))[1],
         "key": b.pop(MSG_ATT_KEY, (None, None))[1],
         "nonce": b.pop(MSG_ATT_NONCE, (None, None))[1],
         "len": b.pop(MSG_ATT_LEN, (None, None))[1],
@@ -1870,24 +1876,36 @@ def parse_message(buf):
         "mime": _take_text(b, MSG_ATT_MIME, MAX_MIME_CHARS, "mime", False),
         "name": _take_text(b, MSG_ATT_NAME, MAX_FILENAME_CHARS, "filename", False),
     }
-    core = [att["record"], att["key"], att["nonce"], att["len"], att["hash"], att["mime"]]
-    if all(x is None for x in core):
-        if att["name"] is not None:
-            raise Reject("Malformed", "a filename without an attachment names nothing")
+    if (att["swarm"] is None) != (att["swarm_digest"] is None):
+        raise Reject("Malformed",
+                     "a swarm attachment carries its share key and digest together")
+    if att["swarm_digest"] is not None and len(att["swarm_digest"]) != 32:
+        raise Reject("Malformed", "a swarm digest is 32 bytes")
+    transport_record = att["record"] is not None
+    transport_swarm = att["swarm"] is not None
+    core = [att["key"], att["nonce"], att["len"], att["hash"], att["mime"]]
+    if not transport_record and not transport_swarm:
+        if any(x is not None for x in core) or att["name"] is not None:
+            raise Reject("Malformed",
+                         "attachment fields without a transport reference nothing")
         out["attachment"] = None
+    elif transport_record and transport_swarm:
+        raise Reject("Malformed",
+                     "one road for the bytes: a record or the swarm, never both")
     elif all(x is not None for x in core):
-        if att["key"] is not None and len(att["key"]) != 32:
+        if len(att["key"]) != 32:
             raise Reject("Malformed", "attachment key is 32 bytes")
         if len(att["nonce"]) != 24:
             raise Reject("Malformed", "attachment nonce is 24 bytes")
         if len(att["hash"]) != 32:
             raise Reject("Malformed", "attachment hash is 32 bytes")
-        if not (1 <= att["len"] <= MAX_ATTACHMENT_BYTES):
+        bound = MAX_SWARM_ATTACHMENT_BYTES if transport_swarm else MAX_ATTACHMENT_BYTES
+        if not (1 <= att["len"] <= bound):
             raise Reject("Malformed", "attachment length out of bounds")
         out["attachment"] = att
     else:
         raise Reject("Malformed",
-                     "an attachment carries record, key, nonce, length, hash and mime together")
+                     "an attachment carries transport, key, nonce, length, hash and mime together")
 
     # §15.12 — the live-position reference: both fields together or neither.
     pos_record = _take_text(b, MSG_POS_RECORD, MAX_RECORD_KEY_CHARS, "record", False)
@@ -2323,7 +2341,12 @@ def run_message_payment(cases, r):
                 fields.append((MSG_GROUP_RE_SEQ, ("uint", m["group_re_seq"])))
             a = m["attachment"]
             if a is not None:
-                fields.append((MSG_ATT_RECORD, ("text", a["record"])))
+                if a["record"] is not None:
+                    fields.append((MSG_ATT_RECORD, ("text", a["record"])))
+                if a.get("swarm") is not None:
+                    fields.append((MSG_ATT_SWARM, ("text", a["swarm"])))
+                if a.get("swarm_digest") is not None:
+                    fields.append((MSG_ATT_SWARM_DIGEST, ("bytes", a["swarm_digest"])))
                 fields.append((MSG_ATT_KEY, ("bytes", a["key"])))
                 fields.append((MSG_ATT_NONCE, ("bytes", a["nonce"])))
                 fields.append((MSG_ATT_LEN, ("uint", a["len"])))

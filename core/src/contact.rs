@@ -925,7 +925,13 @@ pub struct PublicationKey {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Attachment {
     /// The record holding the ciphertext chunks, subkey 0 upward.
-    pub record_key: String,
+    /// The sealed blob chunked on a DHT record — the small road
+    /// (≤ [MAX_ATTACHMENT_BYTES]). Exactly one transport is present.
+    pub record_key: Option<String>,
+    /// The sealed blob as a swarm share — the big road (§16.20's engine,
+    /// ≤ [MAX_SWARM_ATTACHMENT_BYTES]). Key and digest travel together.
+    pub swarm_key: Option<String>,
+    pub swarm_digest: Option<[u8; 32]>,
     /// XChaCha20-Poly1305 key, one per attachment, never reused.
     pub key: [u8; 32],
     pub nonce: [u8; 24],
@@ -944,6 +950,11 @@ pub struct Attachment {
 /// An attachment may not out-size its record: 32 chunks of 32 KiB is Veilid's
 /// 1 MiB record cap, and the AEAD tag rides inside it.
 pub const MAX_ATTACHMENT_BYTES: u64 = 1_048_576 - 64;
+/// The swarm transport's bound (§16.15 post-1.0): a share carries what a
+/// record cannot. Generous on the wire; clients bound their own seals.
+pub const MAX_SWARM_ATTACHMENT_BYTES: u64 = 268_435_456;
+/// A share key is "VLD0:<key>:<owner>" — two encoded keys, not one.
+pub const MAX_SHARE_KEY_CHARS: usize = 128;
 pub const MAX_MIME_CHARS: usize = 64;
 pub const MAX_FILENAME_CHARS: usize = 96;
 
@@ -1009,7 +1020,15 @@ impl Message {
             m.insert(f::MSG_GROUP_RE_SEQ, Value::Uint(g));
         }
         if let Some(a) = &self.attachment {
-            m.insert(f::MSG_ATT_RECORD, Value::Text(a.record_key.clone()));
+            if let Some(rk) = &a.record_key {
+                m.insert(f::MSG_ATT_RECORD, Value::Text(rk.clone()));
+            }
+            if let Some(sk) = &a.swarm_key {
+                m.insert(f::MSG_ATT_SWARM, Value::Text(sk.clone()));
+            }
+            if let Some(d) = &a.swarm_digest {
+                m.insert(f::MSG_ATT_SWARM_DIGEST, Value::Bytes(d.to_vec()));
+            }
             m.insert(f::MSG_ATT_KEY, Value::Bytes(a.key.to_vec()));
             m.insert(f::MSG_ATT_NONCE, Value::Bytes(a.nonce.to_vec()));
             m.insert(f::MSG_ATT_LEN, Value::Uint(a.len));
@@ -1129,34 +1148,83 @@ impl Message {
             },
             attachment: {
                 let record_key = r.opt_text(f::MSG_ATT_RECORD, MAX_RECORD_KEY_CHARS)?;
+                let swarm_key = r.opt_text(f::MSG_ATT_SWARM, MAX_SHARE_KEY_CHARS)?;
+                let swarm_digest = r.opt_bytes(f::MSG_ATT_SWARM_DIGEST, Some(32))?;
                 let key = r.opt_bytes(f::MSG_ATT_KEY, Some(32))?;
                 let nonce = r.opt_bytes(f::MSG_ATT_NONCE, Some(24))?;
                 let len = r.opt_uint(f::MSG_ATT_LEN)?;
                 let ct_hash = r.opt_bytes(f::MSG_ATT_HASH, Some(32))?;
                 let mime = r.opt_text(f::MSG_ATT_MIME, MAX_MIME_CHARS)?;
                 let name = r.opt_text(f::MSG_ATT_NAME, MAX_FILENAME_CHARS)?;
-                match (record_key, key, nonce, len, ct_hash, mime) {
-                    (None, None, None, None, None, None) => {
-                        if name.is_some() {
+                // The swarm pair travels together or not at all.
+                let swarm = match (swarm_key, swarm_digest) {
+                    (None, None) => None,
+                    (Some(k), Some(d)) => Some((k, d)),
+                    _ => {
+                        return Err(Reject::with_detail(
+                            RejectCode::Malformed,
+                            "a swarm attachment carries its share key and digest together",
+                        ))
+                    }
+                };
+                let any_core = key.is_some()
+                    || nonce.is_some()
+                    || len.is_some()
+                    || ct_hash.is_some()
+                    || mime.is_some();
+                match (record_key, swarm) {
+                    (None, None) => {
+                        if any_core || name.is_some() {
                             return Err(Reject::with_detail(
                                 RejectCode::Malformed,
-                                "a filename without an attachment names nothing",
+                                "attachment fields without a transport reference nothing",
                             ));
                         }
                         None
                     }
-                    (Some(record_key), Some(key), Some(nonce), Some(len), Some(ct_hash), Some(mime)) => {
+                    (Some(_), Some(_)) => {
+                        return Err(Reject::with_detail(
+                            RejectCode::Malformed,
+                            "one road for the bytes: a record or the swarm, never both",
+                        ))
+                    }
+                    (record_key, swarm) => {
                         // All or nothing: a partial attachment is a reference
                         // that can be fetched but not decrypted, or decrypted
                         // but not verified — every subset is a trap.
-                        if len == 0 || len > MAX_ATTACHMENT_BYTES {
+                        let (key, nonce, len, ct_hash, mime) =
+                            match (key, nonce, len, ct_hash, mime) {
+                                (Some(k), Some(n), Some(l), Some(h), Some(m)) => {
+                                    (k, n, l, h, m)
+                                }
+                                _ => {
+                                    return Err(Reject::with_detail(
+                                        RejectCode::Malformed,
+                                        "an attachment carries transport, key, nonce, length, hash and mime together",
+                                    ))
+                                }
+                            };
+                        let bound = if swarm.is_some() {
+                            MAX_SWARM_ATTACHMENT_BYTES
+                        } else {
+                            MAX_ATTACHMENT_BYTES
+                        };
+                        if len == 0 || len > bound {
                             return Err(Reject::with_detail(
                                 RejectCode::Malformed,
-                                format!("an attachment is 1..={MAX_ATTACHMENT_BYTES} bytes"),
+                                format!("an attachment is 1..={bound} bytes"),
                             ));
                         }
+                        let (swarm_key, swarm_digest) = match swarm {
+                            Some((k, d)) => {
+                                (Some(k), Some(d.try_into().unwrap()))
+                            }
+                            None => (None, None),
+                        };
                         Some(Attachment {
                             record_key,
+                            swarm_key,
+                            swarm_digest,
                             key: key.try_into().unwrap(),
                             nonce: nonce.try_into().unwrap(),
                             len,
@@ -1164,12 +1232,6 @@ impl Message {
                             mime,
                             name,
                         })
-                    }
-                    _ => {
-                        return Err(Reject::with_detail(
-                            RejectCode::Malformed,
-                            "an attachment carries record, key, nonce, length, hash and mime together",
-                        ))
                     }
                 }
             },

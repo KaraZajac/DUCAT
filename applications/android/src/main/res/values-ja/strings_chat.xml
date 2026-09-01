@@ -139,4 +139,6 @@
     <string name="chat_not_sent_yet">未送信</string>
     <string name="chat_cancel_request">リクエストを取り消す</string>
     <string name="chat_copied">メッセージをコピーしました</string>
+    <string name="chat_download_file">ダウンロード</string>
+    <string name="chat_file_too_big_swarm">そのファイルは %1$d MB です — 現在は 64 MB までです</string>
 </resources>

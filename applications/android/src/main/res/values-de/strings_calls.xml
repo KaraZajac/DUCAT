@@ -20,4 +20,7 @@
     <string name="call_body_decline">Kann gerade nicht sprechen.</string>
     <string name="notify_call_channel">Eingehende Anrufe</string>
     <string name="notify_call_incoming">Eingehender Anruf</string>
+    <string name="call_no_answer">Keine Antwort</string>
+    <string name="call_leave_message">Nachricht hinterlassen</string>
+    <string name="call_dismiss">Jetzt nicht</string>
 </resources>

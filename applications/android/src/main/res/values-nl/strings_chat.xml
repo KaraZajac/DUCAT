@@ -140,4 +140,6 @@
     <string name="chat_not_sent_yet">nog niet verzonden</string>
     <string name="chat_cancel_request">Verzoek intrekken</string>
     <string name="chat_copied">Bericht gekopieerd</string>
+    <string name="chat_download_file">Downloaden</string>
+    <string name="chat_file_too_big_swarm">dat bestand is %1$d MB — bestanden gaan voorlopig tot 64 MB</string>
 </resources>

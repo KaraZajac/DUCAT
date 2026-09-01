@@ -16,6 +16,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.CallEnd
 import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.Button
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +44,10 @@ import org.ducatproject.ducat.R
  * buttons. A call is the one moment the app should look like a telephone
  * and nothing else.
  */
+/** Opens the thread with this contact — the answering-machine button's
+ *  road home. Injected by MainActivity; the desk has no thread screen. */
+var callOpenThread: (String) -> Unit = {}
+
 @Composable
 fun CallScreen() {
     val context = LocalContext.current
@@ -50,7 +56,15 @@ fun CallScreen() {
         is Calls.State.Outgoing -> state.contactHex
         is Calls.State.Incoming -> state.contactHex
         is Calls.State.Active -> state.contactHex
+        is Calls.State.NoAnswer -> state.contactHex
         else -> return
+    }
+    // The answering-machine screen does not linger in a pocket.
+    if (state is Calls.State.NoAnswer) {
+        LaunchedEffect(state) {
+            delay(45_000)
+            Calls.dismissNoAnswer()
+        }
     }
     val contact = remember(contactHex) {
         ContactStore(context).all().firstOrNull { it.personaHex == contactHex }
@@ -92,6 +106,7 @@ fun CallScreen() {
                     when (state) {
                         is Calls.State.Outgoing -> stringResource(R.string.call_calling)
                         is Calls.State.Incoming -> stringResource(R.string.call_incoming)
+                        is Calls.State.NoAnswer -> stringResource(R.string.call_no_answer)
                         is Calls.State.Active -> {
                             val secs = (nowMs - state.sinceMs) / 1000
                             "%d:%02d".format(secs / 60, secs % 60)
@@ -113,6 +128,23 @@ fun CallScreen() {
                 }
             }
 
+            // No early return — that shape has crashed Compose here before.
+            if (state is Calls.State.NoAnswer) {
+                // The answering machine: one primary act (the thread's own
+                // recorder is one tap away), one way out.
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Button(onClick = {
+                        Calls.dismissNoAnswer()
+                        callOpenThread(contactHex)
+                    }) {
+                        Text(stringResource(R.string.call_leave_message))
+                    }
+                    Spacer(Modifier.height(16.dp))
+                    TextButton(onClick = { Calls.dismissNoAnswer() }) {
+                        Text(stringResource(R.string.call_dismiss))
+                    }
+                }
+            } else {
             Row(horizontalArrangement = Arrangement.spacedBy(48.dp)) {
                 if (state is Calls.State.Incoming) {
                     FilledIconButton(
@@ -155,6 +187,7 @@ fun CallScreen() {
                         Modifier.size(32.dp),
                     )
                 }
+            }
             }
         }
     }

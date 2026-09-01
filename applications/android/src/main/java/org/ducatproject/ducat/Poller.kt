@@ -260,6 +260,11 @@ class Poller(private val context: Context) {
                 // key — a verify-only fetch that downloads nothing and
                 // stays. Readers are mirrors (§16.20).
                 runCatching { reseedLibrary(context) }
+                // And the outbox: files this phone sent down the big road
+                // stay served for a week — the sender is the first seeder,
+                // and a restart must not orphan a transfer the other side
+                // has not collected yet. Verify-only, downloads nothing.
+                runCatching { reseedOutbox(context) }
                 // The mempool, only while a bill is out and unsighted — the
                 // scan costs a round trip per pool transaction, and a till
                 // with nothing billed has nothing to look for.
@@ -462,6 +467,44 @@ class Poller(private val context: Context) {
                         ),
                     )
                 }
+            }
+        }
+    }
+
+    @Volatile private var outboxReseeded = false
+
+    private fun reseedOutbox(context: Context) {
+        if (outboxReseeded) return
+        if (!runCatching { uniffi.ducat_mobile.nodeStatus().publicInternetReady }
+                .getOrDefault(false)
+        ) {
+            return
+        }
+        outboxReseeded = true
+        val root = java.io.File(context.filesDir, "swarm_out")
+        val weekAgo = System.currentTimeMillis() / 1000 - 7 * 24 * 3600
+        root.listFiles()?.forEach { dir ->
+            runCatching {
+                val meta = org.json.JSONObject(
+                    java.io.File(dir, "share.json").readText(),
+                )
+                if (meta.optLong("sent") < weekAgo) {
+                    // A week unserved is a transfer nobody is coming for.
+                    dir.deleteRecursively()
+                    return@forEach
+                }
+                Thread {
+                    runCatching {
+                        Swarm.fetch(
+                            meta.getString("share"),
+                            meta.getString("digest"),
+                            dir.absolutePath,
+                            staySeeding = true,
+                        )
+                    }.onFailure {
+                        DucatLog.w(TAG, "outbox reseed: ${it.message}")
+                    }
+                }.apply { isDaemon = true; name = "outbox-reseed" }.start()
             }
         }
     }

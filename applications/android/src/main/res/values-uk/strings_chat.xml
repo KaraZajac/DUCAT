@@ -142,4 +142,6 @@
     <string name="chat_not_sent_yet">ще не надіслано</string>
     <string name="chat_cancel_request">Скасувати запит</string>
     <string name="chat_copied">Повідомлення скопійовано</string>
+    <string name="chat_download_file">Завантажити</string>
+    <string name="chat_file_too_big_swarm">цей файл — %1$d МБ; поки що файли обмежені 64 МБ</string>
 </resources>

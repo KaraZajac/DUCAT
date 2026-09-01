@@ -1669,8 +1669,11 @@ data class StoredMessage(
     /** For a reaction (§16.14): which message, and in whose log. */
     val reSeq: Long? = null,
     val reOwn: Boolean = false,
-    /** An attachment by reference (§16.15); bytes cached by ciphertext hash. */
+    /** An attachment by reference (§16.15); bytes cached by ciphertext hash.
+     *  Exactly one transport: a record (small road) or a swarm share (big). */
     val attRecord: String? = null,
+    val attSwarm: String? = null,
+    val attSwarmDigest: String? = null,
     val attKey: ByteArray? = null,
     val attNonce: ByteArray? = null,
     val attLen: Long = 0,
@@ -1743,8 +1746,11 @@ data class StoredMessage(
         put("txid", txidHex ?: JSONObject.NULL)
         reSeq?.let { put("re_seq", it) }
         if (reOwn) put("re_own", true)
-        attRecord?.let {
-            put("att_rec", it); put("att_key", Base64.encodeToString(attKey, Base64.NO_WRAP))
+        if (attHash != null) {
+            attRecord?.let { put("att_rec", it) }
+            attSwarm?.let { put("att_swarm", it) }
+            attSwarmDigest?.let { put("att_swarm_dig", it) }
+            put("att_key", Base64.encodeToString(attKey, Base64.NO_WRAP))
             put("att_nonce", Base64.encodeToString(attNonce, Base64.NO_WRAP))
             put("att_len", attLen); put("att_hash", attHash)
             put("att_mime", attMime); put("att_name", attName ?: JSONObject.NULL)
@@ -1795,6 +1801,8 @@ data class StoredMessage(
             reSeq = if (o.has("re_seq")) o.getLong("re_seq") else null,
             reOwn = o.optBoolean("re_own", false),
             attRecord = o.optStringOrNull("att_rec"),
+            attSwarm = o.optStringOrNull("att_swarm"),
+            attSwarmDigest = o.optStringOrNull("att_swarm_dig"),
             attKey = o.optStringOrNull("att_key")?.let { Base64.decode(it, Base64.NO_WRAP) },
             attNonce = o.optStringOrNull("att_nonce")?.let { Base64.decode(it, Base64.NO_WRAP) },
             attLen = o.optLong("att_len", 0L),

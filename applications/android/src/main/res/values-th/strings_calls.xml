@@ -20,4 +20,7 @@
     <string name="call_body_decline">ตอนนี้คุยไม่สะดวก</string>
     <string name="notify_call_channel">สายเรียกเข้า</string>
     <string name="notify_call_incoming">สายเรียกเข้า</string>
+    <string name="call_no_answer">ไม่มีผู้รับสาย</string>
+    <string name="call_leave_message">ฝากข้อความ</string>
+    <string name="call_dismiss">ไว้ทีหลัง</string>
 </resources>

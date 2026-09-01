@@ -20,4 +20,7 @@
     <string name="call_body_decline">الان نمی‌توانم صحبت کنم.</string>
     <string name="notify_call_channel">تماس‌های ورودی</string>
     <string name="notify_call_incoming">تماس ورودی</string>
+    <string name="call_no_answer">پاسخی نیست</string>
+    <string name="call_leave_message">پیام بگذارید</string>
+    <string name="call_dismiss">حالا نه</string>
 </resources>

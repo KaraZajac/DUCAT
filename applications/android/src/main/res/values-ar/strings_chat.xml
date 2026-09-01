@@ -144,4 +144,6 @@
     <string name="chat_not_sent_yet">لم يُرسل بعد</string>
     <string name="chat_cancel_request">إلغاء الطلب</string>
     <string name="chat_copied">نُسخت الرسالة</string>
+    <string name="chat_download_file">تنزيل</string>
+    <string name="chat_file_too_big_swarm">حجم هذا الملف %1$d م.ب — الملفات حتى 64 م.ب حاليًا</string>
 </resources>

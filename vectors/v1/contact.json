@@ -1032,6 +1032,49 @@
     },
     {
       "expect": {
+        "ok": true,
+        "reencodes_to_hex": "af001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f64f09f93b718a01a6553f10018c35820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18c45818bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18c51a02aea54018c65820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18c76f6170706c69636174696f6e2f70646618c869706c616e732e706466190116785c564c44303a79546b5079616b52594f6e3162735358482d4f4773656b61384f62625f4e4c385846385a586e6c484164553a524f5867674d766e546666505f365739764964782d6470336e6a754c4b43625f4d6867664e496e425252511901175820dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      },
+      "kind": "message.payment",
+      "name": "attachment_swarm_valid",
+      "payment_hex": "af001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f64f09f93b718a01a6553f10018c35820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18c45818bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18c51a02aea54018c65820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18c76f6170706c69636174696f6e2f70646618c869706c616e732e706466190116785c564c44303a79546b5079616b52594f6e3162735358482d4f4773656b61384f62625f4e4c385846385a586e6c484164553a524f5867674d766e546666505f365739764964782d6470336e6a754c4b43625f4d6867664e496e425252511901175820dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "why": "A big file by reference: the sealed blob rides a swarm share instead of a record — same key, nonce, length, hash and mime, a road that fits what a record cannot."
+    },
+    {
+      "expect": {
+        "hint": "one road, not both",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "attachment_both_roads",
+      "payment_hex": "b0001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f64f09f93b718a01a6553f10018c2785c564c44303a51617139746f2d5344694e3575736773346778646d46446f2d56384f485f787a744d4963763851577150413a7171534a374f74414477357076764b63315a337549534c73712d754f6c31676d6d4c33725f387668766b4118c35820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18c45818bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18c51a02aea54018c65820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18c76f6170706c69636174696f6e2f70646618c869706c616e732e706466190116785c564c44303a79546b5079616b52594f6e3162735358482d4f4773656b61384f62625f4e4c385846385a586e6c484164553a524f5867674d766e546666505f365739764964782d6470336e6a754c4b43625f4d6867664e496e425252511901175820dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "why": "One road for the bytes: a record or the swarm, never both — two references to one blob is a disagreement waiting for a reader to pick wrong."
+    },
+    {
+      "expect": {
+        "hint": "share key and digest together",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "attachment_swarm_missing_digest",
+      "payment_hex": "ae001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f64f09f93b718a01a6553f10018c35820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18c45818bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18c51a02aea54018c65820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18c76f6170706c69636174696f6e2f70646618c869706c616e732e706466190116785c564c44303a79546b5079616b52594f6e3162735358482d4f4773656b61384f62625f4e4c385846385a586e6c484164553a524f5867674d766e546666505f365739764964782d6470336e6a754c4b43625f4d6867664e496e42525251",
+      "why": "The share pair travels together: a key without the digest fetches something unverifiable, and a digest without the key verifies something unfetchable."
+    },
+    {
+      "expect": {
+        "hint": "swarm attachment over bound",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "attachment_swarm_over_bound",
+      "payment_hex": "af001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f64f09f93b718a01a6553f10018c35820aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa18c45818bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb18c51a11e1a30018c65820cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc18c76f6170706c69636174696f6e2f70646618c869706c616e732e706466190116785c564c44303a79546b5079616b52594f6e3162735358482d4f4773656b61384f62625f4e4c385846385a586e6c484164553a524f5867674d766e546666505f365739764964782d6470336e6a754c4b43625f4d6867664e496e425252511901175820dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "why": "The big road has a bound too (256 MiB): past it, this is not a chat attachment but a distribution problem the publication machinery already owns."
+    },
+    {
+      "expect": {
         "hint": "only text carries an attachment",
         "ok": false,
         "reject": "MALFORMED"

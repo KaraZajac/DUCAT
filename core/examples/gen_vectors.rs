@@ -1819,7 +1819,8 @@ fn contact_cases() -> Vec<J> {
 
     // §16.15 — attachments.
     let att = Attachment {
-        record_key: KEY.into(),
+        record_key: Some(KEY.into()),
+        swarm_key: None, swarm_digest: None,
         key: [0xAA; 32], nonce: [0xBB; 24], len: 200_000,
         ct_hash: [0xCC; 32], mime: "image/jpeg".into(), name: Some("cat.jpg".into()),
     };
@@ -1835,6 +1836,47 @@ fn contact_cases() -> Vec<J> {
         "One record is the unit: 32 chunks of 32 KiB is Veilid's measured 1 MiB cap, and a larger file is a different design, not a larger number.",
         &Message { attachment: Some(Attachment { len: 2_000_000, ..att.clone() }), ..with_att.clone() },
         Some((RejectCode::Malformed, "attachment over bound")));
+    // §16.15 post-1.0 — the big road: the same sealed blob as a swarm
+    // share. Key and digest of the share travel inside the sealed message;
+    // the swarm on the network is noise to everyone but the thread.
+    let swarm_att = Attachment {
+        record_key: None,
+        swarm_key: Some(
+            "VLD0:yTkPyakRYOn1bsSXH-OGseka8Obb_NL8XF8ZXnlHAdU:ROXggMvnTffP_6W9vIdx-dp3njuLKCb_MhgfNInBRRQ".into(),
+        ),
+        swarm_digest: Some([0xDD; 32]),
+        key: [0xAA; 32], nonce: [0xBB; 24], len: 45_000_000,
+        ct_hash: [0xCC; 32], mime: "application/pdf".into(),
+        name: Some("plans.pdf".into()),
+    };
+    money("attachment_swarm_valid",
+        "A big file by reference: the sealed blob rides a swarm share instead of a record — same key, nonce, length, hash and mime, a road that fits what a record cannot.",
+        &Message { attachment: Some(swarm_att.clone()), ..with_att.clone() }, None);
+    money("attachment_both_roads",
+        "One road for the bytes: a record or the swarm, never both — two references to one blob is a disagreement waiting for a reader to pick wrong.",
+        &Message {
+            attachment: Some(Attachment {
+                record_key: Some(KEY.into()),
+                ..swarm_att.clone()
+            }),
+            ..with_att.clone()
+        },
+        Some((RejectCode::Malformed, "one road, not both")));
+    money("attachment_swarm_missing_digest",
+        "The share pair travels together: a key without the digest fetches something unverifiable, and a digest without the key verifies something unfetchable.",
+        &Message {
+            attachment: Some(Attachment { swarm_digest: None, ..swarm_att.clone() }),
+            ..with_att.clone()
+        },
+        Some((RejectCode::Malformed, "share key and digest together")));
+    money("attachment_swarm_over_bound",
+        "The big road has a bound too (256 MiB): past it, this is not a chat attachment but a distribution problem the publication machinery already owns.",
+        &Message {
+            attachment: Some(Attachment { len: 300_000_000, ..swarm_att.clone() }),
+            ..with_att.clone()
+        },
+        Some((RejectCode::Malformed, "swarm attachment over bound")));
+
     money("attachment_on_a_request",
         "Attachments ride ordinary messages. A bill with a file in it is two features fused at their least-tested corner.",
         &Message { kind: MessageKind::PaymentRequest, amount_pxmr: Some(1), ..with_att.clone() },

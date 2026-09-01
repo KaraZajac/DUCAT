@@ -139,4 +139,6 @@
     <string name="chat_not_sent_yet">ยังไม่ได้ส่ง</string>
     <string name="chat_cancel_request">ยกเลิกคำขอ</string>
     <string name="chat_copied">คัดลอกข้อความแล้ว</string>
+    <string name="chat_download_file">ดาวน์โหลด</string>
+    <string name="chat_file_too_big_swarm">ไฟล์นี้มีขนาด %1$d MB — ตอนนี้ไฟล์จำกัดที่ 64 MB</string>
 </resources>

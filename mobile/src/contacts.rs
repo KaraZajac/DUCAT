@@ -458,7 +458,12 @@ pub struct SealedOut {
 /// An attachment reference, across the bridge (§16.15).
 #[derive(uniffi::Record, Clone)]
 pub struct AttachmentRef {
-    pub record_key: String,
+    /// Exactly one transport (§16.15): the record road for small blobs,
+    /// or the swarm road (key + digest together) for what a record
+    /// cannot hold.
+    pub record_key: Option<String>,
+    pub swarm_key: Option<String>,
+    pub swarm_digest: Option<Vec<u8>>,
     pub key: Vec<u8>,
     pub nonce: Vec<u8>,
     pub len: u64,
@@ -797,6 +802,10 @@ pub fn seal_message(
         },
         attachment: attachment.map(|a| ducat_core::contact::Attachment {
             record_key: a.record_key,
+            swarm_key: a.swarm_key,
+            swarm_digest: a
+                .swarm_digest
+                .map(|d| d.try_into().unwrap_or([0u8; 32])),
             key: a.key.try_into().unwrap_or([0u8; 32]),
             nonce: a.nonce.try_into().unwrap_or([0u8; 24]),
             len: a.len,
@@ -1117,6 +1126,8 @@ pub fn open_message(
         ceremony_id: msg.ceremony_id.map(|c| c.to_vec()),
         attachment: msg.attachment.as_ref().map(|a| AttachmentRef {
             record_key: a.record_key.clone(),
+            swarm_key: a.swarm_key.clone(),
+            swarm_digest: a.swarm_digest.map(|d| d.to_vec()),
             key: a.key.to_vec(),
             nonce: a.nonce.to_vec(),
             len: a.len,

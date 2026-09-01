@@ -20,4 +20,7 @@
     <string name="call_body_decline">Não posso falar agora.</string>
     <string name="notify_call_channel">Chamadas recebidas</string>
     <string name="notify_call_incoming">Chamada recebida</string>
+    <string name="call_no_answer">Sem resposta</string>
+    <string name="call_leave_message">Deixar um recado</string>
+    <string name="call_dismiss">Agora não</string>
 </resources>

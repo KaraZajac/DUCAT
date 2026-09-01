@@ -123,6 +123,10 @@ object Calls {
     sealed interface State {
         data object Idle : State
         data class Outgoing(val contactHex: String) : State
+        /** Rang the window out, or they declined: the moment a telephone
+         *  answering machine would pick up. The screen offers the thread's
+         *  recorder; dismissing goes back to Idle. */
+        data class NoAnswer(val contactHex: String) : State
         data class Incoming(val contactHex: String, val offerSeq: Long) : State
         data class Active(val contactHex: String, val sinceMs: Long) : State
     }
@@ -200,7 +204,7 @@ object Calls {
                             }
                             CTRL_DECLINE -> {
                                 DucatLog.i("Calls", "declined at the door")
-                                endInternal()
+                                endInternal(noAnswer = true)
                             }
                         }
                     }
@@ -222,7 +226,7 @@ object Calls {
             Thread.sleep(afterSecs * 1000)
             if (state === ringing) {
                 DucatLog.i("Calls", "ring window over")
-                endInternal()
+                endInternal(noAnswer = true)
             }
         }.apply { isDaemon = true }.start()
     }
@@ -257,6 +261,11 @@ object Calls {
                 endInternal()
             }
         }.apply { isDaemon = true }.start()
+    }
+
+    /** Leave the answering-machine screen without leaving a message. */
+    fun dismissNoAnswer() {
+        if (state is State.NoAnswer) state = State.Idle
     }
 
     /** Decline is §16.13's Retract naming the offer — the till's own word. */
@@ -322,7 +331,7 @@ object Calls {
                     }
                 ) {
                     DucatLog.i("Calls", "declined")
-                    endInternal()
+                    endInternal(noAnswer = true)
                 }
             }
             State.Idle -> {
@@ -486,7 +495,12 @@ object Calls {
         }.apply { isDaemon = true; name = "call-rx"; start() }
     }
 
-    private fun endInternal() {
+    private fun endInternal(noAnswer: Boolean = false) {
+        // Where the answering machine lives: an outgoing ring that never
+        // became a call ends on the leave-a-message screen, not on a
+        // silent jump back to wherever the phone was.
+        val unanswered = (state as? State.Outgoing)?.contactHex
+            ?.takeIf { noAnswer }
         val sayBye = running
         val route = theirRoute
         val id = myCallId
@@ -500,7 +514,7 @@ object Calls {
         myCallId = null
         theirRoute = null
         pump = null
-        state = State.Idle
+        state = unanswered?.let { State.NoAnswer(it) } ?: State.Idle
         // The goodbye and the teardown leave together, off this thread —
         // hangUp arrives on a UI click. BYE goes out three times because
         // it is fire-and-forget; the far side's watchdog remains the

@@ -139,4 +139,6 @@
     <string name="chat_not_sent_yet">belum terkirim</string>
     <string name="chat_cancel_request">Batalkan permintaan</string>
     <string name="chat_copied">Pesan disalin</string>
+    <string name="chat_download_file">Unduh</string>
+    <string name="chat_file_too_big_swarm">berkas itu %1$d MB — untuk saat ini berkas sampai 64 MB</string>
 </resources>

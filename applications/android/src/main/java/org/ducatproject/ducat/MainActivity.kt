@@ -130,6 +130,9 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
         Calls.audio = org.ducatproject.ducat.platform.CallAudioAndroid
         // A worldwide-market Subscribe is an ordinary card claim: hand the
         // row's ducat: URI to the same sheet a scanned code opens.
+        // The answering machine's road home: the leave-a-message button
+        // opens the thread whose mic is the recorder.
+        org.ducatproject.ducat.ui.callOpenThread = { hex -> openChat.value = hex }
         org.ducatproject.ducat.ui.marketSubscribe = { claimLink.value = it }
         // The Library's Open: view first, share sheet when nothing on the
         // device claims the type. Lives here because FileProvider and the

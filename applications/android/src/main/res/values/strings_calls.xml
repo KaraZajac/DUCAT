@@ -20,4 +20,7 @@
     <string name="call_body_decline">Can\u2019t talk right now.</string>
     <string name="notify_call_channel">Incoming calls</string>
     <string name="notify_call_incoming">Incoming call</string>
+    <string name="call_no_answer">No answer</string>
+    <string name="call_leave_message">Leave a message</string>
+    <string name="call_dismiss">Not now</string>
 </resources>

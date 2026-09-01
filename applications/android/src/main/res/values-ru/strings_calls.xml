@@ -20,4 +20,7 @@
     <string name="call_body_decline">Сейчас не могу говорить.</string>
     <string name="notify_call_channel">Входящие вызовы</string>
     <string name="notify_call_incoming">Входящий вызов</string>
+    <string name="call_no_answer">Нет ответа</string>
+    <string name="call_leave_message">Оставить сообщение</string>
+    <string name="call_dismiss">Не сейчас</string>
 </resources>

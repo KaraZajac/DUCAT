@@ -379,6 +379,14 @@ dependencies {
 
 // Headless proof the stack stands: JVM, JNA, the Rust bridge, Veilid — no
 // window involved. `./gradlew :desktop:smoke`.
+tasks.register<JavaExec>("filesend") {
+    group = "verification"
+    description = "Big-road file send end to end (roles via DUCAT_FS_ROLE)"
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("org.ducatproject.desk.FileSendTestKt")
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 tasks.register<JavaExec>("swarmdir") {
     group = "verification"
     description = "Multi-file swarm round trip (roles via DUCAT_SW_ROLE)"
