@@ -30,4 +30,23 @@
     <string name="pub_sub_code">رمز الاشتراك</string>
     <string name="pub_code_done">تم</string>
     <string name="pub_sub_code_hint">امسح لتشترك. المطالبة تضيفك إلى القائمة — المنشور المجاني يسلّم أحدث عدد فورًا، والمدفوع يرسل الفاتورة.</string>
+    <string name="market_near_me">بالقرب مني</string>
+    <string name="market_worldwide">عالمي</string>
+    <string name="market_cat_news">أخبار</string>
+    <string name="market_cat_serials">مسلسلات</string>
+    <string name="market_cat_sound">صوت</string>
+    <string name="market_cat_software">برمجيات</string>
+    <string name="market_cat_art">فن</string>
+    <string name="market_cat_other">أخرى</string>
+    <string name="market_empty">لا شيء على هذا الرف بعد — اللوحات تتبدل أسبوعيًا.</string>
+    <string name="market_free">مجاني</string>
+    <string name="market_per_period">%1$s لكل عدد</string>
+    <string name="market_subscribe">اشترك</string>
+    <string name="market_list_header">في السوق العالمي</string>
+    <string name="market_blurb_label">جملة واحدة عنه</string>
+    <string name="market_list_btn">اعرضه</string>
+    <string name="market_delist_btn">أنزله</string>
+    <string name="market_listed_as">مدرج تحت %1$s</string>
+    <string name="market_list_failed">تعذر العرض — هل العقدة تعمل؟</string>
+    <string name="market_all_langs">كل اللغات</string>
 </resources>

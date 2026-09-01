@@ -30,4 +30,23 @@
     <string name="pub_sub_code">Kod subskrypcji</string>
     <string name="pub_code_done">Gotowe</string>
     <string name="pub_sub_code_hint">Zeskanuj, by zasubskrybować. Realizacja wpisuje na listę — darmowa publikacja od razu wydaje najnowszy numer, płatna wysyła rachunek.</string>
+    <string name="market_near_me">W pobliżu</string>
+    <string name="market_worldwide">Cały świat</string>
+    <string name="market_cat_news">wiadomości</string>
+    <string name="market_cat_serials">seriale</string>
+    <string name="market_cat_sound">dźwięk</string>
+    <string name="market_cat_software">oprogramowanie</string>
+    <string name="market_cat_art">sztuka</string>
+    <string name="market_cat_other">inne</string>
+    <string name="market_empty">Na tej półce jeszcze pusto — tablice zmieniają się co tydzień.</string>
+    <string name="market_free">Za darmo</string>
+    <string name="market_per_period">%1$s za wydanie</string>
+    <string name="market_subscribe">Subskrybuj</string>
+    <string name="market_list_header">Na światowym rynku</string>
+    <string name="market_blurb_label">Jedno zdanie o tym</string>
+    <string name="market_list_btn">Wystaw</string>
+    <string name="market_delist_btn">Zdejmij</string>
+    <string name="market_listed_as">W dziale %1$s</string>
+    <string name="market_list_failed">Nie udało się wystawić — czy węzeł działa?</string>
+    <string name="market_all_langs">wszystkie języki</string>
 </resources>

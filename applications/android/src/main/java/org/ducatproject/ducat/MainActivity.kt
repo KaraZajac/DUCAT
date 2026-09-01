@@ -125,6 +125,9 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
         DeviceLock.backend = org.ducatproject.ducat.platform.DeviceLockAndroid
         // §16.21's ears and mouth, same pattern for the same reason.
         Calls.audio = org.ducatproject.ducat.platform.CallAudioAndroid
+        // A worldwide-market Subscribe is an ordinary card claim: hand the
+        // row's ducat: URI to the same sheet a scanned code opens.
+        org.ducatproject.ducat.ui.marketSubscribe = { claimLink.value = it }
         Calls.shell = object : Calls.Shell {
             override fun takeover(context: android.content.Context, from: String) {
                 // A lit, watched app already shows CallScreen by itself.

@@ -30,4 +30,23 @@
     <string name="pub_sub_code">購読コード</string>
     <string name="pub_code_done">完了</string>
     <string name="pub_sub_code_hint">スキャンで購読。受け取ると名簿に加わります — 無料の出版物はその場で最新号を、有料なら請求書を送ります。</string>
+    <string name="market_near_me">近く</string>
+    <string name="market_worldwide">世界</string>
+    <string name="market_cat_news">ニュース</string>
+    <string name="market_cat_serials">連載</string>
+    <string name="market_cat_sound">サウンド</string>
+    <string name="market_cat_software">ソフトウェア</string>
+    <string name="market_cat_art">アート</string>
+    <string name="market_cat_other">その他</string>
+    <string name="market_empty">この棚はまだ空です — 掲示板は毎週入れ替わります。</string>
+    <string name="market_free">無料</string>
+    <string name="market_per_period">1号あたり %1$s</string>
+    <string name="market_subscribe">購読する</string>
+    <string name="market_list_header">世界の市場に出す</string>
+    <string name="market_blurb_label">ひとこと紹介</string>
+    <string name="market_list_btn">出品する</string>
+    <string name="market_delist_btn">取り下げる</string>
+    <string name="market_listed_as">%1$s に掲載中</string>
+    <string name="market_list_failed">出品できませんでした — ノードは起動していますか?</string>
+    <string name="market_all_langs">すべての言語</string>
 </resources>

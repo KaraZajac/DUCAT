@@ -30,4 +30,23 @@
     <string name="pub_sub_code">Код подписки</string>
     <string name="pub_code_done">Готово</string>
     <string name="pub_sub_code_hint">Отсканируй, чтобы подписаться. Предъявление вносит в список — бесплатное издание сразу отдаёт свежий выпуск, платное присылает счёт.</string>
+    <string name="market_near_me">Рядом</string>
+    <string name="market_worldwide">Весь мир</string>
+    <string name="market_cat_news">новости</string>
+    <string name="market_cat_serials">сериалы</string>
+    <string name="market_cat_sound">звук</string>
+    <string name="market_cat_software">программы</string>
+    <string name="market_cat_art">искусство</string>
+    <string name="market_cat_other">другое</string>
+    <string name="market_empty">На этой полке пока пусто — доски меняются каждую неделю.</string>
+    <string name="market_free">Бесплатно</string>
+    <string name="market_per_period">%1$s за выпуск</string>
+    <string name="market_subscribe">Подписаться</string>
+    <string name="market_list_header">На всемирном рынке</string>
+    <string name="market_blurb_label">Одна фраза о нём</string>
+    <string name="market_list_btn">Выставить</string>
+    <string name="market_delist_btn">Снять</string>
+    <string name="market_listed_as">В разделе %1$s</string>
+    <string name="market_list_failed">Не удалось выставить — узел работает?</string>
+    <string name="market_all_langs">все языки</string>
 </resources>

@@ -30,4 +30,23 @@
     <string name="pub_sub_code">Code d\u2019abonnement</string>
     <string name="pub_code_done">Terminé</string>
     <string name="pub_sub_code_hint">Scanner pour s\u2019abonner. La réclamation inscrit sur la liste — une publication gratuite remet aussitôt le dernier numéro, une payante envoie la facture.</string>
+    <string name="market_near_me">Près de moi</string>
+    <string name="market_worldwide">Mondial</string>
+    <string name="market_cat_news">actualités</string>
+    <string name="market_cat_serials">feuilletons</string>
+    <string name="market_cat_sound">son</string>
+    <string name="market_cat_software">logiciels</string>
+    <string name="market_cat_art">art</string>
+    <string name="market_cat_other">autres</string>
+    <string name="market_empty">Rien sur cette étagère pour l\'instant — les tableaux tournent chaque semaine.</string>
+    <string name="market_free">Gratuit</string>
+    <string name="market_per_period">%1$s par numéro</string>
+    <string name="market_subscribe">S\'abonner</string>
+    <string name="market_list_header">Sur le marché mondial</string>
+    <string name="market_blurb_label">Une phrase à son sujet</string>
+    <string name="market_list_btn">Publier</string>
+    <string name="market_delist_btn">Retirer</string>
+    <string name="market_listed_as">Classé sous %1$s</string>
+    <string name="market_list_failed">Impossible de publier — le nœud tourne-t-il ?</string>
+    <string name="market_all_langs">toutes les langues</string>
 </resources>

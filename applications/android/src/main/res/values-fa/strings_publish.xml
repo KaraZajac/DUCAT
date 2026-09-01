@@ -30,4 +30,23 @@
     <string name="pub_sub_code">کد اشتراک</string>
     <string name="pub_code_done">تمام</string>
     <string name="pub_sub_code_hint">برای اشتراک اسکن کن. پذیرش، به فهرست می‌افزاید — نشریهٔ رایگان تازه‌ترین شماره را همان‌جا می‌دهد و پولی صورتحساب می‌فرستد.</string>
+    <string name="market_near_me">نزدیک من</string>
+    <string name="market_worldwide">جهانی</string>
+    <string name="market_cat_news">اخبار</string>
+    <string name="market_cat_serials">دنباله‌دار</string>
+    <string name="market_cat_sound">صدا</string>
+    <string name="market_cat_software">نرم‌افزار</string>
+    <string name="market_cat_art">هنر</string>
+    <string name="market_cat_other">سایر</string>
+    <string name="market_empty">این قفسه هنوز خالی است — تابلوها هر هفته عوض می‌شوند.</string>
+    <string name="market_free">رایگان</string>
+    <string name="market_per_period">%1$s برای هر شماره</string>
+    <string name="market_subscribe">اشتراک</string>
+    <string name="market_list_header">در بازار جهانی</string>
+    <string name="market_blurb_label">یک جمله درباره‌اش</string>
+    <string name="market_list_btn">عرضه کن</string>
+    <string name="market_delist_btn">بردار</string>
+    <string name="market_listed_as">در بخش %1$s</string>
+    <string name="market_list_failed">عرضه نشد — گره روشن است؟</string>
+    <string name="market_all_langs">همه زبان‌ها</string>
 </resources>

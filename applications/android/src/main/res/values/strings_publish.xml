@@ -30,4 +30,23 @@
     <string name="pub_sub_code">Subscriber code</string>
     <string name="pub_code_done">Done</string>
     <string name="pub_sub_code_hint">Scan to subscribe. A claim joins the roster — a free publication hands over the latest issue on the spot; a priced one sends the bill.</string>
+    <string name="market_near_me">Near me</string>
+    <string name="market_worldwide">Worldwide</string>
+    <string name="market_cat_news">news</string>
+    <string name="market_cat_serials">serials</string>
+    <string name="market_cat_sound">sound</string>
+    <string name="market_cat_software">software</string>
+    <string name="market_cat_art">art</string>
+    <string name="market_cat_other">other</string>
+    <string name="market_empty">Nothing on this shelf yet — the boards rotate weekly, so early weeks are quiet.</string>
+    <string name="market_free">Free</string>
+    <string name="market_per_period">%1$s a period</string>
+    <string name="market_subscribe">Subscribe</string>
+    <string name="market_list_header">On the worldwide market</string>
+    <string name="market_blurb_label">One sentence about it</string>
+    <string name="market_list_btn">List it</string>
+    <string name="market_delist_btn">Take it down</string>
+    <string name="market_listed_as">Listed under %1$s</string>
+    <string name="market_list_failed">Could not list it — is the node up?</string>
+    <string name="market_all_langs">every language</string>
 </resources>

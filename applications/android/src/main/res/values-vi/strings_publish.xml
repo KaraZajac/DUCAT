@@ -30,4 +30,23 @@
     <string name="pub_sub_code">Mã đăng ký</string>
     <string name="pub_code_done">Xong</string>
     <string name="pub_sub_code_hint">Quét để đăng ký. Nhận thẻ là vào danh sách — ấn phẩm miễn phí trao ngay số mới nhất, bản trả phí gửi hóa đơn.</string>
+    <string name="market_near_me">Gần tôi</string>
+    <string name="market_worldwide">Toàn cầu</string>
+    <string name="market_cat_news">tin tức</string>
+    <string name="market_cat_serials">truyện dài kỳ</string>
+    <string name="market_cat_sound">âm thanh</string>
+    <string name="market_cat_software">phần mềm</string>
+    <string name="market_cat_art">nghệ thuật</string>
+    <string name="market_cat_other">khác</string>
+    <string name="market_empty">Kệ này còn trống — bảng xoay vòng mỗi tuần.</string>
+    <string name="market_free">Miễn phí</string>
+    <string name="market_per_period">%1$s mỗi kỳ</string>
+    <string name="market_subscribe">Đăng ký</string>
+    <string name="market_list_header">Trên chợ toàn cầu</string>
+    <string name="market_blurb_label">Một câu về nó</string>
+    <string name="market_list_btn">Đăng bán</string>
+    <string name="market_delist_btn">Gỡ xuống</string>
+    <string name="market_listed_as">Đã đăng ở %1$s</string>
+    <string name="market_list_failed">Không đăng được — node có chạy không?</string>
+    <string name="market_all_langs">mọi ngôn ngữ</string>
 </resources>

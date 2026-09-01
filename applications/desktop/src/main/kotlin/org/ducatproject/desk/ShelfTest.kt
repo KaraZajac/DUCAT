@@ -114,6 +114,32 @@ fun main() {
             println("PRESS_CARD ${card.uri}")
             System.out.flush()
 
+            // §16.18.2: the same press, discoverable worldwide. Needs a
+            // Monero node for the stamp's beacon — no node, no post.
+            System.getenv("DUCAT_PUB_MARKET")?.let { spec ->
+                val parts = spec.split('.')
+                val cat = parts[0]
+                val lang = parts.getOrNull(1)
+                runCatching {
+                    val nodes = uniffi.ducat_mobile.moneroDefaultNodes(null)
+                    val picked = uniffi.ducat_mobile.moneroPickNode(nodes, "stagenet", 8_000u)
+                    org.ducatproject.ducat.NodeStore(context).rememberLastGood(picked.url)
+                }.onFailure { System.err.println("market node: ${it.message}") }
+                val listed = runCatching {
+                    Publications.listOnMarket(
+                        context, pubId, cat, lang,
+                        "Twelve pages of the river's week, every Friday.",
+                    )
+                }.getOrDefault(false)
+                if (listed) {
+                    val st = Publications.marketStateOf(context, pubId)
+                    println("MARKET_LISTED ${Publications.marketBoard(cat, lang)} ($st)")
+                } else {
+                    println("MARKET_FAIL could not list")
+                }
+                System.out.flush()
+            }
+
             var sentMark = 0
             var nextIssue = 9
             val deadline = System.currentTimeMillis() + 40 * 60_000L

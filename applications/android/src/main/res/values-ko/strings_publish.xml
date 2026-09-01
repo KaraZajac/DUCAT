@@ -30,4 +30,23 @@
     <string name="pub_sub_code">구독 코드</string>
     <string name="pub_code_done">완료</string>
     <string name="pub_sub_code_hint">스캔하면 구독됩니다. 등록하면 명단에 오르고 — 무료 간행물은 그 자리에서 최신 호를, 유료는 청구서를 보냅니다.</string>
+    <string name="market_near_me">근처</string>
+    <string name="market_worldwide">전 세계</string>
+    <string name="market_cat_news">뉴스</string>
+    <string name="market_cat_serials">연재</string>
+    <string name="market_cat_sound">사운드</string>
+    <string name="market_cat_software">소프트웨어</string>
+    <string name="market_cat_art">예술</string>
+    <string name="market_cat_other">기타</string>
+    <string name="market_empty">이 선반은 아직 비어 있어요 — 게시판은 매주 바뀝니다.</string>
+    <string name="market_free">무료</string>
+    <string name="market_per_period">호당 %1$s</string>
+    <string name="market_subscribe">구독</string>
+    <string name="market_list_header">전 세계 시장에 올리기</string>
+    <string name="market_blurb_label">한 줄 소개</string>
+    <string name="market_list_btn">올리기</string>
+    <string name="market_delist_btn">내리기</string>
+    <string name="market_listed_as">%1$s에 게재됨</string>
+    <string name="market_list_failed">올리지 못했어요 — 노드가 켜져 있나요?</string>
+    <string name="market_all_langs">모든 언어</string>
 </resources>

@@ -3,6 +3,8 @@ package org.ducatproject.ducat.ui
 import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -199,6 +201,77 @@ fun PublishingSection() {
                             }
                         },
                     ) { Text(stringResource(R.string.pub_sub_code)) }
+                }
+            }
+
+            // --- the market: the worldwide shelf (§16.18.2) ---------------
+            val mktCat = remember(version, pubId) {
+                Publications.marketStateOf(context, pubId)
+            }
+            var catPick by remember(pubId) { mutableStateOf(mktCat?.first ?: "news") }
+            var blurbText by remember(pubId) { mutableStateOf(mktCat?.second ?: "") }
+            Card(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(12.dp)) {
+                    Text(
+                        stringResource(R.string.market_list_header),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Row(
+                        Modifier.horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        Publications.MARKET_CATEGORIES.forEach { slug ->
+                            FilterChip(
+                                selected = catPick == slug,
+                                onClick = { catPick = slug },
+                                label = { Text(marketCategoryLabel(slug)) },
+                            )
+                        }
+                    }
+                    OutlinedTextField(
+                        blurbText, { blurbText = it.take(280) },
+                        label = { Text(stringResource(R.string.market_blurb_label)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        OutlinedButton(
+                            enabled = busy == null,
+                            onClick = {
+                                scope.launch(Dispatchers.IO) {
+                                    val lang = java.util.Locale.getDefault().language
+                                    val ok = runCatching {
+                                        Publications.listOnMarket(
+                                            context, pubId, catPick,
+                                            lang.takeIf { it.isNotBlank() },
+                                            blurbText.takeIf { it.isNotBlank() },
+                                        )
+                                    }.getOrDefault(false)
+                                    if (!ok) lastWord = context.getString(R.string.market_list_failed)
+                                    org.ducatproject.ducat.ContactStore.bump()
+                                }
+                            },
+                        ) { Text(stringResource(R.string.market_list_btn)) }
+                        if (mktCat != null) {
+                            Spacer(Modifier.width(8.dp))
+                            TextButton(onClick = {
+                                Publications.delistFromMarket(context, pubId)
+                                org.ducatproject.ducat.ContactStore.bump()
+                            }) { Text(stringResource(R.string.market_delist_btn)) }
+                        }
+                    }
+                    if (mktCat != null) {
+                        Text(
+                            stringResource(
+                                R.string.market_listed_as,
+                                marketCategoryLabel(mktCat.first),
+                            ),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.ducat.settled,
+                        )
+                    }
                 }
             }
 

@@ -1470,6 +1470,86 @@ pub fn rental_decode(
     Ok(info)
 }
 
+/// §16.18.2 over the bridge: what a publication listing says, in the open.
+#[derive(uniffi::Record)]
+pub struct PubListingInfo {
+    pub card: String,
+    pub title: String,
+    pub blurb: Option<String>,
+    /// Piconero a period; `None` is free, and the only spelling of it.
+    pub price_pxmr: Option<u64>,
+    pub expiry: u64,
+    /// Filled by decode: hex of the listing's own verifying key.
+    pub poster: String,
+    pub beacon_height: u64,
+    pub beacon_hash: String,
+}
+
+/// Seal a publication listing for one slot — same stamp, same price, same
+/// rules as a rental's, in this family's own field namespace. The board
+/// name carries the category (topic:) or the cell (local:), and it is
+/// inside the signature, so the same bytes cannot appear on another topic.
+#[uniffi::export]
+pub fn pub_listing_encode(
+    info: PubListingInfo,
+    persona_secret: Vec<u8>,
+    listing_id: String,
+    board: String,
+    subkey: u32,
+    beacon_height: u64,
+    beacon_hash_hex: String,
+) -> Result<Vec<u8>, ContactError> {
+    let n = ducat_core::contact::PubNotice {
+        version: 1,
+        card: info.card,
+        title: info.title,
+        blurb: info.blurb,
+        price_pxmr: info.price_pxmr,
+        expiry: info.expiry,
+    };
+    let ducat_core::cbor::Value::Map(m) = n.to_value() else { unreachable!() };
+    let seed = ducat_core::board::listing_seed(&persona_secret, &listing_id);
+    let beacon = beacon_from(beacon_height, &beacon_hash_hex)?;
+    let sealed =
+        ducat_core::board::seal(m, ducat_core::board::PUB, &seed, &board, subkey, &beacon);
+    let bytes = sealed.encode();
+    pub_listing_decode(bytes.clone(), board, subkey, 0)?;
+    Ok(bytes)
+}
+
+/// Read a publication listing off a board — same refusals as a rental's.
+#[uniffi::export]
+pub fn pub_listing_decode(
+    bytes: Vec<u8>,
+    board: String,
+    subkey: u32,
+    tip_height: u64,
+) -> Result<PubListingInfo, ContactError> {
+    let o = ducat_core::board::open(
+        decode(&bytes).map_err(refuse)?,
+        ducat_core::board::PUB,
+        &board,
+        subkey,
+    )
+    .map_err(refuse)?;
+    if tip_height > 0 && !ducat_core::board::beacon_in_window(&o.beacon, tip_height) {
+        return Err(ContactError::Refused(
+            "this notice was stamped against a block that is not recent".into(),
+        ));
+    }
+    let n = ducat_core::contact::PubNotice::from_value(o.notice).map_err(refuse)?;
+    Ok(PubListingInfo {
+        card: n.card,
+        title: n.title,
+        blurb: n.blurb,
+        price_pxmr: n.price_pxmr,
+        expiry: n.expiry,
+        poster: o.poster.iter().map(|b| format!("{b:02x}")).collect::<String>(),
+        beacon_height: o.beacon.height,
+        beacon_hash: o.beacon.hash.iter().map(|b| format!("{b:02x}")).collect::<String>(),
+    })
+}
+
 /// The hail's half of the same thing — see [`rental_encode`].
 #[uniffi::export]
 pub fn hail_encode(

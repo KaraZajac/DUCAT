@@ -30,4 +30,23 @@
     <string name="pub_sub_code">Kode langganan</string>
     <string name="pub_code_done">Selesai</string>
     <string name="pub_sub_code_hint">Pindai untuk berlangganan. Klaim memasukkanmu ke daftar — terbitan gratis langsung memberi edisi terbaru, yang berbayar mengirim tagihan.</string>
+    <string name="market_near_me">Sekitar saya</string>
+    <string name="market_worldwide">Seluruh dunia</string>
+    <string name="market_cat_news">berita</string>
+    <string name="market_cat_serials">serial</string>
+    <string name="market_cat_sound">suara</string>
+    <string name="market_cat_software">perangkat lunak</string>
+    <string name="market_cat_art">seni</string>
+    <string name="market_cat_other">lainnya</string>
+    <string name="market_empty">Rak ini masih kosong — papan berganti tiap minggu.</string>
+    <string name="market_free">Gratis</string>
+    <string name="market_per_period">%1$s per edisi</string>
+    <string name="market_subscribe">Berlangganan</string>
+    <string name="market_list_header">Di pasar dunia</string>
+    <string name="market_blurb_label">Satu kalimat tentangnya</string>
+    <string name="market_list_btn">Pasang</string>
+    <string name="market_delist_btn">Turunkan</string>
+    <string name="market_listed_as">Terdaftar di %1$s</string>
+    <string name="market_list_failed">Gagal memasang — apakah node berjalan?</string>
+    <string name="market_all_langs">semua bahasa</string>
 </resources>

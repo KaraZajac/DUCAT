@@ -564,6 +564,39 @@ private fun RentSearchScreen(
  */
 @Composable
 fun MarketBrowse(onOpenChat: (Contact) -> Unit) {
+    // §16.18.2: the marketplace has two scopes now — things near you, and
+    // the worldwide shelf of digital goods. Same market, different boards.
+    var scope by androidx.compose.runtime.saveable.rememberSaveable {
+        androidx.compose.runtime.mutableStateOf(0)
+    }
+    androidx.compose.foundation.layout.Column(
+        androidx.compose.ui.Modifier.fillMaxSize(),
+    ) {
+        androidx.compose.foundation.layout.Row(
+            androidx.compose.ui.Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp),
+        ) {
+            FilterChip(
+                selected = scope == 0,
+                onClick = { scope = 0 },
+                label = { Text(stringResource(R.string.market_near_me)) },
+            )
+            FilterChip(
+                selected = scope == 1,
+                onClick = { scope = 1 },
+                label = { Text(stringResource(R.string.market_worldwide)) },
+            )
+        }
+        if (scope == 1) {
+            WorldwideMarket()
+            return@Column
+        }
+        MarketNearMe(onOpenChat)
+    }
+}
+
+@Composable
+private fun MarketNearMe(onOpenChat: (Contact) -> Unit) {
     RentSearchScreen(
         kind = Listings.KIND_SALE,
         onOpenChat = onOpenChat,

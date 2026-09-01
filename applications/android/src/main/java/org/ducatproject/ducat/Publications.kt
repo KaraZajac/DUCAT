@@ -117,6 +117,213 @@ object Publications {
         return all.keys().asSequence().toList()
     }
 
+    // --- the market: discovery for the shelf (§16.18.2) -------------------
+    //
+    // A publication is discovered like a kayak: a PUB_NOTICE on a board.
+    // Worldwide boards shard by category instead of place — six pinned
+    // slugs, the spec appendix's — with an optional language suffix, and
+    // the notice's card is a publish-purpose claim-once whose CLAIM is the
+    // subscription. The stand ladder, the Argon2id stamp and the beacon
+    // are the same machinery every kayak already pays for.
+
+    val MARKET_CATEGORIES = listOf("news", "serials", "sound", "software", "art", "other")
+
+    fun marketBoard(category: String, lang: String?): String =
+        "topic:$category" + (lang?.takeIf { it.isNotBlank() }?.let { ".$it" } ?: "")
+
+    data class MarketRow(
+        val title: String,
+        val blurb: String?,
+        val pricePxmr: Long?,
+        val cardUri: String,
+        val posterHex: String,
+        val board: String,
+        val subkey: Int,
+        val expiry: Long,
+    )
+
+    /**
+     * Post — or re-post — one publication on a market board. Each posting
+     * mints a fresh claim-once card bound to the publication, so a claim
+     * from any generation of the notice still enrolls (§16.20's bindCard).
+     */
+    fun listOnMarket(
+        context: Context,
+        pubId: String,
+        category: String,
+        lang: String?,
+        blurb: String?,
+    ): Boolean {
+        if (category !in MARKET_CATEGORIES) return false
+        val name = publications(context).firstOrNull { it.first == pubId }?.second
+            ?: return false
+        val personas = PersonaStore(context)
+        val ownerHex = personas.worn()
+        val secret = personas.secretFor(ownerHex) ?: personas.secret()
+        val now = System.currentTimeMillis() / 1000
+        val card = runCatching {
+            Mailbox.issueCard(
+                context, name, MARKET_TTL_SECS.toULong(),
+                purpose = "publish", asPersonaHex = ownerHex,
+            )
+        }.getOrElse {
+            DucatLog.w("Publications", "market card: ${it.message}")
+            return false
+        }
+        bindCard(context, pubId, card.inboxKey)
+        val price = priceOf(context, pubId).takeIf { it > 0 }?.toULong()
+        val info = uniffi.ducat_mobile.PubListingInfo(
+            card = card.uri,
+            title = name.take(60),
+            blurb = blurb?.takeIf { it.isNotBlank() }?.take(280),
+            pricePxmr = price,
+            expiry = (now + MARKET_TTL_SECS).toULong(),
+            poster = "",
+            beaconHeight = 0uL,
+            beaconHash = "",
+        )
+        val beacon = Beacons.stampNow(context) ?: run {
+            DucatLog.w("Publications", "market: no recent block to stamp against")
+            return false
+        }
+        fun seal(board: String, slot: UInt): ByteArray =
+            uniffi.ducat_mobile.pubListingEncode(
+                info, secret, "market:$pubId", board, slot,
+                beacon.height.toULong(), beacon.hashHex,
+            )
+        val base = marketBoard(category, lang)
+        var placed: Pair<String, UInt>? = null
+        val prior = readPub(context, pubId)
+        val existing = prior?.optString("mkt_board")?.takeIf {
+            it.isNotBlank() && !standStale(it)
+        }
+        val existingSlot = prior?.optInt("mkt_subkey", -1)?.takeIf { it >= 0 }?.toUInt()
+        if (existing != null && existingSlot != null) {
+            if (runCatching {
+                    uniffi.ducat_mobile.standPost(existing, existingSlot, seal(existing, existingSlot))
+                }.isSuccess
+            ) {
+                placed = existing to existingSlot
+            }
+        }
+        if (placed == null) {
+            ladder@ for (shard in 0u until uniffi.ducat_mobile.maxStandShards()) {
+                val board = uniffi.ducat_mobile.standShardName(standNow(base), shard)
+                val taken = runCatching { uniffi.ducat_mobile.standRead(board) }
+                    .getOrDefault(emptyList())
+                    .mapNotNull { n ->
+                        runCatching {
+                            uniffi.ducat_mobile.pubListingDecode(
+                                n.data, board, n.subkey, Beacons.tip(context).toULong(),
+                            )
+                        }.getOrNull()?.takeIf { it.expiry.toLong() > now }?.let { n.subkey }
+                    }.toSet()
+                for (free in 0u..7u) {
+                    if (free in taken) continue
+                    if (runCatching { uniffi.ducat_mobile.standPost(board, free, seal(board, free)) }
+                            .isSuccess
+                    ) {
+                        placed = board to free
+                        break@ladder
+                    }
+                }
+            }
+        }
+        val (board, slot) = placed ?: run {
+            DucatLog.w("Publications", "every shard of $base is full")
+            return false
+        }
+        editPub(context, pubId) { pub ->
+            pub.put("mkt_board", board)
+            pub.put("mkt_subkey", slot.toInt())
+            pub.put("mkt_cat", category)
+            pub.put("mkt_lang", lang ?: "")
+            pub.put("mkt_blurb", blurb ?: "")
+            pub.put("mkt_at", now)
+        }
+        DucatLog.i("Publications", "listed '$name' on $board slot $slot")
+        return true
+    }
+
+    /** Keep market tenancies alive: re-post past half the TTL or a
+     *  generation rollover. Rides the poll clock beside tendShelf. */
+    fun tendMarket(context: Context) {
+        val now = System.currentTimeMillis() / 1000
+        for ((pubId, _) in publications(context)) {
+            val pub = readPub(context, pubId) ?: continue
+            val cat = pub.optString("mkt_cat").ifBlank { null } ?: continue
+            val board = pub.optString("mkt_board")
+            val at = pub.optLong("mkt_at", 0)
+            val due = now - at > MARKET_TTL_SECS / 2 ||
+                (board.isNotBlank() && standStale(board))
+            if (due) {
+                runCatching {
+                    listOnMarket(
+                        context, pubId, cat,
+                        pub.optString("mkt_lang").ifBlank { null },
+                        pub.optString("mkt_blurb").ifBlank { null },
+                    )
+                }.onFailure { DucatLog.w("Publications", "tend market: ${it.message}") }
+            }
+        }
+    }
+
+    /** Take the listing down: the board copy expires on its own TTL; this
+     *  stops the re-posting that keeps it alive. */
+    fun delistFromMarket(context: Context, pubId: String) {
+        editPub(context, pubId) { pub ->
+            pub.remove("mkt_cat"); pub.remove("mkt_at")
+        }
+    }
+
+    /** Browse one category worldwide: every readable notice, one row per
+     *  poster key (a publisher re-posts; readers want the newest). */
+    fun browseMarket(context: Context, category: String, lang: String?): List<MarketRow> {
+        val now = System.currentTimeMillis() / 1000
+        val tip = Beacons.tip(context).toULong()
+        val base = marketBoard(category, lang)
+        val rows = LinkedHashMap<String, MarketRow>()
+        for (shard in 0u until uniffi.ducat_mobile.maxStandShards()) {
+            val board = uniffi.ducat_mobile.standShardName(standNow(base), shard)
+            val notices = runCatching { uniffi.ducat_mobile.standRead(board) }
+                .getOrDefault(emptyList())
+            // Writers fill the lowest free slot, so the first empty shard is
+            // the top of the ladder — and an empty cell costs a reader a
+            // flat twenty-one seconds of DHT timeouts, so stopping is not
+            // an optimisation, it is the difference between a shelf and a
+            // spinner.
+            if (notices.isEmpty()) break
+            for (n in notices) {
+                val d = runCatching {
+                    uniffi.ducat_mobile.pubListingDecode(n.data, board, n.subkey, tip)
+                }.getOrNull() ?: continue
+                if (d.expiry.toLong() <= now) continue
+                val row = MarketRow(
+                    title = d.title,
+                    blurb = d.blurb,
+                    pricePxmr = d.pricePxmr?.toLong(),
+                    cardUri = d.card,
+                    posterHex = d.poster,
+                    board = board,
+                    subkey = n.subkey.toInt(),
+                    expiry = d.expiry.toLong(),
+                )
+                val prior = rows[d.poster]
+                if (prior == null || prior.expiry < row.expiry) rows[d.poster] = row
+            }
+        }
+        return rows.values.toList()
+    }
+
+    /** (category, blurb) when listed; null when not. The screen's read. */
+    fun marketStateOf(context: Context, pubId: String): Pair<String, String>? {
+        val pub = readPub(context, pubId) ?: return null
+        val cat = pub.optString("mkt_cat").ifBlank { null } ?: return null
+        return cat to pub.optString("mkt_blurb")
+    }
+
+    private const val MARKET_TTL_SECS = 24 * 60 * 60L
+
     // --- the publisher's shelf --------------------------------------------
 
     /**

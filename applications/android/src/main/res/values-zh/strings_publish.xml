@@ -30,4 +30,23 @@
     <string name="pub_sub_code">订阅码</string>
     <string name="pub_code_done">完成</string>
     <string name="pub_sub_code_hint">扫码即订阅。认领后加入名单 — 免费刊物当场送上最新一期,付费的则寄来账单。</string>
+    <string name="market_near_me">附近</string>
+    <string name="market_worldwide">全球</string>
+    <string name="market_cat_news">新闻</string>
+    <string name="market_cat_serials">连载</string>
+    <string name="market_cat_sound">声音</string>
+    <string name="market_cat_software">软件</string>
+    <string name="market_cat_art">艺术</string>
+    <string name="market_cat_other">其他</string>
+    <string name="market_empty">这个书架还是空的 — 板块每周轮换。</string>
+    <string name="market_free">免费</string>
+    <string name="market_per_period">每期 %1$s</string>
+    <string name="market_subscribe">订阅</string>
+    <string name="market_list_header">上架到全球市场</string>
+    <string name="market_blurb_label">一句话介绍</string>
+    <string name="market_list_btn">上架</string>
+    <string name="market_delist_btn">下架</string>
+    <string name="market_listed_as">已列于%1$s</string>
+    <string name="market_list_failed">上架失败 — 节点在运行吗?</string>
+    <string name="market_all_langs">所有语言</string>
 </resources>

@@ -247,6 +247,9 @@ class Poller(private val context: Context) {
                     .onFailure { DucatLog.w(TAG, "issues: ${it.message}") }
                 // And the shelf stays alive — hourly inside, cheap here.
                 runCatching { Publications.tendShelf(context) }
+                // Market tenancies re-post past half their TTL or a weekly
+                // generation rollover, minting a fresh claim-once each time.
+                runCatching { Publications.tendMarket(context) }
                 // The mempool, only while a bill is out and unsighted — the
                 // scan costs a round trip per pool transaction, and a till
                 // with nothing billed has nothing to look for.

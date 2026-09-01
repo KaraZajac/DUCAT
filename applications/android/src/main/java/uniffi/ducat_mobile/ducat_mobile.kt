@@ -965,6 +965,10 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1181,6 +1185,10 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_protocol_version(uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_prune_prekey(`bundleBytes`: RustBuffer.ByValue,`id`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_pub_listing_decode(`bytes`: RustBuffer.ByValue,`board`: RustBuffer.ByValue,`subkey`: Int,`tipHeight`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_pub_listing_encode(`info`: RustBuffer.ByValue,`personaSecret`: RustBuffer.ByValue,`listingId`: RustBuffer.ByValue,`board`: RustBuffer.ByValue,`subkey`: Int,`beaconHeight`: Long,`beaconHashHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_publication_master_create(uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1547,6 +1555,10 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_checksum_func_protocol_version(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_prune_prekey(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_pub_listing_decode(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_pub_listing_encode(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_publication_master_create(
     ): Short
@@ -1918,6 +1930,12 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_prune_prekey() != 19780.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_pub_listing_decode() != 55060.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_pub_listing_encode() != 43453.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_publication_master_create() != 16605.toShort()) {
@@ -4200,6 +4218,71 @@ public object FfiConverterTypeProfile: FfiConverterRustBuffer<Profile> {
             FfiConverterOptionalString.write(value.`carModel`, buf)
             FfiConverterOptionalString.write(value.`carColor`, buf)
             FfiConverterOptionalString.write(value.`plate`, buf)
+    }
+}
+
+
+
+/**
+ * §16.18.2 over the bridge: what a publication listing says, in the open.
+ */
+data class PubListingInfo (
+    var `card`: kotlin.String, 
+    var `title`: kotlin.String, 
+    var `blurb`: kotlin.String?, 
+    /**
+     * Piconero a period; `None` is free, and the only spelling of it.
+     */
+    var `pricePxmr`: kotlin.ULong?, 
+    var `expiry`: kotlin.ULong, 
+    /**
+     * Filled by decode: hex of the listing's own verifying key.
+     */
+    var `poster`: kotlin.String, 
+    var `beaconHeight`: kotlin.ULong, 
+    var `beaconHash`: kotlin.String
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypePubListingInfo: FfiConverterRustBuffer<PubListingInfo> {
+    override fun read(buf: ByteBuffer): PubListingInfo {
+        return PubListingInfo(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: PubListingInfo) = (
+            FfiConverterString.allocationSize(value.`card`) +
+            FfiConverterString.allocationSize(value.`title`) +
+            FfiConverterOptionalString.allocationSize(value.`blurb`) +
+            FfiConverterOptionalULong.allocationSize(value.`pricePxmr`) +
+            FfiConverterULong.allocationSize(value.`expiry`) +
+            FfiConverterString.allocationSize(value.`poster`) +
+            FfiConverterULong.allocationSize(value.`beaconHeight`) +
+            FfiConverterString.allocationSize(value.`beaconHash`)
+    )
+
+    override fun write(value: PubListingInfo, buf: ByteBuffer) {
+            FfiConverterString.write(value.`card`, buf)
+            FfiConverterString.write(value.`title`, buf)
+            FfiConverterOptionalString.write(value.`blurb`, buf)
+            FfiConverterOptionalULong.write(value.`pricePxmr`, buf)
+            FfiConverterULong.write(value.`expiry`, buf)
+            FfiConverterString.write(value.`poster`, buf)
+            FfiConverterULong.write(value.`beaconHeight`, buf)
+            FfiConverterString.write(value.`beaconHash`, buf)
     }
 }
 
@@ -8290,6 +8373,35 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_prune_prekey(
         FfiConverterByteArray.lower(`bundleBytes`),FfiConverterUInt.lower(`id`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Read a publication listing off a board — same refusals as a rental's.
+         */
+    @Throws(ContactException::class) fun `pubListingDecode`(`bytes`: kotlin.ByteArray, `board`: kotlin.String, `subkey`: kotlin.UInt, `tipHeight`: kotlin.ULong): PubListingInfo {
+            return FfiConverterTypePubListingInfo.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_pub_listing_decode(
+        FfiConverterByteArray.lower(`bytes`),FfiConverterString.lower(`board`),FfiConverterUInt.lower(`subkey`),FfiConverterULong.lower(`tipHeight`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Seal a publication listing for one slot — same stamp, same price, same
+         * rules as a rental's, in this family's own field namespace. The board
+         * name carries the category (topic:) or the cell (local:), and it is
+         * inside the signature, so the same bytes cannot appear on another topic.
+         */
+    @Throws(ContactException::class) fun `pubListingEncode`(`info`: PubListingInfo, `personaSecret`: kotlin.ByteArray, `listingId`: kotlin.String, `board`: kotlin.String, `subkey`: kotlin.UInt, `beaconHeight`: kotlin.ULong, `beaconHashHex`: kotlin.String): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_pub_listing_encode(
+        FfiConverterTypePubListingInfo.lower(`info`),FfiConverterByteArray.lower(`personaSecret`),FfiConverterString.lower(`listingId`),FfiConverterString.lower(`board`),FfiConverterUInt.lower(`subkey`),FfiConverterULong.lower(`beaconHeight`),FfiConverterString.lower(`beaconHashHex`),_status)
 }
     )
     }

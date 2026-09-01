@@ -30,4 +30,23 @@
     <string name="pub_sub_code">Abonelik kodu</string>
     <string name="pub_code_done">Bitti</string>
     <string name="pub_sub_code_hint">Abone olmak için tara. Alan listeye girer — ücretsiz yayın son sayıyı anında verir, ücretli fatura yollar.</string>
+    <string name="market_near_me">Yakınımda</string>
+    <string name="market_worldwide">Dünya çapında</string>
+    <string name="market_cat_news">haber</string>
+    <string name="market_cat_serials">diziler</string>
+    <string name="market_cat_sound">ses</string>
+    <string name="market_cat_software">yazılım</string>
+    <string name="market_cat_art">sanat</string>
+    <string name="market_cat_other">diğer</string>
+    <string name="market_empty">Bu raf henüz boş — panolar her hafta döner.</string>
+    <string name="market_free">Ücretsiz</string>
+    <string name="market_per_period">Sayı başına %1$s</string>
+    <string name="market_subscribe">Abone ol</string>
+    <string name="market_list_header">Dünya pazarında</string>
+    <string name="market_blurb_label">Hakkında bir cümle</string>
+    <string name="market_list_btn">Listele</string>
+    <string name="market_delist_btn">Kaldır</string>
+    <string name="market_listed_as">%1$s altında listelendi</string>
+    <string name="market_list_failed">Listelenemedi — düğüm çalışıyor mu?</string>
+    <string name="market_all_langs">tüm diller</string>
 </resources>

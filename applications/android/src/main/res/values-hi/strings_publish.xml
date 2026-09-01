@@ -30,4 +30,23 @@
     <string name="pub_sub_code">सदस्यता कोड</string>
     <string name="pub_code_done">हो गया</string>
     <string name="pub_sub_code_hint">सदस्यता के लिए स्कैन करो। लेते ही सूची में — मुफ़्त प्रकाशन तुरंत ताज़ा अंक देता है, सशुल्क बिल भेजता है।</string>
+    <string name="market_near_me">मेरे पास</string>
+    <string name="market_worldwide">दुनिया भर</string>
+    <string name="market_cat_news">समाचार</string>
+    <string name="market_cat_serials">धारावाहिक</string>
+    <string name="market_cat_sound">ध्वनि</string>
+    <string name="market_cat_software">सॉफ़्टवेयर</string>
+    <string name="market_cat_art">कला</string>
+    <string name="market_cat_other">अन्य</string>
+    <string name="market_empty">यह शेल्फ़ अभी खाली है — बोर्ड हर हफ़्ते बदलते हैं।</string>
+    <string name="market_free">मुफ़्त</string>
+    <string name="market_per_period">प्रति अंक %1$s</string>
+    <string name="market_subscribe">सदस्यता लें</string>
+    <string name="market_list_header">विश्व बाज़ार में</string>
+    <string name="market_blurb_label">इसके बारे में एक वाक्य</string>
+    <string name="market_list_btn">सूचीबद्ध करें</string>
+    <string name="market_delist_btn">हटाएँ</string>
+    <string name="market_listed_as">%1$s में सूचीबद्ध</string>
+    <string name="market_list_failed">सूचीबद्ध नहीं हो सका — क्या नोड चालू है?</string>
+    <string name="market_all_langs">सभी भाषाएँ</string>
 </resources>

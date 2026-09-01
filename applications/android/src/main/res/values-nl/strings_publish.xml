@@ -30,4 +30,23 @@
     <string name="pub_sub_code">Abonneercode</string>
     <string name="pub_code_done">Klaar</string>
     <string name="pub_sub_code_hint">Scan om te abonneren. Claimen zet je op de lijst — een gratis publicatie geeft meteen de nieuwste editie, een betaalde stuurt de rekening.</string>
+    <string name="market_near_me">Dichtbij</string>
+    <string name="market_worldwide">Wereldwijd</string>
+    <string name="market_cat_news">nieuws</string>
+    <string name="market_cat_serials">feuilletons</string>
+    <string name="market_cat_sound">geluid</string>
+    <string name="market_cat_software">software</string>
+    <string name="market_cat_art">kunst</string>
+    <string name="market_cat_other">overig</string>
+    <string name="market_empty">Nog niets op deze plank — de borden wisselen wekelijks.</string>
+    <string name="market_free">Gratis</string>
+    <string name="market_per_period">%1$s per editie</string>
+    <string name="market_subscribe">Abonneren</string>
+    <string name="market_list_header">Op de wereldmarkt</string>
+    <string name="market_blurb_label">Eén zin erover</string>
+    <string name="market_list_btn">Aanbieden</string>
+    <string name="market_delist_btn">Weghalen</string>
+    <string name="market_listed_as">Vermeld onder %1$s</string>
+    <string name="market_list_failed">Aanbieden mislukt — draait de node?</string>
+    <string name="market_all_langs">alle talen</string>
 </resources>

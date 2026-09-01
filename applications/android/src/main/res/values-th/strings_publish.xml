@@ -30,4 +30,23 @@
     <string name="pub_sub_code">รหัสสมัครสมาชิก</string>
     <string name="pub_code_done">เสร็จ</string>
     <string name="pub_sub_code_hint">สแกนเพื่อสมัคร รับสิทธิ์แล้วเข้ารายชื่อทันที — สิ่งพิมพ์ฟรีส่งฉบับล่าสุดให้เลย ส่วนแบบเสียเงินจะส่งบิล</string>
+    <string name="market_near_me">ใกล้ฉัน</string>
+    <string name="market_worldwide">ทั่วโลก</string>
+    <string name="market_cat_news">ข่าว</string>
+    <string name="market_cat_serials">เรื่องต่อเนื่อง</string>
+    <string name="market_cat_sound">เสียง</string>
+    <string name="market_cat_software">ซอฟต์แวร์</string>
+    <string name="market_cat_art">ศิลปะ</string>
+    <string name="market_cat_other">อื่นๆ</string>
+    <string name="market_empty">ชั้นนี้ยังว่าง — กระดานหมุนเวียนทุกสัปดาห์</string>
+    <string name="market_free">ฟรี</string>
+    <string name="market_per_period">%1$s ต่อฉบับ</string>
+    <string name="market_subscribe">สมัครรับ</string>
+    <string name="market_list_header">ในตลาดโลก</string>
+    <string name="market_blurb_label">หนึ่งประโยคเกี่ยวกับมัน</string>
+    <string name="market_list_btn">ลงขาย</string>
+    <string name="market_delist_btn">เอาลง</string>
+    <string name="market_listed_as">อยู่ในหมวด %1$s</string>
+    <string name="market_list_failed">ลงขายไม่สำเร็จ — โหนดทำงานอยู่ไหม?</string>
+    <string name="market_all_langs">ทุกภาษา</string>
 </resources>

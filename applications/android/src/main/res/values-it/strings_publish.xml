@@ -30,4 +30,23 @@
     <string name="pub_sub_code">Codice abbonamento</string>
     <string name="pub_code_done">Fatto</string>
     <string name="pub_sub_code_hint">Scansiona per abbonarti. Riscattarlo iscrive alla lista — una pubblicazione gratuita consegna subito l\u2019ultimo numero, una a pagamento manda il conto.</string>
+    <string name="market_near_me">Vicino a me</string>
+    <string name="market_worldwide">Mondiale</string>
+    <string name="market_cat_news">notizie</string>
+    <string name="market_cat_serials">seriali</string>
+    <string name="market_cat_sound">suono</string>
+    <string name="market_cat_software">software</string>
+    <string name="market_cat_art">arte</string>
+    <string name="market_cat_other">altro</string>
+    <string name="market_empty">Niente su questo scaffale — le bacheche ruotano ogni settimana.</string>
+    <string name="market_free">Gratis</string>
+    <string name="market_per_period">%1$s a numero</string>
+    <string name="market_subscribe">Abbonati</string>
+    <string name="market_list_header">Sul mercato mondiale</string>
+    <string name="market_blurb_label">Una frase al riguardo</string>
+    <string name="market_list_btn">Pubblica</string>
+    <string name="market_delist_btn">Ritira</string>
+    <string name="market_listed_as">Elencato in %1$s</string>
+    <string name="market_list_failed">Impossibile pubblicare — il nodo è attivo?</string>
+    <string name="market_all_langs">tutte le lingue</string>
 </resources>

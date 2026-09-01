@@ -30,4 +30,23 @@
     <string name="pub_sub_code">Abo-Code</string>
     <string name="pub_code_done">Fertig</string>
     <string name="pub_sub_code_hint">Zum Abonnieren scannen. Ein Einlösen trägt in die Liste ein — eine Gratis-Publikation übergibt sofort die neueste Ausgabe, eine bezahlte schickt die Rechnung.</string>
+    <string name="market_near_me">In der Nähe</string>
+    <string name="market_worldwide">Weltweit</string>
+    <string name="market_cat_news">Nachrichten</string>
+    <string name="market_cat_serials">Serien</string>
+    <string name="market_cat_sound">Klang</string>
+    <string name="market_cat_software">Software</string>
+    <string name="market_cat_art">Kunst</string>
+    <string name="market_cat_other">Sonstiges</string>
+    <string name="market_empty">Noch nichts in diesem Regal — die Tafeln wechseln wöchentlich, frühe Wochen sind still.</string>
+    <string name="market_free">Gratis</string>
+    <string name="market_per_period">%1$s pro Ausgabe</string>
+    <string name="market_subscribe">Abonnieren</string>
+    <string name="market_list_header">Auf dem weltweiten Markt</string>
+    <string name="market_blurb_label">Ein Satz dazu</string>
+    <string name="market_list_btn">Einstellen</string>
+    <string name="market_delist_btn">Herunternehmen</string>
+    <string name="market_listed_as">Gelistet unter %1$s</string>
+    <string name="market_list_failed">Konnte nicht einstellen — läuft der Knoten?</string>
+    <string name="market_all_langs">alle Sprachen</string>
 </resources>

@@ -30,4 +30,23 @@
     <string name="pub_sub_code">Código de assinatura</string>
     <string name="pub_code_done">Pronto</string>
     <string name="pub_sub_code_hint">Escaneie para assinar. O resgate entra na lista — uma publicação grátis entrega a última edição na hora; uma paga envia a conta.</string>
+    <string name="market_near_me">Perto de mim</string>
+    <string name="market_worldwide">Mundial</string>
+    <string name="market_cat_news">notícias</string>
+    <string name="market_cat_serials">seriados</string>
+    <string name="market_cat_sound">som</string>
+    <string name="market_cat_software">software</string>
+    <string name="market_cat_art">arte</string>
+    <string name="market_cat_other">outros</string>
+    <string name="market_empty">Nada nesta estante ainda — os quadros trocam toda semana.</string>
+    <string name="market_free">Grátis</string>
+    <string name="market_per_period">%1$s por edição</string>
+    <string name="market_subscribe">Assinar</string>
+    <string name="market_list_header">No mercado mundial</string>
+    <string name="market_blurb_label">Uma frase sobre isso</string>
+    <string name="market_list_btn">Publicar</string>
+    <string name="market_delist_btn">Retirar</string>
+    <string name="market_listed_as">Listado em %1$s</string>
+    <string name="market_list_failed">Não foi possível publicar — o nó está ativo?</string>
+    <string name="market_all_langs">todos os idiomas</string>
 </resources>
