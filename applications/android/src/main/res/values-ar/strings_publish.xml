@@ -57,4 +57,18 @@
     <string name="market_list_yours">اعرض ما عندك</string>
     <string name="market_list_pub">اعرض إصدارًا</string>
     <string name="market_also_local">وعلى اللوحة المحلية أيضًا</string>
+    <string name="mode_press">المطبعة</string>
+    <string name="mode_press_desc">إصدار واحد في الواجهة: رمز الاشتراك على الطاولة، والدعوات عبر محادثاتك.</string>
+    <string name="press_tab_room">غرفة التحرير</string>
+    <string name="press_none_yet">لا إصدار بعد — سمِّه فتوجد المطبعة.</string>
+    <string name="press_name_hint">اسم الإصدار</string>
+    <string name="press_create">إنشاء</string>
+    <string name="press_code_minting">جارٍ إنشاء الرمز…</string>
+    <string name="press_scan">امسح للاشتراك</string>
+    <string name="press_subscribed">%1$d مشتركًا</string>
+    <string name="press_invite">دعوة جهات الاتصال</string>
+    <string name="press_invite_send">إرسال الدعوات</string>
+    <string name="press_invite_later">لاحقًا</string>
+    <string name="press_invite_body">دعوة للاشتراك في %1$s — اضغط للقبول:</string>
+    <string name="press_invite_nobody">لا أحد لدعوته بعد — ستظهر جهات اتصالك هنا.</string>
 </resources>

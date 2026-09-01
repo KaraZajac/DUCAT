@@ -931,6 +931,11 @@ fun ModesScreen() {
             stringResource(R.string.mode_donate_desc),
         ),
         Triple(
+            org.ducatproject.ducat.Mode.Press,
+            stringResource(R.string.mode_press),
+            stringResource(R.string.mode_press_desc),
+        ),
+        Triple(
             org.ducatproject.ducat.Mode.Marketplace,
             stringResource(R.string.mode_marketplace),
             stringResource(R.string.mode_marketplace_desc),

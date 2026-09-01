@@ -57,4 +57,18 @@
     <string name="market_list_yours">Publique a sua</string>
     <string name="market_list_pub">Listar uma publicação</string>
     <string name="market_also_local">Também no quadro local</string>
+    <string name="mode_press">Imprensa</string>
+    <string name="mode_press_desc">Uma publicação na frente: código de assinatura no balcão, convites pelos seus fios.</string>
+    <string name="press_tab_room">Redação</string>
+    <string name="press_none_yet">Nenhuma publicação ainda — dê um nome e a imprensa existe.</string>
+    <string name="press_name_hint">Nome da publicação</string>
+    <string name="press_create">Criar</string>
+    <string name="press_code_minting">Criando o código…</string>
+    <string name="press_scan">Escaneie para assinar</string>
+    <string name="press_subscribed">%1$d assinantes</string>
+    <string name="press_invite">Convidar contatos</string>
+    <string name="press_invite_send">Enviar convites</string>
+    <string name="press_invite_later">Depois</string>
+    <string name="press_invite_body">Um convite para assinar %1$s — toque para aceitar:</string>
+    <string name="press_invite_nobody">Ninguém para convidar ainda — seus contatos aparecem aqui.</string>
 </resources>

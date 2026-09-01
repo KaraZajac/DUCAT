@@ -10,6 +10,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.House
 import androidx.compose.material.icons.filled.Inventory2
@@ -109,6 +111,15 @@ fun ModeShell(mode: Mode, openDrawer: () -> Unit) {
             onLeave = onLeave,
             tabs = listOf(
                 ShellTab(stringResource(R.string.shells_tab_code), Icons.Filled.RadioButtonUnchecked) { DonateScreen() },
+            ),
+        )
+        Mode.Press -> Shell(
+            title = stringResource(R.string.mode_press),
+            openDrawer = openDrawer,
+            onLeave = onLeave,
+            tabs = listOf(
+                ShellTab(stringResource(R.string.shells_tab_code), Icons.Filled.QrCode) { PressScreen() },
+                ShellTab(stringResource(R.string.press_tab_room), Icons.AutoMirrored.Filled.MenuBook) { PublishingSection() },
             ),
         )
         Mode.Renting -> Shell(

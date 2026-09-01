@@ -57,4 +57,18 @@
     <string name="market_list_yours">Deins einstellen</string>
     <string name="market_list_pub">Publikation einstellen</string>
     <string name="market_also_local">Auch auf der lokalen Tafel</string>
+    <string name="mode_press">Presse</string>
+    <string name="mode_press_desc">Eine Publikation im Schaufenster: Abo-Code auf dem Tresen, Einladungen in deine Threads.</string>
+    <string name="press_tab_room">Redaktion</string>
+    <string name="press_none_yet">Noch keine Publikation — gib ihr einen Namen und die Presse existiert.</string>
+    <string name="press_name_hint">Name der Publikation</string>
+    <string name="press_create">Anlegen</string>
+    <string name="press_code_minting">Code wird erstellt…</string>
+    <string name="press_scan">Zum Abonnieren scannen</string>
+    <string name="press_subscribed">%1$d abonniert</string>
+    <string name="press_invite">Kontakte einladen</string>
+    <string name="press_invite_send">Einladungen senden</string>
+    <string name="press_invite_later">Später</string>
+    <string name="press_invite_body">Eine Einladung, %1$s zu abonnieren — zum Annehmen tippen:</string>
+    <string name="press_invite_nobody">Noch niemand zum Einladen — deine Kontakte erscheinen hier.</string>
 </resources>

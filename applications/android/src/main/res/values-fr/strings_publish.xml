@@ -57,4 +57,18 @@
     <string name="market_list_yours">Publier le vôtre</string>
     <string name="market_list_pub">Publier une publication</string>
     <string name="market_also_local">Aussi sur le tableau local</string>
+    <string name="mode_press">Presse</string>
+    <string name="mode_press_desc">Une publication en vitrine : code d\'abonnement sur le comptoir, invitations dans vos fils.</string>
+    <string name="press_tab_room">Rédaction</string>
+    <string name="press_none_yet">Pas encore de publication — nommez-la et la presse existe.</string>
+    <string name="press_name_hint">Nom de la publication</string>
+    <string name="press_create">Créer</string>
+    <string name="press_code_minting">Création du code…</string>
+    <string name="press_scan">Scanner pour s\'abonner</string>
+    <string name="press_subscribed">%1$d abonnés</string>
+    <string name="press_invite">Inviter des contacts</string>
+    <string name="press_invite_send">Envoyer les invitations</string>
+    <string name="press_invite_later">Plus tard</string>
+    <string name="press_invite_body">Une invitation à s\'abonner à %1$s — touchez pour accepter :</string>
+    <string name="press_invite_nobody">Personne à inviter pour l\'instant — vos contacts apparaîtront ici.</string>
 </resources>

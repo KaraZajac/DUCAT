@@ -57,4 +57,18 @@
     <string name="market_list_yours">自分のを出す</string>
     <string name="market_list_pub">出版物を出品</string>
     <string name="market_also_local">近所の掲示板にも</string>
+    <string name="mode_press">プレス</string>
+    <string name="mode_press_desc">一つの出版物を前面に。カウンターに購読コード、スレッドに招待状。</string>
+    <string name="press_tab_room">編集室</string>
+    <string name="press_none_yet">出版物がまだありません — 名前を付ければプレスの誕生です。</string>
+    <string name="press_name_hint">出版物の名前</string>
+    <string name="press_create">作成</string>
+    <string name="press_code_minting">コードを作成中…</string>
+    <string name="press_scan">スキャンして購読</string>
+    <string name="press_subscribed">購読者 %1$d人</string>
+    <string name="press_invite">連絡先を招待</string>
+    <string name="press_invite_send">招待を送る</string>
+    <string name="press_invite_later">あとで</string>
+    <string name="press_invite_body">%1$s の購読への招待です — タップして受け取る:</string>
+    <string name="press_invite_nobody">まだ招待できる人がいません — 連絡先がここに表示されます。</string>
 </resources>

@@ -57,4 +57,18 @@
     <string name="market_list_yours">Zet die van jou erop</string>
     <string name="market_list_pub">Publicatie aanbieden</string>
     <string name="market_also_local">Ook op het lokale bord</string>
+    <string name="mode_press">Pers</string>
+    <string name="mode_press_desc">Eén publicatie voorop: abonneercode op de toonbank, uitnodigingen door je gesprekken.</string>
+    <string name="press_tab_room">Redactie</string>
+    <string name="press_none_yet">Nog geen publicatie — geef er een naam aan en de pers bestaat.</string>
+    <string name="press_name_hint">Naam van de publicatie</string>
+    <string name="press_create">Aanmaken</string>
+    <string name="press_code_minting">Code wordt gemaakt…</string>
+    <string name="press_scan">Scan om te abonneren</string>
+    <string name="press_subscribed">%1$d geabonneerd</string>
+    <string name="press_invite">Contacten uitnodigen</string>
+    <string name="press_invite_send">Uitnodigingen sturen</string>
+    <string name="press_invite_later">Later</string>
+    <string name="press_invite_body">Een uitnodiging om je op %1$s te abonneren — tik om te accepteren:</string>
+    <string name="press_invite_nobody">Nog niemand om uit te nodigen — je contacten verschijnen hier.</string>
 </resources>

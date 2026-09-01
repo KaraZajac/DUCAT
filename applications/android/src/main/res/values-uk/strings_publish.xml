@@ -57,4 +57,18 @@
     <string name="market_list_yours">Виставити своє</string>
     <string name="market_list_pub">Виставити видання</string>
     <string name="market_also_local">І на місцевій дошці</string>
+    <string name="mode_press">Преса</string>
+    <string name="mode_press_desc">Одне видання на вітрині: код підписки на прилавку, запрошення вашими розмовами.</string>
+    <string name="press_tab_room">Редакція</string>
+    <string name="press_none_yet">Видання ще немає — назвіть його, і преса з\'явиться.</string>
+    <string name="press_name_hint">Назва видання</string>
+    <string name="press_create">Створити</string>
+    <string name="press_code_minting">Створюємо код…</string>
+    <string name="press_scan">Скануйте, щоб підписатися</string>
+    <string name="press_subscribed">Підписників: %1$d</string>
+    <string name="press_invite">Запросити контакти</string>
+    <string name="press_invite_send">Надіслати запрошення</string>
+    <string name="press_invite_later">Пізніше</string>
+    <string name="press_invite_body">Запрошення підписатися на %1$s — торкніться, щоб прийняти:</string>
+    <string name="press_invite_nobody">Поки нікого запрошувати — контакти з\'являться тут.</string>
 </resources>

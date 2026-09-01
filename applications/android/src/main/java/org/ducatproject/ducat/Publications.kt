@@ -420,6 +420,51 @@ object Publications {
         return synchronized(rows) { rows.values.toList() }
     }
 
+    /** The publication the Press mode fronts. Null until chosen. */
+    fun pressPub(context: Context): String? =
+        prefs(context).getString("press_pub", null)
+            ?.takeIf { id -> publications(context).any { it.first == id } }
+
+    fun setPressPub(context: Context, pubId: String) {
+        prefs(context).edit().putString("press_pub", pubId).apply()
+        ContactStore.bump()
+    }
+
+    /**
+     * The standing subscribe code the Press face shows: one shared,
+     * multi-claim publish card, re-minted when it nears its expiry so the
+     * QR on the counter never quietly goes stale. Every mint is bound to
+     * the publication, so a claim from any generation still enrolls.
+     */
+    fun standingCode(context: Context, pubId: String): String? {
+        val now = System.currentTimeMillis() / 1000
+        readPub(context, pubId)?.let { pub ->
+            val uri = pub.optString("press_code").ifBlank { null }
+            val exp = pub.optLong("press_code_exp", 0)
+            if (uri != null && exp - now > PRESS_CODE_TTL_SECS / 4) return uri
+        }
+        val name = publications(context).firstOrNull { it.first == pubId }?.second
+            ?: return null
+        val card = runCatching {
+            Mailbox.issueCard(
+                context, name, PRESS_CODE_TTL_SECS.toULong(),
+                purpose = "publish",
+                asPersonaHex = PersonaStore(context).worn(),
+            )
+        }.getOrElse {
+            DucatLog.w("Publications", "press code: ${it.message}")
+            return null
+        }
+        bindCard(context, pubId, card.inboxKey)
+        editPub(context, pubId) { pub ->
+            pub.put("press_code", card.uri)
+            pub.put("press_code_exp", now + PRESS_CODE_TTL_SECS)
+        }
+        return card.uri
+    }
+
+    private const val PRESS_CODE_TTL_SECS = 7 * 24 * 60 * 60L
+
     /** (category, blurb) when listed; null when not. The screen's read. */
     fun marketStateOf(context: Context, pubId: String): Pair<String, String>? {
         val pub = readPub(context, pubId) ?: return null

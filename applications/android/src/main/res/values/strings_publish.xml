@@ -57,4 +57,18 @@
     <string name="market_list_yours">List yours</string>
     <string name="market_list_pub">List a publication</string>
     <string name="market_also_local">Also on the local board</string>
+    <string name="mode_press">Press</string>
+    <string name="mode_press_desc">Front one publication: a subscribe code on the counter, invites down your threads.</string>
+    <string name="press_tab_room">Press room</string>
+    <string name="press_none_yet">No publication yet — name one and the press exists.</string>
+    <string name="press_name_hint">Publication name</string>
+    <string name="press_create">Create</string>
+    <string name="press_code_minting">Minting the code…</string>
+    <string name="press_scan">Scan to subscribe</string>
+    <string name="press_subscribed">%1$d subscribed</string>
+    <string name="press_invite">Invite contacts</string>
+    <string name="press_invite_send">Send invites</string>
+    <string name="press_invite_later">Later</string>
+    <string name="press_invite_body">An invitation to subscribe to %1$s — tap to accept:</string>
+    <string name="press_invite_nobody">Nobody to invite yet — your contacts appear here.</string>
 </resources>

@@ -57,4 +57,18 @@
     <string name="market_list_yours">Seninkini listele</string>
     <string name="market_list_pub">Yayın listele</string>
     <string name="market_also_local">Yerel panoya da</string>
+    <string name="mode_press">Basın</string>
+    <string name="mode_press_desc">Bir yayın önde: tezgâhta abonelik kodu, sohbetlerine davetler.</string>
+    <string name="press_tab_room">Yazı işleri</string>
+    <string name="press_none_yet">Henüz yayın yok — bir ad ver, basın var olsun.</string>
+    <string name="press_name_hint">Yayın adı</string>
+    <string name="press_create">Oluştur</string>
+    <string name="press_code_minting">Kod oluşturuluyor…</string>
+    <string name="press_scan">Abone olmak için tara</string>
+    <string name="press_subscribed">%1$d abone</string>
+    <string name="press_invite">Kişileri davet et</string>
+    <string name="press_invite_send">Davetleri gönder</string>
+    <string name="press_invite_later">Sonra</string>
+    <string name="press_invite_body">%1$s aboneliğine davet — kabul için dokun:</string>
+    <string name="press_invite_nobody">Henüz davet edilecek kimse yok — kişilerin burada görünür.</string>
 </resources>

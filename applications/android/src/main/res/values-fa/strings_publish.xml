@@ -57,4 +57,18 @@
     <string name="market_list_yours">مال خودت را بگذار</string>
     <string name="market_list_pub">انتشار یک نشریه</string>
     <string name="market_also_local">روی تابلوی محلی هم</string>
+    <string name="mode_press">مطبوعات</string>
+    <string name="mode_press_desc">یک نشریه در ویترین: کد اشتراک روی پیشخوان، دعوت‌ها در گفتگوها.</string>
+    <string name="press_tab_room">تحریریه</string>
+    <string name="press_none_yet">هنوز نشریه‌ای نیست — نامی بگذار تا مطبوعات پدید آید.</string>
+    <string name="press_name_hint">نام نشریه</string>
+    <string name="press_create">ایجاد</string>
+    <string name="press_code_minting">در حال ساخت کد…</string>
+    <string name="press_scan">برای اشتراک اسکن کنید</string>
+    <string name="press_subscribed">%1$d مشترک</string>
+    <string name="press_invite">دعوت از مخاطبان</string>
+    <string name="press_invite_send">ارسال دعوت‌ها</string>
+    <string name="press_invite_later">بعداً</string>
+    <string name="press_invite_body">دعوتی برای اشتراک در %1$s — برای پذیرش بزنید:</string>
+    <string name="press_invite_nobody">هنوز کسی برای دعوت نیست — مخاطبان اینجا ظاهر می‌شوند.</string>
 </resources>

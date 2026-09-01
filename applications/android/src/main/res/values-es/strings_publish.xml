@@ -57,4 +57,18 @@
     <string name="market_list_yours">Publica el tuyo</string>
     <string name="market_list_pub">Publicar una publicación</string>
     <string name="market_also_local">También en el tablón local</string>
+    <string name="mode_press">Prensa</string>
+    <string name="mode_press_desc">Una publicación al frente: código de suscripción en el mostrador, invitaciones por tus hilos.</string>
+    <string name="press_tab_room">Redacción</string>
+    <string name="press_none_yet">Aún no hay publicación — ponle nombre y la prensa existe.</string>
+    <string name="press_name_hint">Nombre de la publicación</string>
+    <string name="press_create">Crear</string>
+    <string name="press_code_minting">Creando el código…</string>
+    <string name="press_scan">Escanea para suscribirte</string>
+    <string name="press_subscribed">%1$d suscritos</string>
+    <string name="press_invite">Invitar contactos</string>
+    <string name="press_invite_send">Enviar invitaciones</string>
+    <string name="press_invite_later">Luego</string>
+    <string name="press_invite_body">Una invitación para suscribirse a %1$s — toca para aceptar:</string>
+    <string name="press_invite_nobody">Nadie a quien invitar todavía — tus contactos aparecen aquí.</string>
 </resources>

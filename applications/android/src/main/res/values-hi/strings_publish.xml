@@ -57,4 +57,18 @@
     <string name="market_list_yours">अपना सूचीबद्ध करें</string>
     <string name="market_list_pub">प्रकाशन सूचीबद्ध करें</string>
     <string name="market_also_local">स्थानीय बोर्ड पर भी</string>
+    <string name="mode_press">प्रेस</string>
+    <string name="mode_press_desc">एक प्रकाशन सामने: काउंटर पर सदस्यता कोड, थ्रेड में निमंत्रण।</string>
+    <string name="press_tab_room">संपादकीय कक्ष</string>
+    <string name="press_none_yet">अभी कोई प्रकाशन नहीं — नाम दें और प्रेस बन जाए।</string>
+    <string name="press_name_hint">प्रकाशन का नाम</string>
+    <string name="press_create">बनाएँ</string>
+    <string name="press_code_minting">कोड बन रहा है…</string>
+    <string name="press_scan">सदस्यता के लिए स्कैन करें</string>
+    <string name="press_subscribed">%1$d सदस्य</string>
+    <string name="press_invite">संपर्क आमंत्रित करें</string>
+    <string name="press_invite_send">निमंत्रण भेजें</string>
+    <string name="press_invite_later">बाद में</string>
+    <string name="press_invite_body">%1$s की सदस्यता का निमंत्रण — स्वीकारने के लिए टैप करें:</string>
+    <string name="press_invite_nobody">अभी आमंत्रित करने को कोई नहीं — संपर्क यहाँ दिखेंगे।</string>
 </resources>

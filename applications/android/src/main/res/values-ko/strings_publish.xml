@@ -57,4 +57,18 @@
     <string name="market_list_yours">내 것 올리기</string>
     <string name="market_list_pub">간행물 올리기</string>
     <string name="market_also_local">동네 게시판에도</string>
+    <string name="mode_press">프레스</string>
+    <string name="mode_press_desc">간행물 하나를 전면에: 계산대엔 구독 코드, 대화엔 초대장.</string>
+    <string name="press_tab_room">편집실</string>
+    <string name="press_none_yet">아직 간행물이 없어요 — 이름을 지으면 프레스가 생깁니다.</string>
+    <string name="press_name_hint">간행물 이름</string>
+    <string name="press_create">만들기</string>
+    <string name="press_code_minting">코드 생성 중…</string>
+    <string name="press_scan">스캔하여 구독</string>
+    <string name="press_subscribed">구독자 %1$d명</string>
+    <string name="press_invite">연락처 초대</string>
+    <string name="press_invite_send">초대 보내기</string>
+    <string name="press_invite_later">나중에</string>
+    <string name="press_invite_body">%1$s 구독 초대입니다 — 눌러서 수락:</string>
+    <string name="press_invite_nobody">아직 초대할 사람이 없어요 — 연락처가 여기에 표시됩니다.</string>
 </resources>

@@ -57,4 +57,18 @@
     <string name="market_list_yours">ลงของคุณ</string>
     <string name="market_list_pub">ลงสิ่งพิมพ์</string>
     <string name="market_also_local">ลงกระดานท้องถิ่นด้วย</string>
+    <string name="mode_press">สำนักพิมพ์</string>
+    <string name="mode_press_desc">ชูสิ่งพิมพ์หนึ่งฉบับ: โค้ดสมัครบนเคาน์เตอร์ คำเชิญในบทสนทนา</string>
+    <string name="press_tab_room">กองบรรณาธิการ</string>
+    <string name="press_none_yet">ยังไม่มีสิ่งพิมพ์ — ตั้งชื่อแล้วสำนักพิมพ์ก็เกิด</string>
+    <string name="press_name_hint">ชื่อสิ่งพิมพ์</string>
+    <string name="press_create">สร้าง</string>
+    <string name="press_code_minting">กำลังสร้างโค้ด…</string>
+    <string name="press_scan">สแกนเพื่อสมัครรับ</string>
+    <string name="press_subscribed">สมาชิก %1$d คน</string>
+    <string name="press_invite">เชิญผู้ติดต่อ</string>
+    <string name="press_invite_send">ส่งคำเชิญ</string>
+    <string name="press_invite_later">ไว้ทีหลัง</string>
+    <string name="press_invite_body">คำเชิญสมัครรับ %1$s — แตะเพื่อรับ:</string>
+    <string name="press_invite_nobody">ยังไม่มีใครให้เชิญ — ผู้ติดต่อจะปรากฏที่นี่</string>
 </resources>

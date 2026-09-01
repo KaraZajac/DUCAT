@@ -57,4 +57,18 @@
     <string name="market_list_yours">上架你的</string>
     <string name="market_list_pub">上架出版物</string>
     <string name="market_also_local">同时上本地板</string>
+    <string name="mode_press">报社</string>
+    <string name="mode_press_desc">一份出版物打头：柜台上放订阅码，往对话里发邀请。</string>
+    <string name="press_tab_room">编辑部</string>
+    <string name="press_none_yet">还没有出版物 — 起个名字，报社就成立了。</string>
+    <string name="press_name_hint">出版物名称</string>
+    <string name="press_create">创建</string>
+    <string name="press_code_minting">正在生成二维码…</string>
+    <string name="press_scan">扫码订阅</string>
+    <string name="press_subscribed">%1$d 人已订阅</string>
+    <string name="press_invite">邀请联系人</string>
+    <string name="press_invite_send">发送邀请</string>
+    <string name="press_invite_later">稍后</string>
+    <string name="press_invite_body">邀请你订阅 %1$s — 点按接受：</string>
+    <string name="press_invite_nobody">还没有可邀请的人 — 联系人会出现在这里。</string>
 </resources>

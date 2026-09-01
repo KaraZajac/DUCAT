@@ -57,4 +57,18 @@
     <string name="market_list_yours">Выставить своё</string>
     <string name="market_list_pub">Выставить издание</string>
     <string name="market_also_local">И на местной доске</string>
+    <string name="mode_press">Пресса</string>
+    <string name="mode_press_desc">Одно издание на витрине: код подписки на прилавке, приглашения по вашим переписям.</string>
+    <string name="press_tab_room">Редакция</string>
+    <string name="press_none_yet">Издания пока нет — назовите его, и пресса появится.</string>
+    <string name="press_name_hint">Название издания</string>
+    <string name="press_create">Создать</string>
+    <string name="press_code_minting">Создаём код…</string>
+    <string name="press_scan">Сканируйте, чтобы подписаться</string>
+    <string name="press_subscribed">Подписчиков: %1$d</string>
+    <string name="press_invite">Пригласить контакты</string>
+    <string name="press_invite_send">Отправить приглашения</string>
+    <string name="press_invite_later">Позже</string>
+    <string name="press_invite_body">Приглашение подписаться на %1$s — нажмите, чтобы принять:</string>
+    <string name="press_invite_nobody">Пока некого приглашать — контакты появятся здесь.</string>
 </resources>

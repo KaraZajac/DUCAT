@@ -57,4 +57,18 @@
     <string name="market_list_yours">Pubblica il tuo</string>
     <string name="market_list_pub">Pubblica una pubblicazione</string>
     <string name="market_also_local">Anche sulla bacheca locale</string>
+    <string name="mode_press">Stampa</string>
+    <string name="mode_press_desc">Una pubblicazione in vetrina: codice di abbonamento sul banco, inviti nei tuoi thread.</string>
+    <string name="press_tab_room">Redazione</string>
+    <string name="press_none_yet">Ancora nessuna pubblicazione — dalle un nome e la stampa esiste.</string>
+    <string name="press_name_hint">Nome della pubblicazione</string>
+    <string name="press_create">Crea</string>
+    <string name="press_code_minting">Creazione del codice…</string>
+    <string name="press_scan">Scansiona per abbonarti</string>
+    <string name="press_subscribed">%1$d abbonati</string>
+    <string name="press_invite">Invita contatti</string>
+    <string name="press_invite_send">Invia inviti</string>
+    <string name="press_invite_later">Dopo</string>
+    <string name="press_invite_body">Un invito ad abbonarsi a %1$s — tocca per accettare:</string>
+    <string name="press_invite_nobody">Nessuno da invitare — i tuoi contatti appariranno qui.</string>
 </resources>

@@ -57,4 +57,18 @@
     <string name="market_list_yours">Đăng của bạn</string>
     <string name="market_list_pub">Đăng ấn phẩm</string>
     <string name="market_also_local">Cả trên bảng địa phương</string>
+    <string name="mode_press">Nhà in</string>
+    <string name="mode_press_desc">Một ấn phẩm phía trước: mã đăng ký trên quầy, lời mời trong các cuộc trò chuyện.</string>
+    <string name="press_tab_room">Tòa soạn</string>
+    <string name="press_none_yet">Chưa có ấn phẩm — đặt tên và nhà in ra đời.</string>
+    <string name="press_name_hint">Tên ấn phẩm</string>
+    <string name="press_create">Tạo</string>
+    <string name="press_code_minting">Đang tạo mã…</string>
+    <string name="press_scan">Quét để đăng ký</string>
+    <string name="press_subscribed">%1$d người đăng ký</string>
+    <string name="press_invite">Mời liên hệ</string>
+    <string name="press_invite_send">Gửi lời mời</string>
+    <string name="press_invite_later">Để sau</string>
+    <string name="press_invite_body">Lời mời đăng ký %1$s — chạm để nhận:</string>
+    <string name="press_invite_nobody">Chưa có ai để mời — liên hệ của bạn sẽ hiện ở đây.</string>
 </resources>

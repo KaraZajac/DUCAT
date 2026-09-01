@@ -57,4 +57,18 @@
     <string name="market_list_yours">Wystaw swoje</string>
     <string name="market_list_pub">Wystaw publikację</string>
     <string name="market_also_local">Także na lokalnej tablicy</string>
+    <string name="mode_press">Prasa</string>
+    <string name="mode_press_desc">Jedna publikacja na froncie: kod subskrypcji na ladzie, zaproszenia w twoich wątkach.</string>
+    <string name="press_tab_room">Redakcja</string>
+    <string name="press_none_yet">Nie ma jeszcze publikacji — nazwij ją, a prasa zaistnieje.</string>
+    <string name="press_name_hint">Nazwa publikacji</string>
+    <string name="press_create">Utwórz</string>
+    <string name="press_code_minting">Tworzenie kodu…</string>
+    <string name="press_scan">Zeskanuj, aby subskrybować</string>
+    <string name="press_subscribed">Subskrybentów: %1$d</string>
+    <string name="press_invite">Zaproś kontakty</string>
+    <string name="press_invite_send">Wyślij zaproszenia</string>
+    <string name="press_invite_later">Później</string>
+    <string name="press_invite_body">Zaproszenie do subskrypcji %1$s — dotknij, aby przyjąć:</string>
+    <string name="press_invite_nobody">Nie ma jeszcze kogo zapraszać — kontakty pojawią się tutaj.</string>
 </resources>
