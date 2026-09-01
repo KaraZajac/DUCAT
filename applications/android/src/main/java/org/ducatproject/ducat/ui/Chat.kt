@@ -1673,11 +1673,41 @@ private fun Bubble(
                             // The big road: a swarm file downloads when asked,
                             // never by surprise on somebody's data plan. Name,
                             // size, one button; the bar is the share's own.
+                            //
+                            // Except a voice message: nobody decides whether
+                            // to hear a voicemail file-by-file — it fetches
+                            // itself, the way a memo's record chunks already
+                            // do, and the bubble goes straight to the player.
+                            // Bounded, so the courtesy cannot be abused into
+                            // pulling a movie labelled audio/*.
                             val fetchingHash by Mailbox.swarmFetching.collectAsState()
                             val fetchingThis = fetchingHash == att
+                            val voice = mime.startsWith("audio/") &&
+                                m.attLen <= AUTO_FETCH_AUDIO_BYTES
+                            if (voice) {
+                                LaunchedEffect(att) {
+                                    kotlinx.coroutines.withContext(Dispatchers.IO) {
+                                        // One swarm fetch at a time; a second
+                                        // voicemail waits its turn politely.
+                                        while (true) {
+                                            val busy = Mailbox.swarmFetching.value
+                                            if (busy == null) break
+                                            if (busy == att) return@withContext
+                                            kotlinx.coroutines.delay(1_000)
+                                        }
+                                        runCatching {
+                                            Mailbox.fetchSwarmAttachment(ctx, m)
+                                        }
+                                    }
+                                }
+                            }
                             Column {
                                 Text(
-                                    "📎 ${m.attName ?: stringResource(R.string.chat_file_fallback)}",
+                                    if (voice) {
+                                        stringResource(R.string.chat_downloading_audio)
+                                    } else {
+                                        "📎 ${m.attName ?: stringResource(R.string.chat_file_fallback)}"
+                                    },
                                     color = fg,
                                 )
                                 Text(
@@ -1687,7 +1717,7 @@ private fun Bubble(
                                     style = MaterialTheme.typography.labelSmall,
                                 )
                                 Spacer(Modifier.height(6.dp))
-                                if (fetchingThis) {
+                                if (fetchingThis || voice) {
                                     var p by remember {
                                         mutableStateOf<org.ducatproject.ducat.Swarm.Progress?>(null)
                                     }
@@ -2469,7 +2499,7 @@ private fun sendVoice(
         if (bytes.isEmpty()) {
             throw IllegalArgumentException(context.getString(R.string.chat_nothing_recorded))
         }
-        if (bytes.size > MAX_FILE_BYTES) {
+        if (bytes.size > MAX_SWARM_FILE_BYTES) {
             throw IllegalArgumentException(context.getString(R.string.chat_memo_too_long))
         }
         // The recorder names the format it actually produced: a phone's is
@@ -2477,13 +2507,16 @@ private fun sendVoice(
         // Labelling by extension rather than by assumption is what lets a
         // memo recorded on either one play on the other.
         val wav = memo.extension.equals("wav", ignoreCase = true)
-        sendAttachmentBytes(
-            context, c, bytes,
-            if (wav) "audio/wav" else "audio/mp4",
-            if (wav) "Voice memo.wav" else "Voice memo.m4a",
-            "🎤",
-            onChunk,
-        )
+        val mime = if (wav) "audio/wav" else "audio/mp4"
+        val label = if (wav) "Voice memo.wav" else "Voice memo.m4a"
+        if (bytes.size <= MAX_FILE_BYTES) {
+            sendAttachmentBytes(context, c, bytes, mime, label, "🎤", onChunk)
+        } else {
+            // A long message — a voicemail left on the answering machine,
+            // a desk's uncompressed WAV — rides the big road like any
+            // other heavy attachment, and the far side plays it the same.
+            sendAttachmentBytesBigRoad(context, c, bytes, mime, label, "🎤", onChunk)
+        }
     } finally {
         memo.delete()
     }
@@ -2518,6 +2551,20 @@ private fun sendFile(
             context.getString(R.string.chat_file_too_big_swarm, bytes.size / 1024 / 1024),
         )
     }
+    sendAttachmentBytesBigRoad(context, c, bytes, mime, name, "📎 $name", onChunk)
+}
+
+/** The big road's sender: seal, seed, reference — sendAttachmentBytes
+ *  with a swarm share where the record would have been. */
+private fun sendAttachmentBytesBigRoad(
+    context: android.content.Context,
+    c: Contact,
+    bytes: ByteArray,
+    mime: String,
+    name: String?,
+    body: String,
+    onChunk: (Int, Int) -> Unit = { _, _ -> },
+) {
     val rng = java.security.SecureRandom()
     val key = ByteArray(32).also(rng::nextBytes)
     val nonce = ByteArray(24).also(rng::nextBytes)
@@ -2552,12 +2599,17 @@ private fun sendFile(
         name = name,
     )
     Mailbox.attachmentFile(context, hashHex).writeBytes(bytes)
-    Mailbox.send(context, c, "📎 $name", attachment = ref)
+    Mailbox.send(context, c, body, attachment = ref)
     onChunk(3, 3)
 }
 
 /** The big road's client bound: sealed in memory for now. */
 private const val MAX_SWARM_FILE_BYTES = 64 * 1024 * 1024
+
+/** How much audio fetches itself. Sixteen MiB is over an hour of speech
+ *  at the recorder's bitrate — every real voicemail, no mislabelled
+ *  movie. Past it, audio waits for the button like any other file. */
+private const val AUTO_FETCH_AUDIO_BYTES = 16L * 1024 * 1024
 
 /**
  * Hold-to-record (§16.15's bytes, Signal's gesture).
