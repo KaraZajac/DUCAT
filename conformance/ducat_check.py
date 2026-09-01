@@ -990,6 +990,8 @@ MSG_PAYLOAD, MSG_ROUND, MSG_CEREMONY = 214, 215, 216
 MSG_ATT_RECORD, MSG_ATT_KEY, MSG_ATT_NONCE = 194, 195, 196
 MSG_ATT_LEN, MSG_ATT_HASH, MSG_ATT_MIME, MSG_ATT_NAME = 197, 198, 199, 200
 MSG_ATT_SWARM, MSG_ATT_SWARM_DIGEST = 278, 279
+SITE_VERSION, SITE_TITLE, SITE_SHARE, SITE_DIGEST, SITE_UPDATED = 280, 281, 282, 283, 284
+MAX_SITE_TITLE_CHARS = 80
 MAX_SWARM_ATTACHMENT_BYTES = 268_435_456
 MAX_SHARE_KEY_CHARS = 128
 # §15.12 — the live-position reference (kind 11): record + stream key.
@@ -1479,6 +1481,47 @@ def run_pub_listing(cases, r):
             r.passed -= 1
             r.bad("contact", c["name"], c.get("why", ""),
                   f"re-encoded to {out.hex()}, expected {c['expect']['reencodes_to_hex']}")
+
+
+
+def parse_site_head(v):
+    """§16.22: the site head — strict, closed set, version-gated."""
+    if v[0] != "map":
+        raise Reject("Malformed", "a site head is a map")
+    b = dict(v[1])
+    out = {}
+    ver = b.pop(SITE_VERSION, (None, None))[1]
+    if ver != 1:
+        raise Reject("Malformed", "unknown site head version")
+    out["title"] = _take_text(b, SITE_TITLE, MAX_SITE_TITLE_CHARS, "title", True)
+    out["share"] = _take_text(b, SITE_SHARE, MAX_SHARE_KEY_CHARS, "share", True)
+    digest = b.pop(SITE_DIGEST, (None, None))[1]
+    if digest is None or len(digest) != 32:
+        raise Reject("Malformed", "a site head carries its bundle's digest")
+    out["digest"] = digest
+    updated = b.pop(SITE_UPDATED, (None, None))[1]
+    if updated is None:
+        raise Reject("Malformed", "a site head says when it moved")
+    out["updated"] = updated
+    _finish(b)
+    return out
+
+
+def run_site_head(cases, r):
+    for c in cases:
+        def go(c=c):
+            v = decode_canonical(unhex(c["site_head_hex"]))
+            parse_site_head(v)
+            return encode(v)
+        got = expect_reject(r, "site.head", c, go)
+        if got is None:
+            continue
+        want = c["expect"].get("reencodes_to_hex")
+        if want and got.hex() != want:
+            r.passed -= 1
+            r.bad("site.head", c["name"], c.get("why", ""),
+                  "re-encoding differs from the vector")
+
 
 
 def leading_zero_bits(h):
@@ -2411,6 +2454,7 @@ BY_KIND = {
     "hail.notice": run_hail_notice,
     "rental.listing": run_listing,
     "pub.listing": run_pub_listing,
+    "site.head": run_site_head,
     "board.sealed": run_board_sealed,
     "board.beacon_window": run_beacon_window,
     "board.beacon_verdict": run_beacon_verdict,

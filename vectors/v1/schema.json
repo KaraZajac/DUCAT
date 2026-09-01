@@ -196,6 +196,7 @@
             "hail.notice",
             "rental.listing",
             "pub.listing",
+            "site.head",
             "board.sealed",
             "board.beacon_window",
             "board.beacon_verdict",

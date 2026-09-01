@@ -971,6 +971,10 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1214,6 +1218,10 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_sealed_prekey_id(`sealedBytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
+    fun uniffi_ducat_mobile_fn_func_site_head_decode(`bytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_site_head_encode(`head`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_standepoch(`nowSecs`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): Long
     fun uniffi_ducat_mobile_fn_func_standepochname(`base`: RustBuffer.ByValue,`epoch`: Long,uniffi_out_err: UniffiRustCallStatus, 
@@ -1585,6 +1593,10 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_checksum_func_seal_message(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_sealed_prekey_id(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_site_head_decode(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_site_head_encode(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_standepoch(
     ): Short
@@ -1975,6 +1987,12 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_sealed_prekey_id() != 10001.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_site_head_decode() != 19427.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_site_head_encode() != 18159.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_standepoch() != 1504.toShort()) {
@@ -4992,6 +5010,49 @@ public object FfiConverterTypeSendResult: FfiConverterRustBuffer<SendResult> {
             FfiConverterString.write(value.`txidHex`, buf)
             FfiConverterULong.write(value.`feePxmr`, buf)
             FfiConverterUInt.write(value.`acceptedBy`, buf)
+    }
+}
+
+
+
+/**
+ * §16.22: a site head across the bridge.
+ */
+data class SiteHeadIo (
+    var `title`: kotlin.String, 
+    var `share`: kotlin.String, 
+    var `digestHex`: kotlin.String, 
+    var `updated`: kotlin.ULong
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeSiteHeadIo: FfiConverterRustBuffer<SiteHeadIo> {
+    override fun read(buf: ByteBuffer): SiteHeadIo {
+        return SiteHeadIo(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: SiteHeadIo) = (
+            FfiConverterString.allocationSize(value.`title`) +
+            FfiConverterString.allocationSize(value.`share`) +
+            FfiConverterString.allocationSize(value.`digestHex`) +
+            FfiConverterULong.allocationSize(value.`updated`)
+    )
+
+    override fun write(value: SiteHeadIo, buf: ByteBuffer) {
+            FfiConverterString.write(value.`title`, buf)
+            FfiConverterString.write(value.`share`, buf)
+            FfiConverterString.write(value.`digestHex`, buf)
+            FfiConverterULong.write(value.`updated`, buf)
     }
 }
 
@@ -8642,6 +8703,33 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_sealed_prekey_id(
         FfiConverterByteArray.lower(`sealedBytes`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Decode a site head read from a record. Strict: whatever a stranger
+         * wrote is checked at the door.
+         */
+    @Throws(ContactException::class) fun `siteHeadDecode`(`bytes`: kotlin.ByteArray): SiteHeadIo {
+            return FfiConverterTypeSiteHeadIo.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_site_head_decode(
+        FfiConverterByteArray.lower(`bytes`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Encode a site head for the record's subkey 0.
+         */
+    @Throws(ContactException::class) fun `siteHeadEncode`(`head`: SiteHeadIo): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_site_head_encode(
+        FfiConverterTypeSiteHeadIo.lower(`head`),_status)
 }
     )
     }

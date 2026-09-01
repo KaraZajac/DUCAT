@@ -97,6 +97,7 @@ val sharedLogic = listOf(
     "org/ducatproject/ducat/Recurring.kt",
     "org/ducatproject/ducat/Publications.kt",
     "org/ducatproject/ducat/Swarm.kt",
+    "org/ducatproject/ducat/Sites.kt",
     "org/ducatproject/ducat/ui/GroupChat.kt",
     "org/ducatproject/ducat/ui/SettledMark.kt",
     "org/ducatproject/ducat/ui/CatSpinner.kt",
@@ -379,6 +380,14 @@ dependencies {
 
 // Headless proof the stack stands: JVM, JNA, the Rust bridge, Veilid — no
 // window involved. `./gradlew :desktop:smoke`.
+tasks.register<JavaExec>("sitepublish") {
+    group = "verification"
+    description = "Publish a directory as a ducat site (env DUCAT_SITE_*)"
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("org.ducatproject.desk.SitePublishKt")
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 tasks.register<JavaExec>("filesend") {
     group = "verification"
     description = "Big-road file send end to end (roles via DUCAT_FS_ROLE)"

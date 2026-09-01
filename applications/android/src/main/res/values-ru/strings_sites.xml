@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_sites">Сайты</string>
+    <string name="sites_intro">Страницы путешествуют как издания: скачиваются целиком, читаются офлайн, зеркалируются читателями по их выбору. Ничто на странице вас не видит.</string>
+    <string name="sites_empty_title">Сайтов пока нет</string>
+    <string name="sites_empty_body">Сайт ducat — запечатанная комната: каждая картинка и стиль едут в пакете, скрипты выключены, работают только ссылки ducat:. Вставьте адрес, чтобы сохранить сайт.</string>
+    <string name="sites_add">Добавить сайт</string>
+    <string name="sites_add_confirm">Добавить</string>
+    <string name="sites_uri_label">адрес ducat:site/…</string>
+    <string name="sites_bad_uri">Это не адрес ducat:site/.</string>
+    <string name="sites_fetching">Загрузка…</string>
+    <string name="sites_not_fetched">Ещё не загружен</string>
+    <string name="sites_update_waiting">Есть обновление — откроется свежим</string>
+    <string name="sites_offline_ready">Готов офлайн</string>
+    <string name="sites_open">Открыть</string>
+    <string name="sites_keep_alive">Держать этот сайт живым для других</string>
+    <string name="sites_remove">Убрать</string>
+</resources>

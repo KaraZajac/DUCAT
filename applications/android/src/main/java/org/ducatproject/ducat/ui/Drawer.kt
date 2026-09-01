@@ -21,7 +21,9 @@ import org.ducatproject.ducat.SafeImage
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.draw.clip
 import androidx.compose.runtime.*
+import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -52,6 +54,7 @@ enum class Section(val labelRes: Int) {
     Profile(R.string.section_profile),
     Contacts(R.string.section_contacts),
     Library(R.string.section_library),
+    Sites(R.string.section_sites),
     Selling(R.string.section_selling),
     // Routable but not listed: the Press mode's second tab and the
     // market's "list yours" open it directly, and the Press room is
@@ -112,6 +115,7 @@ private fun iconFor(s: Section) = when (s) {
     Section.Profile -> Icons.Filled.Person
     Section.Contacts -> Icons.Filled.People
     Section.Library -> Icons.Filled.LocalLibrary
+    Section.Sites -> Icons.Filled.Public
     Section.Selling -> Icons.Filled.Storefront
     Section.Publishing -> Icons.AutoMirrored.Filled.MenuBook
     Section.Logs -> Icons.Filled.Description
@@ -149,6 +153,7 @@ fun SectionScreen(
 
         Section.Library -> LibrarySection()
 
+        Section.Sites -> SitesSection()
         Section.Selling -> SellingSection()
         Section.Publishing -> PublishingSection()
 
@@ -1261,6 +1266,214 @@ private fun modeIcon(mode: org.ducatproject.ducat.Mode) = when (mode) {
     org.ducatproject.ducat.Mode.Marketplace -> Icons.Filled.Sell
     org.ducatproject.ducat.Mode.HireHelp -> Icons.Filled.Handyman
     org.ducatproject.ducat.Mode.Press -> Icons.AutoMirrored.Filled.MenuBook
+}
+
+/** Opens the sealed-room viewer for a fetched site. Injected: WebView is
+ *  the phone's business (see MainActivity); the desk compiles a no-op. */
+var siteOpen: (android.content.Context, String) -> Unit = { _, _ -> }
+
+/** A ducat:site/ address arriving from a deep link or paste, waiting for
+ *  the section to add it. */
+val pendingSiteAdd = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
+
+/**
+ * §16.22 on the phone: saved sites, each a stable address whose bundle
+ * travels whole and renders in a sealed room. Adding is pasting an
+ * address; opening fetches if the head moved and hands the bundle to the
+ * viewer; keeping one alive is the mirroring gift, given knowingly.
+ */
+@Composable
+fun SitesSection() {
+    val context = LocalContext.current
+    val version by ContactStore.changes.collectAsState()
+    val sites = remember(version) { org.ducatproject.ducat.Sites.all(context) }
+    val scope = rememberCoroutineScope()
+    var adding by remember { mutableStateOf(false) }
+    var addText by remember { mutableStateOf("") }
+    var busy by remember { mutableStateOf<String?>(null) }
+    var word by remember { mutableStateOf<String?>(null) }
+
+    fun addByUri(uri: String) {
+        val rec = org.ducatproject.ducat.Sites.parseUri(uri.trim())
+        if (rec == null) {
+            word = context.getString(R.string.sites_bad_uri)
+            return
+        }
+        busy = rec
+        scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            runCatching { org.ducatproject.ducat.Sites.add(context, rec) }
+                .onFailure { word = it.message }
+            busy = null
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        pendingSiteAdd.collect { uri ->
+            if (uri != null) {
+                pendingSiteAdd.value = null
+                addByUri(uri)
+            }
+        }
+    }
+
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
+        Text(
+            stringResource(R.string.sites_intro),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(12.dp))
+
+        if (sites.isEmpty()) {
+            Column(
+                Modifier.fillMaxWidth().padding(top = 48.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Box(
+                    Modifier.size(72.dp).clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        Icons.Filled.Public, null, Modifier.size(36.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    stringResource(R.string.sites_empty_title),
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    stringResource(R.string.sites_empty_body),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                )
+                Spacer(Modifier.height(20.dp))
+                Button(onClick = { adding = true }) {
+                    Text(stringResource(R.string.sites_add))
+                }
+            }
+        } else {
+            sites.forEach { site ->
+                Card(
+                    Modifier.fillMaxWidth().padding(bottom = 10.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    ),
+                ) {
+                    Column(Modifier.padding(14.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Column(Modifier.weight(1f)) {
+                                Text(site.title, style = MaterialTheme.typography.titleMedium)
+                                Text(
+                                    if (busy == site.recordKey) {
+                                        stringResource(R.string.sites_fetching)
+                                    } else if (site.fetchedDigestHex == null) {
+                                        stringResource(R.string.sites_not_fetched)
+                                    } else if (site.fetchedDigestHex != site.digestHex) {
+                                        stringResource(R.string.sites_update_waiting)
+                                    } else {
+                                        stringResource(R.string.sites_offline_ready)
+                                    },
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            Button(
+                                enabled = busy == null,
+                                onClick = {
+                                    busy = site.recordKey
+                                    scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                                        runCatching {
+                                            // Head first: an updated site is
+                                            // noticed at the door, fetched
+                                            // behind it, rendered fresh.
+                                            val latest = runCatching {
+                                                org.ducatproject.ducat.Sites.add(
+                                                    context, site.recordKey,
+                                                )
+                                            }.getOrDefault(site)
+                                            org.ducatproject.ducat.Sites.fetchBundle(
+                                                context, latest,
+                                            )
+                                            kotlinx.coroutines.withContext(
+                                                kotlinx.coroutines.Dispatchers.Main,
+                                            ) {
+                                                siteOpen(context, site.recordKey)
+                                            }
+                                        }.onFailure { word = it.message }
+                                        busy = null
+                                    }
+                                },
+                            ) { Text(stringResource(R.string.sites_open)) }
+                        }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(
+                                checked = site.keepAlive,
+                                onCheckedChange = {
+                                    org.ducatproject.ducat.Sites.setKeepAlive(
+                                        context, site.recordKey, it,
+                                    )
+                                },
+                            )
+                            Text(
+                                stringResource(R.string.sites_keep_alive),
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.weight(1f),
+                            )
+                            TextButton(onClick = {
+                                org.ducatproject.ducat.Sites.remove(context, site.recordKey)
+                            }) { Text(stringResource(R.string.sites_remove)) }
+                        }
+                    }
+                }
+            }
+            TextButton(onClick = { adding = true }) {
+                Text(stringResource(R.string.sites_add))
+            }
+        }
+
+        word?.let {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                it,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+    }
+
+    if (adding) {
+        AlertDialog(
+            onDismissRequest = { adding = false },
+            title = { Text(stringResource(R.string.sites_add)) },
+            text = {
+                OutlinedTextField(
+                    addText, { addText = it },
+                    label = { Text(stringResource(R.string.sites_uri_label)) },
+                    singleLine = true,
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = addText.isNotBlank(),
+                    onClick = {
+                        adding = false
+                        addByUri(addText)
+                        addText = ""
+                    },
+                ) { Text(stringResource(R.string.sites_add_confirm)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { adding = false }) {
+                    Text(stringResource(R.string.common_cancel))
+                }
+            },
+        )
+    }
 }
 
 /**

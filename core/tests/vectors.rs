@@ -442,7 +442,7 @@ fn every_case_declares_a_known_kind_and_a_unique_name() {
         "object.roundtrip", "escrow.ceremony", "escrow.ready", "escrow.release",
         "bond.check", "slash.check",
         "contact.card", "contact.details", "log.head", "log.ring", "stand.shard", "stand.epoch", "message.chain",
-        "message.payment", "hail.notice", "rental.listing", "pub.listing", "board.sealed",
+        "message.payment", "hail.notice", "rental.listing", "pub.listing", "site.head", "board.sealed",
         "board.beacon_window", "board.beacon_verdict", "position.frame",
     ];
     let dir = std::path::Path::new("../vectors/v1");
@@ -745,6 +745,23 @@ fn contact_vectors_pass() {
                             format!("{:?}", e.code).to_uppercase(),
                             c["expect"]["reject"].as_str().unwrap(), "{name}"
                         );
+                    }
+                }
+            }
+            "site.head" => {
+                let got = ducat_core::contact::SiteHead::from_value(
+                    decode(&unhex(c["site_head_hex"].as_str().unwrap())).unwrap());
+                let ok = c["expect"]["ok"].as_bool().unwrap_or(true);
+                match got {
+                    Ok(h) => {
+                        assert!(ok, "{name}: decoded a head the vector refuses");
+                        assert_eq!(
+                            hexs(&h.to_value().encode()),
+                            c["expect"]["reencodes_to_hex"].as_str().unwrap(), "{name}"
+                        );
+                    }
+                    Err(e) => {
+                        assert!(!ok, "{name}: refused a head the vector accepts: {e:?}");
                     }
                 }
             }

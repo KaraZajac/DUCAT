@@ -86,6 +86,12 @@
             </intent-filter>
         </activity>
 
+        <!-- §16.22's sealed room: the site viewer, network structurally
+             denied — every request served from the fetched bundle. -->
+        <activity
+            android:name=".SiteViewerActivity"
+            android:exported="false" />
+
         <!-- Sharing the backup out, one recipient at a time. -->
         <provider
             android:name="androidx.core.content.FileProvider"

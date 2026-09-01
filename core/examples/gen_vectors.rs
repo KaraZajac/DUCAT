@@ -1053,6 +1053,8 @@ fn normalize(category: &str, mut c: J) -> (&'static str, J) {
                 ("contact", "rental.listing")
             } else if obj.contains_key("pub_listing_hex") {
                 ("contact", "pub.listing")
+            } else if obj.contains_key("site_head_hex") {
+                ("contact", "site.head")
             } else if obj.contains_key("subkey_count") {
                 ("contact", "log.ring")
             } else if obj.contains_key("shard") {
@@ -2790,6 +2792,51 @@ fn contact_cases() -> Vec<J> {
             }
         }
 
+    }
+
+    // §16.22: the site head — the mutable pointer a ducat:site/ URI names.
+    // Subkey 0 of the site record; rewriting it at the same record key IS
+    // updating the site. The bundle rides a multi-file swarm share and
+    // renders in a sealed room.
+    {
+        use ducat_core::contact::SiteHead;
+        let mut scase = |name: &str, why: &str, h: &SiteHead, bad: Option<(RejectCode, &str)>| {
+            let hex_body = hex(&h.to_value().encode());
+            v.push(match bad {
+                None => json!({ "name": name, "why": why, "site_head_hex": hex_body,
+                                "expect": { "ok": true, "reencodes_to_hex": hex_body } }),
+                Some((code, hint)) => json!({ "name": name, "why": why, "site_head_hex": hex_body,
+                                "expect": { "ok": false, "reject": format!("{:?}", code).to_uppercase(), "hint": hint } }),
+            });
+        };
+        let head = SiteHead {
+            version: 1,
+            title: "The Corner Shop".into(),
+            share: "VLD0:yTkPyakRYOn1bsSXH-OGseka8Obb_NL8XF8ZXnlHAdU:ROXggMvnTffP_6W9vIdx-dp3njuLKCb_MhgfNInBRRQ".into(),
+            digest: [0xE1; 32],
+            updated: 1_800_000_000,
+        };
+        scase("site_head_valid",
+            "The whole pointer: title, the current bundle's share and digest, and when it moved. The record key underneath is the site's stable identity; this head is whatever it points at today.",
+            &head, None);
+        scase("site_head_missing_share",
+            "A head without its bundle points at nothing a reader can fetch.",
+            &SiteHead { share: String::new(), ..head.clone() },
+            Some((RejectCode::Malformed, "names its bundle's share")));
+        scase("site_head_bad_version",
+            "Versions gate readers the way they gate every head in this document.",
+            &SiteHead { version: 2, ..head.clone() },
+            Some((RejectCode::Malformed, "unknown site head version")));
+        {
+            // The closed set's edge, pinned on both sides (the blind-spot
+            // rule): 285, one past SITE_UPDATED.
+            let ducat_core::cbor::Value::Map(mut m) = head.to_value() else { unreachable!() };
+            m.insert(285, ducat_core::cbor::Value::Uint(1));
+            v.push(json!({ "name": "site_head_unknown_field",
+                "why": "285 — one past the newest (284, SITE_UPDATED), the closed set's edge, which must move with it.",
+                "site_head_hex": hex(&ducat_core::cbor::Value::Map(m).encode()),
+                "expect": { "ok": false, "reject": "UNKNOWNFIELD", "hint": "unrecognised field 285" } }));
+        }
     }
 
     // §16.18.2: the publication listing — the digital good on the same

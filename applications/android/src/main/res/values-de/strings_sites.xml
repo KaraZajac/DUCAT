@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_sites">Seiten</string>
+    <string name="sites_intro">Seiten, die wie Publikationen reisen: ganz geholt, offline lesbar, gespiegelt von Lesern, die es wählen. Nichts auf einer Seite kann dich sehen.</string>
+    <string name="sites_empty_title">Noch keine Seiten</string>
+    <string name="sites_empty_body">Eine Ducat-Seite ist ein versiegelter Raum — jedes Bild und jeder Stil reist im Bündel, Skripte bleiben aus, nur ducat:-Links funktionieren. Füge eine Adresse ein, um eine zu behalten.</string>
+    <string name="sites_add">Seite hinzufügen</string>
+    <string name="sites_add_confirm">Hinzufügen</string>
+    <string name="sites_uri_label">ducat:site/…-Adresse</string>
+    <string name="sites_bad_uri">Das ist keine ducat:site/-Adresse.</string>
+    <string name="sites_fetching">Wird geholt…</string>
+    <string name="sites_not_fetched">Noch nicht geholt</string>
+    <string name="sites_update_waiting">Update verfügbar — öffnet frisch</string>
+    <string name="sites_offline_ready">Offline bereit</string>
+    <string name="sites_open">Öffnen</string>
+    <string name="sites_keep_alive">Diese Seite für andere am Leben halten</string>
+    <string name="sites_remove">Entfernen</string>
+</resources>

@@ -184,6 +184,15 @@ pub mod f {
     // a probe is the bond_proof collision (0.60) all over again.
     pub const MSG_ATT_SWARM: u64 = 278;
     pub const MSG_ATT_SWARM_DIGEST: u64 = 279;
+
+    // §16.22 site head (post-1.0): the mutable pointer a ducat: site URI
+    // names. Lives in the site record's subkey 0; updating the site is
+    // rewriting this head at the same record key.
+    pub const SITE_VERSION: u64 = 280;
+    pub const SITE_TITLE: u64 = 281;
+    pub const SITE_SHARE: u64 = 282;
+    pub const SITE_DIGEST: u64 = 283;
+    pub const SITE_UPDATED: u64 = 284;
     // Read watermark and ring size on a log head (§16.16, §16.12).
     pub const HEAD_READ: u64 = 201;
     pub const HEAD_RING: u64 = 202;

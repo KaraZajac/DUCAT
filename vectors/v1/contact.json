@@ -2417,6 +2417,49 @@
     {
       "expect": {
         "ok": true,
+        "reencodes_to_hex": "a5190118011901196f54686520436f726e65722053686f7019011a785c564c44303a79546b5079616b52594f6e3162735358482d4f4773656b61384f62625f4e4c385846385a586e6c484164553a524f5867674d766e546666505f365739764964782d6470336e6a754c4b43625f4d6867664e496e4252525119011b5820e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e119011c1a6b49d200"
+      },
+      "kind": "site.head",
+      "name": "site_head_valid",
+      "site_head_hex": "a5190118011901196f54686520436f726e65722053686f7019011a785c564c44303a79546b5079616b52594f6e3162735358482d4f4773656b61384f62625f4e4c385846385a586e6c484164553a524f5867674d766e546666505f365739764964782d6470336e6a754c4b43625f4d6867664e496e4252525119011b5820e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e119011c1a6b49d200",
+      "why": "The whole pointer: title, the current bundle's share and digest, and when it moved. The record key underneath is the site's stable identity; this head is whatever it points at today."
+    },
+    {
+      "expect": {
+        "hint": "names its bundle's share",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "site.head",
+      "name": "site_head_missing_share",
+      "site_head_hex": "a5190118011901196f54686520436f726e65722053686f7019011a6019011b5820e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e119011c1a6b49d200",
+      "why": "A head without its bundle points at nothing a reader can fetch."
+    },
+    {
+      "expect": {
+        "hint": "unknown site head version",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "site.head",
+      "name": "site_head_bad_version",
+      "site_head_hex": "a5190118021901196f54686520436f726e65722053686f7019011a785c564c44303a79546b5079616b52594f6e3162735358482d4f4773656b61384f62625f4e4c385846385a586e6c484164553a524f5867674d766e546666505f365739764964782d6470336e6a754c4b43625f4d6867664e496e4252525119011b5820e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e119011c1a6b49d200",
+      "why": "Versions gate readers the way they gate every head in this document."
+    },
+    {
+      "expect": {
+        "hint": "unrecognised field 285",
+        "ok": false,
+        "reject": "UNKNOWNFIELD"
+      },
+      "kind": "site.head",
+      "name": "site_head_unknown_field",
+      "site_head_hex": "a6190118011901196f54686520436f726e65722053686f7019011a785c564c44303a79546b5079616b52594f6e3162735358482d4f4773656b61384f62625f4e4c385846385a586e6c484164553a524f5867674d766e546666505f365739764964782d6470336e6a754c4b43625f4d6867664e496e4252525119011b5820e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e119011c1a6b49d20019011d01",
+      "why": "285 — one past the newest (284, SITE_UPDATED), the closed set's edge, which must move with it."
+    },
+    {
+      "expect": {
+        "ok": true,
         "reencodes_to_hex": "a41901090119010a783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5919010b75546865205269766572736964652047617a6574746519010e1a6b49d200"
       },
       "kind": "pub.listing",

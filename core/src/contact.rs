@@ -2206,6 +2206,74 @@ impl PubNotice {
     }
 }
 
+const MAX_SITE_TITLE_CHARS: usize = 80;
+
+/// §16.22: a site's head — the mutable pointer its `ducat:site/` URI names.
+///
+/// Lives in the site record's subkey 0, rewritten in place by its owner:
+/// the record key is the site's stable identity, the head is whatever it
+/// currently points at. The bundle itself travels as a multi-file swarm
+/// share and renders in a sealed room — nothing on the page can reach the
+/// network, which is what makes the trust story one sentence long.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SiteHead {
+    pub version: u64,
+    pub title: String,
+    /// The current bundle's swarm share key.
+    pub share: String,
+    /// The current bundle's index digest.
+    pub digest: [u8; 32],
+    /// When the head was last rewritten, epoch seconds. Advisory — a
+    /// reader shows it, nothing enforces it.
+    pub updated: u64,
+}
+
+impl SiteHead {
+    pub fn to_value(&self) -> Value {
+        let mut m = BTreeMap::new();
+        m.insert(f::SITE_VERSION, Value::Uint(self.version));
+        m.insert(f::SITE_TITLE, Value::Text(self.title.clone()));
+        m.insert(f::SITE_SHARE, Value::Text(self.share.clone()));
+        m.insert(f::SITE_DIGEST, Value::Bytes(self.digest.to_vec()));
+        m.insert(f::SITE_UPDATED, Value::Uint(self.updated));
+        Value::Map(m)
+    }
+
+    pub fn from_value(v: Value) -> Result<Self, Reject> {
+        let mut r = Reader::new(v)?;
+        let version = r.uint(f::SITE_VERSION)?;
+        if version != 1 {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "unknown site head version",
+            ));
+        }
+        let title = r.opt_text(f::SITE_TITLE, MAX_SITE_TITLE_CHARS)?.ok_or_else(|| {
+            Reject::with_detail(RejectCode::Malformed, "a site head needs a title")
+        })?;
+        let share = r.opt_text(f::SITE_SHARE, MAX_SHARE_KEY_CHARS)?.ok_or_else(|| {
+            Reject::with_detail(RejectCode::Malformed, "a site head names its bundle's share")
+        })?;
+        let digest = r
+            .opt_bytes(f::SITE_DIGEST, Some(32))?
+            .ok_or_else(|| {
+                Reject::with_detail(
+                    RejectCode::Malformed,
+                    "a site head carries its bundle's digest",
+                )
+            })?;
+        let updated = r.uint(f::SITE_UPDATED)?;
+        r.finish()?;
+        Ok(Self {
+            version,
+            title,
+            share,
+            digest: digest.try_into().unwrap(),
+            updated,
+        })
+    }
+}
+
 impl RentalNotice {
     pub fn to_value(&self) -> Value {
         let mut m = BTreeMap::new();

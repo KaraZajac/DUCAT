@@ -1496,6 +1496,55 @@ pub struct PubListingInfo {
     pub beacon_hash: String,
 }
 
+/// §16.22: a site head across the bridge.
+#[derive(uniffi::Record, Clone)]
+pub struct SiteHeadIo {
+    pub title: String,
+    pub share: String,
+    pub digest_hex: String,
+    pub updated: u64,
+}
+
+/// Encode a site head for the record's subkey 0.
+#[uniffi::export]
+pub fn site_head_encode(head: SiteHeadIo) -> Result<Vec<u8>, ContactError> {
+    let digest: [u8; 32] = crate::hex_to_bytes(&head.digest_hex)
+        .and_then(|v| v.try_into().ok())
+        .ok_or_else(|| ContactError::Refused("digest is 64 hex chars".into()))?;
+    let h = ducat_core::contact::SiteHead {
+        version: 1,
+        title: head.title,
+        share: head.share,
+        digest,
+        updated: head.updated,
+    };
+    // Encode-then-decode self-check, like every writer here: what we
+    // publish must be what a strict reader accepts.
+    let bytes = h.to_value().encode();
+    ducat_core::contact::SiteHead::from_value(
+        ducat_core::cbor::decode(&bytes)
+            .map_err(|e| ContactError::Refused(format!("self-check: {e:?}")))?,
+    )
+    .map_err(|e| ContactError::Refused(format!("self-check: {e:?}")))?;
+    Ok(bytes)
+}
+
+/// Decode a site head read from a record. Strict: whatever a stranger
+/// wrote is checked at the door.
+#[uniffi::export]
+pub fn site_head_decode(bytes: Vec<u8>) -> Result<SiteHeadIo, ContactError> {
+    let v = ducat_core::cbor::decode(&bytes)
+        .map_err(|e| ContactError::Refused(format!("{e:?}")))?;
+    let h = ducat_core::contact::SiteHead::from_value(v)
+        .map_err(|e| ContactError::Refused(format!("{e:?}")))?;
+    Ok(SiteHeadIo {
+        title: h.title,
+        share: h.share,
+        digest_hex: h.digest.iter().map(|b| format!("{b:02x}")).collect(),
+        updated: h.updated,
+    })
+}
+
 /// Seal a publication listing for one slot — same stamp, same price, same
 /// rules as a rental's, in this family's own field namespace. The board
 /// name carries the category (topic:) or the cell (local:), and it is

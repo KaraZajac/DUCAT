@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_sites">المواقع</string>
+    <string name="sites_intro">صفحات تسافر كالمطبوعات: تُجلب كاملة وتُقرأ دون اتصال ويعكسها القراء باختيارهم. لا شيء في الصفحة يراك.</string>
+    <string name="sites_empty_title">لا مواقع بعد</string>
+    <string name="sites_empty_body">موقع ducat غرفة مختومة — كل صورة ونمط يسافران في الحزمة، لا نصوص برمجية، وروابط ducat: وحدها تعمل. ألصق عنوانًا لحفظ موقع.</string>
+    <string name="sites_add">إضافة موقع</string>
+    <string name="sites_add_confirm">إضافة</string>
+    <string name="sites_uri_label">عنوان ducat:site/…</string>
+    <string name="sites_bad_uri">هذا ليس عنوان ducat:site/.</string>
+    <string name="sites_fetching">جارٍ الجلب…</string>
+    <string name="sites_not_fetched">لم يُجلب بعد</string>
+    <string name="sites_update_waiting">يوجد تحديث — سيفتح محدثًا</string>
+    <string name="sites_offline_ready">جاهز دون اتصال</string>
+    <string name="sites_open">فتح</string>
+    <string name="sites_keep_alive">أبقِ هذا الموقع حيًا للآخرين</string>
+    <string name="sites_remove">إزالة</string>
+</resources>

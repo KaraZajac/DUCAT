@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_sites">Strony</string>
+    <string name="sites_intro">Strony podróżują jak publikacje: pobierane w całości, czytelne offline, powielane przez czytelników, którzy tak wybiorą. Nic na stronie cię nie widzi.</string>
+    <string name="sites_empty_title">Nie ma jeszcze stron</string>
+    <string name="sites_empty_body">Strona ducat to zapieczętowany pokój — każdy obraz i styl jedzie w pakiecie, bez skryptów, działają tylko linki ducat:. Wklej adres, by jakąś zachować.</string>
+    <string name="sites_add">Dodaj stronę</string>
+    <string name="sites_add_confirm">Dodaj</string>
+    <string name="sites_uri_label">adres ducat:site/…</string>
+    <string name="sites_bad_uri">To nie jest adres ducat:site/.</string>
+    <string name="sites_fetching">Pobieranie…</string>
+    <string name="sites_not_fetched">Jeszcze nie pobrano</string>
+    <string name="sites_update_waiting">Jest aktualizacja — otworzy się świeża</string>
+    <string name="sites_offline_ready">Gotowa offline</string>
+    <string name="sites_open">Otwórz</string>
+    <string name="sites_keep_alive">Utrzymuj tę stronę przy życiu dla innych</string>
+    <string name="sites_remove">Usuń</string>
+</resources>

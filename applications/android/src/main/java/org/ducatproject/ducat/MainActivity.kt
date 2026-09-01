@@ -91,6 +91,9 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
 
         /** "List yours" from an empty market shelf: open the press room. */
         val openPublishing = kotlinx.coroutines.flow.MutableStateFlow(false)
+
+        /** A ducat:site/ link asking for the Sites shelf. */
+        val openSites = kotlinx.coroutines.flow.MutableStateFlow(false)
     }
 
     private fun readIntent(i: android.content.Intent?) {
@@ -99,7 +102,17 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
         // used to stop right here, read by nobody — a tapped card opened the
         // app to Home, silently. It now reaches the same claim the scanner
         // runs, behind one confirm.
-        if (i?.data?.scheme == "ducat") claimLink.value = i.dataString
+        if (i?.data?.scheme == "ducat") {
+            val uri = i.dataString
+            // §16.22 addresses route to the Sites shelf; everything else is
+            // a card and takes the claim road it always has.
+            if (uri != null && uri.startsWith("ducat:site/")) {
+                org.ducatproject.ducat.ui.pendingSiteAdd.value = uri
+                openSites.value = true
+            } else {
+                claimLink.value = uri
+            }
+        }
     }
 
     // The chosen language is applied here, before any resource is read, so a
@@ -130,6 +143,14 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
         Calls.audio = org.ducatproject.ducat.platform.CallAudioAndroid
         // A worldwide-market Subscribe is an ordinary card claim: hand the
         // row's ducat: URI to the same sheet a scanned code opens.
+        // §16.22: the sealed-room viewer is an Activity; the shared screen
+        // only holds the hook.
+        org.ducatproject.ducat.ui.siteOpen = { ctx, recordKey ->
+            ctx.startActivity(
+                android.content.Intent(ctx, SiteViewerActivity::class.java)
+                    .putExtra("record", recordKey),
+            )
+        }
         // The answering machine's road home: the leave-a-message button
         // opens the thread whose mic is the recorder.
         org.ducatproject.ducat.ui.callOpenThread = { hex -> openChat.value = hex }
@@ -361,6 +382,13 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         if (wantPublishing) {
             overlay = Overlay.Drawer(Section.Publishing)
             MainActivity.openPublishing.value = false
+        }
+    }
+    val wantSites by MainActivity.openSites.collectAsState()
+    LaunchedEffect(wantSites) {
+        if (wantSites) {
+            overlay = Overlay.Drawer(Section.Sites)
+            MainActivity.openSites.value = false
         }
     }
     val tappedCard by MainActivity.claimLink.collectAsState()
