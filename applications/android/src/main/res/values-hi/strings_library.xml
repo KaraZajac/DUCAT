@@ -26,4 +26,5 @@
         <item quantity="other">%1$d नए अंक इंतज़ार में</item>
     </plurals>
     <string name="library_open">खोलें</string>
+    <string name="library_queued">कतार में</string>
 </resources>

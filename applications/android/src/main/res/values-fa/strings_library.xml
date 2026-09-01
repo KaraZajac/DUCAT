@@ -26,4 +26,5 @@
         <item quantity="other">%1$d شمارهٔ تازه در انتظار</item>
     </plurals>
     <string name="library_open">باز کردن</string>
+    <string name="library_queued">در صف</string>
 </resources>

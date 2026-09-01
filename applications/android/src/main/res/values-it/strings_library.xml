@@ -26,4 +26,5 @@
         <item quantity="other">%1$d nuovi numeri in attesa</item>
     </plurals>
     <string name="library_open">Apri</string>
+    <string name="library_queued">In coda</string>
 </resources>

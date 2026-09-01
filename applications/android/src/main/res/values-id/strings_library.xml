@@ -25,4 +25,5 @@
         <item quantity="other">%1$d edisi baru menunggu</item>
     </plurals>
     <string name="library_open">Buka</string>
+    <string name="library_queued">Dalam antrean</string>
 </resources>

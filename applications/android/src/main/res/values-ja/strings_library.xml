@@ -25,4 +25,5 @@
         <item quantity="other">新しい号が%1$d件待っています</item>
     </plurals>
     <string name="library_open">開く</string>
+    <string name="library_queued">待機中</string>
 </resources>

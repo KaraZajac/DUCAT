@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -55,12 +56,12 @@ import org.ducatproject.ducat.Swarm
  */
 
 /**
- * The one fetch, owned by the process rather than the screen.
+ * The fetches, owned by the process rather than the screen.
  *
  * A month of a publication is minutes of download, and a Composable's scope
  * dies on the first navigation away — so the screen only *watches* this.
- * One at a time is the client contract ([Swarm.fetchProgress] is a single
- * slot); the button simply doesn't offer while one runs.
+ * Two at a time now that swarm progress is keyed per share: a queue feeds
+ * a small pool, and everything past the pool waits its turn visibly.
  */
 object LibraryFetch {
     data class Job(val publisherHex: String, val period: String)
@@ -72,15 +73,39 @@ object LibraryFetch {
         data object Shelf : Source
     }
 
-    var current by mutableStateOf<Job?>(null)
-        private set
+    private const val WIDTH = 2
+
+    /** What each running job's transport is, for progress lookups. */
+    private val activeSources = mutableStateMapOf<Job, Source>()
+
+    /** Shelf-path tickers, per job (the swarm path is keyed in Rust). */
+    private val shelfTickers = mutableStateMapOf<Job, Swarm.Progress>()
+
+    private val queue = ArrayDeque<Triple<Job, Source, Boolean>>()
+    private var runningWorkers = 0
+
     var lastError by mutableStateOf<Pair<Job, String>?>(null)
         private set
 
-    /** The shelf path's own ticker; the swarm path reports through
-     *  [Swarm.fetchProgress] as before. */
-    var shelfProgress by mutableStateOf<Swarm.Progress?>(null)
-        private set
+    /** Is this issue being fetched right now? */
+    fun activeOn(job: Job): Boolean = activeSources.containsKey(job)
+
+    /** Is it waiting behind the pool? */
+    fun queuedOn(job: Job): Boolean =
+        synchronized(this) { queue.any { it.first == job } }
+
+    /** Anything at all in flight (the screen's coarse ticker gate). */
+    val busy: Boolean
+        get() = activeSources.isNotEmpty()
+
+    /** This job's progress, whichever road it is on. */
+    fun progressOf(job: Job): Swarm.Progress? {
+        val src = activeSources[job] ?: return null
+        return when (src) {
+            is Source.Swarm -> Swarm.fetchProgress(src.shareKey)
+            Source.Shelf -> shelfTickers[job]
+        }
+    }
 
     fun dirFor(context: Context, publisherHex: String, period: String): File =
         File(context.filesDir, "publications/$publisherHex/$period")
@@ -95,48 +120,101 @@ object LibraryFetch {
     }
 
     fun start(context: Context, job: Job, source: Source) {
-        synchronized(this) {
-            if (current != null) return
-            current = job
-        }
-        lastError = null
-        shelfProgress = null
+        enqueue(context, job, source, reseed = false)
+    }
+
+    /** Re-serve an already-complete issue: verifies in place, downloads
+     *  nothing, stays seeding — the reader as mirror (§16.20's club). */
+    fun reseed(context: Context, job: Job, source: Source.Swarm) {
+        enqueue(context, job, source, reseed = true)
+    }
+
+    private fun enqueue(context: Context, job: Job, source: Source, reseed: Boolean) {
         val app = context.applicationContext
-        Thread {
-            val done = dirFor(app, job.publisherHex, job.period)
-            // Fetch lands in a .part sibling and moves into place whole, so
-            // "the directory exists" always means "every piece verified".
-            // The .part survives a failure on purpose: the swarm engine
-            // checks pieces on disk, so a retry resumes instead of starting
-            // over; the shelf just rewrites, its issues being small.
-            val part = File(done.parentFile, done.name + ".part")
-            try {
-                part.mkdirs()
-                when (source) {
-                    is Source.Swarm ->
-                        Swarm.fetch(source.shareKey, source.digestHex, part.absolutePath)
-                    Source.Shelf ->
-                        Publications.fetchShelf(
-                            app, job.publisherHex, job.period, part,
-                        ) { pos, len ->
-                            shelfProgress = Swarm.Progress(pos, len, pos >= len && len > 0)
-                        }
-                }
-                done.deleteRecursively()
-                check(part.renameTo(done)) { "could not move the download into place" }
-            } catch (e: Throwable) {
-                DucatLog.w(
-                    "Library",
-                    "fetch of '${job.period}' from ${job.publisherHex.take(8)}… " +
-                        "failed: ${e.message}",
-                )
-                lastError = job to (e.message ?: e.javaClass.simpleName)
-            } finally {
-                current = null
-                shelfProgress = null
-                ContactStore.bump()
+        synchronized(this) {
+            if (activeSources.containsKey(job) || queue.any { it.first == job }) return
+            queue.addLast(Triple(job, source, reseed))
+            if (runningWorkers < WIDTH) {
+                runningWorkers++
+                Thread { worker(app) }
+                    .apply { isDaemon = true; name = "library-fetch-$runningWorkers" }
+                    .start()
             }
-        }.apply { isDaemon = true; name = "library-fetch" }.start()
+        }
+    }
+
+    private fun worker(app: Context) {
+        while (true) {
+            val (job, source, reseed) = synchronized(this) {
+                queue.removeFirstOrNull() ?: run {
+                    runningWorkers--
+                    return
+                }
+            }
+            activeSources[job] = source
+            if (!reseed) lastError = null
+            runOne(app, job, source, reseed)
+            activeSources.remove(job)
+            shelfTickers.remove(job)
+            ContactStore.bump()
+        }
+    }
+
+    private fun runOne(app: Context, job: Job, source: Source, reseed: Boolean) {
+        val done = dirFor(app, job.publisherHex, job.period)
+        if (reseed) {
+            // In place and already whole: verify and stay serving.
+            val share = source as Source.Swarm
+            runCatching {
+                Swarm.fetch(
+                    share.shareKey, share.digestHex, done.absolutePath,
+                    staySeeding = true,
+                )
+            }.onFailure {
+                DucatLog.w("Library", "reseed of '${job.period}': ${it.message}")
+            }
+            return
+        }
+        // Fetch lands in a .part sibling and moves into place whole, so
+        // "the directory exists" always means "every piece verified".
+        // The .part survives a failure on purpose: the swarm engine
+        // checks pieces on disk, so a retry resumes instead of starting
+        // over; the shelf just rewrites, its issues being small.
+        val part = File(done.parentFile, done.name + ".part")
+        try {
+            part.mkdirs()
+            when (source) {
+                is Source.Swarm ->
+                    Swarm.fetch(source.shareKey, source.digestHex, part.absolutePath)
+                Source.Shelf ->
+                    Publications.fetchShelf(
+                        app, job.publisherHex, job.period, part,
+                    ) { pos, len ->
+                        shelfTickers[job] = Swarm.Progress(pos, len, pos >= len && len > 0)
+                    }
+            }
+            done.deleteRecursively()
+            check(part.renameTo(done)) { "could not move the download into place" }
+            // The reader joins the club: what just arrived whole is served
+            // onward from its final path. Verification-only, then parked.
+            if (source is Source.Swarm) {
+                runCatching {
+                    Swarm.fetch(
+                        source.shareKey, source.digestHex, done.absolutePath,
+                        staySeeding = true,
+                    )
+                }.onFailure {
+                    DucatLog.w("Library", "post-fetch seed: ${it.message}")
+                }
+            }
+        } catch (e: Throwable) {
+            DucatLog.w(
+                "Library",
+                "fetch of '${job.period}' from ${job.publisherHex.take(8)}… " +
+                    "failed: ${e.message}",
+            )
+            lastError = job to (e.message ?: e.javaClass.simpleName)
+        }
     }
 }
 
@@ -152,9 +230,9 @@ private data class IssueRow(
 fun LibrarySection() {
     val context = LocalContext.current
     val v by ContactStore.changes.collectAsState()
-    val fetching = LibraryFetch.current
+    val busy = LibraryFetch.busy
 
-    val rows = remember(v, fetching) {
+    val rows = remember(v, busy) {
         val names = ContactStore(context).all().associate {
             it.personaHex to it.displayName()
         }
@@ -184,13 +262,13 @@ fun LibrarySection() {
         )
     }
 
-    // The running fetch's progress: the shelf path reports its own; the
-    // swarm path through the same poll the desk proof used.
-    var progress by remember { mutableStateOf<Swarm.Progress?>(null) }
-    LaunchedEffect(fetching) {
-        progress = null
-        while (fetching != null) {
-            progress = LibraryFetch.shelfProgress ?: Swarm.fetchProgress()
+    // A half-second heartbeat while anything is in flight: each row asks
+    // LibraryFetch.progressOf for its own job, so two concurrent fetches
+    // each show their own bar.
+    var tick by remember { mutableStateOf(0L) }
+    LaunchedEffect(busy) {
+        while (busy) {
+            tick = System.currentTimeMillis()
             delay(500)
         }
     }
@@ -233,7 +311,7 @@ fun LibrarySection() {
                         // nothing re-fetched.
                         if (!Publications.isMuted(context, pub)) {
                             issues.forEach { row ->
-                                IssueLine(row, fetching, progress)
+                                IssueLine(row, tick)
                             }
                         }
                     }
@@ -337,12 +415,16 @@ private fun PublisherHeader(publisherHex: String, publisherName: String?) {
 @Composable
 private fun IssueLine(
     row: IssueRow,
-    fetching: LibraryFetch.Job?,
-    progress: Swarm.Progress?,
+    tick: Long,
 ) {
     val context = LocalContext.current
-    val mine = fetching?.publisherHex == row.publisherHex &&
-        fetching?.period == row.period
+    val job = LibraryFetch.Job(row.publisherHex, row.period)
+    val mine = LibraryFetch.activeOn(job)
+    val queued = !mine && LibraryFetch.queuedOn(job)
+    // Re-read on each heartbeat while active; each row shows its own bar.
+    val progress = remember(tick, mine) {
+        if (mine) LibraryFetch.progressOf(job) else null
+    }
     val error = LibraryFetch.lastError?.takeIf {
         it.first.publisherHex == row.publisherHex && it.first.period == row.period
     }
@@ -405,17 +487,22 @@ private fun IssueLine(
                 )
             }
         }
-        if (row.bytes == null && row.source != null && fetching == null) {
+        if (row.bytes == null && row.source != null && !mine && !queued) {
+            // The queue takes it whenever: two run at once, the rest wait
+            // their turn visibly instead of the button going dead.
             Spacer(Modifier.width(12.dp))
             FilledTonalButton(onClick = {
-                LibraryFetch.start(
-                    context,
-                    LibraryFetch.Job(row.publisherHex, row.period),
-                    row.source,
-                )
+                LibraryFetch.start(context, job, row.source)
             }) {
                 Text(stringResource(R.string.library_download))
             }
+        } else if (queued) {
+            Spacer(Modifier.width(12.dp))
+            Text(
+                stringResource(R.string.library_queued),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         } else if (row.bytes != null && !mine) {
             // On this device and readable: the whole point of the fetch.
             // There was no way to open a downloaded issue — the shelf said

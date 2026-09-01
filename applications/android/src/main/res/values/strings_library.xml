@@ -29,4 +29,5 @@
         <item quantity="other">%1$d new issues waiting</item>
     </plurals>
     <string name="library_open">Open</string>
+    <string name="library_queued">Queued</string>
 </resources>

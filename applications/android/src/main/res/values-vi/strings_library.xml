@@ -25,4 +25,5 @@
         <item quantity="other">%1$d số mới đang chờ</item>
     </plurals>
     <string name="library_open">Mở</string>
+    <string name="library_queued">Trong hàng đợi</string>
 </resources>

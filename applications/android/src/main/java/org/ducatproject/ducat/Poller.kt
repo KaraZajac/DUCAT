@@ -254,6 +254,12 @@ class Poller(private val context: Context) {
                 // the shelf category last read, warmed before anyone opens
                 // a browse screen. See warmBoards for its gates.
                 runCatching { warmBoards(context, scope) }
+                // The club keeps its books on the shelf: once per process,
+                // when the node is up, every swarm-shipped issue already on
+                // this device goes back to serving under its original share
+                // key — a verify-only fetch that downloads nothing and
+                // stays. Readers are mirrors (§16.20).
+                runCatching { reseedLibrary(context) }
                 // The mempool, only while a bill is out and unsighted — the
                 // scan costs a round trip per pool transaction, and a till
                 // with nothing billed has nothing to look for.
@@ -419,6 +425,36 @@ class Poller(private val context: Context) {
     @Volatile private var lastShelfWarm = 0L
     private val warmEveryMs = 7 * 60_000L
     private val shelfWarmEveryMs = 15 * 60_000L
+
+    @Volatile private var reseeded = false
+
+    private fun reseedLibrary(context: Context) {
+        if (reseeded) return
+        if (!runCatching { uniffi.ducat_mobile.nodeStatus().publicInternetReady }
+                .getOrDefault(false)
+        ) {
+            return
+        }
+        reseeded = true
+        for (pub in Publications.subscribedPublishers(context)) {
+            if (Publications.isMuted(context, pub)) continue
+            val sub = Publications.subscription(context, pub) ?: continue
+            for (period in sub.third.keys) {
+                val ship = Publications.shipment(context, pub, period) ?: continue
+                val job = org.ducatproject.ducat.ui.LibraryFetch.Job(pub, period)
+                val done = org.ducatproject.ducat.ui.LibraryFetch
+                    .fetchedBytes(context, pub, period)
+                if (done != null) {
+                    org.ducatproject.ducat.ui.LibraryFetch.reseed(
+                        context, job,
+                        org.ducatproject.ducat.ui.LibraryFetch.Source.Swarm(
+                            ship.first, ship.second,
+                        ),
+                    )
+                }
+            }
+        }
+    }
 
     private fun warmBoards(context: Context, scope: CoroutineScope) {
         if (!AppVisibility.foreground) return

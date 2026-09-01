@@ -30,4 +30,5 @@
         <item quantity="other">%1$d عدد جديد بانتظارك</item>
     </plurals>
     <string name="library_open">فتح</string>
+    <string name="library_queued">في قائمة الانتظار</string>
 </resources>

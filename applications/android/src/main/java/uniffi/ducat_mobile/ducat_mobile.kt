@@ -1230,9 +1230,9 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_stand_watch(`cell`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Byte
-    fun uniffi_ducat_mobile_fn_func_swarm_fetch(`shareKey`: RustBuffer.ByValue,`indexDigestHex`: RustBuffer.ByValue,`root`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_swarm_fetch(`shareKey`: RustBuffer.ByValue,`indexDigestHex`: RustBuffer.ByValue,`root`: RustBuffer.ByValue,`staySeeding`: Byte,uniffi_out_err: UniffiRustCallStatus, 
     ): Long
-    fun uniffi_ducat_mobile_fn_func_swarm_fetch_progress(uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_swarm_fetch_progress(`shareKey`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_swarm_seed(`path`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -2001,10 +2001,10 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_stand_watch() != 52290.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_swarm_fetch() != 24856.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_swarm_fetch() != 31661.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_swarm_fetch_progress() != 6128.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_swarm_fetch_progress() != 59191.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_swarm_seed() != 29515.toShort()) {
@@ -8765,11 +8765,11 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
          * key says. Blocking by design: the Kotlin side calls it on IO, the way
          * attachment chunk fetches already block there.
          */
-    @Throws(SwarmException::class) fun `swarmFetch`(`shareKey`: kotlin.String, `indexDigestHex`: kotlin.String, `root`: kotlin.String): kotlin.ULong {
+    @Throws(SwarmException::class) fun `swarmFetch`(`shareKey`: kotlin.String, `indexDigestHex`: kotlin.String, `root`: kotlin.String, `staySeeding`: kotlin.Boolean): kotlin.ULong {
             return FfiConverterULong.lift(
     uniffiRustCallWithError(SwarmException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_swarm_fetch(
-        FfiConverterString.lower(`shareKey`),FfiConverterString.lower(`indexDigestHex`),FfiConverterString.lower(`root`),_status)
+        FfiConverterString.lower(`shareKey`),FfiConverterString.lower(`indexDigestHex`),FfiConverterString.lower(`root`),FfiConverterBoolean.lower(`staySeeding`),_status)
 }
     )
     }
@@ -8778,11 +8778,11 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
         /**
          * The current fetch's progress. One fetch at a time is the client
          * contract for now; a screen polls this the way wallet sync is polled.
-         */ fun `swarmFetchProgress`(): SwarmProgress {
+         */ fun `swarmFetchProgress`(`shareKey`: kotlin.String): SwarmProgress {
             return FfiConverterTypeSwarmProgress.lift(
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_swarm_fetch_progress(
-        _status)
+        FfiConverterString.lower(`shareKey`),_status)
 }
     )
     }

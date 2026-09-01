@@ -50,7 +50,7 @@ fun main() {
             // a ticker thread reads the same progress the phone will render.
             val ticker = Thread {
                 while (!Thread.currentThread().isInterrupted) {
-                    val p = Swarm.fetchProgress()
+                    val p = Swarm.fetchProgress(key)
                     if (p.length > 0) System.err.println("progress ${p.position}/${p.length}")
                     if (p.done) break
                     try { Thread.sleep(2_000) } catch (_: InterruptedException) { break }

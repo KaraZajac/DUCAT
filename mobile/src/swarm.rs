@@ -84,17 +84,27 @@ pub struct SwarmProgress {
     pub done: bool,
 }
 
-static PROGRESS: Mutex<SwarmProgress> = Mutex::new(SwarmProgress {
-    position: 0,
-    length: 0,
-    done: false,
-});
+static PROGRESS: OnceLock<Mutex<std::collections::HashMap<String, SwarmProgress>>> =
+    OnceLock::new();
+
+fn progress_map() -> &'static Mutex<std::collections::HashMap<String, SwarmProgress>> {
+    PROGRESS.get_or_init(|| Mutex::new(std::collections::HashMap::new()))
+}
 
 /// The current fetch's progress. One fetch at a time is the client
 /// contract for now; a screen polls this the way wallet sync is polled.
 #[uniffi::export]
-pub fn swarm_fetch_progress() -> SwarmProgress {
-    PROGRESS.lock().unwrap().clone()
+pub fn swarm_fetch_progress(share_key: String) -> SwarmProgress {
+    progress_map()
+        .lock()
+        .unwrap()
+        .get(&share_key)
+        .cloned()
+        .unwrap_or(SwarmProgress {
+            position: 0,
+            length: 0,
+            done: false,
+        })
 }
 
 /// Seed a file into the swarm. Returns once the share is announced and
@@ -179,6 +189,13 @@ pub fn swarm_fetch(
     share_key: String,
     index_digest_hex: String,
     root: String,
+    // stay_seeding: keep serving after the last piece verifies. The
+    // fetching share already answers block requests (all peers are
+    // seeders); with this set it is parked in the seed registry under its
+    // share key instead of torn down - the reader becomes a mirror. Also
+    // how a restart re-seeds finished content: a fetch over complete
+    // files verifies, downloads nothing, and stays.
+    stay_seeding: bool,
 ) -> Result<u64, SwarmError> {
     let conn = ensure_conn()?;
     let (_, rt) = crate::node::swarm_handles()
@@ -208,7 +225,16 @@ pub fn swarm_fetch(
         let mut waited = 0u64;
         let mut stalls = 0u32;
         loop {
-            match fetch_once(conn.clone(), root.clone(), want, key.clone()).await {
+            match fetch_once(
+                conn.clone(),
+                root.clone(),
+                want,
+                key.clone(),
+                share_key.clone(),
+                stay_seeding,
+            )
+            .await
+            {
                 Err(SwarmError::Failed(e)) if e.contains("TryAgain") && waited < 40 => {
                     tokio::time::sleep(std::time::Duration::from_secs(5)).await;
                     waited += 5;
@@ -227,6 +253,8 @@ async fn fetch_once(
     root: String,
     want: [u8; 32],
     key: veilid_core::RecordKey,
+    progress_key: String,
+    stay_seeding: bool,
 ) -> Result<u64, SwarmError> {
     let mut share = Share::new(
         conn,
@@ -249,7 +277,14 @@ async fn fetch_once(
         return Err(fail(e));
     }
 
-    *PROGRESS.lock().unwrap() = SwarmProgress::default();
+    progress_map().lock().unwrap().insert(
+        progress_key.clone(),
+        SwarmProgress {
+            position: 0,
+            length: 0,
+            done: false,
+        },
+    );
     let mut total: u64 = 0;
     loop {
         // The watchdog: verification of what is already on disk emits
@@ -274,8 +309,9 @@ async fn fetch_once(
         };
         match ev {
             Event::FetcherStatus(stigmerge_peer::fetcher::Status::Done) => {
-                let mut p = PROGRESS.lock().unwrap();
-                p.done = true;
+                if let Some(p) = progress_map().lock().unwrap().get_mut(&progress_key) {
+                    p.done = true;
+                }
                 break;
             }
             Event::FetcherStatus(stigmerge_peer::fetcher::Status::FetchProgress {
@@ -284,16 +320,29 @@ async fn fetch_once(
                 ..
             }) => {
                 total = fetch_length;
-                let mut p = PROGRESS.lock().unwrap();
-                p.position = fetch_position;
-                p.length = fetch_length;
+                if let Some(p) = progress_map().lock().unwrap().get_mut(&progress_key) {
+                    p.position = fetch_position;
+                    p.length = fetch_length;
+                }
             }
             _ => {}
         }
     }
-    // Done: stop our tasks (we are not staying to seed in this call — the
-    // caller decides that with a seed of its own) and let them wind down
-    // without holding the fetch hostage to their shutdown order.
+    if stay_seeding {
+        // The share already served every verified piece on the way down;
+        // staying is just not leaving. Registered like any seed, so it is
+        // individually stoppable and dies with the process otherwise.
+        seeding_slot()
+            .lock()
+            .unwrap()
+            .insert(progress_key, cancel);
+        tokio::spawn(async move {
+            let _ = share.join().await;
+        });
+        return Ok(total);
+    }
+    // Done: stop our tasks and let them wind down without holding the
+    // fetch hostage to their shutdown order.
     cancel.cancel();
     tokio::spawn(async move {
         let _ = share.join().await;

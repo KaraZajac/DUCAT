@@ -25,4 +25,5 @@
         <item quantity="other">%1$d 期新刊等待中</item>
     </plurals>
     <string name="library_open">打开</string>
+    <string name="library_queued">排队中</string>
 </resources>

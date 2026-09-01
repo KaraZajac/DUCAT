@@ -34,12 +34,21 @@ object Swarm {
     fun stopShare(shareKey: String) = uniffi.ducat_mobile.swarmStopShare(shareKey)
 
     /** Fetch into [rootDir], blocking until every piece verified against
-     *  the promised digest. Returns the byte count. */
-    fun fetch(shareKey: String, indexDigestHex: String, rootDir: String): Long =
-        uniffi.ducat_mobile.swarmFetch(shareKey, indexDigestHex, rootDir).toLong()
+     *  the promised digest. Returns the byte count. With [staySeeding] the
+     *  share keeps serving afterwards — the reader becomes a mirror — and
+     *  a fetch over already-complete files verifies, downloads nothing,
+     *  and stays: that is how a restart re-seeds. */
+    fun fetch(
+        shareKey: String,
+        indexDigestHex: String,
+        rootDir: String,
+        staySeeding: Boolean = false,
+    ): Long =
+        uniffi.ducat_mobile.swarmFetch(shareKey, indexDigestHex, rootDir, staySeeding).toLong()
 
-    fun fetchProgress(): Progress {
-        val p = uniffi.ducat_mobile.swarmFetchProgress()
+    /** This share's fetch progress. Keyed: fetches run concurrently now. */
+    fun fetchProgress(shareKey: String): Progress {
+        val p = uniffi.ducat_mobile.swarmFetchProgress(shareKey)
         return Progress(p.position, p.length.toLong(), p.done)
     }
 }

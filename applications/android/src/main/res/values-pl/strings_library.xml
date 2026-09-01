@@ -28,4 +28,5 @@
         <item quantity="other">%1$d nowego wydania czeka</item>
     </plurals>
     <string name="library_open">Otwórz</string>
+    <string name="library_queued">W kolejce</string>
 </resources>

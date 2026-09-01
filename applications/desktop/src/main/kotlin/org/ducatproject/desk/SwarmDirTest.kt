@@ -52,13 +52,22 @@ fun main() {
             val share = System.getenv("DUCAT_SW_SHARE") ?: error("set DUCAT_SW_SHARE")
             val digest = System.getenv("DUCAT_SW_DIGEST") ?: error("set DUCAT_SW_DIGEST")
             val root = File(state, "fetched").apply { mkdirs() }
+            val stay = System.getenv("DUCAT_SW_STAY") == "1"
             val started = System.currentTimeMillis()
-            val bytes = org.ducatproject.ducat.Swarm.fetch(share, digest, root.absolutePath)
+            val bytes = org.ducatproject.ducat.Swarm.fetch(
+                share, digest, root.absolutePath, staySeeding = stay,
+            )
             val ms = System.currentTimeMillis() - started
             root.walkTopDown().filter { it.isFile }.sortedBy { it.path }.forEach {
                 println("SWARMDIR_GOT ${it.relativeTo(root)} ${sha(it)}")
             }
-            println("SWARMDIR_OK bytes=$bytes ms=$ms")
+            println("SWARMDIR_OK bytes=$bytes ms=$ms stay=$stay")
+            System.out.flush()
+            if (stay) {
+                // The mirror stands: stay up so a third node can fetch from
+                // us after the original seeder is gone.
+                Thread.sleep(15 * 60_000)
+            }
         }
         else -> error("unknown role $role")
     }

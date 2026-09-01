@@ -25,4 +25,5 @@
         <item quantity="other">새 호 %1$d개 대기 중</item>
     </plurals>
     <string name="library_open">열기</string>
+    <string name="library_queued">대기 중</string>
 </resources>
