@@ -1,5 +1,5 @@
 # DUCAT — A Peer-to-Peer Proximity Commerce Protocol
-**Draft 1.1.0-dev5 — Publications track (branch; 1.0.0-rc1 is the frozen line)**
+**Draft 1.1.0-dev6 — Publications track (branch; 1.0.0-rc1 is the frozen line)**
 *A ducat was a gold coin accepted from Venice to Vienna to the Levant for six centuries. It had no issuer relationship, no account behind it, and no permission attached — it was worth something because you were holding it, and it crossed borders the way a bearer instrument should.*
 Canonical home: **ducatproject.org**
 
@@ -27,6 +27,7 @@ DUCAT composes two independent systems — Veilid for everything that isn't mone
 18.1 Canonical encoding · 18.2 Money is integers · 18.3 Signing & domain separation · 18.4 State transition table · 18.5 Reject codes · 18.6 Version negotiation · 18.7 Transport bindings · 18.8 Strictness · 18.9 Test vectors · 18.10 Conformance levels
 
 ### Changelog
+- **1.1.0-dev6** — **A publication is discovered like a kayak (§16.18.2, `PUB_NOTICE`, fields 265–275).** The digital good takes the same boards: a claim-once publish card, a title, an optional blurb and an optional per-period price ride a notice whose stamp block is §16.18.1 verbatim in its own namespace — and whose board name, inside the signature like a slot, carries the where: `topic:<category>[.<lang>]` worldwide (six pinned categories, `other` the valve), `local:<cell>` for the town paper, cross-posting two honest stamps. Absent price means free and an explicit zero is `MALFORMED` — one meaning, one encoding. Claiming the card IS subscribing; everything after is §16.20 unchanged. Eleven new vectors pin both edges including the family's sealed form on a topic board and its unknown-field edge (276) — which caught the second implementation answering `MALFORMED` where core answers `UNKNOWN_FIELD` on every strict reader's leftover path, a divergence no vector had ever exercised; the checker now agrees with core in core's own words. 366 cases, both implementations agreeing.
 - **1.1.0-dev5** — **The answer takes the open door (§16.21 control frames).** A media frame with sequence `0xFFFFFFFF` carries control: type byte (1 ANSWER, 2 DECLINE, 3 BYE), the call id, and for ANSWER the callee's route blob. The offer already delivered a live route; using it for the reply turns connect and decline from two cold mailbox trips (~25–45 s each, measured) into one route trip (~200 ms). The sealed kind-15/Retract remains canonical and MUST follow; frames are honored only against a live call's id on its own route — possession-of-the-sealed-offer trust, identical to the media's. BYE gives hang-up a word; RENEW re-aims a call around a bad route draw mid-flight; the silence watchdog stays for crashes. No wire objects, kinds, or fields changed; vector count stays 355.
 - **1.1.0-dev4** — **Call media is Opus, and constant-rate on principle (§16.21).** Client format v1 replaces the provisional PCM: 8-byte header then one Opus packet — 16 kHz mono, 20 ms, hard CBR at 24 kbit/s, 60 bytes every frame, DTX forbidden. CBR is stated as a privacy rule: encrypted VBR voice leaks speech through packet sizes (phrase spotting, phoneme reconstruction), so a frame leaves the same size whether the speaker talks or holds their breath. The call-route cap moved 1200 → 4096: route blobs embed the full peer-info of their hops, and a live phone allocated one past 1200 the day after the cap was pinned — both edge vectors re-pinned at the new cap. Vector count stays 355.
 - **1.1.0-dev3** — **A call is a door handed down the thread (§16.21, kinds 14–15, fields 263–264).** `CALL_OFFER` carries a fresh private-route blob (1–4096 bytes) and an eight-byte call id; `CALL_ANSWER` carries the callee's own route and quotes the id. The pair travels whole or not at all, the door IS the kind (an offer with no route rings nothing; a route on any other kind is `MALFORMED`), and no amount rides either. Media never touches the mailbox: it flows as Veilid app-messages on the offered routes — client format v0 is an 8-byte header (`seq` u32be ‖ `ms` u32be) and a codec frame, PCM16 mono 16 kHz in 20 ms frames until an Opus dependency lands, provisional like the shelf's record layout. Declining is §16.13's Retract naming the offer; hanging up is stopping; a missed call is simply a message read later — ringing was never a separate channel. Grounded in measurement, not hope: p50 route RTT 187 ms and 500-of-500 frames delivered at the 50 Hz voice cadence with 65 ms jitter (research/post-1.0/CALLS.md). Ten new vectors pin the pair's edges and move the unknown-kind sentinel to the new edge (16); 355 cases, both implementations agreeing.
@@ -1182,7 +1183,7 @@ Ship Phase 1–2 as a working federation at a single seed market before touching
 - **O18.** **Cancellation fees erode the permissionless lane.** §7.3 makes no-show fees enforceable only against collateral. The pressure this creates — providers preferring bonded counterparties precisely because cancellation *costs* them something — pushes the network toward the collateralized lane and quietly hollows out the slow permissionless one A4 depends on (§17.6). Whether the unbonded lane survives contact with real no-show rates is an empirical question no amount of spec work answers.
 - **O19.** **iOS cannot present over NFC, permanently.** Apple's HCE entitlement is conditioned on EEA establishment, organization enrollment, and financial-regulatory standing (§15.3.2) — structurally incompatible with A4, and not a hurdle an open protocol clears. The best-UX medium is therefore available to roughly half the supply side, and QR carries the rest. This is outside DUCAT's control and will not improve through protocol design; it is stated so no one plans around a tap that cannot exist.
 - **O20. (closed in 0.48, §18.7.)** Transport identifiers assigned. The NFC AID is `F0 44 55 43 41 54` (`0xF0` ‖ `"DUCAT"`), and the "pending real RID registration" caveat was mistaken — ISO/IEC 7816-5 reserves the `0xF…` range for **proprietary identifiers requiring no registration at all**, which is what Android HCE documents for exactly this case. There was nothing to wait for. BLE takes one random 128-bit service UUID and three characteristics sharing a base; the Bluetooth SIG registers only 16-bit UUIDs, and the 128-bit space exists so anyone can allocate without asking. **Residue, and it is a real one:** no registry means no uniqueness guarantee, so nothing prevents another vendor choosing the same AID bytes — mitigated by using the full name rather than the four-character contraction, since AIDs may run to 16 bytes and the 5-byte minimum was never a maximum. The L2CAP PSM stays deliberately unassigned: LE CoC PSMs are allocated dynamically by the local stack, so a spec pinning one would pin a value it does not control; it is published in a characteristic and read.
-- **O21. Conformance suite exists, schema published, second implementation runs it (§18.9.1, §18.11).** 355 vectors, every case carrying a `kind` that is the sole discriminator, validated against a **hand-written** `schema.json` — hand-written because a schema emitted by the generator would agree with the generator's mistakes, and it earned that by catching two defects on its first run. A second implementation written from Part V agreed on 101 cases and disagreed on 3, **all three defects in this document**, of which the important one was negative integers being *unspecified* — the reference accepted them, the second implementation refused them, and both were conformant, a divergence no vector set could detect because there was no correct answer to test against. 104/104 after correction. Most of the second implementation's effort went into the harness rather than the protocol; that friction is now removed (§18.11). **Still not closed, and what remains cannot be engineered away: an implementer who has never read `core/`.** Everything accidental has been cleared out of their way — a normative case schema, one event encoding instead of five, `why` required on every case, and two commands that validate any change. The gap is authorship.
+- **O21. Conformance suite exists, schema published, second implementation runs it (§18.9.1, §18.11).** 366 vectors, every case carrying a `kind` that is the sole discriminator, validated against a **hand-written** `schema.json` — hand-written because a schema emitted by the generator would agree with the generator's mistakes, and it earned that by catching two defects on its first run. A second implementation written from Part V agreed on 101 cases and disagreed on 3, **all three defects in this document**, of which the important one was negative integers being *unspecified* — the reference accepted them, the second implementation refused them, and both were conformant, a divergence no vector set could detect because there was no correct answer to test against. 104/104 after correction. Most of the second implementation's effort went into the harness rather than the protocol; that friction is now removed (§18.11). **Still not closed, and what remains cannot be engineered away: an implementer who has never read `core/`.** Everything accidental has been cleared out of their way — a normative case schema, one event encoding instead of five, `why` required on every case, and two commands that validate any change. The gap is authorship.
 - **O22. (closed in 0.44, §4.3.3.)** An escrow participant who loses their device. Resolved once the question was asked correctly: a share cannot be *reconstructed* — measured, `prepare_multisig` draws 88 characters of fresh randomness beyond what the wallet keys determine — but it does not need to be, because it is already a 2,286-byte file that a virgin `wallet-rpc` will open directly. The recovery ask therefore moved from **the counterparty's signature**, which no protocol can compel from an adversary, to **the other participants re-sharing multisig info**, which endorses no outcome and is a step every participant performs routinely. **Residue:** a stale bundle still cannot recover an escrow opened after it, so this now depends on a client prompting for re-export at ceremony completion — a UX obligation rather than a protocol impossibility. And an end-to-end spend from a restored share is still undemonstrated (§4.3.3's last limit).
 ---
 *End of Part I. The remaining parts specify the three mechanisms Part I leans on hardest: the tap that opens every transaction, the identity that optionally survives one, and the settlement that makes it fast enough to matter.*
@@ -2383,6 +2384,38 @@ The seal carries no version of its own, and does not need one: it is not part of
 
 **Expiry is bounded** at `MAX_NOTICE_TTL_SECS` (31 days), and by the *reader* rather than at decode. The repetition above is what the cost model rests on, and a notice good until the next century turns one payment into a permanent squat that no honest client will clear, since clearing another writer's slot is refused. Decoding must not consult the clock: the conformance vectors pin exact bytes to exact outcomes, and a time-dependent decoder would begin failing on its own with nothing changed.
 
+### 16.18.2 The publication listing (`PUB_NOTICE`, fields 265–275)
+
+A digital good discovered like a physical one — on a board — and
+delivered like a subscription, because after discovery it IS one
+(§16.20). The notice carries what a stranger needs to decide: a title
+(≤60 chars), an optional one-sentence blurb (≤280 — the description
+belongs in the issues), an optional price in piconero per §16.20 period
+— **absent means free, and an explicit zero is `MALFORMED`**, because
+one meaning gets one encoding (§18.1) and the signature is over these
+bytes — an expiry, and a claim-once `ducat:` card of purpose `publish`.
+**Claiming the card is subscribing**: the enrolment, the billing on the
+thread, the shelf and the swarm are all §16.20 unchanged. The version
+is 1; the strict reader refuses everything it does not know.
+
+**Where it lives is the board name, not a field.** A worldwide listing
+posts to `topic:<category>[.<lang>]` — category from the pinned set
+below, language an optional BCP-47 primary subtag — and a local one to
+the same `local:<cell>` boards every listing uses; cross-posting is two
+stamps, paid honestly. The board name sits inside the seal's signature
+(§16.18.1) exactly as a cell does, so a notice cannot be lifted onto
+another topic any more than onto another slot. The stamp block —
+poster, signature, work, beacon — is §16.18.1 verbatim in this notice's
+own field namespace (271–275), with the same Argon2id price and the
+same Monero-block freshness.
+
+The categories, pinned so every implementation shards the same way:
+`news`, `serials`, `sound`, `software`, `art`, `other`. Boundary calls
+are settled here rather than argued on boards: fonts are `software`;
+courses are `other`. Adding a category is an appendix row in a later
+draft; removing one strands every board that used it, which is why the
+set starts small and `other` is the pressure valve.
+
 ## 16.19 Small groups over pairwise threads
 
 A group is §17.9's roster pattern carrying words instead of DKG rounds: a member list, then fan-out — the sender seals the same body into each member's existing pairwise thread. There is **no group key, no shared record, and no new object on the network** that says *these N people are a group*. Every property a thread has — §16.11's forward secrecy per pair, prekey partitioning, deniability — comes along unchanged, because nothing changes about how a message is sealed. The cost is stated rather than hidden: N−1 writes per message, which bounds this at *small* — a household, a stall's two phones, the three people organising a thing — and that bound is the shape, not a limitation to engineer away.
@@ -3040,7 +3073,9 @@ Part V numbers four objects (`TapPresent`, `FullOffer`, `ACCEPT`, `RECEIPT`) and
 | 259–260 | publication period: id and content key (§16.20) | **Assigned** |
 | 261–262 | publication shipment: swarm share key and index digest (§16.20) | **Assigned** |
 | 263–264 | live call: private-route blob and call id (§16.21) | **Assigned** |
-| 265+ | Unallocated | — |
+| 265–270 | `PUB_NOTICE` body: version, card, title, blurb, price, expiry (§16.18.2) | **Assigned** |
+| 271–275 | `PUB_NOTICE` stamp: poster, sig, pow, beacon height and hash (§16.18.1–.2) | **Assigned** |
+| 276+ | Unallocated | — |
 
 The `96+ Unallocated` row above was stale from 0.14 onward: 96–103 had been in use since `TERMS` and `MANDATE` shipped, and a second implementer allocating from 96 would have collided head-on. Registries decay silently unless something checks them, which is the argument for the type-code rule below.
 
@@ -3182,6 +3217,7 @@ Format: a JSON manifest of cases with hex-encoded inputs, expected outputs, and 
 | `log.ring` | A sequence number maps to the right subkey, and a reader can tell when the ring has passed it (§16.12) |
 | `hail.notice` | A notice off a public board decodes, or is refused for the hostile-surface rules (§16.17) |
 | `rental.listing` | A listing off a public board decodes, or is refused for §16.18's rules — the coarser cell, the place/vehicle split, the refused enumerations, and `quantity`'s one-spelling rule |
+| `pub.listing` | A publication listing decodes, or is refused for §16.18.2's rules — the one spelling of free, the version, the card's scheme, the text bounds, and the strict reader's edge (276) |
 | `board.sealed` | A notice as it actually sits on a board (§16.18.1): the poster key is recovered, the signature verifies against *that slot*, and the proof of work clears — or the case is refused, as the same bytes offered at a different slot must be |
 | `board.beacon_window` | §16.18.1's freshness range, as a *caller* applies it: a `tip_height` of zero is a device with no chain view and skips the test, and anything else is the range. Both edges and both sides, because decoding must not consult a chain and so the rule cannot live in the reader |
 | `board.beacon_verdict` | The rest of §16.18.1's freshness rule: what a reader may *do* once it has looked at the beacon — show, refuse, or hold. Pinned because the third answer is the one a reader can lose in the attacker's favour without noticing, and because the height half of the test is free and secures nothing on its own |

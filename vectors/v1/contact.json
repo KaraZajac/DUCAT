@@ -2370,6 +2370,130 @@
       "sealed_hex": "b218dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0118df781853756e6e7920726f6f6d206e65617220746865207061726b18e0694b7265757a6265726718e165753333646218e21b00000005d21dba0018e31b000000012a05f20018e41a6b49d20018ec0118ed0218ee0218ef81647769666918f1181c18f25820057a88def05a2428308ed2ae1eb434284e9ea45daa85e06154cbeb49c191294418f358404246645bf5537a06c57fd294a43f07a3a50387f9ecbf8f4eab3d68d73a5908743fd00da21e1a040204ec12ea6c2a461778022d8b942f9c7d7341f8ca4a67580618f419018218f91a0030fb10",
       "subkey": 3,
       "why": "A notice with no beacon hash. The same rule from the other side — the hash is what the work is actually bound to."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "a41901090119010a783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5919010b75546865205269766572736964652047617a6574746519010e1a6b49d200"
+      },
+      "kind": "pub.listing",
+      "name": "publication_free",
+      "pub_listing_hex": "a41901090119010a783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5919010b75546865205269766572736964652047617a6574746519010e1a6b49d200",
+      "why": "A free paper on the board: a claim-once publish card, a title, an expiry — and no price field at all, because free has exactly one spelling."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "a61901090119010a783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5919010b75546865205269766572736964652047617a6574746519010c782f5477656c7665207061676573206f66207468652072697665722773207765656b2c206576657279204672696461792e19010d1a1dcd650019010e1a6b49d200"
+      },
+      "kind": "pub.listing",
+      "name": "publication_priced",
+      "pub_listing_hex": "a61901090119010a783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5919010b75546865205269766572736964652047617a6574746519010c782f5477656c7665207061676573206f66207468652072697665722773207765656b2c206576657279204672696461792e19010d1a1dcd650019010e1a6b49d200",
+      "why": "A priced monthly with a blurb. The price is per §16.20 period, in piconero; the blurb is one sentence, because the description belongs in the issues."
+    },
+    {
+      "expect": {
+        "hint": "free is spelled by omission",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "pub.listing",
+      "name": "publication_price_zero",
+      "pub_listing_hex": "a51901090119010a783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5919010b75546865205269766572736964652047617a6574746519010d0019010e1a6b49d200",
+      "why": "An explicit zero is a second spelling of free, and the signature is over these bytes — one meaning, one encoding (§18.1)."
+    },
+    {
+      "expect": {
+        "hint": "unknown publication notice version",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "pub.listing",
+      "name": "publication_wrong_version",
+      "pub_listing_hex": "a41901090219010a783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5919010b75546865205269766572736964652047617a6574746519010e1a6b49d200",
+      "why": "One past the current version. A reader that guessed at forward compatibility would render fields it cannot know the meaning of."
+    },
+    {
+      "expect": {
+        "hint": "a listing card must be a ducat: URI",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "pub.listing",
+      "name": "publication_card_wrong_scheme",
+      "pub_listing_hex": "a41901090119010a7768747470733a2f2f6578616d706c652e636f6d2f73756219010b75546865205269766572736964652047617a6574746519010e1a6b49d200",
+      "why": "A listing whose card is an https link is an advertisement for somewhere else wearing our seal."
+    },
+    {
+      "expect": {
+        "hint": "text too long",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "pub.listing",
+      "name": "publication_title_too_long",
+      "pub_listing_hex": "a41901090119010a783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5919010b783d7878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787819010e1a6b49d200",
+      "why": "Sixty characters is a masthead; past that it is a manifesto, and manifestos go in the issues."
+    },
+    {
+      "expect": {
+        "hint": "text too long",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "pub.listing",
+      "name": "publication_blurb_too_long",
+      "pub_listing_hex": "a51901090119010a783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5919010b75546865205269766572736964652047617a6574746519010c790119797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797979797919010e1a6b49d200",
+      "why": "One sentence about it. 280 holds a sentence anywhere; more is the first issue leaking onto the board."
+    },
+    {
+      "expect": {
+        "hint": "a publication listing needs a card",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "pub.listing",
+      "name": "publication_no_card",
+      "pub_listing_hex": "a31901090119010b75546865205269766572736964652047617a6574746519010e1a6b49d200",
+      "why": "A listing without its card advertises something nobody can subscribe to; the claim IS the subscription, so the card is the listing's whole point."
+    },
+    {
+      "expect": {
+        "hint": "unrecognised field 276",
+        "ok": false,
+        "reject": "UNKNOWNFIELD"
+      },
+      "kind": "pub.listing",
+      "name": "publication_unknown_field",
+      "pub_listing_hex": "a51901090119010a783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5919010b75546865205269766572736964652047617a6574746519010e1a6b49d20019011401",
+      "why": "276 — one past the newest (275, PN_BEACON_HASH), the closed set's edge, which must move with it. The strict reader is what stops a notice smuggling anything past the stamp."
+    },
+    {
+      "board": "topic:news.en@3021-0",
+      "expect": {
+        "beacon_hash": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+        "beacon_height": 3210000,
+        "ok": true,
+        "poster_hex": "10c50b5316ec50c485a68d161d1a2e237132feb52265eaebc72028879e877158"
+      },
+      "kind": "board.sealed",
+      "name": "publication_sealed",
+      "sealed_hex": "a91901090119010a783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5919010b75546865205269766572736964652047617a6574746519010e1a6b49d20019010f582010c50b5316ec50c485a68d161d1a2e237132feb52265eaebc72028879e8771581901105840338b7117b1e3175207579e668c2fe3fe5b624c31ccf18c3283cabd9cd0a68ab17e3211b0e62a47bc451fc7de9941414dce9933a514305c5e47c6078de47e3a0819011118321901121a0030fb1019011358205a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "subkey": 4,
+      "why": "A publication on a worldwide board: category and language live in the board name — inside the signature, like the slot — so a notice cannot be lifted onto another topic any more than onto another slot. The stamp block rides in this family's own ids (271–275)."
+    },
+    {
+      "board": "topic:news.es@3021-0",
+      "expect": {
+        "hint": "this notice was not signed for this slot",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "board.sealed",
+      "name": "publication_sealed_wrong_board",
+      "sealed_hex": "a91901090119010a783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5919010b75546865205269766572736964652047617a6574746519010e1a6b49d20019010f582010c50b5316ec50c485a68d161d1a2e237132feb52265eaebc72028879e8771581901105840338b7117b1e3175207579e668c2fe3fe5b624c31ccf18c3283cabd9cd0a68ab17e3211b0e62a47bc451fc7de9941414dce9933a514305c5e47c6078de47e3a0819011118321901121a0030fb1019011358205a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "subkey": 4,
+      "why": "The same bytes offered from topic:news.es. The board name is inside the signature: a listing posted to one topic cannot be republished onto another by anyone but its author paying the stamp again."
     }
   ],
   "category": "contact"

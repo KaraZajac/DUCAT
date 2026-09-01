@@ -972,6 +972,8 @@ fn normalize(category: &str, mut c: J) -> (&'static str, J) {
                 ("contact", "hail.notice")
             } else if obj.contains_key("listing_hex") {
                 ("contact", "rental.listing")
+            } else if obj.contains_key("pub_listing_hex") {
+                ("contact", "pub.listing")
             } else if obj.contains_key("subkey_count") {
                 ("contact", "log.ring")
             } else if obj.contains_key("shard") {
@@ -2667,6 +2669,115 @@ fn contact_cases() -> Vec<J> {
             }
         }
 
+    }
+
+    // §16.18.2: the publication listing — the digital good on the same
+    // boards. The board name carries the where (topic:<category>[.<lang>]
+    // worldwide, local:<cell> for the town paper); the notice carries what
+    // a stranger needs to decide, and claiming its card IS subscribing.
+    {
+        use ducat_core::contact::PubNotice;
+        let mut pcase = |name: &str, why: &str, n: &PubNotice, bad: Option<(RejectCode, &str)>| {
+            let hex_body = hex(&n.to_value().encode());
+            v.push(match bad {
+                None => json!({ "name": name, "why": why, "pub_listing_hex": hex_body,
+                                "expect": { "ok": true, "reencodes_to_hex": hex_body } }),
+                Some((code, hint)) => json!({ "name": name, "why": why, "pub_listing_hex": hex_body,
+                                "expect": { "ok": false, "reject": format!("{:?}", code).to_uppercase(), "hint": hint } }),
+            });
+        };
+        let free = PubNotice {
+            version: 1,
+            card: "ducat:2m1CQVCAiPjIfW5EX7ja1i8dRAsCLZ3nSCEgKHZBHZY".into(),
+            title: "The Riverside Gazette".into(),
+            blurb: None,
+            price_pxmr: None,
+            expiry: 1_800_000_000,
+        };
+        let priced = PubNotice {
+            blurb: Some("Twelve pages of the river's week, every Friday.".into()),
+            price_pxmr: Some(500_000_000),
+            ..free.clone()
+        };
+        pcase("publication_free",
+            "A free paper on the board: a claim-once publish card, a title, an expiry — and no price field at all, because free has exactly one spelling.",
+            &free, None);
+        pcase("publication_priced",
+            "A priced monthly with a blurb. The price is per §16.20 period, in piconero; the blurb is one sentence, because the description belongs in the issues.",
+            &priced, None);
+        pcase("publication_price_zero",
+            "An explicit zero is a second spelling of free, and the signature is over these bytes — one meaning, one encoding (§18.1).",
+            &PubNotice { price_pxmr: Some(0), ..free.clone() },
+            Some((RejectCode::Malformed, "free is spelled by omission")));
+        pcase("publication_wrong_version",
+            "One past the current version. A reader that guessed at forward compatibility would render fields it cannot know the meaning of.",
+            &PubNotice { version: 2, ..free.clone() },
+            Some((RejectCode::Malformed, "unknown publication notice version")));
+        pcase("publication_card_wrong_scheme",
+            "A listing whose card is an https link is an advertisement for somewhere else wearing our seal.",
+            &PubNotice { card: "https://example.com/sub".into(), ..free.clone() },
+            Some((RejectCode::Malformed, "a listing card must be a ducat: URI")));
+        pcase("publication_title_too_long",
+            "Sixty characters is a masthead; past that it is a manifesto, and manifestos go in the issues.",
+            &PubNotice { title: "x".repeat(61), ..free.clone() },
+            Some((RejectCode::Malformed, "text too long")));
+        pcase("publication_blurb_too_long",
+            "One sentence about it. 280 holds a sentence anywhere; more is the first issue leaking onto the board.",
+            &PubNotice { blurb: Some("y".repeat(281)), ..free.clone() },
+            Some((RejectCode::Malformed, "text too long")));
+
+        // The edges a struct cannot spell: a missing card, and a field from
+        // the future. By hand, which is what a careless implementation does.
+        {
+            let ducat_core::cbor::Value::Map(mut m) = free.to_value() else { unreachable!() };
+            m.remove(&ducat_core::wire::f::PN_CARD);
+            v.push(json!({ "name": "publication_no_card",
+                "why": "A listing without its card advertises something nobody can subscribe to; the claim IS the subscription, so the card is the listing's whole point.",
+                "pub_listing_hex": hex(&ducat_core::cbor::Value::Map(m).encode()),
+                "expect": { "ok": false, "reject": "MALFORMED", "hint": "a publication listing needs a card" } }));
+        }
+        {
+            let ducat_core::cbor::Value::Map(mut m) = free.to_value() else { unreachable!() };
+            m.insert(276, ducat_core::cbor::Value::Uint(1));
+            v.push(json!({ "name": "publication_unknown_field",
+                "why": "276 — one past the newest (275, PN_BEACON_HASH), the closed set's edge, which must move with it. The strict reader is what stops a notice smuggling anything past the stamp.",
+                "pub_listing_hex": hex(&ducat_core::cbor::Value::Map(m).encode()),
+                "expect": { "ok": false, "reject": "UNKNOWNFIELD", "hint": "unrecognised field 276" } }));
+        }
+
+        // The sealed form on a topic board: the same five-stamp machinery as
+        // a rental, in this family's own field namespace — pinned so a second
+        // implementation knows where this notice's stamp lives.
+        {
+            let seed = ducat_core::board::listing_seed(b"vector-persona", "gazette-1");
+            let board = "topic:news.en@3021-0";
+            let subkey = 4u32;
+            let beacon = ducat_core::board::Beacon { height: 3_210_000, hash: [0x5au8; 32] };
+            let ducat_core::cbor::Value::Map(m) = free.to_value() else { unreachable!() };
+            let sealed = ducat_core::board::seal(
+                m, ducat_core::board::PUB, &seed, board, subkey, &beacon,
+            );
+            let sealed_hex = hex(&sealed.encode());
+            let poster = {
+                let ducat_core::cbor::Value::Map(sm) = &sealed else { unreachable!() };
+                match sm.get(&ducat_core::wire::f::PN_POSTER) {
+                    Some(ducat_core::cbor::Value::Bytes(b)) => b.clone(),
+                    _ => unreachable!("a sealed notice carries its poster"),
+                }
+            };
+            v.push(json!({ "name": "publication_sealed",
+                "why": "A publication on a worldwide board: category and language live in the board name — inside the signature, like the slot — so a notice cannot be lifted onto another topic any more than onto another slot. The stamp block rides in this family's own ids (271–275).",
+                "sealed_hex": sealed_hex,
+                "board": board, "subkey": subkey,
+                "expect": { "ok": true, "poster_hex": hex(&poster),
+                            "beacon_height": beacon.height,
+                            "beacon_hash": hex(&beacon.hash) } }));
+            v.push(json!({ "name": "publication_sealed_wrong_board",
+                "why": "The same bytes offered from topic:news.es. The board name is inside the signature: a listing posted to one topic cannot be republished onto another by anyone but its author paying the stamp again.",
+                "sealed_hex": sealed_hex,
+                "board": "topic:news.es@3021-0", "subkey": subkey,
+                "expect": { "ok": false, "reject": "MALFORMED", "hint": "this notice was not signed for this slot" } }));
+        }
     }
 
     v

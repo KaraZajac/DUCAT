@@ -1008,6 +1008,9 @@ RN_QUANTITY = 248
 # flooding paid for.
 RN_POSTER, RN_SIG, RN_POW = 242, 243, 244
 HN_POSTER, HN_SIG, HN_POW = 245, 246, 247
+# §16.18.2: the publication listing, and its own stamp namespace.
+PN_VERSION, PN_CARD, PN_TITLE, PN_BLURB, PN_PRICE, PN_EXPIRY = 265, 266, 267, 268, 269, 270
+PN_POSTER, PN_SIG, PN_POW, PN_BEACON_HEIGHT, PN_BEACON_HASH = 271, 272, 273, 274, 275
 # §16.18.1's freshness beacon: the Monero block a stamp was mined against.
 # Without it every other field in the preimage is either the poster's own or a
 # floor division of the clock, so the whole of next year could be mined this
@@ -1141,8 +1144,12 @@ def _expect_type(body, want, name):
 
 
 def _finish(body):
+    # Core's strict reader says UnknownField here, in these words. This said
+    # Malformed for every family and no vector had ever exercised the path —
+    # two implementations disagreeing invisibly until publication_unknown_field
+    # pinned it (§18.1's closed world, enforced at last from both sides).
     if body:
-        raise Reject("Malformed", f"unexpected field {sorted(body)[0]}")
+        raise Reject("UnknownField", f"unrecognised field {sorted(body)[0]}")
 
 
 def parse_card(buf):
@@ -1384,6 +1391,57 @@ def parse_listing(buf):
 
 
 
+def parse_pub_listing(buf):
+    # §16.18.2: a publication on a board. The board name carries the where
+    # (topic or local cell — and it is inside the seal's signature); the
+    # notice carries what a stranger needs to decide to subscribe.
+    b = _body(buf)
+    out = {
+        "version": _take(b, PN_VERSION, "uint", "version"),
+        "card": _take(b, PN_CARD, "text", "card"),
+        "title": _take(b, PN_TITLE, "text", "title"),
+    }
+    if out["version"] != 1:
+        raise Reject("Malformed", "unknown publication notice version")
+    if not out["card"].startswith("ducat:"):
+        raise Reject("Malformed", "a listing card must be a ducat: URI")
+    if len(out["card"]) > 1024:
+        raise Reject("Malformed", "text too long")
+    if not out["title"] or len(out["title"]) > 60:
+        raise Reject("Malformed", "a publication listing needs a title")
+    out["blurb"] = _opt(b, PN_BLURB, "text")
+    if out["blurb"] is not None and (not out["blurb"] or len(out["blurb"]) > 280):
+        raise Reject("Malformed", "a blurb is one sentence")
+    out["price"] = _opt(b, PN_PRICE, "uint")
+    if out["price"] == 0:
+        raise Reject("Malformed", "free is spelled by omission")
+    out["expiry"] = _take(b, PN_EXPIRY, "uint", "expiry")
+    _finish(b)
+    return out
+
+
+def run_pub_listing(cases, r):
+    for c in cases:
+        def go(c=c):
+            n = parse_pub_listing(unhex(c["pub_listing_hex"]))
+            fields = [
+                (PN_VERSION, ("uint", n["version"])),
+                (PN_CARD, ("text", n["card"])),
+                (PN_TITLE, ("text", n["title"])),
+            ]
+            if n["blurb"] is not None:
+                fields.append((PN_BLURB, ("text", n["blurb"])))
+            if n["price"] is not None:
+                fields.append((PN_PRICE, ("uint", n["price"])))
+            fields.append((PN_EXPIRY, ("uint", n["expiry"])))
+            return _reencode_map(fields)
+        out = expect_reject(r, "contact", c, go)
+        if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:
+            r.passed -= 1
+            r.bad("contact", c["name"], c.get("why", ""),
+                  f"re-encoded to {out.hex()}, expected {c['expect']['reencodes_to_hex']}")
+
+
 def leading_zero_bits(h):
     """How many zero bits a digest opens with."""
     n = 0
@@ -1415,11 +1473,17 @@ def open_board_notice(buf, board, subkey):
     """
     import hashlib
     body_map = _body(buf)
-    poster = body_map.pop(RN_POSTER, (None, None))[1]
-    sig = body_map.pop(RN_SIG, (None, None))[1]
-    nonce = body_map.pop(RN_POW, (None, None))[1]
-    height = body_map.pop(RN_BEACON_HEIGHT, (None, None))[1]
-    bhash = body_map.pop(RN_BEACON_HASH, (None, None))[1]
+    # Two families seal the same way in their own field namespaces: the
+    # rental's (242…) and the publication's (271…). Which one this is, the
+    # notice itself says.
+    ids = (PN_POSTER, PN_SIG, PN_POW, PN_BEACON_HEIGHT, PN_BEACON_HASH) \
+        if PN_POSTER in body_map else \
+        (RN_POSTER, RN_SIG, RN_POW, RN_BEACON_HEIGHT, RN_BEACON_HASH)
+    poster = body_map.pop(ids[0], (None, None))[1]
+    sig = body_map.pop(ids[1], (None, None))[1]
+    nonce = body_map.pop(ids[2], (None, None))[1]
+    height = body_map.pop(ids[3], (None, None))[1]
+    bhash = body_map.pop(ids[4], (None, None))[1]
     if not isinstance(poster, (bytes, bytearray)):
         raise Reject("Malformed", "a board notice must say who wrote it")
     if not isinstance(sig, (bytes, bytearray)) or len(sig) != 64:
@@ -1481,8 +1545,11 @@ def run_board_sealed(cases, r):
             poster, inner = open_board_notice(
                 unhex(c["sealed_hex"]), c["board"], c["subkey"])
             # What is left has to be a listing this implementation reads, so
-            # the seal and the notice really do compose.
-            parse_listing(inner)
+            # the seal and the notice really do compose — whichever family.
+            if PN_VERSION in dict(decode_canonical(inner)[1]):
+                parse_pub_listing(inner)
+            else:
+                parse_listing(inner)
             return poster
         out = expect_reject(r, "contact", c, go)
         want = c["expect"].get("poster_hex")
@@ -2284,6 +2351,7 @@ BY_KIND = {
     "stand.epoch": run_stand_epoch,
     "hail.notice": run_hail_notice,
     "rental.listing": run_listing,
+    "pub.listing": run_pub_listing,
     "board.sealed": run_board_sealed,
     "board.beacon_window": run_beacon_window,
     "board.beacon_verdict": run_beacon_verdict,

@@ -2068,6 +2068,82 @@ const MAX_RENTAL_FEATURE_CHARS: usize = 16;
 /// count past this is describing inventory that wants its own listing.
 const MAX_RENTAL_QUANTITY: u64 = 999;
 
+/// §16.18.2: a publication on a public board.
+///
+/// The board name carries the where — `topic:<category>[.<lang>]` for the
+/// worldwide shelf, `local:<cell>` for the town paper, and cross-posting is
+/// two stamps, paid honestly. The notice carries what a stranger needs to
+/// decide, and claiming its card IS subscribing (§16.20): after the claim,
+/// everything is the sealed machinery that already exists.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PubNotice {
+    pub version: u64,
+    /// A `ducat:` card URI, purpose `publish`, claim-once.
+    pub card: String,
+    pub title: String,
+    /// A sentence about it, when the title does not already say everything.
+    pub blurb: Option<String>,
+    /// Piconero a period. `None` is free — the only spelling of free.
+    pub price_pxmr: Option<u64>,
+    pub expiry: u64,
+}
+
+const MAX_PUB_TITLE_CHARS: usize = 60;
+const MAX_PUB_BLURB_CHARS: usize = 280;
+
+impl PubNotice {
+    pub fn to_value(&self) -> Value {
+        let mut m = BTreeMap::new();
+        m.insert(f::PN_VERSION, Value::Uint(self.version));
+        m.insert(f::PN_CARD, Value::Text(self.card.clone()));
+        m.insert(f::PN_TITLE, Value::Text(self.title.clone()));
+        if let Some(b) = &self.blurb {
+            m.insert(f::PN_BLURB, Value::Text(b.clone()));
+        }
+        if let Some(p) = self.price_pxmr {
+            m.insert(f::PN_PRICE, Value::Uint(p));
+        }
+        m.insert(f::PN_EXPIRY, Value::Uint(self.expiry));
+        Value::Map(m)
+    }
+
+    pub fn from_value(v: Value) -> Result<Self, Reject> {
+        let mut r = Reader::new(v)?;
+        let version = r.uint(f::PN_VERSION)?;
+        if version != 1 {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "unknown publication notice version",
+            ));
+        }
+        let card = r.opt_text(f::PN_CARD, MAX_HAIL_CARD_CHARS)?.ok_or_else(|| {
+            Reject::with_detail(RejectCode::Malformed, "a publication listing needs a card")
+        })?;
+        if !card.starts_with("ducat:") {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "a listing card must be a ducat: URI",
+            ));
+        }
+        let title = r.opt_text(f::PN_TITLE, MAX_PUB_TITLE_CHARS)?.ok_or_else(|| {
+            Reject::with_detail(RejectCode::Malformed, "a publication listing needs a title")
+        })?;
+        // Empty text is refused inside the reader itself — "omit the key
+        // instead" — so absence stays the one spelling of nothing to say.
+        let blurb = r.opt_text(f::PN_BLURB, MAX_PUB_BLURB_CHARS)?;
+        let price_pxmr = r.opt_uint(f::PN_PRICE)?;
+        if price_pxmr == Some(0) {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "free is spelled by omission",
+            ));
+        }
+        let expiry = r.uint(f::PN_EXPIRY)?;
+        r.finish()?;
+        Ok(Self { version, card, title, blurb, price_pxmr, expiry })
+    }
+}
+
 impl RentalNotice {
     pub fn to_value(&self) -> Value {
         let mut m = BTreeMap::new();

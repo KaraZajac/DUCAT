@@ -243,6 +243,30 @@ pub mod f {
     /// …and the id both halves of the call quote.
     pub const MSG_CALL_ID: u64 = 264;
 
+    // PUB_NOTICE (§16.18.2) — a publication listed on a public board. The
+    // board name carries the where (a topic, or a local cell for the town
+    // paper); the notice carries only what a stranger needs to decide to
+    // subscribe. Claiming the card IS subscribing (§16.20) — the notice is
+    // the advertisement, the sealed thread remains the relationship.
+    pub const PN_VERSION: u64 = 265;
+    /// A `ducat:` card URI, purpose `publish`, claim-once.
+    pub const PN_CARD: u64 = 266;
+    pub const PN_TITLE: u64 = 267;
+    /// A sentence about it. Absent when the title already says everything;
+    /// an empty blurb is absence wearing extra bytes and is refused.
+    pub const PN_BLURB: u64 = 268;
+    /// Piconero a period. Absent means free — an explicit zero is a second
+    /// spelling of the same fact, and one meaning gets one encoding.
+    pub const PN_PRICE: u64 = 269;
+    pub const PN_EXPIRY: u64 = 270;
+
+    // The stamp block, §16.18.1's five, in this notice's own namespace.
+    pub const PN_POSTER: u64 = 271;
+    pub const PN_SIG: u64 = 272;
+    pub const PN_POW: u64 = 273;
+    pub const PN_BEACON_HEIGHT: u64 = 274;
+    pub const PN_BEACON_HASH: u64 = 275;
+
     // RENTAL_NOTICE (§16.18) — a listing on a public board. The second
     // object that lives in the open, and the one that stays there for days
     // rather than minutes, so what it may carry is drawn tighter than a

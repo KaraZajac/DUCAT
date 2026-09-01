@@ -195,6 +195,7 @@
             "message.payment",
             "hail.notice",
             "rental.listing",
+            "pub.listing",
             "board.sealed",
             "board.beacon_window",
             "board.beacon_verdict",
