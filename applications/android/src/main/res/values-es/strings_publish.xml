@@ -60,9 +60,6 @@
     <string name="mode_press">Prensa</string>
     <string name="mode_press_desc">Una publicación al frente: código de suscripción en el mostrador, invitaciones por tus hilos.</string>
     <string name="press_tab_room">Redacción</string>
-    <string name="press_none_yet">Aún no hay publicación — ponle nombre y la prensa existe.</string>
-    <string name="press_name_hint">Nombre de la publicación</string>
-    <string name="press_create">Crear</string>
     <string name="press_code_minting">Creando el código…</string>
     <string name="press_scan">Escanea para suscribirte</string>
     <string name="press_subscribed">%1$d suscritos</string>
@@ -75,4 +72,10 @@
     <string name="pub_delete_title">¿Eliminar esta publicación?</string>
     <string name="pub_delete_body">Los suscriptores conservan cada número ya enviado. El anuncio del mercado y el código de suscripción caducan por sí solos. Nunca podrá salir un número nuevo — esto no se puede deshacer.</string>
     <string name="pub_delete_confirm">Eliminar</string>
+    <string name="pub_empty_title">Aún no hay publicaciones</string>
+    <string name="pub_create_btn">Crear publicación</string>
+    <string name="pub_name_label">Nombre</string>
+    <string name="press_no_code_title">Aún no hay código</string>
+    <string name="press_no_code_body">Publica algo para crear un código: es lo que los lectores escanean para suscribirse.</string>
+    <string name="press_open_room">Abrir la sala de prensa</string>
 </resources>

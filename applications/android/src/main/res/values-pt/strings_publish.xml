@@ -60,9 +60,6 @@
     <string name="mode_press">Imprensa</string>
     <string name="mode_press_desc">Uma publicação na frente: código de assinatura no balcão, convites pelos seus fios.</string>
     <string name="press_tab_room">Redação</string>
-    <string name="press_none_yet">Nenhuma publicação ainda — dê um nome e a imprensa existe.</string>
-    <string name="press_name_hint">Nome da publicação</string>
-    <string name="press_create">Criar</string>
     <string name="press_code_minting">Criando o código…</string>
     <string name="press_scan">Escaneie para assinar</string>
     <string name="press_subscribed">%1$d assinantes</string>
@@ -75,4 +72,10 @@
     <string name="pub_delete_title">Excluir esta publicação?</string>
     <string name="pub_delete_body">Os assinantes ficam com cada edição já enviada. O anúncio do mercado e o código de assinatura expiram sozinhos. Nunca mais poderá sair uma nova edição — isto não pode ser desfeito.</string>
     <string name="pub_delete_confirm">Excluir</string>
+    <string name="pub_empty_title">Ainda sem publicações</string>
+    <string name="pub_create_btn">Criar publicação</string>
+    <string name="pub_name_label">Nome</string>
+    <string name="press_no_code_title">Ainda sem código</string>
+    <string name="press_no_code_body">Publique algo para criar um código — é o que os leitores escaneiam para assinar.</string>
+    <string name="press_open_room">Abrir a sala de imprensa</string>
 </resources>

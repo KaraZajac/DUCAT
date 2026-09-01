@@ -60,9 +60,6 @@
     <string name="mode_press">Stampa</string>
     <string name="mode_press_desc">Una pubblicazione in vetrina: codice di abbonamento sul banco, inviti nei tuoi thread.</string>
     <string name="press_tab_room">Redazione</string>
-    <string name="press_none_yet">Ancora nessuna pubblicazione — dalle un nome e la stampa esiste.</string>
-    <string name="press_name_hint">Nome della pubblicazione</string>
-    <string name="press_create">Crea</string>
     <string name="press_code_minting">Creazione del codice…</string>
     <string name="press_scan">Scansiona per abbonarti</string>
     <string name="press_subscribed">%1$d abbonati</string>
@@ -75,4 +72,10 @@
     <string name="pub_delete_title">Eliminare questa pubblicazione?</string>
     <string name="pub_delete_body">Gli abbonati conservano ogni numero già inviato. L\'annuncio sul mercato e il codice di abbonamento scadono da soli. Non potrà mai uscire un nuovo numero — non si può annullare.</string>
     <string name="pub_delete_confirm">Elimina</string>
+    <string name="pub_empty_title">Ancora nessuna pubblicazione</string>
+    <string name="pub_create_btn">Crea pubblicazione</string>
+    <string name="pub_name_label">Nome</string>
+    <string name="press_no_code_title">Ancora nessun codice</string>
+    <string name="press_no_code_body">Pubblica qualcosa per creare un codice: è ciò che i lettori scansionano per abbonarsi.</string>
+    <string name="press_open_room">Apri la sala stampa</string>
 </resources>

@@ -60,9 +60,6 @@
     <string name="mode_press">Pers</string>
     <string name="mode_press_desc">Eén publicatie voorop: abonneercode op de toonbank, uitnodigingen door je gesprekken.</string>
     <string name="press_tab_room">Redactie</string>
-    <string name="press_none_yet">Nog geen publicatie — geef er een naam aan en de pers bestaat.</string>
-    <string name="press_name_hint">Naam van de publicatie</string>
-    <string name="press_create">Aanmaken</string>
     <string name="press_code_minting">Code wordt gemaakt…</string>
     <string name="press_scan">Scan om te abonneren</string>
     <string name="press_subscribed">%1$d geabonneerd</string>
@@ -75,4 +72,10 @@
     <string name="pub_delete_title">Deze publicatie verwijderen?</string>
     <string name="pub_delete_body">Abonnees houden elke al verzonden editie. De marktvermelding en de abonneercode verlopen vanzelf. Er kan nooit meer een nieuwe editie verschijnen — dit is onomkeerbaar.</string>
     <string name="pub_delete_confirm">Verwijderen</string>
+    <string name="pub_empty_title">Nog geen publicaties</string>
+    <string name="pub_create_btn">Publicatie aanmaken</string>
+    <string name="pub_name_label">Naam</string>
+    <string name="press_no_code_title">Nog geen code</string>
+    <string name="press_no_code_body">Publiceer iets om een code te maken — die scannen lezers om zich te abonneren.</string>
+    <string name="press_open_room">Persruimte openen</string>
 </resources>

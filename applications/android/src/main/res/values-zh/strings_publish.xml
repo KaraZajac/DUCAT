@@ -60,9 +60,6 @@
     <string name="mode_press">报社</string>
     <string name="mode_press_desc">一份出版物打头：柜台上放订阅码，往对话里发邀请。</string>
     <string name="press_tab_room">编辑部</string>
-    <string name="press_none_yet">还没有出版物 — 起个名字，报社就成立了。</string>
-    <string name="press_name_hint">出版物名称</string>
-    <string name="press_create">创建</string>
     <string name="press_code_minting">正在生成二维码…</string>
     <string name="press_scan">扫码订阅</string>
     <string name="press_subscribed">%1$d 人已订阅</string>
@@ -75,4 +72,10 @@
     <string name="pub_delete_title">删除此出版物？</string>
     <string name="pub_delete_body">订阅者保留已寄出的每一期。市场条目和订阅码会自行过期。永远无法再出新的一期——此操作无法撤销。</string>
     <string name="pub_delete_confirm">删除</string>
+    <string name="pub_empty_title">还没有出版物</string>
+    <string name="pub_create_btn">创建出版物</string>
+    <string name="pub_name_label">名称</string>
+    <string name="press_no_code_title">还没有码</string>
+    <string name="press_no_code_body">发布一些内容来生成订阅码——读者扫它即可订阅。</string>
+    <string name="press_open_room">打开新闻室</string>
 </resources>

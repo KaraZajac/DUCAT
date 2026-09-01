@@ -413,6 +413,11 @@ private data class ShellTab(
     val content: @Composable () -> Unit,
 )
 
+/** A screen inside a shell asking to land on a sibling tab — the Code
+ *  tab's empty state pointing at the Press room. One-shot: the shell
+ *  that honours it clears it. */
+val shellTabRequest = kotlinx.coroutines.flow.MutableStateFlow<Int?>(null)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Shell(
@@ -424,6 +429,14 @@ private fun Shell(
     onLeave: (() -> Unit)? = null,
 ) {
     var current by remember { mutableStateOf(0) }
+    LaunchedEffect(Unit) {
+        shellTabRequest.collect { t ->
+            if (t != null) {
+                if (t in tabs.indices) current = t
+                shellTabRequest.value = null
+            }
+        }
+    }
     // Back walks the tabs home before it leaves.
     //
     // The activity's own tab handler is gated on `Mode.None` so that it does

@@ -60,9 +60,6 @@
     <string name="mode_press">Presse</string>
     <string name="mode_press_desc">Une publication en vitrine : code d\'abonnement sur le comptoir, invitations dans vos fils.</string>
     <string name="press_tab_room">Rédaction</string>
-    <string name="press_none_yet">Pas encore de publication — nommez-la et la presse existe.</string>
-    <string name="press_name_hint">Nom de la publication</string>
-    <string name="press_create">Créer</string>
     <string name="press_code_minting">Création du code…</string>
     <string name="press_scan">Scanner pour s\'abonner</string>
     <string name="press_subscribed">%1$d abonnés</string>
@@ -75,4 +72,10 @@
     <string name="pub_delete_title">Supprimer cette publication ?</string>
     <string name="pub_delete_body">Les abonnés gardent chaque numéro déjà envoyé. L\'annonce du marché et le code d\'abonnement expirent d\'eux-mêmes. Aucun nouveau numéro ne pourra jamais paraître — c\'est irréversible.</string>
     <string name="pub_delete_confirm">Supprimer</string>
+    <string name="pub_empty_title">Aucune publication pour l\'instant</string>
+    <string name="pub_create_btn">Créer une publication</string>
+    <string name="pub_name_label">Nom</string>
+    <string name="press_no_code_title">Pas encore de code</string>
+    <string name="press_no_code_body">Publiez quelque chose pour créer un code — c\'est ce que les lecteurs scannent pour s\'abonner.</string>
+    <string name="press_open_room">Ouvrir la salle de presse</string>
 </resources>

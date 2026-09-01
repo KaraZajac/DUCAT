@@ -60,9 +60,6 @@
     <string name="mode_press">สำนักพิมพ์</string>
     <string name="mode_press_desc">ชูสิ่งพิมพ์หนึ่งฉบับ: โค้ดสมัครบนเคาน์เตอร์ คำเชิญในบทสนทนา</string>
     <string name="press_tab_room">กองบรรณาธิการ</string>
-    <string name="press_none_yet">ยังไม่มีสิ่งพิมพ์ — ตั้งชื่อแล้วสำนักพิมพ์ก็เกิด</string>
-    <string name="press_name_hint">ชื่อสิ่งพิมพ์</string>
-    <string name="press_create">สร้าง</string>
     <string name="press_code_minting">กำลังสร้างโค้ด…</string>
     <string name="press_scan">สแกนเพื่อสมัครรับ</string>
     <string name="press_subscribed">สมาชิก %1$d คน</string>
@@ -75,4 +72,10 @@
     <string name="pub_delete_title">ลบสิ่งพิมพ์นี้หรือไม่</string>
     <string name="pub_delete_body">สมาชิกยังเก็บทุกฉบับที่ส่งไปแล้ว ประกาศในตลาดและรหัสสมัครสมาชิกจะหมดอายุเอง จะไม่มีฉบับใหม่ออกได้อีก — ย้อนกลับไม่ได้</string>
     <string name="pub_delete_confirm">ลบ</string>
+    <string name="pub_empty_title">ยังไม่มีสิ่งพิมพ์</string>
+    <string name="pub_create_btn">สร้างสิ่งพิมพ์</string>
+    <string name="pub_name_label">ชื่อ</string>
+    <string name="press_no_code_title">ยังไม่มีรหัส</string>
+    <string name="press_no_code_body">เผยแพร่บางอย่างเพื่อสร้างรหัส — ผู้อ่านสแกนรหัสนี้เพื่อสมัครสมาชิก</string>
+    <string name="press_open_room">เปิดห้องข่าว</string>
 </resources>

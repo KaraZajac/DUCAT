@@ -60,9 +60,6 @@
     <string name="mode_press">Press</string>
     <string name="mode_press_desc">Front one publication: a subscribe code on the counter, invites down your threads.</string>
     <string name="press_tab_room">Press room</string>
-    <string name="press_none_yet">No publication yet — name one and the press exists.</string>
-    <string name="press_name_hint">Publication name</string>
-    <string name="press_create">Create</string>
     <string name="press_code_minting">Minting the code…</string>
     <string name="press_scan">Scan to subscribe</string>
     <string name="press_subscribed">%1$d subscribed</string>
@@ -75,4 +72,10 @@
     <string name="pub_delete_title">Delete this publication?</string>
     <string name="pub_delete_body">Subscribers keep every issue already sent. The market listing and the subscribe code expire on their own. No new issue can ever be cut for it — this cannot be undone.</string>
     <string name="pub_delete_confirm">Delete</string>
+    <string name="pub_empty_title">No publications yet</string>
+    <string name="pub_create_btn">Create publication</string>
+    <string name="pub_name_label">Name</string>
+    <string name="press_no_code_title">No code yet</string>
+    <string name="press_no_code_body">Publish something to create a code — it is what readers scan to subscribe.</string>
+    <string name="press_open_room">Open the Press room</string>
 </resources>

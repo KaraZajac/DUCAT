@@ -60,9 +60,6 @@
     <string name="mode_press">مطبوعات</string>
     <string name="mode_press_desc">یک نشریه در ویترین: کد اشتراک روی پیشخوان، دعوت‌ها در گفتگوها.</string>
     <string name="press_tab_room">تحریریه</string>
-    <string name="press_none_yet">هنوز نشریه‌ای نیست — نامی بگذار تا مطبوعات پدید آید.</string>
-    <string name="press_name_hint">نام نشریه</string>
-    <string name="press_create">ایجاد</string>
     <string name="press_code_minting">در حال ساخت کد…</string>
     <string name="press_scan">برای اشتراک اسکن کنید</string>
     <string name="press_subscribed">%1$d مشترک</string>
@@ -75,4 +72,10 @@
     <string name="pub_delete_title">این نشریه حذف شود؟</string>
     <string name="pub_delete_body">مشترکان هر شماره‌ای را که فرستاده شده نگه می‌دارند. آگهی بازار و کد اشتراک خودبه‌خود منقضی می‌شوند. دیگر هرگز شماره‌ی تازه‌ای منتشر نخواهد شد — قابل بازگشت نیست.</string>
     <string name="pub_delete_confirm">حذف</string>
+    <string name="pub_empty_title">هنوز نشریه‌ای نیست</string>
+    <string name="pub_create_btn">ایجاد نشریه</string>
+    <string name="pub_name_label">نام</string>
+    <string name="press_no_code_title">هنوز کدی نیست</string>
+    <string name="press_no_code_body">چیزی منتشر کنید تا کدی ساخته شود — خوانندگان همان را برای اشتراک اسکن می‌کنند.</string>
+    <string name="press_open_room">باز کردن اتاق مطبوعات</string>
 </resources>

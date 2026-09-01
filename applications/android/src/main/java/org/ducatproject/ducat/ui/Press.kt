@@ -1,7 +1,9 @@
 package org.ducatproject.ducat.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,16 +11,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -30,8 +36,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -56,41 +64,46 @@ import org.ducatproject.ducat.R
 fun PressScreen() {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
-    val scope = androidx.compose.runtime.rememberCoroutineScope()
     val pubs = remember(version) { Publications.publications(context) }
 
-    // No press yet: the one-field beginning, same as the Publishing room.
+    // No press yet: the code stands for a publication, so this screen has
+    // nothing to show — it says where publications come from and takes you
+    // there. Creation lives in one place, the Press room.
     if (pubs.isEmpty()) {
-        var name by remember { mutableStateOf("") }
         Column(
-            Modifier.fillMaxSize().padding(24.dp),
+            Modifier.fillMaxSize().padding(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
         ) {
+            Box(
+                Modifier.size(72.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    Icons.Filled.QrCode,
+                    contentDescription = null,
+                    modifier = Modifier.size(36.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Spacer(Modifier.height(16.dp))
             Text(
-                stringResource(R.string.press_none_yet),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.height(12.dp))
-            OutlinedTextField(
-                name, { name = it },
-                label = { Text(stringResource(R.string.press_name_hint)) },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
+                stringResource(R.string.press_no_code_title),
+                style = MaterialTheme.typography.titleLarge,
             )
             Spacer(Modifier.height(8.dp))
-            Button(
-                enabled = name.isNotBlank(),
-                onClick = {
-                    scope.launch(Dispatchers.IO) {
-                        runCatching {
-                            val id = Publications.create(context, name.trim())
-                            Publications.setPressPub(context, id)
-                        }
-                        ContactStore.bump()
-                    }
-                },
-            ) { Text(stringResource(R.string.press_create)) }
+            Text(
+                stringResource(R.string.press_no_code_body),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(Modifier.height(20.dp))
+            Button(onClick = { shellTabRequest.value = 1 }) {
+                Text(stringResource(R.string.press_open_room))
+            }
         }
         return
     }

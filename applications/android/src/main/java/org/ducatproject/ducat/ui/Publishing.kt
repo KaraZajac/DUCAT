@@ -3,9 +3,11 @@ package org.ducatproject.ducat.ui
 import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,9 +15,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -23,6 +30,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -37,6 +46,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -73,7 +83,7 @@ fun PublishingSection() {
 
     val pubs = remember(version) { Publications.publications(context) }
     var selected by remember { mutableStateOf(pubs.firstOrNull()?.first) }
-    if (selected != null && pubs.none { it.first == selected }) selected = null
+    if (selected == null || pubs.none { it.first == selected }) selected = pubs.firstOrNull()?.first
     var busy by remember { mutableStateOf<String?>(null) }
     var lastWord by remember { mutableStateOf<String?>(null) }
 
@@ -81,15 +91,67 @@ fun PublishingSection() {
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text(
-            stringResource(R.string.pub_intro),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        var creating by remember { mutableStateOf(false) }
 
         // --- which publication, and the door to a new one -----------------
-        if (pubs.isNotEmpty()) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        //
+        // Creation is summoned, never ambient: a desk you manage things at
+        // does not keep a blank form on the counter. With no publications
+        // the whole screen is the invitation; with some, a small + at the
+        // end of the row.
+        if (pubs.isEmpty()) {
+            Column(
+                Modifier.fillMaxWidth().padding(top = 72.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Box(
+                    Modifier.size(72.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.MenuBook,
+                        contentDescription = null,
+                        modifier = Modifier.size(36.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    stringResource(R.string.pub_empty_title),
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    stringResource(R.string.pub_intro),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                )
+                Spacer(Modifier.height(20.dp))
+                Button(onClick = { creating = true }) {
+                    Text(stringResource(R.string.pub_create_btn))
+                }
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    stringResource(R.string.pub_none_yet),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                )
+            }
+        } else {
+            Text(
+                stringResource(R.string.pub_intro),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Row(
+                Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 pubs.forEach { (id, title) ->
                     FilterChip(
                         selected = id == selected,
@@ -97,24 +159,41 @@ fun PublishingSection() {
                         label = { Text(title.ifBlank { id.take(8) }) },
                     )
                 }
+                IconButton(onClick = { creating = true }) {
+                    Icon(
+                        Icons.Filled.Add,
+                        contentDescription = stringResource(R.string.pub_create_btn),
+                    )
+                }
             }
         }
-        var newTitle by remember { mutableStateOf("") }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            OutlinedTextField(
-                newTitle, { if (it.length <= 40) newTitle = it },
-                label = { Text(stringResource(R.string.pub_new_name)) },
-                singleLine = true,
-                modifier = Modifier.weight(1f),
-            )
-            Spacer(Modifier.width(8.dp))
-            TextButton(
-                enabled = newTitle.isNotBlank(),
-                onClick = {
-                    selected = Publications.create(context, newTitle.trim())
-                    newTitle = ""
+        if (creating) {
+            var newTitle by remember { mutableStateOf("") }
+            AlertDialog(
+                onDismissRequest = { creating = false },
+                title = { Text(stringResource(R.string.pub_new_name)) },
+                text = {
+                    OutlinedTextField(
+                        newTitle, { if (it.length <= 40) newTitle = it },
+                        label = { Text(stringResource(R.string.pub_name_label)) },
+                        singleLine = true,
+                    )
                 },
-            ) { Text(stringResource(R.string.pub_create)) }
+                confirmButton = {
+                    TextButton(
+                        enabled = newTitle.isNotBlank(),
+                        onClick = {
+                            selected = Publications.create(context, newTitle.trim())
+                            creating = false
+                        },
+                    ) { Text(stringResource(R.string.pub_create)) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { creating = false }) {
+                        Text(stringResource(R.string.common_cancel))
+                    }
+                },
+            )
         }
 
         // Scan-to-subscribe: a publish-purpose card, QR'd. Each opening
@@ -144,15 +223,7 @@ fun PublishingSection() {
         }
 
         val pubId = selected
-        if (pubId == null) {
-            if (pubs.isEmpty()) {
-                Text(
-                    stringResource(R.string.pub_none_yet),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        } else {
+        if (pubId != null) {
             // --- the price, which decides who the mailbag opens for -------
             val storedPrice = remember(version, pubId) { Publications.priceOf(context, pubId) }
             var priceText by remember(pubId) {

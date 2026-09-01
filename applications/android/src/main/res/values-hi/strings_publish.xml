@@ -60,9 +60,6 @@
     <string name="mode_press">प्रेस</string>
     <string name="mode_press_desc">एक प्रकाशन सामने: काउंटर पर सदस्यता कोड, थ्रेड में निमंत्रण।</string>
     <string name="press_tab_room">संपादकीय कक्ष</string>
-    <string name="press_none_yet">अभी कोई प्रकाशन नहीं — नाम दें और प्रेस बन जाए।</string>
-    <string name="press_name_hint">प्रकाशन का नाम</string>
-    <string name="press_create">बनाएँ</string>
     <string name="press_code_minting">कोड बन रहा है…</string>
     <string name="press_scan">सदस्यता के लिए स्कैन करें</string>
     <string name="press_subscribed">%1$d सदस्य</string>
@@ -75,4 +72,10 @@
     <string name="pub_delete_title">यह प्रकाशन हटाएँ?</string>
     <string name="pub_delete_body">सदस्यों के पास भेजे जा चुके सभी अंक रहेंगे। बाज़ार की सूची और सदस्यता कोड अपने आप समाप्त हो जाएँगे। अब कभी नया अंक नहीं निकल सकेगा — इसे वापस नहीं किया जा सकता।</string>
     <string name="pub_delete_confirm">हटाएँ</string>
+    <string name="pub_empty_title">अभी कोई प्रकाशन नहीं</string>
+    <string name="pub_create_btn">प्रकाशन बनाएँ</string>
+    <string name="pub_name_label">नाम</string>
+    <string name="press_no_code_title">अभी कोई कोड नहीं</string>
+    <string name="press_no_code_body">कोड बनाने के लिए कुछ प्रकाशित करें — इसे ही पाठक सदस्यता के लिए स्कैन करते हैं।</string>
+    <string name="press_open_room">प्रेस रूम खोलें</string>
 </resources>

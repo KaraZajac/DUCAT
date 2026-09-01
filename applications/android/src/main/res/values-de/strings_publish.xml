@@ -60,9 +60,6 @@
     <string name="mode_press">Presse</string>
     <string name="mode_press_desc">Eine Publikation im Schaufenster: Abo-Code auf dem Tresen, Einladungen in deine Threads.</string>
     <string name="press_tab_room">Redaktion</string>
-    <string name="press_none_yet">Noch keine Publikation — gib ihr einen Namen und die Presse existiert.</string>
-    <string name="press_name_hint">Name der Publikation</string>
-    <string name="press_create">Anlegen</string>
     <string name="press_code_minting">Code wird erstellt…</string>
     <string name="press_scan">Zum Abonnieren scannen</string>
     <string name="press_subscribed">%1$d abonniert</string>
@@ -75,4 +72,10 @@
     <string name="pub_delete_title">Diese Publikation löschen?</string>
     <string name="pub_delete_body">Abonnenten behalten jede bereits gesendete Ausgabe. Markteintrag und Abo-Code laufen von selbst ab. Es kann nie wieder eine neue Ausgabe erscheinen — das lässt sich nicht rückgängig machen.</string>
     <string name="pub_delete_confirm">Löschen</string>
+    <string name="pub_empty_title">Noch keine Publikationen</string>
+    <string name="pub_create_btn">Publikation erstellen</string>
+    <string name="pub_name_label">Name</string>
+    <string name="press_no_code_title">Noch kein Code</string>
+    <string name="press_no_code_body">Veröffentliche etwas, um einen Code zu erstellen — ihn scannen Leser, um zu abonnieren.</string>
+    <string name="press_open_room">Presseraum öffnen</string>
 </resources>

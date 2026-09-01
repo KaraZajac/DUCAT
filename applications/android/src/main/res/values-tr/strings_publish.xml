@@ -60,9 +60,6 @@
     <string name="mode_press">Basın</string>
     <string name="mode_press_desc">Bir yayın önde: tezgâhta abonelik kodu, sohbetlerine davetler.</string>
     <string name="press_tab_room">Yazı işleri</string>
-    <string name="press_none_yet">Henüz yayın yok — bir ad ver, basın var olsun.</string>
-    <string name="press_name_hint">Yayın adı</string>
-    <string name="press_create">Oluştur</string>
     <string name="press_code_minting">Kod oluşturuluyor…</string>
     <string name="press_scan">Abone olmak için tara</string>
     <string name="press_subscribed">%1$d abone</string>
@@ -75,4 +72,10 @@
     <string name="pub_delete_title">Bu yayın silinsin mi?</string>
     <string name="pub_delete_body">Aboneler gönderilmiş her sayıyı korur. Pazar ilanı ve abonelik kodu kendiliğinden sona erer. Bir daha asla yeni sayı çıkamaz — bu geri alınamaz.</string>
     <string name="pub_delete_confirm">Sil</string>
+    <string name="pub_empty_title">Henüz yayın yok</string>
+    <string name="pub_create_btn">Yayın oluştur</string>
+    <string name="pub_name_label">Ad</string>
+    <string name="press_no_code_title">Henüz kod yok</string>
+    <string name="press_no_code_body">Kod oluşturmak için bir şey yayımlayın — okurlar abone olmak için onu tarar.</string>
+    <string name="press_open_room">Basın odasını aç</string>
 </resources>

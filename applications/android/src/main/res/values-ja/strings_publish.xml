@@ -60,9 +60,6 @@
     <string name="mode_press">プレス</string>
     <string name="mode_press_desc">一つの出版物を前面に。カウンターに購読コード、スレッドに招待状。</string>
     <string name="press_tab_room">編集室</string>
-    <string name="press_none_yet">出版物がまだありません — 名前を付ければプレスの誕生です。</string>
-    <string name="press_name_hint">出版物の名前</string>
-    <string name="press_create">作成</string>
     <string name="press_code_minting">コードを作成中…</string>
     <string name="press_scan">スキャンして購読</string>
     <string name="press_subscribed">購読者 %1$d人</string>
@@ -75,4 +72,10 @@
     <string name="pub_delete_title">この出版物を削除しますか？</string>
     <string name="pub_delete_body">購読者は送付済みの号をすべて保持します。マーケットの掲載と購読コードは自然に失効します。新しい号は二度と発行できません — 元に戻せません。</string>
     <string name="pub_delete_confirm">削除</string>
+    <string name="pub_empty_title">出版物はまだありません</string>
+    <string name="pub_create_btn">出版物を作成</string>
+    <string name="pub_name_label">名前</string>
+    <string name="press_no_code_title">コードはまだありません</string>
+    <string name="press_no_code_body">何かを発行するとコードが作られます — 読者はそれをスキャンして購読します。</string>
+    <string name="press_open_room">プレスルームを開く</string>
 </resources>

@@ -60,9 +60,6 @@
     <string name="mode_press">Nhà in</string>
     <string name="mode_press_desc">Một ấn phẩm phía trước: mã đăng ký trên quầy, lời mời trong các cuộc trò chuyện.</string>
     <string name="press_tab_room">Tòa soạn</string>
-    <string name="press_none_yet">Chưa có ấn phẩm — đặt tên và nhà in ra đời.</string>
-    <string name="press_name_hint">Tên ấn phẩm</string>
-    <string name="press_create">Tạo</string>
     <string name="press_code_minting">Đang tạo mã…</string>
     <string name="press_scan">Quét để đăng ký</string>
     <string name="press_subscribed">%1$d người đăng ký</string>
@@ -75,4 +72,10 @@
     <string name="pub_delete_title">Xóa ấn phẩm này?</string>
     <string name="pub_delete_body">Người đăng ký giữ lại mọi số đã gửi. Tin rao trên chợ và mã đăng ký tự hết hạn. Sẽ không bao giờ ra được số mới nữa — không thể hoàn tác.</string>
     <string name="pub_delete_confirm">Xóa</string>
+    <string name="pub_empty_title">Chưa có ấn phẩm nào</string>
+    <string name="pub_create_btn">Tạo ấn phẩm</string>
+    <string name="pub_name_label">Tên</string>
+    <string name="press_no_code_title">Chưa có mã</string>
+    <string name="press_no_code_body">Xuất bản gì đó để tạo mã — đây là mã người đọc quét để đăng ký.</string>
+    <string name="press_open_room">Mở phòng báo chí</string>
 </resources>

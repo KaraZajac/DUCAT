@@ -60,9 +60,6 @@
     <string name="mode_press">Prasa</string>
     <string name="mode_press_desc">Jedna publikacja na froncie: kod subskrypcji na ladzie, zaproszenia w twoich wątkach.</string>
     <string name="press_tab_room">Redakcja</string>
-    <string name="press_none_yet">Nie ma jeszcze publikacji — nazwij ją, a prasa zaistnieje.</string>
-    <string name="press_name_hint">Nazwa publikacji</string>
-    <string name="press_create">Utwórz</string>
     <string name="press_code_minting">Tworzenie kodu…</string>
     <string name="press_scan">Zeskanuj, aby subskrybować</string>
     <string name="press_subscribed">Subskrybentów: %1$d</string>
@@ -75,4 +72,10 @@
     <string name="pub_delete_title">Usunąć tę publikację?</string>
     <string name="pub_delete_body">Subskrybenci zachowują każdy wysłany już numer. Ogłoszenie na rynku i kod subskrypcji wygasną same. Nowy numer nigdy już nie wyjdzie — tego nie można cofnąć.</string>
     <string name="pub_delete_confirm">Usuń</string>
+    <string name="pub_empty_title">Nie ma jeszcze publikacji</string>
+    <string name="pub_create_btn">Utwórz publikację</string>
+    <string name="pub_name_label">Nazwa</string>
+    <string name="press_no_code_title">Nie ma jeszcze kodu</string>
+    <string name="press_no_code_body">Opublikuj coś, aby utworzyć kod — to jego czytelnicy skanują, by subskrybować.</string>
+    <string name="press_open_room">Otwórz salę prasową</string>
 </resources>

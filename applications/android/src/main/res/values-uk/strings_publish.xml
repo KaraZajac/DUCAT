@@ -60,9 +60,6 @@
     <string name="mode_press">Преса</string>
     <string name="mode_press_desc">Одне видання на вітрині: код підписки на прилавку, запрошення вашими розмовами.</string>
     <string name="press_tab_room">Редакція</string>
-    <string name="press_none_yet">Видання ще немає — назвіть його, і преса з\'явиться.</string>
-    <string name="press_name_hint">Назва видання</string>
-    <string name="press_create">Створити</string>
     <string name="press_code_minting">Створюємо код…</string>
     <string name="press_scan">Скануйте, щоб підписатися</string>
     <string name="press_subscribed">Підписників: %1$d</string>
@@ -75,4 +72,10 @@
     <string name="pub_delete_title">Видалити це видання?</string>
     <string name="pub_delete_body">Підписники збережуть усі вже надіслані випуски. Оголошення на ринку та код підписки спливуть самі. Новий випуск більше ніколи не вийде — це не можна скасувати.</string>
     <string name="pub_delete_confirm">Видалити</string>
+    <string name="pub_empty_title">Видань поки немає</string>
+    <string name="pub_create_btn">Створити видання</string>
+    <string name="pub_name_label">Назва</string>
+    <string name="press_no_code_title">Коду поки немає</string>
+    <string name="press_no_code_body">Опублікуйте щось, щоб створити код — його сканують читачі, щоб підписатися.</string>
+    <string name="press_open_room">Відкрити прес-залу</string>
 </resources>

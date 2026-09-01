@@ -60,9 +60,6 @@
     <string name="mode_press">Пресса</string>
     <string name="mode_press_desc">Одно издание на витрине: код подписки на прилавке, приглашения по вашим переписям.</string>
     <string name="press_tab_room">Редакция</string>
-    <string name="press_none_yet">Издания пока нет — назовите его, и пресса появится.</string>
-    <string name="press_name_hint">Название издания</string>
-    <string name="press_create">Создать</string>
     <string name="press_code_minting">Создаём код…</string>
     <string name="press_scan">Сканируйте, чтобы подписаться</string>
     <string name="press_subscribed">Подписчиков: %1$d</string>
@@ -75,4 +72,10 @@
     <string name="pub_delete_title">Удалить это издание?</string>
     <string name="pub_delete_body">Подписчики сохранят все уже отправленные выпуски. Объявление на рынке и код подписки истекут сами. Новый выпуск больше никогда не выйдет — это нельзя отменить.</string>
     <string name="pub_delete_confirm">Удалить</string>
+    <string name="pub_empty_title">Изданий пока нет</string>
+    <string name="pub_create_btn">Создать издание</string>
+    <string name="pub_name_label">Название</string>
+    <string name="press_no_code_title">Кода пока нет</string>
+    <string name="press_no_code_body">Опубликуйте что-нибудь, чтобы создать код — его сканируют читатели, чтобы подписаться.</string>
+    <string name="press_open_room">Открыть пресс-зал</string>
 </resources>

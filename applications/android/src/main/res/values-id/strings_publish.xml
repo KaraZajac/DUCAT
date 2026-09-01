@@ -60,9 +60,6 @@
     <string name="mode_press">Pers</string>
     <string name="mode_press_desc">Satu terbitan di depan: kode langganan di meja, undangan lewat percakapanmu.</string>
     <string name="press_tab_room">Ruang redaksi</string>
-    <string name="press_none_yet">Belum ada terbitan — beri nama dan pers pun ada.</string>
-    <string name="press_name_hint">Nama terbitan</string>
-    <string name="press_create">Buat</string>
     <string name="press_code_minting">Membuat kode…</string>
     <string name="press_scan">Pindai untuk berlangganan</string>
     <string name="press_subscribed">%1$d pelanggan</string>
@@ -75,4 +72,10 @@
     <string name="pub_delete_title">Hapus publikasi ini?</string>
     <string name="pub_delete_body">Pelanggan tetap memiliki setiap edisi yang sudah dikirim. Iklan pasar dan kode langganan kedaluwarsa dengan sendirinya. Edisi baru tidak akan pernah bisa terbit lagi — ini tidak dapat dibatalkan.</string>
     <string name="pub_delete_confirm">Hapus</string>
+    <string name="pub_empty_title">Belum ada publikasi</string>
+    <string name="pub_create_btn">Buat publikasi</string>
+    <string name="pub_name_label">Nama</string>
+    <string name="press_no_code_title">Belum ada kode</string>
+    <string name="press_no_code_body">Terbitkan sesuatu untuk membuat kode — itulah yang dipindai pembaca untuk berlangganan.</string>
+    <string name="press_open_room">Buka ruang pers</string>
 </resources>
