@@ -2214,23 +2214,39 @@ class PersonaStore(context: Context) {
     }
 
     /** The roster for the typed backup leg, primary first. */
-    fun backupPersonas(): List<uniffi.ducat_mobile.PersonaBackup> = synchronized(lock) {
-        rosterLocked().map { (secret, p) ->
-            uniffi.ducat_mobile.PersonaBackup(
-                secret = secret,
-                name = p.name.ifBlank { null },
-                color = p.color.toULong() and 0xFFFFFFFFuL,
-                created = p.createdAt.toULong(),
-            )
+    fun backupPersonas(context: Context): List<uniffi.ducat_mobile.PersonaBackup> =
+        synchronized(lock) {
+            rosterLocked().map { (secret, p) ->
+                // Each hat travels dressed: its own §16.9 profile rides the
+                // roster entry, so a restore returns every face, not just
+                // the primary's (which also keeps its legacy top-level copy
+                // for readers from the single-profile era).
+                val mp = MyProfile(context, p.hex)
+                uniffi.ducat_mobile.PersonaBackup(
+                    secret = secret,
+                    name = p.name.ifBlank { null },
+                    color = p.color.toULong() and 0xFFFFFFFFuL,
+                    created = p.createdAt.toULong(),
+                    displayName = mp.name(),
+                    avatar = mp.avatar(),
+                    email = mp.email(),
+                    phone = mp.phone(),
+                    signal = mp.signal(),
+                    pronouns = mp.pronouns()?.toULong(),
+                    carModel = mp.carModel(),
+                    carColor = mp.carColor(),
+                    plate = mp.plate(),
+                    shareProfile = mp.shareProfile(),
+                )
+            }
         }
-    }
 
     /**
      * Restore the whole roster from a typed bundle. Wholesale replacement —
      * a restore is becoming that phone, compartments and all. An empty list
      * (an old bundle) leaves whatever [restoreSecret] already installed.
      */
-    fun restoreRoster(entries: List<uniffi.ducat_mobile.PersonaBackup>) {
+    fun restoreRoster(context: Context, entries: List<uniffi.ducat_mobile.PersonaBackup>) {
         if (entries.isEmpty()) return
         synchronized(lock) {
             writeLocked(entries.map { e ->
@@ -2241,6 +2257,33 @@ class PersonaStore(context: Context) {
                     createdAt = e.created.toLong(),
                 )
             })
+        }
+        // The faces, after the keys. Written only for entries that carry
+        // one, so an old bundle leaves whatever the legacy top-level fields
+        // already restored — and where both exist, this per-persona copy is
+        // the newer statement and wins.
+        for (e in entries) {
+            val dressed = e.displayName != null || e.avatar != null ||
+                e.email != null || e.phone != null || e.signal != null ||
+                e.pronouns != null || e.carModel != null ||
+                e.carColor != null || e.plate != null || !e.shareProfile
+            if (!dressed) continue
+            val hex = uniffi.ducat_mobile.personaPublicHex(e.secret)
+            MyProfile(context, hex).let { p ->
+                p.setName(e.displayName)
+                p.setAvatar(e.avatar)
+                p.setEmail(e.email)
+                p.setPhone(e.phone)
+                p.setSignal(e.signal)
+                p.setPronouns(e.pronouns?.toInt())
+                p.setCarModel(e.carModel)
+                p.setCarColor(e.carColor)
+                p.setPlate(e.plate)
+                p.setShareProfile(e.shareProfile)
+            }
+            NameStore(context, hex).let { n ->
+                e.displayName?.let { n.put(it) }
+            }
         }
     }
 }

@@ -829,6 +829,85 @@ fn backup_cases() -> Vec<J> {
         "hint": "the layout is MAGIC(15) || salt(16) || nonce(24) || AEAD ciphertext"
     })];
 
+    // Post-1.0: each persona carries its own §16.9 profile. Pinned here at
+    // the enumeration's edge — a second implementation that drops or renames
+    // one per-persona key silently loses somebody's face on restore.
+    let dressed = Backup {
+        personas: vec![
+            ducat_core::backup::BackupPersona {
+                secret: vec![0x11; 32],
+                name: None,
+                color: 0,
+                created: 1_799_000_000,
+                display_name: Some("Sam".into()),
+                avatar: None,
+                email: Some("sam@example.org".into()),
+                phone: None,
+                signal: None,
+                pronouns: Some(1),
+                car_model: None,
+                car_color: None,
+                plate: None,
+                share_profile: true,
+            },
+            ducat_core::backup::BackupPersona {
+                secret: vec![0x22; 32],
+                name: Some("Shop".into()),
+                color: 0xFAB387,
+                created: 1_799_500_000,
+                display_name: Some("Corner Shop".into()),
+                avatar: Some(vec![0x89, 0x50, 0x4E, 0x47]),
+                email: None,
+                phone: Some("15551234567".into()),
+                signal: None,
+                pronouns: None,
+                car_model: Some("Vauxhall Astra".into()),
+                car_color: Some("green".into()),
+                plate: Some("AB12 CDE".into()),
+                share_profile: false,
+            },
+        ],
+        ..base.clone()
+    };
+    let dressed_blob = export(&dressed, pass, salt, nonce).expect("export");
+    cases.push(json!({
+        "name": "personas_carry_their_profiles",
+        "why": "post-1.0 compartments: every persona's own profile rides its roster entry                 (keys 4..13 in the per-persona map), the primary's copy still also riding                 the legacy top-level fields. share_profile is written only when off —                 absence decodes as on, the stored default.",
+        "passphrase_utf8": String::from_utf8_lossy(pass),
+        "salt_hex": hex(&salt),
+        "nonce_hex": hex(&nonce),
+        "kdf": {"algorithm": "argon2id", "version": 19, "memory_kib": 65536, "iterations": 3, "lanes": 1, "output_len": 32},
+        "blob_hex": hex(&dressed_blob),
+        "expect": {
+            "ok": true,
+            "decoded": {
+                "persona_suite": 1,
+                "persona_secret_hex": hex(&base.persona_secret),
+                "monero_seed": seed,
+                "monero_restore_height": 2_183_500u64,
+                "rendezvous_hex": base.rendezvous.iter().map(|r| hex(r)).collect::<Vec<_>>(),
+                "attestation_records_hex": base.attestation_records.iter().map(|r| hex(r)).collect::<Vec<_>>(),
+                "mandates_hex": base.mandates.iter().map(|r| hex(r)).collect::<Vec<_>>(),
+                "verification": {
+                    "device_unlock_at": base.verification.device_unlock_at,
+                    "app_secret_at": base.verification.app_secret_at,
+                    "app_secret_validity_s": base.verification.app_secret_validity_s,
+                    "cumulative_at": base.verification.cumulative_at,
+                    "cumulative_window_s": base.verification.cumulative_window_s
+                },
+                "created": 1_800_000_000u64,
+                "personas": [
+                    {"secret_hex": hex(&[0x11; 32]), "display_name": "Sam",
+                     "email": "sam@example.org", "pronouns": 1u64, "share_profile": true},
+                    {"secret_hex": hex(&[0x22; 32]), "name": "Shop", "color": 0xFAB387u64,
+                     "display_name": "Corner Shop", "avatar_hex": hex(&[0x89, 0x50, 0x4E, 0x47]),
+                     "phone": "15551234567", "car_model": "Vauxhall Astra",
+                     "car_color": "green", "plate": "AB12 CDE", "share_profile": false}
+                ]
+            }
+        }
+    }));
+
     cases.push(json!({
         "name": "wrong_passphrase",
         "why": "must be indistinguishable from a tampered file — reporting them differently \

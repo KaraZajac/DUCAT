@@ -732,6 +732,7 @@ def run_backup(cases, r):
         if got is None or "decoded" not in c["expect"]:
             continue
         d = c["expect"]["decoded"]
+        bad = None
         for key, want, label in [
             (1, d["persona_suite"], "persona_suite"),
             (3, d["monero_seed"], "monero_seed"),
@@ -739,10 +740,45 @@ def run_backup(cases, r):
             (7, d["created"], "created"),
         ]:
             if got[key][1] != want:
-                r.passed -= 1
-                r.bad("backup", c["name"], c.get("why", ""),
-                      f"{label}: we read {got[key][1]!r}, vector says {want!r}")
+                bad = f"{label}: we read {got[key][1]!r}, vector says {want!r}"
                 break
+        # Post-1.0: each persona's own profile rides its roster entry
+        # (per-persona keys 4..13). Asserted field by field when the vector
+        # says so — this is the enumeration's edge, and the blind-spot rule
+        # says pin it on both sides.
+        if bad is None and "personas" in d:
+            P = {"name": 1, "color": 2, "display_name": 4, "email": 6,
+                 "phone": 7, "signal": 8, "pronouns": 9, "car_model": 10,
+                 "car_color": 11, "plate": 12}
+            entries = [dict(e[1]) for e in got[27][1]]
+            if len(entries) != len(d["personas"]):
+                bad = f"personas: we read {len(entries)}, vector says {len(d['personas'])}"
+            else:
+                for i, want_p in enumerate(d["personas"]):
+                    e = entries[i]
+                    if e[0][1].hex() != want_p["secret_hex"]:
+                        bad = f"personas[{i}].secret differs"
+                        break
+                    if want_p.get("avatar_hex") is not None and                             e.get(5, (None, b""))[1].hex() != want_p["avatar_hex"]:
+                        bad = f"personas[{i}].avatar differs"
+                        break
+                    # share_profile: written only when off; absence means on.
+                    share = e.get(13, (None, 1))[1] != 0
+                    if share != want_p.get("share_profile", True):
+                        bad = f"personas[{i}].share_profile: we read {share}"
+                        break
+                    for label, key in P.items():
+                        want_v = want_p.get(label)
+                        got_v = e.get(key, (None, None))[1] if key in e else None
+                        if want_v is not None and got_v != want_v:
+                            bad = (f"personas[{i}].{label}: we read {got_v!r}, "
+                                   f"vector says {want_v!r}")
+                            break
+                    if bad:
+                        break
+        if bad:
+            r.passed -= 1
+            r.bad("backup", c["name"], c.get("why", ""), bad)
 
 
 # `kind` is the single discriminator. Nothing is routed by filename or by

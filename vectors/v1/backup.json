@@ -48,6 +48,71 @@
       "why": "the whole format at once — Argon2id parameters, XChaCha20-Poly1305, the AAD, and every CBOR field number. An implementation that differs anywhere produces a file no other client can open, reporting only 'wrong passphrase'."
     },
     {
+      "blob_hex": "44554341542d4241434b55502d76314242424242424242424242424242424237373737373737373737373737373737373737373737373727a9436b092e538de4905cf48b83e9f60b0fe10143b13c670148704163edbd5f3bfb780805d89b3cd3ed201b8b5eccc59a5001c60d55e04a3fdc73dc0adf4158bcaff94b4e5a4e0a362259482995bf37d605a29ad4ca5715836346621968387d70f6449a8d79330a46beb8f0566c796b2596cd8e417ef060416b9f631ccd81fa912308315354c3c131fc1a01e338ed9c78bf008bb2aa6e7c4b0658dc015950f9d619b2e68d47451083e9db6169c8bd1b3c2c683e1c0915f2d9cadac40cf6d6d88c640a7b090d1009a91897709cc4c961771a1db4c5ebdf1440107be384adcdf1c5efacd506bb3cbe1410a22f8cdd9b2e96eafaadd88a020adeaf6fb9ce34b7b2efe4c2a12b454c3a09106ff5aa82dc5ebc65247b4315babacf9997c4149e7a96803c70ddbeda0eedcd6aec2ba0626dd513cb4c670bfeafdad461cd0c9b00c6631d546ca83ad0ce22ac13de4de8f59203de856cafb140b7544c7208663212740253a720017a5f4015edd6700253dd646f2b66372630ff3029317a2f06122574cc852f03a29c90fd7a5f37dbd52302ab405820522805b5997ff49bf6baa65b57d8b509ed1bcf75b5ccad475201d3e0bb5e87d4fdd27932e789af68d02ce7bcf38721df2b6f1da54a1d0aabee052ba930de806193aa9bbd97e7adda227286f058c59dc567b2a2b4492a66f70a0e772668927a1c99a631c6de2ca751205fe8aad83dcdc178816177991c31c95c779fc962647db408ffcb5296b83584d833fcb00fab5b2b46cac8dea593b0e34e34db5914d357a9591c21d1561d7f328a3687215852777f732ef22df0e06b5abe446adf5f7ffe69934c0fb4cc2c5d34b386d14b9d7c3c30ce7580df21aad767b9cdf8decdf414edb662681f7add1012d58c415c889a092ef6e16be1051bdb844159f0d8d8f736aaf6d551bb7b19117efd66cdf51f8697d2ab4d968e6bbf408f9658ed8b1eabd20de090d240a69b6f31bde14165129757",
+      "expect": {
+        "decoded": {
+          "attestation_records_hex": [
+            "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+          ],
+          "created": 1800000000,
+          "mandates_hex": [
+            "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+          ],
+          "monero_restore_height": 2183500,
+          "monero_seed": "abbey abducts ability able abnormal abort about above absurd abyss academy accent acid acoustic acquire across actress acute adapt addicted adept adhesive adjust adopt abbey",
+          "persona_secret_hex": "1111111111111111111111111111111111111111111111111111111111111111",
+          "persona_suite": 1,
+          "personas": [
+            {
+              "display_name": "Sam",
+              "email": "sam@example.org",
+              "pronouns": 1,
+              "secret_hex": "1111111111111111111111111111111111111111111111111111111111111111",
+              "share_profile": true
+            },
+            {
+              "avatar_hex": "89504e47",
+              "car_color": "green",
+              "car_model": "Vauxhall Astra",
+              "color": 16429959,
+              "display_name": "Corner Shop",
+              "name": "Shop",
+              "phone": "15551234567",
+              "plate": "AB12 CDE",
+              "secret_hex": "2222222222222222222222222222222222222222222222222222222222222222",
+              "share_profile": false
+            }
+          ],
+          "rendezvous_hex": [
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          ],
+          "verification": {
+            "app_secret_at": 10000,
+            "app_secret_validity_s": 120,
+            "cumulative_at": 20000,
+            "cumulative_window_s": 3600,
+            "device_unlock_at": 2000
+          }
+        },
+        "ok": true
+      },
+      "kdf": {
+        "algorithm": "argon2id",
+        "iterations": 3,
+        "lanes": 1,
+        "memory_kib": 65536,
+        "output_len": 32,
+        "version": 19
+      },
+      "kind": "backup.import",
+      "name": "personas_carry_their_profiles",
+      "nonce_hex": "373737373737373737373737373737373737373737373737",
+      "passphrase_utf8": "a fixed passphrase",
+      "salt_hex": "42424242424242424242424242424242",
+      "why": "post-1.0 compartments: every persona's own profile rides its roster entry                 (keys 4..13 in the per-persona map), the primary's copy still also riding                 the legacy top-level fields. share_profile is written only when off —                 absence decodes as on, the stored default."
+    },
+    {
       "blob_hex": "44554341542d4241434b55502d76314242424242424242424242424242424237373737373737373737373737373737373737373737373738a9436b092e538de4905cf48b83e9f60b0fe10143b13c670148704163edbd5f3bfb780805d89b3cd3ed201b8b5eccc59a5001c60d55e04a3fdc73dc0adf4158bcaff94b4e5a4e0a362259482995bf37d605a29ad4ca5715836346621968387d70f6449a8d79330a46beb8f0566c796b2596cd8e417ef060416b9f631ccd81fa912308315354c3c131fc1a01e338ed9c78bf008bb2aa6e7c4b0658dc015950f9d619b2e68d47451083e9db6169c8bd1b3c2c683e1c0915f2d9cadac40cf6d6d88c640a7b090d1009a91897709cc4c961771a1db4c5ebdf1440107be384adcdf1c5efacd506bb3cbe1410a22f8cdd9b2e96eafaadd88a020adeaf6fb9ce34b7b2efe4c2a12b454c3a09106ff5aa82dc5ebc65247b4315babacf9997c4149e7a96803c70ddbeda0eedcd6aec2ba0626dd513cb4c670bfeafdad461cd0c9b00c6631d546ca83ad0ce22ac13de4de8f59203de856cafb140b7544c7208663212740253a720017a5f4015edd6700253dd646f2b66372630ff3029317a2f06122574cc852f03a29c90fd7a5f37dbd52302ab405820522805b5997ff49bf6baa65b57d8b509ed1bcf75b5ccad475201d3e0bb5e87d4fdd27932e789af68d02ce7bcf38721df2b6f1da54a1d0aabee052ba930de806193aa9bbd97e7adda227286f058c59dc567b2a2b4492a66f70a0e772668927a1c997f7d958032f737c436f2d852bf6fefa4",
       "expect": {
         "ok": false,

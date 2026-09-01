@@ -625,7 +625,7 @@ private fun BackupStep(state: Onboarding, onDone: () -> Unit) {
                                             ContactStore(context).backupPrekeys().third.toULong(),
                                             ContactStore(context).backupAppState(),
                                             Ceremony.backupShares(context),
-                                            PersonaStore(context).backupPersonas(),
+                                            PersonaStore(context).backupPersonas(context),
                                         ),
                                         passphrase,
                                         persona,

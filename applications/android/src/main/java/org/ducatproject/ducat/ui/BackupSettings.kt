@@ -143,7 +143,7 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
                                             // The compartments, primary first —
                                             // a restore is becoming this phone,
                                             // every hat included.
-                                            PersonaStore(context).backupPersonas(),
+                                            PersonaStore(context).backupPersonas(context),
                                         ),
                                         passphrase,
                                         personaSecret!!,
@@ -268,7 +268,6 @@ internal fun applyBackup(
     // send is signed with ours, so a device that recovered the threads and
     // kept its own keypair is a stranger to everyone in them.
     PersonaStore(context).restoreSecret(r.personaSecret)
-    PersonaStore(context).restoreRoster(r.personas)
     // Settings come back too. A restore that keeps the money and drops the name
     // and the privacy choice has quietly changed both, and the user has no way
     // to notice — publishing especially, where the wrong direction is a silent
@@ -285,6 +284,10 @@ internal fun applyBackup(
         p.setSignal(r.profile.signal)
         p.setPronouns(r.profile.pronouns?.toInt())
     }
+    // The roster after the legacy fields: each entry that carries its own
+    // profile overlays them, so a new bundle dresses every hat and an old
+    // one leaves the primary's top-level restore standing.
+    PersonaStore(context).restoreRoster(context, r.personas)
     // The relationships. Threads and tabs from the opaque blob, then the typed
     // contacts as the authoritative overlay — so a bundle from another client
     // still restores everyone.

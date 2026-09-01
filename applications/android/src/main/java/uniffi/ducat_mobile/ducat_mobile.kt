@@ -3899,7 +3899,17 @@ data class PersonaBackup (
     var `secret`: kotlin.ByteArray, 
     var `name`: kotlin.String?, 
     var `color`: kotlin.ULong, 
-    var `created`: kotlin.ULong
+    var `created`: kotlin.ULong, 
+    var `displayName`: kotlin.String?, 
+    var `avatar`: kotlin.ByteArray?, 
+    var `email`: kotlin.String?, 
+    var `phone`: kotlin.String?, 
+    var `signal`: kotlin.String?, 
+    var `pronouns`: kotlin.ULong?, 
+    var `carModel`: kotlin.String?, 
+    var `carColor`: kotlin.String?, 
+    var `plate`: kotlin.String?, 
+    var `shareProfile`: kotlin.Boolean
 ) {
     
     companion object
@@ -3915,6 +3925,16 @@ public object FfiConverterTypePersonaBackup: FfiConverterRustBuffer<PersonaBacku
             FfiConverterOptionalString.read(buf),
             FfiConverterULong.read(buf),
             FfiConverterULong.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterBoolean.read(buf),
         )
     }
 
@@ -3922,7 +3942,17 @@ public object FfiConverterTypePersonaBackup: FfiConverterRustBuffer<PersonaBacku
             FfiConverterByteArray.allocationSize(value.`secret`) +
             FfiConverterOptionalString.allocationSize(value.`name`) +
             FfiConverterULong.allocationSize(value.`color`) +
-            FfiConverterULong.allocationSize(value.`created`)
+            FfiConverterULong.allocationSize(value.`created`) +
+            FfiConverterOptionalString.allocationSize(value.`displayName`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`avatar`) +
+            FfiConverterOptionalString.allocationSize(value.`email`) +
+            FfiConverterOptionalString.allocationSize(value.`phone`) +
+            FfiConverterOptionalString.allocationSize(value.`signal`) +
+            FfiConverterOptionalULong.allocationSize(value.`pronouns`) +
+            FfiConverterOptionalString.allocationSize(value.`carModel`) +
+            FfiConverterOptionalString.allocationSize(value.`carColor`) +
+            FfiConverterOptionalString.allocationSize(value.`plate`) +
+            FfiConverterBoolean.allocationSize(value.`shareProfile`)
     )
 
     override fun write(value: PersonaBackup, buf: ByteBuffer) {
@@ -3930,6 +3960,16 @@ public object FfiConverterTypePersonaBackup: FfiConverterRustBuffer<PersonaBacku
             FfiConverterOptionalString.write(value.`name`, buf)
             FfiConverterULong.write(value.`color`, buf)
             FfiConverterULong.write(value.`created`, buf)
+            FfiConverterOptionalString.write(value.`displayName`, buf)
+            FfiConverterOptionalByteArray.write(value.`avatar`, buf)
+            FfiConverterOptionalString.write(value.`email`, buf)
+            FfiConverterOptionalString.write(value.`phone`, buf)
+            FfiConverterOptionalString.write(value.`signal`, buf)
+            FfiConverterOptionalULong.write(value.`pronouns`, buf)
+            FfiConverterOptionalString.write(value.`carModel`, buf)
+            FfiConverterOptionalString.write(value.`carColor`, buf)
+            FfiConverterOptionalString.write(value.`plate`, buf)
+            FfiConverterBoolean.write(value.`shareProfile`, buf)
     }
 }
 

@@ -293,7 +293,7 @@ to a banknote.
 ```
 ducat-protocol.md   the spec — 1.1.0-dev1 on this branch (1.0.0-rc1 is the frozen line), changelog first
 core/               reference implementation (Rust)
-vectors/            366 conformance cases + schema — the published artifact
+vectors/            367 conformance cases + schema — the published artifact
 conformance/        four checkers: schema, second implementation, spec audit,
                     declared dependencies
 harness/            end-to-end over real Veilid routes and real settlement

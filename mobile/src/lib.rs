@@ -475,6 +475,18 @@ pub struct PersonaBackup {
     pub name: Option<String>,
     pub color: u64,
     pub created: u64,
+    // §16.9 per persona — the presentation follows the hat, and so does
+    // the backup. All optional; old bundles decode with these absent.
+    pub display_name: Option<String>,
+    pub avatar: Option<Vec<u8>>,
+    pub email: Option<String>,
+    pub phone: Option<String>,
+    pub signal: Option<String>,
+    pub pronouns: Option<u64>,
+    pub car_model: Option<String>,
+    pub car_color: Option<String>,
+    pub plate: Option<String>,
+    pub share_profile: bool,
 }
 
 #[derive(uniffi::Record, Clone)]
@@ -669,6 +681,16 @@ pub fn export_backup(
                 name: p.name.clone(),
                 color: p.color,
                 created: p.created,
+                display_name: p.display_name.clone(),
+                avatar: p.avatar.clone(),
+                email: p.email.clone(),
+                phone: p.phone.clone(),
+                signal: p.signal.clone(),
+                pronouns: p.pronouns,
+                car_model: p.car_model.clone(),
+                car_color: p.car_color.clone(),
+                plate: p.plate.clone(),
+                share_profile: p.share_profile,
             })
             .collect(),
         prekey_signed_secret: input.prekey_signed_secret.clone(),
@@ -946,6 +968,16 @@ pub fn import_backup(blob: Vec<u8>, passphrase: String) -> Result<RestoredBackup
                 name: p.name.clone(),
                 color: p.color,
                 created: p.created,
+                display_name: p.display_name.clone(),
+                avatar: p.avatar.clone(),
+                email: p.email.clone(),
+                phone: p.phone.clone(),
+                signal: p.signal.clone(),
+                pronouns: p.pronouns,
+                car_model: p.car_model.clone(),
+                car_color: p.car_color.clone(),
+                plate: p.plate.clone(),
+                share_profile: p.share_profile,
             })
             .collect(),
         prekey_signed_secret: b.prekey_signed_secret.clone(),

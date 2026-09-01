@@ -114,6 +114,22 @@ mod k {
     pub const P_NAME: u64 = 1;
     pub const P_COLOR: u64 = 2;
     pub const P_CREATED: u64 = 3;
+    // The persona's own §16.9 profile (post-1.0: the presentation follows
+    // the hat). All optional: a v1 bundle from before these existed decodes
+    // with every one absent, and a reader from before ignores them — the
+    // per-persona map has never had an unknown-key rejection, by design.
+    pub const P_DISPLAY_NAME: u64 = 4;
+    pub const P_AVATAR: u64 = 5;
+    pub const P_EMAIL: u64 = 6;
+    pub const P_PHONE: u64 = 7;
+    pub const P_SIGNAL: u64 = 8;
+    pub const P_PRONOUNS: u64 = 9;
+    pub const P_CAR_MODEL: u64 = 10;
+    pub const P_CAR_COLOR: u64 = 11;
+    pub const P_PLATE: u64 = 12;
+    // Present (as 0) only when sharing is off: absence decodes as on, the
+    // field's own default, so old bundles keep their meaning.
+    pub const P_SHARE: u64 = 13;
     pub const ESCROW_KEY_FILE: u64 = 1;
     pub const ESCROW_RESTORE_HEIGHT: u64 = 2;
 }
@@ -371,6 +387,21 @@ pub struct BackupPersona {
     pub name: Option<String>,
     pub color: u64,
     pub created: u64,
+    /// §16.9 per persona: the face this compartment shows. The primary's
+    /// copy also rides the bundle's legacy top-level fields for readers
+    /// from the single-profile era; on import the per-persona copy wins.
+    pub display_name: Option<String>,
+    pub avatar: Option<Vec<u8>>,
+    pub email: Option<String>,
+    pub phone: Option<String>,
+    pub signal: Option<String>,
+    pub pronouns: Option<u64>,
+    pub car_model: Option<String>,
+    pub car_color: Option<String>,
+    pub plate: Option<String>,
+    /// Whether the optional fields go out with a new contact. True is the
+    /// stored default; only a deliberate off is written to the wire.
+    pub share_profile: bool,
 }
 
 impl BackupPersona {
@@ -386,6 +417,36 @@ impl BackupPersona {
         if self.created > 0 {
             m.insert(k::P_CREATED, Value::Uint(self.created));
         }
+        if let Some(v) = &self.display_name {
+            m.insert(k::P_DISPLAY_NAME, Value::Text(v.clone()));
+        }
+        if let Some(v) = &self.avatar {
+            m.insert(k::P_AVATAR, Value::Bytes(v.clone()));
+        }
+        if let Some(v) = &self.email {
+            m.insert(k::P_EMAIL, Value::Text(v.clone()));
+        }
+        if let Some(v) = &self.phone {
+            m.insert(k::P_PHONE, Value::Text(v.clone()));
+        }
+        if let Some(v) = &self.signal {
+            m.insert(k::P_SIGNAL, Value::Text(v.clone()));
+        }
+        if let Some(v) = self.pronouns {
+            m.insert(k::P_PRONOUNS, Value::Uint(v));
+        }
+        if let Some(v) = &self.car_model {
+            m.insert(k::P_CAR_MODEL, Value::Text(v.clone()));
+        }
+        if let Some(v) = &self.car_color {
+            m.insert(k::P_CAR_COLOR, Value::Text(v.clone()));
+        }
+        if let Some(v) = &self.plate {
+            m.insert(k::P_PLATE, Value::Text(v.clone()));
+        }
+        if !self.share_profile {
+            m.insert(k::P_SHARE, Value::Uint(0));
+        }
         Value::Map(m)
     }
 
@@ -394,15 +455,30 @@ impl BackupPersona {
             Value::Map(m) => m,
             _ => return Err(Reject::new(RejectCode::Malformed)),
         };
+        let text = |key: u64| m.get(&key).and_then(|v| v.as_text()).map(|s| s.to_string());
         Ok(BackupPersona {
             secret: m
                 .get(&k::P_SECRET)
                 .and_then(|v| v.as_bytes())
                 .map(|b| b.to_vec())
                 .ok_or_else(|| Reject::new(RejectCode::Malformed))?,
-            name: m.get(&k::P_NAME).and_then(|v| v.as_text()).map(|s| s.to_string()),
+            name: text(k::P_NAME),
             color: m.get(&k::P_COLOR).and_then(|v| v.as_uint()).unwrap_or(0),
             created: m.get(&k::P_CREATED).and_then(|v| v.as_uint()).unwrap_or(0),
+            display_name: text(k::P_DISPLAY_NAME),
+            avatar: m.get(&k::P_AVATAR).and_then(|v| v.as_bytes()).map(|b| b.to_vec()),
+            email: text(k::P_EMAIL),
+            phone: text(k::P_PHONE),
+            signal: text(k::P_SIGNAL),
+            pronouns: m.get(&k::P_PRONOUNS).and_then(|v| v.as_uint()),
+            car_model: text(k::P_CAR_MODEL),
+            car_color: text(k::P_CAR_COLOR),
+            plate: text(k::P_PLATE),
+            share_profile: m
+                .get(&k::P_SHARE)
+                .and_then(|v| v.as_uint())
+                .map(|u| u != 0)
+                .unwrap_or(true),
         })
     }
 }

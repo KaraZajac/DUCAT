@@ -58,6 +58,14 @@ private fun personaRound() {
     pSrc.setWorn(shop.hex)
     org.ducatproject.ducat.ModeStore(src)
         .bindPersona(org.ducatproject.ducat.Mode.Pos, shop.hex)
+    // Each hat dressed differently, so the restore can prove the faces
+    // came back to the right heads and not merged onto one.
+    org.ducatproject.ducat.MyProfile(src, primary).let {
+        it.setName("Sam"); it.setEmail("sam@example.org")
+    }
+    org.ducatproject.ducat.MyProfile(src, shop.hex).let {
+        it.setName("Corner Shop"); it.setPlate("AB12 CDE"); it.setShareProfile(false)
+    }
 
     // One contact behind the shop's wall, one from the single-persona era
     // (blank owner must keep resolving to the primary, §1.1a's migration).
@@ -92,7 +100,7 @@ private fun personaRound() {
             prekeyNextId = 1uL,
             appState = store.backupAppState(),
             escrowShares = emptyList(),
-            personas = pSrc.backupPersonas(),
+            personas = pSrc.backupPersonas(src),
         ),
         "correcthorsebattery",
         pSrc.secret(),
@@ -125,7 +133,26 @@ private fun personaRound() {
         "BACKUPTEST_FAIL a blank owner stopped resolving to the primary"
     }
 
-    println("BACKUPTEST_OK personas: roster=2 worn=shop binding=till→shop walls=held")
+    val prim = org.ducatproject.ducat.MyProfile(dst, primary)
+    check(prim.name() == "Sam" && prim.email() == "sam@example.org") {
+        "BACKUPTEST_FAIL the primary's face: name=${prim.name()} email=${prim.email()}"
+    }
+    val shopFace = org.ducatproject.ducat.MyProfile(dst, shop.hex)
+    check(
+        shopFace.name() == "Corner Shop" && shopFace.plate() == "AB12 CDE" &&
+            !shopFace.shareProfile(),
+    ) {
+        "BACKUPTEST_FAIL the shop's face: name=${shopFace.name()} " +
+            "plate=${shopFace.plate()} share=${shopFace.shareProfile()}"
+    }
+    check(org.ducatproject.ducat.NameStore(dst, shop.hex).get() == "Corner Shop") {
+        "BACKUPTEST_FAIL the shop's card name diverged from its profile"
+    }
+
+    println(
+        "BACKUPTEST_OK personas: roster=2 worn=shop binding=till→shop " +
+            "walls=held faces=dressed",
+    )
 }
 
 private fun appState() {
