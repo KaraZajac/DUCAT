@@ -24,4 +24,5 @@
     <plurals name="main_issues_waiting">
         <item quantity="other">%1$d edisi baru menunggu</item>
     </plurals>
+    <string name="library_open">Buka</string>
 </resources>

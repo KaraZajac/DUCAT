@@ -24,4 +24,5 @@
     <plurals name="main_issues_waiting">
         <item quantity="other">새 호 %1$d개 대기 중</item>
     </plurals>
+    <string name="library_open">열기</string>
 </resources>

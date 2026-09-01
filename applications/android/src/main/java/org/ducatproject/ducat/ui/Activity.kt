@@ -63,6 +63,7 @@ fun ActivityScreen() {
     var pending by remember { mutableStateOf<List<Ledger.OpenRequest>>(emptyList()) }
     var tip by remember { mutableStateOf(0L) }
     var tabs by remember { mutableStateOf<List<org.ducatproject.ducat.RunningTab>>(emptyList()) }
+    var settled by remember { mutableStateOf(false) }
     LaunchedEffect(version) {
         withContext(Dispatchers.IO) {
             events = Ledger.build(context)
@@ -70,6 +71,7 @@ fun ActivityScreen() {
             tip = org.ducatproject.ducat.WalletStore(context).tip()
             tabs = org.ducatproject.ducat.TabStore(context).all()
         }
+        settled = true
     }
     var open by remember { mutableStateOf<Ledger.Event?>(null) }
 
@@ -192,6 +194,20 @@ fun ActivityScreen() {
         }
 
     if (events.isEmpty()) {
+        // "Nothing yet" waits for the ledger to have actually been built
+        // once: a history-sized read runs off-main, and the empty copy
+        // painted during it told a wallet with months of history it was
+        // new. A quiet spinner is the honest interim.
+        if (!settled) {
+            Column(
+                Modifier.fillMaxSize().padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                CircularProgressIndicator()
+            }
+            return
+        }
         Column(
             Modifier.fillMaxSize().padding(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,

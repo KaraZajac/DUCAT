@@ -29,4 +29,5 @@
         <item quantity="many">%1$d عددًا جديدًا بانتظارك</item>
         <item quantity="other">%1$d عدد جديد بانتظارك</item>
     </plurals>
+    <string name="library_open">فتح</string>
 </resources>

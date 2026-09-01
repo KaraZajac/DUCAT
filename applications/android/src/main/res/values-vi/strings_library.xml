@@ -24,4 +24,5 @@
     <plurals name="main_issues_waiting">
         <item quantity="other">%1$d số mới đang chờ</item>
     </plurals>
+    <string name="library_open">Mở</string>
 </resources>

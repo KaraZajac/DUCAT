@@ -24,4 +24,5 @@
     <plurals name="main_issues_waiting">
         <item quantity="other">%1$d 期新刊等待中</item>
     </plurals>
+    <string name="library_open">打开</string>
 </resources>

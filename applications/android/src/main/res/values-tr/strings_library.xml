@@ -25,4 +25,5 @@
         <item quantity="one">%1$d yeni sayı bekliyor</item>
         <item quantity="other">%1$d yeni sayı bekliyor</item>
     </plurals>
+    <string name="library_open">Aç</string>
 </resources>

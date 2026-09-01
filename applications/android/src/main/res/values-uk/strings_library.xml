@@ -27,4 +27,5 @@
         <item quantity="many">%1$d нових випусків чекають</item>
         <item quantity="other">%1$d нового випуску чекає</item>
     </plurals>
+    <string name="library_open">Відкрити</string>
 </resources>

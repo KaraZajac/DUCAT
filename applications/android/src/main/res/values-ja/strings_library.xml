@@ -24,4 +24,5 @@
     <plurals name="main_issues_waiting">
         <item quantity="other">新しい号が%1$d件待っています</item>
     </plurals>
+    <string name="library_open">開く</string>
 </resources>

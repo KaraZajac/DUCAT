@@ -27,4 +27,5 @@
         <item quantity="many">%1$d nowych wydań czeka</item>
         <item quantity="other">%1$d nowego wydania czeka</item>
     </plurals>
+    <string name="library_open">Otwórz</string>
 </resources>

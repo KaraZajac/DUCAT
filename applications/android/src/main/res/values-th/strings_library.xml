@@ -24,4 +24,5 @@
     <plurals name="main_issues_waiting">
         <item quantity="other">%1$d ฉบับใหม่รออยู่</item>
     </plurals>
+    <string name="library_open">เปิด</string>
 </resources>

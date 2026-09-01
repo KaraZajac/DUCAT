@@ -25,4 +25,5 @@
         <item quantity="one">%1$d neue Ausgabe wartet</item>
         <item quantity="other">%1$d neue Ausgaben warten</item>
     </plurals>
+    <string name="library_open">Öffnen</string>
 </resources>

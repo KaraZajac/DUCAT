@@ -214,6 +214,9 @@ fun LibrarySection() {
         return
     }
 
+    // One card per publication — the same card language as every other
+    // list in the app, and it demotes Unsubscribe from the loudest thing
+    // on the shelf to a corner of the cabinet it belongs to.
     LazyColumn(
         Modifier.fillMaxSize(),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
@@ -221,16 +224,52 @@ fun LibrarySection() {
     ) {
         val grouped = rows.groupBy { it.publisherHex }
         grouped.forEach { (pub, issues) ->
-            item(key = "h:$pub") {
-                PublisherHeader(pub, issues.first().publisherName)
-            }
-            // An unsubscribed shelf keeps what it holds and shows nothing
-            // new — the rows return with Resubscribe, nothing re-fetched.
-            if (!Publications.isMuted(context, pub)) {
-                items(issues, key = { "i:$pub:${it.period}" }) { row ->
-                    IssueLine(row, fetching, progress)
+            item(key = "c:$pub") {
+                androidx.compose.material3.Card(Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(horizontal = 14.dp, vertical = 8.dp)) {
+                        PublisherHeader(pub, issues.first().publisherName)
+                        // An unsubscribed shelf keeps what it holds and shows
+                        // nothing new — the rows return with Resubscribe,
+                        // nothing re-fetched.
+                        if (!Publications.isMuted(context, pub)) {
+                            issues.forEach { row ->
+                                IssueLine(row, fetching, progress)
+                            }
+                        }
+                    }
                 }
             }
+        }
+    }
+}
+
+/** Hand a fetched issue to whatever can read it — view first, share sheet
+ *  when nothing on the device claims the type. */
+private fun openIssue(context: android.content.Context, publisherHex: String, period: String) {
+    val dir = java.io.File(context.filesDir, "publications/$publisherHex/$period")
+    val file = dir.walkTopDown().filter { it.isFile && !it.name.endsWith(".part") }
+        .maxByOrNull { it.length() } ?: return
+    val uri = androidx.core.content.FileProvider.getUriForFile(
+        context, "${context.packageName}.backups", file,
+    )
+    val mime = android.webkit.MimeTypeMap.getSingleton()
+        .getMimeTypeFromExtension(file.extension.lowercase()) ?: "*/*"
+    val view = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
+        setDataAndType(uri, mime)
+        addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    runCatching { context.startActivity(view) }.onFailure {
+        // Nothing installed reads this type: the share sheet always opens,
+        // and sending it to yourself is still a way to read it elsewhere.
+        val send = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+            type = mime
+            putExtra(android.content.Intent.EXTRA_STREAM, uri)
+            addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        runCatching {
+            context.startActivity(
+                android.content.Intent.createChooser(send, file.name),
+            )
         }
     }
 }
@@ -402,6 +441,15 @@ private fun IssueLine(
                 )
             }) {
                 Text(stringResource(R.string.library_download))
+            }
+        } else if (row.bytes != null && !mine) {
+            // On this device and readable: the whole point of the fetch.
+            // There was no way to open a downloaded issue — the shelf said
+            // "205 kB" and stopped.
+            androidx.compose.material3.OutlinedButton(onClick = {
+                openIssue(context, row.publisherHex, row.period)
+            }) {
+                Text(stringResource(R.string.library_open))
             }
         }
     }

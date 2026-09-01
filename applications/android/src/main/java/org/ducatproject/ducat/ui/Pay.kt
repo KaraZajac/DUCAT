@@ -33,6 +33,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.*
+import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.R
@@ -239,8 +240,27 @@ private fun ChooseTarget(
     val version by ContactStore.changes.collectAsState()
     // Alphabetical: a picker is looked *up*, not scrolled through in arrival
     // order — recency belongs to the chat list, names belong here.
+    //
+    // And the worn profile's contacts only, like every other people list —
+    // this picker was the one door that showed all compartments merged, so
+    // the shop's till could offer your friends and your friends' screen your
+    // customers. Paying across a wall is still one gesture: switch profiles
+    // in the drawer, which is the same deliberate act it is everywhere else.
+    val personas = remember { PersonaStore(context) }
+    val scoped = remember(version) { personas.all().size > 1 }
+    val wornPersona = remember(version) {
+        personas.all().firstOrNull { it.hex == personas.worn() }
+    }
+    val wornName = wornPersona?.let { personaLabel(it) }
     val contacts = remember(version) {
-        ContactStore(context).all().sortedBy { it.displayName().lowercase() }
+        val all = ContactStore(context).all()
+        val mine = if (personas.all().size > 1) {
+            val worn = personas.worn()
+            all.filter { personas.ownerHexOf(it) == worn }
+        } else {
+            all
+        }
+        mine.sortedBy { it.displayName().lowercase() }
     }
     val ambiguous = remember(version) { ContactStore(context).ambiguous() }
     var address by rememberSaveable { mutableStateOf("") }
@@ -269,6 +289,14 @@ private fun ChooseTarget(
         if (contacts.isNotEmpty()) {
             Spacer(Modifier.height(16.dp))
             Text(stringResource(R.string.pay_your_contacts), style = MaterialTheme.typography.labelLarge)
+            if (scoped && wornName != null) {
+                Text(
+                    stringResource(R.string.personas_contacts_scope, wornName),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                Spacer(Modifier.height(2.dp))
+            }
             Text(
                 stringResource(R.string.pay_contact_vs_address),
                 style = MaterialTheme.typography.bodySmall,

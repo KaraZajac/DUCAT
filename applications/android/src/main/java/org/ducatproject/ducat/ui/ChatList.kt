@@ -60,7 +60,15 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
     // Same reason as the chat screen: a message arriving must move this list,
     // and nothing else tells it one did.
     val version by ContactStore.changes.collectAsState()
-    LaunchedEffect(version) { all = store.all() }
+    // Re-read once after first composition too, not only on version ticks:
+    // a bump that lands between the remember{} read and the collector
+    // arming is otherwise lost, and the screen sat on "No conversations"
+    // with five unread on the tab badge until the next unrelated bump.
+    var settled by remember { mutableStateOf(false) }
+    LaunchedEffect(version) {
+        all = store.all()
+        settled = true
+    }
     var sheet by remember { mutableStateOf<Sheet?>(null) }
     var confirm by remember { mutableStateOf<Contact?>(null) }
     // §16.19: the groups, above the pairwise threads they fan into.
@@ -305,7 +313,11 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
             )
         }
 
-        if (shown.isEmpty()) {
+        // The copy waits for the first settled read: an empty list a frame
+        // after cold start is "still looking", and "no conversations" said
+        // then is a lie the badge contradicts. No early return — that shape
+        // has crashed Compose here before (IntStack.peek2).
+        if (shown.isEmpty() && settled) {
             Column(
                 Modifier.fillMaxWidth().padding(32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -326,7 +338,7 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-        } else {
+        } else if (shown.isNotEmpty()) {
             LazyColumn(Modifier.fillMaxSize()) {
                 items(shown, key = { it.personaHex }) { c ->
                     // The newest message a person would recognise. Ceremony

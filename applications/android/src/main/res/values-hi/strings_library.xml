@@ -25,4 +25,5 @@
         <item quantity="one">%1$d नया अंक इंतज़ार में</item>
         <item quantity="other">%1$d नए अंक इंतज़ार में</item>
     </plurals>
+    <string name="library_open">खोलें</string>
 </resources>

@@ -25,4 +25,5 @@
         <item quantity="one">%1$d شمارهٔ تازه در انتظار</item>
         <item quantity="other">%1$d شمارهٔ تازه در انتظار</item>
     </plurals>
+    <string name="library_open">باز کردن</string>
 </resources>
