@@ -225,6 +225,17 @@ impl<C: Connection + Send + Sync + 'static> PeerGossipInner<C> {
                 if peer.key() == &self.share.key {
                     continue;
                 }
+                // DUCAT modification (see ../STIGMERGE-NOTICE.md): an entry
+                // nobody has refreshed in an hour starts on the bench. A
+                // frozen record — its owner gone — freezes every timestamp
+                // in it, the live mirror's included, so staleness is only a
+                // priority signal; the optimistic slot still dials benched
+                // peers when nobody fresher answers.
+                if Timestamp::now().duration_since(peer.updated_at())
+                    > TimestampDuration::new_secs(3600)
+                {
+                    crate::peer_reputation::note_stale(peer.key());
+                }
                 let remote_share_info = self.share_resolver.add_share(peer.key()).await?;
                 if remote_share_info.index_digest != self.share.want_index_digest {
                     self.share_resolver

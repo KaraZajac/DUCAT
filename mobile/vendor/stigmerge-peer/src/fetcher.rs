@@ -290,14 +290,28 @@ impl<C: Connection + Clone + Send + Sync + 'static> Fetcher<C> {
         let mut task_shares = HashMap::new();
         let mut share_tasks: HashMap<RecordKey, AbortHandle> = HashMap::new();
         let task_cancel = cancel.child_token();
+        // DUCAT modification (see ../STIGMERGE-NOTICE.md): peers on the
+        // reputation bench wait here instead of being redialed hot; the
+        // revive tick puts them back when their time is served, and the
+        // optimistic slot dials the least-recently-tried one anyway when
+        // nobody at all is admissible.
+        let mut parked: std::collections::HashSet<RecordKey> = Default::default();
+        let mut revive = tokio::time::interval(Duration::from_secs(5));
+        revive.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
 
         for remote_share in self.initial_shares.iter() {
             let remote_share_key = remote_share.key.clone();
+            if crate::peer_reputation::wait_remaining(&remote_share_key).is_some() {
+                trace!(key = ?remote_share_key, "benched, parking");
+                parked.insert(remote_share_key);
+                continue;
+            }
             let remote_share = Arc::new(remote_share.clone());
             let pool = FetchPool::new(FetchPoolParams {
                 conn: self.conn.clone(),
                 local_share: self.share.clone(),
                 remote_share,
+                share_resolver: self.share_resolver.clone(),
                 piece_verifier: self.piece_verifier.clone(),
                 piece_lease_manager: self.piece_lease_manager.clone(),
             });
@@ -358,6 +372,7 @@ impl<C: Connection + Clone + Send + Sync + 'static> Fetcher<C> {
                             conn: self.conn.clone(),
                             local_share: self.share.clone(),
                             remote_share: Arc::new(remote_share),
+                            share_resolver: self.share_resolver.clone(),
                             piece_verifier: self.piece_verifier.clone(),
                             piece_lease_manager: self.piece_lease_manager.clone(),
                         });
@@ -384,15 +399,69 @@ impl<C: Connection + Clone + Send + Sync + 'static> Fetcher<C> {
                     };
                     share_tasks.remove(&remote_share_key);
 
+                    // An exited pool is not redialed hot: if its peer is on
+                    // the bench it parks until the revive tick, which also
+                    // spares the re-resolve's DHT reads for the duration.
+                    if crate::peer_reputation::wait_remaining(&remote_share_key).is_some() {
+                        trace!(key = ?remote_share_key, "benched, parking");
+                        parked.insert(remote_share_key);
+                        continue;
+                    }
                     let remote_share = self.share_resolver.add_share(&remote_share_key).await?;
                     let pool = FetchPool::new(FetchPoolParams {
                         conn: self.conn.clone(),
                         local_share: self.share.clone(),
                         remote_share: Arc::new(remote_share),
+                        share_resolver: self.share_resolver.clone(),
                         piece_verifier: self.piece_verifier.clone(),
                         piece_lease_manager: self.piece_lease_manager.clone(),
                     });
                     {
+                        let task_cancel = task_cancel.child_token();
+                        let handle = tasks.spawn(pool.run(task_cancel));
+                        task_shares.insert(handle.id(), remote_share_key.clone());
+                        share_tasks.insert(remote_share_key, handle);
+                    }
+                }
+                _ = revive.tick(), if !parked.is_empty() => {
+                    // Serve out the bench: admissible peers come back; when
+                    // nothing runs and nobody is admissible, the optimistic
+                    // slot dials the least-recently-tried anyway — a swarm
+                    // of benched peers must still be probed, or a recovered
+                    // one is never rediscovered.
+                    let mut wake: Vec<RecordKey> = parked
+                        .iter()
+                        .filter(|k| crate::peer_reputation::wait_remaining(k).is_none())
+                        .cloned()
+                        .collect();
+                    if wake.is_empty() && share_tasks.is_empty() {
+                        let all: Vec<RecordKey> = parked.iter().cloned().collect();
+                        if let Some(k) = crate::peer_reputation::least_recently_tried(&all) {
+                            trace!(key = ?k, "optimistic dial from the bench");
+                            wake.push(k);
+                        }
+                    }
+                    for remote_share_key in wake {
+                        parked.remove(&remote_share_key);
+                        let remote_share = match self.share_resolver.add_share(&remote_share_key).await {
+                            Ok(s) => s,
+                            Err(err) => {
+                                // A peer that cannot even be resolved earns
+                                // a longer bench, not a hot retry loop.
+                                warn!(?err, key = ?remote_share_key, "revive resolve failed");
+                                crate::peer_reputation::note_failure(&remote_share_key);
+                                parked.insert(remote_share_key);
+                                continue;
+                            }
+                        };
+                        let pool = FetchPool::new(FetchPoolParams {
+                            conn: self.conn.clone(),
+                            local_share: self.share.clone(),
+                            remote_share: Arc::new(remote_share),
+                            share_resolver: self.share_resolver.clone(),
+                            piece_verifier: self.piece_verifier.clone(),
+                            piece_lease_manager: self.piece_lease_manager.clone(),
+                        });
                         let task_cancel = task_cancel.child_token();
                         let handle = tasks.spawn(pool.run(task_cancel));
                         task_shares.insert(handle.id(), remote_share_key.clone());
@@ -449,6 +518,7 @@ struct FetchPool<C: Connection + Clone> {
     conn: C,
     local_share: LocalShareInfo,
     remote_share: Arc<RemoteShareInfo>,
+    share_resolver: ShareResolver<C>,
 
     piece_verifier: PieceVerifier,
     piece_lease_manager: PieceLeaseManager,
@@ -459,6 +529,7 @@ struct FetchPoolParams<C: Connection + Clone> {
     conn: C,
     local_share: LocalShareInfo,
     remote_share: Arc<RemoteShareInfo>,
+    share_resolver: ShareResolver<C>,
     piece_verifier: PieceVerifier,
     piece_lease_manager: PieceLeaseManager,
 }
@@ -469,6 +540,7 @@ impl<C: Connection + Clone + Send + Sync + 'static> FetchPool<C> {
             conn: params.conn,
             local_share: params.local_share,
             remote_share: params.remote_share,
+            share_resolver: params.share_resolver,
             piece_verifier: params.piece_verifier,
             piece_lease_manager: params.piece_lease_manager,
         }
@@ -477,6 +549,11 @@ impl<C: Connection + Clone + Send + Sync + 'static> FetchPool<C> {
     #[tracing::instrument(skip_all, err)]
     async fn run(mut self, cancel: CancellationToken) -> Result<()> {
         debug!(share_key = ?self.remote_share.key, "starting fetch pool");
+        // DUCAT modification (see ../STIGMERGE-NOTICE.md): the pool tells
+        // the reputation registry how this peer behaved — a delivered
+        // piece clears it, a network failure or an exhausted retry
+        // benches it — and the fetcher's respawn honors the bench.
+        crate::peer_reputation::note_attempt(&self.remote_share.key);
         let mut backoff = ExponentialBackoff {
             initial_interval: Duration::from_millis(50),
             max_interval: Duration::from_secs(30),
@@ -499,10 +576,12 @@ impl<C: Connection + Clone + Send + Sync + 'static> FetchPool<C> {
                         Ok(lease) => {
                             match self.fetch_lease(&lease, cancel.clone()).await {
                                 Ok(()) => {
+                                    crate::peer_reputation::note_success(&self.remote_share.key);
                                     backoff.reset();
                                     continue;
                                 }
                                 Err(err) => {
+                                    crate::peer_reputation::note_failure(&self.remote_share.key);
                                     self.piece_lease_manager.release_piece(lease.piece_index(), CompletionResult::Failure(FailureReason::NetworkError)).await?;
                                     return Err(err);
                                 }
@@ -514,9 +593,13 @@ impl<C: Connection + Clone + Send + Sync + 'static> FetchPool<C> {
                         }
                     };
                     warn!(?err, share_key = ?self.remote_share.key);
-                    let delay = backoff
-                        .next_backoff()
-                        .ok_or(Error::msg("max attempts reached"))?;
+                    let delay = match backoff.next_backoff() {
+                        Some(delay) => delay,
+                        None => {
+                            crate::peer_reputation::note_failure(&self.remote_share.key);
+                            return Err(Error::msg("max attempts reached"));
+                        }
+                    };
                     tokio::time::sleep(delay).await;
                     debug!(?delay, "resuming");
                 }
@@ -527,6 +610,26 @@ impl<C: Connection + Clone + Send + Sync + 'static> FetchPool<C> {
     /// Fetch a leased piece
     async fn fetch_lease(&mut self, lease: &PieceLease, cancel: CancellationToken) -> Result<()> {
         let task_cancel = cancel.child_token();
+
+        // DUCAT modification (see ../STIGMERGE-NOTICE.md): aim at the
+        // route the peer answers on NOW, not the one it answered on when
+        // this pool was born. A phone's announcer rotates its private
+        // route every few minutes; the resolver's watch imports each
+        // replacement, and a pool that keeps its birth snapshot goes
+        // quiet after the first rotation — the live-measured shape was
+        // one piece per bootstrap, for ever.
+        let remote_share = match self
+            .share_resolver
+            .current_route(&self.remote_share.key)
+            .await
+        {
+            Some(route_id) if route_id != self.remote_share.route_id => {
+                let mut fresh = (*self.remote_share).clone();
+                fresh.route_id = route_id;
+                Arc::new(fresh)
+            }
+            _ => self.remote_share.clone(),
+        };
 
         // Generate blocks for the leased piece
         let file_index = self
@@ -553,7 +656,7 @@ impl<C: Connection + Clone + Send + Sync + 'static> FetchPool<C> {
             let cancel = task_cancel.clone();
             let conn = self.conn.clone();
             let local_root = self.local_share.root.clone();
-            let remote_share = self.remote_share.clone();
+            let remote_share = remote_share.clone();
             let piece_verifier = self.piece_verifier.clone();
             tasks.spawn(async move {
                 let mut block_fetcher = BlockFetcher::new(conn, local_root);

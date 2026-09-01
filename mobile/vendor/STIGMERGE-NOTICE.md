@@ -92,7 +92,27 @@ Recorded per the MPL's Exhibit A expectations and plain courtesy:
    force-reads the subkey to refresh local record state and retries
    once — the retry then signs at the sequence the network expects —
    and a second refusal is a visible error. Upstream candidate.
-8. **`Status::Done` is actually sent.** Upstream's fetcher returned its
+8. **Peer reputation (2026-09-01).** Upstream's fetcher respawns an
+   exited pool immediately and unconditionally (its own TODO says so),
+   so one dead peer is redialed hot for ever — and a share whose origin
+   died keeps every corpse in its frozen peer list in the piece lottery.
+   `peer_reputation.rs` is the standard cure, process-global like
+   `route_registry`: libp2p's dial backoff joined with BitTorrent's
+   snub and optimistic unchoke. A pool notes its peer's behaviour (a
+   delivered piece clears, a failure benches, 30 s doubling capped at
+   ten minutes, memory decays after an hour); the fetcher parks benched
+   peers instead of respawning them, a five-second revive tick returns
+   them when served, and when nobody at all is admissible the least-
+   recently-tried is dialed anyway so a recovered peer is rediscovered.
+   Roster entries nobody refreshed in an hour start benched one minute
+   (`peer_gossip`) — staleness is a priority signal, never a filter,
+   because a dead origin freezes the live mirror's timestamp along with
+   the corpses'. Pools also re-aim each lease at the peer's CURRENT
+   route (`ShareResolver::current_route`): a pool's `RemoteShareInfo`
+   is a snapshot, and on a phone the announcer rotates its route every
+   few minutes — the live-measured shape was one piece per bootstrap.
+   Pinned by `peer_reputation::tests`. Upstream candidate.
+9. **`Status::Done` is actually sent.** Upstream's fetcher returned its
    internal `State::Done` on `index_complete` without ever emitting
    `Status::Done` on the status channel — so every consumer waiting on
    the documented signal, upstream's own CLI included, waited forever on

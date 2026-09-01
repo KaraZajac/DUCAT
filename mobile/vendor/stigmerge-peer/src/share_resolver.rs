@@ -64,6 +64,22 @@ impl<C: Connection + Send + Sync + 'static> ShareResolver<C> {
         Ok(share_info)
     }
 
+    /// The route this peer answers on RIGHT NOW (DUCAT modification —
+    /// see ../STIGMERGE-NOTICE.md). A fetch pool's `RemoteShareInfo` is a
+    /// snapshot: on a phone the announcer rotates its private route every
+    /// few minutes, the resolver's watch imports the replacement, and a
+    /// pool still aiming at the snapshot goes quiet mid-piece. Requests
+    /// ask here per call instead of trusting the snapshot.
+    pub async fn current_route(&self, key: &RecordKey) -> Option<RouteId> {
+        self.inner
+            .lock()
+            .await
+            .remote_shares
+            .values()
+            .find(|s| &s.key == key)
+            .map(|s| s.route_id.clone())
+    }
+
     pub async fn refresh_share(&self, route_id: &RouteId) -> Result<()> {
         let mut inner = self.inner.lock().await;
         let share = {

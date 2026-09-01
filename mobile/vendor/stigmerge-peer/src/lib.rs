@@ -11,6 +11,7 @@ pub mod piece_leases;
 pub mod piece_map;
 pub mod piece_verifier;
 pub mod proto;
+pub mod peer_reputation;
 pub mod record;
 pub mod route_registry;
 // DUCAT modification: the CLI crate's orchestration layer, vendored as a
