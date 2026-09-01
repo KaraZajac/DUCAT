@@ -436,10 +436,20 @@ class Poller(private val context: Context) {
             return
         }
         reseeded = true
+        // The bound that keeps mirroring polite: only the newest issues per
+        // publication go back to serving. Each seed is a live share
+        // announcer with routes to maintain, so "re-serve everything ever
+        // fetched" would slowly turn every phone into a heavy seed-box —
+        // and demand concentrates on recent issues anyway. Older ones stay
+        // fetchable from the publisher and the shelf. Publications only:
+        // their swarm payloads are sealed under §16.20 period keys, so a
+        // mirror holds ciphertext; pairwise transfers (when they arrive)
+        // will not re-serve at all.
+        val newestPerPub = 2
         for (pub in Publications.subscribedPublishers(context)) {
             if (Publications.isMuted(context, pub)) continue
             val sub = Publications.subscription(context, pub) ?: continue
-            for (period in sub.third.keys) {
+            for (period in sub.third.keys.sortedDescending().take(newestPerPub)) {
                 val ship = Publications.shipment(context, pub, period) ?: continue
                 val job = org.ducatproject.ducat.ui.LibraryFetch.Job(pub, period)
                 val done = org.ducatproject.ducat.ui.LibraryFetch
