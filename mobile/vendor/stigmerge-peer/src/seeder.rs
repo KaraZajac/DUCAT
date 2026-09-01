@@ -175,7 +175,7 @@ impl UpdateHandler for BlockRequestHandler {
 struct SeederInner<C: Connection> {
     conn: C,
     share: LocalShareInfo,
-    files: HashMap<u32, File>,
+    files: HashMap<usize, File>,
 }
 
 impl<C: Connection> SeederInner<C> {
@@ -206,11 +206,16 @@ impl<C: Connection> SeederInner<C> {
     }
 
     async fn read_block_into(&mut self, block_req: &BlockRequest, buf: &mut [u8]) -> Result<usize> {
-        let fh = self.get_file_for_block(block_req).await?;
+        // Piece-aligned multi-file (DUCAT): the index says whose piece this
+        // is, and the seek is relative to that file's own slice.
+        let piece: usize = TryInto::<usize>::try_into(block_req.piece).unwrap();
+        let file_index = self.share.want_index.file_index_for_piece(piece);
+        let starting_piece = self.share.want_index.files()[file_index]
+            .contents()
+            .starting_piece();
+        let fh = self.get_file_for_block(file_index).await?;
         fh.seek(std::io::SeekFrom::Start(
-            ((TryInto::<usize>::try_into(block_req.piece).unwrap()
-                * PIECE_SIZE_BLOCKS
-                * BLOCK_SIZE_BYTES)
+            (((piece - starting_piece) * PIECE_SIZE_BLOCKS * BLOCK_SIZE_BYTES)
                 + (Into::<usize>::into(block_req.block) * BLOCK_SIZE_BYTES))
                 .try_into()
                 .unwrap(),
@@ -220,17 +225,16 @@ impl<C: Connection> SeederInner<C> {
         Ok(rd)
     }
 
-    async fn get_file_for_block(&mut self, block_req: &BlockRequest) -> Result<&mut File> {
-        if !self.files.contains_key(&block_req.piece) {
-            // FIXME: does not support multifile; piece -> file mapping should be handled by Index
+    async fn get_file_for_block(&mut self, file_index: usize) -> Result<&mut File> {
+        if !self.files.contains_key(&file_index) {
             let file_path = self
                 .share
                 .root
-                .join(self.share.want_index.files()[0].path());
+                .join(self.share.want_index.files()[file_index].path());
             let fh = File::open(file_path).await?;
-            self.files.insert(block_req.piece, fh);
+            self.files.insert(file_index, fh);
         }
-        Ok(self.files.get_mut(&block_req.piece).unwrap())
+        Ok(self.files.get_mut(&file_index).unwrap())
     }
 }
 

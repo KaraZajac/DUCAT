@@ -29,6 +29,12 @@ pub const PIECE_SIZE_BLOCKS: usize = 32; // 32 * 32KB blocks = 1MB
 /// One piece is 32 blocks long, or 1MiB.
 pub const PIECE_SIZE_BYTES: usize = PIECE_SIZE_BLOCKS * BLOCK_SIZE_BYTES;
 
+/// How many pieces a file of `len` bytes occupies under the piece-aligned
+/// layout (zero-length files occupy none).
+pub fn piece_count_for_len(len: usize) -> usize {
+    len / PIECE_SIZE_BYTES + if len % PIECE_SIZE_BYTES > 0 { 1 } else { 0 }
+}
+
 /// Internal buffer size used when concurrently indexing a file.
 const INDEX_BUFFER_SIZE: usize = 67108864; // 64MB
 
@@ -234,6 +240,10 @@ pub struct Indexer {
 
     digest_progress_tx: watch::Sender<Progress>,
     index_progress_tx: watch::Sender<Progress>,
+    /// Wanted-side alignment: the global starting piece for each file,
+    /// taken from the want index. None on the seed side, where bases
+    /// accumulate naturally in payload order.
+    bases: Option<Vec<usize>>,
 }
 
 impl Default for Indexer {
@@ -243,6 +253,7 @@ impl Default for Indexer {
         Self {
             root_dir: Default::default(),
             files: Default::default(),
+            bases: None,
             digest_progress_tx,
             index_progress_tx,
         }
@@ -270,43 +281,100 @@ impl Indexer {
         Ok(Indexer {
             root_dir: root_dir.to_path_buf(),
             files: vec![resolved_file],
+            bases: None,
             digest_progress_tx,
             index_progress_tx,
         })
     }
 
-    /// Index a wanted local file on disk.
+    /// Index a local path: a file, or a whole directory tree.
     ///
-    /// The wanted file may be incomplete, corrupt, or may not exist yet.
+    /// A directory becomes a multi-file index: every regular file under it,
+    /// sorted by relative path, each starting on a fresh piece boundary.
+    pub async fn from_path(path: &Path) -> Result<Indexer> {
+        let resolved = path.canonicalize()?;
+        let meta = tokio::fs::metadata(&resolved).await?;
+        if !meta.is_dir() {
+            return Indexer::from_file(&resolved).await;
+        }
+        let mut files: Vec<PathBuf> = vec![];
+        let mut stack = vec![resolved.clone()];
+        while let Some(dir) = stack.pop() {
+            let mut rd = tokio::fs::read_dir(&dir).await?;
+            while let Some(entry) = rd.next_entry().await? {
+                let p = entry.path();
+                let ft = entry.file_type().await?;
+                if ft.is_dir() {
+                    stack.push(p);
+                } else if ft.is_file() {
+                    files.push(p);
+                }
+            }
+        }
+        if files.is_empty() {
+            return Err(io::Error::from(io::ErrorKind::NotFound).into());
+        }
+        files.sort();
+        let (digest_progress_tx, _) = watch::channel(Progress::default());
+        let (index_progress_tx, _) = watch::channel(Progress::default());
+        Ok(Indexer {
+            root_dir: resolved,
+            files,
+            bases: None,
+            digest_progress_tx,
+            index_progress_tx,
+        })
+    }
+
+    /// Index a wanted local file set on disk.
+    ///
+    /// The wanted files may be incomplete, corrupt, or may not exist yet.
+    /// Every wanted file is created if absent (so zero-length files exist
+    /// even though no block will ever be fetched for them), oversize ones
+    /// are shrunk to the wanted length, and each carries the want index's
+    /// own starting piece so the have/want diff compares aligned pieces
+    /// even when an earlier file is missing entirely.
     pub async fn from_wanted(want: &Index) -> Result<Indexer> {
         if want.files.is_empty() {
             return Ok(Indexer::default());
         }
-        if want.files.len() != 1 {
-            unimplemented!("number of files > 1");
-        }
-
-        let file_path = want.root.join(want.files[0].path());
-        let file_len = TryInto::<u64>::try_into(want.files[0].contents().length()).unwrap();
-        if async {
-            // Truncate an existing file to the wanted file length
-            let fh = OpenOptions::new()
-                .write(true)
-                .append(true)
-                .open(&file_path)
-                .await?;
-            if fh.metadata().await?.len() > file_len {
-                fh.set_len(file_len).await?;
+        let mut files: Vec<PathBuf> = vec![];
+        let mut bases: Vec<usize> = vec![];
+        for f in want.files.iter() {
+            let file_path = want.root.join(f.path());
+            let file_len = TryInto::<u64>::try_into(f.contents().length()).unwrap();
+            let ready = async {
+                if let Some(parent) = file_path.parent() {
+                    tokio::fs::create_dir_all(parent).await?;
+                }
+                let fh = OpenOptions::new()
+                    .write(true)
+                    .create(true)
+                    .append(true)
+                    .open(&file_path)
+                    .await?;
+                if fh.metadata().await?.len() > file_len {
+                    fh.set_len(file_len).await?;
+                }
+                Ok::<(), Error>(())
             }
-            Ok::<(), Error>(())
+            .await
+            .is_ok();
+            if !ready {
+                return Ok(Indexer::default());
+            }
+            files.push(file_path.canonicalize()?);
+            bases.push(f.contents().starting_piece());
         }
-        .await
-        .is_ok()
-        {
-            Indexer::from_file(&file_path).await
-        } else {
-            Ok(Indexer::default())
-        }
+        let (digest_progress_tx, _) = watch::channel(Progress::default());
+        let (index_progress_tx, _) = watch::channel(Progress::default());
+        Ok(Indexer {
+            root_dir: want.root.to_path_buf(),
+            files,
+            bases: Some(bases),
+            digest_progress_tx,
+            index_progress_tx,
+        })
     }
 
     /// Subscribe to progress updates on calculating digests of pieces and the
@@ -333,25 +401,81 @@ impl Indexer {
             });
             return Ok(Index::empty_root(&self.root_dir));
         }
-        if self.files.len() != 1 {
-            unimplemented!("number of files > 1");
+        if self.files.len() == 1 && self.bases.is_none() {
+            // The single-file path, byte-for-byte as it always was: the
+            // payload digest stays the digest of the file's raw bytes, so
+            // existing single-file shares keep their identity.
+            let resolved_file = self.files[0].to_owned();
+            let payload = self.index_spec(&resolved_file).await?;
+            let length = payload.length;
+            return Ok(Index {
+                root: self.root_dir.to_owned(),
+                payload,
+                files: vec![FileSpec {
+                    path: resolved_file.strip_prefix(&self.root_dir)?.to_owned(),
+                    contents: PayloadSlice {
+                        starting_piece: 0,
+                        piece_offset: 0,
+                        length,
+                    },
+                }],
+            });
         }
-        let resolved_file = self.files[0].to_owned();
-        let payload = self.index_spec(&resolved_file).await?;
-        let length = payload.length;
-
-        // files is the file given
+        // Multi-file: each file scanned independently, its pieces appended
+        // at a global base so every file starts on a piece boundary. The
+        // payload digest is the BLAKE3 chain of the per-file digests in
+        // path order - deterministic on both sides without ever needing to
+        // stream one hash across file boundaries.
+        let mut pieces: Vec<PayloadPiece> = vec![];
+        let mut files: Vec<FileSpec> = vec![];
+        let mut chain = Blake3::new();
+        let mut total: usize = 0;
+        for (i, path) in self.files.iter().enumerate() {
+            let local = self.index_spec(path).await?;
+            let base = match &self.bases {
+                Some(b) => b[i],
+                None => pieces.len(),
+            };
+            match &self.bases {
+                Some(_) => {
+                    // Wanted side: land each file's pieces at the want
+                    // index's own global positions, leaving gaps where
+                    // files are missing or short - the diff reads absent
+                    // pieces as wanted, which is exactly the truth.
+                    if pieces.len() < base + local.pieces.len() {
+                        pieces.resize(
+                            base + local.pieces.len(),
+                            PayloadPiece {
+                                digest: [0u8; 32],
+                                length: 0,
+                            },
+                        );
+                    }
+                    for (j, piece) in local.pieces.iter().enumerate() {
+                        pieces[base + j] = piece.clone();
+                    }
+                }
+                None => pieces.extend(local.pieces.iter().cloned()),
+            }
+            chain.update(&local.digest);
+            total += local.length;
+            files.push(FileSpec {
+                path: path.strip_prefix(&self.root_dir)?.to_owned(),
+                contents: PayloadSlice {
+                    starting_piece: base,
+                    piece_offset: 0,
+                    length: local.length,
+                },
+            });
+        }
         Ok(Index {
             root: self.root_dir.to_owned(),
-            payload,
-            files: vec![FileSpec {
-                path: resolved_file.strip_prefix(&self.root_dir)?.to_owned(),
-                contents: PayloadSlice {
-                    starting_piece: 0,
-                    piece_offset: 0,
-                    length,
-                },
-            }],
+            payload: PayloadSpec {
+                digest: chain.finalize().into(),
+                length: total,
+                pieces,
+            },
+            files,
         })
     }
 
@@ -657,6 +781,9 @@ impl PayloadPiece {
 
 #[cfg(test)]
 mod from_file_tests;
+
+#[cfg(test)]
+mod multi_file_tests;
 
 #[cfg(test)]
 mod want_have_tests;

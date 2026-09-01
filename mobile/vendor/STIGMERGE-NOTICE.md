@@ -56,6 +56,20 @@ Recorded per the MPL's Exhibit A expectations and plain courtesy:
    embedding application drives seeds and fetches exactly as the CLI
    does; its `want_index_digest` takes a `Digest` rather than decoding
    hex.
+6. **Multi-file shares (2026-09-01).** Upstream's index format always
+   carried `Vec<FileSpec>` but three code paths were single-file
+   (`from_wanted`/`index()` `unimplemented!`, the verifier's and
+   seeder's payload-global seeks — both marked FIXME upstream). DUCAT
+   implements the piece-aligned layout: every file starts on a fresh
+   piece (`piece_offset` stays 0 forever), which resolves upstream's
+   unaligned-slice TODO by never creating one. `Indexer::from_path`
+   walks a directory sorted by path; the wanted side lands each present
+   file's pieces at the want index's own global positions so a missing
+   earlier file cannot shift the comparison; block writer, verifier and
+   seeder all seek file-locally. Single-file shares are byte-identical
+   to before, payload digest included; multi-file payload digests are
+   the BLAKE3 chain of per-file digests in path order. Pinned by
+   `multi_file_tests.rs`. Upstream candidate.
 6. **`Status::Done` is actually sent.** Upstream's fetcher returned its
    internal `State::Done` on `index_complete` without ever emitting
    `Status::Done` on the status channel — so every consumer waiting on

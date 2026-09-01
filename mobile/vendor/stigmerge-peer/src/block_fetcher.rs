@@ -65,8 +65,13 @@ impl<C: Connection + Send + Sync> BlockFetcher<C> {
                 self.files.get_mut(&block.file_index).unwrap()
             }
         };
-        fh.seek(SeekFrom::Start(block.block_offset() as u64))
-            .await?;
+        let starting_piece = remote_share.index.files()[block.file_index]
+            .contents()
+            .starting_piece();
+        fh.seek(SeekFrom::Start(
+            block.block_offset_in_file(starting_piece) as u64,
+        ))
+        .await?;
         let block_end = min(result.len(), BLOCK_SIZE_BYTES);
         fh.write_all(&result[0..block_end]).await?;
         if flush {

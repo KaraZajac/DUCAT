@@ -969,6 +969,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1235,6 +1237,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_swarm_seed(`path`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_swarm_stop(uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
+    fun uniffi_ducat_mobile_fn_func_swarm_stop_share(`shareKey`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Unit
     fun uniffi_ducat_mobile_fn_func_thread_aad(`mineHex`: RustBuffer.ByValue,`theirsHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1605,6 +1609,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_checksum_func_swarm_seed(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_swarm_stop(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_swarm_stop_share(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_thread_aad(
     ): Short
@@ -2005,6 +2011,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_swarm_stop() != 49903.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_swarm_stop_share() != 23181.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_thread_aad() != 26627.toShort()) {
@@ -8803,6 +8812,17 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_swarm_stop(
         _status)
+}
+    
+    
+
+        /**
+         * Stop seeding one share, leaving the rest serving.
+         */ fun `swarmStopShare`(`shareKey`: kotlin.String)
+        = 
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_swarm_stop_share(
+        FfiConverterString.lower(`shareKey`),_status)
 }
     
     

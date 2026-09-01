@@ -25,9 +25,13 @@ object Swarm {
         return Share(s.shareKey, s.indexDigestHex)
     }
 
-    /** Stop serving. A fetcher mid-download keeps any other peer it met —
-     *  every peer is a seeder, which is the shape's whole point. */
+    /** Stop serving everything. A fetcher mid-download keeps any other
+     *  peer it met — every peer is a seeder, which is the shape's whole
+     *  point. */
     fun stop() = uniffi.ducat_mobile.swarmStop()
+
+    /** Stop serving one share, leaving the rest up. */
+    fun stopShare(shareKey: String) = uniffi.ducat_mobile.swarmStopShare(shareKey)
 
     /** Fetch into [rootDir], blocking until every piece verified against
      *  the promised digest. Returns the byte count. */

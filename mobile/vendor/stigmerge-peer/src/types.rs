@@ -33,8 +33,13 @@ pub struct FileBlockFetch {
 }
 
 impl FileBlockFetch {
-    pub fn block_offset(&self) -> usize {
-        (self.piece_index * PIECE_SIZE_BYTES)
+    /// Offset of this block within its own file, given the file's starting
+    /// piece in the payload. With single-file shares starting_piece is 0
+    /// and this is the old payload-global math unchanged; with multi-file
+    /// shares (piece-aligned slices) it is what makes the seek land inside
+    /// the right file instead of a gigabyte past its end.
+    pub fn block_offset_in_file(&self, starting_piece: usize) -> usize {
+        ((self.piece_index - starting_piece) * PIECE_SIZE_BYTES)
             + self.piece_offset
             + (self.block_index * BLOCK_SIZE_BYTES)
     }

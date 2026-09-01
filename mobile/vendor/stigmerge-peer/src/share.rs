@@ -119,11 +119,18 @@ impl<C: Connection + Clone + Send + Sync + 'static> Share<C> {
 
     pub async fn start(&mut self, cancel: CancellationToken) -> Result<()> {
         let root = match self.mode {
-            Mode::Seed { ref path } => path
-                .absolutize()?
-                .parent()
-                .ok_or(Error::msg("cannot determine parent directory"))?
-                .to_path_buf(),
+            // DUCAT multi-file: a directory seed is rooted at the directory
+            // itself; a file seed keeps the old parent-directory root.
+            Mode::Seed { ref path } => {
+                let abs = path.absolutize()?.to_path_buf();
+                if abs.is_dir() {
+                    abs
+                } else {
+                    abs.parent()
+                        .ok_or(Error::msg("cannot determine parent directory"))?
+                        .to_path_buf()
+                }
+            }
             Mode::Fetch { ref root, .. } => root.to_owned(),
         };
 
@@ -208,7 +215,7 @@ impl<C: Connection + Clone + Send + Sync + 'static> Share<C> {
                 }
             }
             Mode::Seed { path } => {
-                let indexer = Indexer::from_file(path).await?;
+                let indexer = Indexer::from_path(path).await?;
                 self.tasks.spawn(Self::send_indexer_progress(
                     cancel.clone(),
                     indexer.subscribe_index_progress(),

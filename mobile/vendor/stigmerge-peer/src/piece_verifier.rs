@@ -163,10 +163,14 @@ impl PieceVerifierInner {
         let mut fh = File::open(index.root().join(file_spec.path())).await?;
         let piece_spec = &index.payload().pieces()[piece_index];
 
-        // FIXME: this is wrong for multi-file!
-        // We'd need to seek relative to the file's payload slice
-        fh.seek(SeekFrom::Start((piece_index * PIECE_SIZE_BYTES) as u64))
-            .await?;
+        // Piece-aligned multi-file (DUCAT): seek relative to this file's
+        // own slice. Single-file shares have starting_piece 0, so the old
+        // math is the special case of this one.
+        let starting_piece = file_spec.contents().starting_piece();
+        fh.seek(SeekFrom::Start(
+            ((piece_index - starting_piece) * PIECE_SIZE_BYTES) as u64,
+        ))
+        .await?;
         let mut buf = [0u8; BLOCK_SIZE_BYTES];
         let mut digest = Blake3::new();
         for _ in 0..PIECE_SIZE_BLOCKS {

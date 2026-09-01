@@ -379,6 +379,14 @@ dependencies {
 
 // Headless proof the stack stands: JVM, JNA, the Rust bridge, Veilid — no
 // window involved. `./gradlew :desktop:smoke`.
+tasks.register<JavaExec>("swarmdir") {
+    group = "verification"
+    description = "Multi-file swarm round trip (roles via DUCAT_SW_ROLE)"
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("org.ducatproject.desk.SwarmDirTestKt")
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 tasks.register<JavaExec>("boardbench") {
     group = "verification"
     description = "Time one 9-board ring read under DUCAT_DHT_OPS"

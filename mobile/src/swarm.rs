@@ -31,14 +31,14 @@ static CONN: OnceLock<Mutex<Option<VeilidConnection>>> = OnceLock::new();
 
 /// A running seed, kept alive until stopped: the Share's tasks serve
 /// block requests for as long as this holds their cancellation token.
-static SEEDING: OnceLock<Mutex<Option<CancellationToken>>> = OnceLock::new();
+static SEEDING: OnceLock<Mutex<std::collections::HashMap<String, CancellationToken>>> = OnceLock::new();
 
 fn conn_slot() -> &'static Mutex<Option<VeilidConnection>> {
     CONN.get_or_init(|| Mutex::new(None))
 }
 
-fn seeding_slot() -> &'static Mutex<Option<CancellationToken>> {
-    SEEDING.get_or_init(|| Mutex::new(None))
+fn seeding_slot() -> &'static Mutex<std::collections::HashMap<String, CancellationToken>> {
+    SEEDING.get_or_init(|| Mutex::new(std::collections::HashMap::new()))
 }
 
 /// The borrowed connection, made on first use.
@@ -132,7 +132,15 @@ pub fn swarm_seed(path: String) -> Result<SwarmShare, SwarmError> {
                 _ => {}
             }
         }
-        *seeding_slot().lock().unwrap() = Some(cancel);
+        // Registered by share key: every seed is individually stoppable,
+        // and older seeds no longer become unstoppable orphans when a new
+        // one starts (the old single slot dropped their tokens).
+        if let Some(share) = &out {
+            seeding_slot()
+                .lock()
+                .unwrap()
+                .insert(share.share_key.clone(), cancel);
+        }
         // The Share's tasks keep serving; their JoinSet lives inside it, so
         // park the whole thing on the runtime for the life of the seed.
         tokio::spawn(async move {
@@ -147,7 +155,15 @@ pub fn swarm_seed(path: String) -> Result<SwarmShare, SwarmError> {
 /// whole point.
 #[uniffi::export]
 pub fn swarm_stop() {
-    if let Some(c) = seeding_slot().lock().unwrap().take() {
+    for (_, c) in seeding_slot().lock().unwrap().drain() {
+        c.cancel();
+    }
+}
+
+/// Stop seeding one share, leaving the rest serving.
+#[uniffi::export]
+pub fn swarm_stop_share(share_key: String) {
+    if let Some(c) = seeding_slot().lock().unwrap().remove(&share_key) {
         c.cancel();
     }
 }
