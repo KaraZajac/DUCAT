@@ -71,4 +71,8 @@
     <string name="press_invite_later">बाद में</string>
     <string name="press_invite_body">%1$s की सदस्यता का निमंत्रण — स्वीकारने के लिए टैप करें:</string>
     <string name="press_invite_nobody">अभी आमंत्रित करने को कोई नहीं — संपर्क यहाँ दिखेंगे।</string>
+    <string name="pub_delete_btn">प्रकाशन हटाएँ</string>
+    <string name="pub_delete_title">यह प्रकाशन हटाएँ?</string>
+    <string name="pub_delete_body">सदस्यों के पास भेजे जा चुके सभी अंक रहेंगे। बाज़ार की सूची और सदस्यता कोड अपने आप समाप्त हो जाएँगे। अब कभी नया अंक नहीं निकल सकेगा — इसे वापस नहीं किया जा सकता।</string>
+    <string name="pub_delete_confirm">हटाएँ</string>
 </resources>

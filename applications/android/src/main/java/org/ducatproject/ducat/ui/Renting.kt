@@ -267,7 +267,16 @@ fun RentingScreen(kinds: List<Int> = Listings.KINDS) {
                                 }.onFailure { error = moneyFailure(context, it) }
                             }
                         },
-                        onDelete = { Listings.remove(context, o.optString("id")) },
+                        onDelete = {
+                            scope.launch {
+                                withContext(Dispatchers.IO) {
+                                    if (o.optString("board").isNotBlank()) {
+                                        runCatching { Listings.unpost(context, o.optString("id")) }
+                                    }
+                                    Listings.remove(context, o.optString("id"))
+                                }
+                            }
+                        },
                         onQuantity = { n ->
                             Listings.setQuantity(context, o.optString("id"), n)
                             // Straight onto the board rather than at the next
@@ -396,9 +405,11 @@ private fun MyListingCard(
                     OutlinedButton(onClick = onStop) { Text(stringResource(R.string.rent_take_down)) }
                 } else {
                     Button(onClick = onPost) { Text(stringResource(R.string.rent_post_it)) }
-                    Spacer(Modifier.width(8.dp))
-                    TextButton(onClick = onDelete) { Text(stringResource(R.string.rent_delete)) }
                 }
+                Spacer(Modifier.width(8.dp))
+                // Deleting a live listing takes it off the board on the way
+                // out — one gesture, not a two-step the owner has to know.
+                TextButton(onClick = onDelete) { Text(stringResource(R.string.rent_delete)) }
             }
         }
     }

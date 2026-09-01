@@ -71,4 +71,8 @@
     <string name="press_invite_later">ไว้ทีหลัง</string>
     <string name="press_invite_body">คำเชิญสมัครรับ %1$s — แตะเพื่อรับ:</string>
     <string name="press_invite_nobody">ยังไม่มีใครให้เชิญ — ผู้ติดต่อจะปรากฏที่นี่</string>
+    <string name="pub_delete_btn">ลบสิ่งพิมพ์</string>
+    <string name="pub_delete_title">ลบสิ่งพิมพ์นี้หรือไม่</string>
+    <string name="pub_delete_body">สมาชิกยังเก็บทุกฉบับที่ส่งไปแล้ว ประกาศในตลาดและรหัสสมัครสมาชิกจะหมดอายุเอง จะไม่มีฉบับใหม่ออกได้อีก — ย้อนกลับไม่ได้</string>
+    <string name="pub_delete_confirm">ลบ</string>
 </resources>

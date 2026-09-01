@@ -71,4 +71,8 @@
     <string name="press_invite_later">あとで</string>
     <string name="press_invite_body">%1$s の購読への招待です — タップして受け取る:</string>
     <string name="press_invite_nobody">まだ招待できる人がいません — 連絡先がここに表示されます。</string>
+    <string name="pub_delete_btn">出版物を削除</string>
+    <string name="pub_delete_title">この出版物を削除しますか？</string>
+    <string name="pub_delete_body">購読者は送付済みの号をすべて保持します。マーケットの掲載と購読コードは自然に失効します。新しい号は二度と発行できません — 元に戻せません。</string>
+    <string name="pub_delete_confirm">削除</string>
 </resources>

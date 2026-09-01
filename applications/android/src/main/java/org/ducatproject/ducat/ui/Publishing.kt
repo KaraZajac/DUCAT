@@ -16,7 +16,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FilterChip
@@ -610,6 +612,38 @@ fun PublishingSection() {
                         }
                     }
                 }
+            }
+
+            // --- the end of the run ---------------------------------------
+            var askDelete by remember(pubId) { mutableStateOf(false) }
+            TextButton(
+                onClick = { askDelete = true },
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error,
+                ),
+            ) { Text(stringResource(R.string.pub_delete_btn)) }
+            if (askDelete) {
+                AlertDialog(
+                    onDismissRequest = { askDelete = false },
+                    title = { Text(stringResource(R.string.pub_delete_title)) },
+                    text = { Text(stringResource(R.string.pub_delete_body)) },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            askDelete = false
+                            Publications.deletePub(context, pubId)
+                        }) {
+                            Text(
+                                stringResource(R.string.pub_delete_confirm),
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { askDelete = false }) {
+                            Text(stringResource(R.string.common_cancel))
+                        }
+                    },
+                )
             }
         }
     }

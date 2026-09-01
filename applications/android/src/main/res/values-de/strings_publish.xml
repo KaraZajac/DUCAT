@@ -71,4 +71,8 @@
     <string name="press_invite_later">Später</string>
     <string name="press_invite_body">Eine Einladung, %1$s zu abonnieren — zum Annehmen tippen:</string>
     <string name="press_invite_nobody">Noch niemand zum Einladen — deine Kontakte erscheinen hier.</string>
+    <string name="pub_delete_btn">Publikation löschen</string>
+    <string name="pub_delete_title">Diese Publikation löschen?</string>
+    <string name="pub_delete_body">Abonnenten behalten jede bereits gesendete Ausgabe. Markteintrag und Abo-Code laufen von selbst ab. Es kann nie wieder eine neue Ausgabe erscheinen — das lässt sich nicht rückgängig machen.</string>
+    <string name="pub_delete_confirm">Löschen</string>
 </resources>

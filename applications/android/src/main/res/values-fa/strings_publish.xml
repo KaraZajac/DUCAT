@@ -71,4 +71,8 @@
     <string name="press_invite_later">بعداً</string>
     <string name="press_invite_body">دعوتی برای اشتراک در %1$s — برای پذیرش بزنید:</string>
     <string name="press_invite_nobody">هنوز کسی برای دعوت نیست — مخاطبان اینجا ظاهر می‌شوند.</string>
+    <string name="pub_delete_btn">حذف نشریه</string>
+    <string name="pub_delete_title">این نشریه حذف شود؟</string>
+    <string name="pub_delete_body">مشترکان هر شماره‌ای را که فرستاده شده نگه می‌دارند. آگهی بازار و کد اشتراک خودبه‌خود منقضی می‌شوند. دیگر هرگز شماره‌ی تازه‌ای منتشر نخواهد شد — قابل بازگشت نیست.</string>
+    <string name="pub_delete_confirm">حذف</string>
 </resources>

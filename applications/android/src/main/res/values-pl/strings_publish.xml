@@ -71,4 +71,8 @@
     <string name="press_invite_later">Później</string>
     <string name="press_invite_body">Zaproszenie do subskrypcji %1$s — dotknij, aby przyjąć:</string>
     <string name="press_invite_nobody">Nie ma jeszcze kogo zapraszać — kontakty pojawią się tutaj.</string>
+    <string name="pub_delete_btn">Usuń publikację</string>
+    <string name="pub_delete_title">Usunąć tę publikację?</string>
+    <string name="pub_delete_body">Subskrybenci zachowują każdy wysłany już numer. Ogłoszenie na rynku i kod subskrypcji wygasną same. Nowy numer nigdy już nie wyjdzie — tego nie można cofnąć.</string>
+    <string name="pub_delete_confirm">Usuń</string>
 </resources>

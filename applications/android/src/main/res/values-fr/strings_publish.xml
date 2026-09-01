@@ -71,4 +71,8 @@
     <string name="press_invite_later">Plus tard</string>
     <string name="press_invite_body">Une invitation à s\'abonner à %1$s — touchez pour accepter :</string>
     <string name="press_invite_nobody">Personne à inviter pour l\'instant — vos contacts apparaîtront ici.</string>
+    <string name="pub_delete_btn">Supprimer la publication</string>
+    <string name="pub_delete_title">Supprimer cette publication ?</string>
+    <string name="pub_delete_body">Les abonnés gardent chaque numéro déjà envoyé. L\'annonce du marché et le code d\'abonnement expirent d\'eux-mêmes. Aucun nouveau numéro ne pourra jamais paraître — c\'est irréversible.</string>
+    <string name="pub_delete_confirm">Supprimer</string>
 </resources>

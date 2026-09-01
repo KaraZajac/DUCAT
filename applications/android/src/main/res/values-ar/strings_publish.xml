@@ -71,4 +71,8 @@
     <string name="press_invite_later">لاحقًا</string>
     <string name="press_invite_body">دعوة للاشتراك في %1$s — اضغط للقبول:</string>
     <string name="press_invite_nobody">لا أحد لدعوته بعد — ستظهر جهات اتصالك هنا.</string>
+    <string name="pub_delete_btn">حذف المطبوعة</string>
+    <string name="pub_delete_title">أتريد حذف هذه المطبوعة؟</string>
+    <string name="pub_delete_body">يحتفظ المشتركون بكل عدد أُرسل بالفعل. إعلان السوق ورمز الاشتراك ينتهيان من تلقاء نفسيهما. لن يصدر عدد جديد أبدًا — لا يمكن التراجع عن هذا.</string>
+    <string name="pub_delete_confirm">حذف</string>
 </resources>

@@ -71,4 +71,8 @@
     <string name="press_invite_later">Later</string>
     <string name="press_invite_body">An invitation to subscribe to %1$s — tap to accept:</string>
     <string name="press_invite_nobody">Nobody to invite yet — your contacts appear here.</string>
+    <string name="pub_delete_btn">Delete publication</string>
+    <string name="pub_delete_title">Delete this publication?</string>
+    <string name="pub_delete_body">Subscribers keep every issue already sent. The market listing and the subscribe code expire on their own. No new issue can ever be cut for it — this cannot be undone.</string>
+    <string name="pub_delete_confirm">Delete</string>
 </resources>

@@ -71,4 +71,8 @@
     <string name="press_invite_later">Depois</string>
     <string name="press_invite_body">Um convite para assinar %1$s — toque para aceitar:</string>
     <string name="press_invite_nobody">Ninguém para convidar ainda — seus contatos aparecem aqui.</string>
+    <string name="pub_delete_btn">Excluir a publicação</string>
+    <string name="pub_delete_title">Excluir esta publicação?</string>
+    <string name="pub_delete_body">Os assinantes ficam com cada edição já enviada. O anúncio do mercado e o código de assinatura expiram sozinhos. Nunca mais poderá sair uma nova edição — isto não pode ser desfeito.</string>
+    <string name="pub_delete_confirm">Excluir</string>
 </resources>

@@ -71,4 +71,8 @@
     <string name="press_invite_later">Sonra</string>
     <string name="press_invite_body">%1$s aboneliğine davet — kabul için dokun:</string>
     <string name="press_invite_nobody">Henüz davet edilecek kimse yok — kişilerin burada görünür.</string>
+    <string name="pub_delete_btn">Yayını sil</string>
+    <string name="pub_delete_title">Bu yayın silinsin mi?</string>
+    <string name="pub_delete_body">Aboneler gönderilmiş her sayıyı korur. Pazar ilanı ve abonelik kodu kendiliğinden sona erer. Bir daha asla yeni sayı çıkamaz — bu geri alınamaz.</string>
+    <string name="pub_delete_confirm">Sil</string>
 </resources>

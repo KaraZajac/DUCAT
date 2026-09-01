@@ -71,4 +71,8 @@
     <string name="press_invite_later">Luego</string>
     <string name="press_invite_body">Una invitación para suscribirse a %1$s — toca para aceptar:</string>
     <string name="press_invite_nobody">Nadie a quien invitar todavía — tus contactos aparecen aquí.</string>
+    <string name="pub_delete_btn">Eliminar la publicación</string>
+    <string name="pub_delete_title">¿Eliminar esta publicación?</string>
+    <string name="pub_delete_body">Los suscriptores conservan cada número ya enviado. El anuncio del mercado y el código de suscripción caducan por sí solos. Nunca podrá salir un número nuevo — esto no se puede deshacer.</string>
+    <string name="pub_delete_confirm">Eliminar</string>
 </resources>

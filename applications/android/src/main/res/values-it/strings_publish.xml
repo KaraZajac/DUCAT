@@ -71,4 +71,8 @@
     <string name="press_invite_later">Dopo</string>
     <string name="press_invite_body">Un invito ad abbonarsi a %1$s — tocca per accettare:</string>
     <string name="press_invite_nobody">Nessuno da invitare — i tuoi contatti appariranno qui.</string>
+    <string name="pub_delete_btn">Elimina la pubblicazione</string>
+    <string name="pub_delete_title">Eliminare questa pubblicazione?</string>
+    <string name="pub_delete_body">Gli abbonati conservano ogni numero già inviato. L\'annuncio sul mercato e il codice di abbonamento scadono da soli. Non potrà mai uscire un nuovo numero — non si può annullare.</string>
+    <string name="pub_delete_confirm">Elimina</string>
 </resources>

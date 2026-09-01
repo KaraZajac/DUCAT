@@ -71,4 +71,8 @@
     <string name="press_invite_later">Nanti</string>
     <string name="press_invite_body">Undangan berlangganan %1$s — ketuk untuk menerima:</string>
     <string name="press_invite_nobody">Belum ada yang bisa diundang — kontakmu muncul di sini.</string>
+    <string name="pub_delete_btn">Hapus publikasi</string>
+    <string name="pub_delete_title">Hapus publikasi ini?</string>
+    <string name="pub_delete_body">Pelanggan tetap memiliki setiap edisi yang sudah dikirim. Iklan pasar dan kode langganan kedaluwarsa dengan sendirinya. Edisi baru tidak akan pernah bisa terbit lagi — ini tidak dapat dibatalkan.</string>
+    <string name="pub_delete_confirm">Hapus</string>
 </resources>

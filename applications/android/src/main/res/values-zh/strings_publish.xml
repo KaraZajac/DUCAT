@@ -71,4 +71,8 @@
     <string name="press_invite_later">稍后</string>
     <string name="press_invite_body">邀请你订阅 %1$s — 点按接受：</string>
     <string name="press_invite_nobody">还没有可邀请的人 — 联系人会出现在这里。</string>
+    <string name="pub_delete_btn">删除出版物</string>
+    <string name="pub_delete_title">删除此出版物？</string>
+    <string name="pub_delete_body">订阅者保留已寄出的每一期。市场条目和订阅码会自行过期。永远无法再出新的一期——此操作无法撤销。</string>
+    <string name="pub_delete_confirm">删除</string>
 </resources>

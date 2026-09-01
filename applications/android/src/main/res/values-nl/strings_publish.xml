@@ -71,4 +71,8 @@
     <string name="press_invite_later">Later</string>
     <string name="press_invite_body">Een uitnodiging om je op %1$s te abonneren — tik om te accepteren:</string>
     <string name="press_invite_nobody">Nog niemand om uit te nodigen — je contacten verschijnen hier.</string>
+    <string name="pub_delete_btn">Publicatie verwijderen</string>
+    <string name="pub_delete_title">Deze publicatie verwijderen?</string>
+    <string name="pub_delete_body">Abonnees houden elke al verzonden editie. De marktvermelding en de abonneercode verlopen vanzelf. Er kan nooit meer een nieuwe editie verschijnen — dit is onomkeerbaar.</string>
+    <string name="pub_delete_confirm">Verwijderen</string>
 </resources>

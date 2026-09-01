@@ -71,4 +71,8 @@
     <string name="press_invite_later">Пізніше</string>
     <string name="press_invite_body">Запрошення підписатися на %1$s — торкніться, щоб прийняти:</string>
     <string name="press_invite_nobody">Поки нікого запрошувати — контакти з\'являться тут.</string>
+    <string name="pub_delete_btn">Видалити видання</string>
+    <string name="pub_delete_title">Видалити це видання?</string>
+    <string name="pub_delete_body">Підписники збережуть усі вже надіслані випуски. Оголошення на ринку та код підписки спливуть самі. Новий випуск більше ніколи не вийде — це не можна скасувати.</string>
+    <string name="pub_delete_confirm">Видалити</string>
 </resources>

@@ -315,6 +315,25 @@ object Publications {
         }
     }
 
+    /** Forget a publication. Everything on the network dies of old age:
+     *  the market notice, the local-board copy, the shelf records, the
+     *  standing subscribe code — all expiry-kept, all orphaned the moment
+     *  re-posting stops. Subscribers keep every issue already sent (a
+     *  shipped key is theirs). The master dies here, so no new period can
+     *  ever be cut — which is what makes this worth a second question. */
+    fun deletePub(context: Context, pubId: String) {
+        synchronized(lock) {
+            val p = prefs(context)
+            val all = p.getString("pubs", null)?.let { JSONObject(it) } ?: return
+            if (!all.has(pubId)) return
+            all.remove(pubId)
+            val e = p.edit().putString("pubs", all.toString())
+            if (p.getString("press_pub", null) == pubId) e.remove("press_pub")
+            e.apply()
+        }
+        ContactStore.bump()
+    }
+
     /** Browse one category worldwide: every readable notice, one row per
      *  poster key (a publisher re-posts; readers want the newest). */
     fun browseMarket(

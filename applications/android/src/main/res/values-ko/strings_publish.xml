@@ -71,4 +71,8 @@
     <string name="press_invite_later">나중에</string>
     <string name="press_invite_body">%1$s 구독 초대입니다 — 눌러서 수락:</string>
     <string name="press_invite_nobody">아직 초대할 사람이 없어요 — 연락처가 여기에 표시됩니다.</string>
+    <string name="pub_delete_btn">간행물 삭제</string>
+    <string name="pub_delete_title">이 간행물을 삭제할까요?</string>
+    <string name="pub_delete_body">구독자는 이미 보낸 호를 모두 간직합니다. 마켓 등록과 구독 코드는 저절로 만료됩니다. 새 호는 다시는 낼 수 없습니다 — 되돌릴 수 없습니다.</string>
+    <string name="pub_delete_confirm">삭제</string>
 </resources>
