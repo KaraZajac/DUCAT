@@ -31,52 +31,72 @@ object CallAudioAndroid : Calls.Audio {
     @Volatile private var capturing = false
 
     @SuppressLint("MissingPermission") // Callers gate on RECORD_AUDIO first.
-    override fun start(onFrame: (ByteArray) -> Unit) {
+    @Synchronized
+    override fun start(onFrame: (ByteArray) -> Unit): Boolean {
         stop()
         val minRec = AudioRecord.getMinBufferSize(
             RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT,
         )
-        val rec = AudioRecord(
-            MediaRecorder.AudioSource.VOICE_COMMUNICATION,
-            RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT,
-            maxOf(minRec, Calls.FRAME_BYTES * 4),
-        )
-        if (rec.state != AudioRecord.STATE_INITIALIZED) {
+        val rec = runCatching {
+            AudioRecord(
+                MediaRecorder.AudioSource.VOICE_COMMUNICATION,
+                RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT,
+                maxOf(minRec, Calls.FRAME_BYTES * 4),
+            )
+        }.getOrNull()
+        if (rec == null || rec.state != AudioRecord.STATE_INITIALIZED) {
             DucatLog.w("CallAudio", "microphone would not open")
-            rec.release()
-            return
+            rec?.release()
+            return false
         }
         val minPlay = AudioTrack.getMinBufferSize(
             RATE, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT,
         )
-        val out = AudioTrack.Builder()
-            .setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-                    .build(),
-            )
-            .setAudioFormat(
-                AudioFormat.Builder()
-                    .setSampleRate(RATE)
-                    .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
-                    .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-                    .build(),
-            )
-            .setBufferSizeInBytes(maxOf(minPlay, Calls.FRAME_BYTES * 6))
-            .setTransferMode(AudioTrack.MODE_STREAM)
-            .build()
+        val out = runCatching {
+            AudioTrack.Builder()
+                .setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_VOICE_COMMUNICATION)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                        .build(),
+                )
+                .setAudioFormat(
+                    AudioFormat.Builder()
+                        .setSampleRate(RATE)
+                        .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+                        .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                        .build(),
+                )
+                .setBufferSizeInBytes(maxOf(minPlay, Calls.FRAME_BYTES * 6))
+                .setTransferMode(AudioTrack.MODE_STREAM)
+                .build()
+        }.getOrElse {
+            DucatLog.w("CallAudio", "earpiece would not open: ${it.message}")
+            rec.release()
+            return false
+        }
         recorder = rec
         track = out
         capturing = true
-        rec.startRecording()
-        out.play()
+        runCatching { rec.startRecording(); out.play() }.onFailure {
+            DucatLog.w("CallAudio", "microphone would not start: ${it.message}")
+            stop()
+            return false
+        }
         Thread {
             val buf = ByteArray(Calls.FRAME_BYTES)
             var filled = 0
-            while (capturing) {
+            // THIS recorder, not the field: stop() releases it and the next
+            // start() installs another, and a read on a released recorder
+            // fails at once, for ever — a loop that took an error for
+            // "nothing yet" spun a core until the process died.
+            while (capturing && recorder === rec) {
                 val n = rec.read(buf, filled, buf.size - filled)
-                if (n <= 0) continue
+                if (n < 0) {
+                    DucatLog.w("CallAudio", "microphone read failed ($n)")
+                    break
+                }
+                if (n == 0) continue
                 filled += n
                 if (filled == buf.size) {
                     onFrame(buf.copyOf())
@@ -84,12 +104,14 @@ object CallAudioAndroid : Calls.Audio {
                 }
             }
         }.apply { isDaemon = true; name = "call-mic"; start() }
+        return true
     }
 
     override fun play(frame: ByteArray) {
         track?.write(frame, 0, frame.size)
     }
 
+    @Synchronized
     override fun stop() {
         capturing = false
         recorder?.let { runCatching { it.stop() }; it.release() }

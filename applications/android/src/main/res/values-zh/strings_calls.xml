@@ -23,4 +23,10 @@
     <string name="call_no_answer">无人接听</string>
     <string name="call_leave_message">留言</string>
     <string name="call_dismiss">暂不</string>
+    <string name="call_body_cancel">在你接听前挂断了。</string>
+    <string name="call_connecting">连接中…</string>
+    <string name="call_unreached">联系不上对方</string>
+    <string name="call_notify_calling">正在呼叫 %1$s…</string>
+    <string name="call_notify_in_call">正在与 %1$s 通话</string>
+    <string name="call_notify_return">点按可回到通话。</string>
 </resources>

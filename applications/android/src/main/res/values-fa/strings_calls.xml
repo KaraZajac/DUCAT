@@ -23,4 +23,10 @@
     <string name="call_no_answer">پاسخی نیست</string>
     <string name="call_leave_message">پیام بگذارید</string>
     <string name="call_dismiss">حالا نه</string>
+    <string name="call_body_cancel">پیش از آنکه جواب بدهی قطع شد.</string>
+    <string name="call_connecting">در حال برقراری…</string>
+    <string name="call_unreached">در دسترس نبود</string>
+    <string name="call_notify_calling">در حال تماس با %1$s…</string>
+    <string name="call_notify_in_call">در تماس با %1$s</string>
+    <string name="call_notify_return">برای بازگشت ضربه بزن.</string>
 </resources>

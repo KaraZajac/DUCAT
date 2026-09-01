@@ -23,4 +23,10 @@
     <string name="call_no_answer">ไม่มีผู้รับสาย</string>
     <string name="call_leave_message">ฝากข้อความ</string>
     <string name="call_dismiss">ไว้ทีหลัง</string>
+    <string name="call_body_cancel">วางสายก่อนคุณรับ</string>
+    <string name="call_connecting">กำลังเชื่อมต่อ…</string>
+    <string name="call_unreached">ติดต่อไม่ได้</string>
+    <string name="call_notify_calling">กำลังโทรหา %1$s…</string>
+    <string name="call_notify_in_call">กำลังคุยกับ %1$s</string>
+    <string name="call_notify_return">แตะเพื่อกลับไปที่สาย</string>
 </resources>

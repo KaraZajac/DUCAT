@@ -23,4 +23,10 @@
     <string name="call_no_answer">Không trả lời</string>
     <string name="call_leave_message">Để lại lời nhắn</string>
     <string name="call_dismiss">Để sau</string>
+    <string name="call_body_cancel">Đã cúp máy trước khi bạn nghe.</string>
+    <string name="call_connecting">Đang kết nối…</string>
+    <string name="call_unreached">Không liên lạc được</string>
+    <string name="call_notify_calling">Đang gọi %1$s…</string>
+    <string name="call_notify_in_call">Đang gọi với %1$s</string>
+    <string name="call_notify_return">Chạm để quay lại cuộc gọi.</string>
 </resources>

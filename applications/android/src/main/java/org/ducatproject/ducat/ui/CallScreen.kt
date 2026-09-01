@@ -38,6 +38,7 @@ import kotlinx.coroutines.delay
 import org.ducatproject.ducat.Calls
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.R
+import org.ducatproject.ducat.StoredMessage
 
 /**
  * The call, full screen (§16.21): who, what state, and at most two round
@@ -48,6 +49,11 @@ import org.ducatproject.ducat.R
  *  road home. Injected by MainActivity; the desk has no thread screen. */
 var callOpenThread: (String) -> Unit = {}
 
+/** The offer that is ringing — by its call id, not its seq alone: a fresh
+ *  card restarts the numbering, so a thread can hold two inbound seq-0s. */
+private fun ringingOffer(thread: List<StoredMessage>, r: Calls.State.Incoming): StoredMessage? =
+    thread.lastOrNull { !it.outgoing && it.kind == 14 && it.callId == r.callId && it.seq == r.offerSeq }
+
 @Composable
 fun CallScreen() {
     val context = LocalContext.current
@@ -55,6 +61,7 @@ fun CallScreen() {
     val contactHex = when (state) {
         is Calls.State.Outgoing -> state.contactHex
         is Calls.State.Incoming -> state.contactHex
+        is Calls.State.Answering -> state.contactHex
         is Calls.State.Active -> state.contactHex
         is Calls.State.NoAnswer -> state.contactHex
         else -> return
@@ -69,6 +76,24 @@ fun CallScreen() {
     val contact = remember(contactHex) {
         ContactStore(context).all().firstOrNull { it.personaHex == contactHex }
     } ?: return
+    // The same gate the Call button has (Chat.kt): launched unconditionally,
+    // an already-granted permission answers straight back, so this is both
+    // the ask and the fast path. Answering without it opened a call the
+    // microphone could not join, which the caller heard as ten seconds of
+    // silence and then nothing.
+    val micPerm = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
+    ) { ok ->
+        // Re-read the ring: the dialog took its time, and the state is
+        // whatever it is now, not what the button saw.
+        val ringing = Calls.state as? Calls.State.Incoming
+        val store = ContactStore(context)
+        val c = ringing?.let { r -> store.all().firstOrNull { it.personaHex == r.contactHex } }
+        val offer = ringing?.let { r -> ringingOffer(store.thread(r.contactHex), r) }
+        if (c != null && offer != null) {
+            if (ok) Calls.answer(context, c, offer) else Calls.decline(context, c, offer)
+        }
+    }
 
     var nowMs by remember { mutableLongStateOf(System.currentTimeMillis()) }
     LaunchedEffect(state) {
@@ -106,7 +131,10 @@ fun CallScreen() {
                     when (state) {
                         is Calls.State.Outgoing -> stringResource(R.string.call_calling)
                         is Calls.State.Incoming -> stringResource(R.string.call_incoming)
-                        is Calls.State.NoAnswer -> stringResource(R.string.call_no_answer)
+                        is Calls.State.Answering -> stringResource(R.string.call_connecting)
+                        is Calls.State.NoAnswer -> stringResource(
+                            if (state.unreached) R.string.call_unreached else R.string.call_no_answer,
+                        )
                         is Calls.State.Active -> {
                             val secs = (nowMs - state.sinceMs) / 1000
                             "%d:%02d".format(secs / 60, secs % 60)
@@ -148,11 +176,7 @@ fun CallScreen() {
             Row(horizontalArrangement = Arrangement.spacedBy(48.dp)) {
                 if (state is Calls.State.Incoming) {
                     FilledIconButton(
-                        onClick = {
-                            val offer = ContactStore(context).thread(contactHex)
-                                .lastOrNull { it.seq == state.offerSeq && !it.outgoing }
-                            if (offer != null) Calls.answer(context, contact, offer)
-                        },
+                        onClick = { micPerm.launch(android.Manifest.permission.RECORD_AUDIO) },
                         modifier = Modifier.size(72.dp),
                         colors = IconButtonDefaults.filledIconButtonColors(
                             containerColor = MaterialTheme.colorScheme.primary,
@@ -168,8 +192,7 @@ fun CallScreen() {
                 FilledIconButton(
                     onClick = {
                         if (state is Calls.State.Incoming) {
-                            val offer = ContactStore(context).thread(contactHex)
-                                .lastOrNull { it.seq == state.offerSeq && !it.outgoing }
+                            val offer = ringingOffer(ContactStore(context).thread(contactHex), state)
                             if (offer != null) Calls.decline(context, contact, offer)
                             else Calls.hangUp()
                         } else {

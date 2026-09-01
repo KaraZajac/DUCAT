@@ -23,7 +23,9 @@ import androidx.core.app.NotificationCompat
  */
 object Notify {
     private const val CHANNEL = "ducat_activity"
-    private var nextId = 1000
+    // Posted from several poller lanes at once; a shared id would make one
+    // notification silently replace another.
+    private val nextId = java.util.concurrent.atomic.AtomicInteger(1000)
 
     private fun manager(context: Context): NotificationManager? {
         val mgr = context.getSystemService(NotificationManager::class.java) ?: return null
@@ -49,7 +51,7 @@ object Notify {
 
         val mgr = manager(context) ?: return
         val open = PendingIntent.getActivity(
-            context, ++reqCode,
+            context, reqCode.incrementAndGet(),
             Intent(context, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
                 openChat?.let { putExtra("open_chat", it) }
@@ -74,14 +76,27 @@ object Notify {
             .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
             .setPublicVersion(fact)
             .build()
-        mgr.notify(nextId++, full)
+        mgr.notify(nextId.getAndIncrement(), full)
     }
 
     /** Distinct request codes so two threads' taps do not share one intent. */
-    private var reqCode = 100
+    private val reqCode = java.util.concurrent.atomic.AtomicInteger(100)
 
     /** An inbound thread message, worded by what it is (§16.13's kinds). */
     fun message(context: Context, from: String, personaHex: String, m: StoredMessage) {
+        // The answer to a ring this phone is on: the call screen is showing
+        // exactly that, and "Jordan answered your call" beside "In a call
+        // with Jordan" in the shade was the record announcing itself. An
+        // answer that lands after the ring was given up on is news — they
+        // picked up, you were gone — and still posts.
+        if (m.kind == 15) {
+            val onIt = when (val s = Calls.state) {
+                is Calls.State.Outgoing -> s.contactHex == personaHex
+                is Calls.State.Active -> s.contactHex == personaHex
+                else -> false
+            }
+            if (onIt) return
+        }
         val what = when (m.kind) {
             1 -> {
                 // Their language, not ours: the placeholder body a bill
@@ -164,7 +179,7 @@ object Notify {
             }
         )
         val open = PendingIntent.getActivity(
-            context, ++reqCode,
+            context, reqCode.incrementAndGet(),
             Intent(context, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
             },

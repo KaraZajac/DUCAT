@@ -38,7 +38,19 @@
          process destroys every private route, and a peer nobody can reach is
          not a peer. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <!-- specialUse, not dataSync: Android 15 caps dataSync services at six
+         hours a day in the background and kills the process of one that does
+         not stop when told. A node that goes down at hour six is a phone
+         nobody can reach for the rest of the day. There is no listed type
+         for "a peer-to-peer node"; this is the one Android provides for
+         exactly that, with the reason declared on the service. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <!-- Only for the length of a call (§16.21): Android 14 takes the
+         microphone from a background app unless a foreground service of
+         this type holds it, and a call whose screen went dark went silent
+         at the far end. NodeService adds the type when a call connects and
+         drops it when the call ends. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
@@ -123,6 +135,10 @@
         <service
             android:name=".NodeService"
             android:exported="false"
-            android:foregroundServiceType="dataSync" />
+            android:foregroundServiceType="specialUse|microphone">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Peer-to-peer network node. Holds open the private routes contacts use to reach this phone for messages, payments and calls; there is no server that could do it in its place." />
+        </service>
     </application>
 </manifest>

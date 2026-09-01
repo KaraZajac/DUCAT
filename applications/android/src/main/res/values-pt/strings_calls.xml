@@ -23,4 +23,10 @@
     <string name="call_no_answer">Sem resposta</string>
     <string name="call_leave_message">Deixar um recado</string>
     <string name="call_dismiss">Agora não</string>
+    <string name="call_body_cancel">Desligou antes de você atender.</string>
+    <string name="call_connecting">Conectando…</string>
+    <string name="call_unreached">Não foi possível contatar</string>
+    <string name="call_notify_calling">Ligando para %1$s…</string>
+    <string name="call_notify_in_call">Em chamada com %1$s</string>
+    <string name="call_notify_return">Toque para voltar.</string>
 </resources>

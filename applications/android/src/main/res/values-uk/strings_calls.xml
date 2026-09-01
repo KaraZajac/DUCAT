@@ -23,4 +23,10 @@
     <string name="call_no_answer">Немає відповіді</string>
     <string name="call_leave_message">Залишити повідомлення</string>
     <string name="call_dismiss">Не зараз</string>
+    <string name="call_body_cancel">Поклав(ла) слухавку до відповіді.</string>
+    <string name="call_connecting">З\u2019єднання…</string>
+    <string name="call_unreached">Не вдалося додзвонитися</string>
+    <string name="call_notify_calling">Дзвонимо %1$s…</string>
+    <string name="call_notify_in_call">Розмова з %1$s</string>
+    <string name="call_notify_return">Торкнись, щоб повернутися.</string>
 </resources>
