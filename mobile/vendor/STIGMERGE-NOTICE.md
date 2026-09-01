@@ -77,7 +77,22 @@ Recorded per the MPL's Exhibit A expectations and plain courtesy:
    every phone-side fetch failed `strip_prefix` inside "index local
    share" while identical code passed on a desk. Pinned by
    `wanted_root_through_a_symlink_indexes`.
-7. **`Status::Done` is actually sent.** Upstream's fetcher returned its
+7. **A refused DHT write is an error, not a shrug (2026-09-01).**
+   `set_dht_value` returning `Ok(Some(_))` is veilid refusing the write —
+   the network holds a value signed at a later sequence than the local
+   record state knows, and a plain process restart is enough to cause it.
+   Every write in `record.rs` discarded that return, so a restarted
+   seeder would re-verify its pieces, "sync" its have-map, and the
+   network would keep last session's partial map for ever — fetchers
+   then never ask for the pieces it actually holds (found live: a
+   two-piece map advertised for a three-piece site, `LeaseRejected(No
+   MatchingPieces)` on the missing one from every fetcher). The same
+   silence covered share-header reannounces and peers-record writes.
+   All owner writes now go through one helper that, on refusal,
+   force-reads the subkey to refresh local record state and retries
+   once — the retry then signs at the sequence the network expects —
+   and a second refusal is a visible error. Upstream candidate.
+8. **`Status::Done` is actually sent.** Upstream's fetcher returned its
    internal `State::Done` on `index_complete` without ever emitting
    `Status::Done` on the status channel — so every consumer waiting on
    the documented signal, upstream's own CLI included, waited forever on

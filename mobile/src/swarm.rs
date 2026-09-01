@@ -229,7 +229,13 @@ pub fn swarm_fetch(
                 "swarm: fetch attempt (stalls {stalls}, waited {waited}s) for {}…",
                 &share_key[..share_key.len().min(20)]
             ));
-            match fetch_once(
+            let before = progress_map()
+                .lock()
+                .unwrap()
+                .get(&share_key)
+                .map(|p| p.position)
+                .unwrap_or(0);
+            let outcome = fetch_once(
                 conn.clone(),
                 root.clone(),
                 want,
@@ -237,8 +243,22 @@ pub fn swarm_fetch(
                 share_key.clone(),
                 stay_seeding,
             )
-            .await
-            {
+            .await;
+            let after = progress_map()
+                .lock()
+                .unwrap()
+                .get(&share_key)
+                .map(|p| p.position)
+                .unwrap_or(0);
+            // An attempt that moved bytes buys the next one a clean slate:
+            // a swarm seeded through a dead origin's frozen peer list deals
+            // pieces by lottery among live and dead candidates, and each
+            // re-bootstrap redraws. Progress means somebody is serving —
+            // only six DRY windows in a row mean nobody is.
+            if after > before {
+                stalls = 0;
+            }
+            match outcome {
                 Err(SwarmError::Failed(e)) if e.contains("TryAgain") && waited < 40 => {
                     crate::node::note(format!("swarm: route not ready, retrying — {e}"));
                     tokio::time::sleep(std::time::Duration::from_secs(5)).await;
@@ -300,12 +320,22 @@ async fn fetch_once(
     );
     let mut total: u64 = 0;
     let mut seen: u32 = 0;
+    let mut baseline: i64 = 0;
+    let mut advanced = false;
+    let mut quiet_windows = 0u32;
+    let born = std::time::Instant::now();
     loop {
         // The watchdog: verification of what is already on disk emits
         // progress, so a healthy fetch — resumed or fresh — always has
         // something to say inside this window. Silence means the stream
         // died under a peer that will wait for ever, and the caller's
         // answer to that is a re-bootstrap, not more waiting.
+        //
+        // Unless bytes have already moved THIS attempt: then somebody is
+        // serving, the pool is mid-lottery between live peers and the
+        // frozen peer list's corpses, and a teardown would erase the
+        // failure scores it just paid for. A progressing attempt gets
+        // three quiet windows before the axe; a dry one still gets one.
         let ev = tokio::time::timeout(
             std::time::Duration::from_secs(90),
             events.recv(),
@@ -313,6 +343,13 @@ async fn fetch_once(
         .await;
         let ev = match ev {
             Err(_) => {
+                if advanced && quiet_windows < 2 {
+                    quiet_windows += 1;
+                    crate::node::note(format!(
+                        "swarm: quiet window {quiet_windows} on a moving fetch, holding"
+                    ));
+                    continue;
+                }
                 crate::node::note(format!(
                     "swarm: watchdog fired after {seen} event(s)"
                 ));
@@ -324,6 +361,7 @@ async fn fetch_once(
             }
             Ok(r) => r.map_err(fail)?,
         };
+        quiet_windows = 0;
         seen += 1;
         if seen <= 12 || seen % 64 == 0 {
             let line: String = format!("{ev:?}").chars().take(110).collect();
@@ -342,6 +380,14 @@ async fn fetch_once(
                 ..
             }) => {
                 total = fetch_length;
+                // Early reports are the resume point — what disk already
+                // held, re-verified in a burst; only movement past that,
+                // later than the burst, is the network actually serving.
+                if born.elapsed() < std::time::Duration::from_secs(10) {
+                    baseline = baseline.max(fetch_position);
+                } else if fetch_position > baseline {
+                    advanced = true;
+                }
                 if let Some(p) = progress_map().lock().unwrap().get_mut(&progress_key) {
                     p.position = fetch_position;
                     p.length = fetch_length;

@@ -17,6 +17,51 @@ use crate::piece_map::PieceMap;
 use crate::proto::{Decoder, Encoder, Header, PeerInfo};
 use crate::Error;
 
+/// One DHT write with the refusal made visible (DUCAT modification — see
+/// ../../STIGMERGE-NOTICE.md).
+///
+/// `set_dht_value` returning `Ok(Some(_))` is veilid REFUSING the write:
+/// the network holds a value signed at a later sequence than the local
+/// record state knows, which a plain process restart is enough to cause.
+/// Discarding that return — as every write here used to — leaves the
+/// refusal silent: a restarted seeder re-verifies its pieces, "syncs" its
+/// have-map, and the network keeps last session's partial map for ever,
+/// so fetchers never ask it for the pieces it holds. A forced read
+/// refreshes the local record state; the one retry then signs at the
+/// sequence the network expects.
+async fn set_or_say_why<C: Connection + Send + Sync + 'static>(
+    conn: &mut C,
+    key: &RecordKey,
+    subkey: veilid_core::ValueSubkey,
+    data: Vec<u8>,
+    writer: Option<&KeyPair>,
+) -> Result<()> {
+    let routing_context = conn.routing_context();
+    let options = writer.map(|w| SetDHTValueOptions {
+        writer: Some(w.clone()),
+        ..Default::default()
+    });
+    if routing_context
+        .set_dht_value(key.to_owned(), subkey, data.clone(), options.clone())
+        .await?
+        .is_none()
+    {
+        return Ok(());
+    }
+    let _ = routing_context
+        .get_dht_value(key.to_owned(), subkey, true)
+        .await?;
+    match routing_context
+        .set_dht_value(key.to_owned(), subkey, data, options)
+        .await?
+    {
+        None => Ok(()),
+        Some(_) => Err(Error::msg(
+            "write refused twice: the network holds a newer value for this record",
+        )),
+    }
+}
+
 pub struct StablePublicRecord {
     dht_rec: DHTRecordDescriptor,
     key: RecordKey,
@@ -152,7 +197,6 @@ impl StablePublicRecord {
         {
             conn.require_attachment().await?;
         }
-        let routing_context = conn.routing_context();
         for subkey in range.iter() {
             let i: usize = subkey.try_into()?;
             let key_data = if subkey < data.len().try_into()? {
@@ -160,9 +204,7 @@ impl StablePublicRecord {
             } else {
                 &[]
             };
-            routing_context
-                .set_dht_value(key.to_owned(), subkey, key_data.to_vec(), None)
-                .await?;
+            set_or_say_why(conn, key, subkey, key_data.to_vec(), None).await?;
         }
         Ok(())
     }
@@ -197,27 +239,21 @@ impl StablePublicRecord {
         {
             conn.require_attachment().await?;
         }
-        let routing_context = conn.routing_context();
         let mut offset = 0;
         for subkey in range.iter() {
             if offset > data.len() {
-                routing_context
-                    .set_dht_value(key.to_owned(), subkey, vec![], None)
-                    .await?;
+                set_or_say_why(conn, key, subkey, vec![], None).await?;
                 continue;
             }
             let count = min(ValueData::MAX_LEN, data.len() - offset);
-            routing_context
-                .set_dht_value(
-                    key.to_owned(),
-                    subkey,
-                    data[offset..offset + count].to_vec(),
-                    Some(SetDHTValueOptions {
-                        writer: Some(owner_keypair.clone()),
-                        ..Default::default()
-                    }),
-                )
-                .await?;
+            set_or_say_why(
+                conn,
+                key,
+                subkey,
+                data[offset..offset + count].to_vec(),
+                Some(owner_keypair),
+            )
+            .await?;
             offset += ValueData::MAX_LEN;
         }
         Ok(())

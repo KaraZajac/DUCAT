@@ -24,6 +24,10 @@ object Sites {
         val addedAt: Long,
         val keepAlive: Boolean,
         val fetchedDigestHex: String?,
+        // The share the cached bundle actually came from. The head's share
+        // can rotate ahead of the disk; a mirror serves what it has, under
+        // the key it was fetched from.
+        val fetchedShare: String? = null,
     )
 
     private fun prefs(context: Context) = securePrefs(context, "ducat_sites")
@@ -48,6 +52,7 @@ object Sites {
                 addedAt = o.optLong("added"),
                 keepAlive = o.optBoolean("keep", false),
                 fetchedDigestHex = o.optString("fetched").ifBlank { null },
+                fetchedShare = o.optString("fetched_share").ifBlank { null },
             )
         }
     }
@@ -61,7 +66,8 @@ object Sites {
                     .put("share", s.share).put("digest", s.digestHex)
                     .put("updated", s.updated).put("added", s.addedAt)
                     .put("keep", s.keepAlive)
-                    .put("fetched", s.fetchedDigestHex ?: ""),
+                    .put("fetched", s.fetchedDigestHex ?: "")
+                    .put("fetched_share", s.fetchedShare ?: ""),
             )
         }
         prefs(context).edit().putString("sites", arr.toString()).apply()
@@ -95,6 +101,7 @@ object Sites {
             addedAt = prior?.addedAt ?: now,
             keepAlive = prior?.keepAlive ?: false,
             fetchedDigestHex = prior?.fetchedDigestHex,
+            fetchedShare = prior?.fetchedShare,
         )
         save(context, rest + entry)
         return entry
@@ -112,20 +119,53 @@ object Sites {
         }
         val fresh = File(dir.parentFile, "next")
         fresh.deleteRecursively(); fresh.mkdirs()
-        Swarm.fetch(site.share, site.digestHex, fresh.absolutePath, staySeeding = site.keepAlive)
+        // Never staySeeding here: a seed parked now would be rooted at
+        // `next/`, and the rename below pulls the floor out from under it.
+        // The park happens after the swap, from the dir that will last.
+        Swarm.fetch(site.share, site.digestHex, fresh.absolutePath)
+        Swarm.stopShare(site.fetchedShare ?: site.share)
         dir.deleteRecursively()
         check(fresh.renameTo(dir)) { "could not move the site into place" }
         save(
             context,
             all(context).map {
                 if (it.recordKey == site.recordKey) {
-                    it.copy(fetchedDigestHex = site.digestHex)
+                    it.copy(
+                        fetchedDigestHex = site.digestHex,
+                        fetchedShare = site.share,
+                    )
                 } else {
                     it
                 }
             },
         )
+        if (site.keepAlive) reseed(context, site.recordKey)
         return dir
+    }
+
+    /**
+     * Put a kept site's cached bundle back into serving — a verify-only
+     * stay fetch over complete files that downloads nothing (§16.20's
+     * restart-reseed primitive, same as the shelf and the outbox). This
+     * is what makes the keep-alive checkbox a promise rather than a
+     * mood: it runs after every fetch, when the box is ticked, and once
+     * per process start from the poller.
+     */
+    fun reseed(context: Context, recordKey: String) {
+        val site = all(context).firstOrNull { it.recordKey == recordKey } ?: return
+        if (!site.keepAlive) return
+        val digest = site.fetchedDigestHex ?: return
+        val share = site.fetchedShare ?: site.share
+        val dir = bundleDir(context, recordKey)
+        if (!dir.isDirectory || !dir.walkTopDown().any { it.isFile }) return
+        Thread {
+            runCatching {
+                // Stop-then-stay: parking the same share twice would strand
+                // the first task; stopping a share nobody serves is a no-op.
+                Swarm.stopShare(share)
+                Swarm.fetch(share, digest, dir.absolutePath, staySeeding = true)
+            }
+        }.apply { isDaemon = true; name = "site-reseed" }.start()
     }
 
     fun setKeepAlive(context: Context, recordKey: String, keep: Boolean) {
@@ -135,9 +175,23 @@ object Sites {
                 if (it.recordKey == recordKey) it.copy(keepAlive = keep) else it
             },
         )
+        // The checkbox acts now, not at the next fetch: ticking parks the
+        // bundle already on disk, unticking stops serving it.
+        if (keep) {
+            reseed(context, recordKey)
+        } else {
+            all(context).firstOrNull { it.recordKey == recordKey }?.let {
+                Swarm.stopShare(it.fetchedShare ?: it.share)
+            }
+        }
     }
 
     fun remove(context: Context, recordKey: String) {
+        all(context).firstOrNull { it.recordKey == recordKey }?.let {
+            // A parked seeder over deleted files would linger until the
+            // process dies; stop it before the bundle goes.
+            Swarm.stopShare(it.fetchedShare ?: it.share)
+        }
         save(context, all(context).filterNot { it.recordKey == recordKey })
         File(context.filesDir, "sites/${recordKey.hashCode().toUInt()}").deleteRecursively()
     }

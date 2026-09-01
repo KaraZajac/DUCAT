@@ -395,7 +395,12 @@ pub fn node_start(storage_dir: String, udp: bool) -> Result<(), NodeError> {
         // does (APPM stays: our mailbox answers calls; watches, reads and
         // writes are outbound and unaffected). A deliberately run
         // infrastructure node re-enables with DUCAT_FULL_NODE=1.
-        if std::env::var("DUCAT_FULL_NODE").ok().as_deref() != Some("1") {
+        // The env var serves a desk; a phone has no shell environment, so
+        // the same choice rides a marker file in the node's storage dir
+        // (`adb shell run-as … touch files/veilid/full_node` to flip one).
+        let full_node = std::env::var("DUCAT_FULL_NODE").ok().as_deref() == Some("1")
+            || std::path::Path::new(&storage_dir).join("full_node").exists();
+        if !full_node {
             cfg["capabilities"]["disable"] =
                 serde_json::json!(["ROUT", "TUNL", "RLAY", "DHTV"]);
         }

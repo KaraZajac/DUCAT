@@ -265,6 +265,11 @@ class Poller(private val context: Context) {
                 // and a restart must not orphan a transfer the other side
                 // has not collected yet. Verify-only, downloads nothing.
                 runCatching { reseedOutbox(context) }
+                // And the sites somebody promised to keep alive: the park
+                // dies with the process, so every restart re-verifies the
+                // kept bundles and puts them back on the wire. Without this
+                // the checkbox only means "until my next reboot".
+                runCatching { reseedSites(context) }
                 // The mempool, only while a bill is out and unsighted — the
                 // scan costs a round trip per pool transaction, and a till
                 // with nothing billed has nothing to look for.
@@ -506,6 +511,21 @@ class Poller(private val context: Context) {
                     }
                 }.apply { isDaemon = true; name = "outbox-reseed" }.start()
             }
+        }
+    }
+
+    @Volatile private var sitesReseeded = false
+
+    private fun reseedSites(context: Context) {
+        if (sitesReseeded) return
+        if (!runCatching { uniffi.ducat_mobile.nodeStatus().publicInternetReady }
+                .getOrDefault(false)
+        ) {
+            return
+        }
+        sitesReseeded = true
+        for (site in Sites.all(context)) {
+            if (site.keepAlive) Sites.reseed(context, site.recordKey)
         }
     }
 
