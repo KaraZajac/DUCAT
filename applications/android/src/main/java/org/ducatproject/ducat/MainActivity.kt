@@ -131,6 +131,38 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
         // A worldwide-market Subscribe is an ordinary card claim: hand the
         // row's ducat: URI to the same sheet a scanned code opens.
         org.ducatproject.ducat.ui.marketSubscribe = { claimLink.value = it }
+        // The Library's Open: view first, share sheet when nothing on the
+        // device claims the type. Lives here because FileProvider and the
+        // chooser are Android; the shared screen only holds the hook.
+        org.ducatproject.ducat.ui.libraryOpen = { ctx, publisherHex, period ->
+            val dir = java.io.File(ctx.filesDir, "publications/$publisherHex/$period")
+            val file = dir.walkTopDown()
+                .filter { it.isFile && !it.name.endsWith(".part") }
+                .maxByOrNull { it.length() }
+            if (file != null) {
+                val uri = androidx.core.content.FileProvider.getUriForFile(
+                    ctx, "${ctx.packageName}.backups", file,
+                )
+                val mime = android.webkit.MimeTypeMap.getSingleton()
+                    .getMimeTypeFromExtension(file.extension.lowercase()) ?: "*/*"
+                val view = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
+                    setDataAndType(uri, mime)
+                    addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                runCatching { ctx.startActivity(view) }.onFailure {
+                    val send = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                        type = mime
+                        putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                        addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
+                    runCatching {
+                        ctx.startActivity(
+                            android.content.Intent.createChooser(send, file.name),
+                        )
+                    }
+                }
+            }
+        }
         org.ducatproject.ducat.ui.marketListYours = { openPublishing.value = true }
         Calls.shell = object : Calls.Shell {
             override fun takeover(context: android.content.Context, from: String) {

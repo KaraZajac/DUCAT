@@ -243,36 +243,10 @@ fun LibrarySection() {
     }
 }
 
-/** Hand a fetched issue to whatever can read it — view first, share sheet
- *  when nothing on the device claims the type. */
-private fun openIssue(context: android.content.Context, publisherHex: String, period: String) {
-    val dir = java.io.File(context.filesDir, "publications/$publisherHex/$period")
-    val file = dir.walkTopDown().filter { it.isFile && !it.name.endsWith(".part") }
-        .maxByOrNull { it.length() } ?: return
-    val uri = androidx.core.content.FileProvider.getUriForFile(
-        context, "${context.packageName}.backups", file,
-    )
-    val mime = android.webkit.MimeTypeMap.getSingleton()
-        .getMimeTypeFromExtension(file.extension.lowercase()) ?: "*/*"
-    val view = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
-        setDataAndType(uri, mime)
-        addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
-    }
-    runCatching { context.startActivity(view) }.onFailure {
-        // Nothing installed reads this type: the share sheet always opens,
-        // and sending it to yourself is still a way to read it elsewhere.
-        val send = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-            type = mime
-            putExtra(android.content.Intent.EXTRA_STREAM, uri)
-            addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-        runCatching {
-            context.startActivity(
-                android.content.Intent.createChooser(send, file.name),
-            )
-        }
-    }
-}
+/** Hand a fetched issue to whatever can read it. Injected: viewers,
+ *  FileProvider and the share sheet are the phone's business (see
+ *  MainActivity), and the desk compiles this file without them. */
+var libraryOpen: (android.content.Context, String, String) -> Unit = { _, _, _ -> }
 
 @Composable
 private fun PublisherHeader(publisherHex: String, publisherName: String?) {
@@ -447,7 +421,7 @@ private fun IssueLine(
             // There was no way to open a downloaded issue — the shelf said
             // "205 kB" and stopped.
             androidx.compose.material3.OutlinedButton(onClick = {
-                openIssue(context, row.publisherHex, row.period)
+                libraryOpen(context, row.publisherHex, row.period)
             }) {
                 Text(stringResource(R.string.library_open))
             }
