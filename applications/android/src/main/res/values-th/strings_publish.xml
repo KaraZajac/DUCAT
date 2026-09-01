@@ -49,4 +49,12 @@
     <string name="market_listed_as">อยู่ในหมวด %1$s</string>
     <string name="market_list_failed">ลงขายไม่สำเร็จ — โหนดทำงานอยู่ไหม?</string>
     <string name="market_all_langs">ทุกภาษา</string>
+    <string name="market_what_all">ทั้งหมด</string>
+    <string name="market_what_digital">ดิจิทัล</string>
+    <string name="market_looking">กำลังดูชั้น %1$s…</string>
+    <string name="market_looking_local">กำลังดูชั้นท้องถิ่น… %1$d จาก %2$d กระดาน</string>
+    <string name="market_no_fix">ยังไม่มีตำแหน่ง — ชั้นท้องถิ่นต้องรู้ว่าท้องถิ่นอยู่ที่ไหน</string>
+    <string name="market_list_yours">ลงของคุณ</string>
+    <string name="market_list_pub">ลงสิ่งพิมพ์</string>
+    <string name="market_also_local">ลงกระดานท้องถิ่นด้วย</string>
 </resources>

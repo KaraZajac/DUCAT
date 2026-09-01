@@ -88,6 +88,9 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
 
         /** A tapped ducat: link, waiting for the shell to show who it is. */
         val claimLink = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
+
+        /** "List yours" from an empty market shelf: open the press room. */
+        val openPublishing = kotlinx.coroutines.flow.MutableStateFlow(false)
     }
 
     private fun readIntent(i: android.content.Intent?) {
@@ -128,6 +131,7 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
         // A worldwide-market Subscribe is an ordinary card claim: hand the
         // row's ducat: URI to the same sheet a scanned code opens.
         org.ducatproject.ducat.ui.marketSubscribe = { claimLink.value = it }
+        org.ducatproject.ducat.ui.marketListYours = { openPublishing.value = true }
         Calls.shell = object : Calls.Shell {
             override fun takeover(context: android.content.Context, from: String) {
                 // A lit, watched app already shows CallScreen by itself.
@@ -300,6 +304,13 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
     // fallback). Unlike a scan — aimed at a code in front of you — a link can
     // be sent by anyone, so the card is named before it becomes a contact.
     // The name shown is the card's own claim (§16.9), like every name here.
+    val wantPublishing by MainActivity.openPublishing.collectAsState()
+    LaunchedEffect(wantPublishing) {
+        if (wantPublishing) {
+            overlay = Overlay.Drawer(Section.Publishing)
+            MainActivity.openPublishing.value = false
+        }
+    }
     val tappedCard by MainActivity.claimLink.collectAsState()
     var cardAsk by remember { mutableStateOf<Pair<String, String>?>(null) }
     // Not a new person. A card naming somebody already in the list is the

@@ -49,4 +49,12 @@
     <string name="market_listed_as">%1$s altında listelendi</string>
     <string name="market_list_failed">Listelenemedi — düğüm çalışıyor mu?</string>
     <string name="market_all_langs">tüm diller</string>
+    <string name="market_what_all">Tümü</string>
+    <string name="market_what_digital">Dijital</string>
+    <string name="market_looking">%1$s rafına bakılıyor…</string>
+    <string name="market_looking_local">Yerel rafa bakılıyor… %2$d panodan %1$d</string>
+    <string name="market_no_fix">Henüz konum yok — yerel rafın nerenin yerel olduğunu bilmesi gerek.</string>
+    <string name="market_list_yours">Seninkini listele</string>
+    <string name="market_list_pub">Yayın listele</string>
+    <string name="market_also_local">Yerel panoya da</string>
 </resources>

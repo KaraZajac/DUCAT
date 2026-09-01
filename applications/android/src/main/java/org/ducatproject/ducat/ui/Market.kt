@@ -9,11 +9,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.FilterChip
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,13 +20,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.Publications
@@ -39,6 +40,9 @@ import org.ducatproject.ducat.R
  * rooms wire their own. Shared sources cannot name an Activity.
  */
 var marketSubscribe: (String) -> Unit = {}
+
+/** And how "list yours" reaches the Publishing room, same reason. */
+var marketListYours: () -> Unit = {}
 
 /** A category slug's human name. */
 @Composable
@@ -53,110 +57,149 @@ internal fun marketCategoryLabel(slug: String): String = stringResource(
     },
 )
 
-/**
- * The worldwide shelf (§16.18.2): category boards instead of geohash
- * cells, publications instead of kayaks, and Subscribe instead of a
- * conversation about pick-up. Subscribing IS the ordinary card claim —
- * the row hands its `ducat:` card to the same confirm sheet a scanned
- * code opens, and §16.20 does the rest.
- */
+/** One publication row, wherever its board was. */
 @Composable
-fun WorldwideMarket() {
+private fun MarketRowCard(r: Publications.MarketRow) {
     val context = LocalContext.current
-    var cat by rememberSaveable { mutableStateOf("news") }
-    // The phone's language first: a worldwide board that opens on a wall
-    // of elsewhere is nobody's shelf. "All languages" is one tap away.
-    var myLang by rememberSaveable { mutableStateOf(true) }
-    val lang = java.util.Locale.getDefault().language.takeIf { it.isNotBlank() }
-    var rows by remember { mutableStateOf<List<Publications.MarketRow>>(emptyList()) }
-    var looked by remember { mutableStateOf(false) }
-    LaunchedEffect(cat, myLang) {
-        looked = false
-        rows = withContext(Dispatchers.IO) {
-            runCatching {
-                Publications.browseMarket(
-                    context, cat, if (myLang) lang else null,
-                )
-            }.getOrDefault(emptyList())
-        }
-        looked = true
-    }
-    Column(Modifier.fillMaxSize()) {
-        Row(
-            Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            Publications.MARKET_CATEGORIES.forEach { slug ->
-                FilterChip(
-                    selected = cat == slug,
-                    onClick = { cat = slug },
-                    label = { Text(marketCategoryLabel(slug)) },
+    Surface(
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+    ) {
+        Column(Modifier.padding(12.dp)) {
+            Text(r.title, style = MaterialTheme.typography.titleSmall)
+            r.blurb?.let {
+                Text(
+                    it, style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-        }
-        if (lang != null) {
-            Row(Modifier.padding(horizontal = 16.dp)) {
-                FilterChip(
-                    selected = myLang,
-                    onClick = { myLang = !myLang },
-                    label = {
-                        Text(
-                            if (myLang) lang else stringResource(R.string.market_all_langs),
-                            style = MaterialTheme.typography.labelSmall,
-                        )
-                    },
+            Spacer(Modifier.height(6.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    r.pricePxmr?.let {
+                        stringResource(R.string.market_per_period, Amounts.show(context, it).primary)
+                    } ?: stringResource(R.string.market_free),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.ducat.settled,
                 )
-            }
-        }
-        Spacer(Modifier.height(4.dp))
-        if (looked && rows.isEmpty()) {
-            Text(
-                stringResource(R.string.market_empty),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(24.dp),
-            )
-        }
-        LazyColumn(Modifier.fillMaxSize()) {
-            items(rows.size) { i ->
-                val r = rows[i]
-                Surface(
-                    shape = MaterialTheme.shapes.medium,
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp),
-                ) {
-                    Column(Modifier.padding(12.dp)) {
-                        Text(r.title, style = MaterialTheme.typography.titleSmall)
-                        r.blurb?.let {
-                            Text(
-                                it, style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        Spacer(Modifier.height(6.dp))
-                        Row(
-                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                r.pricePxmr?.let {
-                                    stringResource(
-                                        R.string.market_per_period,
-                                        Amounts.show(context, it).primary,
-                                    )
-                                } ?: stringResource(R.string.market_free),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.ducat.settled,
-                            )
-                            Spacer(Modifier.weight(1f))
-                            Button(onClick = { marketSubscribe(r.cardUri) }) {
-                                Text(stringResource(R.string.market_subscribe))
-                            }
-                        }
-                    }
+                Spacer(Modifier.weight(1f))
+                Button(onClick = { marketSubscribe(r.cardUri) }) {
+                    Text(stringResource(R.string.market_subscribe))
                 }
             }
         }
     }
+}
+
+/** Shared tail: the looking line, the empty state with its invitation,
+ *  and the rows. */
+@Composable
+private fun ShelfBody(
+    rows: List<Publications.MarketRow>,
+    looked: Boolean,
+    looking: String,
+) {
+    val context = LocalContext.current
+    if (!looked) {
+        Row(
+            Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            CircularProgressIndicator(Modifier.height(18.dp))
+            Spacer(Modifier.padding(6.dp))
+            Text(
+                looking,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        return
+    }
+    if (rows.isEmpty()) {
+        Column(Modifier.padding(24.dp)) {
+            Text(
+                stringResource(R.string.market_empty),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            // The invitation, but only for somebody who can accept it.
+            val hasPubs = remember { Publications.publications(context).isNotEmpty() }
+            if (hasPubs) {
+                Spacer(Modifier.height(8.dp))
+                OutlinedButton(onClick = { marketListYours() }) {
+                    Text(stringResource(R.string.market_list_yours))
+                }
+            }
+        }
+        return
+    }
+    LazyColumn(Modifier.fillMaxSize()) {
+        items(rows.size) { i -> MarketRowCard(rows[i]) }
+    }
+}
+
+/** The worldwide shelf for one category (§16.18.2). */
+@Composable
+fun WorldwideShelf(cat: String, myLangOnly: Boolean) {
+    val context = LocalContext.current
+    val lang = java.util.Locale.getDefault().language.takeIf { it.isNotBlank() }
+    var rows by remember { mutableStateOf<List<Publications.MarketRow>>(emptyList()) }
+    var looked by remember { mutableStateOf(false) }
+    LaunchedEffect(cat, myLangOnly) {
+        looked = false
+        rows = withContext(Dispatchers.IO) {
+            runCatching {
+                Publications.browseMarket(context, cat, if (myLangOnly) lang else null)
+            }.getOrDefault(emptyList())
+        }
+        looked = true
+    }
+    ShelfBody(
+        rows, looked,
+        stringResource(R.string.market_looking, marketCategoryLabel(cat)),
+    )
+}
+
+/** The local shelf: publications on the neighbourhood's own boards. */
+@Composable
+fun LocalShelf() {
+    val context = LocalContext.current
+    var rows by remember { mutableStateOf<List<Publications.MarketRow>>(emptyList()) }
+    var looked by remember { mutableStateOf(false) }
+    var progress by remember { mutableStateOf(0 to 9) }
+    var noFix by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        grabFix(context) { fix ->
+            if (fix == null) {
+                noFix = true
+                looked = true
+                return@grabFix
+            }
+            MainScope().launch(Dispatchers.IO) {
+                val got = runCatching {
+                    Publications.browseLocalPubs(context, fix.first, fix.second) { k, n ->
+                        progress = k to n
+                    }
+                }.getOrDefault(emptyList())
+                withContext(Dispatchers.Main) {
+                    rows = got
+                    looked = true
+                }
+            }
+        }
+    }
+    if (noFix) {
+        Text(
+            stringResource(R.string.market_no_fix),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(24.dp),
+        )
+        return
+    }
+    ShelfBody(
+        rows, looked,
+        stringResource(R.string.market_looking_local, progress.first, progress.second),
+    )
 }

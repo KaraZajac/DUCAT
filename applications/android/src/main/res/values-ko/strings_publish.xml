@@ -49,4 +49,12 @@
     <string name="market_listed_as">%1$s에 게재됨</string>
     <string name="market_list_failed">올리지 못했어요 — 노드가 켜져 있나요?</string>
     <string name="market_all_langs">모든 언어</string>
+    <string name="market_what_all">전체</string>
+    <string name="market_what_digital">디지털</string>
+    <string name="market_looking">%1$s 선반을 살펴보는 중…</string>
+    <string name="market_looking_local">동네 선반을 살펴보는 중… %2$d개 중 %1$d개</string>
+    <string name="market_no_fix">아직 위치가 없어요 — 동네 선반은 어디인지 알아야 해요.</string>
+    <string name="market_list_yours">내 것 올리기</string>
+    <string name="market_list_pub">간행물 올리기</string>
+    <string name="market_also_local">동네 게시판에도</string>
 </resources>

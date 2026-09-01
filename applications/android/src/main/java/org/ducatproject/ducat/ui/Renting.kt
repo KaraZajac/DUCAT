@@ -8,6 +8,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Backpack
 import androidx.compose.material.icons.filled.Build
@@ -200,6 +201,19 @@ fun RentingScreen(kinds: List<Int> = Listings.KINDS) {
                     Icon(listingIcon(k), null, Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
                     Text(stringResource(listingButton(k)))
+                }
+            }
+            // Selling a publication is selling too. A seller should not need
+            // to know the physical/digital ontology to find the button —
+            // this one walks them into the press room, where listing lives.
+            if (kinds.contains(Listings.KIND_SALE)) {
+                FilledTonalButton(
+                    onClick = { marketListYours() },
+                    modifier = Modifier.height(44.dp),
+                ) {
+                    Icon(Icons.Filled.MenuBook, null, Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.market_list_pub))
                 }
             }
         }

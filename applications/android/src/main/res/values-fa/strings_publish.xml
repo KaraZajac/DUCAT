@@ -49,4 +49,12 @@
     <string name="market_listed_as">در بخش %1$s</string>
     <string name="market_list_failed">عرضه نشد — گره روشن است؟</string>
     <string name="market_all_langs">همه زبان‌ها</string>
+    <string name="market_what_all">همه</string>
+    <string name="market_what_digital">دیجیتال</string>
+    <string name="market_looking">در حال دیدن قفسهٔ %1$s…</string>
+    <string name="market_looking_local">در حال دیدن قفسهٔ محلی… %1$d از %2$d تابلو</string>
+    <string name="market_no_fix">هنوز موقعیتی نیست — قفسهٔ محلی باید بداند محل کجاست.</string>
+    <string name="market_list_yours">مال خودت را بگذار</string>
+    <string name="market_list_pub">انتشار یک نشریه</string>
+    <string name="market_also_local">روی تابلوی محلی هم</string>
 </resources>

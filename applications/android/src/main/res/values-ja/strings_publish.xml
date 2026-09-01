@@ -49,4 +49,12 @@
     <string name="market_listed_as">%1$s に掲載中</string>
     <string name="market_list_failed">出品できませんでした — ノードは起動していますか?</string>
     <string name="market_all_langs">すべての言語</string>
+    <string name="market_what_all">すべて</string>
+    <string name="market_what_digital">デジタル</string>
+    <string name="market_looking">%1$s の棚を見ています…</string>
+    <string name="market_looking_local">ご近所の棚を見ています… %2$d 枚中 %1$d 枚</string>
+    <string name="market_no_fix">位置情報がまだありません — ご近所の棚には場所が必要です。</string>
+    <string name="market_list_yours">自分のを出す</string>
+    <string name="market_list_pub">出版物を出品</string>
+    <string name="market_also_local">近所の掲示板にも</string>
 </resources>

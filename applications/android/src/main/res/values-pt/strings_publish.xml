@@ -49,4 +49,12 @@
     <string name="market_listed_as">Listado em %1$s</string>
     <string name="market_list_failed">Não foi possível publicar — o nó está ativo?</string>
     <string name="market_all_langs">todos os idiomas</string>
+    <string name="market_what_all">Tudo</string>
+    <string name="market_what_digital">Digital</string>
+    <string name="market_looking">Olhando a estante de %1$s…</string>
+    <string name="market_looking_local">Olhando a estante local… %1$d de %2$d quadros</string>
+    <string name="market_no_fix">Sem localização ainda — a estante local precisa saber onde é local.</string>
+    <string name="market_list_yours">Publique a sua</string>
+    <string name="market_list_pub">Listar uma publicação</string>
+    <string name="market_also_local">Também no quadro local</string>
 </resources>

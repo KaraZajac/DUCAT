@@ -49,4 +49,12 @@
     <string name="market_listed_as">У розділі %1$s</string>
     <string name="market_list_failed">Не вдалося виставити — вузол працює?</string>
     <string name="market_all_langs">усі мови</string>
+    <string name="market_what_all">Усе</string>
+    <string name="market_what_digital">Цифрове</string>
+    <string name="market_looking">Дивимось полицю «%1$s»…</string>
+    <string name="market_looking_local">Дивимось місцеву полицю… %1$d із %2$d дощок</string>
+    <string name="market_no_fix">Ще немає локації — місцевій полиці треба знати, де це.</string>
+    <string name="market_list_yours">Виставити своє</string>
+    <string name="market_list_pub">Виставити видання</string>
+    <string name="market_also_local">І на місцевій дошці</string>
 </resources>

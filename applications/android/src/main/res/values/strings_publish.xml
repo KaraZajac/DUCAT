@@ -49,4 +49,12 @@
     <string name="market_listed_as">Listed under %1$s</string>
     <string name="market_list_failed">Could not list it — is the node up?</string>
     <string name="market_all_langs">every language</string>
+    <string name="market_what_all">Everything</string>
+    <string name="market_what_digital">Digital</string>
+    <string name="market_looking">Looking at the %1$s shelf…</string>
+    <string name="market_looking_local">Looking at the local shelf… %1$d of %2$d boards</string>
+    <string name="market_no_fix">No location yet — the local shelf needs to know where local is.</string>
+    <string name="market_list_yours">List yours</string>
+    <string name="market_list_pub">List a publication</string>
+    <string name="market_also_local">Also on the local board</string>
 </resources>

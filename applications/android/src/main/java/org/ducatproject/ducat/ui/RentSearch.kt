@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.House
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -23,6 +24,7 @@ import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.Listings
+import org.ducatproject.ducat.Publications
 import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.R
 import uniffi.ducat_mobile.RentalInfo
@@ -79,12 +81,20 @@ private fun RentSearchScreen(
      * in it and the home tiles pick which to open on.
      */
     chips: List<Int> = Listings.KINDS,
+    /**
+     * A caller-owned noun selection: the unified market row drives this
+     * instead of the internal chips. Zero means every kind at once. Null
+     * keeps the screen's own chips, exactly as before.
+     */
+    externalKind: Int? = null,
 ) {
     // Which nouns to show. The board holds all five and one read returns all
     // of them (§16.18), so filtering here costs nothing — where asking the
     // network once per noun would cost the read five times over, and an empty
     // board is a flat twenty-one seconds each.
-    var showing by rememberSaveable { mutableStateOf(kind) }
+    var showingState by rememberSaveable { mutableStateOf(kind) }
+    val showing = externalKind ?: showingState
+    fun kindShows(k: Int) = showing == 0 || k == showing
     val context = LocalContext.current
     var results by remember { mutableStateOf<List<RentalInfo>?>(null) }
     var busy by remember { mutableStateOf(false) }
@@ -275,7 +285,7 @@ private fun RentSearchScreen(
                         // electrician was told they were finding a place.
                         // And it was pinned to the opening kind, so tapping a
                         // chip left the heading describing the last screen.
-                        stringResource(boardFindTitle(showing)),
+                        stringResource(boardFindTitle(if (showing == 0) Listings.KIND_SALE else showing)),
                         style = MaterialTheme.typography.titleLarge,
                     )
                 }
@@ -326,7 +336,7 @@ private fun RentSearchScreen(
                         )
                     }
                 }
-                if (found != null && stalled == null && chips.size > 1) {
+                if (externalKind == null && found != null && stalled == null && chips.size > 1) {
                     FlowRow(
                         Modifier.fillMaxWidth().padding(bottom = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -336,7 +346,7 @@ private fun RentSearchScreen(
                             val n = found.count { it.kind.toInt() == k }
                             FilterChip(
                                 selected = showing == k,
-                                onClick = { showing = k },
+                                onClick = { showingState = k },
                                 label = { Text(stringResource(R.string.board_chip_count, stringResource(boardChipLabel(k)), n)) },
                             )
                         }
@@ -350,12 +360,12 @@ private fun RentSearchScreen(
                 // has no chips and still has something to offer.
                 if (found != null && stalled == null) {
                     OutlinedButton(
-                        onClick = { composing = showing },
+                        onClick = { composing = if (showing == 0) Listings.KIND_SALE else showing },
                         modifier = Modifier.padding(bottom = 8.dp).height(40.dp),
                     ) {
                         Icon(Icons.Filled.Add, null, Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text(stringResource(listingButton(showing)))
+                        Text(stringResource(listingButton(if (showing == 0) Listings.KIND_SALE else showing)))
                     }
                 }
                 when {
@@ -382,7 +392,7 @@ private fun RentSearchScreen(
                     // until the remembered paint (see Listings.search) made it
                     // happen on every mode switch.
                     found == null ||
-                        (searching && found.none { it.kind.toInt() == showing }) -> Column {
+                        (searching && found.none { kindShows(it.kind.toInt()) }) -> Column {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             // The brand's wait, not the platform's — see
                             // CatSpinner.
@@ -433,7 +443,7 @@ private fun RentSearchScreen(
                     // may list a car five minutes from now, and a screen whose
                     // only exit is Cancel makes you start the whole thing over
                     // to find out.
-                    found.none { it.kind.toInt() == showing } -> Column {
+                    found.none { kindShows(it.kind.toInt()) } -> Column {
                         Text(
                             stringResource(R.string.rent_none_found),
                             style = MaterialTheme.typography.bodyMedium,
@@ -474,7 +484,7 @@ private fun RentSearchScreen(
                                 Spacer(Modifier.height(8.dp))
                             }
                         }
-                        items(found.filter { it.kind.toInt() == showing }) { info ->
+                        items(found.filter { kindShows(it.kind.toInt()) }) { info ->
                             ListingCard(
                                 info = info,
                                 busy = busy,
@@ -564,10 +574,24 @@ private fun RentSearchScreen(
  */
 @Composable
 fun MarketBrowse(onOpenChat: (Contact) -> Unit) {
-    // §16.18.2: the marketplace has two scopes now — things near you, and
-    // the worldwide shelf of digital goods. Same market, different boards.
+    // §16.18.2's two honest axes: WHERE (near / worldwide) and WHAT. One
+    // flat row for WHAT whose chips follow the scope, because that is what
+    // the boards underneath actually hold: a neighbourhood's board carries
+    // kayaks and the town paper side by side (so near-me shows the kinds
+    // plus one Digital chip — local pub notices carry no category), while
+    // a worldwide board IS a category (so the six shelves replace the
+    // kinds, which have nowhere to stand without a place).
     var scope by androidx.compose.runtime.saveable.rememberSaveable {
         androidx.compose.runtime.mutableStateOf(0)
+    }
+    var what by androidx.compose.runtime.saveable.rememberSaveable {
+        androidx.compose.runtime.mutableStateOf(0) // 0 all · 1..5 kinds · 6 digital
+    }
+    var cat by androidx.compose.runtime.saveable.rememberSaveable {
+        androidx.compose.runtime.mutableStateOf("news")
+    }
+    var myLang by androidx.compose.runtime.saveable.rememberSaveable {
+        androidx.compose.runtime.mutableStateOf(true)
     }
     androidx.compose.foundation.layout.Column(
         androidx.compose.ui.Modifier.fillMaxSize(),
@@ -587,11 +611,69 @@ fun MarketBrowse(onOpenChat: (Contact) -> Unit) {
                 label = { Text(stringResource(R.string.market_worldwide)) },
             )
         }
+        androidx.compose.foundation.layout.Row(
+            androidx.compose.ui.Modifier
+                .horizontalScroll(androidx.compose.foundation.rememberScrollState())
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp),
+        ) {
+            if (scope == 0) {
+                listOf(
+                    0 to R.string.market_what_all,
+                    Listings.KIND_SALE to boardChipLabel(Listings.KIND_SALE),
+                    Listings.KIND_PLACE to boardChipLabel(Listings.KIND_PLACE),
+                    Listings.KIND_VEHICLE to boardChipLabel(Listings.KIND_VEHICLE),
+                    Listings.KIND_GEAR to boardChipLabel(Listings.KIND_GEAR),
+                    Listings.KIND_SKILL to boardChipLabel(Listings.KIND_SKILL),
+                    6 to R.string.market_what_digital,
+                ).forEach { (k, res) ->
+                    FilterChip(
+                        selected = what == k,
+                        onClick = { what = k },
+                        label = { Text(stringResource(res)) },
+                    )
+                }
+            } else {
+                Publications.MARKET_CATEGORIES.forEach { slug ->
+                    FilterChip(
+                        selected = cat == slug,
+                        onClick = { cat = slug },
+                        label = { Text(marketCategoryLabel(slug)) },
+                    )
+                }
+            }
+        }
         if (scope == 1) {
-            WorldwideMarket()
+            val lang = java.util.Locale.getDefault()
+            androidx.compose.foundation.layout.Row(
+                androidx.compose.ui.Modifier.padding(horizontal = 16.dp),
+            ) {
+                FilterChip(
+                    selected = myLang,
+                    onClick = { myLang = !myLang },
+                    label = {
+                        Text(
+                            if (myLang) lang.getDisplayLanguage(lang)
+                            else stringResource(R.string.market_all_langs),
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    },
+                )
+            }
+            WorldwideShelf(cat, myLang)
             return@Column
         }
-        MarketNearMe(onOpenChat)
+        if (what == 6) {
+            LocalShelf()
+            return@Column
+        }
+        androidx.compose.runtime.key(Unit) {
+            RentSearchScreen(
+                kind = Listings.KIND_SALE,
+                onOpenChat = onOpenChat,
+                externalKind = what,
+            )
+        }
     }
 }
 

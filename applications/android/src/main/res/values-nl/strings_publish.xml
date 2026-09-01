@@ -49,4 +49,12 @@
     <string name="market_listed_as">Vermeld onder %1$s</string>
     <string name="market_list_failed">Aanbieden mislukt — draait de node?</string>
     <string name="market_all_langs">alle talen</string>
+    <string name="market_what_all">Alles</string>
+    <string name="market_what_digital">Digitaal</string>
+    <string name="market_looking">De plank %1$s wordt bekeken…</string>
+    <string name="market_looking_local">De lokale plank wordt bekeken… %1$d van %2$d borden</string>
+    <string name="market_no_fix">Nog geen locatie — de lokale plank moet weten waar lokaal is.</string>
+    <string name="market_list_yours">Zet die van jou erop</string>
+    <string name="market_list_pub">Publicatie aanbieden</string>
+    <string name="market_also_local">Ook op het lokale bord</string>
 </resources>

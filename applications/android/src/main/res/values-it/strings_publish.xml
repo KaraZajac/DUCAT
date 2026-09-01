@@ -49,4 +49,12 @@
     <string name="market_listed_as">Elencato in %1$s</string>
     <string name="market_list_failed">Impossibile pubblicare — il nodo è attivo?</string>
     <string name="market_all_langs">tutte le lingue</string>
+    <string name="market_what_all">Tutto</string>
+    <string name="market_what_digital">Digitale</string>
+    <string name="market_looking">Guardando lo scaffale %1$s…</string>
+    <string name="market_looking_local">Guardando lo scaffale locale… %1$d di %2$d bacheche</string>
+    <string name="market_no_fix">Ancora nessuna posizione — lo scaffale locale deve sapere dov\'è.</string>
+    <string name="market_list_yours">Pubblica il tuo</string>
+    <string name="market_list_pub">Pubblica una pubblicazione</string>
+    <string name="market_also_local">Anche sulla bacheca locale</string>
 </resources>

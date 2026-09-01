@@ -236,17 +236,45 @@ fun PublishingSection() {
                         modifier = Modifier.fillMaxWidth(),
                     )
                     Spacer(Modifier.height(6.dp))
+                    var alsoLocal by remember(pubId) { mutableStateOf(false) }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(alsoLocal, { alsoLocal = it })
+                        Text(
+                            stringResource(R.string.market_also_local),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         OutlinedButton(
                             enabled = busy == null,
                             onClick = {
                                 scope.launch(Dispatchers.IO) {
                                     val lang = java.util.Locale.getDefault().language
+                                    // The town paper's own cell, when asked
+                                    // for: a fix at click time, skipped
+                                    // without complaint if none arrives.
+                                    var cell: String? = null
+                                    if (alsoLocal) {
+                                        val gate = java.util.concurrent.CountDownLatch(1)
+                                        org.ducatproject.ducat.ui.grabFix(context) { fix ->
+                                            cell = fix?.let {
+                                                runCatching {
+                                                    uniffi.ducat_mobile.geohashEncode(
+                                                        it.first, it.second,
+                                                        org.ducatproject.ducat.Listings.CELL_PRECISION,
+                                                    )
+                                                }.getOrNull()
+                                            }
+                                            gate.countDown()
+                                        }
+                                        gate.await(10, java.util.concurrent.TimeUnit.SECONDS)
+                                    }
                                     val ok = runCatching {
                                         Publications.listOnMarket(
                                             context, pubId, catPick,
                                             lang.takeIf { it.isNotBlank() },
                                             blurbText.takeIf { it.isNotBlank() },
+                                            cell,
                                         )
                                     }.getOrDefault(false)
                                     if (!ok) lastWord = context.getString(R.string.market_list_failed)

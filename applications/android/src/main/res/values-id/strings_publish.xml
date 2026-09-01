@@ -49,4 +49,12 @@
     <string name="market_listed_as">Terdaftar di %1$s</string>
     <string name="market_list_failed">Gagal memasang — apakah node berjalan?</string>
     <string name="market_all_langs">semua bahasa</string>
+    <string name="market_what_all">Semua</string>
+    <string name="market_what_digital">Digital</string>
+    <string name="market_looking">Melihat rak %1$s…</string>
+    <string name="market_looking_local">Melihat rak lokal… %1$d dari %2$d papan</string>
+    <string name="market_no_fix">Belum ada lokasi — rak lokal perlu tahu di mana lokal itu.</string>
+    <string name="market_list_yours">Pasang punyamu</string>
+    <string name="market_list_pub">Pasang terbitan</string>
+    <string name="market_also_local">Juga di papan lokal</string>
 </resources>

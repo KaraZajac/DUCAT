@@ -153,6 +153,9 @@ object Publications {
         category: String,
         lang: String?,
         blurb: String?,
+        /** A geohash cell to ALSO post on — the town paper's own board.
+         *  Two stamps, paid honestly (§16.18.2). */
+        localCell: String? = null,
     ): Boolean {
         if (category !in MARKET_CATEGORIES) return false
         val name = publications(context).firstOrNull { it.first == pubId }?.second
@@ -240,8 +243,43 @@ object Publications {
             pub.put("mkt_lang", lang ?: "")
             pub.put("mkt_blurb", blurb ?: "")
             pub.put("mkt_at", now)
+            pub.put("mkt_cell", localCell ?: "")
         }
         DucatLog.i("Publications", "listed '$name' on $board slot $slot")
+        // The local shelf, second: its own ladder under local:<cell>, same
+        // notice, second stamp. Best-effort — a full neighbourhood board
+        // does not unlist the worldwide copy.
+        if (localCell != null) {
+            var localPlaced: Pair<String, UInt>? = null
+            lcl@ for (shard in 0u until uniffi.ducat_mobile.maxStandShards()) {
+                val b = uniffi.ducat_mobile.standShardName(standNow("local:$localCell"), shard)
+                val taken = runCatching { uniffi.ducat_mobile.standRead(b) }
+                    .getOrDefault(emptyList())
+                    .mapNotNull { n ->
+                        runCatching {
+                            uniffi.ducat_mobile.pubListingDecode(
+                                n.data, b, n.subkey, Beacons.tip(context).toULong(),
+                            )
+                        }.getOrNull()?.takeIf { it.expiry.toLong() > now }?.let { n.subkey }
+                    }.toSet()
+                for (free in 0u..7u) {
+                    if (free in taken) continue
+                    if (runCatching { uniffi.ducat_mobile.standPost(b, free, seal(b, free)) }
+                            .isSuccess
+                    ) {
+                        localPlaced = b to free
+                        break@lcl
+                    }
+                }
+            }
+            localPlaced?.let { (b, sl) ->
+                editPub(context, pubId) { pub ->
+                    pub.put("mkt_local_board", b)
+                    pub.put("mkt_local_subkey", sl.toInt())
+                }
+                DucatLog.i("Publications", "and on $b slot $sl")
+            }
+        }
         return true
     }
 
@@ -262,6 +300,7 @@ object Publications {
                         context, pubId, cat,
                         pub.optString("mkt_lang").ifBlank { null },
                         pub.optString("mkt_blurb").ifBlank { null },
+                        pub.optString("mkt_cell").ifBlank { null },
                     )
                 }.onFailure { DucatLog.w("Publications", "tend market: ${it.message}") }
             }
@@ -278,7 +317,12 @@ object Publications {
 
     /** Browse one category worldwide: every readable notice, one row per
      *  poster key (a publisher re-posts; readers want the newest). */
-    fun browseMarket(context: Context, category: String, lang: String?): List<MarketRow> {
+    fun browseMarket(
+        context: Context,
+        category: String,
+        lang: String?,
+        onProgress: (Int) -> Unit = { _ -> },
+    ): List<MarketRow> {
         val now = System.currentTimeMillis() / 1000
         val tip = Beacons.tip(context).toULong()
         val base = marketBoard(category, lang)
@@ -292,6 +336,7 @@ object Publications {
             // flat twenty-one seconds of DHT timeouts, so stopping is not
             // an optimisation, it is the difference between a shelf and a
             // spinner.
+            onProgress(shard.toInt() + 1)
             if (notices.isEmpty()) break
             for (n in notices) {
                 val d = runCatching {
@@ -313,6 +358,66 @@ object Publications {
             }
         }
         return rows.values.toList()
+    }
+
+    /**
+     * The local shelf: publication notices on the same `local:<cell>`
+     * boards the kayaks use — the town paper next to the town's canoes.
+     * Home cell first, then the ring, nine boards in parallel because an
+     * empty one costs a flat twenty-one seconds and serially that is a
+     * spinner three minutes long.
+     */
+    fun browseLocalPubs(
+        context: Context,
+        latE7: Long,
+        lonE7: Long,
+        onProgress: (Int, Int) -> Unit = { _, _ -> },
+    ): List<MarketRow> {
+        val now = System.currentTimeMillis() / 1000
+        val tip = Beacons.tip(context).toULong()
+        val home = runCatching {
+            uniffi.ducat_mobile.geohashEncode(latE7, lonE7, Listings.CELL_PRECISION)
+        }.getOrNull() ?: return emptyList()
+        val ring = runCatching { uniffi.ducat_mobile.geohashNeighbors(home) }
+            .getOrDefault(emptyList())
+        val cells = listOf(home) + ring
+        val done = java.util.concurrent.atomic.AtomicInteger()
+        val rows = java.util.Collections.synchronizedMap(LinkedHashMap<String, MarketRow>())
+        val pool = java.util.concurrent.Executors.newFixedThreadPool(cells.size)
+        try {
+            cells.map { cell ->
+                pool.submit {
+                    for (shard in 0u until uniffi.ducat_mobile.maxStandShards()) {
+                        val board = uniffi.ducat_mobile.standShardName(
+                            standNow("local:$cell"), shard,
+                        )
+                        val notices = runCatching { uniffi.ducat_mobile.standRead(board) }
+                            .getOrDefault(emptyList())
+                        if (notices.isEmpty()) break
+                        for (n in notices) {
+                            val d = runCatching {
+                                uniffi.ducat_mobile.pubListingDecode(n.data, board, n.subkey, tip)
+                            }.getOrNull() ?: continue
+                            if (d.expiry.toLong() <= now) continue
+                            synchronized(rows) {
+                                val prior = rows[d.poster]
+                                if (prior == null || prior.expiry < d.expiry.toLong()) {
+                                    rows[d.poster] = MarketRow(
+                                        d.title, d.blurb, d.pricePxmr?.toLong(),
+                                        d.card, d.poster, board, n.subkey.toInt(),
+                                        d.expiry.toLong(),
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    onProgress(done.incrementAndGet(), cells.size)
+                }
+            }.forEach { it.get() }
+        } finally {
+            pool.shutdown()
+        }
+        return synchronized(rows) { rows.values.toList() }
     }
 
     /** (category, blurb) when listed; null when not. The screen's read. */

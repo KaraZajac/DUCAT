@@ -49,4 +49,12 @@
     <string name="market_listed_as">已列于%1$s</string>
     <string name="market_list_failed">上架失败 — 节点在运行吗?</string>
     <string name="market_all_langs">所有语言</string>
+    <string name="market_what_all">全部</string>
+    <string name="market_what_digital">数字</string>
+    <string name="market_looking">正在查看%1$s书架…</string>
+    <string name="market_looking_local">正在查看本地书架… 第 %1$d/%2$d 块板</string>
+    <string name="market_no_fix">还没有定位 — 本地书架需要知道“本地”在哪里。</string>
+    <string name="market_list_yours">上架你的</string>
+    <string name="market_list_pub">上架出版物</string>
+    <string name="market_also_local">同时上本地板</string>
 </resources>

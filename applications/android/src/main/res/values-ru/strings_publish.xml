@@ -49,4 +49,12 @@
     <string name="market_listed_as">В разделе %1$s</string>
     <string name="market_list_failed">Не удалось выставить — узел работает?</string>
     <string name="market_all_langs">все языки</string>
+    <string name="market_what_all">Всё</string>
+    <string name="market_what_digital">Цифровое</string>
+    <string name="market_looking">Смотрим полку «%1$s»…</string>
+    <string name="market_looking_local">Смотрим местную полку… %1$d из %2$d досок</string>
+    <string name="market_no_fix">Пока нет геопозиции — местной полке нужно знать, где это.</string>
+    <string name="market_list_yours">Выставить своё</string>
+    <string name="market_list_pub">Выставить издание</string>
+    <string name="market_also_local">И на местной доске</string>
 </resources>

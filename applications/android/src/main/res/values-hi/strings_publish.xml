@@ -49,4 +49,12 @@
     <string name="market_listed_as">%1$s में सूचीबद्ध</string>
     <string name="market_list_failed">सूचीबद्ध नहीं हो सका — क्या नोड चालू है?</string>
     <string name="market_all_langs">सभी भाषाएँ</string>
+    <string name="market_what_all">सब कुछ</string>
+    <string name="market_what_digital">डिजिटल</string>
+    <string name="market_looking">%1$s शेल्फ़ देखी जा रही है…</string>
+    <string name="market_looking_local">स्थानीय शेल्फ़ देखी जा रही है… %2$d में से %1$d बोर्ड</string>
+    <string name="market_no_fix">अभी लोकेशन नहीं — स्थानीय शेल्फ़ को जानना होगा कि स्थानीय कहाँ है।</string>
+    <string name="market_list_yours">अपना सूचीबद्ध करें</string>
+    <string name="market_list_pub">प्रकाशन सूचीबद्ध करें</string>
+    <string name="market_also_local">स्थानीय बोर्ड पर भी</string>
 </resources>

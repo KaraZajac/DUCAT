@@ -49,4 +49,12 @@
     <string name="market_listed_as">Classé sous %1$s</string>
     <string name="market_list_failed">Impossible de publier — le nœud tourne-t-il ?</string>
     <string name="market_all_langs">toutes les langues</string>
+    <string name="market_what_all">Tout</string>
+    <string name="market_what_digital">Numérique</string>
+    <string name="market_looking">On regarde l\'étagère %1$s…</string>
+    <string name="market_looking_local">On regarde l\'étagère locale… %1$d sur %2$d tableaux</string>
+    <string name="market_no_fix">Pas encore de position — l\'étagère locale doit savoir où est « local ».</string>
+    <string name="market_list_yours">Publier le vôtre</string>
+    <string name="market_list_pub">Publier une publication</string>
+    <string name="market_also_local">Aussi sur le tableau local</string>
 </resources>

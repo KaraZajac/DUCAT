@@ -49,4 +49,12 @@
     <string name="market_listed_as">Gelistet unter %1$s</string>
     <string name="market_list_failed">Konnte nicht einstellen — läuft der Knoten?</string>
     <string name="market_all_langs">alle Sprachen</string>
+    <string name="market_what_all">Alles</string>
+    <string name="market_what_digital">Digitales</string>
+    <string name="market_looking">Das Regal „%1$s“ wird durchgesehen…</string>
+    <string name="market_looking_local">Das lokale Regal wird durchgesehen… %1$d von %2$d Tafeln</string>
+    <string name="market_no_fix">Noch kein Standort — das lokale Regal muss wissen, wo lokal ist.</string>
+    <string name="market_list_yours">Deins einstellen</string>
+    <string name="market_list_pub">Publikation einstellen</string>
+    <string name="market_also_local">Auch auf der lokalen Tafel</string>
 </resources>

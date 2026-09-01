@@ -49,4 +49,12 @@
     <string name="market_listed_as">W dziale %1$s</string>
     <string name="market_list_failed">Nie udało się wystawić — czy węzeł działa?</string>
     <string name="market_all_langs">wszystkie języki</string>
+    <string name="market_what_all">Wszystko</string>
+    <string name="market_what_digital">Cyfrowe</string>
+    <string name="market_looking">Przeglądanie półki %1$s…</string>
+    <string name="market_looking_local">Przeglądanie lokalnej półki… %1$d z %2$d tablic</string>
+    <string name="market_no_fix">Brak lokalizacji — lokalna półka musi wiedzieć, gdzie to jest.</string>
+    <string name="market_list_yours">Wystaw swoje</string>
+    <string name="market_list_pub">Wystaw publikację</string>
+    <string name="market_also_local">Także na lokalnej tablicy</string>
 </resources>

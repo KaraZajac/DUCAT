@@ -49,4 +49,12 @@
     <string name="market_listed_as">مدرج تحت %1$s</string>
     <string name="market_list_failed">تعذر العرض — هل العقدة تعمل؟</string>
     <string name="market_all_langs">كل اللغات</string>
+    <string name="market_what_all">الكل</string>
+    <string name="market_what_digital">رقمي</string>
+    <string name="market_looking">نتصفح رف %1$s…</string>
+    <string name="market_looking_local">نتصفح الرف المحلي… %1$d من %2$d لوحة</string>
+    <string name="market_no_fix">لا موقع بعد — الرف المحلي يحتاج أن يعرف أين هو المحلي.</string>
+    <string name="market_list_yours">اعرض ما عندك</string>
+    <string name="market_list_pub">اعرض إصدارًا</string>
+    <string name="market_also_local">وعلى اللوحة المحلية أيضًا</string>
 </resources>

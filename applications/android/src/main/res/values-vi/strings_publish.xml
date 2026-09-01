@@ -49,4 +49,12 @@
     <string name="market_listed_as">Đã đăng ở %1$s</string>
     <string name="market_list_failed">Không đăng được — node có chạy không?</string>
     <string name="market_all_langs">mọi ngôn ngữ</string>
+    <string name="market_what_all">Tất cả</string>
+    <string name="market_what_digital">Kỹ thuật số</string>
+    <string name="market_looking">Đang xem kệ %1$s…</string>
+    <string name="market_looking_local">Đang xem kệ địa phương… %1$d trong %2$d bảng</string>
+    <string name="market_no_fix">Chưa có vị trí — kệ địa phương cần biết địa phương ở đâu.</string>
+    <string name="market_list_yours">Đăng của bạn</string>
+    <string name="market_list_pub">Đăng ấn phẩm</string>
+    <string name="market_also_local">Cả trên bảng địa phương</string>
 </resources>
