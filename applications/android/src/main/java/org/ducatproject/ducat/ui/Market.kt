@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -102,56 +103,65 @@ private fun ShelfBody(
     refreshing: Boolean = false,
 ) {
     val context = LocalContext.current
-    if (refreshing && rows.isNotEmpty()) {
-        // Painted from memory while the live read runs: say so, quietly.
-        Row(
-            Modifier.padding(horizontal = 24.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            CircularProgressIndicator(Modifier.height(12.dp))
-            Spacer(Modifier.padding(4.dp))
-            Text(
-                stringResource(R.string.market_refreshing),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
-    if (!looked) {
-        Row(
-            Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            CircularProgressIndicator(Modifier.height(18.dp))
-            Spacer(Modifier.padding(6.dp))
-            Text(
-                looking,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        return
-    }
-    if (rows.isEmpty()) {
-        Column(Modifier.padding(24.dp)) {
-            Text(
-                stringResource(R.string.market_empty),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            // The invitation, but only for somebody who can accept it.
-            val hasPubs = remember { Publications.publications(context).isNotEmpty() }
-            if (hasPubs) {
-                Spacer(Modifier.height(8.dp))
-                OutlinedButton(onClick = { marketListYours() }) {
-                    Text(stringResource(R.string.market_list_yours))
-                }
+    // One column of our own: the callers place this body in containers
+    // that stack children on top of each other, and the refresh line drew
+    // behind the first card. What reads as rows must be laid out as rows.
+    // No early returns inside — a bare return from a Compose lambda has
+    // crashed this app before (IntStack.peek2); the branches are an
+    // if/else chain instead.
+    Column(Modifier.fillMaxSize()) {
+        if (refreshing && rows.isNotEmpty()) {
+            // Painted from memory while the live read runs: say so, quietly.
+            Row(
+                Modifier.padding(horizontal = 24.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                CircularProgressIndicator(
+                    Modifier.size(14.dp),
+                    strokeWidth = 2.dp,
+                )
+                Spacer(Modifier.padding(4.dp))
+                Text(
+                    stringResource(R.string.market_refreshing),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
-        return
-    }
-    LazyColumn(Modifier.fillMaxSize()) {
-        items(rows.size) { i -> MarketRowCard(rows[i]) }
+        if (!looked) {
+            Row(
+                Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                CircularProgressIndicator(Modifier.height(18.dp))
+                Spacer(Modifier.padding(6.dp))
+                Text(
+                    looking,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        } else if (rows.isEmpty()) {
+            Column(Modifier.padding(24.dp)) {
+                Text(
+                    stringResource(R.string.market_empty),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                // The invitation, but only for somebody who can accept it.
+                val hasPubs = remember { Publications.publications(context).isNotEmpty() }
+                if (hasPubs) {
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedButton(onClick = { marketListYours() }) {
+                        Text(stringResource(R.string.market_list_yours))
+                    }
+                }
+            }
+        } else {
+            LazyColumn(Modifier.fillMaxSize()) {
+                items(rows.size) { i -> MarketRowCard(rows[i]) }
+            }
+        }
     }
 }
 
