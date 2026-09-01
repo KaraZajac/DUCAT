@@ -18,6 +18,7 @@
     <string name="section_status">الحالة</string>
     <string name="section_profile">الملف الشخصي</string>
     <string name="section_contacts">جهات الاتصال</string>
+    <string name="section_selling">البيع</string>
     <string name="section_logs">السجلات</string>
     <string name="section_settings">الإعدادات</string>
     <string name="section_modes">أوضاع التشغيل</string>

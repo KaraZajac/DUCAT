@@ -1,6 +1,7 @@
 package org.ducatproject.ducat.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.combinedClickable
@@ -8,11 +9,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.draw.clip
 import androidx.compose.runtime.*
 import kotlinx.coroutines.flow.first
 import androidx.compose.ui.Alignment
@@ -45,6 +49,11 @@ enum class Section(val labelRes: Int) {
     Profile(R.string.section_profile),
     Contacts(R.string.section_contacts),
     Library(R.string.section_library),
+    Selling(R.string.section_selling),
+    // Routable but not listed: the Press mode's second tab and the
+    // market's "list yours" open it directly, and the Press room is
+    // where publishing lives now — a drawer row would be a second door
+    // to the same desk.
     Publishing(R.string.section_publishing),
     Logs(R.string.section_logs),
     Settings(R.string.section_settings),
@@ -80,7 +89,7 @@ fun DrawerContent(onPick: (Section) -> Unit) {
         PersonaSwitcher(Modifier.padding(horizontal = 16.dp).padding(bottom = 12.dp))
         HorizontalDivider()
         Spacer(Modifier.height(8.dp))
-        Section.entries.forEach { s ->
+        Section.entries.filter { it != Section.Publishing }.forEach { s ->
             NavigationDrawerItem(
                 label = { Text(stringResource(s.labelRes)) },
                 icon = { Icon(iconFor(s), null) },
@@ -100,6 +109,7 @@ private fun iconFor(s: Section) = when (s) {
     Section.Profile -> Icons.Filled.Person
     Section.Contacts -> Icons.Filled.People
     Section.Library -> Icons.Filled.LocalLibrary
+    Section.Selling -> Icons.Filled.Storefront
     Section.Publishing -> Icons.AutoMirrored.Filled.MenuBook
     Section.Logs -> Icons.Filled.Description
     Section.Settings -> Icons.Filled.Settings
@@ -136,6 +146,7 @@ fun SectionScreen(
 
         Section.Library -> LibrarySection()
 
+        Section.Selling -> SellingSection()
         Section.Publishing -> PublishingSection()
 
         Section.Logs -> LogsScreen()
@@ -965,34 +976,116 @@ fun ModesScreen() {
         )
         Spacer(Modifier.height(16.dp))
 
-        Card(Modifier.fillMaxWidth()) {
-            Column(Modifier.padding(vertical = 4.dp)) {
-                options.forEachIndexed { i, (mode, title, detail) ->
-                    if (i > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                    Row(
-                        Modifier.fillMaxWidth()
-                            .clickable { choose(mode) }
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+        options.forEach { (mode, title, detail) ->
+            val active = current == mode
+            Card(
+                Modifier.fillMaxWidth().padding(bottom = 10.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (active) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.surfaceContainerHigh
+                    },
+                ),
+            ) {
+                Row(
+                    Modifier.fillMaxWidth()
+                        .clickable { choose(mode) }
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Box(
+                        Modifier.size(42.dp)
+                            .clip(CircleShape)
+                            .background(
+                                if (active) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceVariant
+                                },
+                            ),
+                        contentAlignment = Alignment.Center,
                     ) {
-                        RadioButton(selected = current == mode, onClick = { choose(mode) })
+                        Icon(
+                            modeIcon(mode),
+                            contentDescription = null,
+                            tint = if (active) {
+                                MaterialTheme.colorScheme.onPrimary
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            },
+                        )
+                    }
+                    Spacer(Modifier.width(14.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text(title, style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            detail,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        // Which hat the shift starts in (§15.11 meets the
+                        // roster): a bar answering as the bar however the
+                        // phone arrived. Only once a second persona
+                        // exists — one persona has nothing to choose.
+                        ModePersonaBinding(mode)
+                    }
+                    if (active) {
                         Spacer(Modifier.width(8.dp))
-                        Column(Modifier.weight(1f)) {
-                            Text(title, style = MaterialTheme.typography.titleMedium)
-                            Text(
-                                detail,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            // Which hat the shift starts in (§15.11 meets the
-                            // roster): a bar answering as the bar however the
-                            // phone arrived. Only once a second persona
-                            // exists — one persona has nothing to choose.
-                            ModePersonaBinding(mode)
-                        }
+                        Icon(
+                            Icons.Filled.CheckCircle,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
                     }
                 }
             }
+        }
+    }
+}
+
+private fun modeIcon(mode: org.ducatproject.ducat.Mode) = when (mode) {
+    org.ducatproject.ducat.Mode.None -> Icons.Filled.Person
+    org.ducatproject.ducat.Mode.Pos -> Icons.Filled.PointOfSale
+    org.ducatproject.ducat.Mode.BarTab -> Icons.Filled.LocalBar
+    org.ducatproject.ducat.Mode.Taxi -> Icons.Filled.LocalTaxi
+    org.ducatproject.ducat.Mode.Donate -> Icons.Filled.VolunteerActivism
+    org.ducatproject.ducat.Mode.Renting -> Icons.Filled.House
+    org.ducatproject.ducat.Mode.Kiosk -> Icons.Filled.Storefront
+    org.ducatproject.ducat.Mode.Marketplace -> Icons.Filled.Sell
+    org.ducatproject.ducat.Mode.HireHelp -> Icons.Filled.Handyman
+    org.ducatproject.ducat.Mode.Press -> Icons.AutoMirrored.Filled.MenuBook
+}
+
+/**
+ * Everything this phone offers, one desk: the listings across every kind
+ * (a room, a car, a kayak, a bicycle for sale, an afternoon's help) and
+ * the publications. Management without a mode switch — a shift is for
+ * working a counter, not for editing a price.
+ */
+@Composable
+fun SellingSection() {
+    var tab by rememberSaveable { mutableStateOf(0) }
+    Column(Modifier.fillMaxSize()) {
+        Row(
+            Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            FilterChip(
+                selected = tab == 0,
+                onClick = { tab = 0 },
+                label = { Text(stringResource(R.string.shells_tab_listings)) },
+            )
+            FilterChip(
+                selected = tab == 1,
+                onClick = { tab = 1 },
+                label = { Text(stringResource(R.string.section_publishing)) },
+            )
+        }
+        if (tab == 0) {
+            RentingScreen(kinds = org.ducatproject.ducat.Listings.KINDS)
+        } else {
+            PublishingSection()
         }
     }
 }

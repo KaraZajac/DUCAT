@@ -19,6 +19,7 @@
     <string name="section_status">Durum</string>
     <string name="section_profile">Profil</string>
     <string name="section_contacts">Kişiler</string>
+    <string name="section_selling">Satış</string>
     <string name="section_logs">Kayıtlar</string>
     <string name="section_settings">Ayarlar</string>
     <string name="section_modes">Çalışma modları</string>

@@ -19,6 +19,7 @@
     <string name="section_status">Status</string>
     <string name="section_profile">Profil</string>
     <string name="section_contacts">Kontak</string>
+    <string name="section_selling">Penjualan</string>
     <string name="section_logs">Log</string>
     <string name="section_settings">Pengaturan</string>
     <string name="section_modes">Mode operasi</string>

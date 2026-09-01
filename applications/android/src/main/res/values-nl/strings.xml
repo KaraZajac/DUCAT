@@ -18,6 +18,7 @@
     <string name="section_status">Status</string>
     <string name="section_profile">Profiel</string>
     <string name="section_contacts">Contacten</string>
+    <string name="section_selling">Verkoop</string>
     <string name="section_logs">Logboek</string>
     <string name="section_settings">Instellingen</string>
     <string name="section_modes">Gebruiksmodi</string>

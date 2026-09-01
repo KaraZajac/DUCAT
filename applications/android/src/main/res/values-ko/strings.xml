@@ -19,6 +19,7 @@
     <string name="section_status">상태</string>
     <string name="section_profile">프로필</string>
     <string name="section_contacts">연락처</string>
+    <string name="section_selling">판매</string>
     <string name="section_logs">로그</string>
     <string name="section_settings">설정</string>
     <string name="section_modes">운영 모드</string>
