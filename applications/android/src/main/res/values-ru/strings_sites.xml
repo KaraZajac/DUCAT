@@ -6,6 +6,8 @@
     <string name="sites_empty_body">Сайт ducat — запечатанная комната: каждая картинка и стиль едут в пакете, скрипты выключены, работают только ссылки ducat:. Вставьте адрес, чтобы сохранить сайт.</string>
     <string name="sites_add">Добавить сайт</string>
     <string name="sites_add_confirm">Добавить</string>
+    <string name="sites_add_link_title">Добавить этот сайт?</string>
+    <string name="sites_add_link_body">Этот адрес пришёл по ссылке. Добавление кладёт его на твою полку; ничего не загружается, пока ты его не откроешь.</string>
     <string name="sites_uri_label">адрес ducat:site/…</string>
     <string name="sites_bad_uri">Это не адрес ducat:site/.</string>
     <string name="sites_fetching">Загрузка…</string>

@@ -103,4 +103,7 @@
     <string name="hail_search">搜索</string>
     <string name="hail_clear_place">清除</string>
     <string name="hail_joining_network">正在加入网络——还没有读取这些板。</string>
+    <string name="hail_accept_sending">正在答应 %1$s…</string>
+    <string name="hail_accept_failed">给 %1$s 的答应没有发出。检查网络后再看一次报价。</string>
+    <string name="hail_escrow_failed">车费未能放入托管。请在聊天里和司机商量。</string>
 </resources>

@@ -103,4 +103,7 @@
     <string name="hail_search">Tìm</string>
     <string name="hail_clear_place">Xóa</string>
     <string name="hail_joining_network">Đang tham gia mạng lưới — chưa đọc được các bảng.</string>
+    <string name="hail_accept_sending">Đang gửi lời đồng ý tới %1$s…</string>
+    <string name="hail_accept_failed">Lời đồng ý gửi %1$s chưa đi được. Kiểm tra mạng rồi mở lại báo giá.</string>
+    <string name="hail_escrow_failed">Không thể đưa tiền cước vào ký quỹ. Hãy trao đổi với tài xế trong chat.</string>
 </resources>

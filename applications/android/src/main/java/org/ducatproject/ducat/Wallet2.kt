@@ -418,8 +418,14 @@ object Wallet {
      * Cached because the rate is a network call and the amount field changes on
      * every keystroke; a minute is far shorter than fees move and far longer
      * than someone types a number.
+     *
+     * One entry per shape, not one entry. [maxSendable] alone prices three
+     * shapes (one note, every note, the notes worth spending) and the pay
+     * screen asks it on every keystroke; a single cell held whichever shape
+     * was asked last, so each of the three evicted the one before and the
+     * "cache" made three network calls per key press.
      */
-    private var feeCache: Triple<String, Long, Long>? = null  // key, fee, at
+    private val feeCache = HashMap<String, Pair<Long, Long>>()  // key → (fee, at)
 
     fun feeFor(context: Context, inputs: Int, priority: Int = 1): Long {
         val node = NodeStore(context).lastGood() ?: return 0
@@ -429,21 +435,26 @@ object Wallet {
         // retried in seconds — but not once per keystroke, which is what the
         // field log showed: a burst of identical estimate errors as the
         // amount field recomposed against a node that had stopped answering.
-        feeCache?.let { (k, fee, at) ->
-            val ttl = if (fee == 0L) 15_000 else 60_000
-            if (k == key && now - at < ttl) return fee
+        synchronized(feeCache) {
+            feeCache[key]?.let { (fee, at) ->
+                val ttl = if (fee == 0L) 15_000 else 60_000
+                if (now - at < ttl) return fee
+            }
         }
-        return try {
-            val e = uniffi.ducat_mobile.moneroFeeEstimate(
+        val fee = try {
+            uniffi.ducat_mobile.moneroFeeEstimate(
                 node, inputs.coerceAtLeast(1).toUInt(), 2u, priority.toUInt(),
-            )
-            feeCache = Triple(key, e.feePxmr.toLong(), now)
-            e.feePxmr.toLong()
+            ).feePxmr.toLong()
         } catch (e: Exception) {
             DucatLog.w(TAG, "fee estimate: ${e.message}")
-            feeCache = Triple(key, 0L, now)
-            0
+            0L
         }
+        synchronized(feeCache) {
+            // Every input count someone ever held is a key; kept small.
+            if (feeCache.size > 64) feeCache.clear()
+            feeCache[key] = fee to now
+        }
+        return fee
     }
 
     fun minutesToConfirm(priority: Int): Int = when (priority) {
@@ -540,6 +551,28 @@ object Wallet {
     }
 
     /**
+     * Did moneroSend fail before it had anything to relay?
+     *
+     * Matched on the core's own texts (monero.rs, monero_send), each raised
+     * before `relay` runs. The relay stage has exactly one wording — "signed,
+     * but no node confirmed taking it" — and a signed transaction a node may
+     * have taken is precisely the case the intent exists for, so that one,
+     * and anything not listed here, answers no.
+     */
+    private val builtNothing = listOf(
+        "nothing to spend", "spend key is not", "scalar:", "view pair:", "address:",
+        "stored output:", "runtime:", "connect:", "height:", "decoys:", "fee rate:",
+        "not enough in the notes you picked", "too many notes at once",
+        "no notes selected", "no destination", "could not build the transaction",
+        "signing:",
+    )
+
+    private fun neverLeftThePhone(t: Throwable): Boolean {
+        val why = (t as? uniffi.ducat_mobile.MoneroException.Failed)?.v1 ?: return false
+        return builtNothing.any { why.startsWith(it) }
+    }
+
+    /**
      * There is not enough unlocked to cover the amount and its fee.
      *
      * Typed, because the sentence it replaces was English in an app that ships
@@ -582,7 +615,9 @@ object Wallet {
         // blindness the double-pay guard cannot survive. The intent also
         // pins these notes out of the next plan. A throw below does NOT
         // clear it: a timeout can post-date the relay, so only the chain
-        // (refreshSpent) may decide the send never happened.
+        // (refreshSpent) may decide the send never happened. The single
+        // exception is a failure the core raises before it has anything to
+        // relay — see the catch.
         val intent = store.recordSendIntent(
             toAddress, amountPxmr, plan.notes.map { it.keyImage }, contactHex, note,
             donation,
@@ -611,6 +646,17 @@ object Wallet {
                 DucatLog.w(TAG, "node did not answer — demoted, next try re-probes")
             } else if (NodeStore(context).nodeFailed()) {
                 DucatLog.w(TAG, "node demoted after repeated failures — will re-probe")
+            }
+            // The one exception to "a throw does not clear it": a failure the
+            // core reports from BEFORE it tried a relay — no decoys, no fee
+            // rate, could not build — is a transaction that never existed,
+            // and the notes it named were pinned for thirty minutes anyway,
+            // during which the retry the person is about to make said "not
+            // enough". Only the texts the core uses on that side of the
+            // relay qualify; anything unrecognised keeps the claim.
+            if (neverLeftThePhone(e)) {
+                store.dropSendIntent(intent)
+                DucatLog.i(TAG, "nothing was built — the notes are free again")
             }
             throw e
         }

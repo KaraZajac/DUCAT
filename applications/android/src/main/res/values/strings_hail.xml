@@ -103,4 +103,7 @@
     <string name="hail_search">Search</string>
     <string name="hail_clear_place">Clear</string>
     <string name="hail_joining_network">Joining the network — the boards have not been read yet.</string>
+    <string name="hail_accept_sending">Telling %1$s yes…</string>
+    <string name="hail_accept_failed">Your yes to %1$s did not send. Check the network and view the offer again.</string>
+    <string name="hail_escrow_failed">The fare could not be put in escrow. Sort it out with the driver in the chat.</string>
 </resources>

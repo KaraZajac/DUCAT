@@ -103,4 +103,7 @@
     <string name="hail_search">Szukaj</string>
     <string name="hail_clear_place">Wyczyść</string>
     <string name="hail_joining_network">Łączenie z siecią — tablice nie zostały jeszcze odczytane.</string>
+    <string name="hail_accept_sending">Wysyłanie zgody do %1$s…</string>
+    <string name="hail_accept_failed">Twoja zgoda do %1$s nie została wysłana. Sprawdź sieć i otwórz ofertę ponownie.</string>
+    <string name="hail_escrow_failed">Nie udało się złożyć opłaty w depozycie. Dogadaj się z kierowcą na czacie.</string>
 </resources>

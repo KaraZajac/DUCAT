@@ -269,11 +269,13 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                     }
                 }
             }
-            return
-        }
+        } else {
+        // No early return out of the search branch: a bare `return` inside
+        // Column's lambda is the IntStack.peek2 crash the comment below
+        // describes, and it went off on the first character typed here.
         // Groups, each by name with its size. Rendered above the threads they
         // fan into so the two lists cannot be confused for one.
-        if (groups.isNotEmpty() || ContactStore(context).all().size >= 2) {
+        if (groups.isNotEmpty() || all.size >= 2) {
             Row(
                 Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -434,6 +436,7 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                     )
                 }
             }
+        }
         }
     }
 
@@ -647,7 +650,13 @@ internal fun previewOf(context: Context, m: StoredMessage): String = when {
     m.kind == 13 -> context.getString(
         R.string.chatlist_preview_issue, isolate(m.pubPeriodId ?: ""),
     ).trim()
-    m.attHash != null -> context.getString(R.string.chatlist_preview_photo)
+    m.attHash != null -> when {
+        (m.attMime ?: "").startsWith("audio/") ->
+            context.getString(R.string.chatlist_preview_voice)
+        (m.attMime ?: "").startsWith("image/") ->
+            context.getString(R.string.chatlist_preview_photo)
+        else -> "📎 " + isolate(m.attName ?: context.getString(R.string.chat_file_fallback))
+    }
     else -> isolate(m.body)
 }
 

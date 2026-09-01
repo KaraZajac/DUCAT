@@ -30,6 +30,8 @@
     <string name="kiosk_bill_sent_note">บิลอยู่ที่นั่น แยกรายการไว้ให้แล้ว จ่ายเมื่อไรก็ได้</string>
     <string name="kiosk_no_ducat">ไม่มี DUCAT? จ่ายด้วยกระเป๋า Monero</string>
     <string name="kiosk_card_failed">แสดงรหัสไม่ได้: %1$s</string>
+    <string name="kiosk_bill_sending">กำลังส่งบิลของคุณ…</string>
+    <string name="kiosk_bill_not_sent">ยังส่งบิลไม่ได้: %1$s กำลังลองใหม่</string>
     <string name="kiosk_withdraw">ยกเลิกบิล</string>
     <!-- Calling an order out, to somebody who stepped outside -->
     <string name="kiosk_say_ready">พร้อมแล้ว</string>

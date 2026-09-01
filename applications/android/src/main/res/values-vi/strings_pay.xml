@@ -62,6 +62,7 @@
     <string name="pay_fee_unknown">hiện chưa rõ</string>
     <string name="pay_fee_unknown_confirm">Hiện chưa ước tính được phí. Giao dịch sẽ trả đúng mức phí khi được tạo.</string>
     <string name="pay_node_no_answer">Nút Monero không trả lời kịp. Chưa gửi gì cả. Hãy thử lại — ứng dụng sẽ dùng nút khác.</string>
+    <string name="pay_send_interrupted">Ứng dụng bị đóng giữa lúc thanh toán. Hãy xem sao kê trước khi thanh toán lại.</string>
     <string name="pay_not_enough">Số dư khả dụng không đủ — bạn có %1$s và cần %2$s kèm phí mạng.</string>
     <string name="pay_offline">Chưa kết nối — điện thoại này chưa tham gia xong mạng lưới. Chưa gửi gì cả; hãy thử lại sau giây lát.</string>
     <string name="pay_node_unreachable">Không liên hệ được nút Monero nào. Chưa gửi gì cả — hãy kiểm tra kết nối và thử lại.</string>

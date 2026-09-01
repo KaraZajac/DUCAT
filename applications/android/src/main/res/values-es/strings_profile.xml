@@ -44,6 +44,9 @@
     <string name="profile_bond_releasing">Devolviendo — esperando su firma…</string>
     <string name="profile_bond_cosigned">Firmado — la emisión queda en sus manos.</string>
     <string name="profile_bond_released">Depósito devuelto ✓</string>
+    <string name="profile_bond_call_off">Cancelar el depósito</string>
+    <string name="profile_bond_holds">la custodia contiene %1$s — devuelve el depósito en su lugar</string>
+    <string name="profile_bond_called_off">Depósito cancelado.</string>
     <string name="profile_bond_txid">Transacción de devolución</string>
     <string name="profile_bond_arbiter_q">¿Quién guarda la tercera llave?</string>
     <string name="profile_bond_arbiter_note">Con un árbitro, dos de las tres llaves bastan para mover el depósito: un teléfono perdido no bloquea nada y una disputa tiene adónde ir. El árbitro solo no puede llevarse nada.</string>

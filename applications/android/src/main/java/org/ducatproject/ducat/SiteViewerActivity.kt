@@ -7,6 +7,7 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.ComponentActivity
+import androidx.activity.addCallback
 import java.io.ByteArrayInputStream
 import java.io.File
 
@@ -27,12 +28,18 @@ class SiteViewerActivity : ComponentActivity() {
         if (!File(root, "index.html").isFile) {
             finish(); return
         }
-        val rootCanon = root.canonicalPath
+        // With the separator: a bare prefix let `../current-anything/` next
+        // to the bundle pass as inside it.
+        val rootCanon = root.canonicalPath + File.separator
 
         val web = WebView(this)
         web.settings.apply {
             javaScriptEnabled = false
             blockNetworkLoads = true
+            // Safe Browsing checks every navigation against Google before
+            // it loads — one external fetch from a room whose whole point
+            // is having none.
+            if (android.os.Build.VERSION.SDK_INT >= 26) safeBrowsingEnabled = false
             // Not blockNetworkImage: that one short-circuits on the URL
             // scheme before shouldInterceptRequest is consulted, so it
             // starves the bundle's own images. blockNetworkLoads and the
@@ -74,11 +81,17 @@ class SiteViewerActivity : ComponentActivity() {
                     url.scheme == "ducat" -> {
                         // The page's only working exits: hand the URI to
                         // the app's own flows and stay open behind them.
-                        startActivity(
-                            android.content.Intent(
-                                android.content.Intent.ACTION_VIEW, url,
-                            ).setPackage(packageName),
-                        )
+                        // Only a tap on the page itself: a meta refresh
+                        // or a frame can name a ducat: address too, and
+                        // that is a page opening doors without a hand on
+                        // them.
+                        if (request.hasGesture() && request.isForMainFrame) {
+                            startActivity(
+                                android.content.Intent(
+                                    android.content.Intent.ACTION_VIEW, url,
+                                ).setPackage(packageName),
+                            )
+                        }
                         true
                     }
                     url.host == "site.local" -> false
@@ -87,6 +100,11 @@ class SiteViewerActivity : ComponentActivity() {
             }
         }
         setContentView(web)
+        // A site with more than one page has a way back through it; the
+        // system gesture leaves the room only from its first page.
+        onBackPressedDispatcher.addCallback(this) {
+            if (web.canGoBack()) web.goBack() else finish()
+        }
         web.loadUrl("https://site.local/index.html")
     }
 
@@ -98,7 +116,8 @@ class SiteViewerActivity : ComponentActivity() {
         "gif" -> "image/gif"
         "svg" -> "image/svg+xml"
         "webp" -> "image/webp"
-        "woff", "woff2" -> "font/woff2"
+        "woff" -> "font/woff"
+        "woff2" -> "font/woff2"
         "txt", "md" -> "text/plain"
         "json" -> "application/json"
         else -> "application/octet-stream"

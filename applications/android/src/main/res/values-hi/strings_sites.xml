@@ -6,6 +6,8 @@
     <string name="sites_empty_body">ducat साइट एक सीलबंद कमरा है — हर चित्र और शैली बंडल में चलती है, स्क्रिप्ट बंद रहती हैं, केवल ducat: लिंक चलते हैं। पता चिपकाकर सहेजें।</string>
     <string name="sites_add">साइट जोड़ें</string>
     <string name="sites_add_confirm">जोड़ें</string>
+    <string name="sites_add_link_title">यह साइट जोड़ें?</string>
+    <string name="sites_add_link_body">यह पता एक लिंक से आया है। जोड़ने पर यह आपकी शेल्फ़ में सहेज लिया जाता है; जब तक आप इसे खोलें नहीं, कुछ भी डाउनलोड नहीं होता।</string>
     <string name="sites_uri_label">ducat:site/… पता</string>
     <string name="sites_bad_uri">यह ducat:site/ पता नहीं है।</string>
     <string name="sites_fetching">ला रहे हैं…</string>

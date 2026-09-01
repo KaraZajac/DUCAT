@@ -20,6 +20,7 @@
     <string name="chatlist_preview_receipt">🧾 रसीद — %1$s</string>
     <string name="chatlist_preview_reacted">रिएक्शन %1$s</string>
     <string name="chatlist_preview_photo">📷 फ़ोटो</string>
+    <string name="chatlist_preview_voice">🎤 वॉयस मैसेज</string>
     <string name="chatlist_time_now">अभी</string>
     <string name="chatlist_time_minutes">%1$d मि</string>
     <string name="chatlist_time_hours">%1$d घं</string>

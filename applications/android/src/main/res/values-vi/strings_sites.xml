@@ -6,6 +6,8 @@
     <string name="sites_empty_body">Trang ducat là căn phòng niêm phong — mọi hình và kiểu dáng đi trong gói, tắt script, chỉ liên kết ducat: hoạt động. Dán địa chỉ để lưu một trang.</string>
     <string name="sites_add">Thêm trang</string>
     <string name="sites_add_confirm">Thêm</string>
+    <string name="sites_add_link_title">Thêm trang này?</string>
+    <string name="sites_add_link_body">Địa chỉ này đến từ một liên kết. Thêm sẽ lưu nó vào kệ của bạn; không tải gì cho đến khi bạn mở.</string>
     <string name="sites_uri_label">địa chỉ ducat:site/…</string>
     <string name="sites_bad_uri">Đây không phải địa chỉ ducat:site/.</string>
     <string name="sites_fetching">Đang tải…</string>

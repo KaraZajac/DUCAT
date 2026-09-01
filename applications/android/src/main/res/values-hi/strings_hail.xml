@@ -103,4 +103,7 @@
     <string name="hail_search">खोजें</string>
     <string name="hail_clear_place">साफ़ करें</string>
     <string name="hail_joining_network">नेटवर्क से जुड़ रहे हैं — बोर्ड अभी पढ़े नहीं गए हैं।</string>
+    <string name="hail_accept_sending">%1$s को हाँ भेजी जा रही है…</string>
+    <string name="hail_accept_failed">%1$s को आपकी हाँ नहीं भेजी जा सकी। नेटवर्क जाँचें और पेशकश फिर से देखें।</string>
+    <string name="hail_escrow_failed">किराया एस्क्रो में नहीं रखा जा सका। ड्राइवर के साथ चैट में तय कर लें।</string>
 </resources>

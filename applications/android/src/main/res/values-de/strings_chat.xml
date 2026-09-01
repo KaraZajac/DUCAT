@@ -14,10 +14,12 @@
     <string name="chat_voice_failed">Diese Sprachmemo wurde nicht aufgenommen — halte das Mikrofon noch einmal gedrückt.</string>
     <string name="chat_what_card">Karte</string>
     <string name="chat_what_contact">Kontakt</string>
+    <string name="chat_what_reaction">Reaktion</string>
     <string name="chat_error_location_fix">Standort ließ sich nicht bestimmen</string>
     <string name="chat_recording_placeholder">Aufnahme… %1$ds</string>
     <string name="chat_message_placeholder">Nachricht</string>
     <string name="chat_take_picture">Foto aufnehmen</string>
+    <string name="chat_no_camera_app">keine Kamera-App auf diesem Telefon</string>
     <string name="chat_hold_to_record">Gedrückt halten für eine Sprachmemo</string>
     <string name="chat_attach">Anhängen</string>
     <string name="chat_close">Schließen</string>
@@ -83,6 +85,7 @@
     <string name="chat_downloading_audio">🎤 wird geladen…</string>
     <string name="chat_downloading_file">📎 wird geladen…</string>
     <string name="chat_att_stuck">Das ist nicht angekommen — vielleicht gibt es das nicht mehr. Es wird weiter versucht.</string>
+    <string name="chat_att_gone">Das ist nicht angekommen — vielleicht gibt es das nicht mehr.</string>
     <string name="chat_att_no_space">Auf diesem Telefon ist nicht genug Platz zum Herunterladen.</string>
     <string name="chat_picture_desc">Bild</string>
     <string name="chat_could_not_decode">📷 (nicht lesbar)</string>
@@ -108,6 +111,7 @@
     <string name="chat_stop">Stopp</string>
     <string name="chat_play_voice_memo">Sprachmemo abspielen</string>
     <string name="chat_voice_memo">Sprachmemo</string>
+    <string name="chat_play_failed">Diese Sprachnachricht lässt sich nicht abspielen.</string>
     <string name="chat_size_kb">%1$d KB</string>
     <string name="chat_size_b">%1$d B</string>
     <string name="chat_file_fallback">Datei</string>

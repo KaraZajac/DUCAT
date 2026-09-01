@@ -30,6 +30,8 @@
     <string name="kiosk_bill_sent_note">فاتورتك هناك، مفصّلة ببنودها. ادفع متى شئت.</string>
     <string name="kiosk_no_ducat">لا تملك DUCAT؟ ادفع بمحفظة مونيرو</string>
     <string name="kiosk_card_failed">تعذّر عرض الرمز: %1$s</string>
+    <string name="kiosk_bill_sending">جارٍ إرسال فاتورتك…</string>
+    <string name="kiosk_bill_not_sent">تعذّر إرسال الفاتورة بعد: %1$s. جارٍ المحاولة مجددًا.</string>
     <string name="kiosk_withdraw">سحب الفاتورة</string>
     <!-- Calling an order out, to somebody who stepped outside -->
     <string name="kiosk_say_ready">جاهز</string>

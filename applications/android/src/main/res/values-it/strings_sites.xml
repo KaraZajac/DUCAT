@@ -6,6 +6,8 @@
     <string name="sites_empty_body">Un sito ducat è una stanza sigillata: ogni immagine e stile viaggia nel pacchetto, niente script, funzionano solo i link ducat:. Incolla un indirizzo per salvarne uno.</string>
     <string name="sites_add">Aggiungi un sito</string>
     <string name="sites_add_confirm">Aggiungi</string>
+    <string name="sites_add_link_title">Aggiungere questo sito?</string>
+    <string name="sites_add_link_body">Questo indirizzo è arrivato da un link. Aggiungerlo lo salva sul tuo scaffale; non viene scaricato nulla finché non lo apri.</string>
     <string name="sites_uri_label">indirizzo ducat:site/…</string>
     <string name="sites_bad_uri">Questo non è un indirizzo ducat:site/.</string>
     <string name="sites_fetching">Recupero…</string>

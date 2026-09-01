@@ -30,6 +30,8 @@
     <string name="kiosk_bill_sent_note">Deine Rechnung liegt dort, mit allen Posten. Zahl, wann du willst.</string>
     <string name="kiosk_no_ducat">Kein DUCAT? Mit einer Monero-Wallet zahlen</string>
     <string name="kiosk_card_failed">Code konnte nicht angezeigt werden: %1$s</string>
+    <string name="kiosk_bill_sending">Deine Rechnung wird gesendet…</string>
+    <string name="kiosk_bill_not_sent">Rechnung konnte noch nicht gesendet werden: %1$s. Neuer Versuch.</string>
     <string name="kiosk_withdraw">Zurückziehen</string>
     <!-- Calling an order out, to somebody who stepped outside -->
     <string name="kiosk_say_ready">Fertig</string>

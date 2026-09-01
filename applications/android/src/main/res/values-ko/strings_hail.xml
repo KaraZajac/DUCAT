@@ -103,4 +103,7 @@
     <string name="hail_search">검색</string>
     <string name="hail_clear_place">지우기</string>
     <string name="hail_joining_network">네트워크에 참여하는 중 — 게시판을 아직 읽지 못했습니다.</string>
+    <string name="hail_accept_sending">%1$s님에게 수락을 보내는 중…</string>
+    <string name="hail_accept_failed">%1$s님에게 수락이 전송되지 않았어요. 네트워크를 확인하고 제안을 다시 열어 보세요.</string>
+    <string name="hail_escrow_failed">요금을 에스크로에 넣지 못했어요. 채팅에서 기사와 정리하세요.</string>
 </resources>

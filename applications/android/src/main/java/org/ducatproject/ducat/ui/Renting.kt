@@ -278,19 +278,26 @@ fun RentingScreen(kinds: List<Int> = Listings.KINDS) {
                             }
                         },
                         onQuantity = { n ->
-                            Listings.setQuantity(context, o.optString("id"), n)
-                            // Straight onto the board rather than at the next
-                            // six-hourly refresh: the count is what a reader
-                            // is deciding on, and "two left" that is really
-                            // none is the reason to have it at all.
-                            if (o.optString("board").isNotBlank()) scope.launch {
+                            scope.launch {
+                                // The store is an encrypted blob read whole and
+                                // written back; off the main thread like every
+                                // other write on this screen.
                                 withContext(Dispatchers.IO) {
-                                    runCatching { Listings.post(context, o.optString("id")) }
+                                    Listings.setQuantity(context, o.optString("id"), n)
                                 }
-                                    .onSuccess {
-                                        if (!it) error = context.getString(R.string.rent_board_full)
+                                // Straight onto the board rather than at the next
+                                // six-hourly refresh: the count is what a reader
+                                // is deciding on, and "two left" that is really
+                                // none is the reason to have it at all.
+                                if (o.optString("board").isNotBlank()) {
+                                    withContext(Dispatchers.IO) {
+                                        runCatching { Listings.post(context, o.optString("id")) }
                                     }
-                                    .onFailure { error = moneyFailure(context, it) }
+                                        .onSuccess {
+                                            if (!it) error = context.getString(R.string.rent_board_full)
+                                        }
+                                        .onFailure { error = moneyFailure(context, it) }
+                                }
                             }
                         },
                     )
@@ -494,6 +501,10 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
     // one as the first was. So it is an indeterminate wait with the button
     // held, which is the difference between "working" and "nothing happened".
     var posting by remember { mutableStateOf(false) }
+    // One listing per form, however many times Post is pressed: a retry after
+    // a failed board write must re-post the same draft, not save a second copy
+    // that the poller then puts up beside the first.
+    var draftId by rememberSaveable { mutableStateOf<String?>(null) }
     val started = listOf(
         title, area, price, make, model, year, color, seats, trim,
         rooms, sleeps, sizeM2, tags, details,
@@ -872,11 +883,15 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
                         priceCurrency = cur.takeIf { fiat },
                         quantity = howMany.toLongOrNull() ?: 1L,
                     )
-                    Listings.put(context, draft)
+                    draftId?.let { draft.put("id", it) } ?: run { draftId = draft.optString("id") }
+                    error = null
                     posting = true
                     scope.launch {
                         withContext(Dispatchers.IO) {
-                            runCatching { Listings.post(context, draft.optString("id")) }
+                            runCatching {
+                                Listings.put(context, draft)
+                                Listings.post(context, draft.optString("id"))
+                            }
                         }
                             // A full board answers false rather than throwing,
                             // and the screen closed on it as though the thing

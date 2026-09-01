@@ -20,6 +20,7 @@
     <string name="chatlist_preview_receipt">🧾 レシート — %1$s</string>
     <string name="chatlist_preview_reacted">%1$sでリアクション</string>
     <string name="chatlist_preview_photo">📷 写真</string>
+    <string name="chatlist_preview_voice">🎤 ボイスメモ</string>
     <string name="chatlist_time_now">今</string>
     <string name="chatlist_time_minutes">%1$d分</string>
     <string name="chatlist_time_hours">%1$d時間</string>

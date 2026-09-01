@@ -62,6 +62,7 @@
     <string name="pay_fee_unknown">ahora mismo no se sabe</string>
     <string name="pay_fee_unknown_confirm">Ahora mismo no se ha podido estimar la comisión. La transacción pagará lo que cueste al construirse.</string>
     <string name="pay_node_no_answer">El nodo de Monero no respondió a tiempo. No se envió nada. Inténtalo otra vez: la app usará otro nodo.</string>
+    <string name="pay_send_interrupted">La app se cerró a mitad del pago. Revisa el extracto antes de volver a pagar.</string>
     <string name="pay_not_enough">No hay suficiente disponible: tienes %1$s y hacen falta %2$s con la comisión de red.</string>
     <string name="pay_offline">Aún sin conexión: este teléfono no ha terminado de unirse a la red. No se envió nada; inténtalo de nuevo en un momento.</string>
     <string name="pay_node_unreachable">No se pudo contactar con ningún nodo de Monero. No se envió nada: comprueba tu conexión e inténtalo de nuevo.</string>

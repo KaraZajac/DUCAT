@@ -6,6 +6,8 @@
     <string name="sites_empty_body">ducat 站点是一间密封的房间——所有图片与样式都随包而来，脚本关闭，只有 ducat: 链接可用。粘贴地址即可保存。</string>
     <string name="sites_add">添加站点</string>
     <string name="sites_add_confirm">添加</string>
+    <string name="sites_add_link_title">添加此站点？</string>
+    <string name="sites_add_link_body">这个地址来自一个链接。添加后会保存到你的书架；在你打开之前不会获取任何内容。</string>
     <string name="sites_uri_label">ducat:site/… 地址</string>
     <string name="sites_bad_uri">这不是 ducat:site/ 地址。</string>
     <string name="sites_fetching">正在获取…</string>

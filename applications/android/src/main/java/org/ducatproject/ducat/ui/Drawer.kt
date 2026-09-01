@@ -41,6 +41,7 @@ import org.ducatproject.ducat.RateStore
 import org.ducatproject.ducat.UnitsStore
 import org.ducatproject.ducat.WalletStore
 import org.ducatproject.ducat.findActivity
+import org.ducatproject.ducat.saidWhy
 
 /**
  * What the hamburger opens.
@@ -1111,9 +1112,15 @@ fun ModesScreen() {
     var pinFor by remember { mutableStateOf<org.ducatproject.ducat.Mode?>(null) }
 
     fun choose(m: org.ducatproject.ducat.Mode) {
+        val armed = current == org.ducatproject.ducat.Mode.Kiosk
         if (m == org.ducatproject.ducat.Mode.Kiosk &&
             !org.ducatproject.ducat.Pin.isSet(context)
         ) {
+            pinFor = m
+        } else if (armed && m != org.ducatproject.ducat.Mode.Kiosk) {
+            // Leaving is the staff door's question, whichever way this
+            // list was reached. The shell no longer lets a kiosk open the
+            // drawer at all; this is the same rule kept at the picker.
             pinFor = m
         } else {
             pick(m)
@@ -1302,18 +1309,49 @@ fun SitesSection() {
         busy = rec
         scope.launch(kotlinx.coroutines.Dispatchers.IO) {
             runCatching { org.ducatproject.ducat.Sites.add(context, rec) }
-                .onFailure { word = it.message }
+                .onFailure { word = it.saidWhy() }
             busy = null
         }
     }
 
+    // A link is not a paste. Unlike an address typed in here, a link can be
+    // sent by anyone, and a site is a page that gets opened — so the address
+    // is shown and the person asked, the way a tapped card is (MainActivity).
+    var linkAsk by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(Unit) {
         pendingSiteAdd.collect { uri ->
             if (uri != null) {
                 pendingSiteAdd.value = null
-                addByUri(uri)
+                linkAsk = uri
             }
         }
+    }
+    linkAsk?.let { uri ->
+        AlertDialog(
+            onDismissRequest = { linkAsk = null },
+            title = { Text(stringResource(R.string.sites_add_link_title)) },
+            text = {
+                Column {
+                    Text(stringResource(R.string.sites_add_link_body))
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        uri,
+                        fontFamily = FontFamily.Monospace,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { linkAsk = null; addByUri(uri) }) {
+                    Text(stringResource(R.string.sites_add_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { linkAsk = null }) {
+                    Text(stringResource(R.string.common_cancel))
+                }
+            },
+        )
     }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
@@ -1404,19 +1442,24 @@ fun SitesSection() {
                                             ) {
                                                 siteOpen(context, site.recordKey)
                                             }
-                                        }.onFailure { word = it.message }
+                                        }.onFailure { word = it.saidWhy() }
                                         busy = null
                                     }
                                 },
                             ) { Text(stringResource(R.string.sites_open)) }
                         }
                         Row(verticalAlignment = Alignment.CenterVertically) {
+                            // Off the main thread, both: the store is an
+                            // encrypted table read back whole, and remove
+                            // deletes a bundle that can be hundreds of files.
                             Checkbox(
                                 checked = site.keepAlive,
                                 onCheckedChange = {
-                                    org.ducatproject.ducat.Sites.setKeepAlive(
-                                        context, site.recordKey, it,
-                                    )
+                                    scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                                        org.ducatproject.ducat.Sites.setKeepAlive(
+                                            context, site.recordKey, it,
+                                        )
+                                    }
                                 },
                             )
                             Text(
@@ -1425,7 +1468,9 @@ fun SitesSection() {
                                 modifier = Modifier.weight(1f),
                             )
                             TextButton(onClick = {
-                                org.ducatproject.ducat.Sites.remove(context, site.recordKey)
+                                scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                                    org.ducatproject.ducat.Sites.remove(context, site.recordKey)
+                                }
                             }) { Text(stringResource(R.string.sites_remove)) }
                         }
                     }

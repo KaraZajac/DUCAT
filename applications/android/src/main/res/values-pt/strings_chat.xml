@@ -14,10 +14,12 @@
     <string name="chat_voice_failed">Esse recado de voz não gravou — segure o microfone de novo.</string>
     <string name="chat_what_card">cartão</string>
     <string name="chat_what_contact">contato</string>
+    <string name="chat_what_reaction">reação</string>
     <string name="chat_error_location_fix">não foi possível obter sua localização</string>
     <string name="chat_recording_placeholder">Gravando… %1$ds</string>
     <string name="chat_message_placeholder">Mensagem</string>
     <string name="chat_take_picture">Tirar uma foto</string>
+    <string name="chat_no_camera_app">não há app de câmera neste telefone</string>
     <string name="chat_hold_to_record">Segure para gravar um recado de voz</string>
     <string name="chat_attach">Anexar</string>
     <string name="chat_close">Fechar</string>
@@ -83,6 +85,7 @@
     <string name="chat_downloading_audio">🎤 baixando…</string>
     <string name="chat_downloading_file">📎 baixando…</string>
     <string name="chat_att_stuck">Isto não chegou — pode já não estar disponível. A tentar ainda.</string>
+    <string name="chat_att_gone">Isto não chegou — pode já não estar disponível.</string>
     <string name="chat_att_no_space">Não há espaço suficiente neste telemóvel para o descarregar.</string>
     <string name="chat_picture_desc">Foto</string>
     <string name="chat_could_not_decode">📷 (não foi possível decodificar)</string>
@@ -108,6 +111,7 @@
     <string name="chat_stop">Parar</string>
     <string name="chat_play_voice_memo">Reproduzir recado de voz</string>
     <string name="chat_voice_memo">Recado de voz</string>
+    <string name="chat_play_failed">Esta nota de voz não toca.</string>
     <string name="chat_size_kb">%1$d KB</string>
     <string name="chat_size_b">%1$d B</string>
     <string name="chat_file_fallback">arquivo</string>

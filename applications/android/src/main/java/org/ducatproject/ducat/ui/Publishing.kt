@@ -62,6 +62,7 @@ import org.ducatproject.ducat.R
 import org.ducatproject.ducat.Swarm
 import org.ducatproject.ducat.TabStore
 import org.ducatproject.ducat.formatXmr
+import org.ducatproject.ducat.saidWhy
 
 /**
  * Publishing, from the device in your pocket (§16.20) — unlocked the day
@@ -269,7 +270,7 @@ fun PublishingSection() {
                                     subCode = card.uri
                                 }.onFailure {
                                     DucatLog.w("Publishing", "code: ${it.message}")
-                                    lastWord = it.message
+                                    lastWord = it.saidWhy()
                                 }
                             }
                         },
@@ -439,7 +440,16 @@ fun PublishingSection() {
                         }.getOrNull()
                             ?: uri.lastPathSegment?.substringAfterLast('/')
                             ?: "issue.bin"
-                        val dir = File(context.filesDir, "publish_staging").apply { mkdirs() }
+                        // One directory per pick. A large issue is served
+                        // from where it was staged, for as long as the
+                        // publication lives — so a later pick that happened
+                        // to share its name, for any publication, was
+                        // written over the file a seeder was reading, and
+                        // every reader's fetch then failed its digest.
+                        val dir = File(
+                            context.filesDir,
+                            "publish_staging/$pubId/${System.currentTimeMillis()}",
+                        ).apply { mkdirs() }
                         val dst = File(dir, name.replace('/', '_'))
                         context.contentResolver.openInputStream(uri)!!.use { input ->
                             dst.outputStream().use { input.copyTo(it) }
@@ -447,7 +457,7 @@ fun PublishingSection() {
                         staged = dst
                     }.onFailure {
                         DucatLog.w("Publishing", "stage: ${it.message}")
-                        lastWord = it.message
+                        lastWord = it.saidWhy()
                     }
                 }
             }
@@ -498,6 +508,11 @@ fun PublishingSection() {
                                         check(
                                             Publications.shelveIssue(context, pubId, p, f),
                                         ) { "the shelf would not take it" }
+                                        // The shelf holds the bytes now; the
+                                        // staging copy was only ever the way
+                                        // there.
+                                        f.delete()
+                                        f.parentFile?.delete()
                                     } else {
                                         val share = Swarm.seed(f.absolutePath)
                                         Publications.recordIssue(
@@ -542,7 +557,7 @@ fun PublishingSection() {
                                     staged = null
                                 } catch (e: Throwable) {
                                     DucatLog.w("Publishing", "issue $p: ${e.message}")
-                                    lastWord = e.message
+                                    lastWord = e.saidWhy()
                                 } finally {
                                     busy = null
                                 }

@@ -30,6 +30,8 @@
     <string name="kiosk_bill_sent_note">صورت‌حسابت آنجاست، قلم به قلم. هر وقت خواستی پرداخت کن.</string>
     <string name="kiosk_no_ducat">DUCAT نداری؟ با کیف پول مونرو پرداخت کن</string>
     <string name="kiosk_card_failed">نمایش کد ممکن نشد: %1$s</string>
+    <string name="kiosk_bill_sending">در حال فرستادن صورت‌حساب…</string>
+    <string name="kiosk_bill_not_sent">صورت‌حساب هنوز فرستاده نشد: %1$s. دوباره تلاش می‌شود.</string>
     <string name="kiosk_withdraw">پس‌گرفتن</string>
     <!-- Calling an order out, to somebody who stepped outside -->
     <string name="kiosk_say_ready">آماده</string>

@@ -6,6 +6,8 @@
     <string name="sites_empty_body">سایت ducat اتاقی مهروموم است — هر تصویر و سبک در بسته می‌آید، اسکریپت خاموش است و فقط پیوندهای ducat: کار می‌کنند. نشانی‌ای بچسبانید تا نگه دارید.</string>
     <string name="sites_add">افزودن سایت</string>
     <string name="sites_add_confirm">افزودن</string>
+    <string name="sites_add_link_title">این سایت اضافه شود؟</string>
+    <string name="sites_add_link_body">این نشانی از طریق یک پیوند رسیده است. افزودن آن را در قفسهٔ شما ذخیره می‌کند؛ تا بازش نکنید چیزی دریافت نمی‌شود.</string>
     <string name="sites_uri_label">نشانی ducat:site/…</string>
     <string name="sites_bad_uri">این نشانی ducat:site/ نیست.</string>
     <string name="sites_fetching">در حال دریافت…</string>

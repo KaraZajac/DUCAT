@@ -44,6 +44,9 @@
     <string name="profile_bond_releasing">Повернення — чекаємо на їхній підпис…</string>
     <string name="profile_bond_cosigned">Підписано — трансляція на їхньому боці.</string>
     <string name="profile_bond_released">Вклад повернено ✓</string>
+    <string name="profile_bond_call_off">Скасувати заставу</string>
+    <string name="profile_bond_holds">на ескроу лежить %1$s — натомість поверніть депозит</string>
+    <string name="profile_bond_called_off">Заставу скасовано.</string>
     <string name="profile_bond_txid">Транзакція повернення</string>
     <string name="profile_bond_arbiter_q">У кого третій ключ?</string>
     <string name="profile_bond_arbiter_note">З арбітром досить двох ключів із трьох: загублений телефон нічого не блокує, а суперечка має куди піти. Сам арбітр нічого забрати не може.</string>

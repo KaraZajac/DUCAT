@@ -6,6 +6,8 @@
     <string name="sites_empty_body">Situs ducat adalah ruang tersegel — tiap gambar dan gaya ikut dalam bundel, skrip mati, hanya tautan ducat: yang bekerja. Tempel alamat untuk menyimpan satu.</string>
     <string name="sites_add">Tambah situs</string>
     <string name="sites_add_confirm">Tambah</string>
+    <string name="sites_add_link_title">Tambahkan situs ini?</string>
+    <string name="sites_add_link_body">Alamat ini datang lewat tautan. Menambahkannya menyimpannya di rak Anda; tidak ada yang diambil sampai Anda membukanya.</string>
     <string name="sites_uri_label">alamat ducat:site/…</string>
     <string name="sites_bad_uri">Itu bukan alamat ducat:site/.</string>
     <string name="sites_fetching">Mengambil…</string>

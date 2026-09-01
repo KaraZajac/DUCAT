@@ -14,10 +14,12 @@
     <string name="chat_voice_failed">Tin nhắn thoại đó chưa được ghi — hãy giữ micrô lần nữa.</string>
     <string name="chat_what_card">thẻ</string>
     <string name="chat_what_contact">liên hệ</string>
+    <string name="chat_what_reaction">phản ứng</string>
     <string name="chat_error_location_fix">không định vị được</string>
     <string name="chat_recording_placeholder">Đang ghi âm… %1$d giây</string>
     <string name="chat_message_placeholder">Tin nhắn</string>
     <string name="chat_take_picture">Chụp ảnh</string>
+    <string name="chat_no_camera_app">điện thoại này không có ứng dụng máy ảnh</string>
     <string name="chat_hold_to_record">Giữ để ghi âm</string>
     <string name="chat_attach">Đính kèm</string>
     <string name="chat_close">Đóng</string>
@@ -83,6 +85,7 @@
     <string name="chat_downloading_audio">🎤 đang tải…</string>
     <string name="chat_downloading_file">📎 đang tải…</string>
     <string name="chat_att_stuck">Thứ này chưa tới — có thể không còn nữa. Vẫn đang thử.</string>
+    <string name="chat_att_gone">Thứ này chưa tới — có thể không còn nữa.</string>
     <string name="chat_att_no_space">Điện thoại này không đủ dung lượng để tải về.</string>
     <string name="chat_picture_desc">Ảnh</string>
     <string name="chat_could_not_decode">📷 (không giải mã được)</string>
@@ -108,6 +111,7 @@
     <string name="chat_stop">Dừng</string>
     <string name="chat_play_voice_memo">Phát ghi âm</string>
     <string name="chat_voice_memo">Ghi âm</string>
+    <string name="chat_play_failed">Không phát được ghi âm này.</string>
     <string name="chat_size_kb">%1$d KB</string>
     <string name="chat_size_b">%1$d B</string>
     <string name="chat_file_fallback">tệp</string>

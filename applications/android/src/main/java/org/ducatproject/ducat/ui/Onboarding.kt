@@ -171,37 +171,68 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
                 },
             )
 
-            Step.Wallet -> StepCard(
-                title = stringResource(R.string.onb_wallet_title),
-                body = stringResource(R.string.onb_wallet_body),
-                action = stringResource(R.string.onb_wallet_action),
-                onAction = {
-                    // Genesis until a node supplies a real tip — slow to
-                    // restore, and recoverable, which is the side of §4.3.1's
-                    // asymmetry to be on.
-                    // Ask a node where the chain is first. A wallet that does
-                    // not know its own creation height scans from genesis, which
-                    // is a day and a half of reading that looks exactly like
-                    // having no money.
-                    val tip = runCatching {
-                        uniffi.ducat_mobile.moneroPickNode(
-                            uniffi.ducat_mobile.moneroDefaultNodes(null),
-                            "stagenet",
-                            8000u,
-                        ).height
-                    }.getOrDefault(UNKNOWN_TIP)
-                    // Persisted at creation, so a rotation cannot regenerate a
-                    // *different* wallet than the address the user was shown and
-                    // the backup they wrote. onboarded stays false until Backup,
-                    // so this does not open a funded wallet before §4.3's step.
-                    val w = createWallet(tipHeight = tip, stagenet = true)
-                    WalletStore(context).save(
-                        address = w.address, spendKeyHex = w.spendKeyHex,
-                        restoreHeight = w.restoreHeight, stagenet = true,
-                    )
-                    onState(state.copy(step = Step.Pin))
-                },
-            )
+            Step.Wallet -> {
+                // Minting takes a network round trip and a key derivation;
+                // both ran on the tap itself, so the button froze the screen
+                // for up to the node timeout — eight seconds of an app that
+                // had apparently hung on its second step. Off the main
+                // thread, with the button held down while it runs.
+                val scope = rememberCoroutineScope()
+                var minting by remember { mutableStateOf(false) }
+                StepCard(
+                    title = stringResource(R.string.onb_wallet_title),
+                    body = stringResource(R.string.onb_wallet_body),
+                    action = stringResource(R.string.onb_wallet_action),
+                    busy = minting,
+                    onAction = {
+                        if (!minting) {
+                            minting = true
+                            scope.launch {
+                                val made = runCatching {
+                                    withContext(Dispatchers.IO) {
+                                        // Genesis until a node supplies a real
+                                        // tip — slow to restore, and
+                                        // recoverable, which is the side of
+                                        // §4.3.1's asymmetry to be on.
+                                        // Ask a node where the chain is first.
+                                        // A wallet that does not know its own
+                                        // creation height scans from genesis,
+                                        // which is a day and a half of reading
+                                        // that looks exactly like having no
+                                        // money.
+                                        val tip = runCatching {
+                                            uniffi.ducat_mobile.moneroPickNode(
+                                                uniffi.ducat_mobile.moneroDefaultNodes(null),
+                                                "stagenet",
+                                                8000u,
+                                            ).height
+                                        }.getOrDefault(UNKNOWN_TIP)
+                                        // Persisted at creation, so a rotation
+                                        // cannot regenerate a *different*
+                                        // wallet than the address the user was
+                                        // shown and the backup they wrote.
+                                        // onboarded stays false until Backup,
+                                        // so this does not open a funded
+                                        // wallet before §4.3's step.
+                                        val w = createWallet(tipHeight = tip, stagenet = true)
+                                        WalletStore(context).save(
+                                            address = w.address, spendKeyHex = w.spendKeyHex,
+                                            restoreHeight = w.restoreHeight, stagenet = true,
+                                        )
+                                    }
+                                }
+                                minting = false
+                                made.onSuccess { onState(state.copy(step = Step.Pin)) }
+                                    .onFailure {
+                                        org.ducatproject.ducat.DucatLog.w(
+                                            "Onboarding", "wallet: ${it.message}",
+                                        )
+                                    }
+                            }
+                        }
+                    },
+                )
+            }
 
             Step.Profile -> ProfileStep(
                 initialName = state.displayName.orEmpty(),
@@ -345,6 +376,8 @@ private fun StepCard(
     onAction: () -> Unit,
     secondary: String? = null,
     onSecondary: (() -> Unit)? = null,
+    /** The action is under way: the button waits rather than fires twice. */
+    busy: Boolean = false,
 ) {
     Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
         Column(Modifier.padding(20.dp)) {
@@ -352,7 +385,13 @@ private fun StepCard(
             Spacer(Modifier.height(8.dp))
             Text(body, style = MaterialTheme.typography.bodyMedium)
             Spacer(Modifier.height(16.dp))
-            Button(onClick = onAction) { Text(action) }
+            Button(onClick = onAction, enabled = !busy) {
+                if (busy) {
+                    CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                    Spacer(Modifier.width(8.dp))
+                }
+                Text(action)
+            }
             if (secondary != null && onSecondary != null) {
                 TextButton(onClick = onSecondary) { Text(secondary) }
             }

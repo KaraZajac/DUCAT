@@ -382,6 +382,17 @@ object Ledger {
         announced: Map<String, Pair<String, String?>> = emptyMap(),
     ): List<Event> {
         val sends = sendRecords.associateBy { it.txidHex.lowercase() }
+        // Records written by refreshSpent after the process died mid-send:
+        // the chain showed the notes gone and the hash died with the
+        // process, so they carry no txid to be keyed by — only the key
+        // images the intent had claimed. Keyed by those instead, and every
+        // row below that spends one of them takes the record's labels; a
+        // record paired here is not also a "sending" row further down.
+        val recoveredByKi = HashMap<String, SentPayment>()
+        for (r in sendRecords.filter { it.recovered }) {
+            for (k in r.keyImages) recoveredByKi[k] = r
+        }
+        val paired = HashSet<SentPayment>()
         val ourKeyImages = entries.mapNotNull { it.keyImage.takeIf { k -> k.isNotEmpty() } }.toSet()
         val byKeyImage = entries.associateBy { it.keyImage }
 
@@ -412,6 +423,7 @@ object Ledger {
                 val fee = chain?.feePxmr ?: 0L
                 val paid = (spentTotal - received - fee).coerceAtLeast(0L)
                 val rec = sends[txid]
+                    ?: consumedKis.firstNotNullOfOrNull { recoveredByKi[it] }?.also { paired += it }
                 out += Event(
                     txid = txid,
                     height = height,
@@ -487,6 +499,10 @@ object Ledger {
             // version matched on `amount + fee == output`, which is only true
             // when a send produced no change — so it was arithmetic that looked
             // like identification and was wrong in the ordinary case.
+            //
+            // Except by key image, which is identification: a recovered
+            // record names the exact notes its send consumed.
+            val rec = recoveredByKi[e.keyImage]?.also { paired += it }
             out += Event(
                 txid = "",
                 // The output was *created* at e.height and spent later, so its
@@ -494,23 +510,24 @@ object Ledger {
                 // it one block on at least keeps it after its own receipt; the
                 // real height arrives with the transaction.
                 height = 0,
-                timestamp = 0,
+                timestamp = rec?.timestamp ?: 0,
                 direction = Direction.Sent,
-                amountPxmr = e.amountPxmr,
-                feePxmr = 0,
+                amountPxmr = rec?.amountPxmr ?: e.amountPxmr,
+                feePxmr = rec?.feePxmr ?: 0,
                 netPxmr = -e.amountPxmr,
                 balanceAfterPxmr = 0,
-                counterparty = null,
-                address = null,
-                source = Source.Unknown,
-                note = null,
+                counterparty = nameOf(rec?.contactHex),
+                address = rec?.toAddress,
+                source = if (rec != null) Source.OurRecord else Source.Unknown,
+                note = rec?.note,
+                donation = rec?.donation == true,
                 ours = emptyList(),
                 consumed = listOf(e),
                 chain = null,
                 pending = false,
                 locked = false,
                 unlocksInBlocks = 0,
-                unexplained = true,
+                unexplained = rec == null,
                 sortHeight = e.height + 1,
             )
         }
@@ -527,7 +544,7 @@ object Ledger {
         // outright is what made a payment you had just sent, by name, read as a
         // red "Spent, but we cannot say where" until the chain caught up.
         val pendingRecords = sendRecords
-            .filter { it.txidHex.lowercase() !in onChain }
+            .filter { it.txidHex.lowercase() !in onChain && it !in paired }
             .sortedByDescending { it.timestamp }
         val unattributedIdx = out.indices
             .filter { out[it].unexplained }

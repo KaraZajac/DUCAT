@@ -8,6 +8,8 @@
     <string name="main_backup_title">Резервне копіювання</string>
     <string name="main_backup_body">У тебе є контакти, яких немає в останній копії. Відновлення поверне гроші, але не людей.</string>
     <string name="main_open_backup_settings">Відкрити налаштування копій</string>
+    <string name="main_notify_off_title">Сповіщення вимкнено</string>
+    <string name="main_notify_off_body">Телефон не зможе повідомити тобі, коли надійдуть гроші, рахунок або хтось зателефонує. Торкнись, щоб увімкнути.</string>
     <string name="main_recent">Останнє</string>
     <string name="main_see_all">Усе</string>
     <string name="main_card_link_title">Додати контакт?</string>

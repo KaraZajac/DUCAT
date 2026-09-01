@@ -145,6 +145,38 @@ class ContactStore(context: Context) {
     fun update(c: Contact) = add(c)
 
     /**
+     * Replace a record with one derived from what is on disk *now*.
+     *
+     * [add] writes the caller's Contact whole. The claim paths build theirs
+     * from a `prior` read before their network round trips — seconds in
+     * which a poll can advance the inbound counters, or a send the outbound
+     * ones — and writing that snapshot back rewound whichever had moved. A
+     * rewound counter is a thread that stops (§16.12). The lambda sees the
+     * current record, under the lock, and says what replaces it; what it
+     * said is returned, so callers hold what was written, not what they
+     * built.
+     */
+    fun merge(personaHex: String, f: (Contact?) -> Contact): Contact = synchronized(lock) {
+        val current = all().firstOrNull { it.personaHex == personaHex }
+        val next = f(current)
+        save(all().filterNot { it.personaHex == personaHex } + next)
+        next
+    }
+
+    /**
+     * The name this phone calls them, and nothing else — same read-at-write
+     * rule as [advanceOutbound]. The chat screen used to rename by writing its
+     * whole snapshot of the contact back, one keystroke at a time, and a
+     * message landing while the name was being typed had its counters undone
+     * by the next letter.
+     */
+    fun setPetname(personaHex: String, petname: String?) { synchronized(lock) {
+        val c = all().firstOrNull { it.personaHex == personaHex } ?: return
+        if (c.petname == petname) return
+        save(all().filterNot { it.personaHex == personaHex } + c.copy(petname = petname))
+    } }
+
+    /**
      * Advance only the *sending* counters, re-reading first.
      *
      * The chat screen and the responder both used to write the whole record.
@@ -185,11 +217,16 @@ class ContactStore(context: Context) {
     fun expireOld(personaHex: String, afterSecs: Long): Int {
         if (afterSecs <= 0) return 0
         val cutoff = System.currentTimeMillis() / 1000 - afterSecs
-        val kept = thread(personaHex).filter { it.timestamp >= cutoff }
-        val all = thread(personaHex)
-        if (kept.size == all.size) return 0
-        writeThread(personaHex, kept)
-        return all.size - kept.size
+        // Read and write under the one lock: this runs on the poll loop
+        // while the lane appends, and a filtered copy written back over a
+        // thread that grew in between drops the message that just landed.
+        return synchronized(lock) {
+            val all = thread(personaHex)
+            val kept = all.filter { it.timestamp >= cutoff }
+            if (kept.size == all.size) return@synchronized 0
+            writeThread(personaHex, kept)
+            all.size - kept.size
+        }
     }
 
     /**
@@ -209,7 +246,6 @@ class ContactStore(context: Context) {
         if (secs > 0) expireOld(c.personaHex, secs) else 0
     }
 
-    /** Delete one message from this device. */
     /** The half-typed message, per thread. Chat saves it when the screen
      *  is disposed and reads it back on entry; send clears it. */
     fun draftOf(personaHex: String): String =
@@ -222,12 +258,28 @@ class ContactStore(context: Context) {
         }.apply()
     }
 
-    fun deleteMessage(personaHex: String, seq: Long, outgoing: Boolean) {
+    /**
+     * Delete one message from this device.
+     *
+     * Addressed by (seq, timestamp) when the caller has one: a seq is per
+     * mailbox, and a re-claimed card restarts the numbering, so one thread
+     * can hold several messages at the same seq in the same direction.
+     * Without the timestamp, deleting one deleted them all.
+     */
+    fun deleteMessage(
+        personaHex: String,
+        seq: Long,
+        outgoing: Boolean,
+        timestamp: Long? = null,
+    ) { synchronized(lock) {
         writeThread(
             personaHex,
-            thread(personaHex).filterNot { it.seq == seq && it.outgoing == outgoing },
+            thread(personaHex).filterNot {
+                it.seq == seq && it.outgoing == outgoing &&
+                    (timestamp == null || it.timestamp == timestamp)
+            },
         )
-    }
+    } }
 
     private fun writeThread(personaHex: String, msgs: List<StoredMessage>) = synchronized(lock) {
         val arr = JSONArray()
@@ -645,8 +697,13 @@ class ContactStore(context: Context) {
             val o = arr.optJSONObject(i) ?: continue
             val sameTx = m.txidHex != null && !o.isNull("txid") &&
                 o.optString("txid").equals(m.txidHex, ignoreCase = true)
+            // The timestamp beside the seq: a seq is per mailbox, and a
+            // re-claimed card restarts it, so two receipts in one thread can
+            // share a number. A row written before the stamp was checked is
+            // matched the old way rather than captured again.
             val sameMsg = o.optString("hex") == personaHex &&
-                o.optLong("seq", -1L) == m.seq && o.optBoolean("mine") == m.outgoing
+                o.optLong("seq", -1L) == m.seq && o.optBoolean("mine") == m.outgoing &&
+                (!o.has("ts") || o.optLong("ts") == m.timestamp)
             if (sameTx || sameMsg) return
         }
         arr.put(JSONObject().apply {
@@ -1395,7 +1452,14 @@ class ContactStore(context: Context) {
         val e = prefs.edit().putString("prekeys", o.toString())
         // The id lives in exactly one thread's offer; prune it there too, or
         // that head keeps advertising a key that can no longer decrypt.
-        prefs.all.keys.filter { it.startsWith("prekeys_ob_") }.forEach { k ->
+        // The offers are keyed by outbox, and every outbox belongs to a
+        // contact or to a card still waiting to be answered — named from
+        // those rather than found by scanning: `prefs.all` on the encrypted
+        // store decrypts every thread it holds, and this runs once per
+        // inbound message, under the lock.
+        val offers = (all().map { it.myOutbox } + issuedCards().map { it.outboxKey })
+            .filter { it.isNotEmpty() }.distinct().map { "prekeys_ob_$it" }
+        offers.forEach { k ->
             val blob = prefs.getString(k, null) ?: return@forEach
             runCatching {
                 uniffi.ducat_mobile.prunePrekey(unb64(blob), id.toUInt())
@@ -2337,7 +2401,9 @@ class WalletStore(context: Context) {
     companion object {
         /**
          * Guards read-modify-write of the whole output list — the wallet's
-         * record of what it owns. See [mutateEntries].
+         * record of what it owns. See [mutateEntries]. The minor table and
+         * the send-intent / sends lists are read-modify-write of the same
+         * shape (one JSON string, or one counter, per key) and take it too.
          */
         private val walletLock = Any()
     }
@@ -2374,15 +2440,23 @@ class WalletStore(context: Context) {
         }.getOrNull() ?: address()
     }
 
-    /** This contact's minor index, allocated once. */
-    fun minorFor(personaHex: String): Int {
-        prefs.getInt("sub_minor_$personaHex", 0).takeIf { it != 0 }?.let { return it }
+    /**
+     * This contact's minor index, allocated once.
+     *
+     * Under [walletLock]: two threads reaching here for different personas
+     * at once (a claim landing while the pay screen opens) both read the
+     * same `sub_next` and hand two people one address — which is the
+     * linking the minors exist to prevent.
+     */
+    fun minorFor(personaHex: String): Int = synchronized(walletLock) {
+        val have = prefs.getInt("sub_minor_$personaHex", 0)
+        if (have != 0) return@synchronized have
         val next = prefs.getInt("sub_next", 1)
         prefs.edit()
             .putInt("sub_minor_$personaHex", next)
             .putInt("sub_next", next + 1)
             .apply()
-        return next
+        next
     }
 
     /** This contact's minor if one was ever allocated — no allocation here. */
@@ -2393,7 +2467,7 @@ class WalletStore(context: Context) {
     fun subaddressCount(): Int = prefs.getInt("sub_next", 1) - 1
 
     /** A card's minor becomes its claimant's the moment we learn who that is. */
-    fun adoptMinor(cardKey: String, personaHex: String) {
+    fun adoptMinor(cardKey: String, personaHex: String) = synchronized(walletLock) {
         val m = prefs.getInt("sub_minor_$cardKey", 0)
         if (m != 0 && prefs.getInt("sub_minor_$personaHex", 0) == 0) {
             prefs.edit()
@@ -2460,7 +2534,7 @@ class WalletStore(context: Context) {
         contactHex: String?,
         note: String?,
         donation: Boolean = false,
-    ): String {
+    ): String = synchronized(walletLock) {
         val id = java.util.UUID.randomUUID().toString()
         val arr = JSONArray(prefs.getString("send_intents", "[]"))
         arr.put(JSONObject().apply {
@@ -2479,7 +2553,7 @@ class WalletStore(context: Context) {
         // intent behind. The synchronous write costs this IO thread a
         // moment; losing the claim costs the double-pay guard its eyes.
         prefs.edit().putString("send_intents", arr.toString()).commit()
-        return id
+        id
     }
 
     data class SendIntent(
@@ -2514,10 +2588,17 @@ class WalletStore(context: Context) {
      * The send happened: the record, the spent inputs and the intent's
      * removal land in ONE commit, so no death can separate them again.
      * An empty txid is the refreshSpent recovery path — the chain proved
-     * the notes moved but the hash died with the process; the row still
-     * keeps the balance honest, and says so in its note.
+     * the notes moved but the hash died with the process. The row keeps
+     * the balance honest, and carries `recovered` plus the key images it
+     * consumed so a statement can pair it with the chain's Sent event
+     * instead of showing it pending forever (no txid ever confirms).
+     *
+     * Under [walletLock] because the outputs edit is a read-modify-write
+     * of the same list a scan rewrites; it stays one commit rather than
+     * going through [mutateEntries], which would split the record from
+     * the spent marks it must not be separated from.
      */
-    fun resolveSendIntent(id: String, txidHex: String, feePxmr: Long) {
+    fun resolveSendIntent(id: String, txidHex: String, feePxmr: Long) = synchronized(walletLock) {
         val intents = JSONArray(prefs.getString("send_intents", "[]"))
         var found: JSONObject? = null
         val keep = JSONArray()
@@ -2525,7 +2606,7 @@ class WalletStore(context: Context) {
             val o = intents.getJSONObject(i)
             if (o.getString("id") == id) found = o else keep.put(o)
         }
-        val it0 = found ?: return
+        val it0 = found ?: return@synchronized
         val kis = it0.getJSONArray("kis").let { k ->
             (0 until k.length()).map { k.getString(it) }.toSet()
         }
@@ -2537,6 +2618,10 @@ class WalletStore(context: Context) {
             put("note", it0.opt("note") ?: JSONObject.NULL)
             put("ts", System.currentTimeMillis() / 1000)
             if (it0.optBoolean("donate", false)) put("donate", true)
+            if (txidHex.isEmpty()) {
+                put("recovered", true)
+                put("kis", JSONArray(kis.toList()))
+            }
         })
         val outsRaw = prefs.getString("wallet_outputs", null)
         val e = prefs.edit()
@@ -2556,7 +2641,7 @@ class WalletStore(context: Context) {
     }
 
     /** The send provably never happened — the notes come home. */
-    fun dropSendIntent(id: String) {
+    fun dropSendIntent(id: String) { synchronized(walletLock) {
         val intents = JSONArray(prefs.getString("send_intents", "[]"))
         val keep = JSONArray()
         for (i in 0 until intents.length()) {
@@ -2564,7 +2649,7 @@ class WalletStore(context: Context) {
             if (o.getString("id") != id) keep.put(o)
         }
         prefs.edit().putString("send_intents", keep.toString()).commit()
-    }
+    } }
 
     /**
      * Transactions this wallet sent — how to tell our own money from theirs.
@@ -2593,6 +2678,10 @@ class WalletStore(context: Context) {
                 note = if (o.isNull("note")) null else o.optString("note"),
                 timestamp = o.optLong("ts", 0),
                 donation = o.optBoolean("donate", false),
+                recovered = o.optBoolean("recovered", false),
+                keyImages = o.optJSONArray("kis")?.let { k ->
+                    (0 until k.length()).map { k.getString(it) }
+                } ?: emptyList(),
             )
         }
     }
@@ -3012,4 +3101,9 @@ data class SentPayment(
     /** An unprompted payment into a thread born from a `donate` card — the
      *  statement's tax-time filter. Client-local presentation, never wire. */
     val donation: Boolean = false,
+    /** Written by refreshSpent, not by a broadcast: the chain showed the
+     *  notes spent after the process died mid-send, so [txidHex] is empty
+     *  and will never confirm. Pair it by [keyImages] instead. */
+    val recovered: Boolean = false,
+    val keyImages: List<String> = emptyList(),
 )

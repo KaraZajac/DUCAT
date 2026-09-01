@@ -6,6 +6,8 @@
     <string name="sites_empty_body">موقع ducat غرفة مختومة — كل صورة ونمط يسافران في الحزمة، لا نصوص برمجية، وروابط ducat: وحدها تعمل. ألصق عنوانًا لحفظ موقع.</string>
     <string name="sites_add">إضافة موقع</string>
     <string name="sites_add_confirm">إضافة</string>
+    <string name="sites_add_link_title">إضافة هذا الموقع؟</string>
+    <string name="sites_add_link_body">وصل هذا العنوان عبر رابط. الإضافة تحفظه على رفّك؛ لا يُجلب شيء حتى تفتحه.</string>
     <string name="sites_uri_label">عنوان ducat:site/…</string>
     <string name="sites_bad_uri">هذا ليس عنوان ducat:site/.</string>
     <string name="sites_fetching">جارٍ الجلب…</string>

@@ -357,10 +357,51 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     // Applied on open and whenever the thread changes, because nothing else
     // runs while a conversation sits idle.
     LaunchedEffect(version) {
-        val secs = store.disappearAfter(c.personaHex)
-        if (secs > 0 && store.expireOld(c.personaHex, secs) > 0) {
-            messages = store.thread(c.personaHex)
+        // Two thread decrypts and a parse per store bump; off the main thread
+        // like the re-read above, or a long thread stutters on every message.
+        val expired = withContext(Dispatchers.IO) {
+            val secs = store.disappearAfter(c.personaHex)
+            if (secs > 0 && store.expireOld(c.personaHex, secs) > 0) {
+                store.thread(c.personaHex)
+            } else null
         }
+        expired?.let { messages = it }
+    }
+
+    // The one landing for every send that is not the text box: refresh on
+    // success, say what failed otherwise. Called from IO coroutines — the
+    // thread read is a decrypt and a parse. Reactions, unsends and a bill's
+    // decline used to bypass this and swallow their failures whole: the
+    // dialog closed as if the thing had happened, and nothing had.
+    val afterSend: (Result<*>, String?) -> Unit = { r, what ->
+        r.onSuccess { messages = store.thread(c.personaHex) }
+            .onFailure {
+                // Blank counts as missing. `?:` only catches
+                // null, and the throwable that stopped a
+                // picture from sending carried an empty string
+                // instead — so the line above the composer was
+                // set to "" and drew nothing. Picking a photo
+                // looked like picking a photo did nothing at
+                // all: no bubble, no error, no clue.
+                error = moneyFailure(context, it).takeIf {
+                    // The generic sentence is worse than this
+                    // screen's own, which names what failed.
+                    !it.contentEquals(
+                        context.getString(R.string.main_card_link_failed_body),
+                    )
+                } ?: if (what != null) {
+                    context.getString(R.string.chat_could_not_send_the, what)
+                } else context.getString(R.string.chat_could_not_send)
+                // The class name, because an empty message is
+                // exactly the case where the log needs to say
+                // something else.
+                DucatLog.w(
+                    "Chat",
+                    "$what: ${it.javaClass.simpleName}: ${it.message}",
+                )
+            }
+        sending = false
+        sendProgress = null
     }
 
     Scaffold(
@@ -423,9 +464,11 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                             result.onSuccess { updated ->
                                 c = updated
                                 draft = ""
-                                ContactStore(context).saveDraft(c.personaHex, "")
                                 replyTo = null; replyToOwn = false
-                                messages = store.thread(c.personaHex)
+                                messages = withContext(Dispatchers.IO) {
+                                    store.saveDraft(updated.personaHex, "")
+                                    store.thread(updated.personaHex)
+                                }
                             }.onFailure {
                                 // Mapped, not printed. Sending reaches the
                                 // same node as everything else and fails the
@@ -459,39 +502,14 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     var recording by remember { mutableStateOf(false) }
                     var recSecs by remember { mutableStateOf(0) }
                     val recorder = remember { VoiceRecorder(context) }
+                    DisposableEffect(recorder) {
+                        onDispose { (recorder.stop() as? Take.Memo)?.file?.delete() }
+                    }
                     LaunchedEffect(recording) {
                         recSecs = 0
                         while (recording) { kotlinx.coroutines.delay(1000); recSecs++ }
                     }
 
-                    val afterSend: (Result<*>, String) -> Unit = { r, what ->
-                        r.onSuccess { messages = store.thread(c.personaHex) }
-                            .onFailure {
-                                // Blank counts as missing. `?:` only catches
-                                // null, and the throwable that stopped a
-                                // picture from sending carried an empty string
-                                // instead — so the line above the composer was
-                                // set to "" and drew nothing. Picking a photo
-                                // looked like picking a photo did nothing at
-                                // all: no bubble, no error, no clue.
-                                error = moneyFailure(context, it).takeIf {
-                                    // The generic sentence is worse than this
-                                    // screen's own, which names what failed.
-                                    !it.contentEquals(
-                                        context.getString(R.string.main_card_link_failed_body),
-                                    )
-                                } ?: context.getString(R.string.chat_could_not_send_the, what)
-                                // The class name, because an empty message is
-                                // exactly the case where the log needs to say
-                                // something else.
-                                DucatLog.w(
-                                    "Chat",
-                                    "$what: ${it.javaClass.simpleName}: ${it.message}",
-                                )
-                            }
-                        sending = false
-                        sendProgress = null
-                    }
                     // A picture (§16.15): resized, sealed under a fresh key,
                     // parked in its own record, referenced from the message.
                     // The record on the network is noise to everyone but this
@@ -565,7 +583,13 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                             java.io.File(dir, "shot.jpg"),
                         )
                         cameraUri = uri.toString()
-                        takePhoto.launch(uri)
+                        // No camera app at all — a bare phone, or an
+                        // emulator — and launch() throws instead of
+                        // returning ok=false. It took the thread down.
+                        runCatching { takePhoto.launch(uri) }.onFailure {
+                            DucatLog.w("Chat", "camera: ${it.message}")
+                            error = context.getString(R.string.chat_no_camera_app)
+                        }
                     }
                     // Declaring CAMERA in the manifest (the QR scanner needs
                     // it) means even the delegate-to-camera-app intent requires
@@ -715,9 +739,26 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                                         return@detectTapGestures
                                                     }
                                                     recording = true
-                                                    tryAwaitRelease()
-                                                    recording = false
-                                                    when (val take = recorder.stop()) {
+                                                    // The hold ends with the
+                                                    // finger or with the
+                                                    // screen: leaving the
+                                                    // thread mid-press cancels
+                                                    // this coroutine at the
+                                                    // await, and the recorder
+                                                    // kept the microphone until
+                                                    // the process died. Stopped
+                                                    // either way; sent only on
+                                                    // the release.
+                                                    val take = try {
+                                                        tryAwaitRelease()
+                                                        recorder.stop()
+                                                    } catch (e: kotlinx.coroutines.CancellationException) {
+                                                        (recorder.stop() as? Take.Memo)?.file?.delete()
+                                                        throw e
+                                                    } finally {
+                                                        recording = false
+                                                    }
+                                                    when (take) {
                                                         is Take.Memo -> {
                                                             sending = true
                                                             scope.launch(Dispatchers.IO) {
@@ -856,9 +897,19 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     }
 
                     if (contactPick) {
+                        // Read once per open, off the main thread: all() decrypts
+                        // every contact, avatars included, and it sat inside
+                        // composition — re-run on every recomposition while the
+                        // picker was up.
+                        var pickable by remember { mutableStateOf<List<Contact>?>(null) }
+                        LaunchedEffect(version) {
+                            pickable = withContext(Dispatchers.IO) {
+                                store.all().filter { it.personaHex != c.personaHex }
+                                    .sortedBy { it.displayName().lowercase() }
+                            }
+                        }
                         ContactPickDialog(
-                            contacts = store.all().filter { it.personaHex != c.personaHex }
-                                .sortedBy { it.displayName().lowercase() },
+                            contacts = pickable.orEmpty(),
                             // The introduction, done the only way consent
                             // allows: a fresh card of *mine*, dropped into the
                             // thread as a ducat: link, for them to hand to
@@ -1166,27 +1217,31 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
             onPay = { billView = null; payRequest = b },
             onDecline = {
                 billView = null
+                sending = true
                 scope.launch(Dispatchers.IO) {
-                    runCatching {
-                        // A kind-5 Retract naming the bill, not a sentence
-                        // about it. As plain text this told them in words and
-                        // told neither client anything: the bill stayed live on
-                        // both sides, so the screen that had just declined it
-                        // went on offering "Review payment" for it — decline a
-                        // bill and be invited to pay it, one tap away.
-                        //
-                        // `reOwn = false` because the bill is theirs; the
-                        // vendor's own withdrawal (BarTab's cancelTabWithRetract)
-                        // is the same shape with reOwn true.
-                        Mailbox.send(
-                            context, c,
-                            context.getString(
-                                R.string.chat_decline_bill,
-                                Amounts.show(context, b.amountPxmr).primary,
-                            ),
-                            kind = 5, reSeq = b.seq, reOwn = false,
-                        )
-                    }
+                    afterSend(
+                        runCatching {
+                            // A kind-5 Retract naming the bill, not a sentence
+                            // about it. As plain text this told them in words and
+                            // told neither client anything: the bill stayed live on
+                            // both sides, so the screen that had just declined it
+                            // went on offering "Review payment" for it — decline a
+                            // bill and be invited to pay it, one tap away.
+                            //
+                            // `reOwn = false` because the bill is theirs; the
+                            // vendor's own withdrawal (BarTab's cancelTabWithRetract)
+                            // is the same shape with reOwn true.
+                            Mailbox.send(
+                                context, c,
+                                context.getString(
+                                    R.string.chat_decline_bill,
+                                    Amounts.show(context, b.amountPxmr).primary,
+                                ),
+                                kind = 5, reSeq = b.seq, reOwn = false,
+                            )
+                        },
+                        null,
+                    )
                 }
             },
             onClose = { billView = null },
@@ -1223,11 +1278,18 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
             // make, and overwriting it with itself would turn a claim into a
             // choice this person never made.
             initialName = c.petname.orEmpty(),
-            onRename = { store.add(c.copy(petname = it)) },
+            // The name alone, through the store's narrow setter: writing the
+            // screen's whole snapshot back put a stale inSeq over whatever
+            // the poller had accepted while the dialog was open.
+            onRename = { name ->
+                scope.launch(Dispatchers.IO) { store.setPetname(c.personaHex, name) }
+            },
             onPick = { store.setDisappearAfter(c.personaHex, it); settingsOpen = false },
             onClearAll = {
-                store.deleteThread(c.personaHex)
-                messages = emptyList()
+                scope.launch(Dispatchers.IO) {
+                    store.deleteThread(c.personaHex)
+                    messages = emptyList()
+                }
                 settingsOpen = false
             },
             onDismiss = { settingsOpen = false },
@@ -1252,19 +1314,19 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                     modifier = Modifier
                                         .clickable {
                                             confirmDelete = null
+                                            sending = true
                                             scope.launch(Dispatchers.IO) {
-                                                runCatching {
-                                                    Mailbox.send(
-                                                        context, c, emo,
-                                                        kind = 4,
-                                                        reSeq = m.seq,
-                                                        reOwn = m.outgoing,
-                                                    )
-                                                }.onSuccess {
-                                                    messages = store.thread(c.personaHex)
-                                                }.onFailure {
-                                                    DucatLog.w("Chat", "react: ${it.message}")
-                                                }
+                                                afterSend(
+                                                    runCatching {
+                                                        Mailbox.send(
+                                                            context, c, emo,
+                                                            kind = 4,
+                                                            reSeq = m.seq,
+                                                            reOwn = m.outgoing,
+                                                        )
+                                                    },
+                                                    context.getString(R.string.chat_what_reaction),
+                                                )
                                             }
                                         }
                                         .padding(4.dp),
@@ -1295,8 +1357,9 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     ) {
                         TextButton(onClick = {
                             confirmDelete = null
-                            scope.launch {
-                                withContext(Dispatchers.IO) {
+                            sending = true
+                            scope.launch(Dispatchers.IO) {
+                                afterSend(
                                     runCatching {
                                         // The sentence, not the words being taken
                                         // back: chat_retract_with_quote exists so a
@@ -1312,11 +1375,9 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                             context.getString(R.string.chat_unsent),
                                             kind = 5, reSeq = m.seq, reOwn = true,
                                         )
-                                    }.onFailure {
-                                        DucatLog.w("Chat", "unsend: ${it.message}")
-                                    }
-                                }
-                                messages = store.thread(c.personaHex)
+                                    },
+                                    null,
+                                )
                             }
                         }) { Text(stringResource(R.string.chat_unsend)) }
                     }
@@ -1333,8 +1394,9 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     ) {
                         TextButton(onClick = {
                             confirmDelete = null
-                            scope.launch {
-                                withContext(Dispatchers.IO) {
+                            sending = true
+                            scope.launch(Dispatchers.IO) {
+                                afterSend(
                                     runCatching {
                                         Mailbox.send(
                                             context, c,
@@ -1344,11 +1406,9 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                             ),
                                             kind = 5, reSeq = m.seq, reOwn = true,
                                         )
-                                    }.onFailure {
-                                        DucatLog.w("Chat", "cancel bill: ${it.message}")
-                                    }
-                                }
-                                messages = withContext(Dispatchers.IO) { store.thread(c.personaHex) }
+                                    },
+                                    null,
+                                )
                             }
                         }) { Text(stringResource(R.string.chat_cancel_request)) }
                     }
@@ -1369,9 +1429,15 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         confirmDelete = null
                     }) { Text(stringResource(R.string.chat_reply)) }
                     TextButton(onClick = {
-                        store.deleteMessage(c.personaHex, m.seq, m.outgoing)
-                        messages = store.thread(c.personaHex)
                         confirmDelete = null
+                        scope.launch(Dispatchers.IO) {
+                            // With the timestamp: seq restarts on every
+                            // re-claimed card, so a thread can hold several
+                            // messages at this number and only this one is
+                            // being deleted.
+                            store.deleteMessage(c.personaHex, m.seq, m.outgoing, m.timestamp)
+                            messages = store.thread(c.personaHex)
+                        }
                     }) {
                         Text(
                             stringResource(R.string.chat_delete),
@@ -1412,6 +1478,10 @@ private fun ChatSettingsDialog(
         604_800L to stringResource(R.string.chat_1_week),
     )
     var confirmClear by remember { mutableStateOf(false) }
+    // The name is committed once, on the way out by any door — not per
+    // keystroke, which was a store write and a full thread re-read per letter.
+    var name by remember { mutableStateOf(initialName) }
+    val commitName = { onRename(name.trim().ifBlank { null }) }
 
     // Clearing a thread is unrecoverable and one tap from a settings sheet is
     // too close to it, so the tap opens a confirm rather than doing the delete.
@@ -1423,7 +1493,7 @@ private fun ChatSettingsDialog(
                 Text(stringResource(R.string.chat_clear_confirm_text))
             },
             confirmButton = {
-                TextButton(onClick = { confirmClear = false; onClearAll() }) {
+                TextButton(onClick = { confirmClear = false; commitName(); onClearAll() }) {
                     Text(
                         stringResource(R.string.chat_clear),
                         color = MaterialTheme.colorScheme.error,
@@ -1439,7 +1509,7 @@ private fun ChatSettingsDialog(
     }
 
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = { commitName(); onDismiss() },
         title = { Text(stringResource(R.string.chat_conversation_title)) },
         text = {
             Column {
@@ -1447,10 +1517,9 @@ private fun ChatSettingsDialog(
                 // notice you cannot tell who they are. It lived only under
                 // drawer → Contacts → the person → Profile, which is a long
                 // way to go to fix a row that says "Unnamed contact".
-                var name by remember { mutableStateOf(initialName) }
                 OutlinedTextField(
                     value = name,
-                    onValueChange = { if (it.length <= 32) { name = it; onRename(it.trim().ifBlank { null }) } },
+                    onValueChange = { if (it.length <= 32) name = it },
                     label = { Text(stringResource(R.string.chat_their_name_label)) },
                     supportingText = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1468,11 +1537,12 @@ private fun ChatSettingsDialog(
                 )
                 Spacer(Modifier.height(8.dp))
                 options.forEach { (secs, label) ->
+                    val pick = { commitName(); onPick(secs) }
                     Row(
-                        Modifier.fillMaxWidth().clickable { onPick(secs) }.padding(vertical = 6.dp),
+                        Modifier.fillMaxWidth().clickable { pick() }.padding(vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        RadioButton(selected = current == secs, onClick = { onPick(secs) })
+                        RadioButton(selected = current == secs, onClick = { pick() })
                         Spacer(Modifier.width(8.dp))
                         Text(label)
                     }
@@ -1494,7 +1564,9 @@ private fun ChatSettingsDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.chat_done)) }
+            TextButton(onClick = { commitName(); onDismiss() }) {
+                Text(stringResource(R.string.chat_done))
+            }
         },
     )
 }
@@ -1684,9 +1756,24 @@ private fun Bubble(
                             val fetchingThis = fetchingHash == att
                             val voice = mime.startsWith("audio/") &&
                                 m.attLen <= AUTO_FETCH_AUDIO_BYTES
-                            if (voice) {
-                                LaunchedEffect(att) {
+                            // The fetch's own account of why the file is not
+                            // here — the record road reads it below; this road
+                            // wrote it and never looked, so a dead share or a
+                            // full phone kept "Downloading audio…" and a moving
+                            // bar on screen for the life of the thread.
+                            val v by ContactStore.changes.collectAsState()
+                            val state = remember(att, v) { Mailbox.attachmentState(ctx, att) }
+                            val coming = state == Mailbox.AttachmentState.COMING
+                            if (voice && coming) {
+                                // Keyed on the store version too: the fetch
+                                // bumps it as it ends, so a failed try is
+                                // followed by another, a little later, until
+                                // the count says stop. Once per bubble, as it
+                                // was, meant one bad try was the last.
+                                val firstV = remember(att) { v }
+                                LaunchedEffect(att, v) {
                                     kotlinx.coroutines.withContext(Dispatchers.IO) {
+                                        if (v != firstV) kotlinx.coroutines.delay(15_000)
                                         // One swarm fetch at a time; a second
                                         // voicemail waits its turn politely.
                                         while (true) {
@@ -1703,10 +1790,18 @@ private fun Bubble(
                             }
                             Column {
                                 Text(
-                                    if (voice) {
-                                        stringResource(R.string.chat_downloading_audio)
-                                    } else {
-                                        "📎 ${m.attName ?: stringResource(R.string.chat_file_fallback)}"
+                                    when {
+                                        state == Mailbox.AttachmentState.NO_SPACE ->
+                                            stringResource(R.string.chat_att_no_space)
+                                        // Not chat_att_stuck: that one ends
+                                        // "still trying", and here the trying
+                                        // has stopped — the button is the retry.
+                                        voice && !coming ->
+                                            stringResource(R.string.chat_att_gone)
+                                        voice ->
+                                            stringResource(R.string.chat_downloading_audio)
+                                        else ->
+                                            "📎 ${m.attName ?: stringResource(R.string.chat_file_fallback)}"
                                     },
                                     color = fg,
                                 )
@@ -1717,7 +1812,7 @@ private fun Bubble(
                                     style = MaterialTheme.typography.labelSmall,
                                 )
                                 Spacer(Modifier.height(6.dp))
-                                if (fetchingThis || voice) {
+                                if (fetchingThis || (voice && coming)) {
                                     var p by remember {
                                         mutableStateOf<org.ducatproject.ducat.Swarm.Progress?>(null)
                                     }
@@ -1742,11 +1837,18 @@ private fun Bubble(
                                     }
                                 } else {
                                     val scope2 = rememberCoroutineScope()
-                                    OutlinedButton(onClick = {
-                                        scope2.launch(Dispatchers.IO) {
-                                            Mailbox.fetchSwarmAttachment(ctx, m)
-                                        }
-                                    }) {
+                                    // Greyed while another download holds the
+                                    // gate: the fetch refuses a second one
+                                    // without a word, and a button that
+                                    // swallows the tap looks broken.
+                                    OutlinedButton(
+                                        enabled = fetchingHash == null,
+                                        onClick = {
+                                            scope2.launch(Dispatchers.IO) {
+                                                runCatching { Mailbox.fetchSwarmAttachment(ctx, m) }
+                                            }
+                                        },
+                                    ) {
                                         Text(stringResource(R.string.chat_download_file))
                                     }
                                 }
@@ -2250,6 +2352,11 @@ private fun shortLink(url: String): String {
 @Composable
 private fun AudioBubble(file: java.io.File, fg: androidx.compose.ui.graphics.Color) {
     var playing by remember { mutableStateOf(false) }
+    // A memo that will not play said nothing: the tap did nothing and the
+    // button stayed a play button. Now the failure has a sentence — and one
+    // partway through playback (the decoder giving up on a bad file) flips
+    // the icon back instead of leaving a stop button over silence.
+    var failed by remember { mutableStateOf(false) }
     val player = remember { android.media.MediaPlayer() }
     DisposableEffect(Unit) { onDispose { runCatching { player.release() } } }
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -2258,13 +2365,25 @@ private fun AudioBubble(file: java.io.File, fg: androidx.compose.ui.graphics.Col
                 runCatching { player.stop() }
                 playing = false
             } else {
+                failed = false
                 runCatching {
                     player.reset()
                     player.setDataSource(file.absolutePath)
                     player.setOnCompletionListener { playing = false }
-                    player.prepare()
-                    player.start()
+                    player.setOnErrorListener { _, what, extra ->
+                        DucatLog.w("Chat", "play memo: error $what/$extra")
+                        playing = false; failed = true
+                        true
+                    }
+                    // Async: prepare() reads and probes the file on the
+                    // thread that called it, which was the main one.
+                    player.setOnPreparedListener { if (playing) it.start() }
+                    player.prepareAsync()
                 }.onSuccess { playing = true }
+                    .onFailure {
+                        DucatLog.w("Chat", "play memo: ${it.message}")
+                        failed = true
+                    }
             }
         }) {
             Icon(
@@ -2274,10 +2393,17 @@ private fun AudioBubble(file: java.io.File, fg: androidx.compose.ui.graphics.Col
                 tint = fg,
             )
         }
-        Text(
-            stringResource(R.string.chat_voice_memo),
-            color = fg, style = MaterialTheme.typography.bodyMedium,
-        )
+        Column {
+            Text(
+                stringResource(R.string.chat_voice_memo),
+                color = fg, style = MaterialTheme.typography.bodyMedium,
+            )
+            if (failed) Text(
+                stringResource(R.string.chat_play_failed),
+                color = fg.copy(alpha = 0.8f),
+                style = MaterialTheme.typography.labelSmall,
+            )
+        }
     }
 }
 
@@ -2623,25 +2749,35 @@ private class VoiceRecorder(private val context: android.content.Context) {
     private var file: java.io.File? = null
     private var startedAt = 0L
 
-    fun start(): Boolean = runCatching {
+    fun start(): Boolean {
+        // A press that lands while a take is still rolling — the last hold
+        // ended without its release being seen — would have dropped that
+        // recorder on the floor with the microphone still open.
+        if (rec != null) (stop() as? Take.Memo)?.file?.delete()
         val f = voiceMemoFile(context)
         @Suppress("DEPRECATION")
         val r = android.media.MediaRecorder()
-        r.setAudioSource(android.media.MediaRecorder.AudioSource.MIC)
-        r.setOutputFormat(android.media.MediaRecorder.OutputFormat.MPEG_4)
-        r.setAudioEncoder(android.media.MediaRecorder.AudioEncoder.AAC)
-        r.setAudioEncodingBitRate(32_000)
-        r.setAudioSamplingRate(44_100)
-        r.setOutputFile(f.absolutePath)
-        r.prepare()
-        r.start()
-        rec = r
-        file = f
-        startedAt = System.currentTimeMillis()
-    }.onFailure {
-        DucatLog.w("Chat", "recorder: ${it.message}")
-        rec?.release(); rec = null
-    }.isSuccess
+        return runCatching {
+            r.setAudioSource(android.media.MediaRecorder.AudioSource.MIC)
+            r.setOutputFormat(android.media.MediaRecorder.OutputFormat.MPEG_4)
+            r.setAudioEncoder(android.media.MediaRecorder.AudioEncoder.AAC)
+            r.setAudioEncodingBitRate(32_000)
+            r.setAudioSamplingRate(44_100)
+            r.setOutputFile(f.absolutePath)
+            r.prepare()
+            r.start()
+            rec = r
+            file = f
+            startedAt = System.currentTimeMillis()
+        }.onFailure {
+            DucatLog.w("Chat", "recorder: ${it.message}")
+            // The one just built, not the field: `rec` was still null
+            // here, so the failed recorder — and the empty file it had
+            // opened — were never let go.
+            runCatching { r.release() }
+            f.delete()
+        }.isSuccess
+    }
 
     fun stop(): Take {
         val r = rec ?: return Take.Failed

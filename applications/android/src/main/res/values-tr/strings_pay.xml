@@ -62,6 +62,7 @@
     <string name="pay_fee_unknown">şu an bilinmiyor</string>
     <string name="pay_fee_unknown_confirm">Ücret şu an tahmin edilemedi. İşlem, oluşturulurken ne tutuyorsa onu öder.</string>
     <string name="pay_node_no_answer">Monero düğümü zamanında yanıt vermedi. Hiçbir şey gönderilmedi. Tekrar dene — uygulama başka bir düğüm kullanacak.</string>
+    <string name="pay_send_interrupted">Uygulama ödemenin ortasında kapandı. Yeniden ödemeden önce hesap dökümünü kontrol et.</string>
     <string name="pay_not_enough">Yeterli kullanılabilir bakiye yok — %1$s var, ağ ücretiyle birlikte %2$s gerekiyor.</string>
     <string name="pay_offline">Henüz bağlı değil — bu telefon ağa katılmayı bitirmedi. Hiçbir şey gönderilmedi; birazdan tekrar deneyin.</string>
     <string name="pay_node_unreachable">Hiçbir Monero düğümüne ulaşılamadı. Hiçbir şey gönderilmedi — bağlantını kontrol edip tekrar dene.</string>

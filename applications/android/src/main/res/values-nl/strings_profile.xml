@@ -44,6 +44,9 @@
     <string name="profile_bond_releasing">Terughalen — wachten op hun medeondertekening…</string>
     <string name="profile_bond_cosigned">Medeondertekend — uitzenden is aan hen.</string>
     <string name="profile_bond_released">Borg terug ✓</string>
+    <string name="profile_bond_call_off">Borg afblazen</string>
+    <string name="profile_bond_holds">de escrow bevat %1$s — geef in plaats daarvan de borg terug</string>
+    <string name="profile_bond_called_off">Borg afgeblazen.</string>
     <string name="profile_bond_txid">Terugave-transactie</string>
     <string name="profile_bond_arbiter_q">Wie houdt de derde sleutel?</string>
     <string name="profile_bond_arbiter_note">Met een arbiter volstaan twee van de drie sleutels om de borg te verplaatsen: een verloren telefoon zet niets vast en een geschil kan ergens heen. De arbiter alleen kan niets pakken.</string>

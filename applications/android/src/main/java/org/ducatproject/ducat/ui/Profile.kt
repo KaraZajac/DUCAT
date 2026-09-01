@@ -503,6 +503,57 @@ private fun BondSection(c: Contact) {
                 if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
                 else Text(stringResource(R.string.profile_bond_release))
             }
+            // A bond nobody ever paid into. "Return the deposit" is the only
+            // way off this screen and it fails against an empty address, so a
+            // built-and-abandoned bond sat here for good — and, being the
+            // newest record with this contact, hid the button for the next
+            // one. Ceremony.callOff is the ending, but its own guard reads
+            // markers only a ride writes; a bond is funded by an ordinary
+            // send to the address and records nothing, so the chain is asked
+            // first, the way onAbort asks it, and an address that cannot be
+            // read is not called empty.
+            TextButton(
+                enabled = !busy,
+                contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
+                onClick = {
+                    val o = ceremony ?: return@TextButton
+                    val idHex = o.optString("id")
+                    busy = true; error = null
+                    scope.launch {
+                        val held = withContext(Dispatchers.IO) {
+                            runCatching {
+                                val keys = org.ducatproject.ducat.hexToBytes(o.optString("keys"))
+                                    ?: throw IllegalStateException("this device holds no key share")
+                                val nodeUrl = org.ducatproject.ducat.NodeStore(context).lastGood()
+                                    ?: runCatching {
+                                        uniffi.ducat_mobile.moneroPickNode(
+                                            uniffi.ducat_mobile.moneroDefaultNodes(null), "stagenet", 8000u,
+                                        ).url
+                                    }.getOrNull()
+                                    ?: throw org.ducatproject.ducat.Ceremony.NoNode()
+                                val from = o.optLong("scanFrom").takeIf { it > 0 }
+                                    ?: org.ducatproject.ducat.WalletStore(context).restoreHeight().toLong()
+                                val bal = uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
+                                if (bal == 0L) org.ducatproject.ducat.Ceremony.callOff(context, idHex)
+                                bal
+                            }
+                        }
+                        held.onSuccess { bal ->
+                            if (bal > 0) error = context.getString(
+                                R.string.profile_bond_holds,
+                                org.ducatproject.ducat.Amounts.show(context, bal).primary,
+                            )
+                        }.onFailure {
+                            org.ducatproject.ducat.DucatLog.w(
+                                "Profile",
+                                "call off: ${it.javaClass.simpleName}: ${it.message}",
+                            )
+                            error = moneyFailure(context, it)
+                        }
+                        busy = false
+                    }
+                },
+            ) { Text(stringResource(R.string.profile_bond_call_off)) }
             error?.let {
                 Spacer(Modifier.height(4.dp))
                 Text(
@@ -583,6 +634,34 @@ private fun BondSection(c: Contact) {
             )
             // A returned deposit is a finished story, not a closed door —
             // the next bond starts from right here.
+            Spacer(Modifier.height(8.dp))
+            Button(
+                enabled = !busy,
+                onClick = {
+                    val hasOthers = ContactStore(context).all()
+                        .any { it.personaHex != c.personaHex }
+                    if (hasOthers) choosingArbiter = true else post(null)
+                },
+            ) {
+                if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                else Text(stringResource(R.string.profile_bond_post))
+            }
+            error?.let {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    stringResource(R.string.profile_bond_failed, it),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        }
+        // Called off, by either side. Like "released", an ending and not a
+        // door: the fallthrough below showed the dead escrow's address with
+        // no button, and the next bond had nowhere to start.
+        "aborted" -> {
+            Text(stringResource(R.string.profile_bond_called_off),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.height(8.dp))
             Button(
                 enabled = !busy,

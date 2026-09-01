@@ -8,6 +8,8 @@
     <string name="main_backup_title">バックアップ</string>
     <string name="main_backup_body">前回のバックアップに入っていない連絡先があります。今復元すると、お金は戻っても人は戻りません。</string>
     <string name="main_open_backup_settings">バックアップ設定を開く</string>
+    <string name="main_notify_off_title">通知がオフです</string>
+    <string name="main_notify_off_body">お金や請求が届いたり、誰かが電話をかけてきても、この電話は知らせることができません。タップしてオンにしてください。</string>
     <string name="main_recent">最近</string>
     <string name="main_see_all">すべて見る</string>
     <string name="main_card_link_title">連絡先を追加しますか？</string>

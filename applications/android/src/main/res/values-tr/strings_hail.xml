@@ -103,4 +103,7 @@
     <string name="hail_search">Ara</string>
     <string name="hail_clear_place">Temizle</string>
     <string name="hail_joining_network">Ağa katılıyor — panolar henüz okunmadı.</string>
+    <string name="hail_accept_sending">Evet cevabın %1$s kişisine gönderiliyor…</string>
+    <string name="hail_accept_failed">%1$s kişisine evet cevabın gönderilemedi. Ağı kontrol et ve teklifi yeniden aç.</string>
+    <string name="hail_escrow_failed">Ücret emanete konulamadı. Sürücüyle sohbette hallet.</string>
 </resources>

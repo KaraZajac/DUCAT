@@ -103,4 +103,7 @@
     <string name="hail_search">Cerca</string>
     <string name="hail_clear_place">Cancella</string>
     <string name="hail_joining_network">Connessione alla rete: le bacheche non sono ancora state lette.</string>
+    <string name="hail_accept_sending">Sto dicendo di sì a %1$s…</string>
+    <string name="hail_accept_failed">Il tuo sì a %1$s non è partito. Controlla la rete e riapri l\'offerta.</string>
+    <string name="hail_escrow_failed">La tariffa non è stata messa in garanzia. Chiariscilo con l\'autista in chat.</string>
 </resources>

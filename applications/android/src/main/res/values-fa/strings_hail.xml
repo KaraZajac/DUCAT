@@ -103,4 +103,7 @@
     <string name="hail_search">جستجو</string>
     <string name="hail_clear_place">پاک کردن</string>
     <string name="hail_joining_network">در حال پیوستن به شبکه — هنوز تابلوها خوانده نشده‌اند.</string>
+    <string name="hail_accept_sending">در حال اعلام موافقت به %1$s…</string>
+    <string name="hail_accept_failed">موافقتت به %1$s فرستاده نشد. شبکه را بررسی کن و پیشنهاد را دوباره ببین.</string>
+    <string name="hail_escrow_failed">کرایه به امانت گذاشته نشد. با راننده در گفتگو حلش کن.</string>
 </resources>

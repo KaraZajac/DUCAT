@@ -8,6 +8,8 @@
     <string name="main_backup_title">Fazer backup</string>
     <string name="main_backup_body">Você tem contatos que seu último backup não tem. Uma restauração traria de volta o dinheiro, mas não as pessoas.</string>
     <string name="main_open_backup_settings">Abrir configurações de backup</string>
+    <string name="main_notify_off_title">As notificações estão desligadas</string>
+    <string name="main_notify_off_body">O telefone não consegue avisar você quando chega dinheiro, uma conta ou uma chamada. Toque para ligá-las.</string>
     <string name="main_recent">Recentes</string>
     <string name="main_see_all">Ver tudo</string>
     <string name="main_card_link_title">Adicionar um contacto?</string>

@@ -103,4 +103,7 @@
     <string name="hail_search">ค้นหา</string>
     <string name="hail_clear_place">ล้าง</string>
     <string name="hail_joining_network">กำลังเข้าร่วมเครือข่าย — ยังไม่ได้อ่านกระดาน</string>
+    <string name="hail_accept_sending">กำลังตอบตกลง %1$s…</string>
+    <string name="hail_accept_failed">คำตอบตกลงถึง %1$s ส่งไม่สำเร็จ ตรวจสอบเครือข่ายแล้วเปิดข้อเสนออีกครั้ง</string>
+    <string name="hail_escrow_failed">ไม่สามารถวางค่าโดยสารไว้ในเอสโครว์ได้ ตกลงกับคนขับในแชท</string>
 </resources>

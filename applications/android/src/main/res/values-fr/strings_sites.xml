@@ -6,6 +6,8 @@
     <string name="sites_empty_body">Un site ducat est une pièce scellée — chaque image et style voyage dans le paquet, pas de scripts, et seuls les liens ducat: fonctionnent. Collez une adresse pour en garder un.</string>
     <string name="sites_add">Ajouter un site</string>
     <string name="sites_add_confirm">Ajouter</string>
+    <string name="sites_add_link_title">Ajouter ce site ?</string>
+    <string name="sites_add_link_body">Cette adresse est arrivée par un lien. L\'ajouter la range sur ton étagère ; rien n\'est téléchargé tant que tu ne l\'ouvres pas.</string>
     <string name="sites_uri_label">adresse ducat:site/…</string>
     <string name="sites_bad_uri">Ce n\'est pas une adresse ducat:site/.</string>
     <string name="sites_fetching">Récupération…</string>

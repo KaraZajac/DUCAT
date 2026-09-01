@@ -8,6 +8,8 @@
     <string name="main_backup_title">Sao lưu</string>
     <string name="main_backup_body">Bạn có những liên hệ mà bản sao lưu gần nhất chưa có. Khôi phục sẽ lấy lại tiền nhưng không lấy lại người.</string>
     <string name="main_open_backup_settings">Mở cài đặt sao lưu</string>
+    <string name="main_notify_off_title">Thông báo đang tắt</string>
+    <string name="main_notify_off_body">Điện thoại không thể báo cho bạn khi có tiền về, có hóa đơn hay có người gọi. Chạm để bật.</string>
     <string name="main_recent">Gần đây</string>
     <string name="main_see_all">Xem tất cả</string>
     <string name="main_card_link_title">Thêm liên hệ?</string>

@@ -313,7 +313,7 @@ object Groups {
         val personas = PersonaStore(context)
         val ours = personas.allHexes()
         val store = ContactStore(context)
-        val keep = JSONArray()
+        val landed = ArrayList<JSONObject>()
         for (i in 0 until arr.length()) {
             val o = arr.getJSONObject(i)
             val c = store.all().firstOrNull { it.personaHex == o.getString("m") }
@@ -330,7 +330,7 @@ object Groups {
                         groupSeq = o.getLong("s"),
                     )
                 }.isSuccess
-                if (!ok) keep.put(o)
+                if (ok) landed.add(o)
                 continue
             }
             val ok = c != null && runCatching {
@@ -343,10 +343,26 @@ object Groups {
                     groupReSeq = if (o.has("rq")) o.getLong("rq") else null,
                 )
             }.isSuccess
-            if (!ok) keep.put(o)
-            else DucatLog.i(TAG, "group retry landed for ${o.getString("m").take(8)}…")
+            if (ok) {
+                landed.add(o)
+                DucatLog.i(TAG, "group retry landed for ${o.getString("m").take(8)}…")
+            }
         }
+        if (landed.isEmpty()) return
+        // Struck from the queue as it stands now, not the snapshot replayed:
+        // the sends above take as long as the network does, and a message
+        // that failed to a member meanwhile queued itself behind the
+        // snapshot — writing the snapshot back dropped it.
+        fun same(a: JSONObject, b: JSONObject) =
+            a.optString("g") == b.optString("g") && a.optString("m") == b.optString("m") &&
+                a.optLong("s") == b.optLong("s") && a.optBoolean("roster") == b.optBoolean("roster")
         synchronized(lock) {
+            val cur = retries(context)
+            val keep = JSONArray()
+            for (i in 0 until cur.length()) {
+                val o = cur.getJSONObject(i)
+                if (landed.none { same(it, o) }) keep.put(o)
+            }
             prefs(context).edit().putString("retry", keep.toString()).apply()
         }
     }

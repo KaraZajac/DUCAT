@@ -44,6 +44,9 @@
     <string name="profile_bond_releasing">Đang hoàn lại — chờ chữ ký của bên kia…</string>
     <string name="profile_bond_cosigned">Đã ký — việc phát đi thuộc về bên kia.</string>
     <string name="profile_bond_released">Đã hoàn tiền ký quỹ ✓</string>
+    <string name="profile_bond_call_off">Hủy tiền cược</string>
+    <string name="profile_bond_holds">ký quỹ đang giữ %1$s — hãy hoàn lại tiền đặt cọc thay vào đó</string>
+    <string name="profile_bond_called_off">Đã hủy tiền cược.</string>
     <string name="profile_bond_txid">Giao dịch hoàn trả</string>
     <string name="profile_bond_arbiter_q">Ai giữ chìa khóa thứ ba?</string>
     <string name="profile_bond_arbiter_note">Có trọng tài, hai trong ba khóa là đủ để chuyển khoản tiền: mất điện thoại không kẹt gì, tranh chấp có nơi phân xử. Một mình trọng tài không lấy được gì.</string>

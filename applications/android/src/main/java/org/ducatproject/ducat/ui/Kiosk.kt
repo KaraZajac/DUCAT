@@ -354,6 +354,20 @@ private fun PayPanel(order: Orders.Order, onDone: () -> Unit) {
         onDispose { org.ducatproject.ducat.nfc.Tap.offered = null }
     }
 
+    // Bound, and the bill still owed. Orders.bind commits the tab to the
+    // order before the send, so a node that is down at that moment leaves a
+    // settled tab in the store, an order that reads as billed, and a
+    // customer holding nothing — the tab's billSeq is what settle writes
+    // only after the send, so it is the record that knows. Re-derived from
+    // the store on every bump, so the panel below stops claiming the bill
+    // was sent the moment it learns otherwise, and the loop knows to bill
+    // again through the SAME tab rather than open a second one.
+    val version by ContactStore.changes.collectAsState()
+    val owed = remember(order.tabId, version) {
+        order.tabId?.let { TabStore(context).get(it) }
+            ?.takeIf { it.state in setOf("open", "settled") && it.billSeq < 0 }
+    }
+
     // Claim → contact → bill.
     //
     // The loop condition reads the *store*, not the `order` this composable
@@ -363,13 +377,33 @@ private fun PayPanel(order: Orders.Order, onDone: () -> Unit) {
     // ever after a successful bind, and the loop went round again: another
     // tab, another bill, and a customer watching their phone fill up with
     // them. The stored record is the one that knows this sale is done.
-    LaunchedEffect(cardInbox) {
-        val inbox = cardInbox ?: return@LaunchedEffect
+    //
+    // Keyed on the order as well as the card: a rebuilt screen with an
+    // order already bound issues no card, and the bill it may still owe
+    // has to be sent from here regardless.
+    LaunchedEffect(order.id, cardInbox) {
         while (true) {
             val current = withContext(Dispatchers.IO) {
                 Orders.all(context).firstOrNull { it.id == order.id }
             } ?: return@LaunchedEffect
+            // The bill that did not go, sent again through the tab bind
+            // already opened. A bind failure used to fall through to the
+            // exit below and the panel said "sent to your phone" over a
+            // bill nobody had received.
+            val unbilled = withContext(Dispatchers.IO) {
+                current.tabId?.let { TabStore(context).get(it) }
+            }?.takeIf { it.state in setOf("open", "settled") && it.billSeq < 0 }
+            if (unbilled != null) {
+                withContext(Dispatchers.IO) { runCatching { TabStore(context).settle(unbilled) } }
+                    .onSuccess { error = null }
+                    .onFailure {
+                        error = moneyFailure(context, it)
+                        kotlinx.coroutines.delay(5_000)
+                    }
+                continue
+            }
             if (!current.unpaired) return@LaunchedEffect
+            val inbox = cardInbox ?: return@LaunchedEffect
             val who = withContext(Dispatchers.IO) {
                 runCatching {
                     Mailbox.collectClaims(context)
@@ -381,6 +415,7 @@ private fun PayPanel(order: Orders.Order, onDone: () -> Unit) {
                 continue
             }
             withContext(Dispatchers.IO) { runCatching { Orders.bind(context, current, who) } }
+                .onSuccess { error = null }
                 .onFailure {
                     // A claim that has landed stays landed, so without a wait
                     // here a node that is down turns this into a spin: bind,
@@ -407,7 +442,22 @@ private fun PayPanel(order: Orders.Order, onDone: () -> Unit) {
             onFallback = { fallback = true },
         )
     }
-    BilledPanel(order = order, onDone = onDone)
+    BilledPanel(
+        order = order,
+        owed = owed != null,
+        error = error,
+        onDone = onDone,
+        // Giving up on a bill that never went: the tab is closed without a
+        // notice (there is no bill on their phone to withdraw) and the order
+        // reads as walked away, instead of a settled tab left behind to be
+        // matched by the next payment of that size from this customer.
+        onGiveUp = {
+            owed?.let { tab ->
+                TabStore(context).mutate(tab.id) { it.copy(state = "cancelled") }
+            }
+            onDone()
+        },
+    )
 }
 
 /** How long a sale card stays claimable. Two hours outlasts any queue. */
@@ -453,9 +503,21 @@ internal fun PairPanel(
     }
 }
 
-/** Billed into their conversation; the rest happens on their phone. */
+/**
+ * Billed into their conversation; the rest happens on their phone.
+ *
+ * [owed] is the bill that has not left yet — paired, tab open, node not
+ * answering — and the panel says so instead of "sent", with the reason under
+ * it and a way for staff to give the order up.
+ */
 @Composable
-internal fun BilledPanel(order: Orders.Order, onDone: () -> Unit) {
+internal fun BilledPanel(
+    order: Orders.Order,
+    onDone: () -> Unit,
+    owed: Boolean = false,
+    error: String? = null,
+    onGiveUp: () -> Unit = onDone,
+) {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
     val state = remember(order.id, version) { Orders.stateOf(context, order) }
@@ -464,39 +526,64 @@ internal fun BilledPanel(order: Orders.Order, onDone: () -> Unit) {
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Icon(
-            Icons.Filled.Check, null, Modifier.size(48.dp),
-            tint = MaterialTheme.ducat.settled,
-        )
-        Spacer(Modifier.height(8.dp))
-        Text(
-            stringResource(R.string.kiosk_bill_sent),
-            style = MaterialTheme.typography.headlineSmall,
-            textAlign = TextAlign.Center,
-        )
-        Spacer(Modifier.height(4.dp))
-        Text(
-            stringResource(R.string.kiosk_bill_sent_note),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
+        if (owed) {
+            CatSpinner(Modifier.size(48.dp), tint = MaterialTheme.colorScheme.primary)
+            Spacer(Modifier.height(8.dp))
+            Text(
+                stringResource(R.string.kiosk_bill_sending),
+                style = MaterialTheme.typography.headlineSmall,
+                textAlign = TextAlign.Center,
+            )
+            error?.let {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    stringResource(R.string.kiosk_bill_not_sent, it),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    textAlign = TextAlign.Center,
+                )
+            }
+        } else {
+            Icon(
+                Icons.Filled.Check, null, Modifier.size(48.dp),
+                tint = MaterialTheme.ducat.settled,
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                stringResource(R.string.kiosk_bill_sent),
+                style = MaterialTheme.typography.headlineSmall,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                stringResource(R.string.kiosk_bill_sent_note),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+        }
         Spacer(Modifier.height(16.dp))
         Text(
             Amounts.show(context, order.totalPxmr).primary,
             style = MaterialTheme.typography.headlineMedium,
         )
         Spacer(Modifier.height(16.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-            Spacer(Modifier.width(8.dp))
-            Text(
-                stringResource(R.string.kiosk_waiting),
-                style = MaterialTheme.typography.bodyMedium,
-            )
+        if (!owed) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    stringResource(R.string.kiosk_waiting),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            Spacer(Modifier.height(16.dp))
         }
-        Spacer(Modifier.height(16.dp))
-        TextButton(onClick = onDone) { Text(stringResource(R.string.kiosk_next_customer)) }
+        if (owed) {
+            TextButton(onClick = onGiveUp) { Text(stringResource(R.string.kiosk_cancel_order)) }
+        } else {
+            TextButton(onClick = onDone) { Text(stringResource(R.string.kiosk_next_customer)) }
+        }
     }
 }
 

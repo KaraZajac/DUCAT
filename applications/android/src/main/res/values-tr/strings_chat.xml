@@ -14,10 +14,12 @@
     <string name="chat_voice_failed">Bu sesli not kaydedilmedi — mikrofona tekrar basılı tut.</string>
     <string name="chat_what_card">kart</string>
     <string name="chat_what_contact">kişi</string>
+    <string name="chat_what_reaction">tepki</string>
     <string name="chat_error_location_fix">konum alınamadı</string>
     <string name="chat_recording_placeholder">Kaydediliyor… %1$d sn</string>
     <string name="chat_message_placeholder">Mesaj</string>
     <string name="chat_take_picture">Fotoğraf çek</string>
+    <string name="chat_no_camera_app">bu telefonda kamera uygulaması yok</string>
     <string name="chat_hold_to_record">Sesli not için basılı tut</string>
     <string name="chat_attach">Ekle</string>
     <string name="chat_close">Kapat</string>
@@ -83,6 +85,7 @@
     <string name="chat_downloading_audio">🎤 indiriliyor…</string>
     <string name="chat_downloading_file">📎 indiriliyor…</string>
     <string name="chat_att_stuck">Bu ulaşmadı — artık mevcut olmayabilir. Denemeye devam ediliyor.</string>
+    <string name="chat_att_gone">Bu ulaşmadı — artık mevcut olmayabilir.</string>
     <string name="chat_att_no_space">Bunu indirmek için bu telefonda yeterli alan yok.</string>
     <string name="chat_picture_desc">Resim</string>
     <string name="chat_could_not_decode">📷 (çözülemedi)</string>
@@ -108,6 +111,7 @@
     <string name="chat_stop">Durdur</string>
     <string name="chat_play_voice_memo">Sesli notu oynat</string>
     <string name="chat_voice_memo">Sesli not</string>
+    <string name="chat_play_failed">Bu sesli not çalmıyor.</string>
     <string name="chat_size_kb">%1$d KB</string>
     <string name="chat_size_b">%1$d B</string>
     <string name="chat_file_fallback">dosya</string>

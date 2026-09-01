@@ -6,6 +6,8 @@
     <string name="sites_empty_body">ไซต์ ducat คือห้องผนึก — ภาพและสไตล์ทุกชิ้นมากับชุด สคริปต์ปิด และมีเพียงลิงก์ ducat: ที่ใช้ได้ วางที่อยู่เพื่อบันทึก</string>
     <string name="sites_add">เพิ่มไซต์</string>
     <string name="sites_add_confirm">เพิ่ม</string>
+    <string name="sites_add_link_title">เพิ่มไซต์นี้ไหม</string>
+    <string name="sites_add_link_body">ที่อยู่นี้มาจากลิงก์ การเพิ่มจะเก็บไว้บนชั้นของคุณ และจะไม่ดึงข้อมูลใดจนกว่าคุณจะเปิด</string>
     <string name="sites_uri_label">ที่อยู่ ducat:site/…</string>
     <string name="sites_bad_uri">นี่ไม่ใช่ที่อยู่ ducat:site/</string>
     <string name="sites_fetching">กำลังดึง…</string>

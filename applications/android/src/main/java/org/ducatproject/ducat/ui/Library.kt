@@ -43,6 +43,7 @@ import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.Publications
 import org.ducatproject.ducat.R
 import org.ducatproject.ducat.Swarm
+import org.ducatproject.ducat.saidWhy
 
 /**
  * The subscriber's library (§16.20): every publication key the cabinet has
@@ -213,7 +214,7 @@ object LibraryFetch {
                 "fetch of '${job.period}' from ${job.publisherHex.take(8)}… " +
                     "failed: ${e.message}",
             )
-            lastError = job to (e.message ?: e.javaClass.simpleName)
+            lastError = job to (e.saidWhy() ?: e.javaClass.simpleName)
         }
     }
 }
@@ -232,34 +233,42 @@ fun LibrarySection() {
     val v by ContactStore.changes.collectAsState()
     val busy = LibraryFetch.busy
 
-    val rows = remember(v, busy) {
-        val names = ContactStore(context).all().associate {
-            it.personaHex to it.displayName()
-        }
-        Publications.subscribedPublishers(context).flatMap { pub ->
-            val sub = Publications.subscription(context, pub)
-                ?: return@flatMap emptyList()
-            // The shelf pair filed once covers every period; a shipment is
-            // per-period. Prefer the swarm when both exist — it is the
-            // publisher saying this month went by truck.
-            val hasShelf = sub.first != null && sub.second != null
-            sub.third.keys.sortedDescending().map { period ->
-                val ship = Publications.shipment(context, pub, period)
-                IssueRow(
-                    publisherHex = pub,
-                    publisherName = names[pub],
-                    period = period,
-                    source = when {
-                        ship != null -> LibraryFetch.Source.Swarm(ship.first, ship.second)
-                        hasShelf -> LibraryFetch.Source.Shelf
-                        else -> null
-                    },
-                    bytes = LibraryFetch.fetchedBytes(context, pub, period),
-                )
+    // Built off the main thread: every row walks its issue's directory on
+    // disk to say how big it is, and this ran inside composition on each
+    // store bump — a shelf of a few dozen issues stalled the screen for as
+    // long as the walks took. The last list stays up while a fresh one is
+    // built; before the first, nothing, which beats a wrong "no issues".
+    var rows by remember { mutableStateOf<List<IssueRow>?>(null) }
+    LaunchedEffect(v, busy) {
+        rows = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            val names = ContactStore(context).all().associate {
+                it.personaHex to it.displayName()
             }
-        }.sortedWith(
-            compareBy({ it.publisherName ?: it.publisherHex }, { it.publisherHex }),
-        )
+            Publications.subscribedPublishers(context).flatMap { pub ->
+                val sub = Publications.subscription(context, pub)
+                    ?: return@flatMap emptyList()
+                // The shelf pair filed once covers every period; a shipment
+                // is per-period. Prefer the swarm when both exist — it is
+                // the publisher saying this month went by truck.
+                val hasShelf = sub.first != null && sub.second != null
+                sub.third.keys.sortedDescending().map { period ->
+                    val ship = Publications.shipment(context, pub, period)
+                    IssueRow(
+                        publisherHex = pub,
+                        publisherName = names[pub],
+                        period = period,
+                        source = when {
+                            ship != null -> LibraryFetch.Source.Swarm(ship.first, ship.second)
+                            hasShelf -> LibraryFetch.Source.Shelf
+                            else -> null
+                        },
+                        bytes = LibraryFetch.fetchedBytes(context, pub, period),
+                    )
+                }
+            }.sortedWith(
+                compareBy({ it.publisherName ?: it.publisherHex }, { it.publisherHex }),
+            )
+        }
     }
 
     // A half-second heartbeat while anything is in flight: each row asks
@@ -273,7 +282,8 @@ fun LibrarySection() {
         }
     }
 
-    if (rows.isEmpty()) {
+    val shown = rows ?: return
+    if (shown.isEmpty()) {
         Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(
@@ -300,7 +310,7 @@ fun LibrarySection() {
         contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        val grouped = rows.groupBy { it.publisherHex }
+        val grouped = shown.groupBy { it.publisherHex }
         grouped.forEach { (pub, issues) ->
             item(key = "c:$pub") {
                 androidx.compose.material3.Card(Modifier.fillMaxWidth()) {

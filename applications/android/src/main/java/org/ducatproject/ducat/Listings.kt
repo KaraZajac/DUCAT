@@ -522,24 +522,38 @@ object Listings {
         // Remember the tenancy, or the notice is on the network and this
         // device has no idea where: a refresh would post a second copy and
         // "take it down" would have nothing to clear.
-        o.put("card", card.uri)
-        // Every card this listing has ever put on a board, not just the one
-        // currently on it. A live notice is re-posted every few hours and each
-        // posting mints a fresh card (a card is claimed once), so somebody who
-        // read the board before the last refresh is holding a card this device
-        // would otherwise have forgotten — and their enquiry would arrive with
-        // no idea what it was about. Caught in exactly that state on 2026-08-19.
-        val minted = o.optJSONArray("cards") ?: org.json.JSONArray()
-        minted.put(card.uri)
-        // A day's TTL over a six-hour refresh is four cards; the slack is for
-        // re-posts after a failure, and anything older cannot still be on a
-        // board to be read.
-        while (minted.length() > 8) minted.remove(0)
-        o.put("cards", minted)
-        o.put("board", board)
-        o.put("subkey", slot.toInt())
-        o.put("postedAt", now)
-        put(context, o)
+        //
+        // Onto the record as it is *now*, not the copy read before the
+        // seconds of Argon2 and the board walk: a price or a title edited
+        // in that gap was being written back over by the stale copy, and a
+        // listing taken down in it came back.
+        synchronized(lock) {
+            val cur = get(context, id)
+            if (cur == null) {
+                runCatching { uniffi.ducat_mobile.standPost(board, slot, ByteArray(0)) }
+                DucatLog.i(TAG, "listing $id was removed while posting; slot cleared")
+                return false
+            }
+            cur.put("card", card.uri)
+            // Every card this listing has ever put on a board, not just the
+            // one currently on it. A live notice is re-posted every few hours
+            // and each posting mints a fresh card (a card is claimed once), so
+            // somebody who read the board before the last refresh is holding
+            // a card this device would otherwise have forgotten — and their
+            // enquiry would arrive with no idea what it was about. Caught in
+            // exactly that state on 2026-08-19.
+            val minted = cur.optJSONArray("cards") ?: org.json.JSONArray()
+            minted.put(card.uri)
+            // A day's TTL over a six-hour refresh is four cards; the slack is
+            // for re-posts after a failure, and anything older cannot still
+            // be on a board to be read.
+            while (minted.length() > 8) minted.remove(0)
+            cur.put("cards", minted)
+            cur.put("board", board)
+            cur.put("subkey", slot.toInt())
+            cur.put("postedAt", now)
+            put(context, cur)
+        }
         DucatLog.i(TAG, "listing ${o.optString("title")} posted to $board/$slot")
         return true
     }

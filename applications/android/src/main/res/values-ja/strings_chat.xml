@@ -14,10 +14,12 @@
     <string name="chat_voice_failed">そのボイスメモは録音できませんでした。もう一度マイクを長押ししてみて。</string>
     <string name="chat_what_card">カード</string>
     <string name="chat_what_contact">連絡先</string>
+    <string name="chat_what_reaction">リアクション</string>
     <string name="chat_error_location_fix">現在地を取得できませんでした</string>
     <string name="chat_recording_placeholder">録音中… %1$d秒</string>
     <string name="chat_message_placeholder">メッセージ</string>
     <string name="chat_take_picture">写真を撮る</string>
+    <string name="chat_no_camera_app">このスマホにカメラアプリがありません</string>
     <string name="chat_hold_to_record">長押しでボイスメモを録音</string>
     <string name="chat_attach">添付</string>
     <string name="chat_close">閉じる</string>
@@ -83,6 +85,7 @@
     <string name="chat_downloading_audio">🎤 ダウンロード中…</string>
     <string name="chat_downloading_file">📎 ダウンロード中…</string>
     <string name="chat_att_stuck">届いていません。もう残っていないかもしれません。試行は続いています。</string>
+    <string name="chat_att_gone">届いていません。もう残っていないかもしれません。</string>
     <string name="chat_att_no_space">この端末に空き容量が足りず、ダウンロードできません。</string>
     <string name="chat_picture_desc">写真</string>
     <string name="chat_could_not_decode">📷（デコードできませんでした）</string>
@@ -108,6 +111,7 @@
     <string name="chat_stop">停止</string>
     <string name="chat_play_voice_memo">ボイスメモを再生</string>
     <string name="chat_voice_memo">ボイスメモ</string>
+    <string name="chat_play_failed">このボイスメモは再生できません。</string>
     <string name="chat_size_kb">%1$d KB</string>
     <string name="chat_size_b">%1$d B</string>
     <string name="chat_file_fallback">ファイル</string>

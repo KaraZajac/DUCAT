@@ -103,4 +103,7 @@
     <string name="hail_search">Cari</string>
     <string name="hail_clear_place">Hapus</string>
     <string name="hail_joining_network">Bergabung ke jaringan — papan belum dibaca.</string>
+    <string name="hail_accept_sending">Menyampaikan ya ke %1$s…</string>
+    <string name="hail_accept_failed">Jawaban ya-mu ke %1$s tidak terkirim. Periksa jaringan dan lihat tawarannya lagi.</string>
+    <string name="hail_escrow_failed">Ongkos tidak bisa dimasukkan ke escrow. Selesaikan dengan sopir di chat.</string>
 </resources>

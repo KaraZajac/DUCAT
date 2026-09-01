@@ -597,19 +597,40 @@ fun HailCard(
             contact = d,
             onAccept = {
                 rideOffer = null
-                forgetOffered(context)
+                error = null
+                status = context.getString(R.string.hail_accept_sending, d.displayName())
                 // The accept echoes the offer's fare and names its seq —
                 // that echo is what lets the driver's client hold the two
-                // to the same number. Best-effort on hailScope: leaving
-                // Home must not lose the yes mid-send.
+                // to the same number. On hailScope: leaving Home must not
+                // lose the yes mid-send.
+                //
+                // Nothing is committed until the yes has left the phone.
+                // Forgetting the offer and announcing the driver before the
+                // send meant a write the network refused left the rider
+                // told "Sam is on the way" while Sam was still waiting for
+                // an answer that no screen could give any more. A failed
+                // send puts the offer back where the Back button parks it.
                 hailScope.launch {
-                    runCatchingCancellable {
+                    val sent = runCatchingCancellable {
                         Mailbox.send(
                             context, d, context.getString(R.string.hail_accept_message),
                             kind = 7, amountPxmr = offer.amountPxmr,
                             reSeq = offer.seq,
                         )
                     }.onFailure { DucatLog.w(TAG, "ride accept: ${it.message}") }
+                    if (sent.isFailure) {
+                        withContext(Dispatchers.Main) {
+                            status = null
+                            error = context.getString(R.string.hail_accept_failed, d.displayName())
+                            if (rideOffer == null && parkedOffer == null) parkedOffer = d to offer
+                        }
+                        return@launch
+                    }
+                    forgetOffered(context)
+                    withContext(Dispatchers.Main) {
+                        status = null
+                        driverFound = d
+                    }
                     // §15.12: the accept is where the escrow starts, and the
                     // ladder picks the strongest rung available. An arbiter
                     // configured and mutual → 2-of-3 (recovery + judgment).
@@ -644,10 +665,15 @@ fun HailCard(
                             )
                         }.onFailure {
                             DucatLog.w(TAG, "ride escrow: ${it.message}")
+                            // The yes went; the money did not. The ride
+                            // stands on the chat, but a rider who hears
+                            // nothing assumes the bond is in.
+                            withContext(Dispatchers.Main) {
+                                error = moneyFailure(context, it, fallback = R.string.hail_escrow_failed)
+                            }
                         }
                     }
                 }
-                driverFound = d
             },
             onDecline = {
                 rideOffer = null
@@ -871,9 +897,21 @@ fun DriveScreen() {
         mutableStateOf<Pair<org.ducatproject.ducat.Contact, Long>?>(null)
     }
     var riderDeclined by remember { mutableStateOf(false) }
+    // What "Drive here" was doing when it stopped to ask for location, so a
+    // yes carries straight on instead of leaving the driver to tap the same
+    // button again — the dialog used to close onto a screen that had not
+    // moved. `locAsked` is what sends a permanent no to Settings (see
+    // askForLocation) rather than to a button that does nothing.
+    var afterLocPerm by remember { mutableStateOf<(() -> Unit)?>(null) }
+    var locAsked by remember { mutableStateOf(false) }
     val locPerm = androidx.activity.compose.rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
-    ) { }
+    ) { ok ->
+        locAsked = true
+        val go = afterLocPerm
+        afterLocPerm = null
+        if (ok) go?.invoke()
+    }
     var locating by remember { mutableStateOf(false) }
 
     // Asked before the shift, never during it.
@@ -895,10 +933,9 @@ fun DriveScreen() {
         // Terminates: the gate marks itself asked before calling back, so the
         // second pass through here always falls straight past this.
         if (nameGateNeeded(context)) { intro = { driveHere() }; return }
-        if (context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) !=
-            android.content.pm.PackageManager.PERMISSION_GRANTED
-        ) {
-            locPerm.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
+        if (!locationAllowed(context)) {
+            afterLocPerm = { driveHere() }
+            askForLocation(context, locAsked) { locPerm.launch(it) }
             return
         }
         locating = true
@@ -1350,15 +1387,22 @@ fun DriveScreen() {
                     .padding(horizontal = 16.dp, vertical = 4.dp))
             }
             androidx.compose.foundation.layout.Box(Modifier.weight(1f).fillMaxWidth()) {
+                // Pins keep the index of the notice they stand for: a hail
+                // with no cell, or one whose cell will not decode, gets no
+                // pin — and once used to shift every pin after it onto the
+                // wrong hail when tapped.
+                val pins = remember(notices) {
+                    notices.mapIndexedNotNull { i, n ->
+                        n.originCell?.let {
+                            runCatching { uniffi.ducat_mobile.geohashCenter(it) }.getOrNull()
+                        }?.let { c -> i to ((c[0] to c[1]) to n.dest) }
+                    }
+                }
                 DriverMap(
                     coverage = coverage,
                     me = myFix,
-                    fares = notices.mapNotNull { n ->
-                        n.originCell?.let {
-                            runCatching { uniffi.ducat_mobile.geohashCenter(it) }.getOrNull()
-                        }?.let { c -> (c[0] to c[1]) to n.dest }
-                    },
-                    onFareTap = { i -> notices.getOrNull(i)?.let { selected = it } },
+                    fares = pins.map { it.second },
+                    onFareTap = { i -> pins.getOrNull(i)?.let { notices.getOrNull(it.first) }?.let { selected = it } },
                     modifier = Modifier.fillMaxSize(),
                 )
                 if (notices.isEmpty()) {
@@ -2044,21 +2088,23 @@ fun HailSheet(
     var step by remember { mutableStateOf(org.ducatproject.ducat.Hailing.Step.CARD) }
     var error by remember { mutableStateOf<String?>(null) }
 
+    var locating by remember { mutableStateOf(false) }
+    // Same shape as DriveScreen: the ask remembers what it interrupted, and
+    // a yes carries on with the fix. The sheet opens straight into this ask;
+    // a second no is permanent and the button under it went quiet, so the
+    // tap after that goes to Settings instead (askForLocation).
+    var afterLocPerm by remember { mutableStateOf<(() -> Unit)?>(null) }
+    var locAsked by remember { mutableStateOf(false) }
     val locPerm = androidx.activity.compose.rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
     ) { ok ->
-        if (ok) grabFix(context) { f ->
-            from = f?.let {
-                org.ducatproject.ducat.Geo.Hit(
-                    context.getString(R.string.hail_my_location), it.first, it.second)
-            }
-        }
+        locAsked = true
+        val go = afterLocPerm
+        afterLocPerm = null
+        if (ok) go?.invoke()
     }
-    var locating by remember { mutableStateOf(false) }
     fun useMyLocation() {
-        if (context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) ==
-            android.content.pm.PackageManager.PERMISSION_GRANTED
-        ) {
+        if (locationAllowed(context)) {
             locating = true
             grabFix(context) { f ->
                 locating = false
@@ -2068,7 +2114,10 @@ fun HailSheet(
                 }
                 if (f == null) error = context.getString(R.string.hail_location_fix_failed)
             }
-        } else locPerm.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
+        } else {
+            afterLocPerm = { useMyLocation() }
+            askForLocation(context, locAsked) { locPerm.launch(it) }
+        }
     }
     // Only when there is nothing to restore: after a recreation this would
     // otherwise overwrite the pickup somebody had chosen with wherever the

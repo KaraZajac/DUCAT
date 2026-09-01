@@ -103,4 +103,7 @@
     <string name="hail_search">Buscar</string>
     <string name="hail_clear_place">Borrar</string>
     <string name="hail_joining_network">Uniéndose a la red: aún no se han leído los tablones.</string>
+    <string name="hail_accept_sending">Diciéndole que sí a %1$s…</string>
+    <string name="hail_accept_failed">Tu sí a %1$s no se envió. Revisa la red y vuelve a ver la oferta.</string>
+    <string name="hail_escrow_failed">La tarifa no se pudo poner en custodia. Arréglalo con el conductor en el chat.</string>
 </resources>

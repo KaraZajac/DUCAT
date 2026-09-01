@@ -20,6 +20,7 @@
     <string name="chatlist_preview_receipt">🧾 رسید — %1$s</string>
     <string name="chatlist_preview_reacted">با %1$s واکنش نشان داد</string>
     <string name="chatlist_preview_photo">📷 عکس</string>
+    <string name="chatlist_preview_voice">🎤 پیام صوتی</string>
     <string name="chatlist_time_now">همین حالا</string>
     <string name="chatlist_time_minutes">%1$d دق</string>
     <string name="chatlist_time_hours">%1$d س</string>

@@ -627,6 +627,42 @@ object Publications {
         return all.keys().asSequence().map { it to all.getJSONObject(it).optString("title") }.toList()
     }
 
+    /**
+     * Drop the staged issue files nothing will ever publish.
+     *
+     * A pick copies the issue under `publish_staging/<pub>/<stamp>/` and
+     * leaves it there: a small issue's copy goes once the shelf has it, a
+     * large one is served from the copy for as long as the publication
+     * lives — and a pick that was never published, or replaced by a
+     * second pick, or made for a publication since deleted, stayed on the
+     * disk for ever. Issues can be hundreds of megabytes.
+     *
+     * Kept: every directory an issue's recorded file sits in, and anything
+     * younger than a day — a pick sitting on a screen that is still open
+     * is nobody's orphan. Returns the bytes freed.
+     */
+    fun sweepStaging(context: Context): Long {
+        val root = java.io.File(context.filesDir, "publish_staging")
+        val pubs = publications(context).map { it.first }.toSet()
+        val kept = pubs.flatMap { pub ->
+            issues(context, pub).mapNotNull { java.io.File(it.file).parentFile?.canonicalPath }
+        }.toSet()
+        val fresh = System.currentTimeMillis() - 24 * 60 * 60_000L
+        var freed = 0L
+        root.listFiles()?.forEach { pubDir ->
+            pubDir.listFiles()?.forEach { stampDir ->
+                val referenced = runCatching { stampDir.canonicalPath in kept }.getOrDefault(true)
+                val live = pubDir.name in pubs
+                if (referenced || (live && stampDir.lastModified() > fresh)) return@forEach
+                val size = stampDir.walkBottomUp().filter { it.isFile }.sumOf { it.length() }
+                if (stampDir.deleteRecursively()) freed += size
+            }
+            // A publication's directory, once nothing is left in it.
+            if (pubDir.listFiles().isNullOrEmpty()) pubDir.delete()
+        }
+        return freed
+    }
+
     /** A period's key, derived — the master never leaves this function's callee. */
     fun periodKey(context: Context, pubId: String, periodId: String): ByteArray? {
         val all = prefs(context).getString("pubs", null)?.let { JSONObject(it) } ?: return null
@@ -1072,7 +1108,11 @@ object Publications {
             ?: throw IllegalStateException("'$periodId' is not on the shelf yet")
         val chunks = entry.getInt("chunks")
         val total = entry.getLong("bytes")
-        val name = entry.optString("name").ifBlank { "issue.bin" }
+        // The publisher chose this name, and it is about to become a path
+        // under our files directory: the last segment only, never a walk.
+        val name = java.io.File(entry.optString("name")).name
+            .takeIf { it.isNotBlank() && it != "." && it != ".." }
+            ?: "issue.bin"
         // One record or several (client layout v2): an ordered list of
         // records, each holding up to the record cap of chunks, subkeys
         // starting at zero on every shelf.

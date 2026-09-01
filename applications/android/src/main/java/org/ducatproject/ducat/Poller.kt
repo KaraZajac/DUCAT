@@ -270,6 +270,9 @@ class Poller(private val context: Context) {
                 // kept bundles and puts them back on the wire. Without this
                 // the checkbox only means "until my next reboot".
                 runCatching { reseedSites(context) }
+                // And the staged issues nothing will publish (see
+                // Publications.sweepStaging): once per process is plenty.
+                runCatching { sweepStaging(context) }
                 // The mempool, only while a bill is out and unsighted — the
                 // scan costs a round trip per pool transaction, and a till
                 // with nothing billed has nothing to look for.
@@ -514,6 +517,15 @@ class Poller(private val context: Context) {
         }
     }
 
+    @Volatile private var stagingSwept = false
+
+    private fun sweepStaging(context: Context) {
+        if (stagingSwept) return
+        stagingSwept = true
+        val freed = Publications.sweepStaging(context)
+        if (freed > 0) DucatLog.i(TAG, "swept ${freed / 1024} KiB of staged issues nothing will publish")
+    }
+
     @Volatile private var sitesReseeded = false
 
     private fun reseedSites(context: Context) {
@@ -567,45 +579,52 @@ class Poller(private val context: Context) {
 
     private fun lane(scope: CoroutineScope) {
         while (scope.isActive) {
+            // A wait that throws instead of waiting would spin this thread
+            // flat out; pause where the wait would have.
             val rang = runCatching { uniffi.ducat_mobile.nodeWaitChange(WAIT_MS) }
-                .getOrDefault(false)
+                .getOrElse { Thread.sleep(1_000); false }
             if (!rang) continue
-            val moved = runCatching { uniffi.ducat_mobile.nodeChangedKeys() }
-                .getOrDefault(emptyList())
-            NetworkRings.note(moved)
-            val rangKeys = moved.toSet() // several subkeys, one record
-            if (rangKeys.isEmpty()) continue
-            val t0 = System.currentTimeMillis()
-            val store = ContactStore(context)
-            var got = 0
-            val handled = mutableSetOf<String>()
-            for (c in store.all()) {
-                if (c.theirOutbox in rangKeys) {
-                    handled.add(c.theirOutbox)
-                    got += runCatching { Mailbox.pollContact(context, c) }
-                        .getOrDefault(0)
+            // The whole answer to a ring, so one bad iteration is a
+            // logged line and not the end of the lane: a lane that dies
+            // leaves a phone that stops answering until it is restarted.
+            runCatching {
+                val moved = runCatching { uniffi.ducat_mobile.nodeChangedKeys() }
+                    .getOrDefault(emptyList())
+                NetworkRings.note(moved)
+                val rangKeys = moved.toSet() // several subkeys, one record
+                if (rangKeys.isEmpty()) return@runCatching
+                val t0 = System.currentTimeMillis()
+                val store = ContactStore(context)
+                var got = 0
+                val handled = mutableSetOf<String>()
+                for (c in store.all()) {
+                    if (c.theirOutbox in rangKeys) {
+                        handled.add(c.theirOutbox)
+                        got += runCatching { Mailbox.pollContact(context, c) }
+                            .getOrDefault(0)
+                    }
                 }
-            }
-            val cardKeys = store.issuedCards()
-                .filter { it.answeredBy == null }
-                .map { it.inboxKey }
-                .filter { it in rangKeys }
-            if (cardKeys.isNotEmpty()) {
-                handled.addAll(cardKeys)
-                runCatching { Mailbox.collectClaims(context) }
-                runCatching { Listings.linkClaims(context) }
-            }
-            // A message that just landed may be a ringing offer, and no
-            // screen is around to notice it for us.
-            if (got > 0) runCatching { Calls.noticed(context) }
-            val strangers = rangKeys - handled
-            DucatLog.i(
-                TAG,
-                "lane: ${rangKeys.size} record(s) rang, $got message(s) in " +
-                    "${System.currentTimeMillis() - t0} ms" +
-                    if (strangers.isEmpty()) "" else
-                        " — ${strangers.size} for the sweep (${strangers.first().take(12)}…)",
-            )
+                val cardKeys = store.issuedCards()
+                    .filter { it.answeredBy == null }
+                    .map { it.inboxKey }
+                    .filter { it in rangKeys }
+                if (cardKeys.isNotEmpty()) {
+                    handled.addAll(cardKeys)
+                    runCatching { Mailbox.collectClaims(context) }
+                    runCatching { Listings.linkClaims(context) }
+                }
+                // A message that just landed may be a ringing offer, and no
+                // screen is around to notice it for us.
+                if (got > 0) runCatching { Calls.noticed(context) }
+                val strangers = rangKeys - handled
+                DucatLog.i(
+                    TAG,
+                    "lane: ${rangKeys.size} record(s) rang, $got message(s) in " +
+                        "${System.currentTimeMillis() - t0} ms" +
+                        if (strangers.isEmpty()) "" else
+                            " — ${strangers.size} for the sweep (${strangers.first().take(12)}…)",
+                )
+            }.onFailure { DucatLog.w(TAG, "lane: ${it.javaClass.simpleName}: ${it.message}") }
         }
     }
 

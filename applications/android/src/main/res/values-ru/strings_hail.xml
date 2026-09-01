@@ -103,4 +103,7 @@
     <string name="hail_search">Поиск</string>
     <string name="hail_clear_place">Очистить</string>
     <string name="hail_joining_network">Подключение к сети — доски ещё не прочитаны.</string>
+    <string name="hail_accept_sending">Отправляем согласие %1$s…</string>
+    <string name="hail_accept_failed">Твоё согласие для %1$s не отправилось. Проверь сеть и открой предложение снова.</string>
+    <string name="hail_escrow_failed">Не удалось внести плату в депозит. Договорись с водителем в чате.</string>
 </resources>

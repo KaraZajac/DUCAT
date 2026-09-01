@@ -6,6 +6,8 @@
     <string name="sites_empty_body">Um site ducat é uma sala selada — cada imagem e estilo viaja no pacote, sem scripts, e só funcionam links ducat:. Cole um endereço para guardar um.</string>
     <string name="sites_add">Adicionar um site</string>
     <string name="sites_add_confirm">Adicionar</string>
+    <string name="sites_add_link_title">Adicionar este site?</string>
+    <string name="sites_add_link_body">Este endereço chegou por um link. Adicionar o guarda na sua estante; nada é baixado até você abri-lo.</string>
     <string name="sites_uri_label">endereço ducat:site/…</string>
     <string name="sites_bad_uri">Isso não é um endereço ducat:site/.</string>
     <string name="sites_fetching">Buscando…</string>

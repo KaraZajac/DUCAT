@@ -455,7 +455,10 @@ private fun Shell(
      *  Null for a mode somebody chose to work in. */
     onLeave: (() -> Unit)? = null,
 ) {
-    var current by remember { mutableStateOf(0) }
+    // Saveable: a rotation, or the process coming back from the background,
+    // used to rebuild every shell on its first tab — a driver reading the
+    // Meter turned the phone and was looking at the map.
+    var current by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(0) }
     LaunchedEffect(Unit) {
         shellTabRequest.collect { t ->
             if (t != null) {
@@ -542,7 +545,7 @@ private fun Shell(
         },
     ) { padding ->
         Box(Modifier.padding(padding).fillMaxSize()) {
-            tabs[current].content()
+            tabs[current.coerceIn(tabs.indices)].content()
         }
     }
 }

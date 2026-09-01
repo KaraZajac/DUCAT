@@ -20,6 +20,7 @@
     <string name="chatlist_preview_receipt">🧾 Чек — %1$s</string>
     <string name="chatlist_preview_reacted">Реакция %1$s</string>
     <string name="chatlist_preview_photo">📷 Фото</string>
+    <string name="chatlist_preview_voice">🎤 Голосовое сообщение</string>
     <string name="chatlist_time_now">сейчас</string>
     <string name="chatlist_time_minutes">%1$d мин</string>
     <string name="chatlist_time_hours">%1$d ч</string>

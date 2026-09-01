@@ -8,6 +8,8 @@
     <string name="main_backup_title">Back up</string>
     <string name="main_backup_body">You have contacts your last backup does not. A restore would bring back the money and not the people.</string>
     <string name="main_open_backup_settings">Open backup settings</string>
+    <string name="main_notify_off_title">Notifications are off</string>
+    <string name="main_notify_off_body">The phone cannot tell you when money arrives, a bill lands, or someone calls. Tap to turn them on.</string>
     <string name="main_recent">Recent</string>
     <string name="main_see_all">See all</string>
     <string name="main_card_link_title">Add a contact?</string>

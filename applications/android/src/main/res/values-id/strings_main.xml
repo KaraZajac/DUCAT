@@ -8,6 +8,8 @@
     <string name="main_backup_title">Cadangkan</string>
     <string name="main_backup_body">Kamu punya kontak yang belum ada di cadangan terakhirmu. Pemulihan akan mengembalikan uangnya, tapi tidak orang-orangnya.</string>
     <string name="main_open_backup_settings">Buka pengaturan cadangan</string>
+    <string name="main_notify_off_title">Notifikasi mati</string>
+    <string name="main_notify_off_body">Ponsel tidak bisa memberi tahu saat uang masuk, tagihan datang, atau seseorang menelepon. Ketuk untuk menyalakannya.</string>
     <string name="main_recent">Terbaru</string>
     <string name="main_see_all">Lihat semua</string>
     <string name="main_card_link_title">Tambahkan kontak?</string>

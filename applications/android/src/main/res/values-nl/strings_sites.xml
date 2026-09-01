@@ -6,6 +6,8 @@
     <string name="sites_empty_body">Een ducat-site is een verzegelde kamer — elke afbeelding en stijl reist in de bundel, scripts blijven uit, alleen ducat:-links werken. Plak een adres om er een te bewaren.</string>
     <string name="sites_add">Site toevoegen</string>
     <string name="sites_add_confirm">Toevoegen</string>
+    <string name="sites_add_link_title">Deze site toevoegen?</string>
+    <string name="sites_add_link_body">Dit adres kwam via een link. Toevoegen zet hem op je plank; er wordt niets opgehaald tot je hem opent.</string>
     <string name="sites_uri_label">ducat:site/…-adres</string>
     <string name="sites_bad_uri">Dat is geen ducat:site/-adres.</string>
     <string name="sites_fetching">Ophalen…</string>

@@ -8,6 +8,8 @@
     <string name="main_backup_title">پشتیبان بگیر</string>
     <string name="main_backup_body">مخاطبینی داری که در آخرین پشتیبانت نیستند. بازیابی، پول را برمی‌گرداند اما آدم‌ها را نه.</string>
     <string name="main_open_backup_settings">باز کردن تنظیمات پشتیبان</string>
+    <string name="main_notify_off_title">اعلان‌ها خاموش است</string>
+    <string name="main_notify_off_body">گوشی نمی‌تواند به شما خبر دهد که پولی رسیده، صورت‌حسابی آمده یا کسی تماس گرفته است. برای روشن کردن ضربه بزنید.</string>
     <string name="main_recent">اخیر</string>
     <string name="main_see_all">دیدن همه</string>
     <string name="main_card_link_title">مخاطب افزوده شود؟</string>

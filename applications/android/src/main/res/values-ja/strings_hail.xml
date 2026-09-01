@@ -103,4 +103,7 @@
     <string name="hail_search">検索</string>
     <string name="hail_clear_place">消去</string>
     <string name="hail_joining_network">ネットワークに参加中 — 掲示板はまだ読めていません。</string>
+    <string name="hail_accept_sending">%1$sに承諾を伝えています…</string>
+    <string name="hail_accept_failed">%1$sへの承諾を送れませんでした。ネットワークを確認して、オファーをもう一度開いてください。</string>
+    <string name="hail_escrow_failed">運賃をエスクローに預けられませんでした。チャットでドライバーと相談してください。</string>
 </resources>

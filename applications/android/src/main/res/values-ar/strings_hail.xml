@@ -103,4 +103,7 @@
     <string name="hail_search">بحث</string>
     <string name="hail_clear_place">مسح</string>
     <string name="hail_joining_network">جارٍ الانضمام إلى الشبكة — لم تُقرأ اللوحات بعد.</string>
+    <string name="hail_accept_sending">جارٍ إبلاغ %1$s بالموافقة…</string>
+    <string name="hail_accept_failed">لم تُرسَل موافقتك إلى %1$s. تحقّق من الشبكة وافتح العرض من جديد.</string>
+    <string name="hail_escrow_failed">تعذّر إيداع الأجرة في الضمان. تدبّر الأمر مع السائق في الدردشة.</string>
 </resources>

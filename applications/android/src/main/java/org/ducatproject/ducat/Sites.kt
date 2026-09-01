@@ -32,6 +32,12 @@ object Sites {
 
     private fun prefs(context: Context) = securePrefs(context, "ducat_sites")
 
+    // Every write here is read-modify-write over the whole table, and the
+    // writers run on different threads: a tapped link adding a site while
+    // Open refreshes another, a fetch finishing while the checkbox flips.
+    // Held for the table edit only, never across a fetch.
+    private val lock = Any()
+
     /** `ducat:site/<record-key>` — the address for the life of the site. */
     fun uriOf(recordKey: String): String = "ducat:site/$recordKey"
 
@@ -90,21 +96,23 @@ object Sites {
     fun add(context: Context, recordKey: String): Site {
         val head = readHead(recordKey)
         val now = System.currentTimeMillis() / 1000
-        val rest = all(context).filterNot { it.recordKey == recordKey }
-        val prior = all(context).firstOrNull { it.recordKey == recordKey }
-        val entry = Site(
-            recordKey = recordKey,
-            title = head.title,
-            share = head.share,
-            digestHex = head.digestHex,
-            updated = head.updated.toLong(),
-            addedAt = prior?.addedAt ?: now,
-            keepAlive = prior?.keepAlive ?: false,
-            fetchedDigestHex = prior?.fetchedDigestHex,
-            fetchedShare = prior?.fetchedShare,
-        )
-        save(context, rest + entry)
-        return entry
+        return synchronized(lock) {
+            val rest = all(context).filterNot { it.recordKey == recordKey }
+            val prior = all(context).firstOrNull { it.recordKey == recordKey }
+            val entry = Site(
+                recordKey = recordKey,
+                title = head.title,
+                share = head.share,
+                digestHex = head.digestHex,
+                updated = head.updated.toLong(),
+                addedAt = prior?.addedAt ?: now,
+                keepAlive = prior?.keepAlive ?: false,
+                fetchedDigestHex = prior?.fetchedDigestHex,
+                fetchedShare = prior?.fetchedShare,
+            )
+            save(context, rest + entry)
+            entry
+        }
     }
 
     /** Fetch the current bundle if the cache is stale; returns the dir.
@@ -126,20 +134,23 @@ object Sites {
         Swarm.stopShare(site.fetchedShare ?: site.share)
         dir.deleteRecursively()
         check(fresh.renameTo(dir)) { "could not move the site into place" }
-        save(
-            context,
-            all(context).map {
-                if (it.recordKey == site.recordKey) {
-                    it.copy(
-                        fetchedDigestHex = site.digestHex,
-                        fetchedShare = site.share,
-                    )
-                } else {
-                    it
-                }
-            },
-        )
-        if (site.keepAlive) reseed(context, site.recordKey)
+        synchronized(lock) {
+            save(
+                context,
+                all(context).map {
+                    if (it.recordKey == site.recordKey) {
+                        it.copy(
+                            fetchedDigestHex = site.digestHex,
+                            fetchedShare = site.share,
+                        )
+                    } else {
+                        it
+                    }
+                },
+            )
+        }
+        // The choice as it stands now, not as it stood when the fetch began.
+        reseed(context, site.recordKey)
         return dir
     }
 
@@ -169,12 +180,14 @@ object Sites {
     }
 
     fun setKeepAlive(context: Context, recordKey: String, keep: Boolean) {
-        save(
-            context,
-            all(context).map {
-                if (it.recordKey == recordKey) it.copy(keepAlive = keep) else it
-            },
-        )
+        synchronized(lock) {
+            save(
+                context,
+                all(context).map {
+                    if (it.recordKey == recordKey) it.copy(keepAlive = keep) else it
+                },
+            )
+        }
         // The checkbox acts now, not at the next fetch: ticking parks the
         // bundle already on disk, unticking stops serving it.
         if (keep) {
@@ -192,7 +205,9 @@ object Sites {
             // process dies; stop it before the bundle goes.
             Swarm.stopShare(it.fetchedShare ?: it.share)
         }
-        save(context, all(context).filterNot { it.recordKey == recordKey })
+        synchronized(lock) {
+            save(context, all(context).filterNot { it.recordKey == recordKey })
+        }
         File(context.filesDir, "sites/${recordKey.hashCode().toUInt()}").deleteRecursively()
     }
 }

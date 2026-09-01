@@ -6,6 +6,8 @@
     <string name="sites_empty_body">Strona ducat to zapieczętowany pokój — każdy obraz i styl jedzie w pakiecie, bez skryptów, działają tylko linki ducat:. Wklej adres, by jakąś zachować.</string>
     <string name="sites_add">Dodaj stronę</string>
     <string name="sites_add_confirm">Dodaj</string>
+    <string name="sites_add_link_title">Dodać tę stronę?</string>
+    <string name="sites_add_link_body">Ten adres przyszedł z linku. Dodanie zapisuje go na twojej półce; nic nie jest pobierane, dopóki go nie otworzysz.</string>
     <string name="sites_uri_label">adres ducat:site/…</string>
     <string name="sites_bad_uri">To nie jest adres ducat:site/.</string>
     <string name="sites_fetching">Pobieranie…</string>

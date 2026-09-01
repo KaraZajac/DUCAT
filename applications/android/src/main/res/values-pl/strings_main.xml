@@ -8,6 +8,8 @@
     <string name="main_backup_title">Zrób kopię</string>
     <string name="main_backup_body">Masz kontakty, których nie ma w ostatniej kopii zapasowej. Przywrócenie odzyskałoby pieniądze, ale nie ludzi.</string>
     <string name="main_open_backup_settings">Otwórz ustawienia kopii zapasowej</string>
+    <string name="main_notify_off_title">Powiadomienia są wyłączone</string>
+    <string name="main_notify_off_body">Telefon nie może dać ci znać, gdy przyjdą pieniądze, rachunek albo ktoś zadzwoni. Dotknij, aby je włączyć.</string>
     <string name="main_recent">Ostatnie</string>
     <string name="main_see_all">Zobacz wszystko</string>
     <string name="main_card_link_title">Dodać kontakt?</string>

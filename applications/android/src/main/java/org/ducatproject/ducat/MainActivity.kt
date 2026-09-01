@@ -124,6 +124,9 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
 
     override fun onNewIntent(intent: android.content.Intent) {
         super.onNewIntent(intent)
+        // Recorded as the current one: a recreate after this would otherwise
+        // read the *launch* intent back, not the latest.
+        setIntent(intent)
         readIntent(intent)
     }
 
@@ -213,8 +216,23 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
             override fun release(context: android.content.Context) {
                 Notify.quietIncoming(context)
             }
+            // The node's own service, wearing the microphone type for the
+            // length of the call — see NodeService.inCall.
+            override fun connected(context: android.content.Context, from: String) {
+                NodeService.inCall(context, from)
+            }
+            override fun calling(context: android.content.Context, to: String) {
+                NodeService.inCall(context, to, ringing = true)
+            }
+            override fun ended(context: android.content.Context) {
+                NodeService.callEnded(context)
+            }
         }
-        readIntent(intent)
+        // First creation only. A rotation or a language change recreates the
+        // activity with the same intent, and reading it again re-opened the
+        // tapped card's confirm — or the notification's thread — on top of
+        // wherever the person had since gone.
+        if (savedInstanceState == null) readIntent(intent)
         val prefs = ThemePreference(this)
         setContent {
             // Follows the system unless the user has said otherwise (Menu).
@@ -235,7 +253,25 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
                 mutableStateOf(
                     when {
                         WalletStore(this@MainActivity).address() == null -> Onboarding()
-                        !Pin.isSet(this@MainActivity) -> Onboarding(step = Step.Pin)
+                        // A restore lands here too — wallet in place, PIN
+                        // still to choose — and it has already recorded the
+                        // backup that got it here. Resuming with the defaults
+                        // marched a restored phone through Trust and Backup
+                        // again, and Done then wrote the default "publish my
+                        // address" over the choice the backup carried.
+                        !Pin.isSet(this@MainActivity) -> {
+                            val store = ContactStore(this@MainActivity)
+                            val restored = store.backupExportedAt() > 0L
+                            Onboarding(
+                                step = Step.Pin,
+                                backupConfirmed = restored,
+                                publishPayto = if (restored) {
+                                    store.publishAddress()
+                                } else {
+                                    Onboarding().publishPayto
+                                },
+                            )
+                        }
                         // Ask about the backup too, rather than assuming it is
                         // the thing still outstanding. A restore records one —
                         // the file that got them here — and so does making one
@@ -249,7 +285,13 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
                         // process had been killed since the restore, which is
                         // not something onboarding should vary on.
                         ContactStore(this@MainActivity).backupExportedAt() > 0L ->
-                            Onboarding(step = Step.Done, backupConfirmed = true)
+                            Onboarding(
+                                step = Step.Done, backupConfirmed = true,
+                                // Finish writes this back; carry the stored
+                                // choice rather than the default.
+                                publishPayto = ContactStore(this@MainActivity)
+                                    .publishAddress(),
+                            )
                         else -> Onboarding(step = Step.Backup)
                     }
                 )
@@ -349,6 +391,18 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
     val scope = rememberCoroutineScope()
     val persona = remember { PersonaStore(context).secret() }
 
+    // The mode owns the whole scaffold (§15.11): a till is a different app
+    // from a wallet, and the drawer is the one shared door between them.
+    val modeV by ContactStore.changes.collectAsState()
+    val appMode = remember(modeV) { ModeStore(context).current() }
+    // A kiosk is an unattended device in a shop, and its one way out is the
+    // staff door behind the PIN. So nothing else that can reach this screen
+    // — the drawer's edge swipe, a tapped link, a notification's thread, a
+    // ring, a bill — may take the surface from it. Each is answered below
+    // the way an empty shop answers it, rather than held for whoever next
+    // types the PIN.
+    val kiosk = appMode == Mode.Kiosk
+
     // Android 13+ gates notifications behind a runtime ask. Once, up front:
     // this app's whole point includes "your phone tells you when money moves",
     // and a silent decline leaves it looking broken rather than muted.
@@ -369,6 +423,7 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
     LaunchedEffect(wanted) {
         val hex = wanted ?: return@LaunchedEffect
         MainActivity.openChat.value = null
+        if (kiosk) return@LaunchedEffect
         ContactStore(context).all().firstOrNull { it.personaHex == hex }
             ?.let { overlay = Overlay.Chat(it) }
     }
@@ -380,14 +435,20 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
     val wantPublishing by MainActivity.openPublishing.collectAsState()
     LaunchedEffect(wantPublishing) {
         if (wantPublishing) {
-            overlay = Overlay.Drawer(Section.Publishing)
+            if (!kiosk) overlay = Overlay.Drawer(Section.Publishing)
             MainActivity.openPublishing.value = false
         }
     }
     val wantSites by MainActivity.openSites.collectAsState()
     LaunchedEffect(wantSites) {
         if (wantSites) {
-            overlay = Overlay.Drawer(Section.Sites)
+            if (kiosk) {
+                // The address the link carried is waiting on the section
+                // it will never reach; drop it with the request.
+                org.ducatproject.ducat.ui.pendingSiteAdd.value = null
+            } else {
+                overlay = Overlay.Drawer(Section.Sites)
+            }
             MainActivity.openSites.value = false
         }
     }
@@ -402,6 +463,10 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
     var cardFail by remember { mutableStateOf<Int?>(null) }
     LaunchedEffect(tappedCard) {
         val uri = tappedCard ?: return@LaunchedEffect
+        if (kiosk) {
+            MainActivity.claimLink.value = null
+            return@LaunchedEffect
+        }
         // Cleared at the end, not here: this effect is keyed on the flow, so
         // emptying it first changes the key and cancels the read below at its
         // first suspension point. Reading a card is fast enough to usually win
@@ -557,29 +622,65 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
     // rides the store's own change signal, so a ring lands the moment the
     // poller files it.
     val callV by ContactStore.changes.collectAsState()
-    LaunchedEffect(callV) { Calls.noticed(context) }
+    // Off the main thread: noticing means reading every thread in the store
+    // on every change to it, and the poller already calls this from its own.
+    LaunchedEffect(callV) {
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            Calls.noticed(context)
+        }
+    }
     // While a call exists, this activity may be woken by the full-screen
     // ask on a dark, locked phone — it must show over the keyguard and
     // light the screen, and must stop doing either the moment the call
     // ends: these flags on an idle wallet would put balances above locks.
-    val inCall = Calls.state != Calls.State.Idle
-    LaunchedEffect(inCall) {
+    val callState = Calls.state
+    val inCall = callState != Calls.State.Idle
+    LaunchedEffect(inCall, kiosk) {
         (context as? android.app.Activity)?.let {
             if (android.os.Build.VERSION.SDK_INT >= 27) {
-                it.setShowWhenLocked(inCall)
-                it.setTurnScreenOn(inCall)
+                it.setShowWhenLocked(inCall && !kiosk)
+                it.setTurnScreenOn(inCall && !kiosk)
             }
+            // A telephone does not go dark mid-sentence: the screen stays
+            // on for the call and goes back to its timeout after it.
+            val keepOn = android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+            if (inCall && !kiosk) it.window.addFlags(keepOn) else it.window.clearFlags(keepOn)
         }
     }
-    if (inCall) {
+    // A kiosk has nobody to pick up. The ring is declined — the caller
+    // hears the till's own word for "no", not a phone that rings out —
+    // and the answering-machine screen it would leave behind is dismissed,
+    // because the call screen is the one door here with no PIN on it.
+    LaunchedEffect(callState, kiosk) {
+        if (!kiosk) return@LaunchedEffect
+        when (callState) {
+            Calls.State.Idle -> {}
+            is Calls.State.NoAnswer -> Calls.dismissNoAnswer()
+            is Calls.State.Incoming -> {
+                val (c, offer) = kotlinx.coroutines.withContext(
+                    kotlinx.coroutines.Dispatchers.IO,
+                ) {
+                    val store = ContactStore(context)
+                    val c = store.all().firstOrNull { it.personaHex == callState.contactHex }
+                    // By id as well as seq: a fresh card restarts the
+                    // numbering, so one thread can hold several rows at
+                    // the offer's seq, and a decline naming the wrong one
+                    // withdraws nothing.
+                    c to c?.let { store.thread(it.personaHex) }
+                        ?.lastOrNull {
+                            it.seq == callState.offerSeq && !it.outgoing &&
+                                it.callId == callState.callId
+                        }
+                }
+                if (c != null && offer != null) Calls.decline(context, c, offer) else Calls.hangUp()
+            }
+            else -> Calls.hangUp()
+        }
+    }
+    if (inCall && !kiosk) {
         org.ducatproject.ducat.ui.CallScreen()
         return
     }
-
-    // The mode owns the whole scaffold (§15.11): a till is a different app
-    // from a wallet, and the drawer is the one shared door between them.
-    val modeV by ContactStore.changes.collectAsState()
-    val appMode = remember(modeV) { ModeStore(context).current() }
 
     // Android's back gesture is a system behaviour, not a widget: without a
     // handler it goes straight to the activity and closes the app. Every screen
@@ -618,30 +719,42 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
     // takeover at a time, so a bill arriving while another bill's prompt or
     // payment screen is up waits unseen — and the re-key runs this again the
     // moment the current flow closes, which is when the queued one appears.
-    LaunchedEffect(billV, billPrompt, billPay, payOpen) {
+    LaunchedEffect(billV, billPrompt, billPay, payOpen, kiosk) {
         if (billPrompt != null || billPay != null || payOpen) return@LaunchedEffect
-        val store = ContactStore(context)
-        val now = System.currentTimeMillis() / 1000
-        for (c in store.all()) {
-            val thread = store.thread(c.personaHex)
-            val m = thread.lastOrNull { !it.outgoing && it.kind == 1 } ?: continue
-            // Not one that is already settled. `billseen_` only records bills
-            // this prompt itself handled, so paying or declining one from the
-            // thread left it unmarked — and inside the five-minute freshness
-            // window the prompt then took the screen over to offer a bill that
-            // had just been paid.
-            if (Ledger.billAnswered(thread, m)) continue
-            val seen = billPrefs.getLong("billseen_${c.personaHex}", -1L)
-            // Fresh only: reinstalls and restores must not replay history as
-            // a stack of surprise take-overs. Both directions — the stamp is
-            // the asker's clock, and a bill stamped ahead of ours (fast
-            // clock, or worse) otherwise counts as "fresh" until its stamp
-            // passes, taking the screen over at every launch until then.
-            if (m.seq > seen && kotlin.math.abs(now - m.timestamp) < 300) {
-                billPrompt = c to m
-                break
+        // A kiosk pays nobody: the bill stays in the thread for the staff,
+        // where it would have gone anyway once dismissed, and the till's
+        // wallet is not offered to whoever is standing at the counter.
+        if (kiosk) return@LaunchedEffect
+        // Every thread in the store, read on each change to it — off the
+        // main thread, which was drawing the screen the bill takes over.
+        val found = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            val store = ContactStore(context)
+            val now = System.currentTimeMillis() / 1000
+            var hit: Pair<Contact, StoredMessage>? = null
+            for (c in store.all()) {
+                val thread = store.thread(c.personaHex)
+                val m = thread.lastOrNull { !it.outgoing && it.kind == 1 } ?: continue
+                // Not one that is already settled. `billseen_` only records
+                // bills this prompt itself handled, so paying or declining
+                // one from the thread left it unmarked — and inside the
+                // five-minute freshness window the prompt then took the
+                // screen over to offer a bill that had just been paid.
+                if (Ledger.billAnswered(thread, m)) continue
+                val seen = billPrefs.getLong("billseen_${c.personaHex}", -1L)
+                // Fresh only: reinstalls and restores must not replay history
+                // as a stack of surprise take-overs. Both directions — the
+                // stamp is the asker's clock, and a bill stamped ahead of
+                // ours (fast clock, or worse) otherwise counts as "fresh"
+                // until its stamp passes, taking the screen over at every
+                // launch until then.
+                if (m.seq > seen && kotlin.math.abs(now - m.timestamp) < 300) {
+                    hit = c to m
+                    break
+                }
             }
+            hit
         }
+        if (found != null) billPrompt = found
     }
     billPrompt?.let { (c, m) ->
         val markSeen = {
@@ -712,10 +825,20 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         (overlay as? Overlay.Drawer)?.let {
             if (it.section == Section.Modes) overlay = Overlay.None
         }
+        // Nothing may be left standing over a kiosk: whatever section or
+        // thread was up when the mode was chosen, and the drawer itself.
+        if (appMode == Mode.Kiosk) {
+            overlay = Overlay.None
+            if (drawer.isOpen) drawer.close()
+        }
     }
 
     ModalNavigationDrawer(
         drawerState = drawer,
+        // The kiosk draws no menu button, but the drawer also opens on an
+        // edge swipe — every section, Modes included, one gesture from the
+        // counter. The drawer is a door for staff; in a kiosk the PIN is.
+        gesturesEnabled = !kiosk,
         drawerContent = {
             DrawerContent { section ->
                 scope.launch { drawer.close() }
@@ -1028,28 +1151,44 @@ private fun HomeScreen(
     LaunchedEffect(version) {
         loaded = withContext(Dispatchers.IO) { Wallet.balances(context) }
     }
-    val b = loaded ?: return
-
-    // The capacity comes from `core::float` across the bridge, so the one number
-    // §17.2 forbids overstating is computed by the same code the conformance
-    // vectors and the harness run, rather than a second implementation in Kotlin.
-    val float = Float(
-        spendablePxmr = b.spendablePxmr,
-        lockedPxmr = b.lockedPxmr,
-        blocksToUnlock = b.blocksToUnlock.toInt(),
-        unlockedOutputs = b.spendableOutputs,
-    )
-    val approx = remember(b.spendableOutputs) {
-        approxPaymentsSupported(b.spendableOutputs.toUInt()).toInt()
+    // Until the first figure lands the balance is a wait, said as one; the
+    // tiles and cards below need no wallet arithmetic and draw at once. This
+    // used to return here, which left the whole home screen empty for as
+    // long as the first decrypt of a large wallet took — several seconds
+    // of a blank page on every cold start.
+    val b = loaded
+    if (b == null) {
+        Box(
+            Modifier.fillMaxWidth().padding(vertical = 48.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            org.ducatproject.ducat.ui.CatSpinner(
+                Modifier.size(40.dp), tint = MaterialTheme.colorScheme.primary,
+            )
+        }
+    } else {
+        // The capacity comes from `core::float` across the bridge, so the one
+        // number §17.2 forbids overstating is computed by the same code the
+        // conformance vectors and the harness run, rather than a second
+        // implementation in Kotlin.
+        val float = Float(
+            spendablePxmr = b.spendablePxmr,
+            lockedPxmr = b.lockedPxmr,
+            blocksToUnlock = b.blocksToUnlock.toInt(),
+            unlockedOutputs = b.spendableOutputs,
+        )
+        val approx = remember(b.spendableOutputs) {
+            approxPaymentsSupported(b.spendableOutputs.toUInt()).toInt()
+        }
+        BalanceCard(
+            spendablePxmr = b.spendablePxmr,
+            capacity = Capacity(approxPayments = approx),
+            float = float,
+            locked = Money(b.lockedPxmr / 1_000_000L, symbol = "", exponent = 6),
+            onTopUp = onTopUp,
+            sync = b,
+        )
     }
-    BalanceCard(
-        spendablePxmr = b.spendablePxmr,
-        capacity = Capacity(approxPayments = approx),
-        float = float,
-        locked = Money(b.lockedPxmr / 1_000_000L, symbol = "", exponent = 6),
-        onTopUp = onTopUp,
-        sync = b,
-    )
 
     // The three jobs that belong on the personal screen, as one row of
     // squares. Hailing is a rider's moment rather than an operating mode, and
@@ -1354,6 +1493,73 @@ private fun HomeScreen(
                     Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = androidx.compose.ui.res
                         .stringResource(R.string.main_open_backup_settings),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+
+    // The other half of the runtime ask above: a decline is silent, and
+    // after it the app is muted — no bill, no ring, no receipt — while
+    // looking exactly as it does when nothing is happening. Said here, once,
+    // as a card with the way back; re-read on every resume so it leaves the
+    // moment they turn them back on in Settings.
+    val lifecycle = androidx.compose.ui.platform.LocalLifecycleOwner.current
+    var notifyOff by remember {
+        mutableStateOf(
+            !androidx.core.app.NotificationManagerCompat.from(context)
+                .areNotificationsEnabled(),
+        )
+    }
+    DisposableEffect(lifecycle) {
+        val watch = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                notifyOff = !androidx.core.app.NotificationManagerCompat.from(context)
+                    .areNotificationsEnabled()
+            }
+        }
+        lifecycle.lifecycle.addObserver(watch)
+        onDispose { lifecycle.lifecycle.removeObserver(watch) }
+    }
+    if (notifyOff) {
+        Spacer(Modifier.height(12.dp))
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            shape = MaterialTheme.shapes.large,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        ) {
+            Row(
+                Modifier
+                    .clickable {
+                        runCatching {
+                            context.startActivity(
+                                android.content.Intent(
+                                    android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS,
+                                ).putExtra(
+                                    android.provider.Settings.EXTRA_APP_PACKAGE,
+                                    context.packageName,
+                                ),
+                            )
+                        }
+                    }
+                    .padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        androidx.compose.ui.res.stringResource(R.string.main_notify_off_title),
+                        style = MaterialTheme.typography.titleSmall,
+                    )
+                    Text(
+                        androidx.compose.ui.res.stringResource(R.string.main_notify_off_body),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
+                Icon(
+                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }

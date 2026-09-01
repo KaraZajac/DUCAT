@@ -14,10 +14,12 @@
     <string name="chat_voice_failed">این پیام صوتی ضبط نشد — دوباره میکروفون را نگه دار.</string>
     <string name="chat_what_card">کارت</string>
     <string name="chat_what_contact">مخاطب</string>
+    <string name="chat_what_reaction">واکنش</string>
     <string name="chat_error_location_fix">موقعیت‌یابی ممکن نشد</string>
     <string name="chat_recording_placeholder">در حال ضبط… %1$d ثانیه</string>
     <string name="chat_message_placeholder">پیام</string>
     <string name="chat_take_picture">گرفتن عکس</string>
+    <string name="chat_no_camera_app">برنامهٔ دوربینی روی این گوشی نیست</string>
     <string name="chat_hold_to_record">برای ضبط پیام صوتی نگه دار</string>
     <string name="chat_attach">پیوست</string>
     <string name="chat_close">بستن</string>
@@ -83,6 +85,7 @@
     <string name="chat_downloading_audio">🎤 در حال دانلود…</string>
     <string name="chat_downloading_file">📎 در حال دانلود…</string>
     <string name="chat_att_stuck">این نرسیده است — شاید دیگر در دسترس نباشد. تلاش ادامه دارد.</string>
+    <string name="chat_att_gone">این نرسیده است — شاید دیگر در دسترس نباشد.</string>
     <string name="chat_att_no_space">فضای کافی روی این تلفن برای دانلود آن نیست.</string>
     <string name="chat_picture_desc">عکس</string>
     <string name="chat_could_not_decode">📷 (قابل خواندن نبود)</string>
@@ -108,6 +111,7 @@
     <string name="chat_stop">توقف</string>
     <string name="chat_play_voice_memo">پخش پیام صوتی</string>
     <string name="chat_voice_memo">پیام صوتی</string>
+    <string name="chat_play_failed">این پیام صوتی پخش نمی‌شود.</string>
     <string name="chat_size_kb">%1$d کیلوبایت</string>
     <string name="chat_size_b">%1$d بایت</string>
     <string name="chat_file_fallback">فایل</string>

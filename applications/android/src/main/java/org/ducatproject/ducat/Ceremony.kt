@@ -746,6 +746,15 @@ object Ceremony {
         if (o == null && round.toInt() == 0) {
             val inv = parseRound0(payload) ?: return
             if (mineHex !in inv.roster) return
+            // And the one inviting must be on it as well. Anyone this device
+            // has a thread with could otherwise hand it a roster of two other
+            // people and have it commit to — and later count itself into —
+            // a deal it was never party to, with [senderIdx] below reading 0
+            // for every frame that followed.
+            if (contact.personaHex !in inv.roster) {
+                DucatLog.w(TAG, "bond $idHex: the invite came from outside its own roster")
+                return
+            }
             // A ceiling on how many unfunded deals one contact may have open
             // with us at once. Joining is automatic and free to ask for.
             if (tooManyOpen(context, contact.personaHex)) {
@@ -801,15 +810,13 @@ object Ceremony {
                 inv.roster, inv.arbiterIdx, inv.kind, inv.funderIdx, inv.farePxmr,
                 inv.refundAddr, inv.funderDepPxmr, inv.hostDepPxmr, inv.nonce, commit,
             )
-            for (peerHex in inv.roster.filter { it != mineHex }) {
-                val peer = contactFor(context, peerHex) ?: run {
+            // Everyone on the roster has to be someone this device can write
+            // to, or the join is a commitment nobody will ever receive.
+            val peers = inv.roster.filter { it != mineHex }.map { peerHex ->
+                contactFor(context, peerHex) ?: run {
                     DucatLog.w(TAG, "bond $idHex: ${peerHex.take(8)}… is not my contact — cannot join")
                     return
                 }
-                Mailbox.send(
-                    context, peer, "bond: building a shared deposit",
-                    kind = 8, round = 0, ceremonyId = id, payload = frame,
-                )
             }
             o = JSONObject().apply {
                 put("id", idHex); put("nonce", inv.nonce)
@@ -846,8 +853,31 @@ object Ceremony {
                 put("sent0", frame.toHexString())
                 put("progressAt", System.currentTimeMillis())
             }
+            // Written down before a single frame leaves. dkgCommit has
+            // already made the machine, and the commitment it produced is
+            // in `sent0`: a send that fails (or a process that dies) between
+            // here and the last peer used to leave no record at all, so the
+            // next round-0 from the inviter was treated as a fresh invite
+            // and committed *again* — a second machine for the same
+            // ceremony, and a roster holding two different commitments from
+            // this device. Saved first, the retry is [resend]'s job.
             save(context, idHex, o)
-            DucatLog.i(TAG, "joined bond $idHex (i=$i of $n), sent commitment")
+            var sent = 0
+            for (peer in peers) {
+                runCatching {
+                    Mailbox.send(
+                        context, peer, "bond: building a shared deposit",
+                        kind = 8, round = 0, ceremonyId = id, payload = frame,
+                    )
+                    sent++
+                }.onFailure {
+                    DucatLog.w(
+                        TAG,
+                        "bond $idHex: commitment to ${peer.displayName()} did not go: ${it.message}",
+                    )
+                }
+            }
+            DucatLog.i(TAG, "joined bond $idHex (i=$i of $n), sent commitment to $sent of ${peers.size}")
         }
         o ?: return
 
@@ -902,23 +932,37 @@ object Ceremony {
                 val shares = uniffi.ducat_mobile.dkgShare(
                     id, i.toUShort(), T.toUShort(), n.toUShort(), from,
                 )
+                // Kept before any send is tried: dkgShare consumes the
+                // round-1 machine, so these bytes cannot be asked for twice.
+                // A send that threw used to unwind past the save — the
+                // shares were gone with the machine, the stage still read
+                // "committed", and every later frame found nothing to
+                // advance. A peer who is briefly unreachable gets theirs
+                // from [resend] instead.
                 val sent1 = JSONObject()
                 for (s in shares) {
-                    val peerHex = roster[s.participant.toInt() - 1]
-                    // Kept whether or not the send lands: dkgShare consumes
-                    // the round-1 machine, so these bytes cannot be asked
-                    // for twice and a peer who is briefly unreachable would
-                    // otherwise be unreachable for good.
                     sent1.put(s.participant.toInt().toString(), s.bytes.toHexString())
-                    val peer = contactFor(context, peerHex) ?: continue
-                    Mailbox.send(
-                        context, peer, "bond: your share",
-                        kind = 8, round = 1, ceremonyId = id, payload = s.bytes,
-                    )
                 }
                 o.put("sent1", sent1)
                 o.put("stage", "shared"); save(context, idHex, o)
-                DucatLog.i(TAG, "bond $idHex: shared, sent ${shares.size} share(s)")
+                var sent = 0
+                for (s in shares) {
+                    val peerHex = roster[s.participant.toInt() - 1]
+                    val peer = contactFor(context, peerHex) ?: continue
+                    runCatching {
+                        Mailbox.send(
+                            context, peer, "bond: your share",
+                            kind = 8, round = 1, ceremonyId = id, payload = s.bytes,
+                        )
+                        sent++
+                    }.onFailure {
+                        DucatLog.w(
+                            TAG,
+                            "bond $idHex: share to ${peer.displayName()} did not go: ${it.message}",
+                        )
+                    }
+                }
+                DucatLog.i(TAG, "bond $idHex: shared, sent $sent of ${shares.size} share(s)")
             } else if (o.optString("stage") == "committed") {
                 DucatLog.i(TAG, "bond $idHex: commitment ${commits.length()}/${n - 1}")
             }
@@ -936,6 +980,13 @@ object Ceremony {
                 val keys = uniffi.ducat_mobile.dkgTakeKeys(id, i.toUShort())
                 o.put("stage", "done"); o.put("address", addr)
                 o.put("keys", keys.toHexString())
+                // On disk now, not after the announcements below. dkgTakeKeys
+                // hands the share out once; it is the only copy of this
+                // device's part of the escrow key, and what follows is a
+                // blocking send per peer and a node pick — long enough for
+                // the process to be reclaimed mid-way, which would have left
+                // a "shared" record with n-1 shares and no key to spend with.
+                save(context, idHex, o)
                 // **Say which wallet we formed, and wait to hear the same back.**
                 //
                 // Round 0's commitments travel pairwise — there is no broadcast
@@ -1020,7 +1071,14 @@ object Ceremony {
             }
         }.onFailure {
             DucatLog.w(TAG, "bond $idHex round $round failed: ${it.message}")
-            uniffi.ducat_mobile.ceremonyAbort(id, i.toUShort())
+            // Not aborted. The machine that failed to advance is still in
+            // memory (the engine parses a peer's bytes before it takes the
+            // machine out, and puts it back on refusal), and every other
+            // failure here — a send, a corrupt bucket — is one a later frame
+            // or a retransmit can still get past. Abort made all of them
+            // final: it threw the machine away, and §17.9 says nothing can
+            // rebuild one.
+            //
             // **A build this device can no longer finish, written down.**
             //
             // The DKG machine lives in memory (§17.9), so a phone that dies

@@ -14,10 +14,12 @@
     <string name="chat_voice_failed">لم تُسجَّل هذه الرسالة الصوتية — جرّب الضغط مطوّلاً على الميكروفون مرة أخرى.</string>
     <string name="chat_what_card">البطاقة</string>
     <string name="chat_what_contact">جهة الاتصال</string>
+    <string name="chat_what_reaction">التفاعل</string>
     <string name="chat_error_location_fix">تعذّر تحديد الموقع</string>
     <string name="chat_recording_placeholder">جارٍ التسجيل… %1$d ث</string>
     <string name="chat_message_placeholder">رسالة</string>
     <string name="chat_take_picture">التقاط صورة</string>
+    <string name="chat_no_camera_app">لا يوجد تطبيق كاميرا على هذا الهاتف</string>
     <string name="chat_hold_to_record">اضغط مطوّلًا لتسجيل رسالة صوتية</string>
     <string name="chat_attach">إرفاق</string>
     <string name="chat_close">إغلاق</string>
@@ -83,6 +85,7 @@
     <string name="chat_downloading_audio">🎤 جارٍ التنزيل…</string>
     <string name="chat_downloading_file">📎 جارٍ التنزيل…</string>
     <string name="chat_att_stuck">لم يصل هذا — قد لا يكون متاحًا بعد الآن. ما زالت المحاولة جارية.</string>
+    <string name="chat_att_gone">لم يصل هذا — قد لا يكون متاحًا بعد الآن.</string>
     <string name="chat_att_no_space">لا توجد مساحة كافية على هذا الهاتف لتنزيله.</string>
     <string name="chat_picture_desc">صورة</string>
     <string name="chat_could_not_decode">📷 (تعذّر فك الترميز)</string>
@@ -108,6 +111,7 @@
     <string name="chat_stop">إيقاف</string>
     <string name="chat_play_voice_memo">تشغيل الرسالة الصوتية</string>
     <string name="chat_voice_memo">رسالة صوتية</string>
+    <string name="chat_play_failed">لا يمكن تشغيل هذه الرسالة الصوتية.</string>
     <string name="chat_size_kb">%1$d ك.ب</string>
     <string name="chat_size_b">%1$d بايت</string>
     <string name="chat_file_fallback">ملف</string>

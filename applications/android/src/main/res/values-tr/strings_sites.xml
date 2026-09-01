@@ -6,6 +6,8 @@
     <string name="sites_empty_body">Bir ducat sitesi mühürlü bir odadır — her görsel ve stil pakette gelir, betikler kapalı, yalnız ducat: bağlantıları çalışır. Bir adres yapıştırıp sakla.</string>
     <string name="sites_add">Site ekle</string>
     <string name="sites_add_confirm">Ekle</string>
+    <string name="sites_add_link_title">Bu site eklensin mi?</string>
+    <string name="sites_add_link_body">Bu adres bir bağlantıyla geldi. Eklemek onu rafına koyar; sen açana kadar hiçbir şey indirilmez.</string>
     <string name="sites_uri_label">ducat:site/… adresi</string>
     <string name="sites_bad_uri">Bu bir ducat:site/ adresi değil.</string>
     <string name="sites_fetching">Alınıyor…</string>
