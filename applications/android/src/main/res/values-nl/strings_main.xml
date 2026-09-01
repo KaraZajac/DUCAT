@@ -38,4 +38,9 @@
     <string name="err_no_keys_yet">Jullie zijn nog niet klaar met kaarten uitwisselen.</string>
     <string name="err_conversation_too_old">Hun kaart is te oud voor deze app. Vraag om een nieuwe.</string>
     <string name="err_board_full">Er wordt hier op dit moment te veel gevraagd. Probeer het over een minuut opnieuw.</string>
+    <string name="main_deals_title">Afspraken</string>
+    <plurals name="main_deals_waiting">
+        <item quantity="one">%1$d afspraak wacht op jou</item>
+        <item quantity="other">%1$d afspraken wachten op jou</item>
+    </plurals>
 </resources>

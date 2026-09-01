@@ -42,4 +42,13 @@
     <string name="err_no_keys_yet">لم تكتمل بعد عملية تبادل البطاقات بينكما.</string>
     <string name="err_conversation_too_old">بطاقتهم أقدم من أن يقرأها هذا التطبيق. اطلب منهم بطاقة جديدة.</string>
     <string name="err_board_full">عدد الطلبات في هذه المنطقة كبير الآن. حاول بعد دقيقة.</string>
+    <string name="main_deals_title">الصفقات</string>
+    <plurals name="main_deals_waiting">
+        <item quantity="zero">لا صفقات بانتظارك</item>
+        <item quantity="one">صفقة واحدة بانتظارك</item>
+        <item quantity="two">صفقتان بانتظارك</item>
+        <item quantity="few">%1$d صفقات بانتظارك</item>
+        <item quantity="many">%1$d صفقة بانتظارك</item>
+        <item quantity="other">%1$d صفقة بانتظارك</item>
+    </plurals>
 </resources>

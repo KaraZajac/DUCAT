@@ -38,4 +38,8 @@
     <string name="err_no_keys_yet">아직 서로 카드 교환이 끝나지 않았습니다.</string>
     <string name="err_conversation_too_old">상대방의 카드가 이 앱에는 너무 오래되었습니다. 새 카드를 요청하세요.</string>
     <string name="err_board_full">지금 이 근처에 요청이 너무 많습니다. 잠시 후 다시 시도하세요.</string>
+    <string name="main_deals_title">거래</string>
+    <plurals name="main_deals_waiting">
+        <item quantity="other">%1$d건의 거래가 응답을 기다립니다</item>
+    </plurals>
 </resources>

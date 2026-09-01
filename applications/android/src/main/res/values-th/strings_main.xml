@@ -38,4 +38,8 @@
     <string name="err_no_keys_yet">คุณสองคนยังแลกการ์ดกันไม่เสร็จ</string>
     <string name="err_conversation_too_old">การ์ดของเขาเก่าเกินไปสำหรับแอปนี้ ขอการ์ดใหม่จากเขา</string>
     <string name="err_board_full">ตอนนี้แถวนี้มีคำขอมากเกินไป ลองใหม่อีกสักครู่</string>
+    <string name="main_deals_title">ข้อตกลง</string>
+    <plurals name="main_deals_waiting">
+        <item quantity="other">%1$d ข้อตกลงรอคุณอยู่</item>
+    </plurals>
 </resources>

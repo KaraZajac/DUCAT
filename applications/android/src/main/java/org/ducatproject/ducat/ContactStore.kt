@@ -210,6 +210,18 @@ class ContactStore(context: Context) {
     }
 
     /** Delete one message from this device. */
+    /** The half-typed message, per thread. Chat saves it when the screen
+     *  is disposed and reads it back on entry; send clears it. */
+    fun draftOf(personaHex: String): String =
+        prefs.getString("draft_$personaHex", null) ?: ""
+
+    fun saveDraft(personaHex: String, text: String) {
+        prefs.edit().apply {
+            if (text.isBlank()) remove("draft_$personaHex")
+            else putString("draft_$personaHex", text.take(4000))
+        }.apply()
+    }
+
     fun deleteMessage(personaHex: String, seq: Long, outgoing: Boolean) {
         writeThread(
             personaHex,

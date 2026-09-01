@@ -38,4 +38,8 @@
     <string name="err_no_keys_yet">カードの交換がまだ終わっていません。</string>
     <string name="err_conversation_too_old">相手のカードはこのアプリには古すぎます。新しいカードをもらってください。</string>
     <string name="err_board_full">この辺りは今、依頼が多すぎます。1分ほどしてからもう一度お試しください。</string>
+    <string name="main_deals_title">取引</string>
+    <plurals name="main_deals_waiting">
+        <item quantity="other">%1$d 件の取引があなたを待っています</item>
+    </plurals>
 </resources>

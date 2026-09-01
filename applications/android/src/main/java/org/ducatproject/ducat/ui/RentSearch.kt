@@ -581,17 +581,34 @@ fun MarketBrowse(onOpenChat: (Contact) -> Unit) {
     // plus one Digital chip — local pub notices carry no category), while
     // a worldwide board IS a category (so the six shelves replace the
     // kinds, which have nowhere to stand without a place).
+    // The browse remembers where you were looking across launches, not
+    // just rotations: somebody shopping worldwide news all week should
+    // not re-pick it every open. Plain prefs — a shelf choice is not a
+    // secret.
+    val browsePrefs = LocalContext.current
+        .getSharedPreferences("ducat_browse", android.content.Context.MODE_PRIVATE)
     var scope by androidx.compose.runtime.saveable.rememberSaveable {
-        androidx.compose.runtime.mutableStateOf(0)
+        androidx.compose.runtime.mutableStateOf(browsePrefs.getInt("scope", 0))
     }
     var what by androidx.compose.runtime.saveable.rememberSaveable {
-        androidx.compose.runtime.mutableStateOf(0) // 0 all · 1..5 kinds · 6 digital
+        // 0 all · 1..5 kinds · 6 digital
+        androidx.compose.runtime.mutableStateOf(browsePrefs.getInt("what", 0))
     }
     var cat by androidx.compose.runtime.saveable.rememberSaveable {
-        androidx.compose.runtime.mutableStateOf("news")
+        androidx.compose.runtime.mutableStateOf(
+            browsePrefs.getString("cat", null) ?: "news",
+        )
     }
     var myLang by androidx.compose.runtime.saveable.rememberSaveable {
-        androidx.compose.runtime.mutableStateOf(true)
+        androidx.compose.runtime.mutableStateOf(browsePrefs.getBoolean("my_lang", true))
+    }
+    androidx.compose.runtime.LaunchedEffect(scope, what, cat, myLang) {
+        browsePrefs.edit()
+            .putInt("scope", scope)
+            .putInt("what", what)
+            .putString("cat", cat)
+            .putBoolean("my_lang", myLang)
+            .apply()
     }
     androidx.compose.foundation.layout.Column(
         androidx.compose.ui.Modifier.fillMaxSize(),

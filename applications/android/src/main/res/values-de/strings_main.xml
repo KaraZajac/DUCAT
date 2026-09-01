@@ -38,4 +38,9 @@
     <string name="err_no_keys_yet">Ihr habt den Kartentausch noch nicht abgeschlossen.</string>
     <string name="err_conversation_too_old">Ihre Karte ist zu alt für diese App. Bitten Sie um eine neue.</string>
     <string name="err_board_full">Hier wird gerade zu viel gerufen. Versuchen Sie es in einer Minute noch einmal.</string>
+    <string name="main_deals_title">Abmachungen</string>
+    <plurals name="main_deals_waiting">
+        <item quantity="one">%1$d Abmachung wartet auf dich</item>
+        <item quantity="other">%1$d Abmachungen warten auf dich</item>
+    </plurals>
 </resources>

@@ -281,7 +281,20 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     val answers = remember(messages) { billAnswers(messages) }
     // A half-typed message survives a rotation. It is the single most
     // common thing to lose, and the least excusable.
-    var draft by rememberSaveable { mutableStateOf("") }
+    //
+    // And it survives leaving the thread: the overlay disposes this whole
+    // screen on Back, so saveable state alone dropped the draft the moment
+    // somebody checked another conversation mid-sentence. Written to the
+    // store on dispose, read back on entry, cleared by send.
+    var draft by rememberSaveable {
+        mutableStateOf(ContactStore(context).draftOf(contact.personaHex))
+    }
+    val draftNow by androidx.compose.runtime.rememberUpdatedState(draft)
+    androidx.compose.runtime.DisposableEffect(contact.personaHex) {
+        onDispose {
+            ContactStore(context).saveDraft(contact.personaHex, draftNow)
+        }
+    }
     // What the next message answers, if anything. Saved with the draft: half a
     // reply is as easy to lose as half a sentence, and as annoying.
     var replyTo by rememberSaveable { mutableStateOf<Long?>(null) }
@@ -410,6 +423,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                             result.onSuccess { updated ->
                                 c = updated
                                 draft = ""
+                                ContactStore(context).saveDraft(c.personaHex, "")
                                 replyTo = null; replyToOwn = false
                                 messages = store.thread(c.personaHex)
                             }.onFailure {

@@ -38,4 +38,8 @@
     <string name="err_no_keys_yet">你们还没有完成名片交换。</string>
     <string name="err_conversation_too_old">对方的名片对本应用来说太旧了。请他们发一张新的。</string>
     <string name="err_board_full">这附近现在的叫车太多了。请过一分钟再试。</string>
+    <string name="main_deals_title">交易</string>
+    <plurals name="main_deals_waiting">
+        <item quantity="other">%1$d 笔交易等待你处理</item>
+    </plurals>
 </resources>

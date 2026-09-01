@@ -134,6 +134,23 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
         // The Library's Open: view first, share sheet when nothing on the
         // device claims the type. Lives here because FileProvider and the
         // chooser are Android; the shared screen only holds the hook.
+        // Counter etiquette: full brightness while any QR is on screen, put
+        // back the moment the last one leaves. Refcounted — two codes can
+        // overlap during a transition and the first to close must not dim
+        // the one still up.
+        var qrsUp = 0
+        org.ducatproject.ducat.ui.qrLit = { on ->
+            runOnUiThread {
+                qrsUp = (qrsUp + if (on) 1 else -1).coerceAtLeast(0)
+                val lp = window.attributes
+                lp.screenBrightness = if (qrsUp > 0) {
+                    1f
+                } else {
+                    android.view.WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+                }
+                window.attributes = lp
+            }
+        }
         org.ducatproject.ducat.ui.libraryOpen = { ctx, publisherHex, period ->
             val dir = java.io.File(ctx.filesDir, "publications/$publisherHex/$period")
             val file = dir.walkTopDown()
@@ -1215,6 +1232,65 @@ private fun HomeScreen(
         }
     }
 
+
+    // The deal that cannot move without you, said where you already look.
+    // waitingOnMe is precise about whose turn it is — "waiting to be
+    // funded" is true of both sides and useful to neither — and the row
+    // routes to the Deals tab of the mode whose job the deal was.
+    val waitingDeals = remember(version) {
+        runCatching {
+            org.ducatproject.ducat.Ceremony.waitingOnMe(context).filter {
+                it.optInt("kind") == org.ducatproject.ducat.Ceremony.KIND_RESERVATION
+            }
+        }.getOrDefault(emptyList())
+    }
+    if (waitingDeals.isNotEmpty()) {
+        Spacer(Modifier.height(12.dp))
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            shape = MaterialTheme.shapes.large,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        ) {
+            Row(
+                Modifier.clickable {
+                    val about = waitingDeals.first().optInt("aboutKind", 0)
+                    val mode = when (about) {
+                        org.ducatproject.ducat.Listings.KIND_SALE ->
+                            org.ducatproject.ducat.Mode.Marketplace
+                        org.ducatproject.ducat.Listings.KIND_SKILL ->
+                            org.ducatproject.ducat.Mode.HireHelp
+                        else -> org.ducatproject.ducat.Mode.Renting
+                    }
+                    org.ducatproject.ducat.ModeStore(context).set(mode, browsing = true)
+                    // Their Deals tabs all sit third; the shell honours this
+                    // after it composes.
+                    org.ducatproject.ducat.ui.shellTabRequest.value = 2
+                }.padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        androidx.compose.ui.res.stringResource(R.string.main_deals_title),
+                        style = MaterialTheme.typography.titleSmall,
+                    )
+                    Text(
+                        androidx.compose.ui.res.pluralStringResource(
+                            R.plurals.main_deals_waiting,
+                            waitingDeals.size, waitingDeals.size,
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
+                Icon(
+                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
 
     // The nudge that keeps §4.3 true: the bundle carries the relationships
     // now, so every contact made after the last export is one a restore will

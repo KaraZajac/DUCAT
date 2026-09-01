@@ -40,4 +40,11 @@
     <string name="err_no_keys_yet">Nie skończyliście jeszcze wymieniać się wizytówkami.</string>
     <string name="err_conversation_too_old">Ich wizytówka jest za stara dla tej aplikacji. Poproś o nową.</string>
     <string name="err_board_full">W okolicy jest teraz zbyt wiele zgłoszeń. Spróbuj za minutę.</string>
+    <string name="main_deals_title">Transakcje</string>
+    <plurals name="main_deals_waiting">
+        <item quantity="one">%1$d transakcja czeka na ciebie</item>
+        <item quantity="few">%1$d transakcje czekają na ciebie</item>
+        <item quantity="many">%1$d transakcji czeka na ciebie</item>
+        <item quantity="other">%1$d transakcji czeka na ciebie</item>
+    </plurals>
 </resources>

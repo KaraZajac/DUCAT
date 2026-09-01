@@ -38,4 +38,9 @@
     <string name="err_no_keys_yet">Non avete ancora finito di scambiarvi le tessere.</string>
     <string name="err_conversation_too_old">La loro tessera è troppo vecchia per questa app. Chiedigliene una nuova.</string>
     <string name="err_board_full">Ci sono troppe richieste qui in questo momento. Riprova tra un minuto.</string>
+    <string name="main_deals_title">Accordi</string>
+    <plurals name="main_deals_waiting">
+        <item quantity="one">%1$d accordo attende la tua risposta</item>
+        <item quantity="other">%1$d accordi attendono la tua risposta</item>
+    </plurals>
 </resources>

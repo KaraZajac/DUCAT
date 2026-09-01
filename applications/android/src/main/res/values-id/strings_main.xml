@@ -38,4 +38,8 @@
     <string name="err_no_keys_yet">Kalian belum selesai bertukar kartu.</string>
     <string name="err_conversation_too_old">Kartu mereka terlalu lama untuk aplikasi ini. Minta yang baru.</string>
     <string name="err_board_full">Sekarang terlalu banyak permintaan di sekitar sini. Coba lagi semenit lagi.</string>
+    <string name="main_deals_title">Kesepakatan</string>
+    <plurals name="main_deals_waiting">
+        <item quantity="other">%1$d kesepakatan menunggu Anda</item>
+    </plurals>
 </resources>

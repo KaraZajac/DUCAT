@@ -40,4 +40,11 @@
     <string name="err_no_keys_yet">Ви ще не завершили обмін картками.</string>
     <string name="err_conversation_too_old">Їхня картка застара для цього застосунку. Попросіть нову.</string>
     <string name="err_board_full">Зараз тут забагато викликів. Спробуйте за хвилину.</string>
+    <string name="main_deals_title">Угоди</string>
+    <plurals name="main_deals_waiting">
+        <item quantity="one">%1$d угода чекає на вас</item>
+        <item quantity="few">%1$d угоди чекають на вас</item>
+        <item quantity="many">%1$d угод чекають на вас</item>
+        <item quantity="other">%1$d угод чекають на вас</item>
+    </plurals>
 </resources>
