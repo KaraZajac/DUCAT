@@ -317,6 +317,30 @@ pub fn node_start(storage_dir: String, udp: bool) -> Result<(), NodeError> {
         {
             cfg["network"]["dht"]["set_value_count"] = serde_json::json!(n);
         }
+        // The pipe a board wave flows through (2026-09-01). A ring read is
+        // 9 boards x 8 shard subkeys = 72 get operations, and veilid gates
+        // outbound DHT operations behind a 16-permit semaphore
+        // (storage_manager operation_concurrency) - so the wave drains in
+        // ~4.5 batches of the flat 10-second empty-board timeout, which is
+        // the measured 48 seconds that read as "an effective width of four"
+        // (see the worker-thread note above; the workers were never the
+        // bottleneck). 72 permits lets the whole wave fly at once; an idle
+        // permit costs nothing. The fanout under each operation (5 nodes,
+        // quorum 3) is unchanged - this widens how many questions we ask
+        // together, not how hard each question hits the network.
+        let dht_ops = std::env::var("DUCAT_DHT_OPS")
+            .ok()
+            .and_then(|v| v.parse::<u64>().ok())
+            .unwrap_or(72);
+        cfg["network"]["dht"]["max_concurrent_operations"] = serde_json::json!(dht_ops);
+        // Probe knob for the residual gate (bench use): veilid's RPC worker
+        // count, 0 = automatic. Unset means leave the default.
+        if let Some(n) = std::env::var("DUCAT_RPC_CONCURRENCY")
+            .ok()
+            .and_then(|v| v.parse::<u64>().ok())
+        {
+            cfg["network"]["rpc"]["concurrency"] = serde_json::json!(n);
+        }
         // A wallet is a client, not a backbone (2026-08-31, the load-shedding
         // find): with inbound reachability veilid volunteers this device as a
         // relay, DHT host, route hop, signaler and dial-info validator for

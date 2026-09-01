@@ -379,6 +379,14 @@ dependencies {
 
 // Headless proof the stack stands: JVM, JNA, the Rust bridge, Veilid — no
 // window involved. `./gradlew :desktop:smoke`.
+tasks.register<JavaExec>("boardbench") {
+    group = "verification"
+    description = "Time one 9-board ring read under DUCAT_DHT_OPS"
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("org.ducatproject.desk.BoardBenchKt")
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 tasks.register<JavaExec>("smoke") {
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "org.ducatproject.desk.SmokeKt"
