@@ -52,4 +52,5 @@
     <string name="book_side_hiring">กำลังจ้าง</string>
     <string name="book_side_working">กำลังทำงาน</string>
     <string name="shells_tab_deals">ดีล</string>
+    <string name="shells_bookings_empty_body">เมื่อมีคนจองประกาศของคุณ — หรือคุณจองของคนอื่น — ข้อตกลงและเงินประกันจะมาอยู่ที่นี่</string>
 </resources>

@@ -78,4 +78,5 @@
     <string name="press_no_code_title">No code yet</string>
     <string name="press_no_code_body">Publish something to create a code — it is what readers scan to subscribe.</string>
     <string name="press_open_room">Open the Press room</string>
+    <string name="market_refreshing">Checking for changes…</string>
 </resources>

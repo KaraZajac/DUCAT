@@ -78,4 +78,5 @@
     <string name="press_no_code_title">Nie ma jeszcze kodu</string>
     <string name="press_no_code_body">Opublikuj coś, aby utworzyć kod — to jego czytelnicy skanują, by subskrybować.</string>
     <string name="press_open_room">Otwórz salę prasową</string>
+    <string name="market_refreshing">Sprawdzanie zmian…</string>
 </resources>

@@ -78,4 +78,5 @@
     <string name="press_no_code_title">Belum ada kode</string>
     <string name="press_no_code_body">Terbitkan sesuatu untuk membuat kode — itulah yang dipindai pembaca untuk berlangganan.</string>
     <string name="press_open_room">Buka ruang pers</string>
+    <string name="market_refreshing">Memeriksa perubahan…</string>
 </resources>

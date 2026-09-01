@@ -52,4 +52,5 @@
     <string name="book_side_hiring">Наём</string>
     <string name="book_side_working">Работа</string>
     <string name="shells_tab_deals">Сделки</string>
+    <string name="shells_bookings_empty_body">Когда кто-то бронирует ваше объявление — или вы бронируете чужое — сделка и её залог появляются здесь.</string>
 </resources>

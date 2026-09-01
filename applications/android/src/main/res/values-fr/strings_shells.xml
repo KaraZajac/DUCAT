@@ -52,4 +52,5 @@
     <string name="book_side_hiring">Embauche</string>
     <string name="book_side_working">Travail</string>
     <string name="shells_tab_deals">Affaires</string>
+    <string name="shells_bookings_empty_body">Quand quelqu\'un réserve une de vos annonces — ou que vous réservez celle d\'un autre — l\'accord et son séquestre arrivent ici.</string>
 </resources>

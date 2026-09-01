@@ -78,4 +78,5 @@
     <string name="press_no_code_title">아직 코드가 없습니다</string>
     <string name="press_no_code_body">무언가를 발행하면 코드가 만들어집니다 — 독자는 그것을 스캔해 구독합니다.</string>
     <string name="press_open_room">프레스룸 열기</string>
+    <string name="market_refreshing">변경 사항 확인 중…</string>
 </resources>

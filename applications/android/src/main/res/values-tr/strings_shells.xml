@@ -52,4 +52,5 @@
     <string name="book_side_hiring">İşe alıyorsun</string>
     <string name="book_side_working">Çalışıyorsun</string>
     <string name="shells_tab_deals">Anlaşmalar</string>
+    <string name="shells_bookings_empty_body">Biri ilanlarınızdan birini ayırttığında — ya da siz başkasınınkini ayırttığınızda — anlaşma ve teminatı buraya düşer.</string>
 </resources>

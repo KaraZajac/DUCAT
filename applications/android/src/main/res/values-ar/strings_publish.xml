@@ -78,4 +78,5 @@
     <string name="press_no_code_title">لا رمز بعد</string>
     <string name="press_no_code_body">انشر شيئًا لإنشاء رمز — إنه ما يمسحه القرّاء للاشتراك.</string>
     <string name="press_open_room">افتح غرفة الصحافة</string>
+    <string name="market_refreshing">جارٍ التحقق من التغييرات…</string>
 </resources>

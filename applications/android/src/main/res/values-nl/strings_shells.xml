@@ -52,4 +52,5 @@
     <string name="book_side_hiring">Inhuren</string>
     <string name="book_side_working">Werken</string>
     <string name="shells_tab_deals">Deals</string>
+    <string name="shells_bookings_empty_body">Wanneer iemand een van je aanbiedingen boekt — of jij die van een ander — komen de afspraak en het onderpand hier terecht.</string>
 </resources>

@@ -78,4 +78,5 @@
     <string name="press_no_code_title">还没有码</string>
     <string name="press_no_code_body">发布一些内容来生成订阅码——读者扫它即可订阅。</string>
     <string name="press_open_room">打开新闻室</string>
+    <string name="market_refreshing">正在检查更新…</string>
 </resources>

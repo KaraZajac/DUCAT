@@ -78,4 +78,5 @@
     <string name="press_no_code_title">Ancora nessun codice</string>
     <string name="press_no_code_body">Pubblica qualcosa per creare un codice: è ciò che i lettori scansionano per abbonarsi.</string>
     <string name="press_open_room">Apri la sala stampa</string>
+    <string name="market_refreshing">Controllo delle novità…</string>
 </resources>

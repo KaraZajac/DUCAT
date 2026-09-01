@@ -334,6 +334,94 @@ object Publications {
         ContactStore.bump()
     }
 
+    // ------------------------------------------------------------------
+    // The remembered shelf. Same shape as the listings' board cache: what
+    // a shelf said last time paints instantly, the live read replaces it.
+    // Public board content, so plain prefs.
+    private val shelfCache =
+        java.util.concurrent.ConcurrentHashMap<String, Pair<Long, List<MarketRow>>>()
+    private const val SHELF_CACHE_PREFS = "ducat_market_cache"
+    private const val SHELF_CACHE_TTL_MS = 6 * 60 * 60_000L
+    @Volatile private var shelfCacheLoaded = false
+
+    private fun shelfRowJson(r: MarketRow) = JSONObject().apply {
+        put("title", r.title); r.blurb?.let { put("blurb", it) }
+        r.pricePxmr?.let { put("price", it) }
+        put("card", r.cardUri); put("poster", r.posterHex)
+        put("board", r.board); put("subkey", r.subkey); put("expiry", r.expiry)
+    }
+
+    private fun shelfRowFrom(o: JSONObject): MarketRow? = runCatching {
+        MarketRow(
+            title = o.getString("title"),
+            blurb = if (o.has("blurb")) o.getString("blurb") else null,
+            pricePxmr = if (o.has("price")) o.getLong("price") else null,
+            cardUri = o.getString("card"),
+            posterHex = o.getString("poster"),
+            board = o.getString("board"),
+            subkey = o.getInt("subkey"),
+            expiry = o.getLong("expiry"),
+        )
+    }.getOrNull()
+
+    private fun loadShelfCache(context: Context) {
+        if (shelfCacheLoaded) return
+        synchronized(shelfCache) {
+            if (shelfCacheLoaded) return
+            shelfCacheLoaded = true
+            runCatching {
+                val raw = context.getSharedPreferences(SHELF_CACHE_PREFS, 0)
+                    .getString("shelves", null) ?: return
+                val all = JSONObject(raw)
+                for (key in all.keys()) {
+                    val e = all.optJSONObject(key) ?: continue
+                    val rows = e.optJSONArray("rows") ?: continue
+                    val list = (0 until rows.length())
+                        .mapNotNull { i -> rows.optJSONObject(i)?.let(::shelfRowFrom) }
+                    shelfCache.putIfAbsent(key, e.optLong("at") to list)
+                }
+            }.onFailure { DucatLog.w("Publications", "shelf cache load: ${it.message}") }
+        }
+    }
+
+    private fun rememberShelf(context: Context, key: String, rows: List<MarketRow>) {
+        shelfCache[key] = System.currentTimeMillis() to rows
+        runCatching {
+            val all = JSONObject()
+            for ((k, v) in shelfCache) {
+                all.put(
+                    k,
+                    JSONObject()
+                        .put("at", v.first)
+                        .put("rows", org.json.JSONArray(v.second.map(::shelfRowJson))),
+                )
+            }
+            context.getSharedPreferences(SHELF_CACHE_PREFS, 0)
+                .edit().putString("shelves", all.toString()).apply()
+        }.onFailure { DucatLog.w("Publications", "shelf cache save: ${it.message}") }
+    }
+
+    /** What the worldwide shelf said last time, if recent enough to paint. */
+    fun cachedMarket(context: Context, category: String, lang: String?): List<MarketRow>? {
+        loadShelfCache(context)
+        val now = System.currentTimeMillis() / 1000
+        return shelfCache["w|$category|${lang ?: "*"}"]
+            ?.takeIf { System.currentTimeMillis() - it.first < SHELF_CACHE_TTL_MS }
+            ?.second?.filter { it.expiry > now }
+    }
+
+    /** What the neighbourhood shelf said last time, keyed by the home cell. */
+    fun cachedLocalPubs(context: Context, latE7: Long, lonE7: Long): List<MarketRow>? {
+        loadShelfCache(context)
+        val home = runCatching {
+            uniffi.ducat_mobile.geohashEncode(latE7, lonE7, Listings.CELL_PRECISION)
+        }.getOrNull() ?: return null
+        val now = System.currentTimeMillis() / 1000
+        return shelfCache["l|$home"]
+            ?.takeIf { System.currentTimeMillis() - it.first < SHELF_CACHE_TTL_MS }
+            ?.second?.filter { it.expiry > now }
+    }
+
     /** Browse one category worldwide: every readable notice, one row per
      *  poster key (a publisher re-posts; readers want the newest). */
     fun browseMarket(
@@ -342,6 +430,9 @@ object Publications {
         lang: String?,
         onProgress: (Int) -> Unit = { _ -> },
     ): List<MarketRow> {
+        val attachedAtStart = runCatching {
+            uniffi.ducat_mobile.nodeStatus().publicInternetReady
+        }.getOrDefault(false)
         val now = System.currentTimeMillis() / 1000
         val tip = Beacons.tip(context).toULong()
         val base = marketBoard(category, lang)
@@ -376,7 +467,14 @@ object Publications {
                 if (prior == null || prior.expiry < row.expiry) rows[d.poster] = row
             }
         }
-        return rows.values.toList()
+        // Remember what a device that could ask was told. An unattached
+        // read "succeeds" empty in a blink, and writing that emptiness over
+        // yesterday's rows is how a cache poisons itself.
+        return rows.values.toList().also {
+            if (it.isNotEmpty() || attachedAtStart) {
+                rememberShelf(context, "w|$category|${lang ?: "*"}", it)
+            }
+        }
     }
 
     /**
@@ -392,6 +490,9 @@ object Publications {
         lonE7: Long,
         onProgress: (Int, Int) -> Unit = { _, _ -> },
     ): List<MarketRow> {
+        val attachedAtStart = runCatching {
+            uniffi.ducat_mobile.nodeStatus().publicInternetReady
+        }.getOrDefault(false)
         val now = System.currentTimeMillis() / 1000
         val tip = Beacons.tip(context).toULong()
         val home = runCatching {
@@ -436,7 +537,9 @@ object Publications {
         } finally {
             pool.shutdown()
         }
-        return synchronized(rows) { rows.values.toList() }
+        return synchronized(rows) { rows.values.toList() }.also {
+            if (it.isNotEmpty() || attachedAtStart) rememberShelf(context, "l|$home", it)
+        }
     }
 
     /** The publication the Press mode fronts. Null until chosen. */

@@ -78,4 +78,5 @@
     <string name="press_no_code_title">Chưa có mã</string>
     <string name="press_no_code_body">Xuất bản gì đó để tạo mã — đây là mã người đọc quét để đăng ký.</string>
     <string name="press_open_room">Mở phòng báo chí</string>
+    <string name="market_refreshing">Đang kiểm tra thay đổi…</string>
 </resources>

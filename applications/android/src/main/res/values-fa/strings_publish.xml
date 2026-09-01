@@ -78,4 +78,5 @@
     <string name="press_no_code_title">هنوز کدی نیست</string>
     <string name="press_no_code_body">چیزی منتشر کنید تا کدی ساخته شود — خوانندگان همان را برای اشتراک اسکن می‌کنند.</string>
     <string name="press_open_room">باز کردن اتاق مطبوعات</string>
+    <string name="market_refreshing">در حال بررسی تغییرات…</string>
 </resources>

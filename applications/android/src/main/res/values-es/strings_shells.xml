@@ -52,4 +52,5 @@
     <string name="book_side_hiring">Contratando</string>
     <string name="book_side_working">Trabajando</string>
     <string name="shells_tab_deals">Tratos</string>
+    <string name="shells_bookings_empty_body">Cuando alguien reserva uno de tus anuncios — o tú reservas el de otra persona — el trato y su depósito llegan aquí.</string>
 </resources>

@@ -78,4 +78,5 @@
     <string name="press_no_code_title">अभी कोई कोड नहीं</string>
     <string name="press_no_code_body">कोड बनाने के लिए कुछ प्रकाशित करें — इसे ही पाठक सदस्यता के लिए स्कैन करते हैं।</string>
     <string name="press_open_room">प्रेस रूम खोलें</string>
+    <string name="market_refreshing">बदलाव जाँचे जा रहे हैं…</string>
 </resources>

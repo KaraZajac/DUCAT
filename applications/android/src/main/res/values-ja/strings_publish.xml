@@ -78,4 +78,5 @@
     <string name="press_no_code_title">コードはまだありません</string>
     <string name="press_no_code_body">何かを発行するとコードが作られます — 読者はそれをスキャンして購読します。</string>
     <string name="press_open_room">プレスルームを開く</string>
+    <string name="market_refreshing">変更を確認中…</string>
 </resources>

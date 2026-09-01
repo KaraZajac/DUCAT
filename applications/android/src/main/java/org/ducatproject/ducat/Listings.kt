@@ -65,7 +65,111 @@ object Listings {
 
     private fun cacheKey(cell: String, kind: Int?) = "$cell|${kind ?: -1}"
 
-    private const val CACHE_TTL_MS = 3 * 60_000L
+    // How old a remembered board may be and still paint. Three minutes when
+    // the cache lived and died with the process; six hours now that it
+    // survives a relaunch, because that is the re-post cadence — a notice
+    // older than its board's own refresh clock is stale twice over. The
+    // window governs only the first paint: every board is still read, every
+    // answer still replaces what was painted, and a notice past its own
+    // expiry is dropped at paint time whatever the cache thinks.
+    private const val CACHE_TTL_MS = 6 * 60 * 60_000L
+
+    // The remembered boards, on disk: what makes "open Marketplace, see the
+    // neighbourhood" instant on the first open after a relaunch, not just
+    // the second in a session. Plain prefs, not securePrefs — everything in
+    // here was read off a public board.
+    private const val CACHE_PREFS = "ducat_board_cache"
+    private const val CACHE_KEEP = 48
+    @Volatile private var cacheLoaded = false
+
+    private fun rowToJson(r: uniffi.ducat_mobile.RentalInfo) = JSONObject().apply {
+        put("poster", r.poster); put("card", r.card)
+        put("kind", r.kind.toLong()); put("title", r.title); put("area", r.area)
+        r.cell?.let { put("cell", it) }
+        put("price", r.pricePxmr.toString()); put("deposit", r.depositPxmr.toString())
+        put("expiry", r.expiry.toLong())
+        r.make?.let { put("make", it) }; r.model?.let { put("model", it) }
+        r.year?.let { put("year", it.toLong()) }
+        r.gearbox?.let { put("gearbox", it.toLong()) }
+        r.fuel?.let { put("fuel", it.toLong()) }
+        r.seats?.let { put("seats", it.toLong()) }
+        r.color?.let { put("color", it) }; r.trim?.let { put("trim", it) }
+        r.rooms?.let { put("rooms", it.toLong()) }
+        r.sleeps?.let { put("sleeps", it.toLong()) }
+        r.sizeM2?.let { put("size_m2", it.toLong()) }
+        r.subtype?.let { put("subtype", it.toLong()) }
+        put("features", org.json.JSONArray(r.features))
+        put("quantity", r.quantity.toLong())
+    }
+
+    private fun rowFromJson(o: JSONObject): uniffi.ducat_mobile.RentalInfo? = runCatching {
+        uniffi.ducat_mobile.RentalInfo(
+            poster = o.getString("poster"),
+            card = o.getString("card"),
+            kind = o.getLong("kind").toULong(),
+            title = o.getString("title"),
+            area = o.optString("area"),
+            cell = if (o.has("cell")) o.getString("cell") else null,
+            pricePxmr = o.getString("price").toULong(),
+            depositPxmr = o.getString("deposit").toULong(),
+            expiry = o.getLong("expiry").toULong(),
+            make = if (o.has("make")) o.getString("make") else null,
+            model = if (o.has("model")) o.getString("model") else null,
+            year = if (o.has("year")) o.getLong("year").toULong() else null,
+            gearbox = if (o.has("gearbox")) o.getLong("gearbox").toULong() else null,
+            fuel = if (o.has("fuel")) o.getLong("fuel").toULong() else null,
+            seats = if (o.has("seats")) o.getLong("seats").toULong() else null,
+            color = if (o.has("color")) o.getString("color") else null,
+            trim = if (o.has("trim")) o.getString("trim") else null,
+            rooms = if (o.has("rooms")) o.getLong("rooms").toULong() else null,
+            sleeps = if (o.has("sleeps")) o.getLong("sleeps").toULong() else null,
+            sizeM2 = if (o.has("size_m2")) o.getLong("size_m2").toULong() else null,
+            subtype = if (o.has("subtype")) o.getLong("subtype").toULong() else null,
+            features = o.optJSONArray("features")?.let { a ->
+                (0 until a.length()).map { a.getString(it) }
+            } ?: emptyList(),
+            quantity = o.optLong("quantity", 1).toULong(),
+        )
+    }.getOrNull()
+
+    private fun loadCellCache(context: Context) {
+        if (cacheLoaded) return
+        synchronized(cellCache) {
+            if (cacheLoaded) return
+            cacheLoaded = true
+            runCatching {
+                val raw = context.getSharedPreferences(CACHE_PREFS, 0)
+                    .getString("cells", null) ?: return
+                val all = JSONObject(raw)
+                for (key in all.keys()) {
+                    val e = all.optJSONObject(key) ?: continue
+                    val rows = e.optJSONArray("rows") ?: continue
+                    val list = (0 until rows.length())
+                        .mapNotNull { i -> rows.optJSONObject(i)?.let(::rowFromJson) }
+                    cellCache.putIfAbsent(key, e.optLong("at") to list)
+                }
+            }.onFailure { DucatLog.w(TAG, "board cache load: ${it.message}") }
+        }
+    }
+
+    private fun saveCellCache(context: Context) {
+        runCatching {
+            val keep = cellCache.entries
+                .sortedByDescending { it.value.first }
+                .take(CACHE_KEEP)
+            val all = JSONObject()
+            for ((key, v) in keep) {
+                all.put(
+                    key,
+                    JSONObject()
+                        .put("at", v.first)
+                        .put("rows", org.json.JSONArray(v.second.map(::rowToJson))),
+                )
+            }
+            context.getSharedPreferences(CACHE_PREFS, 0)
+                .edit().putString("cells", all.toString()).apply()
+        }.onFailure { DucatLog.w(TAG, "board cache save: ${it.message}") }
+    }
 
     /** The same, for the second pass over boards that came back full. */
     private const val LADDER_BUDGET_MS = 90_000L
@@ -578,6 +682,13 @@ object Listings {
          */
     ): Int {
         val started = System.currentTimeMillis()
+        loadCellCache(context)
+        // See browseMarket: an unattached read finds nothing honestly enough
+        // to display, but writing that nothing over remembered rows poisons
+        // the cache every airplane-mode open.
+        val attachedAtStart = runCatching {
+            uniffi.ducat_mobile.nodeStatus().publicInternetReady
+        }.getOrDefault(false)
         val replied = java.util.concurrent.atomic.AtomicInteger()
         val home = runCatching {
             uniffi.ducat_mobile.geohashEncode(latE7, lonE7, CELL_PRECISION)
@@ -606,7 +717,10 @@ object Listings {
 
         fun absorb(cell: String, fresh: List<uniffi.ducat_mobile.RentalInfo>) {
             synchronized(byCell) { byCell[cell] = fresh }
-            cellCache[cacheKey(cell, kind)] = System.currentTimeMillis() to fresh
+            if (fresh.isNotEmpty() || attachedAtStart) {
+                cellCache[cacheKey(cell, kind)] = System.currentTimeMillis() to fresh
+                saveCellCache(context)
+            }
             publish()
         }
 

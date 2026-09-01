@@ -99,8 +99,24 @@ private fun ShelfBody(
     rows: List<Publications.MarketRow>,
     looked: Boolean,
     looking: String,
+    refreshing: Boolean = false,
 ) {
     val context = LocalContext.current
+    if (refreshing && rows.isNotEmpty()) {
+        // Painted from memory while the live read runs: say so, quietly.
+        Row(
+            Modifier.padding(horizontal = 24.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            CircularProgressIndicator(Modifier.height(12.dp))
+            Spacer(Modifier.padding(4.dp))
+            Text(
+                stringResource(R.string.market_refreshing),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
     if (!looked) {
         Row(
             Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
@@ -139,6 +155,24 @@ private fun ShelfBody(
     }
 }
 
+
+/** Wait for the node before asking the network anything: a shelf read
+ *  while unattached "succeeds" empty in a blink, and an empty answer
+ *  from a device that could not ask is a confident lie — one that used
+ *  to overwrite the remembered rows already on screen. */
+private suspend fun awaitAttached(maxMs: Long): Boolean {
+    val end = System.currentTimeMillis() + maxMs
+    while (System.currentTimeMillis() < end) {
+        if (runCatching { uniffi.ducat_mobile.nodeStatus().publicInternetReady }
+                .getOrDefault(false)
+        ) {
+            return true
+        }
+        kotlinx.coroutines.delay(1_500)
+    }
+    return false
+}
+
 /** The worldwide shelf for one category (§16.18.2). */
 @Composable
 fun WorldwideShelf(cat: String, myLangOnly: Boolean) {
@@ -146,18 +180,39 @@ fun WorldwideShelf(cat: String, myLangOnly: Boolean) {
     val lang = java.util.Locale.getDefault().language.takeIf { it.isNotBlank() }
     var rows by remember { mutableStateOf<List<Publications.MarketRow>>(emptyList()) }
     var looked by remember { mutableStateOf(false) }
+    var refreshing by remember { mutableStateOf(false) }
     LaunchedEffect(cat, myLangOnly) {
         looked = false
-        rows = withContext(Dispatchers.IO) {
-            runCatching {
-                Publications.browseMarket(context, cat, if (myLangOnly) lang else null)
-            }.getOrDefault(emptyList())
+        val wanted = if (myLangOnly) lang else null
+        // What this shelf said last time paints now; the live read replaces
+        // it. The remembered choice is also what the background warmer keeps
+        // fresh between visits.
+        val warm = withContext(Dispatchers.IO) {
+            context.getSharedPreferences("ducat_market_cache", 0).edit()
+                .putString("last_cat", cat)
+                .putString("last_lang", wanted ?: "").apply()
+            runCatching { Publications.cachedMarket(context, cat, wanted) }.getOrNull()
         }
+        if (!warm.isNullOrEmpty()) {
+            rows = warm
+            looked = true
+            refreshing = true
+        }
+        if (withContext(Dispatchers.IO) { awaitAttached(120_000) }) {
+            val fresh = withContext(Dispatchers.IO) {
+                runCatching {
+                    Publications.browseMarket(context, cat, wanted)
+                }.getOrDefault(emptyList())
+            }
+            rows = fresh
+        }
+        refreshing = false
         looked = true
     }
     ShelfBody(
         rows, looked,
         stringResource(R.string.market_looking, marketCategoryLabel(cat)),
+        refreshing = refreshing,
     )
 }
 
@@ -169,6 +224,7 @@ fun LocalShelf() {
     var looked by remember { mutableStateOf(false) }
     var progress by remember { mutableStateOf(0 to 9) }
     var noFix by remember { mutableStateOf(false) }
+    var refreshing by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         grabFix(context) { fix ->
             if (fix == null) {
@@ -177,14 +233,27 @@ fun LocalShelf() {
                 return@grabFix
             }
             MainScope().launch(Dispatchers.IO) {
-                val got = runCatching {
-                    Publications.browseLocalPubs(context, fix.first, fix.second) { k, n ->
-                        progress = k to n
+                val warm = runCatching {
+                    Publications.cachedLocalPubs(context, fix.first, fix.second)
+                }.getOrNull()
+                if (!warm.isNullOrEmpty()) {
+                    withContext(Dispatchers.Main) {
+                        rows = warm
+                        looked = true
+                        refreshing = true
                     }
-                }.getOrDefault(emptyList())
+                }
+                if (awaitAttached(120_000)) {
+                    val got = runCatching {
+                        Publications.browseLocalPubs(context, fix.first, fix.second) { k, n ->
+                            progress = k to n
+                        }
+                    }.getOrDefault(emptyList())
+                    withContext(Dispatchers.Main) { rows = got }
+                }
                 withContext(Dispatchers.Main) {
-                    rows = got
                     looked = true
+                    refreshing = false
                 }
             }
         }
@@ -201,5 +270,6 @@ fun LocalShelf() {
     ShelfBody(
         rows, looked,
         stringResource(R.string.market_looking_local, progress.first, progress.second),
+        refreshing = refreshing,
     )
 }

@@ -52,4 +52,5 @@
     <string name="book_side_hiring">A contratar</string>
     <string name="book_side_working">A trabalhar</string>
     <string name="shells_tab_deals">Negócios</string>
+    <string name="shells_bookings_empty_body">Quando alguém reserva um dos seus anúncios — ou você reserva o de outra pessoa — o acordo e a caução chegam aqui.</string>
 </resources>

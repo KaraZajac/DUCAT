@@ -52,4 +52,5 @@
     <string name="book_side_hiring">依頼</string>
     <string name="book_side_working">作業</string>
     <string name="shells_tab_deals">取引</string>
+    <string name="shells_bookings_empty_body">誰かがあなたの掲載を予約したとき — またはあなたが誰かのを予約したとき — 取引とそのエスクローがここに届きます。</string>
 </resources>

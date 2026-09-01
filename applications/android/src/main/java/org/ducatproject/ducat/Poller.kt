@@ -250,6 +250,10 @@ class Poller(private val context: Context) {
                 // Market tenancies re-post past half their TTL or a weekly
                 // generation rollover, minting a fresh claim-once each time.
                 runCatching { Publications.tendMarket(context) }
+                // The invisible help: the boards around the last fix, and
+                // the shelf category last read, warmed before anyone opens
+                // a browse screen. See warmBoards for its gates.
+                runCatching { warmBoards(context, scope) }
                 // The mempool, only while a bill is out and unsighted — the
                 // scan costs a round trip per pool transaction, and a till
                 // with nothing billed has nothing to look for.
@@ -401,6 +405,57 @@ class Poller(private val context: Context) {
      * at 53 s where this lane measures ~1 s. Boards, rails and streams get
      * their ring through [NetworkRings], exactly as before.
      */
+    // ------------------------------------------------------------------
+    // The board warmer. A browse screen that opens onto a spinner is the
+    // network's latency worn on the sleeve; this pays it early, quietly,
+    // so the screen opens onto the neighbourhood instead. Gates, in order:
+    // foreground only (a pocketed phone spends nothing), at most once per
+    // warmEveryMs, node attached (an unattached read is a 21-second lie),
+    // permission granted, and a fix the phone already holds — passiveFix
+    // never wakes a radio, so a phone that has not moved or navigated
+    // lately simply skips the warm rather than lighting up GPS.
+    private val warming = java.util.concurrent.atomic.AtomicBoolean(false)
+    @Volatile private var lastWarm = 0L
+    @Volatile private var lastShelfWarm = 0L
+    private val warmEveryMs = 7 * 60_000L
+    private val shelfWarmEveryMs = 15 * 60_000L
+
+    private fun warmBoards(context: Context, scope: CoroutineScope) {
+        if (!AppVisibility.foreground) return
+        val now = System.currentTimeMillis()
+        if (now - lastWarm < warmEveryMs) return
+        if (!runCatching { uniffi.ducat_mobile.nodeStatus().publicInternetReady }
+                .getOrDefault(false)
+        ) {
+            return
+        }
+        if (!org.ducatproject.ducat.ui.locationAllowed(context)) return
+        val fix = org.ducatproject.ducat.ui.passiveFix(context, 30 * 60_000L) ?: return
+        if (!warming.compareAndSet(false, true)) return
+        lastWarm = now
+        scope.launch(Dispatchers.IO) {
+            try {
+                DucatLog.i(TAG, "warming the boards around the last fix")
+                // The same wave a browse runs, results discarded: the point
+                // is the cache it fills on the way through.
+                runCatching { Listings.search(context, fix.first, fix.second, null, {}) }
+                // And the worldwide shelf somebody last had open, on its own
+                // slower clock — one category, not the whole market.
+                if (now - lastShelfWarm >= shelfWarmEveryMs) {
+                    lastShelfWarm = now
+                    val prefs = context.getSharedPreferences("ducat_market_cache", 0)
+                    val cat = prefs.getString("last_cat", null)
+                    if (cat != null) {
+                        val lang = prefs.getString("last_lang", "")?.ifBlank { null }
+                        runCatching { Publications.browseMarket(context, cat, lang) }
+                    }
+                }
+            } finally {
+                warming.set(false)
+            }
+        }
+    }
+
     private fun lane(scope: CoroutineScope) {
         while (scope.isActive) {
             val rang = runCatching { uniffi.ducat_mobile.nodeWaitChange(WAIT_MS) }

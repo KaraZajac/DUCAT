@@ -52,4 +52,5 @@
     <string name="book_side_hiring">काम पर रखना</string>
     <string name="book_side_working">काम</string>
     <string name="shells_tab_deals">सौदे</string>
+    <string name="shells_bookings_empty_body">जब कोई आपकी किसी सूची को बुक करता है — या आप किसी और की बुक करते हैं — तो सौदा और उसकी धरोहर यहाँ आती है।</string>
 </resources>

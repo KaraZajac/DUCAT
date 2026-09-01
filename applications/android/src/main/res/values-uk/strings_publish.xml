@@ -78,4 +78,5 @@
     <string name="press_no_code_title">Коду поки немає</string>
     <string name="press_no_code_body">Опублікуйте щось, щоб створити код — його сканують читачі, щоб підписатися.</string>
     <string name="press_open_room">Відкрити прес-залу</string>
+    <string name="market_refreshing">Перевірка змін…</string>
 </resources>
