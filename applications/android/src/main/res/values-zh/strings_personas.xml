@@ -1,17 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="personas_title">身份</string>
-    <string name="personas_body">这部手机是谁。每个身份都是独立的密钥和独立的联系人——店铺永远不会认识你的朋友，朋友也永远看不到店铺。新的关系会进入你当前戴着的身份。</string>
+    <string name="personas_body">这部手机可以是谁。每个档案都有自己的密钥和自己的联系人——店铺永远不认识你的朋友，朋友也永远遇不到店铺。新关系加入你正戴着的档案。</string>
     <string name="personas_primary">个人</string>
     <string name="personas_worn">当前</string>
-    <string name="personas_add">添加身份</string>
+    <string name="personas_add">新建档案</string>
     <string name="personas_name_label">名称</string>
     <string name="personas_name_support">你这一面的名字——店铺、市集、浏览。</string>
-    <string name="personas_cap">上限是四个：分隔只有在一只手数得过来时才有意义。</string>
-    <string name="personas_no_delete">身份无法删除——它的联系人只认它的密钥。不再使用，它就安静下来。</string>
+    <string name="personas_cap">上限为四个：档案只有一只手数得过来才好用。</string>
+    <string name="personas_no_delete">档案无法删除——它的联系人只认它的密钥。停用之后它自会安静。</string>
     <string name="personas_save">保存</string>
     <string name="personas_cancel">取消</string>
     <string name="personas_mode_answers">以%1$s身份应答</string>
-    <string name="personas_mode_answers_worn">以当前身份应答</string>
-    <string name="personas_contacts_scope">正在显示%1$s的联系人 — 在菜单中切换身份查看其余。</string>
+    <string name="personas_mode_answers_worn">以所戴档案应答</string>
+    <string name="personas_contacts_scope">%1$s 的联系人——其余的请在菜单中切换档案查看。</string>
+    <string name="profiles_personal_sub">个人档案</string>
+    <string name="profiles_answers_for">负责：%1$s</string>
+    <string name="profiles_editing_note">%1$s 的档案</string>
+    <string name="profiles_rename">重命名</string>
+    <string name="profiles_appears_as">显示为 %1$s</string>
 </resources>

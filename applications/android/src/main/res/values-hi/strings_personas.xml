@@ -1,17 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="personas_title">पर्सोना</string>
-    <string name="personas_body">यह फ़ोन कौन है। हर पर्सोना की अपनी कुंजी और अपने संपर्क हैं — दुकान को आपके दोस्तों का कभी पता नहीं चलता, और दोस्तों को दुकान कभी नहीं दिखती। नए रिश्ते उसी में जुड़ते हैं जिसे आपने पहन रखा है।</string>
+    <string name="personas_body">यह फ़ोन कौन-कौन हो सकता है। हर प्रोफ़ाइल की अपनी कुंजी और अपने संपर्क हैं — दुकान को आपके दोस्त कभी पता नहीं चलते, और दोस्तों को दुकान कभी नहीं मिलती। नए रिश्ते उसी प्रोफ़ाइल में जुड़ते हैं जो आपने पहनी है।</string>
     <string name="personas_primary">निजी</string>
     <string name="personas_worn">पहनी हुई</string>
-    <string name="personas_add">पर्सोना जोड़ें</string>
+    <string name="personas_add">नई प्रोफ़ाइल</string>
     <string name="personas_name_label">नाम</string>
     <string name="personas_name_support">आपके इस पहलू का नाम — दुकान, बाज़ार, ब्राउज़िंग।</string>
-    <string name="personas_cap">चार ही सीमा है: खाने तभी काम करते हैं जब एक हाथ पर गिने जा सकें।</string>
-    <string name="personas_no_delete">पर्सोना मिटाया नहीं जा सकता — उसके संपर्क सिर्फ़ उसी की कुंजी को जवाब देते हैं। इस्तेमाल बंद कर दें, वह बस शांत हो जाएगा।</string>
+    <string name="personas_cap">चार की सीमा है: प्रोफ़ाइलें तभी काम करती हैं जब एक हाथ में समाएँ।</string>
+    <string name="personas_no_delete">प्रोफ़ाइल हटाई नहीं जा सकती — उसके संपर्क केवल उसकी कुंजी को जवाब देते हैं। इस्तेमाल बंद करें, वह शांत हो जाती है।</string>
     <string name="personas_save">सहेजें</string>
     <string name="personas_cancel">रद्द करें</string>
     <string name="personas_mode_answers">%1$s के रूप में जवाब देगा</string>
-    <string name="personas_mode_answers_worn">जो भी पहना है उसी रूप में</string>
-    <string name="personas_contacts_scope">%1$s के संपर्क — बाकी के लिए मेनू से पर्सोना बदलो।</string>
+    <string name="personas_mode_answers_worn">पहनी हुई प्रोफ़ाइल के रूप में जवाब</string>
+    <string name="personas_contacts_scope">%1$s के संपर्क — बाक़ी के लिए मेनू से प्रोफ़ाइल बदलें।</string>
+    <string name="profiles_personal_sub">निजी प्रोफ़ाइल</string>
+    <string name="profiles_answers_for">%1$s के लिए जवाब देती है</string>
+    <string name="profiles_editing_note">%1$s की प्रोफ़ाइल</string>
+    <string name="profiles_rename">नाम बदलें</string>
+    <string name="profiles_appears_as">%1$s के रूप में दिखता है</string>
 </resources>

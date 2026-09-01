@@ -1,17 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="personas_title">Персоны</string>
-    <string name="personas_body">Кто этот телефон. Каждая персона — свой ключ со своими контактами: магазин никогда не узнает твоих друзей, а друзья не увидят магазин. Новые связи попадают в ту, что сейчас надета.</string>
+    <string name="personas_body">Кем может быть этот телефон. Каждый профиль — свой ключ со своими контактами: магазин никогда не узнает ваших друзей, а друзья никогда не встретят магазин. Новые связи попадают в тот профиль, который надет.</string>
     <string name="personas_primary">Личная</string>
     <string name="personas_worn">Надета</string>
-    <string name="personas_add">Добавить персону</string>
+    <string name="personas_add">Новый профиль</string>
     <string name="personas_name_label">Имя</string>
     <string name="personas_name_support">Как зовётся эта твоя сторона — Магазин, Рынок, Сёрфинг.</string>
-    <string name="personas_cap">Четыре — предел: отсеки работают, только пока умещаются на одной руке.</string>
-    <string name="personas_no_delete">Персону нельзя удалить — её контакты отвечают только её ключу. Перестань ею пользоваться, и она просто затихнет.</string>
+    <string name="personas_cap">Не больше четырёх: профили работают, только пока умещаются на одной руке.</string>
+    <string name="personas_no_delete">Профиль нельзя удалить — его контакты отвечают только его ключу. Перестаньте им пользоваться, и он затихнет.</string>
     <string name="personas_save">Сохранить</string>
     <string name="personas_cancel">Отмена</string>
     <string name="personas_mode_answers">Отвечает как %1$s</string>
-    <string name="personas_mode_answers_worn">Отвечает как текущая персона</string>
-    <string name="personas_contacts_scope">Контакты %1$s — остальные после смены персоны в меню.</string>
+    <string name="personas_mode_answers_worn">Отвечает как надетый профиль</string>
+    <string name="personas_contacts_scope">Контакты %1$s — смените профиль в меню, чтобы увидеть остальные.</string>
+    <string name="profiles_personal_sub">Личный профиль</string>
+    <string name="profiles_answers_for">Отвечает за: %1$s</string>
+    <string name="profiles_editing_note">Профиль %1$s</string>
+    <string name="profiles_rename">Переименовать</string>
+    <string name="profiles_appears_as">Отображается как %1$s</string>
 </resources>

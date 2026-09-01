@@ -1814,12 +1814,21 @@ data class StoredMessage(
 }
 
 /** Our own display name, and the last card we issued. */
-class NameStore(context: Context) {
+class NameStore(context: Context, personaHex: String? = null) {
     private val prefs = securePrefs(context, "ducat_contacts")
-    fun get(): String? = prefs.getString("my_name", null)
+    // The same field MyProfile.name reads, under the same rule: the primary
+    // keeps the unsuffixed key, every other persona keys by hex, and null
+    // means the worn one.
+    private val key: String
+    init {
+        val personas = PersonaStore(context)
+        val hex = personaHex ?: personas.worn()
+        key = if (hex == personas.personaHex()) "my_name" else "my_name|$hex"
+    }
+    fun get(): String? = prefs.getString(key, null)
     /** Cleaned on the way in, because this travels on every handshake. */
     fun put(v: String) =
-        prefs.edit().putString("my_name", withoutDisplayHazards(v)).apply()
+        prefs.edit().putString(key, withoutDisplayHazards(v)).apply()
 
     /**
      * Nothing to introduce ourselves with.

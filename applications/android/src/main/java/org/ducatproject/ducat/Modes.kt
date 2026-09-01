@@ -64,8 +64,28 @@ class ModeStore(context: Context) {
         // nothing, and the switcher can still change hats mid-shift (the
         // binding is a default, not a cage). setWorn ignores a persona
         // that no longer exists, so a stale binding degrades to "as worn".
+        //
+        // And the walk out is a doorway too. The hat the shift put on used
+        // to stay on: close the till and your personal browsing carried on
+        // as the shop, with new claims landing in the shop's compartment.
+        // Now the doorway remembers what was worn when a binding first
+        // took over, and an unbound doorway hands it back.
         if (!browsing) {
-            boundPersona(m)?.let { PersonaStore(app).setWorn(it) }
+            val bound = boundPersona(m)
+            val personas = PersonaStore(app)
+            if (bound != null) {
+                if (prefs.getString("worn_before_shift", null) == null) {
+                    prefs.edit()
+                        .putString("worn_before_shift", personas.worn())
+                        .apply()
+                }
+                personas.setWorn(bound)
+            } else {
+                prefs.getString("worn_before_shift", null)?.let { prior ->
+                    prefs.edit().remove("worn_before_shift").apply()
+                    personas.setWorn(prior)
+                }
+            }
         }
         ContactStore.bump()
     }

@@ -1,17 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="personas_title">ペルソナ</string>
-    <string name="personas_body">この電話が誰であるか。ペルソナごとに鍵も連絡先も別々です — 店が友人を知ることはなく、友人が店を見ることもありません。新しい関係は、いま身につけているペルソナに加わります。</string>
+    <string name="personas_body">この電話がなれる顔ぶれ。プロフィールごとに鍵と連絡先が独立しています — 店はあなたの友人を知らず、友人は店に出会いません。新しい関係は、いま身につけているプロフィールに加わります。</string>
     <string name="personas_primary">個人</string>
     <string name="personas_worn">着用中</string>
-    <string name="personas_add">ペルソナを追加</string>
+    <string name="personas_add">新しいプロフィール</string>
     <string name="personas_name_label">名前</string>
     <string name="personas_name_support">この一面の名前 — 店、マーケット、ブラウズなど。</string>
-    <string name="personas_cap">上限は4つ。仕切りは片手で数えられるうちしか機能しません。</string>
-    <string name="personas_no_delete">ペルソナは削除できません — その連絡先は、その鍵にしか応じません。使うのをやめれば、ただ静かになります。</string>
+    <string name="personas_cap">上限は4つ。片手に収まるからこそ使い分けられます。</string>
+    <string name="personas_no_delete">プロフィールは削除できません — その連絡先はその鍵だけに応じます。使うのをやめれば静かになります。</string>
     <string name="personas_save">保存</string>
     <string name="personas_cancel">キャンセル</string>
     <string name="personas_mode_answers">%1$sとして応答</string>
-    <string name="personas_mode_answers_worn">現在のペルソナで応答</string>
-    <string name="personas_contacts_scope">%1$sの連絡先を表示中 — 他はメニューでペルソナを切り替え。</string>
+    <string name="personas_mode_answers_worn">身につけたプロフィールとして応答</string>
+    <string name="personas_contacts_scope">%1$s の連絡先 — 残りはメニューでプロフィールを切り替えて。</string>
+    <string name="profiles_personal_sub">個人プロフィール</string>
+    <string name="profiles_answers_for">%1$s を担当</string>
+    <string name="profiles_editing_note">%1$s のプロフィール</string>
+    <string name="profiles_rename">名前を変更</string>
+    <string name="profiles_appears_as">%1$s として表示</string>
 </resources>

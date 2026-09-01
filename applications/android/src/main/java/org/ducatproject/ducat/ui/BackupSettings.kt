@@ -120,9 +120,15 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
                                             // their keys: a restore that keeps the
                                             // money and loses the name and the
                                             // privacy choice quietly changed both.
-                                            NameStore(context).get(),
+                                            NameStore(
+                                                context,
+                                                PersonaStore(context).personaHex(),
+                                            ).get(),
                                             ContactStore(context).publishAddress(),
-                                            MyProfile(context).toWire(),
+                                            MyProfile(
+                                                context,
+                                                PersonaStore(context).personaHex(),
+                                            ).toWire(),
                                             ContactStore(context).backupContacts(),
                                             ContactStore(context).backupPrekeys().first,
                                             ContactStore(context).backupPrekeys().second,
@@ -272,7 +278,7 @@ internal fun applyBackup(
     // §16.9's profile with it. A persona that comes back with the right money
     // and no face is not the same person to anyone who knew them, and nothing
     // else in the app would report the loss.
-    MyProfile(context).let { p ->
+    MyProfile(context, PersonaStore(context).personaHex()).let { p ->
         p.setAvatar(r.profile.avatar)
         p.setEmail(r.profile.email)
         p.setPhone(r.profile.phone)

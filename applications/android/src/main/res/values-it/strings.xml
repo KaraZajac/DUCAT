@@ -16,7 +16,7 @@
     <string name="tab_send_receive">Invia/Ricevi</string>
 
     <string name="section_status">Stato</string>
-    <string name="section_profile">Profilo</string>
+    <string name="section_profile">Profili</string>
     <string name="section_contacts">Contatti</string>
     <string name="section_selling">Vendite</string>
     <string name="section_logs">Log</string>

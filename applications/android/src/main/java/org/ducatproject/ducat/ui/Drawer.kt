@@ -15,6 +15,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.ui.graphics.asImageBitmap
+import org.ducatproject.ducat.MyProfile
+import org.ducatproject.ducat.SafeImage
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.draw.clip
 import androidx.compose.runtime.*
@@ -237,8 +240,6 @@ fun SettingsScreen(
         FareRegion()
         Spacer(Modifier.height(24.dp))
         TaxSetting()
-        Spacer(Modifier.height(24.dp))
-        PersonasSetting()
         Spacer(Modifier.height(24.dp))
         RecurringSetting()
 
@@ -596,13 +597,211 @@ private fun RateSettings() {
 @Composable
 private fun ProfileSection() {
     val context = LocalContext.current
-    val persona = remember { PersonaStore(context).personaHex() }
+    val version by ContactStore.changes.collectAsState()
+    val personas = remember { PersonaStore(context) }
+    val roster = remember(version) { personas.all() }
+    val worn = remember(version) { personas.worn() }
+    val modes = remember { org.ducatproject.ducat.ModeStore(context) }
+
+    // Which profile is on the desk. Editing is not wearing: the hat is
+    // switched in the drawer header, at the doorway; this only chooses
+    // whose presentation the fields below belong to.
+    var picked by rememberSaveable { mutableStateOf<String?>(null) }
+    val editing = picked?.takeIf { h -> roster.any { it.hex == h } } ?: worn
+    var adding by remember { mutableStateOf(false) }
+    var renaming by remember { mutableStateOf(false) }
+    var newLabel by remember { mutableStateOf("") }
+
+    val modeNames = mapOf(
+        org.ducatproject.ducat.Mode.None to stringResource(R.string.mode_personal),
+        org.ducatproject.ducat.Mode.Pos to stringResource(R.string.mode_pos),
+        org.ducatproject.ducat.Mode.BarTab to stringResource(R.string.mode_bartab),
+        org.ducatproject.ducat.Mode.Taxi to stringResource(R.string.mode_taxi),
+        org.ducatproject.ducat.Mode.Donate to stringResource(R.string.mode_donate),
+        org.ducatproject.ducat.Mode.Renting to stringResource(R.string.mode_renting),
+        org.ducatproject.ducat.Mode.Marketplace to stringResource(R.string.mode_marketplace),
+        org.ducatproject.ducat.Mode.HireHelp to stringResource(R.string.mode_hire_help),
+        org.ducatproject.ducat.Mode.Press to stringResource(R.string.mode_press),
+    )
+    val bindings = remember(version) {
+        roster.associate { p ->
+            p.hex to modeNames.keys.filter { m -> modes.boundPersona(m) == p.hex }
+        }
+    }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-        // The whole profile, including the name — it used to live here as a
-        // lone text field, and splitting "what people see of you" across two
-        // screens is how a name and a picture end up disagreeing.
-        MyProfileEditor()
+        Column(Modifier.padding(horizontal = 20.dp).padding(top = 16.dp)) {
+            Text(
+                stringResource(R.string.personas_body),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(12.dp))
+
+            roster.forEach { pr ->
+                val active = pr.hex == editing
+                // The card carries the profile's public face — the avatar
+                // and name contacts see — not the compartment label's
+                // initial. A card saying "P" above an editor saying "S"
+                // read as two different people.
+                val mp = remember(version, pr.hex) { MyProfile(context, pr.hex) }
+                val pic = remember(version, pr.hex) { mp.avatar() }
+                val publicName = remember(version, pr.hex) { mp.name() }
+                Card(
+                    Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (active) {
+                            MaterialTheme.colorScheme.primaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainerHigh
+                        },
+                    ),
+                ) {
+                    Row(
+                        Modifier.fillMaxWidth()
+                            .clickable { picked = pr.hex; renaming = false }
+                            .padding(horizontal = 14.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Box(
+                            Modifier.size(40.dp).clip(CircleShape).background(
+                                if (pr.color != 0) {
+                                    androidx.compose.ui.graphics.Color(pr.color)
+                                } else {
+                                    MaterialTheme.colorScheme.primary
+                                },
+                            ),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            val bmp = remember(pic) {
+                                pic?.let { SafeImage.fromBytes(it, SafeImage.AVATAR_PIXELS) }
+                            }
+                            if (bmp != null) {
+                                androidx.compose.foundation.Image(
+                                    bmp.asImageBitmap(), null,
+                                    Modifier.fillMaxSize(),
+                                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                                )
+                            } else {
+                                Text(
+                                    (publicName ?: personaLabel(pr)).take(1).uppercase(),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = androidx.compose.ui.graphics.Color.White,
+                                )
+                            }
+                        }
+                        Spacer(Modifier.width(12.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text(personaLabel(pr), style = MaterialTheme.typography.titleMedium)
+                            val sub = buildList {
+                                if (pr.hex == personas.personaHex()) {
+                                    add(stringResource(R.string.profiles_personal_sub))
+                                }
+                                if (publicName != null && publicName != personaLabel(pr)) {
+                                    add(stringResource(R.string.profiles_appears_as, publicName))
+                                }
+                                val bound = bindings[pr.hex].orEmpty()
+                                if (bound.isNotEmpty()) {
+                                    add(
+                                        stringResource(
+                                            R.string.profiles_answers_for,
+                                            bound.mapNotNull { modeNames[it] }.joinToString(", "),
+                                        ),
+                                    )
+                                }
+                            }
+                            if (sub.isNotEmpty()) {
+                                Text(
+                                    sub.joinToString(" · "),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                        if (pr.hex == worn) {
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                stringResource(R.string.personas_worn),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                        if (active) {
+                            // A bare icon, not an IconButton: the 48 dp
+                            // touch target of the latter squeezed the
+                            // subtitle into a wrap on the wearing card.
+                            Icon(
+                                Icons.Filled.Edit,
+                                contentDescription =
+                                    stringResource(R.string.profiles_rename),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier
+                                    .padding(start = 8.dp)
+                                    .size(18.dp)
+                                    .clickable {
+                                        newLabel = pr.name
+                                        renaming = !renaming
+                                    },
+                            )
+                        }
+                    }
+                }
+                if (active && renaming) {
+                    Row(
+                        Modifier.padding(bottom = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        OutlinedTextField(
+                            value = newLabel,
+                            onValueChange = { if (it.length <= 24) newLabel = it },
+                            label = { Text(stringResource(R.string.personas_name_label)) },
+                            singleLine = true,
+                            modifier = Modifier.weight(1f),
+                        )
+                        TextButton(onClick = {
+                            if (newLabel.isNotBlank() || pr.name.isBlank()) {
+                                personas.rename(pr.hex, newLabel.trim())
+                            }
+                            renaming = false
+                            ContactStore.bump()
+                        }) { Text(stringResource(R.string.personas_save)) }
+                    }
+                }
+            }
+            if (roster.size < PersonaStore.MAX_PERSONAS) {
+                TextButton(onClick = { adding = true }) {
+                    Text(stringResource(R.string.personas_add))
+                }
+            } else {
+                Text(
+                    stringResource(R.string.personas_cap),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.outline,
+                )
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+        // Whose desk the fields below belong to — with the label editable
+        // in place, because the card list is where the label lives.
+        val editingPersona = roster.firstOrNull { it.hex == editing }
+        if (editingPersona != null) {
+            val editingPublic = remember(version, editing) {
+                MyProfile(context, editing).name()
+            }
+            Text(
+                stringResource(
+                    R.string.profiles_editing_note,
+                    editingPublic ?: personaLabel(editingPersona),
+                ),
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.padding(horizontal = 20.dp).padding(top = 16.dp),
+            )
+        }
+
+        MyProfileEditor(personaHex = editing)
 
         Column(Modifier.padding(20.dp)) {
             PublishAddressSetting()
@@ -617,8 +816,15 @@ private fun ProfileSection() {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(8.dp))
-            SelectionContainerText(persona)
+            SelectionContainerText(editing)
         }
+    }
+
+    if (adding) {
+        NewProfileDialog(onDone = { created ->
+            adding = false
+            if (created != null) picked = created
+        })
     }
 }
 
@@ -1106,16 +1312,29 @@ private fun ModePersonaBinding(mode: org.ducatproject.ducat.Mode) {
             ?: context.getString(R.string.personas_primary)
     }
     Box {
-        Text(
-            if (bound != null) {
-                stringResource(R.string.personas_mode_answers, nameOf(bound))
-            } else {
-                stringResource(R.string.personas_mode_answers_worn)
-            },
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.clickable { open = true }.padding(top = 4.dp),
-        )
+        // A control, dressed as one: the bare text link sat exactly where
+        // a thumb taps the card to choose the mode, and swallowed the tap.
+        // The arrow says "this opens something" and the row hugs its text.
+        Row(
+            Modifier.clickable { open = true }.padding(top = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                if (bound != null) {
+                    stringResource(R.string.personas_mode_answers, nameOf(bound))
+                } else {
+                    stringResource(R.string.personas_mode_answers_worn)
+                },
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Icon(
+                Icons.Filled.ArrowDropDown,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(16.dp),
+            )
+        }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.personas_mode_answers_worn)) },

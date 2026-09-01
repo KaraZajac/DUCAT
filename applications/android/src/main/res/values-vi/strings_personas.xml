@@ -1,17 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="personas_title">Nhân dạng</string>
-    <string name="personas_body">Chiếc điện thoại này là ai. Mỗi nhân dạng là một khóa riêng với danh bạ riêng — cửa hàng không bao giờ biết bạn bè của bạn, và bạn bè không bao giờ thấy cửa hàng. Quan hệ mới sẽ vào nhân dạng bạn đang mang.</string>
+    <string name="personas_body">Chiếc điện thoại này có thể là những ai. Mỗi hồ sơ là một khóa riêng với danh bạ riêng — cửa hàng không bao giờ biết bạn bè của bạn, và bạn bè không bao giờ gặp cửa hàng. Quan hệ mới vào hồ sơ bạn đang mang.</string>
     <string name="personas_primary">Cá nhân</string>
     <string name="personas_worn">Đang mang</string>
-    <string name="personas_add">Thêm nhân dạng</string>
+    <string name="personas_add">Hồ sơ mới</string>
     <string name="personas_name_label">Tên</string>
     <string name="personas_name_support">Tên của phía này của bạn — Cửa hàng, Chợ, Duyệt web.</string>
-    <string name="personas_cap">Bốn là giới hạn: các ngăn chỉ hữu ích khi đếm được trên một bàn tay.</string>
-    <string name="personas_no_delete">Không thể xóa nhân dạng — danh bạ của nó chỉ trả lời khóa của nó. Ngừng dùng, nó chỉ lặng im.</string>
+    <string name="personas_cap">Bốn là giới hạn: hồ sơ chỉ hữu ích khi đếm được trên một bàn tay.</string>
+    <string name="personas_no_delete">Không thể xóa hồ sơ — danh bạ của nó chỉ trả lời khóa của nó. Ngừng dùng, nó sẽ im lặng.</string>
     <string name="personas_save">Lưu</string>
     <string name="personas_cancel">Hủy</string>
     <string name="personas_mode_answers">Trả lời với tư cách %1$s</string>
-    <string name="personas_mode_answers_worn">Trả lời theo persona đang dùng</string>
-    <string name="personas_contacts_scope">Danh bạ của %1$s — đổi persona trong menu để xem phần còn lại.</string>
+    <string name="personas_mode_answers_worn">Trả lời bằng hồ sơ đang mang</string>
+    <string name="personas_contacts_scope">Danh bạ của %1$s — đổi hồ sơ trong menu để xem phần còn lại.</string>
+    <string name="profiles_personal_sub">Hồ sơ cá nhân</string>
+    <string name="profiles_answers_for">Trả lời cho %1$s</string>
+    <string name="profiles_editing_note">Hồ sơ của %1$s</string>
+    <string name="profiles_rename">Đổi tên</string>
+    <string name="profiles_appears_as">Hiển thị là %1$s</string>
 </resources>

@@ -107,140 +107,62 @@ fun PersonaSwitcher(modifier: Modifier = Modifier) {
  * look for the button.
  */
 @Composable
-internal fun PersonasSetting() {
+internal fun NewProfileDialog(onDone: (String?) -> Unit) {
     val context = LocalContext.current
-    val version by ContactStore.changes.collectAsState()
     val store = remember { PersonaStore(context) }
-    val personas = remember(version) { store.all() }
-    val worn = remember(version) { store.worn() }
-    var adding by remember { mutableStateOf(false) }
-    var renaming by remember { mutableStateOf<String?>(null) }
     var name by remember { mutableStateOf("") }
     var color by remember { mutableStateOf(ACCENTS.first()) }
-
-    Column {
-        Text(
-            stringResource(R.string.personas_title),
-            style = MaterialTheme.typography.titleMedium,
-        )
-        Spacer(Modifier.height(4.dp))
-        Text(
-            stringResource(R.string.personas_body),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(Modifier.height(8.dp))
-
-        for (p in personas) {
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .clickable { renaming = p.hex; name = p.name }
-                    .padding(vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                PersonaDot(p, size = 12)
-                Spacer(Modifier.width(10.dp))
-                Column(Modifier.weight(1f)) {
-                    Text(personaLabel(p), style = MaterialTheme.typography.bodyLarge)
-                    Text(
-                        "${p.hex.take(12)}…",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontFamily = FontFamily.Monospace,
-                        color = MaterialTheme.colorScheme.outline,
-                    )
-                }
-                if (p.hex == worn) {
-                    Text(
-                        stringResource(R.string.personas_worn),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                }
-            }
-            if (renaming == p.hex) {
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = { onDone(null) },
+        title = { Text(stringResource(R.string.personas_add)) },
+        text = {
+            Column {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { if (it.length <= 24) name = it },
                     label = { Text(stringResource(R.string.personas_name_label)) },
+                    supportingText = { Text(stringResource(R.string.personas_name_support)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                Row {
-                    TextButton(onClick = {
-                        if (name.isNotBlank() || p.name.isBlank()) {
-                            store.rename(p.hex, name.trim())
-                        }
-                        renaming = null
-                        ContactStore.bump()
-                    }) { Text(stringResource(R.string.personas_save)) }
-                    TextButton(onClick = { renaming = null }) {
-                        Text(stringResource(R.string.personas_cancel))
+                Spacer(Modifier.height(10.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    for (c in ACCENTS) {
+                        Spacer(
+                            Modifier
+                                .size(28.dp)
+                                .background(Color(c), CircleShape)
+                                .then(
+                                    if (c == color) Modifier.border(
+                                        2.dp, MaterialTheme.colorScheme.onSurface, CircleShape,
+                                    ) else Modifier,
+                                )
+                                .clickable { color = c },
+                        )
                     }
                 }
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    stringResource(R.string.personas_no_delete),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.outline,
+                )
             }
-        }
-
-        Spacer(Modifier.height(8.dp))
-        if (!adding && personas.size < PersonaStore.MAX_PERSONAS) {
-            OutlinedButton(onClick = { adding = true; name = ""; color = ACCENTS.first() }) {
-                Text(stringResource(R.string.personas_add))
+        },
+        confirmButton = {
+            TextButton(
+                enabled = name.isNotBlank(),
+                onClick = {
+                    val p = store.create(name.trim(), color)
+                    ContactStore.bump()
+                    onDone(p?.hex)
+                },
+            ) { Text(stringResource(R.string.pub_create)) }
+        },
+        dismissButton = {
+            TextButton(onClick = { onDone(null) }) {
+                Text(stringResource(R.string.personas_cancel))
             }
-        }
-        if (personas.size >= PersonaStore.MAX_PERSONAS) {
-            Text(
-                stringResource(R.string.personas_cap),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        if (adding) {
-            OutlinedTextField(
-                value = name,
-                onValueChange = { if (it.length <= 24) name = it },
-                label = { Text(stringResource(R.string.personas_name_label)) },
-                supportingText = { Text(stringResource(R.string.personas_name_support)) },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Spacer(Modifier.height(6.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                for (c in ACCENTS) {
-                    Spacer(
-                        Modifier
-                            .size(28.dp)
-                            .background(Color(c), CircleShape)
-                            .then(
-                                if (c == color) Modifier.border(
-                                    2.dp, MaterialTheme.colorScheme.onSurface, CircleShape,
-                                ) else Modifier,
-                            )
-                            .clickable { color = c },
-                    )
-                }
-            }
-            Spacer(Modifier.height(6.dp))
-            Row {
-                TextButton(
-                    onClick = {
-                        val p = store.create(name.trim(), color)
-                        if (p != null) store.setWorn(p.hex)
-                        adding = false
-                        ContactStore.bump()
-                    },
-                    enabled = name.isNotBlank(),
-                ) { Text(stringResource(R.string.personas_save)) }
-                TextButton(onClick = { adding = false }) {
-                    Text(stringResource(R.string.personas_cancel))
-                }
-            }
-        }
-
-        Spacer(Modifier.height(6.dp))
-        Text(
-            stringResource(R.string.personas_no_delete),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.outline,
-        )
-    }
+        },
+    )
 }

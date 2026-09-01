@@ -237,7 +237,7 @@ object Mailbox {
                 // carrying a picture is a QR code nobody can scan. Scoped to
                 // the purpose — a "sale" card does not carry the till owner's
                 // phone number to every customer who claims it.
-                MyProfile(context).toWire(purpose = purpose),
+                MyProfile(context, ownerHex).toWire(purpose = purpose),
                 // Stamped so the claimant can scope their reply to match.
                 purpose,
             ),
@@ -629,7 +629,9 @@ object Mailbox {
                     // hat entirely by now.
                     runCatching {
                         issueCard(
-                            context, NameStore(context).get(), 60uL * 60uL * 24uL,
+                            context,
+                            NameStore(context, issued.owner.ifBlank { null }).get(),
+                            60uL * 60uL * 24uL,
                             asPersonaHex = issued.owner.ifBlank { null },
                         )
                     }
@@ -667,8 +669,16 @@ object Mailbox {
                         // still be there; cut its replacement now rather than
                         // at the next handshake.
                         if (issued.purpose == "profile") {
+                            // The same owner rule as the pre-issue above: the
+                            // replacement belongs to the persona whose code
+                            // expired, not to whoever is worn right now.
                             runCatching {
-                                issueCard(context, NameStore(context).get(), 60uL * 60uL * 24uL)
+                                issueCard(
+                                    context,
+                                    NameStore(context, issued.owner.ifBlank { null }).get(),
+                                    60uL * 60uL * 24uL,
+                                    asPersonaHex = issued.owner.ifBlank { null },
+                                )
                             }.onFailure { DucatLog.w(TAG, "could not re-issue: ${it.message}") }
                         }
                     } else {

@@ -1,17 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="personas_title">Persona\'s</string>
-    <string name="personas_body">Wie deze telefoon is. Elke persona is een eigen sleutel met eigen contacten — de winkel leert je vrienden nooit kennen, en je vrienden zien de winkel nooit. Nieuwe relaties komen bij degene die je draagt.</string>
+    <string name="personas_body">Wie deze telefoon kan zijn. Elk profiel is een eigen sleutel met eigen contacten — de winkel leert je vrienden nooit kennen, en je vrienden ontmoeten nooit de winkel. Nieuwe relaties komen in het profiel dat je draagt.</string>
     <string name="personas_primary">Persoonlijk</string>
     <string name="personas_worn">Gedragen</string>
-    <string name="personas_add">Persona toevoegen</string>
+    <string name="personas_add">Nieuw profiel</string>
     <string name="personas_name_label">Naam</string>
     <string name="personas_name_support">Hoe deze kant van je heet — Winkel, Markt, Surfen.</string>
-    <string name="personas_cap">Vier is het maximum: vakjes werken alleen als ze op één hand passen.</string>
-    <string name="personas_no_delete">Een persona kan niet worden verwijderd — haar contacten antwoorden alleen haar sleutel. Stop met gebruiken en ze wordt gewoon stil.</string>
+    <string name="personas_cap">Vier is het maximum: profielen werken alleen als ze op één hand passen.</string>
+    <string name="personas_no_delete">Een profiel kan niet worden verwijderd — zijn contacten antwoorden alleen op zijn sleutel. Stop met gebruiken en het wordt stil.</string>
     <string name="personas_save">Opslaan</string>
     <string name="personas_cancel">Annuleren</string>
     <string name="personas_mode_answers">Antwoordt als %1$s</string>
-    <string name="personas_mode_answers_worn">Antwoordt als de gedragen persona</string>
-    <string name="personas_contacts_scope">Contacten van %1$s — wissel van persona in het menu voor de rest.</string>
+    <string name="personas_mode_answers_worn">Antwoordt als het gedragen profiel</string>
+    <string name="personas_contacts_scope">Contacten van %1$s — wissel van profiel in het menu voor de rest.</string>
+    <string name="profiles_personal_sub">Het persoonlijke profiel</string>
+    <string name="profiles_answers_for">Antwoordt voor %1$s</string>
+    <string name="profiles_editing_note">Profiel van %1$s</string>
+    <string name="profiles_rename">Hernoemen</string>
+    <string name="profiles_appears_as">Verschijnt als %1$s</string>
 </resources>

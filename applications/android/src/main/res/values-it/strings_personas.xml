@@ -1,17 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="personas_title">Personas</string>
-    <string name="personas_body">Chi è questo telefono. Ogni persona è una chiave a sé con i suoi contatti — il negozio non conosce mai i tuoi amici, e i tuoi amici non vedono mai il negozio. Le nuove relazioni entrano in quella che indossi.</string>
+    <string name="personas_body">Chi può essere questo telefono. Ogni profilo è una chiave a sé con i propri contatti: il negozio non conosce mai i tuoi amici, e i tuoi amici non incontrano mai il negozio. Le nuove relazioni entrano nel profilo che indossi.</string>
     <string name="personas_primary">Personale</string>
     <string name="personas_worn">In uso</string>
-    <string name="personas_add">Aggiungi una persona</string>
+    <string name="personas_add">Nuovo profilo</string>
     <string name="personas_name_label">Nome</string>
     <string name="personas_name_support">Come si chiama questo tuo lato — Negozio, Mercato, Navigazione.</string>
-    <string name="personas_cap">Quattro è il limite: gli scomparti funzionano solo se stanno su una mano.</string>
-    <string name="personas_no_delete">Una persona non si può eliminare — i suoi contatti rispondono solo alla sua chiave. Smetti di usarla e semplicemente tace.</string>
+    <string name="personas_cap">Quattro è il limite: i profili funzionano solo se stanno su una mano.</string>
+    <string name="personas_no_delete">Un profilo non si può eliminare: i suoi contatti rispondono solo alla sua chiave. Smetti di usarlo e tace.</string>
     <string name="personas_save">Salva</string>
     <string name="personas_cancel">Annulla</string>
     <string name="personas_mode_answers">Risponde come %1$s</string>
-    <string name="personas_mode_answers_worn">Risponde come la persona indossata</string>
-    <string name="personas_contacts_scope">Contatti di %1$s — cambia persona dal menu per vedere gli altri.</string>
+    <string name="personas_mode_answers_worn">Risponde come il profilo indossato</string>
+    <string name="personas_contacts_scope">Contatti di %1$s — cambia profilo nel menu per gli altri.</string>
+    <string name="profiles_personal_sub">Il profilo personale</string>
+    <string name="profiles_answers_for">Risponde per %1$s</string>
+    <string name="profiles_editing_note">Profilo di %1$s</string>
+    <string name="profiles_rename">Rinomina</string>
+    <string name="profiles_appears_as">Appare come %1$s</string>
 </resources>
