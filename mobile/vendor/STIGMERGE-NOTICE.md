@@ -112,12 +112,46 @@ Recorded per the MPL's Exhibit A expectations and plain courtesy:
    is a snapshot, and on a phone the announcer rotates its route every
    few minutes — the live-measured shape was one piece per bootstrap.
    Pinned by `peer_reputation::tests`. Upstream candidate.
+   Gossip follows the same rule (2026-09-01): a roster entry that will
+   not resolve is skipped and benched, where upstream's `?` aborted the
+   whole reannounce — one expired record in a frozen roster silenced a
+   live mirror to every other peer. And a peer whose index does not
+   match is now actually rejected; upstream logged the rejection and
+   recorded the peer anyway.
 9. **`Status::Done` is actually sent.** Upstream's fetcher returned its
    internal `State::Done` on `index_complete` without ever emitting
    `Status::Done` on the status channel — so every consumer waiting on
    the documented signal, upstream's own CLI included, waited forever on
    a finished fetch. One line at the completion site. Upstream's issues
    #401/#402 may be this. **The clearest upstream patch of the lot.**
+10. **An index off the wire may not name a path outside its root
+   (2026-09-01).** A fetcher creates and writes every file the
+   publisher's index names, under its own root, before a byte is
+   verified — and the path came from the publisher verbatim. An
+   absolute path replaced the root outright; a `..` walked out of it.
+   On a phone the root sits beside the app's own data, so a hostile
+   share could have overwritten it. `FileSpec::is_contained`
+   (`stigmerge-fileindex/src/lib.rs`) says whether a path is relative,
+   non-empty and never climbs; `Index::from_wanted` refuses to build
+   from one that is not, and the wire decoder
+   (`stigmerge-peer/src/proto/index.rs`) refuses the whole index with
+   `Error::UnsafePath` before anything is created under that name
+   (test `escaping_paths_are_refused_at_decode`). **Upstream candidate.**
+11. **A finished task's update handler is skipped and swept
+   (2026-09-01).** veilnet's `HandlerChain` only ever grows: the share
+   resolver, announcer, seeder and peer gossip each register a handler
+   on the connection when they start and nothing removes it when they
+   stop, so on a connection shared by every seed and fetch a process
+   makes (ours; upstream's CLI makes one per process) each dead handler
+   kept receiving every update, failing to send it down a closed
+   channel, and logging the failure — 587 lines of "failed to send
+   route change" in one shutdown, on a phone whose readable log holds
+   600. `UpdateHandler::is_done` (default `false`) lets a handler say
+   its task is gone; the four stigmerge handlers and the datagram
+   listener answer from their channel (`Sender::is_disconnected`), the
+   chain skips a done handler on every dispatch and drops it on the
+   next `add` (test `done_handlers_are_skipped_and_swept`). **Upstream
+   candidate for both crates.**
 
 Proven live 2026-08-30, two DUCAT nodes on real Veilid: 25 MiB in 97.5 s
 and 100 MiB in 279.9 s (~3 Mbit/s through private routes), payload

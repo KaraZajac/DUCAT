@@ -247,6 +247,9 @@ impl ListenerWatcher {
 }
 
 impl UpdateHandler for ListenerWatcher {
+    fn is_done(&self) -> bool {
+        self.app_message_tx.is_disconnected()
+    }
     fn app_message(&self, message: &VeilidAppMessage) {
         if let Err(err) = self.app_message_tx.send((*message).clone()) {
             error!(

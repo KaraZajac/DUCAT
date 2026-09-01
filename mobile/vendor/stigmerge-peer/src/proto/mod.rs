@@ -32,6 +32,8 @@ pub enum Error {
     EncodePath(PathBuf),
     #[error("{0}")]
     DecodePath(#[from] Utf8Error),
+    #[error("index names a path outside the share: {0}")]
+    UnsafePath(PathBuf),
     #[error("{0}")]
     InternalUsize(#[from] TryFromIntError),
     #[error("{0}")]

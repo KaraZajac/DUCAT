@@ -131,7 +131,18 @@ impl<C: Connection + Send + Sync + 'static> PeerGossipInner<C> {
             .cloned()
             .collect();
         for known_peer in peers.iter() {
-            let remote_share = self.share_resolver.add_share(known_peer).await?;
+            // DUCAT modification (see ../STIGMERGE-NOTICE.md): one peer
+            // whose record cannot be resolved must not silence us to every
+            // other peer — a dead entry in a frozen roster is the normal
+            // case, not the exception, once a share's origin is gone.
+            let remote_share = match self.share_resolver.add_share(known_peer).await {
+                Ok(s) => s,
+                Err(err) => {
+                    warn!(?err, ?known_peer, "resolve known peer for reannounce");
+                    crate::peer_reputation::note_failure(known_peer);
+                    continue;
+                }
+            };
             let key = self.share.key.clone();
 
             // Don't advertise the same peer to the same target too often
@@ -213,6 +224,12 @@ impl<C: Connection + Send + Sync + 'static> PeerGossipInner<C> {
                     remote_index_digest = ?remote_share.index_digest,
                     "rejected peer, index does not match local share",
                 );
+                // DUCAT modification: actually reject it — upstream logged
+                // the rejection and then recorded the peer regardless, so a
+                // stranger's share rode our roster into every fetcher's
+                // lottery (where it was refused again, one dial at a time).
+                self.share_resolver.remove_share(key).await?;
+                return Ok(());
             }
             self.peers_record.update_peer(&mut self.conn, key).await?;
             if let Err(err) = self
@@ -236,7 +253,16 @@ impl<C: Connection + Send + Sync + 'static> PeerGossipInner<C> {
                 {
                     crate::peer_reputation::note_stale(peer.key());
                 }
-                let remote_share_info = self.share_resolver.add_share(peer.key()).await?;
+                // Same rule as reannounce: a roster entry that will not
+                // resolve is skipped, not fatal to the rest of the roster.
+                let remote_share_info = match self.share_resolver.add_share(peer.key()).await {
+                    Ok(s) => s,
+                    Err(err) => {
+                        warn!(?err, key = ?peer.key(), "resolve roster peer");
+                        crate::peer_reputation::note_failure(peer.key());
+                        continue;
+                    }
+                };
                 if remote_share_info.index_digest != self.share.want_index_digest {
                     self.share_resolver
                         .remove_share(&remote_share_info.key)
@@ -290,6 +316,9 @@ impl AdvertisePeerRequestHandler {
 }
 
 impl UpdateHandler for AdvertisePeerRequestHandler {
+    fn is_done(&self) -> bool {
+        self.advertise_peer_tx.is_disconnected()
+    }
     fn app_message(&self, app_message: &VeilidAppMessage) {
         match proto::Request::decode(app_message.message()) {
             Ok(proto::Request::AdvertisePeer(adv_peer_req)) => {

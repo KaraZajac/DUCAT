@@ -56,6 +56,18 @@ fn finished() -> &'static Mutex<HashMap<([u8; 32], u16), ThresholdKeys<Ed25519>>
     M.get_or_init(|| Mutex::new(HashMap::new()))
 }
 
+/// A slot map's guard, poisoned or not.
+///
+/// Every export here runs under uniffi's catch_unwind, so a panic inside one
+/// reaches the caller as an exception — and leaves the lock it held poisoned
+/// for the life of the process. `lock().unwrap()` then panicked on every later
+/// ceremony call, each reporting the first failure, until the app was killed.
+/// The maps hold whole machines, never half-updated ones (each call inserts
+/// or removes one entry), so a poisoned guard's contents are sound to use.
+fn lock<T>(m: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
+    m.lock().unwrap_or_else(std::sync::PoisonError::into_inner)
+}
+
 fn cid(bytes: &[u8]) -> Result<[u8; 32], ContactError> {
     bytes
         .try_into()
@@ -94,7 +106,7 @@ pub fn dkg_commit(
     let id = cid(&ceremony_id)?;
     let (ss, commitment) =
         KeyGenMachine::<Ed25519>::new(params(i, t, n)?, id).generate_coefficients(&mut OsRng);
-    dkgs().lock().unwrap().insert((id, i), DkgStage::Committed(ss));
+    lock(dkgs()).insert((id, i), DkgStage::Committed(ss));
     Ok(commitment.serialize())
 }
 
@@ -110,15 +122,12 @@ pub fn dkg_share(
     commitments: Vec<FromParty>,
 ) -> Result<Vec<ToParty>, ContactError> {
     let id = cid(&ceremony_id)?;
-    let stage = dkgs()
-        .lock()
-        .unwrap()
-        .remove(&(id, i))
-        .ok_or_else(|| ContactError::Refused("no dkg in progress for this ceremony".into()))?;
-    let DkgStage::Committed(ss) = stage else {
-        return Err(ContactError::Refused("dkg is not at the commit stage".into()));
-    };
-
+    // The peers' bytes are read before the machine is taken. A round's
+    // machine lives only here (§17.9 — nothing can rebuild it), so taking it
+    // first meant one malformed frame from one peer ended the ceremony for
+    // this device: the next honest frame found "no dkg in progress". Refusing
+    // the frame and keeping the machine costs nothing and leaves the
+    // retransmit a machine to advance.
     let mut map = HashMap::new();
     for c in commitments {
         let p = Participant::new(c.participant)
@@ -131,10 +140,20 @@ pub fn dkg_share(
         map.insert(p, msg);
     }
 
+    let stage = lock(dkgs())
+        .remove(&(id, i))
+        .ok_or_else(|| ContactError::Refused("no dkg in progress for this ceremony".into()))?;
+    let DkgStage::Committed(ss) = stage else {
+        // Put back what was not ours to take: a late duplicate of round 0
+        // must not destroy the round-1 machine it found in the slot.
+        lock(dkgs()).insert((id, i), stage);
+        return Err(ContactError::Refused("dkg is not at the commit stage".into()));
+    };
+
     let (km, shares) = ss
         .generate_secret_shares(&mut OsRng, map)
         .map_err(|e| ContactError::Refused(format!("shares: {e:?}")))?;
-    dkgs().lock().unwrap().insert((id, i), DkgStage::Shared(km));
+    lock(dkgs()).insert((id, i), DkgStage::Shared(km));
 
     Ok(shares
         .into_iter()
@@ -155,15 +174,7 @@ pub fn dkg_finish(
     stagenet: bool,
 ) -> Result<String, ContactError> {
     let id = cid(&ceremony_id)?;
-    let stage = dkgs()
-        .lock()
-        .unwrap()
-        .remove(&(id, i))
-        .ok_or_else(|| ContactError::Refused("no dkg in progress for this ceremony".into()))?;
-    let DkgStage::Shared(km) = stage else {
-        return Err(ContactError::Refused("dkg is not at the share stage".into()));
-    };
-
+    // Bytes first, machine second — see dkg_share.
     let mut map = HashMap::new();
     for s in shares {
         let p = Participant::new(s.participant)
@@ -176,12 +187,20 @@ pub fn dkg_finish(
         map.insert(p, msg);
     }
 
+    let stage = lock(dkgs())
+        .remove(&(id, i))
+        .ok_or_else(|| ContactError::Refused("no dkg in progress for this ceremony".into()))?;
+    let DkgStage::Shared(km) = stage else {
+        lock(dkgs()).insert((id, i), stage);
+        return Err(ContactError::Refused("dkg is not at the share stage".into()));
+    };
+
     let keys = km
         .calculate_share(&mut OsRng, map)
         .map_err(|e| ContactError::Refused(format!("calculate: {e:?}")))?
         .complete();
     let addr = group_address(&keys, stagenet)?;
-    finished().lock().unwrap().insert((id, i), keys);
+    lock(finished()).insert((id, i), keys);
     Ok(addr)
 }
 
@@ -208,9 +227,7 @@ fn group_address(keys: &ThresholdKeys<Ed25519>, stagenet: bool) -> Result<String
 #[uniffi::export]
 pub fn dkg_take_keys(ceremony_id: Vec<u8>, i: u16) -> Result<Vec<u8>, ContactError> {
     let id = cid(&ceremony_id)?;
-    let keys = finished()
-        .lock()
-        .unwrap()
+    let keys = lock(finished())
         .remove(&(id, i))
         .ok_or_else(|| ContactError::Refused("no finished dkg for this ceremony".into()))?;
     Ok(keys.serialize().to_vec())
@@ -221,9 +238,9 @@ pub fn dkg_take_keys(ceremony_id: Vec<u8>, i: u16) -> Result<Vec<u8>, ContactErr
 #[uniffi::export]
 pub fn ceremony_abort(ceremony_id: Vec<u8>, i: u16) {
     if let Ok(id) = cid(&ceremony_id) {
-        dkgs().lock().unwrap().remove(&(id, i));
-        finished().lock().unwrap().remove(&(id, i));
-        frosts().lock().unwrap().remove(&(id, i));
+        lock(dkgs()).remove(&(id, i));
+        lock(finished()).remove(&(id, i));
+        lock(frosts()).remove(&(id, i));
     }
 }
 
@@ -321,19 +338,22 @@ fn scan_escrow(
         let mut youngest = 0u64;
         let mut h = from_height;
         while h <= tip {
-            let Ok(block) = rpc.block_by_number(h as usize).await else {
-                h += 1;
-                continue;
-            };
-            let Ok(sb) = rpc.expand_to_scannable_block(block).await else {
-                h += 1;
-                continue;
-            };
-            if let Ok(found) = scanner.scan(sb) {
-                for o in found.not_additionally_locked() {
-                    outputs.push(o);
-                    youngest = youngest.max(h);
-                }
+            // A block this scan cannot read is the whole answer's problem, not
+            // that block's: it used to be skipped, and a skipped block is an
+            // output nobody saw. From a balance that reads as "not funded yet"
+            // (survivable: the next poll looks again) — from a release
+            // proposal it is a sweep of *part* of the escrow, co-signed and
+            // broadcast, with the rest left behind under a key nobody can
+            // spend alone twice.
+            let sb = crate::monero::scannable_block(&rpc, h)
+                .await
+                .map_err(|e| ContactError::Refused(format!("block {h}: {e}")))?;
+            let found = scanner
+                .scan(sb)
+                .map_err(|e| ContactError::Refused(format!("scan block {h}: {e:?}")))?;
+            for o in found.not_additionally_locked() {
+                outputs.push(o);
+                youngest = youngest.max(h);
             }
             h += 1;
         }
@@ -606,13 +626,18 @@ pub fn frost_propose_split(
         )));
     }
     let total: u64 = outputs.iter().map(|o| o.commitment().amount).sum();
-    let fixed_sum: u64 = fixed.iter().map(|(_, a)| a).sum();
-    if total <= fixed_sum + FEE_RESERVE {
+    // Checked: the slices are the caller's numbers, and a sum that wrapped
+    // would pass the cover test below with a payout it never had.
+    let owed = fixed
+        .iter()
+        .try_fold(FEE_RESERVE, |acc, (_, a)| acc.checked_add(*a))
+        .ok_or_else(|| ContactError::Refused("the split does not add up".into()))?;
+    if total <= owed {
         return Err(ContactError::Refused(
             "the escrow cannot cover the split and the fee".into(),
         ));
     }
-    let payout = total - fixed_sum - FEE_RESERVE;
+    let payout = total - owed;
 
     let rt = tokio::runtime::Builder::new_current_thread()
         .enable_all()
@@ -667,7 +692,7 @@ pub fn frost_propose_split(
     let mut payload = Vec::new();
     frame(&mut payload, &tx.serialize());
     frame(&mut payload, &preprocess.serialize());
-    frosts().lock().unwrap().insert((id, i), sign_machine);
+    lock(frosts()).insert((id, i), sign_machine);
 
     Ok(FrostProposal { payload, total_pxmr: total, payout_pxmr: payout })
 }
@@ -735,24 +760,26 @@ pub fn frost_complete(
     payload: Vec<u8>,
     node_url: String,
 ) -> Result<String, ContactError> {
-    use monero_daemon_rpc::prelude::*;
 
     let id = cid(&ceremony_id)?;
     let their = Participant::new(cosigner)
         .ok_or_else(|| ContactError::Refused("participant is 1..".into()))?;
-    let sign_machine = frosts()
-        .lock()
-        .unwrap()
-        .remove(&(id, i))
-        .ok_or_else(|| ContactError::Refused("no release in progress for this ceremony".into()))?;
-
+    // Bytes first, machine second (see dkg_share): a co-sign that does not
+    // parse must not take the proposer's machine with it.
     let mut buf = payload.as_slice();
     let pre_b_bytes = unframe(&mut buf)?;
     let share_b_bytes = unframe(&mut buf)?;
 
-    let pre_b = sign_machine
-        .read_preprocess(&mut &pre_b_bytes[..])
-        .map_err(|e| ContactError::Refused(format!("their preprocess: {e}")))?;
+    let sign_machine = lock(frosts())
+        .remove(&(id, i))
+        .ok_or_else(|| ContactError::Refused("no release in progress for this ceremony".into()))?;
+    let pre_b = match sign_machine.read_preprocess(&mut &pre_b_bytes[..]) {
+        Ok(p) => p,
+        Err(e) => {
+            lock(frosts()).insert((id, i), sign_machine);
+            return Err(ContactError::Refused(format!("their preprocess: {e}")));
+        }
+    };
     let (sig_machine, _our_share) = sign_machine
         .sign(HashMap::from([(their, pre_b)]), &[])
         .map_err(|e| ContactError::Refused(format!("sign: {e:?}")))?;
@@ -769,31 +796,7 @@ pub fn frost_complete(
         .enable_all()
         .build()
         .map_err(|e| ContactError::Refused(format!("runtime: {e}")))?;
-    let (accepted, last_err) = rt.block_on(async {
-        let mut accepted = 0u32;
-        let mut last_err = String::new();
-        for url in [
-            node_url.as_str(),
-            "http://node.monerodevs.org:38089",
-            "http://stagenet.xmr-tw.org:38081",
-        ] {
-            match monero_daemon_rpc::MoneroDaemon::new(crate::monero::UreqTransport::new(
-                url.to_string(),
-            ))
-            .await
-            {
-                Ok(rpc) => match rpc.publish_transaction(&tx).await {
-                    Ok(_) => accepted += 1,
-                    // The daemon's refusal reason is the whole diagnosis —
-                    // "too few outputs", "fee too low", "key image spent" are
-                    // three different bugs, and a silent is_ok() hid which.
-                    Err(e) => last_err = format!("{e:?}"),
-                },
-                Err(e) => last_err = format!("connect {url}: {e:?}"),
-            }
-        }
-        (accepted, last_err)
-    });
+    let (accepted, last_err) = rt.block_on(crate::monero::relay(&tx, &node_url));
     if accepted == 0 {
         // Debug aid while the daemons' reasons stay empty through the
         // wrapper: the raw bytes let a curl to sendrawtransaction read the

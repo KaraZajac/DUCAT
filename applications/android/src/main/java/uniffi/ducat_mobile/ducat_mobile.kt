@@ -1908,7 +1908,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_node_status() != 13257.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_node_stop() != 20027.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_node_stop() != 61954.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_test_route() != 9881.toShort()) {
@@ -4794,6 +4794,12 @@ data class ScanResult (
      * The height scanning reached. Persist this: rescanning from the restore
      * height every time is the difference between a wallet that opens and one
      * that appears to hang.
+     *
+     * Never past a block that could not be read. The loop skips an unreadable
+     * block and carries on so one hiccup does not discard the window, but the
+     * cursor stops at the height before it: a cursor that had walked past the
+     * gap made a payment in that block invisible until somebody rescanned by
+     * hand — the wallet showed less than it held, for good.
      */
     var `scannedTo`: kotlin.ULong, 
     /**
@@ -8304,7 +8310,18 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
     )
     }
     
- fun `nodeStop`()
+
+        /**
+         * Stop the node and forget everything that was only true of it.
+         *
+         * Every map in this module holds handles into the node that just went
+         * away: routes it allocated, routes imported through it, watches it armed,
+         * the swarm's feeder installed for its connection, and the call sender's
+         * "up" flag — for a task that ran on its runtime and died with it. A
+         * restart (the service coming back after Android reclaimed it) used to
+         * find the flag still set and never spawn a sender: the next call
+         * connected and carried no audio, until the process was killed.
+         */ fun `nodeStop`()
         = 
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_stop(

@@ -24,6 +24,23 @@ struct Node {
 }
 
 static NODE: OnceLock<Mutex<Option<Node>>> = OnceLock::new();
+/// Set while a node is coming up or going down — work the slot's lock does
+/// not cover any more (see [`node_start`]). A start that meets it returns
+/// as if the node were already running; the caller polls status either way.
+static BUSY: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+/// Clears [`BUSY`] on every way out.
+struct Busy;
+impl Busy {
+    fn take() -> Option<Busy> {
+        (!BUSY.swap(true, std::sync::atomic::Ordering::SeqCst)).then_some(Busy)
+    }
+}
+impl Drop for Busy {
+    fn drop(&mut self) {
+        BUSY.store(false, std::sync::atomic::Ordering::SeqCst);
+    }
+}
 
 /// One bit and a doorbell: "something you watch has changed".
 static CHANGE: OnceLock<(Mutex<bool>, std::sync::Condvar)> = OnceLock::new();
@@ -49,10 +66,7 @@ fn changed_keys() -> &'static Mutex<VecDeque<String>> {
 /// consumes the flag the same way and for the same reason.
 #[uniffi::export]
 pub fn node_changed_keys() -> Vec<String> {
-    changed_keys()
-        .lock()
-        .map(|mut q| q.drain(..).collect())
-        .unwrap_or_default()
+    crate::lock(changed_keys()).drain(..).collect()
 }
 
 fn change_signal() -> &'static (Mutex<bool>, std::sync::Condvar) {
@@ -83,11 +97,11 @@ static INBOX: OnceLock<Mutex<VecDeque<(u64, Vec<u8>)>>> = OnceLock::new();
 // route they arrived on — the seeder answers block requests on routes the
 // announcer registered, the mailbox answers everything else, and neither
 // can steal the other's single reply slot.
-static SWARM_FEEDER: OnceLock<Mutex<Option<Box<dyn Fn(VeilidUpdate) + Send + Sync>>>> =
-    OnceLock::new();
+type Feeder = std::sync::Arc<dyn Fn(VeilidUpdate) + Send + Sync>;
+static SWARM_FEEDER: OnceLock<Mutex<Option<Feeder>>> = OnceLock::new();
 static SWARM_ROUTES: OnceLock<Mutex<std::collections::HashSet<RouteId>>> = OnceLock::new();
 
-fn swarm_feeder() -> &'static Mutex<Option<Box<dyn Fn(VeilidUpdate) + Send + Sync>>> {
+fn swarm_feeder() -> &'static Mutex<Option<Feeder>> {
     SWARM_FEEDER.get_or_init(|| Mutex::new(None))
 }
 
@@ -96,11 +110,11 @@ fn swarm_routes() -> &'static Mutex<std::collections::HashSet<RouteId>> {
 }
 
 pub(crate) fn swarm_install_feeder(f: Box<dyn Fn(VeilidUpdate) + Send + Sync>) {
-    *swarm_feeder().lock().unwrap() = Some(f);
+    *crate::lock(swarm_feeder()) = Some(std::sync::Arc::from(f));
 }
 
 pub(crate) fn swarm_route_changed(route_id: &RouteId, added: bool) {
-    let mut r = swarm_routes().lock().unwrap();
+    let mut r = crate::lock(swarm_routes());
     if added {
         r.insert(route_id.clone());
     } else {
@@ -138,15 +152,22 @@ fn call_mine() -> &'static Mutex<std::collections::HashMap<Vec<u8>, RouteId>> {
     CALL_MINE.get_or_init(|| Mutex::new(std::collections::HashMap::new()))
 }
 
+/// Cloned out, then called: the feeder is stigmerge's handler chain, and
+/// it is fed from the update callback — which the node runs on its own
+/// thread with no catch_unwind over it. Holding the slot's lock while a
+/// handler ran meant a handler that reached back for the node (a route
+/// rebuild does) deadlocked against `ensure_conn`, and one that panicked
+/// took the feeder's lock down with it.
 fn feed_swarm(update: VeilidUpdate) {
-    if let Some(f) = swarm_feeder().lock().unwrap().as_ref() {
+    let f = crate::lock(swarm_feeder()).clone();
+    if let Some(f) = f {
         f(update);
     }
 }
 
 /// The running API and its runtime handle, for the swarm module.
 pub(crate) fn swarm_handles() -> Option<(VeilidAPI, tokio::runtime::Handle)> {
-    let guard = slot().lock().ok()?;
+    let guard = crate::lock(slot());
     guard.as_ref().map(|n| (n.api.clone(), n.runtime.handle().clone()))
 }
 
@@ -173,14 +194,14 @@ fn logs() -> &'static Mutex<VecDeque<String>> {
 /// Drain the node's buffered log lines, oldest first.
 #[uniffi::export]
 pub fn node_logs() -> Vec<String> {
-    logs().lock().unwrap().drain(..).collect()
+    crate::lock(logs()).drain(..).collect()
 }
 
 /// A line of our own into the same ring — the swarm's fetch loop lives and
 /// dies entirely between two FFI calls, and on a phone that death is
 /// invisible without this.
 pub(crate) fn note(line: String) {
-    let mut q = logs().lock().unwrap();
+    let mut q = crate::lock(logs());
     if q.len() >= MAX_LOGS {
         q.pop_front();
     }
@@ -197,7 +218,7 @@ pub(crate) fn note(line: String) {
 /// the app not responding. It reads to a user as a crash while building a card,
 /// and there is nothing in the log to say a lock was the reason.
 fn handles() -> Result<(VeilidAPI, tokio::runtime::Handle), NodeError> {
-    let guard = slot().lock().unwrap();
+    let guard = crate::lock(slot());
     let node = guard.as_ref().ok_or(NodeError::NotRunning)?;
     Ok((node.api.clone(), node.runtime.handle().clone()))
 }
@@ -238,10 +259,22 @@ pub enum NodeError {
 /// that appears frozen. Poll [`node_status`].
 #[uniffi::export]
 pub fn node_start(storage_dir: String, udp: bool) -> Result<(), NodeError> {
-    let mut guard = slot().lock().unwrap();
-    if guard.is_some() {
-        return Ok(()); // already running; starting twice would fight over the store
-    }
+    // "Already running" and "already starting" both mean don't: starting
+    // twice would fight over the store. The flag, not the slot's lock, is
+    // what holds the second caller off — startup takes seconds (the keyring,
+    // the table store, attach), and the slot's lock used to be held across
+    // all of it, so a `node_status` poll from a recomposition stood behind
+    // it for that long, which Android reports as the app not responding.
+    let _busy = {
+        let guard = crate::lock(slot());
+        if guard.is_some() {
+            return Ok(());
+        }
+        match Busy::take() {
+            Some(b) => b,
+            None => return Ok(()),
+        }
+    };
 
     // The swarm's own narration, into the same ring the node's goes to.
     // stigmerge speaks through `tracing`, and on a phone that had no
@@ -424,13 +457,13 @@ pub fn node_start(storage_dir: String, udp: bool) -> Result<(), NodeError> {
                     // answerers means whoever loses answered nothing.
                     let to_swarm = call
                         .route_id()
-                        .map(|r| swarm_routes().lock().unwrap().contains(r))
+                        .map(|r| crate::lock(swarm_routes()).contains(r))
                         .unwrap_or(false);
                     if to_swarm {
                         feed_swarm(VeilidUpdate::AppCall(call));
                         return;
                     }
-                    let mut q = inbox().lock().unwrap();
+                    let mut q = crate::lock(inbox());
                     if q.len() >= MAX_PENDING {
                         q.pop_front();
                     }
@@ -457,21 +490,20 @@ pub fn node_start(storage_dir: String, udp: bool) -> Result<(), NodeError> {
                     // Forget it, so the next arming pass puts it back and
                     // reads resume closing the record.
                     if vc.count == 0 || vc.subkeys.is_empty() {
-                        if let Ok(mut w) = watched().lock() {
-                            w.remove(&key);
-                        }
-                    } else if let Ok(mut q) = changed_keys().lock() {
+                        crate::lock(watched()).remove(&key);
+                    } else {
+                        let mut q = crate::lock(changed_keys());
                         if q.len() >= MAX_CHANGED {
                             q.pop_front();
                         }
                         q.push_back(key);
                     }
                     let (flag, cond) = change_signal();
-                    *flag.lock().unwrap() = true;
+                    *crate::lock(flag) = true;
                     cond.notify_all();
                 }
                 VeilidUpdate::Log(l) => {
-                    let mut q = logs().lock().unwrap();
+                    let mut q = crate::lock(logs());
                     if q.len() >= MAX_LOGS {
                         q.pop_front();
                     }
@@ -485,10 +517,10 @@ pub fn node_start(storage_dir: String, udp: bool) -> Result<(), NodeError> {
                 VeilidUpdate::AppMessage(msg) => {
                     let to_call = msg
                         .route_id()
-                        .map(|r| call_routes().lock().unwrap().contains(r))
+                        .map(|r| crate::lock(call_routes()).contains(r))
                         .unwrap_or(false);
                     if to_call {
-                        let mut ring = call_rx().lock().unwrap();
+                        let mut ring = crate::lock(call_rx());
                         if ring.len() >= CALL_RING_CAP {
                             ring.pop_front();
                         }
@@ -508,7 +540,7 @@ pub fn node_start(storage_dir: String, udp: bool) -> Result<(), NodeError> {
     })
     .map_err(NodeError::Failed)?;
 
-    *guard = Some(Node { api, runtime });
+    *crate::lock(slot()) = Some(Node { api, runtime });
     Ok(())
 }
 
@@ -545,26 +577,56 @@ pub fn node_status() -> NodeStatus {
 /// transact and one that can only receive.
 #[uniffi::export]
 pub fn node_test_route() -> Result<u32, NodeError> {
-    let guard = slot().lock().unwrap();
-    let node = guard.as_ref().ok_or_else(|| NodeError::Failed("node not started".into()))?;
-    node.runtime.block_on(async {
-        let r = node
-            .api
+    let (api, rt) = handles()?;
+    rt.block_on(async {
+        let r = api
             .new_custom_private_route(PrivateSpec::default())
             .await
             .map_err(|e| NodeError::Failed(e.to_string()))?;
         let len = r.blob.len() as u32;
-        let _ = node.api.release_private_route(r.route_id);
+        let _ = api.release_private_route(r.route_id);
         Ok(len)
     })
 }
 
+/// Stop the node and forget everything that was only true of it.
+///
+/// Every map in this module holds handles into the node that just went
+/// away: routes it allocated, routes imported through it, watches it armed,
+/// the swarm's feeder installed for its connection, and the call sender's
+/// "up" flag — for a task that ran on its runtime and died with it. A
+/// restart (the service coming back after Android reclaimed it) used to
+/// find the flag still set and never spawn a sender: the next call
+/// connected and carried no audio, until the process was killed.
 #[uniffi::export]
 pub fn node_stop() {
-    let mut guard = slot().lock().unwrap();
-    if let Some(node) = guard.take() {
-        node.runtime.block_on(node.api.shutdown());
+    // Busy for the shutdown too, or a start arriving mid-way finds the slot
+    // empty and opens the store the old node is still closing.
+    let node = crate::lock(slot()).take();
+    if let Some(node) = node {
+        let busy = loop {
+            if let Some(b) = Busy::take() {
+                break b;
+            }
+            std::thread::sleep(std::time::Duration::from_millis(20));
+        };
+        let Node { api, runtime } = node;
+        runtime.block_on(api.shutdown());
+        drop(runtime);
+        drop(busy);
     }
+    crate::callcodec::reset();
+    crate::lock(call_routes()).clear();
+    crate::lock(call_mine()).clear();
+    crate::lock(call_targets()).clear();
+    crate::lock(call_rx()).clear();
+    crate::lock(call_queue()).clear();
+    call_sender_up().store(false, std::sync::atomic::Ordering::SeqCst);
+    crate::lock(watched()).clear();
+    crate::lock(inbox()).clear();
+    *crate::lock(swarm_feeder()) = None;
+    crate::lock(swarm_routes()).clear();
+    crate::swarm::node_stopped();
 }
 
 // ---------------------------------------------------------------------------
@@ -696,9 +758,7 @@ pub struct InboundCall {
 /// Take the next inbound call, if any. Non-blocking, safe on any thread.
 #[uniffi::export]
 pub fn node_poll_call() -> Option<InboundCall> {
-    inbox()
-        .lock()
-        .unwrap()
+    crate::lock(inbox())
         .pop_front()
         .map(|(id, message)| InboundCall { id, message })
 }
@@ -729,8 +789,8 @@ pub fn node_call_route() -> Result<Vec<u8>, NodeError> {
         loop {
             match api.new_private_route().await {
                 Ok(rb) => {
-                    call_routes().lock().unwrap().insert(rb.route_id.clone());
-                    call_mine().lock().unwrap().insert(rb.blob.clone(), rb.route_id);
+                    crate::lock(call_routes()).insert(rb.route_id.clone());
+                    crate::lock(call_mine()).insert(rb.blob.clone(), rb.route_id);
                     return Ok(rb.blob);
                 }
                 Err(e) if format!("{e}").contains("TryAgain") && waited < 40 => {
@@ -756,7 +816,7 @@ pub fn node_call_route() -> Result<Vec<u8>, NodeError> {
 pub fn node_call_send(route_blob: Vec<u8>, frame: Vec<u8>) -> Result<(), NodeError> {
     let (api, rt) = handles()?;
     {
-        let mut q = call_queue().lock().unwrap();
+        let mut q = crate::lock(call_queue());
         while q.len() >= CALL_QUEUE_MAX {
             q.pop_front(); // freshest wins; voice never waits for the past
         }
@@ -764,25 +824,45 @@ pub fn node_call_send(route_blob: Vec<u8>, frame: Vec<u8>) -> Result<(), NodeErr
     }
     if !call_sender_up().swap(true, std::sync::atomic::Ordering::SeqCst) {
         rt.spawn(async move {
+            // Ticks with nothing to send. Two seconds of them and the call
+            // is over: the task hands the flag back and goes, instead of
+            // waking two hundred times a second for the life of the
+            // process. The next frame spawns a fresh one.
+            const IDLE_TICKS: u32 = 400;
+            let mut idle = 0u32;
             loop {
-                let next = call_queue().lock().unwrap().pop_front();
+                let next = crate::lock(call_queue()).pop_front();
                 let Some((blob, frame)) = next else {
+                    idle += 1;
+                    if idle >= IDLE_TICKS {
+                        call_sender_up().store(false, std::sync::atomic::Ordering::SeqCst);
+                        // A frame queued between the pop and the store has
+                        // no task yet unless its sender spawned one — in
+                        // which case the flag is taken again and we go.
+                        if crate::lock(call_queue()).is_empty()
+                            || call_sender_up().swap(true, std::sync::atomic::Ordering::SeqCst)
+                        {
+                            return;
+                        }
+                        idle = 0;
+                    }
                     tokio::time::sleep(std::time::Duration::from_millis(5)).await;
                     continue;
                 };
+                idle = 0;
                 let route = {
-                    let cached = call_targets().lock().unwrap().get(&blob).cloned();
+                    let cached = crate::lock(call_targets()).get(&blob).cloned();
                     match cached {
                         Some(r) => r,
                         None => match api.import_remote_private_route(blob.clone()) {
                             Ok(r) => {
-                                call_targets().lock().unwrap().insert(blob.clone(), r.clone());
+                                crate::lock(call_targets()).insert(blob.clone(), r.clone());
                                 r
                             }
                             Err(e) => {
                                 call_send_errs()
                                     .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-                                *call_send_last().lock().unwrap() = format!("import: {e}");
+                                *crate::lock(call_send_last()) = format!("import: {e}");
                                 continue;
                             }
                         },
@@ -799,9 +879,9 @@ pub fn node_call_send(route_blob: Vec<u8>, frame: Vec<u8>) -> Result<(), NodeErr
                         // A route that stopped resolving may have rotated
                         // under us: forget it so the next frame re-imports.
                         if msg.contains("private route") {
-                            call_targets().lock().unwrap().remove(&blob);
+                            crate::lock(call_targets()).remove(&blob);
                         }
-                        *call_send_last().lock().unwrap() = msg;
+                        *crate::lock(call_send_last()) = msg;
                     }
                 }
             }
@@ -833,7 +913,7 @@ pub fn node_call_send_report() -> String {
         "{}/{} {}",
         call_send_oks().load(std::sync::atomic::Ordering::SeqCst),
         call_send_errs().load(std::sync::atomic::Ordering::SeqCst),
-        call_send_last().lock().unwrap()
+        crate::lock(call_send_last())
     )
 }
 
@@ -841,9 +921,9 @@ pub fn node_call_send_report() -> String {
 /// harness does to its predecessor, proving the far side really moved.
 #[uniffi::export]
 pub fn node_call_release(route_blob: Vec<u8>) {
-    let id = call_mine().lock().unwrap().remove(&route_blob);
+    let id = crate::lock(call_mine()).remove(&route_blob);
     if let Some(id) = id {
-        call_routes().lock().unwrap().remove(&id);
+        crate::lock(call_routes()).remove(&id);
         if let Ok((api, _rt)) = handles() {
             let _ = api.release_private_route(id);
         }
@@ -869,7 +949,7 @@ pub fn node_call_recv(timeout_ms: u32) -> Option<Vec<u8>> {
     let deadline =
         std::time::Instant::now() + std::time::Duration::from_millis(timeout_ms as u64);
     loop {
-        if let Some(f) = call_rx().lock().unwrap().pop_front() {
+        if let Some(f) = crate::lock(call_rx()).pop_front() {
             return Some(f);
         }
         if std::time::Instant::now() >= deadline {
@@ -884,7 +964,7 @@ pub fn node_call_recv(timeout_ms: u32) -> Option<Vec<u8>> {
 #[uniffi::export]
 pub fn node_call_close() {
     crate::callcodec::reset();
-    let routes: Vec<RouteId> = call_routes().lock().unwrap().drain().collect();
+    let routes: Vec<RouteId> = crate::lock(call_routes()).drain().collect();
     if let Ok((api, rt)) = handles() {
         rt.block_on(async {
             for r in routes {
@@ -892,10 +972,10 @@ pub fn node_call_close() {
             }
         });
     }
-    call_rx().lock().unwrap().clear();
-    call_targets().lock().unwrap().clear();
-    call_queue().lock().unwrap().clear();
-    call_mine().lock().unwrap().clear();
+    crate::lock(call_rx()).clear();
+    crate::lock(call_targets()).clear();
+    crate::lock(call_queue()).clear();
+    crate::lock(call_mine()).clear();
 }
 
 // ---------------------------------------------------------------------------
@@ -1113,14 +1193,16 @@ pub fn node_dht_watch(key: String) -> Result<bool, NodeError> {
 #[uniffi::export]
 pub fn node_wait_change(timeout_ms: u32) -> bool {
     let (flag, cond) = change_signal();
-    let guard = flag.lock().unwrap();
+    let guard = crate::lock(flag);
+    // Poison-tolerant like every other lock here: the flag is a bool, and a
+    // poisoned one is still a bool.
     let (mut guard, _timeout) = cond
         .wait_timeout_while(
             guard,
             std::time::Duration::from_millis(timeout_ms as u64),
             |changed| !*changed,
         )
-        .unwrap();
+        .unwrap_or_else(std::sync::PoisonError::into_inner);
     let fired = *guard;
     *guard = false;
     fired
@@ -1292,10 +1374,7 @@ fn watched() -> &'static Mutex<std::collections::HashSet<String>> {
 }
 
 fn is_watched(key: &RecordKey) -> bool {
-    watched()
-        .lock()
-        .map(|w| w.contains(&key.to_string()))
-        .unwrap_or(false)
+    crate::lock(watched()).contains(&key.to_string())
 }
 
 /// Ask the network to tell us when this *board* changes.
@@ -1352,9 +1431,7 @@ pub fn stand_watch(cell: String) -> Result<bool, NodeError> {
             .await
             .map_err(|e| NodeError::Failed(format!("watch: {e}")))?;
         if armed {
-            if let Ok(mut w) = watched().lock() {
-                w.insert(key.to_string());
-            }
+            crate::lock(watched()).insert(key.to_string());
         }
         Ok(armed)
     })

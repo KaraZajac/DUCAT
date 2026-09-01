@@ -86,7 +86,7 @@ pub fn call_encode(pcm: Vec<u8>) -> Result<Vec<u8>, NodeError> {
     for (i, s) in samples.iter_mut().enumerate() {
         *s = i16::from_le_bytes([pcm[i * 2], pcm[i * 2 + 1]]);
     }
-    let mut guard = slot().lock().unwrap();
+    let mut guard = crate::lock(slot());
     ensure(&mut guard)?;
     let codec = guard.as_mut().unwrap();
     let mut out = vec![0u8; MAX_PACKET];
@@ -115,7 +115,7 @@ pub fn call_decode(packet: Vec<u8>) -> Result<Vec<u8>, NodeError> {
             packet.len()
         )));
     }
-    let mut guard = slot().lock().unwrap();
+    let mut guard = crate::lock(slot());
     ensure(&mut guard)?;
     let codec = guard.as_mut().unwrap();
     let mut samples = [0i16; FRAME_SAMPLES];
@@ -146,7 +146,7 @@ pub fn call_decode(packet: Vec<u8>) -> Result<Vec<u8>, NodeError> {
 /// after it decode clean instead of smeared.
 #[uniffi::export]
 pub fn call_conceal() -> Result<Vec<u8>, NodeError> {
-    let mut guard = slot().lock().unwrap();
+    let mut guard = crate::lock(slot());
     ensure(&mut guard)?;
     let codec = guard.as_mut().unwrap();
     let mut samples = [0i16; FRAME_SAMPLES];
@@ -174,7 +174,7 @@ pub fn call_conceal() -> Result<Vec<u8>, NodeError> {
 
 /// The call is over: codec state dies with it, fresh pair next call.
 pub(crate) fn reset() {
-    if let Some(c) = slot().lock().unwrap().take() {
+    if let Some(c) = crate::lock(slot()).take() {
         unsafe {
             opus_encoder_destroy(c.enc);
             opus_decoder_destroy(c.dec);

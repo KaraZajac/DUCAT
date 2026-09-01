@@ -41,6 +41,43 @@ fn seeding_slot() -> &'static Mutex<std::collections::HashMap<String, Cancellati
     SEEDING.get_or_init(|| Mutex::new(std::collections::HashMap::new()))
 }
 
+/// One seed per key. A second seed of the same share (a re-fetch that
+/// stays, a library re-seeding what it already serves) replaces the first
+/// and cancels it — an overwritten token was a Share still serving, with
+/// nothing left that could ever stop it.
+fn register_seed(key: String, cancel: CancellationToken) {
+    let old = seeding_slot()
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner)
+        .insert(key, cancel);
+    if let Some(old) = old {
+        old.cancel();
+    }
+}
+
+/// The node under this module went away (see `node_stop`). The borrowed
+/// connection, the feeder installed for it and every seed's tasks belonged
+/// to that node's runtime and died with it; a cached connection to a dead
+/// node made every later swarm call fail with a stale handle until the
+/// process was killed. Cleared here, the next call borrows the new node.
+pub(crate) fn node_stopped() {
+    for (_, c) in seeding_slot()
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner)
+        .drain()
+    {
+        c.cancel();
+    }
+    conn_slot()
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner)
+        .take();
+    progress_map()
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner)
+        .clear();
+}
+
 /// The borrowed connection, made on first use.
 ///
 /// Order matters and is subtle: the feeder must be installed BEFORE
@@ -48,7 +85,7 @@ fn seeding_slot() -> &'static Mutex<std::collections::HashMap<String, Cancellati
 /// dropped on the floor — so the whole dance happens under the slot's
 /// lock, and the route observer goes in at the same time.
 fn ensure_conn() -> Result<VeilidConnection, SwarmError> {
-    let mut slot = conn_slot().lock().unwrap();
+    let mut slot = crate::lock(conn_slot());
     if let Some(c) = slot.as_ref() {
         return Ok(c.clone());
     }
@@ -95,9 +132,7 @@ fn progress_map() -> &'static Mutex<std::collections::HashMap<String, SwarmProgr
 /// contract for now; a screen polls this the way wallet sync is polled.
 #[uniffi::export]
 pub fn swarm_fetch_progress(share_key: String) -> SwarmProgress {
-    progress_map()
-        .lock()
-        .unwrap()
+    crate::lock(progress_map())
         .get(&share_key)
         .cloned()
         .unwrap_or(SwarmProgress {
@@ -146,10 +181,7 @@ pub fn swarm_seed(path: String) -> Result<SwarmShare, SwarmError> {
         // and older seeds no longer become unstoppable orphans when a new
         // one starts (the old single slot dropped their tokens).
         if let Some(share) = &out {
-            seeding_slot()
-                .lock()
-                .unwrap()
-                .insert(share.share_key.clone(), cancel);
+            register_seed(share.share_key.clone(), cancel);
         }
         // The Share's tasks keep serving; their JoinSet lives inside it, so
         // park the whole thing on the runtime for the life of the seed.
@@ -165,7 +197,7 @@ pub fn swarm_seed(path: String) -> Result<SwarmShare, SwarmError> {
 /// whole point.
 #[uniffi::export]
 pub fn swarm_stop() {
-    for (_, c) in seeding_slot().lock().unwrap().drain() {
+    for (_, c) in crate::lock(seeding_slot()).drain() {
         c.cancel();
     }
 }
@@ -173,7 +205,7 @@ pub fn swarm_stop() {
 /// Stop seeding one share, leaving the rest serving.
 #[uniffi::export]
 pub fn swarm_stop_share(share_key: String) {
-    if let Some(c) = seeding_slot().lock().unwrap().remove(&share_key) {
+    if let Some(c) = crate::lock(seeding_slot()).remove(&share_key) {
         c.cancel();
     }
 }
@@ -229,9 +261,7 @@ pub fn swarm_fetch(
                 "swarm: fetch attempt (stalls {stalls}, waited {waited}s) for {}…",
                 &share_key[..share_key.len().min(20)]
             ));
-            let before = progress_map()
-                .lock()
-                .unwrap()
+            let before = crate::lock(progress_map())
                 .get(&share_key)
                 .map(|p| p.position)
                 .unwrap_or(0);
@@ -244,9 +274,7 @@ pub fn swarm_fetch(
                 stay_seeding,
             )
             .await;
-            let after = progress_map()
-                .lock()
-                .unwrap()
+            let after = crate::lock(progress_map())
                 .get(&share_key)
                 .map(|p| p.position)
                 .unwrap_or(0);
@@ -310,7 +338,7 @@ async fn fetch_once(
     }
     crate::node::note("swarm: bootstrapped, waiting on the stream".into());
 
-    progress_map().lock().unwrap().insert(
+    crate::lock(progress_map()).insert(
         progress_key.clone(),
         SwarmProgress {
             position: 0,
@@ -369,7 +397,7 @@ async fn fetch_once(
         }
         match ev {
             Event::FetcherStatus(stigmerge_peer::fetcher::Status::Done) => {
-                if let Some(p) = progress_map().lock().unwrap().get_mut(&progress_key) {
+                if let Some(p) = crate::lock(progress_map()).get_mut(&progress_key) {
                     p.done = true;
                 }
                 break;
@@ -388,7 +416,7 @@ async fn fetch_once(
                 } else if fetch_position > baseline {
                     advanced = true;
                 }
-                if let Some(p) = progress_map().lock().unwrap().get_mut(&progress_key) {
+                if let Some(p) = crate::lock(progress_map()).get_mut(&progress_key) {
                     p.position = fetch_position;
                     p.length = fetch_length;
                 }
@@ -400,10 +428,7 @@ async fn fetch_once(
         // The share already served every verified piece on the way down;
         // staying is just not leaving. Registered like any seed, so it is
         // individually stoppable and dies with the process otherwise.
-        seeding_slot()
-            .lock()
-            .unwrap()
-            .insert(progress_key, cancel);
+        register_seed(progress_key, cancel);
         tokio::spawn(async move {
             let _ = share.join().await;
         });
@@ -423,11 +448,5 @@ fn hex_of(b: &[u8]) -> String {
 }
 
 fn un_hex(s: &str) -> Option<Vec<u8>> {
-    if s.len() % 2 != 0 {
-        return None;
-    }
-    (0..s.len())
-        .step_by(2)
-        .map(|i| u8::from_str_radix(&s[i..i + 2], 16).ok())
-        .collect()
+    crate::hex_to_bytes(s)
 }

@@ -351,6 +351,14 @@ impl Indexer {
         let mut files: Vec<PathBuf> = vec![];
         let mut bases: Vec<usize> = vec![];
         for f in want.files.iter() {
+            // Belt and braces with the wire decoder's check: nothing in a
+            // want index may reach outside its root, whoever built it.
+            if !f.is_contained() {
+                return Err(anyhow::anyhow!(
+                    "refusing to fetch outside the share root: {:?}",
+                    f.path()
+                ));
+            }
             let file_path = root.join(f.path());
             let file_len = TryInto::<u64>::try_into(f.contents().length()).unwrap();
             let ready = async {
@@ -667,6 +675,27 @@ impl FileSpec {
 
     pub fn path(&self) -> &Path {
         self.path.as_ref()
+    }
+
+    /// Whether this path can only ever land *under* a fetch root.
+    ///
+    /// DUCAT modification (see ../../STIGMERGE-NOTICE.md): the path comes
+    /// off the wire, from whoever published the share. `root.join(path)`
+    /// discards the root for an absolute path and walks out of it for a
+    /// `..` — and the fetcher creates, truncates and writes that file
+    /// before any hash is checked. Only plain relative components, and at
+    /// least one of them.
+    pub fn is_contained(&self) -> bool {
+        use std::path::Component;
+        let mut any = false;
+        for c in self.path.components() {
+            match c {
+                Component::Normal(_) => any = true,
+                Component::CurDir => {}
+                Component::ParentDir | Component::RootDir | Component::Prefix(_) => return false,
+            }
+        }
+        any
     }
 
     pub fn contents(&self) -> PayloadSlice {

@@ -148,6 +148,9 @@ impl BlockRequestHandler {
 }
 
 impl UpdateHandler for BlockRequestHandler {
+    fn is_done(&self) -> bool {
+        self.block_request_tx.is_disconnected()
+    }
     fn app_call(&self, app_call: &VeilidAppCall) {
         match proto::Request::decode(app_call.message()) {
             Ok(proto::Request::BlockRequest(block_req)) => {

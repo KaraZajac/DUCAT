@@ -334,6 +334,9 @@ impl DeadRoutesHandler {
 }
 
 impl UpdateHandler for DeadRoutesHandler {
+    fn is_done(&self) -> bool {
+        self.dead_routes_tx.is_disconnected()
+    }
     fn route_change(&self, change: &VeilidRouteChange) {
         if !change.dead_remote_routes.is_empty() {
             if let Err(err) = self

@@ -777,8 +777,24 @@ fn now() -> u64 {
         .unwrap_or(0)
 }
 
-fn hex_to_bytes(s: &str) -> Option<Vec<u8>> {
-    if s.len() % 2 != 0 {
+/// A static's guard, poisoned or not.
+///
+/// The engine's state lives in `static Mutex`es, and every export runs under
+/// uniffi's catch_unwind: a panic in one reaches Kotlin as an exception and
+/// leaves whatever lock it held poisoned for the life of the process. With
+/// `lock().unwrap()` at every site, the second call to touch that lock
+/// panicked too — the node, the calls, the swarm, all reporting the first
+/// failure until the app was killed. Each of these maps holds whole values
+/// inserted or removed in one step, so a poisoned guard's contents are sound.
+pub(crate) fn lock<T>(m: &std::sync::Mutex<T>) -> std::sync::MutexGuard<'_, T> {
+    m.lock().unwrap_or_else(std::sync::PoisonError::into_inner)
+}
+
+pub(crate) fn hex_to_bytes(s: &str) -> Option<Vec<u8>> {
+    // Byte slicing below panics inside a multi-byte character, and some of
+    // this comes from the wire and from daemons: a non-ASCII "hex" string is
+    // simply not hex.
+    if s.len() % 2 != 0 || !s.is_ascii() {
         return None;
     }
     (0..s.len())

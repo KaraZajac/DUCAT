@@ -80,7 +80,7 @@ impl Decoder for (Vec<PayloadPiece>, Vec<FileSpec>) {
         let mut idx_files = vec![];
         for file in files_reader.iter() {
             let payload_slice_reader = file.get_contents()?;
-            idx_files.push(FileSpec::new(
+            let spec = FileSpec::new(
                 PathBuf::from_str(file.get_path()?.to_str()?)
                     .map_err(|e| Error::Other(format!("{:?}", e)))?,
                 PayloadSlice::new(
@@ -88,7 +88,15 @@ impl Decoder for (Vec<PayloadPiece>, Vec<FileSpec>) {
                     payload_slice_reader.get_piece_offset() as usize,
                     payload_slice_reader.get_length() as usize,
                 ),
-            ));
+            );
+            // DUCAT modification (see ../../../STIGMERGE-NOTICE.md): the
+            // publisher chose this path, and the fetcher would create and
+            // write it under its root before verifying a byte. An absolute
+            // path replaces the root outright; a `..` walks out of it.
+            if !spec.is_contained() {
+                return Err(Error::UnsafePath(spec.path().to_owned()));
+            }
+            idx_files.push(spec);
         }
 
         Ok((idx_pieces, idx_files))
@@ -139,5 +147,39 @@ mod tests {
             payload_files,
         );
         assert_eq!(idx, idx2);
+    }
+
+    /// An index off the wire that names a path outside its root is refused
+    /// at decode — before anything could be created under that name.
+    #[tokio::test]
+    async fn escaping_paths_are_refused_at_decode() {
+        let tempf = temp_file(b'@', 65536);
+        let indexer = Indexer::from_file(tempf.path()).await.expect("indexer");
+        let idx = indexer.index().await.expect("index");
+        for bad in [
+            "../../shared_prefs/ducat_sites.xml",
+            "/data/data/org.ducatproject.ducat/files/x",
+            "a/../../b",
+            "",
+        ] {
+            let evil = Index::new(
+                idx.root().to_owned(),
+                idx.payload().clone(),
+                vec![FileSpec::new(
+                    PathBuf::from(bad),
+                    idx.files()[0].contents(),
+                )],
+            );
+            let message = evil.encode().expect("encode index");
+            let err = <(Vec<PayloadPiece>, Vec<FileSpec>)>::decode(message.as_slice())
+                .expect_err(bad);
+            assert!(
+                matches!(err, Error::UnsafePath(_)),
+                "{bad:?} refused for the wrong reason: {err}"
+            );
+        }
+        // And the honest shape still decodes.
+        let message = idx.encode().expect("encode index");
+        <(Vec<PayloadPiece>, Vec<FileSpec>)>::decode(message.as_slice()).expect("plain path");
     }
 }

@@ -111,7 +111,9 @@ fn main() {
             node_start(state, true).expect("node start");
             wait_ready();
             let t0 = std::time::Instant::now();
-            let bytes = swarm_fetch(key, digest, out.to_string_lossy().into()).expect("fetch");
+            // Not staying to seed: the proof is the fetch, and the process
+            // exits on the hash.
+            let bytes = swarm_fetch(key, digest, out.to_string_lossy().into(), false).expect("fetch");
             let secs = t0.elapsed().as_secs_f64();
             // One file in the out dir is the share; hash it.
             let fetched = std::fs::read_dir(&out)
