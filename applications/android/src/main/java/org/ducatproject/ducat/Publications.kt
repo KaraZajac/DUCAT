@@ -870,10 +870,27 @@ object Publications {
      * looks from the tab store — which knows nothing about publications and
      * is told instead.
      */
-    fun billedTabIds(context: Context): Set<String> =
-        publications(context).flatMap { (pubId, _) ->
-            issues(context, pubId).flatMap { billedFor(context, pubId, it.periodId).values }
-        }.toSet()
+    fun billedTabIds(context: Context): Set<String> {
+        // One read of the store, walked in place, rather than the
+        // publications → issues → billedFor route the shape of this invites.
+        // Each of those goes through readPub, and readPub decrypts and parses
+        // the *whole* blob to pick one publication out of it — so the obvious
+        // spelling costs one full decrypt per publication plus one per issue,
+        // and this runs on every poll pass. A club with a few monthly
+        // publications would have spent forty of them a minute, for a set
+        // that is usually empty.
+        val all = prefs(context).getString("pubs", null)
+            ?.let { runCatching { JSONObject(it) }.getOrNull() } ?: return emptySet()
+        val out = HashSet<String>()
+        for (pubId in all.keys()) {
+            val issues = all.optJSONObject(pubId)?.optJSONObject("issues") ?: continue
+            for (period in issues.keys()) {
+                val billed = issues.optJSONObject(period)?.optJSONObject("billed") ?: continue
+                for (hex in billed.keys()) out.add(billed.getString(hex))
+            }
+        }
+        return out
+    }
 
     fun billedFor(context: Context, pubId: String, periodId: String): Map<String, String> {
         val o = readPub(context, pubId)?.optJSONObject("issues")
@@ -1294,16 +1311,30 @@ object Publications {
      * reconcile pass delivers.
      */
     fun dueSettled(context: Context): List<Due> {
-        val tabs = TabStore(context)
+        // Both stores read once. Written the obvious way — publications, then
+        // issues, then billedFor — every step goes through readPub, which
+        // decrypts and parses the whole blob to pick one publication out of
+        // it, and `tabs.get` decrypts the whole tab store to find one id. On
+        // a poll pass that runs unconditionally, a publisher with a few
+        // monthly issues was paying dozens of full decrypts of each store a
+        // minute to be told, almost always, that nobody is owed anything.
+        val byId = TabStore(context).all().associateBy { it.id }
+        val root = prefs(context).getString("pubs", null)
+            ?.let { runCatching { JSONObject(it) }.getOrNull() }
+        fun billedIn(pubId: String, periodId: String): Map<String, String> =
+            root?.optJSONObject(pubId)?.optJSONObject("issues")
+                ?.optJSONObject(periodId)?.optJSONObject("billed")
+                ?.let { o -> o.keys().asSequence().associateWith { o.getString(it) } }
+                ?: emptyMap()
         val out = mutableListOf<Due>()
         for ((pubId, _) in publications(context)) {
             for (issue in issues(context, pubId)) {
                 // Due only once SOME rail exists — pay-then-ship holds
                 // until the bytes are reachable, by shelf or by swarm.
                 if (issue.swarmKey.isBlank() && issue.shelfRec.isBlank()) continue
-                for ((hex, tabId) in billedFor(context, pubId, issue.periodId)) {
+                for ((hex, tabId) in billedIn(pubId, issue.periodId)) {
                     if (hex in issue.sentTo) continue
-                    val t = tabs.get(tabId) ?: continue
+                    val t = byId[tabId] ?: continue
                     if (t.state.startsWith("paid")) {
                         out.add(Due(pubId, issue.periodId, hex))
                     }
