@@ -908,10 +908,21 @@ object Calls {
             fun row() = store.thread(contactHex).lastOrNull {
                 it.outgoing && it.kind == 14 && it.callId == idHex
             }
+            // Backing off rather than once a second, which was wrong at both
+            // ends. `row()` re-reads and re-parses the whole conversation, so
+            // the wait for a row that never comes — the offer failed to seal
+            // at all — cost ninety of those. And a full second is a long time
+            // to wait for a race measured in milliseconds: the row is written
+            // locally, before the DHT write it precedes, so the common case
+            // is the very first retry.
             val deadline = System.currentTimeMillis() + RING_WINDOW_SECS * 1000
             var offer = row()
-            while (offer == null && System.currentTimeMillis() < deadline) {
-                Thread.sleep(1_000)
+            var wait = 100L
+            while (offer == null) {
+                val left = deadline - System.currentTimeMillis()
+                if (left <= 0) break
+                Thread.sleep(wait.coerceAtMost(left))
+                wait = (wait * 2).coerceAtMost(5_000L)
                 offer = row()
             }
             val c = store.all().firstOrNull { it.personaHex == contactHex }
