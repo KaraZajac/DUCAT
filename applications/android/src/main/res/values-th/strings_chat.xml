@@ -15,6 +15,7 @@
     <string name="chat_what_card">นามบัตร</string>
     <string name="chat_what_contact">ผู้ติดต่อ</string>
     <string name="chat_what_reaction">การตอบสนอง</string>
+    <string name="chat_what_invite">คำเชิญ</string>
     <string name="chat_error_location_fix">ระบุตำแหน่งไม่สำเร็จ</string>
     <string name="chat_recording_placeholder">กำลังอัดเสียง… %1$d วิ</string>
     <string name="chat_message_placeholder">ข้อความ</string>

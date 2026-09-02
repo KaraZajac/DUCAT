@@ -27,7 +27,6 @@ import org.ducatproject.ducat.BillItem
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.Mailbox
-import org.ducatproject.ducat.MyProfile
 import org.ducatproject.ducat.R
 import org.ducatproject.ducat.RunningTab
 import org.ducatproject.ducat.TabStore
@@ -363,15 +362,12 @@ private fun OpenTab(onOpened: (RunningTab) -> Unit, onBack: () -> Unit) {
 
     LaunchedEffect(Unit) {
         if (cardUri != null) return@LaunchedEffect
-        val r = withContext(Dispatchers.IO) {
-            runCatching {
-                Mailbox.issueCard(
-                    context, MyProfile(context).name(), 60uL * 60uL * 12uL, purpose = "sale",
-                )
-            }
-        }
-        r.onSuccess { cardUri = it.uri; cardInbox = it.inboxKey }
-            .onFailure { error = moneyFailure(context, it) }
+        // Until it is cut: "Start a tab" is opened at the first order, and
+        // one refused cut used to leave the bartender with a sentence
+        // instead of a code until they backed out and came in again.
+        val card = issueCardPatiently(context, 60uL * 60uL * 12uL, "sale") { error = it }
+        error = null
+        cardUri = card.uri; cardInbox = card.inboxKey
     }
 
     // A scan opens the tab by itself — the bartender should not need a second

@@ -15,6 +15,7 @@
     <string name="chat_what_card">kartu</string>
     <string name="chat_what_contact">kontak</string>
     <string name="chat_what_reaction">reaksi</string>
+    <string name="chat_what_invite">undangan</string>
     <string name="chat_error_location_fix">tidak bisa mendapatkan titik lokasi</string>
     <string name="chat_recording_placeholder">Merekam… %1$d dtk</string>
     <string name="chat_message_placeholder">Pesan</string>

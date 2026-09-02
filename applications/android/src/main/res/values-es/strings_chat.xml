@@ -15,6 +15,7 @@
     <string name="chat_what_card">la tarjeta</string>
     <string name="chat_what_contact">el contacto</string>
     <string name="chat_what_reaction">la reacción</string>
+    <string name="chat_what_invite">la invitación</string>
     <string name="chat_error_location_fix">no se pudo obtener tu ubicación</string>
     <string name="chat_recording_placeholder">Grabando… %1$ds</string>
     <string name="chat_message_placeholder">Mensaje</string>

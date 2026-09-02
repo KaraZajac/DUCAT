@@ -15,6 +15,7 @@
     <string name="chat_what_card">картку</string>
     <string name="chat_what_contact">контакт</string>
     <string name="chat_what_reaction">реакцію</string>
+    <string name="chat_what_invite">запрошення</string>
     <string name="chat_error_location_fix">не вдалося визначити місцеположення</string>
     <string name="chat_recording_placeholder">Запис… %1$d с</string>
     <string name="chat_message_placeholder">Повідомлення</string>

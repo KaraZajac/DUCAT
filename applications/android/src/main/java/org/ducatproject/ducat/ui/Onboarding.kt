@@ -24,7 +24,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.FileProvider
 import java.io.File
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.Ceremony
 import org.ducatproject.ducat.ContactStore
@@ -255,13 +254,37 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
                 // for up to the node timeout — eight seconds of an app that
                 // had apparently hung on its second step. Off the main
                 // thread, with the button held down while it runs.
-                val scope = rememberCoroutineScope()
-                var minting by remember { mutableStateOf(false) }
+                // The mint runs under a process-level job, not this card's
+                // scope. A rotation while it ran cancelled the scope after
+                // the store was written, and the rebuilt card offered to
+                // create what existed; the check below caught that when the
+                // write had already landed, but a mint still out found no
+                // address, showed the button, and never heard the landing —
+                // nothing moved the step on until a second tap. The rebuilt
+                // card now starts busy if the mint is out and advances when
+                // it lands, and a second tap cannot run a second mint beside
+                // the first.
+                val key = "wallet:create"
+                var minting by remember { mutableStateOf(ThreadSends.inFlight(key)) }
                 var failed by remember { mutableStateOf(false) }
+                val tick by ThreadSends.ticks.collectAsState()
+                LaunchedEffect(tick) {
+                    minting = ThreadSends.inFlight(key)
+                    for (o in ThreadSends.take(key)) when (o) {
+                        is ThreadSends.Outcome.Landed -> onState(state.copy(step = Step.Pin))
+                        is ThreadSends.Outcome.Failed -> {
+                            org.ducatproject.ducat.DucatLog.w(
+                                "Onboarding",
+                                "wallet: ${o.error.javaClass.simpleName}: ${o.error.message}",
+                            )
+                            failed = true
+                        }
+                    }
+                }
                 // A wallet already in place means this step's work is done —
-                // a rotation while it was minting cancelled the scope above
-                // after the store was written, and the rebuilt card offered
-                // to create what exists. Same rule MainActivity resumes by.
+                // a rotation while it was minting cancelled the scope after
+                // the store was written, and the rebuilt card offered to
+                // create what exists. Same rule MainActivity resumes by.
                 LaunchedEffect(Unit) {
                     if (withContext(Dispatchers.IO) { WalletStore(context).address() } != null) {
                         onState(state.copy(step = Step.Pin))
@@ -277,64 +300,54 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
                     // on the one step a new user cannot go around.
                     error = if (failed) stringResource(R.string.onb_wallet_error) else null,
                     onAction = {
-                        if (!minting) {
+                        if (!minting && !ThreadSends.inFlight(key)) {
                             minting = true
                             failed = false
-                            scope.launch {
-                                val made = runCatching {
-                                    withContext(Dispatchers.IO) {
-                                        // A wallet already in the store is not
-                                        // this step's to replace. The only way
-                                        // one is there before this mints it is
-                                        // a restore that landed under a
-                                        // rotation — its import runs on past
-                                        // the screen that started it — and
-                                        // minting over it would throw away the
-                                        // money the restore had just brought
-                                        // back.
-                                        if (WalletStore(context).address() != null) {
-                                            return@withContext
-                                        }
-                                        // Genesis until a node supplies a real
-                                        // tip — slow to restore, and
-                                        // recoverable, which is the side of
-                                        // §4.3.1's asymmetry to be on.
-                                        // Ask a node where the chain is first.
-                                        // A wallet that does not know its own
-                                        // creation height scans from genesis,
-                                        // which is a day and a half of reading
-                                        // that looks exactly like having no
-                                        // money.
-                                        val tip = runCatching {
-                                            uniffi.ducat_mobile.moneroPickNode(
-                                                uniffi.ducat_mobile.moneroDefaultNodes(null),
-                                                "stagenet",
-                                                8000u,
-                                            ).height
-                                        }.getOrDefault(UNKNOWN_TIP)
-                                        // Persisted at creation, so a rotation
-                                        // cannot regenerate a *different*
-                                        // wallet than the address the user was
-                                        // shown and the backup they wrote.
-                                        // onboarded stays false until Backup,
-                                        // so this does not open a funded
-                                        // wallet before §4.3's step.
-                                        val w = createWallet(tipHeight = tip, stagenet = true)
-                                        WalletStore(context).save(
-                                            address = w.address, spendKeyHex = w.spendKeyHex,
-                                            restoreHeight = w.restoreHeight, stagenet = true,
-                                        )
+                            ThreadSends.launch(ContactStore(context), key, null) {
+                                run {
+                                    // A wallet already in the store is not
+                                    // this step's to replace. The only way
+                                    // one is there before this mints it is
+                                    // a restore that landed under a
+                                    // rotation — its import runs on past
+                                    // the screen that started it — and
+                                    // minting over it would throw away the
+                                    // money the restore had just brought
+                                    // back.
+                                    if (WalletStore(context).address() != null) {
+                                        return@run
                                     }
+                                    // Genesis until a node supplies a real
+                                    // tip — slow to restore, and
+                                    // recoverable, which is the side of
+                                    // §4.3.1's asymmetry to be on.
+                                    // Ask a node where the chain is first.
+                                    // A wallet that does not know its own
+                                    // creation height scans from genesis,
+                                    // which is a day and a half of reading
+                                    // that looks exactly like having no
+                                    // money.
+                                    val tip = runCatching {
+                                        uniffi.ducat_mobile.moneroPickNode(
+                                            uniffi.ducat_mobile.moneroDefaultNodes(null),
+                                            "stagenet",
+                                            8000u,
+                                        ).height
+                                    }.getOrDefault(UNKNOWN_TIP)
+                                    // Persisted at creation, so a rotation
+                                    // cannot regenerate a *different*
+                                    // wallet than the address the user was
+                                    // shown and the backup they wrote.
+                                    // onboarded stays false until Backup,
+                                    // so this does not open a funded
+                                    // wallet before §4.3's step.
+                                    val w = createWallet(tipHeight = tip, stagenet = true)
+                                    WalletStore(context).save(
+                                        address = w.address, spendKeyHex = w.spendKeyHex,
+                                        restoreHeight = w.restoreHeight, stagenet = true,
+                                    )
                                 }
-                                minting = false
-                                made.onSuccess { onState(state.copy(step = Step.Pin)) }
-                                    .onFailure {
-                                        org.ducatproject.ducat.DucatLog.w(
-                                            "Onboarding",
-                                            "wallet: ${it.javaClass.simpleName}: ${it.message}",
-                                        )
-                                        failed = true
-                                    }
+                                null
                             }
                         }
                     },
@@ -659,7 +672,6 @@ private fun RestoreStep(
 @Composable
 private fun BackupStep(onDone: () -> Unit) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     // Saveable for the same reason the restore form's is: a rotation
     // rebuilt this card, and eight or more characters somebody had chosen
     // with care were gone from the field with no sign they had been typed.
@@ -678,7 +690,32 @@ private fun BackupStep(onDone: () -> Unit) {
         )
     }
     var error by remember { mutableStateOf<String?>(null) }
-    var busy by remember { mutableStateOf(false) }
+    // The export runs off the card, not off this composition. Argon2id is
+    // deliberately slow, and a rotation while it ground — or a call landing
+    // on top of setup — took the card's scope with it: the file was still
+    // written and marked (that part had no suspension point), but the line
+    // that showed it was never reached, so the rebuilt card offered "Create
+    // backup" again over a backup that already existed. Settings' export
+    // shares the key: same file, so a second export while one is writing it
+    // must wait rather than race it.
+    var busy by remember { mutableStateOf(ThreadSends.inFlight(BACKUP_EXPORT_KEY)) }
+    val tick by ThreadSends.ticks.collectAsState()
+    LaunchedEffect(tick) {
+        busy = ThreadSends.inFlight(BACKUP_EXPORT_KEY)
+        for (o in ThreadSends.take(BACKUP_EXPORT_KEY)) when (o) {
+            is ThreadSends.Outcome.Landed -> { written = File(o.result!!); error = null }
+            is ThreadSends.Outcome.Failed -> {
+                // Settings' export says the same on the same failure. This
+                // said the exception's class name — "IOException" in every
+                // language.
+                org.ducatproject.ducat.DucatLog.w(
+                    "Onboarding",
+                    "backup: ${o.error.javaClass.simpleName}: ${o.error.message}",
+                )
+                error = o.error.saidWhy() ?: context.getString(R.string.backup_export_failed)
+            }
+        }
+    }
     val longEnough = passphrase.length >= 8
 
     Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
@@ -754,77 +791,59 @@ private fun BackupStep(onDone: () -> Unit) {
                         val persona = PersonaStore(context).secret()
                         val restoreHeight = ws.restoreHeight()
                         busy = true; error = null
-                        scope.launch {
-                            // Encrypt and write off the main thread so the setup
-                            // screen does not freeze while the file is built.
-                            val result = withContext(Dispatchers.IO) {
-                                runCatching {
-                                    val bytes = exportBackup(
-                                        BackupInput(
-                                            spendKey,
-                                            restoreHeight,
-                                            // The stores, as Settings' export
-                                            // reads them, and not the flow's
-                                            // state: the Profile step writes
-                                            // both as it is answered, and the
-                                            // state is rebuilt from the stores
-                                            // on every rotation anyway.
-                                            NameStore(context, PersonaStore(context).personaHex()).get(),
-                                            ContactStore(context).publishAddress(),
-                                            MyProfile(context, PersonaStore(context).personaHex()).toWire(),
-                                            // Read, not assumed empty. "First run:
-                                            // no relationships yet" was true of the
-                                            // only path this screen had when it was
-                                            // written, and stopped being true when
-                                            // restoring gained one: step 5 is where
-                                            // a restore ends too, and it was handing
-                                            // that person a bundle with no contacts,
-                                            // no prekeys, no threads and no escrows —
-                                            // 215 bytes against the 51 KB file they
-                                            // had just opened, offered as their
-                                            // backup. On a genuine first run these
-                                            // stores are empty and this reads the
-                                            // same emptiness the constants asserted.
-                                            ContactStore(context).backupContacts(),
-                                            ContactStore(context).backupPrekeys().first,
-                                            ContactStore(context).backupPrekeys().second,
-                                            ContactStore(context).backupPrekeys().third.toULong(),
-                                            ContactStore(context).backupAppState(),
-                                            Ceremony.backupShares(context),
-                                            PersonaStore(context).backupPersonas(context),
-                                        ),
-                                        passphrase,
-                                        persona,
-                                    )
-                                    val f = setupBackupFile(context)
-                                    f.parentFile?.mkdirs()
-                                    f.writeBytes(bytes)
-                                    // Say that one exists. Settings' export has
-                                    // always recorded this and setup's never did,
-                                    // so the app finished setup believing the
-                                    // backup it had just written did not exist —
-                                    // which is the baseline every later "your
-                                    // backup is out of date" is measured against,
-                                    // and the answer to what is missing when a
-                                    // killed process resumes mid-setup.
-                                    ContactStore(context).markBackupExported()
-                                    f
-                                }
-                            }
-                            result.onSuccess { written = it }
-                                .onFailure {
-                                    // Settings' export says the same on the
-                                    // same failure. This said the exception's
-                                    // class name — "IOException" in every
-                                    // language.
-                                    org.ducatproject.ducat.DucatLog.w(
-                                        "Onboarding",
-                                        "backup: ${it.javaClass.simpleName}: ${it.message}",
-                                    )
-                                    error = it.saidWhy()
-                                        ?: context.getString(R.string.backup_export_failed)
-                                }
-                            busy = false
+                        // Encrypt and write off the main thread so the setup
+                        // screen does not freeze while the file is built.
+                        ThreadSends.launch(ContactStore(context), BACKUP_EXPORT_KEY, null) {
+                            val bytes = exportBackup(
+                                BackupInput(
+                                    spendKey,
+                                    restoreHeight,
+                                    // The stores, as Settings' export
+                                    // reads them, and not the flow's
+                                    // state: the Profile step writes
+                                    // both as it is answered, and the
+                                    // state is rebuilt from the stores
+                                    // on every rotation anyway.
+                                    NameStore(context, PersonaStore(context).personaHex()).get(),
+                                    ContactStore(context).publishAddress(),
+                                    MyProfile(context, PersonaStore(context).personaHex()).toWire(),
+                                    // Read, not assumed empty. "First run:
+                                    // no relationships yet" was true of the
+                                    // only path this screen had when it was
+                                    // written, and stopped being true when
+                                    // restoring gained one: step 5 is where
+                                    // a restore ends too, and it was handing
+                                    // that person a bundle with no contacts,
+                                    // no prekeys, no threads and no escrows —
+                                    // 215 bytes against the 51 KB file they
+                                    // had just opened, offered as their
+                                    // backup. On a genuine first run these
+                                    // stores are empty and this reads the
+                                    // same emptiness the constants asserted.
+                                    ContactStore(context).backupContacts(),
+                                    ContactStore(context).backupPrekeys().first,
+                                    ContactStore(context).backupPrekeys().second,
+                                    ContactStore(context).backupPrekeys().third.toULong(),
+                                    ContactStore(context).backupAppState(),
+                                    Ceremony.backupShares(context),
+                                    PersonaStore(context).backupPersonas(context),
+                                ),
+                                passphrase,
+                                persona,
+                            )
+                            val f = setupBackupFile(context)
+                            f.parentFile?.mkdirs()
+                            f.writeBytes(bytes)
+                            // Say that one exists. Settings' export has
+                            // always recorded this and setup's never did,
+                            // so the app finished setup believing the
+                            // backup it had just written did not exist —
+                            // which is the baseline every later "your
+                            // backup is out of date" is measured against,
+                            // and the answer to what is missing when a
+                            // killed process resumes mid-setup.
+                            ContactStore(context).markBackupExported()
+                            f.absolutePath
                         }
                     },
                     enabled = longEnough && !busy,
@@ -860,6 +879,14 @@ private fun BackupStep(onDone: () -> Unit) {
  */
 internal fun setupBackupFile(context: Context): File =
     File(File(context.filesDir, "backups"), "ducat-backup.ducatbak")
+
+/**
+ * The [ThreadSends] key both exports run under — setup's and Settings'.
+ * One key because it is one file: two exports writing it at once would
+ * hand the share sheet whichever finished second, encrypted under
+ * whichever passphrase that was. A word a persona's hex can never be.
+ */
+internal const val BACKUP_EXPORT_KEY = "backup:export"
 
 /**
  * Hand the file to whatever the user already trusts with important things.

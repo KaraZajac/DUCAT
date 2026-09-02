@@ -15,6 +15,7 @@
     <string name="chat_what_card">biglietto</string>
     <string name="chat_what_contact">contatto</string>
     <string name="chat_what_reaction">reazione</string>
+    <string name="chat_what_invite">invito</string>
     <string name="chat_error_location_fix">impossibile ottenere la posizione</string>
     <string name="chat_recording_placeholder">Registrazione… %1$ds</string>
     <string name="chat_message_placeholder">Messaggio</string>

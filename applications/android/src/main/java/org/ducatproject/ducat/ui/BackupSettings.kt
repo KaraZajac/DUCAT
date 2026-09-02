@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -20,7 +21,6 @@ import androidx.core.content.FileProvider
 import java.io.File
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.Ceremony
@@ -51,16 +51,43 @@ import org.ducatproject.ducat.saidWhy
 @Composable
 fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: ByteArray?) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    var passphrase by remember { mutableStateOf("") }
-    var message by remember { mutableStateOf<String?>(null) }
+    // Saveable, as setup's is: a rotation rebuilt this card, and a
+    // passphrase chosen with care — and the "Exported N bytes" that said
+    // the last tap worked — were gone with no sign they had been there.
+    var passphrase by rememberSaveable { mutableStateOf("") }
+    var message by rememberSaveable { mutableStateOf<String?>(null) }
     var restored by remember { mutableStateOf<String?>(null) }
     var pendingImport by remember { mutableStateOf<Uri?>(null) }
     // Export encrypts and writes a file; import decrypts one. Both are heavy
     // enough to jank the frame if run on the main thread, and both used to,
     // with no sign the tap had landed. One flag disables both and shows a
     // spinner so a slow encrypt reads as working, not frozen.
-    var busy by remember { mutableStateOf(false) }
+    var importing by remember { mutableStateOf(false) }
+    // The export runs off the screen, under the key setup's export uses —
+    // see [BACKUP_EXPORT_KEY]. It used to run in this screen's scope, and
+    // a rotation or a call landing while Argon2id ground took the scope
+    // with it: the file was written and marked, and the share sheet — the
+    // only reason to export from here — never opened. Whoever is up when
+    // it lands opens it.
+    var exporting by remember { mutableStateOf(ThreadSends.inFlight(BACKUP_EXPORT_KEY)) }
+    val busy = importing || exporting
+    val tick by ThreadSends.ticks.collectAsState()
+    LaunchedEffect(tick) {
+        exporting = ThreadSends.inFlight(BACKUP_EXPORT_KEY)
+        for (o in ThreadSends.take(BACKUP_EXPORT_KEY)) when (o) {
+            is ThreadSends.Outcome.Landed -> {
+                // The share sheet is an activity; it has to start on the
+                // main thread, which this effect is.
+                val f = File(o.result!!)
+                share(context, f)
+                message = context.getString(R.string.backup_exported_bytes, f.length())
+            }
+            is ThreadSends.Outcome.Failed -> {
+                DucatLog.w("Backup", "export: ${o.error.javaClass.simpleName}: ${o.error.message}")
+                message = o.error.saidWhy() ?: context.getString(R.string.backup_export_failed)
+            }
+        }
+    }
 
     val picker = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
@@ -108,63 +135,49 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
                     enabled = !busy && passphrase.length >= 8 &&
                         spendKeyHex != null && personaSecret != null,
                     onClick = {
-                        busy = true; message = null
-                        scope.launch {
-                            val result = withContext(Dispatchers.IO) {
-                                runCatching {
-                                    val bytes = exportBackup(
-                                        BackupInput(
-                                            spendKeyHex!!,
-                                            restoreHeight,
-                                            // The user's own settings travel with
-                                            // their keys: a restore that keeps the
-                                            // money and loses the name and the
-                                            // privacy choice quietly changed both.
-                                            NameStore(
-                                                context,
-                                                PersonaStore(context).personaHex(),
-                                            ).get(),
-                                            ContactStore(context).publishAddress(),
-                                            MyProfile(
-                                                context,
-                                                PersonaStore(context).personaHex(),
-                                            ).toWire(),
-                                            ContactStore(context).backupContacts(),
-                                            ContactStore(context).backupPrekeys().first,
-                                            ContactStore(context).backupPrekeys().second,
-                                            ContactStore(context).backupPrekeys().third.toULong(),
-                                            ContactStore(context).backupAppState(),
-                                            // §4.3.3, and the reason this screen
-                                            // talks about freshness. They live in
-                                            // their own store, which is how they
-                                            // came to be left out of the one this
-                                            // is assembled from.
-                                            Ceremony.backupShares(context),
-                                            // The compartments, primary first —
-                                            // a restore is becoming this phone,
-                                            // every hat included.
-                                            PersonaStore(context).backupPersonas(context),
-                                        ),
-                                        passphrase,
-                                        personaSecret!!,
-                                    )
-                                    val dir = File(context.filesDir, "backups").apply { mkdirs() }
-                                    val f = File(dir, "ducat-backup.ducatbak")
-                                    f.writeBytes(bytes)
-                                    ContactStore(context).markBackupExported()
-                                    f to bytes.size
-                                }
-                            }
-                            // The share sheet is an activity; it has to start on
-                            // the main thread, so it waits for the IO to finish.
-                            result.onSuccess { (f, size) ->
-                                share(context, f)
-                                message = context.getString(R.string.backup_exported_bytes, size)
-                            }.onFailure {
-                                message = it.saidWhy()
-                                    ?: context.getString(R.string.backup_export_failed)
-                            }
-                            busy = false
+                        exporting = true; message = null
+                        ThreadSends.launch(ContactStore(context), BACKUP_EXPORT_KEY, null) {
+                            val bytes = exportBackup(
+                                BackupInput(
+                                    spendKeyHex!!,
+                                    restoreHeight,
+                                    // The user's own settings travel with
+                                    // their keys: a restore that keeps the
+                                    // money and loses the name and the
+                                    // privacy choice quietly changed both.
+                                    NameStore(
+                                        context,
+                                        PersonaStore(context).personaHex(),
+                                    ).get(),
+                                    ContactStore(context).publishAddress(),
+                                    MyProfile(
+                                        context,
+                                        PersonaStore(context).personaHex(),
+                                    ).toWire(),
+                                    ContactStore(context).backupContacts(),
+                                    ContactStore(context).backupPrekeys().first,
+                                    ContactStore(context).backupPrekeys().second,
+                                    ContactStore(context).backupPrekeys().third.toULong(),
+                                    ContactStore(context).backupAppState(),
+                                    // §4.3.3, and the reason this screen
+                                    // talks about freshness. They live in
+                                    // their own store, which is how they
+                                    // came to be left out of the one this
+                                    // is assembled from.
+                                    Ceremony.backupShares(context),
+                                    // The compartments, primary first —
+                                    // a restore is becoming this phone,
+                                    // every hat included.
+                                    PersonaStore(context).backupPersonas(context),
+                                ),
+                                passphrase,
+                                personaSecret!!,
+                            )
+                            val f = setupBackupFile(context)
+                            f.parentFile?.mkdirs()
+                            f.writeBytes(bytes)
+                            ContactStore(context).markBackupExported()
+                            f.absolutePath
                         }
                     },
                 ) {
@@ -200,7 +213,7 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
 
     LaunchedEffect(pendingImport) {
         val uri = pendingImport ?: return@LaunchedEffect
-        busy = true
+        importing = true
         // NonCancellable, and `pendingImport` is cleared at the very end.
         //
         // This effect is keyed on `pendingImport`, so clearing it *first* — as
@@ -240,7 +253,7 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
                 context.getString(R.string.backup_could_not_open)
             },
         )
-        busy = false
+        importing = false
         pendingImport = null
     }
 }

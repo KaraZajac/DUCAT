@@ -1286,6 +1286,10 @@ var siteOpen: (android.content.Context, String) -> Unit = { _, _ -> }
  *  the section to add it. */
 val pendingSiteAdd = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
 
+/** The [ThreadSends] key the add runs under — one at a time, and a word a
+ *  record key can never be. */
+private const val SITE_ADD_JOB = "add"
+
 /**
  * §16.22 on the phone: saved sites, each a stable address whose bundle
  * travels whole and renders in a sealed room. Adding is pasting an
@@ -1297,11 +1301,36 @@ fun SitesSection() {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
     val sites = remember(version) { org.ducatproject.ducat.Sites.all(context) }
-    val scope = rememberCoroutineScope()
     var adding by remember { mutableStateOf(false) }
     var addText by remember { mutableStateOf("") }
-    var busy by remember { mutableStateOf<String?>(null) }
+    // The add and each site's fetch run under process-level jobs, keyed
+    // "site:<record key>" (the add under a word no key can be), and this
+    // section reads which one is out rather than owning it. They ran in
+    // this section's scope: a rotation or a call while a bundle of
+    // hundreds of files came down took the scope with it, the fetch
+    // finished into the store, and the hand-off to the viewer — a
+    // `withContext(Main)` — was the one line cancellation could skip. The
+    // site was fetched and never opened, over a button that offered to
+    // fetch it again. Whoever is up when it lands opens it.
+    fun siteJobs(): List<String> = listOf(SITE_ADD_JOB) + sites.map { it.recordKey }
+    var busy by remember {
+        mutableStateOf(siteJobs().firstOrNull { ThreadSends.inFlight("site:$it") })
+    }
     var word by remember { mutableStateOf<String?>(null) }
+    val tick by ThreadSends.ticks.collectAsState()
+    LaunchedEffect(tick, sites) {
+        val keys = siteJobs()
+        busy = keys.firstOrNull { ThreadSends.inFlight("site:$it") }
+        for (k in keys) for (o in ThreadSends.take("site:$k")) when (o) {
+            is ThreadSends.Outcome.Landed -> {
+                word = null
+                o.result?.let { siteOpen(context, it) }
+            }
+            is ThreadSends.Outcome.Failed -> {
+                word = o.error.saidWhy() ?: o.error.javaClass.simpleName
+            }
+        }
+    }
 
     fun addByUri(uri: String) {
         val rec = org.ducatproject.ducat.Sites.parseUri(uri.trim())
@@ -1309,11 +1338,10 @@ fun SitesSection() {
             word = context.getString(R.string.sites_bad_uri)
             return
         }
-        busy = rec
-        scope.launch(kotlinx.coroutines.Dispatchers.IO) {
-            runCatching { org.ducatproject.ducat.Sites.add(context, rec) }
-                .onFailure { word = it.saidWhy() ?: it.javaClass.simpleName }
-            busy = null
+        busy = SITE_ADD_JOB
+        ThreadSends.launch(ContactStore(context), "site:$SITE_ADD_JOB", null) {
+            org.ducatproject.ducat.Sites.add(context, rec)
+            null
         }
     }
 
@@ -1427,28 +1455,24 @@ fun SitesSection() {
                                 enabled = busy == null,
                                 onClick = {
                                     busy = site.recordKey
-                                    scope.launch(kotlinx.coroutines.Dispatchers.IO) {
-                                        runCatching {
-                                            // Head first: an updated site is
-                                            // noticed at the door, fetched
-                                            // behind it, rendered fresh.
-                                            val latest = runCatching {
-                                                org.ducatproject.ducat.Sites.add(
-                                                    context, site.recordKey,
-                                                )
-                                            }.getOrDefault(site)
-                                            org.ducatproject.ducat.Sites.fetchBundle(
-                                                context, latest,
+                                    ThreadSends.launch(
+                                        ContactStore(context), "site:${site.recordKey}", null,
+                                    ) {
+                                        // Head first: an updated site is
+                                        // noticed at the door, fetched
+                                        // behind it, rendered fresh.
+                                        val latest = runCatching {
+                                            org.ducatproject.ducat.Sites.add(
+                                                context, site.recordKey,
                                             )
-                                            kotlinx.coroutines.withContext(
-                                                kotlinx.coroutines.Dispatchers.Main,
-                                            ) {
-                                                siteOpen(context, site.recordKey)
-                                            }
-                                        }.onFailure {
-                                            word = it.saidWhy() ?: it.javaClass.simpleName
-                                        }
-                                        busy = null
+                                        }.getOrDefault(site)
+                                        org.ducatproject.ducat.Sites.fetchBundle(
+                                            context, latest,
+                                        )
+                                        // The landing opens it — on the
+                                        // main thread, from whichever
+                                        // section is up to hear it.
+                                        site.recordKey
                                     }
                                 },
                             ) { Text(stringResource(R.string.sites_open)) }
@@ -1459,11 +1483,14 @@ fun SitesSection() {
                             // deletes a bundle that can be hundreds of files.
                             Checkbox(
                                 checked = site.keepAlive,
-                                onCheckedChange = {
-                                    scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                                onCheckedChange = { keep ->
+                                    ThreadSends.launch(
+                                        ContactStore(context), "site:${site.recordKey}", null,
+                                    ) {
                                         org.ducatproject.ducat.Sites.setKeepAlive(
-                                            context, site.recordKey, it,
+                                            context, site.recordKey, keep,
                                         )
+                                        null
                                     }
                                 },
                             )
@@ -1473,8 +1500,11 @@ fun SitesSection() {
                                 modifier = Modifier.weight(1f),
                             )
                             TextButton(onClick = {
-                                scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                                ThreadSends.launch(
+                                    ContactStore(context), "site:${site.recordKey}", null,
+                                ) {
                                     org.ducatproject.ducat.Sites.remove(context, site.recordKey)
+                                    null
                                 }
                             }) { Text(stringResource(R.string.sites_remove)) }
                         }

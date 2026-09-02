@@ -95,6 +95,27 @@ fun QrHub(
     // "now, and skip the grace below".
     var attempt by remember { mutableIntStateOf(0) }
 
+    // The mint is the process's (ThreadSends), keyed to the hat, and `busy`
+    // is read from there rather than kept here: kept here, a rotation
+    // mid-mint recreated this screen with busy false, and for a hat that
+    // had never had a code the effect below met no guard at all and
+    // minted a second card while the first was still being written.
+    val mintKey = "mint:$worn"
+    val tick by ThreadSends.ticks.collectAsState()
+    LaunchedEffect(tick) {
+        busy = ThreadSends.inFlight(mintKey)
+        for (o in ThreadSends.take(mintKey)) when (o) {
+            is ThreadSends.Outcome.Landed -> { o.result?.let { uri = it }; error = null }
+            is ThreadSends.Outcome.Failed -> {
+                // The link sentence is the mapper's default, and there
+                // is no link here: nothing was scanned, a record was
+                // not written.
+                error = moneyFailure(context, o.error, fallback = R.string.qrhub_issue_failed)
+                DucatLog.w(TAG, "issue: ${o.error.javaClass.simpleName}: ${o.error.message}")
+            }
+        }
+    }
+
     // One effect for both lives of the code. The registry answers scoped to
     // the worn persona now, so switching hats re-reads; a hat that has NEVER
     // had a standing code gets one minted here (the first-run case, per
@@ -114,7 +135,7 @@ fun QrHub(
             it.purpose == "profile" &&
                 (it.owner == worn || (it.owner.isBlank() && worn == primary))
         }
-        if (busy) return@LaunchedEffect
+        if (ThreadSends.inFlight(mintKey)) return@LaunchedEffect
         if (everHad && attempt == 0) {
             // Left alone for a while, not for good. The pre-issue is one
             // DHT write behind the claim, and when it lands the store bumps
@@ -126,6 +147,9 @@ fun QrHub(
             // long is not coming.
             delay(REPLACEMENT_GRACE_MS)
         }
+        // After the grace, not before it: a mint that landed during the
+        // wait restarted this effect with the code in hand.
+        if (ThreadSends.inFlight(mintKey)) return@LaunchedEffect
         busy = true
         error = null
         // Its own job, not this effect's. issueCard bumps the store midway,
@@ -134,24 +158,12 @@ fun QrHub(
         // as the screen was open; an unrelated bump landing in the same
         // seconds found no card and no history and minted a second one for
         // the same hat. The guard above is what the restart now meets.
-        scope.launch {
-            val r = withContext(Dispatchers.IO) {
-                runCatching {
-                    Mailbox.issueCard(
-                        context, MyProfile(context).name(), 60uL * 60uL * 24uL,
-                        asPersonaHex = worn,
-                    )
-                }
-            }
-            busy = false
-            r.onSuccess { uri = it.uri; error = null }
-                .onFailure {
-                    // The link sentence is the mapper's default, and there
-                    // is no link here: nothing was scanned, a record was
-                    // not written.
-                    error = moneyFailure(context, it, fallback = R.string.qrhub_issue_failed)
-                    DucatLog.w(TAG, "issue: ${it.javaClass.simpleName}: ${it.message}")
-                }
+        val hat = worn
+        ThreadSends.launch(store, mintKey, null) {
+            Mailbox.issueCard(
+                context, MyProfile(context).name(), 60uL * 60uL * 24uL,
+                asPersonaHex = hat,
+            ).uri
         }
     }
 

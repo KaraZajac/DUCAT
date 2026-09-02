@@ -13,14 +13,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.BillItem
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.Mailbox
-import org.ducatproject.ducat.MyProfile
 import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.R
 import org.ducatproject.ducat.RateStore
@@ -82,13 +80,27 @@ private class RideStore(context: android.content.Context) {
         prefs.edit().putString("ride_persona", persona)
             .putLong("ride_started", System.currentTimeMillis())
             .putLong("ride_started_elapsed", android.os.SystemClock.elapsedRealtime())
-            .putLong("ride_base", base).putLong("ride_per_min", perMin).apply()
+            .putLong("ride_base", base).putLong("ride_per_min", perMin)
+            .remove("ride_tab").apply()
         org.ducatproject.ducat.ContactStore.bump()
     }
+
+    /**
+     * The tab this ride is being billed through, written before the bill
+     * goes out. TabStore.settle commits the tab as billed before the send,
+     * and the meter is cleared only after; a process that dies between the
+     * two comes back with the meter still running over a bill the rider
+     * already holds, and the driver's next press could only open a second
+     * tab and send a second one. With the id kept here, TaxiScreen reads
+     * the tab instead and retires the ride.
+     */
+    fun billingTab(): String? = prefs.getString("ride_tab", null)
+    fun billingVia(tabId: String) { prefs.edit().putString("ride_tab", tabId).apply() }
+
     fun clear() {
         prefs.edit().remove("ride_persona").remove("ride_started")
             .remove("ride_started_elapsed")
-            .remove("ride_base").remove("ride_per_min").apply()
+            .remove("ride_base").remove("ride_per_min").remove("ride_tab").apply()
         org.ducatproject.ducat.ContactStore.bump()
     }
 }
@@ -99,6 +111,22 @@ fun TaxiScreen() {
     val version by ContactStore.changes.collectAsState()
     val rides = remember { RideStore(context) }
     val active = remember(version) { rides.personaHex() }
+
+    // A meter still up over a bill that already went out. The end-ride job
+    // clears the meter after the tab is billed; a death in that gap left
+    // the meter running on relaunch, and the next press — the driver's
+    // natural one — found no open tab to resume, opened another, and sent
+    // the rider a second fare. The tab is the record: anything but "open"
+    // (billed, paid, or since deleted) means this ride is over.
+    LaunchedEffect(active, version) {
+        val tabId = rides.billingTab() ?: return@LaunchedEffect
+        if (active == null) return@LaunchedEffect
+        val billed = withContext(Dispatchers.IO) { TabStore(context).get(tabId)?.state != "open" }
+        if (billed) {
+            DucatLog.i(TAG, "ride with $active already billed through tab $tabId; meter cleared")
+            rides.clear()
+        }
+    }
 
     if (active != null) {
         MeterScreen(rides, active)
@@ -176,16 +204,15 @@ private fun NewRideScreen(rides: RideStore) {
         onDispose { org.ducatproject.ducat.nfc.Tap.offered = null }
     }
 
+    // Until it is cut: the cab's phone is opened on the way to the rank,
+    // before the node has attached, and one refused cut used to leave the
+    // screen without a code for the shift.
     LaunchedEffect(Unit) {
-        val r = withContext(Dispatchers.IO) {
-            runCatching {
-                Mailbox.issueCard(
-                    context, MyProfile(context).name(), 60uL * 60uL * 12uL, purpose = "sale",
-                )
-            }
-        }
-        r.onSuccess { cardUri = it.uri; cardInbox = it.inboxKey }
-            .onFailure { error = it.saidWhy() ?: context.getString(R.string.taxi_err_publish_code) }
+        val card = issueCardPatiently(
+            context, 60uL * 60uL * 12uL, "sale", R.string.taxi_err_publish_code,
+        ) { error = it }
+        error = null
+        cardUri = card.uri; cardInbox = card.inboxKey
     }
 
     // Scan → terms into the thread → meter starts. The rider has the rate in
@@ -298,13 +325,28 @@ private fun NewRideScreen(rides: RideStore) {
 @Composable
 private fun MeterScreen(rides: RideStore, personaHex: String) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     var now by remember { mutableStateOf(System.currentTimeMillis()) }
     var error by remember { mutableStateOf<String?>(null) }
-    var busy by remember { mutableStateOf(false) }
     var confirmCancel by remember { mutableStateOf(false) }
     val contact = remember(personaHex) {
         ContactStore(context).all().firstOrNull { it.personaHex == personaHex }
+    }
+
+    // The bill is the process's job, not this screen's (ThreadSends). On
+    // the screen's own scope, a rotation or a call landing on top while
+    // the bill went out cancelled everything after the send: the tab was
+    // billed, the meter was never cleared, and the driver's next press —
+    // no open tab left to resume — opened a second tab and billed the
+    // fare again. Now the meter is cleared by the job itself, and the
+    // screen that is up when it finishes is the one that hears.
+    val key = "taxi:$personaHex"
+    var busy by remember { mutableStateOf(ThreadSends.inFlight(key)) }
+    val tick by ThreadSends.ticks.collectAsState()
+    LaunchedEffect(tick) {
+        busy = ThreadSends.inFlight(key)
+        for (o in ThreadSends.take(key)) if (o is ThreadSends.Outcome.Failed) {
+            error = o.error.saidWhy() ?: context.getString(R.string.taxi_err_send_fare)
+        }
     }
 
     // A ticking clock, not a stored counter: the fare is *derived* from the
@@ -367,21 +409,19 @@ private fun MeterScreen(rides: RideStore, personaHex: String) {
                         meteredEnd,
                     ))
                 }
-                scope.launch {
-                    val r = withContext(Dispatchers.IO) {
-                        runCatching {
-                            val store = TabStore(context)
-                            // Resumed, not opened again: a fare whose bill
-                            // never left the phone goes back to an open tab
-                            // (TabStore.settle), and the second press bills
-                            // through it rather than leaving an orphan.
-                            val tab = store.openOrResume(personaHex, "taxi")
-                            store.settle(store.mutate(tab.id) { it.copy(lines = lines) }!!)
-                        }
-                    }
-                    busy = false
-                    r.onSuccess { rides.clear() }
-                        .onFailure { error = it.saidWhy() ?: context.getString(R.string.taxi_err_send_fare) }
+                ThreadSends.launch(ContactStore(context), key, null) {
+                    val store = TabStore(context)
+                    // Resumed, not opened again: a fare whose bill never
+                    // left the phone goes back to an open tab
+                    // (TabStore.settle), and the second press bills
+                    // through it rather than leaving an orphan.
+                    val tab = store.openOrResume(personaHex, "taxi")
+                    // Named before the bill goes, for the relaunch that
+                    // finds the meter still up (TaxiScreen).
+                    rides.billingVia(tab.id)
+                    store.settle(store.mutate(tab.id) { it.copy(lines = lines) }!!)
+                    rides.clear()
+                    null
                 }
             },
             enabled = !busy,

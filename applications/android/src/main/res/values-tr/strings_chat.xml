@@ -15,6 +15,7 @@
     <string name="chat_what_card">kart</string>
     <string name="chat_what_contact">kişi</string>
     <string name="chat_what_reaction">tepki</string>
+    <string name="chat_what_invite">davet</string>
     <string name="chat_error_location_fix">konum alınamadı</string>
     <string name="chat_recording_placeholder">Kaydediliyor… %1$d sn</string>
     <string name="chat_message_placeholder">Mesaj</string>

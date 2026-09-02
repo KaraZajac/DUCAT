@@ -15,6 +15,7 @@
     <string name="chat_what_card">card</string>
     <string name="chat_what_contact">contact</string>
     <string name="chat_what_reaction">reaction</string>
+    <string name="chat_what_invite">invite</string>
     <string name="chat_error_location_fix">could not get a location fix</string>
     <string name="chat_recording_placeholder">Recording… %1$ds</string>
     <string name="chat_message_placeholder">Message</string>

@@ -181,3 +181,53 @@ fun moneyFailure(
         context.getString(org.ducatproject.ducat.R.string.err_board_full)
     else -> orElse?.invoke() ?: context.getString(fallback)
 }
+
+/**
+ * Cut a card for a screen that cannot do its work without one, and keep
+ * cutting until one is cut.
+ *
+ * The sale screens — the till, the bar tab, the kiosk, the taxi, the
+ * donation box — each asked once, on first composition, and showed
+ * [moneyFailure]'s sentence when the node was not attached yet: a phone
+ * stood up and left, or opened on the way in, wore "offline" for the
+ * evening, and the only way to a code was to leave the screen and come
+ * back. Backed off to half a minute, because a phone with no network is
+ * not helped by asking faster; [onFailure] gets each miss so the screen
+ * can say why it is still waiting, and the return is the card.
+ *
+ * Suspending, not registry-run: a screen that goes takes its card
+ * with it (the tap offer, the claim poll, the sale are all its), so the
+ * cutting should stop with it too.
+ */
+suspend fun issueCardPatiently(
+    context: android.content.Context,
+    validSecs: ULong,
+    purpose: String,
+    /** [moneyFailure]'s fallback — the screen's own sentence for a miss
+     *  that is none of the kinds it names. */
+    fallback: Int = org.ducatproject.ducat.R.string.main_card_link_failed_body,
+    onFailure: (String) -> Unit,
+): org.ducatproject.ducat.IssuedHandle {
+    var wait = 5_000L
+    while (true) {
+        val r = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            runCatching {
+                Mailbox.issueCard(
+                    context, org.ducatproject.ducat.MyProfile(context).name(),
+                    validSecs, purpose = purpose,
+                )
+            }
+        }
+        r.getOrNull()?.let { return it }
+        val e = r.exceptionOrNull()!!
+        // The class name, for the log: the sentence the screen gets folds
+        // every kind of "not yet" into one, and an autopsy wants to know
+        // which it was.
+        org.ducatproject.ducat.DucatLog.w(
+            "Cards", "$purpose card: ${e.javaClass.simpleName}: ${e.message}",
+        )
+        onFailure(moneyFailure(context, e, fallback))
+        kotlinx.coroutines.delay(wait)
+        wait = (wait * 2).coerceAtMost(30_000L)
+    }
+}

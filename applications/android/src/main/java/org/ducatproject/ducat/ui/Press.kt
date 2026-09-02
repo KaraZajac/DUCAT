@@ -42,12 +42,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.ContactStore
-import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.Publications
@@ -111,9 +110,29 @@ fun PressScreen() {
     val pubId = Publications.pressPub(context) ?: pubs.first().first
     val pubName = pubs.firstOrNull { it.first == pubId }?.second ?: return
     var code by remember(pubId) { mutableStateOf<String?>(null) }
-    LaunchedEffect(pubId, version) {
-        code = withContext(Dispatchers.IO) {
-            runCatching { Publications.standingCode(context, pubId) }.getOrNull()
+    // The code on record, or a mint off the screen. This called
+    // `standingCode` — read-or-mint — from the screen's own effect, keyed on
+    // every contact-store change: a bump while the mint was out (a poll
+    // delivering, a rotation rebuilding the screen) started a second mint
+    // beside the first, and each bound another card to the publication
+    // before the record said one existed. The mint runs once, under a key
+    // the rebuilt screen checks before starting its own; a failed mint
+    // waits longer each time rather than spinning against a node that is
+    // not attached yet.
+    val kPress = "press:$pubId"
+    val tick by ThreadSends.ticks.collectAsState()
+    var wait by remember(pubId) { mutableStateOf(0L) }
+    LaunchedEffect(pubId, version, tick) {
+        val failed = ThreadSends.take(kPress).any {
+            it !is ThreadSends.Outcome.Landed || it.result == null
+        }
+        if (failed) wait = (wait * 2).coerceIn(5_000L, 60_000L)
+        val standing = withContext(Dispatchers.IO) { Publications.pressCode(context, pubId) }
+        if (standing != null) { code = standing; wait = 0L; return@LaunchedEffect }
+        if (ThreadSends.inFlight(kPress)) return@LaunchedEffect
+        if (wait > 0L) delay(wait)
+        ThreadSends.launch(ContactStore(context), kPress, null) {
+            Publications.standingCode(context, pubId)
         }
     }
     val price = remember(version, pubId) { Publications.priceOf(context, pubId) }
@@ -185,7 +204,6 @@ fun PressScreen() {
 @Composable
 private fun InviteSheet(pubName: String, code: String?, onDone: () -> Unit) {
     val context = LocalContext.current
-    val scope = androidx.compose.runtime.rememberCoroutineScope()
     val personas = remember { PersonaStore(context) }
     val contacts = remember {
         val all = ContactStore(context).all()
@@ -197,7 +215,6 @@ private fun InviteSheet(pubName: String, code: String?, onDone: () -> Unit) {
         }
     }
     var picked by remember { mutableStateOf(setOf<String>()) }
-    var busy by remember { mutableStateOf(false) }
     AlertDialog(
         onDismissRequest = onDone,
         title = { Text(stringResource(R.string.press_invite)) },
@@ -227,29 +244,30 @@ private fun InviteSheet(pubName: String, code: String?, onDone: () -> Unit) {
         },
         confirmButton = {
             Button(
-                enabled = !busy && picked.isNotEmpty() && code != null,
+                enabled = picked.isNotEmpty() && code != null,
                 onClick = {
-                    busy = true
-                    scope.launch(Dispatchers.IO) {
-                        val store = ContactStore(context)
-                        for (hex in picked) {
+                    // One send per thread, off the sheet. These ran in the
+                    // sheet's own scope, dispatched to IO: a rotation or a
+                    // call in the moment before a worker picked the job up
+                    // cancelled it unstarted, and nobody was invited — with
+                    // the sheet gone, nothing said so either. Each thread's
+                    // registry job runs whatever happens to this sheet, and a
+                    // failure is heard by the thread it belongs to, in the
+                    // words that screen uses for a send that did not go.
+                    val store = ContactStore(context)
+                    val what = context.getString(R.string.chat_what_invite)
+                    val text = context.getString(R.string.press_invite_body, pubName) + "\n" + code
+                    for (hex in picked) {
+                        ThreadSends.launch(store, hex, what) {
                             // The freshest copy each time: send advances the
                             // contact, and a stale snapshot reuses a slot.
                             val c = store.all().firstOrNull { it.personaHex == hex }
-                                ?: continue
-                            runCatching {
-                                Mailbox.send(
-                                    context, c,
-                                    context.getString(
-                                        R.string.press_invite_body, pubName,
-                                    ) + "\n" + code,
-                                )
-                            }.onFailure {
-                                DucatLog.w("Press", "invite: ${it.message}")
-                            }
+                                ?: return@launch null
+                            Mailbox.send(context, c, text)
+                            null
                         }
-                        withContext(Dispatchers.Main) { onDone() }
                     }
+                    onDone()
                 },
             ) { Text(stringResource(R.string.press_invite_send)) }
         },

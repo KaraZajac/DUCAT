@@ -57,14 +57,28 @@ import uniffi.ducat_mobile.readContactCard
 @Composable
 internal fun ShareCardSheet(personaSecret: ByteArray?, onDismiss: () -> Unit) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     // The card outlives a turn of the phone: the activity is recreated on
     // rotation, and the QR just published went with it — the next tap
     // minted a second card for the same inbox.
     var name by rememberSaveable { mutableStateOf(NameStore(context).get() ?: "") }
     var uri by rememberSaveable { mutableStateOf<String?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
-    var busy by remember { mutableStateOf(false) }
+    // The mint itself outlives the turn too (ThreadSends), under the same
+    // key QrHub mints the standing code with — it is the same card. Saved
+    // `uri` covered a mint that had finished; one still going came back
+    // to a sheet with `busy` false and the button live, and the card it
+    // was writing landed a moment later as the first of two.
+    val mintKey = "mint:${remember { org.ducatproject.ducat.PersonaStore(context).worn() }}"
+    var busy by remember { mutableStateOf(ThreadSends.inFlight(mintKey)) }
+    val tick by ThreadSends.ticks.collectAsState()
+    LaunchedEffect(tick) {
+        busy = ThreadSends.inFlight(mintKey)
+        for (o in ThreadSends.take(mintKey)) when (o) {
+            is ThreadSends.Outcome.Landed -> o.result?.let { NameStore(context).put(name); uri = it }
+            is ThreadSends.Outcome.Failed ->
+                error = o.error.saidWhy() ?: context.getString(R.string.contacts_error_make_card)
+        }
+    }
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.padding(20.dp).verticalScroll(rememberScrollState())) {
@@ -96,23 +110,11 @@ internal fun ShareCardSheet(personaSecret: ByteArray?, onDismiss: () -> Unit) {
                     onClick = {
                         busy = true
                         error = null
-                        scope.launch {
-                            val r = withContext(Dispatchers.IO) {
-                                runCatching {
-                                    // Records, not a route: the card names an
-                                    // inbox that outlives this process (§16.12).
-                                    Mailbox.issueCard(
-                                        context,
-                                        name.ifBlank { null },
-                                        60uL * 60uL * 24uL,
-                                    )
-                                }
-                            }
-                            busy = false
-                            r.onSuccess {
-                                NameStore(context).put(name)
-                                uri = it.uri
-                            }.onFailure { error = it.saidWhy() ?: context.getString(R.string.contacts_error_make_card) }
+                        val shown = name.ifBlank { null }
+                        ThreadSends.launch(ContactStore(context), mintKey, null) {
+                            // Records, not a route: the card names an
+                            // inbox that outlives this process (§16.12).
+                            Mailbox.issueCard(context, shown, 60uL * 60uL * 24uL).uri
                         }
                     },
                     enabled = !busy && personaSecret != null,

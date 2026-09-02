@@ -382,7 +382,8 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     var billView by rememberSaveable(stateSaver = BILL_SAVER) {
         mutableStateOf<StoredMessage?>(null)
     }
-    var reserveOpen by remember { mutableStateOf(false) }
+    // The booking sheet too, now that its proposal outlives it (ReserveSheet).
+    var reserveOpen by rememberSaveable { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf<StoredMessage?>(null) }
 
     // Applied on open and whenever the thread changes, because nothing else
@@ -4439,7 +4440,11 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
         org.ducatproject.ducat.RateStore(context).cached()?.first
     }
     val cur = remember(rateVersion) { Amounts.currency(context) }
-    var fiat by remember { mutableStateOf(Amounts.enterFiat(context)) }
+    // Saveable, the fields below with it. This sheet is where a week's rent
+    // and two stakes get typed and argued over, and a rotation — or the
+    // keyboard's own layout change on some phones — threw the lot away and
+    // put the listing's defaults back.
+    var fiat by rememberSaveable { mutableStateOf(Amounts.enterFiat(context)) }
 
     /**
      * A piconero figure as text, in whichever unit this sheet is showing.
@@ -4462,10 +4467,10 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
     // had to work out seven nights themselves and type the total into a box
     // that said "per night". The commonest thing this screen does, and it did
     // not have a place to say it.
-    var rent by remember { mutableStateOf(about?.let { asUnit(it.pricePxmr) } ?: "") }
-    var count by remember { mutableStateOf("1") }
-    var myDep by remember { mutableStateOf(about?.let { asUnit(it.depositPxmr) } ?: "") }
-    var hostDep by remember { mutableStateOf(about?.let { asUnit(it.depositPxmr) } ?: "") }
+    var rent by rememberSaveable { mutableStateOf(about?.let { asUnit(it.pricePxmr) } ?: "") }
+    var count by rememberSaveable { mutableStateOf("1") }
+    var myDep by rememberSaveable { mutableStateOf(about?.let { asUnit(it.depositPxmr) } ?: "") }
+    var hostDep by rememberSaveable { mutableStateOf(about?.let { asUnit(it.depositPxmr) } ?: "") }
     // What kind of thing is being handed over decides how much each side
     // stakes: a room is not a car (see Stakes.kt for where the numbers come
     // from). Picking one fills both deposits, and either can still be typed
@@ -4475,15 +4480,37 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
     // sale and an electrician's afternoon both defaulted to a room's twenty
     // percent — against a suggestion of ten — and the chips below offered no
     // way to say otherwise.
-    var deal by remember {
+    var deal by rememberSaveable {
         mutableStateOf(
             about?.kind?.let { org.ducatproject.ducat.Listings.dealFor(it) }
                 ?: org.ducatproject.ducat.Stakes.Deal.Stay,
         )
     }
-    var busy by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }
-    val scope = rememberCoroutineScope()
+    var error by rememberSaveable { mutableStateOf<String?>(null) }
+    // The proposal is the process's (ThreadSends), keyed to the thread.
+    // On this sheet's own scope, a rotation mid-propose sent the round-0s
+    // and then cancelled the landing: the sheet came back — or did not —
+    // with no word, over a proposal already in the thread. `proposed`
+    // says whether the outcome under the key is this sheet's to act on:
+    // a sheet swiped away mid-flight leaves one behind, and the next
+    // sheet opened on this thread must not close itself on it.
+    val key = "reserve:${contact.personaHex}"
+    var proposed by rememberSaveable { mutableStateOf(false) }
+    var busy by remember { mutableStateOf(ThreadSends.inFlight(key)) }
+    val tick by ThreadSends.ticks.collectAsState()
+    LaunchedEffect(tick) {
+        busy = ThreadSends.inFlight(key)
+        for (o in ThreadSends.take(key)) {
+            if (!proposed) {
+                org.ducatproject.ducat.DucatLog.i("Chat", "reservation outcome nobody was waiting for: $o")
+                continue
+            }
+            when (o) {
+                is ThreadSends.Outcome.Landed -> onDone()
+                is ThreadSends.Outcome.Failed -> { proposed = false; error = moneyFailure(context, o.error) }
+            }
+        }
+    }
     // Through the shared parser, like every other money field. These three
     // accept whatever `isNumberChar` allows — which is deliberately more than
     // ASCII, because a keyboard set to Persian or Hindi types its own digits —
@@ -4735,23 +4762,17 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
                         )
                         return@Button
                     }
-                    busy = true; error = null
-                    scope.launch {
-                        withContext(Dispatchers.IO) {
-                            runCatching {
-                                val arbHex = org.ducatproject.ducat.ArbiterStore(context).hex()
-                                    ?.takeIf { it != contact.personaHex }
-                                val arb = arbHex?.let { hx ->
-                                    org.ducatproject.ducat.ContactStore(context).all()
-                                        .firstOrNull { it.personaHex == hx }
-                                }
-                                org.ducatproject.ducat.Ceremony.startReservation(
-                                    context, contact, arb, r, g ?: 0L, h ?: 0L,
-                                )
-                            }
-                        }.onSuccess {
-                            busy = false; onDone()
-                        }.onFailure { error = moneyFailure(context, it); busy = false }
+                    busy = true; error = null; proposed = true
+                    ThreadSends.launch(ContactStore(context), key, null) {
+                        val arbHex = org.ducatproject.ducat.ArbiterStore(context).hex()
+                            ?.takeIf { it != contact.personaHex }
+                        val arb = arbHex?.let { hx ->
+                            org.ducatproject.ducat.ContactStore(context).all()
+                                .firstOrNull { it.personaHex == hx }
+                        }
+                        org.ducatproject.ducat.Ceremony.startReservation(
+                            context, contact, arb, r, g ?: 0L, h ?: 0L,
+                        )
                     }
                 },
                 enabled = !busy && rent.isNotBlank(),

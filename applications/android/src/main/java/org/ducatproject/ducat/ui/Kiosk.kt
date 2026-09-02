@@ -28,7 +28,6 @@ import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.Mode
 import org.ducatproject.ducat.ModeStore
-import org.ducatproject.ducat.MyProfile
 import org.ducatproject.ducat.Orders
 import org.ducatproject.ducat.R
 import org.ducatproject.ducat.TabStore
@@ -351,15 +350,12 @@ private fun PayPanel(order: Orders.Order, onDone: () -> Unit) {
     // room is not handed the queue's coffee.
     LaunchedEffect(order.id, monero) {
         if (cardUri != null || monero || !order.unpaired) return@LaunchedEffect
-        val r = withContext(Dispatchers.IO) {
-            runCatching {
-                Mailbox.issueCard(
-                    context, MyProfile(context).name(), CARD_TTL_SECS, purpose = "sale",
-                )
-            }
-        }
-        r.onSuccess { cardUri = it.uri; cardInbox = it.inboxKey }
-            .onFailure { error = moneyFailure(context, it) }
+        // Until it is cut: the first order of the day is often placed
+        // before the node has attached, and one refused cut used to leave
+        // the order wearing "offline" until staff gave up on it.
+        val card = issueCardPatiently(context, CARD_TTL_SECS, "sale") { error = it }
+        error = null
+        cardUri = card.uri; cardInbox = card.inboxKey
     }
 
     // The same card over NFC, for as long as it is on screen: tapping and
@@ -377,7 +373,7 @@ private fun PayPanel(order: Orders.Order, onDone: () -> Unit) {
     // mempool for it and the staff list stops calling it "awaiting" —
     // rather than half an hour later, when expiry would have found it.
     val giveUp: () -> Unit = {
-        scope.launch(Dispatchers.IO) { runCatching { Orders.abandon(context, order.id) } }
+        kioskScope.launch { runCatching { Orders.abandon(context, order.id) } }
         onDone()
     }
 
@@ -499,7 +495,7 @@ private fun PayPanel(order: Orders.Order, onDone: () -> Unit) {
         // matched by the next payment of that size from this customer.
         onGiveUp = {
             owed?.let { tab ->
-                scope.launch(Dispatchers.IO) {
+                kioskScope.launch {
                     runCatching { TabStore(context).mutate(tab.id) { it.copy(state = "cancelled") } }
                 }
             }
@@ -510,6 +506,17 @@ private fun PayPanel(order: Orders.Order, onDone: () -> Unit) {
 
 /** How long a sale card stays claimable. Two hours outlasts any queue. */
 private const val CARD_TTL_SECS: ULong = 7_200uL
+
+/**
+ * Store writes that outlive the screen making them — BarTab's tabScope,
+ * for the same reason. "Give up" launched the abandon on the screen's own
+ * scope and left the screen in the same tap; a coroutine cancelled before
+ * a worker picked it up never runs at all, and the order stayed "awaiting"
+ * for the poller to keep reading the mempool for.
+ */
+private val kioskScope = kotlinx.coroutines.CoroutineScope(
+    kotlinx.coroutines.SupervisorJob() + Dispatchers.IO,
+)
 
 /** The card, waiting to be tapped or scanned. */
 @Composable
@@ -818,10 +825,12 @@ private fun StaffOrders() {
     // on the other one, where a swallowed failure left the shop believing a
     // bill had been withdrawn when it had not, and the customer's phone still
     // showing money to pay.
-    val working = remember { mutableStateListOf<String>() }
+    //
+    // Held by the process (ThreadSends), one key per order, not by this
+    // screen: a list kept here was empty again after a rotation while the
+    // message was still going, and the button came back live over it.
     var staffError by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     val version by ContactStore.changes.collectAsState()
     // One read of the order book and one of the tab book per change. Each
     // row used to ask [Orders.stateOf] three times, and each ask decrypted
@@ -831,6 +840,19 @@ private fun StaffOrders() {
         val all = Orders.all(context)
         val tabs = TabStore(context).all().associateBy { it.id }
         all to all.associate { it.id to Orders.stateOf(it, it.tabId?.let(tabs::get)) }
+    }
+    val tick by ThreadSends.ticks.collectAsState()
+    val working = remember(tick, orders) {
+        orders.map { it.id }.filter { ThreadSends.inFlight("kiosk:$it") }.toSet()
+    }
+    LaunchedEffect(tick, orders) {
+        for (o in orders) for (out in ThreadSends.take("kiosk:${o.id}")) {
+            if (out is ThreadSends.Outcome.Failed) staffError = moneyFailure(context, out.error)
+        }
+    }
+    val staffSend: (String, () -> Unit) -> Unit = { id, block ->
+        staffError = null
+        ThreadSends.launch(ContactStore(context), "kiosk:$id", null) { block(); null }
     }
     Column(Modifier.fillMaxSize()) {
         Spacer(Modifier.height(8.dp))
@@ -903,18 +925,7 @@ private fun StaffOrders() {
                             ) {
                                 TextButton(
                                     enabled = o.id !in working,
-                                    onClick = {
-                                        working += o.id
-                                        staffError = null
-                                        scope.launch {
-                                            withContext(Dispatchers.IO) {
-                                                runCatching { Orders.sayReady(context, o) }
-                                            }.onFailure {
-                                                staffError = moneyFailure(context, it)
-                                            }
-                                            working -= o.id
-                                        }
-                                    },
+                                    onClick = { staffSend(o.id) { Orders.sayReady(context, o) } },
                                 ) {
                                     Text(
                                         stringResource(
@@ -941,23 +952,14 @@ private fun StaffOrders() {
                             if (o.tabId != null && state == Orders.State.Awaiting) {
                                 TextButton(
                                     enabled = o.id !in working,
+                                    // Its failure is said out loud (the tick
+                                    // effect above). A withdrawal that quietly
+                                    // failed left the customer's phone pointing
+                                    // at money nobody was waiting for.
                                     onClick = {
-                                        working += o.id
-                                        staffError = null
-                                        scope.launch {
-                                            withContext(Dispatchers.IO) {
-                                                runCatching {
-                                                    val tabs = TabStore(context)
-                                                    tabs.get(o.tabId!!)?.let { tabs.cancel(it) }
-                                                }
-                                            }.onFailure {
-                                                // Said out loud. A withdrawal
-                                                // that quietly failed left the
-                                                // customer's phone pointing at
-                                                // money nobody was waiting for.
-                                                staffError = moneyFailure(context, it)
-                                            }
-                                            working -= o.id
+                                        staffSend(o.id) {
+                                            val tabs = TabStore(context)
+                                            tabs.get(o.tabId!!)?.let { tabs.cancel(it) }
                                         }
                                     },
                                 ) {

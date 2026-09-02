@@ -560,11 +560,7 @@ object Publications {
      */
     fun standingCode(context: Context, pubId: String): String? {
         val now = System.currentTimeMillis() / 1000
-        readPub(context, pubId)?.let { pub ->
-            val uri = pub.optString("press_code").ifBlank { null }
-            val exp = pub.optLong("press_code_exp", 0)
-            if (uri != null && exp - now > PRESS_CODE_TTL_SECS / 4) return uri
-        }
+        pressCode(context, pubId)?.let { return it }
         val name = publications(context).firstOrNull { it.first == pubId }?.second
             ?: return null
         val card = runCatching {
@@ -583,6 +579,20 @@ object Publications {
             pub.put("press_code_exp", now + PRESS_CODE_TTL_SECS)
         }
         return card.uri
+    }
+
+    /**
+     * The read half of [standingCode]: the code on record, if it has more
+     * than a quarter of its life left; null when a mint is what it takes.
+     * The Press face reads this on every look and mints only when this says
+     * so, under a job that outlives the screen — so a rotation mid-mint
+     * finds the mint still running rather than starting a second one.
+     */
+    fun pressCode(context: Context, pubId: String): String? {
+        val pub = readPub(context, pubId) ?: return null
+        val uri = pub.optString("press_code").ifBlank { null } ?: return null
+        val now = System.currentTimeMillis() / 1000
+        return uri.takeIf { pub.optLong("press_code_exp", 0) - now > PRESS_CODE_TTL_SECS / 4 }
     }
 
     private const val PRESS_CODE_TTL_SECS = 7 * 24 * 60 * 60L

@@ -153,7 +153,12 @@ fun NetworkPanel(storageDir: String) {
     LaunchedEffect(starting) {
         if (!starting) return@LaunchedEffect
         val result = withContext(Dispatchers.IO) {
-            runCatching { nodeStart(storageDir, udp = true) }.exceptionOrNull()?.saidWhy()
+            // The class name when the throwable says nothing: a start that
+            // failed with a blank message reset the button to "Start node"
+            // and showed no error at all, on the one panel whose job is to
+            // say why nothing works.
+            runCatching { nodeStart(storageDir, udp = true) }.exceptionOrNull()
+                ?.let { it.saidWhy() ?: it.javaClass.simpleName }
         }
         status = withContext(Dispatchers.IO) { nodeStatus() }
         if (result != null) status = status.copy(error = startupNote(context, result))

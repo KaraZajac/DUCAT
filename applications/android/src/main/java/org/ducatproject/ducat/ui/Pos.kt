@@ -27,7 +27,6 @@ import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.Mailbox
-import org.ducatproject.ducat.MyProfile
 import org.ducatproject.ducat.R
 import org.ducatproject.ducat.RateStore
 import org.ducatproject.ducat.RunningTab
@@ -656,18 +655,12 @@ private fun PresentScreen(
     // instance: a restored screen already holds its card and keeps it.
     LaunchedEffect(Unit) {
         if (cardUri != null) return@LaunchedEffect
-        val r = withContext(Dispatchers.IO) {
-            runCatching {
-                Mailbox.issueCard(
-                    context, MyProfile(context).name(), 60uL * 60uL * 2uL, purpose = "sale",
-                )
-            }
-        }
-        r.onSuccess { cardUri = it.uri; cardInbox = it.inboxKey }
-            .onFailure {
-                error = moneyFailure(context, it)
-                DucatLog.e(TAG, "card: ${it.message}")
-            }
+        // Until it is cut: the till's first sale is rung before the node
+        // has attached, and one refused cut used to leave the sale wearing
+        // "offline" until it was abandoned and rung again.
+        val card = issueCardPatiently(context, 60uL * 60uL * 2uL, "sale") { error = it }
+        error = null
+        cardUri = card.uri; cardInbox = card.inboxKey
     }
 
     // Scan → bill. The claim bound to this card makes them a contact; the

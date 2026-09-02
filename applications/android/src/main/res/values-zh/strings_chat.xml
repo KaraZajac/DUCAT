@@ -15,6 +15,7 @@
     <string name="chat_what_card">名片</string>
     <string name="chat_what_contact">联系人</string>
     <string name="chat_what_reaction">回应</string>
+    <string name="chat_what_invite">邀请</string>
     <string name="chat_error_location_fix">无法获取定位</string>
     <string name="chat_recording_placeholder">录音中… %1$d 秒</string>
     <string name="chat_message_placeholder">消息</string>
