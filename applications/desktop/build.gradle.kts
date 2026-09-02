@@ -14,6 +14,7 @@ plugins {
 // only through the shims in src/main/kotlin/android/. Grown one file at a
 // time, deliberately — anything ui/ or screen-shaped stays on the phone.
 val sharedLogic = listOf(
+    "org/ducatproject/ducat/Elapsed.kt",
     "org/ducatproject/ducat/Mailbox.kt",
     "org/ducatproject/ducat/Ceremony.kt",
     "org/ducatproject/ducat/ContactStore.kt",

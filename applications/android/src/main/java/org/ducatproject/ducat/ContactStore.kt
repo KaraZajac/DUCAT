@@ -1344,8 +1344,8 @@ class ContactStore(context: Context) {
                 if (ttlSecs > 0) ttlSecs * 1000L + 60 * 60 * 1000L
                 else 24 * 60 * 60 * 1000L
             val stale =
-                (answered && now - made > 60 * 60 * 1000L) ||
-                    (!answered && now - made > unansweredLife)
+                if (answered) Elapsed.due(now, made, 60 * 60 * 1000L)
+                else Elapsed.due(now, made, unansweredLife)
             if (stale) dropped += o.getString("inbox") else keep.put(o)
         }
         if (dropped.isNotEmpty()) {

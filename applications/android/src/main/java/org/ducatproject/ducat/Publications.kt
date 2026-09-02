@@ -292,7 +292,7 @@ object Publications {
             val cat = pub.optString("mkt_cat").ifBlank { null } ?: continue
             val board = pub.optString("mkt_board")
             val at = pub.optLong("mkt_at", 0)
-            val due = now - at > MARKET_TTL_SECS / 2 ||
+            val due = Elapsed.dueSecs(now, at, MARKET_TTL_SECS / 2) ||
                 (board.isNotBlank() && standStale(board))
             if (due) {
                 runCatching {

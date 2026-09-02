@@ -732,9 +732,17 @@ object Listings {
                 // take — no node, or a full board. Spaced by RETRY_SECONDS,
                 // because a try is not cheap and the board does not free
                 // between polls.
-                it.optBoolean("wanted") && now - it.optLong("triedAt") >= RETRY_SECONDS
+                it.optBoolean("wanted") &&
+                    Elapsed.dueSecs(now, it.optLong("triedAt"), RETRY_SECONDS)
             } else {
-                now - it.optLong("postedAt") >= REFRESH_SECONDS || standStale(board)
+                // [Elapsed] rather than the subtraction, and this is the site
+                // that matters most: a stamp written while the clock was
+                // ahead never comes of age, so the notice is never re-posted,
+                // falls off the board when its day runs out, and the owner's
+                // screen goes on saying "Live on the board near you" for ever
+                // — the exact failure the refresh was added to prevent.
+                Elapsed.dueSecs(now, it.optLong("postedAt"), REFRESH_SECONDS) ||
+                    standStale(board)
             }
         }
     }

@@ -293,7 +293,7 @@ object Wallet {
                         DucatLog.w(TAG, "send intent ${intent.id} resolved by chain — recording without txid")
                         store.resolveSendIntent(intent.id, "", 0L)
                     }
-                    now - intent.ts > INTENT_GIVE_UP_SECS &&
+                    Elapsed.dueSecs(now, intent.ts, INTENT_GIVE_UP_SECS) &&
                         kis.isNotEmpty() && kis.all { it in chainAnswered && it !in chainSpent } -> {
                         DucatLog.w(TAG, "send intent ${intent.id} never relayed — releasing its notes")
                         store.dropSendIntent(intent.id)

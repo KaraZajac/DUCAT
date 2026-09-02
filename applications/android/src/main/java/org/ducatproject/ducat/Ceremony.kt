@@ -293,7 +293,7 @@ object Ceremony {
                 isStale(o) -> true
                 isFinished(o) -> {
                     val at = o.optLong("created").takeIf { it > 0 } ?: return@filter false
-                    now - at > KEEP_FINISHED_MS
+                    Elapsed.due(now, at, KEEP_FINISHED_MS)
                 }
                 else -> false
             }
@@ -1071,7 +1071,7 @@ object Ceremony {
             val lastHelp = caughtUp.optLong(senderIdx.toString())
             if (o.optString("stage") == "done" && round.toInt() <= 1 &&
                 !theyFinished &&
-                System.currentTimeMillis() - lastHelp > NUDGE_AFTER_MS
+                Elapsed.due(System.currentTimeMillis(), lastHelp, NUDGE_AFTER_MS)
             ) {
                 caughtUp.put(senderIdx.toString(), System.currentTimeMillis())
                 o.put("caughtUp", caughtUp)
@@ -1454,7 +1454,7 @@ object Ceremony {
         val due = all(context).filter { o ->
             o.optString("stage") in setOf("committed", "shared") &&
                 !isFinished(o) && !isStale(o) &&
-                now - o.optLong("progressAt", o.optLong("created")) > NUDGE_AFTER_MS
+                Elapsed.due(now, o.optLong("progressAt", o.optLong("created")), NUDGE_AFTER_MS)
         }
         for (o in due) {
             val idHex = o.optString("id")
@@ -1544,7 +1544,11 @@ object Ceremony {
         if (o.optString("fundTxid").isNotEmpty()) return false
         if (o.optString("hostFundTxid").isNotEmpty()) return false
         val created = o.optLong("created").takeIf { it > 0 } ?: return false
-        return System.currentTimeMillis() - created > UNANSWERED_MS
+        // [Elapsed], because this one decides whether a ceremony ever ends:
+        // a `created` stamped ahead of now is never old enough to be stale,
+        // so the escrow stays live for ever and the cleanup above never
+        // reaches it either.
+        return Elapsed.due(System.currentTimeMillis(), created, UNANSWERED_MS)
     }
 
     /**
@@ -2560,7 +2564,7 @@ object Ceremony {
             if (idHex.isBlank()) continue
             val asked = o.optLong("wantReleaseAt")
             if (asked <= 0) continue
-            if (now - asked > RELEASE_PATIENCE_MS) {
+            if (Elapsed.due(now, asked, RELEASE_PATIENCE_MS)) {
                 mutate(context, idHex) { cur -> cur.put("wantReleaseAt", 0L) }
                 DucatLog.i(TAG, "escrow $idHex: gave up retrying the release")
                 continue

@@ -168,7 +168,9 @@ object SecondOpinion {
             Verdict.NotYet -> {
                 val first = if (since == 0L) now else since
                 prefs.edit().putLong("asked_$key", now).putLong("since_$key", first).apply()
-                if (now - first > ALARM_AFTER_MS && !prefs.getBoolean("said_$key", false)) {
+                if (Elapsed.due(now, first, ALARM_AFTER_MS) &&
+                    !prefs.getBoolean("said_$key", false)
+                ) {
                     prefs.edit().putBoolean("said_$key", true).apply()
                     DucatLog.w(TAG, "${key.take(12)}… unknown to other nodes after ten minutes")
                     Notify.post(

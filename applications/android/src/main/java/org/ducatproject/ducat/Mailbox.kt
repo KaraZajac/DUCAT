@@ -1298,7 +1298,36 @@ object Mailbox {
             }
         }
         if (freed > 0) DucatLog.i(TAG, "attachments: reclaimed ${freed / 1024} KiB")
+        sweepAttachmentTrouble(context, live)
         return freed
+    }
+
+    /** Counters last forgotten. Hourly, because the read below decrypts
+     *  every key in the store and this runs on a loop that has plenty to do. */
+    @Volatile private var lastTroubleSweep = 0L
+
+    /**
+     * The counters, not only the files.
+     *
+     * A picture that never arrived leaves an `att_trouble_<hash>` behind —
+     * and the ones that never arrive are exactly the ones that keep theirs:
+     * a fetch that succeeds clears its own. So a thread cleared, a message
+     * expired under its window, a picture abandoned by a sender whose
+     * record aged out all left a key in the store for the life of the
+     * install, while the file sweep beside them found nothing to delete
+     * because a picture that never arrived was never written.
+     */
+    private fun sweepAttachmentTrouble(context: Context, live: Set<String>) {
+        val now = System.currentTimeMillis()
+        if (now - lastTroubleSweep < 3_600_000L) return
+        lastTroubleSweep = now
+        val p = troublePrefs(context)
+        val stale = p.all.keys.filter {
+            it.startsWith("att_trouble_") && it.removePrefix("att_trouble_") !in live
+        }
+        if (stale.isEmpty()) return
+        p.edit().apply { stale.forEach { remove(it) } }.apply()
+        DucatLog.i(TAG, "attachments: forgot ${stale.size} counter(s) for pictures nobody holds")
     }
 
     /**

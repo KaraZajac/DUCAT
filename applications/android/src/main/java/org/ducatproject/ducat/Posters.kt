@@ -58,7 +58,7 @@ object Posters {
         // The last sighting is the sweep's clock, and it moves at most once a
         // day: a board reply stamps every notice in it, and a write per
         // scroll would make this the busiest file on the phone.
-        if (now - p.getLong(posterHex + LAST, first) >= DAY_MS) {
+        if (Elapsed.due(now, p.getLong(posterHex + LAST, first), DAY_MS)) {
             p.edit().putLong(posterHex + LAST, now).apply()
         }
         return first
