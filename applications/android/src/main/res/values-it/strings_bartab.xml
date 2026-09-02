@@ -56,13 +56,13 @@
          speaking, the way a paper receipt from a Berlin cafe is in
          German. The labels around it are already localised for
          whoever is reading. -->
-    <string name="bill_note_order">Il tuo ordine</string>
-    <string name="bill_note_fare">La tua corsa</string>
-    <string name="bill_note_tab">Il tuo conto</string>
+    <string name="bill_note_order">Il Suo ordine</string>
+    <string name="bill_note_fare">La Sua corsa</string>
+    <string name="bill_note_tab">Il Suo conto</string>
     <string name="receipt_note">Ricevuta — grazie</string>
     <string name="receipt_note_oob">Ricevuta — saldato fuori da DUCAT. Grazie</string>
     <string name="bill_note_cancelled">Il conto da %1$s è annullato — non c\'è nulla da pagare.</string>
-    <string name="bill_note_sale">Il tuo conto</string>
+    <string name="bill_note_sale">Il Suo acquisto</string>
     <string name="bartab_tip_line">Mancia — grazie</string>
     <string name="bill_note_issue">Abbonamento</string>
     <string name="bartab_paid_pending">Pagato ✓ — la ricevuta è ancora su questo telefono. Partirà appena torna la rete.</string>

@@ -56,13 +56,13 @@
          speaking, the way a paper receipt from a Berlin cafe is in
          German. The labels around it are already localised for
          whoever is reading. -->
-    <string name="bill_note_order">Siparişin</string>
-    <string name="bill_note_fare">Yolculuk ücretin</string>
-    <string name="bill_note_tab">Hesabın</string>
+    <string name="bill_note_order">Siparişiniz</string>
+    <string name="bill_note_fare">Yolculuk ücretiniz</string>
+    <string name="bill_note_tab">Hesabınız</string>
     <string name="receipt_note">Fiş — teşekkürler</string>
     <string name="receipt_note_oob">Fiş — DUCAT dışında ödendi. Teşekkürler</string>
     <string name="bill_note_cancelled">%1$s tutarındaki hesap iptal edildi — ödenecek bir şey yok.</string>
-    <string name="bill_note_sale">Hesabın</string>
+    <string name="bill_note_sale">Alışverişiniz</string>
     <string name="bartab_tip_line">Bahşiş — teşekkürler</string>
     <string name="bill_note_issue">Abonelik</string>
     <string name="bartab_paid_pending">Ödendi ✓ — makbuz hâlâ bu telefonda. Ağ gelir gelmez gidecek.</string>

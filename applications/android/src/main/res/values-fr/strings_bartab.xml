@@ -56,9 +56,9 @@
          speaking, the way a paper receipt from a Berlin cafe is in
          German. The labels around it are already localised for
          whoever is reading. -->
-    <string name="bill_note_order">Ta commande</string>
-    <string name="bill_note_fare">Ta course</string>
-    <string name="bill_note_tab">Ton addition</string>
+    <string name="bill_note_order">Votre commande</string>
+    <string name="bill_note_fare">Votre course</string>
+    <string name="bill_note_tab">Votre addition</string>
     <string name="receipt_note">Reçu — merci</string>
     <string name="receipt_note_oob">Reçu — réglé hors DUCAT. Merci</string>
     <string name="bill_note_cancelled">L\'addition de %1$s est annulée — rien à payer.</string>

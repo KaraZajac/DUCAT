@@ -199,6 +199,40 @@ def main() -> int:
                     print(f"  ! {loc}/{name}: plural {n}/{quantity} has {got}, base has {want}")
                     problems += 1
 
+    # --- distinctions that must survive translation ----------------------
+    #
+    # Parity checks that a string exists, never that it still says something
+    # different from its neighbour. `bill_note_sale` was added after its four
+    # siblings and thirteen languages translated it by copying
+    # `bill_note_tab` — so the counter sale went back to reading "Your tab"
+    # everywhere except English, which is the exact bug Tabs.kt fixed and
+    # commented. A shop's customer saw "your tab" above a coffee they had
+    # already paid for, in every language but the one the fix was written in.
+    #
+    # Only for sets where the difference is load-bearing: two English words
+    # collapsing into one is ordinary translation, not a finding.
+    DISTINCT = [
+        # What the shop hands over is named by what it is: an open bar tab,
+        # a counter sale, a fare, a kiosk order.
+        ("bill_note_tab", "bill_note_sale", "bill_note_fare", "bill_note_order"),
+    ]
+    for group in DISTINCT:
+        for loc in ["", *locales]:
+            folder = f"values-{loc}" if loc else "values"
+            seen = {}
+            for path in glob.glob(os.path.join(RES, folder, "strings*.xml")):
+                got, _ = read(path)
+                for key in group:
+                    if key in got:
+                        seen[key] = got[key]
+            for key, value in sorted(seen.items()):
+                twin = next(
+                    (k for k, v in sorted(seen.items()) if v == value and k != key), None
+                )
+                if twin and twin > key:
+                    print(f"  ! {folder}: {key} and {twin} both say {value!r}")
+                    problems += 1
+
     # --- keys nothing displays ------------------------------------------
     #
     # Parity only proves the languages agree with each other. A key no screen

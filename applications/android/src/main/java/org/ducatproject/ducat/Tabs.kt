@@ -364,6 +364,12 @@ class TabStore(private val context: Context) {
                 // shop speaking — a paper receipt from a Berlin cafe is in
                 // German — and the sender cannot know what the payer reads
                 // anyway. Every label around it is already localised for them.
+                //
+                // And because it is the shop speaking to a customer, these
+                // five take the *formal* address wherever a language has one:
+                // vous, usted, Sie, Lei, u, siz. The app says "tu" to its own
+                // user all day, which is why the translations drifted into it
+                // here — but a till does not tutoyer the person paying at it.
                 context.getString(
                     when (tab.origin) {
                         "taxi" -> R.string.bill_note_fare

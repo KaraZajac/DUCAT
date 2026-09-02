@@ -61,7 +61,7 @@
     <string name="receipt_note">領収 — ありがとうございました</string>
     <string name="receipt_note_oob">領収 — DUCAT外でのお支払い。ありがとうございました</string>
     <string name="bill_note_cancelled">%1$s のご請求は取り消しました。お支払いは不要です。</string>
-    <string name="bill_note_sale">お会計</string>
+    <string name="bill_note_sale">お買い上げ</string>
     <string name="bartab_tip_line">チップ — ありがとうございます</string>
     <string name="bill_note_issue">定期購読</string>
     <string name="bartab_paid_pending">支払い済み ✓ — レシートはまだこの端末にあります。ネットワークが戻り次第送信されます。</string>

@@ -55,13 +55,13 @@
          speaking, the way a paper receipt from a Berlin cafe is in
          German. The labels around it are already localised for
          whoever is reading. -->
-    <string name="bill_note_order">Pesananmu</string>
-    <string name="bill_note_fare">Ongkosmu</string>
-    <string name="bill_note_tab">Tagihanmu</string>
+    <string name="bill_note_order">Pesanan Anda</string>
+    <string name="bill_note_fare">Ongkos Anda</string>
+    <string name="bill_note_tab">Tagihan Anda</string>
     <string name="receipt_note">Struk — terima kasih</string>
     <string name="receipt_note_oob">Struk — dibayar di luar DUCAT. Terima kasih</string>
     <string name="bill_note_cancelled">Tagihan %1$s dibatalkan — tidak ada yang perlu dibayar.</string>
-    <string name="bill_note_sale">Tagihanmu</string>
+    <string name="bill_note_sale">Pembelian Anda</string>
     <string name="bartab_tip_line">Tip — terima kasih</string>
     <string name="bill_note_issue">Langganan</string>
     <string name="bartab_paid_pending">Lunas ✓ — struknya masih di ponsel ini. Akan terkirim begitu jaringan kembali.</string>

@@ -61,7 +61,7 @@
     <string name="receipt_note">收据 — 谢谢惠顾</string>
     <string name="receipt_note_oob">收据 — 已在 DUCAT 之外结清。谢谢惠顾</string>
     <string name="bill_note_cancelled">%1$s 的这笔账单已取消，无需付款。</string>
-    <string name="bill_note_sale">你的账单</string>
+    <string name="bill_note_sale">您的消费</string>
     <string name="bartab_tip_line">小费 — 谢谢</string>
     <string name="bill_note_issue">订阅</string>
     <string name="bartab_paid_pending">已付 ✓ — 收据仍在这部手机上。网络恢复后立即发出。</string>

@@ -61,7 +61,7 @@
     <string name="receipt_note">ใบเสร็จ — ขอบคุณ</string>
     <string name="receipt_note_oob">ใบเสร็จ — ชำระนอก DUCAT ขอบคุณ</string>
     <string name="bill_note_cancelled">บิล %1$s ถูกยกเลิกแล้ว ไม่ต้องชำระ</string>
-    <string name="bill_note_sale">บิลของคุณ</string>
+    <string name="bill_note_sale">ยอดซื้อของคุณ</string>
     <string name="bartab_tip_line">ทิป — ขอบคุณ</string>
     <string name="bill_note_issue">ค่าสมาชิก</string>
     <string name="bartab_paid_pending">ชำระแล้ว ✓ — ใบเสร็จยังอยู่ในโทรศัพท์เครื่องนี้ จะส่งออกทันทีที่เครือข่ายกลับมา</string>

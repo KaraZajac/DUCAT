@@ -64,7 +64,7 @@
     <string name="receipt_note">Чек — спасибо</string>
     <string name="receipt_note_oob">Чек — оплачено вне DUCAT. Спасибо</string>
     <string name="bill_note_cancelled">Счёт на %1$s отменён — платить нечего.</string>
-    <string name="bill_note_sale">Ваш счёт</string>
+    <string name="bill_note_sale">Ваша покупка</string>
     <string name="bartab_tip_line">Чаевые — спасибо</string>
     <string name="bill_note_issue">Подписка</string>
     <string name="bartab_paid_pending">Оплачен ✓ — чек всё ещё на этом телефоне. Уйдёт, как только появится сеть.</string>

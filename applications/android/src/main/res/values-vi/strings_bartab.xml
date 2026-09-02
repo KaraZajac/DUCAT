@@ -57,11 +57,11 @@
          whoever is reading. -->
     <string name="bill_note_order">Đơn của bạn</string>
     <string name="bill_note_fare">Cước xe của bạn</string>
-    <string name="bill_note_tab">Hoá đơn của bạn</string>
+    <string name="bill_note_tab">Hóa đơn của bạn</string>
     <string name="receipt_note">Biên nhận — cảm ơn bạn</string>
     <string name="receipt_note_oob">Biên nhận — đã thanh toán ngoài DUCAT. Cảm ơn bạn</string>
     <string name="bill_note_cancelled">Hoá đơn %1$s đã được huỷ — không phải trả gì.</string>
-    <string name="bill_note_sale">Hóa đơn của bạn</string>
+    <string name="bill_note_sale">Khoản mua của bạn</string>
     <string name="bartab_tip_line">Tiền boa — cảm ơn</string>
     <string name="bill_note_issue">Gói đăng ký</string>
     <string name="bartab_paid_pending">Đã trả ✓ — biên nhận vẫn còn trên điện thoại này. Sẽ gửi đi ngay khi có mạng trở lại.</string>
