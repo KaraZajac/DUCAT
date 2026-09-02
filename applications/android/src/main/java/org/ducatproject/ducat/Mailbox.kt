@@ -42,6 +42,11 @@ object Mailbox {
      *  is left for the next send to replay. An offline pass is not one. */
     private const val LATE_SLOT_GIVE_UP = 5
 
+    /** Whether the last [poll] pass found the network dark. Read by
+     *  [verifyLastWrites], which runs later in the same pass and must not
+     *  spend its one re-push on a flood that cannot leave the phone. */
+    @Volatile private var lastPollOffline = false
+
     /** Persisted, not in-memory: the patience clock reset on every app
      *  restart, and a phone that restarts every few minutes (this one does)
      *  made a dead letter immortal — sixteen observed minutes on a ten-minute
@@ -132,6 +137,16 @@ object Mailbox {
      * gets its insurance flood one poll pass later.
      */
     fun verifyLastWrites(context: Context) {
+        // The watermark moves once, so the re-push has to happen when a
+        // flood can actually travel. Found live (2026-09-01): a bill sent
+        // with the emulator's data off was "re-pushed" on the very next
+        // pass — the node accepted the set locally exactly as it had the
+        // send, the watermark advanced, and the insurance was spent on a
+        // dark network: the one wedge this repair exists to prevent, now
+        // guaranteed. The node's own status is no help (it stayed
+        // AttachedFull throughout); the poll's reads are the only honest
+        // witness, and they run earlier in the same pass.
+        if (lastPollOffline) return
         val store = ContactStore(context)
         val c = store.all().firstOrNull { k ->
             k.outSeq > 0 && k.myOutbox.isNotEmpty() &&
@@ -1714,6 +1729,7 @@ object Mailbox {
         runCatching { org.ducatproject.ducat.ui.sweepHailTombstones(context) }
         val personas = PersonaStore(context)
         var got = 0
+        var offline = false
         for (c in store.all()) {
             got += try {
                 // Ours first: a slot an interrupted send left behind is
@@ -1725,12 +1741,14 @@ object Mailbox {
                 if (isOffline(e)) {
                     // Offline fails every contact identically; one line says it.
                     DucatLog.i(TAG, "offline — messages wait for the network")
+                    offline = true
                     break
                 }
                 DucatLog.w(TAG, "poll ${c.displayName()}: ${e.message}")
                 0
             }
         }
+        lastPollOffline = offline
         return got
     }
 
