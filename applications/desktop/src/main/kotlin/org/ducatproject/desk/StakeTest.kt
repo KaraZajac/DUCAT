@@ -187,6 +187,55 @@ fun main() {
             pot - fromRider == stake, formatXmr(pot - fromRider))
     }
 
+    // 8. **The ordinary ending**, which is the one that runs every time.
+    //
+    // Completing a deal sends the funder's own deposit home and everything
+    // else to the provider. Nothing checked this arithmetic until now, and
+    // it is the piece with the most money through it: a ride that pays the
+    // driver the rider's stake as well looks exactly like a ride that went
+    // well, from both phones, until somebody counts.
+    run {
+        val fare = 5L * xmr
+        val stake = fare / 10
+        val pot = fare + stake + stake
+
+        val ride = org.json.JSONObject()
+            .put("i", 1).put("funderIdx", 1)
+            .put("farePxmr", fare).put("funderDepPxmr", stake).put("hostDepPxmr", stake)
+        val back = org.ducatproject.ducat.Ceremony.settlementBack(ride, pot)
+        check("a completed ride sends the payer's stake home", back == stake, formatXmr(back))
+        check("and the driver takes the fare and their own stake",
+            pot - back == fare + stake, formatXmr(pot - back))
+
+        // The old rule, kept as the thing that must not come back.
+        check("not everything above the fare — that was the driver's stake too",
+            back != pot - fare, "the old rule would have sent ${formatXmr(pot - fare)}")
+
+        // A booking: the guest's deposit home, rent and the host's deposit
+        // to the host.
+        val rent = 2L * xmr
+        val guestDep = rent / 5
+        val hostDep = rent / 10
+        val stay = org.json.JSONObject()
+            .put("i", 1).put("funderIdx", 1).put("kind", 2)
+            .put("farePxmr", rent).put("funderDepPxmr", guestDep).put("hostDepPxmr", hostDep)
+        val stayPot = rent + guestDep + hostDep
+        val stayBack = org.ducatproject.ducat.Ceremony.settlementBack(stay, stayPot)
+        check("a finished stay sends the guest's deposit home", stayBack == guestDep,
+            formatXmr(stayBack))
+        check("and the host takes the rent and their own deposit",
+            stayPot - stayBack == rent + hostDep, formatXmr(stayPot - stayBack))
+
+        // Ceremonies built before the deposit was recorded derive it from
+        // the pot, and must still leave the driver's stake alone.
+        val legacy = org.json.JSONObject()
+            .put("i", 1).put("funderIdx", 1)
+            .put("farePxmr", fare).put("hostDepPxmr", stake)
+        val legacyBack = org.ducatproject.ducat.Ceremony.settlementBack(legacy, pot)
+        check("a ceremony with no recorded deposit derives the same number",
+            legacyBack == stake, formatXmr(legacyBack))
+    }
+
     println(if (failures == 0) "STAKETEST OK" else "STAKETEST FAILED ($failures)")
     if (failures > 0) kotlin.system.exitProcess(1)
 }

@@ -1657,6 +1657,38 @@ object Ceremony {
      * is already in and the offer is only ever an offer.
      */
     /**
+     * What comes home to the funder when a deal is *completed*, and only
+     * that: their own deposit back, the price and the provider's stake to
+     * the provider.
+     *
+     * "Everything above the fare" was right while the rider was the only
+     * one paying in. It stopped being right the day the driver staked too:
+     * the pot then holds fare + rider stake + driver stake, and handing back
+     * everything above the fare would give the rider the driver's stake as
+     * well — a successful ride that quietly robs the driver. The funder's
+     * own stake is the number, recorded in the ceremony at birth so a later
+     * change to the suggested percentage cannot re-price an escrow that is
+     * already standing.
+     *
+     * Split out for the same reason [refundBack] is: this is the ordinary
+     * ending, it runs on every completed deal, and it was the one piece of
+     * money arithmetic in the app that nothing checked. [total] must be a
+     * balance worth trusting — see [liveTotal].
+     */
+    internal fun settlementBack(o: JSONObject, total: Long): Long {
+        val recorded = o.optLong("funderDepPxmr")
+        return when {
+            o.optInt("kind") == KIND_RESERVATION -> recorded.coerceAtMost(total)
+            recorded > 0 -> recorded.coerceAtMost(total)
+            // Ceremonies built before the stake was recorded: derive it from
+            // the pot, less the fare and less whatever the driver staked.
+            else -> (total - o.optLong("farePxmr") - o.optLong("hostDepPxmr"))
+                .coerceAtLeast(0L)
+                .coerceAtMost((total - o.optLong("farePxmr")).coerceAtLeast(0L))
+        }
+    }
+
+    /**
      * The rider's slice when an escrow is unwound and each side takes back
      * its own contribution.
      *
@@ -2064,8 +2096,38 @@ object Ceremony {
      * refusal: an amount that decides where money goes may not be guessed
      * from a view that is missing some of it.
      */
-    class EscrowBehind(val saw: Long, val mine: Long) :
-        IllegalStateException("the escrow shows $saw, less than the $mine this party put in")
+    class EscrowBehind(val saw: Long, val known: Long) :
+        IllegalStateException("the escrow shows $saw, less than the $known already recorded")
+
+    /**
+     * The escrow's balance for a decision about where money goes — or a
+     * refusal, never a guess.
+     *
+     * Two ways this used to go wrong, and both of them paid somebody the
+     * wrong amount:
+     *
+     *  - **A failed read defaulted to zero.** `getOrDefault(0L)` on a node
+     *    that did not answer, and the split that came out of it sent the
+     *    funder's deposit to the other side, because "nothing came home" is
+     *    what a zero balance divides into.
+     *  - **A short read was clamped, not questioned.** The funder's own
+     *    deposit is capped at the balance, so a view missing part of the
+     *    escrow silently shrank what came home and grew the residual. Seen
+     *    live on 2026-09-02: a refund proposed 0.0006 to the payer and
+     *    0.0072 to the provider, the wrong way round.
+     *
+     * [fundedPxmr] is what this device has already scanned and written
+     * down, and it follows the balance *down* as well as up (see
+     * [checkRideFunding]), so a live reading below it means this view has
+     * gone backwards — a node behind its peers, a scan that has not caught
+     * up. That is not a number to divide an escrow with.
+     */
+    private fun liveTotal(o: JSONObject, keys: ByteArray, nodeUrl: String, from: Long): Long {
+        val saw = uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
+        val known = o.optLong("fundedPxmr")
+        if (saw < known) throw EscrowBehind(saw, known)
+        return saw
+    }
 
     /** Somebody formed a different wallet. This escrow is not what it claims. */
     class EscrowDisagreed : IllegalStateException("participants formed different wallets")
@@ -2429,30 +2491,7 @@ object Ceremony {
         val nodeUrl = node(context) ?: throw NoNode()
         val from = o.optLong("scanFrom").takeIf { it > 0 }
             ?: WalletStore(context).restoreHeight().toLong()
-        val total = runCatching {
-            uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
-        }.getOrDefault(0L)
-        // What comes home to the funder, and only that.
-        //
-        // "Everything above the fare" was right while the rider was the only
-        // one paying in. It stopped being right the day the driver staked
-        // too: the pot then holds fare + rider stake + driver stake, and
-        // handing back everything above the fare would give the rider the
-        // driver's stake as well — a successful ride that quietly robs the
-        // driver. The funder's own stake is the number, recorded in the
-        // ceremony at birth so a later change to the suggested percentage
-        // cannot re-price an escrow that is already standing.
-        val recorded = o.optLong("funderDepPxmr")
-        val back = when {
-            o.optInt("kind") == KIND_RESERVATION -> recorded.coerceAtMost(total)
-            recorded > 0 -> recorded.coerceAtMost(total)
-            // Ceremonies built before the stake was recorded: derive it from
-            // the pot, less the fare and less whatever the driver staked.
-            else -> (total - o.optLong("farePxmr") - o.optLong("hostDepPxmr"))
-                .coerceAtLeast(0L)
-                .coerceAtMost((total - o.optLong("farePxmr")).coerceAtLeast(0L))
-        }
-        return proposeRideSplit(context, idHex, back)
+        return proposeRideSplit(context, idHex, settlementBack(o, liveTotal(o, keys, nodeUrl, from)))
     }
 
     /**
@@ -2562,9 +2601,7 @@ object Ceremony {
                 ?: throw IllegalStateException("no wallet to receive the fare")
         }
 
-        val total = runCatching {
-            uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
-        }.getOrDefault(0L)
+        val total = liveTotal(o, keys, nodeUrl, from)
         val back = if (refundBoth) {
             // Refuse rather than divide a balance that cannot be this
             // escrow's whole story. See [EscrowBehind] — this check is the
