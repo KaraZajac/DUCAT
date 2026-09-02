@@ -644,7 +644,20 @@ class ContactStore(context: Context) {
             // Machinery — ceremony rounds, roster traffic — stays quiet, as
             // it does in the list's preview line; a person's words, a
             // request, a payment, a call, an issue all count as writing.
-            val surfaces = m.kind !in HIDDEN_KINDS
+            // A group message is writing too, but not to this thread: it
+            // is the group's, and the group row is the one that answers
+            // for it ([Groups.markSeen]).
+            val surfaces = m.kind !in HIDDEN_KINDS && m.groupId == null
+            // What the thread will not show must not raise its dot. Every
+            // row advanced inSeq and the dot was inSeq against the mark, so
+            // Sam posting in the ladder crew flagged Sam's direct row and
+            // the tab badge, and opening Sam found nothing new. A thread
+            // with nothing unread steps its mark over the row; one with a
+            // direct line waiting keeps the mark where that line is.
+            if (!surfaces && chatSeen(c) >= c.inSeq) {
+                e.putLong("seen_$personaHex", newInSeq)
+                    .putString("seenlog_$personaHex", c.theirOutbox)
+            }
             putContacts(e, all().filterNot { it.personaHex == personaHex } +
                 c.copy(
                     inSeq = newInSeq, inPrevLink = newPrevLink,
@@ -681,8 +694,19 @@ class ContactStore(context: Context) {
             JSONObject().put("seq", m.seq).put("b", b64(sealedSlot)).toString(),
         )
         all().firstOrNull { it.personaHex == personaHex }?.let { c ->
+            // Own words bring a deleted conversation back the way theirs
+            // do. Contacts, a search hit and a notification all open a
+            // hidden thread without un-hiding it, so a message written
+            // there landed in a conversation the Chats tab would not list
+            // until the other side answered — "where did what I just sent
+            // go". Same rule as inbound: a person's line to this thread,
+            // not machinery, not a group's fan-out copy.
+            val surfaces = m.kind !in HIDDEN_KINDS && m.groupId == null
             putContacts(e, all().filterNot { it.personaHex == personaHex } +
-                c.copy(outSeq = newOutSeq, outPrevLink = newPrevLink))
+                c.copy(
+                    outSeq = newOutSeq, outPrevLink = newPrevLink,
+                    chatVisible = c.chatVisible || surfaces,
+                ))
         }
         e.apply()
         bump()

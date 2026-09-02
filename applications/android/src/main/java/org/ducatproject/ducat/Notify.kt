@@ -40,7 +40,10 @@ object Notify {
         return mgr
     }
 
-    fun post(context: Context, title: String, body: String, openChat: String? = null) {
+    fun post(
+        context: Context, title: String, body: String,
+        openChat: String? = null, openGroup: String? = null,
+    ) {
         // Android 13+ gates posting behind a runtime permission; posting
         // without it throws on some builds and is silently dropped on others.
         // Either way the caller cannot fix it here, so check and skip.
@@ -55,6 +58,7 @@ object Notify {
             Intent(context, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
                 openChat?.let { putExtra("open_chat", it) }
+                openGroup?.let { putExtra("open_group", it) }
             },
             // The extra varies per notification; without UPDATE_CURRENT every
             // notification reuses the first one's intent and every tap lands
@@ -166,7 +170,12 @@ object Notify {
                 ?: context.getString(R.string.personas_primary)
             "$label · $from"
         } else from
-        post(context, title, what, openChat = personaHex)
+        // A group's line opens the group: the sender's thread keeps group
+        // rows out, so "Sam · ladder crew" tapped through to Sam and found
+        // nothing new there. A group id nobody here knows falls back to the
+        // sender — the roster may still be on its way.
+        val group = m.groupId?.takeIf { Groups.get(context, it) != null }
+        post(context, title, what, openChat = personaHex, openGroup = group)
     }
 
     // ----- §16.21: the takeover an incoming call is owed -----

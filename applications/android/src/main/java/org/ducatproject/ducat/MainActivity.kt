@@ -76,6 +76,13 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
          */
         val openChat = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
 
+        /** The group a notification named ("Sam · ladder crew"). Its own
+         *  channel because the sender's thread does not show what was
+         *  announced: a group's rows live in the members' pairwise logs and
+         *  the pairwise screen keeps them out, so opening Sam on a tap that
+         *  promised the ladder crew landed on nothing new. */
+        val openGroup = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
+
         /**
          * Which noun Renting's board should open on.
          *
@@ -97,7 +104,8 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
     }
 
     private fun readIntent(i: android.content.Intent?) {
-        i?.getStringExtra("open_chat")?.let { openChat.value = it }
+        i?.getStringExtra("open_group")?.let { openGroup.value = it }
+            ?: i?.getStringExtra("open_chat")?.let { openChat.value = it }
         // §18.7 token mode: the manifest registers ducat: links, and this URI
         // used to stop right here, read by nobody — a tapped card opened the
         // app to Home, silently. It now reaches the same claim the scanner
@@ -336,6 +344,11 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
 private sealed interface Overlay {
     data object None : Overlay
     data class Chat(val contact: Contact) : Overlay
+    /** A group's conversation (§16.19). An overlay like a pairwise one: it
+     *  used to be drawn inside the Chats tab, under the tab's own bar — two
+     *  headers stacked on a chat, and the back gesture, which the tab shell
+     *  owns, left it for Home rather than for the list it came from. */
+    data class Group(val idHex: String) : Overlay
     /** [jumpToBackup] lands on the backup card rather than the top of a long
      *  settings screen — the nudge that sent you there was about backups. */
     data class Drawer(val section: Section, val jumpToBackup: Boolean = false) : Overlay
@@ -369,6 +382,7 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                 when (it) {
                     is Overlay.None -> ""
                     is Overlay.Chat -> "chat:${it.contact.personaHex}"
+                    is Overlay.Group -> "group:${it.idHex}"
                     is Overlay.Drawer -> "drawer:${it.section.name}"
                 }
             },
@@ -377,6 +391,9 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                     s.startsWith("chat:") -> ContactStore(context).all()
                         .firstOrNull { it.personaHex == s.removePrefix("chat:") }
                         ?.let { Overlay.Chat(it) } ?: Overlay.None
+                    s.startsWith("group:") -> s.removePrefix("group:")
+                        .takeIf { Groups.get(context, it) != null }
+                        ?.let { Overlay.Group(it) } ?: Overlay.None
                     s.startsWith("drawer:") -> runCatching {
                         Overlay.Drawer(Section.valueOf(s.removePrefix("drawer:")))
                     }.getOrDefault(Overlay.None)
@@ -429,6 +446,13 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         if (kiosk) return@LaunchedEffect
         ContactStore(context).all().firstOrNull { it.personaHex == hex }
             ?.let { overlay = Overlay.Chat(it) }
+    }
+    val wantedGroup by MainActivity.openGroup.collectAsState()
+    LaunchedEffect(wantedGroup) {
+        val hex = wantedGroup ?: return@LaunchedEffect
+        MainActivity.openGroup.value = null
+        if (kiosk) return@LaunchedEffect
+        if (Groups.get(context, hex) != null) overlay = Overlay.Group(hex)
     }
 
     // A tapped ducat: link (a chat app, an email, an NDEF sticker's browser
@@ -870,6 +894,10 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                 ChatScreen(o.contact) { overlay = Overlay.None }
                 return@ModalNavigationDrawer
             }
+            is Overlay.Group -> {
+                org.ducatproject.ducat.ui.GroupChatScreen(o.idHex) { overlay = Overlay.None }
+                return@ModalNavigationDrawer
+            }
             is Overlay.Drawer -> {
                 Scaffold(
                     topBar = {
@@ -1065,7 +1093,11 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                             // the app's life.
                             val unread by produceState(0, unv) {
                                 value = withContext(Dispatchers.IO) {
-                                    ContactStore(context).unreadThreads()
+                                    // Groups count as their own rows now
+                                    // that their traffic no longer flags
+                                    // the sender's thread (Groups.markSeen).
+                                    ContactStore(context).unreadThreads() +
+                                        org.ducatproject.ducat.Groups.unreadGroups(context)
                                 }
                             }
                             NavigationBarItem(
@@ -1149,7 +1181,11 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                         }
                         Tab.Accounts -> AccountsScreen()
                         Tab.Activity -> ActivityScreen()
-                        Tab.Chat -> ChatListScreen(persona) { overlay = Overlay.Chat(it) }
+                        Tab.Chat -> ChatListScreen(
+                            persona,
+                            onOpenChat = { overlay = Overlay.Chat(it) },
+                            onOpenGroup = { overlay = Overlay.Group(it) },
+                        )
                     }
                 }
             }

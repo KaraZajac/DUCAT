@@ -105,6 +105,16 @@ object Groups {
         return members.firstOrNull { it in ours } ?: PersonaStore(context).personaHex()
     }
 
+    /**
+     * Who this phone is in a group — for the screens that offer people to
+     * add. A member can only be somebody this persona holds: the roster
+     * reaches them down their pairwise thread, signed by whichever of our
+     * personas owns that contact, and a roster from one hat naming another
+     * as "me" is a member the recipient does not hold — their mesh check
+     * then refuses the whole group.
+     */
+    fun mineIn(context: Context, g: Group): String = myHexIn(context, g.members)
+
     fun create(context: Context, name: String, memberHexes: List<String>): Group {
         // The doorway: a group made now belongs to the worn persona.
         val mine = PersonaStore(context).worn()
@@ -379,12 +389,22 @@ object Groups {
     fun thread(context: Context, idHex: String): List<Row> {
         val g = get(context, idHex) ?: return emptyList()
         val store = ContactStore(context)
+        return merge(context, g) { store.thread(it) }
+    }
+
+    /**
+     * [thread] over threads already in hand. The chat list decodes every
+     * visible conversation once per store bump to sort them; asking each
+     * group to decode its members again on top was one decrypt per member
+     * per group per bump, on the tab that is open most.
+     */
+    fun merge(context: Context, g: Group, threadOf: (String) -> List<StoredMessage>): List<Row> {
         val mine = myHexIn(context, g.members)
         val seen = HashSet<Pair<String, Long>>()
         val out = ArrayList<Row>()
         for (m in g.members.filter { it != mine }) {
-            for (msg in store.thread(m)) {
-                if (msg.groupId != idHex) continue
+            for (msg in threadOf(m)) {
+                if (msg.groupId != g.idHex) continue
                 // The roster is machinery, not conversation: its effect is the
                 // member count in the top bar, and a bubble reading
                 // "group: name" is internal words about nothing a person can
@@ -403,5 +423,73 @@ object Groups {
     fun markDisclosed(context: Context, idHex: String) {
         val g = get(context, idHex) ?: return
         if (!g.disclosed) upsert(context, g.copy(disclosed = true))
+    }
+
+    // --- read marks ---------------------------------------------------------
+    //
+    // A group had no notion of having been looked at. Its rows arrive in the
+    // members' pairwise threads, so what a group message raised was the
+    // *sender's* direct row: Sam posting in the ladder crew put the dot and
+    // the tab badge on Sam, whose conversation then opened on nothing new,
+    // while the group row — where the words were — showed no change. The
+    // pairwise mark now steps over group rows (see ContactStore
+    // .appendAndAdvance) and the group keeps a mark of its own here.
+    //
+    // The mark is each member's group counter as of the last look — the
+    // half of (sender, group_seq) that names their messages for everyone,
+    // which only ever climbs. Not the pairwise seq (it restarts with every
+    // fresh card), not a timestamp (their clock), and not a row count: rows
+    // also leave — a retention window sweeps them on every poll, a long
+    // press deletes one — and a count that moved would have raised the dot
+    // over nothing said. A row that is gone lowers nothing; the next word
+    // still carries a higher number than any look has recorded.
+
+    /** Everybody else's newest word, by who said it: their group counter. */
+    fun highWater(context: Context, rows: List<Row>): Map<String, Long> {
+        val ours = PersonaStore(context).allHexes()
+        val out = HashMap<String, Long>()
+        for (r in rows) {
+            if (r.senderHex in ours) continue
+            out[r.senderHex] = maxOf(out[r.senderHex] ?: 0L, r.message.groupSeq)
+        }
+        return out
+    }
+
+    /** The marks as of the last look; empty for a group never opened. */
+    fun seenMarks(context: Context, idHex: String): Map<String, Long> =
+        prefs(context).getString("seen_$idHex", null)?.let { raw ->
+            runCatching {
+                val o = JSONObject(raw)
+                o.keys().asSequence().associateWith { o.getLong(it) }
+            }.getOrNull()
+        } ?: emptyMap()
+
+    /** Whether anybody has said something since the last look. */
+    fun unread(seen: Map<String, Long>, now: Map<String, Long>): Boolean =
+        now.any { (m, s) -> s > (seen[m] ?: 0L) }
+
+    /**
+     * Looking at the group is what "seen" means, as for a thread. A mark
+     * never comes down: what was looked at stays looked at even after the
+     * rows that carried it have been swept.
+     */
+    fun markSeen(context: Context, idHex: String, now: Map<String, Long>) {
+        val seen = seenMarks(context, idHex)
+        val merged = (seen.keys + now.keys).associateWith { maxOf(seen[it] ?: 0L, now[it] ?: 0L) }
+        if (merged == seen) return
+        prefs(context).edit().putString("seen_$idHex", JSONObject(merged).toString()).apply()
+        ContactStore.bump()
+    }
+
+    /** Groups with something unlooked-at, for the tab badge. */
+    fun unreadGroups(context: Context): Int {
+        val groups = all(context)
+        if (groups.isEmpty()) return 0
+        val store = ContactStore(context)
+        val threads = HashMap<String, List<StoredMessage>>()
+        return groups.count { g ->
+            val rows = merge(context, g) { hex -> threads.getOrPut(hex) { store.thread(hex) } }
+            unread(seenMarks(context, g.idHex), highWater(context, rows))
+        }
     }
 }

@@ -632,6 +632,16 @@ tasks.register<JavaExec>("backuptest") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// The read marks: which row raises which dot. A group message flags the
+// group and not its sender's direct row, a look clears it, a swept row raises
+// nothing, and a deleted conversation returns for words but not machinery.
+// `./gradlew :desktop:markstest`.
+tasks.register<JavaExec>("markstest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.MarksTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // §4.3's strength meter, through the bridge the screen calls: the shapes it
 // used to grade Strong, and the ones it still must. `./gradlew :desktop:passmeter`.
 tasks.register<JavaExec>("passmeter") {

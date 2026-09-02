@@ -58,7 +58,13 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
     // (the ledger ANR's lesson). Empty for a beat on first open.
     var rows by remember(idHex) { mutableStateOf<List<Groups.Row>>(emptyList()) }
     LaunchedEffect(version, idHex) {
-        rows = withContext(Dispatchers.IO) { Groups.thread(context, idHex) }
+        val fresh = withContext(Dispatchers.IO) { Groups.thread(context, idHex) }
+        rows = fresh
+        // Looking at the group is what "seen" means, as for a thread: the
+        // list's dot and the tab badge clear when the eyes arrive.
+        withContext(Dispatchers.IO) {
+            Groups.markSeen(context, idHex, Groups.highWater(context, fresh))
+        }
     }
     // Reactions and retracts decorate; only words are bubbles. Same split the
     // pairwise screen makes, with the group reference doing the naming.
@@ -381,7 +387,14 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
         SplitSheet(idHex = idHex, group = group, onDone = { splitOpen = false })
     }
     if (addOpen) {
-        val candidates = contacts.filter { it.personaHex !in group.members }
+        // This persona's contacts, not the phone's: see Groups.mineIn.
+        val candidates = remember(contacts, group) {
+            val personas = PersonaStore(context)
+            val asWhom = Groups.mineIn(context, group)
+            contacts.filter {
+                it.personaHex !in group.members && personas.ownerHexOf(it) == asWhom
+            }
+        }
         AlertDialog(
             onDismissRequest = { addOpen = false },
             title = { Text(stringResource(R.string.group_add_title)) },
@@ -501,7 +514,17 @@ private fun GroupBubble(
 fun GroupCreateScreen(onDone: (String) -> Unit, onCancel: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val contacts = remember { ContactStore(context).all() }
+    // The worn persona's contacts, because the group is made as the worn
+    // persona (Groups.create) and a member has to be somebody it holds —
+    // see Groups.mineIn. The single-persona era sees the whole book.
+    val contacts = remember {
+        val personas = PersonaStore(context)
+        val all = ContactStore(context).all()
+        if (personas.all().size > 1) {
+            val worn = personas.worn()
+            all.filter { personas.ownerHexOf(it) == worn }
+        } else all
+    }
     var name by rememberSaveable { mutableStateOf("") }
     var picked by remember { mutableStateOf(setOf<String>()) }
     var busy by remember { mutableStateOf(false) }

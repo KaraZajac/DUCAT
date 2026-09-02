@@ -155,8 +155,46 @@ fun main() {
     render("contacts", w = 520, h = 900) {
         org.ducatproject.ducat.ui.ContactsAdminPreview()
     }
+    // A group with words in it from two members, so the list draws its
+    // Groups section with a row that has something unread, and the group
+    // screen draws the merged view — sender labels, two bubbles, composer.
+    // Seated the way a real one is: a member's roster naming us.
+    val groupHex = run {
+        val store = org.ducatproject.ducat.ContactStore(context)
+        val known = org.ducatproject.ducat.Groups.all(context).firstOrNull()
+        if (known != null) return@run known.idHex
+        val members = store.all().take(2).map { it.personaHex }
+        val me = org.ducatproject.ducat.PersonaStore(context).personaHex()
+        val gid = ByteArray(16) { (it + 7).toByte() }
+        org.ducatproject.ducat.Groups.absorbRoster(
+            context, members[0], gid,
+            uniffi.ducat_mobile.groupRosterEncode(
+                "ladder crew", (members + me).map { org.ducatproject.ducat.hexToBytes(it)!! },
+            ),
+        )
+        val gidHex = org.ducatproject.ducat.Groups.all(context).first().idHex
+        val now = System.currentTimeMillis() / 1000
+        listOf(
+            Triple(members[0], "who has the big ladder", 2L),
+            Triple(members[1], "I do — bringing it friday", 1L),
+        ).forEach { (hex, body, groupSeq) ->
+            val c = store.all().first { it.personaHex == hex }
+            store.appendAndAdvance(
+                hex,
+                org.ducatproject.ducat.StoredMessage(
+                    outgoing = false, seq = c.inSeq + 1, body = body, timestamp = now,
+                    groupId = gidHex, groupSeq = groupSeq,
+                ),
+                newInSeq = c.inSeq + 1, newPrevLink = null,
+            )
+        }
+        gidHex
+    }
     render("chatlist") {
-        org.ducatproject.ducat.ui.ChatListScreen(personaSecret = null, onOpenChat = {})
+        org.ducatproject.ducat.ui.ChatListScreen(personaSecret = null, onOpenChat = {}, onOpenGroup = {})
+    }
+    render("groupchat") {
+        org.ducatproject.ducat.ui.GroupChatScreen(idHex = groupHex, onBack = {})
     }
     render("scanner") {
         org.ducatproject.ducat.ui.QrScannerContent("Scan a card", onResult = {})
@@ -362,7 +400,7 @@ fun main() {
         }
     }
     render("chatlist-priced") {
-        org.ducatproject.ducat.ui.ChatListScreen(personaSecret = null, onOpenChat = {})
+        org.ducatproject.ducat.ui.ChatListScreen(personaSecret = null, onOpenChat = {}, onOpenGroup = {})
     }
     // Activity, with money in it.
     //
