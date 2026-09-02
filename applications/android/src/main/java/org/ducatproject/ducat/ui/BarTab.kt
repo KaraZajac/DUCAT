@@ -526,10 +526,46 @@ internal fun cancelTabWithRetract(
 private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
     val context = LocalContext.current
     val store = remember { TabStore(context) }
-    val scope = rememberCoroutineScope()
     var error by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
     var confirmDiscard by remember { mutableStateOf(false) }
+    // **The till's four acts run off the screen.**
+    //
+    // Billing, cancelling, marking cash paid and re-sending a receipt each
+    // write to a customer's mailbox, which is seconds of network; they ran
+    // on this screen's scope. A bartender who turned the phone, or whose
+    // screen went away to serve somebody else, cancelled the line that
+    // reports the failure — never the send itself — so a bill that did not
+    // go looked exactly like one that did. The two that leave the screen on
+    // success now leave it when the send actually lands, not when the tap
+    // is made.
+    val tabKey = "tab:${tab.id}"
+    val sends = remember { ContactStore(context) }
+    // Whether *this* visit asked to be shown out. Saveable, so a turn of
+    // the phone mid-send keeps the intent; dropped when the screen is left,
+    // so opening the closed tab tomorrow to look at it does not walk into
+    // yesterday's answer and bounce straight back out.
+    var leaveWhenDone by rememberSaveable { mutableStateOf(false) }
+    val sendTick by ThreadSends.ticks.collectAsState()
+    LaunchedEffect(sendTick, tab.id) {
+        for (o in ThreadSends.take(tabKey)) when (o) {
+            // "back" is the only word any of these hands back: the two acts
+            // that close a tab say it, and the screen goes when they land.
+            is ThreadSends.Outcome.Landed ->
+                if (o.result == "back" && leaveWhenDone) { leaveWhenDone = false; onBack() }
+            is ThreadSends.Outcome.Failed -> {
+                leaveWhenDone = false
+                error = moneyFailure(context, o.error)
+            }
+        }
+        busy = ThreadSends.inFlight(tabKey)
+    }
+    /** One of this screen's acts, run where the screen cannot cancel it. */
+    val act: (() -> String?) -> Unit = { body ->
+        busy = true
+        error = null
+        ThreadSends.launch(sends, tabKey, null) { body() }
+    }
     // Off the main thread: .all() decrypts the whole contact book per call.
     val contact by produceState<org.ducatproject.ducat.Contact?>(null, tab.personaHex) {
         value = withContext(Dispatchers.IO) {
@@ -693,18 +729,12 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                     else 0L
                 Button(
                     onClick = {
-                        busy = true; error = null
-                        scope.launch {
-                            val r = withContext(Dispatchers.IO) {
-                                runCatching {
-                                    val toSettle = if (standingTax > 0)
-                                        store.mutate(tab.id) { it.copy(taxPxmr = standingTax) }!!
-                                    else tab
-                                    store.settle(toSettle)
-                                }
-                            }
-                            busy = false
-                            r.onFailure { error = moneyFailure(context, it) }
+                        act {
+                            val toSettle = if (standingTax > 0)
+                                store.mutate(tab.id) { it.copy(taxPxmr = standingTax) }!!
+                            else tab
+                            store.settle(toSettle)
+                            null
                         }
                     },
                     enabled = !busy && tab.lines.isNotEmpty(),
@@ -824,14 +854,10 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                         // closed while the receipt had not gone anywhere —
                         // and there was no second chance to notice, because
                         // the screen that would have said so was gone.
-                        busy = true; error = null
-                        scope.launch {
-                            withContext(Dispatchers.IO) {
-                                runCatching { store.markPaidOutside(tab) }
-                            }
-                                .onSuccess { onBack() }
-                                .onFailure { error = moneyFailure(context, it) }
-                            busy = false
+                        leaveWhenDone = true
+                        act {
+                            store.markPaidOutside(tab)
+                            "back"
                         }
                     },
                     modifier = Modifier.fillMaxWidth().height(48.dp),
@@ -848,14 +874,10 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                         // never hear about is a payment into the void, and the
                         // code then dropped the failure and walked away. Now
                         // it stays until the retract has gone.
-                        busy = true; error = null
-                        scope.launch {
-                            withContext(Dispatchers.IO) {
-                                runCatching { cancelTabWithRetract(context, store, tab) }
-                            }
-                                .onSuccess { onBack() }
-                                .onFailure { error = moneyFailure(context, it) }
-                            busy = false
+                        leaveWhenDone = true
+                        act {
+                            cancelTabWithRetract(context, store, tab)
+                            "back"
                         }
                     },
                     modifier = Modifier.fillMaxWidth().height(48.dp),
@@ -904,15 +926,10 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                     TextButton(
                         enabled = !busy,
                         onClick = {
-                            busy = true; error = null
-                            scope.launch {
-                                withContext(Dispatchers.IO) {
-                                    runCatching {
-                                        if (oob) store.sendOobReceipt(tab)
-                                        else store.sendChainReceipt(tab)
-                                    }
-                                }.onFailure { error = moneyFailure(context, it) }
-                                busy = false
+                            act {
+                                if (oob) store.sendOobReceipt(tab)
+                                else store.sendChainReceipt(tab)
+                                null
                             }
                         },
                     ) { Text(stringResource(R.string.bartab_send_receipt)) }
