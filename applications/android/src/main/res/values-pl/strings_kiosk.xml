@@ -45,4 +45,5 @@
     <string name="kiosk_no_menu">W menu jeszcze nic nie ma. Dodaj to, co sprzedajesz, za kłódką.</string>
     <string name="kiosk_all_off">Chwilowo nic nie jest dostępne.</string>
     <string name="kiosk_tip_pct">%1$d%%</string>
+    <string name="kiosk_declined">Odrzucili ten rachunek. Nic nie wpłynie — przejdź do następnego klienta albo uporządkuj to za drzwiami dla obsługi.</string>
 </resources>

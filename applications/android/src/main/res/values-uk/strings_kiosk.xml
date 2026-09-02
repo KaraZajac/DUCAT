@@ -45,4 +45,5 @@
     <string name="kiosk_no_menu">У меню поки порожньо. Додайте те, що продаєте, за замком.</string>
     <string name="kiosk_all_off">Зараз нічого немає.</string>
     <string name="kiosk_tip_pct">%1$d%%</string>
+    <string name="kiosk_declined">Вони відхилили цей рахунок. Нічого не надійде — переходьте до наступного клієнта або залагодьте це за службовими дверима.</string>
 </resources>

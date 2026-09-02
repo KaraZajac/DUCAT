@@ -45,4 +45,5 @@
     <string name="kiosk_no_menu">Noch nichts auf der Karte. Hinter dem Schloss eintragen, was du verkaufst.</string>
     <string name="kiosk_all_off">Gerade ist alles von der Karte.</string>
     <string name="kiosk_tip_pct">%1$d%%</string>
+    <string name="kiosk_declined">Sie haben diese Rechnung abgelehnt. Es kommt nichts — nimm den nächsten Kunden, oder räum sie hinter der Personaltür auf.</string>
 </resources>

@@ -45,4 +45,5 @@
     <string name="kiosk_no_menu">Nog niets op de kaart. Voeg achter het slot toe wat je verkoopt.</string>
     <string name="kiosk_all_off">Alles is nu van de kaart.</string>
     <string name="kiosk_tip_pct">%1$d%%</string>
+    <string name="kiosk_declined">Ze hebben deze rekening geweigerd. Er komt niets — ga door met de volgende klant, of ruim het op achter de personeelsdeur.</string>
 </resources>

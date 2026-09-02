@@ -45,4 +45,5 @@
     <string name="kiosk_no_menu">ยังไม่มีอะไรในเมนู เพิ่มสิ่งที่คุณขายหลังกุญแจล็อก</string>
     <string name="kiosk_all_off">ตอนนี้หมดทุกอย่าง</string>
     <string name="kiosk_tip_pct">%1$d%%</string>
+    <string name="kiosk_declined">ลูกค้าปฏิเสธบิลนี้ จะไม่มีเงินเข้ามา — เริ่มกับลูกค้าคนถัดไป หรือจัดการหลังประตูพนักงาน</string>
 </resources>

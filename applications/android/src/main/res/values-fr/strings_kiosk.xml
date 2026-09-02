@@ -45,4 +45,5 @@
     <string name="kiosk_no_menu">Rien sur la carte pour l\'instant. Ajoutez ce que vous vendez derrière le cadenas.</string>
     <string name="kiosk_all_off">Tout est retiré de la carte pour le moment.</string>
     <string name="kiosk_tip_pct">%1$d%%</string>
+    <string name="kiosk_declined">Ils ont refusé cette note. Rien n\'arrivera — passez au client suivant, ou réglez cela derrière la porte du personnel.</string>
 </resources>

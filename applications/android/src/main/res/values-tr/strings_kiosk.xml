@@ -45,4 +45,5 @@
     <string name="kiosk_no_menu">Menüde henüz bir şey yok. Sattıklarını kilidin arkasından ekle.</string>
     <string name="kiosk_all_off">Şu an hiçbir şey yok.</string>
     <string name="kiosk_tip_pct">%1$d%%</string>
+    <string name="kiosk_declined">Bu hesabı reddettiler. Gelen olmayacak — sonraki müşteriye geç ya da personel kapısının ardında düzelt.</string>
 </resources>

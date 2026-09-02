@@ -45,4 +45,5 @@
     <string name="kiosk_no_menu">هنوز چیزی در فهرست نیست. از پشت قفل آنچه می‌فروشی را اضافه کن.</string>
     <string name="kiosk_all_off">الان همه‌چیز از فهرست خارج است.</string>
     <string name="kiosk_tip_pct">%1$d%%</string>
+    <string name="kiosk_declined">این صورت‌حساب را رد کردند. چیزی نمی‌آید — مشتری بعدی را شروع کنید یا از در کارکنان مرتبش کنید.</string>
 </resources>

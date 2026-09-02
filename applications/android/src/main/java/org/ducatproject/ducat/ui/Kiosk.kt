@@ -576,6 +576,27 @@ internal fun BilledPanel(
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
     val state = remember(order.id, version) { Orders.stateOf(context, order) }
+    // **They said no, and the counter went on waiting.**
+    //
+    // A customer can decline a bill from their own screen (§16.13's
+    // retract, the same one the tab book reads), and nothing here looked:
+    // the panel showed a spinner and "Waiting for your payment…"
+    // indefinitely, at a counter, for money that was never coming. Seen
+    // live — the refusal reached this phone in two seconds and changed
+    // nothing on it. The tab book has said this for a while
+    // (`bartab_declined_hint`); the kiosk is the screen a stranger is
+    // standing at, so it needed it more.
+    val refused = remember(order.id, order.tabId, version) {
+        order.tabId
+            ?.let { org.ducatproject.ducat.TabStore(context).get(it) }
+            ?.let { tab ->
+                val thread = ContactStore(context).thread(tab.personaHex)
+                tab.billIn(thread)
+                    ?.let { (it.seq to it.timestamp) in billAnswers(thread).refused }
+                    ?: false
+            }
+            ?: false
+    }
     // Paid is a sighting or the chain, and nothing else. "Anything but
     // awaiting" also covered withdrawn: staff took the bill back from the
     // orders list, closed the panel, and the customer's screen thanked them
@@ -636,13 +657,25 @@ internal fun BilledPanel(
         )
         Spacer(Modifier.height(16.dp))
         if (!owed) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                Spacer(Modifier.width(8.dp))
+            if (refused) {
+                // No spinner: nothing is in flight. The staff door's order
+                // list is where a refused sale is tidied up, and the button
+                // below already goes back to the counter.
                 Text(
-                    stringResource(R.string.kiosk_waiting),
+                    stringResource(R.string.kiosk_declined),
                     style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    textAlign = TextAlign.Center,
                 )
+            } else {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        stringResource(R.string.kiosk_waiting),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
             }
             Spacer(Modifier.height(16.dp))
         }

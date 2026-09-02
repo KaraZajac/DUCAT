@@ -45,4 +45,5 @@
     <string name="kiosk_no_menu">Ancora niente nel menù. Aggiungi ciò che vendi dietro il lucchetto.</string>
     <string name="kiosk_all_off">Al momento non c\'è nulla disponibile.</string>
     <string name="kiosk_tip_pct">%1$d%%</string>
+    <string name="kiosk_declined">Hanno rifiutato questo conto. Non arriverà nulla: passa al cliente successivo, o sistemalo dietro la porta del personale.</string>
 </resources>

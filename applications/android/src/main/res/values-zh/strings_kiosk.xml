@@ -45,4 +45,5 @@
     <string name="kiosk_no_menu">菜单还是空的。在锁后面添加你要卖的东西。</string>
     <string name="kiosk_all_off">现在都下架了。</string>
     <string name="kiosk_tip_pct">%1$d%%</string>
+    <string name="kiosk_declined">对方拒绝了这张账单。不会有款项进来 — 接待下一位顾客，或在员工界面里处理掉。</string>
 </resources>

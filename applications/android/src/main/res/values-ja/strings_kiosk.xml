@@ -45,4 +45,5 @@
     <string name="kiosk_no_menu">メニューはまだ空です。鍵の向こうで売るものを追加してください。</string>
     <string name="kiosk_all_off">いまはすべて品切れです。</string>
     <string name="kiosk_tip_pct">%1$d%%</string>
+    <string name="kiosk_declined">この請求は断られました。入金はありません。次のお客様へ進むか、スタッフ用の画面で整理してください。</string>
 </resources>

@@ -45,4 +45,5 @@
     <string name="kiosk_no_menu">Aún no hay nada en la carta. Añade lo que vendes detrás del candado.</string>
     <string name="kiosk_all_off">Ahora mismo no hay nada disponible.</string>
     <string name="kiosk_tip_pct">%1$d%%</string>
+    <string name="kiosk_declined">Rechazaron esta cuenta. No va a llegar nada: atiende al siguiente cliente, o arréglala tras la puerta del personal.</string>
 </resources>
