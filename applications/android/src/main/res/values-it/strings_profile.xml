@@ -45,7 +45,7 @@
     <string name="profile_bond_cosigned">Controfirmato — la trasmissione spetta a loro.</string>
     <string name="profile_bond_released">Deposito restituito ✓</string>
     <string name="profile_bond_call_off">Annulla la cauzione</string>
-    <string name="profile_bond_holds">il deposito a garanzia contiene %1$s — restituisci invece la cauzione</string>
+    <string name="profile_bond_holds">Il deposito a garanzia contiene %1$s — restituisci invece la cauzione</string>
     <string name="profile_bond_called_off">Cauzione annullata.</string>
     <string name="profile_bond_txid">Transazione di restituzione</string>
     <string name="profile_bond_arbiter_q">Chi custodisce la terza chiave?</string>

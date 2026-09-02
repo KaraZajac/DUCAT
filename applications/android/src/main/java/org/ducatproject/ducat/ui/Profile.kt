@@ -166,9 +166,12 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
             Spacer(Modifier.height(8.dp))
             Button(
                 onClick = {
-                    // No re-read here: `add` bumps the store and `c` is
-                    // derived from that.
-                    store.add(c.copy(petname = petname.trim().ifBlank { null }))
+                    // The name and nothing else, read-at-write: `c` is as
+                    // fresh as the last recomposition, and writing it back
+                    // whole carried whatever counters a poll had advanced
+                    // since — the rewind setPetname exists to prevent. It
+                    // bumps the store, and `c` is derived from that.
+                    store.setPetname(c.personaHex, petname.trim().ifBlank { null })
                     saved = true
                 },
                 // Only when there is something to save. It was always live, so
@@ -343,6 +346,11 @@ private fun BondSection(c: Contact) {
     // produceState on IO, not remember: Ceremony.all decrypts the whole
     // ceremony store, and this ran on the main thread — keyed on `busy`, so
     // every button press paid for it twice.
+    // Null until read is "not looked yet", not "no bond": with the initial
+    // value standing for both, every opening of a bonded contact's profile
+    // showed "Post a bond" — live — for the length of the decrypt, and a
+    // tap inside that flash started a second ceremony under the first.
+    var looked by remember { mutableStateOf(false) }
     val ceremony by produceState<org.json.JSONObject?>(null, version, busy) {
         value = withContext(Dispatchers.IO) {
             org.ducatproject.ducat.Ceremony.all(context)
@@ -361,6 +369,7 @@ private fun BondSection(c: Contact) {
                 // promise, and lastOrNull() was betting on it.
                 .maxByOrNull { it.optLong("created") }
         }
+        looked = true
     }
 
     fun post(arbiter: org.ducatproject.ducat.Contact?) {
@@ -422,7 +431,8 @@ private fun BondSection(c: Contact) {
         )
     }
 
-    when (ceremony?.optString("stage").orEmpty()) {
+    when (if (looked) ceremony?.optString("stage").orEmpty() else "looking") {
+        "looking" -> {}
         "" -> {
             // Sealing and sending the commitment is network work; the button
             // shows it working rather than freezing the profile.
@@ -556,8 +566,12 @@ private fun BondSection(c: Contact) {
             ) { Text(stringResource(R.string.profile_bond_call_off)) }
             error?.let {
                 Spacer(Modifier.height(4.dp))
+                // The sentence as it comes: "Could not start:" is the
+                // opening branch's prefix, and here nothing was being
+                // started — a return that failed read "Could not start:
+                // the escrow holds 0.5 XMR — return the deposit instead".
                 Text(
-                    stringResource(R.string.profile_bond_failed, it),
+                    it,
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall,
                 )
@@ -613,7 +627,7 @@ private fun BondSection(c: Contact) {
             error?.let {
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    stringResource(R.string.profile_bond_failed, it),
+                    it,
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall,
                 )

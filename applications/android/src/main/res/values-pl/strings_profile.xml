@@ -45,7 +45,7 @@
     <string name="profile_bond_cosigned">Podpisano — nadanie jest po ich stronie.</string>
     <string name="profile_bond_released">Depozyt zwrócony ✓</string>
     <string name="profile_bond_call_off">Odwołaj kaucję</string>
-    <string name="profile_bond_holds">depozyt zawiera %1$s — zamiast tego zwróć kaucję</string>
+    <string name="profile_bond_holds">Depozyt zawiera %1$s — zamiast tego zwróć kaucję</string>
     <string name="profile_bond_called_off">Kaucja odwołana.</string>
     <string name="profile_bond_txid">Transakcja zwrotu</string>
     <string name="profile_bond_arbiter_q">Kto trzyma trzeci klucz?</string>

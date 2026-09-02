@@ -45,7 +45,7 @@
     <string name="profile_bond_cosigned">İmzalandı — yayınlamak karşı tarafta.</string>
     <string name="profile_bond_released">Depozito geri alındı ✓</string>
     <string name="profile_bond_call_off">Teminatı iptal et</string>
-    <string name="profile_bond_holds">emanette %1$s var — bunun yerine depozitoyu iade et</string>
+    <string name="profile_bond_holds">Emanette %1$s var — bunun yerine depozitoyu iade et</string>
     <string name="profile_bond_called_off">Teminat iptal edildi.</string>
     <string name="profile_bond_txid">Geri alma işlemi</string>
     <string name="profile_bond_arbiter_q">Üçüncü anahtar kimde?</string>

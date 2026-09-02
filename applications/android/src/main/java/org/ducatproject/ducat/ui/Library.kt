@@ -85,8 +85,12 @@ object LibraryFetch {
     private val queue = ArrayDeque<Triple<Job, Source, Boolean>>()
     private var runningWorkers = 0
 
-    var lastError by mutableStateOf<Pair<Job, String>?>(null)
-        private set
+    /** Why each issue's last fetch failed, until its next attempt. Per job:
+     *  two run at once, and one slot let the second failure erase the
+     *  first row's line — or a fresh download of B blank A's. */
+    private val errors = mutableStateMapOf<Job, String>()
+
+    fun errorOf(job: Job): String? = errors[job]
 
     /** Is this issue being fetched right now? */
     fun activeOn(job: Job): Boolean = activeSources.containsKey(job)
@@ -147,13 +151,17 @@ object LibraryFetch {
     private fun worker(app: Context) {
         while (true) {
             val (job, source, reseed) = synchronized(this) {
-                queue.removeFirstOrNull() ?: run {
+                val next = queue.removeFirstOrNull() ?: run {
                     runningWorkers--
                     return
                 }
+                // Claimed under the same lock that dequeues it: between the
+                // two, enqueue saw the job neither queued nor active and a
+                // second tap could start it twice into one .part directory.
+                activeSources[next.first] = next.second
+                next
             }
-            activeSources[job] = source
-            if (!reseed) lastError = null
+            if (!reseed) errors.remove(job)
             runOne(app, job, source, reseed)
             activeSources.remove(job)
             shelfTickers.remove(job)
@@ -214,7 +222,7 @@ object LibraryFetch {
                 "fetch of '${job.period}' from ${job.publisherHex.take(8)}… " +
                     "failed: ${e.message}",
             )
-            lastError = job to (e.saidWhy() ?: e.javaClass.simpleName)
+            errors[job] = e.saidWhy() ?: e.javaClass.simpleName
         }
     }
 }
@@ -435,9 +443,7 @@ private fun IssueLine(
     val progress = remember(tick, mine) {
         if (mine) LibraryFetch.progressOf(job) else null
     }
-    val error = LibraryFetch.lastError?.takeIf {
-        it.first.publisherHex == row.publisherHex && it.first.period == row.period
-    }
+    val error = LibraryFetch.errorOf(job)
 
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
@@ -491,7 +497,7 @@ private fun IssueLine(
             }
             if (error != null && !mine) {
                 Text(
-                    stringResource(R.string.library_failed, error.second),
+                    stringResource(R.string.library_failed, error),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.error,
                 )

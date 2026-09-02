@@ -45,7 +45,7 @@
     <string name="profile_bond_cosigned">Firmado — la emisión queda en sus manos.</string>
     <string name="profile_bond_released">Depósito devuelto ✓</string>
     <string name="profile_bond_call_off">Cancelar el depósito</string>
-    <string name="profile_bond_holds">la custodia contiene %1$s — devuelve el depósito en su lugar</string>
+    <string name="profile_bond_holds">La custodia contiene %1$s — devuelve el depósito en su lugar</string>
     <string name="profile_bond_called_off">Depósito cancelado.</string>
     <string name="profile_bond_txid">Transacción de devolución</string>
     <string name="profile_bond_arbiter_q">¿Quién guarda la tercera llave?</string>

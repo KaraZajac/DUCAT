@@ -45,7 +45,7 @@
     <string name="profile_bond_cosigned">Co-signed — the release is theirs to broadcast.</string>
     <string name="profile_bond_released">Deposit returned ✓</string>
     <string name="profile_bond_call_off">Call the bond off</string>
-    <string name="profile_bond_holds">the escrow holds %1$s — return the deposit instead</string>
+    <string name="profile_bond_holds">The escrow holds %1$s — return the deposit instead</string>
     <string name="profile_bond_called_off">Bond called off.</string>
     <string name="profile_bond_txid">Release transaction</string>
     <string name="profile_bond_arbiter_q">Who holds the third key?</string>

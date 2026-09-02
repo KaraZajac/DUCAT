@@ -59,6 +59,12 @@ class ContactStore(context: Context) {
          */
         const val BURN_GRACE_MS = 30L * 60 * 1000
 
+        /** Message kinds that are protocol machinery rather than
+         *  conversation: the DKG and FROST rounds (8, 9, 11), the abort (10)
+         *  and roster traffic (12) — what the chat list leaves out of its
+         *  preview, and what does not un-hide a deleted conversation. */
+        val HIDDEN_KINDS = setOf(8, 9, 10, 11, 12)
+
         /**
          * One lock for the whole store, across every instance.
          *
@@ -631,8 +637,19 @@ class ContactStore(context: Context) {
         e.putString("thread_$personaHex", arr.toString())
         if (m.kind == 3) saveReceiptLocked(personaHex, m, e)
         all().firstOrNull { it.personaHex == personaHex }?.let { c ->
+            // A hidden conversation comes back when they write. Deleting one
+            // hides it (setChatVisible) and nothing un-hid it, so the next
+            // thing they said was announced by a notification that opened
+            // a thread the Chats tab still refused to list, with no badge.
+            // Machinery — ceremony rounds, roster traffic — stays quiet, as
+            // it does in the list's preview line; a person's words, a
+            // request, a payment, a call, an issue all count as writing.
+            val surfaces = m.kind !in HIDDEN_KINDS
             putContacts(e, all().filterNot { it.personaHex == personaHex } +
-                c.copy(inSeq = newInSeq, inPrevLink = newPrevLink))
+                c.copy(
+                    inSeq = newInSeq, inPrevLink = newPrevLink,
+                    chatVisible = c.chatVisible || surfaces,
+                ))
         }
         e.apply()
         bump()

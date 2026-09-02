@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -43,6 +42,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -83,7 +83,10 @@ fun PublishingSection() {
     val scope = rememberCoroutineScope()
 
     val pubs = remember(version) { Publications.publications(context) }
-    var selected by remember { mutableStateOf(pubs.firstOrNull()?.first) }
+    // The form below is saveable field by field, like every other form in
+    // the app: the activity is recreated on rotation, and a note typed and
+    // a file picked for this month's issue were gone when the phone turned.
+    var selected by rememberSaveable { mutableStateOf(pubs.firstOrNull()?.first) }
     if (selected == null || pubs.none { it.first == selected }) selected = pubs.firstOrNull()?.first
     var busy by remember { mutableStateOf<String?>(null) }
     var lastWord by remember { mutableStateOf<String?>(null) }
@@ -227,8 +230,15 @@ fun PublishingSection() {
         if (pubId != null) {
             // --- the price, which decides who the mailbag opens for -------
             val storedPrice = remember(version, pubId) { Publications.priceOf(context, pubId) }
-            var priceText by remember(pubId) {
+            var priceText by rememberSaveable(pubId) {
                 mutableStateOf(if (storedPrice > 0) formatXmr(storedPrice) else "")
+            }
+            // Blank means free; anything else must be a figure. "Set" used
+            // to swallow "abc" without a word — now the field says so and
+            // the button waits, the way the listing forms do it.
+            val pricePxmr = remember(priceText) {
+                if (priceText.isBlank()) 0L
+                else Amounts.parse(priceText)?.let { Amounts.toPxmr(it) }
             }
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(12.dp)) {
@@ -237,14 +247,16 @@ fun PublishingSection() {
                             priceText, { priceText = it },
                             label = { Text(stringResource(R.string.pub_price_label)) },
                             singleLine = true,
+                            isError = pricePxmr == null,
                             modifier = Modifier.weight(1f),
                         )
                         Spacer(Modifier.width(8.dp))
-                        TextButton(onClick = {
-                            val pxmr = if (priceText.isBlank()) 0L
-                            else Amounts.parse(priceText)?.let { Amounts.toPxmr(it) } ?: -1L
-                            if (pxmr >= 0) Publications.setPrice(context, pubId, pxmr)
-                        }) { Text(stringResource(R.string.pub_price_set)) }
+                        TextButton(
+                            enabled = pricePxmr != null,
+                            onClick = {
+                                pricePxmr?.let { Publications.setPrice(context, pubId, it) }
+                            },
+                        ) { Text(stringResource(R.string.pub_price_set)) }
                     }
                     Text(
                         stringResource(
@@ -255,9 +267,15 @@ fun PublishingSection() {
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(Modifier.height(6.dp))
+                    // One card per tap: the mint is a DHT write, and the
+                    // button stayed live through it, so a second tap while
+                    // the first was still out bound two cards to the
+                    // publication and showed only the later one.
+                    var minting by remember { mutableStateOf(false) }
                     OutlinedButton(
-                        enabled = busy == null,
+                        enabled = busy == null && !minting,
                         onClick = {
+                            minting = true
                             scope.launch(Dispatchers.IO) {
                                 runCatching {
                                     val card = org.ducatproject.ducat.Mailbox.issueCard(
@@ -272,6 +290,7 @@ fun PublishingSection() {
                                     DucatLog.w("Publishing", "code: ${it.message}")
                                     lastWord = it.saidWhy()
                                 }
+                                minting = false
                             }
                         },
                     ) { Text(stringResource(R.string.pub_sub_code)) }
@@ -282,8 +301,8 @@ fun PublishingSection() {
             val mktCat = remember(version, pubId) {
                 Publications.marketStateOf(context, pubId)
             }
-            var catPick by remember(pubId) { mutableStateOf(mktCat?.first ?: "news") }
-            var blurbText by remember(pubId) { mutableStateOf(mktCat?.second ?: "") }
+            var catPick by rememberSaveable(pubId) { mutableStateOf(mktCat?.first ?: "news") }
+            var blurbText by rememberSaveable(pubId) { mutableStateOf(mktCat?.second ?: "") }
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(12.dp)) {
                     Text(
@@ -310,7 +329,7 @@ fun PublishingSection() {
                         modifier = Modifier.fillMaxWidth(),
                     )
                     Spacer(Modifier.height(6.dp))
-                    var alsoLocal by remember(pubId) { mutableStateOf(false) }
+                    var alsoLocal by rememberSaveable(pubId) { mutableStateOf(false) }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(alsoLocal, { alsoLocal = it })
                         Text(
@@ -419,9 +438,12 @@ fun PublishingSection() {
 
             // --- the issue: period, file, and out the door ----------------
             val now = remember { java.time.YearMonth.now().toString() }
-            var period by remember(pubId) { mutableStateOf(now) }
-            var note by remember(pubId) { mutableStateOf("") }
-            var staged by remember(pubId) { mutableStateOf<File?>(null) }
+            var period by rememberSaveable(pubId) { mutableStateOf(now) }
+            var note by rememberSaveable(pubId) { mutableStateOf("") }
+            // The staging copy is on disk already; its path is what
+            // survives, not the File.
+            var stagedPath by rememberSaveable(pubId) { mutableStateOf<String?>(null) }
+            val staged = stagedPath?.let(::File)?.takeIf { it.isFile }
             val picker = rememberLauncherForActivityResult(
                 ActivityResultContracts.OpenDocument(),
             ) { uri ->
@@ -454,7 +476,7 @@ fun PublishingSection() {
                         context.contentResolver.openInputStream(uri)!!.use { input ->
                             dst.outputStream().use { input.copyTo(it) }
                         }
-                        staged = dst
+                        stagedPath = dst.absolutePath
                     }.onFailure {
                         DucatLog.w("Publishing", "stage: ${it.message}")
                         lastWord = it.saidWhy()
@@ -554,7 +576,7 @@ fun PublishingSection() {
                                             R.string.pub_out_free, p, sent,
                                         )
                                     }
-                                    staged = null
+                                    stagedPath = null
                                 } catch (e: Throwable) {
                                     DucatLog.w("Publishing", "issue $p: ${e.message}")
                                     lastWord = e.saidWhy()

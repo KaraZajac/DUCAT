@@ -45,7 +45,7 @@
     <string name="profile_bond_cosigned">Підписано — трансляція на їхньому боці.</string>
     <string name="profile_bond_released">Вклад повернено ✓</string>
     <string name="profile_bond_call_off">Скасувати заставу</string>
-    <string name="profile_bond_holds">на ескроу лежить %1$s — натомість поверніть депозит</string>
+    <string name="profile_bond_holds">На ескроу лежить %1$s — натомість поверніть депозит</string>
     <string name="profile_bond_called_off">Заставу скасовано.</string>
     <string name="profile_bond_txid">Транзакція повернення</string>
     <string name="profile_bond_arbiter_q">У кого третій ключ?</string>

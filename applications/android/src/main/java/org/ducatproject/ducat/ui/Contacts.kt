@@ -14,6 +14,7 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -57,8 +58,11 @@ import uniffi.ducat_mobile.readContactCard
 internal fun ShareCardSheet(personaSecret: ByteArray?, onDismiss: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var name by remember { mutableStateOf(NameStore(context).get() ?: "") }
-    var uri by remember { mutableStateOf<String?>(null) }
+    // The card outlives a turn of the phone: the activity is recreated on
+    // rotation, and the QR just published went with it — the next tap
+    // minted a second card for the same inbox.
+    var name by rememberSaveable { mutableStateOf(NameStore(context).get() ?: "") }
+    var uri by rememberSaveable { mutableStateOf<String?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
 

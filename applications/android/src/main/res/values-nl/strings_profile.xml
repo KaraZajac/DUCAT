@@ -45,7 +45,7 @@
     <string name="profile_bond_cosigned">Medeondertekend — uitzenden is aan hen.</string>
     <string name="profile_bond_released">Borg terug ✓</string>
     <string name="profile_bond_call_off">Borg afblazen</string>
-    <string name="profile_bond_holds">de escrow bevat %1$s — geef in plaats daarvan de borg terug</string>
+    <string name="profile_bond_holds">De escrow bevat %1$s — geef in plaats daarvan de borg terug</string>
     <string name="profile_bond_called_off">Borg afgeblazen.</string>
     <string name="profile_bond_txid">Terugave-transactie</string>
     <string name="profile_bond_arbiter_q">Wie houdt de derde sleutel?</string>

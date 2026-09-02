@@ -45,7 +45,7 @@
     <string name="profile_bond_cosigned">Подписано — отправка на их стороне.</string>
     <string name="profile_bond_released">Вклад возвращён ✓</string>
     <string name="profile_bond_call_off">Отменить залог</string>
-    <string name="profile_bond_holds">на эскроу лежит %1$s — вместо этого верните депозит</string>
+    <string name="profile_bond_holds">На эскроу лежит %1$s — вместо этого верните депозит</string>
     <string name="profile_bond_called_off">Залог отменён.</string>
     <string name="profile_bond_txid">Транзакция возврата</string>
     <string name="profile_bond_arbiter_q">У кого третий ключ?</string>

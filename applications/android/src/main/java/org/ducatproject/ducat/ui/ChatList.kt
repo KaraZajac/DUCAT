@@ -67,9 +67,8 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
     var settled by remember { mutableStateOf(false) }
     LaunchedEffect(version) {
         all = store.all()
-        settled = true
     }
-    var sheet by remember { mutableStateOf<Sheet?>(null) }
+    var sheet by rememberSaveable { mutableStateOf<Sheet?>(null) }
     var confirm by remember { mutableStateOf<Contact?>(null) }
     // §16.19: the groups, above the pairwise threads they fan into.
     val groups = remember(version) { org.ducatproject.ducat.Groups.all(context) }
@@ -132,6 +131,12 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
             )
         }
         shown = sorted; rowLast = lasts; rowUnread = unread
+        // Settled means *this* list has landed, not the re-read above: that
+        // one never suspends, so it flipped the flag a frame after every
+        // composition — one frame of "No conversations" on each visit to
+        // the tab and each return from a thread, while the sort was still
+        // decrypting.
+        settled = true
     }
     Column(Modifier.fillMaxSize()) {
         Row(
@@ -477,7 +482,10 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
         )
         Sheet.New -> NewChatSheet(
             contacts = all.sortedBy { it.displayName().lowercase() },
-            ambiguous = store.ambiguous(),
+            // The set computed off-main above; asking the store here
+            // re-read and decrypted the whole book on every recomposition
+            // the sheet was open for, on the main thread.
+            ambiguous = ambiguous,
             onDismiss = { sheet = null },
             onAdd = { sheet = Sheet.Add },
             onPick = {
@@ -617,7 +625,7 @@ internal fun Avatar(name: String, picture: ByteArray? = null, size: Int = 40) {
  * set out of the thread itself; here it keeps them out of the preview line
  * and out of the order the list is sorted in.
  */
-private val CEREMONY_KINDS = setOf(8, 9, 10, 11, 12)
+private val CEREMONY_KINDS = ContactStore.HIDDEN_KINDS
 
 /** What one message looks like from a list away (§16.13's kinds included). */
 internal fun previewOf(context: Context, m: StoredMessage): String = when {

@@ -45,7 +45,7 @@
     <string name="profile_bond_cosigned">Gegengezeichnet — das Senden liegt bei der Gegenseite.</string>
     <string name="profile_bond_released">Einlage zurückgegeben ✓</string>
     <string name="profile_bond_call_off">Bond abbrechen</string>
-    <string name="profile_bond_holds">das Treuhandkonto enthält %1$s — gib stattdessen die Kaution zurück</string>
+    <string name="profile_bond_holds">Das Treuhandkonto enthält %1$s — gib stattdessen die Kaution zurück</string>
     <string name="profile_bond_called_off">Bond abgebrochen.</string>
     <string name="profile_bond_txid">Rückgabe-Transaktion</string>
     <string name="profile_bond_arbiter_q">Wer hält den dritten Schlüssel?</string>
