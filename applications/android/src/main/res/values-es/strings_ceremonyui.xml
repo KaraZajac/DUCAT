@@ -43,4 +43,5 @@
     <string name="ceremony_eta_in_chat">Paga en el chat en cuanto esté su fianza — la hora de llegada también está ahí.</string>
     <string name="ceremony_eta_in_chat_nostake">Paga en el chat — la hora de llegada también está ahí. Una tarifa tan pequeña no lleva fianza.</string>
     <string name="ceremony_stake_note">Pones %2$s: la tarifa más una garantía de %1$s. El conductor también deja %1$s, y ambas vuelven al terminar el viaje.</string>
+    <string name="ceremony_asked_you_for">te pidió</string>
 </resources>

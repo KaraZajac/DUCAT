@@ -43,4 +43,5 @@
     <string name="ceremony_eta_in_chat">Paga nella chat appena c\'è la loro cauzione — lì trovi anche l\'orario di arrivo.</string>
     <string name="ceremony_eta_in_chat_nostake">Paga nella chat — lì trovi anche l\'orario di arrivo. Una tariffa così piccola non prevede cauzione.</string>
     <string name="ceremony_stake_note">Metti %2$s: la tariffa più una cauzione di %1$s. Anche l\'autista mette %1$s, e tornano entrambe a fine corsa.</string>
+    <string name="ceremony_asked_you_for">ti ha chiesto</string>
 </resources>

@@ -43,4 +43,5 @@
     <string name="ceremony_eta_in_chat">उनकी जमानत राशि जमा होते ही चैट में भुगतान करें — पहुँचने का समय भी वहीं है।</string>
     <string name="ceremony_eta_in_chat_nostake">चैट में भुगतान करें — पहुँचने का समय भी वहीं है। इतने छोटे किराये पर कोई जमानत राशि नहीं होती।</string>
     <string name="ceremony_stake_note">आप %2$s देते हैं: किराया और %1$s जमानत राशि। ड्राइवर भी %1$s रखता है, और सवारी खत्म होने पर दोनों वापस आ जाती हैं।</string>
+    <string name="ceremony_asked_you_for">ने आपसे माँगे थे</string>
 </resources>

@@ -66,4 +66,5 @@
     <string name="bill_note_issue">订阅</string>
     <string name="bartab_paid_pending">已付 ✓ — 收据仍在这部手机上。网络恢复后立即发出。</string>
     <string name="bartab_paid_unsent">已付 ✓ — 但收据未能发出。会自动重试。</string>
+    <string name="bartab_removed_notice">已撤销：%1$s · 挂账现共 %2$s</string>
 </resources>

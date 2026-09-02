@@ -66,4 +66,5 @@
     <string name="bill_note_issue">Gói đăng ký</string>
     <string name="bartab_paid_pending">Đã trả ✓ — biên nhận vẫn còn trên điện thoại này. Sẽ gửi đi ngay khi có mạng trở lại.</string>
     <string name="bartab_paid_unsent">Đã trả ✓ — nhưng không gửi được biên nhận. Sẽ tự thử lại.</string>
+    <string name="bartab_removed_notice">Đã bỏ: %1$s · tab hiện %2$s</string>
 </resources>

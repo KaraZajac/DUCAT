@@ -42,4 +42,5 @@
     <string name="ceremony_eta_in_chat">จ่ายในแชทเมื่อหลักประกันของอีกฝ่ายเข้าแล้ว — เวลาที่จะถึงก็อยู่ในนั้น</string>
     <string name="ceremony_eta_in_chat_nostake">จ่ายในแชท — เวลาที่จะถึงก็อยู่ในนั้น ค่าโดยสารเล็กเท่านี้ไม่มีหลักประกัน</string>
     <string name="ceremony_stake_note">คุณวาง %2$s คือค่าโดยสารบวกหลักประกัน %1$s คนขับก็วาง %1$s เช่นกัน และทั้งสองจะคืนเมื่อจบการเดินทาง</string>
+    <string name="ceremony_asked_you_for">เคยขอจากคุณ</string>
 </resources>

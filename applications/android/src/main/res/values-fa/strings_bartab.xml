@@ -67,4 +67,5 @@
     <string name="bill_note_issue">اشتراک</string>
     <string name="bartab_paid_pending">پرداخت شد ✓ — رسید هنوز روی این گوشی است. به محض برگشتن شبکه فرستاده می‌شود.</string>
     <string name="bartab_paid_unsent">پرداخت شد ✓ — اما رسید فرستاده نشد. خودبه‌خود دوباره تلاش می‌شود.</string>
+    <string name="bartab_removed_notice">حذف شد: %1$s · حساب الان %2$s</string>
 </resources>

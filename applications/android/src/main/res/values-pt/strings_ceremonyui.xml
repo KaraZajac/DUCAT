@@ -43,4 +43,5 @@
     <string name="ceremony_eta_in_chat">Pague na conversa assim que a caução deles entrar — o tempo de chegada também está lá.</string>
     <string name="ceremony_eta_in_chat_nostake">Pague na conversa — o tempo de chegada também está lá. Um valor tão pequeno não leva caução.</string>
     <string name="ceremony_stake_note">Você põe %2$s: o valor mais uma caução de %1$s. O condutor também deixa %1$s, e as duas voltam no fim da viagem.</string>
+    <string name="ceremony_asked_you_for">pediu a você</string>
 </resources>

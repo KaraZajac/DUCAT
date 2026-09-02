@@ -66,4 +66,5 @@
     <string name="bill_note_issue">ค่าสมาชิก</string>
     <string name="bartab_paid_pending">ชำระแล้ว ✓ — ใบเสร็จยังอยู่ในโทรศัพท์เครื่องนี้ จะส่งออกทันทีที่เครือข่ายกลับมา</string>
     <string name="bartab_paid_unsent">ชำระแล้ว ✓ — แต่ส่งใบเสร็จไม่ได้ จะลองส่งใหม่เองโดยอัตโนมัติ</string>
+    <string name="bartab_removed_notice">เอาออก: %1$s · ยอดบิลตอนนี้ %2$s</string>
 </resources>

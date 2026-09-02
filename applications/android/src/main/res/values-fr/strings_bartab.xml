@@ -67,4 +67,5 @@
     <string name="bill_note_issue">Abonnement</string>
     <string name="bartab_paid_pending">Payée ✓ — le reçu est encore sur ce téléphone. Il partira dès que le réseau sera de retour.</string>
     <string name="bartab_paid_unsent">Payée ✓ — mais le reçu n\'a pas pu être envoyé. Il sera réessayé tout seul.</string>
+    <string name="bartab_removed_notice">Retiré : %1$s · ardoise à %2$s</string>
 </resources>

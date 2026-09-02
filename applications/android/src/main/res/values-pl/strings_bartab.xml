@@ -69,4 +69,5 @@
     <string name="bill_note_issue">Prenumerata</string>
     <string name="bartab_paid_pending">Zapłacone ✓ — paragon wciąż jest na tym telefonie. Wyjdzie, gdy tylko wróci sieć.</string>
     <string name="bartab_paid_unsent">Zapłacone ✓ — ale paragonu nie udało się wysłać. Próba zostanie ponowiona sama.</string>
+    <string name="bartab_removed_notice">Usunięto: %1$s · rachunek: %2$s</string>
 </resources>

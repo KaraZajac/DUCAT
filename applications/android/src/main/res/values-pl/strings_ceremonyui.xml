@@ -45,4 +45,5 @@
     <string name="ceremony_eta_in_chat">Zapłać w czacie, gdy tylko będzie ich kaucja — czas dojazdu też tam znajdziesz.</string>
     <string name="ceremony_eta_in_chat_nostake">Zapłać w czacie — czas dojazdu też tam znajdziesz. Tak mała cena nie niesie kaucji.</string>
     <string name="ceremony_stake_note">Wpłacasz %2$s: cenę plus kaucję %1$s. Kierowca też wpłaca %1$s, a obie wracają po zakończeniu przejazdu.</string>
+    <string name="ceremony_asked_you_for">prosił(a) cię o</string>
 </resources>

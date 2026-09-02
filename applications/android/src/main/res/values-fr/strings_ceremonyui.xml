@@ -43,4 +43,5 @@
     <string name="ceremony_eta_in_chat">Paie dans la discussion dès que sa caution y est — l\'heure d\'arrivée y est aussi.</string>
     <string name="ceremony_eta_in_chat_nostake">Paie dans la discussion — l\'heure d\'arrivée y est aussi. Un prix aussi petit ne comporte pas de caution.</string>
     <string name="ceremony_stake_note">Vous versez %2$s : le prix plus un dépôt de %1$s. Le conducteur dépose aussi %1$s, et les deux reviennent à la fin de la course.</string>
+    <string name="ceremony_asked_you_for">t’a demandé</string>
 </resources>

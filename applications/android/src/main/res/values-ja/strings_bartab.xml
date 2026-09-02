@@ -66,4 +66,5 @@
     <string name="bill_note_issue">定期購読</string>
     <string name="bartab_paid_pending">支払い済み ✓ — レシートはまだこの端末にあります。ネットワークが戻り次第送信されます。</string>
     <string name="bartab_paid_unsent">支払い済み ✓ — ただしレシートを送信できませんでした。自動的に再試行されます。</string>
+    <string name="bartab_removed_notice">取り消し: %1$s · ツケ合計 %2$s</string>
 </resources>

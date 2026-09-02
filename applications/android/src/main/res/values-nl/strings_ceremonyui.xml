@@ -43,4 +43,5 @@
     <string name="ceremony_eta_in_chat">Betaal in de chat zodra hun borg er is — de aankomsttijd staat er ook.</string>
     <string name="ceremony_eta_in_chat_nostake">Betaal in de chat — de aankomsttijd staat er ook. Zo\'n kleine ritprijs kent geen borg.</string>
     <string name="ceremony_stake_note">Jij legt %2$s in: de ritprijs plus %1$s borg. De chauffeur legt ook %1$s in, en beide komen terug als de rit klaar is.</string>
+    <string name="ceremony_asked_you_for">vroeg je om</string>
 </resources>

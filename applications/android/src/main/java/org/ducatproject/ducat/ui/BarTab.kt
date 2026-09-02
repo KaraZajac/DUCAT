@@ -643,10 +643,29 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                                         // writer appends: a drink poured while
                                         // this row was being tapped lands after
                                         // it and leaves i naming the same one.
-                                        store.mutate(tab.id) { t ->
+                                        var gone: BillItem? = null
+                                        val updated = store.mutate(tab.id) { t ->
                                             if (t.state != "open") t
-                                            else t.copy(
-                                                lines = t.lines.filterIndexed { j, _ -> j != i },
+                                            else {
+                                                gone = t.lines.getOrNull(i)
+                                                t.copy(lines = t.lines.filterIndexed { j, _ -> j != i })
+                                            }
+                                        }
+                                        // Told, as the line added was. Every
+                                        // drink went to the customer with the
+                                        // running total, and a line taken off
+                                        // went to nobody — so the last thing
+                                        // in their thread was a total the
+                                        // bill would not match.
+                                        val g = gone
+                                        if (updated != null && g != null) {
+                                            tellCustomer(
+                                                context, tab.personaHex,
+                                                context.getString(
+                                                    R.string.bartab_removed_notice,
+                                                    g.description,
+                                                    Amounts.show(context, updated.totalPxmr).primary,
+                                                ),
                                             )
                                         }
                                     },

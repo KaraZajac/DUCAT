@@ -67,4 +67,5 @@
     <string name="bill_note_issue">सदस्यता</string>
     <string name="bartab_paid_pending">चुकाया ✓ — रसीद अभी इसी फ़ोन पर है। नेटवर्क लौटते ही चली जाएगी।</string>
     <string name="bartab_paid_unsent">चुकाया ✓ — पर रसीद भेजी नहीं जा सकी। अपने आप फिर कोशिश होगी।</string>
+    <string name="bartab_removed_notice">हटाया गया: %1$s · टैब अब %2$s</string>
 </resources>

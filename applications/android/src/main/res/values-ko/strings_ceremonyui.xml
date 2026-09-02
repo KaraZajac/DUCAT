@@ -42,4 +42,5 @@
     <string name="ceremony_eta_in_chat">상대의 보증금이 들어오면 채팅에서 결제하세요 — 도착 시간도 거기 있어요.</string>
     <string name="ceremony_eta_in_chat_nostake">채팅에서 결제하세요 — 도착 시간도 거기 있어요. 이렇게 작은 요금에는 보증금이 없습니다.</string>
     <string name="ceremony_stake_note">당신은 %2$s를 넣습니다: 요금에 %1$s 보증금을 더한 금액입니다. 기사도 %1$s를 걸고, 운행이 끝나면 둘 다 돌아옵니다.</string>
+    <string name="ceremony_asked_you_for">님이 요청했던 금액</string>
 </resources>

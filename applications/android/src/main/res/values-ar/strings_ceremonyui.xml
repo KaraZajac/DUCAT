@@ -47,4 +47,5 @@
     <string name="ceremony_eta_in_chat">ادفع في الدردشة بمجرد وصول تأمينهم — ووقت الوصول هناك أيضًا.</string>
     <string name="ceremony_eta_in_chat_nostake">ادفع في الدردشة — ووقت الوصول هناك أيضًا. أجرة بهذا الصغر لا تحمل تأمينًا.</string>
     <string name="ceremony_stake_note">‏تضع %2$s: الأجرة مع ضمان %1$s. والسائق يضع %1$s أيضًا، ويعود الضمانان عند انتهاء الرحلة.</string>
+    <string name="ceremony_asked_you_for">طلب منك</string>
 </resources>

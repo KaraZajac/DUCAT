@@ -66,4 +66,5 @@
     <string name="bill_note_issue">Langganan</string>
     <string name="bartab_paid_pending">Lunas ✓ — struknya masih di ponsel ini. Akan terkirim begitu jaringan kembali.</string>
     <string name="bartab_paid_unsent">Lunas ✓ — tapi struknya tidak bisa dikirim. Akan dicoba lagi dengan sendirinya.</string>
+    <string name="bartab_removed_notice">Dihapus: %1$s · bon sekarang %2$s</string>
 </resources>

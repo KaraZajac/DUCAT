@@ -42,4 +42,5 @@
     <string name="ceremony_eta_in_chat">Trả tiền trong cuộc trò chuyện ngay khi tiền cọc của họ vào — giờ tới nơi cũng ở đó.</string>
     <string name="ceremony_eta_in_chat_nostake">Trả tiền trong cuộc trò chuyện — giờ tới nơi cũng ở đó. Cước nhỏ thế này không có tiền cọc.</string>
     <string name="ceremony_stake_note">Bạn đặt %2$s: giá cước cộng tiền cọc %1$s. Tài xế cũng đặt %1$s, và cả hai quay về khi chuyến đi kết thúc.</string>
+    <string name="ceremony_asked_you_for">đã yêu cầu bạn trả</string>
 </resources>

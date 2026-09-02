@@ -43,4 +43,5 @@
     <string name="ceremony_eta_in_chat">به‌محض رسیدن ودیعهٔ آن‌ها در گفتگو پرداخت کنید — زمان رسیدن هم همان‌جاست.</string>
     <string name="ceremony_eta_in_chat_nostake">در گفتگو پرداخت کنید — زمان رسیدن هم همان‌جاست. کرایه‌ای به این کوچکی ودیعه ندارد.</string>
     <string name="ceremony_stake_note">‏شما %2$s می‌گذارید: کرایه به‌علاوهٔ ودیعهٔ %1$s. راننده هم %1$s می‌گذارد و هر دو در پایان سفر برمی‌گردند.</string>
+    <string name="ceremony_asked_you_for">از تو خواسته بود</string>
 </resources>

@@ -43,4 +43,5 @@
     <string name="ceremony_eta_in_chat">Onların teminatı girer girmez sohbette öde — varış süresi de orada.</string>
     <string name="ceremony_eta_in_chat_nostake">Sohbette öde — varış süresi de orada. Bu kadar küçük bir ücret teminat taşımaz.</string>
     <string name="ceremony_stake_note">%2$s yatırıyorsun: ücret artı %1$s teminat. Sürücü de %1$s yatırır ve yolculuk bitince ikisi de geri gelir.</string>
+    <string name="ceremony_asked_you_for">senden şunu istemişti</string>
 </resources>

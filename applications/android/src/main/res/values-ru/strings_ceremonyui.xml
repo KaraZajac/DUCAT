@@ -45,4 +45,5 @@
     <string name="ceremony_eta_in_chat">Заплати в чате, как только появится их залог — время прибытия тоже там.</string>
     <string name="ceremony_eta_in_chat_nostake">Заплати в чате — время прибытия тоже там. Такая маленькая сумма не требует залога.</string>
     <string name="ceremony_stake_note">Вы вносите %2$s: стоимость плюс залог %1$s. Водитель тоже вносит %1$s, и оба залога вернутся в конце поездки.</string>
+    <string name="ceremony_asked_you_for">просил(а) у тебя</string>
 </resources>

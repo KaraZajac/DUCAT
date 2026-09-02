@@ -71,4 +71,5 @@
     <string name="bill_note_issue">الاشتراك</string>
     <string name="bartab_paid_pending">مدفوع ✓ — الإيصال ما زال على هذا الهاتف. سيخرج فور عودة الشبكة.</string>
     <string name="bartab_paid_unsent">مدفوع ✓ — لكن تعذّر إرسال الإيصال. ستُعاد المحاولة تلقائيًا.</string>
+    <string name="bartab_removed_notice">أُزيل: %1$s · الحساب الآن %2$s</string>
 </resources>

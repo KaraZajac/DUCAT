@@ -42,4 +42,5 @@
     <string name="ceremony_eta_in_chat">相手の保証金が入ったらチャットで支払ってください — 到着予定もそこにあります。</string>
     <string name="ceremony_eta_in_chat_nostake">チャットで支払ってください — 到着予定もそこにあります。これほど小さな運賃には保証金はありません。</string>
     <string name="ceremony_stake_note">あなたは %2$s を預けます。運賃に %1$s の預り金を足した額です。ドライバーも %1$s を預け、乗車が終われば両方戻ります。</string>
+    <string name="ceremony_asked_you_for">からの請求でした</string>
 </resources>

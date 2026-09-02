@@ -67,4 +67,5 @@
     <string name="bill_note_issue">Assinatura</string>
     <string name="bartab_paid_pending">Pago ✓ — o recibo ainda está neste telefone. Sai assim que a rede voltar.</string>
     <string name="bartab_paid_unsent">Pago ✓ — mas o recibo não pôde ser enviado. Será tentado de novo sozinho.</string>
+    <string name="bartab_removed_notice">Retirado: %1$s · comanda agora em %2$s</string>
 </resources>

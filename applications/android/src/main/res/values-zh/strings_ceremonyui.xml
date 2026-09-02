@@ -42,4 +42,5 @@
     <string name="ceremony_eta_in_chat">对方保证金到位后在聊天里付款 — 预计到达时间也在那里。</string>
     <string name="ceremony_eta_in_chat_nostake">在聊天里付款 — 预计到达时间也在那里。这么小的车费不设保证金。</string>
     <string name="ceremony_stake_note">你放入 %2$s：车费加上 %1$s 押金。司机同样押 %1$s，行程结束后两份都退回。</string>
+    <string name="ceremony_asked_you_for">曾向你请求</string>
 </resources>

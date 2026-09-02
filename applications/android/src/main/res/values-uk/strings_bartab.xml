@@ -69,4 +69,5 @@
     <string name="bill_note_issue">Підписка</string>
     <string name="bartab_paid_pending">Сплачено ✓ — чек досі на цьому телефоні. Піде, щойно з’явиться мережа.</string>
     <string name="bartab_paid_unsent">Сплачено ✓ — але чек надіслати не вдалося. Спроба повториться сама.</string>
+    <string name="bartab_removed_notice">Знято: %1$s · на рахунку вже %2$s</string>
 </resources>

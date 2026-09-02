@@ -43,4 +43,5 @@
     <string name="ceremony_eta_in_chat">Zahle im Chat, sobald ihre Sicherheit da ist — die Ankunftszeit steht auch dort.</string>
     <string name="ceremony_eta_in_chat_nostake">Zahle im Chat — die Ankunftszeit steht auch dort. Ein so kleiner Fahrpreis trägt keine Sicherheit.</string>
     <string name="ceremony_stake_note">Du zahlst %2$s ein: den Fahrpreis plus %1$s Einlage. Die Fahrerin legt ebenfalls %1$s hinein, und beide kommen am Ende zurück.</string>
+    <string name="ceremony_asked_you_for">bat dich um</string>
 </resources>

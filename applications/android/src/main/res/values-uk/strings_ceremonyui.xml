@@ -45,4 +45,5 @@
     <string name="ceremony_eta_in_chat">Заплати в чаті, щойно з\'явиться їхня застава — час прибуття теж там.</string>
     <string name="ceremony_eta_in_chat_nostake">Заплати в чаті — час прибуття теж там. Така мала сума не потребує застави.</string>
     <string name="ceremony_stake_note">Ви вносите %2$s: вартість плюс застава %1$s. Водій теж вносить %1$s, і обидві повернуться наприкінці поїздки.</string>
+    <string name="ceremony_asked_you_for">просив(ла) у тебе</string>
 </resources>

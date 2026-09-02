@@ -67,4 +67,5 @@
     <string name="bill_note_issue">Suscripción</string>
     <string name="bartab_paid_pending">Pagada ✓ — el recibo sigue en este teléfono. Saldrá en cuanto vuelva la red.</string>
     <string name="bartab_paid_unsent">Pagada ✓ — pero el recibo no se pudo enviar. Se volverá a intentar solo.</string>
+    <string name="bartab_removed_notice">Quitado: %1$s · la cuenta va en %2$s</string>
 </resources>

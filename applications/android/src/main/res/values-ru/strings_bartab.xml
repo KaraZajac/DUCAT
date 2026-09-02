@@ -69,4 +69,5 @@
     <string name="bill_note_issue">Подписка</string>
     <string name="bartab_paid_pending">Оплачен ✓ — чек всё ещё на этом телефоне. Уйдёт, как только появится сеть.</string>
     <string name="bartab_paid_unsent">Оплачен ✓ — но чек отправить не удалось. Попытка повторится сама.</string>
+    <string name="bartab_removed_notice">Убрано: %1$s · на счету уже %2$s</string>
 </resources>

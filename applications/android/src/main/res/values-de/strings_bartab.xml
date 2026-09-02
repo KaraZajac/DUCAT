@@ -67,4 +67,5 @@
     <string name="bill_note_issue">Abo</string>
     <string name="bartab_paid_pending">Bezahlt ✓ — die Quittung ist noch auf diesem Telefon. Sie geht raus, sobald das Netz wieder da ist.</string>
     <string name="bartab_paid_unsent">Bezahlt ✓ — aber die Quittung konnte nicht gesendet werden. Es wird von selbst erneut versucht.</string>
+    <string name="bartab_removed_notice">Gestrichen: %1$s · Deckel jetzt %2$s</string>
 </resources>

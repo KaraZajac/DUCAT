@@ -97,8 +97,14 @@ fun BillScreen(
                 Avatar(contact.displayName(), contact.avatar, size = 72)
                 Spacer(Modifier.height(10.dp))
                 Text(contact.displayName(), style = MaterialTheme.typography.titleLarge)
+                // Past tense once the decision is over: "asks you for" above
+                // a bill the bar has withdrawn is a request still standing,
+                // and the verdict at the bottom says the opposite.
                 Text(
-                    stringResource(R.string.ceremony_asks_you_for),
+                    stringResource(
+                        if (over != null) R.string.ceremony_asked_you_for
+                        else R.string.ceremony_asks_you_for,
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

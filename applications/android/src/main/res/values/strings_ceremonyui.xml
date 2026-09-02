@@ -43,4 +43,5 @@
     <string name="ceremony_eta_in_chat">Pay in the chat once their stake is in — the ETA is there too.</string>
     <string name="ceremony_eta_in_chat_nostake">Pay in the chat — the ETA is there too. A fare this small carries no stake.</string>
     <string name="ceremony_stake_note">You put in %2$s: the fare plus a %1$s stake. The driver stakes %1$s too, and both come back when the ride ends.</string>
+    <string name="ceremony_asked_you_for">asked you for</string>
 </resources>
