@@ -59,6 +59,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import org.ducatproject.ducat.formatXmr
 import org.ducatproject.ducat.DucatLog
+import org.ducatproject.ducat.TabStore
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
@@ -298,7 +299,15 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     val draftNow by androidx.compose.runtime.rememberUpdatedState(draft)
     androidx.compose.runtime.DisposableEffect(contact.personaHex) {
         onDispose {
-            ContactStore(context).saveDraft(contact.personaHex, draftNow)
+            // Not the words on their way out. Send does not empty the box
+            // until the send lands, and a Back tapped in between saved the
+            // sentence that had just gone as the draft — offered up again,
+            // under a Send button, the next time the thread was opened.
+            val d = draftNow
+            ContactStore(context).saveDraft(
+                contact.personaHex,
+                if (ThreadSends.owns(contact.personaHex, d)) "" else d,
+            )
         }
     }
     // What the next message answers, if anything. Saved with the draft: half a
@@ -306,6 +315,10 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     var replyTo by rememberSaveable { mutableStateOf<Long?>(null) }
     var replyToOwn by rememberSaveable { mutableStateOf(false) }
     var sending by remember { mutableStateOf(false) }
+    // Waiting on a location fix, which is busy time the registry below
+    // does not know about: a tick from any other thread's send would
+    // otherwise put the composer back the moment the fix started.
+    var fixing by remember { mutableStateOf(false) }
     // (done, total) chunks of an attachment on its way to the network —
     // null for text sends and during the resize/seal prep. Written from the
     // IO coroutine; snapshot state takes cross-thread writes.
@@ -354,9 +367,21 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     }
 
     var settingsOpen by remember { mutableStateOf(false) }
-    var askOpen by remember { mutableStateOf(false) }
-    var payRequest by remember { mutableStateOf<StoredMessage?>(null) }
-    var billView by remember { mutableStateOf<StoredMessage?>(null) }
+    // The money sheets survive a rotation. PaySheet keeps its own typed
+    // amount, its busy state and the id of a payment already on its way
+    // (see Pay.kt) — all of which was thrown away here, because the flag
+    // that put the sheet on screen was a plain remember: turn the phone
+    // mid-payment and the sheet was gone, and with it any sign that the
+    // money had left. The bill itself rides along as its stored form — a
+    // message does not fit a Bundle, its JSON does, and the thread's own
+    // copy takes over below the moment it has loaded.
+    var askOpen by rememberSaveable { mutableStateOf(false) }
+    var payRequest by rememberSaveable(stateSaver = BILL_SAVER) {
+        mutableStateOf<StoredMessage?>(null)
+    }
+    var billView by rememberSaveable(stateSaver = BILL_SAVER) {
+        mutableStateOf<StoredMessage?>(null)
+    }
     var reserveOpen by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf<StoredMessage?>(null) }
 
@@ -374,40 +399,73 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
         expired?.let { messages = it }
     }
 
-    // The one landing for every send that is not the text box: refresh on
-    // success, say what failed otherwise. Called from IO coroutines — the
-    // thread read is a decrypt and a parse. Reactions, unsends and a bill's
-    // decline used to bypass this and swallow their failures whole: the
-    // dialog closed as if the thing had happened, and nothing had.
-    val afterSend: (Result<*>, String?) -> Unit = { r, what ->
-        r.onSuccess { messages = store.thread(c.personaHex) }
-            .onFailure {
-                // Blank counts as missing. `?:` only catches
-                // null, and the throwable that stopped a
-                // picture from sending carried an empty string
-                // instead — so the line above the composer was
-                // set to "" and drew nothing. Picking a photo
-                // looked like picking a photo did nothing at
-                // all: no bubble, no error, no clue.
-                error = moneyFailure(context, it).takeIf {
-                    // The generic sentence is worse than this
-                    // screen's own, which names what failed.
+    // The one door for every send, the text box included: off this screen,
+    // under ThreadSends, because a send on this screen's own scope was
+    // cancelled by the screen leaving — and the write always finished,
+    // it was the landing that was lost (the draft kept, the busy state
+    // dropped, the same words offered up again on the way back in). Says
+    // what failed otherwise; reactions, unsends and a bill's decline used
+    // to swallow their failures whole, the dialog closing as if the thing
+    // had happened.
+    val send: (String?, ((Int, Int) -> Unit) -> Unit) -> Unit = { what, block ->
+        sending = true
+        error = null
+        ThreadSends.launch(store, c.personaHex, what, block = block)
+    }
+    // ...and the landing, read back by whichever instance of this screen is
+    // up when the send finishes. The thread itself needs no refresh here:
+    // the send bumps the store as it persists its row and again as it
+    // marks it delivered, and the effect on `version` re-reads.
+    val tick by ThreadSends.ticks.collectAsState()
+    LaunchedEffect(tick) {
+        val hex = c.personaHex
+        sending = ThreadSends.inFlight(hex) || fixing
+        sendProgress = ThreadSends.progress(hex)
+        for (o in ThreadSends.take(hex)) when (o) {
+            is ThreadSends.Outcome.Landed -> {
+                // The composer is done with these words wherever they
+                // are — the send that took them, or the store's copy a
+                // dispose saved and this instance read back. Only these:
+                // the box stays live while a send is out, so whatever was
+                // typed after them stays, and a sentence typed over them
+                // is not the one that went.
+                val d = draft.trimStart()
+                if (d.startsWith(o.body)) {
+                    draft = d.removePrefix(o.body).trimStart()
+                    replyTo = null; replyToOwn = false
+                }
+                // A sent message is the proof the last failure is over.
+                // The line stayed up under a thread that had moved on,
+                // saying a photo would not send above the photo.
+                error = null
+            }
+            is ThreadSends.Outcome.Failed -> {
+                // The words come back to a box that lost them — a dispose
+                // in between saved an empty draft on this send's account.
+                if (o.body != null && draft.isBlank()) draft = o.body
+                // Blank counts as missing. `?:` only catches null, and the
+                // throwable that stopped a picture from sending carried an
+                // empty string instead — so the line above the composer was
+                // set to "" and drew nothing. Picking a photo looked like
+                // picking a photo did nothing at all: no bubble, no error,
+                // no clue.
+                error = moneyFailure(context, o.error).takeIf {
+                    // The generic sentence is worse than this screen's own,
+                    // which names what failed.
                     !it.contentEquals(
                         context.getString(R.string.main_card_link_failed_body),
                     )
-                } ?: if (what != null) {
-                    context.getString(R.string.chat_could_not_send_the, what)
+                } ?: if (o.what != null) {
+                    context.getString(R.string.chat_could_not_send_the, o.what)
                 } else context.getString(R.string.chat_could_not_send)
-                // The class name, because an empty message is
-                // exactly the case where the log needs to say
-                // something else.
+                // The class name, because an empty message is exactly the
+                // case where the log needs to say something else.
                 DucatLog.w(
                     "Chat",
-                    "$what: ${it.javaClass.simpleName}: ${it.message}",
+                    "${o.what ?: "send"}: ${o.error.javaClass.simpleName}: ${o.error.message}",
                 )
             }
-        sending = false
-        sendProgress = null
+        }
     }
 
     Scaffold(
@@ -460,33 +518,17 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     val doSend = doSend@{
                         val body = draft.trim()
                         if (body.isEmpty() || sending || c.theirBundle == null) return@doSend
+                        // The box keeps the words until the send lands —
+                        // the tick effect above empties it then, or hands
+                        // them back if nothing left the phone. `c` is a
+                        // snapshot for the same reason it always was; the
+                        // store's copy comes back through `version`.
+                        val to = c
+                        val (reSeq, reOwn) = replyTo to replyToOwn
                         sending = true
                         error = null
-                        scope.launch {
-                            val result = withContext(Dispatchers.IO) {
-                                runCatching { sendOne(context, c, body, replyTo, replyToOwn) }
-                            }
-                            sending = false
-                            result.onSuccess { updated ->
-                                c = updated
-                                draft = ""
-                                replyTo = null; replyToOwn = false
-                                messages = withContext(Dispatchers.IO) {
-                                    store.saveDraft(updated.personaHex, "")
-                                    store.thread(updated.personaHex)
-                                }
-                            }.onFailure {
-                                // Mapped, not printed. Sending reaches the
-                                // same node as everything else and fails the
-                                // same way, and `it.message` put that failure
-                                // in front of a reader in English — in an app
-                                // that ships in nineteen languages.
-                                error = moneyFailure(context, it, R.string.chat_could_not_send)
-                                DucatLog.w(
-                                    "Chat",
-                                    "send: ${it.javaClass.simpleName}: ${it.message}",
-                                )
-                            }
+                        ThreadSends.launch(store, to.personaHex, null, body) {
+                            sendOne(context, to, body, reSeq, reOwn)
                         }
                     }
 
@@ -524,16 +566,8 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         androidx.activity.result.contract.ActivityResultContracts.GetContent()
                     ) { uri ->
                         if (uri != null) {
-                            sending = true
-                            scope.launch(Dispatchers.IO) {
-                                afterSend(
-                                    runCatching {
-                                        sendPicture(context, c, uri) { d, t ->
-                                            sendProgress = d to t
-                                        }
-                                    },
-                                    context.getString(R.string.chat_what_picture),
-                                )
+                            send(context.getString(R.string.chat_what_picture)) { progress ->
+                                sendPicture(context, c, uri, progress)
                             }
                         }
                     }
@@ -541,16 +575,8 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         androidx.activity.result.contract.ActivityResultContracts.GetContent()
                     ) { uri ->
                         if (uri != null) {
-                            sending = true
-                            scope.launch(Dispatchers.IO) {
-                                afterSend(
-                                    runCatching {
-                                        sendFile(context, c, uri) { d, t ->
-                                            sendProgress = d to t
-                                        }
-                                    },
-                                    context.getString(R.string.chat_what_file),
-                                )
+                            send(context.getString(R.string.chat_what_file)) { progress ->
+                                sendFile(context, c, uri, progress)
                             }
                         }
                     }
@@ -569,16 +595,8 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     ) { ok ->
                         val uri = cameraUri?.let(android.net.Uri::parse)
                         if (ok && uri != null) {
-                            sending = true
-                            scope.launch(Dispatchers.IO) {
-                                afterSend(
-                                    runCatching {
-                                        sendPicture(context, c, uri) { d, t ->
-                                            sendProgress = d to t
-                                        }
-                                    },
-                                    context.getString(R.string.chat_what_picture),
-                                )
+                            send(context.getString(R.string.chat_what_picture)) { progress ->
+                                sendPicture(context, c, uri, progress)
                             }
                         }
                     }
@@ -612,15 +630,23 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     }
                     val sendLocation = {
                         trayOpen = false
+                        // Busy from the tap, not from the fix. A phone with
+                        // no recent position waits on getCurrentLocation,
+                        // which takes up to thirty seconds to give up
+                        // indoors, and for all of them the tray had closed
+                        // and nothing else had changed: the button looked
+                        // ignored, and was tapped again, and again.
+                        fixing = true
+                        sending = true
+                        error = null
                         grabLocation(context) { place ->
+                            fixing = false
                             if (place == null) {
+                                sending = ThreadSends.inFlight(c.personaHex)
                                 error = context.getString(R.string.chat_error_location_fix)
                             } else {
-                                scope.launch(Dispatchers.IO) {
-                                    afterSend(
-                                        runCatching { Mailbox.send(context, c, place) },
-                                        context.getString(R.string.chat_what_location),
-                                    )
+                                send(context.getString(R.string.chat_what_location)) {
+                                    Mailbox.send(context, c, place)
                                 }
                             }
                         }
@@ -776,23 +802,12 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                                         recording = false
                                                     }
                                                     when (take) {
-                                                        is Take.Memo -> {
-                                                            sending = true
-                                                            scope.launch(Dispatchers.IO) {
-                                                                afterSend(
-                                                                    runCatching {
-                                                                        sendVoice(
-                                                                            context, c,
-                                                                            take.file,
-                                                                        ) { d, t ->
-                                                                            sendProgress = d to t
-                                                                        }
-                                                                    },
-                                                                    context.getString(
-                                                                        R.string.chat_what_voice_memo
-                                                                    ),
-                                                                )
-                                                            }
+                                                        is Take.Memo -> send(
+                                                            context.getString(
+                                                                R.string.chat_what_voice_memo
+                                                            ),
+                                                        ) { progress ->
+                                                            sendVoice(context, c, take.file, progress)
                                                         }
                                                         Take.Failed -> error = context.getString(
                                                             R.string.chat_voice_failed
@@ -919,14 +934,22 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         // composition — re-run on every recomposition while the
                         // picker was up.
                         var pickable by remember { mutableStateOf<List<Contact>?>(null) }
+                        // The shared-name set comes from the same read: it
+                        // is a second all() over every contact, and it was
+                        // computed in the dialog's composition, on the main
+                        // thread, once per list.
+                        var ambiguous by remember { mutableStateOf<Set<String>>(emptySet()) }
                         LaunchedEffect(version) {
-                            pickable = withContext(Dispatchers.IO) {
+                            val (list, shared) = withContext(Dispatchers.IO) {
                                 store.all().filter { it.personaHex != c.personaHex }
-                                    .sortedBy { it.displayName().lowercase() }
+                                    .sortedBy { it.displayName().lowercase() } to store.ambiguous()
                             }
+                            pickable = list
+                            ambiguous = shared
                         }
                         ContactPickDialog(
                             contacts = pickable.orEmpty(),
+                            ambiguous = ambiguous,
                             // The introduction, done the only way consent
                             // allows: a fresh card of *mine*, dropped into the
                             // thread as a ducat: link, for them to hand to
@@ -934,36 +957,25 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                             // through the same registry as any other card.
                             onIntroduceMe = {
                                 contactPick = false
-                                sending = true
-                                scope.launch(Dispatchers.IO) {
-                                    afterSend(
-                                        runCatching {
-                                            val card = Mailbox.issueCard(
-                                                context,
-                                                org.ducatproject.ducat.MyProfile(context).name(),
-                                                60uL * 60uL * 24uL * 7uL,
-                                                purpose = "intro",
-                                            )
-                                            Mailbox.send(
-                                                context, c,
-                                                context.getString(
-                                                    R.string.chat_intro_card_body, card.uri
-                                                ),
-                                            )
-                                        },
-                                        context.getString(R.string.chat_what_card),
+                                send(context.getString(R.string.chat_what_card)) {
+                                    val card = Mailbox.issueCard(
+                                        context,
+                                        org.ducatproject.ducat.MyProfile(context).name(),
+                                        60uL * 60uL * 24uL * 7uL,
+                                        purpose = "intro",
+                                    )
+                                    Mailbox.send(
+                                        context, c,
+                                        context.getString(
+                                            R.string.chat_intro_card_body, card.uri
+                                        ),
                                     )
                                 }
                             },
                             onPick = { chosen ->
                                 contactPick = false
-                                scope.launch(Dispatchers.IO) {
-                                    afterSend(
-                                        runCatching {
-                                            Mailbox.send(context, c, contactCard(chosen))
-                                        },
-                                        context.getString(R.string.chat_what_contact),
-                                    )
+                                send(context.getString(R.string.chat_what_contact)) {
+                                    Mailbox.send(context, c, contactCard(chosen))
                                 }
                             },
                             onDismiss = { contactPick = false },
@@ -1032,7 +1044,23 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
             // Group traffic lives in the group's own screen: a pairwise view
             // showing fan-out copies would show every group in every thread.
             val shown = messages.filter { it.kind !in setOf(4, 8, 9, 10, 11, 12) && it.groupId == null }
-            itemsIndexed(shown) { at, m ->
+            // Keyed, so a row keeps its identity when the rows around it
+            // move: without keys the list was positional, and three
+            // messages expiring at the top (disappearing messages) or one
+            // deleted from the middle slid every bubble below into the
+            // slot — and the state — of the one above it, and the view
+            // jumped by that many rows. Direction, seq and timestamp
+            // together: seq is per mailbox in each direction, and restarts
+            // with every re-claimed card. A repeat of even that triple is
+            // numbered rather than trusted not to happen — a LazyColumn
+            // handed the same key twice throws, and takes the thread down.
+            val seen = HashMap<String, Int>(shown.size)
+            val keys = shown.map { m ->
+                val k = "${if (m.outgoing) 'o' else 'i'}${m.seq}:${m.timestamp}"
+                val n = seen.merge(k, 1, Int::plus) ?: 1
+                if (n == 1) k else "$k#$n"
+            }
+            itemsIndexed(shown, key = { at, _ -> keys[at] }) { at, m ->
                 // A run is consecutive plain messages from the same side,
                 // close together in time. Only kind 0: a bill, a payment or a
                 // reservation is a card that reads as one thing on its own,
@@ -1256,30 +1284,24 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
             onPay = { billView = null; payRequest = b },
             onDecline = {
                 billView = null
-                sending = true
-                scope.launch(Dispatchers.IO) {
-                    afterSend(
-                        runCatching {
-                            // A kind-5 Retract naming the bill, not a sentence
-                            // about it. As plain text this told them in words and
-                            // told neither client anything: the bill stayed live on
-                            // both sides, so the screen that had just declined it
-                            // went on offering "Review payment" for it — decline a
-                            // bill and be invited to pay it, one tap away.
-                            //
-                            // `reOwn = false` because the bill is theirs; the
-                            // vendor's own withdrawal (BarTab's cancelTabWithRetract)
-                            // is the same shape with reOwn true.
-                            Mailbox.send(
-                                context, c,
-                                context.getString(
-                                    R.string.chat_decline_bill,
-                                    Amounts.show(context, b.amountPxmr).primary,
-                                ),
-                                kind = 5, reSeq = b.seq, reOwn = false,
-                            )
-                        },
-                        null,
+                send(null) {
+                    // A kind-5 Retract naming the bill, not a sentence
+                    // about it. As plain text this told them in words and
+                    // told neither client anything: the bill stayed live on
+                    // both sides, so the screen that had just declined it
+                    // went on offering "Review payment" for it — decline a
+                    // bill and be invited to pay it, one tap away.
+                    //
+                    // `reOwn = false` because the bill is theirs; the
+                    // vendor's own withdrawal (BarTab's cancelTabWithRetract)
+                    // is the same shape with reOwn true.
+                    Mailbox.send(
+                        context, c,
+                        context.getString(
+                            R.string.chat_decline_bill,
+                            Amounts.show(context, b.amountPxmr).primary,
+                        ),
+                        kind = 5, reSeq = b.seq, reOwn = false,
                     )
                 }
             },
@@ -1298,7 +1320,9 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
             // splash off; declined cannot happen from behind the sheet.
             LaunchedEffect(r) {
                 payRequest = null
-                error = context.getString(R.string.ceremony_bill_withdrawn, c.displayName())
+                error = context.getString(
+                    R.string.ceremony_bill_withdrawn, isolate(c.displayName()),
+                )
             }
         } else {
             // The contact rides along, not just the address. Paying a
@@ -1368,18 +1392,12 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                     modifier = Modifier
                                         .clickable {
                                             confirmDelete = null
-                                            sending = true
-                                            scope.launch(Dispatchers.IO) {
-                                                afterSend(
-                                                    runCatching {
-                                                        Mailbox.send(
-                                                            context, c, emo,
-                                                            kind = 4,
-                                                            reSeq = m.seq,
-                                                            reOwn = m.outgoing,
-                                                        )
-                                                    },
-                                                    context.getString(R.string.chat_what_reaction),
+                                            send(context.getString(R.string.chat_what_reaction)) {
+                                                Mailbox.send(
+                                                    context, c, emo,
+                                                    kind = 4,
+                                                    reSeq = m.seq,
+                                                    reOwn = m.outgoing,
                                                 )
                                             }
                                         }
@@ -1411,26 +1429,20 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     ) {
                         TextButton(onClick = {
                             confirmDelete = null
-                            sending = true
-                            scope.launch(Dispatchers.IO) {
-                                afterSend(
-                                    runCatching {
-                                        // The sentence, not the words being taken
-                                        // back: chat_retract_with_quote exists so a
-                                        // withdrawn *bill* can say which one, and
-                                        // quoting an unsent message back into the
-                                        // thread is the one thing this must not do.
-                                        // A body is required — core refuses an empty
-                                        // one — and this client never shows it (see
-                                        // BillAnswers.quiet), so it is there for a
-                                        // reader that does not know the convention.
-                                        Mailbox.send(
-                                            context, c,
-                                            context.getString(R.string.chat_unsent),
-                                            kind = 5, reSeq = m.seq, reOwn = true,
-                                        )
-                                    },
-                                    null,
+                            send(null) {
+                                // The sentence, not the words being taken
+                                // back: chat_retract_with_quote exists so a
+                                // withdrawn *bill* can say which one, and
+                                // quoting an unsent message back into the
+                                // thread is the one thing this must not do.
+                                // A body is required — core refuses an empty
+                                // one — and this client never shows it (see
+                                // BillAnswers.quiet), so it is there for a
+                                // reader that does not know the convention.
+                                Mailbox.send(
+                                    context, c,
+                                    context.getString(R.string.chat_unsent),
+                                    kind = 5, reSeq = m.seq, reOwn = true,
                                 )
                             }
                         }) { Text(stringResource(R.string.chat_unsend)) }
@@ -1448,21 +1460,45 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     ) {
                         TextButton(onClick = {
                             confirmDelete = null
-                            sending = true
-                            scope.launch(Dispatchers.IO) {
-                                afterSend(
-                                    runCatching {
-                                        Mailbox.send(
-                                            context, c,
-                                            context.getString(
-                                                R.string.bartab_bill_cancelled_msg,
-                                                Amounts.show(context, m.amountPxmr).primary,
-                                            ),
-                                            kind = 5, reSeq = m.seq, reOwn = true,
-                                        )
-                                    },
-                                    null,
-                                )
+                            send(null) {
+                                // A bill the till sent has a tab behind it,
+                                // and the tab is what keeps watching the
+                                // chain for the payment. Taking the bill back
+                                // from here used to leave that tab billed and
+                                // waiting: the customer's screen said
+                                // "cancelled", the Tabs screen said "awaiting
+                                // payment", and a payment that did arrive was
+                                // read as settling a bill this thread had
+                                // withdrawn. The tab's own cancel closes both
+                                // — the same kind-5, through TabStore.close.
+                                val tabs = TabStore(context)
+                                val thread = store.thread(c.personaHex)
+                                val waiting = tabs.all().firstOrNull { t ->
+                                    t.personaHex == c.personaHex &&
+                                        t.state == "settled" && t.seenTx == null &&
+                                        t.billIn(thread)?.let { b ->
+                                            b.seq == m.seq && b.timestamp == m.timestamp
+                                        } == true
+                                }
+                                if (waiting != null) {
+                                    // Null: the tab moved on between the look
+                                    // and the close — paid, or cancelled from
+                                    // the counter. Either lands in this
+                                    // thread on its own, and this button goes
+                                    // with it.
+                                    if (cancelTabWithRetract(context, tabs, waiting) == null) {
+                                        DucatLog.i("Chat", "cancel request: tab ${waiting.id} had moved on")
+                                    }
+                                } else {
+                                    Mailbox.send(
+                                        context, c,
+                                        context.getString(
+                                            R.string.bartab_bill_cancelled_msg,
+                                            Amounts.show(context, m.amountPxmr).primary,
+                                        ),
+                                        kind = 5, reSeq = m.seq, reOwn = true,
+                                    )
+                                }
                             }
                         }) { Text(stringResource(R.string.chat_cancel_request)) }
                     }
@@ -1633,6 +1669,21 @@ private fun ChatSettingsDialog(
  * its own clock beside it.
  */
 private const val RUN_GAP_SECONDS = 300L
+
+/**
+ * A bill on its way through a rotation: the message as the store keeps it,
+ * as a string. Bills only — a bill carries an amount, its lines and an
+ * address, nothing the process should not hand the system on its way
+ * down; an attachment's row would carry its key, and does not come here.
+ * A saved form that will not parse restores as no bill open.
+ */
+private val BILL_SAVER = androidx.compose.runtime.saveable.Saver<StoredMessage?, String>(
+    save = { it?.toJson()?.toString() ?: "" },
+    restore = { s ->
+        if (s.isEmpty()) null
+        else runCatching { StoredMessage.from(org.json.JSONObject(s)) }.getOrNull()
+    },
+)
 
 /**
  * One line standing for a message, for the chrome above a reply.
@@ -1854,8 +1905,13 @@ private fun Bubble(
                                             stringResource(R.string.chat_att_gone)
                                         voice ->
                                             stringResource(R.string.chat_downloading_audio)
+                                        // Fenced like a body: a file is named
+                                        // by whoever sent it, in their script,
+                                        // and a name ending in a bracket or a
+                                        // digit came apart under a reader
+                                        // whose paragraph runs the other way.
                                         else ->
-                                            "📎 ${m.attName ?: stringResource(R.string.chat_file_fallback)}"
+                                            "📎 ${isolate(m.attName ?: stringResource(R.string.chat_file_fallback))}"
                                     },
                                     color = fg,
                                 )
@@ -1990,7 +2046,7 @@ private fun Bubble(
                         mime.startsWith("audio/") -> AudioBubble(file, fg)
                         else -> FileBubble(
                             file,
-                            m.attName ?: stringResource(R.string.chat_file_fallback),
+                            isolate(m.attName ?: stringResource(R.string.chat_file_fallback)),
                             m.attLen, mime, fg,
                         )
                     }
@@ -2933,15 +2989,15 @@ private fun TrayItem(
 @Composable
 private fun ContactPickDialog(
     contacts: List<Contact>,
+    // Whose name belongs to more than one person. Sharing somebody's profile
+    // with the wrong Sam sends a stranger a contact card; the row has to say
+    // which rows are two people, the way Pay's picker already does. Read by
+    // the caller, off the main thread, alongside the list itself.
+    ambiguous: Set<String>,
     onIntroduceMe: () -> Unit,
     onPick: (Contact) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val context = androidx.compose.ui.platform.LocalContext.current
-    // Whose name belongs to more than one person. Sharing somebody's profile
-    // with the wrong Sam sends a stranger a contact card; the row has to say
-    // which rows are two people, the way Pay's picker already does.
-    val ambiguous = remember(contacts) { ContactStore(context).ambiguous() }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.chat_share)) },
@@ -3070,7 +3126,10 @@ private fun EnquiryLine(
                             if (about.kind == org.ducatproject.ducat.Listings.KIND_SALE) shown
                             else stringResource(priceLabelShort(about.kind), shown)
                         }
-                        .let { price -> "${about.title} · $price" },
+                        // The title is the seller's, in the seller's script;
+                        // fenced so its last word and the price keep their
+                        // places under a reader running the other way.
+                        .let { price -> "${isolate(about.title)} · $price" },
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,

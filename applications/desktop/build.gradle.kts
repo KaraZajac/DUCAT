@@ -124,6 +124,9 @@ val sharedLogic = listOf(
     "org/ducatproject/ducat/ui/BackupSettings.kt",
     "org/ducatproject/ducat/ui/MyProfileEditor.kt",
     "org/ducatproject/ducat/ui/Chat.kt",
+    // The conversation's sends in flight, held by the process: Chat.kt
+    // reads its busy state and its landings from here.
+    "org/ducatproject/ducat/ui/ThreadSends.kt",
     "org/ducatproject/ducat/ui/QrHub.kt",
     // Desk-side glue that lives inside the shared package — these two match
     // files in *this* module's tree (like SecurePrefsDesk below), not app/.
