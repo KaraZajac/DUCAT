@@ -1656,6 +1656,27 @@ object Ceremony {
      * "long enough", and that is the right side to be wrong on: the money
      * is already in and the offer is only ever an offer.
      */
+    /**
+     * The rider's slice of a "give me back what I put in" proposal.
+     *
+     * Split out because it is the arithmetic the claim rests on, and
+     * arithmetic that decides where money goes should be checkable without
+     * a chain. [total] is the escrow's live balance, read at the moment of
+     * proposing and never a caller's older scan: that is the whole point.
+     * The funder's own money is the rider's slice, so they ask for it
+     * directly; everybody else is the residual, so their own share is what
+     * is left once the rider's is taken out.
+     *
+     * The case this exists for is the half-funded escrow, where [total] is
+     * one party's contribution. The case it must not break is the race —
+     * the other side funding between the button and this line — where
+     * asking for the whole escrow would be asking for their money too.
+     */
+    internal fun refundBack(o: JSONObject, total: Long): Long {
+        val mine = mySharePxmr(o)
+        return if (isFunder(o)) mine.coerceIn(0L, total) else (total - mine).coerceAtLeast(0L)
+    }
+
     /** Whether this party's own money is in the escrow. */
     fun myFundTxidPresent(o: JSONObject): Boolean =
         myFundTxid(o).let { it.isNotEmpty() && it != SENDING }
@@ -2493,16 +2514,8 @@ object Ceremony {
         val total = runCatching {
             uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
         }.getOrDefault(0L)
-        // Against the live balance, never the caller's scan: the whole point
-        // of [refundMineOnly] is that a stale figure is what makes the claim
-        // wrong. The funder's own money is the rider's slice; everybody
-        // else's is the residual, so their own share is what is left after it.
-        val mine = mySharePxmr(o)
-        val back = when {
-            !refundMineOnly -> riderBackPxmr.coerceIn(0L, total)
-            isFunder(o) -> mine.coerceIn(0L, total)
-            else -> (total - mine).coerceAtLeast(0L)
-        }
+        val back =
+            if (refundMineOnly) refundBack(o, total) else riderBackPxmr.coerceIn(0L, total)
         // Two shapes, one meaning: normally the rider's slice is fixed and
         // the driver is residual; when the driver's remainder could not
         // cover the fee, the driver's slice is fixed (possibly zero) and

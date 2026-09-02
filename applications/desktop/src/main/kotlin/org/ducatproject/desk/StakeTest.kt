@@ -128,6 +128,43 @@ fun main() {
             driverGets >= f - fee, "${formatXmr(driverGets)} vs fare ${formatXmr(f - fee)}")
     }
 
+    // 7. **Getting your own money back out of a half-funded escrow.**
+    //
+    // One side has paid, the other never came, and the claim the banner
+    // makes for them is "give me back what I put in". Two things must hold:
+    // it is the whole balance when the balance is only theirs, and it is
+    // still only their own share when the other side funded a second after
+    // the button was pressed. The second is the one worth pinning — the
+    // difference between an honest claim and asking an arbiter to hand over
+    // somebody else's money.
+    run {
+        val fare = 5L * xmr
+        val stake = fare / 10
+        fun ride(funder: Boolean) = org.json.JSONObject()
+            .put("i", if (funder) 1 else 2)
+            .put("funderIdx", 1)
+            .put("farePxmr", fare)
+            .put("hostDepPxmr", stake)
+
+        val riderOnly = org.ducatproject.ducat.Ceremony.refundBack(ride(true), fare + stake)
+        check("a stranded rider asks for exactly what they paid",
+            riderOnly == fare + stake, formatXmr(riderOnly))
+        val riderRaced = org.ducatproject.ducat.Ceremony
+            .refundBack(ride(true), fare + stake + stake)
+        check("and not the driver's stake that landed meanwhile",
+            riderRaced == fare + stake, formatXmr(riderRaced))
+
+        val driverOnly = org.ducatproject.ducat.Ceremony.refundBack(ride(false), stake)
+        check("a stranded driver leaves nothing to the rider", driverOnly == 0L)
+        val driverRaced = org.ducatproject.ducat.Ceremony
+            .refundBack(ride(false), stake + fare + stake)
+        check("and hands back the fare that landed meanwhile",
+            driverRaced == fare + stake, formatXmr(driverRaced))
+
+        val short = org.ducatproject.ducat.Ceremony.refundBack(ride(true), stake)
+        check("nobody may claim more than the escrow holds", short == stake)
+    }
+
     println(if (failures == 0) "STAKETEST OK" else "STAKETEST FAILED ($failures)")
     if (failures > 0) kotlin.system.exitProcess(1)
 }
