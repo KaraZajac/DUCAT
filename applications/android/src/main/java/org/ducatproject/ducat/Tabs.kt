@@ -983,6 +983,9 @@ class TabStore(private val context: Context) {
             }
         }
 
+        /** The owed tab the last pass tried. See [sendOwedReceipts]. */
+        private var lastOwed: String? = null
+
         /**
          * A receipt owed from an earlier pass, sent now.
          *
@@ -991,14 +994,28 @@ class TabStore(private val context: Context) {
          * after. Ahead of the matching in [reconcile], and regardless of
          * whether anything is left to match — the tab that owes the word is
          * already paid.
+         *
+         * **Taken in turn, not from the front.** It used to retry whichever
+         * owed tab came first, for ever, which is fine while a failure is
+         * the network having a bad minute and fatal when it is not: a
+         * customer whose prekeys have never arrived (Mailbox.NoKeysYet)
+         * cannot be sent to *at all* until they publish some, and one such
+         * tab at the head of the list meant nobody else's receipt was ever
+         * attempted again. The stuck tab still gets its turn — the bundle
+         * may yet land — it simply no longer gets everybody else's.
          */
         fun sendOwedReceipts(context: Context) {
             val store = TabStore(context)
-            val owed = store.all().firstOrNull {
+            val owed = store.all().filter {
                 it.state == "paid" && it.wordSeq == RunningTab.WORD_UNSENT
-            } ?: return
-            runCatching { store.sendChainReceipt(owed) }
-                .onFailure { DucatLog.w(TAG, "receipt retry for ${owed.origin} tab: ${it.message}") }
+            }
+            if (owed.isEmpty()) return
+            // The one after last time's, wrapping — and the first when that
+            // tab is gone (indexOfFirst gives -1, so this lands on 0).
+            val pick = owed[(owed.indexOfFirst { it.id == lastOwed } + 1) % owed.size]
+            lastOwed = pick.id
+            runCatching { store.sendChainReceipt(pick) }
+                .onFailure { DucatLog.w(TAG, "receipt retry for ${pick.origin} tab: ${it.message}") }
         }
     }
 

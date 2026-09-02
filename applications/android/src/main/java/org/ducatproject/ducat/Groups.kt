@@ -231,7 +231,7 @@ object Groups {
             arr.put(JSONObject().apply {
                 put("g", idHex); put("m", memberHex); put("roster", true); put("s", seq)
             })
-            prefs(context).edit().putString("retry", arr.toString()).apply()
+            prefs(context).edit().putString("retry", trimQueue(context, arr).toString()).apply()
         }
 
     /** The local mesh check: members we do not hold as contacts. */
@@ -303,6 +303,36 @@ object Groups {
         prefs(context).getString("retry", null)?.let { runCatching { JSONArray(it) }.getOrNull() }
             ?: JSONArray()
 
+    /**
+     * How many parked copies one pass may try.
+     *
+     * The queue was replayed whole, every pass, with a round trip for each
+     * entry — so a member whose phone had been off all week cost the poll
+     * one timeout per message they had missed, on the same loop that
+     * delivers everybody else's mail. A backlog drains over several passes
+     * instead, taken in turn so nothing at the back waits for ever.
+     */
+    private const val RETRIES_PER_PASS = 8
+
+    /** How many are kept at all. Past this the oldest go, the way a
+     *  listing keeps only its last few minted cards: the queue is replayed
+     *  on every pass for as long as it exists, so unbounded here is
+     *  unbounded work as well as unbounded storage. */
+    private const val MAX_QUEUED = 200
+
+    /** Where the last pass stopped. */
+    private var retryCursor = 0
+
+    /** Newest kept, oldest dropped, and said out loud — a copy quietly
+     *  abandoned is a message somebody will never see and never hear about. */
+    private fun trimQueue(context: Context, arr: JSONArray): JSONArray {
+        if (arr.length() <= MAX_QUEUED) return arr
+        var dropped = 0
+        while (arr.length() > MAX_QUEUED) { arr.remove(0); dropped++ }
+        DucatLog.w(TAG, "retry queue full — $dropped undelivered copy(s) dropped")
+        return arr
+    }
+
     private fun queueRetry(
         context: Context, idHex: String, memberHex: String, body: String,
         kind: Int, seq: Long, reSender: String?, reSeq: Long?,
@@ -313,20 +343,25 @@ object Groups {
             put("k", kind); put("s", seq)
             reSender?.let { put("rs", it) }; reSeq?.let { put("rq", it) }
         })
-        prefs(context).edit().putString("retry", arr.toString()).apply()
+        prefs(context).edit().putString("retry", trimQueue(context, arr).toString()).apply()
     }
 
     /** Poller hook: replay what did not land. Quietly — the queue is the news. */
     fun retryOutbox(context: Context) {
         val arr = retries(context)
-        if (arr.length() == 0) return
-        val personas = PersonaStore(context)
-        val ours = personas.allHexes()
+        val n = arr.length()
+        if (n == 0) return
         val store = ContactStore(context)
+        // Read once, not once per entry: `all()` decrypts the whole book,
+        // and this loop asked it for every parked copy in the queue.
+        val book = store.all()
         val landed = ArrayList<JSONObject>()
-        for (i in 0 until arr.length()) {
-            val o = arr.getJSONObject(i)
-            val c = store.all().firstOrNull { it.personaHex == o.getString("m") }
+        if (retryCursor >= n) retryCursor = 0
+        var at = retryCursor
+        repeat(minOf(RETRIES_PER_PASS, n)) {
+            val o = arr.getJSONObject(at % n)
+            at++
+            val c = book.firstOrNull { it.personaHex == o.getString("m") }
             if (o.optBoolean("roster")) {
                 val g = get(context, o.getString("g"))
                 val ok = c != null && g != null && runCatching {
@@ -341,7 +376,7 @@ object Groups {
                     )
                 }.isSuccess
                 if (ok) landed.add(o)
-                continue
+                return@repeat
             }
             val ok = c != null && runCatching {
                 Mailbox.send(
@@ -358,6 +393,7 @@ object Groups {
                 DucatLog.i(TAG, "group retry landed for ${o.getString("m").take(8)}…")
             }
         }
+        retryCursor = at % n
         if (landed.isEmpty()) return
         // Struck from the queue as it stands now, not the snapshot replayed:
         // the sends above take as long as the network does, and a message

@@ -1029,6 +1029,16 @@ object Ceremony {
                         "stagenet", 8_000u,
                     ).height.toLong()
                     o.put("scanFrom", (h - 10).coerceAtLeast(0))
+                }.onFailure {
+                    // Not fatal and not free: with no height here every later
+                    // scan of this escrow falls back to the wallet's restore
+                    // height and reads the chain from there — minutes where
+                    // this would have been seconds, for the life of the
+                    // escrow, with nothing anywhere to say why. Now a line.
+                    DucatLog.w(
+                        TAG,
+                        "bond $idHex: no scan height (${it.message}) — scans start from the wallet's",
+                    )
                 }
                 save(context, idHex, o)
                 ContactStore.bump()
@@ -2078,6 +2088,16 @@ object Ceremony {
                 // a node that timed out locks this party out of their own
                 // escrow for good.
                 runCatching { mutate(context, idHex) { cur -> cur.put(mine, "") } }
+                    .onFailure { e ->
+                        // And if *that* write fails, the lockout is real and
+                        // permanent: the mark says this party has already
+                        // sent, so nothing will ever offer to send again.
+                        // At error, because the way back is a human noticing.
+                        DucatLog.e(
+                            TAG,
+                            "escrow $idHex: could not clear the send mark — ${e.message}",
+                        )
+                    }
             }
             .getOrThrow()
         // Per-party mark: for reservations both sides fund, each records
