@@ -934,12 +934,17 @@ private fun AmountStep(
                         val memo = note
                         val cadence = repeat
                         val id = "ask:" + java.util.UUID.randomUUID()
+                        // The application, not this screen's activity: the
+                        // job sits in PaySends until a screen collects it,
+                        // and one that is never reopened would hold a dead
+                        // activity for the life of the process.
+                        val app = context.applicationContext
                         PaySends.start(id) {
                             Mailbox.send(
-                                context, target.contact,
-                                memo.ifBlank { context.getString(R.string.pay_payment_request) },
+                                app, target.contact,
+                                memo.ifBlank { app.getString(R.string.pay_payment_request) },
                                 kind = 1, amountPxmr = amt,
-                                payto = WalletStore(context)
+                                payto = WalletStore(app)
                                     .addressFor(target.contact.personaHex),
                             )
                             // Registered only after the first request truly
@@ -949,7 +954,7 @@ private fun AmountStep(
                             if (cadence != 0) {
                                 runCatching {
                                     Recurring.add(
-                                        context, target.contact.personaHex,
+                                        app, target.contact.personaHex,
                                         amt, memo, monthly = cadence == 2,
                                     )
                                 }.onFailure { DucatLog.w("Pay", "asked, but not scheduled: ${it.message}") }
@@ -1056,28 +1061,32 @@ private fun AmountStep(
             // statement's tax-time filter true, nothing more.
             val isDonation = answersSeq == null && contact?.cardPurpose == "donate"
             val id = "pay:" + java.util.UUID.randomUUID()
+            // The application, not this screen's activity — see the ask
+            // button: the job outlives the screen, and may outlive every
+            // screen.
+            val app = context.applicationContext
             PaySends.start(id) {
                 // A demoted node leaves lastGood empty; the user's retry
                 // deserves a fresh probe, not "no node".
-                val node = NodeStore(context).lastGood()
+                val node = NodeStore(app).lastGood()
                     ?: runCatching {
                         uniffi.ducat_mobile.moneroPickNode(
                             uniffi.ducat_mobile.moneroDefaultNodes(
-                                NodeStore(context).ownUrl()),
+                                NodeStore(app).ownUrl()),
                             "stagenet", 8000u,
                         ).also {
-                            NodeStore(context).rememberLastGood(it.url)
+                            NodeStore(app).rememberLastGood(it.url)
                         }.url
                     }.getOrNull()
                     ?: throw IllegalStateException(
-                        context.getString(R.string.pay_no_node)
+                        app.getString(R.string.pay_no_node)
                     )
                 val to = dest
                     ?: throw IllegalStateException(
-                        context.getString(R.string.pay_no_address_error)
+                        app.getString(R.string.pay_no_address_error)
                     )
                 val res = Wallet.send(
-                    context, node, to, amount,
+                    app, node, to, amount,
                     contactHex = contact?.personaHex,
                     note = memo.ifBlank { null },
                     priority = speed,
@@ -1090,8 +1099,8 @@ private fun AmountStep(
                 contact?.let { c ->
                     runCatching {
                         Mailbox.send(
-                            context, c,
-                            memo.ifBlank { context.getString(R.string.pay_payment) },
+                            app, c,
+                            memo.ifBlank { app.getString(R.string.pay_payment) },
                             kind = 2, amountPxmr = amount,
                             // Which request this settles. `reOwn` is false:
                             // the bill is in *their* outbox, and we are

@@ -42,6 +42,7 @@ import org.ducatproject.ducat.Ledger
 import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.WalletStore
 import org.ducatproject.ducat.PersonaStore
+import org.ducatproject.ducat.referent
 import org.ducatproject.ducat.threadAad
 import org.ducatproject.ducat.StoredMessage
 import org.ducatproject.ducat.Amounts
@@ -152,11 +153,7 @@ internal fun reactionsOn(
     val out = HashMap<Pair<Long, Long>, Pair<String?, String?>>()
     for (r in messages.sortedBy { it.timestamp }) {
         if (r.kind != 4) continue
-        val seq = r.reSeq ?: continue
-        val side = if (r.reOwn) r.outgoing else !r.outgoing
-        val t = messages
-            .filter { it.outgoing == side && it.seq == seq && it.timestamp <= r.timestamp }
-            .maxByOrNull { it.timestamp } ?: continue
+        val t = messages.referent(r) ?: continue
         val k = t.seq to t.timestamp
         val cur = out[k] ?: (null to null)
         out[k] = if (r.outgoing) r.body to cur.second else cur.first to r.body
@@ -193,24 +190,12 @@ internal data class BillAnswers(
  * Which message each retraction or refusal actually answers.
  *
  * A kind-5 names its target by sequence number alone, and the comment that
- * used to sit on the check called that "exact". It is exact only while a
- * sequence number is unique in a thread, and it is not: every card cut for a
- * hail, a sale or a listing restarts the mailbox, so one conversation holds
- * several messages numbered 0. Declining a ride offer at seq 0 therefore
- * marked a shop's bill "Declined" — a bill that had arrived on a later card,
- * also at seq 0, and whose Pay button vanished with the label. The customer
- * was standing at the counter holding an unpayable bill they had never
- * refused, while the till read "bill sent" and waited (found live,
- * 2026-08-24: a coffee and a croissant, USD 8.03).
- *
- * With only a seq on the wire the honest reading is positional: a reaction
- * answers the message with that seq which most recently preceded it. Resolve
- * against every message rather than only bills, so a reaction that answered
- * something else resolves to that something else and leaves the bills alone.
+ * used to sit on the check called that "exact". It is not — see
+ * [referent], the one reading of a reference every screen shares: a decline
+ * at seq 0 once marked a shop's bill "Declined", a bill that had arrived on
+ * a later card, also at seq 0, and whose Pay button vanished with the label
+ * while the till read "bill sent" and waited.
  */
-/** How far apart two honest clocks are allowed to be (§16.14 resolution). */
-private const val CLOCK_SKEW_SECS = 900L
-
 internal fun billAnswers(messages: List<StoredMessage>): BillAnswers {
     val withdrawn = HashSet<Pair<Long, Long>>()
     val refused = HashSet<Pair<Long, Long>>()
@@ -218,32 +203,7 @@ internal fun billAnswers(messages: List<StoredMessage>): BillAnswers {
     val quiet = HashSet<Pair<Long, Long>>()
     for (r in messages) {
         if (r.kind != 5) continue
-        val seq = r.reSeq ?: continue
-        // Whose log the seq belongs to: our own for a retraction, the other
-        // side's for a refusal.
-        val side = if (r.reOwn) r.outgoing else !r.outgoing
-        // Positional first, exactly as before: the nearest preceding
-        // message with that seq. Only when nothing precedes may the answer
-        // reach *forward*, and then only within the skew grace — because
-        // the two timestamps were stamped by two different clocks, and a
-        // bill minted by a fast clock and declined straight away sits
-        // "after" its own refusal (found live 2026-08-27; the refusal
-        // resolved to nothing and the asker's bubble stayed live).
-        //
-        // The order matters. A flat grace window re-created the 08-24
-        // failure this function exists to prevent: a seq reborn on a fresh
-        // card ten minutes later fell inside the window, and the refusal
-        // of the old message reached the new one. Preferring the preceding
-        // candidate keeps rebirth resolution untouched; the forward reach
-        // exists only for the case where the old rule found nothing at all.
-        val onSide = messages.filter { it.outgoing == side && it.seq == seq }
-        val target = onSide
-            .filter { it.timestamp <= r.timestamp }
-            .maxByOrNull { it.timestamp }
-            ?: onSide
-                .filter { it.timestamp <= r.timestamp + CLOCK_SKEW_SECS }
-                .minByOrNull { it.timestamp }
-            ?: continue
+        val target = messages.referent(r) ?: continue
         when {
             target.kind == 1 -> (if (r.reOwn) withdrawn else refused) +=
                 target.seq to target.timestamp
@@ -627,7 +587,18 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     // typed in — so it is visible while the sentence is being
                     // chosen, and cancellable without deleting the sentence.
                     replyTo?.let { seq ->
-                        val line = replyLine(messages, seq, replyToOwn, answers)
+                        // Read as the message about to be sent will be read
+                        // at the other end: a reference from now, to that
+                        // seq, in that log.
+                        val line = replyLine(
+                            messages,
+                            StoredMessage(
+                                outgoing = true, seq = -1, body = "",
+                                timestamp = System.currentTimeMillis() / 1000,
+                                reSeq = seq, reOwn = replyToOwn,
+                            ),
+                            answers,
+                        )
                         Row(
                             Modifier.fillMaxWidth()
                                 .padding(start = 12.dp, end = 12.dp, top = 8.dp),
@@ -1128,9 +1099,12 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         // money they were paid. An incoming payment naming
                         // this request (their re_own=false: our log), or our
                         // own receipt for it (re_own=true), is not a guess.
+                        // Which bill a reference names is `referent`'s
+                        // reading — positional, since a seq is per card —
+                        // and the reference's own re_own says whose log.
                         paid = (m.kind == 1 && m.outgoing && messages.any {
-                            (it.kind == 2 && !it.outgoing && it.reSeq == m.seq && !it.reOwn) ||
-                                (it.kind == 3 && it.outgoing && it.reSeq == m.seq && it.reOwn)
+                            ((it.kind == 2 && !it.outgoing) || (it.kind == 3 && it.outgoing)) &&
+                                messages.referent(it) === m
                         }) || (m.kind == 1 && !m.outgoing && messages.any {
                             val answers = ((it.kind == 2 && it.outgoing) ||
                                 (it.kind == 3 && !it.outgoing))
@@ -1139,11 +1113,9 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                 // The bill is theirs, so it lives in their
                                 // outbox — and `re_own` means "the sender's
                                 // own log". Our payment answering it says
-                                // false; their receipt for it says true. Both
-                                // reduce to: the reference points at the log
-                                // the answering message did *not* come from,
-                                // unless they sent both.
-                                it.reSeq == m.seq && it.reOwn == !it.outgoing
+                                // false; their receipt for it says true;
+                                // `referent` reads either.
+                                messages.referent(it) === m
                             } else {
                                 it.amountPxmr >= m.amountPxmr &&
                                     it.timestamp >= m.timestamp
@@ -1161,11 +1133,9 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         unsent = (m.seq to m.timestamp) in answers.unsent,
                         // Resolved here, where the thread is. A bubble sees one
                         // message; the target lives in the list around it.
-                        answering = m.reSeq?.let {
-                            replyLine(messages, it, m.reOwn == m.outgoing, answers)
-                        },
+                        answering = m.reSeq?.let { replyLine(messages, m, answers) },
                         answeredGone = m.reSeq != null &&
-                            replyLine(messages, m.reSeq!!, m.reOwn == m.outgoing, answers) == null,
+                            replyLine(messages, m, answers) == null,
                         onLongPress = { confirmDelete = m },
                         onPay = { billView = it },
                     )
@@ -1598,11 +1568,11 @@ private const val RUN_GAP_SECONDS = 300L
 @Composable
 private fun replyLine(
     messages: List<StoredMessage>,
-    seq: Long,
-    own: Boolean,
+    /** The reply; what it quotes is [referent]'s reading of its reference. */
+    m: StoredMessage,
     answers: BillAnswers,
 ): String? {
-    val t = messages.lastOrNull { it.outgoing == own && it.seq == seq } ?: return null
+    val t = messages.referent(m) ?: return null
     if ((t.seq to t.timestamp) in answers.unsent) return stringResource(R.string.chat_unsent)
     return when {
         t.kind == 1 -> stringResource(R.string.chat_reply_to_bill)

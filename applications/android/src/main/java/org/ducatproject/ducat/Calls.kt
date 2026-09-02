@@ -399,8 +399,12 @@ object Calls {
                     it.outgoing && it.kind == 14 &&
                         myCallId != null && it.callId == myCallId!!.toHexLower()
                 }
+                // Read as `referent` reads a reference — a seq is per card,
+                // and a "no" to an old card's seq-3 must not end a fresh
+                // ring at seq 3.
                 if (offer != null && thread.any {
-                        !it.outgoing && it.kind == 5 && it.reSeq == offer.seq && !it.reOwn
+                        !it.outgoing && it.kind == 5 && !it.reOwn &&
+                            thread.referent(it) === offer
                     }
                 ) {
                     DucatLog.i("Calls", "declined")
@@ -409,9 +413,15 @@ object Calls {
             }
             is State.Incoming -> {
                 // The caller withdrew the offer — hung up before we picked
-                // up. Their Retract names their own message.
-                if (store.thread(s.contactHex).any {
-                        !it.outgoing && it.kind == 5 && it.reOwn && it.reSeq == s.offerSeq
+                // up. Their Retract names their own message, by the seq
+                // `referent` resolves; the offer itself is known by call id.
+                val thread = store.thread(s.contactHex)
+                val offer = thread.lastOrNull {
+                    !it.outgoing && it.kind == 14 && it.callId == s.callId
+                }
+                if (offer != null && thread.any {
+                        !it.outgoing && it.kind == 5 && it.reOwn &&
+                            thread.referent(it) === offer
                     }
                 ) {
                     DucatLog.i("Calls", "caller hung up before the answer")
@@ -428,11 +438,13 @@ object Calls {
                             it.callId !in dealtWith &&
                             // A ring already answered, declined or withdrawn
                             // is history. A Retract names the offer in its
-                            // sender's numbering: ours with reOwn false,
-                            // theirs with reOwn true.
+                            // sender's numbering — ours with reOwn false,
+                            // theirs with reOwn true — which is what
+                            // `referent` reads, positionally, since a seq
+                            // is per card.
                             thread.none { r ->
                                 (r.outgoing && r.kind == 15 && r.callId == it.callId) ||
-                                    (r.kind == 5 && r.reSeq == it.seq && r.reOwn == !r.outgoing)
+                                    (r.kind == 5 && thread.referent(r) === it)
                             }
                     } ?: continue
                     if (startRinging(context, c, offer, now)) return

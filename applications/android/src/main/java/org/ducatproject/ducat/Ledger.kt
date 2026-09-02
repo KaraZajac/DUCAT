@@ -313,34 +313,34 @@ object Ledger {
             p.kind == 2 && p.outgoing != m.outgoing &&
                 // §16.14 first, arithmetic second — the till's rule (see
                 // Tabs' said-sets). A payment that names a bill answers the
-                // bill it names, with no timestamp condition: the two stamps
-                // come from two different clocks, and a named answer sitting
-                // "before" its bill is ordinary skew, not time travel. The
-                // amount-and-time arm stays for notices that predate the
-                // reference — and a named notice must never fall through to
-                // it, or it answers every cheaper bill in the thread too.
-                if (p.reSeq != null) !p.reOwn && p.reSeq == m.seq
+                // bill it names — the one [referent] reads, since a seq is
+                // per card and a thread can hold two bills numbered alike;
+                // with the skew grace rather than a timestamp condition,
+                // because the two stamps come from two different clocks and
+                // a named answer sitting "before" its bill is ordinary skew,
+                // not time travel. The amount-and-time arm stays for notices
+                // that predate the reference — and a named notice must never
+                // fall through to it, or it answers every cheaper bill in
+                // the thread too.
+                if (p.reSeq != null) thread.referent(p) === m
                 else p.timestamp >= m.timestamp && p.amountPxmr >= m.amountPxmr
         } || thread.any { p ->
             // A receipt at or above it also closes it (paid outside). Named
             // receipts are exact the same way: the receipt's re_own says
-            // whose log the bill lives in, which is "the sender's own" only
-            // when receipt and bill come from the same side.
+            // whose log the bill lives in, and [referent] reads it.
             p.kind == 3 &&
                 if (p.reSeq != null) {
-                    p.reSeq == m.seq && p.reOwn == (p.outgoing == m.outgoing)
+                    thread.referent(p) === m
                 } else {
                     p.timestamp >= m.timestamp && p.amountPxmr >= m.amountPxmr
                 }
         } || thread.any { p ->
-            // §16.13's Retract closes it too. Named by sequence rather than
-            // matched by amount, so it is exact.
-            //
-            // Both directions. `reOwn` and the same side is the issuer taking
-            // their own bill back; not `reOwn` and the other side is the payer
-            // refusing it.
-            p.kind == 5 && p.reSeq == m.seq &&
-                (if (p.reOwn) p.outgoing == m.outgoing else p.outgoing != m.outgoing)
+            // §16.13's Retract closes it too — the issuer taking their own
+            // bill back, or the payer refusing it; [referent] tells which
+            // bill, and whose. Matching by seq alone here let a declined
+            // ride offer at seq 0 close a later card's bill at seq 0 on the
+            // Activity screen, the same fault the chat fixed on 2026-08-24.
+            p.kind == 5 && thread.referent(p) === m
         }
 
     fun openRequests(context: Context): List<OpenRequest> {

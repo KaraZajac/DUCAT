@@ -1897,6 +1897,51 @@ data class StoredMessage(
     }
 }
 
+/** How far apart two honest clocks are allowed to be (§16.14 resolution). */
+const val CLOCK_SKEW_SECS = 900L
+
+/**
+ * The message a reference names.
+ *
+ * A reaction, a notice, a receipt or a retraction names its target by
+ * (seq, re_own) — §16.13, §16.14 — and a seq is unique in a mailbox, not in a
+ * conversation: every card cut for a hail, a sale or a listing restarts the
+ * numbering (§16.12), so one thread holds several messages numbered 0 on
+ * each side, and the reference alone cannot tell them apart. Declining a
+ * ride offer at seq 0 once marked a shop's bill "Declined" — a bill that had
+ * arrived on a later card, also at seq 0 (2026-08-24: a coffee and a
+ * croissant, USD 8.03).
+ *
+ * The honest reading is positional: the message with that seq on that side
+ * which most recently preceded the referrer. Only when nothing precedes may
+ * the answer reach *forward*, and then only within the skew two honest
+ * clocks are allowed — the two stamps come from two phones, and a bill
+ * minted by a fast clock and declined straight away sits "after" its own
+ * refusal (2026-08-27). The order matters: a flat window let the refusal
+ * of a seq reach the same seq reborn on a fresh card ten minutes later.
+ *
+ * And when every candidate sits further ahead than that, the earliest of
+ * them: one of the two clocks was simply wrong when it stamped — a phone
+ * days out, a tester's clock set forward and back — and a bill that was
+ * paid must not come back as owed because its own stamp is in the future.
+ * The reference is still what the sender meant; only the ordering is gone,
+ * and the message that existed first is the one that was there to answer.
+ *
+ * Resolved against every message, not only bills, so a reference that
+ * answered something else resolves to that something else and leaves the
+ * bills alone. The answer is an element of [this] — compare by identity.
+ */
+fun List<StoredMessage>.referent(r: StoredMessage): StoredMessage? {
+    val seq = r.reSeq ?: return null
+    // Whose log the seq belongs to: the referrer's own, or the other side's.
+    val side = if (r.reOwn) r.outgoing else !r.outgoing
+    val onSide = filter { it.outgoing == side && it.seq == seq }
+    return onSide.filter { it.timestamp <= r.timestamp }.maxByOrNull { it.timestamp }
+        ?: onSide.filter { it.timestamp <= r.timestamp + CLOCK_SKEW_SECS }
+            .minByOrNull { it.timestamp }
+        ?: onSide.minByOrNull { it.timestamp }
+}
+
 /** Our own display name, and the last card we issued. */
 class NameStore(context: Context, personaHex: String? = null) {
     private val prefs = securePrefs(context, "ducat_contacts")
