@@ -29,14 +29,18 @@
     <string name="ceremony_plate">kenteken %1$s</string>
     <string name="ceremony_accept">Accepteren</string>
     <string name="ceremony_accepting_agrees_fare">Accepteren zet de ritprijs en jouw borg vast in een escrow die alleen jullie samen kunnen openen.</string>
+    <string name="ceremony_accepting_agrees_fare_nostake">Accepteren zet de ritprijs vast in een escrow die alleen jullie samen kunnen openen. Zo\'n kleine ritprijs kent geen borg.</string>
     <string name="ceremony_accepting_agrees_fare_arbiter">Accepteren zet de ritprijs en jouw borg vast in een escrow die twee van de drie sleutels nodig heeft: die van jou, die van hen en die van %1$s, die alleen gevraagd wordt als jullie er samen niet uitkomen.</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter_nostake">Accepteren zet de ritprijs vast in een escrow die twee van de drie sleutels nodig heeft: die van jou, die van hen en die van %1$s, die alleen gevraagd wordt als jullie er samen niet uitkomen. Zo\'n kleine ritprijs kent geen borg.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Rit bevestigd</string>
     <string name="ceremony_expecting_you">Stort je borg in de chat — ze betalen zodra die er is.</string>
+    <string name="ceremony_expecting_you_nostake">Geen borg bij zo\'n kleine ritprijs — ze betalen in de chat, en daar zie je het binnenkomen.</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Je rit komt eraan</string>
     <string name="ceremony_eta_in_chat">Betaal in de chat zodra hun borg er is — de aankomsttijd staat er ook.</string>
+    <string name="ceremony_eta_in_chat_nostake">Betaal in de chat — de aankomsttijd staat er ook. Zo\'n kleine ritprijs kent geen borg.</string>
     <string name="ceremony_stake_note">Jij legt %2$s in: de ritprijs plus %1$s borg. De chauffeur legt ook %1$s in, en beide komen terug als de rit klaar is.</string>
 </resources>

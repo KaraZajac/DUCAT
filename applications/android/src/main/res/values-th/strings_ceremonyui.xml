@@ -28,14 +28,18 @@
     <string name="ceremony_plate">ทะเบียน %1$s</string>
     <string name="ceremony_accept">ยอมรับ</string>
     <string name="ceremony_accepting_agrees_fare">การตอบรับจะล็อกค่าโดยสารและหลักประกันของคุณไว้ในบัญชีที่มีเพียงคุณสองคนเท่านั้นที่เปิดได้</string>
+    <string name="ceremony_accepting_agrees_fare_nostake">การตอบรับจะล็อกค่าโดยสารไว้ในบัญชีที่มีเพียงคุณสองคนเท่านั้นที่เปิดได้ ค่าโดยสารเล็กเท่านี้ไม่มีหลักประกัน</string>
     <string name="ceremony_accepting_agrees_fare_arbiter">การตอบรับจะล็อกค่าโดยสารและหลักประกันของคุณไว้ในบัญชีที่ต้องใช้กุญแจสองในสามดอก คือของคุณ ของเขา และของ %1$s ซึ่งจะถูกเรียกก็ต่อเมื่อคุณสองคนตกลงกันไม่ได้</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter_nostake">การตอบรับจะล็อกค่าโดยสารไว้ในบัญชีที่ต้องใช้กุญแจสองในสามดอก คือของคุณ ของเขา และของ %1$s ซึ่งจะถูกเรียกก็ต่อเมื่อคุณสองคนตกลงกันไม่ได้ ค่าโดยสารเล็กเท่านี้ไม่มีหลักประกัน</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">ยืนยันการเดินทางแล้ว</string>
     <string name="ceremony_expecting_you">วางหลักประกันของคุณในแชท — พอวางแล้วอีกฝ่ายจะจ่ายทันที</string>
+    <string name="ceremony_expecting_you_nostake">ค่าโดยสารเล็กเท่านี้ไม่มีหลักประกัน — อีกฝ่ายจะจ่ายในแชท และคุณจะเห็นเงินเข้าที่นั่น</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">รถของคุณกำลังมา</string>
     <string name="ceremony_eta_in_chat">จ่ายในแชทเมื่อหลักประกันของอีกฝ่ายเข้าแล้ว — เวลาที่จะถึงก็อยู่ในนั้น</string>
+    <string name="ceremony_eta_in_chat_nostake">จ่ายในแชท — เวลาที่จะถึงก็อยู่ในนั้น ค่าโดยสารเล็กเท่านี้ไม่มีหลักประกัน</string>
     <string name="ceremony_stake_note">คุณวาง %2$s คือค่าโดยสารบวกหลักประกัน %1$s คนขับก็วาง %1$s เช่นกัน และทั้งสองจะคืนเมื่อจบการเดินทาง</string>
 </resources>

@@ -28,14 +28,18 @@
     <string name="ceremony_plate">번호판 %1$s</string>
     <string name="ceremony_accept">수락</string>
     <string name="ceremony_accepting_agrees_fare">수락하면 요금과 보증금이 두 사람만 열 수 있는 에스크로에 잠깁니다.</string>
+    <string name="ceremony_accepting_agrees_fare_nostake">수락하면 요금이 두 사람만 열 수 있는 에스크로에 잠깁니다. 이렇게 작은 요금에는 보증금이 없습니다.</string>
     <string name="ceremony_accepting_agrees_fare_arbiter">수락하면 요금과 보증금이 세 개 중 두 개의 열쇠로 열리는 에스크로에 잠깁니다. 당신의 열쇠, 상대의 열쇠, 그리고 두 사람이 합의하지 못할 때만 요청받는 %1$s의 열쇠입니다.</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter_nostake">수락하면 요금이 세 개 중 두 개의 열쇠로 열리는 에스크로에 잠깁니다. 당신의 열쇠, 상대의 열쇠, 그리고 두 사람이 합의하지 못할 때만 요청받는 %1$s의 열쇠입니다. 이렇게 작은 요금에는 보증금이 없습니다.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">탑승 확정</string>
     <string name="ceremony_expecting_you">채팅에서 보증금을 예치하세요 — 들어오는 대로 요금을 보내줍니다.</string>
+    <string name="ceremony_expecting_you_nostake">이렇게 작은 요금에는 보증금이 없습니다 — 상대가 채팅에서 결제하고, 도착하는 것을 거기서 볼 수 있습니다.</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">차가 오고 있어요</string>
     <string name="ceremony_eta_in_chat">상대의 보증금이 들어오면 채팅에서 결제하세요 — 도착 시간도 거기 있어요.</string>
+    <string name="ceremony_eta_in_chat_nostake">채팅에서 결제하세요 — 도착 시간도 거기 있어요. 이렇게 작은 요금에는 보증금이 없습니다.</string>
     <string name="ceremony_stake_note">당신은 %2$s를 넣습니다: 요금에 %1$s 보증금을 더한 금액입니다. 기사도 %1$s를 걸고, 운행이 끝나면 둘 다 돌아옵니다.</string>
 </resources>

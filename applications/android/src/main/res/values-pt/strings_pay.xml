@@ -70,7 +70,7 @@
     <string name="pay_node_unreachable">Não foi possível alcançar nenhum nó Monero. Nada foi enviado — verifique a sua ligação e tente de novo.</string>
     <string name="board_unverified_note">Nenhum nó Monero está acessível, por isso o que aparece aqui não pôde ser verificado contra a cadeia. Continua assinado e pago — trate-o apenas com o cuidado que daria a um quadro não verificado.</string>
     <string name="board_needs_a_block">Não foi possível contactar nenhum nó Monero. O que vai para um quadro leva o carimbo de um bloco recente, por isso ainda não pode ser publicado — verifique a ligação e tente de novo.</string>
-    <string name="pay_sending_why">A construir a transação. Demora cerca de um minuto — a carteira está a reunir os chamarizes que escondem quais são as suas moedas. Pode sair deste ecrã; não para.</string>
+    <string name="pay_sending_why">A construir a transação. Demora cerca de um minuto — a carteira está a reunir os chamarizes que escondem quais são as suas moedas. Mudar para outra aplicação não o interrompe.</string>
     <string name="pay_sending_to">para %1$s</string>
     <string name="claim_own_card">Esse cartão é seu — pertence a este dispositivo.</string>
     <string name="pay_already_paid">Já pagou para este depósito em garantia. O seu dinheiro está lá; nada foi enviado de novo.</string>

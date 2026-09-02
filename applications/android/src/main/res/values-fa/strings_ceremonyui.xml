@@ -29,14 +29,18 @@
     <string name="ceremony_plate">پلاک %1$s</string>
     <string name="ceremony_accept">قبول</string>
     <string name="ceremony_accepting_agrees_fare">‏پذیرش، کرایه و ودیعهٔ شما را در امانتی قفل می‌کند که فقط شما دو نفر می‌توانید بازش کنید.</string>
+    <string name="ceremony_accepting_agrees_fare_nostake">‏پذیرش، کرایه را در امانتی قفل می‌کند که فقط شما دو نفر می‌توانید بازش کنید. کرایه‌ای به این کوچکی ودیعه ندارد.</string>
     <string name="ceremony_accepting_agrees_fare_arbiter">‏پذیرش، کرایه و ودیعهٔ شما را در امانتی قفل می‌کند که به دو کلید از سه کلید نیاز دارد: کلید شما، کلید آن‌ها و کلید %1$s، که فقط وقتی از او پرسیده می‌شود که شما دو نفر به توافق نرسید.</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter_nostake">‏پذیرش، کرایه را در امانتی قفل می‌کند که به دو کلید از سه کلید نیاز دارد: کلید شما، کلید آن‌ها و کلید %1$s، که فقط وقتی از او پرسیده می‌شود که شما دو نفر به توافق نرسید. کرایه‌ای به این کوچکی ودیعه ندارد.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">سفر قطعی شد</string>
     <string name="ceremony_expecting_you">ودیعه‌تان را در گفتگو بگذارید — به‌محض رسیدنش پرداخت می‌کنند.</string>
+    <string name="ceremony_expecting_you_nostake">برای کرایه‌ای به این کوچکی ودیعه‌ای نیست — در گفتگو پرداخت می‌کنند و رسیدنش را همان‌جا می‌بینید.</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">ماشینت دارد می‌آید</string>
     <string name="ceremony_eta_in_chat">به‌محض رسیدن ودیعهٔ آن‌ها در گفتگو پرداخت کنید — زمان رسیدن هم همان‌جاست.</string>
+    <string name="ceremony_eta_in_chat_nostake">در گفتگو پرداخت کنید — زمان رسیدن هم همان‌جاست. کرایه‌ای به این کوچکی ودیعه ندارد.</string>
     <string name="ceremony_stake_note">‏شما %2$s می‌گذارید: کرایه به‌علاوهٔ ودیعهٔ %1$s. راننده هم %1$s می‌گذارد و هر دو در پایان سفر برمی‌گردند.</string>
 </resources>

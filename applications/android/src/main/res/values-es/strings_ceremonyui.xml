@@ -29,14 +29,18 @@
     <string name="ceremony_plate">placa %1$s</string>
     <string name="ceremony_accept">Aceptar</string>
     <string name="ceremony_accepting_agrees_fare">Aceptar bloquea la tarifa y tu garantía en un depósito que solo vosotros dos podéis abrir.</string>
+    <string name="ceremony_accepting_agrees_fare_nostake">Aceptar bloquea la tarifa en un depósito que solo vosotros dos podéis abrir. Una tarifa tan pequeña no lleva garantía.</string>
     <string name="ceremony_accepting_agrees_fare_arbiter">Aceptar bloquea la tarifa y tu garantía en un depósito que necesita dos de tres llaves: la tuya, la suya y la de %1$s, a quien solo se recurre si vosotros dos no lográis poneros de acuerdo.</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter_nostake">Aceptar bloquea la tarifa en un depósito que necesita dos de tres llaves: la tuya, la suya y la de %1$s, a quien solo se recurre si vosotros dos no lográis poneros de acuerdo. Una tarifa tan pequeña no lleva garantía.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Viaje confirmado</string>
     <string name="ceremony_expecting_you">Deposita tu fianza en el chat: te pagan en cuanto esté.</string>
+    <string name="ceremony_expecting_you_nostake">Sin fianza en una tarifa tan pequeña: te pagan en el chat y allí verás llegar el dinero.</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Tu viaje viene en camino</string>
     <string name="ceremony_eta_in_chat">Paga en el chat en cuanto esté su fianza — la hora de llegada también está ahí.</string>
+    <string name="ceremony_eta_in_chat_nostake">Paga en el chat — la hora de llegada también está ahí. Una tarifa tan pequeña no lleva fianza.</string>
     <string name="ceremony_stake_note">Pones %2$s: la tarifa más una garantía de %1$s. El conductor también deja %1$s, y ambas vuelven al terminar el viaje.</string>
 </resources>

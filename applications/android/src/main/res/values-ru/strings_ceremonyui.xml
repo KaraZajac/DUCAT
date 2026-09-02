@@ -31,14 +31,18 @@
     <string name="ceremony_plate">номер %1$s</string>
     <string name="ceremony_accept">Принять</string>
     <string name="ceremony_accepting_agrees_fare">Принятие блокирует стоимость и ваш залог на счёте, который можете открыть только вы вдвоём.</string>
+    <string name="ceremony_accepting_agrees_fare_nostake">Принятие блокирует стоимость на счёте, который можете открыть только вы вдвоём. Такая маленькая сумма не требует залога.</string>
     <string name="ceremony_accepting_agrees_fare_arbiter">Принятие блокирует стоимость и ваш залог на счёте, который открывается двумя ключами из трёх: вашим, их и ключом %1$s, к которому обращаются, только если вы вдвоём не смогли договориться.</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter_nostake">Принятие блокирует стоимость на счёте, который открывается двумя ключами из трёх: вашим, их и ключом %1$s, к которому обращаются, только если вы вдвоём не смогли договориться. Такая маленькая сумма не требует залога.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Поездка подтверждена</string>
     <string name="ceremony_expecting_you">Внеси залог в чате — они заплатят, как только он там будет.</string>
+    <string name="ceremony_expecting_you_nostake">На такую маленькую сумму залога нет — они заплатят в чате, и там ты увидишь, когда деньги придут.</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Машина едет</string>
     <string name="ceremony_eta_in_chat">Заплати в чате, как только появится их залог — время прибытия тоже там.</string>
+    <string name="ceremony_eta_in_chat_nostake">Заплати в чате — время прибытия тоже там. Такая маленькая сумма не требует залога.</string>
     <string name="ceremony_stake_note">Вы вносите %2$s: стоимость плюс залог %1$s. Водитель тоже вносит %1$s, и оба залога вернутся в конце поездки.</string>
 </resources>

@@ -70,7 +70,7 @@
     <string name="pay_node_unreachable">Nie udało się połączyć z żadnym węzłem Monero. Nic nie wysłano — sprawdź połączenie i spróbuj ponownie.</string>
     <string name="board_unverified_note">Żaden węzeł Monero nie jest osiągalny, więc tego, co tu widać, nie dało się sprawdzić z łańcuchem. Nadal jest podpisane i opłacone — po prostu traktuj to z ostrożnością należną niezweryfikowanej tablicy.</string>
     <string name="board_needs_a_block">Nie udało się połączyć z żadnym węzłem Monero. To, co trafia na tablicę, jest stemplowane niedawnym blokiem, więc na razie nie może się tam znaleźć — sprawdź połączenie i spróbuj ponownie.</string>
-    <string name="pay_sending_why">Budowanie transakcji. Trwa to około minuty — portfel zbiera wabiki, które ukrywają, które monety są twoje. Możesz opuścić ten ekran; nic się nie przerwie.</string>
+    <string name="pay_sending_why">Budowanie transakcji. Trwa to około minuty — portfel zbiera wabiki, które ukrywają, które monety są twoje. Przejście do innej aplikacji niczego nie przerwie.</string>
     <string name="pay_sending_to">do %1$s</string>
     <string name="claim_own_card">Ta karta jest twoja — należy do tego urządzenia.</string>
     <string name="pay_already_paid">Już wpłaciłeś do tego depozytu. Twoje pieniądze są w środku; nic nie wysłano ponownie.</string>

@@ -29,14 +29,18 @@
     <string name="ceremony_plate">plaka %1$s</string>
     <string name="ceremony_accept">Kabul et</string>
     <string name="ceremony_accepting_agrees_fare">Kabul etmek, ücreti ve teminatını yalnızca ikinizin açabileceği bir emanete kilitler.</string>
+    <string name="ceremony_accepting_agrees_fare_nostake">Kabul etmek, ücreti yalnızca ikinizin açabileceği bir emanete kilitler. Bu kadar küçük bir ücret teminat taşımaz.</string>
     <string name="ceremony_accepting_agrees_fare_arbiter">Kabul etmek, ücreti ve teminatını üç anahtardan ikisini gerektiren bir emanete kilitler: seninki, onlarınki ve yalnızca ikiniz anlaşamazsanız başvurulan %1$s’ninki.</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter_nostake">Kabul etmek, ücreti üç anahtardan ikisini gerektiren bir emanete kilitler: seninki, onlarınki ve yalnızca ikiniz anlaşamazsanız başvurulan %1$s’ninki. Bu kadar küçük bir ücret teminat taşımaz.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Yolculuk onaylandı</string>
     <string name="ceremony_expecting_you">Teminatını sohbette yatır — o girer girmez ödeme yapılır.</string>
+    <string name="ceremony_expecting_you_nostake">Bu kadar küçük bir ücrette teminat yok — sohbette öderler, geldiğini de orada görürsün.</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Aracın geliyor</string>
     <string name="ceremony_eta_in_chat">Onların teminatı girer girmez sohbette öde — varış süresi de orada.</string>
+    <string name="ceremony_eta_in_chat_nostake">Sohbette öde — varış süresi de orada. Bu kadar küçük bir ücret teminat taşımaz.</string>
     <string name="ceremony_stake_note">%2$s yatırıyorsun: ücret artı %1$s teminat. Sürücü de %1$s yatırır ve yolculuk bitince ikisi de geri gelir.</string>
 </resources>

@@ -29,14 +29,18 @@
     <string name="ceremony_plate">plaque %1$s</string>
     <string name="ceremony_accept">Accepter</string>
     <string name="ceremony_accepting_agrees_fare">Accepter bloque le prix et votre dépôt dans un séquestre que vous seuls deux pouvez ouvrir.</string>
+    <string name="ceremony_accepting_agrees_fare_nostake">Accepter bloque le prix dans un séquestre que vous seuls deux pouvez ouvrir. Un prix aussi petit ne comporte pas de dépôt.</string>
     <string name="ceremony_accepting_agrees_fare_arbiter">Accepter bloque le prix et votre dépôt dans un séquestre qui exige deux clés sur trois : la vôtre, la leur et celle de %1$s, sollicité seulement si vous deux n’arrivez pas à vous entendre.</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter_nostake">Accepter bloque le prix dans un séquestre qui exige deux clés sur trois : la vôtre, la leur et celle de %1$s, sollicité seulement si vous deux n’arrivez pas à vous entendre. Un prix aussi petit ne comporte pas de dépôt.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Course confirmée</string>
     <string name="ceremony_expecting_you">Dépose ta caution dans la discussion — on te paie dès qu\'elle y est.</string>
+    <string name="ceremony_expecting_you_nostake">Pas de caution pour un prix aussi petit — on te paie dans la discussion, et tu verras l\'argent y arriver.</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Ta course arrive</string>
     <string name="ceremony_eta_in_chat">Paie dans la discussion dès que sa caution y est — l\'heure d\'arrivée y est aussi.</string>
+    <string name="ceremony_eta_in_chat_nostake">Paie dans la discussion — l\'heure d\'arrivée y est aussi. Un prix aussi petit ne comporte pas de caution.</string>
     <string name="ceremony_stake_note">Vous versez %2$s : le prix plus un dépôt de %1$s. Le conducteur dépose aussi %1$s, et les deux reviennent à la fin de la course.</string>
 </resources>

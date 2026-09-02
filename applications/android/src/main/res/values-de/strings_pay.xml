@@ -70,7 +70,7 @@
     <string name="pay_node_unreachable">Kein Monero-Knoten war erreichbar. Es wurde nichts gesendet – prüfe deine Verbindung und versuche es erneut.</string>
     <string name="board_unverified_note">Kein Monero-Knoten erreichbar, daher konnte das hier Gezeigte nicht gegen die Chain geprüft werden. Es ist weiterhin signiert und bezahlt — begegne ihm nur mit der Vorsicht, die ein ungeprüftes Brett verdient.</string>
     <string name="board_needs_a_block">Kein Monero-Knoten erreichbar. Was auf ein Brett geht, wird gegen einen aktuellen Block gestempelt — das kann also noch nicht hoch. Prüfe deine Verbindung und versuch es erneut.</string>
-    <string name="pay_sending_why">Die Transaktion wird gebaut. Das dauert etwa eine Minute — die Wallet sammelt die Attrappen, die verbergen, welche Münzen dir gehören. Du kannst diesen Bildschirm verlassen; es läuft weiter.</string>
+    <string name="pay_sending_why">Die Transaktion wird gebaut. Das dauert etwa eine Minute — die Wallet sammelt die Attrappen, die verbergen, welche Münzen dir gehören. Ein Wechsel zu einer anderen App hält es nicht an.</string>
     <string name="pay_sending_to">an %1$s</string>
     <string name="claim_own_card">Diese Karte ist deine eigene — sie gehört zu diesem Gerät.</string>
     <string name="pay_already_paid">Du hast bereits in diese Treuhand eingezahlt. Dein Geld ist drin; es wurde nichts erneut gesendet.</string>

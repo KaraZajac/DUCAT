@@ -29,14 +29,18 @@
     <string name="ceremony_plate">placa %1$s</string>
     <string name="ceremony_accept">Aceitar</string>
     <string name="ceremony_accepting_agrees_fare">Aceitar bloqueia o valor e a sua caução num depósito que só vocês os dois podem abrir.</string>
+    <string name="ceremony_accepting_agrees_fare_nostake">Aceitar bloqueia o valor num depósito que só vocês os dois podem abrir. Um valor tão pequeno não leva caução.</string>
     <string name="ceremony_accepting_agrees_fare_arbiter">Aceitar bloqueia o valor e a sua caução num depósito que precisa de duas de três chaves: a sua, a deles e a de %1$s, que só é chamado se vocês os dois não conseguirem chegar a acordo.</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter_nostake">Aceitar bloqueia o valor num depósito que precisa de duas de três chaves: a sua, a deles e a de %1$s, que só é chamado se vocês os dois não conseguirem chegar a acordo. Um valor tão pequeno não leva caução.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Corrida confirmada</string>
     <string name="ceremony_expecting_you">Deposite a sua caução na conversa — eles pagam assim que ela entrar.</string>
+    <string name="ceremony_expecting_you_nostake">Sem caução num valor tão pequeno — eles pagam na conversa, e é lá que verá o dinheiro entrar.</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Sua corrida está a caminho</string>
     <string name="ceremony_eta_in_chat">Pague na conversa assim que a caução deles entrar — o tempo de chegada também está lá.</string>
+    <string name="ceremony_eta_in_chat_nostake">Pague na conversa — o tempo de chegada também está lá. Um valor tão pequeno não leva caução.</string>
     <string name="ceremony_stake_note">Você põe %2$s: o valor mais uma caução de %1$s. O condutor também deixa %1$s, e as duas voltam no fim da viagem.</string>
 </resources>

@@ -31,14 +31,18 @@
     <string name="ceremony_plate">rejestracja %1$s</string>
     <string name="ceremony_accept">Przyjmij</string>
     <string name="ceremony_accepting_agrees_fare">Akceptacja blokuje cenę i twoją kaucję w depozycie, który możecie otworzyć tylko we dwoje.</string>
+    <string name="ceremony_accepting_agrees_fare_nostake">Akceptacja blokuje cenę w depozycie, który możecie otworzyć tylko we dwoje. Tak mała cena nie niesie kaucji.</string>
     <string name="ceremony_accepting_agrees_fare_arbiter">Akceptacja blokuje cenę i twoją kaucję w depozycie, który wymaga dwóch z trzech kluczy: twojego, ich i klucza %1$s, o który prosi się tylko wtedy, gdy nie zdołacie się dogadać.</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter_nostake">Akceptacja blokuje cenę w depozycie, który wymaga dwóch z trzech kluczy: twojego, ich i klucza %1$s, o który prosi się tylko wtedy, gdy nie zdołacie się dogadać. Tak mała cena nie niesie kaucji.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Przejazd potwierdzony</string>
     <string name="ceremony_expecting_you">Wpłać kaucję w czacie — zapłacą, gdy tylko tam będzie.</string>
+    <string name="ceremony_expecting_you_nostake">Brak kaucji przy tak małej cenie — zapłacą w czacie, a ty zobaczysz tam, gdy pieniądze dotrą.</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Twój przejazd jedzie</string>
     <string name="ceremony_eta_in_chat">Zapłać w czacie, gdy tylko będzie ich kaucja — czas dojazdu też tam znajdziesz.</string>
+    <string name="ceremony_eta_in_chat_nostake">Zapłać w czacie — czas dojazdu też tam znajdziesz. Tak mała cena nie niesie kaucji.</string>
     <string name="ceremony_stake_note">Wpłacasz %2$s: cenę plus kaucję %1$s. Kierowca też wpłaca %1$s, a obie wracają po zakończeniu przejazdu.</string>
 </resources>

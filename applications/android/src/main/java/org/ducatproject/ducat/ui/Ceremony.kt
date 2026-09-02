@@ -116,7 +116,9 @@ fun BillScreen(
                 )
                 if (m.body.isNotBlank() && m.body !in filler) {
                     Spacer(Modifier.height(6.dp))
-                    Text(stringResource(R.string.ceremony_quoted_body, m.body),
+                    // Fenced: the quotation marks are in the reader's
+                    // direction and the words in the writer's — see isolate.
+                    Text(stringResource(R.string.ceremony_quoted_body, isolate(m.body)),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
@@ -384,7 +386,7 @@ fun PaidSplash(amountPxmr: Long, toName: String?, onDone: () -> Unit) {
                     color = MaterialTheme.colorScheme.onTertiary,
                 )
                 Text(
-                    if (toName != null) stringResource(R.string.ceremony_paid_to, toName)
+                    if (toName != null) stringResource(R.string.ceremony_paid_to, isolate(toName))
                     else stringResource(R.string.ceremony_paid),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onTertiary,
@@ -456,14 +458,14 @@ fun RideOfferScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 contact.plate?.let { plate ->
-                    Text(stringResource(R.string.ceremony_plate, plate),
+                    Text(stringResource(R.string.ceremony_plate, isolate(plate)),
                         style = MaterialTheme.typography.bodyMedium,
                         fontFamily = FontFamily.Monospace,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 if (m.body.isNotBlank()) {
                     Spacer(Modifier.height(6.dp))
-                    Text(stringResource(R.string.ceremony_quoted_body, m.body),
+                    Text(stringResource(R.string.ceremony_quoted_body, isolate(m.body)),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
@@ -524,10 +526,20 @@ fun RideOfferScreen(
                     Text(
                         if (arbiterName != null) {
                             stringResource(
-                                R.string.ceremony_accepting_agrees_fare_arbiter, arbiterName,
+                                // A fare too small to carry a stake locks the
+                                // fare alone (Stakes.stakeFor returns zero
+                                // below the floor), and the sentence at the
+                                // moment of consent has to say what the escrow
+                                // will actually hold.
+                                if (stake > 0) R.string.ceremony_accepting_agrees_fare_arbiter
+                                else R.string.ceremony_accepting_agrees_fare_arbiter_nostake,
+                                isolate(arbiterName),
                             )
                         } else {
-                            stringResource(R.string.ceremony_accepting_agrees_fare)
+                            stringResource(
+                                if (stake > 0) R.string.ceremony_accepting_agrees_fare
+                                else R.string.ceremony_accepting_agrees_fare_nostake,
+                            )
                         },
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.outline,
@@ -581,8 +593,16 @@ fun RideConfirmed(
                 Spacer(Modifier.height(10.dp))
                 Text(contact.displayName(), style = MaterialTheme.typography.headlineSmall)
                 Spacer(Modifier.height(12.dp))
+                // "Post your stake" sends the driver to the chat looking for
+                // a button that is not there when the fare is under the
+                // stake floor: nothing is asked of them, and the rider pays
+                // straight away.
+                val stake = org.ducatproject.ducat.Ceremony.rideStakeAmount(farePxmr)
                 Text(
-                    stringResource(R.string.ceremony_expecting_you),
+                    stringResource(
+                        if (stake > 0) R.string.ceremony_expecting_you
+                        else R.string.ceremony_expecting_you_nostake,
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -598,7 +618,13 @@ fun RideConfirmed(
 
 /** A stranger becomes your ride: the card you scan the curb with. */
 @Composable
-fun DriverFound(contact: Contact, onOpenChat: () -> Unit, onDismiss: () -> Unit) {
+fun DriverFound(
+    contact: Contact,
+    /** The accepted fare — what decides whether there is a stake to wait for. */
+    farePxmr: Long,
+    onOpenChat: () -> Unit,
+    onDismiss: () -> Unit,
+) {
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false),
@@ -649,8 +675,14 @@ fun DriverFound(contact: Contact, onOpenChat: () -> Unit, onDismiss: () -> Unit)
                     }
                 }
                 Spacer(Modifier.height(12.dp))
+                // Same rule as RideConfirmed's line: "once their stake is in"
+                // names a wait that never ends on a fare too small for one.
+                val stake = org.ducatproject.ducat.Ceremony.rideStakeAmount(farePxmr)
                 Text(
-                    stringResource(R.string.ceremony_eta_in_chat),
+                    stringResource(
+                        if (stake > 0) R.string.ceremony_eta_in_chat
+                        else R.string.ceremony_eta_in_chat_nostake,
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

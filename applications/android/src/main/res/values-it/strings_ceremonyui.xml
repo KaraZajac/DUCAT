@@ -29,14 +29,18 @@
     <string name="ceremony_plate">targa %1$s</string>
     <string name="ceremony_accept">Accetta</string>
     <string name="ceremony_accepting_agrees_fare">Accettare blocca la tariffa e la tua cauzione in un deposito che solo voi due potete aprire.</string>
+    <string name="ceremony_accepting_agrees_fare_nostake">Accettare blocca la tariffa in un deposito che solo voi due potete aprire. Una tariffa così piccola non prevede cauzione.</string>
     <string name="ceremony_accepting_agrees_fare_arbiter">Accettare blocca la tariffa e la tua cauzione in un deposito che richiede due chiavi su tre: la tua, la loro e quella di %1$s, interpellato solo se voi due non riuscite a mettervi d’accordo.</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter_nostake">Accettare blocca la tariffa in un deposito che richiede due chiavi su tre: la tua, la loro e quella di %1$s, interpellato solo se voi due non riuscite a mettervi d’accordo. Una tariffa così piccola non prevede cauzione.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Corsa confermata</string>
     <string name="ceremony_expecting_you">Versa la tua cauzione nella chat — pagano appena c\'è.</string>
+    <string name="ceremony_expecting_you_nostake">Nessuna cauzione su una tariffa così piccola — pagano nella chat, e lì vedrai arrivare il denaro.</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Il tuo passaggio sta arrivando</string>
     <string name="ceremony_eta_in_chat">Paga nella chat appena c\'è la loro cauzione — lì trovi anche l\'orario di arrivo.</string>
+    <string name="ceremony_eta_in_chat_nostake">Paga nella chat — lì trovi anche l\'orario di arrivo. Una tariffa così piccola non prevede cauzione.</string>
     <string name="ceremony_stake_note">Metti %2$s: la tariffa più una cauzione di %1$s. Anche l\'autista mette %1$s, e tornano entrambe a fine corsa.</string>
 </resources>

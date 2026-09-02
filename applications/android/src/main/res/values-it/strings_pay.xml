@@ -70,7 +70,7 @@
     <string name="pay_node_unreachable">Nessun nodo Monero raggiungibile. Non è stato inviato nulla — controlla la connessione e riprova.</string>
     <string name="board_unverified_note">Nessun nodo Monero è raggiungibile, quindi ciò che è mostrato qui non è stato verificato contro la catena. È comunque firmato e pagato — trattalo solo con la cautela che daresti a una bacheca non verificata.</string>
     <string name="board_needs_a_block">Nessun nodo Monero raggiungibile. Ciò che va su una bacheca viene timbrato su un blocco recente, quindi per ora non può essere pubblicato: controlla la connessione e riprova.</string>
-    <string name="pay_sending_why">Sto costruendo la transazione. Ci vuole circa un minuto: il portafoglio raccoglie i richiami che nascondono quali monete sono tue. Puoi lasciare questa schermata, non si ferma.</string>
+    <string name="pay_sending_why">Sto costruendo la transazione. Ci vuole circa un minuto: il portafoglio raccoglie i richiami che nascondono quali monete sono tue. Passare a un’altra app non la ferma.</string>
     <string name="pay_sending_to">a %1$s</string>
     <string name="claim_own_card">Quella scheda è la tua: appartiene a questo dispositivo.</string>
     <string name="pay_already_paid">Hai già pagato in questo deposito a garanzia. Il tuo denaro è dentro; non è stato inviato di nuovo.</string>

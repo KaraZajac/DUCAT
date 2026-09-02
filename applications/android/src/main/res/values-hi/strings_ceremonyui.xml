@@ -29,14 +29,18 @@
     <string name="ceremony_plate">प्लेट %1$s</string>
     <string name="ceremony_accept">स्वीकारें</string>
     <string name="ceremony_accepting_agrees_fare">स्वीकार करने पर किराया और आपकी जमानत राशि एक ऐसे एस्क्रो में बंद हो जाती है जिसे सिर्फ आप दोनों खोल सकते हैं।</string>
+    <string name="ceremony_accepting_agrees_fare_nostake">स्वीकार करने पर किराया एक ऐसे एस्क्रो में बंद हो जाता है जिसे सिर्फ आप दोनों खोल सकते हैं। इतने छोटे किराये पर कोई जमानत राशि नहीं होती।</string>
     <string name="ceremony_accepting_agrees_fare_arbiter">स्वीकार करने पर किराया और आपकी जमानत राशि एक ऐसे एस्क्रो में बंद हो जाती है जिसे खोलने के लिए तीन में से दो चाबियाँ चाहिए: आपकी, उनकी, और %1$s की — जिनसे तभी पूछा जाता है जब आप दोनों सहमत न हो पाएँ।</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter_nostake">स्वीकार करने पर किराया एक ऐसे एस्क्रो में बंद हो जाता है जिसे खोलने के लिए तीन में से दो चाबियाँ चाहिए: आपकी, उनकी, और %1$s की — जिनसे तभी पूछा जाता है जब आप दोनों सहमत न हो पाएँ। इतने छोटे किराये पर कोई जमानत राशि नहीं होती।</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">राइड पक्की</string>
     <string name="ceremony_expecting_you">अपनी जमानत राशि चैट में जमा करें — जमा होते ही वे भुगतान कर देंगे।</string>
+    <string name="ceremony_expecting_you_nostake">इतने छोटे किराये पर कोई जमानत राशि नहीं — वे चैट में भुगतान करेंगे, और आप उसे वहीं आते देखेंगे।</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">आपकी राइड आ रही है</string>
     <string name="ceremony_eta_in_chat">उनकी जमानत राशि जमा होते ही चैट में भुगतान करें — पहुँचने का समय भी वहीं है।</string>
+    <string name="ceremony_eta_in_chat_nostake">चैट में भुगतान करें — पहुँचने का समय भी वहीं है। इतने छोटे किराये पर कोई जमानत राशि नहीं होती।</string>
     <string name="ceremony_stake_note">आप %2$s देते हैं: किराया और %1$s जमानत राशि। ड्राइवर भी %1$s रखता है, और सवारी खत्म होने पर दोनों वापस आ जाती हैं।</string>
 </resources>

@@ -28,14 +28,18 @@
     <string name="ceremony_plate">车牌 %1$s</string>
     <string name="ceremony_accept">接受</string>
     <string name="ceremony_accepting_agrees_fare">接受后，车费和你的押金会锁进一个只有你们两人才能打开的托管地址。</string>
+    <string name="ceremony_accepting_agrees_fare_nostake">接受后，车费会锁进一个只有你们两人才能打开的托管地址。这么小的车费不设押金。</string>
     <string name="ceremony_accepting_agrees_fare_arbiter">接受后，车费和你的押金会锁进一个需要三把钥匙中任意两把才能打开的托管地址：你的、对方的，以及 %1$s 的——只有你们两人谈不拢时才会找他们。</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter_nostake">接受后，车费会锁进一个需要三把钥匙中任意两把才能打开的托管地址：你的、对方的，以及 %1$s 的——只有你们两人谈不拢时才会找他们。这么小的车费不设押金。</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">行程已确认</string>
     <string name="ceremony_expecting_you">在聊天里缴纳保证金 — 保证金到位后对方就付款。</string>
+    <string name="ceremony_expecting_you_nostake">这么小的车费不设保证金 — 对方会在聊天里付款，你会在那里看到到账。</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">你的车正在路上</string>
     <string name="ceremony_eta_in_chat">对方保证金到位后在聊天里付款 — 预计到达时间也在那里。</string>
+    <string name="ceremony_eta_in_chat_nostake">在聊天里付款 — 预计到达时间也在那里。这么小的车费不设保证金。</string>
     <string name="ceremony_stake_note">你放入 %2$s：车费加上 %1$s 押金。司机同样押 %1$s，行程结束后两份都退回。</string>
 </resources>

@@ -222,7 +222,11 @@ fun HailCard(
     sheetState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
 ) {
     var sheetOpen by sheetState
-    var driverFound by remember { mutableStateOf<org.ducatproject.ducat.Contact?>(null) }
+    // The driver and the fare they were accepted at: the card says whether
+    // there is a stake to wait for, and that is the fare's decision.
+    var driverFound by remember {
+        mutableStateOf<Pair<org.ducatproject.ducat.Contact, Long>?>(null)
+    }
     // Between the claim and the yes: the driver who took the hail, while
     // their kind-6 offer is still in flight; then the offer itself, on the
     // decision screen; and the offer set aside when the rider backs out of
@@ -571,8 +575,8 @@ fun HailCard(
     // while they stand on the kerb. Take it down when the escrow is called
     // off; the chat banner says what happened.
     val ceremonyV by ContactStore.changes.collectAsState()
-    LaunchedEffect(ceremonyV, driverFound?.personaHex) {
-        val d = driverFound ?: return@LaunchedEffect
+    LaunchedEffect(ceremonyV, driverFound?.first?.personaHex) {
+        val d = driverFound?.first ?: return@LaunchedEffect
         val stage = withContext(Dispatchers.IO) {
             runCatchingCancellable {
                 org.ducatproject.ducat.Ceremony.rideWith(context, d.personaHex)
@@ -581,9 +585,10 @@ fun HailCard(
         }
         if (stage == "aborted") driverFound = null
     }
-    driverFound?.let { d ->
+    driverFound?.let { (d, fare) ->
         DriverFound(
             contact = d,
+            farePxmr = fare,
             onOpenChat = {
                 driverFound = null
                 MainActivity.openChat.value = d.personaHex
@@ -629,7 +634,7 @@ fun HailCard(
                     forgetOffered(context)
                     withContext(Dispatchers.Main) {
                         status = null
-                        driverFound = d
+                        driverFound = d to (offer.amountPxmr ?: 0L)
                     }
                     // §15.12: the accept is where the escrow starts, and the
                     // ladder picks the strongest rung available. An arbiter

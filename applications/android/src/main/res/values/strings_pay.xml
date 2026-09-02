@@ -72,7 +72,7 @@
     <string name="pay_node_unreachable">Could not reach any Monero node. Nothing was sent — check your connection and try again.</string>
     <string name="board_unverified_note">No Monero node is reachable, so what is shown here could not be checked against the chain. It is still signed and paid for — just treat it with the care you would give an unverified board.</string>
     <string name="board_needs_a_block">Could not reach any Monero node. What goes on a board is stamped against a recent block, so this cannot go up yet — check your connection and try again.</string>
-    <string name="pay_sending_why">Building the transaction. This takes about a minute — the wallet is gathering the decoys that hide which coins are yours. You can leave this screen; it does not stop.</string>
+    <string name="pay_sending_why">Building the transaction. This takes about a minute — the wallet is gathering the decoys that hide which coins are yours. Switching to another app does not stop it.</string>
     <string name="pay_sending_to">to %1$s</string>
     <string name="claim_own_card">That card is your own — it belongs to this device.</string>
     <string name="pay_already_paid">You have already paid into this escrow. Your money is in; nothing was sent again.</string>

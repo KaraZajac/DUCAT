@@ -70,7 +70,7 @@
     <string name="pay_node_unreachable">Tidak ada node Monero yang bisa dihubungi. Tidak ada yang dikirim — periksa koneksimu dan coba lagi.</string>
     <string name="board_unverified_note">Tidak ada node Monero yang terjangkau, jadi yang tampil di sini belum bisa dicek terhadap rantai. Semuanya tetap ditandatangani dan dibayar — hanya saja perlakukan dengan kehati-hatian seperti papan yang belum terverifikasi.</string>
     <string name="board_needs_a_block">Tidak ada node Monero yang bisa dihubungi. Apa pun yang naik ke papan dicap dengan blok terbaru, jadi ini belum bisa tayang — periksa koneksi Anda lalu coba lagi.</string>
-    <string name="pay_sending_why">Menyusun transaksi. Ini memakan waktu sekitar satu menit — dompet sedang mengumpulkan umpan yang menyembunyikan koin mana milik Anda. Anda boleh meninggalkan layar ini; prosesnya tidak berhenti.</string>
+    <string name="pay_sending_why">Menyusun transaksi. Ini memakan waktu sekitar satu menit — dompet sedang mengumpulkan umpan yang menyembunyikan koin mana milik Anda. Berpindah ke aplikasi lain tidak menghentikannya.</string>
     <string name="pay_sending_to">ke %1$s</string>
     <string name="claim_own_card">Kartu itu milik Anda sendiri — kartu ini milik perangkat ini.</string>
     <string name="pay_already_paid">Kamu sudah membayar ke escrow ini. Uangmu sudah masuk; tidak ada yang dikirim lagi.</string>
