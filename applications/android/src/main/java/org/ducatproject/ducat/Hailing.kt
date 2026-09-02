@@ -194,6 +194,11 @@ object Hailing {
         var placed: Pair<String, UInt>? = null
         // Who else was on the board we landed on, as the ladder saw it.
         var placedTaken: Set<UInt> = emptySet()
+        // Why no slot was taken, when none was. A seal that fails is not a
+        // full board — it is this device unable to write a notice at all —
+        // and both ended as "the corner is busy", which sends a rider to
+        // wait for a rank to clear that was never the problem.
+        var sealTrouble: Throwable? = null
         onStep(Step.SLOT)
         ladder@ for (shard in 0u until uniffi.ducat_mobile.maxStandShards()) {
             val name = uniffi.ducat_mobile.standShardName(base, shard)
@@ -217,7 +222,9 @@ object Hailing {
                 // standPost verifies its own landing (a refused or raced set
                 // throws); re-reading the network here raced its own
                 // propagation and read a nearly-empty cell as full.
-                val sealed = runCatching { seal(name, free) }.getOrNull() ?: continue
+                val sealed = runCatching { seal(name, free) }
+                    .onFailure { if (sealTrouble == null) sealTrouble = it }
+                    .getOrNull() ?: continue
                 if (runCatching { standPost(name, free, sealed) }.isSuccess) {
                     bytes = sealed
                     placed = name to free
@@ -228,6 +235,11 @@ object Hailing {
         // Not "every shard is full", which was the sentence a rider actually
         // saw: a ladder is our word for it, and what happened to them is that
         // the corner is busy.
+        if (placed == null) {
+            sealTrouble?.let {
+                DucatLog.w(TAG, "no notice could be sealed — reporting a full board: ${it.message}")
+            }
+        }
         val (board, sub) = placed ?: throw BoardFull()
         RideStore(context).save(
             RideStore.PostedRide(

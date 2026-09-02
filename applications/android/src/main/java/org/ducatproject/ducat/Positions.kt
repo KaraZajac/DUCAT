@@ -338,6 +338,14 @@ object Positions {
             // A value that does not authenticate is not this stream's: either
             // the sender stopped and blanked it, or somebody wrote noise. Both
             // are "no position", never a guess.
+            //
+            // Said once, though. A blanked slot is empty and was handled
+            // above, so reaching here means the record holds bytes this key
+            // cannot open — a stream whose key has moved on, or a slot
+            // somebody else is writing — and that reads on the card exactly
+            // like "no position yet", for ever, which is the silence this
+            // file learned about the hard way.
+            note(personaHex, "position did not authenticate: ${it.message}")
             return null
         }
         val seen = frame.counter.toLong()
