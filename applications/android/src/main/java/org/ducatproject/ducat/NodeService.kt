@@ -179,10 +179,29 @@ class NodeService : Service() {
                 startForeground(ID, n, types)
             } catch (e: Exception) {
                 DucatLog.w("NodeService", "foreground type ${types}: ${e.message}")
-                startForeground(ID, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
+                // The fallback can be refused too — a service told to go
+                // foreground from the background is refused whatever type it
+                // asks for — and this one runs inside onStartCommand, where
+                // a throw is not a failed call but a dead process. The node
+                // lives with the process, so that costs every conversation
+                // on the phone to save a notification. Better a service the
+                // system may reap later than one this line kills now.
+                try {
+                    startForeground(ID, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
+                } catch (e2: Exception) {
+                    DucatLog.w("NodeService", "no foreground at all: ${e2.message}")
+                }
             }
         } else {
-            startForeground(ID, n)
+            // Same reasoning as the branch above, for the reason that
+            // predates the types: Android 12 refuses a foreground start from
+            // the background outright, and the refusal is an exception in
+            // onStartCommand either way.
+            try {
+                startForeground(ID, n)
+            } catch (e: Exception) {
+                DucatLog.w("NodeService", "no foreground: ${e.message}")
+            }
         }
 
         // START_STICKY: if the system kills us for memory, come back. A node
