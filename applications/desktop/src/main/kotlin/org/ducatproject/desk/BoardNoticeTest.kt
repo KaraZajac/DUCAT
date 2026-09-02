@@ -200,6 +200,14 @@ fun main() {
         "BOARD_FAIL a tip with no reading time was trusted"
     }
     check(Beacons.usableTip(0L, nowMs, nowMs) == 0L) { "BOARD_FAIL zero is not a height" }
+    // A clock wound forward and back leaves a reading stamped ahead of now;
+    // "younger than three minutes" is true of it for days. Not current.
+    check(Beacons.usableTip(3_210_000L, nowMs + 10 * minute, nowMs) == 0L) {
+        "BOARD_FAIL a tip stamped in the future was trusted as current"
+    }
+    check(Beacons.usableTip(3_210_000L, nowMs + 5_000L, nowMs) == 3_210_000L) {
+        "BOARD_FAIL a few seconds of clock slack should not discard a tip"
+    }
 
     // The whole point: a stamp cannot be re-labelled with a different block
     // once the work is done. Both halves — the hash is what the work is bound

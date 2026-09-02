@@ -11,6 +11,8 @@
     <string name="pay_address_placeholder">5… або 7…</string>
     <string name="pay_continue">Далі</string>
     <string name="pay_not_monero_address">Це не схоже на адресу Monero.</string>
+    <string name="pay_scan_unknown_card">Ця картка ще не належить нікому з ваших контактів. Спочатку додайте людину в Чаті, потім платіть.</string>
+    <string name="pay_scan_not_payable">Цей код — ні адреса Monero, ні картка DUCAT.</string>
 
     <!-- Pay.kt — amount step -->
     <string name="pay_back">Назад</string>
@@ -62,12 +64,13 @@
     <string name="pay_fee_unknown">зараз невідома</string>
     <string name="pay_fee_unknown_confirm">Зараз не вдалося оцінити комісію. Транзакція заплатить стільки, скільки коштуватиме під час створення.</string>
     <string name="pay_node_no_answer">Вузол Monero не відповів вчасно. Нічого не надіслано. Спробуйте ще раз — застосунок візьме інший вузол.</string>
+    <string name="pay_send_interrupted">Застосунок закрився посеред платежу. Перевірте виписку, перш ніж платити знову.</string>
     <string name="pay_not_enough">Недостатньо розблокованих коштів — у вас %1$s, а потрібно %2$s з урахуванням комісії мережі.</string>
     <string name="pay_offline">Ще немає зв\'язку — цей телефон не завершив підключення до мережі. Нічого не надіслано; спробуйте за хвилину.</string>
     <string name="pay_node_unreachable">Не вдалося зв\'язатися з жодним вузлом Monero. Нічого не надіслано — перевірте з\'єднання та спробуйте ще раз.</string>
     <string name="board_unverified_note">Жоден вузол Monero недоступний, тому показане тут не вдалося звірити з ланцюгом. Усе так само підписане й оплачене — просто ставтеся до цього з обережністю, як до неперевіреної дошки.</string>
     <string name="board_needs_a_block">Не вдалося зв’язатися з жодним вузлом Monero. Те, що потрапляє на дошку, штампується нещодавнім блоком, тож поки що не може бути розміщене — перевірте з’єднання і спробуйте ще раз.</string>
-    <string name="pay_sending_why">Формуємо транзакцію. Це триває близько хвилини — гаманець збирає підставні виходи, які приховують, які монети ваші. Цей екран можна залишити, процес не спиниться.</string>
+    <string name="pay_sending_why">Формуємо транзакцію. Це триває близько хвилини — гаманець збирає підставні виходи, які приховують, які монети ваші. Перехід в інший застосунок процес не спинить.</string>
     <string name="pay_sending_to">для %1$s</string>
     <string name="claim_own_card">Ця картка ваша власна — вона належить цьому пристрою.</string>
     <string name="pay_already_paid">Ви вже внесли кошти в цей ескроу. Гроші на місці; повторно нічого не надіслано.</string>
@@ -78,4 +81,6 @@
     <string name="pay_repeat_monthly">Щомісяця</string>
     <string name="pay_recur_notify">Регулярний рахунок надіслано — %1$s</string>
     <string name="pay_donation_hint">Це пожертва — квитанція надійде в цей чат після отримання, а виписка запише її в «Пожертви».</string>
+    <string name="pay_relay_unconfirmed">Жоден вузол Monero не підтвердив, що прийняв платіж. Він усе ж може пройти — використані купюри залишаються зарезервованими, доки ланцюжок не вирішить. Перевірте виписку, перш ніж платити знову.</string>
+    <string name="pay_request_kept">Запит збережено — він піде сам, щойно з’явиться мережа.</string>
 </resources>

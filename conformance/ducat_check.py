@@ -732,6 +732,7 @@ def run_backup(cases, r):
         if got is None or "decoded" not in c["expect"]:
             continue
         d = c["expect"]["decoded"]
+        bad = None
         for key, want, label in [
             (1, d["persona_suite"], "persona_suite"),
             (3, d["monero_seed"], "monero_seed"),
@@ -739,10 +740,45 @@ def run_backup(cases, r):
             (7, d["created"], "created"),
         ]:
             if got[key][1] != want:
-                r.passed -= 1
-                r.bad("backup", c["name"], c.get("why", ""),
-                      f"{label}: we read {got[key][1]!r}, vector says {want!r}")
+                bad = f"{label}: we read {got[key][1]!r}, vector says {want!r}"
                 break
+        # Post-1.0: each persona's own profile rides its roster entry
+        # (per-persona keys 4..13). Asserted field by field when the vector
+        # says so — this is the enumeration's edge, and the blind-spot rule
+        # says pin it on both sides.
+        if bad is None and "personas" in d:
+            P = {"name": 1, "color": 2, "display_name": 4, "email": 6,
+                 "phone": 7, "signal": 8, "pronouns": 9, "car_model": 10,
+                 "car_color": 11, "plate": 12}
+            entries = [dict(e[1]) for e in got[27][1]]
+            if len(entries) != len(d["personas"]):
+                bad = f"personas: we read {len(entries)}, vector says {len(d['personas'])}"
+            else:
+                for i, want_p in enumerate(d["personas"]):
+                    e = entries[i]
+                    if e[0][1].hex() != want_p["secret_hex"]:
+                        bad = f"personas[{i}].secret differs"
+                        break
+                    if want_p.get("avatar_hex") is not None and                             e.get(5, (None, b""))[1].hex() != want_p["avatar_hex"]:
+                        bad = f"personas[{i}].avatar differs"
+                        break
+                    # share_profile: written only when off; absence means on.
+                    share = e.get(13, (None, 1))[1] != 0
+                    if share != want_p.get("share_profile", True):
+                        bad = f"personas[{i}].share_profile: we read {share}"
+                        break
+                    for label, key in P.items():
+                        want_v = want_p.get(label)
+                        got_v = e.get(key, (None, None))[1] if key in e else None
+                        if want_v is not None and got_v != want_v:
+                            bad = (f"personas[{i}].{label}: we read {got_v!r}, "
+                                   f"vector says {want_v!r}")
+                            break
+                    if bad:
+                        break
+        if bad:
+            r.passed -= 1
+            r.bad("backup", c["name"], c.get("why", ""), bad)
 
 
 # `kind` is the single discriminator. Nothing is routed by filename or by
@@ -953,8 +989,24 @@ MSG_ETA = 213
 MSG_PAYLOAD, MSG_ROUND, MSG_CEREMONY = 214, 215, 216
 MSG_ATT_RECORD, MSG_ATT_KEY, MSG_ATT_NONCE = 194, 195, 196
 MSG_ATT_LEN, MSG_ATT_HASH, MSG_ATT_MIME, MSG_ATT_NAME = 197, 198, 199, 200
+MSG_ATT_SWARM, MSG_ATT_SWARM_DIGEST = 278, 279
+SITE_VERSION, SITE_TITLE, SITE_SHARE, SITE_DIGEST, SITE_UPDATED = 280, 281, 282, 283, 284
+MAX_SITE_TITLE_CHARS = 80
+MAX_SWARM_ATTACHMENT_BYTES = 268_435_456
+MAX_SHARE_KEY_CHARS = 128
 # §15.12 — the live-position reference (kind 11): record + stream key.
 MSG_POS_RECORD, MSG_POS_STREAM = 218, 219
+# §16.20 — a publication period's key (kind 13): the period pair is the
+# kind's whole point; the shelf pair (record + standing head key) rides the
+# first delivery. Each pair together or not at all.
+MSG_PUB_RECORD, MSG_PUB_HEAD = 257, 258
+MSG_PUB_PERIOD, MSG_PUB_KEY = 259, 260
+# A heavy period's swarm shipment: bootstrap key + authenticating index
+# digest, together or not at all, and only aboard a publication key.
+MSG_PUB_SWARM_KEY, MSG_PUB_SWARM_DIGEST = 261, 262
+# §16.21 — a live call's door: route blob and call id, whole or not at all.
+MSG_CALL_ROUTE, MSG_CALL_ID = 263, 264
+MAX_CALL_ROUTE = 4096
 # §16.19 — small groups: the group, the sender's own counter in it, and the
 # group reference (target's sender + their counter). The pairwise seq cannot
 # name a group message: the fanned-out copies land at different seqs.
@@ -997,6 +1049,9 @@ RN_QUANTITY = 248
 # flooding paid for.
 RN_POSTER, RN_SIG, RN_POW = 242, 243, 244
 HN_POSTER, HN_SIG, HN_POW = 245, 246, 247
+# §16.18.2: the publication listing, and its own stamp namespace.
+PN_VERSION, PN_CARD, PN_TITLE, PN_BLURB, PN_PRICE, PN_EXPIRY = 265, 266, 267, 268, 269, 270
+PN_POSTER, PN_SIG, PN_POW, PN_BEACON_HEIGHT, PN_BEACON_HASH = 271, 272, 273, 274, 275
 # §16.18.1's freshness beacon: the Monero block a stamp was mined against.
 # Without it every other field in the preimage is either the poster's own or a
 # floor division of the clock, so the whole of next year could be mined this
@@ -1130,8 +1185,12 @@ def _expect_type(body, want, name):
 
 
 def _finish(body):
+    # Core's strict reader says UnknownField here, in these words. This said
+    # Malformed for every family and no vector had ever exercised the path —
+    # two implementations disagreeing invisibly until publication_unknown_field
+    # pinned it (§18.1's closed world, enforced at last from both sides).
     if body:
-        raise Reject("Malformed", f"unexpected field {sorted(body)[0]}")
+        raise Reject("UnknownField", f"unrecognised field {sorted(body)[0]}")
 
 
 def parse_card(buf):
@@ -1373,6 +1432,98 @@ def parse_listing(buf):
 
 
 
+def parse_pub_listing(buf):
+    # §16.18.2: a publication on a board. The board name carries the where
+    # (topic or local cell — and it is inside the seal's signature); the
+    # notice carries what a stranger needs to decide to subscribe.
+    b = _body(buf)
+    out = {
+        "version": _take(b, PN_VERSION, "uint", "version"),
+        "card": _take(b, PN_CARD, "text", "card"),
+        "title": _take(b, PN_TITLE, "text", "title"),
+    }
+    if out["version"] != 1:
+        raise Reject("Malformed", "unknown publication notice version")
+    if not out["card"].startswith("ducat:"):
+        raise Reject("Malformed", "a listing card must be a ducat: URI")
+    if len(out["card"]) > 1024:
+        raise Reject("Malformed", "text too long")
+    if not out["title"] or len(out["title"]) > 60:
+        raise Reject("Malformed", "a publication listing needs a title")
+    out["blurb"] = _opt(b, PN_BLURB, "text")
+    if out["blurb"] is not None and (not out["blurb"] or len(out["blurb"]) > 280):
+        raise Reject("Malformed", "a blurb is one sentence")
+    out["price"] = _opt(b, PN_PRICE, "uint")
+    if out["price"] == 0:
+        raise Reject("Malformed", "free is spelled by omission")
+    out["expiry"] = _take(b, PN_EXPIRY, "uint", "expiry")
+    _finish(b)
+    return out
+
+
+def run_pub_listing(cases, r):
+    for c in cases:
+        def go(c=c):
+            n = parse_pub_listing(unhex(c["pub_listing_hex"]))
+            fields = [
+                (PN_VERSION, ("uint", n["version"])),
+                (PN_CARD, ("text", n["card"])),
+                (PN_TITLE, ("text", n["title"])),
+            ]
+            if n["blurb"] is not None:
+                fields.append((PN_BLURB, ("text", n["blurb"])))
+            if n["price"] is not None:
+                fields.append((PN_PRICE, ("uint", n["price"])))
+            fields.append((PN_EXPIRY, ("uint", n["expiry"])))
+            return _reencode_map(fields)
+        out = expect_reject(r, "contact", c, go)
+        if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:
+            r.passed -= 1
+            r.bad("contact", c["name"], c.get("why", ""),
+                  f"re-encoded to {out.hex()}, expected {c['expect']['reencodes_to_hex']}")
+
+
+
+def parse_site_head(v):
+    """§16.22: the site head — strict, closed set, version-gated."""
+    if v[0] != "map":
+        raise Reject("Malformed", "a site head is a map")
+    b = dict(v[1])
+    out = {}
+    ver = b.pop(SITE_VERSION, (None, None))[1]
+    if ver != 1:
+        raise Reject("Malformed", "unknown site head version")
+    out["title"] = _take_text(b, SITE_TITLE, MAX_SITE_TITLE_CHARS, "title", True)
+    out["share"] = _take_text(b, SITE_SHARE, MAX_SHARE_KEY_CHARS, "share", True)
+    digest = b.pop(SITE_DIGEST, (None, None))[1]
+    if digest is None or len(digest) != 32:
+        raise Reject("Malformed", "a site head carries its bundle's digest")
+    out["digest"] = digest
+    updated = b.pop(SITE_UPDATED, (None, None))[1]
+    if updated is None:
+        raise Reject("Malformed", "a site head says when it moved")
+    out["updated"] = updated
+    _finish(b)
+    return out
+
+
+def run_site_head(cases, r):
+    for c in cases:
+        def go(c=c):
+            v = decode_canonical(unhex(c["site_head_hex"]))
+            parse_site_head(v)
+            return encode(v)
+        got = expect_reject(r, "site.head", c, go)
+        if got is None:
+            continue
+        want = c["expect"].get("reencodes_to_hex")
+        if want and got.hex() != want:
+            r.passed -= 1
+            r.bad("site.head", c["name"], c.get("why", ""),
+                  "re-encoding differs from the vector")
+
+
+
 def leading_zero_bits(h):
     """How many zero bits a digest opens with."""
     n = 0
@@ -1404,11 +1555,17 @@ def open_board_notice(buf, board, subkey):
     """
     import hashlib
     body_map = _body(buf)
-    poster = body_map.pop(RN_POSTER, (None, None))[1]
-    sig = body_map.pop(RN_SIG, (None, None))[1]
-    nonce = body_map.pop(RN_POW, (None, None))[1]
-    height = body_map.pop(RN_BEACON_HEIGHT, (None, None))[1]
-    bhash = body_map.pop(RN_BEACON_HASH, (None, None))[1]
+    # Two families seal the same way in their own field namespaces: the
+    # rental's (242…) and the publication's (271…). Which one this is, the
+    # notice itself says.
+    ids = (PN_POSTER, PN_SIG, PN_POW, PN_BEACON_HEIGHT, PN_BEACON_HASH) \
+        if PN_POSTER in body_map else \
+        (RN_POSTER, RN_SIG, RN_POW, RN_BEACON_HEIGHT, RN_BEACON_HASH)
+    poster = body_map.pop(ids[0], (None, None))[1]
+    sig = body_map.pop(ids[1], (None, None))[1]
+    nonce = body_map.pop(ids[2], (None, None))[1]
+    height = body_map.pop(ids[3], (None, None))[1]
+    bhash = body_map.pop(ids[4], (None, None))[1]
     if not isinstance(poster, (bytes, bytearray)):
         raise Reject("Malformed", "a board notice must say who wrote it")
     if not isinstance(sig, (bytes, bytearray)) or len(sig) != 64:
@@ -1470,8 +1627,11 @@ def run_board_sealed(cases, r):
             poster, inner = open_board_notice(
                 unhex(c["sealed_hex"]), c["board"], c["subkey"])
             # What is left has to be a listing this implementation reads, so
-            # the seal and the notice really do compose.
-            parse_listing(inner)
+            # the seal and the notice really do compose — whichever family.
+            if PN_VERSION in dict(decode_canonical(inner)[1]):
+                parse_pub_listing(inner)
+            else:
+                parse_listing(inner)
             return poster
         out = expect_reject(r, "contact", c, go)
         want = c["expect"].get("poster_hex")
@@ -1692,7 +1852,7 @@ def parse_message(buf):
             raise Reject("Malformed", "kind is not an integer")
         if kind == 0:
             raise Reject("Malformed", "text is encoded by omitting the kind")
-        if kind not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12):
+        if kind not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15):
             raise Reject("Malformed", "unknown message kind")
     else:
         kind = 0
@@ -1746,9 +1906,12 @@ def parse_message(buf):
     else:
         out["re_own"] = False
 
-    # §16.15 — attachments: all fields or none.
+    # §16.15 — attachments: one transport (a record, or a swarm share),
+    # and the sealed-blob fields all together or not at all.
     att = {
         "record": _take_text(b, MSG_ATT_RECORD, MAX_RECORD_KEY_CHARS, "record", False),
+        "swarm": _take_text(b, MSG_ATT_SWARM, MAX_SHARE_KEY_CHARS, "share key", False),
+        "swarm_digest": b.pop(MSG_ATT_SWARM_DIGEST, (None, None))[1],
         "key": b.pop(MSG_ATT_KEY, (None, None))[1],
         "nonce": b.pop(MSG_ATT_NONCE, (None, None))[1],
         "len": b.pop(MSG_ATT_LEN, (None, None))[1],
@@ -1756,24 +1919,36 @@ def parse_message(buf):
         "mime": _take_text(b, MSG_ATT_MIME, MAX_MIME_CHARS, "mime", False),
         "name": _take_text(b, MSG_ATT_NAME, MAX_FILENAME_CHARS, "filename", False),
     }
-    core = [att["record"], att["key"], att["nonce"], att["len"], att["hash"], att["mime"]]
-    if all(x is None for x in core):
-        if att["name"] is not None:
-            raise Reject("Malformed", "a filename without an attachment names nothing")
+    if (att["swarm"] is None) != (att["swarm_digest"] is None):
+        raise Reject("Malformed",
+                     "a swarm attachment carries its share key and digest together")
+    if att["swarm_digest"] is not None and len(att["swarm_digest"]) != 32:
+        raise Reject("Malformed", "a swarm digest is 32 bytes")
+    transport_record = att["record"] is not None
+    transport_swarm = att["swarm"] is not None
+    core = [att["key"], att["nonce"], att["len"], att["hash"], att["mime"]]
+    if not transport_record and not transport_swarm:
+        if any(x is not None for x in core) or att["name"] is not None:
+            raise Reject("Malformed",
+                         "attachment fields without a transport reference nothing")
         out["attachment"] = None
+    elif transport_record and transport_swarm:
+        raise Reject("Malformed",
+                     "one road for the bytes: a record or the swarm, never both")
     elif all(x is not None for x in core):
-        if att["key"] is not None and len(att["key"]) != 32:
+        if len(att["key"]) != 32:
             raise Reject("Malformed", "attachment key is 32 bytes")
         if len(att["nonce"]) != 24:
             raise Reject("Malformed", "attachment nonce is 24 bytes")
         if len(att["hash"]) != 32:
             raise Reject("Malformed", "attachment hash is 32 bytes")
-        if not (1 <= att["len"] <= MAX_ATTACHMENT_BYTES):
+        bound = MAX_SWARM_ATTACHMENT_BYTES if transport_swarm else MAX_ATTACHMENT_BYTES
+        if not (1 <= att["len"] <= bound):
             raise Reject("Malformed", "attachment length out of bounds")
         out["attachment"] = att
     else:
         raise Reject("Malformed",
-                     "an attachment carries record, key, nonce, length, hash and mime together")
+                     "an attachment carries transport, key, nonce, length, hash and mime together")
 
     # §15.12 — the live-position reference: both fields together or neither.
     pos_record = _take_text(b, MSG_POS_RECORD, MAX_RECORD_KEY_CHARS, "record", False)
@@ -1787,6 +1962,51 @@ def parse_message(buf):
     else:
         raise Reject("Malformed",
                      "a position reference carries its record and its key together")
+
+    # §16.20 — the period pair together or not at all; likewise the shelf.
+    pub_period = _take_text(b, MSG_PUB_PERIOD, 64, "period id", False)
+    pub_key = b.pop(MSG_PUB_KEY, (None, None))[1]
+    pub_record = _take_text(b, MSG_PUB_RECORD, MAX_RECORD_KEY_CHARS, "publication record", False)
+    pub_head = b.pop(MSG_PUB_HEAD, (None, None))[1]
+    swarm_key = _take_text(b, MSG_PUB_SWARM_KEY, MAX_RECORD_KEY_CHARS, "swarm share key", False)
+    swarm_digest = b.pop(MSG_PUB_SWARM_DIGEST, (None, None))[1]
+    if (swarm_key is None) != (swarm_digest is None):
+        raise Reject("Malformed",
+                     "a swarm share carries its key and its index digest together")
+    if swarm_digest is not None and len(swarm_digest) != 32:
+        raise Reject("Malformed", "an index digest is 32 bytes")
+    if pub_period is None and pub_key is None and pub_record is None and pub_head is None:
+        if swarm_key is not None:
+            raise Reject("Malformed", "a swarm share rides a publication key")
+        out["publication"] = None
+    elif pub_period is not None and pub_key is not None:
+        if len(pub_key) != 32:
+            raise Reject("Malformed", "a period key is 32 bytes")
+        if (pub_record is None) != (pub_head is None):
+            raise Reject("Malformed",
+                         "a publication shelf carries its record and its head key together")
+        if pub_head is not None and len(pub_head) != 32:
+            raise Reject("Malformed", "a head key is 32 bytes")
+        out["publication"] = {"period": pub_period, "key": pub_key,
+                              "record": pub_record, "head": pub_head,
+                              "swarm_key": swarm_key, "swarm_digest": swarm_digest}
+    else:
+        raise Reject("Malformed",
+                     "a publication key carries its period id and its key together")
+
+    # §16.21 — the door and its name, together or not at all.
+    call_route = b.pop(MSG_CALL_ROUTE, (None, None))[1]
+    call_id = b.pop(MSG_CALL_ID, (None, None))[1]
+    if (call_route is None) != (call_id is None):
+        raise Reject("Malformed", "a call carries its route and its id together")
+    if call_route is not None:
+        if len(call_route) == 0 or len(call_route) > MAX_CALL_ROUTE:
+            raise Reject("Malformed", "a call route is 1 to 4096 bytes")
+        if len(call_id) != 8:
+            raise Reject("Malformed", "a call id is 8 bytes")
+        out["call"] = {"route": call_route, "id": call_id}
+    else:
+        out["call"] = None
     _finish(b)
 
     # A payment with no amount is a screen with a blank where the number goes;
@@ -1794,7 +2014,7 @@ def parse_message(buf):
     # A FROST round (9) is the exception: a release proposal MAY state the
     # amount the funder gets back — the consent screen shows it beside the
     # signed payload (§15.12's settlement); a statement, not authority.
-    if kind in (0, 4, 5, 8, 10, 12) and out["amount"] is not None:
+    if kind in (0, 4, 5, 8, 10, 12, 13, 14, 15) and out["amount"] is not None:
         raise Reject("Malformed", "this kind must not carry an amount")
     if kind in (1, 2, 3) and out["amount"] is None:
         raise Reject("Malformed", "a payment message must carry an amount")
@@ -1868,6 +2088,16 @@ def parse_message(buf):
         raise Reject("Malformed", "a position message carries a reference to the stream")
     if kind != 11 and out["position"] is not None:
         raise Reject("Malformed", "only a position message carries a stream reference")
+    # §16.20's closed world: the key IS the kind.
+    if kind == 13 and out["publication"] is None:
+        raise Reject("Malformed", "a publication message carries the period's key")
+    if kind != 13 and out["publication"] is not None:
+        raise Reject("Malformed", "only a publication message carries a period key")
+    # §16.21's closed world: the door IS the kind.
+    if kind in (14, 15) and out["call"] is None:
+        raise Reject("Malformed", "a call message carries its route and id")
+    if kind not in (14, 15) and out["call"] is not None:
+        raise Reject("Malformed", "only a call message carries a call route")
     if kind in (0, 5, 6, 7, 8, 9, 10) and (out["items"] or out["tax"] is not None):
         raise Reject("Malformed", "this message kind has no bill to itemise")
     # An eta is a ride offer's courtesy figure, bounded by honesty: a day.
@@ -2154,7 +2384,12 @@ def run_message_payment(cases, r):
                 fields.append((MSG_GROUP_RE_SEQ, ("uint", m["group_re_seq"])))
             a = m["attachment"]
             if a is not None:
-                fields.append((MSG_ATT_RECORD, ("text", a["record"])))
+                if a["record"] is not None:
+                    fields.append((MSG_ATT_RECORD, ("text", a["record"])))
+                if a.get("swarm") is not None:
+                    fields.append((MSG_ATT_SWARM, ("text", a["swarm"])))
+                if a.get("swarm_digest") is not None:
+                    fields.append((MSG_ATT_SWARM_DIGEST, ("bytes", a["swarm_digest"])))
                 fields.append((MSG_ATT_KEY, ("bytes", a["key"])))
                 fields.append((MSG_ATT_NONCE, ("bytes", a["nonce"])))
                 fields.append((MSG_ATT_LEN, ("uint", a["len"])))
@@ -2166,6 +2401,21 @@ def run_message_payment(cases, r):
             if pos is not None:
                 fields.append((MSG_POS_RECORD, ("text", pos["record"])))
                 fields.append((MSG_POS_STREAM, ("bytes", pos["stream"])))
+            pub = m.get("publication")
+            if pub is not None:
+                if pub["record"] is not None:
+                    fields.append((MSG_PUB_RECORD, ("text", pub["record"])))
+                if pub["head"] is not None:
+                    fields.append((MSG_PUB_HEAD, ("bytes", pub["head"])))
+                fields.append((MSG_PUB_PERIOD, ("text", pub["period"])))
+                fields.append((MSG_PUB_KEY, ("bytes", pub["key"])))
+                if pub["swarm_key"] is not None:
+                    fields.append((MSG_PUB_SWARM_KEY, ("text", pub["swarm_key"])))
+                if pub["swarm_digest"] is not None:
+                    fields.append((MSG_PUB_SWARM_DIGEST, ("bytes", pub["swarm_digest"])))
+            if m.get("call") is not None:
+                fields.append((MSG_CALL_ROUTE, ("bytes", m["call"]["route"])))
+                fields.append((MSG_CALL_ID, ("bytes", m["call"]["id"])))
             return encode(("map", fields))
         out = expect_reject(r, "contact", c, go)
         if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:
@@ -2203,6 +2453,8 @@ BY_KIND = {
     "stand.epoch": run_stand_epoch,
     "hail.notice": run_hail_notice,
     "rental.listing": run_listing,
+    "pub.listing": run_pub_listing,
+    "site.head": run_site_head,
     "board.sealed": run_board_sealed,
     "board.beacon_window": run_beacon_window,
     "board.beacon_verdict": run_beacon_verdict,

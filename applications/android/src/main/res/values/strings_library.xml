@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The subscriber's library: the drawer screen where filed publication
+         keys and their downloads live (§16.20). The cabinet outlives the
+         chat thread, so this screen is the durable face of a subscription. -->
+    <string name="section_library">Library</string>
+    <string name="library_empty">Nothing here yet. When a publisher sends you an issue, it is filed here — and stays even if the chat is deleted.</string>
+    <string name="library_issue">Issue %1$s</string>
+    <string name="library_on_device">On this device · %1$s</string>
+    <string name="library_no_shipment">Key on file — no download offered yet</string>
+    <string name="library_download">Download</string>
+    <string name="library_progress">%1$s of %2$s</string>
+    <string name="library_starting">Starting…</string>
+    <string name="library_failed">Download failed: %1$s</string>
+    <string name="library_gone">no longer in your contacts</string>
+    <string name="chat_issue_sent_you">Sent you an issue</string>
+    <string name="chat_issue_you_sent">You sent an issue</string>
+    <string name="chatlist_preview_issue">New issue: %1$s</string>
+    <string name="notify_new_issue">%1$s sent a new issue</string>
+    <string name="library_note_new_issue">A new issue is out.</string>
+    <string name="library_unsubscribe">Unsubscribe</string>
+    <string name="library_unsub_confirm">Stop receiving from %1$s? Issues you already hold stay yours.</string>
+    <string name="library_unsub_keep">Keep subscription</string>
+    <string name="library_resubscribe">Resubscribe</string>
+    <string name="library_unsubscribed">Unsubscribed — new issues are not filed</string>
+    <string name="library_unsub_note">Unsubscribed.</string>
+    <plurals name="main_issues_waiting">
+        <item quantity="one">%1$d new issue waiting</item>
+        <item quantity="other">%1$d new issues waiting</item>
+    </plurals>
+    <string name="library_open">Open</string>
+    <string name="library_queued">Queued</string>
+</resources>

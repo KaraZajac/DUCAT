@@ -11,6 +11,8 @@
     <string name="pay_address_placeholder">5… 或 7…</string>
     <string name="pay_continue">继续</string>
     <string name="pay_not_monero_address">这看起来不像 Monero 地址。</string>
+    <string name="pay_scan_unknown_card">这张卡片还不属于你的任何联系人。请先在聊天中添加对方，再付款。</string>
+    <string name="pay_scan_not_payable">这个码既不是 Monero 地址，也不是 DUCAT 卡片。</string>
 
     <!-- Pay.kt — amount step -->
     <string name="pay_back">返回</string>
@@ -62,12 +64,13 @@
     <string name="pay_fee_unknown">暂时无法得知</string>
     <string name="pay_fee_unknown_confirm">暂时无法估算手续费。交易在构建时会按实际费用支付。</string>
     <string name="pay_node_no_answer">Monero 节点没有及时响应，什么都没有发送。请再试一次——应用会换一个节点。</string>
+    <string name="pay_send_interrupted">应用在付款中途被关闭。再次付款前请先查看对账单。</string>
     <string name="pay_not_enough">可用余额不足——你有 %1$s，加上网络手续费需要 %2$s。</string>
     <string name="pay_offline">尚未连接——这台手机还没有加入网络。什么都没有发送，请稍后再试。</string>
     <string name="pay_node_unreachable">无法连接到任何 Monero 节点。什么都没有发送——请检查网络后重试。</string>
     <string name="board_unverified_note">无法连接任何 Monero 节点，所以这里显示的内容未能与链核对。它仍然经过签名并已付费——只是请像对待未经核实的板一样多加留意。</string>
     <string name="board_needs_a_block">无法连接任何 Monero 节点。上板的内容会以一个近期区块盖章，所以现在还发不出去——请检查网络后重试。</string>
-    <string name="pay_sending_why">正在构建交易。大约需要一分钟 — 钱包正在收集用来掩盖哪些币属于你的诱饵。你可以离开这个界面，它不会停下。</string>
+    <string name="pay_sending_why">正在构建交易。大约需要一分钟 — 钱包正在收集用来掩盖哪些币属于你的诱饵。切换到其他应用也不会让它停下。</string>
     <string name="pay_sending_to">给 %1$s</string>
     <string name="claim_own_card">那是你自己的名片 — 它属于这台设备。</string>
     <string name="pay_already_paid">你已经向该托管付过款了。钱已存入，没有重复发送。</string>
@@ -78,4 +81,6 @@
     <string name="pay_repeat_monthly">每月</string>
     <string name="pay_recur_notify">已发送周期账单 — %1$s</string>
     <string name="pay_donation_hint">这是一笔捐赠 — 到账后收据会送到此对话，账单会将其归入捐赠类。</string>
+    <string name="pay_relay_unconfirmed">没有任何 Monero 节点确认收下这笔付款。它仍可能成功——所用的票据会一直保留，直到链上给出结果。再次付款前请先查看对账单。</string>
+    <string name="pay_request_kept">请求已保存——网络恢复后会自动发出。</string>
 </resources>

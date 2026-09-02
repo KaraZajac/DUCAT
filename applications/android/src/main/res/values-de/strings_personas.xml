@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="personas_title">Personas</string>
+    <string name="personas_body">Wer dieses Telefon sein kann. Jedes Profil ist ein eigener Schlüssel mit eigenen Kontakten — der Laden erfährt nie von deinen Freunden, und deine Freunde begegnen nie dem Laden. Neue Beziehungen landen im Profil, das du gerade trägst.</string>
+    <string name="personas_primary">Persönlich</string>
+    <string name="personas_worn">Getragen</string>
+    <string name="personas_add">Neues Profil</string>
+    <string name="personas_name_label">Name</string>
+    <string name="personas_name_support">Wie diese Seite von dir heißt — Laden, Markt, Stöbern.</string>
+    <string name="personas_cap">Vier sind das Limit: Profile funktionieren nur, wenn sie auf eine Hand passen.</string>
+    <string name="personas_no_delete">Ein Profil lässt sich nicht löschen — seine Kontakte antworten allein auf seinen Schlüssel. Nicht mehr benutzen, und es wird still.</string>
+    <string name="personas_save">Speichern</string>
+    <string name="personas_cancel">Abbrechen</string>
+    <string name="personas_mode_answers">Antwortet als %1$s</string>
+    <string name="personas_mode_answers_worn">Antwortet als getragenes Profil</string>
+    <string name="personas_contacts_scope">Kontakte von %1$s — Profil im Menü wechseln für die übrigen.</string>
+    <string name="profiles_personal_sub">Das persönliche Profil</string>
+    <string name="profiles_answers_for">Antwortet für %1$s</string>
+    <string name="profiles_editing_note">Profil von %1$s</string>
+    <string name="profiles_rename">Umbenennen</string>
+    <string name="profiles_appears_as">Erscheint als %1$s</string>
+</resources>

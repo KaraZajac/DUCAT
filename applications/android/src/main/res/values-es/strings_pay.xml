@@ -11,6 +11,8 @@
     <string name="pay_address_placeholder">5… o 7…</string>
     <string name="pay_continue">Continuar</string>
     <string name="pay_not_monero_address">Eso no parece una dirección de Monero.</string>
+    <string name="pay_scan_unknown_card">Esa tarjeta aún no es de ninguno de tus contactos. Añade primero a la persona desde Chat y luego paga.</string>
+    <string name="pay_scan_not_payable">Ese código no es ni una dirección de Monero ni una tarjeta DUCAT.</string>
 
     <!-- Pay.kt — amount step -->
     <string name="pay_back">Atrás</string>
@@ -62,12 +64,13 @@
     <string name="pay_fee_unknown">ahora mismo no se sabe</string>
     <string name="pay_fee_unknown_confirm">Ahora mismo no se ha podido estimar la comisión. La transacción pagará lo que cueste al construirse.</string>
     <string name="pay_node_no_answer">El nodo de Monero no respondió a tiempo. No se envió nada. Inténtalo otra vez: la app usará otro nodo.</string>
+    <string name="pay_send_interrupted">La app se cerró a mitad del pago. Revisa el extracto antes de volver a pagar.</string>
     <string name="pay_not_enough">No hay suficiente disponible: tienes %1$s y hacen falta %2$s con la comisión de red.</string>
     <string name="pay_offline">Aún sin conexión: este teléfono no ha terminado de unirse a la red. No se envió nada; inténtalo de nuevo en un momento.</string>
     <string name="pay_node_unreachable">No se pudo contactar con ningún nodo de Monero. No se envió nada: comprueba tu conexión e inténtalo de nuevo.</string>
     <string name="board_unverified_note">No hay ningún nodo de Monero al alcance, así que lo que se muestra aquí no se ha podido comprobar contra la cadena. Sigue estando firmado y pagado; trátalo solo con el cuidado que darías a un tablón sin verificar.</string>
     <string name="board_needs_a_block">No se pudo contactar con ningún nodo de Monero. Lo que se publica en un tablón lleva el sello de un bloque reciente, así que esto no puede subir todavía: revisa tu conexión e inténtalo de nuevo.</string>
-    <string name="pay_sending_why">Construyendo la transacción. Tarda alrededor de un minuto: el monedero reúne los señuelos que ocultan cuáles son tus monedas. Puedes salir de esta pantalla; no se detiene.</string>
+    <string name="pay_sending_why">Construyendo la transacción. Tarda alrededor de un minuto: el monedero reúne los señuelos que ocultan cuáles son tus monedas. Cambiar a otra aplicación no lo detiene.</string>
     <string name="pay_sending_to">a %1$s</string>
     <string name="claim_own_card">Esa tarjeta es tuya: pertenece a este dispositivo.</string>
     <string name="pay_already_paid">Ya has pagado en este depósito en garantía. Tu dinero está dentro; no se ha enviado nada más.</string>
@@ -78,4 +81,6 @@
     <string name="pay_repeat_monthly">Mensual</string>
     <string name="pay_recur_notify">Cuenta recurrente enviada — %1$s</string>
     <string name="pay_donation_hint">Esto es una donación: tu recibo llegará a este chat en cuanto se reciba, y tu estado de cuenta lo archivará en Donaciones.</string>
+    <string name="pay_relay_unconfirmed">Ningún nodo de Monero confirmó haber aceptado el pago. Aun así puede llegar: las notas que usó quedan reservadas hasta que la cadena lo resuelva. Revisa el extracto antes de volver a pagar.</string>
+    <string name="pay_request_kept">Solicitud guardada: saldrá sola en cuanto vuelva la red.</string>
 </resources>

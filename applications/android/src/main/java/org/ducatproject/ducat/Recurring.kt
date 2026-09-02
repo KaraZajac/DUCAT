@@ -131,7 +131,6 @@ object Recurring {
                 Mailbox.send(
                     context, c,
                     b.note.ifBlank { context.getString(R.string.pay_payment_request) },
-                    mine,
                     kind = 1, amountPxmr = b.amountPxmr,
                     payto = WalletStore(context).addressFor(b.personaHex),
                 )

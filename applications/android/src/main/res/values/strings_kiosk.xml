@@ -30,6 +30,8 @@
     <string name="kiosk_bill_sent_note">Your bill is there, itemised. Pay whenever you are ready.</string>
     <string name="kiosk_no_ducat">No DUCAT? Pay with a Monero wallet</string>
     <string name="kiosk_card_failed">Could not show a code: %1$s</string>
+    <string name="kiosk_bill_sending">Sending your bill…</string>
+    <string name="kiosk_bill_not_sent">Could not send the bill yet: %1$s. Trying again.</string>
     <string name="kiosk_withdraw">Withdraw</string>
     <!-- Calling an order out, to somebody who stepped outside -->
     <string name="kiosk_say_ready">Ready</string>

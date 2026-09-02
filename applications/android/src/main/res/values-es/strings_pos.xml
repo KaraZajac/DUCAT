@@ -32,4 +32,6 @@
     <string name="pos_cancel_sale">Cancelar venta</string>
     <string name="pos_tax_at">Impuesto (%1$s %%)</string>
     <string name="pos_in_unit">en %1$s</string>
+    <string name="pos_error_bill_not_withdrawn">La cuenta sigue en su teléfono — no se pudo retirar: %1$s</string>
+    <string name="pos_receipt_pending">El recibo aún no se pudo enviar — saldrá solo en cuanto vuelva la red.</string>
 </resources>

@@ -14,6 +14,7 @@ plugins {
 // only through the shims in src/main/kotlin/android/. Grown one file at a
 // time, deliberately — anything ui/ or screen-shaped stays on the phone.
 val sharedLogic = listOf(
+    "org/ducatproject/ducat/Elapsed.kt",
     "org/ducatproject/ducat/Mailbox.kt",
     "org/ducatproject/ducat/Ceremony.kt",
     "org/ducatproject/ducat/ContactStore.kt",
@@ -95,17 +96,28 @@ val sharedLogic = listOf(
     // the shared export carries it, so the desk must hold the same number.
     "org/ducatproject/ducat/Tax.kt",
     "org/ducatproject/ducat/Recurring.kt",
+    "org/ducatproject/ducat/Publications.kt",
+    "org/ducatproject/ducat/Swarm.kt",
+    "org/ducatproject/ducat/Sites.kt",
     "org/ducatproject/ducat/ui/GroupChat.kt",
     "org/ducatproject/ducat/ui/SettledMark.kt",
     "org/ducatproject/ducat/ui/CatSpinner.kt",
     "org/ducatproject/ducat/ui/DucatBar.kt",
     "org/ducatproject/ducat/ui/Clip.kt",
+    "org/ducatproject/ducat/ui/Personas.kt",
     "org/ducatproject/ducat/Enquiries.kt",
     "org/ducatproject/ducat/Stakes.kt",
+    "org/ducatproject/ducat/Donations.kt",
     "org/ducatproject/ducat/Places.kt",
     // §15.12's per-country fare table, which Places.kt prices from.
     "org/ducatproject/ducat/FareRates.kt",
     "org/ducatproject/ducat/ui/Drawer.kt",
+    "org/ducatproject/ducat/ui/Library.kt",
+    "org/ducatproject/ducat/ui/Publishing.kt",
+    "org/ducatproject/ducat/ui/Market.kt",
+    "org/ducatproject/ducat/ui/Press.kt",
+    "org/ducatproject/ducat/Calls.kt",
+    "org/ducatproject/ducat/ui/CallScreen.kt",
     "org/ducatproject/ducat/ui/Shells.kt",
     "org/ducatproject/ducat/ui/Hail.kt",
     "org/ducatproject/ducat/ui/Taxi.kt",
@@ -113,6 +125,9 @@ val sharedLogic = listOf(
     "org/ducatproject/ducat/ui/BackupSettings.kt",
     "org/ducatproject/ducat/ui/MyProfileEditor.kt",
     "org/ducatproject/ducat/ui/Chat.kt",
+    // The conversation's sends in flight, held by the process: Chat.kt
+    // reads its busy state and its landings from here.
+    "org/ducatproject/ducat/ui/ThreadSends.kt",
     "org/ducatproject/ducat/ui/QrHub.kt",
     // Desk-side glue that lives inside the shared package — these two match
     // files in *this* module's tree (like SecurePrefsDesk below), not app/.
@@ -134,12 +149,12 @@ val sharedLogic = listOf(
 // stopped the build with a sentence.
 val deskNativeFreshness = tasks.register("deskNativeFreshness") {
     val lib = File(rootProject.projectDir.parentFile, "target/release/libducat_mobile.so")
-    val rustDirs = listOf("core/src", "mobile/src")
+    val rustDirs = listOf("core/src", "mobile/src", "mobile/vendor")
         .map { File(rootProject.projectDir.parentFile, it) }
     doLast {
         if (!lib.isFile) return@doLast
         val newest = rustDirs.filter { it.isDirectory }
-            .flatMap { it.walkTopDown().filter { f -> f.isFile }.toList() }
+            .flatMap { it.walkTopDown().filter { f -> f.isFile && (f.extension == "rs" || f.extension == "toml") }.toList() }
             .maxByOrNull { it.lastModified() } ?: return@doLast
         if (newest.lastModified() > lib.lastModified()) {
             throw GradleException(
@@ -369,6 +384,38 @@ dependencies {
 
 // Headless proof the stack stands: JVM, JNA, the Rust bridge, Veilid — no
 // window involved. `./gradlew :desktop:smoke`.
+tasks.register<JavaExec>("sitepublish") {
+    group = "verification"
+    description = "Publish a directory as a ducat site (env DUCAT_SITE_*)"
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("org.ducatproject.desk.SitePublishKt")
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
+tasks.register<JavaExec>("filesend") {
+    group = "verification"
+    description = "Big-road file send end to end (roles via DUCAT_FS_ROLE)"
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("org.ducatproject.desk.FileSendTestKt")
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
+tasks.register<JavaExec>("swarmdir") {
+    group = "verification"
+    description = "Multi-file swarm round trip (roles via DUCAT_SW_ROLE)"
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("org.ducatproject.desk.SwarmDirTestKt")
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
+tasks.register<JavaExec>("boardbench") {
+    group = "verification"
+    description = "Time one 9-board ring read under DUCAT_DHT_OPS"
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("org.ducatproject.desk.BoardBenchKt")
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 tasks.register<JavaExec>("smoke") {
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "org.ducatproject.desk.SmokeKt"
@@ -560,6 +607,15 @@ tasks.register<JavaExec>("cardaddress") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// A receipt the reconciler could not send is owed, not forgotten: the debt
+// survives a failed retry, writes no row, and is released when nobody is left
+// to tell. `./gradlew :desktop:receiptowed`.
+tasks.register<JavaExec>("receiptowed") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.ReceiptOwedTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // Two contacts a person cannot tell apart: the confusable-name fold and the
 // store query that drives the warning. `./gradlew :desktop:confusable`.
 tasks.register<JavaExec>("confusable") {
@@ -586,6 +642,16 @@ tasks.register<JavaExec>("escrowsweep") {
 tasks.register<JavaExec>("backuptest") {
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "org.ducatproject.desk.BackupTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
+// The read marks: which row raises which dot. A group message flags the
+// group and not its sender's direct row, a look clears it, a swept row raises
+// nothing, and a deleted conversation returns for words but not machinery.
+// `./gradlew :desktop:markstest`.
+tasks.register<JavaExec>("markstest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.MarksTestKt"
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
@@ -619,6 +685,65 @@ tasks.register<JavaExec>("arbiter") {
 tasks.register<JavaExec>("ringtest") {
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "org.ducatproject.desk.RingTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
+// The swarm through the client's own path — see SwarmTest.kt for the env
+// contract. `DUCAT_SWARM_ROLE=seed … ./gradlew :desktop:swarmtest`.
+tasks.register<JavaExec>("swarmtest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.SwarmTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
+// The whole 1.2+1.3 vertical: card claim → kind-13 manifest (period key +
+// shipment) → swarm fetch by the FILED pair. See PubSwarmTest.kt.
+tasks.register<JavaExec>("pubswarmtest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.PubSwarmTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
+// A live call between two desks: offer/answer on the thread, fifteen
+// seconds of verified full-duplex PCM on the exchanged routes.
+// Writes the runtime classpath to build/cp.txt so test roles can run as
+// plain `java` processes — two gradle invocations serialize on the project
+// lock, and a callee that waits forever would starve its own caller.
+tasks.register("cpfile") {
+    doLast {
+        val f = layout.buildDirectory.file("cp.txt").get().asFile
+        f.parentFile.mkdirs()
+        f.writeText(sourceSets["main"].runtimeClasspath.asPath)
+    }
+}
+
+tasks.register<JavaExec>("calltest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.CallTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
+// The shelf's sharpest edge: publisher shelves, mails the manifest, and
+// EXITS — a reader arriving later still gets the bytes off the network.
+tasks.register<JavaExec>("shelftest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.ShelfTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
+// Money through the gate, live on stagenet: bill → chain → reconcile →
+// swarm, two desks, no operator. See PubSettleTest.kt for the env contract.
+tasks.register<JavaExec>("pubsettletest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.PubSettleTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
+// The publisher's ledger without a network: roster, issue log, re-seed
+// semantics. `DUCAT_LEDGER_STATE=<dir> ./gradlew :desktop:publedgertest`.
+tasks.register<JavaExec>("publedgertest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.PublisherLedgerTestKt"
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 

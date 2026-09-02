@@ -24,12 +24,14 @@
     <string name="bartab_back">Kembali</string>
     <string name="bartab_bill_cancelled_msg">Tagihan %1$s itu dibatalkan — tidak ada yang perlu dibayar.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · bon sekarang %3$s</string>
+    <string name="bartab_discard_notice">Bon dibuang — tidak ada yang perlu dibayar.</string>
     <string name="bartab_remove_line">Hapus</string>
     <string name="bartab_settle_bill">Tutup — tagih %1$s</string>
     <string name="bartab_settle_hint">Satu tagihan terperinci masuk ke percakapanmu dengan %1$s. Mereka bisa membayar dari mana saja — utasnya tidak tertutup saat mereka pergi.</string>
     <string name="bartab_discard_tab">Buang bon</string>
     <string name="bartab_discard_title">Buang bon ini?</string>
     <string name="bartab_discard_body">Bon dan semua yang tercatat di dalamnya dihapus dari ponsel ini. Tidak ada tagihan yang dikirim, dan ini tidak bisa dibatalkan.</string>
+    <string name="bartab_discard_body_told">Bon dan semua yang tercatat di dalamnya dihapus dari ponsel ini. Tidak ada tagihan yang dikirim — mereka diberi tahu tidak ada yang perlu dibayar — dan ini tidak bisa dibatalkan.</string>
     <string name="bartab_discard_confirm">Buang</string>
     <string name="bartab_keep_tab">Simpan bon</string>
     <string name="bartab_billed_hint">Sudah ditagih. Struk terkirim sendiri ke mereka saat pembayaran masuk. Kalau diselesaikan dengan cara lain, catat di sini:</string>
@@ -39,6 +41,13 @@
     <string name="bartab_cancelled_note">Dibatalkan — mereka sudah diberi tahu di percakapan.</string>
     <string name="bartab_paid_oob_note">Dibayar di luar DUCAT ✓ — struk terkirim, tanpa transaksi terlampir.</string>
     <string name="bartab_paid_note">Lunas ✓ — struk terkirim.</string>
+    <string name="bartab_bill_pending">Sudah ditagih, tapi tagihannya masih di ponsel ini — akan terkirim begitu jaringan kembali. Dilunasi dengan cara lain? Katakan di sini:</string>
+    <string name="bartab_bill_unsent">Tagihan tidak pernah sampai ke mereka: percakapan direset sebelum tagihan sempat terkirim. Batalkan dan tagih lagi, atau katakan di sini jika dilunasi dengan cara lain:</string>
+    <string name="bartab_cancelled_pending">Dibatalkan — mereka belum diberi tahu. Pemberitahuannya akan terkirim begitu ponsel ini menemukan jaringan.</string>
+    <string name="bartab_cancelled_unsent">Dibatalkan — tapi pemberitahuannya tidak pernah keluar dari ponsel ini, dan kini tak bisa lagi. Beri tahu mereka di percakapan, atau mereka mungkin tetap membayar tagihan ini.</string>
+    <string name="bartab_paid_oob_pending">Dibayar di luar DUCAT ✓ — struknya masih di ponsel ini. Akan terkirim begitu jaringan kembali.</string>
+    <string name="bartab_paid_oob_unsent">Dibayar di luar DUCAT ✓ — tapi struknya tidak bisa dikirim.</string>
+    <string name="bartab_send_receipt">Kirim struk</string>
     <string name="bartab_remove_from_book">Hapus dari buku bon</string>
     <string name="bartab_back_to_tabs">Kembali ke bon</string>
     <!-- What the payer reads on the bill and the receipt. Written in
@@ -54,4 +63,8 @@
     <string name="bill_note_cancelled">Tagihan %1$s dibatalkan — tidak ada yang perlu dibayar.</string>
     <string name="bill_note_sale">Tagihanmu</string>
     <string name="bartab_tip_line">Tip — terima kasih</string>
+    <string name="bill_note_issue">Langganan</string>
+    <string name="bartab_paid_pending">Lunas ✓ — struknya masih di ponsel ini. Akan terkirim begitu jaringan kembali.</string>
+    <string name="bartab_paid_unsent">Lunas ✓ — tapi struknya tidak bisa dikirim. Akan dicoba lagi dengan sendirinya.</string>
+    <string name="bartab_removed_notice">Dihapus: %1$s · bon sekarang %2$s</string>
 </resources>

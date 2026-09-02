@@ -85,8 +85,7 @@ fun main() {
 
     // An answer "before" the only candidate resolves to it when the gap is
     // clock-skew-sized — you can only refuse what arrived, and the two
-    // stamps come from two different phones (the 08-27 live finding). The
-    // far-forward guard below is what keeps this from answering tomorrow.
+    // stamps come from two different phones (the 08-27 live finding).
     val early = msg(kind = 5, seq = 9, ts = 50, outgoing = true, reSeq = 0)
     check(billAnswers(listOf(early, firstBill)).refused == setOf(0L to 400L)) {
         "BILL_FAIL a skew-sized gap did not resolve"
@@ -142,11 +141,20 @@ fun main() {
     check(billAnswers(listOf(fastBill, quickNo)).refused == setOf(9L to 1000L)) {
         "BILL_FAIL a ten-minute clock skew lost the refusal"
     }
-    // And a skew far past the grace still refuses to reach forward: a
-    // refusal cannot answer a bill from tomorrow.
+    // And when the only candidate sits far past the grace, it is still the
+    // one: one of the two clocks was simply wrong when it stamped (bills
+    // minted under a clock set four days ahead, on the emulators, 2026-09-01),
+    // and a refusal that could reach nothing else would leave a refused bill
+    // reading as owed. The rebirth case stays apart because rebirth has a
+    // predecessor, and a predecessor always wins.
     val farBill = msg(kind = 1, seq = 9, ts = 1000 + 86_400, outgoing = true, pxmr = 700)
-    check(billAnswers(listOf(farBill, quickNo)).refused.isEmpty()) {
-        "BILL_FAIL an answer reached a bill a day in its future"
+    check(billAnswers(listOf(farBill, quickNo)).refused == setOf(9L to 1000L + 86_400)) {
+        "BILL_FAIL a bill stamped by a wrong clock lost its refusal"
+    }
+    // Two far-future candidates: the earliest, the one that existed first.
+    val fartherBill = msg(kind = 1, seq = 9, ts = 1000 + 172_800, outgoing = true, pxmr = 900)
+    check(billAnswers(listOf(fartherBill, farBill, quickNo)).refused == setOf(9L to 1000L + 86_400)) {
+        "BILL_FAIL two wrong-clock bills: the later one took the refusal"
     }
 
     println("BILL_OK a refusal answers the message it was sent about")

@@ -32,4 +32,6 @@
     <string name="pos_cancel_sale">बिक्री रद्द करें</string>
     <string name="pos_tax_at">कर (%1$s%%)</string>
     <string name="pos_in_unit">%1$s में</string>
+    <string name="pos_error_bill_not_withdrawn">बिल अब भी उनके फ़ोन पर है — वापस नहीं लिया जा सका: %1$s</string>
+    <string name="pos_receipt_pending">रसीद अभी भेजी नहीं जा सकी — नेटवर्क लौटते ही अपने आप चली जाएगी।</string>
 </resources>

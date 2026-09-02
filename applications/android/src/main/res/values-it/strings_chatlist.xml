@@ -20,6 +20,7 @@
     <string name="chatlist_preview_receipt">🧾 Ricevuta — %1$s</string>
     <string name="chatlist_preview_reacted">Ha reagito con %1$s</string>
     <string name="chatlist_preview_photo">📷 Foto</string>
+    <string name="chatlist_preview_voice">🎤 Memo vocale</string>
     <string name="chatlist_time_now">adesso</string>
     <string name="chatlist_time_minutes">%1$dm</string>
     <string name="chatlist_time_hours">%1$dh</string>

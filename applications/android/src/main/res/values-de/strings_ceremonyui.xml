@@ -12,6 +12,9 @@
     <string name="ceremony_accept_and_pay">Annehmen &amp; zahlen</string>
     <string name="ceremony_no_address">Keine Adresse in dieser Anfrage — frag nach, wohin das Geld soll.</string>
     <string name="ceremony_accept_opens_confirm">Annehmen öffnet den Bestätigungsbildschirm — nichts bewegt sich, bevor du es dort freigibst.</string>
+    <string name="ceremony_bill_withdrawn">%1$s hat diese Rechnung zurückgezogen — es gibt nichts zu zahlen.</string>
+    <string name="ceremony_bill_declined">Du hast diese Rechnung abgelehnt.</string>
+    <string name="ceremony_bill_paid">Bezahlt ✓ — diese Rechnung ist beglichen.</string>
 
     <!-- PaidSplash -->
     <string name="ceremony_paid">Bezahlt ✓</string>
@@ -26,14 +29,19 @@
     <string name="ceremony_plate">Kennzeichen %1$s</string>
     <string name="ceremony_accept">Annehmen</string>
     <string name="ceremony_accepting_agrees_fare">Annehmen sperrt Fahrpreis und Einlage in ein Depot, das nur ihr beide öffnen könnt.</string>
+    <string name="ceremony_accepting_agrees_fare_nostake">Annehmen sperrt den Fahrpreis in ein Depot, das nur ihr beide öffnen könnt. Ein so kleiner Fahrpreis trägt keine Einlage.</string>
     <string name="ceremony_accepting_agrees_fare_arbiter">Annehmen sperrt Fahrpreis und Einlage in ein Depot, das zwei von drei Schlüsseln braucht: deinen, ihren und den von %1$s, die nur gefragt werden, wenn ihr beide euch nicht einig werdet.</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter_nostake">Annehmen sperrt den Fahrpreis in ein Depot, das zwei von drei Schlüsseln braucht: deinen, ihren und den von %1$s, die nur gefragt werden, wenn ihr beide euch nicht einig werdet. Ein so kleiner Fahrpreis trägt keine Einlage.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Fahrt bestätigt</string>
     <string name="ceremony_expecting_you">Hinterlege deine Sicherheit im Chat — sie zahlen, sobald sie da ist.</string>
+    <string name="ceremony_expecting_you_nostake">Keine Sicherheit bei so einem kleinen Fahrpreis — sie zahlen im Chat, und du siehst dort, wenn es ankommt.</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Deine Fahrt kommt</string>
     <string name="ceremony_eta_in_chat">Zahle im Chat, sobald ihre Sicherheit da ist — die Ankunftszeit steht auch dort.</string>
+    <string name="ceremony_eta_in_chat_nostake">Zahle im Chat — die Ankunftszeit steht auch dort. Ein so kleiner Fahrpreis trägt keine Sicherheit.</string>
     <string name="ceremony_stake_note">Du zahlst %2$s ein: den Fahrpreis plus %1$s Einlage. Die Fahrerin legt ebenfalls %1$s hinein, und beide kommen am Ende zurück.</string>
+    <string name="ceremony_asked_you_for">bat dich um</string>
 </resources>

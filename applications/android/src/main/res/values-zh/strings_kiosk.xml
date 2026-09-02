@@ -30,6 +30,8 @@
     <string name="kiosk_bill_sent_note">账单在你手机上，逐项列好。什么时候方便什么时候付。</string>
     <string name="kiosk_no_ducat">没有 DUCAT？用 Monero 钱包付款</string>
     <string name="kiosk_card_failed">无法显示码：%1$s</string>
+    <string name="kiosk_bill_sending">正在发送账单…</string>
+    <string name="kiosk_bill_not_sent">暂时无法发送账单：%1$s。正在重试。</string>
     <string name="kiosk_withdraw">撤回账单</string>
     <!-- Calling an order out, to somebody who stepped outside -->
     <string name="kiosk_say_ready">已做好</string>

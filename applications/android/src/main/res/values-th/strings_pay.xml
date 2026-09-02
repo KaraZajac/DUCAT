@@ -11,6 +11,8 @@
     <string name="pay_address_placeholder">5… หรือ 7…</string>
     <string name="pay_continue">ดำเนินการต่อ</string>
     <string name="pay_not_monero_address">นั่นดูไม่เหมือนที่อยู่ Monero</string>
+    <string name="pay_scan_unknown_card">การ์ดนี้ยังไม่ใช่ของผู้ติดต่อของคุณ เพิ่มเขาจากแชทก่อน แล้วค่อยจ่าย</string>
+    <string name="pay_scan_not_payable">โค้ดนี้ไม่ใช่ทั้งที่อยู่ Monero และการ์ด DUCAT</string>
 
     <!-- Pay.kt — amount step -->
     <string name="pay_back">กลับ</string>
@@ -62,12 +64,13 @@
     <string name="pay_fee_unknown">ยังไม่ทราบตอนนี้</string>
     <string name="pay_fee_unknown_confirm">ยังประเมินค่าธรรมเนียมไม่ได้ในตอนนี้ ธุรกรรมจะจ่ายตามจริงเมื่อสร้างขึ้น</string>
     <string name="pay_node_no_answer">โหนด Monero ไม่ตอบกลับทันเวลา ยังไม่มีการส่งอะไร ลองอีกครั้ง แอปจะใช้โหนดอื่น</string>
+    <string name="pay_send_interrupted">แอปถูกปิดกลางคันระหว่างจ่ายเงิน ตรวจดูรายการเดินบัญชีก่อนจ่ายอีกครั้ง</string>
     <string name="pay_not_enough">ยอดที่ใช้ได้ไม่พอ — คุณมี %1$s และต้องใช้ %2$s เมื่อรวมค่าธรรมเนียมเครือข่าย</string>
     <string name="pay_offline">ยังไม่ได้เชื่อมต่อ — โทรศัพท์เครื่องนี้ยังเข้าร่วมเครือข่ายไม่เสร็จ ยังไม่ได้ส่งอะไร ลองใหม่อีกครั้งในอีกสักครู่</string>
     <string name="pay_node_unreachable">ติดต่อโหนด Monero ไม่ได้เลย ยังไม่ได้ส่งอะไร — ตรวจสอบการเชื่อมต่อแล้วลองใหม่</string>
     <string name="board_unverified_note">ติดต่อโหนด Monero ไม่ได้ สิ่งที่แสดงที่นี่จึงยังไม่ได้ตรวจสอบกับเชน ทุกอย่างยังลงนามและจ่ายแล้ว — เพียงแต่ให้ระวังเหมือนบอร์ดที่ยังไม่ยืนยัน</string>
     <string name="board_needs_a_block">ติดต่อโหนด Monero ไม่ได้เลย สิ่งที่จะขึ้นบอร์ดต้องประทับกับบล็อกล่าสุด จึงยังขึ้นไม่ได้ — ตรวจสอบการเชื่อมต่อแล้วลองใหม่</string>
-    <string name="pay_sending_why">กำลังสร้างธุรกรรม ใช้เวลาราวหนึ่งนาที — กระเป๋าเงินกำลังรวบรวมตัวลวงที่ปิดบังว่าเหรียญไหนเป็นของคุณ คุณออกจากหน้านี้ได้ มันจะไม่หยุด</string>
+    <string name="pay_sending_why">กำลังสร้างธุรกรรม ใช้เวลาราวหนึ่งนาที — กระเป๋าเงินกำลังรวบรวมตัวลวงที่ปิดบังว่าเหรียญไหนเป็นของคุณ สลับไปแอปอื่นก็ไม่หยุด</string>
     <string name="pay_sending_to">ถึง %1$s</string>
     <string name="claim_own_card">การ์ดนั้นเป็นของคุณเอง — เป็นของเครื่องนี้</string>
     <string name="pay_already_paid">คุณชำระเข้าเอสโครว์นี้ไปแล้ว เงินอยู่ในนั้นแล้ว ไม่ได้ส่งซ้ำ</string>
@@ -78,4 +81,6 @@
     <string name="pay_repeat_monthly">รายเดือน</string>
     <string name="pay_recur_notify">ส่งบิลประจำแล้ว — %1$s</string>
     <string name="pay_donation_hint">นี่คือการบริจาค — ใบเสร็จจะมาถึงแชตนี้เมื่อเงินเข้า และรายการเดินบัญชีจะบันทึกไว้ในหมวดการบริจาค</string>
+    <string name="pay_relay_unconfirmed">ไม่มีโหนด Monero ใดยืนยันว่ารับการชำระเงินนี้ แต่ก็อาจผ่านได้อยู่ — ธนบัตรที่ใช้จะถูกกันไว้จนกว่าเชนจะตัดสิน โปรดตรวจสอบรายการเดินบัญชีก่อนชำระอีกครั้ง</string>
+    <string name="pay_request_kept">เก็บคำขอไว้แล้ว — จะส่งออกเองทันทีที่เครือข่ายกลับมา</string>
 </resources>

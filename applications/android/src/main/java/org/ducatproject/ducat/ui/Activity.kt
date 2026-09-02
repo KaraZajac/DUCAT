@@ -34,6 +34,7 @@ import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.Ledger
 import org.ducatproject.ducat.NodeStore
 import org.ducatproject.ducat.R
+import org.ducatproject.ducat.saidWhy
 import org.ducatproject.ducat.Wallet
 
 /**
@@ -62,12 +63,16 @@ fun ActivityScreen() {
     // the wallet has ever owned to keep a single field.
     var pending by remember { mutableStateOf<List<Ledger.OpenRequest>>(emptyList()) }
     var tip by remember { mutableStateOf(0L) }
+    var tabs by remember { mutableStateOf<List<org.ducatproject.ducat.RunningTab>>(emptyList()) }
+    var settled by remember { mutableStateOf(false) }
     LaunchedEffect(version) {
         withContext(Dispatchers.IO) {
             events = Ledger.build(context)
             pending = Ledger.openRequests(context)
             tip = org.ducatproject.ducat.WalletStore(context).tip()
+            tabs = org.ducatproject.ducat.TabStore(context).all()
         }
+        settled = true
     }
     var open by remember { mutableStateOf<Ledger.Event?>(null) }
 
@@ -76,7 +81,15 @@ fun ActivityScreen() {
     // has been read, change from an outgoing payment is indistinguishable from
     // an incoming one, and this is the screen where that distinction is the
     // entire content.
-    LaunchedEffect(version) {
+    //
+    // Keyed on the rows, not the store version: the rows arrive from the
+    // read above some time after the version moved, and an effect keyed on
+    // the version ran before they did, found the previous list, and left
+    // the first look at this screen to wait for the poll after all. Each
+    // enrichment that resolves something bumps the store, which rebuilds
+    // the rows, which runs this again over whatever is still open; one
+    // that resolves nothing bumps nothing, so there is no chasing.
+    LaunchedEffect(events) {
         // Only what a fetch could actually resolve. Keying on "chain == null"
         // would also match rows that have no transaction id to look up, so the
         // condition would never go false and the screen would re-enrich on
@@ -141,17 +154,76 @@ fun ActivityScreen() {
     // threads, with what they add up to. The chip only exists once there is
     // a donation to show — a filter for money nobody has given is clutter.
     var donationsOnly by rememberSaveable { mutableStateOf(false) }
+    // The glanceable answer above the statement: a period, four figures,
+    // and — when there was trade — the business's own line. The tiles are
+    // filters, not decoration: In shows only money in, Out only money out,
+    // so the summary and its evidence stay one screen.
+    var period by rememberSaveable { mutableStateOf(2) } // 0 today, 1 7d, 2 month, 3 all
+    var dirOnly by rememberSaveable { mutableStateOf(0) } // 0 both, 1 in, 2 out
+    val zone = java.time.ZoneId.systemDefault()
+    val fromTs = when (period) {
+        0 -> java.time.LocalDate.now(zone).atStartOfDay(zone).toEpochSecond()
+        1 -> System.currentTimeMillis() / 1000 - 7 * 86_400
+        2 -> java.time.LocalDate.now(zone).withDayOfMonth(1).atStartOfDay(zone).toEpochSecond()
+        else -> 0L
+    }
+    val summary = remember(events, fromTs) {
+        Ledger.summarize(events, fromTs, Long.MAX_VALUE)
+    }
+    // Three shops on one phone must not share an undifferentiated take:
+    // when the roster has more than one persona, the business line can be
+    // narrowed to one. Wallet tiles stay whole-wallet — there is one purse.
+    val personas = remember { org.ducatproject.ducat.PersonaStore(context).all() }
+    var bizPersona by rememberSaveable { mutableStateOf<String?>(null) }
+    val bizAll = remember(tabs, fromTs) {
+        Ledger.summarizeBusiness(tabs, fromTs, Long.MAX_VALUE)
+    }
+    val biz = remember(tabs, fromTs, bizPersona) {
+        if (bizPersona == null) bizAll
+        else Ledger.summarizeBusiness(
+            tabs.filter { it.personaHex == bizPersona }, fromTs, Long.MAX_VALUE,
+        )
+    }
     val searched = if (q.isEmpty()) events else haystacks
         .filter { (_, text, id) -> text.contains(q) || (ids && id.contains(q)) }
         .map { it.first }
-    val shownEvents = if (donationsOnly) searched.filter { it.donation } else searched
+    val ranged = searched.filter { it.pending || it.timestamp >= fromTs }
+        .filter {
+            when (dirOnly) {
+                1 -> it.direction == Ledger.Direction.Received
+                2 -> it.direction == Ledger.Direction.Sent
+                else -> true
+            }
+        }
+    val shownEvents = if (donationsOnly) ranged.filter { it.donation } else ranged
     val shownPending = if (donationsOnly) emptyList() else
         if (q.isEmpty()) pending else pending.filter {
             it.counterparty.lowercase().contains(q) ||
                 Amounts.show(context, it.amountPxmr).primary.lowercase().contains(q)
         }
 
-    if (events.isEmpty()) {
+    // Nothing settled *and* nothing awaiting: a bill that arrived before the
+    // wallet's first transaction is exactly the uncleared half this
+    // statement shows, and "Nothing yet" over it said the wallet was new
+    // while somebody was waiting to be paid.
+    if (events.isEmpty() && pending.isEmpty()) {
+        // "Nothing yet" waits for the ledger to have actually been built
+        // once: a history-sized read runs off-main, and the empty copy
+        // painted during it told a wallet with months of history it was
+        // new. A quiet spinner is the honest interim — the app's own, which
+        // is drawn whole on its first frame. The stock indicator starts
+        // from a zero-length arc, and the desk's one-frame render of this
+        // screen ("every screen draws") came back a blank rectangle.
+        if (!settled) {
+            Column(
+                Modifier.fillMaxSize().padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                CatSpinner(Modifier.size(48.dp), tint = MaterialTheme.colorScheme.primary)
+            }
+            return
+        }
         Column(
             Modifier.fillMaxSize().padding(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -197,40 +269,203 @@ fun ActivityScreen() {
         // the share sheet — see Ledger.exportCsv for what a row carries and
         // why there is deliberately no fiat column.
         val scope = androidx.compose.runtime.rememberCoroutineScope()
-        IconButton(onClick = {
+        var exportMenu by remember { mutableStateOf(false) }
+        fun share(json: Boolean) {
             scope.launch {
                 withContext(Dispatchers.IO) {
                     runCatching {
-                        val csv = Ledger.exportCsv(context)
+                        val body = if (json) Ledger.exportJson(context) else Ledger.exportCsv(context)
                         val dir = java.io.File(context.filesDir, "backups").apply { mkdirs() }
-                        val f = java.io.File(dir, "ducat-statement.csv")
-                        f.writeText(csv)
+                        val f = java.io.File(
+                            dir, if (json) "ducat-statement.json" else "ducat-statement.csv",
+                        )
+                        f.writeText(body)
                         f
                     }
-                }.onSuccess { f ->
-                    runCatching {
-                        val uri = androidx.core.content.FileProvider.getUriForFile(
-                            context, "${context.packageName}.backups", f,
-                        )
-                        val send = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                            type = "text/csv"
-                            putExtra(android.content.Intent.EXTRA_STREAM, uri)
-                            addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                        }
-                        context.startActivity(
-                            android.content.Intent.createChooser(
-                                send, context.getString(R.string.activity_export_share),
-                            ),
-                        )
+                }.mapCatching { f ->
+                    val uri = androidx.core.content.FileProvider.getUriForFile(
+                        context, "${context.packageName}.backups", f,
+                    )
+                    val send = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                        type = if (json) "application/json" else "text/csv"
+                        putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                        addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     }
+                    context.startActivity(
+                        android.content.Intent.createChooser(
+                            send, context.getString(R.string.activity_export_share),
+                        ),
+                    )
+                }.onFailure {
+                    // Both halves were swallowed: a ledger that would not
+                    // serialise, a disk with no room, a phone with nothing
+                    // that opens a CSV. Every one of them looked exactly
+                    // like tapping Export and having the menu close.
+                    org.ducatproject.ducat.DucatLog.w("Activity", "export: ${it.message}")
+                    android.widget.Toast.makeText(
+                        context,
+                        it.saidWhy() ?: context.getString(R.string.backup_export_failed),
+                        android.widget.Toast.LENGTH_SHORT,
+                    ).show()
                 }
             }
-        }) {
-            Icon(
-                Icons.Filled.IosShare,
-                stringResource(R.string.activity_export),
+        }
+        Box {
+            IconButton(onClick = { exportMenu = true }) {
+                Icon(
+                    Icons.Filled.IosShare,
+                    stringResource(R.string.activity_export),
+                )
+            }
+            DropdownMenu(expanded = exportMenu, onDismissRequest = { exportMenu = false }) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.activity_export_csv)) },
+                    onClick = { exportMenu = false; share(json = false) },
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.activity_export_json)) },
+                    onClick = { exportMenu = false; share(json = true) },
+                )
+            }
+        }
+    }
+    Row(
+        Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        listOf(
+            R.string.activity_period_today, R.string.activity_period_7d,
+            R.string.activity_period_month, R.string.activity_period_all,
+        ).forEachIndexed { i, res ->
+            FilterChip(
+                selected = period == i,
+                onClick = { period = i },
+                label = { Text(stringResource(res), style = MaterialTheme.typography.labelSmall) },
             )
         }
+    }
+    Row(
+        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        @Composable
+        fun tile(label: Int, pxmr: Long, filter: Int, tint: androidx.compose.ui.graphics.Color?) {
+            val active = dirOnly == filter && filter != 0
+            Surface(
+                onClick = {
+                    if (filter != 0) dirOnly = if (dirOnly == filter) 0 else filter
+                },
+                enabled = filter != 0,
+                shape = MaterialTheme.shapes.medium,
+                color = if (active) {
+                    MaterialTheme.colorScheme.secondaryContainer
+                } else {
+                    MaterialTheme.colorScheme.surfaceVariant
+                },
+                modifier = Modifier.weight(1f),
+            ) {
+                Column(Modifier.padding(horizontal = 8.dp, vertical = 6.dp)) {
+                    Text(
+                        stringResource(label),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        Amounts.show(context, pxmr).primary,
+                        style = MaterialTheme.typography.labelMedium,
+                        maxLines = 1,
+                        color = tint ?: MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+            }
+        }
+        tile(R.string.activity_sum_in, summary.inPxmr, 1, MaterialTheme.ducat.settled)
+        tile(R.string.activity_sum_out, summary.outPxmr, 2, null)
+        tile(R.string.activity_sum_net, summary.netPxmr, 0, null)
+        tile(R.string.activity_sum_fees, summary.feesPxmr, 0, null)
+    }
+    if (bizAll.salesCount > 0 || bizAll.outstandingCount > 0 || bizAll.taxCollectedPxmr > 0) {
+        Surface(
+            shape = MaterialTheme.shapes.medium,
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        ) {
+            Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        stringResource(R.string.activity_business),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    if (personas.size > 1) {
+                        Spacer(Modifier.weight(1f))
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            FilterChip(
+                                selected = bizPersona == null,
+                                onClick = { bizPersona = null },
+                                label = {
+                                    Text(
+                                        stringResource(R.string.activity_period_all),
+                                        style = MaterialTheme.typography.labelSmall,
+                                    )
+                                },
+                            )
+                            personas.forEach { pers ->
+                                FilterChip(
+                                    selected = bizPersona == pers.hex,
+                                    onClick = { bizPersona = pers.hex },
+                                    label = {
+                                        Text(
+                                            pers.name.ifBlank {
+                                                stringResource(R.string.personas_primary)
+                                            },
+                                            style = MaterialTheme.typography.labelSmall,
+                                        )
+                                    },
+                                )
+                            }
+                        }
+                    }
+                }
+                Spacer(Modifier.height(2.dp))
+                val doorNames = mapOf(
+                    "pos" to stringResource(R.string.activity_door_pos),
+                    "bar" to stringResource(R.string.activity_door_bar),
+                    "taxi" to stringResource(R.string.activity_door_taxi),
+                    "donate" to stringResource(R.string.activity_door_donate),
+                    "pub" to stringResource(R.string.activity_door_pub),
+                )
+                val doors = biz.byOrigin.entries.joinToString(" · ") { (origin, d) ->
+                    "${doorNames[origin] ?: origin} ${d.count} · " +
+                        Amounts.show(context, d.takePxmr).primary
+                }
+                if (biz.salesCount > 0) {
+                    Text(
+                        "${stringResource(R.string.activity_sales)} ${biz.salesCount} · " +
+                            Amounts.show(context, biz.salesPxmr).primary +
+                            if (doors.isNotEmpty()) "  ($doors)" else "",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+                if (biz.taxCollectedPxmr > 0) {
+                    Text(
+                        "${stringResource(R.string.activity_tax_collected)}: " +
+                            Amounts.show(context, biz.taxCollectedPxmr).primary,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+                if (biz.outstandingCount > 0) {
+                    Text(
+                        "${stringResource(R.string.activity_outstanding)}: " +
+                            "${biz.outstandingCount} · " +
+                            Amounts.show(context, biz.outstandingPxmr).primary,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.tertiary,
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.height(4.dp))
     }
     if (events.any { it.donation }) {
         Row(
@@ -261,9 +496,18 @@ fun ActivityScreen() {
         }
         Spacer(Modifier.height(4.dp))
     }
-    if (q.isNotEmpty() && shownEvents.isEmpty() && shownPending.isEmpty()) {
+    if (shownEvents.isEmpty() && shownPending.isEmpty()) {
+        // The ledger has rows (the "Nothing yet" screen would have taken
+        // an empty one), so an empty list here is a narrowing: the search,
+        // the period, or a tile. Say which — four zero tiles over blank
+        // space on the first of the month, "This month" selected by
+        // default, read as a wallet that had lost its history.
         Text(
-            stringResource(R.string.activity_search_none, query),
+            when {
+                q.isNotEmpty() -> stringResource(R.string.activity_search_none, query)
+                period != 3 -> stringResource(R.string.activity_period_none)
+                else -> stringResource(R.string.activity_filter_none)
+            },
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp),

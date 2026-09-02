@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_library">Biblioteca</string>
+    <string name="library_empty">Ainda não há nada aqui. Quando um editor te enviar uma edição, ela fica guardada aqui — e permanece mesmo que o chat seja apagado.</string>
+    <string name="library_issue">Edição %1$s</string>
+    <string name="library_on_device">Neste dispositivo · %1$s</string>
+    <string name="library_no_shipment">Chave guardada — nenhum download disponível ainda</string>
+    <string name="library_download">Baixar</string>
+    <string name="library_progress">%1$s de %2$s</string>
+    <string name="library_starting">Iniciando…</string>
+    <string name="library_failed">Falha no download: %1$s</string>
+    <string name="library_gone">não está mais nos seus contatos</string>
+    <string name="chat_issue_sent_you">Te enviou uma edição</string>
+    <string name="chat_issue_you_sent">Você enviou uma edição</string>
+    <string name="chatlist_preview_issue">Nova edição: %1$s</string>
+    <string name="notify_new_issue">%1$s enviou uma nova edição</string>
+    <string name="library_note_new_issue">Saiu uma nova edição.</string>
+    <string name="library_unsubscribe">Cancelar assinatura</string>
+    <string name="library_unsub_confirm">Parar de receber de %1$s? As edições que você já tem continuam suas.</string>
+    <string name="library_unsub_keep">Manter assinatura</string>
+    <string name="library_resubscribe">Assinar de novo</string>
+    <string name="library_unsubscribed">Assinatura cancelada — novas edições não são arquivadas</string>
+    <string name="library_unsub_note">Assinatura cancelada.</string>
+    <plurals name="main_issues_waiting">
+        <item quantity="one">%1$d edição nova esperando</item>
+        <item quantity="other">%1$d edições novas esperando</item>
+    </plurals>
+    <string name="library_open">Abrir</string>
+    <string name="library_queued">Na fila</string>
+</resources>

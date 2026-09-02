@@ -68,4 +68,5 @@ When the deal finishes, both stakes come straight back and the fare goes to the 
     <string name="onb_restore_pick">Choose the file</string>
     <string name="onb_restore_cancel">Not now</string>
     <string name="onb_restore_continue">Continue</string>
+    <string name="onb_wallet_error">The wallet could not be created. Try again.</string>
 </resources>

@@ -32,4 +32,6 @@
     <string name="pos_cancel_sale">取消这单</string>
     <string name="pos_tax_at">税（%1$s%%）</string>
     <string name="pos_in_unit">改用 %1$s</string>
+    <string name="pos_error_bill_not_withdrawn">账单还在对方手机上——无法撤回：%1$s</string>
+    <string name="pos_receipt_pending">收据暂时未能发出——网络恢复后会自动发出。</string>
 </resources>

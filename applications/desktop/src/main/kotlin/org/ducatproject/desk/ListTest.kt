@@ -45,6 +45,19 @@ fun main() {
         Thread.sleep(2_000)
     }
     check(nodeStatus().publicInternetReady) { "LIST_FAIL node never became ready" }
+    // A notice is stamped against the chain tip (§16.18.1), and a reader
+    // confirms the stamp against the same chain — so both roles need a
+    // Monero node, and a fresh directory has none remembered. This used to
+    // pass only in a directory `:desktop:wallet` had already visited, and
+    // failed every post in a clean one with "no recent Monero block".
+    if (org.ducatproject.ducat.NodeStore(context).lastGood() == null) {
+        runCatching {
+            uniffi.ducat_mobile.moneroPickNode(
+                uniffi.ducat_mobile.moneroDefaultNodes(null), "stagenet", 8_000u,
+            )
+        }.onSuccess { org.ducatproject.ducat.NodeStore(context).rememberLastGood(it.url) }
+            .onFailure { println("LIST_WARN no Monero node reachable: ${it.message}") }
+    }
     println("LIST_UP $role at ${uniffi.ducat_mobile.geohashEncode(lat, lon, 5u)}")
 
     var failures = 0
@@ -271,18 +284,27 @@ fun main() {
         })
     }
     fun of(kind: Int) = found.filter { it.kind.toInt() == kind }
-    val cars = of(Listings.KIND_VEHICLE)
-    val rooms = of(Listings.KIND_PLACE)
+    // The owner's own first, for the same reason as the titles below.
+    fun ownFirst(kind: Int, title: String) =
+        of(kind).sortedBy { if (it.title == title) 0 else 1 }
+    val cars = ownFirst(Listings.KIND_VEHICLE, "2019 Corolla, automatic")
+    val rooms = ownFirst(Listings.KIND_PLACE, "Sunny room near the park")
 
     // The three nouns added in 0.89, off a real board rather than a unit
     // test: posted by one client, read back by another that never saw the
     // draft.
+    // The owner's own, by title, when the board holds more than one of a
+    // noun: a board keeps notices for a day, and the spot is a fixed one, so
+    // a run meets whatever the last run — or an emulator — left there. The
+    // first sale on the board was somebody else's bicycle with a different
+    // category, and this read that as a lost tag.
     listOf(
-        Triple(Listings.KIND_SALE, "for sale", 4),
-        Triple(Listings.KIND_GEAR, "gear", 3),
-        Triple(Listings.KIND_SKILL, "a skill", 1),
-    ).forEach { (kind, what, subtype) ->
-        val hit = of(kind).firstOrNull()
+        Triple(Listings.KIND_SALE, "for sale", 4) to "Bicycle, barely ridden",
+        Triple(Listings.KIND_GEAR, "gear", 3) to "Sea kayak, paddle included",
+        Triple(Listings.KIND_SKILL, "a skill", 1) to "Electrician, 20 years",
+    ).forEach { (spec, title) ->
+        val (kind, what, subtype) = spec
+        val hit = of(kind).firstOrNull { it.title == title } ?: of(kind).firstOrNull()
         check("found $what on the board", hit != null, of(kind).size.toString())
         hit?.let {
             check(
@@ -334,12 +356,28 @@ fun main() {
         val claimed = cars.asSequence().mapNotNull { c ->
             runCatching {
                 val card = uniffi.ducat_mobile.readContactCard(c.card)
-                org.ducatproject.ducat.Mailbox.claimCard(context, card, null)
+                c.card to org.ducatproject.ducat.Mailbox.claimCard(context, card, null)
             }.getOrNull()
         }.firstOrNull()
         if (claimed != null) {
-            check("the card turns into a conversation", claimed.personaHex.isNotEmpty(),
-                claimed.displayName())
+            val (uri, contact) = claimed
+            check("the card turns into a conversation", contact.personaHex.isNotEmpty(),
+                contact.displayName())
+            // The same card again, from the same seeker — a second tap on the
+            // listing. The reply in its slot is this seeker's own, so the
+            // answer is the thread already opened, named, and not a stranger
+            // who "asked just before you".
+            val again = runCatching {
+                org.ducatproject.ducat.Mailbox.claimCard(
+                    context, uniffi.ducat_mobile.readContactCard(uri), null,
+                )
+            }.exceptionOrNull()
+            check(
+                "claiming it twice names the thread it made",
+                (again as? org.ducatproject.ducat.Mailbox.CardAlreadyMine)
+                    ?.contact?.personaHex == contact.personaHex,
+                again?.toString() ?: "claimed twice",
+            )
         } else {
             println("LIST skip  every card on the board was already claimed")
         }

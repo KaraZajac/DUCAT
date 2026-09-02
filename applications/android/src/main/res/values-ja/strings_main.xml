@@ -8,6 +8,8 @@
     <string name="main_backup_title">バックアップ</string>
     <string name="main_backup_body">前回のバックアップに入っていない連絡先があります。今復元すると、お金は戻っても人は戻りません。</string>
     <string name="main_open_backup_settings">バックアップ設定を開く</string>
+    <string name="main_notify_off_title">通知がオフです</string>
+    <string name="main_notify_off_body">お金や請求が届いたり、誰かが電話をかけてきても、この電話は知らせることができません。タップしてオンにしてください。</string>
     <string name="main_recent">最近</string>
     <string name="main_see_all">すべて見る</string>
     <string name="main_card_link_title">連絡先を追加しますか？</string>
@@ -38,4 +40,8 @@
     <string name="err_no_keys_yet">カードの交換がまだ終わっていません。</string>
     <string name="err_conversation_too_old">相手のカードはこのアプリには古すぎます。新しいカードをもらってください。</string>
     <string name="err_board_full">この辺りは今、依頼が多すぎます。1分ほどしてからもう一度お試しください。</string>
+    <string name="main_deals_title">取引</string>
+    <plurals name="main_deals_waiting">
+        <item quantity="other">%1$d 件の取引があなたを待っています</item>
+    </plurals>
 </resources>

@@ -98,9 +98,12 @@ fun QrScannerContent(
                 PackageManager.PERMISSION_GRANTED
         )
     }
+    // Whether the system has answered once: past a second refusal it stops
+    // asking, and "Allow" has to go to Settings instead (askForPermission).
+    var asked by remember { mutableStateOf(false) }
     val ask = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { granted = it }
+    ) { granted = it; asked = true }
 
     LaunchedEffect(Unit) { if (!granted) ask.launch(Manifest.permission.CAMERA) }
 
@@ -148,7 +151,9 @@ fun QrScannerContent(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(Modifier.height(16.dp))
-                    Button(onClick = { ask.launch(Manifest.permission.CAMERA) }) { Text(stringResource(R.string.scanner_allow)) }
+                    Button(onClick = {
+                        askForPermission(context, Manifest.permission.CAMERA, asked) { ask.launch(it) }
+                    }) { Text(stringResource(R.string.scanner_allow)) }
                 }
                 return@Column
             }
@@ -181,13 +186,30 @@ private fun CameraPreview(onResult: (String) -> Unit, onFailure: () -> Unit) {
     var torch by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    // One frame is enough. Without this the callback fires repeatedly while the
+    // One frame per code. Without this the callback fires repeatedly while the
     // code is still in view, and a scanner that reports the same card five times
-    // makes the screen behind it decide five times.
-    val done = remember { java.util.concurrent.atomic.AtomicBoolean(false) }
+    // makes the screen behind it decide five times. Per code rather than
+    // once ever: a host that stays up after a result — the codes screen,
+    // which says "that is not a code" and keeps the camera open — was left
+    // with a live preview that read nothing more. The same code again is
+    // still swallowed; a different one is delivered.
+    val delivered = remember { java.util.concurrent.atomic.AtomicReference<String?>(null) }
     val executor = remember { Executors.newSingleThreadExecutor() }
+    // The camera is bound to the activity's lifecycle (a Dialog inherits
+    // it), so leaving this composable did not stop it: the preview went
+    // away and the camera went on streaming — indicator lit, battery
+    // spent — until the activity itself stopped. Unbound here, and a
+    // provider that arrives after we are gone is not bound at all.
+    val provider = remember { java.util.concurrent.atomic.AtomicReference<ProcessCameraProvider?>(null) }
+    val disposed = remember { java.util.concurrent.atomic.AtomicBoolean(false) }
 
-    DisposableEffect(Unit) { onDispose { executor.shutdown() } }
+    DisposableEffect(Unit) {
+        onDispose {
+            disposed.set(true)
+            runCatching { provider.get()?.unbindAll() }
+            executor.shutdown()
+        }
+    }
 
     Box(Modifier.fillMaxSize()) {
     AndroidView(
@@ -196,7 +218,9 @@ private fun CameraPreview(onResult: (String) -> Unit, onFailure: () -> Unit) {
             val view = PreviewView(ctx)
             val providerFuture = ProcessCameraProvider.getInstance(ctx)
             providerFuture.addListener({
-                val provider = providerFuture.get()
+                if (disposed.get()) return@addListener
+                val p = providerFuture.get()
+                provider.set(p)
                 val preview = androidx.camera.core.Preview.Builder().build().also {
                     it.surfaceProvider = view.surfaceProvider
                 }
@@ -204,11 +228,10 @@ private fun CameraPreview(onResult: (String) -> Unit, onFailure: () -> Unit) {
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                     .build()
                 analysis.setAnalyzer(executor) { image ->
-                    if (!done.get()) {
-                        decode(image)?.let {
-                            if (done.compareAndSet(false, true)) {
-                                view.post { onResult(it) }
-                            }
+                    decode(image)?.let { text ->
+                        val last = delivered.get()
+                        if (text != last && delivered.compareAndSet(last, text)) {
+                            view.post { if (!disposed.get()) onResult(text) }
                         }
                     }
                     image.close()
@@ -217,8 +240,8 @@ private fun CameraPreview(onResult: (String) -> Unit, onFailure: () -> Unit) {
                 // black rectangle with no explanation, which is exactly how the
                 // last camera problem presented.
                 runCatching {
-                    provider.unbindAll()
-                    camera = provider.bindToLifecycle(
+                    p.unbindAll()
+                    camera = p.bindToLifecycle(
                         lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, preview, analysis,
                     )
                 }.onFailure { e ->

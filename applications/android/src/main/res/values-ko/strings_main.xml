@@ -8,6 +8,8 @@
     <string name="main_backup_title">백업하기</string>
     <string name="main_backup_body">마지막 백업에 없는 연락처가 있어요. 지금 복원하면 돈은 돌아와도 사람은 돌아오지 않아요.</string>
     <string name="main_open_backup_settings">백업 설정 열기</string>
+    <string name="main_notify_off_title">알림이 꺼져 있습니다</string>
+    <string name="main_notify_off_body">돈이나 청구서가 도착하거나 누군가 전화해도 휴대폰이 알려 줄 수 없습니다. 눌러서 켜세요.</string>
     <string name="main_recent">최근</string>
     <string name="main_see_all">모두 보기</string>
     <string name="main_card_link_title">연락처를 추가할까요?</string>
@@ -38,4 +40,8 @@
     <string name="err_no_keys_yet">아직 서로 카드 교환이 끝나지 않았습니다.</string>
     <string name="err_conversation_too_old">상대방의 카드가 이 앱에는 너무 오래되었습니다. 새 카드를 요청하세요.</string>
     <string name="err_board_full">지금 이 근처에 요청이 너무 많습니다. 잠시 후 다시 시도하세요.</string>
+    <string name="main_deals_title">거래</string>
+    <plurals name="main_deals_waiting">
+        <item quantity="other">%1$d건의 거래가 응답을 기다립니다</item>
+    </plurals>
 </resources>

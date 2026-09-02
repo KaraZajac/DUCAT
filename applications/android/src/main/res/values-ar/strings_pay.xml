@@ -11,6 +11,8 @@
     <string name="pay_address_placeholder">5… أو 7…</string>
     <string name="pay_continue">متابعة</string>
     <string name="pay_not_monero_address">هذا لا يبدو عنوان Monero.</string>
+    <string name="pay_scan_unknown_card">هذه البطاقة ليست لأحد جهات اتصالك بعد. أضِف الشخص من الدردشة أولًا، ثم ادفع.</string>
+    <string name="pay_scan_not_payable">هذا الرمز ليس عنوان Monero ولا بطاقة DUCAT.</string>
 
     <!-- Pay.kt — amount step -->
     <string name="pay_back">رجوع</string>
@@ -62,12 +64,13 @@
     <string name="pay_fee_unknown">غير معروفة الآن</string>
     <string name="pay_fee_unknown_confirm">تعذّر تقدير الرسوم الآن. ستدفع المعاملة ما تكلّفه عند بنائها.</string>
     <string name="pay_node_no_answer">لم تستجب عقدة Monero في الوقت المحدد. لم يُرسَل شيء. أعد المحاولة — سيستخدم التطبيق عقدة أخرى.</string>
+    <string name="pay_send_interrupted">أُغلق التطبيق في منتصف الدفع. راجع كشف الحساب قبل أن تدفع مرة أخرى.</string>
     <string name="pay_not_enough">الرصيد المتاح غير كافٍ — لديك %1$s ويلزم %2$s مع رسوم الشبكة.</string>
     <string name="pay_offline">غير متصل بعد — لم ينتهِ هذا الهاتف من الانضمام إلى الشبكة. لم يُرسل شيء؛ حاول مرة أخرى بعد قليل.</string>
     <string name="pay_node_unreachable">تعذّر الوصول إلى أي عقدة مونيرو. لم يُرسل شيء — تحقّق من اتصالك وحاول مرة أخرى.</string>
     <string name="board_unverified_note">‏لا يمكن الوصول إلى أي عقدة مونيرو، لذا لم يتسنَّ التحقق مما يظهر هنا مقابل السلسلة. لا يزال موقّعًا ومدفوع الثمن — فقط تعامل معه بالحذر الذي توليه للوحة غير متحقق منها.</string>
     <string name="board_needs_a_block">‏تعذّر الوصول إلى أي عقدة مونيرو. ما يُنشر على اللوحة يحمل ختمًا مرتبطًا بكتلة حديثة، لذا لا يمكن نشر هذا الآن — تحقّق من اتصالك وحاول مرة أخرى.</string>
-    <string name="pay_sending_why">يجري بناء المعاملة. يستغرق هذا نحو دقيقة — تجمع المحفظة الطُعوم التي تُخفي أي العملات لك. يمكنك مغادرة هذه الشاشة؛ لن يتوقف الأمر.</string>
+    <string name="pay_sending_why">يجري بناء المعاملة. يستغرق هذا نحو دقيقة — تجمع المحفظة الطُعوم التي تُخفي أي العملات لك. الانتقال إلى تطبيق آخر لا يوقفه.</string>
     <string name="pay_sending_to">إلى %1$s</string>
     <string name="claim_own_card">هذه البطاقة بطاقتك أنت — إنها تخص هذا الجهاز.</string>
     <string name="pay_already_paid">لقد دفعت بالفعل في هذا الضمان. أموالك بالداخل؛ لم يُرسل شيء مرة أخرى.</string>
@@ -78,4 +81,6 @@
     <string name="pay_repeat_monthly">شهريًا</string>
     <string name="pay_recur_notify">أُرسلت فاتورة دورية — %1$s</string>
     <string name="pay_donation_hint">هذا تبرع — سيصلك الإيصال في هذه المحادثة فور وصوله، وسيُدرجه كشف حسابك ضمن التبرعات.</string>
+    <string name="pay_relay_unconfirmed">لم تؤكد أي عقدة Monero استلام الدفعة. قد تمرّ رغم ذلك — تبقى الأوراق التي استُخدمت محجوزة حتى تحسمها السلسلة. راجع كشف الحساب قبل أن تدفع مرة أخرى.</string>
+    <string name="pay_request_kept">حُفظ الطلب — سيخرج تلقائيًا فور عودة الشبكة.</string>
 </resources>

@@ -6,6 +6,8 @@
     <!-- Pending requests -->
     <string name="activity_awaiting">Đang chờ</string>
     <string name="activity_search_none">Không có gì khớp với “%1$s”.</string>
+    <string name="activity_period_none">Không có gì trong khoảng thời gian này. Chọn khoảng dài hơn ở trên để xem hoạt động trước đó.</string>
+    <string name="activity_filter_none">Chưa có gì thuộc loại này. Chạm lại ô đang được tô sáng để hiển thị tất cả.</string>
     <string name="activity_search_clear">Xoá tìm kiếm</string>
     <string name="activity_search_hint">Tìm biên nhận, tên, ghi chú</string>
     <string name="activity_they_ask">%1$s yêu cầu</string>
@@ -41,4 +43,23 @@
     <string name="activity_donations_filter">Quyên góp</string>
     <string name="activity_donation_chip">Quyên góp</string>
     <string name="activity_donated_total">Đã quyên góp %1$s</string>
+    <string name="activity_period_today">Hôm nay</string>
+    <string name="activity_period_7d">7 ngày</string>
+    <string name="activity_period_month">Tháng này</string>
+    <string name="activity_period_all">Tất cả</string>
+    <string name="activity_sum_in">Vào</string>
+    <string name="activity_sum_out">Ra</string>
+    <string name="activity_sum_net">Ròng</string>
+    <string name="activity_sum_fees">Phí</string>
+    <string name="activity_business">Kinh doanh</string>
+    <string name="activity_sales">Doanh số</string>
+    <string name="activity_tax_collected">Thuế đã thu</string>
+    <string name="activity_outstanding">Chưa thu</string>
+    <string name="activity_export_csv">Tệp CSV</string>
+    <string name="activity_export_json">Tệp JSON</string>
+    <string name="activity_door_pos">quầy</string>
+    <string name="activity_door_bar">sổ nợ</string>
+    <string name="activity_door_taxi">chuyến</string>
+    <string name="activity_door_donate">hũ</string>
+    <string name="activity_door_pub">số</string>
 </resources>

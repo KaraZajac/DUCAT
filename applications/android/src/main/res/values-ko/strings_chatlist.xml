@@ -20,6 +20,7 @@
     <string name="chatlist_preview_receipt">🧾 영수증 — %1$s</string>
     <string name="chatlist_preview_reacted">반응: %1$s</string>
     <string name="chatlist_preview_photo">📷 사진</string>
+    <string name="chatlist_preview_voice">🎤 음성 메모</string>
     <string name="chatlist_time_now">방금</string>
     <string name="chatlist_time_minutes">%1$d분</string>
     <string name="chatlist_time_hours">%1$d시간</string>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="personas_title">Persona</string>
+    <string name="personas_body">Siapa saja ponsel ini bisa menjadi. Setiap profil adalah kunci tersendiri dengan kontaknya sendiri — toko tak pernah tahu teman-temanmu, dan temanmu tak pernah bertemu toko. Hubungan baru masuk ke profil yang sedang kaupakai.</string>
+    <string name="personas_primary">Pribadi</string>
+    <string name="personas_worn">Dikenakan</string>
+    <string name="personas_add">Profil baru</string>
+    <string name="personas_name_label">Nama</string>
+    <string name="personas_name_support">Nama sisi dirimu ini — Toko, Pasar, Jelajah.</string>
+    <string name="personas_cap">Batasnya empat: profil hanya berguna selama muat di satu tangan.</string>
+    <string name="personas_no_delete">Profil tidak bisa dihapus — kontaknya hanya menjawab kuncinya. Berhenti memakainya, ia pun senyap.</string>
+    <string name="personas_save">Simpan</string>
+    <string name="personas_cancel">Batal</string>
+    <string name="personas_mode_answers">Menjawab sebagai %1$s</string>
+    <string name="personas_mode_answers_worn">Menjawab sebagai profil yang dipakai</string>
+    <string name="personas_contacts_scope">Kontak %1$s — ganti profil di menu untuk melihat sisanya.</string>
+    <string name="profiles_personal_sub">Profil pribadi</string>
+    <string name="profiles_answers_for">Menjawab untuk %1$s</string>
+    <string name="profiles_editing_note">Profil %1$s</string>
+    <string name="profiles_rename">Ganti nama</string>
+    <string name="profiles_appears_as">Tampil sebagai %1$s</string>
+</resources>

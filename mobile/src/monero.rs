@@ -274,6 +274,12 @@ pub struct ScanResult {
     /// The height scanning reached. Persist this: rescanning from the restore
     /// height every time is the difference between a wallet that opens and one
     /// that appears to hang.
+    ///
+    /// Never past a block that could not be read. The loop skips an unreadable
+    /// block and carries on so one hiccup does not discard the window, but the
+    /// cursor stops at the height before it: a cursor that had walked past the
+    /// gap made a payment in that block invisible until somebody rescanned by
+    /// hand — the wallet showed less than it held, for good.
     pub scanned_to: u64,
     /// The chain tip when we started, so a caller can show progress honestly
     /// rather than implying it is finished.
@@ -356,21 +362,17 @@ pub fn monero_scan(
         let last = tip.min(from_height + max_blocks as u64);
         let mut h = from_height;
         let mut first_error: Option<String> = None;
+        let mut first_failed: Option<u64> = None;
         while h <= last {
-            let block = match rpc.block_by_number(h as usize).await {
-                Ok(b) => b,
-                // A gap is skipped rather than fatal: one flaky block should not
-                // discard the window's progress. Counted, though — see
-                // `blocks_failed`.
-                Err(e) => {
-                    if first_error.is_none() { first_error = Some(format!("{e:?}")); }
-                    failed += 1; h += 1; continue
-                }
-            };
-            let sb = match rpc.expand_to_scannable_block(block).await {
+            // A gap is skipped rather than fatal: one flaky block should not
+            // discard the window's progress. Counted, though — see
+            // `blocks_failed` — and the cursor does not cross it (see
+            // `scanned_to`).
+            let sb = match scannable_block(&rpc, h).await {
                 Ok(b) => b,
                 Err(e) => {
-                    if first_error.is_none() { first_error = Some(format!("{e:?}")); }
+                    if first_error.is_none() { first_error = Some(e); }
+                    if first_failed.is_none() { first_failed = Some(h); }
                     failed += 1; h += 1; continue
                 }
             };
@@ -415,8 +417,44 @@ pub fn monero_scan(
                 first_error.unwrap_or_else(|| "unknown".into())
             )));
         }
-        Ok(ScanResult { scanned_to: last, tip, outputs, blocks_read: read, blocks_failed: failed })
+        Ok(ScanResult {
+            scanned_to: reached(last, first_failed),
+            tip,
+            outputs,
+            blocks_read: read,
+            blocks_failed: failed,
+        })
     })
+}
+
+/// One block, fetched and expanded, with a single immediate retry: a scan is
+/// hundreds of round trips to somebody else's node, and one dropped answer
+/// in the middle of them is the ordinary case, not the exceptional one.
+pub(crate) async fn scannable_block(
+    rpc: &monero_daemon_rpc::MoneroDaemon<UreqTransport>,
+    h: u64,
+) -> Result<monero_wallet::interface::ScannableBlock, String> {
+    use monero_daemon_rpc::prelude::*;
+    let mut last = String::new();
+    for _ in 0..2 {
+        match rpc.block_by_number(h as usize).await {
+            Ok(block) => match rpc.expand_to_scannable_block(block).await {
+                Ok(sb) => return Ok(sb),
+                Err(e) => last = format!("{e:?}"),
+            },
+            Err(e) => last = format!("{e:?}"),
+        }
+    }
+    Err(last)
+}
+
+/// Where a window's cursor may honestly stop: the window's end when every
+/// block was read, otherwise the height before the first one that was not.
+fn reached(last: u64, first_failed: Option<u64>) -> u64 {
+    match first_failed {
+        Some(f) => f.saturating_sub(1).min(last),
+        None => last,
+    }
 }
 
 /// §15.10's per-contact address: subaddress (0, minor) of this wallet.
@@ -509,9 +547,12 @@ pub fn monero_scan_view_only(
         let last = tip.min(from_height + max_blocks as u64);
         let mut h = from_height;
         let (mut read, mut failed) = (0u32, 0u32);
+        let mut first_failed: Option<u64> = None;
         while h <= last {
-            let Ok(block) = rpc.block_by_number(h as usize).await else { failed += 1; h += 1; continue };
-            let Ok(sb) = rpc.expand_to_scannable_block(block).await else { failed += 1; h += 1; continue };
+            let Ok(sb) = scannable_block(&rpc, h).await else {
+                if first_failed.is_none() { first_failed = Some(h); }
+                failed += 1; h += 1; continue
+            };
             read += 1;
             // Read before `scan` consumes the block.
             let block_time = sb.block.header.timestamp;
@@ -536,7 +577,13 @@ pub fn monero_scan_view_only(
         if read == 0 && failed > 0 {
             return Err(MoneroError::Failed(format!("could not read any of {failed} blocks")));
         }
-        Ok(ScanResult { scanned_to: last, tip, outputs, blocks_read: read, blocks_failed: failed })
+        Ok(ScanResult {
+            scanned_to: reached(last, first_failed),
+            tip,
+            outputs,
+            blocks_read: read,
+            blocks_failed: failed,
+        })
     })
 }
 
@@ -663,7 +710,13 @@ pub fn monero_tx_known(node_url: String, tx_hash_hex: String, timeout_ms: u32) -
             // The node answered and does not have it. A daemon that is up but
             // behind will also say this, which is why the caller waits and
             // asks again rather than treating one No as proof of a forgery.
-            Err(_) => TxKnown::No,
+            Err(TransactionsError::TransactionNotFound) => TxKnown::No,
+            // Everything else — a stalled read, a 5xx, a body that did not
+            // parse, a node that returned the wrong transaction — is the node
+            // saying nothing, not the node saying no. Mapped to No, a flaky
+            // second node made the first node's honest answer look like a
+            // forgery (the three-answer rule this enum exists for).
+            Err(_) => TxKnown::Unreachable,
         }
     })
 }
@@ -883,34 +936,42 @@ pub fn monero_scan_pool(
     let view = Zeroizing::new(Scalar::hash(&sb));
     let spend_pub = Point::from(&spend.into() * ED25519_BASEPOINT_TABLE);
 
-    // The pool listing, hashes only. `get_transaction_pool` carries whole
-    // blobs in an escaping scheme not worth trusting; the ids are enough, and
-    // the transactions come back clean through the ordinary fetch.
+    // The pool listing, hashes only. This used to read `get_transaction_pool`
+    // and pick the ids out of it by hand: that answer carries every blob in
+    // the pool in an escaping scheme not worth trusting, and it grows with
+    // the pool — past ureq's ten-megabyte body cap it stopped being readable
+    // at all, so a busy network's pool was a scan that always failed. The
+    // hashes endpoint answers with the ids alone (absent, not empty, when
+    // the pool is), and the transactions come back clean through the
+    // ordinary fetch.
     let agent = ureq::AgentBuilder::new()
         .timeout(Duration::from_secs(10))
         .build();
-    let body = agent
-        .post(&format!("{}/get_transaction_pool", node_url.trim_end_matches('/')))
+    let v: serde_json::Value = agent
+        .post(&format!("{}/get_transaction_pool_hashes", node_url.trim_end_matches('/')))
         .call()
         .map_err(|e| MoneroError::Failed(short_error(&e.to_string())))?
         .into_string()
-        .map_err(|e| MoneroError::Failed(format!("pool read: {e}")))?;
-    let mut hashes: Vec<[u8; 32]> = Vec::new();
-    // Pulled by key rather than by full deserialize: the entries also carry
-    // `tx_blob` fields full of escaped binary that serde_json will choke on
-    // long before it reaches the ids.
-    for part in body.split("\"id_hash\": \"").skip(1) {
-        if let Some(h) = part.get(..64).and_then(hex_to_bytes) {
-            if h.len() == 32 {
-                let mut a = [0u8; 32];
-                a.copy_from_slice(&h);
-                hashes.push(a);
-            }
-        }
-        if hashes.len() >= max as usize {
-            break;
-        }
+        .map_err(|e| MoneroError::Failed(format!("pool read: {e}")))
+        .and_then(|b| {
+            serde_json::from_str(&b).map_err(|e| MoneroError::Failed(format!("pool read: {e}")))
+        })?;
+    if v["status"].as_str() != Some("OK") {
+        return Err(MoneroError::Failed(format!(
+            "pool: node said {}",
+            v["status"].as_str().unwrap_or("nothing")
+        )));
     }
+    let hashes: Vec<[u8; 32]> = v["tx_hashes"]
+        .as_array()
+        .map(|a| {
+            a.iter()
+                .filter_map(|h| h.as_str().and_then(hex_to_bytes))
+                .filter_map(|h| <[u8; 32]>::try_from(h).ok())
+                .take(max as usize)
+                .collect()
+        })
+        .unwrap_or_default();
     if hashes.is_empty() {
         return Ok(Vec::new());
     }
@@ -1005,13 +1066,35 @@ pub fn monero_spent(node_url: String, key_images_hex: Vec<String>) -> Result<Vec
         .into_string()
         .map_err(|e| MoneroError::Failed(e.to_string()))
         .and_then(|b| serde_json::from_str(&b).map_err(|e| MoneroError::Failed(e.to_string())))?;
+    // The daemon says whether it answered at all. A non-OK status arrives
+    // with the same shape and no array; read as "no answer for anyone" it was
+    // silently a spent check that checked nothing.
+    if v["status"].as_str() != Some("OK") {
+        return Err(MoneroError::Failed(format!(
+            "is_key_image_spent: {}",
+            v["status"].as_str().unwrap_or("no status")
+        )));
+    }
     // 0 = unspent, 1 = spent in the chain, 2 = spent in the pool. Anything not
     // zero means the money is gone or going, and both must count as spent —
     // showing pool-spent output as available is how a wallet double-spends.
-    Ok(v["spent_status"]
+    let answers: Vec<bool> = v["spent_status"]
         .as_array()
-        .map(|a| a.iter().map(|x| x.as_u64().unwrap_or(0) != 0).collect())
-        .unwrap_or_default())
+        .ok_or_else(|| MoneroError::Failed("is_key_image_spent: no spent_status".into()))?
+        .iter()
+        .map(|x| x.as_u64().map(|n| n != 0))
+        .collect::<Option<_>>()
+        .ok_or_else(|| MoneroError::Failed("is_key_image_spent: malformed status".into()))?;
+    // One answer per question, in order — the caller zips them, and a short
+    // list would pair the wrong verdicts with the wrong notes.
+    if answers.len() != key_images_hex.len() {
+        return Err(MoneroError::Failed(format!(
+            "is_key_image_spent: asked about {} key images, told about {}",
+            key_images_hex.len(),
+            answers.len()
+        )));
+    }
+    Ok(answers)
 }
 
 fn hex_of(b: &[u8]) -> String {
@@ -1019,13 +1102,7 @@ fn hex_of(b: &[u8]) -> String {
 }
 
 fn hex_to_bytes(s: &str) -> Option<Vec<u8>> {
-    if s.len() % 2 != 0 {
-        return None;
-    }
-    (0..s.len())
-        .step_by(2)
-        .map(|i| u8::from_str_radix(&s[i..i + 2], 16).ok())
-        .collect()
+    crate::hex_to_bytes(s)
 }
 
 // ---------------------------------------------------------------------------
@@ -1501,27 +1578,57 @@ pub fn monero_send(
         // success, and propagated nothing. Ok from a single node means that node
         // took it, not that the network has it. Nodes deduplicate, so submitting
         // everywhere is free.
-        let mut accepted = 0u32;
-        for r in [
-            node_url.as_str(),
-            "http://xmr-lux.boldsuck.org:38081",
-            "http://node.monerodevs.org:38089",
-            "http://stagenet.xmr-tw.org:38081",
-        ] {
-            let Ok(t) = monero_daemon_rpc::MoneroDaemon::new(UreqTransport::new(r.to_string())).await
-            else { continue };
-            if t.publish_transaction(&signed).await.is_ok() {
-                accepted += 1;
-            }
-        }
+        let (accepted, last_err) = relay(&signed, &node_url).await;
         if accepted == 0 {
-            return Err(MoneroError::Failed(
-                "signed, but no node accepted it — it has not been sent".into(),
-            ));
+            // Not "it has not been sent". A relay that timed out after
+            // taking the bytes has it, and will propagate it; the phone
+            // only knows nobody *confirmed*. The notes stay claimed until
+            // the chain says either way (resolveSendIntent's contract).
+            return Err(MoneroError::Failed(format!(
+                "signed, but no node confirmed taking it ({last_err}) — \
+                 the notes stay reserved until the chain settles it"
+            )));
         }
 
         Ok(SendResult { txid_hex: txid, fee_pxmr: fee, accepted_by: accepted })
     })
+}
+
+/// Where a signed transaction goes: the node it was built against and then
+/// every default relay, deduplicated. Nodes deduplicate transactions, so
+/// submitting everywhere is free — and §8.7.2 says one node's "OK" means
+/// that node took it, not that the network has it.
+pub(crate) fn relay_urls(first: &str) -> Vec<String> {
+    let mut urls = vec![first.to_string()];
+    for n in monero_default_nodes(None) {
+        if !urls.contains(&n.url) {
+            urls.push(n.url);
+        }
+    }
+    urls
+}
+
+/// Publish to every relay; how many confirmed and the last refusal. The
+/// daemon's reason is the whole diagnosis — "too few outputs", "fee too
+/// low", "key image spent" are three different bugs, and an `is_ok()` that
+/// swallowed it left the release path blaming the network for all three.
+pub(crate) async fn relay(
+    tx: &monero_wallet::transaction::Transaction,
+    node_url: &str,
+) -> (u32, String) {
+    use monero_daemon_rpc::prelude::*;
+    let mut accepted = 0u32;
+    let mut last_err = String::new();
+    for url in relay_urls(node_url) {
+        match monero_daemon_rpc::MoneroDaemon::new(UreqTransport::new(url.clone())).await {
+            Ok(rpc) => match rpc.publish_transaction(tx).await {
+                Ok(_) => accepted += 1,
+                Err(e) => last_err = format!("{url}: {e:?}"),
+            },
+            Err(e) => last_err = format!("connect {url}: {e:?}"),
+        }
+    }
+    (accepted, last_err)
 }
 
 /// Turn the library's error into something a person can act on.

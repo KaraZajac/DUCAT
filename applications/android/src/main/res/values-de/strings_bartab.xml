@@ -25,12 +25,14 @@
     <string name="bartab_back">Zurück</string>
     <string name="bartab_bill_cancelled_msg">Die Rechnung über %1$s ist storniert — nichts zu zahlen.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · Deckel jetzt %3$s</string>
+    <string name="bartab_discard_notice">Deckel verworfen — nichts zu zahlen.</string>
     <string name="bartab_remove_line">Entfernen</string>
     <string name="bartab_settle_bill">Abrechnen — Rechnung %1$s</string>
     <string name="bartab_settle_hint">Eine aufgeschlüsselte Rechnung in deine Unterhaltung mit %1$s. Bezahlt werden kann von überall — der Thread schließt nicht, wenn der Gast geht.</string>
     <string name="bartab_discard_tab">Deckel verwerfen</string>
     <string name="bartab_discard_title">Diesen Deckel verwerfen?</string>
     <string name="bartab_discard_body">Der Deckel und alles, was darauf gebongt wurde, werden von diesem Telefon gelöscht. Es geht keine Rechnung raus, und rückgängig machen lässt es sich nicht.</string>
+    <string name="bartab_discard_body_told">Der Deckel und alles, was darauf gebongt wurde, werden von diesem Telefon gelöscht. Es geht keine Rechnung raus — sie erfahren, dass nichts zu zahlen ist — und rückgängig machen lässt es sich nicht.</string>
     <string name="bartab_discard_confirm">Verwerfen</string>
     <string name="bartab_keep_tab">Deckel behalten</string>
     <string name="bartab_billed_hint">Abgerechnet. Die Quittung geht von selbst raus, sobald die Zahlung eintrifft. Wurde anders beglichen? Dann sag es hier:</string>
@@ -40,6 +42,13 @@
     <string name="bartab_cancelled_note">Storniert — der Gast wurde in der Unterhaltung informiert.</string>
     <string name="bartab_paid_oob_note">Außerhalb von DUCAT bezahlt ✓ — Quittung gesendet, keine Transaktion angehängt.</string>
     <string name="bartab_paid_note">Bezahlt ✓ — Quittung gesendet.</string>
+    <string name="bartab_bill_pending">Abgerechnet, aber die Rechnung ist noch auf diesem Telefon — sie geht raus, sobald das Netz wieder da ist. Wurde anders beglichen? Dann sag es hier:</string>
+    <string name="bartab_bill_unsent">Die Rechnung ist nie angekommen: Die Unterhaltung wurde zurückgesetzt, bevor sie rausgehen konnte. Storniere sie und rechne neu ab, oder halte hier fest, dass anders bezahlt wurde:</string>
+    <string name="bartab_cancelled_pending">Storniert — der Gast weiß es noch nicht. Die Nachricht geht raus, sobald dieses Telefon das Netz wieder findet.</string>
+    <string name="bartab_cancelled_unsent">Storniert — aber die Nachricht hat dieses Telefon nie verlassen und kann jetzt nicht mehr raus. Sag es dem Gast in der Unterhaltung, sonst zahlt er diese Rechnung womöglich noch.</string>
+    <string name="bartab_paid_oob_pending">Außerhalb von DUCAT bezahlt ✓ — die Quittung ist noch auf diesem Telefon. Sie geht raus, sobald das Netz wieder da ist.</string>
+    <string name="bartab_paid_oob_unsent">Außerhalb von DUCAT bezahlt ✓ — aber die Quittung konnte nicht gesendet werden.</string>
+    <string name="bartab_send_receipt">Quittung senden</string>
     <string name="bartab_remove_from_book">Aus dem Deckelbuch entfernen</string>
     <string name="bartab_back_to_tabs">Zurück zu den Deckeln</string>
     <!-- What the payer reads on the bill and the receipt. Written in
@@ -55,4 +64,8 @@
     <string name="bill_note_cancelled">Die Rechnung über %1$s ist storniert — nichts zu zahlen.</string>
     <string name="bill_note_sale">Deine Rechnung</string>
     <string name="bartab_tip_line">Trinkgeld — danke</string>
+    <string name="bill_note_issue">Abo</string>
+    <string name="bartab_paid_pending">Bezahlt ✓ — die Quittung ist noch auf diesem Telefon. Sie geht raus, sobald das Netz wieder da ist.</string>
+    <string name="bartab_paid_unsent">Bezahlt ✓ — aber die Quittung konnte nicht gesendet werden. Es wird von selbst erneut versucht.</string>
+    <string name="bartab_removed_notice">Gestrichen: %1$s · Deckel jetzt %2$s</string>
 </resources>

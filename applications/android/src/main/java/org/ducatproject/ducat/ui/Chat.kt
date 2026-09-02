@@ -42,6 +42,7 @@ import org.ducatproject.ducat.Ledger
 import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.WalletStore
 import org.ducatproject.ducat.PersonaStore
+import org.ducatproject.ducat.referent
 import org.ducatproject.ducat.threadAad
 import org.ducatproject.ducat.StoredMessage
 import org.ducatproject.ducat.Amounts
@@ -58,6 +59,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import org.ducatproject.ducat.formatXmr
 import org.ducatproject.ducat.DucatLog
+import org.ducatproject.ducat.TabStore
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
@@ -66,6 +68,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.PlayArrow
@@ -150,11 +154,7 @@ internal fun reactionsOn(
     val out = HashMap<Pair<Long, Long>, Pair<String?, String?>>()
     for (r in messages.sortedBy { it.timestamp }) {
         if (r.kind != 4) continue
-        val seq = r.reSeq ?: continue
-        val side = if (r.reOwn) r.outgoing else !r.outgoing
-        val t = messages
-            .filter { it.outgoing == side && it.seq == seq && it.timestamp <= r.timestamp }
-            .maxByOrNull { it.timestamp } ?: continue
+        val t = messages.referent(r) ?: continue
         val k = t.seq to t.timestamp
         val cur = out[k] ?: (null to null)
         out[k] = if (r.outgoing) r.body to cur.second else cur.first to r.body
@@ -191,24 +191,12 @@ internal data class BillAnswers(
  * Which message each retraction or refusal actually answers.
  *
  * A kind-5 names its target by sequence number alone, and the comment that
- * used to sit on the check called that "exact". It is exact only while a
- * sequence number is unique in a thread, and it is not: every card cut for a
- * hail, a sale or a listing restarts the mailbox, so one conversation holds
- * several messages numbered 0. Declining a ride offer at seq 0 therefore
- * marked a shop's bill "Declined" — a bill that had arrived on a later card,
- * also at seq 0, and whose Pay button vanished with the label. The customer
- * was standing at the counter holding an unpayable bill they had never
- * refused, while the till read "bill sent" and waited (found live,
- * 2026-08-24: a coffee and a croissant, USD 8.03).
- *
- * With only a seq on the wire the honest reading is positional: a reaction
- * answers the message with that seq which most recently preceded it. Resolve
- * against every message rather than only bills, so a reaction that answered
- * something else resolves to that something else and leaves the bills alone.
+ * used to sit on the check called that "exact". It is not — see
+ * [referent], the one reading of a reference every screen shares: a decline
+ * at seq 0 once marked a shop's bill "Declined", a bill that had arrived on
+ * a later card, also at seq 0, and whose Pay button vanished with the label
+ * while the till read "bill sent" and waited.
  */
-/** How far apart two honest clocks are allowed to be (§16.14 resolution). */
-private const val CLOCK_SKEW_SECS = 900L
-
 internal fun billAnswers(messages: List<StoredMessage>): BillAnswers {
     val withdrawn = HashSet<Pair<Long, Long>>()
     val refused = HashSet<Pair<Long, Long>>()
@@ -216,32 +204,7 @@ internal fun billAnswers(messages: List<StoredMessage>): BillAnswers {
     val quiet = HashSet<Pair<Long, Long>>()
     for (r in messages) {
         if (r.kind != 5) continue
-        val seq = r.reSeq ?: continue
-        // Whose log the seq belongs to: our own for a retraction, the other
-        // side's for a refusal.
-        val side = if (r.reOwn) r.outgoing else !r.outgoing
-        // Positional first, exactly as before: the nearest preceding
-        // message with that seq. Only when nothing precedes may the answer
-        // reach *forward*, and then only within the skew grace — because
-        // the two timestamps were stamped by two different clocks, and a
-        // bill minted by a fast clock and declined straight away sits
-        // "after" its own refusal (found live 2026-08-27; the refusal
-        // resolved to nothing and the asker's bubble stayed live).
-        //
-        // The order matters. A flat grace window re-created the 08-24
-        // failure this function exists to prevent: a seq reborn on a fresh
-        // card ten minutes later fell inside the window, and the refusal
-        // of the old message reached the new one. Preferring the preceding
-        // candidate keeps rebirth resolution untouched; the forward reach
-        // exists only for the case where the old rule found nothing at all.
-        val onSide = messages.filter { it.outgoing == side && it.seq == seq }
-        val target = onSide
-            .filter { it.timestamp <= r.timestamp }
-            .maxByOrNull { it.timestamp }
-            ?: onSide
-                .filter { it.timestamp <= r.timestamp + CLOCK_SKEW_SECS }
-                .minByOrNull { it.timestamp }
-            ?: continue
+        val target = messages.referent(r) ?: continue
         when {
             target.kind == 1 -> (if (r.reOwn) withdrawn else refused) +=
                 target.seq to target.timestamp
@@ -258,6 +221,52 @@ internal fun billAnswers(messages: List<StoredMessage>): BillAnswers {
     return BillAnswers(withdrawn, refused, unsent, quiet)
 }
 
+/**
+ * Whether a bill in [messages] has been paid — the bubble's rule, and the
+ * full-screen bill's, so a bill can never read "Paid" in one place and
+ * offer "Accept & pay" in the other. The identity test (`=== m`) means [m]
+ * must be an element of [messages], not an older copy of it.
+ *
+ * Answered, said rather than guessed: a payment names the request it settles
+ * and a receipt names the request it receipts (§16.14), so the first test is
+ * whether anything points here. The amount rule stays for messages that
+ * predate the reference, and it errs toward "paid" on purpose — the
+ * alternative is a live button one tap from paying twice — but only on the
+ * payer's copy. The asker's own copy flips on an explicit reference alone,
+ * because erring toward "paid" is safe where it kills a spend button and a
+ * lie where it tells the person owed money they were paid.
+ */
+internal fun billPaid(messages: List<StoredMessage>, m: StoredMessage): Boolean {
+    if (m.kind != 1) return false
+    return if (m.outgoing) {
+        // An incoming payment naming this request (their re_own=false: our
+        // log), or our own receipt for it (re_own=true), is not a guess.
+        messages.any {
+            ((it.kind == 2 && !it.outgoing) || (it.kind == 3 && it.outgoing)) &&
+                messages.referent(it) === m
+        }
+    } else {
+        messages.any {
+            val answers = ((it.kind == 2 && it.outgoing) ||
+                (it.kind == 3 && !it.outgoing))
+            if (!answers) false
+            else if (it.reSeq != null) {
+                // The bill is theirs, so it lives in their outbox — and
+                // `re_own` means "the sender's own log". Our payment
+                // answering it says false; their receipt for it says true;
+                // `referent` reads either.
+                messages.referent(it) === m
+            } else {
+                // At least this much, later: a bill paid with a tip on top
+                // must still settle, and this is the rule the payee's own
+                // reconciliation uses.
+                it.amountPxmr >= m.amountPxmr &&
+                    it.timestamp >= m.timestamp
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(contact: Contact, onBack: () -> Unit) {
@@ -265,7 +274,6 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     val store = remember { ContactStore(context) }
     val scope = rememberCoroutineScope()
     var c by remember { mutableStateOf(contact) }
-    val mine = remember { PersonaStore(context).personaHex() }
     // Starts empty and fills from IO below: decoding a whole thread is work
     // that scales with how long two people have known each other, and the
     // ledger ANR (2026-08-27) established what that costs on the main
@@ -280,12 +288,37 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     val answers = remember(messages) { billAnswers(messages) }
     // A half-typed message survives a rotation. It is the single most
     // common thing to lose, and the least excusable.
-    var draft by rememberSaveable { mutableStateOf("") }
+    //
+    // And it survives leaving the thread: the overlay disposes this whole
+    // screen on Back, so saveable state alone dropped the draft the moment
+    // somebody checked another conversation mid-sentence. Written to the
+    // store on dispose, read back on entry, cleared by send.
+    var draft by rememberSaveable {
+        mutableStateOf(ContactStore(context).draftOf(contact.personaHex))
+    }
+    val draftNow by androidx.compose.runtime.rememberUpdatedState(draft)
+    androidx.compose.runtime.DisposableEffect(contact.personaHex) {
+        onDispose {
+            // Not the words on their way out. Send does not empty the box
+            // until the send lands, and a Back tapped in between saved the
+            // sentence that had just gone as the draft — offered up again,
+            // under a Send button, the next time the thread was opened.
+            val d = draftNow
+            ContactStore(context).saveDraft(
+                contact.personaHex,
+                if (ThreadSends.owns(contact.personaHex, d)) "" else d,
+            )
+        }
+    }
     // What the next message answers, if anything. Saved with the draft: half a
     // reply is as easy to lose as half a sentence, and as annoying.
     var replyTo by rememberSaveable { mutableStateOf<Long?>(null) }
     var replyToOwn by rememberSaveable { mutableStateOf(false) }
     var sending by remember { mutableStateOf(false) }
+    // Waiting on a location fix, which is busy time the registry below
+    // does not know about: a tick from any other thread's send would
+    // otherwise put the composer back the moment the fix started.
+    var fixing by remember { mutableStateOf(false) }
     // (done, total) chunks of an attachment on its way to the network —
     // null for text sends and during the resize/seal prep. Written from the
     // IO coroutine; snapshot state takes cross-thread writes.
@@ -318,7 +351,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
         fresh?.let { c = it }
         // Looking at the thread is what "seen" means; the dot and the badge
         // clear the moment the eyes arrive, not when a reply goes out.
-        withContext(Dispatchers.IO) { store.setChatSeen(c.personaHex, c.inSeq) }
+        withContext(Dispatchers.IO) { store.setChatSeen(c) }
     }
 
     LaunchedEffect(messages.size) {
@@ -334,18 +367,105 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     }
 
     var settingsOpen by remember { mutableStateOf(false) }
-    var askOpen by remember { mutableStateOf(false) }
-    var payRequest by remember { mutableStateOf<StoredMessage?>(null) }
-    var billView by remember { mutableStateOf<StoredMessage?>(null) }
-    var reserveOpen by remember { mutableStateOf(false) }
+    // The money sheets survive a rotation. PaySheet keeps its own typed
+    // amount, its busy state and the id of a payment already on its way
+    // (see Pay.kt) — all of which was thrown away here, because the flag
+    // that put the sheet on screen was a plain remember: turn the phone
+    // mid-payment and the sheet was gone, and with it any sign that the
+    // money had left. The bill itself rides along as its stored form — a
+    // message does not fit a Bundle, its JSON does, and the thread's own
+    // copy takes over below the moment it has loaded.
+    var askOpen by rememberSaveable { mutableStateOf(false) }
+    var payRequest by rememberSaveable(stateSaver = BILL_SAVER) {
+        mutableStateOf<StoredMessage?>(null)
+    }
+    var billView by rememberSaveable(stateSaver = BILL_SAVER) {
+        mutableStateOf<StoredMessage?>(null)
+    }
+    // The booking sheet too, now that its proposal outlives it (ReserveSheet).
+    var reserveOpen by rememberSaveable { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf<StoredMessage?>(null) }
 
     // Applied on open and whenever the thread changes, because nothing else
     // runs while a conversation sits idle.
     LaunchedEffect(version) {
-        val secs = store.disappearAfter(c.personaHex)
-        if (secs > 0 && store.expireOld(c.personaHex, secs) > 0) {
-            messages = store.thread(c.personaHex)
+        // Two thread decrypts and a parse per store bump; off the main thread
+        // like the re-read above, or a long thread stutters on every message.
+        val expired = withContext(Dispatchers.IO) {
+            val secs = store.disappearAfter(c.personaHex)
+            if (secs > 0 && store.expireOld(c.personaHex, secs) > 0) {
+                store.thread(c.personaHex)
+            } else null
+        }
+        expired?.let { messages = it }
+    }
+
+    // The one door for every send, the text box included: off this screen,
+    // under ThreadSends, because a send on this screen's own scope was
+    // cancelled by the screen leaving — and the write always finished,
+    // it was the landing that was lost (the draft kept, the busy state
+    // dropped, the same words offered up again on the way back in). Says
+    // what failed otherwise; reactions, unsends and a bill's decline used
+    // to swallow their failures whole, the dialog closing as if the thing
+    // had happened.
+    val send: (String?, ((Int, Int) -> Unit) -> Unit) -> Unit = { what, block ->
+        sending = true
+        error = null
+        ThreadSends.launch(store, c.personaHex, what) { progress -> block(progress); null }
+    }
+    // ...and the landing, read back by whichever instance of this screen is
+    // up when the send finishes. The thread itself needs no refresh here:
+    // the send bumps the store as it persists its row and again as it
+    // marks it delivered, and the effect on `version` re-reads.
+    val tick by ThreadSends.ticks.collectAsState()
+    LaunchedEffect(tick) {
+        val hex = c.personaHex
+        sending = ThreadSends.inFlight(hex) || fixing
+        sendProgress = ThreadSends.progress(hex)
+        for (o in ThreadSends.take(hex)) when (o) {
+            is ThreadSends.Outcome.Landed -> {
+                // The composer is done with these words wherever they
+                // are — the send that took them, or the store's copy a
+                // dispose saved and this instance read back. Only these:
+                // the box stays live while a send is out, so whatever was
+                // typed after them stays, and a sentence typed over them
+                // is not the one that went.
+                val d = draft.trimStart()
+                if (o.body != null && d.startsWith(o.body)) {
+                    draft = d.removePrefix(o.body).trimStart()
+                    replyTo = null; replyToOwn = false
+                }
+                // A sent message is the proof the last failure is over.
+                // The line stayed up under a thread that had moved on,
+                // saying a photo would not send above the photo.
+                error = null
+            }
+            is ThreadSends.Outcome.Failed -> {
+                // The words come back to a box that lost them — a dispose
+                // in between saved an empty draft on this send's account.
+                if (o.body != null && draft.isBlank()) draft = o.body
+                // Blank counts as missing. `?:` only catches null, and the
+                // throwable that stopped a picture from sending carried an
+                // empty string instead — so the line above the composer was
+                // set to "" and drew nothing. Picking a photo looked like
+                // picking a photo did nothing at all: no bubble, no error,
+                // no clue.
+                error = moneyFailure(context, o.error).takeIf {
+                    // The generic sentence is worse than this screen's own,
+                    // which names what failed.
+                    !it.contentEquals(
+                        context.getString(R.string.main_card_link_failed_body),
+                    )
+                } ?: if (o.what != null) {
+                    context.getString(R.string.chat_could_not_send_the, o.what)
+                } else context.getString(R.string.chat_could_not_send)
+                // The class name, because an empty message is exactly the
+                // case where the log needs to say something else.
+                DucatLog.w(
+                    "Chat",
+                    "${o.what ?: "send"}: ${o.error.javaClass.simpleName}: ${o.error.message}",
+                )
+            }
         }
     }
 
@@ -363,6 +483,22 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     }
                 },
                 actions = {
+                    // §16.21: the thread is where a call starts — same door,
+                    // same counterpart, one tap. Only once keys exist, and
+                    // with the memo button's own permission gate.
+                    if (c.theirBundle != null) {
+                        val callPerm = androidx.activity.compose.rememberLauncherForActivityResult(
+                            androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
+                        ) { ok -> if (ok) org.ducatproject.ducat.Calls.place(context, c) }
+                        IconButton(onClick = {
+                            // Launch unconditionally: an already-granted
+                            // permission answers straight back, so this is
+                            // both the ask and the fast path in one line.
+                            callPerm.launch(android.Manifest.permission.RECORD_AUDIO)
+                        }) {
+                            Icon(Icons.Filled.Call, stringResource(R.string.call_button))
+                        }
+                    }
                     IconButton(onClick = { settingsOpen = true }) {
                         Icon(Icons.Filled.MoreVert, stringResource(R.string.chat_conversation_settings))
                     }
@@ -383,30 +519,18 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     val doSend = doSend@{
                         val body = draft.trim()
                         if (body.isEmpty() || sending || c.theirBundle == null) return@doSend
+                        // The box keeps the words until the send lands —
+                        // the tick effect above empties it then, or hands
+                        // them back if nothing left the phone. `c` is a
+                        // snapshot for the same reason it always was; the
+                        // store's copy comes back through `version`.
+                        val to = c
+                        val (reSeq, reOwn) = replyTo to replyToOwn
                         sending = true
                         error = null
-                        scope.launch {
-                            val result = withContext(Dispatchers.IO) {
-                                runCatching { sendOne(context, c, body, mine, replyTo, replyToOwn) }
-                            }
-                            sending = false
-                            result.onSuccess { updated ->
-                                c = updated
-                                draft = ""
-                                replyTo = null; replyToOwn = false
-                                messages = store.thread(c.personaHex)
-                            }.onFailure {
-                                // Mapped, not printed. Sending reaches the
-                                // same node as everything else and fails the
-                                // same way, and `it.message` put that failure
-                                // in front of a reader in English — in an app
-                                // that ships in nineteen languages.
-                                error = moneyFailure(context, it, R.string.chat_could_not_send)
-                                DucatLog.w(
-                                    "Chat",
-                                    "send: ${it.javaClass.simpleName}: ${it.message}",
-                                )
-                            }
+                        ThreadSends.launch(store, to.personaHex, null, body) {
+                            sendOne(context, to, body, reSeq, reOwn)
+                            null
                         }
                     }
 
@@ -428,39 +552,14 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     var recording by remember { mutableStateOf(false) }
                     var recSecs by remember { mutableStateOf(0) }
                     val recorder = remember { VoiceRecorder(context) }
+                    DisposableEffect(recorder) {
+                        onDispose { (recorder.stop() as? Take.Memo)?.file?.delete() }
+                    }
                     LaunchedEffect(recording) {
                         recSecs = 0
                         while (recording) { kotlinx.coroutines.delay(1000); recSecs++ }
                     }
 
-                    val afterSend: (Result<*>, String) -> Unit = { r, what ->
-                        r.onSuccess { messages = store.thread(c.personaHex) }
-                            .onFailure {
-                                // Blank counts as missing. `?:` only catches
-                                // null, and the throwable that stopped a
-                                // picture from sending carried an empty string
-                                // instead — so the line above the composer was
-                                // set to "" and drew nothing. Picking a photo
-                                // looked like picking a photo did nothing at
-                                // all: no bubble, no error, no clue.
-                                error = moneyFailure(context, it).takeIf {
-                                    // The generic sentence is worse than this
-                                    // screen's own, which names what failed.
-                                    !it.contentEquals(
-                                        context.getString(R.string.main_card_link_failed_body),
-                                    )
-                                } ?: context.getString(R.string.chat_could_not_send_the, what)
-                                // The class name, because an empty message is
-                                // exactly the case where the log needs to say
-                                // something else.
-                                DucatLog.w(
-                                    "Chat",
-                                    "$what: ${it.javaClass.simpleName}: ${it.message}",
-                                )
-                            }
-                        sending = false
-                        sendProgress = null
-                    }
                     // A picture (§16.15): resized, sealed under a fresh key,
                     // parked in its own record, referenced from the message.
                     // The record on the network is noise to everyone but this
@@ -469,16 +568,8 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         androidx.activity.result.contract.ActivityResultContracts.GetContent()
                     ) { uri ->
                         if (uri != null) {
-                            sending = true
-                            scope.launch(Dispatchers.IO) {
-                                afterSend(
-                                    runCatching {
-                                        sendPicture(context, c, mine, uri) { d, t ->
-                                            sendProgress = d to t
-                                        }
-                                    },
-                                    context.getString(R.string.chat_what_picture),
-                                )
+                            send(context.getString(R.string.chat_what_picture)) { progress ->
+                                sendPicture(context, c, uri, progress)
                             }
                         }
                     }
@@ -486,16 +577,8 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         androidx.activity.result.contract.ActivityResultContracts.GetContent()
                     ) { uri ->
                         if (uri != null) {
-                            sending = true
-                            scope.launch(Dispatchers.IO) {
-                                afterSend(
-                                    runCatching {
-                                        sendFile(context, c, mine, uri) { d, t ->
-                                            sendProgress = d to t
-                                        }
-                                    },
-                                    context.getString(R.string.chat_what_file),
-                                )
+                            send(context.getString(R.string.chat_what_file)) { progress ->
+                                sendFile(context, c, uri, progress)
                             }
                         }
                     }
@@ -514,16 +597,8 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     ) { ok ->
                         val uri = cameraUri?.let(android.net.Uri::parse)
                         if (ok && uri != null) {
-                            sending = true
-                            scope.launch(Dispatchers.IO) {
-                                afterSend(
-                                    runCatching {
-                                        sendPicture(context, c, mine, uri) { d, t ->
-                                            sendProgress = d to t
-                                        }
-                                    },
-                                    context.getString(R.string.chat_what_picture),
-                                )
+                            send(context.getString(R.string.chat_what_picture)) { progress ->
+                                sendPicture(context, c, uri, progress)
                             }
                         }
                     }
@@ -534,7 +609,13 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                             java.io.File(dir, "shot.jpg"),
                         )
                         cameraUri = uri.toString()
-                        takePhoto.launch(uri)
+                        // No camera app at all — a bare phone, or an
+                        // emulator — and launch() throws instead of
+                        // returning ok=false. It took the thread down.
+                        runCatching { takePhoto.launch(uri) }.onFailure {
+                            DucatLog.w("Chat", "camera: ${it.message}")
+                            error = context.getString(R.string.chat_no_camera_app)
+                        }
                     }
                     // Declaring CAMERA in the manifest (the QR scanner needs
                     // it) means even the delegate-to-camera-app intent requires
@@ -551,15 +632,23 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     }
                     val sendLocation = {
                         trayOpen = false
+                        // Busy from the tap, not from the fix. A phone with
+                        // no recent position waits on getCurrentLocation,
+                        // which takes up to thirty seconds to give up
+                        // indoors, and for all of them the tray had closed
+                        // and nothing else had changed: the button looked
+                        // ignored, and was tapped again, and again.
+                        fixing = true
+                        sending = true
+                        error = null
                         grabLocation(context) { place ->
+                            fixing = false
                             if (place == null) {
+                                sending = ThreadSends.inFlight(c.personaHex)
                                 error = context.getString(R.string.chat_error_location_fix)
                             } else {
-                                scope.launch(Dispatchers.IO) {
-                                    afterSend(
-                                        runCatching { Mailbox.send(context, c, place, mine) },
-                                        context.getString(R.string.chat_what_location),
-                                    )
+                                send(context.getString(R.string.chat_what_location)) {
+                                    Mailbox.send(context, c, place)
                                 }
                             }
                         }
@@ -572,7 +661,18 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     // typed in — so it is visible while the sentence is being
                     // chosen, and cancellable without deleting the sentence.
                     replyTo?.let { seq ->
-                        val line = replyLine(messages, seq, replyToOwn, answers)
+                        // Read as the message about to be sent will be read
+                        // at the other end: a reference from now, to that
+                        // seq, in that log.
+                        val line = replyLine(
+                            messages,
+                            StoredMessage(
+                                outgoing = true, seq = -1, body = "",
+                                timestamp = System.currentTimeMillis() / 1000,
+                                reSeq = seq, reOwn = replyToOwn,
+                            ),
+                            answers,
+                        )
                         Row(
                             Modifier.fillMaxWidth()
                                 .padding(start = 12.dp, end = 12.dp, top = 8.dp),
@@ -684,26 +784,32 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                                         return@detectTapGestures
                                                     }
                                                     recording = true
-                                                    tryAwaitRelease()
-                                                    recording = false
-                                                    when (val take = recorder.stop()) {
-                                                        is Take.Memo -> {
-                                                            sending = true
-                                                            scope.launch(Dispatchers.IO) {
-                                                                afterSend(
-                                                                    runCatching {
-                                                                        sendVoice(
-                                                                            context, c, mine,
-                                                                            take.file,
-                                                                        ) { d, t ->
-                                                                            sendProgress = d to t
-                                                                        }
-                                                                    },
-                                                                    context.getString(
-                                                                        R.string.chat_what_voice_memo
-                                                                    ),
-                                                                )
-                                                            }
+                                                    // The hold ends with the
+                                                    // finger or with the
+                                                    // screen: leaving the
+                                                    // thread mid-press cancels
+                                                    // this coroutine at the
+                                                    // await, and the recorder
+                                                    // kept the microphone until
+                                                    // the process died. Stopped
+                                                    // either way; sent only on
+                                                    // the release.
+                                                    val take = try {
+                                                        tryAwaitRelease()
+                                                        recorder.stop()
+                                                    } catch (e: kotlinx.coroutines.CancellationException) {
+                                                        (recorder.stop() as? Take.Memo)?.file?.delete()
+                                                        throw e
+                                                    } finally {
+                                                        recording = false
+                                                    }
+                                                    when (take) {
+                                                        is Take.Memo -> send(
+                                                            context.getString(
+                                                                R.string.chat_what_voice_memo
+                                                            ),
+                                                        ) { progress ->
+                                                            sendVoice(context, c, take.file, progress)
                                                         }
                                                         Take.Failed -> error = context.getString(
                                                             R.string.chat_voice_failed
@@ -825,9 +931,27 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     }
 
                     if (contactPick) {
+                        // Read once per open, off the main thread: all() decrypts
+                        // every contact, avatars included, and it sat inside
+                        // composition — re-run on every recomposition while the
+                        // picker was up.
+                        var pickable by remember { mutableStateOf<List<Contact>?>(null) }
+                        // The shared-name set comes from the same read: it
+                        // is a second all() over every contact, and it was
+                        // computed in the dialog's composition, on the main
+                        // thread, once per list.
+                        var ambiguous by remember { mutableStateOf<Set<String>>(emptySet()) }
+                        LaunchedEffect(version) {
+                            val (list, shared) = withContext(Dispatchers.IO) {
+                                store.all().filter { it.personaHex != c.personaHex }
+                                    .sortedBy { it.displayName().lowercase() } to store.ambiguous()
+                            }
+                            pickable = list
+                            ambiguous = shared
+                        }
                         ContactPickDialog(
-                            contacts = store.all().filter { it.personaHex != c.personaHex }
-                                .sortedBy { it.displayName().lowercase() },
+                            contacts = pickable.orEmpty(),
+                            ambiguous = ambiguous,
                             // The introduction, done the only way consent
                             // allows: a fresh card of *mine*, dropped into the
                             // thread as a ducat: link, for them to hand to
@@ -835,37 +959,25 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                             // through the same registry as any other card.
                             onIntroduceMe = {
                                 contactPick = false
-                                sending = true
-                                scope.launch(Dispatchers.IO) {
-                                    afterSend(
-                                        runCatching {
-                                            val card = Mailbox.issueCard(
-                                                context,
-                                                org.ducatproject.ducat.MyProfile(context).name(),
-                                                60uL * 60uL * 24uL * 7uL,
-                                                purpose = "intro",
-                                            )
-                                            Mailbox.send(
-                                                context, c,
-                                                context.getString(
-                                                    R.string.chat_intro_card_body, card.uri
-                                                ),
-                                                mine,
-                                            )
-                                        },
-                                        context.getString(R.string.chat_what_card),
+                                send(context.getString(R.string.chat_what_card)) {
+                                    val card = Mailbox.issueCard(
+                                        context,
+                                        org.ducatproject.ducat.MyProfile(context).name(),
+                                        60uL * 60uL * 24uL * 7uL,
+                                        purpose = "intro",
+                                    )
+                                    Mailbox.send(
+                                        context, c,
+                                        context.getString(
+                                            R.string.chat_intro_card_body, card.uri
+                                        ),
                                     )
                                 }
                             },
                             onPick = { chosen ->
                                 contactPick = false
-                                scope.launch(Dispatchers.IO) {
-                                    afterSend(
-                                        runCatching {
-                                            Mailbox.send(context, c, contactCard(chosen), mine)
-                                        },
-                                        context.getString(R.string.chat_what_contact),
-                                    )
+                                send(context.getString(R.string.chat_what_contact)) {
+                                    Mailbox.send(context, c, contactCard(chosen))
                                 }
                             },
                             onDismiss = { contactPick = false },
@@ -934,7 +1046,23 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
             // Group traffic lives in the group's own screen: a pairwise view
             // showing fan-out copies would show every group in every thread.
             val shown = messages.filter { it.kind !in setOf(4, 8, 9, 10, 11, 12) && it.groupId == null }
-            itemsIndexed(shown) { at, m ->
+            // Keyed, so a row keeps its identity when the rows around it
+            // move: without keys the list was positional, and three
+            // messages expiring at the top (disappearing messages) or one
+            // deleted from the middle slid every bubble below into the
+            // slot — and the state — of the one above it, and the view
+            // jumped by that many rows. Direction, seq and timestamp
+            // together: seq is per mailbox in each direction, and restarts
+            // with every re-claimed card. A repeat of even that triple is
+            // numbered rather than trusted not to happen — a LazyColumn
+            // handed the same key twice throws, and takes the thread down.
+            val seen = HashMap<String, Int>(shown.size)
+            val keys = shown.map { m ->
+                val k = "${if (m.outgoing) 'o' else 'i'}${m.seq}:${m.timestamp}"
+                val n = seen.merge(k, 1, Int::plus) ?: 1
+                if (n == 1) k else "$k#$n"
+            }
+            itemsIndexed(shown, key = { at, _ -> keys[at] }) { at, m ->
                 // A run is consecutive plain messages from the same side,
                 // close together in time. Only kind 0: a bill, a payment or a
                 // reservation is a card that reads as one thing on its own,
@@ -975,9 +1103,28 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     // A retraction is a remark about the thread, not a message
                     // in it: one quiet centred line, no bubble and no buttons —
                     // the bill or offer it names greys out where it stands.
+                    //
+                    // Named by what it takes back. "Sam withdrew a message —
+                    // ‘That bill for USD 4.33 is cancelled — nothing to pay.’"
+                    // read as Sam unsaying the cancellation, the opposite of
+                    // what happened, because the quote is the retraction's own
+                    // words and a *message* is the one thing a visible
+                    // withdrawal never names (BillAnswers.quiet). A bill is a
+                    // bill, a ring is a call; only a target this phone cannot
+                    // find keeps the generic word.
                     val retractLine = if (m.reOwn) {
-                        if (m.outgoing) stringResource(R.string.chat_you_withdrew)
-                        else stringResource(R.string.chat_they_withdrew, isolate(c.displayName()))
+                        val took = messages.referent(m)?.kind
+                        stringResource(
+                            when {
+                                took == 1 && m.outgoing -> R.string.chat_you_withdrew_bill
+                                took == 1 -> R.string.chat_they_withdrew_bill
+                                took == 14 && m.outgoing -> R.string.chat_you_withdrew_call
+                                took == 14 -> R.string.chat_they_withdrew_call
+                                m.outgoing -> R.string.chat_you_withdrew
+                                else -> R.string.chat_they_withdrew
+                            },
+                            isolate(c.displayName()),
+                        )
                     } else {
                         if (m.outgoing) stringResource(R.string.chat_you_declined)
                         else stringResource(R.string.chat_they_declined, isolate(c.displayName()))
@@ -1047,27 +1194,12 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         // money they were paid. An incoming payment naming
                         // this request (their re_own=false: our log), or our
                         // own receipt for it (re_own=true), is not a guess.
-                        paid = (m.kind == 1 && m.outgoing && messages.any {
-                            (it.kind == 2 && !it.outgoing && it.reSeq == m.seq && !it.reOwn) ||
-                                (it.kind == 3 && it.outgoing && it.reSeq == m.seq && it.reOwn)
-                        }) || (m.kind == 1 && !m.outgoing && messages.any {
-                            val answers = ((it.kind == 2 && it.outgoing) ||
-                                (it.kind == 3 && !it.outgoing))
-                            if (!answers) false
-                            else if (it.reSeq != null) {
-                                // The bill is theirs, so it lives in their
-                                // outbox — and `re_own` means "the sender's
-                                // own log". Our payment answering it says
-                                // false; their receipt for it says true. Both
-                                // reduce to: the reference points at the log
-                                // the answering message did *not* come from,
-                                // unless they sent both.
-                                it.reSeq == m.seq && it.reOwn == !it.outgoing
-                            } else {
-                                it.amountPxmr >= m.amountPxmr &&
-                                    it.timestamp >= m.timestamp
-                            }
-                        }),
+                        // Which bill a reference names is `referent`'s
+                        // reading — positional, since a seq is per card —
+                        // and the reference's own re_own says whose log.
+                        // The rule itself is `billPaid`, shared with the
+                        // full-screen bill so the two can never disagree.
+                        paid = billPaid(messages, m),
                         // The sender's own retract (kind 5, reOwn) withdraws
                         // the bill, and the payer's refusal is the same
                         // mechanism from the other end. Both are resolved in
@@ -1080,11 +1212,9 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         unsent = (m.seq to m.timestamp) in answers.unsent,
                         // Resolved here, where the thread is. A bubble sees one
                         // message; the target lives in the list around it.
-                        answering = m.reSeq?.let {
-                            replyLine(messages, it, m.reOwn == m.outgoing, answers)
-                        },
+                        answering = m.reSeq?.let { replyLine(messages, m, answers) },
                         answeredGone = m.reSeq != null &&
-                            replyLine(messages, m.reSeq!!, m.reOwn == m.outgoing, answers) == null,
+                            replyLine(messages, m, answers) == null,
                         onLongPress = { confirmDelete = m },
                         onPay = { billView = it },
                     )
@@ -1126,38 +1256,55 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
         )
     }
 
-    billView?.let { b ->
+    billView?.let { opened ->
         // The bill gets the whole screen (Ceremony.kt): a decision, not a
         // bubble. Accept leads to the same confirm screen as ever — §15.5
         // survives every coat of paint.
+        //
+        // The bill as the thread holds it *now*, not the row that was
+        // tapped: `messages` is re-read on every store bump, and the verdicts
+        // below compare by identity within that list. The tapped copy is an
+        // element of an older list, so it would read as never answered —
+        // which is how the screen went on offering to pay a withdrawn bill
+        // while the bubble under it said "Cancelled".
+        val b = messages.firstOrNull {
+            it.kind == 1 && !it.outgoing &&
+                it.seq == opened.seq && it.timestamp == opened.timestamp
+        } ?: opened
+        val key = b.seq to b.timestamp
+        val over = when {
+            billPaid(messages, b) -> stringResource(R.string.ceremony_bill_paid)
+            key in answers.refused -> stringResource(R.string.ceremony_bill_declined)
+            key in answers.withdrawn ->
+                stringResource(R.string.ceremony_bill_withdrawn, isolate(c.displayName()))
+            else -> null
+        }
         BillScreen(
             m = b,
             contact = c,
+            over = over,
             onPay = { billView = null; payRequest = b },
             onDecline = {
                 billView = null
-                scope.launch(Dispatchers.IO) {
-                    runCatching {
-                        // A kind-5 Retract naming the bill, not a sentence
-                        // about it. As plain text this told them in words and
-                        // told neither client anything: the bill stayed live on
-                        // both sides, so the screen that had just declined it
-                        // went on offering "Review payment" for it — decline a
-                        // bill and be invited to pay it, one tap away.
-                        //
-                        // `reOwn = false` because the bill is theirs; the
-                        // vendor's own withdrawal (BarTab's cancelTabWithRetract)
-                        // is the same shape with reOwn true.
-                        Mailbox.send(
-                            context, c,
-                            context.getString(
-                                R.string.chat_decline_bill,
-                                Amounts.show(context, b.amountPxmr).primary,
-                            ),
-                            mine,
-                            kind = 5, reSeq = b.seq, reOwn = false,
-                        )
-                    }
+                send(null) {
+                    // A kind-5 Retract naming the bill, not a sentence
+                    // about it. As plain text this told them in words and
+                    // told neither client anything: the bill stayed live on
+                    // both sides, so the screen that had just declined it
+                    // went on offering "Review payment" for it — decline a
+                    // bill and be invited to pay it, one tap away.
+                    //
+                    // `reOwn = false` because the bill is theirs; the
+                    // vendor's own withdrawal (BarTab's cancelTabWithRetract)
+                    // is the same shape with reOwn true.
+                    Mailbox.send(
+                        context, c,
+                        context.getString(
+                            R.string.chat_decline_bill,
+                            Amounts.show(context, b.amountPxmr).primary,
+                        ),
+                        kind = 5, reSeq = b.seq, reOwn = false,
+                    )
                 }
             },
             onClose = { billView = null },
@@ -1165,18 +1312,35 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     }
 
     payRequest?.let { r ->
-        // The contact rides along, not just the address. Paying a request as a
-        // bare address silently dropped the payment notice — the vendor never
-        // learned which transaction answered their bill, and nothing could be
-        // marked paid. The request's own payto is already on the contact:
-        // receiving a request stores it as their freshest address (§16.12).
-        PaySheet(
-            prefillContact = c,
-            prefillAmountPxmr = r.amountPxmr,
-            // The bill being answered, so the payment can name it rather than
-            // leave the two to be matched on their amounts.
-            answersSeq = r.seq,
-        ) { payRequest = null }
+        if ((r.seq to r.timestamp) in answers.withdrawn) {
+            // Withdrawn under the confirm screen: the sheet was showing an
+            // amount and a Send button for a bill its sender had just
+            // taken back, with the bubble that says so hidden behind it.
+            // Down it comes, and the thread's error line says why. Paid is
+            // deliberately not a reason here — our own payment lands in
+            // the thread before the paid splash, and this would cut the
+            // splash off; declined cannot happen from behind the sheet.
+            LaunchedEffect(r) {
+                payRequest = null
+                error = context.getString(
+                    R.string.ceremony_bill_withdrawn, isolate(c.displayName()),
+                )
+            }
+        } else {
+            // The contact rides along, not just the address. Paying a
+            // request as a bare address silently dropped the payment notice
+            // — the vendor never learned which transaction answered their
+            // bill, and nothing could be marked paid. The request's own
+            // payto is already on the contact: receiving a request stores
+            // it as their freshest address (§16.12).
+            PaySheet(
+                prefillContact = c,
+                prefillAmountPxmr = r.amountPxmr,
+                // The bill being answered, so the payment can name it rather
+                // than leave the two to be matched on their amounts.
+                answersSeq = r.seq,
+            ) { payRequest = null }
+        }
     }
 
     // The same sheet the send/request button opens, with the contact already
@@ -1194,11 +1358,18 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
             // make, and overwriting it with itself would turn a claim into a
             // choice this person never made.
             initialName = c.petname.orEmpty(),
-            onRename = { store.add(c.copy(petname = it)) },
+            // The name alone, through the store's narrow setter: writing the
+            // screen's whole snapshot back put a stale inSeq over whatever
+            // the poller had accepted while the dialog was open.
+            onRename = { name ->
+                scope.launch(Dispatchers.IO) { store.setPetname(c.personaHex, name) }
+            },
             onPick = { store.setDisappearAfter(c.personaHex, it); settingsOpen = false },
             onClearAll = {
-                store.deleteThread(c.personaHex)
-                messages = emptyList()
+                scope.launch(Dispatchers.IO) {
+                    store.deleteThread(c.personaHex)
+                    messages = emptyList()
+                }
                 settingsOpen = false
             },
             onDismiss = { settingsOpen = false },
@@ -1223,19 +1394,13 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                     modifier = Modifier
                                         .clickable {
                                             confirmDelete = null
-                                            scope.launch(Dispatchers.IO) {
-                                                runCatching {
-                                                    Mailbox.send(
-                                                        context, c, emo, mine,
-                                                        kind = 4,
-                                                        reSeq = m.seq,
-                                                        reOwn = m.outgoing,
-                                                    )
-                                                }.onSuccess {
-                                                    messages = store.thread(c.personaHex)
-                                                }.onFailure {
-                                                    DucatLog.w("Chat", "react: ${it.message}")
-                                                }
+                                            send(context.getString(R.string.chat_what_reaction)) {
+                                                Mailbox.send(
+                                                    context, c, emo,
+                                                    kind = 4,
+                                                    reSeq = m.seq,
+                                                    reOwn = m.outgoing,
+                                                )
                                             }
                                         }
                                         .padding(4.dp),
@@ -1266,29 +1431,21 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     ) {
                         TextButton(onClick = {
                             confirmDelete = null
-                            scope.launch {
-                                withContext(Dispatchers.IO) {
-                                    runCatching {
-                                        // The sentence, not the words being taken
-                                        // back: chat_retract_with_quote exists so a
-                                        // withdrawn *bill* can say which one, and
-                                        // quoting an unsent message back into the
-                                        // thread is the one thing this must not do.
-                                        // A body is required — core refuses an empty
-                                        // one — and this client never shows it (see
-                                        // BillAnswers.quiet), so it is there for a
-                                        // reader that does not know the convention.
-                                        Mailbox.send(
-                                            context, c,
-                                            context.getString(R.string.chat_unsent),
-                                            mine,
-                                            kind = 5, reSeq = m.seq, reOwn = true,
-                                        )
-                                    }.onFailure {
-                                        DucatLog.w("Chat", "unsend: ${it.message}")
-                                    }
-                                }
-                                messages = store.thread(c.personaHex)
+                            send(null) {
+                                // The sentence, not the words being taken
+                                // back: chat_retract_with_quote exists so a
+                                // withdrawn *bill* can say which one, and
+                                // quoting an unsent message back into the
+                                // thread is the one thing this must not do.
+                                // A body is required — core refuses an empty
+                                // one — and this client never shows it (see
+                                // BillAnswers.quiet), so it is there for a
+                                // reader that does not know the convention.
+                                Mailbox.send(
+                                    context, c,
+                                    context.getString(R.string.chat_unsent),
+                                    kind = 5, reSeq = m.seq, reOwn = true,
+                                )
                             }
                         }) { Text(stringResource(R.string.chat_unsend)) }
                     }
@@ -1305,23 +1462,45 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     ) {
                         TextButton(onClick = {
                             confirmDelete = null
-                            scope.launch {
-                                withContext(Dispatchers.IO) {
-                                    runCatching {
-                                        Mailbox.send(
-                                            context, c,
-                                            context.getString(
-                                                R.string.bartab_bill_cancelled_msg,
-                                                Amounts.show(context, m.amountPxmr).primary,
-                                            ),
-                                            mine,
-                                            kind = 5, reSeq = m.seq, reOwn = true,
-                                        )
-                                    }.onFailure {
-                                        DucatLog.w("Chat", "cancel bill: ${it.message}")
-                                    }
+                            send(null) {
+                                // A bill the till sent has a tab behind it,
+                                // and the tab is what keeps watching the
+                                // chain for the payment. Taking the bill back
+                                // from here used to leave that tab billed and
+                                // waiting: the customer's screen said
+                                // "cancelled", the Tabs screen said "awaiting
+                                // payment", and a payment that did arrive was
+                                // read as settling a bill this thread had
+                                // withdrawn. The tab's own cancel closes both
+                                // — the same kind-5, through TabStore.close.
+                                val tabs = TabStore(context)
+                                val thread = store.thread(c.personaHex)
+                                val waiting = tabs.all().firstOrNull { t ->
+                                    t.personaHex == c.personaHex &&
+                                        t.state == "settled" && t.seenTx == null &&
+                                        t.billIn(thread)?.let { b ->
+                                            b.seq == m.seq && b.timestamp == m.timestamp
+                                        } == true
                                 }
-                                messages = withContext(Dispatchers.IO) { store.thread(c.personaHex) }
+                                if (waiting != null) {
+                                    // Null: the tab moved on between the look
+                                    // and the close — paid, or cancelled from
+                                    // the counter. Either lands in this
+                                    // thread on its own, and this button goes
+                                    // with it.
+                                    if (cancelTabWithRetract(context, tabs, waiting) == null) {
+                                        DucatLog.i("Chat", "cancel request: tab ${waiting.id} had moved on")
+                                    }
+                                } else {
+                                    Mailbox.send(
+                                        context, c,
+                                        context.getString(
+                                            R.string.bartab_bill_cancelled_msg,
+                                            Amounts.show(context, m.amountPxmr).primary,
+                                        ),
+                                        kind = 5, reSeq = m.seq, reOwn = true,
+                                    )
+                                }
                             }
                         }) { Text(stringResource(R.string.chat_cancel_request)) }
                     }
@@ -1342,9 +1521,15 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         confirmDelete = null
                     }) { Text(stringResource(R.string.chat_reply)) }
                     TextButton(onClick = {
-                        store.deleteMessage(c.personaHex, m.seq, m.outgoing)
-                        messages = store.thread(c.personaHex)
                         confirmDelete = null
+                        scope.launch(Dispatchers.IO) {
+                            // With the timestamp: seq restarts on every
+                            // re-claimed card, so a thread can hold several
+                            // messages at this number and only this one is
+                            // being deleted.
+                            store.deleteMessage(c.personaHex, m.seq, m.outgoing, m.timestamp)
+                            messages = store.thread(c.personaHex)
+                        }
                     }) {
                         Text(
                             stringResource(R.string.chat_delete),
@@ -1385,6 +1570,10 @@ private fun ChatSettingsDialog(
         604_800L to stringResource(R.string.chat_1_week),
     )
     var confirmClear by remember { mutableStateOf(false) }
+    // The name is committed once, on the way out by any door — not per
+    // keystroke, which was a store write and a full thread re-read per letter.
+    var name by remember { mutableStateOf(initialName) }
+    val commitName = { onRename(name.trim().ifBlank { null }) }
 
     // Clearing a thread is unrecoverable and one tap from a settings sheet is
     // too close to it, so the tap opens a confirm rather than doing the delete.
@@ -1396,7 +1585,7 @@ private fun ChatSettingsDialog(
                 Text(stringResource(R.string.chat_clear_confirm_text))
             },
             confirmButton = {
-                TextButton(onClick = { confirmClear = false; onClearAll() }) {
+                TextButton(onClick = { confirmClear = false; commitName(); onClearAll() }) {
                     Text(
                         stringResource(R.string.chat_clear),
                         color = MaterialTheme.colorScheme.error,
@@ -1412,7 +1601,7 @@ private fun ChatSettingsDialog(
     }
 
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = { commitName(); onDismiss() },
         title = { Text(stringResource(R.string.chat_conversation_title)) },
         text = {
             Column {
@@ -1420,10 +1609,9 @@ private fun ChatSettingsDialog(
                 // notice you cannot tell who they are. It lived only under
                 // drawer → Contacts → the person → Profile, which is a long
                 // way to go to fix a row that says "Unnamed contact".
-                var name by remember { mutableStateOf(initialName) }
                 OutlinedTextField(
                     value = name,
-                    onValueChange = { if (it.length <= 32) { name = it; onRename(it.trim().ifBlank { null }) } },
+                    onValueChange = { if (it.length <= 32) name = it },
                     label = { Text(stringResource(R.string.chat_their_name_label)) },
                     supportingText = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1441,11 +1629,12 @@ private fun ChatSettingsDialog(
                 )
                 Spacer(Modifier.height(8.dp))
                 options.forEach { (secs, label) ->
+                    val pick = { commitName(); onPick(secs) }
                     Row(
-                        Modifier.fillMaxWidth().clickable { onPick(secs) }.padding(vertical = 6.dp),
+                        Modifier.fillMaxWidth().clickable { pick() }.padding(vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        RadioButton(selected = current == secs, onClick = { onPick(secs) })
+                        RadioButton(selected = current == secs, onClick = { pick() })
                         Spacer(Modifier.width(8.dp))
                         Text(label)
                     }
@@ -1467,7 +1656,9 @@ private fun ChatSettingsDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.chat_done)) }
+            TextButton(onClick = { commitName(); onDismiss() }) {
+                Text(stringResource(R.string.chat_done))
+            }
         },
     )
 }
@@ -1480,6 +1671,21 @@ private fun ChatSettingsDialog(
  * its own clock beside it.
  */
 private const val RUN_GAP_SECONDS = 300L
+
+/**
+ * A bill on its way through a rotation: the message as the store keeps it,
+ * as a string. Bills only — a bill carries an amount, its lines and an
+ * address, nothing the process should not hand the system on its way
+ * down; an attachment's row would carry its key, and does not come here.
+ * A saved form that will not parse restores as no bill open.
+ */
+private val BILL_SAVER = androidx.compose.runtime.saveable.Saver<StoredMessage?, String>(
+    save = { it?.toJson()?.toString() ?: "" },
+    restore = { s ->
+        if (s.isEmpty()) null
+        else runCatching { StoredMessage.from(org.json.JSONObject(s)) }.getOrNull()
+    },
+)
 
 /**
  * One line standing for a message, for the chrome above a reply.
@@ -1499,11 +1705,11 @@ private const val RUN_GAP_SECONDS = 300L
 @Composable
 private fun replyLine(
     messages: List<StoredMessage>,
-    seq: Long,
-    own: Boolean,
+    /** The reply; what it quotes is [referent]'s reading of its reference. */
+    m: StoredMessage,
     answers: BillAnswers,
 ): String? {
-    val t = messages.lastOrNull { it.outgoing == own && it.seq == seq } ?: return null
+    val t = messages.referent(m) ?: return null
     if ((t.seq to t.timestamp) in answers.unsent) return stringResource(R.string.chat_unsent)
     return when {
         t.kind == 1 -> stringResource(R.string.chat_reply_to_bill)
@@ -1520,11 +1726,10 @@ private fun sendOne(
     context: android.content.Context,
     c: Contact,
     body: String,
-    minePersonaHex: String,
     /** §16.14: the message this answers, if it answers one. */
     reSeq: Long? = null,
     reOwn: Boolean = false,
-): Contact = Mailbox.send(context, c, body, minePersonaHex, reSeq = reSeq, reOwn = reOwn)
+): Contact = Mailbox.send(context, c, body, reSeq = reSeq, reOwn = reOwn)
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -1643,6 +1848,124 @@ private fun Bubble(
                     val file = remember(att) { Mailbox.attachmentFile(ctx, att) }
                     val mime = m.attMime ?: "application/octet-stream"
                     when {
+                        !file.exists() && m.attSwarm != null -> {
+                            // The big road: a swarm file downloads when asked,
+                            // never by surprise on somebody's data plan. Name,
+                            // size, one button; the bar is the share's own.
+                            //
+                            // Except a voice message: nobody decides whether
+                            // to hear a voicemail file-by-file — it fetches
+                            // itself, the way a memo's record chunks already
+                            // do, and the bubble goes straight to the player.
+                            // Bounded, so the courtesy cannot be abused into
+                            // pulling a movie labelled audio/*.
+                            val fetchingHash by Mailbox.swarmFetching.collectAsState()
+                            val fetchingThis = fetchingHash == att
+                            val voice = mime.startsWith("audio/") &&
+                                m.attLen <= AUTO_FETCH_AUDIO_BYTES
+                            // The fetch's own account of why the file is not
+                            // here — the record road reads it below; this road
+                            // wrote it and never looked, so a dead share or a
+                            // full phone kept "Downloading audio…" and a moving
+                            // bar on screen for the life of the thread.
+                            val v by ContactStore.changes.collectAsState()
+                            val state = remember(att, v) { Mailbox.attachmentState(ctx, att) }
+                            val coming = state == Mailbox.AttachmentState.COMING
+                            if (voice && coming) {
+                                // Keyed on the store version too: the fetch
+                                // bumps it as it ends, so a failed try is
+                                // followed by another, a little later, until
+                                // the count says stop. Once per bubble, as it
+                                // was, meant one bad try was the last.
+                                val firstV = remember(att) { v }
+                                LaunchedEffect(att, v) {
+                                    kotlinx.coroutines.withContext(Dispatchers.IO) {
+                                        if (v != firstV) kotlinx.coroutines.delay(15_000)
+                                        // One swarm fetch at a time; a second
+                                        // voicemail waits its turn politely.
+                                        while (true) {
+                                            val busy = Mailbox.swarmFetching.value
+                                            if (busy == null) break
+                                            if (busy == att) return@withContext
+                                            kotlinx.coroutines.delay(1_000)
+                                        }
+                                        runCatching {
+                                            Mailbox.fetchSwarmAttachment(ctx, m)
+                                        }
+                                    }
+                                }
+                            }
+                            Column {
+                                Text(
+                                    when {
+                                        state == Mailbox.AttachmentState.NO_SPACE ->
+                                            stringResource(R.string.chat_att_no_space)
+                                        // Not chat_att_stuck: that one ends
+                                        // "still trying", and here the trying
+                                        // has stopped — the button is the retry.
+                                        voice && !coming ->
+                                            stringResource(R.string.chat_att_gone)
+                                        voice ->
+                                            stringResource(R.string.chat_downloading_audio)
+                                        // Fenced like a body: a file is named
+                                        // by whoever sent it, in their script,
+                                        // and a name ending in a bracket or a
+                                        // digit came apart under a reader
+                                        // whose paragraph runs the other way.
+                                        else ->
+                                            "📎 ${isolate(m.attName ?: stringResource(R.string.chat_file_fallback))}"
+                                    },
+                                    color = fg,
+                                )
+                                Text(
+                                    android.text.format.Formatter
+                                        .formatShortFileSize(ctx, m.attLen),
+                                    color = fg.copy(alpha = 0.7f),
+                                    style = MaterialTheme.typography.labelSmall,
+                                )
+                                Spacer(Modifier.height(6.dp))
+                                if (fetchingThis || (voice && coming)) {
+                                    var p by remember {
+                                        mutableStateOf<org.ducatproject.ducat.Swarm.Progress?>(null)
+                                    }
+                                    LaunchedEffect(att) {
+                                        while (true) {
+                                            p = m.attSwarm
+                                                ?.let { org.ducatproject.ducat.Swarm.fetchProgress(it) }
+                                            kotlinx.coroutines.delay(500)
+                                        }
+                                    }
+                                    val prog = p
+                                    if (prog != null && prog.length > 0) {
+                                        LinearProgressIndicator(
+                                            progress = {
+                                                (prog.position.toFloat() / prog.length.toFloat())
+                                                    .coerceIn(0f, 1f)
+                                            },
+                                            Modifier.fillMaxWidth(),
+                                        )
+                                    } else {
+                                        LinearProgressIndicator(Modifier.fillMaxWidth())
+                                    }
+                                } else {
+                                    val scope2 = rememberCoroutineScope()
+                                    // Greyed while another download holds the
+                                    // gate: the fetch refuses a second one
+                                    // without a word, and a button that
+                                    // swallows the tap looks broken.
+                                    OutlinedButton(
+                                        enabled = fetchingHash == null,
+                                        onClick = {
+                                            scope2.launch(Dispatchers.IO) {
+                                                runCatching { Mailbox.fetchSwarmAttachment(ctx, m) }
+                                            }
+                                        },
+                                    ) {
+                                        Text(stringResource(R.string.chat_download_file))
+                                    }
+                                }
+                            }
+                        }
                         !file.exists() -> {
                             // "Downloading" is a promise, and it was the only
                             // thing this ever said. A phone with no room left,
@@ -1725,7 +2048,7 @@ private fun Bubble(
                         mime.startsWith("audio/") -> AudioBubble(file, fg)
                         else -> FileBubble(
                             file,
-                            m.attName ?: stringResource(R.string.chat_file_fallback),
+                            isolate(m.attName ?: stringResource(R.string.chat_file_fallback)),
                             m.attLen, mime, fg,
                         )
                     }
@@ -1753,6 +2076,80 @@ private fun Bubble(
                         }
                     } else {
                         LinkableText(m.body, fg)
+                    }
+                }
+            } else if (m.kind == 14 || m.kind == 15) {
+                // §16.21: ringing was a message all along. Until the phone
+                // grows a call screen, an offer renders as the missed call
+                // it is — the honest state, not a broken money bubble.
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Filled.Call,
+                            null,
+                            Modifier.size(14.dp),
+                            tint = fg.copy(alpha = 0.8f),
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            stringResource(
+                                when {
+                                    m.kind == 14 && m.outgoing -> R.string.chat_call_you_rang
+                                    m.kind == 14 -> R.string.chat_call_rang_you
+                                    m.outgoing -> R.string.chat_call_you_answered
+                                    else -> R.string.chat_call_answered
+                                },
+                            ),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = fg.copy(alpha = 0.8f),
+                        )
+                    }
+                    if (m.kind == 14 && !m.outgoing) {
+                        Text(
+                            stringResource(R.string.chat_call_missed_note),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = fg.copy(alpha = 0.75f),
+                        )
+                    }
+                }
+            } else if (m.kind == 13) {
+                // A publication key (§16.20). The protocol wrote the fields;
+                // the note is the only human part. The issue itself lives in
+                // the drawer's Library once fetched — this bubble is the
+                // paper trail of the handover, so no amount row and no
+                // buttons: the cabinet filed it the moment it arrived.
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.MenuBook,
+                            null,
+                            Modifier.size(14.dp),
+                            tint = fg.copy(alpha = 0.8f),
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            stringResource(
+                                if (m.outgoing) R.string.chat_issue_you_sent
+                                else R.string.chat_issue_sent_you,
+                            ),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = fg.copy(alpha = 0.8f),
+                        )
+                    }
+                    m.pubPeriodId?.let {
+                        Text(
+                            stringResource(R.string.library_issue, it),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = fg,
+                        )
+                    }
+                    if (m.body.isNotBlank()) {
+                        Spacer(Modifier.height(2.dp))
+                        Text(
+                            isolate(m.body),
+                            color = fg,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
                     }
                 }
             } else {
@@ -1936,15 +2333,26 @@ private fun Bubble(
                 // writes the slot — the sealed bytes are committed from that
                 // moment, so a re-seal is not allowed — which means a failed
                 // write leaves a bubble that has not gone anywhere and used to
-                // look exactly like one that had. It goes out with the next
-                // message to this contact, and the mark clears itself then.
+                // look exactly like one that had. It goes out on the next
+                // poll that finds the network (Mailbox.lateSlot), or with the
+                // next message to this contact, whichever comes first, and
+                // the mark clears itself then.
                 //
                 // Ahead of the ticks and instead of them: a message that has
                 // not left cannot have been read, so showing both would be
                 // saying two things at once.
+                //
+                // "Yet" is a promise the poll keeps — unless the log it was
+                // numbered in has been retired by a re-claim since, which
+                // dropped the pending slot with it (Mailbox.mergeRebuilt): no
+                // send will ever carry it. The frozen read mark is what says a
+                // row is from a retired log.
                 if (!m.delivered) {
                     Text(
-                        stringResource(R.string.chat_not_sent_yet),
+                        stringResource(
+                            if (m.readByThem != null) R.string.chat_not_sent
+                            else R.string.chat_not_sent_yet,
+                        ),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.error,
                     )
@@ -1967,7 +2375,12 @@ private fun Bubble(
                     // nothing about them, and a message that stays on one tick
                     // for good is the honest picture of a reader who has not
                     // told us — not a claim that they have not read it.
-                    val read = theirReadUpTo != null && theirReadUpTo > m.seq
+                    //
+                    // A row from a log since retired keeps the answer it had
+                    // when the log was: the watermark now counts a different
+                    // numbering (StoredMessage.readByThem).
+                    val read = m.readByThem
+                        ?: (theirReadUpTo != null && theirReadUpTo > m.seq)
                     Text(
                         if (read) "✓✓" else "✓",
                         style = MaterialTheme.typography.labelSmall,
@@ -2067,6 +2480,11 @@ private fun shortLink(url: String): String {
 @Composable
 private fun AudioBubble(file: java.io.File, fg: androidx.compose.ui.graphics.Color) {
     var playing by remember { mutableStateOf(false) }
+    // A memo that will not play said nothing: the tap did nothing and the
+    // button stayed a play button. Now the failure has a sentence — and one
+    // partway through playback (the decoder giving up on a bad file) flips
+    // the icon back instead of leaving a stop button over silence.
+    var failed by remember { mutableStateOf(false) }
     val player = remember { android.media.MediaPlayer() }
     DisposableEffect(Unit) { onDispose { runCatching { player.release() } } }
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -2075,13 +2493,25 @@ private fun AudioBubble(file: java.io.File, fg: androidx.compose.ui.graphics.Col
                 runCatching { player.stop() }
                 playing = false
             } else {
+                failed = false
                 runCatching {
                     player.reset()
                     player.setDataSource(file.absolutePath)
                     player.setOnCompletionListener { playing = false }
-                    player.prepare()
-                    player.start()
+                    player.setOnErrorListener { _, what, extra ->
+                        DucatLog.w("Chat", "play memo: error $what/$extra")
+                        playing = false; failed = true
+                        true
+                    }
+                    // Async: prepare() reads and probes the file on the
+                    // thread that called it, which was the main one.
+                    player.setOnPreparedListener { if (playing) it.start() }
+                    player.prepareAsync()
                 }.onSuccess { playing = true }
+                    .onFailure {
+                        DucatLog.w("Chat", "play memo: ${it.message}")
+                        failed = true
+                    }
             }
         }) {
             Icon(
@@ -2091,10 +2521,17 @@ private fun AudioBubble(file: java.io.File, fg: androidx.compose.ui.graphics.Col
                 tint = fg,
             )
         }
-        Text(
-            stringResource(R.string.chat_voice_memo),
-            color = fg, style = MaterialTheme.typography.bodyMedium,
-        )
+        Column {
+            Text(
+                stringResource(R.string.chat_voice_memo),
+                color = fg, style = MaterialTheme.typography.bodyMedium,
+            )
+            if (failed) Text(
+                stringResource(R.string.chat_play_failed),
+                color = fg.copy(alpha = 0.8f),
+                style = MaterialTheme.typography.labelSmall,
+            )
+        }
     }
 }
 
@@ -2219,7 +2656,6 @@ private fun Bill(m: StoredMessage, fg: androidx.compose.ui.graphics.Color) {
 private fun sendPicture(
     context: android.content.Context,
     c: Contact,
-    mine: String,
     uri: android.net.Uri,
     onChunk: (Int, Int) -> Unit = { _, _ -> },
 ) {
@@ -2244,7 +2680,7 @@ private fun sendPicture(
     val bytes = plain ?: throw IllegalArgumentException(
         context.getString(R.string.chat_picture_too_big)
     )
-    sendAttachmentBytes(context, c, mine, bytes, "image/jpeg", null, "📷", onChunk)
+    sendAttachmentBytes(context, c, bytes, "image/jpeg", null, "📷", onChunk)
 }
 
 /**
@@ -2259,7 +2695,6 @@ private fun sendPicture(
 private fun sendAttachmentBytes(
     context: android.content.Context,
     c: Contact,
-    mine: String,
     bytes: ByteArray,
     mime: String,
     name: String?,
@@ -2286,6 +2721,7 @@ private fun sendAttachmentBytes(
 
     val ref = uniffi.ducat_mobile.AttachmentRef(
         recordKey = rec.key,
+        swarmKey = null, swarmDigest = null,
         key = key, nonce = nonce,
         len = bytes.size.toULong(),
         ctHash = hash,
@@ -2299,7 +2735,7 @@ private fun sendAttachmentBytes(
     // failed send is inert and invisible.
     Mailbox.attachmentFile(context, hash.joinToString("") { "%02x".format(it) })
         .writeBytes(bytes)
-    Mailbox.send(context, c, body, mine, attachment = ref)
+    Mailbox.send(context, c, body, attachment = ref)
 }
 
 /** The record cap: 32 subkeys of 32 KiB, minus the AEAD tag's 16 bytes. */
@@ -2309,7 +2745,6 @@ private const val MAX_FILE_BYTES = 32 * 32_768 - 16
 private fun sendVoice(
     context: android.content.Context,
     c: Contact,
-    mine: String,
     memo: java.io.File,
     onChunk: (Int, Int) -> Unit = { _, _ -> },
 ) {
@@ -2318,7 +2753,7 @@ private fun sendVoice(
         if (bytes.isEmpty()) {
             throw IllegalArgumentException(context.getString(R.string.chat_nothing_recorded))
         }
-        if (bytes.size > MAX_FILE_BYTES) {
+        if (bytes.size > MAX_SWARM_FILE_BYTES) {
             throw IllegalArgumentException(context.getString(R.string.chat_memo_too_long))
         }
         // The recorder names the format it actually produced: a phone's is
@@ -2326,13 +2761,16 @@ private fun sendVoice(
         // Labelling by extension rather than by assumption is what lets a
         // memo recorded on either one play on the other.
         val wav = memo.extension.equals("wav", ignoreCase = true)
-        sendAttachmentBytes(
-            context, c, mine, bytes,
-            if (wav) "audio/wav" else "audio/mp4",
-            if (wav) "Voice memo.wav" else "Voice memo.m4a",
-            "🎤",
-            onChunk,
-        )
+        val mime = if (wav) "audio/wav" else "audio/mp4"
+        val label = if (wav) "Voice memo.wav" else "Voice memo.m4a"
+        if (bytes.size <= MAX_FILE_BYTES) {
+            sendAttachmentBytes(context, c, bytes, mime, label, "🎤", onChunk)
+        } else {
+            // A long message — a voicemail left on the answering machine,
+            // a desk's uncompressed WAV — rides the big road like any
+            // other heavy attachment, and the far side plays it the same.
+            sendAttachmentBytesBigRoad(context, c, bytes, mime, label, "🎤", onChunk)
+        }
     } finally {
         memo.delete()
     }
@@ -2342,7 +2780,6 @@ private fun sendVoice(
 private fun sendFile(
     context: android.content.Context,
     c: Contact,
-    mine: String,
     uri: android.net.Uri,
     onChunk: (Int, Int) -> Unit = { _, _ -> },
 ) {
@@ -2353,14 +2790,80 @@ private fun sendFile(
     } ?: context.getString(R.string.chat_file_fallback)
     val bytes = resolver.openInputStream(uri)?.use { it.readBytes() }
         ?: throw IllegalArgumentException(context.getString(R.string.chat_could_not_read_file))
-    if (bytes.size > MAX_FILE_BYTES) {
+    val mime = resolver.getType(uri) ?: "application/octet-stream"
+    if (bytes.size <= MAX_FILE_BYTES) {
+        sendAttachmentBytes(context, c, bytes, mime, name, "📎 $name", onChunk)
+        return
+    }
+    // The big road (§16.15 post-1.0): past one record, the sealed blob
+    // rides a swarm share; key, digest and the seal travel inside the
+    // sealed message, and the swarm on the network is noise to everyone
+    // but this thread. Sealed in memory for now, so bounded here — past
+    // this it is a distribution problem, not a chat one.
+    if (bytes.size > MAX_SWARM_FILE_BYTES) {
         throw IllegalArgumentException(
-            context.getString(R.string.chat_file_too_big, bytes.size / 1024)
+            context.getString(R.string.chat_file_too_big_swarm, bytes.size / 1024 / 1024),
         )
     }
-    val mime = resolver.getType(uri) ?: "application/octet-stream"
-    sendAttachmentBytes(context, c, mine, bytes, mime, name, "📎 $name", onChunk)
+    sendAttachmentBytesBigRoad(context, c, bytes, mime, name, "📎 $name", onChunk)
 }
+
+/** The big road's sender: seal, seed, reference — sendAttachmentBytes
+ *  with a swarm share where the record would have been. */
+private fun sendAttachmentBytesBigRoad(
+    context: android.content.Context,
+    c: Contact,
+    bytes: ByteArray,
+    mime: String,
+    name: String?,
+    body: String,
+    onChunk: (Int, Int) -> Unit = { _, _ -> },
+) {
+    val rng = java.security.SecureRandom()
+    val key = ByteArray(32).also(rng::nextBytes)
+    val nonce = ByteArray(24).also(rng::nextBytes)
+    onChunk(0, 3)
+    val ct = uniffi.ducat_mobile.attachmentSeal(key, nonce, bytes)
+    val hash = java.security.MessageDigest.getInstance("SHA-256").digest(ct)
+    val hashHex = hash.joinToString("") { "%02x".format(it) }
+    // The outbox blob this phone serves from; the sidecar remembers the
+    // share so a restart can re-serve it (see Poller).
+    val outDir = java.io.File(context.filesDir, "swarm_out/$hashHex").apply { mkdirs() }
+    val blob = java.io.File(outDir, "payload.bin")
+    blob.writeBytes(ct)
+    onChunk(1, 3)
+    val share = org.ducatproject.ducat.Swarm.seed(blob.absolutePath)
+    java.io.File(outDir, "share.json").writeText(
+        org.json.JSONObject()
+            .put("share", share.shareKey)
+            .put("digest", share.indexDigestHex)
+            .put("sent", System.currentTimeMillis() / 1000)
+            .toString(),
+    )
+    onChunk(2, 3)
+    val ref = uniffi.ducat_mobile.AttachmentRef(
+        recordKey = null,
+        swarmKey = share.shareKey,
+        swarmDigest = share.indexDigestHex.chunked(2)
+            .map { it.toInt(16).toByte() }.toByteArray(),
+        key = key, nonce = nonce,
+        len = bytes.size.toULong(),
+        ctHash = hash,
+        mime = mime,
+        name = name,
+    )
+    Mailbox.attachmentFile(context, hashHex).writeBytes(bytes)
+    Mailbox.send(context, c, body, attachment = ref)
+    onChunk(3, 3)
+}
+
+/** The big road's client bound: sealed in memory for now. */
+private const val MAX_SWARM_FILE_BYTES = 64 * 1024 * 1024
+
+/** How much audio fetches itself. Sixteen MiB is over an hour of speech
+ *  at the recorder's bitrate — every real voicemail, no mislabelled
+ *  movie. Past it, audio waits for the button like any other file. */
+private const val AUTO_FETCH_AUDIO_BYTES = 16L * 1024 * 1024
 
 /**
  * Hold-to-record (§16.15's bytes, Signal's gesture).
@@ -2374,25 +2877,35 @@ private class VoiceRecorder(private val context: android.content.Context) {
     private var file: java.io.File? = null
     private var startedAt = 0L
 
-    fun start(): Boolean = runCatching {
+    fun start(): Boolean {
+        // A press that lands while a take is still rolling — the last hold
+        // ended without its release being seen — would have dropped that
+        // recorder on the floor with the microphone still open.
+        if (rec != null) (stop() as? Take.Memo)?.file?.delete()
         val f = voiceMemoFile(context)
         @Suppress("DEPRECATION")
         val r = android.media.MediaRecorder()
-        r.setAudioSource(android.media.MediaRecorder.AudioSource.MIC)
-        r.setOutputFormat(android.media.MediaRecorder.OutputFormat.MPEG_4)
-        r.setAudioEncoder(android.media.MediaRecorder.AudioEncoder.AAC)
-        r.setAudioEncodingBitRate(32_000)
-        r.setAudioSamplingRate(44_100)
-        r.setOutputFile(f.absolutePath)
-        r.prepare()
-        r.start()
-        rec = r
-        file = f
-        startedAt = System.currentTimeMillis()
-    }.onFailure {
-        DucatLog.w("Chat", "recorder: ${it.message}")
-        rec?.release(); rec = null
-    }.isSuccess
+        return runCatching {
+            r.setAudioSource(android.media.MediaRecorder.AudioSource.MIC)
+            r.setOutputFormat(android.media.MediaRecorder.OutputFormat.MPEG_4)
+            r.setAudioEncoder(android.media.MediaRecorder.AudioEncoder.AAC)
+            r.setAudioEncodingBitRate(32_000)
+            r.setAudioSamplingRate(44_100)
+            r.setOutputFile(f.absolutePath)
+            r.prepare()
+            r.start()
+            rec = r
+            file = f
+            startedAt = System.currentTimeMillis()
+        }.onFailure {
+            DucatLog.w("Chat", "recorder: ${it.message}")
+            // The one just built, not the field: `rec` was still null
+            // here, so the failed recorder — and the empty file it had
+            // opened — were never let go.
+            runCatching { r.release() }
+            f.delete()
+        }.isSuccess
+    }
 
     fun stop(): Take {
         val r = rec ?: return Take.Failed
@@ -2478,15 +2991,15 @@ private fun TrayItem(
 @Composable
 private fun ContactPickDialog(
     contacts: List<Contact>,
+    // Whose name belongs to more than one person. Sharing somebody's profile
+    // with the wrong Sam sends a stranger a contact card; the row has to say
+    // which rows are two people, the way Pay's picker already does. Read by
+    // the caller, off the main thread, alongside the list itself.
+    ambiguous: Set<String>,
     onIntroduceMe: () -> Unit,
     onPick: (Contact) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val context = androidx.compose.ui.platform.LocalContext.current
-    // Whose name belongs to more than one person. Sharing somebody's profile
-    // with the wrong Sam sends a stranger a contact card; the row has to say
-    // which rows are two people, the way Pay's picker already does.
-    val ambiguous = remember(contacts) { ContactStore(context).ambiguous() }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.chat_share)) },
@@ -2615,7 +3128,10 @@ private fun EnquiryLine(
                             if (about.kind == org.ducatproject.ducat.Listings.KIND_SALE) shown
                             else stringResource(priceLabelShort(about.kind), shown)
                         }
-                        .let { price -> "${about.title} · $price" },
+                        // The title is the seller's, in the seller's script;
+                        // fenced so its last word and the price keep their
+                        // places under a reader running the other way.
+                        .let { price -> "${isolate(about.title)} · $price" },
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -2782,7 +3298,10 @@ private fun RideBondBanner(contact: Contact) {
     // is written by whichever side proposed, so its presence is exactly the
     // question — have I already proposed here — and it answers all three.
     val iHaveProposed = ride.optLong("myRiderBack", -1L) >= 0
-    var countering by remember { mutableStateOf(false) }
+    // Saveable, with the figure in it. A failed counter now leaves the
+    // editor open so the number can go again (see the counter's own key in
+    // ThreadSends), which is worth nothing if turning the phone empties it.
+    var countering by rememberSaveable { mutableStateOf(false) }
     // The counter is a money field, so it reads money the way the rest of the
     // app does. It asked for XMR — directly under a line saying "USD 2.23 back
     // to you" — which made the one field in the settlement a person types into
@@ -2795,8 +3314,62 @@ private fun RideBondBanner(contact: Contact) {
     }
     val counterFiat = remember(counterRateV) { Amounts.enterFiat(context) }
     val counterCur = remember(counterRateV) { Amounts.currency(context) }
-    var counterXmr by remember { mutableStateOf("") }
-    val scope = rememberCoroutineScope()
+    var counterXmr by rememberSaveable { mutableStateOf("") }
+    // **Every button on this banner runs off the screen.**
+    //
+    // Funding, signing, proposing and calling off are seconds of node each,
+    // and they ran on this composable's scope inside a chat — the screen a
+    // call arrives on top of, that a rotation recreates, that Back leaves.
+    // The blocking call itself always finished; what was cancelled was the
+    // line after it, which is the only line that says whether it worked. A
+    // signature that failed said nothing at all, on the screen holding
+    // somebody's fare.
+    //
+    // It also makes `busy` outlive the turn: before this, rotating during a
+    // fund brought back a live button, and a second tap started a second
+    // one.
+    val sends = remember { ContactStore(context) }
+    val rideKey = "ride:$idHex"
+    // The counter has a key of its own for one reason: its landing closes
+    // the editor the figure was typed into, and no other action's should.
+    val counterKey = "$rideKey:counter"
+    val sendTick by ThreadSends.ticks.collectAsState()
+    LaunchedEffect(sendTick, idHex) {
+        for (o in ThreadSends.take(counterKey)) when (o) {
+            is ThreadSends.Outcome.Landed -> countering = false
+            is ThreadSends.Outcome.Failed -> error = trouble(context, o.error)
+        }
+        for (o in ThreadSends.take(rideKey)) {
+            if (o is ThreadSends.Outcome.Failed) {
+                // Said in the log as well as on the screen. Diagnosing a
+                // wrong split from a live run meant reasoning backwards from
+                // one number, because a refusal here left no trace at all.
+                org.ducatproject.ducat.DucatLog.w(
+                    "RideBanner",
+                    "escrow $idHex: ${o.error.javaClass.simpleName}: ${o.error.message}",
+                )
+                error = trouble(context, o.error)
+            }
+        }
+        busy = ThreadSends.inFlight(rideKey) || ThreadSends.inFlight(counterKey)
+    }
+    // A clock for the stranded exit below, which appears when a wait is
+    // over: without something moving, the banner would only notice on the
+    // next store bump, and a phone left on that screen would never see it.
+    var nowTick by remember { mutableStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(idHex) {
+        while (true) {
+            kotlinx.coroutines.delay(20_000)
+            nowTick = System.currentTimeMillis()
+        }
+    }
+
+    /** One of this banner's acts, run where the screen cannot cancel it. */
+    val act: (String, () -> Unit) -> Unit = { key, body ->
+        busy = true
+        error = null
+        ThreadSends.launch(sends, key, null) { body(); null }
+    }
     // Whatever is waiting on the PIN. Held rather than run, so that the only
     // path from tapping to spending goes through the gate below.
     var pinAction by remember { mutableStateOf<(() -> Unit)?>(null) }
@@ -2858,13 +3431,7 @@ private fun RideBondBanner(contact: Contact) {
     // Money leaving, so it goes behind the PIN; `proposeNow` does not,
     // because proposing a split spends nothing — the signature does.
     val fundReally: () -> Unit = {
-        busy = true; error = null
-        scope.launch {
-            withContext(Dispatchers.IO) {
-                runCatching { org.ducatproject.ducat.Ceremony.fundRide(context, idHex) }
-            }.onFailure { error = trouble(context, it) }
-            busy = false
-        }
+        act(rideKey) { org.ducatproject.ducat.Ceremony.fundRide(context, idHex) }
     }
     val fundNow: () -> Unit = { pinAction = fundReally }
     // Send the proposal again — *the* proposal, not a fresh default one.
@@ -2883,46 +3450,56 @@ private fun RideBondBanner(contact: Contact) {
     // the resend the button promises. Fresh nonces either way, which is what
     // makes a retry useful after a broadcast that never landed.
     val proposeNow: () -> Unit = {
-        busy = true; error = null
-        scope.launch {
-            withContext(Dispatchers.IO) {
-                runCatching {
-                    val standing = ride.optLong("myRiderBack", -1L)
-                    if (standing >= 0) {
-                        org.ducatproject.ducat.Ceremony
-                            .proposeRideSplit(context, idHex, standing)
-                    } else {
-                        org.ducatproject.ducat.Ceremony.proposeRideRelease(context, idHex)
-                    }
-                }
-            }.onFailure { error = trouble(context, it) }
-            busy = false
+        act(rideKey) {
+            val standing = ride.optLong("myRiderBack", -1L)
+            if (standing >= 0) {
+                org.ducatproject.ducat.Ceremony.proposeRideSplit(context, idHex, standing)
+            } else {
+                org.ducatproject.ducat.Ceremony.proposeRideRelease(context, idHex)
+            }
         }
     }
     val signReally: () -> Unit = {
-        busy = true; error = null
-        scope.launch {
-            withContext(Dispatchers.IO) {
-                runCatching {
-                    org.ducatproject.ducat.Ceremony.approveRideRelease(context, idHex)
-                }
-            }.onFailure { error = trouble(context, it) }
-            busy = false
-        }
+        act(rideKey) { org.ducatproject.ducat.Ceremony.approveRideRelease(context, idHex) }
     }
     val signNow: () -> Unit = { pinAction = signReally }
+    /**
+     * **Called off by agreement, with everybody's money going home.**
+     *
+     * A deal that stops being a deal after the escrow is funded — the car
+     * never came, the room fell through, both of you simply changed your
+     * minds — had no name in this app. The machinery was always there: a
+     * split is any two numbers the pair agree on, and "each side takes back
+     * what it put in" is one of them. But reaching it meant knowing that,
+     * opening the counter field, and typing the right figure to the
+     * piconero, in the one state that offers a counter.
+     *
+     * It is a proposal, not an act: nothing moves until the other side
+     * signs, which is exactly what "both parties agree" means here. And
+     * either side gets the same arithmetic out of it, so there is no
+     * advantage to being the one who presses it — see Ceremony.refundBack.
+     */
+    val refundBothNow: () -> Unit = {
+        act(rideKey) {
+            org.ducatproject.ducat.Ceremony.proposeRideSplit(
+                context, idHex, 0L, refundBoth = true,
+            )
+        }
+    }
     // Saying no, and saying it to the other phone rather than only to this
     // one. Ceremony.callOff refuses once there is money in the escrow — that
     // one ends with two signatures or an arbiter, never with a local flag.
     val callOffNow: () -> Unit = {
-        busy = true; error = null
-        scope.launch {
-            withContext(Dispatchers.IO) {
-                runCatching { org.ducatproject.ducat.Ceremony.callOff(context, idHex) }
-            }.onFailure { error = trouble(context, it) }
-            busy = false
-        }
+        act(rideKey) { org.ducatproject.ducat.Ceremony.callOff(context, idHex) }
     }
+    // Whether that button belongs on the screen at all: callOff's own first
+    // test, read from the same scan. The rider's step offered it beside
+    // "secure the fare" once the driver's stake was visible — the exact
+    // moment it could no longer work — and the refusal came back worded for
+    // a card link. A stake in the escrow leaves by a release, and until the
+    // banner can propose one from here the honest thing is no button, not a
+    // button that apologises.
+    val canCallOff = funded == 0L
 
     // Ten blocks is the chain's answer, not a refusal.
     //
@@ -2940,11 +3517,26 @@ private fun RideBondBanner(contact: Contact) {
     //
     // User-initiated by construction: `error` is null until somebody presses
     // the button, so this can only ever be continuing something already begun.
+    // **Whatever was asked for, not whatever this screen proposes by
+    // default.** This retried through `proposeNow`, which is the *settlement*
+    // — fare to the provider, deposit home — and that was right when
+    // completing the deal was the only thing a proposal could be. It is now
+    // one of three. So pressing "call it off — refund both" against an
+    // escrow the chain calls too young meant a refusal, and then, thirty
+    // seconds later, the screen proposing to pay the provider in full: the
+    // opposite of what the button said, arriving at the other side's phone
+    // as an ordinary settlement to sign. Found live on the second walk.
+    //
+    // The parked intent already knows what was wanted — it is recorded
+    // before the attempt, figure and refund-flag both — so the retry is the
+    // poller's own, aimed at this one ceremony.
     LaunchedEffect(idHex, error?.waiting) {
         if (error?.waiting != true) return@LaunchedEffect
         while (error?.waiting == true) {
             kotlinx.coroutines.delay(30_000)
-            if (!busy) proposeNow()
+            if (!busy) act(rideKey) {
+                org.ducatproject.ducat.Ceremony.retryRelease(context, idHex)
+            }
         }
     }
     // What actually comes back to me, read from the escrow rather than worked
@@ -2956,6 +3548,112 @@ private fun RideBondBanner(contact: Contact) {
             Amounts.show(context, myStakeShown).primary,
         )
     } else null
+
+    // **A half-funded escrow with nobody coming.**
+    //
+    // One side has paid and the other has not, and until now that state was
+    // a spinner and a line of text — no buttons, for ever, over money that
+    // is already in a shared address. §9.3.4 is explicit that this is the
+    // one thing a protocol with no operator may not do: "in a system with
+    // no operator, 'nothing happens' is not a safe default. Every deadline
+    // must name the action it triggers, because there is nobody to sort out
+    // the mess afterwards."
+    //
+    // So the deadline names one. With an arbiter there is a real way out —
+    // their co-signature is the ruling (§9.3.2) — and it asks for exactly
+    // what this device put in, never for the whole escrow: see
+    // `refundMineOnly`. Without an arbiter there is nothing the app can do
+    // and the honest thing is to say so, rather than spin and let somebody
+    // discover it themselves.
+    //
+    // Not offered at once. The other side may be three seconds from paying,
+    // and a way out that appears immediately is an invitation to take it.
+    // The wait is the app's existing sense of "this has stalled" for a ride;
+    // a booking is a slower thing and gets an hour, because a guest who has
+    // not paid in three minutes is not a guest who has gone.
+    @Composable
+    fun StrandedExit(sinceMs: Long) {
+        val waited = sinceMs <= 0L || org.ducatproject.ducat.Elapsed.due(
+            nowTick, sinceMs, if (reservation) 60L * 60 * 1000 else 3L * 60 * 1000,
+        )
+        if (!waited) return
+        Spacer(Modifier.height(6.dp))
+        // **The counterparty first, the arbiter after.** A half-funded
+        // escrow holds one person's money, so the other side signing it
+        // home costs them nothing and needs no third party — it is the
+        // ordinary release, with the whole balance going one way. The
+        // arbiter is for when they have stopped answering, which is a
+        // different problem and a slower one.
+        OutlinedButton(
+            onClick = {
+                act(rideKey) {
+                    org.ducatproject.ducat.Ceremony.proposeRideSplit(
+                        context, idHex, 0L, refundBoth = true,
+                    )
+                }
+            },
+            enabled = !busy,
+            modifier = Modifier.fillMaxWidth().height(40.dp),
+        ) { Text(stringResource(R.string.bond_ask_back)) }
+        BondNote(stringResource(R.string.bond_ask_back_note))
+        if (ride.optInt("arbiterIdx") != 0) {
+            Spacer(Modifier.height(4.dp))
+            OutlinedButton(
+                onClick = {
+                    act(rideKey) {
+                        org.ducatproject.ducat.Ceremony.proposeRideSplit(
+                            context, idHex, 0L, toArbiter = true, refundBoth = true,
+                        )
+                    }
+                },
+                enabled = !busy,
+                modifier = Modifier.fillMaxWidth().height(40.dp),
+            ) { Text(stringResource(R.string.bond_ask_arbiter)) }
+        } else {
+            BondNote(stringResource(R.string.bond_stranded_no_arbiter))
+        }
+    }
+
+    /** The mutual refund, offered wherever a funded escrow has not yet
+     *  been released. */
+    @Composable
+    fun RefundBoth() {
+        Spacer(Modifier.height(6.dp))
+        OutlinedButton(
+            onClick = refundBothNow,
+            enabled = !busy,
+            modifier = Modifier.fillMaxWidth().height(40.dp),
+        ) { Text(stringResource(R.string.bond_refund_both)) }
+        BondNote(stringResource(R.string.bond_refund_both_note))
+    }
+
+    /**
+     * The other half of the same moment: **I have changed my mind, and
+     * their money is already in.**
+     *
+     * A reservation's host accepts by funding their deposit (§15.12), and
+     * from that instant the guest's "call it off" disappeared — `callOff`
+     * refuses once there is money in the escrow, correctly, because a local
+     * flag cannot move a 2-of-2. So the only way to decline was to walk
+     * away and leave the host's deposit stranded, which is the failure the
+     * banner above exists to unwind and a rude way to start.
+     *
+     * A release costs the decliner nothing and gives the host their money
+     * back in one signature: everything to them, proposed by the person who
+     * owes nothing. No wait on this one — deciding not to buy something is
+     * not a state that needs to ripen.
+     */
+    @Composable
+    fun DeclineTheirs() {
+        if (funded <= 0L) return
+        Spacer(Modifier.height(6.dp))
+        OutlinedButton(
+            onClick = { act(rideKey) { org.ducatproject.ducat.Ceremony.proposeRideSplit(context, idHex, 0L) } },
+            enabled = !busy,
+            modifier = Modifier.fillMaxWidth().height(40.dp),
+        ) { Text(stringResource(R.string.bond_decline_theirs)) }
+        BondNote(stringResource(R.string.bond_decline_theirs_note))
+    }
 
     data class Step(
         val title: String,
@@ -2990,8 +3688,26 @@ private fun RideBondBanner(contact: Contact) {
                 Amounts.show(context, myShare).primary,
             ),
             onAction = fundNow,
-            secondary = stringResource(R.string.bond_call_off),
-            onSecondary = callOffNow,
+            // Two different noes, and the step used to offer only the first.
+            // With nothing in the escrow, calling off is local and instant.
+            // Once the other side's money is in, a local flag cannot move a
+            // 2-of-2 — so the honest decline is a release that hands their
+            // money back, which they sign. Before, this simply disappeared
+            // and the only way to decline was to walk away and strand them.
+            secondary = when {
+                canCallOff -> stringResource(R.string.bond_call_off)
+                funded > 0 -> stringResource(R.string.bond_decline_theirs)
+                else -> null
+            },
+            onSecondary = when {
+                canCallOff -> callOffNow
+                funded > 0 -> ({
+                    act(rideKey) {
+                        org.ducatproject.ducat.Ceremony.proposeRideSplit(context, idHex, 0L)
+                    }
+                })
+                else -> null
+            },
         )
         // The rider putting the fare and their stake in — but not while still
         // waiting on the other side's, which is a wait, not a decision.
@@ -3014,8 +3730,26 @@ private fun RideBondBanner(contact: Contact) {
                 Amounts.show(context, myShare).primary,
             ),
             onAction = fundNow,
-            secondary = stringResource(R.string.bond_call_off),
-            onSecondary = callOffNow,
+            // Two different noes, and the step used to offer only the first.
+            // With nothing in the escrow, calling off is local and instant.
+            // Once the other side's money is in, a local flag cannot move a
+            // 2-of-2 — so the honest decline is a release that hands their
+            // money back, which they sign. Before, this simply disappeared
+            // and the only way to decline was to walk away and strand them.
+            secondary = when {
+                canCallOff -> stringResource(R.string.bond_call_off)
+                funded > 0 -> stringResource(R.string.bond_decline_theirs)
+                else -> null
+            },
+            onSecondary = when {
+                canCallOff -> callOffNow
+                funded > 0 -> ({
+                    act(rideKey) {
+                        org.ducatproject.ducat.Ceremony.proposeRideSplit(context, idHex, 0L)
+                    }
+                })
+                else -> null
+            },
         )
         // The driver ending the ride and asking for the fare.
         stage == "done" && !rider && funded >= need -> Step(
@@ -3028,6 +3762,12 @@ private fun RideBondBanner(contact: Contact) {
                 if (reservation) R.string.res_settle else R.string.bond_complete_ride,
             ),
             onAction = proposeNow,
+            // The free slot on the one screen where somebody is deciding
+            // what to do with a funded escrow. Settling is the ordinary
+            // answer; calling it off with everyone made whole is the other
+            // one, and it had no name anywhere before.
+            secondary = stringResource(R.string.bond_refund_both),
+            onSecondary = refundBothNow,
         )
         // A split on the table, from either side.
         stage == "release_pending" -> {
@@ -3206,15 +3946,19 @@ private fun RideBondBanner(contact: Contact) {
                     ride.optLong("hostDepPxmr") > 0 &&
                     funded < ride.optLong("hostDepPxmr") -> {
                     BondLine(spin = true, text = stringResource(R.string.bond_await_their_stake))
+                    DeclineTheirs()
                     // The one wait in this flow with no end of its own: the
                     // far side may simply never answer, and until there was a
                     // way to say so the only exits were to abandon the thread
-                    // or wait for ever.
-                    TextButton(
-                        onClick = callOffNow,
-                        enabled = !busy,
-                        contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
-                    ) { Text(stringResource(R.string.bond_call_off)) }
+                    // or wait for ever. Only while the address is still empty
+                    // — a partial stake is money, and money is released.
+                    if (canCallOff) {
+                        TextButton(
+                            onClick = callOffNow,
+                            enabled = !busy,
+                            contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
+                        ) { Text(stringResource(R.string.bond_call_off)) }
+                    }
                 }
 
                 stage == "done" && rider && ride.optString("fundTxid").isEmpty() -> {
@@ -3233,21 +3977,10 @@ private fun RideBondBanner(contact: Contact) {
                         context, org.ducatproject.ducat.Ceremony.mySharePxmr(ride),
                     ).primary
                     Button(
-                        // Behind the PIN: this is money leaving.
-                        onClick = {
-                            pinAction = {
-                                busy = true; error = null
-                                scope.launch {
-                                    withContext(Dispatchers.IO) {
-                                        runCatching {
-                                            org.ducatproject.ducat.Ceremony
-                                                .fundRide(context, idHex)
-                                        }
-                                    }.onFailure { error = trouble(context, it) }
-                                    busy = false
-                                }
-                            }
-                        },
+                        // Behind the PIN: this is money leaving. The same
+                        // path the step's button takes, so the two cannot
+                        // drift about what funding does.
+                        onClick = fundNow,
                         enabled = !busy,
                         modifier = Modifier.fillMaxWidth().height(44.dp),
                     ) {
@@ -3263,6 +3996,11 @@ private fun RideBondBanner(contact: Contact) {
                     // rather than in a help page nobody opens — and read from
                     // the escrow, not worked out again with a room's twenty
                     // percent for every kind of deal there is.
+                    // Beneath the pay button, not instead of it: the deal
+                    // is still the first thing offered, and this is the
+                    // answer for somebody who has decided against it while
+                    // the other side's money is already in.
+                    DeclineTheirs()
                     val myStake = org.ducatproject.ducat.Ceremony.myStakePxmr(ride)
                     if (myStake > 0) {
                         Spacer(Modifier.height(4.dp))
@@ -3274,7 +4012,7 @@ private fun RideBondBanner(contact: Contact) {
                         )
                     }
                 }
-                stage == "done" && rider && funded < need ->
+                stage == "done" && rider && funded < need -> {
                     BondLine(
                         spin = true,
                         text = stringResource(
@@ -3282,17 +4020,17 @@ private fun RideBondBanner(contact: Contact) {
                             else R.string.bond_fare_sent,
                         ),
                     )
+                    StrandedExit(org.ducatproject.ducat.Ceremony.myFundedAt(ride))
+                }
                 stage == "done" && rider -> {
                     BondLine(spin = false, text = stringResource(
                         if (reservation) R.string.res_secured else R.string.bond_fare_secured))
+                    RefundBoth()
                     if (ride.optInt("arbiterIdx") != 0) {
                         Spacer(Modifier.height(4.dp))
                         OutlinedButton(
                             onClick = {
-                                busy = true; error = null
-                                scope.launch {
-                                    withContext(Dispatchers.IO) {
-                                        runCatching {
+                                act(rideKey) {
                                             // The stranded rider asks for
                                             // everything back; the arbiter
                                             // judges, and can decline by
@@ -3312,12 +4050,8 @@ private fun RideBondBanner(contact: Contact) {
                                             // itself, so asking for more than
                                             // exists is exactly how you ask
                                             // for all of it.
-                                            org.ducatproject.ducat.Ceremony.proposeRideSplit(
-                                                context, idHex, Long.MAX_VALUE,
-                                                toArbiter = true)
-                                        }
-                                    }.onFailure { error = trouble(context, it) }
-                                    busy = false
+                                    org.ducatproject.ducat.Ceremony.proposeRideSplit(
+                                        context, idHex, Long.MAX_VALUE, toArbiter = true)
                                 }
                             },
                             enabled = !busy,
@@ -3356,21 +4090,10 @@ private fun RideBondBanner(contact: Contact) {
                         context, org.ducatproject.ducat.Ceremony.mySharePxmr(ride),
                     ).primary
                     Button(
-                        // Behind the PIN: this is money leaving.
-                        onClick = {
-                            pinAction = {
-                                busy = true; error = null
-                                scope.launch {
-                                    withContext(Dispatchers.IO) {
-                                        runCatching {
-                                            org.ducatproject.ducat.Ceremony
-                                                .fundRide(context, idHex)
-                                        }
-                                    }.onFailure { error = trouble(context, it) }
-                                    busy = false
-                                }
-                            }
-                        },
+                        // Behind the PIN: this is money leaving. The same
+                        // path the step's button takes, so the two cannot
+                        // drift about what funding does.
+                        onClick = fundNow,
                         enabled = !busy,
                         modifier = Modifier.fillMaxWidth().height(44.dp),
                     ) {
@@ -3385,7 +4108,7 @@ private fun RideBondBanner(contact: Contact) {
                     Spacer(Modifier.height(4.dp))
                     BondNote(stringResource(R.string.bond_stake_refunded, myShown))
                 }
-                stage == "done" && !rider && funded < need ->
+                stage == "done" && !rider && funded < need -> {
                     BondLine(
                         spin = true,
                         text = stringResource(
@@ -3393,27 +4116,29 @@ private fun RideBondBanner(contact: Contact) {
                             else R.string.bond_waiting_funding,
                         ),
                     )
+                    // Only once this side's own money is actually in. Before
+                    // that there is nothing stranded and nothing to ask for
+                    // — the branch above offers the stake, and a provider who
+                    // never funds has simply declined (§15.12).
+                    if (org.ducatproject.ducat.Ceremony.myFundTxidPresent(ride)) {
+                        StrandedExit(org.ducatproject.ducat.Ceremony.myFundedAt(ride))
+                    }
+                }
                 stage == "done" && !rider -> {
                     BondLine(spin = false, text = stringResource(
                         if (reservation) R.string.res_secured else R.string.bond_fare_secured))
                     Spacer(Modifier.height(6.dp))
                     Button(
                         onClick = {
-                            busy = true; error = null
-                            scope.launch {
-                                withContext(Dispatchers.IO) {
-                                    runCatching {
-                                        org.ducatproject.ducat.Ceremony
-                                            .proposeRideRelease(context, idHex)
-                                    }
-                                }.onFailure { error = trouble(context, it) }
-                                busy = false
+                            act(rideKey) {
+                                org.ducatproject.ducat.Ceremony.proposeRideRelease(context, idHex)
                             }
                         },
                         enabled = !busy,
                         modifier = Modifier.fillMaxWidth().height(44.dp),
                     ) { Text(stringResource(
                         if (reservation) R.string.res_settle else R.string.bond_complete_ride)) }
+                    RefundBoth()
                     // The address, the door code, where the keys are. It has
                     // been sitting on the listing since it was written, never
                     // on a board, waiting for exactly this moment — and until
@@ -3430,19 +4155,7 @@ private fun RideBondBanner(contact: Contact) {
                             Spacer(Modifier.height(6.dp))
                             OutlinedButton(
                                 onClick = {
-                                    busy = true; error = null
-                                    scope.launch {
-                                        withContext(Dispatchers.IO) {
-                                            runCatching {
-                                                Mailbox.send(
-                                                    context, contact, details,
-                                                    org.ducatproject.ducat
-                                                        .PersonaStore(context).personaHex(),
-                                                )
-                                            }
-                                        }.onFailure { error = trouble(context, it) }
-                                        busy = false
-                                    }
+                                    act(rideKey) { Mailbox.send(context, contact, details) }
                                 },
                                 enabled = !busy,
                                 modifier = Modifier.fillMaxWidth().height(40.dp),
@@ -3465,17 +4178,11 @@ private fun RideBondBanner(contact: Contact) {
                         Spacer(Modifier.height(4.dp))
                         OutlinedButton(
                             onClick = {
-                                busy = true; error = null
                                 val back = ride.optLong("myRiderBack",
                                     (funded - fare).coerceAtLeast(0L))
-                                scope.launch {
-                                    withContext(Dispatchers.IO) {
-                                        runCatching {
-                                            org.ducatproject.ducat.Ceremony.proposeRideSplit(
-                                                context, idHex, back, toArbiter = true)
-                                        }
-                                    }.onFailure { error = trouble(context, it) }
-                                    busy = false
+                                act(rideKey) {
+                                    org.ducatproject.ducat.Ceremony.proposeRideSplit(
+                                        context, idHex, back, toArbiter = true)
                                 }
                             },
                             enabled = !busy,
@@ -3515,6 +4222,17 @@ private fun RideBondBanner(contact: Contact) {
                         ) { Text(stringResource(R.string.bond_ask_again)) }
                         BondNote(stringResource(R.string.bond_ask_again_note))
                     }
+                    // **A proposal on the table is not a decision made.**
+                    //
+                    // Everything this branch offered sent the *standing*
+                    // number again — "ask again" is explicitly that — so a
+                    // proposer who wanted to change their mind, or who had
+                    // proposed a figure they no longer stood behind, had
+                    // nowhere to go but the counter field on the other
+                    // side's phone. The engine has always allowed a
+                    // proposal to supersede one's own (stage "releasing" is
+                    // in its accepted list); only the screen did not.
+                    RefundBoth()
                 }
                 stage == "release_pending" -> {
                     // A proposal stands, from the other side (either side may
@@ -3543,18 +4261,15 @@ private fun RideBondBanner(contact: Contact) {
                     )
                     Spacer(Modifier.height(6.dp))
                     Button(
-                        onClick = {
-                            busy = true; error = null
-                            scope.launch {
-                                withContext(Dispatchers.IO) {
-                                    runCatching {
-                                        org.ducatproject.ducat.Ceremony
-                                            .approveRideRelease(context, idHex)
-                                    }
-                                }.onFailure { error = trouble(context, it) }
-                                busy = false
-                            }
-                        },
+                        // **Behind the PIN, like its twin.** This is the same
+                        // signature the full-screen step asks for — the one
+                        // that moves the escrow — and the step has asked for
+                        // the PIN since the gate went in. This rendering
+                        // (shown on every visit after the step has been seen
+                        // once, so it is the one most people actually press)
+                        // called the ceremony directly, so the gate could be
+                        // walked around by closing a screen.
+                        onClick = signNow,
                         enabled = !busy,
                         modifier = Modifier.fillMaxWidth().height(44.dp),
                     ) { Text(stringResource(R.string.bond_sign_split)) }
@@ -3595,18 +4310,12 @@ private fun RideBondBanner(contact: Contact) {
                             Button(
                                 onClick = {
                                     val pxmr = offerToPxmr(counterXmr, counterFiat, counterRate)
-                                    if (pxmr != null) {
-                                        busy = true; error = null
-                                        scope.launch {
-                                            withContext(Dispatchers.IO) {
-                                                runCatching {
-                                                    org.ducatproject.ducat.Ceremony
-                                                        .proposeRideSplit(context, idHex, pxmr)
-                                                }
-                                            }.onFailure { error = trouble(context, it) }
-                                            busy = false
-                                            countering = false
-                                        }
+                                    // Under its own key, so the editor closes
+                                    // when *this* lands — and stays open, with
+                                    // the figure still in it, when it does not.
+                                    if (pxmr != null) act(counterKey) {
+                                        org.ducatproject.ducat.Ceremony
+                                            .proposeRideSplit(context, idHex, pxmr)
                                     }
                                 },
                                 enabled = !busy && counterXmr.isNotBlank(),
@@ -3712,7 +4421,14 @@ private fun RideBondBanner(contact: Contact) {
             // The retry itself was never in memory: the poller works from
             // `wantRelease` on the escrow, which is why it fires with the
             // phone away. This reads the same field the poller does.
-            if (error == null && ride.optLong("wantReleaseAt") > 0) {
+            // And only where a retry is still a thing that can happen. The
+            // record is cleared at the end now, but a promise this specific
+            // ("it keeps trying") should be read off the stage as well as
+            // the field — the two disagreeing is what put this sentence
+            // under the word "Settled".
+            if (error == null && ride.optLong("wantReleaseAt") > 0 &&
+                stage in setOf("done", "releasing", "release_pending", "release_cosigned")
+            ) {
                 Spacer(Modifier.height(4.dp))
                 Text(
                     stringResource(R.string.bond_release_asked),
@@ -3915,7 +4631,11 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
         org.ducatproject.ducat.RateStore(context).cached()?.first
     }
     val cur = remember(rateVersion) { Amounts.currency(context) }
-    var fiat by remember { mutableStateOf(Amounts.enterFiat(context)) }
+    // Saveable, the fields below with it. This sheet is where a week's rent
+    // and two stakes get typed and argued over, and a rotation — or the
+    // keyboard's own layout change on some phones — threw the lot away and
+    // put the listing's defaults back.
+    var fiat by rememberSaveable { mutableStateOf(Amounts.enterFiat(context)) }
 
     /**
      * A piconero figure as text, in whichever unit this sheet is showing.
@@ -3938,10 +4658,10 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
     // had to work out seven nights themselves and type the total into a box
     // that said "per night". The commonest thing this screen does, and it did
     // not have a place to say it.
-    var rent by remember { mutableStateOf(about?.let { asUnit(it.pricePxmr) } ?: "") }
-    var count by remember { mutableStateOf("1") }
-    var myDep by remember { mutableStateOf(about?.let { asUnit(it.depositPxmr) } ?: "") }
-    var hostDep by remember { mutableStateOf(about?.let { asUnit(it.depositPxmr) } ?: "") }
+    var rent by rememberSaveable { mutableStateOf(about?.let { asUnit(it.pricePxmr) } ?: "") }
+    var count by rememberSaveable { mutableStateOf("1") }
+    var myDep by rememberSaveable { mutableStateOf(about?.let { asUnit(it.depositPxmr) } ?: "") }
+    var hostDep by rememberSaveable { mutableStateOf(about?.let { asUnit(it.depositPxmr) } ?: "") }
     // What kind of thing is being handed over decides how much each side
     // stakes: a room is not a car (see Stakes.kt for where the numbers come
     // from). Picking one fills both deposits, and either can still be typed
@@ -3951,15 +4671,37 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
     // sale and an electrician's afternoon both defaulted to a room's twenty
     // percent — against a suggestion of ten — and the chips below offered no
     // way to say otherwise.
-    var deal by remember {
+    var deal by rememberSaveable {
         mutableStateOf(
             about?.kind?.let { org.ducatproject.ducat.Listings.dealFor(it) }
                 ?: org.ducatproject.ducat.Stakes.Deal.Stay,
         )
     }
-    var busy by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }
-    val scope = rememberCoroutineScope()
+    var error by rememberSaveable { mutableStateOf<String?>(null) }
+    // The proposal is the process's (ThreadSends), keyed to the thread.
+    // On this sheet's own scope, a rotation mid-propose sent the round-0s
+    // and then cancelled the landing: the sheet came back — or did not —
+    // with no word, over a proposal already in the thread. `proposed`
+    // says whether the outcome under the key is this sheet's to act on:
+    // a sheet swiped away mid-flight leaves one behind, and the next
+    // sheet opened on this thread must not close itself on it.
+    val key = "reserve:${contact.personaHex}"
+    var proposed by rememberSaveable { mutableStateOf(false) }
+    var busy by remember { mutableStateOf(ThreadSends.inFlight(key)) }
+    val tick by ThreadSends.ticks.collectAsState()
+    LaunchedEffect(tick) {
+        busy = ThreadSends.inFlight(key)
+        for (o in ThreadSends.take(key)) {
+            if (!proposed) {
+                org.ducatproject.ducat.DucatLog.i("Chat", "reservation outcome nobody was waiting for: $o")
+                continue
+            }
+            when (o) {
+                is ThreadSends.Outcome.Landed -> onDone()
+                is ThreadSends.Outcome.Failed -> { proposed = false; error = moneyFailure(context, o.error) }
+            }
+        }
+    }
     // Through the shared parser, like every other money field. These three
     // accept whatever `isNumberChar` allows — which is deliberately more than
     // ASCII, because a keyboard set to Persian or Hindi types its own digits —
@@ -4211,23 +4953,17 @@ private fun ReserveSheet(contact: Contact, onDone: () -> Unit) {
                         )
                         return@Button
                     }
-                    busy = true; error = null
-                    scope.launch {
-                        withContext(Dispatchers.IO) {
-                            runCatching {
-                                val arbHex = org.ducatproject.ducat.ArbiterStore(context).hex()
-                                    ?.takeIf { it != contact.personaHex }
-                                val arb = arbHex?.let { hx ->
-                                    org.ducatproject.ducat.ContactStore(context).all()
-                                        .firstOrNull { it.personaHex == hx }
-                                }
-                                org.ducatproject.ducat.Ceremony.startReservation(
-                                    context, contact, arb, r, g ?: 0L, h ?: 0L,
-                                )
-                            }
-                        }.onSuccess {
-                            busy = false; onDone()
-                        }.onFailure { error = moneyFailure(context, it); busy = false }
+                    busy = true; error = null; proposed = true
+                    ThreadSends.launch(ContactStore(context), key, null) {
+                        val arbHex = org.ducatproject.ducat.ArbiterStore(context).hex()
+                            ?.takeIf { it != contact.personaHex }
+                        val arb = arbHex?.let { hx ->
+                            org.ducatproject.ducat.ContactStore(context).all()
+                                .firstOrNull { it.personaHex == hx }
+                        }
+                        org.ducatproject.ducat.Ceremony.startReservation(
+                            context, contact, arb, r, g ?: 0L, h ?: 0L,
+                        )
                     }
                 },
                 enabled = !busy && rent.isNotBlank(),

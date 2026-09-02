@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">전화가 왔어요</string>
+    <string name="chat_call_you_rang">전화를 걸었어요</string>
+    <string name="chat_call_answered">통화에 응답했어요</string>
+    <string name="chat_call_you_answered">응답했어요</string>
+    <string name="chat_call_missed_note">자리를 비운 사이 전화가 울렸어요.</string>
+    <string name="chatlist_preview_call">전화</string>
+    <string name="chatlist_preview_call_answered">통화 응답</string>
+    <string name="notify_call">%1$s님이 전화 중</string>
+    <string name="notify_call_answered">%1$s님이 응답했어요</string>
+    <string name="call_button">전화 걸기</string>
+    <string name="call_calling">거는 중…</string>
+    <string name="call_incoming">DUCAT 수신 전화</string>
+    <string name="call_frames">↓%1$d ↑%2$d 프레임</string>
+    <string name="call_answer_btn">받기</string>
+    <string name="call_end_btn">끊기</string>
+    <string name="call_body_ring">전화 거는 중</string>
+    <string name="call_body_answer">받았어요</string>
+    <string name="call_body_decline">지금은 통화하기 어려워요.</string>
+    <string name="notify_call_channel">수신 전화</string>
+    <string name="notify_call_incoming">수신 전화</string>
+    <string name="call_no_answer">응답 없음</string>
+    <string name="call_leave_message">메시지 남기기</string>
+    <string name="call_dismiss">나중에</string>
+    <string name="call_body_cancel">받기 전에 끊었어요.</string>
+    <string name="call_connecting">연결 중…</string>
+    <string name="call_unreached">연결할 수 없었어요</string>
+    <string name="call_never_connected">연결되지 않았어요</string>
+    <string name="call_notify_calling">%1$s에게 전화 거는 중…</string>
+    <string name="call_notify_in_call">%1$s님과 통화 중</string>
+    <string name="call_notify_return">탭하면 통화로 돌아가요.</string>
+</resources>

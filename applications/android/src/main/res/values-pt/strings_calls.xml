@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">Te ligou</string>
+    <string name="chat_call_you_rang">Você ligou</string>
+    <string name="chat_call_answered">Atendeu sua ligação</string>
+    <string name="chat_call_you_answered">Você atendeu</string>
+    <string name="chat_call_missed_note">Uma ligação tocou enquanto você estava fora.</string>
+    <string name="chatlist_preview_call">Ligou</string>
+    <string name="chatlist_preview_call_answered">Atendeu uma ligação</string>
+    <string name="notify_call">%1$s está ligando</string>
+    <string name="notify_call_answered">%1$s atendeu sua ligação</string>
+    <string name="call_button">Ligar</string>
+    <string name="call_calling">Ligando…</string>
+    <string name="call_incoming">Chamada DUCAT recebida</string>
+    <string name="call_frames">↓%1$d ↑%2$d quadros</string>
+    <string name="call_answer_btn">Atender</string>
+    <string name="call_end_btn">Desligar</string>
+    <string name="call_body_ring">Ligando para você</string>
+    <string name="call_body_answer">Atendida</string>
+    <string name="call_body_decline">Não posso falar agora.</string>
+    <string name="notify_call_channel">Chamadas recebidas</string>
+    <string name="notify_call_incoming">Chamada recebida</string>
+    <string name="call_no_answer">Sem resposta</string>
+    <string name="call_leave_message">Deixar um recado</string>
+    <string name="call_dismiss">Agora não</string>
+    <string name="call_body_cancel">Desligou antes de você atender.</string>
+    <string name="call_connecting">Conectando…</string>
+    <string name="call_unreached">Não foi possível contatar</string>
+    <string name="call_never_connected">Não chegou a conectar</string>
+    <string name="call_notify_calling">Ligando para %1$s…</string>
+    <string name="call_notify_in_call">Em chamada com %1$s</string>
+    <string name="call_notify_return">Toque para voltar.</string>
+</resources>

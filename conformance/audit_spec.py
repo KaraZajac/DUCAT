@@ -156,7 +156,7 @@ for k in sorted(schema_kinds):
 # release-candidate tag, and the three artifacts must agree on the exact
 # string, suffix included — an rc that compares equal to its own final
 # release would defeat the point of being one.
-_VER = r"(\d+\.\d+(?:\.\d+)?(?:-rc\d+)?)"
+_VER = r"(\d+\.\d+(?:\.\d+)?(?:-(?:rc|dev)\d+)?)"
 hdr = re.search(r"\*\*Draft " + _VER, SPEC)
 first = re.search(r"^- \*\*" + _VER + r"\*\* —", SPEC, re.M)
 if hdr and first and hdr.group(1) != first.group(1):
@@ -198,7 +198,7 @@ for doc in COUNTED:
         # Changelog entries are history and are supposed to say what was true
         # then. Only live prose is checked, or every release note becomes a
         # false alarm and the check gets ignored.
-        if re.match(r"- \*\*\d+\.\d+\*\* —", line.strip()):
+        if re.match(r"- \*\*\d+\.\d+(?:\.\d+)?(?:-(?:rc|dev)\d+)?\*\* —", line.strip()):
             continue
         for m in re.finditer(r"(\d+)\s+(?:conformance\s+)?(?:vectors|cases)\b", line):
             n = int(m.group(1))

@@ -1,137 +1,148 @@
 package org.ducatproject.desk
 
 import java.io.File
+import org.ducatproject.ducat.ContactStore
+import org.ducatproject.ducat.Mailbox
+import org.ducatproject.ducat.NameStore
+import uniffi.ducat_mobile.nodeChangedKeys
 import uniffi.ducat_mobile.nodeDhtWatch
 import uniffi.ducat_mobile.nodeStart
 import uniffi.ducat_mobile.nodeStatus
 import uniffi.ducat_mobile.nodeWaitChange
-import uniffi.ducat_mobile.standPost
-import uniffi.ducat_mobile.standRead
-import uniffi.ducat_mobile.standRecordKey
 
 /**
- * Does a watched board actually ring?
+ * The push probe (PUSH.md stage A): does a DHT watch on a contact's outbox
+ * turn a write into a prompt ring, and does it stay armed through renewal?
  *
- * The driver's map arms `node_dht_watch` on every cell it watches and then
- * sleeps on `node_wait_change`, so that a fare posted a hundred metres away
- * reaches the screen in seconds instead of at the end of a sweep. The sweep
- * is the guarantee; the watch is what makes hailing feel instant. Measured on
- * the emulator, a lap of eighteen boards takes 44 to 64 seconds — which is
- * either the floor, if the watch never rings, or a backstop nobody normally
- * waits for. Nothing had ever told us which.
+ *   DUCAT_WT_ROLE=writer  DUCAT_WT_STATE=<dir>   # ticks its first contact
+ *   DUCAT_WT_ROLE=watcher DUCAT_WT_STATE=<dir> DUCAT_WT_CARD=<uri>
  *
- * Two roles against one board on the live network:
+ * The writer sends "tick N" every 20 s for 15 rounds, sleeps 20 minutes
+ * (the renewal gap — a watch that expires unrenewed goes quiet here), then
+ * sends 3 more. Every send prints `WT_SENT n=N at=<epoch ms>`.
  *
- *   DUCAT_WATCH_ROLE=watcher DUCAT_DESK_STATE=/tmp/w1 ./gradlew :desktop:watchtest
- *   DUCAT_WATCH_ROLE=poster  DUCAT_DESK_STATE=/tmp/w2 ./gradlew :desktop:watchtest
- *
- * Both derive the same board from DUCAT_WATCH_CELL, so they need no contact
- * with each other — the geocell *is* the rendezvous, which is the whole idea
- * behind §15.12. The watcher prints WATCH_RANG with how long it took, or
- * WATCH_SILENT if the deadline passed with nothing; then it reads the board
- * either way, so a silent watch on a board that did change is reported as
- * exactly that rather than as a failure to post.
+ * The watcher claims, polls once (opening the records), arms the watch,
+ * and then only ever reads when the network rings: `WT_RING at=<ms>` and,
+ * after the targeted read, `WT_GOT n=N at=<ms>`. Latency = GOT − SENT,
+ * same host clock. A watcher that logs WT_STALL instead has been waiting
+ * five minutes past a due tick — the watch died and this probe says so.
  */
-fun main() {
-    val dir = File(
-        System.getenv("DUCAT_DESK_STATE")?.takeIf { it.isNotEmpty() }
-            ?: error("WATCH_FAIL set DUCAT_DESK_STATE"),
-    ).apply { mkdirs() }
-    val role = System.getenv("DUCAT_WATCH_ROLE")?.takeIf { it.isNotEmpty() }
-        ?: error("WATCH_FAIL set DUCAT_WATCH_ROLE to watcher or poster")
-    // A cell no test has used, so the board starts empty and the only change
-    // on it is the one this run makes.
-    val cell = org.ducatproject.ducat.standNow(
-        System.getenv("DUCAT_WATCH_CELL")?.takeIf { it.isNotEmpty() } ?: "geo:u0zh7wx",
-    )
-    val waitSecs = System.getenv("DUCAT_WATCH_SECS")?.toLongOrNull() ?: 240L
 
-    Unlock.orExit(dir)
+private fun up(dir: File): DeskContext {
+    val context = DeskContext(dir)
     nodeStart("${dir.absolutePath}/veilid", true)
-    val ready = System.currentTimeMillis() + 90_000
-    while (System.currentTimeMillis() < ready && !nodeStatus().publicInternetReady) {
+    val deadline = System.currentTimeMillis() + 240_000
+    while (System.currentTimeMillis() < deadline && !nodeStatus().publicInternetReady) {
         Thread.sleep(2_000)
     }
-    check(nodeStatus().publicInternetReady) { "WATCH_FAIL node never became ready" }
-    println("WATCH_UP $role on $cell")
+    check(nodeStatus().publicInternetReady) { "WT_FAIL node never became ready" }
+    System.err.println("node ready")
+    return context
+}
 
-    if (role == "poster") {
-        // Give the watcher time to arm before there is anything to hear.
-        val delay = System.getenv("DUCAT_WATCH_DELAY")?.toLongOrNull() ?: 45L
-        println("WATCH_WAITING ${delay}s so the watcher can arm first")
-        Thread.sleep(delay * 1000)
-        val note = "watchtest ${System.currentTimeMillis()}".toByteArray()
-        val at = System.currentTimeMillis()
-        runCatching { standPost(cell, 0u, note) }
-            .onSuccess {
-                // Absolute, so the watcher's ring can be subtracted from it:
-                // what matters is post-to-notification, and each side only
-                // knows its own clock.
-                println(
-                    "WATCH_POSTED at ${System.currentTimeMillis()} " +
-                        "(the set itself took ${System.currentTimeMillis() - at} ms)",
-                )
+fun main() {
+    val role = System.getenv("DUCAT_WT_ROLE") ?: error("WT_FAIL set DUCAT_WT_ROLE")
+    val dir = File(System.getenv("DUCAT_WT_STATE") ?: error("WT_FAIL set DUCAT_WT_STATE"))
+        .apply { mkdirs() }
+
+    when (role) {
+        "writer" -> {
+            val context = up(dir)
+            NameStore(context).get() ?: NameStore(context).put("Ticker")
+            var callee = ContactStore(context).all().firstOrNull()
+            if (callee == null) {
+                val card = Mailbox.issueCard(context, "Ticker", 60uL * 60uL)
+                println("WT_CARD ${card.uri}")
+                System.out.flush()
+                val deadline = System.currentTimeMillis() + 600_000
+                while (callee == null && System.currentTimeMillis() < deadline) {
+                    runCatching { Mailbox.collectClaims(context) }
+                    callee = ContactStore(context).all().firstOrNull()
+                    Thread.sleep(2_000)
+                }
             }
-            .onFailure { println("WATCH_FAIL post: ${it.message}"); return }
-        println("WATCHTEST OK (poster)")
-        return
-    }
+            val to = callee ?: error("WT_FAIL nobody claimed")
+            var c = to
+            var n = 0
+            fun tick() {
+                n++
+                c = Mailbox.send(context, c, "tick $n")
+                println("WT_SENT n=$n at=${System.currentTimeMillis()}")
+                System.out.flush()
+            }
+            val rounds = (System.getenv("DUCAT_WT_ROUNDS") ?: "15").toInt()
+            repeat(rounds) {
+                tick()
+                Thread.sleep(20_000)
+            }
+            if (rounds >= 15) {
+                println("WT_QUIET 20 minutes — the renewal gap")
+                System.out.flush()
+                Thread.sleep(20 * 60_000)
+                repeat(3) {
+                    tick()
+                    Thread.sleep(20_000)
+                }
+            }
+            println("WT_WRITER_DONE")
+        }
+        "watcher" -> {
+            val context = up(dir)
+            NameStore(context).get() ?: NameStore(context).put("Listener")
+            val contact = ContactStore(context).all().firstOrNull()
+                ?: Mailbox.claimCard(
+                    context,
+                    uniffi.ducat_mobile.readContactCard(
+                        System.getenv("DUCAT_WT_CARD") ?: error("WT_FAIL set DUCAT_WT_CARD"),
+                    ),
+                    "ticker",
+                )
+            // One sweep to open the records a watch needs open.
+            runCatching { Mailbox.poll(context) }
+            val armed = runCatching { nodeDhtWatch(contact.theirOutbox) }.getOrDefault(false)
+            println("WT_ARMED $armed at=${System.currentTimeMillis()}")
+            System.out.flush()
 
-    // Arm first, then sleep on the flag exactly as the driver's sweep does.
-    val key = runCatching { standRecordKey(cell) }.getOrNull()
-        ?: run { println("WATCH_FAIL no record key for $cell"); return }
-    // Open first when asked to: watch_dht_values needs the record open in this
-    // process, and the phone's sweep does not open it — which is the thing
-    // under test. DUCAT_WATCH_OPEN=1 is the control.
-    // standWatch opens the board (creating it if nobody has pinned that
-    // corner yet) and leaves it open, which is what watching requires;
-    // DUCAT_WATCH_RAW=1 arms it the old way, to keep the failure reproducible.
-    val armed = if (System.getenv("DUCAT_WATCH_RAW") == "1") {
-        runCatching { nodeDhtWatch(key) }
-    } else {
-        runCatching { uniffi.ducat_mobile.standWatch(cell) }
+            var lastSeq = ContactStore(context).thread(contact.personaHex)
+                .filter { !it.outgoing }.maxOfOrNull { it.seq } ?: -1L
+            var lastHeard = System.currentTimeMillis()
+            var lastArm = System.currentTimeMillis()
+            val end = System.currentTimeMillis() + 32 * 60_000
+            while (System.currentTimeMillis() < end) {
+                // Stage A's lesson: a watch armed once dies quietly. The
+                // phone re-stamps every pass; so does this probe now.
+                if (System.currentTimeMillis() - lastArm > 15_000) {
+                    lastArm = System.currentTimeMillis()
+                    runCatching { nodeDhtWatch(contact.theirOutbox) }
+                }
+                val rang = nodeWaitChange(2_000u)
+                if (!rang) {
+                    if (System.currentTimeMillis() - lastHeard > 300_000) {
+                        println("WT_STALL at=${System.currentTimeMillis()}")
+                        System.out.flush()
+                        lastHeard = System.currentTimeMillis()
+                    }
+                    continue
+                }
+                val at = System.currentTimeMillis()
+                val moved = runCatching { nodeChangedKeys() }.getOrDefault(emptyList())
+                println("WT_RING keys=${moved.size} at=$at")
+                if (contact.theirOutbox in moved || moved.isEmpty()) {
+                    runCatching { Mailbox.pollContact(context, contact) }
+                    val fresh = ContactStore(context).thread(contact.personaHex)
+                        .filter { !it.outgoing }
+                    for (m in fresh.filter { it.seq > lastSeq }.sortedBy { it.seq }) {
+                        println("WT_GOT n=${m.body.removePrefix("tick ")} at=${System.currentTimeMillis()}")
+                        lastSeq = m.seq
+                        lastHeard = System.currentTimeMillis()
+                    }
+                    System.out.flush()
+                    // Idempotent re-arm; veilid only renegotiates on change.
+                    runCatching { nodeDhtWatch(contact.theirOutbox) }
+                }
+            }
+            println("WT_WATCHER_DONE")
+        }
+        else -> error("WT_FAIL unknown role $role")
     }
-    println(
-        "WATCH_ARMED ${armed.getOrNull()} ${key.take(24)}… " +
-            (armed.exceptionOrNull()?.message ?: ""),
-    )
-
-    val started = System.currentTimeMillis()
-    var rang = false
-    while (System.currentTimeMillis() - started < waitSecs * 1000) {
-        if (nodeWaitChange(10_000u)) { rang = true; break }
-    }
-    val took = (System.currentTimeMillis() - started) / 1000
-    if (rang) {
-        println("WATCH_RANG at ${System.currentTimeMillis()} (${took}s after arming)")
-        // And *which* record. A ring that cannot say which of eighteen boards
-        // moved leaves a driver reading all eighteen, which is the lap the
-        // watch exists to avoid.
-        val moved = runCatching { uniffi.ducat_mobile.nodeChangedKeys() }
-            .getOrDefault(emptyList())
-        println(
-            if (moved.contains(key)) {
-                "WATCH_NAMED the ring named this board (${moved.size} key(s) in it)"
-            } else {
-                "WATCH_UNNAMED the ring did not name this board — ${moved.size} key(s): " +
-                    moved.joinToString(",") { it.take(16) }
-            },
-        )
-    } else {
-        println("WATCH_SILENT after ${took}s")
-    }
-
-    // Either way, is the post actually on the board? A watch that never rang
-    // on a board that never changed says nothing about watches.
-    val found = runCatching { standRead(cell) }.getOrDefault(emptyList())
-    println("WATCH_BOARD ${found.size} notice(s) on $cell")
-    println(
-        when {
-            rang && found.isNotEmpty() -> "WATCHTEST OK — the watch rang, and the board had it"
-            !rang && found.isNotEmpty() ->
-                "WATCHTEST SILENT — the board changed and no notification came; " +
-                    "the sweep is the only thing finding fares"
-            else -> "WATCHTEST INCONCLUSIVE — nothing was on the board to notice"
-        },
-    )
 }

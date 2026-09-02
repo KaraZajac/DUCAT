@@ -293,7 +293,7 @@ object Ceremony {
                 isStale(o) -> true
                 isFinished(o) -> {
                     val at = o.optLong("created").takeIf { it > 0 } ?: return@filter false
-                    now - at > KEEP_FINISHED_MS
+                    Elapsed.due(now, at, KEEP_FINISHED_MS)
                 }
                 else -> false
             }
@@ -667,7 +667,7 @@ object Ceremony {
                 ?: throw IllegalStateException("everyone in a bond must be your contact")
             Mailbox.send(
                 context, peer, "bond: building a shared deposit",
-                mineHex, kind = 8, round = 0, ceremonyId = id, payload = frame,
+                kind = 8, round = 0, ceremonyId = id, payload = frame,
             )
         }
         val o = JSONObject().apply {
@@ -746,6 +746,15 @@ object Ceremony {
         if (o == null && round.toInt() == 0) {
             val inv = parseRound0(payload) ?: return
             if (mineHex !in inv.roster) return
+            // And the one inviting must be on it as well. Anyone this device
+            // has a thread with could otherwise hand it a roster of two other
+            // people and have it commit to — and later count itself into —
+            // a deal it was never party to, with [senderIdx] below reading 0
+            // for every frame that followed.
+            if (contact.personaHex !in inv.roster) {
+                DucatLog.w(TAG, "bond $idHex: the invite came from outside its own roster")
+                return
+            }
             // A ceiling on how many unfunded deals one contact may have open
             // with us at once. Joining is automatic and free to ask for.
             if (tooManyOpen(context, contact.personaHex)) {
@@ -801,15 +810,13 @@ object Ceremony {
                 inv.roster, inv.arbiterIdx, inv.kind, inv.funderIdx, inv.farePxmr,
                 inv.refundAddr, inv.funderDepPxmr, inv.hostDepPxmr, inv.nonce, commit,
             )
-            for (peerHex in inv.roster.filter { it != mineHex }) {
-                val peer = contactFor(context, peerHex) ?: run {
+            // Everyone on the roster has to be someone this device can write
+            // to, or the join is a commitment nobody will ever receive.
+            val peers = inv.roster.filter { it != mineHex }.map { peerHex ->
+                contactFor(context, peerHex) ?: run {
                     DucatLog.w(TAG, "bond $idHex: ${peerHex.take(8)}… is not my contact — cannot join")
                     return
                 }
-                Mailbox.send(
-                    context, peer, "bond: building a shared deposit",
-                    mineHex, kind = 8, round = 0, ceremonyId = id, payload = frame,
-                )
             }
             o = JSONObject().apply {
                 put("id", idHex); put("nonce", inv.nonce)
@@ -846,8 +853,31 @@ object Ceremony {
                 put("sent0", frame.toHexString())
                 put("progressAt", System.currentTimeMillis())
             }
+            // Written down before a single frame leaves. dkgCommit has
+            // already made the machine, and the commitment it produced is
+            // in `sent0`: a send that fails (or a process that dies) between
+            // here and the last peer used to leave no record at all, so the
+            // next round-0 from the inviter was treated as a fresh invite
+            // and committed *again* — a second machine for the same
+            // ceremony, and a roster holding two different commitments from
+            // this device. Saved first, the retry is [resend]'s job.
             save(context, idHex, o)
-            DucatLog.i(TAG, "joined bond $idHex (i=$i of $n), sent commitment")
+            var sent = 0
+            for (peer in peers) {
+                runCatching {
+                    Mailbox.send(
+                        context, peer, "bond: building a shared deposit",
+                        kind = 8, round = 0, ceremonyId = id, payload = frame,
+                    )
+                    sent++
+                }.onFailure {
+                    DucatLog.w(
+                        TAG,
+                        "bond $idHex: commitment to ${peer.displayName()} did not go: ${it.message}",
+                    )
+                }
+            }
+            DucatLog.i(TAG, "joined bond $idHex (i=$i of $n), sent commitment to $sent of ${peers.size}")
         }
         o ?: return
 
@@ -902,23 +932,37 @@ object Ceremony {
                 val shares = uniffi.ducat_mobile.dkgShare(
                     id, i.toUShort(), T.toUShort(), n.toUShort(), from,
                 )
+                // Kept before any send is tried: dkgShare consumes the
+                // round-1 machine, so these bytes cannot be asked for twice.
+                // A send that threw used to unwind past the save — the
+                // shares were gone with the machine, the stage still read
+                // "committed", and every later frame found nothing to
+                // advance. A peer who is briefly unreachable gets theirs
+                // from [resend] instead.
                 val sent1 = JSONObject()
                 for (s in shares) {
-                    val peerHex = roster[s.participant.toInt() - 1]
-                    // Kept whether or not the send lands: dkgShare consumes
-                    // the round-1 machine, so these bytes cannot be asked
-                    // for twice and a peer who is briefly unreachable would
-                    // otherwise be unreachable for good.
                     sent1.put(s.participant.toInt().toString(), s.bytes.toHexString())
-                    val peer = contactFor(context, peerHex) ?: continue
-                    Mailbox.send(
-                        context, peer, "bond: your share",
-                        mineHex, kind = 8, round = 1, ceremonyId = id, payload = s.bytes,
-                    )
                 }
                 o.put("sent1", sent1)
                 o.put("stage", "shared"); save(context, idHex, o)
-                DucatLog.i(TAG, "bond $idHex: shared, sent ${shares.size} share(s)")
+                var sent = 0
+                for (s in shares) {
+                    val peerHex = roster[s.participant.toInt() - 1]
+                    val peer = contactFor(context, peerHex) ?: continue
+                    runCatching {
+                        Mailbox.send(
+                            context, peer, "bond: your share",
+                            kind = 8, round = 1, ceremonyId = id, payload = s.bytes,
+                        )
+                        sent++
+                    }.onFailure {
+                        DucatLog.w(
+                            TAG,
+                            "bond $idHex: share to ${peer.displayName()} did not go: ${it.message}",
+                        )
+                    }
+                }
+                DucatLog.i(TAG, "bond $idHex: shared, sent $sent of ${shares.size} share(s)")
             } else if (o.optString("stage") == "committed") {
                 DucatLog.i(TAG, "bond $idHex: commitment ${commits.length()}/${n - 1}")
             }
@@ -936,6 +980,13 @@ object Ceremony {
                 val keys = uniffi.ducat_mobile.dkgTakeKeys(id, i.toUShort())
                 o.put("stage", "done"); o.put("address", addr)
                 o.put("keys", keys.toHexString())
+                // On disk now, not after the announcements below. dkgTakeKeys
+                // hands the share out once; it is the only copy of this
+                // device's part of the escrow key, and what follows is a
+                // blocking send per peer and a node pick — long enough for
+                // the process to be reclaimed mid-way, which would have left
+                // a "shared" record with n-1 shares and no key to spend with.
+                save(context, idHex, o)
                 // **Say which wallet we formed, and wait to hear the same back.**
                 //
                 // Round 0's commitments travel pairwise — there is no broadcast
@@ -961,7 +1012,7 @@ object Ceremony {
                     runCatching {
                         Mailbox.send(
                             context, peer, "bond: the wallet I formed",
-                            mineHex, kind = 8, round = 2, ceremonyId = id,
+                            kind = 8, round = 2, ceremonyId = id,
                             payload = addr.toByteArray(),
                         )
                     }.onFailure {
@@ -978,6 +1029,16 @@ object Ceremony {
                         "stagenet", 8_000u,
                     ).height.toLong()
                     o.put("scanFrom", (h - 10).coerceAtLeast(0))
+                }.onFailure {
+                    // Not fatal and not free: with no height here every later
+                    // scan of this escrow falls back to the wallet's restore
+                    // height and reads the chain from there — minutes where
+                    // this would have been seconds, for the life of the
+                    // escrow, with nothing anywhere to say why. Now a line.
+                    DucatLog.w(
+                        TAG,
+                        "bond $idHex: no scan height (${it.message}) — scans start from the wallet's",
+                    )
                 }
                 save(context, idHex, o)
                 ContactStore.bump()
@@ -1010,7 +1071,7 @@ object Ceremony {
             val lastHelp = caughtUp.optLong(senderIdx.toString())
             if (o.optString("stage") == "done" && round.toInt() <= 1 &&
                 !theyFinished &&
-                System.currentTimeMillis() - lastHelp > NUDGE_AFTER_MS
+                Elapsed.due(System.currentTimeMillis(), lastHelp, NUDGE_AFTER_MS)
             ) {
                 caughtUp.put(senderIdx.toString(), System.currentTimeMillis())
                 o.put("caughtUp", caughtUp)
@@ -1020,7 +1081,14 @@ object Ceremony {
             }
         }.onFailure {
             DucatLog.w(TAG, "bond $idHex round $round failed: ${it.message}")
-            uniffi.ducat_mobile.ceremonyAbort(id, i.toUShort())
+            // Not aborted. The machine that failed to advance is still in
+            // memory (the engine parses a peer's bytes before it takes the
+            // machine out, and puts it back on refusal), and every other
+            // failure here — a send, a corrupt bucket — is one a later frame
+            // or a retransmit can still get past. Abort made all of them
+            // final: it threw the machine away, and §17.9 says nothing can
+            // rebuild one.
+            //
             // **A build this device can no longer finish, written down.**
             //
             // The DKG machine lives in memory (§17.9), so a phone that dies
@@ -1101,7 +1169,7 @@ object Ceremony {
         )
         Mailbox.send(
             context, contact, "bond: returning the deposit",
-            mineHex, kind = 9, round = 0, ceremonyId = id, payload = prop.payload,
+            kind = 9, round = 0, ceremonyId = id, payload = prop.payload,
         )
         o.put("stage", "releasing")
         o.put("cosignerIdx", cosignerIdx)
@@ -1386,7 +1454,7 @@ object Ceremony {
         val due = all(context).filter { o ->
             o.optString("stage") in setOf("committed", "shared") &&
                 !isFinished(o) && !isStale(o) &&
-                now - o.optLong("progressAt", o.optLong("created")) > NUDGE_AFTER_MS
+                Elapsed.due(now, o.optLong("progressAt", o.optLong("created")), NUDGE_AFTER_MS)
         }
         for (o in due) {
             val idHex = o.optString("id")
@@ -1422,7 +1490,7 @@ object Ceremony {
                 runCatching {
                     Mailbox.send(
                         context, peer, "bond: building a shared deposit",
-                        mineHex, kind = 8, round = 0, ceremonyId = id, payload = frame,
+                        kind = 8, round = 0, ceremonyId = id, payload = frame,
                     )
                 }.onSuccess { n++ }
                     .onFailure { DucatLog.w(TAG, "escrow $idHex: round 0 again — ${it.message}") }
@@ -1432,7 +1500,7 @@ object Ceremony {
                     runCatching {
                         Mailbox.send(
                             context, peer, "bond: your share",
-                            mineHex, kind = 8, round = 1, ceremonyId = id, payload = share,
+                            kind = 8, round = 1, ceremonyId = id, payload = share,
                         )
                     }.onSuccess { n++ }
                         .onFailure { DucatLog.w(TAG, "escrow $idHex: round 1 again — ${it.message}") }
@@ -1476,7 +1544,11 @@ object Ceremony {
         if (o.optString("fundTxid").isNotEmpty()) return false
         if (o.optString("hostFundTxid").isNotEmpty()) return false
         val created = o.optLong("created").takeIf { it > 0 } ?: return false
-        return System.currentTimeMillis() - created > UNANSWERED_MS
+        // [Elapsed], because this one decides whether a ceremony ever ends:
+        // a `created` stamped ahead of now is never old enough to be stale,
+        // so the escrow stays live for ever and the cleanup above never
+        // reaches it either.
+        return Elapsed.due(System.currentTimeMillis(), created, UNANSWERED_MS)
     }
 
     /**
@@ -1573,6 +1645,80 @@ object Ceremony {
     private fun myFundTxid(o: JSONObject): String =
         if (isFunder(o)) o.optString("fundTxid") else o.optString("hostFundTxid")
 
+    /**
+     * When this party's own money went in, or 0.
+     *
+     * The clock the banner's stranded branches run on: an escrow only half
+     * funded leaves whoever paid first exposed, and §9.3.4's rule — in a
+     * system with no operator, "nothing happens" is not a safe default —
+     * means that exposure has to name the moment it becomes a way out.
+     * Records written before this field existed answer 0, which reads as
+     * "long enough", and that is the right side to be wrong on: the money
+     * is already in and the offer is only ever an offer.
+     */
+    /**
+     * What comes home to the funder when a deal is *completed*, and only
+     * that: their own deposit back, the price and the provider's stake to
+     * the provider.
+     *
+     * "Everything above the fare" was right while the rider was the only
+     * one paying in. It stopped being right the day the driver staked too:
+     * the pot then holds fare + rider stake + driver stake, and handing back
+     * everything above the fare would give the rider the driver's stake as
+     * well — a successful ride that quietly robs the driver. The funder's
+     * own stake is the number, recorded in the ceremony at birth so a later
+     * change to the suggested percentage cannot re-price an escrow that is
+     * already standing.
+     *
+     * Split out for the same reason [refundBack] is: this is the ordinary
+     * ending, it runs on every completed deal, and it was the one piece of
+     * money arithmetic in the app that nothing checked. [total] must be a
+     * balance worth trusting — see [liveTotal].
+     */
+    internal fun settlementBack(o: JSONObject, total: Long): Long {
+        val recorded = o.optLong("funderDepPxmr")
+        return when {
+            o.optInt("kind") == KIND_RESERVATION -> recorded.coerceAtMost(total)
+            recorded > 0 -> recorded.coerceAtMost(total)
+            // Ceremonies built before the stake was recorded: derive it from
+            // the pot, less the fare and less whatever the driver staked.
+            else -> (total - o.optLong("farePxmr") - o.optLong("hostDepPxmr"))
+                .coerceAtLeast(0L)
+                .coerceAtMost((total - o.optLong("farePxmr")).coerceAtLeast(0L))
+        }
+    }
+
+    /**
+     * The rider's slice when an escrow is unwound and each side takes back
+     * its own contribution.
+     *
+     * Split out because it is the arithmetic the whole thing rests on, and
+     * arithmetic that decides where money goes should be checkable without
+     * a chain. [total] is the escrow's live balance, read at the moment of
+     * proposing and never a caller's older scan: that is the whole point.
+     * The funder's own money is the rider's slice, so it is theirs
+     * directly; everybody else is the residual, so their own share is what
+     * is left once the rider's is taken out.
+     *
+     * **Both sides compute the same number**, which is what makes the
+     * refund an agreement rather than a claim. On a funded escrow it is the
+     * mutual refund; on a half-funded one it is the only contribution there
+     * is, coming home. And it is what keeps the race honest — the other
+     * side funding between the button and the proposal — where asking for
+     * the whole balance would be asking for their money too.
+     */
+    internal fun refundBack(o: JSONObject, total: Long): Long {
+        val mine = mySharePxmr(o)
+        return if (isFunder(o)) mine.coerceIn(0L, total) else (total - mine).coerceAtLeast(0L)
+    }
+
+    /** Whether this party's own money is in the escrow. */
+    fun myFundTxidPresent(o: JSONObject): Boolean =
+        myFundTxid(o).let { it.isNotEmpty() && it != SENDING }
+
+    fun myFundedAt(o: JSONObject): Long =
+        if (isFunder(o)) o.optLong("fundTxidAt") else o.optLong("hostFundTxidAt")
+
     fun rideWith(context: Context, peerHex: String): JSONObject? =
         dealWith(context, peerHex)?.takeIf { bannerWorthy(it) }
 
@@ -1649,6 +1795,19 @@ object Ceremony {
     class AlreadyPaid : IllegalStateException("you have already paid into this escrow")
 
     /**
+     * The escrow holds money, so "call it off" is not an ending it has.
+     *
+     * Typed for the same reason as [AlreadyPaid]: this is reached by
+     * circumstance, not by a bug. The banner hides the button once this
+     * device's scan has seen the other side's stake, but the scan runs every
+     * nine seconds and a stake is paid in one — so the tap that lands in
+     * between is ordinary, and used to be answered with the card-link
+     * sentence ("the link may be broken, already claimed…") because nothing
+     * in `moneyFailure` recognised the refusal.
+     */
+    class HoldsMoney(val pxmr: Long) : IllegalStateException("there is money in this escrow")
+
+    /**
      * Call this deal off, and say so.
      *
      * `MessageKind::CeremonyAbort` has been in the wire format the whole time
@@ -1665,6 +1824,20 @@ object Ceremony {
      * same reason and read from the same three places: this device's own scan
      * of the escrow address plus the two txids it would have written itself.
      *
+     * **And then the chain, once there is an address to ask.** The three
+     * markers are what this device has seen, and the scan behind the first
+     * runs every nine seconds while the thread is open and never while it is
+     * not. A rider who tapped "Call it off" in the gap after the driver's
+     * stake landed passed all three, marked their own record aborted, and
+     * lost the co-signing path the driver's stake needs to come home: the
+     * driver's phone rightly ignores an abort against money it has paid
+     * ([onAbort]), so the two records disagreed for good, with the money on
+     * the side that could no longer be asked to release it. The Profile
+     * screen's bond call-off has asked the address first since it existed;
+     * this is the same rule, in the one place both callers pass through.
+     * An address that cannot be read is not called empty ([NoNode]) — the
+     * cost of refusing is a retry, and the cost of guessing was the stake.
+     *
      * The message is best-effort and the local record is not. A peer who is
      * offline learns about this on their next poll; a peer who never comes
      * back leaves an escrow that goes stale on its own, which is what
@@ -1674,9 +1847,32 @@ object Ceremony {
     fun callOff(context: Context, idHex: String) {
         val o = load(context, idHex) ?: throw IllegalStateException("no such ceremony")
         check(!isFinished(o)) { "this escrow is already over" }
-        check(o.optLong("fundedPxmr") == 0L) { "there is money in this escrow" }
+        if (o.optLong("fundedPxmr") > 0) throw HoldsMoney(o.optLong("fundedPxmr"))
         check(o.optString("fundTxid").isEmpty()) { "there is money in this escrow" }
         check(o.optString("hostFundTxid").isEmpty()) { "there is money in this escrow" }
+        // A release requires funding by construction, whatever this device's
+        // scan last said — the same refusal [onAbort] gives the other side.
+        check(o.optString("stage") !in listOf("releasing", "release_pending", "release_cosigned")) {
+            "a release is in progress"
+        }
+        hexToBytes(o.optString("keys"))?.let { keys ->
+            val nodeUrl = node(context) ?: throw NoNode()
+            val from = o.optLong("scanFrom").takeIf { it > 0 }
+                ?: WalletStore(context).restoreHeight().toLong()
+            val bal = runCatching {
+                uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
+            }.getOrElse {
+                DucatLog.w(TAG, "escrow $idHex: call-off could not read the address: ${it.message}")
+                throw NoNode()
+            }
+            // Not written to `fundedPxmr`: one node's word is enough to
+            // refuse an abort and not enough to show money as secured —
+            // that figure waits for [checkRideFunding]'s second opinion.
+            if (bal > 0) {
+                DucatLog.w(TAG, "escrow $idHex: call-off refused — the address holds ${formatXmr(bal)} XMR")
+                throw HoldsMoney(bal)
+            }
+        }
 
         val id = hexToBytes(o.optString("id")) ?: throw IllegalStateException("no ceremony id")
         val mineHex = PersonaStore(context).personaHex()
@@ -1692,7 +1888,7 @@ object Ceremony {
                 // thread like the other ceremony traffic, and the reader's
                 // own phone writes the sentence they see.
                 Mailbox.send(
-                    context, peer, "ceremony: called off", mineHex,
+                    context, peer, "ceremony: called off",
                     kind = 10, ceremonyId = id,
                 )
             }.onFailure { DucatLog.w(TAG, "abort $idHex: ${it.message}") }
@@ -1858,13 +2054,80 @@ object Ceremony {
     }
 
     /** Stamp the moment an escrow stopped needing anyone. */
+    /**
+     * A ceremony reaching its last stage, and letting go of what it was
+     * still trying to do.
+     *
+     * The parked release intent dies here too. It is cleared where a
+     * proposal succeeds, which is the common path — but not the only one: a
+     * release can land through the *other* side's broadcast, and the merge
+     * that records it can carry a snapshot taken before the clear. Seen on
+     * the first live refund, where a settled escrow went on promising "it
+     * keeps trying on its own until it goes through" underneath the words
+     * "Settled — USD 3.66 to you". A finished ceremony has nothing left to
+     * retry, whichever way it finished, so the end is the honest place to
+     * say so.
+     */
     private fun settle(o: JSONObject, stage: String): JSONObject =
-        o.put("stage", stage).put("settledAt", System.currentTimeMillis() / 1000)
+        o.put("stage", stage)
+            .put("settledAt", System.currentTimeMillis() / 1000)
+            .put("wantReleaseAt", 0L)
 
     /** The rider pays the fare into the escrow — an ordinary wallet send to
      *  an address that happens to need two of three keys to leave. */
     /** Nobody has disagreed *yet* — the roster has not all reported. */
     class EscrowNotConfirmed : IllegalStateException("waiting for the roster to agree")
+
+    /**
+     * The escrow is not showing what this party is known to have put in.
+     *
+     * **Found live, 2026-09-02, and it very nearly cost the money it was
+     * built to protect.** A refund divides the balance read at the moment of
+     * proposing, and the number it divides was clamped to that balance — so
+     * a reading that came back *short* did not fail, it produced a smaller
+     * refund and quietly gave the difference to the other side. On a
+     * reservation whose guest had paid 0.0072 and whose host had staked
+     * 0.0006, one node behind another was enough: the guest proposed 0.0006
+     * back to themselves and 0.0072 to the host, under a button that says
+     * each side gets back what it put in.
+     *
+     * Two readings of one escrow may honestly differ — nodes catch up at
+     * their own pace — so the shortfall is not an accusation. It is a
+     * refusal: an amount that decides where money goes may not be guessed
+     * from a view that is missing some of it.
+     */
+    class EscrowBehind(val saw: Long, val known: Long) :
+        IllegalStateException("the escrow shows $saw, less than the $known already recorded")
+
+    /**
+     * The escrow's balance for a decision about where money goes — or a
+     * refusal, never a guess.
+     *
+     * Two ways this used to go wrong, and both of them paid somebody the
+     * wrong amount:
+     *
+     *  - **A failed read defaulted to zero.** `getOrDefault(0L)` on a node
+     *    that did not answer, and the split that came out of it sent the
+     *    funder's deposit to the other side, because "nothing came home" is
+     *    what a zero balance divides into.
+     *  - **A short read was clamped, not questioned.** The funder's own
+     *    deposit is capped at the balance, so a view missing part of the
+     *    escrow silently shrank what came home and grew the residual. Seen
+     *    live on 2026-09-02: a refund proposed 0.0006 to the payer and
+     *    0.0072 to the provider, the wrong way round.
+     *
+     * [fundedPxmr] is what this device has already scanned and written
+     * down, and it follows the balance *down* as well as up (see
+     * [checkRideFunding]), so a live reading below it means this view has
+     * gone backwards — a node behind its peers, a scan that has not caught
+     * up. That is not a number to divide an escrow with.
+     */
+    private fun liveTotal(o: JSONObject, keys: ByteArray, nodeUrl: String, from: Long): Long {
+        val saw = uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
+        val known = o.optLong("fundedPxmr")
+        if (saw < known) throw EscrowBehind(saw, known)
+        return saw
+    }
 
     /** Somebody formed a different wallet. This escrow is not what it claims. */
     class EscrowDisagreed : IllegalStateException("participants formed different wallets")
@@ -1970,6 +2233,16 @@ object Ceremony {
                 // a node that timed out locks this party out of their own
                 // escrow for good.
                 runCatching { mutate(context, idHex) { cur -> cur.put(mine, "") } }
+                    .onFailure { e ->
+                        // And if *that* write fails, the lockout is real and
+                        // permanent: the mark says this party has already
+                        // sent, so nothing will ever offer to send again.
+                        // At error, because the way back is a human noticing.
+                        DucatLog.e(
+                            TAG,
+                            "escrow $idHex: could not clear the send mark — ${e.message}",
+                        )
+                    }
             }
             .getOrThrow()
         // Per-party mark: for reservations both sides fund, each records
@@ -1977,7 +2250,14 @@ object Ceremony {
         // function started with — rounds arrive on the poller while a
         // transaction is being built, and writing the old object back put the
         // ceremony into a state the protocol had already left.
-        mutate(context, idHex) { cur -> cur.put(mine, r.txidHex) }
+        // With the moment, not only the txid. Half a funded escrow is a
+        // party exposed until the other side follows, and how long they have
+        // been exposed is the whole question when deciding whether to offer
+        // them a way out (see the banner's stranded branches). Per party,
+        // because each is exposed from its own payment.
+        mutate(context, idHex) { cur ->
+            cur.put(mine, r.txidHex).put("${mine}At", System.currentTimeMillis())
+        }
         ContactStore.bump()
         DucatLog.i(TAG, "escrow $idHex: ${formatXmr(share)} XMR sent — ${r.txidHex.take(16)}…")
         return r.txidHex
@@ -2211,30 +2491,7 @@ object Ceremony {
         val nodeUrl = node(context) ?: throw NoNode()
         val from = o.optLong("scanFrom").takeIf { it > 0 }
             ?: WalletStore(context).restoreHeight().toLong()
-        val total = runCatching {
-            uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
-        }.getOrDefault(0L)
-        // What comes home to the funder, and only that.
-        //
-        // "Everything above the fare" was right while the rider was the only
-        // one paying in. It stopped being right the day the driver staked
-        // too: the pot then holds fare + rider stake + driver stake, and
-        // handing back everything above the fare would give the rider the
-        // driver's stake as well — a successful ride that quietly robs the
-        // driver. The funder's own stake is the number, recorded in the
-        // ceremony at birth so a later change to the suggested percentage
-        // cannot re-price an escrow that is already standing.
-        val recorded = o.optLong("funderDepPxmr")
-        val back = when {
-            o.optInt("kind") == KIND_RESERVATION -> recorded.coerceAtMost(total)
-            recorded > 0 -> recorded.coerceAtMost(total)
-            // Ceremonies built before the stake was recorded: derive it from
-            // the pot, less the fare and less whatever the driver staked.
-            else -> (total - o.optLong("farePxmr") - o.optLong("hostDepPxmr"))
-                .coerceAtLeast(0L)
-                .coerceAtMost((total - o.optLong("farePxmr")).coerceAtLeast(0L))
-        }
-        return proposeRideSplit(context, idHex, back)
+        return proposeRideSplit(context, idHex, settlementBack(o, liveTotal(o, keys, nodeUrl, from)))
     }
 
     /**
@@ -2262,6 +2519,32 @@ object Ceremony {
          *  arbiter instead — their co-signature IS the ruling. The split's
          *  destinations do not change; only who is asked to agree does. */
         toArbiter: Boolean = false,
+        /**
+         * Ignore [riderBackPxmr]: **unwind the escrow, each side taking
+         * back exactly what it put in.**
+         *
+         * One split with two readings, and both are wanted. On a fully
+         * funded escrow it is the mutual refund — the deal called off by
+         * agreement, the fare and the payer's deposit home, the provider's
+         * stake home, nobody up and nobody down. On a half-funded one it is
+         * the stranded party's own money coming back, because the only
+         * contribution in there is theirs.
+         *
+         * Either side computes the identical split (see [refundBack]),
+         * which is what makes it an *agreement* rather than a claim: the
+         * proposer cannot express a better deal for themselves through this
+         * door, and the signer is looking at the same arithmetic they would
+         * have produced.
+         *
+         * It is also the safe shape for the stranded case. "Everything back
+         * to me" would be the obvious implementation and a dangerous one:
+         * the balance is read here, at the moment of proposing, so if the
+         * other side funded in the seconds between the button and this
+         * line, a claim for the whole escrow is a claim for their money —
+         * arriving at an arbiter with no way to know it was meant
+         * innocently.
+         */
+        refundBoth: Boolean = false,
     ): Long {
         val o = load(context, idHex) ?: throw IllegalStateException("no such ceremony")
         // done → first proposal; releasing → retry or self-supersede;
@@ -2318,10 +2601,18 @@ object Ceremony {
                 ?: throw IllegalStateException("no wallet to receive the fare")
         }
 
-        val total = runCatching {
-            uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
-        }.getOrDefault(0L)
-        val back = riderBackPxmr.coerceIn(0L, total)
+        val total = liveTotal(o, keys, nodeUrl, from)
+        val back = if (refundBoth) {
+            // Refuse rather than divide a balance that cannot be this
+            // escrow's whole story. See [EscrowBehind] — this check is the
+            // whole reason it exists, and a `coerceIn` standing here
+            // instead is how a refund became a gift.
+            val mine = mySharePxmr(o)
+            if (total < mine) throw EscrowBehind(total, mine)
+            refundBack(o, total)
+        } else {
+            riderBackPxmr.coerceIn(0L, total)
+        }
         // Two shapes, one meaning: normally the rider's slice is fixed and
         // the driver is residual; when the driver's remainder could not
         // cover the fee, the driver's slice is fixed (possibly zero) and
@@ -2352,7 +2643,18 @@ object Ceremony {
         // a proposal lands (just below).
         mutate(context, idHex) { cur ->
             if (cur.optLong("wantReleaseAt") > 0) cur
-            else cur.put("wantRelease", riderBackPxmr)
+            else cur.put("wantRelease", back)
+                // **How the number was reached, not only the number.** A
+                // refund is derived from the balance at the moment of
+                // proposing, so a retry that replays the figure replays a
+                // reading of the escrow that may have moved: a stranded
+                // provider's "nothing back to the payer" is correct while
+                // the escrow holds only their stake and is a claim on the
+                // payer's money the second it does not. Recomputed on
+                // every retry when it was a refund; replayed verbatim when
+                // it was a negotiated number, which is what a counter-offer
+                // means.
+                .put("wantRefundBoth", refundBoth)
                 .put("wantReleaseAt", System.currentTimeMillis())
         }
         val margin = MIN_ESCROW_PXMR
@@ -2376,7 +2678,6 @@ object Ceremony {
         Mailbox.send(
             context, peer,
             if (toArbiter) "ride: asking the arbiter to rule" else "ride: proposed a split",
-            PersonaStore(context).personaHex(),
             kind = 9, round = 0, ceremonyId = id, payload = prop.payload,
             amountPxmr = back,
         )
@@ -2418,10 +2719,11 @@ object Ceremony {
      * re-sends the number that was asked for, never a freshly computed
      * default, for the reason "Ask again" learned the hard way.
      */
-    fun retryRelease(context: Context): Int {
+    fun retryRelease(context: Context, onlyId: String? = null): Int {
         val now = System.currentTimeMillis()
         var n = 0
         for (o in all(context)) {
+            if (onlyId != null && o.optString("id") != onlyId) continue
             // Every stage a proposal is legal from — the same list
             // proposeRideSplit accepts. Gating on "done" alone meant a
             // counter-offer that failed at release_pending recorded an
@@ -2433,12 +2735,17 @@ object Ceremony {
             if (idHex.isBlank()) continue
             val asked = o.optLong("wantReleaseAt")
             if (asked <= 0) continue
-            if (now - asked > RELEASE_PATIENCE_MS) {
+            if (Elapsed.due(now, asked, RELEASE_PATIENCE_MS)) {
                 mutate(context, idHex) { cur -> cur.put("wantReleaseAt", 0L) }
                 DucatLog.i(TAG, "escrow $idHex: gave up retrying the release")
                 continue
             }
-            runCatching { proposeRideSplit(context, idHex, o.optLong("wantRelease")) }
+            runCatching {
+                proposeRideSplit(
+                    context, idHex, o.optLong("wantRelease"),
+                    refundBoth = o.optBoolean("wantRefundBoth"),
+                )
+            }
                 .onSuccess { n += 1; DucatLog.i(TAG, "escrow $idHex: release proposed on a retry") }
         }
         return n
@@ -2556,7 +2863,6 @@ object Ceremony {
         )
         Mailbox.send(
             context, proposer, "fare released — thank you for the ride",
-            PersonaStore(context).personaHex(),
             kind = 9, round = 1, ceremonyId = id, payload = ans.payload,
         )
         settle(o, "release_cosigned")

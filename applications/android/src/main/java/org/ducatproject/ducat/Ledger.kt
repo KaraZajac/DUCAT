@@ -297,6 +297,9 @@ object Ledger {
         val timestamp: Long,
     )
 
+    /** How a bill was answered — see [billOutcome]. */
+    enum class BillOutcome { Paid, Withdrawn, Declined }
+
     /**
      * Whether a bill has been answered — paid, receipted, withdrawn or declined.
      *
@@ -309,39 +312,55 @@ object Ledger {
      * `m` must be the kind-1 bill; `thread` is the conversation it sits in.
      */
     fun billAnswered(thread: List<StoredMessage>, m: StoredMessage): Boolean =
-        thread.any { p ->
+        billOutcome(thread, m) != null
+
+    /**
+     * [billAnswered] with the answer: which of the three things happened to
+     * the bill, or null while it is still open. The screens that show a
+     * bill after it was answered need the word, not just the fact — a
+     * take-over prompt that greys out has to say why.
+     *
+     * Paid wins over a retraction (money talks). Same-side retraction is the
+     * issuer taking the bill back; other-side is the payer refusing it.
+     */
+    fun billOutcome(thread: List<StoredMessage>, m: StoredMessage): BillOutcome? {
+        val paid = thread.any { p ->
             p.kind == 2 && p.outgoing != m.outgoing &&
                 // §16.14 first, arithmetic second — the till's rule (see
                 // Tabs' said-sets). A payment that names a bill answers the
-                // bill it names, with no timestamp condition: the two stamps
-                // come from two different clocks, and a named answer sitting
-                // "before" its bill is ordinary skew, not time travel. The
-                // amount-and-time arm stays for notices that predate the
-                // reference — and a named notice must never fall through to
-                // it, or it answers every cheaper bill in the thread too.
-                if (p.reSeq != null) !p.reOwn && p.reSeq == m.seq
+                // bill it names — the one [referent] reads, since a seq is
+                // per card and a thread can hold two bills numbered alike;
+                // with the skew grace rather than a timestamp condition,
+                // because the two stamps come from two different clocks and
+                // a named answer sitting "before" its bill is ordinary skew,
+                // not time travel. The amount-and-time arm stays for notices
+                // that predate the reference — and a named notice must never
+                // fall through to it, or it answers every cheaper bill in
+                // the thread too.
+                if (p.reSeq != null) thread.referent(p) === m
                 else p.timestamp >= m.timestamp && p.amountPxmr >= m.amountPxmr
         } || thread.any { p ->
             // A receipt at or above it also closes it (paid outside). Named
             // receipts are exact the same way: the receipt's re_own says
-            // whose log the bill lives in, which is "the sender's own" only
-            // when receipt and bill come from the same side.
+            // whose log the bill lives in, and [referent] reads it.
             p.kind == 3 &&
                 if (p.reSeq != null) {
-                    p.reSeq == m.seq && p.reOwn == (p.outgoing == m.outgoing)
+                    thread.referent(p) === m
                 } else {
                     p.timestamp >= m.timestamp && p.amountPxmr >= m.amountPxmr
                 }
-        } || thread.any { p ->
-            // §16.13's Retract closes it too. Named by sequence rather than
-            // matched by amount, so it is exact.
-            //
-            // Both directions. `reOwn` and the same side is the issuer taking
-            // their own bill back; not `reOwn` and the other side is the payer
-            // refusing it.
-            p.kind == 5 && p.reSeq == m.seq &&
-                (if (p.reOwn) p.outgoing == m.outgoing else p.outgoing != m.outgoing)
         }
+        if (paid) return BillOutcome.Paid
+        // §16.13's Retract closes it too — the issuer taking their own
+        // bill back, or the payer refusing it; [referent] tells which
+        // bill, and whose. Matching by seq alone here let a declined
+        // ride offer at seq 0 close a later card's bill at seq 0 on the
+        // Activity screen, the same fault the chat fixed on 2026-08-24.
+        val retract = thread.firstOrNull { p -> p.kind == 5 && thread.referent(p) === m }
+            ?: return null
+        return if (retract.outgoing == m.outgoing) BillOutcome.Withdrawn
+        else BillOutcome.Declined
+    }
 
     fun openRequests(context: Context): List<OpenRequest> {
         val contacts = ContactStore(context)
@@ -382,6 +401,17 @@ object Ledger {
         announced: Map<String, Pair<String, String?>> = emptyMap(),
     ): List<Event> {
         val sends = sendRecords.associateBy { it.txidHex.lowercase() }
+        // Records written by refreshSpent after the process died mid-send:
+        // the chain showed the notes gone and the hash died with the
+        // process, so they carry no txid to be keyed by — only the key
+        // images the intent had claimed. Keyed by those instead, and every
+        // row below that spends one of them takes the record's labels; a
+        // record paired here is not also a "sending" row further down.
+        val recoveredByKi = HashMap<String, SentPayment>()
+        for (r in sendRecords.filter { it.recovered }) {
+            for (k in r.keyImages) recoveredByKi[k] = r
+        }
+        val paired = HashSet<SentPayment>()
         val ourKeyImages = entries.mapNotNull { it.keyImage.takeIf { k -> k.isNotEmpty() } }.toSet()
         val byKeyImage = entries.associateBy { it.keyImage }
 
@@ -412,6 +442,7 @@ object Ledger {
                 val fee = chain?.feePxmr ?: 0L
                 val paid = (spentTotal - received - fee).coerceAtLeast(0L)
                 val rec = sends[txid]
+                    ?: consumedKis.firstNotNullOfOrNull { recoveredByKi[it] }?.also { paired += it }
                 out += Event(
                     txid = txid,
                     height = height,
@@ -487,6 +518,10 @@ object Ledger {
             // version matched on `amount + fee == output`, which is only true
             // when a send produced no change — so it was arithmetic that looked
             // like identification and was wrong in the ordinary case.
+            //
+            // Except by key image, which is identification: a recovered
+            // record names the exact notes its send consumed.
+            val rec = recoveredByKi[e.keyImage]?.also { paired += it }
             out += Event(
                 txid = "",
                 // The output was *created* at e.height and spent later, so its
@@ -494,23 +529,24 @@ object Ledger {
                 // it one block on at least keeps it after its own receipt; the
                 // real height arrives with the transaction.
                 height = 0,
-                timestamp = 0,
+                timestamp = rec?.timestamp ?: 0,
                 direction = Direction.Sent,
-                amountPxmr = e.amountPxmr,
-                feePxmr = 0,
+                amountPxmr = rec?.amountPxmr ?: e.amountPxmr,
+                feePxmr = rec?.feePxmr ?: 0,
                 netPxmr = -e.amountPxmr,
                 balanceAfterPxmr = 0,
-                counterparty = null,
-                address = null,
-                source = Source.Unknown,
-                note = null,
+                counterparty = nameOf(rec?.contactHex),
+                address = rec?.toAddress,
+                source = if (rec != null) Source.OurRecord else Source.Unknown,
+                note = rec?.note,
+                donation = rec?.donation == true,
                 ours = emptyList(),
                 consumed = listOf(e),
                 chain = null,
                 pending = false,
                 locked = false,
                 unlocksInBlocks = 0,
-                unexplained = true,
+                unexplained = rec == null,
                 sortHeight = e.height + 1,
             )
         }
@@ -527,7 +563,7 @@ object Ledger {
         // outright is what made a payment you had just sent, by name, read as a
         // red "Spent, but we cannot say where" until the chain caught up.
         val pendingRecords = sendRecords
-            .filter { it.txidHex.lowercase() !in onChain }
+            .filter { it.txidHex.lowercase() !in onChain && it !in paired }
             .sortedByDescending { it.timestamp }
         val unattributedIdx = out.indices
             .filter { out[it].unexplained }
@@ -708,6 +744,90 @@ object Ledger {
      * - Tax is its own column — the till stamps it per sale (see [Tax]) and
      *   this is the half a business actually files.
      */
+    /**
+     * One period, added up — the glanceable answer above the statement.
+     *
+     * Pure over [build]'s rows so the desk can test the arithmetic without
+     * a wallet. Pending rows are excluded exactly as the export excludes
+     * them: a summary that counts money the chain has not confirmed is a
+     * forecast wearing a statement's clothes.
+     */
+    data class Summary(
+        val inPxmr: Long,
+        val outPxmr: Long,
+        val netPxmr: Long,
+        val feesPxmr: Long,
+        val inCount: Int,
+        val outCount: Int,
+        /** Tax carried on receipted money IN — what a till owes onward. */
+        val taxCollectedPxmr: Long,
+        /** Sent into donate-card threads within the period. */
+        val donationsPxmr: Long,
+    )
+
+    fun summarize(events: List<Event>, fromTs: Long, toTs: Long): Summary {
+        var inP = 0L; var outP = 0L; var fees = 0L; var net = 0L
+        var inC = 0; var outC = 0; var tax = 0L; var don = 0L
+        for (e in events) {
+            if (e.pending || e.provisional) continue
+            if (e.timestamp < fromTs || e.timestamp >= toTs) continue
+            if (e.direction == Direction.Received) {
+                inP += e.amountPxmr; inC++
+                tax += e.taxPxmr ?: 0L
+            } else {
+                outP += e.amountPxmr; outC++
+                fees += e.feePxmr
+                if (e.donation) don += e.amountPxmr
+            }
+            net += e.netPxmr
+        }
+        return Summary(inP, outP, net, fees, inC, outC, tax, don)
+    }
+
+    /**
+     * The business lens over the same period: what the tills, tabs, fares,
+     * jars and presses brought in, by door — plus what is still out.
+     *
+     * Tabs are the business's own sales ledger (origin, persona, tip and
+     * tax all live there), so this reads them rather than re-deriving trade
+     * from the wallet. Revenue counts tabs the chain has answered ("paid"
+     * or "settled"); outstanding is every billed tab still waiting.
+     */
+    data class DoorTake(val count: Int, val takePxmr: Long, val tipPxmr: Long)
+
+    data class BusinessSummary(
+        val byOrigin: Map<String, DoorTake>,
+        val taxCollectedPxmr: Long,
+        val outstandingCount: Int,
+        val outstandingPxmr: Long,
+    ) {
+        val salesCount: Int get() = byOrigin.values.sumOf { it.count }
+        val salesPxmr: Long get() = byOrigin.values.sumOf { it.takePxmr }
+    }
+
+    fun summarizeBusiness(tabs: List<RunningTab>, fromTs: Long, toTs: Long): BusinessSummary {
+        val by = LinkedHashMap<String, DoorTake>()
+        var tax = 0L
+        var outC = 0; var outP = 0L
+        for (t in tabs) {
+            when (t.state) {
+                "paid", "settled" -> {
+                    val at = if (t.settledAt > 0) t.settledAt / 1000 else t.openedAt / 1000
+                    if (at < fromTs || at >= toTs) continue
+                    val d = by[t.origin] ?: DoorTake(0, 0, 0)
+                    by[t.origin] = DoorTake(
+                        d.count + 1, d.takePxmr + t.takePxmr, d.tipPxmr + t.tipPxmr,
+                    )
+                    tax += t.taxPxmr ?: 0L
+                }
+                "open" -> if (t.billSeq >= 0) {
+                    outC++; outP += t.totalPxmr
+                }
+            }
+        }
+        return BusinessSummary(by, tax, outC, outP)
+    }
+
     fun exportCsv(context: android.content.Context): String {
         fun xmr(pxmr: Long): String =
             java.math.BigDecimal(pxmr).movePointLeft(12).toPlainString()
@@ -742,6 +862,62 @@ object Ledger {
             sb.append(xmr(e.balanceAfterPxmr)).append('\n')
         }
         return sb.toString()
+    }
+
+    /**
+     * The same statement as [exportCsv], for machines: one object per
+     * event, oldest first, amounts as XMR strings (fixed-point decimal —
+     * a double would shave piconero off a balance and call it rounding).
+     * Same fiat rule as the CSV: none. Timestamps are ISO-8601 UTC.
+     */
+    fun exportJson(context: android.content.Context): String {
+        fun xmr(pxmr: Long): String =
+            java.math.BigDecimal(pxmr).movePointLeft(12).toPlainString()
+        val fmt = java.time.format.DateTimeFormatter.ISO_INSTANT
+        val events = JSONArray()
+        for (e in build(context).asReversed()) {
+            if (e.pending) continue
+            events.put(JSONObject().apply {
+                put("date_utc", fmt.format(java.time.Instant.ofEpochSecond(e.timestamp)))
+                put("direction", if (e.direction == Direction.Sent) "out" else "in")
+                e.counterparty?.let { put("counterparty", it) }
+                e.note?.let { put("note", it) }
+                if (e.items.isNotEmpty()) {
+                    put("items", JSONArray().also { a ->
+                        e.items.forEach {
+                            a.put(
+                                JSONObject()
+                                    .put("description", it.description)
+                                    .put("amount_xmr", xmr(it.amountPxmr)),
+                            )
+                        }
+                    })
+                }
+                put("amount_xmr", xmr(e.amountPxmr))
+                put("fee_xmr", xmr(e.feePxmr))
+                put("net_xmr", xmr(e.netPxmr))
+                e.taxPxmr?.let { put("tax_xmr", xmr(it)) }
+                if (e.donation) put("donation", true)
+                e.escrow?.let { put("escrow", it.ifBlank { "unnamed" }) }
+                if (e.receipted) {
+                    put("receipted", true)
+                    e.receiptBy?.let { put("receipt_by", it) }
+                    if (e.receiptAt > 0) {
+                        put("receipt_at_utc", fmt.format(java.time.Instant.ofEpochSecond(e.receiptAt)))
+                    }
+                }
+                put("txid", e.txid)
+                put("height", e.height)
+                if (e.locked) put("locked", true)
+                put("balance_after_xmr", xmr(e.balanceAfterPxmr))
+            })
+        }
+        return JSONObject()
+            .put("format", "ducat-ledger")
+            .put("version", 1)
+            .put("generated_utc", fmt.format(java.time.Instant.now()))
+            .put("events", events)
+            .toString(2)
     }
 }
 

@@ -3,17 +3,20 @@ package org.ducatproject.ducat.ui
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.House
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
@@ -23,6 +26,7 @@ import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.Listings
+import org.ducatproject.ducat.Publications
 import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.R
 import uniffi.ducat_mobile.RentalInfo
@@ -67,7 +71,10 @@ internal fun boardChipLabel(kind: Int): Int = when (kind) {
 private enum class Stall { NoPermission, NoFix, NoNetwork }
 
 @Composable
-@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@OptIn(
+    androidx.compose.foundation.layout.ExperimentalLayoutApi::class,
+    androidx.compose.material3.ExperimentalMaterial3Api::class,
+)
 private fun RentSearchScreen(
     kind: Int,
     onOpenChat: (Contact) -> Unit,
@@ -79,12 +86,20 @@ private fun RentSearchScreen(
      * in it and the home tiles pick which to open on.
      */
     chips: List<Int> = Listings.KINDS,
+    /**
+     * A caller-owned noun selection: the unified market row drives this
+     * instead of the internal chips. Zero means every kind at once. Null
+     * keeps the screen's own chips, exactly as before.
+     */
+    externalKind: Int? = null,
 ) {
     // Which nouns to show. The board holds all five and one read returns all
     // of them (§16.18), so filtering here costs nothing — where asking the
     // network once per noun would cost the read five times over, and an empty
     // board is a flat twenty-one seconds each.
-    var showing by rememberSaveable { mutableStateOf(kind) }
+    var showingState by rememberSaveable { mutableStateOf(kind) }
+    val showing = externalKind ?: showingState
+    fun kindShows(k: Int) = showing == 0 || k == showing
     val context = LocalContext.current
     var results by remember { mutableStateOf<List<RentalInfo>?>(null) }
     var busy by remember { mutableStateOf(false) }
@@ -114,6 +129,37 @@ private fun RentSearchScreen(
         onNamed = { val go = intro; intro = null; go?.invoke() },
     )
 
+    // The claim a tap on "Ask about it" starts, by the card it is for. Off
+    // the screen (claimOffScreen), because this one was cancelled in a way
+    // no rotation showed: the scope further down is disposed with the rest
+    // of the list when the listing form opens over it, so a claim out at
+    // that moment finished — contact added, question sent — while `busy`,
+    // remembered up here, stayed true for as long as the search was open
+    // and every Ask button with it. Saveable, so the screen a rotation
+    // rebuilds is the one that reads the outcome and opens the thread.
+    var asking by rememberSaveable { mutableStateOf<String?>(null) }
+    val claimTick by ThreadSends.ticks.collectAsState()
+    LaunchedEffect(claimTick, asking) {
+        val k = asking?.let(::claimKey) ?: return@LaunchedEffect
+        for (o in ThreadSends.take(k)) {
+            asking = null
+            when (o) {
+                is ThreadSends.Outcome.Landed -> o.claimed(context)?.let(onOpenChat)
+                is ThreadSends.Outcome.Failed -> {
+                    DucatLog.w("RentSearch", "claim: ${o.error.message}")
+                    error = context.getString(
+                        // "Ask them for a new one" is the right thing to
+                        // say to someone holding a scanned card and the
+                        // wrong thing entirely here: asking is what they
+                        // were trying to do.
+                        claimFailureRes(o.error, alreadyUsed = R.string.rent_already_asked),
+                    )
+                }
+            }
+        }
+        busy = asking != null && ThreadSends.inFlight(k)
+    }
+
     // The form owns the screen while it is open, exactly as it does on the
     // Renting side — a half-filled listing over a live search behind it is
     // two jobs at once.
@@ -125,9 +171,11 @@ private fun RentSearchScreen(
     // Compose does not warn about, it throws. The first tap on "Sell
     // something" took the whole app down.
     //
-    // Returning rather than stacking: the search's state lives in this
-    // function and survives not emitting its own Dialog, so closing the form
-    // comes back to the results already read rather than searching again.
+    // Returning rather than stacking. What is remembered above this line
+    // survives the form; what is remembered below it — the attempt counter
+    // and the effect keyed on it — is disposed and made afresh, so closing
+    // the form starts the search over (see the note on `found` below, which
+    // is where that restart once bit).
     composing?.let { k ->
         androidx.compose.ui.window.Dialog(
             onDismissRequest = { composing = null },
@@ -153,6 +201,13 @@ private fun RentSearchScreen(
     // permission simply not requested yet.
     var attempt by remember { mutableIntStateOf(0) }
     var asked by remember { mutableStateOf(false) }
+    // True from a pull until that search settles — it drives only the
+    // pull indicator, so the auto-search on entry does not double up with
+    // the in-list spinner row.
+    var pulled by remember { mutableStateOf(false) }
+    androidx.compose.runtime.LaunchedEffect(searching) {
+        if (!searching) pulled = false
+    }
     val scope = rememberCoroutineScope()
     val perm = android.Manifest.permission.ACCESS_FINE_LOCATION
     val locPerm = androidx.activity.compose.rememberLauncherForActivityResult(
@@ -275,7 +330,7 @@ private fun RentSearchScreen(
                         // electrician was told they were finding a place.
                         // And it was pinned to the opening kind, so tapping a
                         // chip left the heading describing the last screen.
-                        stringResource(boardFindTitle(showing)),
+                        stringResource(boardFindTitle(if (showing == 0) Listings.KIND_SALE else showing)),
                         style = MaterialTheme.typography.titleLarge,
                     )
                 }
@@ -326,7 +381,7 @@ private fun RentSearchScreen(
                         )
                     }
                 }
-                if (found != null && stalled == null && chips.size > 1) {
+                if (externalKind == null && found != null && stalled == null && chips.size > 1) {
                     FlowRow(
                         Modifier.fillMaxWidth().padding(bottom = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -336,7 +391,7 @@ private fun RentSearchScreen(
                             val n = found.count { it.kind.toInt() == k }
                             FilterChip(
                                 selected = showing == k,
-                                onClick = { showing = k },
+                                onClick = { showingState = k },
                                 label = { Text(stringResource(R.string.board_chip_count, stringResource(boardChipLabel(k)), n)) },
                             )
                         }
@@ -348,14 +403,25 @@ private fun RentSearchScreen(
                 //
                 // Outside the chips' condition: a screen pinned to one noun
                 // has no chips and still has something to offer.
+                //
+                // Not while an ask is in flight. Opening the form takes this
+                // function down the early return above, which disposes
+                // everything remembered after it — the coroutine scope the
+                // ask runs in included. The claim itself is blocking work on
+                // an IO thread and completes regardless, so the thread was
+                // opened; but the line that clears `busy` and the one that
+                // opens the chat are after the suspension and never ran.
+                // Coming back from the form found every card greyed out for
+                // good, and the person never told they had already asked.
                 if (found != null && stalled == null) {
                     OutlinedButton(
-                        onClick = { composing = showing },
+                        enabled = !busy,
+                        onClick = { composing = if (showing == 0) Listings.KIND_SALE else showing },
                         modifier = Modifier.padding(bottom = 8.dp).height(40.dp),
                     ) {
                         Icon(Icons.Filled.Add, null, Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text(stringResource(listingButton(showing)))
+                        Text(stringResource(listingButton(if (showing == 0) Listings.KIND_SALE else showing)))
                     }
                 }
                 when {
@@ -382,7 +448,7 @@ private fun RentSearchScreen(
                     // until the remembered paint (see Listings.search) made it
                     // happen on every mode switch.
                     found == null ||
-                        (searching && found.none { it.kind.toInt() == showing }) -> Column {
+                        (searching && found.none { kindShows(it.kind.toInt()) }) -> Column {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             // The brand's wait, not the platform's — see
                             // CatSpinner.
@@ -433,18 +499,34 @@ private fun RentSearchScreen(
                     // may list a car five minutes from now, and a screen whose
                     // only exit is Cancel makes you start the whole thing over
                     // to find out.
-                    found.none { it.kind.toInt() == showing } -> Column {
-                        Text(
-                            stringResource(R.string.rent_none_found),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        Spacer(Modifier.height(12.dp))
-                        OutlinedButton(onClick = { attempt++ }) {
-                            Text(stringResource(R.string.rent_search_retry))
+                    found.none { kindShows(it.kind.toInt()) } ->
+                        androidx.compose.material3.pulltorefresh.PullToRefreshBox(
+                            isRefreshing = pulled,
+                            onRefresh = { pulled = true; attempt++ },
+                        ) {
+                            Column(
+                                Modifier.fillMaxSize()
+                                    .verticalScroll(
+                                        androidx.compose.foundation
+                                            .rememberScrollState(),
+                                    ),
+                            ) {
+                                Text(
+                                    stringResource(R.string.rent_none_found),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                                Spacer(Modifier.height(12.dp))
+                                OutlinedButton(onClick = { attempt++ }) {
+                                    Text(stringResource(R.string.rent_search_retry))
+                                }
+                            }
                         }
-                    }
-                    else -> LazyColumn(Modifier.fillMaxSize()) {
+                    else -> androidx.compose.material3.pulltorefresh.PullToRefreshBox(
+                        isRefreshing = pulled,
+                        onRefresh = { pulled = true; attempt++ },
+                    ) {
+                        LazyColumn(Modifier.fillMaxSize()) {
                         if (searching) {
                             item {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -474,81 +556,57 @@ private fun RentSearchScreen(
                                 Spacer(Modifier.height(8.dp))
                             }
                         }
-                        items(found.filter { it.kind.toInt() == showing }) { info ->
+                        items(found.filter { kindShows(it.kind.toInt()) }) { info ->
                             ListingCard(
                                 info = info,
                                 busy = busy,
                                 onAsk = {
                                   val go: () -> Unit = {
                                     busy = true; error = null
-                                    scope.launch {
-                                        val r = withContext(Dispatchers.IO) {
-                                            runCatching {
-                                                val card = uniffi.ducat_mobile
-                                                    .readContactCard(info.card)
-                                                val c = Mailbox.claimCard(context, card, null)
-                                                // This side knows the subject
-                                                // without being told: they
-                                                // tapped it.
-                                                org.ducatproject.ducat.Enquiries.remember(
-                                                    context, c.personaHex,
-                                                    org.ducatproject.ducat.Enquiries.About(
-                                                        title = info.title,
-                                                        pricePxmr = info.pricePxmr.toLong(),
-                                                        depositPxmr = info.depositPxmr.toLong(),
-                                                        kind = info.kind.toInt(),
-                                                    ),
-                                                )
-                                                // Say what this is about.
-                                                //
-                                                // The claim alone opened an
-                                                // empty thread with a stranger:
-                                                // the owner got somebody
-                                                // arriving with nothing said,
-                                                // and the asker got a blank
-                                                // screen and had to remember
-                                                // which of the cars they had
-                                                // tapped. "Ask about it" is a
-                                                // question; this is the
-                                                // question.
-                                                runCatching {
-                                                    Mailbox.send(
-                                                        context, c,
-                                                        context.getString(
-                                                            R.string.rent_asking_about,
-                                                            isolate(info.title),
-                                                        ),
-                                                        org.ducatproject.ducat
-                                                            .PersonaStore(context).personaHex(),
-                                                    )
-                                                }
-                                                c
-                                            }
+                                    asking = info.card
+                                    // Asked from this phone already: the
+                                    // card's reply is ours and the thread it
+                                    // opened is still here. The claim goes to
+                                    // it, and says nothing again — the
+                                    // question is already in it.
+                                    claimOffScreen(context, info.card, onFresh = { c ->
+                                        // This side knows the subject without
+                                        // being told: they tapped it.
+                                        org.ducatproject.ducat.Enquiries.remember(
+                                            context, c.personaHex,
+                                            org.ducatproject.ducat.Enquiries.About(
+                                                title = info.title,
+                                                pricePxmr = info.pricePxmr.toLong(),
+                                                depositPxmr = info.depositPxmr.toLong(),
+                                                kind = info.kind.toInt(),
+                                            ),
+                                        )
+                                        // Say what this is about.
+                                        //
+                                        // The claim alone opened an empty
+                                        // thread with a stranger: the owner
+                                        // got somebody arriving with nothing
+                                        // said, and the asker got a blank
+                                        // screen and had to remember which of
+                                        // the cars they had tapped. "Ask about
+                                        // it" is a question; this is the
+                                        // question.
+                                        runCatching {
+                                            Mailbox.send(
+                                                context, c,
+                                                context.getString(
+                                                    R.string.rent_asking_about,
+                                                    isolate(info.title),
+                                                ),
+                                            )
                                         }
-                                        busy = false
-                                        r.onSuccess { onOpenChat(it) }
-                                            .onFailure {
-                                                DucatLog.w("RentSearch", "claim: ${it.message}")
-                                                error = context.getString(
-                                                    // "Ask them for a new one"
-                                                    // is the right thing to say
-                                                    // to someone holding a
-                                                    // scanned card and the
-                                                    // wrong thing entirely
-                                                    // here: asking is what
-                                                    // they were trying to do.
-                                                    claimFailureRes(
-                                                        it,
-                                                        alreadyUsed = R.string.rent_already_asked,
-                                                    ),
-                                                )
-                                            }
-                                    }
+                                    })
                                   }
                                   if (nameGateNeeded(context)) intro = go else go()
                                 },
                             )
                             Spacer(Modifier.height(10.dp))
+                        }
                         }
                     }
                 }
@@ -566,6 +624,128 @@ private fun RentSearchScreen(
  */
 @Composable
 fun MarketBrowse(onOpenChat: (Contact) -> Unit) {
+    // §16.18.2's two honest axes: WHERE (near / worldwide) and WHAT. One
+    // flat row for WHAT whose chips follow the scope, because that is what
+    // the boards underneath actually hold: a neighbourhood's board carries
+    // kayaks and the town paper side by side (so near-me shows the kinds
+    // plus one Digital chip — local pub notices carry no category), while
+    // a worldwide board IS a category (so the six shelves replace the
+    // kinds, which have nowhere to stand without a place).
+    // The browse remembers where you were looking across launches, not
+    // just rotations: somebody shopping worldwide news all week should
+    // not re-pick it every open. Plain prefs — a shelf choice is not a
+    // secret.
+    val browsePrefs = LocalContext.current
+        .getSharedPreferences("ducat_browse", android.content.Context.MODE_PRIVATE)
+    var scope by androidx.compose.runtime.saveable.rememberSaveable {
+        androidx.compose.runtime.mutableStateOf(browsePrefs.getInt("scope", 0))
+    }
+    var what by androidx.compose.runtime.saveable.rememberSaveable {
+        // 0 all · 1..5 kinds · 6 digital
+        androidx.compose.runtime.mutableStateOf(browsePrefs.getInt("what", 0))
+    }
+    var cat by androidx.compose.runtime.saveable.rememberSaveable {
+        androidx.compose.runtime.mutableStateOf(
+            browsePrefs.getString("cat", null) ?: "news",
+        )
+    }
+    var myLang by androidx.compose.runtime.saveable.rememberSaveable {
+        androidx.compose.runtime.mutableStateOf(browsePrefs.getBoolean("my_lang", true))
+    }
+    androidx.compose.runtime.LaunchedEffect(scope, what, cat, myLang) {
+        browsePrefs.edit()
+            .putInt("scope", scope)
+            .putInt("what", what)
+            .putString("cat", cat)
+            .putBoolean("my_lang", myLang)
+            .apply()
+    }
+    androidx.compose.foundation.layout.Column(
+        androidx.compose.ui.Modifier.fillMaxSize(),
+    ) {
+        androidx.compose.foundation.layout.Row(
+            androidx.compose.ui.Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp),
+        ) {
+            FilterChip(
+                selected = scope == 0,
+                onClick = { scope = 0 },
+                label = { Text(stringResource(R.string.market_near_me)) },
+            )
+            FilterChip(
+                selected = scope == 1,
+                onClick = { scope = 1 },
+                label = { Text(stringResource(R.string.market_worldwide)) },
+            )
+        }
+        androidx.compose.foundation.layout.Row(
+            androidx.compose.ui.Modifier
+                .horizontalScroll(androidx.compose.foundation.rememberScrollState())
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp),
+        ) {
+            if (scope == 0) {
+                listOf(
+                    0 to R.string.market_what_all,
+                    Listings.KIND_SALE to boardChipLabel(Listings.KIND_SALE),
+                    Listings.KIND_PLACE to boardChipLabel(Listings.KIND_PLACE),
+                    Listings.KIND_VEHICLE to boardChipLabel(Listings.KIND_VEHICLE),
+                    Listings.KIND_GEAR to boardChipLabel(Listings.KIND_GEAR),
+                    Listings.KIND_SKILL to boardChipLabel(Listings.KIND_SKILL),
+                    6 to R.string.market_what_digital,
+                ).forEach { (k, res) ->
+                    FilterChip(
+                        selected = what == k,
+                        onClick = { what = k },
+                        label = { Text(stringResource(res)) },
+                    )
+                }
+            } else {
+                Publications.MARKET_CATEGORIES.forEach { slug ->
+                    FilterChip(
+                        selected = cat == slug,
+                        onClick = { cat = slug },
+                        label = { Text(marketCategoryLabel(slug)) },
+                    )
+                }
+            }
+        }
+        if (scope == 1) {
+            val lang = java.util.Locale.getDefault()
+            androidx.compose.foundation.layout.Row(
+                androidx.compose.ui.Modifier.padding(horizontal = 16.dp),
+            ) {
+                FilterChip(
+                    selected = myLang,
+                    onClick = { myLang = !myLang },
+                    label = {
+                        Text(
+                            if (myLang) lang.getDisplayLanguage(lang)
+                            else stringResource(R.string.market_all_langs),
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    },
+                )
+            }
+            WorldwideShelf(cat, myLang)
+            return@Column
+        }
+        if (what == 6) {
+            LocalShelf()
+            return@Column
+        }
+        androidx.compose.runtime.key(Unit) {
+            RentSearchScreen(
+                kind = Listings.KIND_SALE,
+                onOpenChat = onOpenChat,
+                externalKind = what,
+            )
+        }
+    }
+}
+
+@Composable
+private fun MarketNearMe(onOpenChat: (Contact) -> Unit) {
     RentSearchScreen(
         kind = Listings.KIND_SALE,
         onOpenChat = onOpenChat,
@@ -775,11 +955,19 @@ private fun ListingCard(info: RentalInfo, busy: Boolean, onAsk: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+            // Numbers say what they count. A car's line ended "Hybrid LE · 5"
+            // and a room's began "1 · 2 · 28 m²" — the seats, bedrooms and
+            // sleeping places, which the form labels and the card did not.
+            //
+            // And what the owner typed is isolated from what this phone
+            // says: the make, model, trim and tags come off a public board,
+            // and a right-to-left one beside a localised "automatic" would
+            // otherwise reorder the whole line.
             val specs = buildList {
                 if (vehicle) {
                     info.year?.let { add(it.toString()) }
-                    info.make?.let { add(it) }
-                    info.model?.let { add(it) }
+                    info.make?.let { add(isolate(it)) }
+                    info.model?.let { add(isolate(it)) }
                     info.gearbox?.let {
                         add(stringResource(
                             if (it.toInt() == 1) R.string.rent_manual else R.string.rent_automatic,
@@ -793,11 +981,15 @@ private fun ListingCard(info: RentalInfo, busy: Boolean, onAsk: () -> Unit) {
                             else -> R.string.rent_petrol
                         }))
                     }
-                    info.trim?.let { add(it) }
-                    info.seats?.let { add(Amounts.count(it.toLong())) }
+                    info.trim?.let { add(isolate(it)) }
+                    info.seats?.let {
+                        add(pluralStringResource(R.plurals.rent_seats_n, it.toInt(), it.toInt()))
+                    }
                 } else if (place) {
-                    info.rooms?.let { add(Amounts.count(it.toLong())) }
-                    info.sleeps?.let { add(Amounts.count(it.toLong())) }
+                    info.rooms?.let {
+                        add(pluralStringResource(R.plurals.rent_rooms_n, it.toInt(), it.toInt()))
+                    }
+                    info.sleeps?.let { add(stringResource(R.string.rent_sleeps_n, it.toInt())) }
                     info.sizeM2?.let { add(stringResource(R.string.rent_size_m2, it.toInt())) }
                     info.subtype?.let {
                         add(stringResource(
@@ -812,7 +1004,7 @@ private fun ListingCard(info: RentalInfo, busy: Boolean, onAsk: () -> Unit) {
                     // Sport category read "Whole place".
                     info.subtype?.let { add(stringResource(categoryLabel(kind, it.toInt()))) }
                 }
-                addAll(info.features)
+                addAll(info.features.map { isolate(it) })
                 // Only when there is more than one. Somebody deciding whether
                 // to ask wants to know they are not competing for the last
                 // one — and for the listing that *is* one thing, which is

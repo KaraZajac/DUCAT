@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_sites">Sites</string>
+    <string name="sites_intro">Pagina\'s die reizen als publicaties: heel opgehaald, offline leesbaar, gespiegeld door lezers die dat kiezen. Niets op een pagina kan je zien.</string>
+    <string name="sites_empty_title">Nog geen sites</string>
+    <string name="sites_empty_body">Een ducat-site is een verzegelde kamer — elke afbeelding en stijl reist in de bundel, scripts blijven uit, alleen ducat:-links werken. Plak een adres om er een te bewaren.</string>
+    <string name="sites_add">Site toevoegen</string>
+    <string name="sites_add_confirm">Toevoegen</string>
+    <string name="sites_add_link_title">Deze site toevoegen?</string>
+    <string name="sites_add_link_body">Dit adres kwam via een link. Toevoegen zet hem op je plank; er wordt niets opgehaald tot je hem opent.</string>
+    <string name="sites_uri_label">ducat:site/…-adres</string>
+    <string name="sites_bad_uri">Dat is geen ducat:site/-adres.</string>
+    <string name="sites_fetching">Ophalen…</string>
+    <string name="sites_not_fetched">Nog niet opgehaald</string>
+    <string name="sites_update_waiting">Update beschikbaar — opent vers</string>
+    <string name="sites_offline_ready">Offline klaar</string>
+    <string name="sites_open">Openen</string>
+    <string name="sites_keep_alive">Deze site voor anderen in leven houden</string>
+    <string name="sites_remove">Verwijderen</string>
+</resources>

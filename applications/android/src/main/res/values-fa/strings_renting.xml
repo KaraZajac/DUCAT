@@ -123,4 +123,12 @@
     <string name="rent_in_unit">به %1$s</string>
     <string name="board_chip_count">%1$s %2$d</string>
     <string name="rent_size_m2">%1$d متر مربع</string>
+    <string name="rent_waiting_board">هنوز روی تابلو نیست — خودبه‌خود دوباره تلاش می‌شود</string>
+    <plurals name="rent_seats_n">
+        <item quantity="other">%1$d صندلی</item>
+    </plurals>
+    <plurals name="rent_rooms_n">
+        <item quantity="other">%1$d اتاق خواب</item>
+    </plurals>
+    <string name="rent_sleeps_n">گنجایش %1$d نفر</string>
 </resources>

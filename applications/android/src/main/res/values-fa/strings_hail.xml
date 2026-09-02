@@ -21,6 +21,8 @@
     <!-- Driver: DriveScreen -->
     <string name="hail_rider_declined_title">مسافر رد کرد</string>
     <string name="hail_rider_declined_body">پیشنهادت را نپذیرفت. درخواستش از تابلو رفته است.</string>
+    <string name="hail_offer_lapsed_title">پاسخی به پیشنهادت نیامد</string>
+    <string name="hail_offer_lapsed_body">نیم ساعت گذشت و مسافر نه بله گفت نه نه. پیشنهاد در گفتگو می‌ماند، اگر هنوز بخواهد.</string>
     <string name="hail_ok">باشه</string>
     <string name="hail_on_duty">سر کار</string>
     <string name="hail_net_wide">تور گسترده — حدود %1$s پهنا</string>
@@ -102,5 +104,10 @@
     <string name="hail_step_card">در حال ساخت کد…</string>
     <string name="hail_search">جستجو</string>
     <string name="hail_clear_place">پاک کردن</string>
+    <string name="hail_no_places">مکانی با این مشخصات پیدا نشد</string>
+    <string name="hail_search_unreachable">جستجوی نقشه در دسترس نبود — اتصال خود را بررسی کنید</string>
     <string name="hail_joining_network">در حال پیوستن به شبکه — هنوز تابلوها خوانده نشده‌اند.</string>
+    <string name="hail_accept_sending">در حال اعلام موافقت به %1$s…</string>
+    <string name="hail_accept_failed">موافقتت به %1$s فرستاده نشد. شبکه را بررسی کن و پیشنهاد را دوباره ببین.</string>
+    <string name="hail_escrow_failed">کرایه به امانت گذاشته نشد. با راننده در گفتگو حلش کن.</string>
 </resources>

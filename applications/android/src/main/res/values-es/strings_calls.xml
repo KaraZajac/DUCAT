@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">Te llamó</string>
+    <string name="chat_call_you_rang">Llamaste</string>
+    <string name="chat_call_answered">Contestó tu llamada</string>
+    <string name="chat_call_you_answered">Contestaste</string>
+    <string name="chat_call_missed_note">Sonó una llamada mientras no estabas.</string>
+    <string name="chatlist_preview_call">Llamó</string>
+    <string name="chatlist_preview_call_answered">Contestó una llamada</string>
+    <string name="notify_call">%1$s está llamando</string>
+    <string name="notify_call_answered">%1$s contestó tu llamada</string>
+    <string name="call_button">Llamar</string>
+    <string name="call_calling">Llamando…</string>
+    <string name="call_incoming">Llamada DUCAT entrante</string>
+    <string name="call_frames">↓%1$d ↑%2$d tramas</string>
+    <string name="call_answer_btn">Contestar</string>
+    <string name="call_end_btn">Colgar</string>
+    <string name="call_body_ring">Te está llamando</string>
+    <string name="call_body_answer">Contestada</string>
+    <string name="call_body_decline">Ahora no puedo hablar.</string>
+    <string name="notify_call_channel">Llamadas entrantes</string>
+    <string name="notify_call_incoming">Llamada entrante</string>
+    <string name="call_no_answer">Sin respuesta</string>
+    <string name="call_leave_message">Dejar un mensaje</string>
+    <string name="call_dismiss">Ahora no</string>
+    <string name="call_body_cancel">Colgó antes de que contestaras.</string>
+    <string name="call_connecting">Conectando…</string>
+    <string name="call_unreached">No se pudo contactar</string>
+    <string name="call_never_connected">No llegó a conectarse</string>
+    <string name="call_notify_calling">Llamando a %1$s…</string>
+    <string name="call_notify_in_call">En llamada con %1$s</string>
+    <string name="call_notify_return">Toca para volver.</string>
+</resources>

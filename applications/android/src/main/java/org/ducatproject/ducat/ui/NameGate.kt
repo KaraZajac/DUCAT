@@ -52,6 +52,13 @@ fun NameGate(
 ) {
     if (!open) return
     val context = LocalContext.current
+    // Not saveable, and it would not help: this dialog is gated by the
+    // caller's *continuation* — the thing to do once they are named — which
+    // is a lambda and cannot go in a Bundle. A rotation closes the gate and
+    // drops the action with it, so the name has nowhere to be typed into.
+    // Making it survive means giving the four callers a saveable tag for
+    // what they were about to do; worth it only if this ever stops being a
+    // dialog somebody sees once in the life of the phone.
     var name by remember { mutableStateOf("") }
 
     // Staying anonymous, however you say it.

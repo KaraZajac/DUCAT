@@ -25,12 +25,14 @@
     <string name="bartab_back">Terug</string>
     <string name="bartab_bill_cancelled_msg">Die rekening van %1$s is geannuleerd — er hoeft niets betaald te worden.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · tab nu %3$s</string>
+    <string name="bartab_discard_notice">Tab weggegooid — er hoeft niets betaald te worden.</string>
     <string name="bartab_remove_line">Verwijderen</string>
     <string name="bartab_settle_bill">Afrekenen — rekening %1$s</string>
     <string name="bartab_settle_hint">Eén gespecificeerde rekening in je gesprek met %1$s. Ze kunnen overal vandaan betalen — het gesprek sluit niet als ze weggaan.</string>
     <string name="bartab_discard_tab">Tab weggooien</string>
     <string name="bartab_discard_title">Deze tab weggooien?</string>
     <string name="bartab_discard_body">De tab en alles wat erop is aangeslagen worden van deze telefoon verwijderd. Er wordt geen rekening gestuurd, en dit kan niet ongedaan worden gemaakt.</string>
+    <string name="bartab_discard_body_told">De tab en alles wat erop is aangeslagen worden van deze telefoon verwijderd. Er wordt geen rekening gestuurd — ze horen dat er niets betaald hoeft te worden — en dit kan niet ongedaan worden gemaakt.</string>
     <string name="bartab_discard_confirm">Weggooien</string>
     <string name="bartab_keep_tab">Tab houden</string>
     <string name="bartab_billed_hint">Rekening gestuurd. De bon gaat vanzelf naar ze zodra de betaling binnenkomt. Is er op een andere manier afgerekend, geef dat dan hier aan:</string>
@@ -40,6 +42,13 @@
     <string name="bartab_cancelled_note">Geannuleerd — ze zijn in het gesprek op de hoogte gebracht.</string>
     <string name="bartab_paid_oob_note">Buiten DUCAT betaald ✓ — bon verstuurd, geen transactie gekoppeld.</string>
     <string name="bartab_paid_note">Betaald ✓ — bon verstuurd.</string>
+    <string name="bartab_bill_pending">Afgerekend, maar de rekening staat nog op deze telefoon: ze gaat weg zodra het netwerk er weer is. Anders afgerekend? Zeg het hier:</string>
+    <string name="bartab_bill_unsent">De rekening is nooit aangekomen: het gesprek is gereset voordat ze kon vertrekken. Annuleer ze en reken opnieuw af, of geef hier aan dat er anders is betaald:</string>
+    <string name="bartab_cancelled_pending">Geannuleerd — ze weten het nog niet. Het bericht gaat weg zodra deze telefoon het netwerk weer vindt.</string>
+    <string name="bartab_cancelled_unsent">Geannuleerd — maar het bericht heeft deze telefoon nooit verlaten en kan nu niet meer weg. Zeg het ze in het gesprek, anders betalen ze deze rekening misschien nog.</string>
+    <string name="bartab_paid_oob_pending">Buiten DUCAT betaald ✓ — de bon staat nog op deze telefoon. Hij gaat weg zodra het netwerk er weer is.</string>
+    <string name="bartab_paid_oob_unsent">Buiten DUCAT betaald ✓ — maar de bon kon niet worden verzonden.</string>
+    <string name="bartab_send_receipt">Bon verzenden</string>
     <string name="bartab_remove_from_book">Uit het tabboek verwijderen</string>
     <string name="bartab_back_to_tabs">Terug naar tabs</string>
     <!-- What the payer reads on the bill and the receipt. Written in
@@ -55,4 +64,8 @@
     <string name="bill_note_cancelled">De rekening van %1$s is ingetrokken — niets te betalen.</string>
     <string name="bill_note_sale">Je rekening</string>
     <string name="bartab_tip_line">Fooi — bedankt</string>
+    <string name="bill_note_issue">Abonnement</string>
+    <string name="bartab_paid_pending">Betaald ✓ — de bon staat nog op deze telefoon. Hij gaat weg zodra het netwerk er weer is.</string>
+    <string name="bartab_paid_unsent">Betaald ✓ — maar de bon kon niet worden verzonden. Het wordt vanzelf opnieuw geprobeerd.</string>
+    <string name="bartab_removed_notice">Eraf: %1$s · tab nu %2$s</string>
 </resources>

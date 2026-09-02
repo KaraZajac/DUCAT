@@ -24,12 +24,14 @@
     <string name="bartab_back">กลับ</string>
     <string name="bartab_bill_cancelled_msg">บิล %1$s นั้นถูกยกเลิกแล้ว — ไม่ต้องชำระ</string>
     <string name="bartab_drink_notice">%1$s — %2$s · ยอดบิลตอนนี้ %3$s</string>
+    <string name="bartab_discard_notice">ยกเลิกบิลแล้ว — ไม่ต้องชำระ</string>
     <string name="bartab_remove_line">ลบออก</string>
     <string name="bartab_settle_bill">เช็คบิล — เรียกเก็บ %1$s</string>
     <string name="bartab_settle_hint">บิลแยกรายการหนึ่งใบส่งเข้าบทสนทนากับ %1$s เขาจ่ายจากที่ไหนก็ได้ — บทสนทนาไม่ปิดแม้เขาจะกลับไปแล้ว</string>
     <string name="bartab_discard_tab">ทิ้งบิล</string>
     <string name="bartab_discard_title">ทิ้งบิลนี้?</string>
     <string name="bartab_discard_body">บิลและทุกรายการที่ลงไว้จะถูกลบจากโทรศัพท์เครื่องนี้ จะไม่มีการส่งบิลเรียกเก็บ และย้อนกลับไม่ได้</string>
+    <string name="bartab_discard_body_told">บิลและทุกรายการที่ลงไว้จะถูกลบจากโทรศัพท์เครื่องนี้ จะไม่มีการส่งบิลเรียกเก็บ — ลูกค้าจะได้รับแจ้งว่าไม่ต้องชำระ — และย้อนกลับไม่ได้</string>
     <string name="bartab_discard_confirm">ทิ้ง</string>
     <string name="bartab_keep_tab">เก็บบิลไว้</string>
     <string name="bartab_billed_hint">เรียกเก็บแล้ว ใบเสร็จจะส่งถึงเขาเองเมื่อเงินเข้า หากชำระด้วยวิธีอื่นไปแล้ว แจ้งไว้ที่นี่:</string>
@@ -39,6 +41,13 @@
     <string name="bartab_cancelled_note">ยกเลิกแล้ว — แจ้งให้เขาทราบในบทสนทนาแล้ว</string>
     <string name="bartab_paid_oob_note">ชำระนอก DUCAT ✓ — ส่งใบเสร็จแล้ว ไม่มีธุรกรรมแนบ</string>
     <string name="bartab_paid_note">ชำระแล้ว ✓ — ส่งใบเสร็จแล้ว</string>
+    <string name="bartab_bill_pending">เรียกเก็บแล้ว แต่บิลยังอยู่ในโทรศัพท์เครื่องนี้ — จะส่งออกทันทีที่เครือข่ายกลับมา ชำระด้วยวิธีอื่นแล้ว? บอกไว้ที่นี่:</string>
+    <string name="bartab_bill_unsent">บิลไม่เคยไปถึงพวกเขา: การสนทนาถูกรีเซ็ตก่อนที่บิลจะส่งออกได้ ยกเลิกแล้วเรียกเก็บใหม่ หรือบอกไว้ที่นี่หากชำระด้วยวิธีอื่นแล้ว:</string>
+    <string name="bartab_cancelled_pending">ยกเลิกแล้ว — ยังไม่ได้แจ้งพวกเขา ข้อความจะส่งออกทันทีที่โทรศัพท์เครื่องนี้พบเครือข่าย</string>
+    <string name="bartab_cancelled_unsent">ยกเลิกแล้ว — แต่ข้อความไม่เคยออกจากโทรศัพท์เครื่องนี้ และตอนนี้ส่งไม่ได้แล้ว บอกพวกเขาในการสนทนา ไม่เช่นนั้นพวกเขาอาจยังจ่ายบิลนี้อยู่</string>
+    <string name="bartab_paid_oob_pending">ชำระนอก DUCAT ✓ — ใบเสร็จยังอยู่ในโทรศัพท์เครื่องนี้ จะส่งออกทันทีที่เครือข่ายกลับมา</string>
+    <string name="bartab_paid_oob_unsent">ชำระนอก DUCAT ✓ — แต่ส่งใบเสร็จไม่ได้</string>
+    <string name="bartab_send_receipt">ส่งใบเสร็จ</string>
     <string name="bartab_remove_from_book">ลบออกจากสมุดบิล</string>
     <string name="bartab_back_to_tabs">กลับไปหน้าบิล</string>
     <!-- What the payer reads on the bill and the receipt. Written in
@@ -54,4 +63,8 @@
     <string name="bill_note_cancelled">บิล %1$s ถูกยกเลิกแล้ว ไม่ต้องชำระ</string>
     <string name="bill_note_sale">บิลของคุณ</string>
     <string name="bartab_tip_line">ทิป — ขอบคุณ</string>
+    <string name="bill_note_issue">ค่าสมาชิก</string>
+    <string name="bartab_paid_pending">ชำระแล้ว ✓ — ใบเสร็จยังอยู่ในโทรศัพท์เครื่องนี้ จะส่งออกทันทีที่เครือข่ายกลับมา</string>
+    <string name="bartab_paid_unsent">ชำระแล้ว ✓ — แต่ส่งใบเสร็จไม่ได้ จะลองส่งใหม่เองโดยอัตโนมัติ</string>
+    <string name="bartab_removed_notice">เอาออก: %1$s · ยอดบิลตอนนี้ %2$s</string>
 </resources>

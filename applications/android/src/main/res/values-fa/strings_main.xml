@@ -8,6 +8,8 @@
     <string name="main_backup_title">پشتیبان بگیر</string>
     <string name="main_backup_body">مخاطبینی داری که در آخرین پشتیبانت نیستند. بازیابی، پول را برمی‌گرداند اما آدم‌ها را نه.</string>
     <string name="main_open_backup_settings">باز کردن تنظیمات پشتیبان</string>
+    <string name="main_notify_off_title">اعلان‌ها خاموش است</string>
+    <string name="main_notify_off_body">گوشی نمی‌تواند به شما خبر دهد که پولی رسیده، صورت‌حسابی آمده یا کسی تماس گرفته است. برای روشن کردن ضربه بزنید.</string>
     <string name="main_recent">اخیر</string>
     <string name="main_see_all">دیدن همه</string>
     <string name="main_card_link_title">مخاطب افزوده شود؟</string>
@@ -38,4 +40,9 @@
     <string name="err_no_keys_yet">هنوز تبادل کارت‌ها میان شما کامل نشده است.</string>
     <string name="err_conversation_too_old">کارت آن‌ها برای این برنامه قدیمی است. کارت تازه‌ای بخواهید.</string>
     <string name="err_board_full">الان درخواست‌های زیادی در این حوالی هست. یک دقیقه دیگر دوباره امتحان کنید.</string>
+    <string name="main_deals_title">معامله‌ها</string>
+    <plurals name="main_deals_waiting">
+        <item quantity="one">%1$d معامله منتظر شماست</item>
+        <item quantity="other">%1$d معامله منتظر شماست</item>
+    </plurals>
 </resources>

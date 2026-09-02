@@ -25,12 +25,14 @@
     <string name="bartab_back">Retour</string>
     <string name="bartab_bill_cancelled_msg">Cette addition de %1$s est annulée — rien à payer.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · ardoise à %3$s</string>
+    <string name="bartab_discard_notice">Ardoise abandonnée — rien à payer.</string>
     <string name="bartab_remove_line">Retirer</string>
     <string name="bartab_settle_bill">Clôturer — addition %1$s</string>
     <string name="bartab_settle_hint">Une addition détaillée dans ta conversation avec %1$s. Le paiement peut se faire de n\'importe où — le fil ne se ferme pas quand la personne s\'en va.</string>
     <string name="bartab_discard_tab">Jeter l\'ardoise</string>
     <string name="bartab_discard_title">Jeter cette ardoise ?</string>
     <string name="bartab_discard_body">L\'ardoise et tout ce qui y a été inscrit sont supprimés de ce téléphone. Aucune addition n\'est envoyée, et c\'est irréversible.</string>
+    <string name="bartab_discard_body_told">L\'ardoise et tout ce qui y a été inscrit sont supprimés de ce téléphone. Aucune addition n\'est envoyée — la personne est prévenue qu\'il n\'y a rien à payer — et c\'est irréversible.</string>
     <string name="bartab_discard_confirm">Jeter</string>
     <string name="bartab_keep_tab">Garder l\'ardoise</string>
     <string name="bartab_billed_hint">Facturée. Le reçu leur parvient tout seul quand le paiement arrive. Si elle a été réglée autrement, indique-le ici :</string>
@@ -40,6 +42,13 @@
     <string name="bartab_cancelled_note">Annulée — la personne a été prévenue dans la conversation.</string>
     <string name="bartab_paid_oob_note">Payée hors DUCAT ✓ — reçu envoyé, aucune transaction attachée.</string>
     <string name="bartab_paid_note">Payée ✓ — reçu envoyé.</string>
+    <string name="bartab_bill_pending">Facturée, mais l\'addition est encore sur ce téléphone : elle partira dès que le réseau sera de retour. Réglée autrement ? Dites-le ici :</string>
+    <string name="bartab_bill_unsent">L\'addition ne leur est jamais parvenue : la conversation a été réinitialisée avant qu\'elle ne parte. Annulez-la et refacturez, ou indiquez ici si elle a été réglée autrement :</string>
+    <string name="bartab_cancelled_pending">Annulée — ils ne sont pas encore prévenus. L\'avis partira dès que ce téléphone retrouvera le réseau.</string>
+    <string name="bartab_cancelled_unsent">Annulée — mais l\'avis n\'a jamais quitté ce téléphone et ne peut plus partir. Prévenez-les dans la conversation, sinon ils risquent de payer cette addition.</string>
+    <string name="bartab_paid_oob_pending">Payée hors DUCAT ✓ — le reçu est encore sur ce téléphone. Il partira dès que le réseau sera de retour.</string>
+    <string name="bartab_paid_oob_unsent">Payée hors DUCAT ✓ — mais le reçu n\'a pas pu être envoyé.</string>
+    <string name="bartab_send_receipt">Envoyer le reçu</string>
     <string name="bartab_remove_from_book">Retirer du carnet d\'ardoises</string>
     <string name="bartab_back_to_tabs">Retour aux ardoises</string>
     <!-- What the payer reads on the bill and the receipt. Written in
@@ -55,4 +64,8 @@
     <string name="bill_note_cancelled">L\'addition de %1$s est annulée — rien à payer.</string>
     <string name="bill_note_sale">Votre ticket</string>
     <string name="bartab_tip_line">Pourboire — merci</string>
+    <string name="bill_note_issue">Abonnement</string>
+    <string name="bartab_paid_pending">Payée ✓ — le reçu est encore sur ce téléphone. Il partira dès que le réseau sera de retour.</string>
+    <string name="bartab_paid_unsent">Payée ✓ — mais le reçu n\'a pas pu être envoyé. Il sera réessayé tout seul.</string>
+    <string name="bartab_removed_notice">Retiré : %1$s · ardoise à %2$s</string>
 </resources>

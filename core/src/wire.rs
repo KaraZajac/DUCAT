@@ -176,6 +176,23 @@ pub mod f {
     pub const MSG_ATT_HASH: u64 = 198;
     pub const MSG_ATT_MIME: u64 = 199;
     pub const MSG_ATT_NAME: u64 = 200;
+    // §16.15's second transport (post-1.0): the sealed blob rides a swarm
+    // share instead of a DHT record — same key/nonce/len/hash/mime fields,
+    // different road. Exactly one of MSG_ATT_RECORD / MSG_ATT_SWARM.
+    // 276-277 stay unassigned for ever: 276 is the strict-reader probe the
+    // publication_unknown_field vector pins as unknown, and assigning past
+    // a probe is the bond_proof collision (0.60) all over again.
+    pub const MSG_ATT_SWARM: u64 = 278;
+    pub const MSG_ATT_SWARM_DIGEST: u64 = 279;
+
+    // §16.22 site head (post-1.0): the mutable pointer a ducat: site URI
+    // names. Lives in the site record's subkey 0; updating the site is
+    // rewriting this head at the same record key.
+    pub const SITE_VERSION: u64 = 280;
+    pub const SITE_TITLE: u64 = 281;
+    pub const SITE_SHARE: u64 = 282;
+    pub const SITE_DIGEST: u64 = 283;
+    pub const SITE_UPDATED: u64 = 284;
     // Read watermark and ring size on a log head (§16.16, §16.12).
     pub const HEAD_READ: u64 = 201;
     pub const HEAD_RING: u64 = 202;
@@ -215,6 +232,57 @@ pub mod f {
     pub const MSG_POS_RECORD: u64 = 218;
     /// A fresh 32-byte key for that stream, one per ride, never reused.
     pub const MSG_POS_STREAM: u64 = 219;
+
+    // PUBLICATION_KEY (§16.20, kind 13) — a paid thread handing over what a
+    // period of a publication costs the network nothing to copy: the key.
+    // The shelf reference (record + standing head key) rides the FIRST
+    // delivery and is optional after; the period pair is the kind's whole
+    // point and is mandatory on it.
+    /// The publication's root record — its shelf.
+    pub const MSG_PUB_RECORD: u64 = 257;
+    /// The standing head key that opens the shelf's index, for the life of
+    /// the subscription. Travels with the record or not at all.
+    pub const MSG_PUB_HEAD: u64 = 258;
+    /// The publisher's own label for the period ("2026-09"). ≤64 bytes.
+    pub const MSG_PUB_PERIOD: u64 = 259;
+    /// That period's content key. Opaque 32 bytes to the reader — §16.20
+    /// derives it on the publisher's side; the reader just holds it.
+    pub const MSG_PUB_KEY: u64 = 260;
+    /// A heavy period's swarm shipment (§16.20): the share key a fetcher
+    /// bootstraps from…
+    pub const MSG_PUB_SWARM_KEY: u64 = 261;
+    /// …and the index digest that authenticates what answers. Together or
+    /// not at all: a key without its digest bootstraps into whatever
+    /// replies, which is not a fetch, it is an ask.
+    pub const MSG_PUB_SWARM_DIGEST: u64 = 262;
+    /// §16.21: a live call's private-route blob…
+    pub const MSG_CALL_ROUTE: u64 = 263;
+    /// …and the id both halves of the call quote.
+    pub const MSG_CALL_ID: u64 = 264;
+
+    // PUB_NOTICE (§16.18.2) — a publication listed on a public board. The
+    // board name carries the where (a topic, or a local cell for the town
+    // paper); the notice carries only what a stranger needs to decide to
+    // subscribe. Claiming the card IS subscribing (§16.20) — the notice is
+    // the advertisement, the sealed thread remains the relationship.
+    pub const PN_VERSION: u64 = 265;
+    /// A `ducat:` card URI, purpose `publish`, claim-once.
+    pub const PN_CARD: u64 = 266;
+    pub const PN_TITLE: u64 = 267;
+    /// A sentence about it. Absent when the title already says everything;
+    /// an empty blurb is absence wearing extra bytes and is refused.
+    pub const PN_BLURB: u64 = 268;
+    /// Piconero a period. Absent means free — an explicit zero is a second
+    /// spelling of the same fact, and one meaning gets one encoding.
+    pub const PN_PRICE: u64 = 269;
+    pub const PN_EXPIRY: u64 = 270;
+
+    // The stamp block, §16.18.1's five, in this notice's own namespace.
+    pub const PN_POSTER: u64 = 271;
+    pub const PN_SIG: u64 = 272;
+    pub const PN_POW: u64 = 273;
+    pub const PN_BEACON_HEIGHT: u64 = 274;
+    pub const PN_BEACON_HASH: u64 = 275;
 
     // RENTAL_NOTICE (§16.18) — a listing on a public board. The second
     // object that lives in the open, and the one that stays there for days

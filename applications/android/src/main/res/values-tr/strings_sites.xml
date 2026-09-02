@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_sites">Siteler</string>
+    <string name="sites_intro">Yayınlar gibi yolculuk eden sayfalar: bütün olarak alınır, çevrimdışı okunur, seçen okurlarca aynalanır. Sayfadaki hiçbir şey seni göremez.</string>
+    <string name="sites_empty_title">Henüz site yok</string>
+    <string name="sites_empty_body">Bir ducat sitesi mühürlü bir odadır — her görsel ve stil pakette gelir, betikler kapalı, yalnız ducat: bağlantıları çalışır. Bir adres yapıştırıp sakla.</string>
+    <string name="sites_add">Site ekle</string>
+    <string name="sites_add_confirm">Ekle</string>
+    <string name="sites_add_link_title">Bu site eklensin mi?</string>
+    <string name="sites_add_link_body">Bu adres bir bağlantıyla geldi. Eklemek onu rafına koyar; sen açana kadar hiçbir şey indirilmez.</string>
+    <string name="sites_uri_label">ducat:site/… adresi</string>
+    <string name="sites_bad_uri">Bu bir ducat:site/ adresi değil.</string>
+    <string name="sites_fetching">Alınıyor…</string>
+    <string name="sites_not_fetched">Henüz alınmadı</string>
+    <string name="sites_update_waiting">Güncelleme var — taze açılır</string>
+    <string name="sites_offline_ready">Çevrimdışı hazır</string>
+    <string name="sites_open">Aç</string>
+    <string name="sites_keep_alive">Bu siteyi başkaları için yaşat</string>
+    <string name="sites_remove">Kaldır</string>
+</resources>

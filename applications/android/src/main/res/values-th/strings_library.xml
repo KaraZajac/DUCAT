@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_library">ห้องสมุด</string>
+    <string name="library_empty">ยังไม่มีอะไรที่นี่ เมื่อผู้จัดพิมพ์ส่งฉบับมาให้คุณ จะถูกเก็บไว้ที่นี่ — และยังอยู่แม้ลบแชทไปแล้ว</string>
+    <string name="library_issue">ฉบับ %1$s</string>
+    <string name="library_on_device">อยู่ในเครื่องนี้ · %1$s</string>
+    <string name="library_no_shipment">เก็บกุญแจไว้แล้ว — ยังไม่มีดาวน์โหลดให้</string>
+    <string name="library_download">ดาวน์โหลด</string>
+    <string name="library_progress">%1$s จาก %2$s</string>
+    <string name="library_starting">กำลังเริ่ม…</string>
+    <string name="library_failed">ดาวน์โหลดล้มเหลว: %1$s</string>
+    <string name="library_gone">ไม่อยู่ในรายชื่อติดต่อแล้ว</string>
+    <string name="chat_issue_sent_you">ส่งฉบับมาให้คุณ</string>
+    <string name="chat_issue_you_sent">คุณส่งฉบับแล้ว</string>
+    <string name="chatlist_preview_issue">ฉบับใหม่: %1$s</string>
+    <string name="notify_new_issue">%1$s ส่งฉบับใหม่มาให้</string>
+    <string name="library_note_new_issue">ฉบับใหม่ออกแล้ว</string>
+    <string name="library_unsubscribe">เลิกติดตาม</string>
+    <string name="library_unsub_confirm">หยุดรับจาก %1$s? ฉบับที่มีอยู่ยังเป็นของคุณ</string>
+    <string name="library_unsub_keep">คงการสมัครไว้</string>
+    <string name="library_resubscribe">สมัครใหม่</string>
+    <string name="library_unsubscribed">เลิกแล้ว — ไม่เก็บฉบับใหม่</string>
+    <string name="library_unsub_note">เลิกติดตามแล้ว</string>
+    <plurals name="main_issues_waiting">
+        <item quantity="other">%1$d ฉบับใหม่รออยู่</item>
+    </plurals>
+    <string name="library_open">เปิด</string>
+    <string name="library_queued">อยู่ในคิว</string>
+</resources>

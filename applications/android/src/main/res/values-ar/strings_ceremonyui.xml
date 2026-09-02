@@ -12,6 +12,9 @@
     <string name="ceremony_accept_and_pay">قبول ودفع</string>
     <string name="ceremony_no_address">لا عنوان في هذا الطلب — اسألهم أين تُرسل المال.</string>
     <string name="ceremony_accept_opens_confirm">القبول يفتح شاشة التأكيد — لا يتحرك شيء حتى توافق هناك.</string>
+    <string name="ceremony_bill_withdrawn">سحب %1$s هذه الفاتورة — لا شيء للدفع.</string>
+    <string name="ceremony_bill_declined">رفضت هذه الفاتورة.</string>
+    <string name="ceremony_bill_paid">مدفوعة ✓ — هذه الفاتورة مسوّاة.</string>
 
     <!-- PaidSplash -->
     <string name="ceremony_paid">تم الدفع ✓</string>
@@ -30,14 +33,19 @@
     <string name="ceremony_plate">اللوحة %1$s</string>
     <string name="ceremony_accept">قبول</string>
     <string name="ceremony_accepting_agrees_fare">‏القبول يقفل الأجرة وضمانك في حساب لا يفتحه إلا أنتما معًا.</string>
+    <string name="ceremony_accepting_agrees_fare_nostake">‏القبول يقفل الأجرة في حساب لا يفتحه إلا أنتما معًا. أجرة بهذا الصغر لا تحمل ضمانًا.</string>
     <string name="ceremony_accepting_agrees_fare_arbiter">‏القبول يقفل الأجرة وضمانك في حساب يحتاج مفتاحين من ثلاثة: مفتاحك ومفتاحهما ومفتاح %1$s، الذي لا يُسأل إلا إذا تعذّر اتفاقكما.</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter_nostake">‏القبول يقفل الأجرة في حساب يحتاج مفتاحين من ثلاثة: مفتاحك ومفتاحهما ومفتاح %1$s، الذي لا يُسأل إلا إذا تعذّر اتفاقكما. أجرة بهذا الصغر لا تحمل ضمانًا.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">تأكّد المشوار</string>
     <string name="ceremony_expecting_you">أودع تأمينك في الدردشة — سيدفعون بمجرد وصوله.</string>
+    <string name="ceremony_expecting_you_nostake">لا تأمين على أجرة بهذا الصغر — سيدفعون في الدردشة، وسترى وصول المبلغ هناك.</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">مشوارك قادم</string>
     <string name="ceremony_eta_in_chat">ادفع في الدردشة بمجرد وصول تأمينهم — ووقت الوصول هناك أيضًا.</string>
+    <string name="ceremony_eta_in_chat_nostake">ادفع في الدردشة — ووقت الوصول هناك أيضًا. أجرة بهذا الصغر لا تحمل تأمينًا.</string>
     <string name="ceremony_stake_note">‏تضع %2$s: الأجرة مع ضمان %1$s. والسائق يضع %1$s أيضًا، ويعود الضمانان عند انتهاء الرحلة.</string>
+    <string name="ceremony_asked_you_for">طلب منك</string>
 </resources>

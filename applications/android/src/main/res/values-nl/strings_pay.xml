@@ -11,6 +11,8 @@
     <string name="pay_address_placeholder">5… of 7…</string>
     <string name="pay_continue">Doorgaan</string>
     <string name="pay_not_monero_address">Dat ziet er niet uit als een Monero-adres.</string>
+    <string name="pay_scan_unknown_card">Die kaart is nog van geen van je contacten. Voeg de persoon eerst toe via Chat en betaal daarna.</string>
+    <string name="pay_scan_not_payable">Die code is geen Monero-adres en geen DUCAT-kaart.</string>
 
     <!-- Pay.kt — amount step -->
     <string name="pay_back">Terug</string>
@@ -62,12 +64,13 @@
     <string name="pay_fee_unknown">nu niet bekend</string>
     <string name="pay_fee_unknown_confirm">De kosten konden nu niet worden geschat. De transactie betaalt wat ze kost zodra ze wordt opgebouwd.</string>
     <string name="pay_node_no_answer">De Monero-node antwoordde niet op tijd. Er is niets verstuurd. Probeer opnieuw — de app pakt een andere node.</string>
+    <string name="pay_send_interrupted">De app is midden in de betaling gesloten. Bekijk het overzicht voordat je opnieuw betaalt.</string>
     <string name="pay_not_enough">Niet genoeg beschikbaar — je hebt %1$s en dit vereist %2$s inclusief netwerkkosten.</string>
     <string name="pay_offline">Nog niet verbonden — deze telefoon is nog niet klaar met verbinden. Er is niets verzonden; probeer het zo opnieuw.</string>
     <string name="pay_node_unreachable">Geen enkele Monero-node reageerde. Er is niets verzonden — controleer je verbinding en probeer opnieuw.</string>
     <string name="board_unverified_note">Geen Monero-node bereikbaar, dus wat hier staat kon niet tegen de chain worden gecontroleerd. Het is nog steeds ondertekend en betaald — behandel het alleen met de voorzichtigheid van een ongeverifieerd bord.</string>
     <string name="board_needs_a_block">Geen Monero-node bereikbaar. Wat op een bord komt, wordt gestempeld op een recent blok, dus dit kan er nog niet op — controleer je verbinding en probeer het opnieuw.</string>
-    <string name="pay_sending_why">De transactie wordt opgebouwd. Dit duurt ongeveer een minuut — de portemonnee verzamelt de lokmunten die verbergen welke munten van jou zijn. Je mag dit scherm verlaten; het stopt niet.</string>
+    <string name="pay_sending_why">De transactie wordt opgebouwd. Dit duurt ongeveer een minuut — de portemonnee verzamelt de lokmunten die verbergen welke munten van jou zijn. Overschakelen naar een andere app stopt het niet.</string>
     <string name="pay_sending_to">naar %1$s</string>
     <string name="claim_own_card">Die kaart is je eigen — hij hoort bij dit apparaat.</string>
     <string name="pay_already_paid">Je hebt al in deze escrow betaald. Je geld staat erin; er is niets opnieuw verzonden.</string>
@@ -78,4 +81,6 @@
     <string name="pay_repeat_monthly">Maandelijks</string>
     <string name="pay_recur_notify">Terugkerende rekening verzonden — %1$s</string>
     <string name="pay_donation_hint">Dit is een donatie — je bewijs landt in deze chat zodra het binnen is, en je overzicht zet het onder Donaties.</string>
+    <string name="pay_relay_unconfirmed">Geen enkele Monero-node heeft bevestigd de betaling te hebben aangenomen. Hij kan alsnog doorgaan — de gebruikte biljetten blijven gereserveerd tot de chain het beslist. Controleer het overzicht voordat je opnieuw betaalt.</string>
+    <string name="pay_request_kept">Verzoek bewaard — het gaat vanzelf weg zodra het netwerk er weer is.</string>
 </resources>

@@ -14,10 +14,14 @@
     <string name="chat_voice_failed">Це голосове не записалося — утримай мікрофон ще раз.</string>
     <string name="chat_what_card">картку</string>
     <string name="chat_what_contact">контакт</string>
+    <string name="chat_what_reaction">реакцію</string>
+    <string name="chat_what_invite">запрошення</string>
+    <string name="chat_what_note">нотатку</string>
     <string name="chat_error_location_fix">не вдалося визначити місцеположення</string>
     <string name="chat_recording_placeholder">Запис… %1$d с</string>
     <string name="chat_message_placeholder">Повідомлення</string>
     <string name="chat_take_picture">Зробити фото</string>
+    <string name="chat_no_camera_app">на цьому телефоні немає застосунку камери</string>
     <string name="chat_hold_to_record">Утримуй, щоб записати голосове</string>
     <string name="chat_attach">Прикріпити</string>
     <string name="chat_close">Закрити</string>
@@ -42,6 +46,10 @@
     <!-- Retractions (kind 5) -->
     <string name="chat_you_withdrew">Повідомлення відкликано тобою</string>
     <string name="chat_they_withdrew">Повідомлення відкликано: %1$s</string>
+    <string name="chat_you_withdrew_bill">Рахунок відкликано тобою</string>
+    <string name="chat_they_withdrew_bill">Рахунок відкликано: %1$s</string>
+    <string name="chat_you_withdrew_call">Дзвінок відкликано тобою</string>
+    <string name="chat_they_withdrew_call">Дзвінок відкликано: %1$s</string>
     <string name="chat_you_declined">Відхилено тобою</string>
     <string name="chat_they_declined">Відхилено: %1$s</string>
     <string name="chat_retract_with_quote">%1$s — “%2$s”</string>
@@ -83,6 +91,7 @@
     <string name="chat_downloading_audio">🎤 завантаження…</string>
     <string name="chat_downloading_file">📎 завантаження…</string>
     <string name="chat_att_stuck">Це не надійшло — можливо, його більше немає. Спроби тривають.</string>
+    <string name="chat_att_gone">Це не надійшло — можливо, його більше немає.</string>
     <string name="chat_att_no_space">На цьому телефоні бракує місця, щоб це завантажити.</string>
     <string name="chat_picture_desc">Зображення</string>
     <string name="chat_could_not_decode">📷 (не вдалося декодувати)</string>
@@ -108,6 +117,7 @@
     <string name="chat_stop">Стоп</string>
     <string name="chat_play_voice_memo">Відтворити голосове</string>
     <string name="chat_voice_memo">Голосове повідомлення</string>
+    <string name="chat_play_failed">Це голосове не відтворюється.</string>
     <string name="chat_size_kb">%1$d КБ</string>
     <string name="chat_size_b">%1$d Б</string>
     <string name="chat_file_fallback">файл</string>
@@ -140,6 +150,9 @@
         <item quantity="other">Тут бракує %1$d повідомлень</item>
     </plurals>
     <string name="chat_not_sent_yet">ще не надіслано</string>
+    <string name="chat_not_sent">не надіслано</string>
     <string name="chat_cancel_request">Скасувати запит</string>
     <string name="chat_copied">Повідомлення скопійовано</string>
+    <string name="chat_download_file">Завантажити</string>
+    <string name="chat_file_too_big_swarm">цей файл — %1$d МБ; поки що файли обмежені 64 МБ</string>
 </resources>

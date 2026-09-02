@@ -21,6 +21,8 @@
     <!-- Driver: DriveScreen -->
     <string name="hail_rider_declined_title">Rider declined</string>
     <string name="hail_rider_declined_body">They passed on your offer. Their hail is gone from the board.</string>
+    <string name="hail_offer_lapsed_title">No answer to your offer</string>
+    <string name="hail_offer_lapsed_body">Half an hour on, the rider has not said yes or no. The offer stands in the chat if they still want it.</string>
     <string name="hail_ok">OK</string>
     <string name="hail_on_duty">On duty</string>
     <string name="hail_net_wide">wide net — ~%1$s across</string>
@@ -102,5 +104,10 @@
     <string name="hail_step_card">Making a code…</string>
     <string name="hail_search">Search</string>
     <string name="hail_clear_place">Clear</string>
+    <string name="hail_no_places">No places found for that</string>
+    <string name="hail_search_unreachable">Could not reach the map search — check your connection</string>
     <string name="hail_joining_network">Joining the network — the boards have not been read yet.</string>
+    <string name="hail_accept_sending">Telling %1$s yes…</string>
+    <string name="hail_accept_failed">Your yes to %1$s did not send. Check the network and view the offer again.</string>
+    <string name="hail_escrow_failed">The fare could not be put in escrow. Sort it out with the driver in the chat.</string>
 </resources>

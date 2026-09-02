@@ -19,6 +19,7 @@
     <string name="section_status">สถานะ</string>
     <string name="section_profile">โปรไฟล์</string>
     <string name="section_contacts">ผู้ติดต่อ</string>
+    <string name="section_selling">การขาย</string>
     <string name="section_logs">บันทึก</string>
     <string name="section_settings">การตั้งค่า</string>
     <string name="section_modes">โหมดการทำงาน</string>

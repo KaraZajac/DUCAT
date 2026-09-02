@@ -16,8 +16,9 @@
     <string name="tab_send_receive">Wyślij/Odbierz</string>
 
     <string name="section_status">Stan</string>
-    <string name="section_profile">Profil</string>
+    <string name="section_profile">Profile</string>
     <string name="section_contacts">Kontakty</string>
+    <string name="section_selling">Sprzedaż</string>
     <string name="section_logs">Dziennik</string>
     <string name="section_settings">Ustawienia</string>
     <string name="section_modes">Tryby pracy</string>

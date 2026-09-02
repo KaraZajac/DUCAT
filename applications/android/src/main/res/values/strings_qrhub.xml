@@ -14,4 +14,8 @@
     <string name="qrhub_one_per_code">One person per code. As soon as somebody takes this one, the next is made automatically — nothing to do.</string>
     <string name="qrhub_name_travels">Your name and picture travel with it. Everything else you share arrives afterwards, over the connection it opens.</string>
     <string name="qrhub_copied">Link copied</string>
+    <string name="qrhub_showing_as">Showing as %1$s</string>
+    <string name="qrhub_issue_failed">Your code could not be published. Check the network and try again.</string>
+    <string name="qrhub_try_again">Try again</string>
+    <string name="qrhub_offline">Not connected yet — nobody can take this code until this phone finishes joining the network.</string>
 </resources>

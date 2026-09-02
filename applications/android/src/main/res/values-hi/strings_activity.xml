@@ -6,6 +6,8 @@
     <!-- Pending requests -->
     <string name="activity_awaiting">प्रतीक्षा में</string>
     <string name="activity_search_none">यहाँ “%1$s” से कुछ मेल नहीं खाता।</string>
+    <string name="activity_period_none">इस अवधि में कुछ नहीं। पहले की गतिविधि देखने के लिए ऊपर लंबी अवधि चुनें।</string>
+    <string name="activity_filter_none">अभी ऐसा कुछ नहीं है। सब कुछ देखने के लिए हाइलाइट की गई टाइल पर फिर से टैप करें।</string>
     <string name="activity_search_clear">खोज साफ़ करें</string>
     <string name="activity_search_hint">रसीदें, नाम, नोट खोजें</string>
     <string name="activity_they_ask">%1$s माँग रहे हैं</string>
@@ -42,4 +44,23 @@
     <string name="activity_donations_filter">दान</string>
     <string name="activity_donation_chip">दान</string>
     <string name="activity_donated_total">%1$s दान किया</string>
+    <string name="activity_period_today">आज</string>
+    <string name="activity_period_7d">7 दिन</string>
+    <string name="activity_period_month">इस महीने</string>
+    <string name="activity_period_all">सभी</string>
+    <string name="activity_sum_in">आय</string>
+    <string name="activity_sum_out">व्यय</string>
+    <string name="activity_sum_net">नेट</string>
+    <string name="activity_sum_fees">शुल्क</string>
+    <string name="activity_business">व्यवसाय</string>
+    <string name="activity_sales">बिक्री</string>
+    <string name="activity_tax_collected">कर वसूला</string>
+    <string name="activity_outstanding">बकाया</string>
+    <string name="activity_export_csv">CSV फ़ाइल</string>
+    <string name="activity_export_json">JSON फ़ाइल</string>
+    <string name="activity_door_pos">गल्ला</string>
+    <string name="activity_door_bar">उधार</string>
+    <string name="activity_door_taxi">सवारी</string>
+    <string name="activity_door_donate">दानपात्र</string>
+    <string name="activity_door_pub">अंक</string>
 </resources>

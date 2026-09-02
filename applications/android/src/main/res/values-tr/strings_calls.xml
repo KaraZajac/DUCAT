@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">Seni aradı</string>
+    <string name="chat_call_you_rang">Aradın</string>
+    <string name="chat_call_answered">Aramana cevap verdi</string>
+    <string name="chat_call_you_answered">Cevap verdin</string>
+    <string name="chat_call_missed_note">Sen yokken bir arama çaldı.</string>
+    <string name="chatlist_preview_call">Aradı</string>
+    <string name="chatlist_preview_call_answered">Arama cevaplandı</string>
+    <string name="notify_call">%1$s arıyor</string>
+    <string name="notify_call_answered">%1$s aramana cevap verdi</string>
+    <string name="call_button">Ara</string>
+    <string name="call_calling">Aranıyor…</string>
+    <string name="call_incoming">Gelen DUCAT araması</string>
+    <string name="call_frames">↓%1$d ↑%2$d kare</string>
+    <string name="call_answer_btn">Yanıtla</string>
+    <string name="call_end_btn">Kapat</string>
+    <string name="call_body_ring">Seni arıyor</string>
+    <string name="call_body_answer">Yanıtlandı</string>
+    <string name="call_body_decline">Şu an konuşamıyorum.</string>
+    <string name="notify_call_channel">Gelen aramalar</string>
+    <string name="notify_call_incoming">Gelen arama</string>
+    <string name="call_no_answer">Yanıt yok</string>
+    <string name="call_leave_message">Mesaj bırak</string>
+    <string name="call_dismiss">Şimdi değil</string>
+    <string name="call_body_cancel">Sen açmadan kapattı.</string>
+    <string name="call_connecting">Bağlanıyor…</string>
+    <string name="call_unreached">Ulaşılamadı</string>
+    <string name="call_never_connected">Bağlantı kurulamadı</string>
+    <string name="call_notify_calling">%1$s aranıyor…</string>
+    <string name="call_notify_in_call">%1$s ile görüşmede</string>
+    <string name="call_notify_return">Geri dönmek için dokun.</string>
+</resources>

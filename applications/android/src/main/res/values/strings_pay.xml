@@ -11,6 +11,8 @@
     <string name="pay_address_placeholder">5… or 7…</string>
     <string name="pay_continue">Continue</string>
     <string name="pay_not_monero_address">That does not look like a Monero address.</string>
+    <string name="pay_scan_unknown_card">That card is not one of your contacts yet. Add them from Chat first, then pay.</string>
+    <string name="pay_scan_not_payable">That code is neither a Monero address nor a DUCAT card.</string>
 
     <!-- Pay.kt — amount step -->
     <string name="pay_back">Back</string>
@@ -64,12 +66,13 @@
     <string name="pay_fee_unknown">not known right now</string>
     <string name="pay_fee_unknown_confirm">The fee could not be estimated just now. The transaction pays whatever it costs when it is built.</string>
     <string name="pay_node_no_answer">The Monero node did not answer in time. Nothing was sent. Try again — the app will use a different node.</string>
+    <string name="pay_send_interrupted">The app was closed mid-payment. Check the statement before paying again.</string>
     <string name="pay_not_enough">Not enough unlocked — you have %1$s and this needs %2$s with the network fee.</string>
     <string name="pay_offline">Not connected yet — this phone has not finished joining the network. Nothing was sent; try again in a moment.</string>
     <string name="pay_node_unreachable">Could not reach any Monero node. Nothing was sent — check your connection and try again.</string>
     <string name="board_unverified_note">No Monero node is reachable, so what is shown here could not be checked against the chain. It is still signed and paid for — just treat it with the care you would give an unverified board.</string>
     <string name="board_needs_a_block">Could not reach any Monero node. What goes on a board is stamped against a recent block, so this cannot go up yet — check your connection and try again.</string>
-    <string name="pay_sending_why">Building the transaction. This takes about a minute — the wallet is gathering the decoys that hide which coins are yours. You can leave this screen; it does not stop.</string>
+    <string name="pay_sending_why">Building the transaction. This takes about a minute — the wallet is gathering the decoys that hide which coins are yours. Switching to another app does not stop it.</string>
     <string name="pay_sending_to">to %1$s</string>
     <string name="claim_own_card">That card is your own — it belongs to this device.</string>
     <string name="pay_already_paid">You have already paid into this escrow. Your money is in; nothing was sent again.</string>
@@ -78,4 +81,6 @@
     <string name="pay_repeat_monthly">Monthly</string>
     <string name="pay_recur_notify">Recurring bill sent — %1$s</string>
     <string name="pay_donation_hint">This is a donation — your receipt will land in this chat once it arrives, and your statement will file it under Donations.</string>
+    <string name="pay_relay_unconfirmed">No Monero node confirmed taking the payment. It may still go through — the notes it used stay reserved until the chain settles it. Check the statement before paying again.</string>
+    <string name="pay_request_kept">Request kept — it goes out by itself when the network is back.</string>
 </resources>

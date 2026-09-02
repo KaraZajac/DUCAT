@@ -17,6 +17,26 @@ private const val FUSED = "fused"
  * `try`/`catch` and nothing else, so it reports this as unhandled — and one
  * standing error is how a lint run stops being read.
  */
+/**
+ * The last position the phone already knows, or null. Never wakes a radio —
+ * this is what background work is allowed to ask, where a person tapping a
+ * button gets [grabFix] and the thirty-second cold start it may spend.
+ */
+@android.annotation.SuppressLint("MissingPermission")
+fun passiveFix(context: android.content.Context, maxAgeMs: Long): Pair<Long, Long>? {
+    val lm = context.getSystemService(android.location.LocationManager::class.java)
+        ?: return null
+    val best = listOf(
+        FUSED,
+        android.location.LocationManager.GPS_PROVIDER,
+        android.location.LocationManager.NETWORK_PROVIDER,
+    ).mapNotNull { p ->
+        runCatching { lm.getLastKnownLocation(p) }.getOrNull()
+    }.minByOrNull { fixAgeNanos(it) } ?: return null
+    if (fixAgeNanos(best) !in 0..maxAgeMs * 1_000_000) return null
+    return (best.latitude * 1e7).toLong() to (best.longitude * 1e7).toLong()
+}
+
 @android.annotation.SuppressLint("MissingPermission")
 fun grabFix(
     context: android.content.Context,

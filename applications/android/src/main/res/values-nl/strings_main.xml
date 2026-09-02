@@ -8,6 +8,8 @@
     <string name="main_backup_title">Back-up maken</string>
     <string name="main_backup_body">Je hebt contacten die niet in je laatste back-up staan. Een herstel zou het geld terugbrengen, maar niet de mensen.</string>
     <string name="main_open_backup_settings">Open back-upinstellingen</string>
+    <string name="main_notify_off_title">Meldingen staan uit</string>
+    <string name="main_notify_off_body">De telefoon kan je niet laten weten wanneer er geld binnenkomt, een rekening aankomt of iemand belt. Tik om ze aan te zetten.</string>
     <string name="main_recent">Recent</string>
     <string name="main_see_all">Alles bekijken</string>
     <string name="main_card_link_title">Contact toevoegen?</string>
@@ -38,4 +40,9 @@
     <string name="err_no_keys_yet">Jullie zijn nog niet klaar met kaarten uitwisselen.</string>
     <string name="err_conversation_too_old">Hun kaart is te oud voor deze app. Vraag om een nieuwe.</string>
     <string name="err_board_full">Er wordt hier op dit moment te veel gevraagd. Probeer het over een minuut opnieuw.</string>
+    <string name="main_deals_title">Afspraken</string>
+    <plurals name="main_deals_waiting">
+        <item quantity="one">%1$d afspraak wacht op jou</item>
+        <item quantity="other">%1$d afspraken wachten op jou</item>
+    </plurals>
 </resources>

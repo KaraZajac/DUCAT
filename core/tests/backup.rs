@@ -25,7 +25,7 @@ fn sample() -> Backup {
         display_name: None,
         publish_payto: false,
         avatar: None, email: None, phone: None, signal: None, pronouns: None,
-        contacts: Vec::new(), prekey_signed_secret: None, prekey_one_time: Vec::new(), prekey_next_id: 0, app_state: None,
+        contacts: Vec::new(), personas: Vec::new(), prekey_signed_secret: None, prekey_one_time: Vec::new(), prekey_next_id: 0, app_state: None,
         created: 1_800_000_000,
     }
 }
@@ -317,6 +317,48 @@ fn an_older_bundle_restores_with_an_empty_profile() {
     assert!(!back.publish_payto, "publishing must never default to on");
 }
 
+/// The compartments survive: the roster, and which persona owns whom.
+#[test]
+fn personas_and_owners_survive_the_round_trip() {
+    use ducat_core::backup::BackupPersona;
+    let mut b = sample();
+    b.personas = vec![
+        BackupPersona { secret: vec![0x11; 32], name: None, color: 0, created: 1_700_000_000 },
+        BackupPersona {
+            secret: vec![0x22; 32],
+            name: Some("Shop".into()),
+            color: 0xFF88_4499,
+            created: 1_700_000_500,
+        },
+    ];
+    b.contacts = vec![BackupContact {
+        persona: vec![0xAB; 32],
+        my_outbox_key: "VLD0:mine".into(),
+        my_outbox_owner_public: vec![1; 32],
+        my_outbox_owner_secret: vec![2; 32],
+        their_outbox_key: "VLD0:theirs".into(),
+        their_bundle: None,
+        their_payto: None,
+        petname: None,
+        asserted_name: None,
+        in_seq: 0,
+        out_seq: 0,
+        in_prev: None,
+        out_prev: None,
+        owner: Some("22aa".into()),
+    }];
+    let blob = export(&b, b"a real passphrase", [7u8; 16], [9u8; 24]).expect("export");
+    let back = import(&blob, b"a real passphrase").expect("import");
+    assert_eq!(back.personas, b.personas);
+    assert_eq!(back.contacts[0].owner.as_deref(), Some("22aa"));
+
+    // A bundle with no roster — the single-persona era — restores with an
+    // empty list, never an invented one.
+    let plain = sample();
+    let blob = export(&plain, b"a real passphrase", [7u8; 16], [9u8; 24]).expect("export");
+    assert!(import(&blob, b"a real passphrase").expect("import").personas.is_empty());
+}
+
 /// The relationships survive: every field another client would need.
 #[test]
 fn contacts_and_prekeys_survive_the_round_trip() {
@@ -335,6 +377,7 @@ fn contacts_and_prekeys_survive_the_round_trip() {
         out_seq: 9,
         in_prev: Some(vec![4; 32]),
         out_prev: Some(vec![5; 32]),
+        owner: Some("ab12".into()),
     }];
     b.prekey_signed_secret = Some(vec![6; 32]);
     b.prekey_one_time = vec![(41, vec![7; 32]), (42, vec![8; 32])];

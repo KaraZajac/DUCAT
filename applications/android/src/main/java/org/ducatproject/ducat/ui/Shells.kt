@@ -2,6 +2,7 @@ package org.ducatproject.ducat.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,6 +11,9 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.EventAvailable
+import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.House
 import androidx.compose.material.icons.filled.Inventory2
@@ -27,6 +31,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -109,6 +114,15 @@ fun ModeShell(mode: Mode, openDrawer: () -> Unit) {
             onLeave = onLeave,
             tabs = listOf(
                 ShellTab(stringResource(R.string.shells_tab_code), Icons.Filled.RadioButtonUnchecked) { DonateScreen() },
+            ),
+        )
+        Mode.Press -> Shell(
+            title = stringResource(R.string.mode_press),
+            openDrawer = openDrawer,
+            onLeave = onLeave,
+            tabs = listOf(
+                ShellTab(stringResource(R.string.shells_tab_code), Icons.Filled.QrCode) { PressScreen() },
+                ShellTab(stringResource(R.string.press_tab_room), Icons.AutoMirrored.Filled.MenuBook) { PublishingSection() },
             ),
         )
         Mode.Renting -> Shell(
@@ -286,11 +300,35 @@ private fun BookingsList(kinds: List<Int> = Listings.KINDS) {
     }
     if (rows.isEmpty()) {
         if (loaded) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column(
+                Modifier.fillMaxSize().padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Box(
+                    Modifier.size(72.dp)
+                        .clip(androidx.compose.foundation.shape.CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        Icons.Filled.EventAvailable,
+                        contentDescription = null,
+                        modifier = Modifier.size(36.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Spacer(Modifier.height(16.dp))
                 Text(
                     stringResource(R.string.shells_no_bookings_yet),
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    stringResource(R.string.shells_bookings_empty_body),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                 )
             }
         }
@@ -402,6 +440,11 @@ private data class ShellTab(
     val content: @Composable () -> Unit,
 )
 
+/** A screen inside a shell asking to land on a sibling tab — the Code
+ *  tab's empty state pointing at the Press room. One-shot: the shell
+ *  that honours it clears it. */
+val shellTabRequest = kotlinx.coroutines.flow.MutableStateFlow<Int?>(null)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Shell(
@@ -412,7 +455,18 @@ private fun Shell(
      *  Null for a mode somebody chose to work in. */
     onLeave: (() -> Unit)? = null,
 ) {
-    var current by remember { mutableStateOf(0) }
+    // Saveable: a rotation, or the process coming back from the background,
+    // used to rebuild every shell on its first tab — a driver reading the
+    // Meter turned the phone and was looking at the map.
+    var current by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(0) }
+    LaunchedEffect(Unit) {
+        shellTabRequest.collect { t ->
+            if (t != null) {
+                if (t in tabs.indices) current = t
+                shellTabRequest.value = null
+            }
+        }
+    }
     // Back walks the tabs home before it leaves.
     //
     // The activity's own tab handler is gated on `Mode.None` so that it does
@@ -490,8 +544,15 @@ private fun Shell(
             }
         },
     ) { padding ->
+        // Each tab's saveable state is kept while another tab is showing.
+        // Without the holder, `rememberSaveable` in a tab's screen only ever
+        // restores from the activity's bundle: leaving the Sales tab for
+        // Orders and coming back rebuilt the basket empty, and a half-typed
+        // search was gone.
+        val kept = androidx.compose.runtime.saveable.rememberSaveableStateHolder()
+        val shown = current.coerceIn(tabs.indices)
         Box(Modifier.padding(padding).fillMaxSize()) {
-            tabs[current].content()
+            kept.SaveableStateProvider(shown) { tabs[shown].content() }
         }
     }
 }

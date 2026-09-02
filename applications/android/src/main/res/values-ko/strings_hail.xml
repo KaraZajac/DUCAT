@@ -21,6 +21,8 @@
     <!-- Driver: DriveScreen -->
     <string name="hail_rider_declined_title">승객이 거절했어요</string>
     <string name="hail_rider_declined_body">제안을 넘겼어요. 그 호출은 게시판에서 사라졌어요.</string>
+    <string name="hail_offer_lapsed_title">제안에 답이 없습니다</string>
+    <string name="hail_offer_lapsed_body">30분이 지났지만 승객이 예도 아니오도 하지 않았습니다. 아직 원한다면 제안은 대화에 남아 있습니다.</string>
     <string name="hail_ok">확인</string>
     <string name="hail_on_duty">운행 중</string>
     <string name="hail_net_wide">넓은 그물 — 약 %1$s 범위</string>
@@ -102,5 +104,10 @@
     <string name="hail_step_card">코드를 만드는 중…</string>
     <string name="hail_search">검색</string>
     <string name="hail_clear_place">지우기</string>
+    <string name="hail_no_places">해당하는 장소를 찾지 못했어요</string>
+    <string name="hail_search_unreachable">지도 검색에 연결하지 못했어요 — 연결 상태를 확인하세요</string>
     <string name="hail_joining_network">네트워크에 참여하는 중 — 게시판을 아직 읽지 못했습니다.</string>
+    <string name="hail_accept_sending">%1$s님에게 수락을 보내는 중…</string>
+    <string name="hail_accept_failed">%1$s님에게 수락이 전송되지 않았어요. 네트워크를 확인하고 제안을 다시 열어 보세요.</string>
+    <string name="hail_escrow_failed">요금을 에스크로에 넣지 못했어요. 채팅에서 기사와 정리하세요.</string>
 </resources>

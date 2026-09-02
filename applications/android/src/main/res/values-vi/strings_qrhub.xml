@@ -14,4 +14,8 @@
     <string name="qrhub_one_per_code">Mỗi mã một người. Ai đó nhận mã này xong, mã tiếp theo tự sinh ra — bạn không phải làm gì.</string>
     <string name="qrhub_name_travels">Tên và ảnh của bạn đi cùng nó. Mọi thứ khác bạn chia sẻ sẽ tới sau, qua kết nối mà nó mở ra.</string>
     <string name="qrhub_copied">Đã sao chép liên kết</string>
+    <string name="qrhub_showing_as">Đang hiển thị là %1$s</string>
+    <string name="qrhub_issue_failed">Không công bố được mã của bạn. Kiểm tra mạng rồi thử lại.</string>
+    <string name="qrhub_try_again">Thử lại</string>
+    <string name="qrhub_offline">Chưa kết nối — không ai lấy được mã này cho tới khi máy tham gia mạng.</string>
 </resources>

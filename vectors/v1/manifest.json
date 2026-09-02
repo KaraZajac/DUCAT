@@ -1,9 +1,9 @@
 {
   "counts": {
-    "backup": 7,
+    "backup": 8,
     "codec": 43,
     "commit": 2,
-    "contact": 189,
+    "contact": 235,
     "contract": 25,
     "negotiate": 4,
     "object": 8,
@@ -32,8 +32,8 @@
     "suite 2 key agreement": "only signatures are covered; X25519/ECDH is unimplemented"
   },
   "generated_by": "ducat-core examples/gen_vectors.rs",
-  "protocol_draft": "1.0.0-rc1",
+  "protocol_draft": "1.1.0-dev6",
   "reject_codes_are": "§18.5 wire codes. Two clients must agree an input is MALFORMED; they need not agree on which internal decoder rule said so. The non-normative `hint` field names the rule.",
-  "total_cases": 328,
+  "total_cases": 375,
   "vector_set": "1"
 }

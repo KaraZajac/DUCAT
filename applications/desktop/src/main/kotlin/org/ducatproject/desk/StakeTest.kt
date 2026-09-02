@@ -128,6 +128,114 @@ fun main() {
             driverGets >= f - fee, "${formatXmr(driverGets)} vs fare ${formatXmr(f - fee)}")
     }
 
+    // 7. **Getting your own money back out of a half-funded escrow.**
+    //
+    // One side has paid, the other never came, and the claim the banner
+    // makes for them is "give me back what I put in". Two things must hold:
+    // it is the whole balance when the balance is only theirs, and it is
+    // still only their own share when the other side funded a second after
+    // the button was pressed. The second is the one worth pinning — the
+    // difference between an honest claim and asking an arbiter to hand over
+    // somebody else's money.
+    run {
+        val fare = 5L * xmr
+        val stake = fare / 10
+        fun ride(funder: Boolean) = org.json.JSONObject()
+            .put("i", if (funder) 1 else 2)
+            .put("funderIdx", 1)
+            .put("farePxmr", fare)
+            .put("hostDepPxmr", stake)
+
+        val riderOnly = org.ducatproject.ducat.Ceremony.refundBack(ride(true), fare + stake)
+        check("a stranded rider asks for exactly what they paid",
+            riderOnly == fare + stake, formatXmr(riderOnly))
+        val riderRaced = org.ducatproject.ducat.Ceremony
+            .refundBack(ride(true), fare + stake + stake)
+        check("and not the driver's stake that landed meanwhile",
+            riderRaced == fare + stake, formatXmr(riderRaced))
+
+        val driverOnly = org.ducatproject.ducat.Ceremony.refundBack(ride(false), stake)
+        check("a stranded driver leaves nothing to the rider", driverOnly == 0L)
+        val driverRaced = org.ducatproject.ducat.Ceremony
+            .refundBack(ride(false), stake + fare + stake)
+        check("and hands back the fare that landed meanwhile",
+            driverRaced == fare + stake, formatXmr(driverRaced))
+
+        // A view of the escrow that is SHORT of this party's own payment is
+        // the one case refundBack must never be asked about: clamping there
+        // is how a refund became a gift on the first live run (see
+        // Ceremony.EscrowBehind, which proposeRideSplit now throws instead).
+        // Kept as an assertion about the clamp so the shape cannot come
+        // back by accident: it still clamps, and the caller must not let it.
+        val short = org.ducatproject.ducat.Ceremony.refundBack(ride(true), stake)
+        check("a short reading clamps — which is why the caller refuses first",
+            short == stake, formatXmr(short))
+
+        // The same split read the other way: a funded escrow unwound by
+        // agreement. Both sides must compute the identical number, or the
+        // "refund" would mean something different depending on who pressed
+        // it — and one of the two would be proposing a deal in their own
+        // favour under a button that says it is even.
+        val pot = fare + stake + stake
+        val fromRider = org.ducatproject.ducat.Ceremony.refundBack(ride(true), pot)
+        val fromDriver = org.ducatproject.ducat.Ceremony.refundBack(ride(false), pot)
+        check("a mutual refund is the same split from either side",
+            fromRider == fromDriver, formatXmr(fromRider))
+        check("the payer gets their fare and their stake",
+            fromRider == fare + stake, formatXmr(fromRider))
+        check("and the provider is left exactly their own stake",
+            pot - fromRider == stake, formatXmr(pot - fromRider))
+    }
+
+    // 8. **The ordinary ending**, which is the one that runs every time.
+    //
+    // Completing a deal sends the funder's own deposit home and everything
+    // else to the provider. Nothing checked this arithmetic until now, and
+    // it is the piece with the most money through it: a ride that pays the
+    // driver the rider's stake as well looks exactly like a ride that went
+    // well, from both phones, until somebody counts.
+    run {
+        val fare = 5L * xmr
+        val stake = fare / 10
+        val pot = fare + stake + stake
+
+        val ride = org.json.JSONObject()
+            .put("i", 1).put("funderIdx", 1)
+            .put("farePxmr", fare).put("funderDepPxmr", stake).put("hostDepPxmr", stake)
+        val back = org.ducatproject.ducat.Ceremony.settlementBack(ride, pot)
+        check("a completed ride sends the payer's stake home", back == stake, formatXmr(back))
+        check("and the driver takes the fare and their own stake",
+            pot - back == fare + stake, formatXmr(pot - back))
+
+        // The old rule, kept as the thing that must not come back.
+        check("not everything above the fare — that was the driver's stake too",
+            back != pot - fare, "the old rule would have sent ${formatXmr(pot - fare)}")
+
+        // A booking: the guest's deposit home, rent and the host's deposit
+        // to the host.
+        val rent = 2L * xmr
+        val guestDep = rent / 5
+        val hostDep = rent / 10
+        val stay = org.json.JSONObject()
+            .put("i", 1).put("funderIdx", 1).put("kind", 2)
+            .put("farePxmr", rent).put("funderDepPxmr", guestDep).put("hostDepPxmr", hostDep)
+        val stayPot = rent + guestDep + hostDep
+        val stayBack = org.ducatproject.ducat.Ceremony.settlementBack(stay, stayPot)
+        check("a finished stay sends the guest's deposit home", stayBack == guestDep,
+            formatXmr(stayBack))
+        check("and the host takes the rent and their own deposit",
+            stayPot - stayBack == rent + hostDep, formatXmr(stayPot - stayBack))
+
+        // Ceremonies built before the deposit was recorded derive it from
+        // the pot, and must still leave the driver's stake alone.
+        val legacy = org.json.JSONObject()
+            .put("i", 1).put("funderIdx", 1)
+            .put("farePxmr", fare).put("hostDepPxmr", stake)
+        val legacyBack = org.ducatproject.ducat.Ceremony.settlementBack(legacy, pot)
+        check("a ceremony with no recorded deposit derives the same number",
+            legacyBack == stake, formatXmr(legacyBack))
+    }
+
     println(if (failures == 0) "STAKETEST OK" else "STAKETEST FAILED ($failures)")
     if (failures > 0) kotlin.system.exitProcess(1)
 }

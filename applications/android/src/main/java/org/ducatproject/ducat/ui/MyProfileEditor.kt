@@ -43,24 +43,27 @@ import java.io.ByteArrayOutputStream
  */
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
-fun MyProfileEditor() {
+fun MyProfileEditor(personaHex: String? = null) {
     val context = LocalContext.current
-    val p = remember { MyProfile(context) }
+    val p = remember(personaHex) { MyProfile(context, personaHex) }
 
     // Saveable, so a rotation loses nothing typed but not yet saved. The
     // avatar stays out of it deliberately: it is image bytes, and saved
     // instance state is a Binder transaction with a hard size limit.
-    var name by rememberSaveable { mutableStateOf(p.name() ?: "") }
-    var email by rememberSaveable { mutableStateOf(p.email() ?: "") }
-    var phone by rememberSaveable { mutableStateOf(p.phone() ?: "") }
-    var signal by rememberSaveable { mutableStateOf(p.signal() ?: "") }
-    var carModel by rememberSaveable { mutableStateOf(p.carModel() ?: "") }
-    var carColor by rememberSaveable { mutableStateOf(p.carColor() ?: "") }
-    var plate by rememberSaveable { mutableStateOf(p.plate() ?: "") }
-    var pronouns by rememberSaveable { mutableStateOf(p.pronouns()) }
-    var avatar by remember { mutableStateOf(p.avatar()) }
-    var share by rememberSaveable { mutableStateOf(p.shareProfile()) }
-    var saved by remember { mutableStateOf(false) }
+    // Keyed by the persona whose profile this is: picking another card in
+    // the Profiles section must reload every field, not edit the old
+    // persona's text under the new persona's name.
+    var name by rememberSaveable(personaHex) { mutableStateOf(p.name() ?: "") }
+    var email by rememberSaveable(personaHex) { mutableStateOf(p.email() ?: "") }
+    var phone by rememberSaveable(personaHex) { mutableStateOf(p.phone() ?: "") }
+    var signal by rememberSaveable(personaHex) { mutableStateOf(p.signal() ?: "") }
+    var carModel by rememberSaveable(personaHex) { mutableStateOf(p.carModel() ?: "") }
+    var carColor by rememberSaveable(personaHex) { mutableStateOf(p.carColor() ?: "") }
+    var plate by rememberSaveable(personaHex) { mutableStateOf(p.plate() ?: "") }
+    var pronouns by rememberSaveable(personaHex) { mutableStateOf(p.pronouns()) }
+    var avatar by remember(personaHex) { mutableStateOf(p.avatar()) }
+    var share by rememberSaveable(personaHex) { mutableStateOf(p.shareProfile()) }
+    var saved by remember(personaHex) { mutableStateOf(false) }
     var avatarError by remember { mutableStateOf<String?>(null) }
 
     // The wire carries the code (§16.9, core's Pronouns enum); the labels are

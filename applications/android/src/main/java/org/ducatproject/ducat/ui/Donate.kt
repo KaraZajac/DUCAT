@@ -72,16 +72,16 @@ fun DonateScreen() {
     var cardError by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(rail, cardUri) {
         if (rail != 0 || cardUri != null) return@LaunchedEffect
-        val r = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-            runCatching {
-                org.ducatproject.ducat.Mailbox.issueCard(
-                    context, MyProfile(context).name(),
-                    60uL * 60uL * 12uL, purpose = "donate",
-                )
-            }
-        }
-        r.onSuccess { cardUri = it.uri; cardInbox = it.inboxKey }
-            .onFailure { cardError = moneyFailure(context, it) }
+        // Keeps trying. The box is stood up once and left — on a table,
+        // in a case — and its first cut is often asked for before the node
+        // has attached, which used to leave the offline sentence up for
+        // the evening; the only way to a code was to switch rails and
+        // back.
+        val card = issueCardPatiently(context, 60uL * 60uL * 12uL, "donate") { cardError = it }
+        // Cleared, or a recut after a bad evening showed the old
+        // sentence in place of the spinner while the next cut ran.
+        cardError = null
+        cardUri = card.uri; cardInbox = card.inboxKey
     }
     LaunchedEffect(cardInbox) {
         val inbox = cardInbox ?: return@LaunchedEffect

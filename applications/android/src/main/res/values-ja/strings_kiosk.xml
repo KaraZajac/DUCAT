@@ -30,6 +30,8 @@
     <string name="kiosk_bill_sent_note">明細つきの請求がそちらに届いています。好きなときにお支払いください。</string>
     <string name="kiosk_no_ducat">DUCATがない場合はMoneroウォレットで支払う</string>
     <string name="kiosk_card_failed">コードを表示できませんでした：%1$s</string>
+    <string name="kiosk_bill_sending">請求を送っています…</string>
+    <string name="kiosk_bill_not_sent">まだ請求を送れませんでした：%1$s。再試行しています。</string>
     <string name="kiosk_withdraw">取り消す</string>
     <!-- Calling an order out, to somebody who stepped outside -->
     <string name="kiosk_say_ready">できました</string>

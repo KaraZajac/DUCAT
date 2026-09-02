@@ -8,6 +8,8 @@
     <string name="main_backup_title">Zrób kopię</string>
     <string name="main_backup_body">Masz kontakty, których nie ma w ostatniej kopii zapasowej. Przywrócenie odzyskałoby pieniądze, ale nie ludzi.</string>
     <string name="main_open_backup_settings">Otwórz ustawienia kopii zapasowej</string>
+    <string name="main_notify_off_title">Powiadomienia są wyłączone</string>
+    <string name="main_notify_off_body">Telefon nie może dać ci znać, gdy przyjdą pieniądze, rachunek albo ktoś zadzwoni. Dotknij, aby je włączyć.</string>
     <string name="main_recent">Ostatnie</string>
     <string name="main_see_all">Zobacz wszystko</string>
     <string name="main_card_link_title">Dodać kontakt?</string>
@@ -40,4 +42,11 @@
     <string name="err_no_keys_yet">Nie skończyliście jeszcze wymieniać się wizytówkami.</string>
     <string name="err_conversation_too_old">Ich wizytówka jest za stara dla tej aplikacji. Poproś o nową.</string>
     <string name="err_board_full">W okolicy jest teraz zbyt wiele zgłoszeń. Spróbuj za minutę.</string>
+    <string name="main_deals_title">Transakcje</string>
+    <plurals name="main_deals_waiting">
+        <item quantity="one">%1$d transakcja czeka na ciebie</item>
+        <item quantity="few">%1$d transakcje czekają na ciebie</item>
+        <item quantity="many">%1$d transakcji czeka na ciebie</item>
+        <item quantity="other">%1$d transakcji czeka na ciebie</item>
+    </plurals>
 </resources>

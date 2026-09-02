@@ -771,7 +771,7 @@ fn backup_cases() -> Vec<J> {
                 addicted adept adhesive adjust adopt abbey";
     let base = Backup {
         avatar: None, email: None, phone: None, signal: None, pronouns: None,
-        contacts: Vec::new(), prekey_signed_secret: None, prekey_one_time: Vec::new(), prekey_next_id: 0, app_state: None,
+        contacts: Vec::new(), personas: Vec::new(), prekey_signed_secret: None, prekey_one_time: Vec::new(), prekey_next_id: 0, app_state: None,
         persona_suite: 1,
         persona_secret: vec![0x11; 32],
         monero_seed: seed.to_string(),
@@ -828,6 +828,85 @@ fn backup_cases() -> Vec<J> {
         },
         "hint": "the layout is MAGIC(15) || salt(16) || nonce(24) || AEAD ciphertext"
     })];
+
+    // Post-1.0: each persona carries its own §16.9 profile. Pinned here at
+    // the enumeration's edge — a second implementation that drops or renames
+    // one per-persona key silently loses somebody's face on restore.
+    let dressed = Backup {
+        personas: vec![
+            ducat_core::backup::BackupPersona {
+                secret: vec![0x11; 32],
+                name: None,
+                color: 0,
+                created: 1_799_000_000,
+                display_name: Some("Sam".into()),
+                avatar: None,
+                email: Some("sam@example.org".into()),
+                phone: None,
+                signal: None,
+                pronouns: Some(1),
+                car_model: None,
+                car_color: None,
+                plate: None,
+                share_profile: true,
+            },
+            ducat_core::backup::BackupPersona {
+                secret: vec![0x22; 32],
+                name: Some("Shop".into()),
+                color: 0xFAB387,
+                created: 1_799_500_000,
+                display_name: Some("Corner Shop".into()),
+                avatar: Some(vec![0x89, 0x50, 0x4E, 0x47]),
+                email: None,
+                phone: Some("15551234567".into()),
+                signal: None,
+                pronouns: None,
+                car_model: Some("Vauxhall Astra".into()),
+                car_color: Some("green".into()),
+                plate: Some("AB12 CDE".into()),
+                share_profile: false,
+            },
+        ],
+        ..base.clone()
+    };
+    let dressed_blob = export(&dressed, pass, salt, nonce).expect("export");
+    cases.push(json!({
+        "name": "personas_carry_their_profiles",
+        "why": "post-1.0 compartments: every persona's own profile rides its roster entry                 (keys 4..13 in the per-persona map), the primary's copy still also riding                 the legacy top-level fields. share_profile is written only when off —                 absence decodes as on, the stored default.",
+        "passphrase_utf8": String::from_utf8_lossy(pass),
+        "salt_hex": hex(&salt),
+        "nonce_hex": hex(&nonce),
+        "kdf": {"algorithm": "argon2id", "version": 19, "memory_kib": 65536, "iterations": 3, "lanes": 1, "output_len": 32},
+        "blob_hex": hex(&dressed_blob),
+        "expect": {
+            "ok": true,
+            "decoded": {
+                "persona_suite": 1,
+                "persona_secret_hex": hex(&base.persona_secret),
+                "monero_seed": seed,
+                "monero_restore_height": 2_183_500u64,
+                "rendezvous_hex": base.rendezvous.iter().map(|r| hex(r)).collect::<Vec<_>>(),
+                "attestation_records_hex": base.attestation_records.iter().map(|r| hex(r)).collect::<Vec<_>>(),
+                "mandates_hex": base.mandates.iter().map(|r| hex(r)).collect::<Vec<_>>(),
+                "verification": {
+                    "device_unlock_at": base.verification.device_unlock_at,
+                    "app_secret_at": base.verification.app_secret_at,
+                    "app_secret_validity_s": base.verification.app_secret_validity_s,
+                    "cumulative_at": base.verification.cumulative_at,
+                    "cumulative_window_s": base.verification.cumulative_window_s
+                },
+                "created": 1_800_000_000u64,
+                "personas": [
+                    {"secret_hex": hex(&[0x11; 32]), "display_name": "Sam",
+                     "email": "sam@example.org", "pronouns": 1u64, "share_profile": true},
+                    {"secret_hex": hex(&[0x22; 32]), "name": "Shop", "color": 0xFAB387u64,
+                     "display_name": "Corner Shop", "avatar_hex": hex(&[0x89, 0x50, 0x4E, 0x47]),
+                     "phone": "15551234567", "car_model": "Vauxhall Astra",
+                     "car_color": "green", "plate": "AB12 CDE", "share_profile": false}
+                ]
+            }
+        }
+    }));
 
     cases.push(json!({
         "name": "wrong_passphrase",
@@ -972,6 +1051,10 @@ fn normalize(category: &str, mut c: J) -> (&'static str, J) {
                 ("contact", "hail.notice")
             } else if obj.contains_key("listing_hex") {
                 ("contact", "rental.listing")
+            } else if obj.contains_key("pub_listing_hex") {
+                ("contact", "pub.listing")
+            } else if obj.contains_key("site_head_hex") {
+                ("contact", "site.head")
             } else if obj.contains_key("subkey_count") {
                 ("contact", "log.ring")
             } else if obj.contains_key("shard") {
@@ -1471,9 +1554,12 @@ fn contact_cases() -> Vec<J> {
         }));
     }
 
-    let m0 = Message { version: 1, suite: 1, seq: 0, prev: [0u8; 32], body: "hey".into(), timestamp: 1_700_000_000, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None };
-    let m1 = Message { version: 1, suite: 1, seq: 1, prev: m0.link(), body: "you around?".into(), timestamp: 1_700_000_060, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None };
-    let m2 = Message { version: 1, suite: 1, seq: 2, prev: m1.link(), body: "here's the 20 back".into(), timestamp: 1_700_000_120, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None };
+    let m0 = Message { version: 1, suite: 1, seq: 0, prev: [0u8; 32], body: "hey".into(), timestamp: 1_700_000_000, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, publication: None,
+        call: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None };
+    let m1 = Message { version: 1, suite: 1, seq: 1, prev: m0.link(), body: "you around?".into(), timestamp: 1_700_000_060, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, publication: None,
+        call: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None };
+    let m2 = Message { version: 1, suite: 1, seq: 2, prev: m1.link(), body: "here's the 20 back".into(), timestamp: 1_700_000_120, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, publication: None,
+        call: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None };
 
     let mut chain = |name: &str, why: &str, msgs: &[&Message], fail_at: Option<(usize, RejectCode, &str)>| {
         v.push(json!({
@@ -1518,7 +1604,8 @@ fn contact_cases() -> Vec<J> {
         version: 1, suite: 1, seq: 0, prev: [0u8; 32],
         body: "for the coffee".into(), timestamp: 1_700_000_000,
         kind: MessageKind::PaymentRequest, amount_pxmr: Some(21_000_000_000), txid: None,
-        payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
+        payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, publication: None,
+        call: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
     };
     money("payment_request", "Asking a contact for an exact amount. It carries no authority — the payer still decides at §15.5's confirm screen.", &base_pay, None);
     money("payment_sent",
@@ -1734,7 +1821,8 @@ fn contact_cases() -> Vec<J> {
 
     // §16.15 — attachments.
     let att = Attachment {
-        record_key: KEY.into(),
+        record_key: Some(KEY.into()),
+        swarm_key: None, swarm_digest: None,
         key: [0xAA; 32], nonce: [0xBB; 24], len: 200_000,
         ct_hash: [0xCC; 32], mime: "image/jpeg".into(), name: Some("cat.jpg".into()),
     };
@@ -1750,6 +1838,47 @@ fn contact_cases() -> Vec<J> {
         "One record is the unit: 32 chunks of 32 KiB is Veilid's measured 1 MiB cap, and a larger file is a different design, not a larger number.",
         &Message { attachment: Some(Attachment { len: 2_000_000, ..att.clone() }), ..with_att.clone() },
         Some((RejectCode::Malformed, "attachment over bound")));
+    // §16.15 post-1.0 — the big road: the same sealed blob as a swarm
+    // share. Key and digest of the share travel inside the sealed message;
+    // the swarm on the network is noise to everyone but the thread.
+    let swarm_att = Attachment {
+        record_key: None,
+        swarm_key: Some(
+            "VLD0:yTkPyakRYOn1bsSXH-OGseka8Obb_NL8XF8ZXnlHAdU:ROXggMvnTffP_6W9vIdx-dp3njuLKCb_MhgfNInBRRQ".into(),
+        ),
+        swarm_digest: Some([0xDD; 32]),
+        key: [0xAA; 32], nonce: [0xBB; 24], len: 45_000_000,
+        ct_hash: [0xCC; 32], mime: "application/pdf".into(),
+        name: Some("plans.pdf".into()),
+    };
+    money("attachment_swarm_valid",
+        "A big file by reference: the sealed blob rides a swarm share instead of a record — same key, nonce, length, hash and mime, a road that fits what a record cannot.",
+        &Message { attachment: Some(swarm_att.clone()), ..with_att.clone() }, None);
+    money("attachment_both_roads",
+        "One road for the bytes: a record or the swarm, never both — two references to one blob is a disagreement waiting for a reader to pick wrong.",
+        &Message {
+            attachment: Some(Attachment {
+                record_key: Some(KEY.into()),
+                ..swarm_att.clone()
+            }),
+            ..with_att.clone()
+        },
+        Some((RejectCode::Malformed, "one road, not both")));
+    money("attachment_swarm_missing_digest",
+        "The share pair travels together: a key without the digest fetches something unverifiable, and a digest without the key verifies something unfetchable.",
+        &Message {
+            attachment: Some(Attachment { swarm_digest: None, ..swarm_att.clone() }),
+            ..with_att.clone()
+        },
+        Some((RejectCode::Malformed, "share key and digest together")));
+    money("attachment_swarm_over_bound",
+        "The big road has a bound too (256 MiB): past it, this is not a chat attachment but a distribution problem the publication machinery already owns.",
+        &Message {
+            attachment: Some(Attachment { len: 300_000_000, ..swarm_att.clone() }),
+            ..with_att.clone()
+        },
+        Some((RejectCode::Malformed, "swarm attachment over bound")));
+
     money("attachment_on_a_request",
         "Attachments ride ordinary messages. A bill with a file in it is two features fused at their least-tested corner.",
         &Message { kind: MessageKind::PaymentRequest, amount_pxmr: Some(1), ..with_att.clone() },
@@ -1854,9 +1983,152 @@ fn contact_cases() -> Vec<J> {
         Some((RejectCode::Malformed, "only a position message carries a stream reference")));
     money("position_kind_without_a_reference",
         "A PositionRef whose reference is absent hands over nothing.",
-        &Message { kind: MessageKind::PositionRef, position: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
+        &Message { kind: MessageKind::PositionRef, position: None, publication: None,
+        call: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
                    body: "empty".into(), ..base_pay.clone() },
         Some((RejectCode::Malformed, "a position message carries a reference to the stream")));
+    // §16.20 — a publication period's key down the paid thread (kind 13).
+    let pub_full = Message {
+        kind: MessageKind::PublicationKey, amount_pxmr: None,
+        body: "september".into(),
+        publication: Some(ducat_core::contact::PublicationKey {
+            period_id: "2026-09".into(),
+            period_key: [0x42u8; 32],
+            record_key: Some("VLD0:AbCdEfGhIjKlMnOpQrStUvWxYz0123456789aBcDeF".into()),
+            head_key: Some([0x24u8; 32]),
+            swarm_key: None,
+            swarm_digest: None,
+        }),
+        call: None,
+        ..base_pay.clone()
+    };
+    money("publication_key_first",
+        "The first delivery: this period's key, plus the shelf — the publication's root record and the standing head key that opens its index. A capability, never content; the thread stays small while the shelf holds the weight.",
+        &pub_full, None);
+    let pub_minimal = Message {
+        publication: Some(ducat_core::contact::PublicationKey {
+            period_id: "2026-10".into(),
+            period_key: [0x43u8; 32],
+            record_key: None,
+            head_key: None,
+            swarm_key: None,
+            swarm_digest: None,
+        }),
+        call: None,
+        ..pub_full.clone()
+    };
+    money("publication_key_period_only",
+        "Every delivery after the first: the reader already holds the shelf, so only the period pair travels.",
+        &pub_minimal, None);
+    money("publication_key_on_a_text",
+        "The period key IS the kind. On any other kind it is a capability smuggled where no reader is looking for one.",
+        &Message { kind: MessageKind::Text, body: "hi".into(), ..pub_minimal.clone() },
+        Some((RejectCode::Malformed, "only a publication message carries a period key")));
+    money("publication_kind_without_a_key",
+        "A publication message with nothing to hand over is an empty gesture.",
+        &Message { kind: MessageKind::PublicationKey, position: None, publication: None,
+        call: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
+                   body: "empty".into(), ..base_pay.clone() },
+        Some((RejectCode::Malformed, "a publication message carries the period's key")));
+    // Both edges of the period id: the empty spelling is a second encoding
+    // of "omitted" and refused below the field layer; one past the cap is
+    // refused at it; the cap itself is accepted — pinned from both sides.
+    let empty = Message {
+        publication: Some(ducat_core::contact::PublicationKey {
+            period_id: "".into(), period_key: [0x43u8; 32],
+            record_key: None, head_key: None,
+            swarm_key: None,
+            swarm_digest: None,
+        }),
+        call: None,
+        ..pub_minimal.clone()
+    };
+    money("publication_empty_period_id",
+        "A present-but-empty period id is a second encoding of omission (§18.1).",
+        &empty,
+        Some((RejectCode::Malformed, "text field is present but empty; omit the key instead")));
+    let oversize = Message {
+        publication: Some(ducat_core::contact::PublicationKey {
+            period_id: "x".repeat(65), period_key: [0x43u8; 32],
+            record_key: None, head_key: None,
+            swarm_key: None,
+            swarm_digest: None,
+        }),
+        call: None,
+        ..pub_minimal.clone()
+    };
+    money("publication_period_id_too_long",
+        "A period id is a label, not a channel: 64 characters is the cap, and 65 is refused.",
+        &oversize,
+        Some((RejectCode::Malformed, "text exceeds 64 characters")));
+    let at_cap = Message {
+        publication: Some(ducat_core::contact::PublicationKey {
+            period_id: "x".repeat(64), period_key: [0x43u8; 32],
+            record_key: None, head_key: None,
+            swarm_key: None,
+            swarm_digest: None,
+        }),
+        call: None,
+        ..pub_minimal.clone()
+    };
+    money("publication_period_id_at_cap",
+        "Sixty-four exactly is accepted — the cap is pinned from both sides.",
+        &at_cap, None);
+    money("publication_key_with_an_amount",
+        "A key handover with an amount on it is a number nothing will honour — the bill travelled separately (§16.13) and settled before this message existed.",
+        &Message { amount_pxmr: Some(21_000_000_000), ..pub_minimal.clone() },
+        Some((RejectCode::Malformed, "this message kind must not carry an amount")));
+    let pub_shipment = Message {
+        publication: Some(ducat_core::contact::PublicationKey {
+            period_id: "2026-11".into(),
+            period_key: [0x44u8; 32],
+            record_key: None,
+            head_key: None,
+            swarm_key: Some("VLD0:SwArMkEyAbCdEfGhIjKlMnOpQrStUvWxYz012345".into()),
+            swarm_digest: Some([0x55u8; 32]),
+        }),
+        call: None,
+        ..pub_minimal.clone()
+    };
+    money("publication_key_with_shipment",
+        "A heavy period ships by swarm: the share key to bootstrap from and the index digest that authenticates what answers ride beside the period's key, so the whole month arrives on one message — capability and truck, never content.",
+        &pub_shipment, None);
+
+    // §16.21 — a call is a door handed down the thread (kinds 14–15).
+    let call_offer = Message {
+        kind: MessageKind::CallOffer, amount_pxmr: None,
+        body: "ring".into(),
+        call: Some(ducat_core::contact::CallRef {
+            route: vec![0xAB; 200],
+            id: [0x77u8; 8],
+        }),
+        ..base_pay.clone()
+    };
+    money("call_offer",
+        "Kind 14: the offer carries a fresh private-route blob and a call id — the door and its name, both.",
+        &call_offer, None);
+    money("call_answer",
+        "Kind 15: the callee's own route, quoting the id — an answer names its call even when two offers cross.",
+        &Message { kind: MessageKind::CallAnswer, ..call_offer.clone() }, None);
+    money("call_offer_missing_pair",
+        "An offer with no route rings nothing — the door IS the kind.",
+        &Message { call: None, ..call_offer.clone() },
+        Some((RejectCode::Malformed, "a call message carries its route and id")));
+    money("call_route_on_a_text",
+        "A route on any other kind is a door held open where no call is happening.",
+        &Message { kind: MessageKind::Text, ..call_offer.clone() },
+        Some((RejectCode::Malformed, "only a call message carries a call route")));
+    money("call_offer_with_amount",
+        "No money rides a doorbell: the bill travelled separately, like a publication's.",
+        &Message { amount_pxmr: Some(5), ..call_offer.clone() },
+        Some((RejectCode::Malformed, "this message kind must not carry an amount")));
+    money("call_route_at_cap",
+        "4096 bytes of route is the cap (blobs embed hop peer-info and a live phone measured one past 1200), and the cap is a member — pinned from the inside.",
+        &Message {
+            call: Some(ducat_core::contact::CallRef { route: vec![0xAB; 4096], id: [0x77u8; 8] }),
+            ..call_offer.clone()
+        }, None);
+
     // The half-reference cannot be built from the struct (both fields or none),
     // so it is made by deleting one from the encoding — same trick as the
     // half-attachment below.
@@ -1877,7 +2149,118 @@ fn contact_cases() -> Vec<J> {
             "why": "A key pointing at no record points nowhere.",
             "payment_hex": hex(&v3.encode()),
             "expect": { "ok": false, "reject": "MALFORMED", "hint": "a position reference carries its record and its key together" } }));
+        use ducat_core::wire::f;
+        let mut half = pub_minimal.to_value();
+        if let ducat_core::cbor::Value::Map(ref mut m) = half {
+            m.remove(&f::MSG_PUB_KEY);
+        }
+        v.push(json!({ "name": "publication_period_without_key",
+            "why": "A period name with no key opens nothing. The period pair travels together or not at all.",
+            "payment_hex": hex(&half.encode()),
+            "expect": { "ok": false, "reject": "MALFORMED", "hint": "a publication key carries its period id and its key together" } }));
+        let mut half = pub_minimal.to_value();
+        if let ducat_core::cbor::Value::Map(ref mut m) = half {
+            m.remove(&f::MSG_PUB_PERIOD);
+        }
+        v.push(json!({ "name": "publication_key_without_period",
+            "why": "A key with no name cannot be filed.",
+            "payment_hex": hex(&half.encode()),
+            "expect": { "ok": false, "reject": "MALFORMED", "hint": "a publication key carries its period id and its key together" } }));
+        let mut half = pub_full.to_value();
+        if let ducat_core::cbor::Value::Map(ref mut m) = half {
+            m.remove(&f::MSG_PUB_HEAD);
+        }
+        v.push(json!({ "name": "publication_shelf_without_head_key",
+            "why": "A shelf whose index cannot be opened was not handed over. Record and head key travel together or not at all.",
+            "payment_hex": hex(&half.encode()),
+            "expect": { "ok": false, "reject": "MALFORMED", "hint": "a publication shelf carries its record and its head key together" } }));
+        let mut half = pub_full.to_value();
+        if let ducat_core::cbor::Value::Map(ref mut m) = half {
+            m.remove(&f::MSG_PUB_RECORD);
+        }
+        v.push(json!({ "name": "publication_head_key_without_record",
+            "why": "A head key for no shelf opens nothing.",
+            "payment_hex": hex(&half.encode()),
+            "expect": { "ok": false, "reject": "MALFORMED", "hint": "a publication shelf carries its record and its head key together" } }));
+        let mut half = pub_shipment.to_value();
+        if let ducat_core::cbor::Value::Map(ref mut m) = half {
+            m.remove(&f::MSG_PUB_SWARM_DIGEST);
+        }
+        v.push(json!({ "name": "publication_swarm_without_digest",
+            "why": "A bootstrap key without the digest that authenticates its answers is an ask, not a fetch.",
+            "payment_hex": hex(&half.encode()),
+            "expect": { "ok": false, "reject": "MALFORMED", "hint": "a swarm share carries its key and its index digest together" } }));
+        let mut half = pub_shipment.to_value();
+        if let ducat_core::cbor::Value::Map(ref mut m) = half {
+            m.remove(&f::MSG_PUB_SWARM_KEY);
+        }
+        v.push(json!({ "name": "publication_swarm_without_key",
+            "why": "A digest with nothing to fetch authenticates nothing.",
+            "payment_hex": hex(&half.encode()),
+            "expect": { "ok": false, "reject": "MALFORMED", "hint": "a swarm share carries its key and its index digest together" } }));
+        let mut stray = pub_shipment.to_value();
+        if let ducat_core::cbor::Value::Map(ref mut m) = stray {
+            m.remove(&f::MSG_PUB_PERIOD);
+            m.remove(&f::MSG_PUB_KEY);
+        }
+        v.push(json!({ "name": "publication_swarm_without_publication",
+            "why": "The shipment describes a period; away from the period's key it describes a shipment of nothing.",
+            "payment_hex": hex(&stray.encode()),
+            "expect": { "ok": false, "reject": "MALFORMED", "hint": "a swarm share rides a publication key" } }));
+        let mut short = pub_shipment.to_value();
+        if let ducat_core::cbor::Value::Map(ref mut m) = short {
+            m.insert(ducat_core::wire::f::MSG_PUB_SWARM_DIGEST,
+                     ducat_core::cbor::Value::Bytes(vec![0x55u8; 31]));
+        }
+        v.push(json!({ "name": "publication_swarm_digest_short",
+            "why": "An index digest is 32 bytes; 31 is not a shorter digest, it is a different claim.",
+            "payment_hex": hex(&short.encode()),
+            "expect": { "ok": false, "reject": "MALFORMED", "hint": "field 262 must be 32 bytes, got 31" } }));
+    
     }
+
+    // §16.21's forged halves: encode won't build these, which is exactly
+    // why they need vectors.
+    {
+        let ducat_core::cbor::Value::Map(call_base) = call_offer.to_value() else { unreachable!() };
+        {
+            let mut m = call_base.clone();
+            m.remove(&ducat_core::wire::f::MSG_CALL_ID);
+            v.push(json!({ "name": "call_route_without_id",
+                "why": "Half a door: a route with no id cannot be answered by name.",
+                "payment_hex": hex(&ducat_core::cbor::Value::Map(m).encode()),
+                "expect": { "ok": false, "reject": "MALFORMED", "hint": "a call carries its route and its id together" } }));
+        }
+        {
+            let mut m = call_base.clone();
+            m.remove(&ducat_core::wire::f::MSG_CALL_ROUTE);
+            v.push(json!({ "name": "call_id_without_route",
+                "why": "The other half: a name with no door opens nothing.",
+                "payment_hex": hex(&ducat_core::cbor::Value::Map(m).encode()),
+                "expect": { "ok": false, "reject": "MALFORMED", "hint": "a call carries its route and its id together" } }));
+        }
+        {
+            let mut m = call_base.clone();
+            m.insert(ducat_core::wire::f::MSG_CALL_ROUTE,
+                     ducat_core::cbor::Value::Bytes(vec![0xAB; 4097]));
+            v.push(json!({ "name": "call_route_oversize",
+                "why": "One past the cap, from the outside: 4097 bytes is not a longer route, it is smuggling.",
+                "payment_hex": hex(&ducat_core::cbor::Value::Map(m).encode()),
+                "expect": { "ok": false, "reject": "MALFORMED", "hint": "a call route is 1 to 4096 bytes" } }));
+        }
+        {
+            let mut m = call_base.clone();
+            m.insert(ducat_core::wire::f::MSG_CALL_ID,
+                     ducat_core::cbor::Value::Bytes(vec![0x77u8; 7]));
+            v.push(json!({ "name": "call_id_short",
+                "why": "A call id is eight bytes; seven is a different claim, not a shorter one.",
+                "payment_hex": hex(&ducat_core::cbor::Value::Map(m).encode()),
+                "expect": { "ok": false, "reject": "MALFORMED", "hint": "field 264 must be 8 bytes, got 7" } }));
+        }
+    }
+
+
+
 
     // The stream itself (§15.12): the encrypted value written to the record's
     // subkey each cadence. A fixed-length primitive, not CBOR — so the
@@ -2035,9 +2418,9 @@ fn contact_cases() -> Vec<J> {
     // as text shows a payment request as a chat line, or the reverse.
     {
         let ducat_core::cbor::Value::Map(mut m) = base_pay.to_value() else { unreachable!() };
-        m.insert(ducat_core::wire::f::MSG_KIND, ducat_core::cbor::Value::Uint(11));
+        m.insert(ducat_core::wire::f::MSG_KIND, ducat_core::cbor::Value::Uint(16));
         v.push(json!({ "name": "message_unknown_kind",
-            "why": "Kind 11. The set is closed at ten, and a kind decides what every other field on the message *means* — an amount, a target sequence, a ceremony payload. Falling back to text would render a request for money as something to read.",
+            "why": "Kind 16 — one past the newest (15, CALL_ANSWER), because this sentinel must sit at the closed set's EDGE and move with it. A kind decides what every other field on the message *means*; falling back to text would render a request for money as something to read.",
             "payment_hex": hex(&ducat_core::cbor::Value::Map(m).encode()),
             "expect": { "ok": false, "reject": "MALFORMED", "hint": "unknown message kind" } }));
     }
@@ -2409,6 +2792,160 @@ fn contact_cases() -> Vec<J> {
             }
         }
 
+    }
+
+    // §16.22: the site head — the mutable pointer a ducat:site/ URI names.
+    // Subkey 0 of the site record; rewriting it at the same record key IS
+    // updating the site. The bundle rides a multi-file swarm share and
+    // renders in a sealed room.
+    {
+        use ducat_core::contact::SiteHead;
+        let mut scase = |name: &str, why: &str, h: &SiteHead, bad: Option<(RejectCode, &str)>| {
+            let hex_body = hex(&h.to_value().encode());
+            v.push(match bad {
+                None => json!({ "name": name, "why": why, "site_head_hex": hex_body,
+                                "expect": { "ok": true, "reencodes_to_hex": hex_body } }),
+                Some((code, hint)) => json!({ "name": name, "why": why, "site_head_hex": hex_body,
+                                "expect": { "ok": false, "reject": format!("{:?}", code).to_uppercase(), "hint": hint } }),
+            });
+        };
+        let head = SiteHead {
+            version: 1,
+            title: "The Corner Shop".into(),
+            share: "VLD0:yTkPyakRYOn1bsSXH-OGseka8Obb_NL8XF8ZXnlHAdU:ROXggMvnTffP_6W9vIdx-dp3njuLKCb_MhgfNInBRRQ".into(),
+            digest: [0xE1; 32],
+            updated: 1_800_000_000,
+        };
+        scase("site_head_valid",
+            "The whole pointer: title, the current bundle's share and digest, and when it moved. The record key underneath is the site's stable identity; this head is whatever it points at today.",
+            &head, None);
+        scase("site_head_missing_share",
+            "A head without its bundle points at nothing a reader can fetch.",
+            &SiteHead { share: String::new(), ..head.clone() },
+            Some((RejectCode::Malformed, "names its bundle's share")));
+        scase("site_head_bad_version",
+            "Versions gate readers the way they gate every head in this document.",
+            &SiteHead { version: 2, ..head.clone() },
+            Some((RejectCode::Malformed, "unknown site head version")));
+        {
+            // The closed set's edge, pinned on both sides (the blind-spot
+            // rule): 285, one past SITE_UPDATED.
+            let ducat_core::cbor::Value::Map(mut m) = head.to_value() else { unreachable!() };
+            m.insert(285, ducat_core::cbor::Value::Uint(1));
+            v.push(json!({ "name": "site_head_unknown_field",
+                "why": "285 — one past the newest (284, SITE_UPDATED), the closed set's edge, which must move with it.",
+                "site_head_hex": hex(&ducat_core::cbor::Value::Map(m).encode()),
+                "expect": { "ok": false, "reject": "UNKNOWNFIELD", "hint": "unrecognised field 285" } }));
+        }
+    }
+
+    // §16.18.2: the publication listing — the digital good on the same
+    // boards. The board name carries the where (topic:<category>[.<lang>]
+    // worldwide, local:<cell> for the town paper); the notice carries what
+    // a stranger needs to decide, and claiming its card IS subscribing.
+    {
+        use ducat_core::contact::PubNotice;
+        let mut pcase = |name: &str, why: &str, n: &PubNotice, bad: Option<(RejectCode, &str)>| {
+            let hex_body = hex(&n.to_value().encode());
+            v.push(match bad {
+                None => json!({ "name": name, "why": why, "pub_listing_hex": hex_body,
+                                "expect": { "ok": true, "reencodes_to_hex": hex_body } }),
+                Some((code, hint)) => json!({ "name": name, "why": why, "pub_listing_hex": hex_body,
+                                "expect": { "ok": false, "reject": format!("{:?}", code).to_uppercase(), "hint": hint } }),
+            });
+        };
+        let free = PubNotice {
+            version: 1,
+            card: "ducat:2m1CQVCAiPjIfW5EX7ja1i8dRAsCLZ3nSCEgKHZBHZY".into(),
+            title: "The Riverside Gazette".into(),
+            blurb: None,
+            price_pxmr: None,
+            expiry: 1_800_000_000,
+        };
+        let priced = PubNotice {
+            blurb: Some("Twelve pages of the river's week, every Friday.".into()),
+            price_pxmr: Some(500_000_000),
+            ..free.clone()
+        };
+        pcase("publication_free",
+            "A free paper on the board: a claim-once publish card, a title, an expiry — and no price field at all, because free has exactly one spelling.",
+            &free, None);
+        pcase("publication_priced",
+            "A priced monthly with a blurb. The price is per §16.20 period, in piconero; the blurb is one sentence, because the description belongs in the issues.",
+            &priced, None);
+        pcase("publication_price_zero",
+            "An explicit zero is a second spelling of free, and the signature is over these bytes — one meaning, one encoding (§18.1).",
+            &PubNotice { price_pxmr: Some(0), ..free.clone() },
+            Some((RejectCode::Malformed, "free is spelled by omission")));
+        pcase("publication_wrong_version",
+            "One past the current version. A reader that guessed at forward compatibility would render fields it cannot know the meaning of.",
+            &PubNotice { version: 2, ..free.clone() },
+            Some((RejectCode::Malformed, "unknown publication notice version")));
+        pcase("publication_card_wrong_scheme",
+            "A listing whose card is an https link is an advertisement for somewhere else wearing our seal.",
+            &PubNotice { card: "https://example.com/sub".into(), ..free.clone() },
+            Some((RejectCode::Malformed, "a listing card must be a ducat: URI")));
+        pcase("publication_title_too_long",
+            "Sixty characters is a masthead; past that it is a manifesto, and manifestos go in the issues.",
+            &PubNotice { title: "x".repeat(61), ..free.clone() },
+            Some((RejectCode::Malformed, "text too long")));
+        pcase("publication_blurb_too_long",
+            "One sentence about it. 280 holds a sentence anywhere; more is the first issue leaking onto the board.",
+            &PubNotice { blurb: Some("y".repeat(281)), ..free.clone() },
+            Some((RejectCode::Malformed, "text too long")));
+
+        // The edges a struct cannot spell: a missing card, and a field from
+        // the future. By hand, which is what a careless implementation does.
+        {
+            let ducat_core::cbor::Value::Map(mut m) = free.to_value() else { unreachable!() };
+            m.remove(&ducat_core::wire::f::PN_CARD);
+            v.push(json!({ "name": "publication_no_card",
+                "why": "A listing without its card advertises something nobody can subscribe to; the claim IS the subscription, so the card is the listing's whole point.",
+                "pub_listing_hex": hex(&ducat_core::cbor::Value::Map(m).encode()),
+                "expect": { "ok": false, "reject": "MALFORMED", "hint": "a publication listing needs a card" } }));
+        }
+        {
+            let ducat_core::cbor::Value::Map(mut m) = free.to_value() else { unreachable!() };
+            m.insert(276, ducat_core::cbor::Value::Uint(1));
+            v.push(json!({ "name": "publication_unknown_field",
+                "why": "276 — one past the newest (275, PN_BEACON_HASH), the closed set's edge, which must move with it. The strict reader is what stops a notice smuggling anything past the stamp.",
+                "pub_listing_hex": hex(&ducat_core::cbor::Value::Map(m).encode()),
+                "expect": { "ok": false, "reject": "UNKNOWNFIELD", "hint": "unrecognised field 276" } }));
+        }
+
+        // The sealed form on a topic board: the same five-stamp machinery as
+        // a rental, in this family's own field namespace — pinned so a second
+        // implementation knows where this notice's stamp lives.
+        {
+            let seed = ducat_core::board::listing_seed(b"vector-persona", "gazette-1");
+            let board = "topic:news.en@3021-0";
+            let subkey = 4u32;
+            let beacon = ducat_core::board::Beacon { height: 3_210_000, hash: [0x5au8; 32] };
+            let ducat_core::cbor::Value::Map(m) = free.to_value() else { unreachable!() };
+            let sealed = ducat_core::board::seal(
+                m, ducat_core::board::PUB, &seed, board, subkey, &beacon,
+            );
+            let sealed_hex = hex(&sealed.encode());
+            let poster = {
+                let ducat_core::cbor::Value::Map(sm) = &sealed else { unreachable!() };
+                match sm.get(&ducat_core::wire::f::PN_POSTER) {
+                    Some(ducat_core::cbor::Value::Bytes(b)) => b.clone(),
+                    _ => unreachable!("a sealed notice carries its poster"),
+                }
+            };
+            v.push(json!({ "name": "publication_sealed",
+                "why": "A publication on a worldwide board: category and language live in the board name — inside the signature, like the slot — so a notice cannot be lifted onto another topic any more than onto another slot. The stamp block rides in this family's own ids (271–275).",
+                "sealed_hex": sealed_hex,
+                "board": board, "subkey": subkey,
+                "expect": { "ok": true, "poster_hex": hex(&poster),
+                            "beacon_height": beacon.height,
+                            "beacon_hash": hex(&beacon.hash) } }));
+            v.push(json!({ "name": "publication_sealed_wrong_board",
+                "why": "The same bytes offered from topic:news.es. The board name is inside the signature: a listing posted to one topic cannot be republished onto another by anyone but its author paying the stamp again.",
+                "sealed_hex": sealed_hex,
+                "board": "topic:news.es@3021-0", "subkey": subkey,
+                "expect": { "ok": false, "reject": "MALFORMED", "hint": "this notice was not signed for this slot" } }));
+        }
     }
 
     v

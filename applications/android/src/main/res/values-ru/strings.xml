@@ -17,8 +17,9 @@
     <string name="tab_send_receive">Перевод</string>
 
     <string name="section_status">Статус</string>
-    <string name="section_profile">Профиль</string>
+    <string name="section_profile">Профили</string>
     <string name="section_contacts">Контакты</string>
+    <string name="section_selling">Продажи</string>
     <string name="section_logs">Журнал</string>
     <string name="section_settings">Настройки</string>
     <string name="section_modes">Режимы работы</string>

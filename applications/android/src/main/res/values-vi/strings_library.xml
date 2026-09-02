@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_library">Thư viện</string>
+    <string name="library_empty">Chưa có gì ở đây. Khi nhà xuất bản gửi cho bạn một số báo, nó được lưu vào đây — và vẫn còn dù bạn xóa cuộc trò chuyện.</string>
+    <string name="library_issue">Số %1$s</string>
+    <string name="library_on_device">Trên thiết bị này · %1$s</string>
+    <string name="library_no_shipment">Đã lưu khóa — chưa có bản tải xuống nào</string>
+    <string name="library_download">Tải xuống</string>
+    <string name="library_progress">%1$s / %2$s</string>
+    <string name="library_starting">Đang bắt đầu…</string>
+    <string name="library_failed">Tải xuống thất bại: %1$s</string>
+    <string name="library_gone">không còn trong danh bạ của bạn</string>
+    <string name="chat_issue_sent_you">Đã gửi cho bạn một số báo</string>
+    <string name="chat_issue_you_sent">Bạn đã gửi một số báo</string>
+    <string name="chatlist_preview_issue">Số mới: %1$s</string>
+    <string name="notify_new_issue">%1$s đã gửi một số mới</string>
+    <string name="library_note_new_issue">Số mới đã ra.</string>
+    <string name="library_unsubscribe">Hủy đăng ký</string>
+    <string name="library_unsub_confirm">Ngừng nhận từ %1$s? Các số bạn đã có vẫn là của bạn.</string>
+    <string name="library_unsub_keep">Giữ đăng ký</string>
+    <string name="library_resubscribe">Đăng ký lại</string>
+    <string name="library_unsubscribed">Đã hủy — số mới không được lưu</string>
+    <string name="library_unsub_note">Đã hủy đăng ký.</string>
+    <plurals name="main_issues_waiting">
+        <item quantity="other">%1$d số mới đang chờ</item>
+    </plurals>
+    <string name="library_open">Mở</string>
+    <string name="library_queued">Trong hàng đợi</string>
+</resources>

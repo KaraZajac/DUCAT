@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_library">Bibliotheek</string>
+    <string name="library_empty">Nog niets hier. Als een uitgever je een editie stuurt, wordt die hier bewaard — en blijft, ook als de chat wordt verwijderd.</string>
+    <string name="library_issue">Editie %1$s</string>
+    <string name="library_on_device">Op dit apparaat · %1$s</string>
+    <string name="library_no_shipment">Sleutel bewaard — nog geen download beschikbaar</string>
+    <string name="library_download">Downloaden</string>
+    <string name="library_progress">%1$s van %2$s</string>
+    <string name="library_starting">Starten…</string>
+    <string name="library_failed">Download mislukt: %1$s</string>
+    <string name="library_gone">niet meer in je contacten</string>
+    <string name="chat_issue_sent_you">Heeft je een editie gestuurd</string>
+    <string name="chat_issue_you_sent">Je hebt een editie gestuurd</string>
+    <string name="chatlist_preview_issue">Nieuwe editie: %1$s</string>
+    <string name="notify_new_issue">%1$s heeft een nieuwe editie gestuurd</string>
+    <string name="library_note_new_issue">Er is een nieuwe editie uit.</string>
+    <string name="library_unsubscribe">Opzeggen</string>
+    <string name="library_unsub_confirm">Niets meer van %1$s ontvangen? Edities die je al hebt blijven van jou.</string>
+    <string name="library_unsub_keep">Abonnement houden</string>
+    <string name="library_resubscribe">Opnieuw abonneren</string>
+    <string name="library_unsubscribed">Opgezegd — nieuwe edities worden niet bewaard</string>
+    <string name="library_unsub_note">Opgezegd.</string>
+    <plurals name="main_issues_waiting">
+        <item quantity="one">%1$d nieuwe editie wacht</item>
+        <item quantity="other">%1$d nieuwe edities wachten</item>
+    </plurals>
+    <string name="library_open">Openen</string>
+    <string name="library_queued">In de wachtrij</string>
+</resources>

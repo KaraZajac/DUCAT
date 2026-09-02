@@ -19,6 +19,7 @@
     <string name="section_status">ステータス</string>
     <string name="section_profile">プロフィール</string>
     <string name="section_contacts">連絡先</string>
+    <string name="section_selling">販売</string>
     <string name="section_logs">ログ</string>
     <string name="section_settings">設定</string>
     <string name="section_modes">動作モード</string>

@@ -30,6 +30,8 @@
     <string name="kiosk_bill_sent_note">A sua conta está lá, discriminada. Pague quando quiser.</string>
     <string name="kiosk_no_ducat">Sem DUCAT? Pague com uma carteira Monero</string>
     <string name="kiosk_card_failed">Não foi possível mostrar um código: %1$s</string>
+    <string name="kiosk_bill_sending">Enviando a sua conta…</string>
+    <string name="kiosk_bill_not_sent">Ainda não foi possível enviar a conta: %1$s. Tentando de novo.</string>
     <string name="kiosk_withdraw">Retirar</string>
     <!-- Calling an order out, to somebody who stepped outside -->
     <string name="kiosk_say_ready">Pronto</string>

@@ -27,9 +27,9 @@ import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.Mailbox
-import org.ducatproject.ducat.MyProfile
 import org.ducatproject.ducat.R
 import org.ducatproject.ducat.RateStore
+import org.ducatproject.ducat.RunningTab
 import org.ducatproject.ducat.TabStore
 import org.ducatproject.ducat.formatXmr
 import java.math.BigDecimal
@@ -48,7 +48,7 @@ private const val TAG = "POS"
 /** The basket across recreation and process death: a till is a tablet that
  *  rotates and a phone Android reclaims mid-rush, and a rung-up sale is real
  *  work. Flattened to [desc, amount, desc, amount, …] — both bundle-safe. */
-private val BasketSaver = androidx.compose.runtime.saveable.listSaver<List<BillItem>, Any>(
+internal val BasketSaver = androidx.compose.runtime.saveable.listSaver<List<BillItem>, Any>(
     save = { it.flatMap { b -> listOf(b.description, b.amountPxmr) } },
     restore = { flat -> flat.chunked(2).map { (d, a) -> BillItem(d as String, a as Long) } },
 )
@@ -209,7 +209,14 @@ fun PosScreen() {
                             )
                             AmountBoth(item.amountPxmr)
                             IconButton(
-                                onClick = { basket = basket.filterIndexed { j, _ -> j != i } },
+                                onClick = {
+                                    basket = basket.filterIndexed { j, _ -> j != i }
+                                    // The tax line belongs to the lines it was
+                                    // worked out on. Left standing, an emptied
+                                    // basket showed the old tax as the whole
+                                    // sale, and a typed one rode into the next.
+                                    if (basket.isEmpty()) taxPxmr = 0L
+                                },
                                 // 40dp, not 32: the explicit size overrides
                                 // the 48dp the component reserves, and this
                                 // removes a rung-up line mid-sale.
@@ -228,7 +235,10 @@ fun PosScreen() {
                         // occasional seller quoting one odd levy is a different
                         // person from a business with a standing percentage.
                         val subtotal = basket.sumOf { it.amountPxmr }
-                        LaunchedEffect(subtotal) {
+                        // Keyed on the rate too (Tax.set bumps the store):
+                        // a rate changed in Settings mid-sale used to leave
+                        // the old figure on the bill until the basket moved.
+                        LaunchedEffect(subtotal, rateVersion) {
                             taxPxmr = org.ducatproject.ducat.Tax.on(context, subtotal)
                         }
                         Row(
@@ -516,6 +526,16 @@ private fun PresentScreen(
     // does, and the store is the source of truth for the rest of them anyway.
     var customerHex by rememberSaveable { mutableStateOf<String?>(null) }
     var saleTabId by rememberSaveable { mutableStateOf<String?>(null) }
+    // The tab opened for this sale before its bill has gone. One per sale,
+    // however many tries the bill takes: the billing loop used to open a
+    // fresh tab on every attempt, and a node that was down for a minute left
+    // thirty "settled" tabs in the store for one coffee — each a live claim
+    // on the next payment of that size from that customer, none of them
+    // withdrawn by leaving the screen, which only knew about the last.
+    var pendingTabId by rememberSaveable { mutableStateOf<String?>(null) }
+    // When the sale went up, so its own bill can be told from an older one
+    // to the same customer for the same things.
+    val presentedAt = rememberSaveable { System.currentTimeMillis() }
     val customer: Contact? = remember(customerHex, version) {
         customerHex?.let { h -> ContactStore(context).all().firstOrNull { it.personaHex == h } }
     }
@@ -524,35 +544,81 @@ private fun PresentScreen(
     // drives — so a sale marked paid while this screen was backgrounded shows
     // paid the moment it returns, and the receipt logic lives in exactly one
     // place (TabStore.reconcile) for every vendor mode.
+    val saleTab = remember(version, saleTabId) { saleTabId?.let { TabStore(context).get(it) } }
     val stage = when {
-        saleTabId != null -> remember(version, saleTabId) {
-            val t = TabStore(context).get(saleTabId!!)
-            when {
-                t?.state == "paid" -> Sale.Paid
-                t?.seenTx != null -> Sale.Seen
-                else -> Sale.Billed
-            }
+        saleTabId != null -> when {
+            saleTab?.state == "paid" -> Sale.Paid
+            saleTab?.seenTx != null -> Sale.Seen
+            else -> Sale.Billed
         }
         else -> Sale.Waiting
     }
+    // Whether the receipt actually left. "Receipt sent" used to be read
+    // off the paid state alone, over a send the reconciler had logged as
+    // failed and forgotten; the tab now owes it, and the poll sends it.
+    val receiptOwed = saleTab?.wordSeq == RunningTab.WORD_UNSENT
 
     val scope = rememberCoroutineScope()
+    var leaving by remember { mutableStateOf(false) }
     // Leaving a billed sale must withdraw the bill, not just the screen.
     // The settled record would otherwise sit in the store forever, and a
     // later unrelated payment of the same amount would match it — a
     // receipt fired into a dead sale's thread.
-    fun abandon() {
-        saleTabId?.let { id ->
-            scope.launch(Dispatchers.IO) {
+    //
+    // And the screen waits for the word to go. It used to fire the retract
+    // and leave in the same tap, which was the same bug on a timer: a node
+    // that refused the send failed inside a coroutine nobody was watching
+    // (or one the departing screen had already cancelled), TabStore.close
+    // put the tab back to "settled" as it must, and the till returned to
+    // its basket with the bill live on the customer's phone and the claim
+    // live in the store — now with no screen that knew about either. The
+    // Bar Tab's cancel stays until the word is out or says why it is not;
+    // this does the same, and the buttons are the retry.
+    fun leave(then: () -> Unit) {
+        val billed = saleTabId
+        val pending = pendingTabId
+        if (billed == null && pending == null) { then(); return }
+        if (leaving) return
+        leaving = true
+        error = null
+        scope.launch {
+            val r = withContext(Dispatchers.IO) {
                 runCatching {
                     val store = TabStore(context)
-                    store.get(id)
-                        ?.takeIf { it.state == "settled" }
-                        // The retract path: the customer's Review button
-                        // greys out by itself when the bill can be named.
-                        ?.let { cancelTabWithRetract(context, store, it) }
+                    if (billed != null) {
+                        store.get(billed)
+                            ?.takeIf { it.state == "settled" }
+                            // The retract path: the customer's Review button
+                            // greys out by itself when the bill can be named.
+                            ?.let { cancelTabWithRetract(context, store, it) }
+                    } else {
+                        // Opened, never billed — unless one attempt's bill did
+                        // leave and only the bookkeeping after it failed, in
+                        // which case the thread holds it and it is withdrawn
+                        // like any other. Otherwise there is nothing on their
+                        // phone to withdraw, and a "your bill was cancelled" for
+                        // a bill they never saw would only puzzle them: the tab
+                        // is closed quietly so no later payment can match it.
+                        val tab = store.get(pending!!) ?: return@runCatching
+                        val went = ContactStore(context).thread(tab.personaHex).any {
+                            it.outgoing && it.kind == 1 && it.amountPxmr == tab.settledTotal
+                        }
+                        if (went) {
+                            cancelTabWithRetract(context, store, tab)
+                        } else {
+                            store.mutate(tab.id) { it.copy(state = "cancelled") }
+                        }
+                    }
                 }
             }
+            leaving = false
+            r.onSuccess { then() }
+                .onFailure {
+                    error = context.getString(
+                        R.string.pos_error_bill_not_withdrawn, moneyFailure(context, it),
+                    )
+                    DucatLog.e(TAG, "withdraw: ${it.message}")
+                }
         }
     }
 
@@ -567,10 +633,14 @@ private fun PresentScreen(
     // phone for a sale the till had already forgotten.
     //
     // Sighted and paid sales are exempt for the reason the Cancel button
-    // gives below: the money is in flight, and retracting now orphans it.
+    // gives below: the money is in flight, and retracting now orphans it —
+    // and for those the gesture is the "New sale" button, not the Back one
+    // the screen no longer shows. Returning to the basket with the sold
+    // items still in it rang the next customer up for the last one's
+    // coffee.
     BackHandler {
-        if (stage == Sale.Waiting || stage == Sale.Billed) abandon()
-        onBack()
+        if (stage == Sale.Waiting || stage == Sale.Billed) leave(onBack)
+        else onDone()
     }
 
     // While the code is up, a tap offers the same sale card.
@@ -585,18 +655,12 @@ private fun PresentScreen(
     // instance: a restored screen already holds its card and keeps it.
     LaunchedEffect(Unit) {
         if (cardUri != null) return@LaunchedEffect
-        val r = withContext(Dispatchers.IO) {
-            runCatching {
-                Mailbox.issueCard(
-                    context, MyProfile(context).name(), 60uL * 60uL * 2uL, purpose = "sale",
-                )
-            }
-        }
-        r.onSuccess { cardUri = it.uri; cardInbox = it.inboxKey }
-            .onFailure {
-                error = moneyFailure(context, it)
-                DucatLog.e(TAG, "card: ${it.message}")
-            }
+        // Until it is cut: the till's first sale is rung before the node
+        // has attached, and one refused cut used to leave the sale wearing
+        // "offline" until it was abandoned and rung again.
+        val card = issueCardPatiently(context, 60uL * 60uL * 2uL, "sale") { error = it }
+        error = null
+        cardUri = card.uri; cardInbox = card.inboxKey
     }
 
     // Scan → bill. The claim bound to this card makes them a contact; the
@@ -620,15 +684,35 @@ private fun PresentScreen(
             withContext(Dispatchers.IO) {
                 runCatching {
                     val store = TabStore(context)
-                    val tab = store.open(fresh.personaHex, "pos")
-                    val filled = store.mutate(tab.id) {
+                    // A bill this screen already sent and then lost track
+                    // of. The saved state is written when the activity
+                    // stops — a locked screen, a call — and this loop keeps
+                    // running after that, so the bill can go out with no
+                    // bundle to record it; if Android then reclaims the
+                    // process, the restored screen holds the card and the
+                    // claimant and none of the ids, and billed the same
+                    // customer the same coffee again. The tab is in the
+                    // store whatever the bundle says: this sale's own,
+                    // billed and unpaid, opened since the sale went up.
+                    store.all().firstOrNull {
+                        it.origin == "pos" && it.personaHex == fresh.personaHex &&
+                            it.state == "settled" && it.openedAt >= presentedAt &&
+                            it.lines == items && it.taxPxmr == taxPxmr
+                    }?.let { return@runCatching it.id }
+                    // The same tab on every try; a retry re-sends the bill
+                    // through it rather than opening another.
+                    val id = pendingTabId?.takeIf { store.get(it) != null }
+                        ?: store.open(fresh.personaHex, "pos").id.also { pendingTabId = it }
+                    val filled = store.mutate(id) {
                         it.copy(lines = items, taxPxmr = taxPxmr)
                     }!!
                     store.settle(filled)
-                    tab.id
+                    id
                 }.onSuccess { id ->
                     customerHex = fresh.personaHex
                     saleTabId = id
+                    pendingTabId = null
+                    error = null
                     DucatLog.i(TAG, "billed ${fresh.displayName()} ${formatXmr(totalPxmr)} XMR")
                 }.onFailure {
                     // The frame was localised and the reason was not, so a
@@ -735,7 +819,7 @@ private fun PresentScreen(
                 Text(
                     stringResource(
                         R.string.pos_bill_sent_to,
-                        customer?.displayName() ?: stringResource(R.string.pos_the_customer),
+                        customer?.let { isolate(it.displayName()) } ?: stringResource(R.string.pos_the_customer),
                     ),
                     style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(6.dp))
@@ -753,12 +837,14 @@ private fun PresentScreen(
                     color = MaterialTheme.ducat.settled)
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    stringResource(
+                    if (receiptOwed) stringResource(R.string.pos_receipt_pending)
+                    else stringResource(
                         R.string.pos_receipt_sent_to,
-                        customer?.displayName() ?: stringResource(R.string.pos_the_customer),
+                        customer?.let { isolate(it.displayName()) } ?: stringResource(R.string.pos_the_customer),
                     ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                 )
             }
         }
@@ -773,18 +859,23 @@ private fun PresentScreen(
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             if (stage == Sale.Waiting || stage == Sale.Billed) {
                 OutlinedButton(
-                    onClick = { abandon(); onBack() },
+                    onClick = { leave(onBack) },
+                    enabled = !leaving,
                     modifier = Modifier.weight(1f).height(48.dp),
-                ) { Text(stringResource(R.string.pos_back)) }
+                ) {
+                    if (leaving) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                    else Text(stringResource(R.string.pos_back))
+                }
             }
             Button(
                 onClick = {
                     // Once a payment is sighted, the money is in flight and
                     // cancelling the bill would orphan it — the way out is
                     // letting it settle.
-                    if (stage == Sale.Waiting || stage == Sale.Billed) abandon()
-                    onDone()
+                    if (stage == Sale.Waiting || stage == Sale.Billed) leave(onDone)
+                    else onDone()
                 },
+                enabled = !leaving,
                 modifier = Modifier.weight(1f).height(48.dp),
             ) {
                 Text(

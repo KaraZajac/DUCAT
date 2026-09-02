@@ -931,6 +931,50 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -963,6 +1007,12 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_bundle_one_time_count(`bundleBytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
     fun uniffi_ducat_mobile_fn_func_bundle_one_time_ids(`bundleBytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_call_conceal(uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_call_decode(`packet`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_call_encode(`pcm`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_capacity_bucket(`capacityPxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): Long
@@ -1070,6 +1120,18 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_app_call(`routeBlob`: RustBuffer.ByValue,`message`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_node_call_close(uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
+    fun uniffi_ducat_mobile_fn_func_node_call_recv(`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_node_call_release(`routeBlob`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
+    fun uniffi_ducat_mobile_fn_func_node_call_route(uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_node_call_send(`routeBlob`: RustBuffer.ByValue,`frame`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
+    fun uniffi_ducat_mobile_fn_func_node_call_send_report(uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_changed_keys(uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_dht_close(`key`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -1130,6 +1192,18 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_prune_prekey(`bundleBytes`: RustBuffer.ByValue,`id`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_pub_listing_decode(`bytes`: RustBuffer.ByValue,`board`: RustBuffer.ByValue,`subkey`: Int,`tipHeight`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_pub_listing_encode(`info`: RustBuffer.ByValue,`personaSecret`: RustBuffer.ByValue,`listingId`: RustBuffer.ByValue,`board`: RustBuffer.ByValue,`subkey`: Int,`beaconHeight`: Long,`beaconHashHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_publication_master_create(uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_publication_open_chunk(`key`: RustBuffer.ByValue,`recordKey`: RustBuffer.ByValue,`subkey`: Int,`value`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_publication_period_key(`master`: RustBuffer.ByValue,`periodId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_publication_seal_chunk(`key`: RustBuffer.ByValue,`recordKey`: RustBuffer.ByValue,`subkey`: Int,`nonce`: RustBuffer.ByValue,`plaintext`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_random_bytes(`n`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_read_contact_card(`input`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -1140,10 +1214,14 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_rental_encode(`info`: RustBuffer.ByValue,`personaSecret`: RustBuffer.ByValue,`listingId`: RustBuffer.ByValue,`board`: RustBuffer.ByValue,`subkey`: Int,`beaconHeight`: Long,`beaconHashHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_seal_message(`bundleBytes`: RustBuffer.ByValue,`seq`: Long,`prevLink`: RustBuffer.ByValue,`body`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,`kind`: Byte,`amountPxmr`: RustBuffer.ByValue,`txid`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,`items`: RustBuffer.ByValue,`taxPxmr`: RustBuffer.ByValue,`reSeq`: RustBuffer.ByValue,`reOwn`: Byte,`attachment`: RustBuffer.ByValue,`etaSecs`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`round`: RustBuffer.ByValue,`ceremonyId`: RustBuffer.ByValue,`positionRecord`: RustBuffer.ByValue,`positionStreamKey`: RustBuffer.ByValue,`groupId`: RustBuffer.ByValue,`groupSeq`: RustBuffer.ByValue,`groupReSender`: RustBuffer.ByValue,`groupReSeq`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_seal_message(`bundleBytes`: RustBuffer.ByValue,`seq`: Long,`prevLink`: RustBuffer.ByValue,`body`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,`kind`: Byte,`amountPxmr`: RustBuffer.ByValue,`txid`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,`items`: RustBuffer.ByValue,`taxPxmr`: RustBuffer.ByValue,`reSeq`: RustBuffer.ByValue,`reOwn`: Byte,`attachment`: RustBuffer.ByValue,`etaSecs`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`round`: RustBuffer.ByValue,`ceremonyId`: RustBuffer.ByValue,`positionRecord`: RustBuffer.ByValue,`positionStreamKey`: RustBuffer.ByValue,`groupId`: RustBuffer.ByValue,`groupSeq`: RustBuffer.ByValue,`groupReSender`: RustBuffer.ByValue,`groupReSeq`: RustBuffer.ByValue,`pubPeriodId`: RustBuffer.ByValue,`pubPeriodKey`: RustBuffer.ByValue,`pubRecord`: RustBuffer.ByValue,`pubHeadKey`: RustBuffer.ByValue,`pubSwarmKey`: RustBuffer.ByValue,`pubSwarmDigest`: RustBuffer.ByValue,`callRoute`: RustBuffer.ByValue,`callId`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_sealed_prekey_id(`sealedBytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
+    fun uniffi_ducat_mobile_fn_func_site_head_decode(`bytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_site_head_encode(`head`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_standepoch(`nowSecs`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): Long
     fun uniffi_ducat_mobile_fn_func_standepochname(`base`: RustBuffer.ByValue,`epoch`: Long,uniffi_out_err: UniffiRustCallStatus, 
@@ -1160,6 +1238,16 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_stand_watch(`cell`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Byte
+    fun uniffi_ducat_mobile_fn_func_swarm_fetch(`shareKey`: RustBuffer.ByValue,`indexDigestHex`: RustBuffer.ByValue,`root`: RustBuffer.ByValue,`staySeeding`: Byte,uniffi_out_err: UniffiRustCallStatus, 
+    ): Long
+    fun uniffi_ducat_mobile_fn_func_swarm_fetch_progress(`shareKey`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_swarm_seed(`path`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_swarm_stop(uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
+    fun uniffi_ducat_mobile_fn_func_swarm_stop_share(`shareKey`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Unit
     fun uniffi_ducat_mobile_fn_func_thread_aad(`mineHex`: RustBuffer.ByValue,`theirsHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_vault_key(`passphrase`: RustBuffer.ByValue,`salt`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -1296,6 +1384,12 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_bundle_one_time_ids(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_call_conceal(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_call_decode(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_call_encode(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_capacity_bucket(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_capacity_leak_bits(
@@ -1402,6 +1496,18 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_app_call(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_call_close(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_call_recv(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_call_release(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_call_route(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_call_send(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_call_send_report(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_node_changed_keys(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_dht_close(
@@ -1462,6 +1568,18 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_prune_prekey(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_pub_listing_decode(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_pub_listing_encode(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_publication_master_create(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_publication_open_chunk(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_publication_period_key(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_publication_seal_chunk(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_random_bytes(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_read_contact_card(
@@ -1475,6 +1593,10 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_checksum_func_seal_message(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_sealed_prekey_id(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_site_head_decode(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_site_head_encode(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_standepoch(
     ): Short
@@ -1491,6 +1613,16 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_checksum_func_stand_record_key(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_stand_watch(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_swarm_fetch(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_swarm_fetch_progress(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_swarm_seed(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_swarm_stop(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_swarm_stop_share(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_thread_aad(
     ): Short
@@ -1540,6 +1672,15 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_bundle_one_time_ids() != 16903.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_call_conceal() != 6119.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_call_decode() != 24578.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_call_encode() != 31022.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_capacity_bucket() != 17889.toShort()) {
@@ -1701,6 +1842,24 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_node_app_call() != 36150.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_call_close() != 14639.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_call_recv() != 13639.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_call_release() != 8944.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_call_route() != 28389.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_call_send() != 62733.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_call_send_report() != 64076.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ducat_mobile_checksum_func_node_changed_keys() != 44940.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -1749,7 +1908,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_node_status() != 13257.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_node_stop() != 20027.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_node_stop() != 61954.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_test_route() != 9881.toShort()) {
@@ -1791,6 +1950,24 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_prune_prekey() != 19780.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_ducat_mobile_checksum_func_pub_listing_decode() != 55060.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_pub_listing_encode() != 43453.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_publication_master_create() != 16605.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_publication_open_chunk() != 2941.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_publication_period_key() != 40459.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_publication_seal_chunk() != 46507.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ducat_mobile_checksum_func_random_bytes() != 387.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -1806,10 +1983,16 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_rental_encode() != 60190.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_seal_message() != 2630.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_seal_message() != 36084.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_sealed_prekey_id() != 10001.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_site_head_decode() != 19427.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_site_head_encode() != 18159.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_standepoch() != 1504.toShort()) {
@@ -1834,6 +2017,21 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_stand_watch() != 52290.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_swarm_fetch() != 31661.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_swarm_fetch_progress() != 59191.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_swarm_seed() != 29515.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_swarm_stop() != 49903.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_swarm_stop_share() != 23181.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_thread_aad() != 26627.toShort()) {
@@ -2135,7 +2333,14 @@ public object FfiConverterByteArray: FfiConverterRustBuffer<ByteArray> {
  * An attachment reference, across the bridge (§16.15).
  */
 data class AttachmentRef (
-    var `recordKey`: kotlin.String, 
+    /**
+     * Exactly one transport (§16.15): the record road for small blobs,
+     * or the swarm road (key + digest together) for what a record
+     * cannot hold.
+     */
+    var `recordKey`: kotlin.String?, 
+    var `swarmKey`: kotlin.String?, 
+    var `swarmDigest`: kotlin.ByteArray?, 
     var `key`: kotlin.ByteArray, 
     var `nonce`: kotlin.ByteArray, 
     var `len`: kotlin.ULong, 
@@ -2153,7 +2358,9 @@ data class AttachmentRef (
 public object FfiConverterTypeAttachmentRef: FfiConverterRustBuffer<AttachmentRef> {
     override fun read(buf: ByteBuffer): AttachmentRef {
         return AttachmentRef(
-            FfiConverterString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
             FfiConverterByteArray.read(buf),
             FfiConverterByteArray.read(buf),
             FfiConverterULong.read(buf),
@@ -2164,7 +2371,9 @@ public object FfiConverterTypeAttachmentRef: FfiConverterRustBuffer<AttachmentRe
     }
 
     override fun allocationSize(value: AttachmentRef) = (
-            FfiConverterString.allocationSize(value.`recordKey`) +
+            FfiConverterOptionalString.allocationSize(value.`recordKey`) +
+            FfiConverterOptionalString.allocationSize(value.`swarmKey`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`swarmDigest`) +
             FfiConverterByteArray.allocationSize(value.`key`) +
             FfiConverterByteArray.allocationSize(value.`nonce`) +
             FfiConverterULong.allocationSize(value.`len`) +
@@ -2174,7 +2383,9 @@ public object FfiConverterTypeAttachmentRef: FfiConverterRustBuffer<AttachmentRe
     )
 
     override fun write(value: AttachmentRef, buf: ByteBuffer) {
-            FfiConverterString.write(value.`recordKey`, buf)
+            FfiConverterOptionalString.write(value.`recordKey`, buf)
+            FfiConverterOptionalString.write(value.`swarmKey`, buf)
+            FfiConverterOptionalByteArray.write(value.`swarmDigest`, buf)
             FfiConverterByteArray.write(value.`key`, buf)
             FfiConverterByteArray.write(value.`nonce`, buf)
             FfiConverterULong.write(value.`len`, buf)
@@ -2231,7 +2442,13 @@ data class BackupInput (
      * convenience: on the two-party rung a lost share is an escrow that can
      * never be released, by anyone, ever.
      */
-    var `escrowShares`: List<EscrowShareEntry>
+    var `escrowShares`: List<EscrowShareEntry>, 
+    /**
+     * The whole persona roster, primary first (post-1.0 compartments).
+     * Empty from a single-persona client; the primary always also travels
+     * as the top-level persona secret, so old readers lose nothing.
+     */
+    var `personas`: List<PersonaBackup>
 ) {
     
     companion object
@@ -2254,6 +2471,7 @@ public object FfiConverterTypeBackupInput: FfiConverterRustBuffer<BackupInput> {
             FfiConverterULong.read(buf),
             FfiConverterOptionalByteArray.read(buf),
             FfiConverterSequenceTypeEscrowShareEntry.read(buf),
+            FfiConverterSequenceTypePersonaBackup.read(buf),
         )
     }
 
@@ -2268,7 +2486,8 @@ public object FfiConverterTypeBackupInput: FfiConverterRustBuffer<BackupInput> {
             FfiConverterSequenceTypePrekeyEntry.allocationSize(value.`prekeyOneTime`) +
             FfiConverterULong.allocationSize(value.`prekeyNextId`) +
             FfiConverterOptionalByteArray.allocationSize(value.`appState`) +
-            FfiConverterSequenceTypeEscrowShareEntry.allocationSize(value.`escrowShares`)
+            FfiConverterSequenceTypeEscrowShareEntry.allocationSize(value.`escrowShares`) +
+            FfiConverterSequenceTypePersonaBackup.allocationSize(value.`personas`)
     )
 
     override fun write(value: BackupInput, buf: ByteBuffer) {
@@ -2283,6 +2502,7 @@ public object FfiConverterTypeBackupInput: FfiConverterRustBuffer<BackupInput> {
             FfiConverterULong.write(value.`prekeyNextId`, buf)
             FfiConverterOptionalByteArray.write(value.`appState`, buf)
             FfiConverterSequenceTypeEscrowShareEntry.write(value.`escrowShares`, buf)
+            FfiConverterSequenceTypePersonaBackup.write(value.`personas`, buf)
     }
 }
 
@@ -2398,7 +2618,11 @@ data class ContactBackup (
     var `inSeq`: kotlin.ULong, 
     var `outSeq`: kotlin.ULong, 
     var `inPrev`: kotlin.ByteArray?, 
-    var `outPrev`: kotlin.ByteArray?
+    var `outPrev`: kotlin.ByteArray?, 
+    /**
+     * Hex of the owning persona; None from the single-persona era.
+     */
+    var `owner`: kotlin.String?
 ) {
     
     companion object
@@ -2423,6 +2647,7 @@ public object FfiConverterTypeContactBackup: FfiConverterRustBuffer<ContactBacku
             FfiConverterULong.read(buf),
             FfiConverterOptionalByteArray.read(buf),
             FfiConverterOptionalByteArray.read(buf),
+            FfiConverterOptionalString.read(buf),
         )
     }
 
@@ -2439,7 +2664,8 @@ public object FfiConverterTypeContactBackup: FfiConverterRustBuffer<ContactBacku
             FfiConverterULong.allocationSize(value.`inSeq`) +
             FfiConverterULong.allocationSize(value.`outSeq`) +
             FfiConverterOptionalByteArray.allocationSize(value.`inPrev`) +
-            FfiConverterOptionalByteArray.allocationSize(value.`outPrev`)
+            FfiConverterOptionalByteArray.allocationSize(value.`outPrev`) +
+            FfiConverterOptionalString.allocationSize(value.`owner`)
     )
 
     override fun write(value: ContactBackup, buf: ByteBuffer) {
@@ -2456,6 +2682,7 @@ public object FfiConverterTypeContactBackup: FfiConverterRustBuffer<ContactBacku
             FfiConverterULong.write(value.`outSeq`, buf)
             FfiConverterOptionalByteArray.write(value.`inPrev`, buf)
             FfiConverterOptionalByteArray.write(value.`outPrev`, buf)
+            FfiConverterOptionalString.write(value.`owner`, buf)
     }
 }
 
@@ -3378,6 +3605,15 @@ data class OpenedMessage (
      */
     var `position`: PositionRefOut?, 
     /**
+     * §16.20: a publication period's key. Present only on kind 13.
+     */
+    var `publication`: PublicationKeyOut?, 
+    /**
+     * §16.21: a live call's door. Present only on kinds 14–15.
+     */
+    var `callRoute`: kotlin.ByteArray?, 
+    var `callId`: kotlin.ByteArray?, 
+    /**
      * §16.19: the group this message belongs to, and its name there.
      */
     var `groupId`: kotlin.ByteArray?, 
@@ -3415,6 +3651,9 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterOptionalULong.read(buf),
             FfiConverterOptionalByteArray.read(buf),
             FfiConverterOptionalTypePositionRefOut.read(buf),
+            FfiConverterOptionalTypePublicationKeyOut.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
             FfiConverterOptionalByteArray.read(buf),
             FfiConverterOptionalULong.read(buf),
             FfiConverterOptionalByteArray.read(buf),
@@ -3443,6 +3682,9 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterOptionalULong.allocationSize(value.`round`) +
             FfiConverterOptionalByteArray.allocationSize(value.`ceremonyId`) +
             FfiConverterOptionalTypePositionRefOut.allocationSize(value.`position`) +
+            FfiConverterOptionalTypePublicationKeyOut.allocationSize(value.`publication`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`callRoute`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`callId`) +
             FfiConverterOptionalByteArray.allocationSize(value.`groupId`) +
             FfiConverterOptionalULong.allocationSize(value.`groupSeq`) +
             FfiConverterOptionalByteArray.allocationSize(value.`groupReSender`) +
@@ -3470,6 +3712,9 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterOptionalULong.write(value.`round`, buf)
             FfiConverterOptionalByteArray.write(value.`ceremonyId`, buf)
             FfiConverterOptionalTypePositionRefOut.write(value.`position`, buf)
+            FfiConverterOptionalTypePublicationKeyOut.write(value.`publication`, buf)
+            FfiConverterOptionalByteArray.write(value.`callRoute`, buf)
+            FfiConverterOptionalByteArray.write(value.`callId`, buf)
             FfiConverterOptionalByteArray.write(value.`groupId`, buf)
             FfiConverterOptionalULong.write(value.`groupSeq`, buf)
             FfiConverterOptionalByteArray.write(value.`groupReSender`, buf)
@@ -3681,6 +3926,90 @@ public object FfiConverterTypePeerDetails: FfiConverterRustBuffer<PeerDetails> {
             FfiConverterOptionalString.write(value.`payto`, buf)
             FfiConverterTypeProfile.write(value.`profile`, buf)
             FfiConverterOptionalString.write(value.`purpose`, buf)
+    }
+}
+
+
+
+/**
+ * One of this phone's own personas, across the bridge (§4.3, post-1.0
+ * compartments).
+ */
+data class PersonaBackup (
+    var `secret`: kotlin.ByteArray, 
+    var `name`: kotlin.String?, 
+    var `color`: kotlin.ULong, 
+    var `created`: kotlin.ULong, 
+    var `displayName`: kotlin.String?, 
+    var `avatar`: kotlin.ByteArray?, 
+    var `email`: kotlin.String?, 
+    var `phone`: kotlin.String?, 
+    var `signal`: kotlin.String?, 
+    var `pronouns`: kotlin.ULong?, 
+    var `carModel`: kotlin.String?, 
+    var `carColor`: kotlin.String?, 
+    var `plate`: kotlin.String?, 
+    var `shareProfile`: kotlin.Boolean
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypePersonaBackup: FfiConverterRustBuffer<PersonaBackup> {
+    override fun read(buf: ByteBuffer): PersonaBackup {
+        return PersonaBackup(
+            FfiConverterByteArray.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterBoolean.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: PersonaBackup) = (
+            FfiConverterByteArray.allocationSize(value.`secret`) +
+            FfiConverterOptionalString.allocationSize(value.`name`) +
+            FfiConverterULong.allocationSize(value.`color`) +
+            FfiConverterULong.allocationSize(value.`created`) +
+            FfiConverterOptionalString.allocationSize(value.`displayName`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`avatar`) +
+            FfiConverterOptionalString.allocationSize(value.`email`) +
+            FfiConverterOptionalString.allocationSize(value.`phone`) +
+            FfiConverterOptionalString.allocationSize(value.`signal`) +
+            FfiConverterOptionalULong.allocationSize(value.`pronouns`) +
+            FfiConverterOptionalString.allocationSize(value.`carModel`) +
+            FfiConverterOptionalString.allocationSize(value.`carColor`) +
+            FfiConverterOptionalString.allocationSize(value.`plate`) +
+            FfiConverterBoolean.allocationSize(value.`shareProfile`)
+    )
+
+    override fun write(value: PersonaBackup, buf: ByteBuffer) {
+            FfiConverterByteArray.write(value.`secret`, buf)
+            FfiConverterOptionalString.write(value.`name`, buf)
+            FfiConverterULong.write(value.`color`, buf)
+            FfiConverterULong.write(value.`created`, buf)
+            FfiConverterOptionalString.write(value.`displayName`, buf)
+            FfiConverterOptionalByteArray.write(value.`avatar`, buf)
+            FfiConverterOptionalString.write(value.`email`, buf)
+            FfiConverterOptionalString.write(value.`phone`, buf)
+            FfiConverterOptionalString.write(value.`signal`, buf)
+            FfiConverterOptionalULong.write(value.`pronouns`, buf)
+            FfiConverterOptionalString.write(value.`carModel`, buf)
+            FfiConverterOptionalString.write(value.`carColor`, buf)
+            FfiConverterOptionalString.write(value.`plate`, buf)
+            FfiConverterBoolean.write(value.`shareProfile`, buf)
     }
 }
 
@@ -3975,6 +4304,122 @@ public object FfiConverterTypeProfile: FfiConverterRustBuffer<Profile> {
 
 
 /**
+ * §16.18.2 over the bridge: what a publication listing says, in the open.
+ */
+data class PubListingInfo (
+    var `card`: kotlin.String, 
+    var `title`: kotlin.String, 
+    var `blurb`: kotlin.String?, 
+    /**
+     * Piconero a period; `None` is free, and the only spelling of it.
+     */
+    var `pricePxmr`: kotlin.ULong?, 
+    var `expiry`: kotlin.ULong, 
+    /**
+     * Filled by decode: hex of the listing's own verifying key.
+     */
+    var `poster`: kotlin.String, 
+    var `beaconHeight`: kotlin.ULong, 
+    var `beaconHash`: kotlin.String
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypePubListingInfo: FfiConverterRustBuffer<PubListingInfo> {
+    override fun read(buf: ByteBuffer): PubListingInfo {
+        return PubListingInfo(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: PubListingInfo) = (
+            FfiConverterString.allocationSize(value.`card`) +
+            FfiConverterString.allocationSize(value.`title`) +
+            FfiConverterOptionalString.allocationSize(value.`blurb`) +
+            FfiConverterOptionalULong.allocationSize(value.`pricePxmr`) +
+            FfiConverterULong.allocationSize(value.`expiry`) +
+            FfiConverterString.allocationSize(value.`poster`) +
+            FfiConverterULong.allocationSize(value.`beaconHeight`) +
+            FfiConverterString.allocationSize(value.`beaconHash`)
+    )
+
+    override fun write(value: PubListingInfo, buf: ByteBuffer) {
+            FfiConverterString.write(value.`card`, buf)
+            FfiConverterString.write(value.`title`, buf)
+            FfiConverterOptionalString.write(value.`blurb`, buf)
+            FfiConverterOptionalULong.write(value.`pricePxmr`, buf)
+            FfiConverterULong.write(value.`expiry`, buf)
+            FfiConverterString.write(value.`poster`, buf)
+            FfiConverterULong.write(value.`beaconHeight`, buf)
+            FfiConverterString.write(value.`beaconHash`, buf)
+    }
+}
+
+
+
+/**
+ * A publication key as it crosses the bridge (§16.20).
+ */
+data class PublicationKeyOut (
+    var `periodId`: kotlin.String, 
+    var `periodKey`: kotlin.ByteArray, 
+    var `recordKey`: kotlin.String?, 
+    var `headKey`: kotlin.ByteArray?, 
+    var `swarmKey`: kotlin.String?, 
+    var `swarmDigest`: kotlin.ByteArray?
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypePublicationKeyOut: FfiConverterRustBuffer<PublicationKeyOut> {
+    override fun read(buf: ByteBuffer): PublicationKeyOut {
+        return PublicationKeyOut(
+            FfiConverterString.read(buf),
+            FfiConverterByteArray.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: PublicationKeyOut) = (
+            FfiConverterString.allocationSize(value.`periodId`) +
+            FfiConverterByteArray.allocationSize(value.`periodKey`) +
+            FfiConverterOptionalString.allocationSize(value.`recordKey`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`headKey`) +
+            FfiConverterOptionalString.allocationSize(value.`swarmKey`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`swarmDigest`)
+    )
+
+    override fun write(value: PublicationKeyOut, buf: ByteBuffer) {
+            FfiConverterString.write(value.`periodId`, buf)
+            FfiConverterByteArray.write(value.`periodKey`, buf)
+            FfiConverterOptionalString.write(value.`recordKey`, buf)
+            FfiConverterOptionalByteArray.write(value.`headKey`, buf)
+            FfiConverterOptionalString.write(value.`swarmKey`, buf)
+            FfiConverterOptionalByteArray.write(value.`swarmDigest`, buf)
+    }
+}
+
+
+
+/**
  * A quote, for display only.
  */
 data class Rate (
@@ -4255,6 +4700,12 @@ data class RestoredBackup (
      */
     var `escrowShares`: List<EscrowShareEntry>, 
     /**
+     * The persona roster, when the bundle carries one (post-1.0
+     * compartments). Empty for older bundles: the top-level persona secret
+     * is the only identity, exactly as it always was.
+     */
+    var `personas`: List<PersonaBackup>, 
+    /**
      * When the bundle was written, in seconds since the epoch — the thing that
      * makes "how old is this backup" answerable.
      *
@@ -4291,6 +4742,7 @@ public object FfiConverterTypeRestoredBackup: FfiConverterRustBuffer<RestoredBac
             FfiConverterOptionalByteArray.read(buf),
             FfiConverterUInt.read(buf),
             FfiConverterSequenceTypeEscrowShareEntry.read(buf),
+            FfiConverterSequenceTypePersonaBackup.read(buf),
             FfiConverterULong.read(buf),
         )
     }
@@ -4309,6 +4761,7 @@ public object FfiConverterTypeRestoredBackup: FfiConverterRustBuffer<RestoredBac
             FfiConverterOptionalByteArray.allocationSize(value.`appState`) +
             FfiConverterUInt.allocationSize(value.`escrowCount`) +
             FfiConverterSequenceTypeEscrowShareEntry.allocationSize(value.`escrowShares`) +
+            FfiConverterSequenceTypePersonaBackup.allocationSize(value.`personas`) +
             FfiConverterULong.allocationSize(value.`created`)
     )
 
@@ -4326,6 +4779,7 @@ public object FfiConverterTypeRestoredBackup: FfiConverterRustBuffer<RestoredBac
             FfiConverterOptionalByteArray.write(value.`appState`, buf)
             FfiConverterUInt.write(value.`escrowCount`, buf)
             FfiConverterSequenceTypeEscrowShareEntry.write(value.`escrowShares`, buf)
+            FfiConverterSequenceTypePersonaBackup.write(value.`personas`, buf)
             FfiConverterULong.write(value.`created`, buf)
     }
 }
@@ -4340,6 +4794,12 @@ data class ScanResult (
      * The height scanning reached. Persist this: rescanning from the restore
      * height every time is the difference between a wallet that opens and one
      * that appears to hang.
+     *
+     * Never past a block that could not be read. The loop skips an unreadable
+     * block and carries on so one hiccup does not discard the window, but the
+     * cursor stops at the height before it: a cursor that had walked past the
+     * gap made a payment in that block invisible until somebody rescanned by
+     * hand — the wallet showed less than it held, for good.
      */
     var `scannedTo`: kotlin.ULong, 
     /**
@@ -4562,6 +5022,49 @@ public object FfiConverterTypeSendResult: FfiConverterRustBuffer<SendResult> {
 
 
 /**
+ * §16.22: a site head across the bridge.
+ */
+data class SiteHeadIo (
+    var `title`: kotlin.String, 
+    var `share`: kotlin.String, 
+    var `digestHex`: kotlin.String, 
+    var `updated`: kotlin.ULong
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeSiteHeadIo: FfiConverterRustBuffer<SiteHeadIo> {
+    override fun read(buf: ByteBuffer): SiteHeadIo {
+        return SiteHeadIo(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: SiteHeadIo) = (
+            FfiConverterString.allocationSize(value.`title`) +
+            FfiConverterString.allocationSize(value.`share`) +
+            FfiConverterString.allocationSize(value.`digestHex`) +
+            FfiConverterULong.allocationSize(value.`updated`)
+    )
+
+    override fun write(value: SiteHeadIo, buf: ByteBuffer) {
+            FfiConverterString.write(value.`title`, buf)
+            FfiConverterString.write(value.`share`, buf)
+            FfiConverterString.write(value.`digestHex`, buf)
+            FfiConverterULong.write(value.`updated`, buf)
+    }
+}
+
+
+
+/**
  * One fixed slice of a split release: this much, to this address.
  */
 data class SplitOut (
@@ -4626,6 +5129,84 @@ public object FfiConverterTypeStandNotice: FfiConverterRustBuffer<StandNotice> {
     override fun write(value: StandNotice, buf: ByteBuffer) {
             FfiConverterUInt.write(value.`subkey`, buf)
             FfiConverterByteArray.write(value.`data`, buf)
+    }
+}
+
+
+
+/**
+ * Where a fetch is, for a screen that polls: bytes landed, bytes
+ * wanted. Zero/zero before the first status arrives.
+ */
+data class SwarmProgress (
+    var `position`: kotlin.Long, 
+    var `length`: kotlin.ULong, 
+    var `done`: kotlin.Boolean
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeSwarmProgress: FfiConverterRustBuffer<SwarmProgress> {
+    override fun read(buf: ByteBuffer): SwarmProgress {
+        return SwarmProgress(
+            FfiConverterLong.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterBoolean.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: SwarmProgress) = (
+            FfiConverterLong.allocationSize(value.`position`) +
+            FfiConverterULong.allocationSize(value.`length`) +
+            FfiConverterBoolean.allocationSize(value.`done`)
+    )
+
+    override fun write(value: SwarmProgress, buf: ByteBuffer) {
+            FfiConverterLong.write(value.`position`, buf)
+            FfiConverterULong.write(value.`length`, buf)
+            FfiConverterBoolean.write(value.`done`, buf)
+    }
+}
+
+
+
+/**
+ * What a seed hands out: the share key a fetcher bootstraps from, and
+ * the index digest that authenticates what they will be handed. These
+ * two travel together on the §16.20 thread — a key without its digest
+ * bootstraps into whatever answers, which is not a fetch, it is an ask.
+ */
+data class SwarmShare (
+    var `shareKey`: kotlin.String, 
+    var `indexDigestHex`: kotlin.String
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeSwarmShare: FfiConverterRustBuffer<SwarmShare> {
+    override fun read(buf: ByteBuffer): SwarmShare {
+        return SwarmShare(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: SwarmShare) = (
+            FfiConverterString.allocationSize(value.`shareKey`) +
+            FfiConverterString.allocationSize(value.`indexDigestHex`)
+    )
+
+    override fun write(value: SwarmShare, buf: ByteBuffer) {
+            FfiConverterString.write(value.`shareKey`, buf)
+            FfiConverterString.write(value.`indexDigestHex`, buf)
     }
 }
 
@@ -5320,6 +5901,65 @@ public object FfiConverterTypePassphraseStrength: FfiConverterRustBuffer<Passphr
 
 
 
+
+
+sealed class SwarmException: kotlin.Exception() {
+    
+    class Failed(
+        
+        val v1: kotlin.String
+        ) : SwarmException() {
+        override val message
+            get() = "v1=${ v1 }"
+    }
+    
+
+    companion object ErrorHandler : UniffiRustCallStatusErrorHandler<SwarmException> {
+        override fun lift(error_buf: RustBuffer.ByValue): SwarmException = FfiConverterTypeSwarmError.lift(error_buf)
+    }
+
+    
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeSwarmError : FfiConverterRustBuffer<SwarmException> {
+    override fun read(buf: ByteBuffer): SwarmException {
+        
+
+        return when(buf.getInt()) {
+            1 -> SwarmException.Failed(
+                FfiConverterString.read(buf),
+                )
+            else -> throw RuntimeException("invalid error enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: SwarmException): ULong {
+        return when(value) {
+            is SwarmException.Failed -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+                + FfiConverterString.allocationSize(value.v1)
+            )
+        }
+    }
+
+    override fun write(value: SwarmException, buf: ByteBuffer) {
+        when(value) {
+            is SwarmException.Failed -> {
+                buf.putInt(1)
+                FfiConverterString.write(value.v1, buf)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+
+}
+
+
+
 /**
  * A second node's answer about one transaction.
  *
@@ -5738,6 +6378,38 @@ public object FfiConverterOptionalTypePositionRefOut: FfiConverterRustBuffer<Pos
 /**
  * @suppress
  */
+public object FfiConverterOptionalTypePublicationKeyOut: FfiConverterRustBuffer<PublicationKeyOut?> {
+    override fun read(buf: ByteBuffer): PublicationKeyOut? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypePublicationKeyOut.read(buf)
+    }
+
+    override fun allocationSize(value: PublicationKeyOut?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypePublicationKeyOut.allocationSize(value)
+        }
+    }
+
+    override fun write(value: PublicationKeyOut?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypePublicationKeyOut.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterSequenceUInt: FfiConverterRustBuffer<List<kotlin.UInt>> {
     override fun read(buf: ByteBuffer): List<kotlin.UInt> {
         val len = buf.getInt()
@@ -6074,6 +6746,34 @@ public object FfiConverterSequenceTypeOwnedOutput: FfiConverterRustBuffer<List<O
 /**
  * @suppress
  */
+public object FfiConverterSequenceTypePersonaBackup: FfiConverterRustBuffer<List<PersonaBackup>> {
+    override fun read(buf: ByteBuffer): List<PersonaBackup> {
+        val len = buf.getInt()
+        return List<PersonaBackup>(len) {
+            FfiConverterTypePersonaBackup.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<PersonaBackup>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypePersonaBackup.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<PersonaBackup>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypePersonaBackup.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterSequenceTypePoolHit: FfiConverterRustBuffer<List<PoolHit>> {
     override fun read(buf: ByteBuffer): List<PoolHit> {
         val len = buf.getInt()
@@ -6365,6 +7065,47 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_bundle_one_time_ids(
         FfiConverterByteArray.lower(`bundleBytes`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * One concealment frame: what Opus guesses the lost 20 ms sounded like,
+         * keeping the decoder's state continuous across a gap so the frames
+         * after it decode clean instead of smeared.
+         */
+    @Throws(NodeException::class) fun `callConceal`(): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(NodeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_call_conceal(
+        _status)
+}
+    )
+    }
+    
+
+        /**
+         * One Opus packet in, 640 bytes of PCM16LE out.
+         */
+    @Throws(NodeException::class) fun `callDecode`(`packet`: kotlin.ByteArray): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(NodeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_call_decode(
+        FfiConverterByteArray.lower(`packet`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * 640 bytes of PCM16LE in, one Opus packet out (60 bytes, always).
+         */
+    @Throws(NodeException::class) fun `callEncode`(`pcm`: kotlin.ByteArray): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(NodeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_call_encode(
+        FfiConverterByteArray.lower(`pcm`),_status)
 }
     )
     }
@@ -7216,6 +7957,91 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
     
 
         /**
+         * Hang up: release every call route this node allocated, drop the ring
+         * and the import cache. A call's routes never outlive the call.
+         */ fun `nodeCallClose`()
+        = 
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_call_close(
+        _status)
+}
+    
+    
+
+        /**
+         * The next inbound frame, or None after `timeout_ms` of silence. Simple
+         * short-poll under the hood — a 20 ms cadence needs nothing cleverer.
+         */ fun `nodeCallRecv`(`timeoutMs`: kotlin.UInt): kotlin.ByteArray? {
+            return FfiConverterOptionalByteArray.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_call_recv(
+        FfiConverterUInt.lower(`timeoutMs`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Release ONE of our own call doors by its blob — what a RENEW's test
+         * harness does to its predecessor, proving the far side really moved.
+         */ fun `nodeCallRelease`(`routeBlob`: kotlin.ByteArray)
+        = 
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_call_release(
+        FfiConverterByteArray.lower(`routeBlob`),_status)
+}
+    
+    
+
+        /**
+         * Allocate this end's door for one live call (§16.21): a fresh private
+         * route whose inbound app messages land in the call ring, not the
+         * mailbox. Returns the blob the offer or answer carries.
+         */
+    @Throws(NodeException::class) fun `nodeCallRoute`(): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(NodeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_call_route(
+        _status)
+}
+    )
+    }
+    
+
+        /**
+         * One media frame out the far door — without blocking the microphone and
+         * without flooding the route. The frame goes on a short queue served by a
+         * single sender task: one app-message in flight at a time, which a phone's
+         * relayed, NAT-shadowed connection can actually sustain (32 concurrent
+         * sends thrashed route resolution — "could not get remote private route" —
+         * and delivered 2%). On a slow route the queue keeps the freshest
+         * [CALL_QUEUE_MAX] frames and the receiver's concealment bridges the gaps;
+         * a blocked capture thread was the original sin (it capped a phone at
+         * ~14 fps and got blamed on the microphone).
+         */
+    @Throws(NodeException::class) fun `nodeCallSend`(`routeBlob`: kotlin.ByteArray, `frame`: kotlin.ByteArray)
+        = 
+    uniffiRustCallWithError(NodeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_call_send(
+        FfiConverterByteArray.lower(`routeBlob`),FfiConverterByteArray.lower(`frame`),_status)
+}
+    
+    
+
+        /**
+         * What became of the fire-and-forget frames: "confirmed/failed last-error".
+         * Confirmation is veilid's send completing, not the far end hearing it.
+         */ fun `nodeCallSendReport`(): kotlin.String {
+            return FfiConverterString.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_call_send_report(
+        _status)
+}
+    )
+    }
+    
+
+        /**
          * Take the record keys that have changed since the last call.
          *
          * Draining, because these are events: whoever asks gets them, and asking
@@ -7484,7 +8310,18 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
     )
     }
     
- fun `nodeStop`()
+
+        /**
+         * Stop the node and forget everything that was only true of it.
+         *
+         * Every map in this module holds handles into the node that just went
+         * away: routes it allocated, routes imported through it, watches it armed,
+         * the swarm's feeder installed for its connection, and the call sender's
+         * "up" flag — for a task that ran on its runtime and died with it. A
+         * restart (the service coming back after Android reclaimed it) used to
+         * find the flag still set and never spawn a sender: the next call
+         * connected and carried no audio, until the process was killed.
+         */ fun `nodeStop`()
         = 
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_stop(
@@ -7682,6 +8519,90 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
     
 
         /**
+         * Read a publication listing off a board — same refusals as a rental's.
+         */
+    @Throws(ContactException::class) fun `pubListingDecode`(`bytes`: kotlin.ByteArray, `board`: kotlin.String, `subkey`: kotlin.UInt, `tipHeight`: kotlin.ULong): PubListingInfo {
+            return FfiConverterTypePubListingInfo.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_pub_listing_decode(
+        FfiConverterByteArray.lower(`bytes`),FfiConverterString.lower(`board`),FfiConverterUInt.lower(`subkey`),FfiConverterULong.lower(`tipHeight`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Seal a publication listing for one slot — same stamp, same price, same
+         * rules as a rental's, in this family's own field namespace. The board
+         * name carries the category (topic:) or the cell (local:), and it is
+         * inside the signature, so the same bytes cannot appear on another topic.
+         */
+    @Throws(ContactException::class) fun `pubListingEncode`(`info`: PubListingInfo, `personaSecret`: kotlin.ByteArray, `listingId`: kotlin.String, `board`: kotlin.String, `subkey`: kotlin.UInt, `beaconHeight`: kotlin.ULong, `beaconHashHex`: kotlin.String): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_pub_listing_encode(
+        FfiConverterTypePubListingInfo.lower(`info`),FfiConverterByteArray.lower(`personaSecret`),FfiConverterString.lower(`listingId`),FfiConverterString.lower(`board`),FfiConverterUInt.lower(`subkey`),FfiConverterULong.lower(`beaconHeight`),FfiConverterString.lower(`beaconHashHex`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * A fresh publication master secret (§16.20 track). One per publication;
+         * every period's content key derives from it, so this is the only key a
+         * publisher stores or backs up.
+         */ fun `publicationMasterCreate`(): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_publication_master_create(
+        _status)
+}
+    )
+    }
+    
+
+        /**
+         * Open a chunk read from a record's slot; the landing site is the AAD, so
+         * pass where it was actually read from.
+         */
+    @Throws(ContactException::class) fun `publicationOpenChunk`(`key`: kotlin.ByteArray, `recordKey`: kotlin.String, `subkey`: kotlin.UInt, `value`: kotlin.ByteArray): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_publication_open_chunk(
+        FfiConverterByteArray.lower(`key`),FfiConverterString.lower(`recordKey`),FfiConverterUInt.lower(`subkey`),FfiConverterByteArray.lower(`value`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * One period's content key, derived — deterministic over (master, id), so
+         * a restored device and a paying member both arrive at the same key.
+         */
+    @Throws(ContactException::class) fun `publicationPeriodKey`(`master`: kotlin.ByteArray, `periodId`: kotlin.String): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_publication_period_key(
+        FfiConverterByteArray.lower(`master`),FfiConverterString.lower(`periodId`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Seal one publication chunk for one (record, subkey) landing site.
+         */
+    @Throws(ContactException::class) fun `publicationSealChunk`(`key`: kotlin.ByteArray, `recordKey`: kotlin.String, `subkey`: kotlin.UInt, `nonce`: kotlin.ByteArray, `plaintext`: kotlin.ByteArray): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_publication_seal_chunk(
+        FfiConverterByteArray.lower(`key`),FfiConverterString.lower(`recordKey`),FfiConverterUInt.lower(`subkey`),FfiConverterByteArray.lower(`nonce`),FfiConverterByteArray.lower(`plaintext`),_status)
+}
+    )
+    }
+    
+
+        /**
          * Sixteen fresh bytes, for a salt or a nonce the caller stores in the clear.
          */ fun `randomBytes`(`n`: kotlin.UInt): kotlin.ByteArray {
             return FfiConverterByteArray.lift(
@@ -7777,11 +8698,11 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
         /**
          * Seal one message in a thread.
          */
-    @Throws(ContactException::class) fun `sealMessage`(`bundleBytes`: kotlin.ByteArray, `seq`: kotlin.ULong, `prevLink`: kotlin.ByteArray, `body`: kotlin.String, `threadAad`: kotlin.ByteArray, `kind`: kotlin.UByte, `amountPxmr`: kotlin.ULong?, `txid`: kotlin.ByteArray?, `payto`: kotlin.String?, `items`: List<BillLine>, `taxPxmr`: kotlin.ULong?, `reSeq`: kotlin.ULong?, `reOwn`: kotlin.Boolean, `attachment`: AttachmentRef?, `etaSecs`: kotlin.ULong?, `payload`: kotlin.ByteArray?, `round`: kotlin.ULong?, `ceremonyId`: kotlin.ByteArray?, `positionRecord`: kotlin.String?, `positionStreamKey`: kotlin.ByteArray?, `groupId`: kotlin.ByteArray?, `groupSeq`: kotlin.ULong?, `groupReSender`: kotlin.ByteArray?, `groupReSeq`: kotlin.ULong?): SealedOut {
+    @Throws(ContactException::class) fun `sealMessage`(`bundleBytes`: kotlin.ByteArray, `seq`: kotlin.ULong, `prevLink`: kotlin.ByteArray, `body`: kotlin.String, `threadAad`: kotlin.ByteArray, `kind`: kotlin.UByte, `amountPxmr`: kotlin.ULong?, `txid`: kotlin.ByteArray?, `payto`: kotlin.String?, `items`: List<BillLine>, `taxPxmr`: kotlin.ULong?, `reSeq`: kotlin.ULong?, `reOwn`: kotlin.Boolean, `attachment`: AttachmentRef?, `etaSecs`: kotlin.ULong?, `payload`: kotlin.ByteArray?, `round`: kotlin.ULong?, `ceremonyId`: kotlin.ByteArray?, `positionRecord`: kotlin.String?, `positionStreamKey`: kotlin.ByteArray?, `groupId`: kotlin.ByteArray?, `groupSeq`: kotlin.ULong?, `groupReSender`: kotlin.ByteArray?, `groupReSeq`: kotlin.ULong?, `pubPeriodId`: kotlin.String?, `pubPeriodKey`: kotlin.ByteArray?, `pubRecord`: kotlin.String?, `pubHeadKey`: kotlin.ByteArray?, `pubSwarmKey`: kotlin.String?, `pubSwarmDigest`: kotlin.ByteArray?, `callRoute`: kotlin.ByteArray?, `callId`: kotlin.ByteArray?): SealedOut {
             return FfiConverterTypeSealedOut.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_seal_message(
-        FfiConverterByteArray.lower(`bundleBytes`),FfiConverterULong.lower(`seq`),FfiConverterByteArray.lower(`prevLink`),FfiConverterString.lower(`body`),FfiConverterByteArray.lower(`threadAad`),FfiConverterUByte.lower(`kind`),FfiConverterOptionalULong.lower(`amountPxmr`),FfiConverterOptionalByteArray.lower(`txid`),FfiConverterOptionalString.lower(`payto`),FfiConverterSequenceTypeBillLine.lower(`items`),FfiConverterOptionalULong.lower(`taxPxmr`),FfiConverterOptionalULong.lower(`reSeq`),FfiConverterBoolean.lower(`reOwn`),FfiConverterOptionalTypeAttachmentRef.lower(`attachment`),FfiConverterOptionalULong.lower(`etaSecs`),FfiConverterOptionalByteArray.lower(`payload`),FfiConverterOptionalULong.lower(`round`),FfiConverterOptionalByteArray.lower(`ceremonyId`),FfiConverterOptionalString.lower(`positionRecord`),FfiConverterOptionalByteArray.lower(`positionStreamKey`),FfiConverterOptionalByteArray.lower(`groupId`),FfiConverterOptionalULong.lower(`groupSeq`),FfiConverterOptionalByteArray.lower(`groupReSender`),FfiConverterOptionalULong.lower(`groupReSeq`),_status)
+        FfiConverterByteArray.lower(`bundleBytes`),FfiConverterULong.lower(`seq`),FfiConverterByteArray.lower(`prevLink`),FfiConverterString.lower(`body`),FfiConverterByteArray.lower(`threadAad`),FfiConverterUByte.lower(`kind`),FfiConverterOptionalULong.lower(`amountPxmr`),FfiConverterOptionalByteArray.lower(`txid`),FfiConverterOptionalString.lower(`payto`),FfiConverterSequenceTypeBillLine.lower(`items`),FfiConverterOptionalULong.lower(`taxPxmr`),FfiConverterOptionalULong.lower(`reSeq`),FfiConverterBoolean.lower(`reOwn`),FfiConverterOptionalTypeAttachmentRef.lower(`attachment`),FfiConverterOptionalULong.lower(`etaSecs`),FfiConverterOptionalByteArray.lower(`payload`),FfiConverterOptionalULong.lower(`round`),FfiConverterOptionalByteArray.lower(`ceremonyId`),FfiConverterOptionalString.lower(`positionRecord`),FfiConverterOptionalByteArray.lower(`positionStreamKey`),FfiConverterOptionalByteArray.lower(`groupId`),FfiConverterOptionalULong.lower(`groupSeq`),FfiConverterOptionalByteArray.lower(`groupReSender`),FfiConverterOptionalULong.lower(`groupReSeq`),FfiConverterOptionalString.lower(`pubPeriodId`),FfiConverterOptionalByteArray.lower(`pubPeriodKey`),FfiConverterOptionalString.lower(`pubRecord`),FfiConverterOptionalByteArray.lower(`pubHeadKey`),FfiConverterOptionalString.lower(`pubSwarmKey`),FfiConverterOptionalByteArray.lower(`pubSwarmDigest`),FfiConverterOptionalByteArray.lower(`callRoute`),FfiConverterOptionalByteArray.lower(`callId`),_status)
 }
     )
     }
@@ -7799,6 +8720,33 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_sealed_prekey_id(
         FfiConverterByteArray.lower(`sealedBytes`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Decode a site head read from a record. Strict: whatever a stranger
+         * wrote is checked at the door.
+         */
+    @Throws(ContactException::class) fun `siteHeadDecode`(`bytes`: kotlin.ByteArray): SiteHeadIo {
+            return FfiConverterTypeSiteHeadIo.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_site_head_decode(
+        FfiConverterByteArray.lower(`bytes`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Encode a site head for the record's subkey 0.
+         */
+    @Throws(ContactException::class) fun `siteHeadEncode`(`head`: SiteHeadIo): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_site_head_encode(
+        FfiConverterTypeSiteHeadIo.lower(`head`),_status)
 }
     )
     }
@@ -7925,6 +8873,76 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
 }
     )
     }
+    
+
+        /**
+         * Fetch a share into `root`, blocking until every piece has verified.
+         * Returns the byte count. The caller supplies the digest it was promised
+         * (it rode the same message as the share key, §16.20's manifest rule) —
+         * a share whose index does not match is not the content, whatever its
+         * key says. Blocking by design: the Kotlin side calls it on IO, the way
+         * attachment chunk fetches already block there.
+         */
+    @Throws(SwarmException::class) fun `swarmFetch`(`shareKey`: kotlin.String, `indexDigestHex`: kotlin.String, `root`: kotlin.String, `staySeeding`: kotlin.Boolean): kotlin.ULong {
+            return FfiConverterULong.lift(
+    uniffiRustCallWithError(SwarmException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_swarm_fetch(
+        FfiConverterString.lower(`shareKey`),FfiConverterString.lower(`indexDigestHex`),FfiConverterString.lower(`root`),FfiConverterBoolean.lower(`staySeeding`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * The current fetch's progress. One fetch at a time is the client
+         * contract for now; a screen polls this the way wallet sync is polled.
+         */ fun `swarmFetchProgress`(`shareKey`: kotlin.String): SwarmProgress {
+            return FfiConverterTypeSwarmProgress.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_swarm_fetch_progress(
+        FfiConverterString.lower(`shareKey`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Seed a file into the swarm. Returns once the share is announced and
+         * every local piece is verified available; serving continues in the
+         * background until [`swarm_stop`].
+         */
+    @Throws(SwarmException::class) fun `swarmSeed`(`path`: kotlin.String): SwarmShare {
+            return FfiConverterTypeSwarmShare.lift(
+    uniffiRustCallWithError(SwarmException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_swarm_seed(
+        FfiConverterString.lower(`path`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Stop serving. A fetcher mid-download loses this source and keeps any
+         * other peer it has met — every peer is a seeder, which is the shape's
+         * whole point.
+         */ fun `swarmStop`()
+        = 
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_swarm_stop(
+        _status)
+}
+    
+    
+
+        /**
+         * Stop seeding one share, leaving the rest serving.
+         */ fun `swarmStopShare`(`shareKey`: kotlin.String)
+        = 
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_swarm_stop_share(
+        FfiConverterString.lower(`shareKey`),_status)
+}
+    
     
 
         /**

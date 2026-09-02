@@ -20,6 +20,7 @@
     <string name="chatlist_preview_receipt">🧾 Makbuz — %1$s</string>
     <string name="chatlist_preview_reacted">%1$s ile tepki verdi</string>
     <string name="chatlist_preview_photo">📷 Fotoğraf</string>
+    <string name="chatlist_preview_voice">🎤 Sesli not</string>
     <string name="chatlist_time_now">şimdi</string>
     <string name="chatlist_time_minutes">%1$d dk</string>
     <string name="chatlist_time_hours">%1$d sa</string>

@@ -6,6 +6,8 @@
     <!-- Pending requests -->
     <string name="activity_awaiting">En espera</string>
     <string name="activity_search_none">Aquí no hay nada que coincida con «%1$s».</string>
+    <string name="activity_period_none">Nada en este periodo. Elige uno más largo arriba para ver actividad anterior.</string>
+    <string name="activity_filter_none">Todavía no hay nada de ese tipo. Toca de nuevo el recuadro resaltado para mostrar todo.</string>
     <string name="activity_search_clear">Borrar la búsqueda</string>
     <string name="activity_search_hint">Buscar en recibos, nombres, notas</string>
     <string name="activity_they_ask">%1$s te pide</string>
@@ -42,4 +44,23 @@
     <string name="activity_donations_filter">Donaciones</string>
     <string name="activity_donation_chip">Donación</string>
     <string name="activity_donated_total">%1$s donado</string>
+    <string name="activity_period_today">Hoy</string>
+    <string name="activity_period_7d">7 días</string>
+    <string name="activity_period_month">Este mes</string>
+    <string name="activity_period_all">Todo</string>
+    <string name="activity_sum_in">Entradas</string>
+    <string name="activity_sum_out">Salidas</string>
+    <string name="activity_sum_net">Neto</string>
+    <string name="activity_sum_fees">Comisiones</string>
+    <string name="activity_business">Negocio</string>
+    <string name="activity_sales">Ventas</string>
+    <string name="activity_tax_collected">Impuesto cobrado</string>
+    <string name="activity_outstanding">Pendiente</string>
+    <string name="activity_export_csv">Archivo CSV</string>
+    <string name="activity_export_json">Archivo JSON</string>
+    <string name="activity_door_pos">caja</string>
+    <string name="activity_door_bar">cuentas</string>
+    <string name="activity_door_taxi">carreras</string>
+    <string name="activity_door_donate">bote</string>
+    <string name="activity_door_pub">números</string>
 </resources>

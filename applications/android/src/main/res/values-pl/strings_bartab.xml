@@ -27,12 +27,14 @@
     <string name="bartab_back">Wstecz</string>
     <string name="bartab_bill_cancelled_msg">To rozliczenie na %1$s jest anulowane — nie ma nic do zapłaty.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · rachunek: %3$s</string>
+    <string name="bartab_discard_notice">Rachunek odrzucony — nie ma nic do zapłaty.</string>
     <string name="bartab_remove_line">Usuń</string>
     <string name="bartab_settle_bill">Zamknij — rozliczenie na %1$s</string>
     <string name="bartab_settle_hint">Jedno rozliczenie z listą pozycji trafia do rozmowy z %1$s. Mogą zapłacić skądkolwiek — wątek nie zamyka się, gdy wyjdą.</string>
     <string name="bartab_discard_tab">Odrzuć rachunek</string>
     <string name="bartab_discard_title">Odrzucić ten rachunek?</string>
     <string name="bartab_discard_body">Rachunek i wszystko na nim nabite zostaną usunięte z tego telefonu. Rozliczenie nie zostanie wysłane i nie da się tego cofnąć.</string>
+    <string name="bartab_discard_body_told">Rachunek i wszystko na nim nabite zostaną usunięte z tego telefonu. Rozliczenie nie zostanie wysłane — gość dowie się, że nie ma nic do zapłaty — i nie da się tego cofnąć.</string>
     <string name="bartab_discard_confirm">Odrzuć</string>
     <string name="bartab_keep_tab">Zachowaj rachunek</string>
     <string name="bartab_billed_hint">Rozliczenie wysłane. Paragon trafi do nich sam, gdy płatność dojdzie. Jeśli zapłacono inaczej, zaznacz to tutaj:</string>
@@ -42,6 +44,13 @@
     <string name="bartab_cancelled_note">Anulowane — dostali wiadomość w rozmowie.</string>
     <string name="bartab_paid_oob_note">Zapłacone poza DUCAT ✓ — paragon wysłany, bez dołączonej transakcji.</string>
     <string name="bartab_paid_note">Zapłacone ✓ — paragon wysłany.</string>
+    <string name="bartab_bill_pending">Rozliczono, ale rachunek wciąż jest na tym telefonie — wyjdzie, gdy tylko wróci sieć. Rozliczono inaczej? Zaznacz to tutaj:</string>
+    <string name="bartab_bill_unsent">Rachunek nigdy do nich nie dotarł: rozmowa została zresetowana, zanim zdążył wyjść. Anuluj go i rozlicz ponownie albo zaznacz tutaj, że zapłacono inaczej:</string>
+    <string name="bartab_cancelled_pending">Anulowano — jeszcze o tym nie wiedzą. Powiadomienie wyjdzie, gdy tylko ten telefon odnajdzie sieć.</string>
+    <string name="bartab_cancelled_unsent">Anulowano — ale powiadomienie nigdy nie opuściło tego telefonu i już nie wyjdzie. Powiedz im w rozmowie, inaczej mogą jeszcze zapłacić ten rachunek.</string>
+    <string name="bartab_paid_oob_pending">Zapłacono poza DUCAT ✓ — paragon wciąż jest na tym telefonie. Wyjdzie, gdy tylko wróci sieć.</string>
+    <string name="bartab_paid_oob_unsent">Zapłacono poza DUCAT ✓ — ale paragonu nie udało się wysłać.</string>
+    <string name="bartab_send_receipt">Wyślij paragon</string>
     <string name="bartab_remove_from_book">Usuń z księgi rachunków</string>
     <string name="bartab_back_to_tabs">Wróć do rachunków</string>
     <!-- What the payer reads on the bill and the receipt. Written in
@@ -57,4 +66,8 @@
     <string name="bill_note_cancelled">Rachunek na %1$s został anulowany — nie ma nic do zapłaty.</string>
     <string name="bill_note_sale">Twój rachunek</string>
     <string name="bartab_tip_line">Napiwek — dziękujemy</string>
+    <string name="bill_note_issue">Prenumerata</string>
+    <string name="bartab_paid_pending">Zapłacone ✓ — paragon wciąż jest na tym telefonie. Wyjdzie, gdy tylko wróci sieć.</string>
+    <string name="bartab_paid_unsent">Zapłacone ✓ — ale paragonu nie udało się wysłać. Próba zostanie ponowiona sama.</string>
+    <string name="bartab_removed_notice">Usunięto: %1$s · rachunek: %2$s</string>
 </resources>

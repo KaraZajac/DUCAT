@@ -11,6 +11,8 @@
     <string name="pay_address_placeholder">5… یا 7…</string>
     <string name="pay_continue">ادامه</string>
     <string name="pay_not_monero_address">این شبیه نشانی Monero نیست.</string>
+    <string name="pay_scan_unknown_card">این کارت هنوز متعلق به هیچ‌یک از مخاطبان شما نیست. ابتدا او را از گفتگو اضافه کنید، سپس پرداخت کنید.</string>
+    <string name="pay_scan_not_payable">این کد نه نشانی Monero است و نه کارت DUCAT.</string>
 
     <!-- Pay.kt — amount step -->
     <string name="pay_back">بازگشت</string>
@@ -62,12 +64,13 @@
     <string name="pay_fee_unknown">اکنون نامشخص است</string>
     <string name="pay_fee_unknown_confirm">هزینه در این لحظه قابل برآورد نبود. تراکنش هر چه هنگام ساخته‌شدن هزینه داشته باشد می‌پردازد.</string>
     <string name="pay_node_no_answer">گرهٔ Monero به‌موقع پاسخ نداد. چیزی ارسال نشد. دوباره تلاش کنید — برنامه از گرهٔ دیگری استفاده می‌کند.</string>
+    <string name="pay_send_interrupted">برنامه در میانهٔ پرداخت بسته شد. پیش از پرداخت دوباره، صورتحساب را بررسی کنید.</string>
     <string name="pay_not_enough">موجودی آزادشده کافی نیست — شما %1$s دارید و با کارمزد شبکه %2$s لازم است.</string>
     <string name="pay_offline">هنوز متصل نیست — این گوشی هنوز به شبکه نپیوسته است. چیزی ارسال نشد؛ کمی بعد دوباره تلاش کنید.</string>
     <string name="pay_node_unreachable">به هیچ نود مونرو نمی‌توان وصل شد. چیزی ارسال نشد — اتصال خود را بررسی کنید و دوباره تلاش کنید.</string>
     <string name="board_unverified_note">‏هیچ گرهٔ مونرویی در دسترس نیست، پس آنچه اینجا می‌بینید با زنجیره تطبیق داده نشده است. همچنان امضاشده و پرداخت‌شده است — فقط با همان احتیاطی با آن رفتار کنید که با تابلوی تأییدنشده می‌کنید.</string>
     <string name="board_needs_a_block">‏دسترسی به هیچ گرهٔ مونرو ممکن نشد. آنچه روی تابلو می‌رود با یک بلاک اخیر مُهر می‌خورد، پس فعلاً نمی‌تواند منتشر شود — اتصالتان را بررسی کنید و دوباره تلاش کنید.</string>
-    <string name="pay_sending_why">در حال ساخت تراکنش. حدود یک دقیقه طول می‌کشد — کیف پول طعمه‌هایی را جمع می‌کند که پنهان می‌کنند کدام سکه‌ها مال شماست. می‌توانید این صفحه را ترک کنید؛ متوقف نمی‌شود.</string>
+    <string name="pay_sending_why">در حال ساخت تراکنش. حدود یک دقیقه طول می‌کشد — کیف پول طعمه‌هایی را جمع می‌کند که پنهان می‌کنند کدام سکه‌ها مال شماست. رفتن به برنامه‌ای دیگر آن را متوقف نمی‌کند.</string>
     <string name="pay_sending_to">به %1$s</string>
     <string name="claim_own_card">این کارت از خودتان است — متعلق به همین دستگاه است.</string>
     <string name="pay_already_paid">شما قبلاً به این امانی پرداخت کرده‌اید. پول شما داخل است؛ چیزی دوباره ارسال نشد.</string>
@@ -78,4 +81,6 @@
     <string name="pay_repeat_monthly">ماهانه</string>
     <string name="pay_recur_notify">صورت‌حساب دوره‌ای ارسال شد — %1$s</string>
     <string name="pay_donation_hint">این یک اهداست — رسید شما پس از رسیدن در همین گفتگو می‌آید و صورت‌حساب آن را زیر «اهداها» ثبت می‌کند.</string>
+    <string name="pay_relay_unconfirmed">هیچ گره Monero تأیید نکرد که پرداخت را گرفته است. ممکن است باز هم انجام شود — برگه‌های استفاده‌شده تا زمانی که زنجیره تکلیفش را روشن کند رزرو می‌مانند. پیش از پرداخت دوباره، صورت‌حساب را بررسی کنید.</string>
+    <string name="pay_request_kept">درخواست نگه داشته شد — به محض برگشتن شبکه خودش فرستاده می‌شود.</string>
 </resources>

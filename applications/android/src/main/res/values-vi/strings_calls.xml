@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">Đã gọi cho bạn</string>
+    <string name="chat_call_you_rang">Bạn đã gọi</string>
+    <string name="chat_call_answered">Đã trả lời cuộc gọi của bạn</string>
+    <string name="chat_call_you_answered">Bạn đã trả lời</string>
+    <string name="chat_call_missed_note">Có cuộc gọi đổ chuông khi bạn vắng mặt.</string>
+    <string name="chatlist_preview_call">Đã gọi</string>
+    <string name="chatlist_preview_call_answered">Đã trả lời cuộc gọi</string>
+    <string name="notify_call">%1$s đang gọi</string>
+    <string name="notify_call_answered">%1$s đã trả lời cuộc gọi của bạn</string>
+    <string name="call_button">Gọi</string>
+    <string name="call_calling">Đang gọi…</string>
+    <string name="call_incoming">Cuộc gọi DUCAT đến</string>
+    <string name="call_frames">↓%1$d ↑%2$d khung</string>
+    <string name="call_answer_btn">Trả lời</string>
+    <string name="call_end_btn">Gác máy</string>
+    <string name="call_body_ring">Đang gọi cho bạn</string>
+    <string name="call_body_answer">Đã trả lời</string>
+    <string name="call_body_decline">Giờ tôi chưa nói chuyện được.</string>
+    <string name="notify_call_channel">Cuộc gọi đến</string>
+    <string name="notify_call_incoming">Cuộc gọi đến</string>
+    <string name="call_no_answer">Không trả lời</string>
+    <string name="call_leave_message">Để lại lời nhắn</string>
+    <string name="call_dismiss">Để sau</string>
+    <string name="call_body_cancel">Đã cúp máy trước khi bạn nghe.</string>
+    <string name="call_connecting">Đang kết nối…</string>
+    <string name="call_unreached">Không liên lạc được</string>
+    <string name="call_never_connected">Không kết nối được</string>
+    <string name="call_notify_calling">Đang gọi %1$s…</string>
+    <string name="call_notify_in_call">Đang gọi với %1$s</string>
+    <string name="call_notify_return">Chạm để quay lại cuộc gọi.</string>
+</resources>

@@ -69,4 +69,5 @@ Setelah selesai, kedua jaminan kembali utuh dan tarifnya jadi milik pengemudi. T
     <string name="onb_pin_done">PIN kamu sudah disetel. Akan ditanyakan sebelum setiap pembayaran.</string>
     <string name="onb_pin_action">Pilih PIN</string>
     <string name="onb_pin_next">Lanjut</string>
+    <string name="onb_wallet_error">Dompet tidak dapat dibuat. Coba lagi.</string>
 </resources>

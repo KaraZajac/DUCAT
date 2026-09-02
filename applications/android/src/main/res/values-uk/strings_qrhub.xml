@@ -14,4 +14,8 @@
     <string name="qrhub_one_per_code">Один код — одна людина. Щойно хтось бере цей, наступний створюється автоматично — робити нічого не треба.</string>
     <string name="qrhub_name_travels">З нею їдуть твоє ім\'я і фото. Усе інше, чим ти ділишся, приходить пізніше, через з\'єднання, яке вона відкриває.</string>
     <string name="qrhub_copied">Посилання скопійовано</string>
+    <string name="qrhub_showing_as">Показано як %1$s</string>
+    <string name="qrhub_issue_failed">Не вдалося опублікувати твій код. Перевір мережу й спробуй ще раз.</string>
+    <string name="qrhub_try_again">Повторити</string>
+    <string name="qrhub_offline">Ще не під’єднано — ніхто не зможе взяти цей код, доки телефон не приєднається до мережі.</string>
 </resources>

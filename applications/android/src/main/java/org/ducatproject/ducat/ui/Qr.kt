@@ -46,8 +46,17 @@ import kotlinx.coroutines.withContext
  * some scanners refuse, and a code that looks right and does not scan is worse
  * than one that looks plain.
  */
+/** Counter etiquette, injected: the phone raises the screen to full
+ *  brightness while a code is up and puts it back after (see
+ *  MainActivity); the desk has no backlight to raise. */
+var qrLit: (Boolean) -> Unit = {}
+
 @Composable
 fun QrBlock(text: String) {
+    androidx.compose.runtime.DisposableEffect(Unit) {
+        qrLit(true)
+        onDispose { qrLit(false) }
+    }
     // The producer does assign — that is the line below. Compose's lint fails
     // to see it through `by` plus a suspend right-hand side, and reports the
     // producer as never assigning either way round, with or without a local

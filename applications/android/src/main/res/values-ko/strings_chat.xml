@@ -14,10 +14,14 @@
     <string name="chat_voice_failed">그 음성 메모는 녹음되지 않았어 — 마이크를 다시 길게 눌러 봐.</string>
     <string name="chat_what_card">카드</string>
     <string name="chat_what_contact">연락처</string>
+    <string name="chat_what_reaction">반응</string>
+    <string name="chat_what_invite">초대</string>
+    <string name="chat_what_note">메모</string>
     <string name="chat_error_location_fix">위치를 잡지 못했어요</string>
     <string name="chat_recording_placeholder">녹음 중… %1$d초</string>
     <string name="chat_message_placeholder">메시지</string>
     <string name="chat_take_picture">사진 찍기</string>
+    <string name="chat_no_camera_app">이 휴대폰에 카메라 앱이 없습니다</string>
     <string name="chat_hold_to_record">길게 눌러 음성 메모 녹음</string>
     <string name="chat_attach">첨부</string>
     <string name="chat_close">닫기</string>
@@ -42,6 +46,10 @@
     <!-- Retractions (kind 5) -->
     <string name="chat_you_withdrew">메시지를 회수했어요</string>
     <string name="chat_they_withdrew">%1$s님이 메시지를 회수했어요</string>
+    <string name="chat_you_withdrew_bill">청구서를 회수했어요</string>
+    <string name="chat_they_withdrew_bill">%1$s님이 청구서를 회수했어요</string>
+    <string name="chat_you_withdrew_call">통화를 회수했어요</string>
+    <string name="chat_they_withdrew_call">%1$s님이 통화를 회수했어요</string>
     <string name="chat_you_declined">거절했어요</string>
     <string name="chat_they_declined">%1$s님이 거절했어요</string>
     <string name="chat_retract_with_quote">%1$s — “%2$s”</string>
@@ -83,6 +91,7 @@
     <string name="chat_downloading_audio">🎤 다운로드 중…</string>
     <string name="chat_downloading_file">📎 다운로드 중…</string>
     <string name="chat_att_stuck">도착하지 않았습니다 — 더 이상 없을 수도 있습니다. 계속 시도 중입니다.</string>
+    <string name="chat_att_gone">도착하지 않았습니다 — 더 이상 없을 수도 있습니다.</string>
     <string name="chat_att_no_space">이 기기에 공간이 부족해 내려받을 수 없습니다.</string>
     <string name="chat_picture_desc">사진</string>
     <string name="chat_could_not_decode">📷 (열 수 없음)</string>
@@ -108,6 +117,7 @@
     <string name="chat_stop">정지</string>
     <string name="chat_play_voice_memo">음성 메모 재생</string>
     <string name="chat_voice_memo">음성 메모</string>
+    <string name="chat_play_failed">이 음성 메모를 재생할 수 없습니다.</string>
     <string name="chat_size_kb">%1$d KB</string>
     <string name="chat_size_b">%1$d B</string>
     <string name="chat_file_fallback">파일</string>
@@ -137,6 +147,9 @@
         <item quantity="other">여기 메시지 %1$d개가 빠져 있어</item>
     </plurals>
     <string name="chat_not_sent_yet">아직 전송 안 됨</string>
+    <string name="chat_not_sent">전송 안 됨</string>
     <string name="chat_cancel_request">요청 취소</string>
     <string name="chat_copied">메시지를 복사했어요</string>
+    <string name="chat_download_file">다운로드</string>
+    <string name="chat_file_too_big_swarm">이 파일은 %1$d MB입니다 — 현재 파일은 64 MB까지입니다</string>
 </resources>

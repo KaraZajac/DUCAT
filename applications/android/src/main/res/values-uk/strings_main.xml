@@ -8,6 +8,8 @@
     <string name="main_backup_title">Резервне копіювання</string>
     <string name="main_backup_body">У тебе є контакти, яких немає в останній копії. Відновлення поверне гроші, але не людей.</string>
     <string name="main_open_backup_settings">Відкрити налаштування копій</string>
+    <string name="main_notify_off_title">Сповіщення вимкнено</string>
+    <string name="main_notify_off_body">Телефон не зможе повідомити тобі, коли надійдуть гроші, рахунок або хтось зателефонує. Торкнись, щоб увімкнути.</string>
     <string name="main_recent">Останнє</string>
     <string name="main_see_all">Усе</string>
     <string name="main_card_link_title">Додати контакт?</string>
@@ -40,4 +42,11 @@
     <string name="err_no_keys_yet">Ви ще не завершили обмін картками.</string>
     <string name="err_conversation_too_old">Їхня картка застара для цього застосунку. Попросіть нову.</string>
     <string name="err_board_full">Зараз тут забагато викликів. Спробуйте за хвилину.</string>
+    <string name="main_deals_title">Угоди</string>
+    <plurals name="main_deals_waiting">
+        <item quantity="one">%1$d угода чекає на вас</item>
+        <item quantity="few">%1$d угоди чекають на вас</item>
+        <item quantity="many">%1$d угод чекають на вас</item>
+        <item quantity="other">%1$d угод чекають на вас</item>
+    </plurals>
 </resources>

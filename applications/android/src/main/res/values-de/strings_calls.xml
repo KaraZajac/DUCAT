@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">Hat dich angerufen</string>
+    <string name="chat_call_you_rang">Du hast angerufen</string>
+    <string name="chat_call_answered">Hat deinen Anruf angenommen</string>
+    <string name="chat_call_you_answered">Du bist rangegangen</string>
+    <string name="chat_call_missed_note">Ein Anruf kam, während du weg warst.</string>
+    <string name="chatlist_preview_call">Angerufen</string>
+    <string name="chatlist_preview_call_answered">Anruf angenommen</string>
+    <string name="notify_call">%1$s ruft an</string>
+    <string name="notify_call_answered">%1$s hat deinen Anruf angenommen</string>
+    <string name="call_button">Anrufen</string>
+    <string name="call_calling">Rufe an…</string>
+    <string name="call_incoming">Eingehender DUCAT-Anruf</string>
+    <string name="call_frames">↓%1$d ↑%2$d Frames</string>
+    <string name="call_answer_btn">Annehmen</string>
+    <string name="call_end_btn">Auflegen</string>
+    <string name="call_body_ring">Ruft dich an</string>
+    <string name="call_body_answer">Angenommen</string>
+    <string name="call_body_decline">Kann gerade nicht sprechen.</string>
+    <string name="notify_call_channel">Eingehende Anrufe</string>
+    <string name="notify_call_incoming">Eingehender Anruf</string>
+    <string name="call_no_answer">Keine Antwort</string>
+    <string name="call_leave_message">Nachricht hinterlassen</string>
+    <string name="call_dismiss">Jetzt nicht</string>
+    <string name="call_body_cancel">Aufgelegt, bevor du rangegangen bist.</string>
+    <string name="call_connecting">Verbinde…</string>
+    <string name="call_unreached">Nicht erreichbar</string>
+    <string name="call_never_connected">Keine Verbindung zustande gekommen</string>
+    <string name="call_notify_calling">Rufe %1$s an…</string>
+    <string name="call_notify_in_call">Im Gespräch mit %1$s</string>
+    <string name="call_notify_return">Tippen, um zurückzukehren.</string>
+</resources>

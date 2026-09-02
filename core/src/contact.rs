@@ -691,6 +691,20 @@ pub enum MessageKind {
     /// need a consensus a peer-to-peer group cannot have, so the set is
     /// grow-only and every view converges by union, in any order.
     GroupRoster = 12,
+    /// §16.20: a publication period's content key, handed down the paid
+    /// thread — with the shelf itself (record + standing head key) on the
+    /// first delivery. The message that turns a settled bill into readable
+    /// content; it carries a capability, never content, so the thread stays
+    /// small while the shelf holds the weight.
+    PublicationKey = 13,
+    /// "Pick up — here is the door" (§16.21). The offer carries a fresh
+    /// private-route blob and a call id; media flows as app messages on
+    /// that route, never through the mailbox. Ringing is a message, so
+    /// missed calls are simply messages you read later.
+    CallOffer = 14,
+    /// The other half: the callee's own route and the echoed id. Declining
+    /// is §16.13's Retract naming the offer, hanging up is stopping.
+    CallAnswer = 15,
 }
 
 impl MessageKind {
@@ -709,6 +723,9 @@ impl MessageKind {
             10 => MessageKind::CeremonyAbort,
             11 => MessageKind::PositionRef,
             12 => MessageKind::GroupRoster,
+            13 => MessageKind::PublicationKey,
+            14 => MessageKind::CallOffer,
+            15 => MessageKind::CallAnswer,
             _ => return None,
         })
     }
@@ -832,6 +849,11 @@ pub struct Message {
     /// A live-position stream, by reference (§15.12). Present only on a
     /// `PositionRef`.
     pub position: Option<PositionRef>,
+    /// §16.20: a publication period's key. Present only on a
+    /// `PublicationKey`, where it is mandatory.
+    pub publication: Option<PublicationKey>,
+    /// §16.21: the door a call offer or answer opens.
+    pub call: Option<CallRef>,
     /// §16.19: which group this message belongs to — 16 random bytes minted
     /// at creation. Present with [`Self::group_seq`] or not at all.
     pub group_id: Option<Vec<u8>>,
@@ -865,11 +887,51 @@ pub struct PositionRef {
     pub stream_key: [u8; 32],
 }
 
+/// Longest a call-route blob may be: a measured default-config blob is
+/// 832 bytes; past this something is being smuggled that is not a route.
+pub const MAX_CALL_ROUTE: usize = 4096;
+
+/// A live call's door (§16.21): the private route to stream media to and
+/// the eight random bytes both halves quote so an answer names its offer.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CallRef {
+    pub route: Vec<u8>,
+    pub id: [u8; 8],
+}
+
+/// A publication period's key, with the shelf on first delivery (§16.20).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct PublicationKey {
+    /// The publisher's own label for the period — "2026-09", "issue-12".
+    /// What the reader files the key under; never parsed for meaning.
+    pub period_id: String,
+    /// The period's content key. Opaque here: the publisher derives it
+    /// (core::publish), the reader only holds and uses it.
+    pub period_key: [u8; 32],
+    /// The publication's root record — present with [`Self::head_key`] on
+    /// the first delivery, optional after (the reader already has it).
+    pub record_key: Option<String>,
+    /// The standing key that opens the shelf's index for the life of the
+    /// subscription. Travels with the record or not at all.
+    pub head_key: Option<[u8; 32]>,
+    /// A heavy period ships by swarm (§16.20): the share key to bootstrap
+    /// from, with the index digest that authenticates what answers —
+    /// together or not at all, and only aboard a publication key.
+    pub swarm_key: Option<String>,
+    pub swarm_digest: Option<[u8; 32]>,
+}
+
 /// A sealed blob parked in a DHT record (§16.15).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Attachment {
     /// The record holding the ciphertext chunks, subkey 0 upward.
-    pub record_key: String,
+    /// The sealed blob chunked on a DHT record — the small road
+    /// (≤ [MAX_ATTACHMENT_BYTES]). Exactly one transport is present.
+    pub record_key: Option<String>,
+    /// The sealed blob as a swarm share — the big road (§16.20's engine,
+    /// ≤ [MAX_SWARM_ATTACHMENT_BYTES]). Key and digest travel together.
+    pub swarm_key: Option<String>,
+    pub swarm_digest: Option<[u8; 32]>,
     /// XChaCha20-Poly1305 key, one per attachment, never reused.
     pub key: [u8; 32],
     pub nonce: [u8; 24],
@@ -888,6 +950,11 @@ pub struct Attachment {
 /// An attachment may not out-size its record: 32 chunks of 32 KiB is Veilid's
 /// 1 MiB record cap, and the AEAD tag rides inside it.
 pub const MAX_ATTACHMENT_BYTES: u64 = 1_048_576 - 64;
+/// The swarm transport's bound (§16.15 post-1.0): a share carries what a
+/// record cannot. Generous on the wire; clients bound their own seals.
+pub const MAX_SWARM_ATTACHMENT_BYTES: u64 = 268_435_456;
+/// A share key is "VLD0:<key>:<owner>" — two encoded keys, not one.
+pub const MAX_SHARE_KEY_CHARS: usize = 128;
 pub const MAX_MIME_CHARS: usize = 64;
 pub const MAX_FILENAME_CHARS: usize = 96;
 
@@ -953,7 +1020,15 @@ impl Message {
             m.insert(f::MSG_GROUP_RE_SEQ, Value::Uint(g));
         }
         if let Some(a) = &self.attachment {
-            m.insert(f::MSG_ATT_RECORD, Value::Text(a.record_key.clone()));
+            if let Some(rk) = &a.record_key {
+                m.insert(f::MSG_ATT_RECORD, Value::Text(rk.clone()));
+            }
+            if let Some(sk) = &a.swarm_key {
+                m.insert(f::MSG_ATT_SWARM, Value::Text(sk.clone()));
+            }
+            if let Some(d) = &a.swarm_digest {
+                m.insert(f::MSG_ATT_SWARM_DIGEST, Value::Bytes(d.to_vec()));
+            }
             m.insert(f::MSG_ATT_KEY, Value::Bytes(a.key.to_vec()));
             m.insert(f::MSG_ATT_NONCE, Value::Bytes(a.nonce.to_vec()));
             m.insert(f::MSG_ATT_LEN, Value::Uint(a.len));
@@ -966,6 +1041,26 @@ impl Message {
         if let Some(p) = &self.position {
             m.insert(f::MSG_POS_RECORD, Value::Text(p.record_key.clone()));
             m.insert(f::MSG_POS_STREAM, Value::Bytes(p.stream_key.to_vec()));
+        }
+        if let Some(p) = &self.publication {
+            m.insert(f::MSG_PUB_PERIOD, Value::Text(p.period_id.clone()));
+            m.insert(f::MSG_PUB_KEY, Value::Bytes(p.period_key.to_vec()));
+            if let Some(rk) = &p.record_key {
+                m.insert(f::MSG_PUB_RECORD, Value::Text(rk.clone()));
+            }
+            if let Some(hk) = &p.head_key {
+                m.insert(f::MSG_PUB_HEAD, Value::Bytes(hk.to_vec()));
+            }
+            if let Some(sk) = &p.swarm_key {
+                m.insert(f::MSG_PUB_SWARM_KEY, Value::Text(sk.clone()));
+            }
+            if let Some(sd) = &p.swarm_digest {
+                m.insert(f::MSG_PUB_SWARM_DIGEST, Value::Bytes(sd.to_vec()));
+            }
+        }
+        if let Some(c) = &self.call {
+            m.insert(f::MSG_CALL_ROUTE, Value::Bytes(c.route.clone()));
+            m.insert(f::MSG_CALL_ID, Value::Bytes(c.id.to_vec()));
         }
         Value::Map(m)
     }
@@ -1053,34 +1148,83 @@ impl Message {
             },
             attachment: {
                 let record_key = r.opt_text(f::MSG_ATT_RECORD, MAX_RECORD_KEY_CHARS)?;
+                let swarm_key = r.opt_text(f::MSG_ATT_SWARM, MAX_SHARE_KEY_CHARS)?;
+                let swarm_digest = r.opt_bytes(f::MSG_ATT_SWARM_DIGEST, Some(32))?;
                 let key = r.opt_bytes(f::MSG_ATT_KEY, Some(32))?;
                 let nonce = r.opt_bytes(f::MSG_ATT_NONCE, Some(24))?;
                 let len = r.opt_uint(f::MSG_ATT_LEN)?;
                 let ct_hash = r.opt_bytes(f::MSG_ATT_HASH, Some(32))?;
                 let mime = r.opt_text(f::MSG_ATT_MIME, MAX_MIME_CHARS)?;
                 let name = r.opt_text(f::MSG_ATT_NAME, MAX_FILENAME_CHARS)?;
-                match (record_key, key, nonce, len, ct_hash, mime) {
-                    (None, None, None, None, None, None) => {
-                        if name.is_some() {
+                // The swarm pair travels together or not at all.
+                let swarm = match (swarm_key, swarm_digest) {
+                    (None, None) => None,
+                    (Some(k), Some(d)) => Some((k, d)),
+                    _ => {
+                        return Err(Reject::with_detail(
+                            RejectCode::Malformed,
+                            "a swarm attachment carries its share key and digest together",
+                        ))
+                    }
+                };
+                let any_core = key.is_some()
+                    || nonce.is_some()
+                    || len.is_some()
+                    || ct_hash.is_some()
+                    || mime.is_some();
+                match (record_key, swarm) {
+                    (None, None) => {
+                        if any_core || name.is_some() {
                             return Err(Reject::with_detail(
                                 RejectCode::Malformed,
-                                "a filename without an attachment names nothing",
+                                "attachment fields without a transport reference nothing",
                             ));
                         }
                         None
                     }
-                    (Some(record_key), Some(key), Some(nonce), Some(len), Some(ct_hash), Some(mime)) => {
+                    (Some(_), Some(_)) => {
+                        return Err(Reject::with_detail(
+                            RejectCode::Malformed,
+                            "one road for the bytes: a record or the swarm, never both",
+                        ))
+                    }
+                    (record_key, swarm) => {
                         // All or nothing: a partial attachment is a reference
                         // that can be fetched but not decrypted, or decrypted
                         // but not verified — every subset is a trap.
-                        if len == 0 || len > MAX_ATTACHMENT_BYTES {
+                        let (key, nonce, len, ct_hash, mime) =
+                            match (key, nonce, len, ct_hash, mime) {
+                                (Some(k), Some(n), Some(l), Some(h), Some(m)) => {
+                                    (k, n, l, h, m)
+                                }
+                                _ => {
+                                    return Err(Reject::with_detail(
+                                        RejectCode::Malformed,
+                                        "an attachment carries transport, key, nonce, length, hash and mime together",
+                                    ))
+                                }
+                            };
+                        let bound = if swarm.is_some() {
+                            MAX_SWARM_ATTACHMENT_BYTES
+                        } else {
+                            MAX_ATTACHMENT_BYTES
+                        };
+                        if len == 0 || len > bound {
                             return Err(Reject::with_detail(
                                 RejectCode::Malformed,
-                                format!("an attachment is 1..={MAX_ATTACHMENT_BYTES} bytes"),
+                                format!("an attachment is 1..={bound} bytes"),
                             ));
                         }
+                        let (swarm_key, swarm_digest) = match swarm {
+                            Some((k, d)) => {
+                                (Some(k), Some(d.try_into().unwrap()))
+                            }
+                            None => (None, None),
+                        };
                         Some(Attachment {
                             record_key,
+                            swarm_key,
+                            swarm_digest,
                             key: key.try_into().unwrap(),
                             nonce: nonce.try_into().unwrap(),
                             len,
@@ -1088,12 +1232,6 @@ impl Message {
                             mime,
                             name,
                         })
-                    }
-                    _ => {
-                        return Err(Reject::with_detail(
-                            RejectCode::Malformed,
-                            "an attachment carries record, key, nonce, length, hash and mime together",
-                        ))
                     }
                 }
             },
@@ -1116,6 +1254,98 @@ impl Message {
                     }
                 }
             },
+            publication: {
+                let period_id = r.opt_text(f::MSG_PUB_PERIOD, crate::publish::MAX_PERIOD_ID)?;
+                let period_key = r.opt_bytes(f::MSG_PUB_KEY, Some(32))?;
+                let record_key = r.opt_text(f::MSG_PUB_RECORD, MAX_RECORD_KEY_CHARS)?;
+                let head_key = r.opt_bytes(f::MSG_PUB_HEAD, Some(32))?;
+                let swarm_key = r.opt_text(f::MSG_PUB_SWARM_KEY, MAX_RECORD_KEY_CHARS)?;
+                let swarm_digest = r.opt_bytes(f::MSG_PUB_SWARM_DIGEST, Some(32))?;
+                // The swarm pair is one thing, and it rides a publication:
+                // a bootstrap key without the digest that authenticates its
+                // answers is an ask, not a fetch — and either of them away
+                // from a period key describes a shipment of nothing.
+                let swarm = match (swarm_key, swarm_digest) {
+                    (None, None) => None,
+                    (Some(k), Some(d)) => Some((k, d)),
+                    _ => {
+                        return Err(Reject::with_detail(
+                            RejectCode::Malformed,
+                            "a swarm share carries its key and its index digest together",
+                        ))
+                    }
+                };
+                match (period_id, period_key, record_key, head_key) {
+                    (None, None, None, None) if swarm.is_none() => None,
+                    (None, None, None, None) => {
+                        return Err(Reject::with_detail(
+                            RejectCode::Malformed,
+                            "a swarm share rides a publication key",
+                        ))
+                    }
+                    // The period pair is the kind's whole point: a key with
+                    // no name cannot be filed, a name with no key opens
+                    // nothing.
+                    (Some(period_id), Some(period_key), record_key, head_key) => {
+                        // Emptiness is already refused below the field layer:
+                        // opt_text treats present-but-empty as a second
+                        // encoding of "omitted" (§18.1) and rejects it.
+                        // The shelf reference is one thing: the record and
+                        // the head key that opens its index, together or
+                        // not at all.
+                        let shelf = match (record_key, head_key) {
+                            (None, None) => (None, None),
+                            (Some(rk), Some(hk)) => (Some(rk), Some(hk)),
+                            _ => {
+                                return Err(Reject::with_detail(
+                                    RejectCode::Malformed,
+                                    "a publication shelf carries its record and its head key together",
+                                ))
+                            }
+                        };
+                        Some(PublicationKey {
+                            period_id,
+                            period_key: period_key.try_into().unwrap(),
+                            record_key: shelf.0,
+                            head_key: shelf.1.map(|h: Vec<u8>| h.try_into().unwrap()),
+                            swarm_key: swarm.as_ref().map(|(k, _)| k.clone()),
+                            swarm_digest: swarm.map(|(_, d)| d.try_into().unwrap()),
+                        })
+                    }
+                    _ => {
+                        return Err(Reject::with_detail(
+                            RejectCode::Malformed,
+                            "a publication key carries its period id and its key together",
+                        ))
+                    }
+                }
+            },
+            call: {
+                let route = r.opt_bytes(f::MSG_CALL_ROUTE, None)?;
+                let id = r.opt_bytes(f::MSG_CALL_ID, Some(8))?;
+                match (route, id) {
+                    (None, None) => None,
+                    (Some(route), Some(id)) => {
+                        // A route is a real blob with a real ceiling: empty
+                        // opens no door, oversize is not a route.
+                        if route.is_empty() || route.len() > MAX_CALL_ROUTE {
+                            return Err(Reject::with_detail(
+                                RejectCode::Malformed,
+                                "a call route is 1 to 4096 bytes",
+                            ));
+                        }
+                        Some(CallRef { route, id: id.try_into().unwrap() })
+                    }
+                    // Both or neither: a door with no name cannot be
+                    // answered, a name with no door opens nothing.
+                    _ => {
+                        return Err(Reject::with_detail(
+                            RejectCode::Malformed,
+                            "a call carries its route and its id together",
+                        ))
+                    }
+                }
+            },
         };
         r.finish()?;
         // A payment with no amount is a payment screen with a blank on it, and
@@ -1132,7 +1362,10 @@ impl Message {
             | (MessageKind::Retract, Some(_))
             | (MessageKind::DkgRound, Some(_))
             | (MessageKind::CeremonyAbort, Some(_))
-            | (MessageKind::GroupRoster, Some(_)) => {
+            | (MessageKind::GroupRoster, Some(_))
+            | (MessageKind::PublicationKey, Some(_))
+            | (MessageKind::CallOffer, Some(_))
+            | (MessageKind::CallAnswer, Some(_)) => {
                 return Err(Reject::with_detail(
                     RejectCode::Malformed,
                     "this message kind must not carry an amount",
@@ -1367,6 +1600,44 @@ impl Message {
                 return Err(Reject::with_detail(
                     RejectCode::Malformed,
                     "only a position message carries a stream reference",
+                ))
+            }
+            _ => {}
+        }
+        // §16.20's rule, the same closed world: the key IS the kind. A
+        // publication message with nothing to hand over is an empty gesture,
+        // and a period key on any other kind is a capability smuggled where
+        // no reader is looking for one.
+        match (out.kind, out.publication.is_some()) {
+            (MessageKind::PublicationKey, false) => {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "a publication message carries the period's key",
+                ))
+            }
+            (k, true) if k != MessageKind::PublicationKey => {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "only a publication message carries a period key",
+                ))
+            }
+            _ => {}
+        }
+        // §16.21, the same closed world again: the door IS the kind. An
+        // offer or answer with no route rings nothing, and a route on any
+        // other kind is a door held open where no call is happening.
+        let call_kind = matches!(out.kind, MessageKind::CallOffer | MessageKind::CallAnswer);
+        match (call_kind, out.call.is_some()) {
+            (true, false) => {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "a call message carries its route and id",
+                ))
+            }
+            (false, true) => {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "only a call message carries a call route",
                 ))
             }
             _ => {}
@@ -1858,6 +2129,150 @@ const MAX_RENTAL_FEATURE_CHARS: usize = 16;
 /// thing and a listing is an advertisement for what somebody has to hand; a
 /// count past this is describing inventory that wants its own listing.
 const MAX_RENTAL_QUANTITY: u64 = 999;
+
+/// §16.18.2: a publication on a public board.
+///
+/// The board name carries the where — `topic:<category>[.<lang>]` for the
+/// worldwide shelf, `local:<cell>` for the town paper, and cross-posting is
+/// two stamps, paid honestly. The notice carries what a stranger needs to
+/// decide, and claiming its card IS subscribing (§16.20): after the claim,
+/// everything is the sealed machinery that already exists.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PubNotice {
+    pub version: u64,
+    /// A `ducat:` card URI, purpose `publish`, claim-once.
+    pub card: String,
+    pub title: String,
+    /// A sentence about it, when the title does not already say everything.
+    pub blurb: Option<String>,
+    /// Piconero a period. `None` is free — the only spelling of free.
+    pub price_pxmr: Option<u64>,
+    pub expiry: u64,
+}
+
+const MAX_PUB_TITLE_CHARS: usize = 60;
+const MAX_PUB_BLURB_CHARS: usize = 280;
+
+impl PubNotice {
+    pub fn to_value(&self) -> Value {
+        let mut m = BTreeMap::new();
+        m.insert(f::PN_VERSION, Value::Uint(self.version));
+        m.insert(f::PN_CARD, Value::Text(self.card.clone()));
+        m.insert(f::PN_TITLE, Value::Text(self.title.clone()));
+        if let Some(b) = &self.blurb {
+            m.insert(f::PN_BLURB, Value::Text(b.clone()));
+        }
+        if let Some(p) = self.price_pxmr {
+            m.insert(f::PN_PRICE, Value::Uint(p));
+        }
+        m.insert(f::PN_EXPIRY, Value::Uint(self.expiry));
+        Value::Map(m)
+    }
+
+    pub fn from_value(v: Value) -> Result<Self, Reject> {
+        let mut r = Reader::new(v)?;
+        let version = r.uint(f::PN_VERSION)?;
+        if version != 1 {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "unknown publication notice version",
+            ));
+        }
+        let card = r.opt_text(f::PN_CARD, MAX_HAIL_CARD_CHARS)?.ok_or_else(|| {
+            Reject::with_detail(RejectCode::Malformed, "a publication listing needs a card")
+        })?;
+        if !card.starts_with("ducat:") {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "a listing card must be a ducat: URI",
+            ));
+        }
+        let title = r.opt_text(f::PN_TITLE, MAX_PUB_TITLE_CHARS)?.ok_or_else(|| {
+            Reject::with_detail(RejectCode::Malformed, "a publication listing needs a title")
+        })?;
+        // Empty text is refused inside the reader itself — "omit the key
+        // instead" — so absence stays the one spelling of nothing to say.
+        let blurb = r.opt_text(f::PN_BLURB, MAX_PUB_BLURB_CHARS)?;
+        let price_pxmr = r.opt_uint(f::PN_PRICE)?;
+        if price_pxmr == Some(0) {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "free is spelled by omission",
+            ));
+        }
+        let expiry = r.uint(f::PN_EXPIRY)?;
+        r.finish()?;
+        Ok(Self { version, card, title, blurb, price_pxmr, expiry })
+    }
+}
+
+const MAX_SITE_TITLE_CHARS: usize = 80;
+
+/// §16.22: a site's head — the mutable pointer its `ducat:site/` URI names.
+///
+/// Lives in the site record's subkey 0, rewritten in place by its owner:
+/// the record key is the site's stable identity, the head is whatever it
+/// currently points at. The bundle itself travels as a multi-file swarm
+/// share and renders in a sealed room — nothing on the page can reach the
+/// network, which is what makes the trust story one sentence long.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SiteHead {
+    pub version: u64,
+    pub title: String,
+    /// The current bundle's swarm share key.
+    pub share: String,
+    /// The current bundle's index digest.
+    pub digest: [u8; 32],
+    /// When the head was last rewritten, epoch seconds. Advisory — a
+    /// reader shows it, nothing enforces it.
+    pub updated: u64,
+}
+
+impl SiteHead {
+    pub fn to_value(&self) -> Value {
+        let mut m = BTreeMap::new();
+        m.insert(f::SITE_VERSION, Value::Uint(self.version));
+        m.insert(f::SITE_TITLE, Value::Text(self.title.clone()));
+        m.insert(f::SITE_SHARE, Value::Text(self.share.clone()));
+        m.insert(f::SITE_DIGEST, Value::Bytes(self.digest.to_vec()));
+        m.insert(f::SITE_UPDATED, Value::Uint(self.updated));
+        Value::Map(m)
+    }
+
+    pub fn from_value(v: Value) -> Result<Self, Reject> {
+        let mut r = Reader::new(v)?;
+        let version = r.uint(f::SITE_VERSION)?;
+        if version != 1 {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "unknown site head version",
+            ));
+        }
+        let title = r.opt_text(f::SITE_TITLE, MAX_SITE_TITLE_CHARS)?.ok_or_else(|| {
+            Reject::with_detail(RejectCode::Malformed, "a site head needs a title")
+        })?;
+        let share = r.opt_text(f::SITE_SHARE, MAX_SHARE_KEY_CHARS)?.ok_or_else(|| {
+            Reject::with_detail(RejectCode::Malformed, "a site head names its bundle's share")
+        })?;
+        let digest = r
+            .opt_bytes(f::SITE_DIGEST, Some(32))?
+            .ok_or_else(|| {
+                Reject::with_detail(
+                    RejectCode::Malformed,
+                    "a site head carries its bundle's digest",
+                )
+            })?;
+        let updated = r.uint(f::SITE_UPDATED)?;
+        r.finish()?;
+        Ok(Self {
+            version,
+            title,
+            share,
+            digest: digest.try_into().unwrap(),
+            updated,
+        })
+    }
+}
 
 impl RentalNotice {
     pub fn to_value(&self) -> Value {
@@ -2462,7 +2877,8 @@ mod position_ref_tests {
             position: Some(PositionRef {
                 record_key: "VLD0:positionrecord".into(),
                 stream_key: [0x5au8; 32],
-            }),
+            }), publication: None,
+        call: None,
             group_id: None, group_seq: None,
             group_re_sender: None, group_re_seq: None,
         }

@@ -1,5 +1,7 @@
 package org.ducatproject.ducat.ui
 
+import kotlin.coroutines.resume
+
 // Turning a fix into something a person can send is the same everywhere;
 // *getting* the fix is not. The phone reads its GPS (Location.kt); a desk
 // does not move, so it is told where it is once (the desk's LocationDesk.kt).
@@ -23,8 +25,15 @@ fun askForLocation(
     context: android.content.Context,
     asked: Boolean,
     launch: (String) -> Unit,
+) = askForPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION, asked, launch)
+
+/** The same road for any permission — the camera's "Allow" walks it too. */
+fun askForPermission(
+    context: android.content.Context,
+    perm: String,
+    asked: Boolean,
+    launch: (String) -> Unit,
 ) {
-    val perm = android.Manifest.permission.ACCESS_FINE_LOCATION
     // Compose hands screens whatever context wraps the activity, which is
     // often not the activity itself; an unwrapped cast quietly comes back
     // null and this button would never find its way to Settings.
@@ -44,6 +53,19 @@ fun askForLocation(
         launch(perm)
     }
 }
+
+/**
+ * [grabFix] as a suspension: the caller's coroutine waits for the fix, so a
+ * screen that leaves — or asks again — cancels the wait, instead of leaving
+ * a job of its own behind to browse nine boards for a list nobody is
+ * looking at and write the answer over the one somebody is.
+ */
+suspend fun awaitFix(context: android.content.Context): Pair<Long, Long>? =
+    kotlinx.coroutines.suspendCancellableCoroutine { cont ->
+        grabFix(context) { fix ->
+            if (cont.isActive) cont.resume(fix)
+        }
+    }
 
 /**
  * One location fix, sent as a link anyone's map can open.

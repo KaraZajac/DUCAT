@@ -14,4 +14,8 @@
     <string name="qrhub_one_per_code">Один человек на код. Как только кто-то заберёт этот, следующий создастся сам — делать ничего не нужно.</string>
     <string name="qrhub_name_travels">С карточкой едут твоё имя и фото. Всё остальное, чем ты делишься, приходит потом — по открывшемуся соединению.</string>
     <string name="qrhub_copied">Ссылка скопирована</string>
+    <string name="qrhub_showing_as">Показано как %1$s</string>
+    <string name="qrhub_issue_failed">Не удалось опубликовать твой код. Проверь сеть и повтори попытку.</string>
+    <string name="qrhub_try_again">Повторить</string>
+    <string name="qrhub_offline">Пока нет связи — никто не сможет взять этот код, пока телефон не подключится к сети.</string>
 </resources>

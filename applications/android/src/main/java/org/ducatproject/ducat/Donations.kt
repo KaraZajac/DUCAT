@@ -85,7 +85,6 @@ object Donations {
                     Mailbox.send(
                         context, donor,
                         context.getString(R.string.donate_receipt_note),
-                        PersonaStore(context).personaHex(),
                         kind = 3, amountPxmr = amount,
                         txidHex = m.txidHex,
                         // §16.14: the notice this receipts lives in *their*

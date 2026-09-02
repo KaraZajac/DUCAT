@@ -59,7 +59,18 @@ import org.ducatproject.ducat.formatXmr
  * thing between a message and money leaving.
  */
 
-/** A bill, full screen: the decision gets the whole display. */
+/**
+ * A bill, full screen: the decision gets the whole display.
+ *
+ * [over] is the sentence that says the decision has already been made —
+ * withdrawn by its sender, declined here, or paid — and with one the
+ * screen offers nothing to press. Found live (2026-09-01): the bar
+ * withdrew a bill while the customer had it open; the retraction arrived,
+ * the bubble underneath greyed to "Cancelled", and this screen went on
+ * offering "Accept & pay" for money nobody was watching for (§15.11),
+ * one tap from the confirm screen. The caller works the verdict out from
+ * the thread as it stands *now*; this screen only shows it.
+ */
 @Composable
 fun BillScreen(
     m: StoredMessage,
@@ -67,6 +78,7 @@ fun BillScreen(
     onPay: () -> Unit,
     onDecline: () -> Unit,
     onClose: () -> Unit,
+    over: String? = null,
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     Dialog(
@@ -85,8 +97,14 @@ fun BillScreen(
                 Avatar(contact.displayName(), contact.avatar, size = 72)
                 Spacer(Modifier.height(10.dp))
                 Text(contact.displayName(), style = MaterialTheme.typography.titleLarge)
+                // Past tense once the decision is over: "asks you for" above
+                // a bill the bar has withdrawn is a request still standing,
+                // and the verdict at the bottom says the opposite.
                 Text(
-                    stringResource(R.string.ceremony_asks_you_for),
+                    stringResource(
+                        if (over != null) R.string.ceremony_asked_you_for
+                        else R.string.ceremony_asks_you_for,
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -104,7 +122,9 @@ fun BillScreen(
                 )
                 if (m.body.isNotBlank() && m.body !in filler) {
                     Spacer(Modifier.height(6.dp))
-                    Text(stringResource(R.string.ceremony_quoted_body, m.body),
+                    // Fenced: the quotation marks are in the reader's
+                    // direction and the words in the writer's — see isolate.
+                    Text(stringResource(R.string.ceremony_quoted_body, isolate(m.body)),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
@@ -144,31 +164,43 @@ fun BillScreen(
 
                 Spacer(Modifier.weight(1f))
                 Column(Modifier.fillMaxWidth().padding(24.dp)) {
-                    Button(
-                        onClick = onPay,
-                        enabled = m.payto != null,
-                        modifier = Modifier.fillMaxWidth().height(54.dp),
-                    ) { Text(stringResource(R.string.ceremony_accept_and_pay),
-                        style = MaterialTheme.typography.titleMedium) }
-                    if (m.payto == null) {
+                    if (over != null) {
+                        // Nothing to decide any more, so nothing to press:
+                        // the verdict where the buttons were, and Close in
+                        // the corner as the only way out.
                         Text(
-                            stringResource(R.string.ceremony_no_address),
+                            over,
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    } else {
+                        Button(
+                            onClick = onPay,
+                            enabled = m.payto != null,
+                            modifier = Modifier.fillMaxWidth().height(54.dp),
+                        ) { Text(stringResource(R.string.ceremony_accept_and_pay),
+                            style = MaterialTheme.typography.titleMedium) }
+                        if (m.payto == null) {
+                            Text(
+                                stringResource(R.string.ceremony_no_address),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.outline,
+                            )
+                        }
+                        Spacer(Modifier.height(8.dp))
+                        OutlinedButton(
+                            onClick = onDecline,
+                            modifier = Modifier.fillMaxWidth().height(48.dp),
+                        ) { Text(stringResource(R.string.ceremony_decline),
+                            color = MaterialTheme.colorScheme.error) }
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            stringResource(R.string.ceremony_accept_opens_confirm),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.outline,
                         )
                     }
-                    Spacer(Modifier.height(8.dp))
-                    OutlinedButton(
-                        onClick = onDecline,
-                        modifier = Modifier.fillMaxWidth().height(48.dp),
-                    ) { Text(stringResource(R.string.ceremony_decline),
-                        color = MaterialTheme.colorScheme.error) }
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        stringResource(R.string.ceremony_accept_opens_confirm),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.outline,
-                    )
                 }
             }
         }
@@ -360,7 +392,7 @@ fun PaidSplash(amountPxmr: Long, toName: String?, onDone: () -> Unit) {
                     color = MaterialTheme.colorScheme.onTertiary,
                 )
                 Text(
-                    if (toName != null) stringResource(R.string.ceremony_paid_to, toName)
+                    if (toName != null) stringResource(R.string.ceremony_paid_to, isolate(toName))
                     else stringResource(R.string.ceremony_paid),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onTertiary,
@@ -432,14 +464,14 @@ fun RideOfferScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 contact.plate?.let { plate ->
-                    Text(stringResource(R.string.ceremony_plate, plate),
+                    Text(stringResource(R.string.ceremony_plate, isolate(plate)),
                         style = MaterialTheme.typography.bodyMedium,
                         fontFamily = FontFamily.Monospace,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 if (m.body.isNotBlank()) {
                     Spacer(Modifier.height(6.dp))
-                    Text(stringResource(R.string.ceremony_quoted_body, m.body),
+                    Text(stringResource(R.string.ceremony_quoted_body, isolate(m.body)),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
@@ -500,10 +532,20 @@ fun RideOfferScreen(
                     Text(
                         if (arbiterName != null) {
                             stringResource(
-                                R.string.ceremony_accepting_agrees_fare_arbiter, arbiterName,
+                                // A fare too small to carry a stake locks the
+                                // fare alone (Stakes.stakeFor returns zero
+                                // below the floor), and the sentence at the
+                                // moment of consent has to say what the escrow
+                                // will actually hold.
+                                if (stake > 0) R.string.ceremony_accepting_agrees_fare_arbiter
+                                else R.string.ceremony_accepting_agrees_fare_arbiter_nostake,
+                                isolate(arbiterName),
                             )
                         } else {
-                            stringResource(R.string.ceremony_accepting_agrees_fare)
+                            stringResource(
+                                if (stake > 0) R.string.ceremony_accepting_agrees_fare
+                                else R.string.ceremony_accepting_agrees_fare_nostake,
+                            )
                         },
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.outline,
@@ -557,8 +599,16 @@ fun RideConfirmed(
                 Spacer(Modifier.height(10.dp))
                 Text(contact.displayName(), style = MaterialTheme.typography.headlineSmall)
                 Spacer(Modifier.height(12.dp))
+                // "Post your stake" sends the driver to the chat looking for
+                // a button that is not there when the fare is under the
+                // stake floor: nothing is asked of them, and the rider pays
+                // straight away.
+                val stake = org.ducatproject.ducat.Ceremony.rideStakeAmount(farePxmr)
                 Text(
-                    stringResource(R.string.ceremony_expecting_you),
+                    stringResource(
+                        if (stake > 0) R.string.ceremony_expecting_you
+                        else R.string.ceremony_expecting_you_nostake,
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -574,7 +624,13 @@ fun RideConfirmed(
 
 /** A stranger becomes your ride: the card you scan the curb with. */
 @Composable
-fun DriverFound(contact: Contact, onOpenChat: () -> Unit, onDismiss: () -> Unit) {
+fun DriverFound(
+    contact: Contact,
+    /** The accepted fare — what decides whether there is a stake to wait for. */
+    farePxmr: Long,
+    onOpenChat: () -> Unit,
+    onDismiss: () -> Unit,
+) {
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false),
@@ -625,8 +681,14 @@ fun DriverFound(contact: Contact, onOpenChat: () -> Unit, onDismiss: () -> Unit)
                     }
                 }
                 Spacer(Modifier.height(12.dp))
+                // Same rule as RideConfirmed's line: "once their stake is in"
+                // names a wait that never ends on a fare too small for one.
+                val stake = org.ducatproject.ducat.Ceremony.rideStakeAmount(farePxmr)
                 Text(
-                    stringResource(R.string.ceremony_eta_in_chat),
+                    stringResource(
+                        if (stake > 0) R.string.ceremony_eta_in_chat
+                        else R.string.ceremony_eta_in_chat_nostake,
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

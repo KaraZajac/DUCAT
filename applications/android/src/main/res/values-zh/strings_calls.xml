@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">来电</string>
+    <string name="chat_call_you_rang">你拨出了电话</string>
+    <string name="chat_call_answered">接听了你的通话</string>
+    <string name="chat_call_you_answered">你已接听</string>
+    <string name="chat_call_missed_note">你不在时有来电响起。</string>
+    <string name="chatlist_preview_call">来电</string>
+    <string name="chatlist_preview_call_answered">已接听</string>
+    <string name="notify_call">%1$s 来电中</string>
+    <string name="notify_call_answered">%1$s 接听了你的通话</string>
+    <string name="call_button">拨打</string>
+    <string name="call_calling">拨打中…</string>
+    <string name="call_incoming">DUCAT 来电</string>
+    <string name="call_frames">↓%1$d ↑%2$d 帧</string>
+    <string name="call_answer_btn">接听</string>
+    <string name="call_end_btn">挂断</string>
+    <string name="call_body_ring">正在呼叫你</string>
+    <string name="call_body_answer">已接听</string>
+    <string name="call_body_decline">现在不方便通话。</string>
+    <string name="notify_call_channel">来电</string>
+    <string name="notify_call_incoming">来电</string>
+    <string name="call_no_answer">无人接听</string>
+    <string name="call_leave_message">留言</string>
+    <string name="call_dismiss">暂不</string>
+    <string name="call_body_cancel">在你接听前挂断了。</string>
+    <string name="call_connecting">连接中…</string>
+    <string name="call_unreached">联系不上对方</string>
+    <string name="call_never_connected">未接通</string>
+    <string name="call_notify_calling">正在呼叫 %1$s…</string>
+    <string name="call_notify_in_call">正在与 %1$s 通话</string>
+    <string name="call_notify_return">点按可回到通话。</string>
+</resources>

@@ -69,4 +69,5 @@
     <string name="onb_pin_done">PIN 码已设置。每次付款前都会询问。</string>
     <string name="onb_pin_action">设置 PIN 码</string>
     <string name="onb_pin_next">下一步</string>
+    <string name="onb_wallet_error">无法创建钱包。请重试。</string>
 </resources>

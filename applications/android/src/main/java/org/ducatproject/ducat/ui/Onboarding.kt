@@ -9,6 +9,9 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -21,10 +24,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.FileProvider
 import java.io.File
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.Ceremony
 import org.ducatproject.ducat.ContactStore
+import org.ducatproject.ducat.MyProfile
+import org.ducatproject.ducat.NameStore
 import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.R
 import org.ducatproject.ducat.Stakes
@@ -37,7 +41,7 @@ import uniffi.ducat_mobile.createWallet
 import uniffi.ducat_mobile.exportBackup
 
 /**
- * Four steps, and the order is an argument rather than a sequence.
+ * Six steps, and the order is an argument rather than a sequence.
  *
  * The backup comes **before** the wallet can be funded. It is the step users
  * skip and the only one whose absence is unrecoverable — a persona lost without
@@ -81,18 +85,67 @@ data class Onboarding(
      * to understand it before they can send a friend twenty. The setup screen
      * states it plainly and the switch is right there; nobody is uninformed,
      * and nobody is stopped at the first step either.
+     *
+     * "The setup screen states it plainly" is the whole of that argument, and
+     * for a year of builds it did not: [Step.Profile] existed, with its
+     * switch and both explanations, and nothing ever went there — Persona
+     * stepped straight to Wallet, and Finish wrote this default into the
+     * store. Every card a new user handed out carried a reused address
+     * nobody had chosen and nobody had been told about, which is the exact
+     * outcome the reversal was argued to be safe from. Persona goes to
+     * Profile now.
      */
     val publishPayto: Boolean = true,
     /** §16.9's optional profile, gathered at setup and editable afterwards. */
     val profile: uniffi.ducat_mobile.Profile =
         uniffi.ducat_mobile.Profile(null, null, null, null, null, null, null, null),
     val backupConfirmed: Boolean = false,
-)
+) {
+    companion object {
+        /**
+         * What a rotation keeps: the step, and the answers given so far.
+         *
+         * MainActivity rebuilds this from the stores when it has nothing
+         * saved, and that is the right answer after the process has been
+         * killed — but it was the *only* answer, so a phone turned on its
+         * side at the Profile step went back to "Create your identity",
+         * the name typed so far and the switch's position with it. The
+         * stores cannot tell a step apart from the one before it until the
+         * step is answered; the saved state can. The profile is not carried:
+         * nothing here writes it yet.
+         */
+        val Saver: Saver<Onboarding, Any> = listSaver(
+            save = {
+                listOf(it.step.name, it.displayName ?: "", it.publishPayto, it.backupConfirmed)
+            },
+            restore = {
+                Onboarding(
+                    step = Step.valueOf(it[0] as String),
+                    displayName = (it[1] as String).ifEmpty { null },
+                    publishPayto = it[2] as Boolean,
+                    backupConfirmed = it[3] as Boolean,
+                )
+            },
+        )
+    }
+}
 
 @Composable
 fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
     val context = LocalContext.current
-    var restoring by remember { mutableStateOf(false) }
+    // Saveable, because the restore screen hands off to the system's file
+    // picker, and a phone turned in the picker recreates this activity
+    // underneath it. Plain `remember` forgot the flag, the recreated flow
+    // drew the Persona card, and the file the picker came back with was
+    // delivered to a launcher nothing was composing any more — one more
+    // silent nothing for somebody who has already lost a phone.
+    //
+    // Only honoured while the flow is still at its first step. A restore
+    // that has already landed resumes at the PIN (MainActivity reads the
+    // wallet it put in place), and drawing the restore form over that would
+    // offer to import again the file that just was.
+    var restoringFlag by rememberSaveable { mutableStateOf(false) }
+    val restoring = restoringFlag && state.step == Step.Persona
     Column(
         // imePadding before the scroll: with the keyboard up the column
         // shrinks to the space above it and becomes scrollable, instead of
@@ -108,7 +161,7 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
 
         if (restoring) {
             RestoreStep(
-                onCancel = { restoring = false },
+                onCancel = { restoringFlag = false },
                 onRestored = { r ->
                     // Past the backup step: the file that brought them here is
                     // the backup, and asking for a second one before letting
@@ -138,7 +191,7 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
                     // restore — right wallet, right address — that could not
                     // be walked away from, on the one path somebody reaches by
                     // having already lost a phone.
-                    restoring = false
+                    restoringFlag = false
                     onState(
                         state.copy(
                             step = Step.Pin,
@@ -158,7 +211,7 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
                 body = stringResource(R.string.onb_persona_body),
                 action = stringResource(R.string.onb_persona_action),
                 secondary = stringResource(R.string.onb_have_backup),
-                onSecondary = { restoring = true },
+                onSecondary = { restoringFlag = true },
                 onAction = {
                     // Persisted the moment it is created, not held in Compose
                     // state until Done. A rotation used to throw the persona
@@ -167,39 +220,7 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
                     // ran under. secret() writes it once and returns the same
                     // bytes on every later read.
                     PersonaStore(context).secret()
-                    onState(state.copy(step = Step.Wallet))
-                },
-            )
-
-            Step.Wallet -> StepCard(
-                title = stringResource(R.string.onb_wallet_title),
-                body = stringResource(R.string.onb_wallet_body),
-                action = stringResource(R.string.onb_wallet_action),
-                onAction = {
-                    // Genesis until a node supplies a real tip — slow to
-                    // restore, and recoverable, which is the side of §4.3.1's
-                    // asymmetry to be on.
-                    // Ask a node where the chain is first. A wallet that does
-                    // not know its own creation height scans from genesis, which
-                    // is a day and a half of reading that looks exactly like
-                    // having no money.
-                    val tip = runCatching {
-                        uniffi.ducat_mobile.moneroPickNode(
-                            uniffi.ducat_mobile.moneroDefaultNodes(null),
-                            "stagenet",
-                            8000u,
-                        ).height
-                    }.getOrDefault(UNKNOWN_TIP)
-                    // Persisted at creation, so a rotation cannot regenerate a
-                    // *different* wallet than the address the user was shown and
-                    // the backup they wrote. onboarded stays false until Backup,
-                    // so this does not open a funded wallet before §4.3's step.
-                    val w = createWallet(tipHeight = tip, stagenet = true)
-                    WalletStore(context).save(
-                        address = w.address, spendKeyHex = w.spendKeyHex,
-                        restoreHeight = w.restoreHeight, stagenet = true,
-                    )
-                    onState(state.copy(step = Step.Pin))
+                    onState(state.copy(step = Step.Profile))
                 },
             )
 
@@ -207,6 +228,16 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
                 initialName = state.displayName.orEmpty(),
                 initialPublish = state.publishPayto,
                 onNext = { name, publish ->
+                    // Written here, under the same rule as the persona above
+                    // and the wallet below: a rotation rebuilds this flow from
+                    // the stores, and anything only Compose held is gone. Held
+                    // until Done, the name went missing on the first rotation
+                    // and the privacy answer reverted to the default — which,
+                    // for somebody who had just read why and said no, is the
+                    // one answer they had ruled out.
+                    val persona = PersonaStore(context).personaHex()
+                    if (name.isNotBlank()) NameStore(context, persona).put(name)
+                    ContactStore(context).setPublishAddress(publish)
                     onState(
                         state.copy(
                             step = Step.Wallet,
@@ -216,6 +247,112 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
                     )
                 },
             )
+
+            Step.Wallet -> {
+                // Minting takes a network round trip and a key derivation;
+                // both ran on the tap itself, so the button froze the screen
+                // for up to the node timeout — eight seconds of an app that
+                // had apparently hung on its second step. Off the main
+                // thread, with the button held down while it runs.
+                // The mint runs under a process-level job, not this card's
+                // scope. A rotation while it ran cancelled the scope after
+                // the store was written, and the rebuilt card offered to
+                // create what existed; the check below caught that when the
+                // write had already landed, but a mint still out found no
+                // address, showed the button, and never heard the landing —
+                // nothing moved the step on until a second tap. The rebuilt
+                // card now starts busy if the mint is out and advances when
+                // it lands, and a second tap cannot run a second mint beside
+                // the first.
+                val key = "wallet:create"
+                var minting by remember { mutableStateOf(ThreadSends.inFlight(key)) }
+                var failed by remember { mutableStateOf(false) }
+                val tick by ThreadSends.ticks.collectAsState()
+                LaunchedEffect(tick) {
+                    minting = ThreadSends.inFlight(key)
+                    for (o in ThreadSends.take(key)) when (o) {
+                        is ThreadSends.Outcome.Landed -> onState(state.copy(step = Step.Pin))
+                        is ThreadSends.Outcome.Failed -> {
+                            org.ducatproject.ducat.DucatLog.w(
+                                "Onboarding",
+                                "wallet: ${o.error.javaClass.simpleName}: ${o.error.message}",
+                            )
+                            failed = true
+                        }
+                    }
+                }
+                // A wallet already in place means this step's work is done —
+                // a rotation while it was minting cancelled the scope after
+                // the store was written, and the rebuilt card offered to
+                // create what exists. Same rule MainActivity resumes by.
+                LaunchedEffect(Unit) {
+                    if (withContext(Dispatchers.IO) { WalletStore(context).address() } != null) {
+                        onState(state.copy(step = Step.Pin))
+                    }
+                }
+                StepCard(
+                    title = stringResource(R.string.onb_wallet_title),
+                    body = stringResource(R.string.onb_wallet_body),
+                    action = stringResource(R.string.onb_wallet_action),
+                    busy = minting,
+                    // Said, not only logged. The failure went to the log and
+                    // the button came back as if nothing had been tapped —
+                    // on the one step a new user cannot go around.
+                    error = if (failed) stringResource(R.string.onb_wallet_error) else null,
+                    onAction = {
+                        if (!minting && !ThreadSends.inFlight(key)) {
+                            minting = true
+                            failed = false
+                            ThreadSends.launch(ContactStore(context), key, null) {
+                                run {
+                                    // A wallet already in the store is not
+                                    // this step's to replace. The only way
+                                    // one is there before this mints it is
+                                    // a restore that landed under a
+                                    // rotation — its import runs on past
+                                    // the screen that started it — and
+                                    // minting over it would throw away the
+                                    // money the restore had just brought
+                                    // back.
+                                    if (WalletStore(context).address() != null) {
+                                        return@run
+                                    }
+                                    // Genesis until a node supplies a real
+                                    // tip — slow to restore, and
+                                    // recoverable, which is the side of
+                                    // §4.3.1's asymmetry to be on.
+                                    // Ask a node where the chain is first.
+                                    // A wallet that does not know its own
+                                    // creation height scans from genesis,
+                                    // which is a day and a half of reading
+                                    // that looks exactly like having no
+                                    // money.
+                                    val tip = runCatching {
+                                        uniffi.ducat_mobile.moneroPickNode(
+                                            uniffi.ducat_mobile.moneroDefaultNodes(null),
+                                            "stagenet",
+                                            8000u,
+                                        ).height
+                                    }.getOrDefault(UNKNOWN_TIP)
+                                    // Persisted at creation, so a rotation
+                                    // cannot regenerate a *different*
+                                    // wallet than the address the user was
+                                    // shown and the backup they wrote.
+                                    // onboarded stays false until Backup,
+                                    // so this does not open a funded
+                                    // wallet before §4.3's step.
+                                    val w = createWallet(tipHeight = tip, stagenet = true)
+                                    WalletStore(context).save(
+                                        address = w.address, spendKeyHex = w.spendKeyHex,
+                                        restoreHeight = w.restoreHeight, stagenet = true,
+                                    )
+                                }
+                                null
+                            }
+                        }
+                    },
+                )
+            }
 
             // This step used to describe a PIN the app did not have —
             // "larger payments ask for your PIN", with nothing behind it.
@@ -251,7 +388,6 @@ fun OnboardingFlow(state: Onboarding, onState: (Onboarding) -> Unit) {
 
             // Deliberately before funding, and deliberately not skippable.
             Step.Backup -> BackupStep(
-                state = state,
                 onDone = { onState(state.copy(step = Step.Done, backupConfirmed = true)) },
             )
 
@@ -270,18 +406,17 @@ private fun Progress(step: Step, restored: Boolean) {
     // The step you are *on*, not the number completed. "0 of 4" on the first
     // screen reads as though nothing has started and something has gone wrong.
     //
-    // The reachable flow is five steps — Persona → Wallet → PIN → Trust →
-    // Backup — then Done. `Step.Profile` exists but is skipped (Persona goes
-    // straight to Wallet), so it is not counted; numbering the shown steps
-    // contiguously is what keeps "Step 2 of 5" from ever jumping to "Step 3".
+    // The flow is six steps — Persona → Profile → Wallet → PIN → Trust →
+    // Backup — then Done, numbered in the order they are shown, which is
+    // what keeps "Step 2 of 6" from ever jumping to "Step 4".
     //
     // A restore is a different, shorter flow: the file that brought them here
     // is the backup, so the wallet, the trust explainer and the backup step
     // are all behind them, and what is left is the restore itself and a PIN.
-    // Counting that against five said "Step 3 of 5" and then finished — a bar
-    // that leapt from three fifths to full, to somebody who has just lost a
-    // phone and is watching this screen closely.
-    val total = if (restored) 2 else 5
+    // Counting that against six said "Step 3 of 6" and then finished — a bar
+    // that leapt from half to full, to somebody who has just lost a phone
+    // and is watching this screen closely.
+    val total = if (restored) 2 else 6
     val n = if (restored) {
         when (step) {
             Step.Pin -> 2
@@ -290,11 +425,11 @@ private fun Progress(step: Step, restored: Boolean) {
         }
     } else when (step) {
         Step.Persona -> 1
-        Step.Wallet -> 2
-        Step.Profile -> 2 // unreachable in the current flow; kept in range
-        Step.Pin -> 3
-        Step.Trust -> 4
-        Step.Backup -> 5
+        Step.Profile -> 2
+        Step.Wallet -> 3
+        Step.Pin -> 4
+        Step.Trust -> 5
+        Step.Backup -> 6
         Step.Done -> total
     }
     Column {
@@ -345,6 +480,10 @@ private fun StepCard(
     onAction: () -> Unit,
     secondary: String? = null,
     onSecondary: (() -> Unit)? = null,
+    /** The action is under way: the button waits rather than fires twice. */
+    busy: Boolean = false,
+    /** What the last attempt at the action said, when it failed. */
+    error: String? = null,
 ) {
     Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
         Column(Modifier.padding(20.dp)) {
@@ -352,7 +491,21 @@ private fun StepCard(
             Spacer(Modifier.height(8.dp))
             Text(body, style = MaterialTheme.typography.bodyMedium)
             Spacer(Modifier.height(16.dp))
-            Button(onClick = onAction) { Text(action) }
+            Button(onClick = onAction, enabled = !busy) {
+                if (busy) {
+                    CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                    Spacer(Modifier.width(8.dp))
+                }
+                Text(action)
+            }
+            error?.let {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    it,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
             if (secondary != null && onSecondary != null) {
                 TextButton(onClick = onSecondary) { Text(secondary) }
             }
@@ -380,13 +533,19 @@ private fun RestoreStep(
     onRestored: (uniffi.ducat_mobile.RestoredBackup) -> Unit,
 ) {
     val context = LocalContext.current
-    var passphrase by remember { mutableStateOf("") }
+    // Saveable for the same reason as the flag that shows this card: the
+    // picker's result comes back to a recreated activity, and the import it
+    // starts needs the passphrase typed before the picker was opened. With
+    // it forgotten, the file that came back was tried against "" and
+    // reported as the wrong passphrase.
+    var passphrase by rememberSaveable { mutableStateOf("") }
     var pending by remember { mutableStateOf<android.net.Uri?>(null) }
-    var busy by remember { mutableStateOf(false) }
+    // All three start from what the process already knows, so a card rebuilt
+    // by a rotation mid-import comes back to the import rather than to the
+    // form that starts one. See RestoreRun.
+    var busy by remember { mutableStateOf(ThreadSends.inFlight(RestoreRun.KEY)) }
     var error by remember { mutableStateOf<String?>(null) }
-    var done by remember {
-        mutableStateOf<Pair<uniffi.ducat_mobile.RestoredBackup, String>?>(null)
-    }
+    var done by remember { mutableStateOf(RestoreRun.landed) }
 
     val picker = rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.OpenDocument()
@@ -402,33 +561,39 @@ private fun RestoreStep(
     //
     // It follows the button rather than the flag, in both directions the
     // button is unavailable. Mid-import there is nothing to cancel — the work
-    // is NonCancellable for the reason the effect above gives — and once the
-    // backup is *in*, the wallet is on this device: going back to "Create a
-    // persona" would offer to mint a fresh one over the top of it, and the
+    // is off the screen entirely, for the reason RestoreRun gives — and once
+    // the backup is *in*, the wallet is on this device: going back to "Create
+    // a persona" would offer to mint a fresh one over the top of it, and the
     // only honest way on is Continue.
     BackHandler { if (!busy && done == null) onCancel() }
 
-    // `pending` is cleared last and the work is NonCancellable — clearing it
-    // first would change this effect's key and cancel the restore it started.
+    // The import runs off the card. `pending` can be cleared as soon as it is
+    // handed over, because what carries the work is no longer this effect.
     LaunchedEffect(pending) {
         val uri = pending ?: return@LaunchedEffect
+        val phrase = passphrase
         busy = true
         error = null
-        val outcome = withContext(Dispatchers.IO + kotlinx.coroutines.NonCancellable) {
-            runCatching {
-                val bytes = context.contentResolver.openInputStream(uri)!!
-                    .use { it.readBytes() }
-                applyBackup(context, bytes, passphrase)
+        ThreadSends.launch(ContactStore(context), RestoreRun.KEY, null) {
+            val bytes = context.contentResolver.openInputStream(uri)!!.use { it.readBytes() }
+            RestoreRun.landed = applyBackup(context, bytes, phrase)
+            null
+        }
+        pending = null
+    }
+    val tick by ThreadSends.ticks.collectAsState()
+    LaunchedEffect(tick) {
+        busy = ThreadSends.inFlight(RestoreRun.KEY)
+        for (o in ThreadSends.take(RestoreRun.KEY)) when (o) {
+            is ThreadSends.Outcome.Landed -> { done = RestoreRun.landed; error = null }
+            is ThreadSends.Outcome.Failed -> {
+                org.ducatproject.ducat.DucatLog.w(
+                    "Backup",
+                    "setup restore: ${o.error.javaClass.simpleName}: ${o.error.message}",
+                )
+                error = context.getString(R.string.backup_could_not_open)
             }
         }
-        outcome.onSuccess { done = it }.onFailure {
-            org.ducatproject.ducat.DucatLog.w(
-                "Backup", "setup restore: ${it.javaClass.simpleName}: ${it.message}",
-            )
-            error = context.getString(R.string.backup_could_not_open)
-        }
-        busy = false
-        pending = null
     }
 
     Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
@@ -495,7 +660,7 @@ private fun RestoreStep(
                     fontFamily = FontFamily.Monospace,
                 )
                 Spacer(Modifier.height(16.dp))
-                Button(onClick = { onRestored(restored.first) }) {
+                Button(onClick = { RestoreRun.landed = null; onRestored(restored.first) }) {
                     Text(stringResource(R.string.onb_restore_continue))
                 }
             }
@@ -512,13 +677,52 @@ private fun RestoreStep(
  * unrecoverable, and there is no operator to appeal to.
  */
 @Composable
-private fun BackupStep(state: Onboarding, onDone: () -> Unit) {
+private fun BackupStep(onDone: () -> Unit) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    var passphrase by remember { mutableStateOf("") }
-    var written by remember { mutableStateOf<File?>(null) }
+    // Saveable for the same reason the restore form's is: a rotation
+    // rebuilt this card, and eight or more characters somebody had chosen
+    // with care were gone from the field with no sign they had been typed.
+    var passphrase by rememberSaveable { mutableStateOf("") }
+    // Starts on the file if setup already wrote one. The write marks the
+    // backup as taken the moment it lands, and MainActivity resumes a flow
+    // from that mark — so a phone turned on the "Backup created" card
+    // rebuilt this step and, until this read, found nothing written: the
+    // bundle sat in app-private storage with the row that offers to send it
+    // somewhere never shown again. The one file that matters, kept where
+    // losing the phone loses it.
+    var written by remember {
+        mutableStateOf(
+            setupBackupFile(context)
+                .takeIf { ContactStore(context).backupExportedAt() > 0L && it.exists() },
+        )
+    }
     var error by remember { mutableStateOf<String?>(null) }
-    var busy by remember { mutableStateOf(false) }
+    // The export runs off the card, not off this composition. Argon2id is
+    // deliberately slow, and a rotation while it ground — or a call landing
+    // on top of setup — took the card's scope with it: the file was still
+    // written and marked (that part had no suspension point), but the line
+    // that showed it was never reached, so the rebuilt card offered "Create
+    // backup" again over a backup that already existed. Settings' export
+    // shares the key: same file, so a second export while one is writing it
+    // must wait rather than race it.
+    var busy by remember { mutableStateOf(ThreadSends.inFlight(BACKUP_EXPORT_KEY)) }
+    val tick by ThreadSends.ticks.collectAsState()
+    LaunchedEffect(tick) {
+        busy = ThreadSends.inFlight(BACKUP_EXPORT_KEY)
+        for (o in ThreadSends.take(BACKUP_EXPORT_KEY)) when (o) {
+            is ThreadSends.Outcome.Landed -> { written = File(o.result!!); error = null }
+            is ThreadSends.Outcome.Failed -> {
+                // Settings' export says the same on the same failure. This
+                // said the exception's class name — "IOException" in every
+                // language.
+                org.ducatproject.ducat.DucatLog.w(
+                    "Onboarding",
+                    "backup: ${o.error.javaClass.simpleName}: ${o.error.message}",
+                )
+                error = o.error.saidWhy() ?: context.getString(R.string.backup_export_failed)
+            }
+        }
+    }
     val longEnough = passphrase.length >= 8
 
     Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
@@ -594,59 +798,59 @@ private fun BackupStep(state: Onboarding, onDone: () -> Unit) {
                         val persona = PersonaStore(context).secret()
                         val restoreHeight = ws.restoreHeight()
                         busy = true; error = null
-                        scope.launch {
-                            // Encrypt and write off the main thread so the setup
-                            // screen does not freeze while the file is built.
-                            val result = withContext(Dispatchers.IO) {
-                                runCatching {
-                                    val bytes = exportBackup(
-                                        BackupInput(
-                                            spendKey,
-                                            restoreHeight,
-                                            state.displayName,
-                                            state.publishPayto,
-                                            state.profile,
-                                            // Read, not assumed empty. "First run:
-                                            // no relationships yet" was true of the
-                                            // only path this screen had when it was
-                                            // written, and stopped being true when
-                                            // restoring gained one: step 5 is where
-                                            // a restore ends too, and it was handing
-                                            // that person a bundle with no contacts,
-                                            // no prekeys, no threads and no escrows —
-                                            // 215 bytes against the 51 KB file they
-                                            // had just opened, offered as their
-                                            // backup. On a genuine first run these
-                                            // stores are empty and this reads the
-                                            // same emptiness the constants asserted.
-                                            ContactStore(context).backupContacts(),
-                                            ContactStore(context).backupPrekeys().first,
-                                            ContactStore(context).backupPrekeys().second,
-                                            ContactStore(context).backupPrekeys().third.toULong(),
-                                            ContactStore(context).backupAppState(),
-                                            Ceremony.backupShares(context),
-                                        ),
-                                        passphrase,
-                                        persona,
-                                    )
-                                    val dir = File(context.filesDir, "backups").apply { mkdirs() }
-                                    val f = File(dir, "ducat-backup.ducatbak")
-                                    f.writeBytes(bytes)
-                                    // Say that one exists. Settings' export has
-                                    // always recorded this and setup's never did,
-                                    // so the app finished setup believing the
-                                    // backup it had just written did not exist —
-                                    // which is the baseline every later "your
-                                    // backup is out of date" is measured against,
-                                    // and the answer to what is missing when a
-                                    // killed process resumes mid-setup.
-                                    ContactStore(context).markBackupExported()
-                                    f
-                                }
-                            }
-                            result.onSuccess { written = it }
-                                .onFailure { error = it.saidWhy() ?: it::class.simpleName }
-                            busy = false
+                        // Encrypt and write off the main thread so the setup
+                        // screen does not freeze while the file is built.
+                        ThreadSends.launch(ContactStore(context), BACKUP_EXPORT_KEY, null) {
+                            val bytes = exportBackup(
+                                BackupInput(
+                                    spendKey,
+                                    restoreHeight,
+                                    // The stores, as Settings' export
+                                    // reads them, and not the flow's
+                                    // state: the Profile step writes
+                                    // both as it is answered, and the
+                                    // state is rebuilt from the stores
+                                    // on every rotation anyway.
+                                    NameStore(context, PersonaStore(context).personaHex()).get(),
+                                    ContactStore(context).publishAddress(),
+                                    MyProfile(context, PersonaStore(context).personaHex()).toWire(),
+                                    // Read, not assumed empty. "First run:
+                                    // no relationships yet" was true of the
+                                    // only path this screen had when it was
+                                    // written, and stopped being true when
+                                    // restoring gained one: step 5 is where
+                                    // a restore ends too, and it was handing
+                                    // that person a bundle with no contacts,
+                                    // no prekeys, no threads and no escrows —
+                                    // 215 bytes against the 51 KB file they
+                                    // had just opened, offered as their
+                                    // backup. On a genuine first run these
+                                    // stores are empty and this reads the
+                                    // same emptiness the constants asserted.
+                                    ContactStore(context).backupContacts(),
+                                    ContactStore(context).backupPrekeys().first,
+                                    ContactStore(context).backupPrekeys().second,
+                                    ContactStore(context).backupPrekeys().third.toULong(),
+                                    ContactStore(context).backupAppState(),
+                                    Ceremony.backupShares(context),
+                                    PersonaStore(context).backupPersonas(context),
+                                ),
+                                passphrase,
+                                persona,
+                            )
+                            val f = setupBackupFile(context)
+                            f.parentFile?.mkdirs()
+                            f.writeBytes(bytes)
+                            // Say that one exists. Settings' export has
+                            // always recorded this and setup's never did,
+                            // so the app finished setup believing the
+                            // backup it had just written did not exist —
+                            // which is the baseline every later "your
+                            // backup is out of date" is measured against,
+                            // and the answer to what is missing when a
+                            // killed process resumes mid-setup.
+                            ContactStore(context).markBackupExported()
+                            f.absolutePath
                         }
                     },
                     enabled = longEnough && !busy,
@@ -673,6 +877,23 @@ private fun BackupStep(state: Onboarding, onDone: () -> Unit) {
         }
     }
 }
+
+/**
+ * Where setup writes the bundle, and where Settings' export writes its own:
+ * app-private, so it goes when the app does, which is why the step that
+ * writes it does not end until the person has been offered somewhere else
+ * to put it.
+ */
+internal fun setupBackupFile(context: Context): File =
+    File(File(context.filesDir, "backups"), "ducat-backup.ducatbak")
+
+/**
+ * The [ThreadSends] key both exports run under — setup's and Settings'.
+ * One key because it is one file: two exports writing it at once would
+ * hand the share sheet whichever finished second, encrypted under
+ * whichever passphrase that was. A word a persona's hex can never be.
+ */
+internal const val BACKUP_EXPORT_KEY = "backup:export"
 
 /**
  * Hand the file to whatever the user already trusts with important things.
@@ -710,8 +931,10 @@ private fun ProfileStep(
     initialPublish: Boolean,
     onNext: (String, Boolean) -> Unit,
 ) {
-    var name by remember { mutableStateOf(initialName) }
-    var publish by remember { mutableStateOf(initialPublish) }
+    // Saveable: the step survives a rotation now, and a form that did not
+    // would have handed back an empty field on it.
+    var name by rememberSaveable { mutableStateOf(initialName) }
+    var publish by rememberSaveable { mutableStateOf(initialPublish) }
 
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(20.dp)) {

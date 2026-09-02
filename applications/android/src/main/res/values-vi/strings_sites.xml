@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_sites">Trang</string>
+    <string name="sites_intro">Những trang đi như ấn phẩm: tải trọn, đọc ngoại tuyến, được người đọc tự nguyện nhân bản. Không gì trên trang thấy được bạn.</string>
+    <string name="sites_empty_title">Chưa có trang nào</string>
+    <string name="sites_empty_body">Trang ducat là căn phòng niêm phong — mọi hình và kiểu dáng đi trong gói, tắt script, chỉ liên kết ducat: hoạt động. Dán địa chỉ để lưu một trang.</string>
+    <string name="sites_add">Thêm trang</string>
+    <string name="sites_add_confirm">Thêm</string>
+    <string name="sites_add_link_title">Thêm trang này?</string>
+    <string name="sites_add_link_body">Địa chỉ này đến từ một liên kết. Thêm sẽ lưu nó vào kệ của bạn; không tải gì cho đến khi bạn mở.</string>
+    <string name="sites_uri_label">địa chỉ ducat:site/…</string>
+    <string name="sites_bad_uri">Đây không phải địa chỉ ducat:site/.</string>
+    <string name="sites_fetching">Đang tải…</string>
+    <string name="sites_not_fetched">Chưa tải</string>
+    <string name="sites_update_waiting">Có bản cập nhật — sẽ mở bản mới</string>
+    <string name="sites_offline_ready">Sẵn sàng ngoại tuyến</string>
+    <string name="sites_open">Mở</string>
+    <string name="sites_keep_alive">Giữ trang này sống cho người khác</string>
+    <string name="sites_remove">Xóa</string>
+</resources>

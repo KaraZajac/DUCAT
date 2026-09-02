@@ -44,6 +44,9 @@
     <string name="profile_bond_releasing">वापसी जारी — उनके सह-हस्ताक्षर का इंतज़ार…</string>
     <string name="profile_bond_cosigned">सह-हस्ताक्षर हो गया — प्रसारण उनके हाथ में है।</string>
     <string name="profile_bond_released">जमा वापस मिल गई ✓</string>
+    <string name="profile_bond_call_off">बॉन्ड रद्द करें</string>
+    <string name="profile_bond_holds">एस्क्रो में %1$s है — इसके बजाय जमा लौटाएँ</string>
+    <string name="profile_bond_called_off">बॉन्ड रद्द कर दिया गया।</string>
     <string name="profile_bond_txid">वापसी लेनदेन</string>
     <string name="profile_bond_arbiter_q">तीसरी चाबी किसके पास रहेगी?</string>
     <string name="profile_bond_arbiter_note">मध्यस्थ के साथ तीन में से कोई दो चाबियाँ जमा को हिला सकती हैं: खोया फ़ोन कुछ नहीं अटकाता और विवाद के पास जाने की जगह होती है। अकेला मध्यस्थ कुछ नहीं ले सकता।</string>

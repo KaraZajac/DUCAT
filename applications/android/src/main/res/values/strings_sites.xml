@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_sites">Sites</string>
+    <string name="sites_intro">Pages that travel like publications: fetched whole, readable offline, mirrored by readers who choose to. Nothing on a page can see you.</string>
+    <string name="sites_empty_title">No sites yet</string>
+    <string name="sites_empty_body">A ducat site is a sealed room — every image and style ships in the bundle, scripts stay off, and the only working links are ducat: ones. Paste an address to save one.</string>
+    <string name="sites_add">Add a site</string>
+    <string name="sites_add_confirm">Add</string>
+    <string name="sites_add_link_title">Add this site?</string>
+    <string name="sites_add_link_body">A link brought this address here. Adding saves it to your shelf; nothing is fetched until you open it.</string>
+    <string name="sites_uri_label">ducat:site/… address</string>
+    <string name="sites_bad_uri">That is not a ducat:site/ address.</string>
+    <string name="sites_fetching">Fetching…</string>
+    <string name="sites_not_fetched">Not fetched yet</string>
+    <string name="sites_update_waiting">Update available — opens fresh</string>
+    <string name="sites_offline_ready">Ready offline</string>
+    <string name="sites_open">Open</string>
+    <string name="sites_keep_alive">Keep this site alive for others</string>
+    <string name="sites_remove">Remove</string>
+</resources>

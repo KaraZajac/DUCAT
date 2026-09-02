@@ -11,6 +11,8 @@
     <string name="pay_address_placeholder">5… veya 7…</string>
     <string name="pay_continue">Devam</string>
     <string name="pay_not_monero_address">Bu bir Monero adresine benzemiyor.</string>
+    <string name="pay_scan_unknown_card">Bu kart henüz kişilerinizden birine ait değil. Önce Sohbet\'ten ekleyin, sonra ödeyin.</string>
+    <string name="pay_scan_not_payable">Bu kod ne bir Monero adresi ne de bir DUCAT kartı.</string>
 
     <!-- Pay.kt — amount step -->
     <string name="pay_back">Geri</string>
@@ -62,12 +64,13 @@
     <string name="pay_fee_unknown">şu an bilinmiyor</string>
     <string name="pay_fee_unknown_confirm">Ücret şu an tahmin edilemedi. İşlem, oluşturulurken ne tutuyorsa onu öder.</string>
     <string name="pay_node_no_answer">Monero düğümü zamanında yanıt vermedi. Hiçbir şey gönderilmedi. Tekrar dene — uygulama başka bir düğüm kullanacak.</string>
+    <string name="pay_send_interrupted">Uygulama ödemenin ortasında kapandı. Yeniden ödemeden önce hesap dökümünü kontrol et.</string>
     <string name="pay_not_enough">Yeterli kullanılabilir bakiye yok — %1$s var, ağ ücretiyle birlikte %2$s gerekiyor.</string>
     <string name="pay_offline">Henüz bağlı değil — bu telefon ağa katılmayı bitirmedi. Hiçbir şey gönderilmedi; birazdan tekrar deneyin.</string>
     <string name="pay_node_unreachable">Hiçbir Monero düğümüne ulaşılamadı. Hiçbir şey gönderilmedi — bağlantını kontrol edip tekrar dene.</string>
     <string name="board_unverified_note">Ulaşılabilir bir Monero düğümü yok; burada gösterilenler zincire karşı doğrulanamadı. Yine de imzalı ve bedeli ödenmiş — sadece doğrulanmamış bir panoya gösterdiğin özenle yaklaş.</string>
     <string name="board_needs_a_block">Hiçbir Monero düğümüne ulaşılamadı. Panoya çıkan her şey yakın tarihli bir blokla damgalanır, bu yüzden şimdilik yayınlanamıyor — bağlantını kontrol edip yeniden dene.</string>
-    <string name="pay_sending_why">İşlem oluşturuluyor. Bu yaklaşık bir dakika sürer — cüzdan, hangi paraların sizin olduğunu gizleyen sahte çıktıları topluyor. Bu ekrandan çıkabilirsiniz; işlem durmaz.</string>
+    <string name="pay_sending_why">İşlem oluşturuluyor. Bu yaklaşık bir dakika sürer — cüzdan, hangi paraların sizin olduğunu gizleyen sahte çıktıları topluyor. Başka bir uygulamaya geçmek işlemi durdurmaz.</string>
     <string name="pay_sending_to">%1$s adlı kişiye</string>
     <string name="claim_own_card">Bu kart sizin — bu cihaza ait.</string>
     <string name="pay_already_paid">Bu emanete zaten ödeme yaptın. Paran içeride; tekrar gönderilmedi.</string>
@@ -78,4 +81,6 @@
     <string name="pay_repeat_monthly">Aylık</string>
     <string name="pay_recur_notify">Yinelenen hesap gönderildi — %1$s</string>
     <string name="pay_donation_hint">Bu bir bağış — makbuzunuz ulaştığında bu sohbete gelecek ve ekstreniz onu Bağışlar altında listeleyecek.</string>
+    <string name="pay_relay_unconfirmed">Hiçbir Monero düğümü ödemeyi aldığını onaylamadı. Yine de geçebilir — kullanılan banknotlar zincir karar verene kadar ayrılmış kalır. Yeniden ödemeden önce hesap özetini kontrol et.</string>
+    <string name="pay_request_kept">İstek saklandı — ağ gelir gelmez kendiliğinden gidecek.</string>
 </resources>

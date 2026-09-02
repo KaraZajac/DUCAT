@@ -14,4 +14,8 @@
     <string name="qrhub_one_per_code">Her koda bir kişi. Biri bunu aldığı anda sıradaki kendiliğinden oluşturulur — yapman gereken bir şey yok.</string>
     <string name="qrhub_name_travels">Adın ve resmin kartla birlikte gider. Paylaştığın geri kalan her şey sonradan, kartın açtığı bağlantı üzerinden ulaşır.</string>
     <string name="qrhub_copied">Bağlantı kopyalandı</string>
+    <string name="qrhub_showing_as">%1$s olarak gösteriliyor</string>
+    <string name="qrhub_issue_failed">Kodun yayımlanamadı. Ağı kontrol edip tekrar dene.</string>
+    <string name="qrhub_try_again">Tekrar dene</string>
+    <string name="qrhub_offline">Henüz bağlı değil — bu telefon ağa katılana kadar bu kodu kimse alamaz.</string>
 </resources>

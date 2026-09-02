@@ -24,12 +24,14 @@
     <string name="bartab_back">返回</string>
     <string name="bartab_bill_cancelled_msg">那张 %1$s 的账单已取消 — 不用付了。</string>
     <string name="bartab_drink_notice">%1$s — %2$s · 挂账现共 %3$s</string>
+    <string name="bartab_discard_notice">挂账已作废 — 不用付了。</string>
     <string name="bartab_remove_line">移除</string>
     <string name="bartab_settle_bill">结账 — 账单 %1$s</string>
     <string name="bartab_settle_hint">一张逐项列明的账单会发进你和 %1$s 的对话。对方在哪儿都能付 — 人走了，对话也不会关。</string>
     <string name="bartab_discard_tab">丢弃挂账</string>
     <string name="bartab_discard_title">丢弃这笔挂账？</string>
     <string name="bartab_discard_body">这笔挂账和上面记的所有项目都会从这台手机上删除。不会发出账单，而且无法撤销。</string>
+    <string name="bartab_discard_body_told">这笔挂账和上面记的所有项目都会从这台手机上删除。不会发出账单 — 会告知对方不用付了 — 而且无法撤销。</string>
     <string name="bartab_discard_confirm">丢弃</string>
     <string name="bartab_keep_tab">保留挂账</string>
     <string name="bartab_billed_hint">已出账。付款到账后，收据会自动发给对方。如果已通过其他方式结清，请在这里注明：</string>
@@ -39,6 +41,13 @@
     <string name="bartab_cancelled_note">已取消 — 已在对话中告知对方。</string>
     <string name="bartab_paid_oob_note">在 DUCAT 之外付清 ✓ — 收据已发送，未附交易。</string>
     <string name="bartab_paid_note">已付 ✓ — 收据已发送。</string>
+    <string name="bartab_bill_pending">已开单，但账单仍在这部手机上 — 网络恢复后立即发出。若已通过其他方式结清，请在此注明：</string>
+    <string name="bartab_bill_unsent">账单从未送达对方：对话在账单发出前被重置了。请取消并重新开单，或若已通过其他方式结清，在此注明：</string>
+    <string name="bartab_cancelled_pending">已取消 — 对方尚未收到通知。这部手机一连上网络，通知就会发出。</string>
+    <string name="bartab_cancelled_unsent">已取消 — 但通知从未离开这部手机，现在也无法再发出。请在对话中告诉对方，否则他们可能仍会支付这笔账单。</string>
+    <string name="bartab_paid_oob_pending">在 DUCAT 之外付清 ✓ — 收据仍在这部手机上。网络恢复后立即发出。</string>
+    <string name="bartab_paid_oob_unsent">在 DUCAT 之外付清 ✓ — 但收据未能发出。</string>
+    <string name="bartab_send_receipt">发送收据</string>
     <string name="bartab_remove_from_book">从挂账簿中移除</string>
     <string name="bartab_back_to_tabs">返回挂账列表</string>
     <!-- What the payer reads on the bill and the receipt. Written in
@@ -54,4 +63,8 @@
     <string name="bill_note_cancelled">%1$s 的这笔账单已取消，无需付款。</string>
     <string name="bill_note_sale">你的账单</string>
     <string name="bartab_tip_line">小费 — 谢谢</string>
+    <string name="bill_note_issue">订阅</string>
+    <string name="bartab_paid_pending">已付 ✓ — 收据仍在这部手机上。网络恢复后立即发出。</string>
+    <string name="bartab_paid_unsent">已付 ✓ — 但收据未能发出。会自动重试。</string>
+    <string name="bartab_removed_notice">已撤销：%1$s · 挂账现共 %2$s</string>
 </resources>

@@ -442,7 +442,7 @@ fn every_case_declares_a_known_kind_and_a_unique_name() {
         "object.roundtrip", "escrow.ceremony", "escrow.ready", "escrow.release",
         "bond.check", "slash.check",
         "contact.card", "contact.details", "log.head", "log.ring", "stand.shard", "stand.epoch", "message.chain",
-        "message.payment", "hail.notice", "rental.listing", "board.sealed",
+        "message.payment", "hail.notice", "rental.listing", "pub.listing", "site.head", "board.sealed",
         "board.beacon_window", "board.beacon_verdict", "position.frame",
     ];
     let dir = std::path::Path::new("../vectors/v1");
@@ -612,9 +612,21 @@ fn contact_vectors_pass() {
                 let bytes = unhex(c["sealed_hex"].as_str().unwrap());
                 let board = c["board"].as_str().unwrap();
                 let subkey = c["subkey"].as_u64().unwrap() as u32;
+                // Two families seal identically in their own namespaces; the
+                // notice says which it is, exactly as the second
+                // implementation decides.
+                let decoded = decode(&bytes).unwrap();
+                let is_pub = matches!(&decoded,
+                    ducat_core::cbor::Value::Map(m)
+                        if m.contains_key(&ducat_core::wire::f::PN_POSTER));
+                let fields = if is_pub {
+                    ducat_core::board::PUB
+                } else {
+                    ducat_core::board::RENTAL
+                };
                 let got = ducat_core::board::open(
-                    decode(&bytes).unwrap(),
-                    ducat_core::board::RENTAL,
+                    decoded,
+                    fields,
                     board,
                     subkey,
                 );
@@ -639,9 +651,15 @@ fn contact_vectors_pass() {
                             c["expect"]["beacon_hash"].as_str().unwrap(), "{name}"
                         );
                         // And what is left is a listing this implementation
-                        // reads, so the seal and the notice really do compose.
-                        RentalNotice::from_value(o.notice)
-                            .unwrap_or_else(|e| panic!("{name}: inner listing refused: {e:?}"));
+                        // reads, so the seal and the notice really do compose
+                        // — whichever family sealed it.
+                        if is_pub {
+                            ducat_core::contact::PubNotice::from_value(o.notice)
+                                .unwrap_or_else(|e| panic!("{name}: inner listing refused: {e:?}"));
+                        } else {
+                            RentalNotice::from_value(o.notice)
+                                .unwrap_or_else(|e| panic!("{name}: inner listing refused: {e:?}"));
+                        }
                     }
                     Err(e) => {
                         assert!(!ok, "{name}: refused a notice the vector accepts: {e:?}");
@@ -723,6 +741,44 @@ fn contact_vectors_pass() {
                     }
                     Err(e) => {
                         assert!(!ok, "{name}: refused a frame the vector accepts: {e:?}");
+                        assert_eq!(
+                            format!("{:?}", e.code).to_uppercase(),
+                            c["expect"]["reject"].as_str().unwrap(), "{name}"
+                        );
+                    }
+                }
+            }
+            "site.head" => {
+                let got = ducat_core::contact::SiteHead::from_value(
+                    decode(&unhex(c["site_head_hex"].as_str().unwrap())).unwrap());
+                let ok = c["expect"]["ok"].as_bool().unwrap_or(true);
+                match got {
+                    Ok(h) => {
+                        assert!(ok, "{name}: decoded a head the vector refuses");
+                        assert_eq!(
+                            hexs(&h.to_value().encode()),
+                            c["expect"]["reencodes_to_hex"].as_str().unwrap(), "{name}"
+                        );
+                    }
+                    Err(e) => {
+                        assert!(!ok, "{name}: refused a head the vector accepts: {e:?}");
+                    }
+                }
+            }
+            "pub.listing" => {
+                let got = ducat_core::contact::PubNotice::from_value(
+                    decode(&unhex(c["pub_listing_hex"].as_str().unwrap())).unwrap());
+                let ok = c["expect"]["ok"].as_bool().unwrap_or(true);
+                match got {
+                    Ok(n) => {
+                        assert!(ok, "{name}: decoded a listing the vector refuses");
+                        assert_eq!(
+                            hexs(&n.to_value().encode()),
+                            c["expect"]["reencodes_to_hex"].as_str().unwrap(), "{name}"
+                        );
+                    }
+                    Err(e) => {
+                        assert!(!ok, "{name}: refused a listing the vector accepts: {e:?}");
                         assert_eq!(
                             format!("{:?}", e.code).to_uppercase(),
                             c["expect"]["reject"].as_str().unwrap(), "{name}"

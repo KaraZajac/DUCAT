@@ -1,6 +1,7 @@
 package org.ducatproject.ducat
 
 import android.app.Application
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -33,7 +34,19 @@ object AppVisibility {
 }
 
 class DucatApplication : Application() {
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    // The poller's lanes live here. Without a handler, anything one of them
+    // lets slip past its own runCatching reaches the thread's uncaught
+    // handler and takes the process down — a background sweep is not worth
+    // the wallet. Logged with its class so the line still says what died.
+    private val scope = CoroutineScope(
+        SupervisorJob() + Dispatchers.IO + CoroutineExceptionHandler { _, e ->
+            DucatLog.e("App", "uncaught: ${e.javaClass.simpleName}: ${e.message}")
+        },
+    )
+
+    /** Set once nodeStart has returned: the node service is only ever put
+     *  up in front of a node that is running. */
+    @Volatile private var nodeUp = false
 
     // So the app context — the one background notifications and the node service
     // format their text against — speaks the user's chosen language too, not
@@ -60,6 +73,18 @@ class DucatApplication : Application() {
             private var started = 0
             override fun onActivityStarted(a: android.app.Activity) {
                 AppVisibility.foreground = ++started > 0
+                // Coming back on screen is the one moment Android lets an
+                // app start a foreground service unconditionally, so it is
+                // where the service is put back if it is not up: the launch
+                // below can run with no screen at all (a sticky restart, a
+                // notification's process) and Android 12+ refuses a
+                // background start — silently, inside that runCatching —
+                // and a timed-out service stands itself down. Idempotent
+                // on a running service. Only once the node is actually up,
+                // for the same reason the launch waits.
+                if (started == 1 && nodeUp) {
+                    runCatching { NodeService.start(this@DucatApplication) }
+                }
             }
             override fun onActivityStopped(a: android.app.Activity) {
                 AppVisibility.foreground = --started > 0
@@ -84,6 +109,14 @@ class DucatApplication : Application() {
                 securePrefs(this@DucatApplication, "ducat_contacts")
                 securePrefs(this@DucatApplication, "ducat_ceremonies")
             }
+            // Stamp the single-persona era's contacts with their owner —
+            // idempotent behind its flag, and the flag is cleared by a
+            // restore so an old bundle's contacts get stamped on the next
+            // launch too.
+            runCatching {
+                ContactStore(this@DucatApplication)
+                    .migrateOwners(PersonaStore(this@DucatApplication).personaHex())
+            }
             // Tried and measured on the emulator: UDP-on reads but its set
             // fanout dies inside QEMU user-net; UDP-off gets zero peers at
             // all. SLIRP cannot carry a Veilid node either way, so the flag
@@ -95,6 +128,7 @@ class DucatApplication : Application() {
             // meant noticing the *absence* of lines. The poller retries (see
             // REVIVE_EVERY_MS); this is how anyone finds out it had to.
             runCatching { nodeStart("${filesDir.absolutePath}/veilid", udp = true) }
+                .onSuccess { nodeUp = true }
                 .onFailure {
                     DucatLog.w("App", "node start: ${it.javaClass.simpleName}: ${it.message}")
                 }

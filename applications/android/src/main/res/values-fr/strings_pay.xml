@@ -11,6 +11,8 @@
     <string name="pay_address_placeholder">5… ou 7…</string>
     <string name="pay_continue">Continuer</string>
     <string name="pay_not_monero_address">Ça ne ressemble pas à une adresse Monero.</string>
+    <string name="pay_scan_unknown_card">Cette carte n\'appartient encore à aucun de vos contacts. Ajoutez d\'abord la personne depuis Discussions, puis payez.</string>
+    <string name="pay_scan_not_payable">Ce code n\'est ni une adresse Monero ni une carte DUCAT.</string>
 
     <!-- Pay.kt — amount step -->
     <string name="pay_back">Retour</string>
@@ -62,12 +64,13 @@
     <string name="pay_fee_unknown">inconnus pour l’instant</string>
     <string name="pay_fee_unknown_confirm">Les frais n’ont pas pu être estimés pour l’instant. La transaction paiera ce qu’elle coûte au moment de sa construction.</string>
     <string name="pay_node_no_answer">Le nœud Monero n’a pas répondu à temps. Rien n’a été envoyé. Réessayez : l’application prendra un autre nœud.</string>
+    <string name="pay_send_interrupted">L’application s’est fermée en plein paiement. Vérifiez le relevé avant de payer à nouveau.</string>
     <string name="pay_not_enough">Fonds débloqués insuffisants : vous avez %1$s et il en faut %2$s avec les frais de réseau.</string>
     <string name="pay_offline">Pas encore connecté — ce téléphone n\'a pas fini de rejoindre le réseau. Rien n\'a été envoyé ; réessayez dans un instant.</string>
     <string name="pay_node_unreachable">Aucun nœud Monero n\'a répondu. Rien n\'a été envoyé — vérifiez votre connexion et réessayez.</string>
     <string name="board_unverified_note">Aucun nœud Monero n’est joignable : ce qui s’affiche ici n’a pas pu être vérifié contre la chaîne. C’est toujours signé et payé — traitez-le simplement avec la prudence due à un tableau non vérifié.</string>
     <string name="board_needs_a_block">Aucun nœud Monero joignable. Ce qui va sur un tableau est estampillé sur un bloc récent : cela ne peut donc pas encore être publié — vérifiez votre connexion et réessayez.</string>
-    <string name="pay_sending_why">Construction de la transaction. Cela prend environ une minute : le portefeuille rassemble les leurres qui cachent quelles pièces sont les vôtres. Vous pouvez quitter cet écran, cela continue.</string>
+    <string name="pay_sending_why">Construction de la transaction. Cela prend environ une minute : le portefeuille rassemble les leurres qui cachent quelles pièces sont les vôtres. Passer à une autre application ne l’arrête pas.</string>
     <string name="pay_sending_to">à %1$s</string>
     <string name="claim_own_card">Cette carte est la vôtre — elle appartient à cet appareil.</string>
     <string name="pay_already_paid">Vous avez déjà payé dans ce séquestre. Votre argent y est ; rien n\'a été envoyé de nouveau.</string>
@@ -78,4 +81,6 @@
     <string name="pay_repeat_monthly">Mensuelle</string>
     <string name="pay_recur_notify">Facture récurrente envoyée — %1$s</string>
     <string name="pay_donation_hint">Ceci est un don — votre reçu arrivera dans cette conversation dès réception, et votre relevé le classera dans Dons.</string>
+    <string name="pay_relay_unconfirmed">Aucun nœud Monero n’a confirmé avoir pris le paiement. Il peut quand même passer : les billets utilisés restent réservés jusqu’à ce que la chaîne tranche. Vérifiez le relevé avant de payer à nouveau.</string>
+    <string name="pay_request_kept">Demande conservée : elle partira toute seule dès que le réseau sera de retour.</string>
 </resources>

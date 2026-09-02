@@ -13,4 +13,6 @@
     <!-- Received attachments, cached by ciphertext hash, so "open with"
          can hand one to a viewer per-grant. -->
     <files-path name="att" path="att/" />
+    <!-- Fetched issues (§16.20): the Library's Open hands one to a viewer. -->
+    <files-path name="publications" path="publications/" />
 </paths>

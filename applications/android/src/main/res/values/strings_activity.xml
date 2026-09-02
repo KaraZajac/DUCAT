@@ -6,6 +6,8 @@
     <!-- Pending requests -->
     <string name="activity_awaiting">Awaiting</string>
     <string name="activity_search_none">Nothing here matches “%1$s”.</string>
+    <string name="activity_period_none">Nothing in this period. Choose a longer one above to see earlier activity.</string>
+    <string name="activity_filter_none">Nothing of that kind yet. Tap the highlighted tile again to show everything.</string>
     <string name="activity_search_clear">Clear the search</string>
     <string name="activity_search_hint">Search receipts, names, notes</string>
     <string name="activity_they_ask">%1$s asks for</string>
@@ -43,4 +45,23 @@
     <string name="activity_donations_filter">Donations</string>
     <string name="activity_donation_chip">Donation</string>
     <string name="activity_donated_total">%1$s donated</string>
+    <string name="activity_period_today">Today</string>
+    <string name="activity_period_7d">7 days</string>
+    <string name="activity_period_month">This month</string>
+    <string name="activity_period_all">All</string>
+    <string name="activity_sum_in">In</string>
+    <string name="activity_sum_out">Out</string>
+    <string name="activity_sum_net">Net</string>
+    <string name="activity_sum_fees">Fees</string>
+    <string name="activity_business">Business</string>
+    <string name="activity_sales">Sales</string>
+    <string name="activity_tax_collected">Tax collected</string>
+    <string name="activity_outstanding">Outstanding</string>
+    <string name="activity_export_csv">CSV file</string>
+    <string name="activity_export_json">JSON file</string>
+    <string name="activity_door_pos">till</string>
+    <string name="activity_door_bar">tabs</string>
+    <string name="activity_door_taxi">fares</string>
+    <string name="activity_door_donate">jar</string>
+    <string name="activity_door_pub">issues</string>
 </resources>

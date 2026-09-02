@@ -123,4 +123,14 @@
     <string name="rent_in_unit">en %1$s</string>
     <string name="board_chip_count">%1$s %2$d</string>
     <string name="rent_size_m2">%1$d m²</string>
+    <string name="rent_waiting_board">Pas encore sur un tableau : nouvel essai automatique</string>
+    <plurals name="rent_seats_n">
+        <item quantity="one">%1$d place</item>
+        <item quantity="other">%1$d places</item>
+    </plurals>
+    <plurals name="rent_rooms_n">
+        <item quantity="one">%1$d chambre</item>
+        <item quantity="other">%1$d chambres</item>
+    </plurals>
+    <string name="rent_sleeps_n">pour %1$d personnes</string>
 </resources>

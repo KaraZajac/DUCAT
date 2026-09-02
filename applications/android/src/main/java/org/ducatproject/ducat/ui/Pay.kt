@@ -29,10 +29,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.*
+import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.R
@@ -106,8 +110,15 @@ fun PaySheet(
     // What a code scanned *here* asked for. The sheet's own parameter covers a
     // scan made from the codes screen; this covers the scanner inside it, and
     // without it the amount survived one route into this screen and not the
-    // other.
-    var scannedPxmr by remember { mutableStateOf(0L) }
+    // other. Saveable like the target above it: a bill scanned in here and
+    // then rotated came back as a bare address with the amount editable —
+    // the billed mode and the tip gone, and a sum the till could never
+    // match to its order one keystroke away.
+    var scannedPxmr by rememberSaveable { mutableStateOf(0L) }
+    // Why the last scan chose nothing. A card that is not yet a contact, or
+    // a code that is neither, used to land back on the chooser in silence —
+    // the same screen, no word for why.
+    var scanError by rememberSaveable { mutableStateOf<Int?>(null) }
 
     if (scanning) {
         QrScanner(
@@ -116,6 +127,11 @@ fun PaySheet(
                 scanning = false
                 target = readScan(context, raw)
                 scannedPxmr = moneroUri(raw)?.second ?: 0L
+                scanError = when {
+                    target != null -> null
+                    raw.trim().startsWith("ducat:card/") -> R.string.pay_scan_unknown_card
+                    else -> R.string.pay_scan_not_payable
+                }
             },
             onDismiss = { scanning = false },
         )
@@ -150,6 +166,7 @@ fun PaySheet(
                 null -> ChooseTarget(
                     onPick = { t, amt -> target = t; scannedPxmr = amt },
                     onScan = { scanning = true },
+                    scanError = scanError,
                     onClose = onDismiss,
                 )
                 else -> AmountStep(
@@ -206,11 +223,17 @@ internal fun moneroUri(raw: String): Pair<String, Long>? {
     val q = t.substringAfter("?", "")
     // Only tx_amount. `amount` is not a Monero URI field, and guessing at one
     // would be inventing a request nobody made.
+    // The decode is inside the catch with the parse: this runs in
+    // composition on every keystroke of the address field, and a stray "%"
+    // in a pasted amount ("1%") made URLDecoder throw and the app die.
     val amount = q.split('&')
         .firstOrNull { it.startsWith("tx_amount=") }
         ?.removePrefix("tx_amount=")
-        ?.let { java.net.URLDecoder.decode(it, "UTF-8") }
-        ?.let { v -> runCatching { Amounts.toPxmr(java.math.BigDecimal(v)) }.getOrNull() }
+        ?.let { v ->
+            runCatching {
+                Amounts.toPxmr(java.math.BigDecimal(java.net.URLDecoder.decode(v, "UTF-8")))
+            }.getOrNull()
+        }
         ?.takeIf { it > 0 }
         ?: 0L
     return addr to amount
@@ -233,14 +256,35 @@ private fun readScan(context: android.content.Context, raw: String): PayTarget? 
 private fun ChooseTarget(
     onPick: (PayTarget, Long) -> Unit,
     onScan: () -> Unit,
+    /** What the last scan came to, when it came to nothing. */
+    scanError: Int? = null,
     onClose: () -> Unit,
 ) {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
     // Alphabetical: a picker is looked *up*, not scrolled through in arrival
     // order — recency belongs to the chat list, names belong here.
+    //
+    // And the worn profile's contacts only, like every other people list —
+    // this picker was the one door that showed all compartments merged, so
+    // the shop's till could offer your friends and your friends' screen your
+    // customers. Paying across a wall is still one gesture: switch profiles
+    // in the drawer, which is the same deliberate act it is everywhere else.
+    val personas = remember { PersonaStore(context) }
+    val scoped = remember(version) { personas.all().size > 1 }
+    val wornPersona = remember(version) {
+        personas.all().firstOrNull { it.hex == personas.worn() }
+    }
+    val wornName = wornPersona?.let { personaLabel(it) }
     val contacts = remember(version) {
-        ContactStore(context).all().sortedBy { it.displayName().lowercase() }
+        val all = ContactStore(context).all()
+        val mine = if (personas.all().size > 1) {
+            val worn = personas.worn()
+            all.filter { personas.ownerHexOf(it) == worn }
+        } else {
+            all
+        }
+        mine.sortedBy { it.displayName().lowercase() }
     }
     val ambiguous = remember(version) { ContactStore(context).ambiguous() }
     var address by rememberSaveable { mutableStateOf("") }
@@ -265,10 +309,26 @@ private fun ChooseTarget(
             Spacer(Modifier.width(8.dp))
             Text(stringResource(R.string.pay_scan_a_code))
         }
+        scanError?.let {
+            Spacer(Modifier.height(6.dp))
+            Text(
+                stringResource(it),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
 
         if (contacts.isNotEmpty()) {
             Spacer(Modifier.height(16.dp))
             Text(stringResource(R.string.pay_your_contacts), style = MaterialTheme.typography.labelLarge)
+            if (scoped && wornName != null) {
+                Text(
+                    stringResource(R.string.personas_contacts_scope, wornName),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                Spacer(Modifier.height(2.dp))
+            }
             Text(
                 stringResource(R.string.pay_contact_vs_address),
                 style = MaterialTheme.typography.bodySmall,
@@ -363,13 +423,37 @@ private fun AmountStep(
     onDone: () -> Unit,
 ) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     val version by ContactStore.changes.collectAsState()
-    val b = remember(version) { Wallet.balances(context) }
+    // The contact as the store has it now, not as it was when the sheet
+    // opened. The target is a saved snapshot, and everything below that
+    // decides whether a payment can go — their address, a held one — read
+    // it: a request of theirs landing with their address while this screen
+    // sat on it left Send disabled over "they have not shared an address"
+    // until the sheet was reopened. The poll had it; the snapshot never
+    // would. A contact forgotten under the screen keeps the snapshot: the
+    // address on it is still theirs.
+    @Suppress("NAME_SHADOWING") val target = remember(target, version) {
+        (target as? PayTarget.ToContact)?.let { t ->
+            ContactStore(context).all().firstOrNull { it.personaHex == t.contact.personaHex }
+                ?.let { PayTarget.ToContact(it) }
+        } ?: target
+    }
+    // No balances read here: nothing on this step used it, and it decrypted
+    // every wallet output on the main thread, in composition, on every
+    // store bump — a hitch on the amount screen that grew with the wallet.
+    // The quote below asks the wallet what it needs, on IO.
     var fiatEntry by rememberSaveable { mutableStateOf(Amounts.enterFiat(context)) }
     val rate = remember(version) { RateStore(context).cached()?.first }
     val cur = remember { Amounts.currency(context) }
-    var priority by remember { mutableIntStateOf(1) }
+    // Saveable: the speed prices the fee, and a rotation that reset it to
+    // Normal under a "Slow" the person had chosen changed what the send
+    // would cost without a word.
+    var priority by rememberSaveable { mutableIntStateOf(1) }
+    // Whether typed money is the local currency *right now*: the entry
+    // preference, and a rate to convert at. The two came apart in places —
+    // a tip labelled in dollars was computed as nothing when the rate was
+    // missing, while the amount beside it fell back to XMR.
+    val fiatLive = fiatEntry && rate != null && rate > 0
 
     // A prefilled amount is a *bill* — somebody else's number, answered rather
     // than edited. What stays yours is the tip. Editing the bill down and
@@ -381,12 +465,19 @@ private fun AmountStep(
         mutableStateOf(if (prefillAmountPxmr > 0) formatXmr(prefillAmountPxmr) else "")
     }
     var note by rememberSaveable { mutableStateOf("") }
-    var busy by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }
-    var done by remember { mutableStateOf<String?>(null) }
+    // Saveable, all four: a rotation recreates the activity, and a payment
+    // that was on its way came back as an empty form with Send enabled over
+    // a balance that had just dropped. The send itself outlives the screen
+    // in PaySends; these are what the returning screen shows about it.
+    var busy by rememberSaveable { mutableStateOf(false) }
+    var error by rememberSaveable { mutableStateOf<String?>(null) }
+    var done by rememberSaveable { mutableStateOf<String?>(null) }
     // The ceremony: a completed *send* takes the screen (Ceremony.kt). A
     // request keeps the quiet text — asking is not a crescendo.
-    var paidPxmr by remember { mutableStateOf<Long?>(null) }
+    var paidPxmr by rememberSaveable { mutableStateOf<Long?>(null) }
+    // The send in flight, if any — "pay:…" or "ask:…" — so the screen that
+    // comes back after a rotation collects what the one that left started.
+    var sendId by rememberSaveable { mutableStateOf<String?>(null) }
     /**
      * Asking for money, or sending it.
      *
@@ -400,7 +491,7 @@ private fun AmountStep(
      * The toggle makes the mode the first decision rather than the last, and
      * everything that only applies to a spend disappears when it does not.
      */
-    var asking by remember { mutableStateOf(false) }
+    var asking by rememberSaveable { mutableStateOf(false) }
     // Asking needs a thread to ask in. A bare address has no way back.
     val canAsk = target is PayTarget.ToContact
     var confirming by remember { mutableStateOf(false) }
@@ -427,16 +518,36 @@ private fun AmountStep(
         }
     }
 
+    // The other end of PaySends: whichever instance of this screen is alive
+    // when the send finishes shows the result. Nothing under the id means
+    // the process died with the send in it — the chain has the answer
+    // (refreshSpent), the statement shows it, and the person is told to
+    // look there rather than pay again.
+    LaunchedEffect(sendId) {
+        val id = sendId ?: return@LaunchedEffect
+        val r = PaySends.await(id)
+        when {
+            r == null -> error = context.getString(R.string.pay_send_interrupted)
+            // Done, in the sense that matters here: the bill is in the thread
+            // and nothing on this screen should offer to write it again.
+            r.exceptionOrNull() is RequestKept -> done = context.getString(R.string.pay_request_kept)
+            r.isFailure -> error = sendFailure(context, r.exceptionOrNull()!!)
+            id.startsWith("pay:") -> paidPxmr = r.getOrThrow()
+            else -> done = context.getString(R.string.pay_request_sent)
+        }
+        busy = false
+        PaySends.forget(id)
+        // Last: this is the effect's own key, and clearing it restarts it.
+        sendId = null
+    }
+
     // And nothing leaves it while a payment is halfway out.
     //
     // Back steps the sheet back to the chooser or closes it outright, either
-    // of which unmounts this screen — and unmounting cancels the scope
-    // `doSend` is running in. Not the transaction: by then it is with a node
-    // and cannot be taken back. What dies with the scope is everything after
-    // it — the §16.13 kind-2 notice that names the txid, which is the only
-    // way their wallet can put a sender on the output that just arrived, and
-    // the arm that would have shown the error if there had been one. Money
-    // gone, nothing in the thread, nothing on screen to say so.
+    // of which unmounts this screen. The send itself no longer dies with it
+    // (PaySends), but the screen that would show its result does — the paid
+    // splash, or the error if there was one — and the person is left with
+    // money gone and nothing on screen to say so.
     //
     // The few seconds this covers have a spinner on them and nothing else, so
     // there is no step to take and swallowing the press costs nobody a thing.
@@ -449,17 +560,17 @@ private fun AmountStep(
     // Sticky: once someone has asked for the maximum, changing the speed
     // changes the fee, and the amount has to follow or the screen is showing a
     // number that is no longer the maximum it just promised.
-    var maxLocked by remember { mutableStateOf(false) }
+    var maxLocked by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(version, priority) {
         maxPxmr = withContext(Dispatchers.IO) { Wallet.maxSendable(context, priority) }
     }
-    LaunchedEffect(maxPxmr, maxLocked, fiatEntry) {
+    LaunchedEffect(maxPxmr, maxLocked, fiatLive) {
         if (maxLocked && maxPxmr > 0) {
             // This text is re-parsed as the amount, so it is pinned to the
             // dot the parser expects rather than the locale's separator, and
             // floored to the cent — a rounded-up cent would convert back to
             // more than the maximum just promised.
-            typed = if (fiatEntry && rate != null) {
+            typed = if (fiatLive) {
                 "%.2f".format(
                     java.util.Locale.US,
                     kotlin.math.floor(maxPxmr / 1e12 * rate * 100) / 100,
@@ -468,20 +579,24 @@ private fun AmountStep(
         }
     }
 
-    val tipPxmr = remember(tipTyped, fiatEntry, rate) {
+    val tipPxmr = remember(tipTyped, fiatLive, rate, target) {
+        // Only a contact can be told about a tip; see the field below.
+        if (target !is PayTarget.ToContact) return@remember 0L
         val v = moneyText(tipTyped).toBigDecimalOrNull() ?: return@remember 0L
-        val xmr = if (fiatEntry && rate != null && rate > 0) {
-            v.divide(BigDecimal.valueOf(rate), 12, java.math.RoundingMode.DOWN)
-        } else if (fiatEntry) return@remember 0L else v
+        val xmr = if (fiatLive) {
+            v.divide(BigDecimal.valueOf(rate!!), 12, java.math.RoundingMode.DOWN)
+        } else v
         Amounts.toPxmr(xmr)?.coerceAtLeast(0) ?: 0L
     }
-    val pxmr = remember(typed, fiatEntry, rate, tipPxmr, billed) {
+    val pxmr = remember(typed, fiatLive, rate, tipPxmr, billed) {
         if (billed) return@remember prefillAmountPxmr + tipPxmr
         val v = moneyText(typed).toBigDecimalOrNull() ?: return@remember null
-        val xmr = if (fiatEntry && rate != null && rate > 0) {
-            v.divide(BigDecimal.valueOf(rate), 12, java.math.RoundingMode.DOWN)
+        val xmr = if (fiatLive) {
+            v.divide(BigDecimal.valueOf(rate!!), 12, java.math.RoundingMode.DOWN)
         } else v
-        xmr.multiply(BigDecimal(1_000_000_000_000L)).toLong().takeIf { it > 0 }
+        // toPxmr, not toLong: toLong keeps the low 64 bits of an overflow,
+        // and an absurd figure typed by mistake came out as a plausible one.
+        Amounts.toPxmr(xmr)?.takeIf { it > 0 }
     }
 
     var quote by remember { mutableStateOf<Quote?>(null) }
@@ -590,23 +705,34 @@ private fun AmountStep(
                 Text(it, style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Spacer(Modifier.height(14.dp))
-            OutlinedTextField(
-                value = tipTyped,
-                onValueChange = { tipTyped = it.filter { c -> Amounts.isNumberChar(c) } },
-                label = { Text(stringResource(R.string.pay_add_tip, if (fiatEntry) cur else "XMR")) },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                modifier = Modifier.fillMaxWidth(),
-            )
-            if (tipPxmr > 0) {
-                Spacer(Modifier.height(6.dp))
-                val t = Amounts.show(context, pxmr ?: 0L)
-                Text(
-                    stringResource(R.string.pay_total_with_tip, t.primary) +
-                        (t.secondary?.let { " · $it" } ?: ""),
-                    style = MaterialTheme.typography.titleMedium,
+            // A tip only where the payee can be told about it. On a bill
+            // from a contact the PAYMENT_SENT notice names what was sent,
+            // and their reconciler matches the bill plus the tip by it. A
+            // `monero:` code names an address and an exact amount and
+            // nothing else can reach it: the kiosk attributes an order by
+            // that amount down to its sub-cent tag (moneroUri), so a tipped
+            // payment landed in the wallet and the order sat at Awaiting
+            // for good — the very hazard that docstring describes, offered
+            // as a field.
+            if (target is PayTarget.ToContact) {
+                Spacer(Modifier.height(14.dp))
+                OutlinedTextField(
+                    value = tipTyped,
+                    onValueChange = { tipTyped = it.filter { c -> Amounts.isNumberChar(c) } },
+                    label = { Text(stringResource(R.string.pay_add_tip, if (fiatLive) cur else "XMR")) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.fillMaxWidth(),
                 )
+                if (tipPxmr > 0) {
+                    Spacer(Modifier.height(6.dp))
+                    val t = Amounts.show(context, pxmr ?: 0L)
+                    Text(
+                        stringResource(R.string.pay_total_with_tip, t.primary) +
+                            (t.secondary?.let { " · $it" } ?: ""),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                }
             }
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -636,7 +762,7 @@ private fun AmountStep(
                     typed = ""
                     maxLocked = wasMax
                 },
-                    label = { Text(if (fiatEntry) cur else "XMR") },
+                    label = { Text(if (fiatLive) cur else "XMR") },
                     trailingIcon = { Icon(Icons.Filled.SwapVert, null, Modifier.size(16.dp)) },
                 )
             } else if (!billed) {
@@ -657,7 +783,7 @@ private fun AmountStep(
         // on a bill with no tip it sat directly under the first one.
         if (!billed) pxmr?.let {
             Text(
-                if (fiatEntry) "${formatXmr(it)} XMR"
+                if (fiatLive) "${formatXmr(it)} XMR"
                 else Amounts.show(context, it).secondary.orEmpty(),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -669,7 +795,7 @@ private fun AmountStep(
             Text(
                 stringResource(
                     R.string.pay_asking_explainer,
-                    (target as? PayTarget.ToContact)?.contact?.displayName()
+                    (target as? PayTarget.ToContact)?.contact?.displayName()?.let(::isolate)
                         ?: stringResource(R.string.pay_them),
                 ),
                 style = MaterialTheme.typography.bodySmall,
@@ -678,7 +804,7 @@ private fun AmountStep(
         } else {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                stringResource(R.string.pay_up_to_after_fees, inUnit(context, maxPxmr, fiatEntry, rate, cur)),
+                stringResource(R.string.pay_up_to_after_fees, inUnit(context, maxPxmr, fiatLive, rate, cur)),
                 style = MaterialTheme.typography.bodySmall,
                 color = if (overMax) MaterialTheme.colorScheme.error
                         else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -873,35 +999,57 @@ private fun AmountStep(
                     onClick = {
                         val amt = pxmr ?: return@Button
                         busy = true; error = null
-                        scope.launch {
-                            val r = withContext(Dispatchers.IO) {
-                                runCatching {
-                                    Mailbox.send(
-                                        context, target.contact,
-                                        note.ifBlank { context.getString(R.string.pay_payment_request) },
-                                        PersonaStore(context).personaHex(),
-                                        kind = 1, amountPxmr = amt,
-                                        payto = WalletStore(context)
-                                            .addressFor(target.contact.personaHex),
-                                    )
-                                }
+                        // Read now, not inside the job: state belongs to
+                        // this instance of the screen, and the job outlives it.
+                        val memo = note
+                        val cadence = repeat
+                        val id = "ask:" + java.util.UUID.randomUUID()
+                        // The application, not this screen's activity: the
+                        // job sits in PaySends until a screen collects it,
+                        // and one that is never reopened would hold a dead
+                        // activity for the life of the process.
+                        val app = context.applicationContext
+                        PaySends.start(id) {
+                            val hex = target.contact.personaHex
+                            // The counter before, from the store rather than
+                            // this screen's snapshot: send re-reads it too,
+                            // and a snapshot behind by a message would call
+                            // that message the request.
+                            val seqBefore = ContactStore(app).all()
+                                .firstOrNull { it.personaHex == hex }?.outSeq ?: target.contact.outSeq
+                            val kept = try {
+                                Mailbox.send(
+                                    app, target.contact,
+                                    memo.ifBlank { app.getString(R.string.pay_payment_request) },
+                                    kind = 1, amountPxmr = amt,
+                                    payto = WalletStore(app).addressFor(hex),
+                                )
+                                false
+                            } catch (e: Exception) {
+                                // Committed under the throw? Then it is a
+                                // late slot, not a failure — see RequestKept.
+                                val row = ContactStore(app).thread(hex).lastOrNull { it.outgoing }
+                                    ?.takeIf { it.seq >= seqBefore && it.kind == 1 && !it.delivered }
+                                    ?: throw e
+                                DucatLog.w("Pay", "request seq ${row.seq} kept for the poll: ${e.message}")
+                                true
                             }
                             // Registered only after the first request truly
                             // went: a schedule whose opening bill failed
                             // would start the cadence on a debt nobody has
-                            // heard of.
-                            if (r.isSuccess && repeat != 0) {
-                                withContext(Dispatchers.IO) {
+                            // heard of. A kept one will be heard of.
+                            if (cadence != 0) {
+                                runCatching {
                                     Recurring.add(
-                                        context, target.contact.personaHex,
-                                        amt, note, monthly = repeat == 2,
+                                        app, hex,
+                                        amt, memo, monthly = cadence == 2,
                                     )
-                                }
+                                }.onFailure { DucatLog.w("Pay", "asked, but not scheduled: ${it.message}") }
                             }
-                            busy = false
-                            r.onSuccess { done = context.getString(R.string.pay_request_sent) }
-                                .onFailure { error = sendFailure(context, it) }
+                            if (kept) throw RequestKept()
+                            amt
                         }
+                        sendId = id
                     },
                     // Asking for more than you hold is perfectly reasonable, so
                     // a request is never blocked by the balance. It is blocked
@@ -946,7 +1094,7 @@ private fun AmountStep(
         ) {
             Spacer(Modifier.height(8.dp))
             Text(
-                stringResource(R.string.pay_no_address_hint, target.contact.displayName()),
+                stringResource(R.string.pay_no_address_hint, isolate(target.contact.displayName())),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -958,7 +1106,10 @@ private fun AmountStep(
         // The minute the money is in flight, on the whole screen rather than
         // inside a button. The paid splash is this same object resolving, so
         // one becomes the other without the eye losing what it was following.
-        if (busy && pxmr != null && paidPxmr == null) {
+        // A request is busy too — the DHT write — and it wore this splash:
+        // "Building the transaction… gathering the decoys", undismissable,
+        // over money that was not leaving. Asking keeps to its button.
+        if (busy && !asking && pxmr != null && paidPxmr == null) {
             SendingSplash(
                 amountPxmr = pxmr,
                 toName = (target as? PayTarget.ToContact)?.contact?.displayName(),
@@ -989,79 +1140,79 @@ private fun AmountStep(
         // is the owner, and this is the moment that is true.
         val doSend: () -> Unit = doSend@{
             val amount = pxmr ?: return@doSend
-                busy = true; error = null
-                scope.launch {
-                    val r = withContext(Dispatchers.IO) {
-                        runCatching {
-                            // A demoted node leaves lastGood empty; the user's
-                            // retry deserves a fresh probe, not "no node".
-                            val node = NodeStore(context).lastGood()
-                                ?: runCatching {
-                                    uniffi.ducat_mobile.moneroPickNode(
-                                        uniffi.ducat_mobile.moneroDefaultNodes(
-                                            NodeStore(context).ownUrl()),
-                                        "stagenet", 8000u,
-                                    ).also {
-                                        NodeStore(context).rememberLastGood(it.url)
-                                    }.url
-                                }.getOrNull()
-                                ?: throw IllegalStateException(
-                                    context.getString(R.string.pay_no_node)
-                                )
-                            val to = dest
-                                ?: throw IllegalStateException(
-                                    context.getString(R.string.pay_no_address_error)
-                                )
-                            val contact = (target as? PayTarget.ToContact)?.contact
-                            // A donation is an unprompted payment into a
-                            // thread born from a `donate` card: not answering
-                            // a bill, to a contact whose card said donate.
-                            // The flag is presentation — it makes the
-                            // statement's tax-time filter true, nothing more.
-                            val isDonation = answersSeq == null &&
-                                contact?.cardPurpose == "donate"
-                            val res = Wallet.send(
-                                context, node, to, amount,
-                                contactHex = contact?.personaHex,
-                                note = note.ifBlank { null },
-                                priority = priority,
-                                donation = isDonation,
-                            )
-                            // Tell them, in the thread. §16.13's notice is
-                            // advisory — they verify by finding the output — but
-                            // without it a payment lands with no explanation and
-                            // neither side has a record of what it was for.
-                            contact?.let { c ->
-                                runCatching {
-                                    Mailbox.send(
-                                        context, c,
-                                        note.ifBlank { context.getString(R.string.pay_payment) },
-                                        PersonaStore(context).personaHex(),
-                                        kind = 2, amountPxmr = amount,
-                                        // Which request this settles. `reOwn`
-                                        // is false: the bill is in *their*
-                                        // outbox, and we are answering it.
-                                        reSeq = answersSeq, reOwn = false,
-                                        // Names the transaction, which is what
-                                        // lets their wallet put our name on the
-                                        // output when it arrives. Monero carries
-                                        // no sender; this is the only channel.
-                                        txidHex = res.txidHex,
-                                    )
-                                }.onFailure {
-                                    DucatLog.w(
-                                        "Pay",
-                                        "sent, but could not tell them: ${it.message}",
-                                    )
-                                }
-                            }
-                            res
-                        }
+            busy = true; error = null
+            // Read now, not inside the job: state belongs to this instance
+            // of the screen, and the job outlives it (PaySends).
+            val memo = note
+            val speed = priority
+            val contact = (target as? PayTarget.ToContact)?.contact
+            // A donation is an unprompted payment into a thread born from a
+            // `donate` card: not answering a bill, to a contact whose card
+            // said donate. The flag is presentation — it makes the
+            // statement's tax-time filter true, nothing more.
+            val isDonation = answersSeq == null && contact?.cardPurpose == "donate"
+            val id = "pay:" + java.util.UUID.randomUUID()
+            // The application, not this screen's activity — see the ask
+            // button: the job outlives the screen, and may outlive every
+            // screen.
+            val app = context.applicationContext
+            PaySends.start(id) {
+                // A demoted node leaves lastGood empty; the user's retry
+                // deserves a fresh probe, not "no node".
+                val node = NodeStore(app).lastGood()
+                    ?: runCatching {
+                        uniffi.ducat_mobile.moneroPickNode(
+                            uniffi.ducat_mobile.moneroDefaultNodes(
+                                NodeStore(app).ownUrl()),
+                            "stagenet", 8000u,
+                        ).also {
+                            NodeStore(app).rememberLastGood(it.url)
+                        }.url
+                    }.getOrNull()
+                    ?: throw IllegalStateException(
+                        app.getString(R.string.pay_no_node)
+                    )
+                val to = dest
+                    ?: throw IllegalStateException(
+                        app.getString(R.string.pay_no_address_error)
+                    )
+                val res = Wallet.send(
+                    app, node, to, amount,
+                    contactHex = contact?.personaHex,
+                    note = memo.ifBlank { null },
+                    priority = speed,
+                    donation = isDonation,
+                )
+                // Tell them, in the thread. §16.13's notice is advisory —
+                // they verify by finding the output — but without it a
+                // payment lands with no explanation and neither side has a
+                // record of what it was for.
+                contact?.let { c ->
+                    runCatching {
+                        Mailbox.send(
+                            app, c,
+                            memo.ifBlank { app.getString(R.string.pay_payment) },
+                            kind = 2, amountPxmr = amount,
+                            // Which request this settles. `reOwn` is false:
+                            // the bill is in *their* outbox, and we are
+                            // answering it.
+                            reSeq = answersSeq, reOwn = false,
+                            // Names the transaction, which is what lets their
+                            // wallet put our name on the output when it
+                            // arrives. Monero carries no sender; this is the
+                            // only channel.
+                            txidHex = res.txidHex,
+                        )
+                    }.onFailure {
+                        DucatLog.w(
+                            "Pay",
+                            "sent, but could not tell them: ${it.message}",
+                        )
                     }
-                    busy = false
-                    r.onSuccess { paidPxmr = amount }
-                        .onFailure { error = sendFailure(context, it) }
                 }
+                amount
+            }
+            sendId = id
         }
     // Outside the confirm, because it outlives it.
     //
@@ -1164,7 +1315,7 @@ private fun ConfirmSend(
         },
         text = {
             Column {
-                contactName?.let { Text(stringResource(R.string.pay_to, it), style = MaterialTheme.typography.bodyMedium) }
+                contactName?.let { Text(stringResource(R.string.pay_to, isolate(it)), style = MaterialTheme.typography.bodyMedium) }
                 destination?.let {
                     Spacer(Modifier.height(6.dp))
                     Text(it, fontFamily = FontFamily.Monospace,
@@ -1209,10 +1360,59 @@ private fun ConfirmSend(
  * to do with the wallet, the amount, or the address, and nothing a person can
  * act on as written. The app has already demoted that node by the time this
  * runs, so the useful thing to say is: try again, it will use another.
+ *
+ * Through [moneyFailure], which knows the typed ones — not enough with the
+ * fee, no keys yet, our own node not up — and the one shape of node trouble
+ * that is *not* "nothing was sent" (`Wallet.relayUnconfirmed`). This used to
+ * test node trouble alone and hand everything else the engine's sentence,
+ * so `NotEnough` reached the screen as its English constructor message with
+ * both numbers in XMR, and a request from a phone still joining read
+ * "TryAgain". The engine's own sentence stays the last resort: "could not
+ * build the transaction: …" is something to paste into a bug report, and
+ * "could not send" is not.
  */
-private fun sendFailure(context: android.content.Context, t: Throwable): String = when {
-    Wallet.isNodeTrouble(t) -> context.getString(R.string.pay_node_no_answer)
-    else -> t.saidWhy() ?: context.getString(R.string.pay_could_not_send)
+private fun sendFailure(context: android.content.Context, t: Throwable): String =
+    moneyFailure(context, t, R.string.pay_could_not_send) { t.saidWhy() }
+
+/**
+ * A request the network refused after the thread had already kept it.
+ *
+ * [Mailbox.send] commits the row and the counters before it writes the slot,
+ * so a node that was not attached leaves the bill in the thread, undelivered,
+ * for the poll to carry (`Mailbox.flushPending`). The screen read the throw
+ * as "could not send", cleared `busy` and handed Request back — and the
+ * second tap wrote a second bill behind the first, which the poll then
+ * delivered too. Two identical bills in the customer's thread, a minute
+ * apart, from one person pressing a button that said it had not worked.
+ */
+private class RequestKept : Exception("request kept for the poll")
+
+/**
+ * Sends in flight, outliving the screen that started them.
+ *
+ * `rememberCoroutineScope` dies with the composable, and a rotation recreates
+ * the activity. A payment launched from that scope kept running — the send
+ * is blocking and never sees the cancel — but everything after it was gone:
+ * the paid splash, the error, the `busy` that kept Send disabled. The money
+ * left, the note was consumed, and the screen came back as an empty form
+ * over a balance that had just dropped. Keyed by an id the screen saves, so
+ * the instance that comes back finds the job the one that left started and
+ * takes its result. Process-wide and never cancelled: the job is the
+ * payment, and the result is what the screen owes the person.
+ */
+private object PaySends {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val jobs = java.util.concurrent.ConcurrentHashMap<String, Deferred<Result<Long>>>()
+
+    /** Start one if it is not already running; the body returns the amount. */
+    fun start(id: String, block: () -> Long) {
+        jobs.getOrPut(id) { scope.async { runCatching(block) } }
+    }
+
+    /** Null when nothing runs under that id: the process died with it. */
+    suspend fun await(id: String): Result<Long>? = jobs[id]?.await()
+
+    fun forget(id: String) { jobs.remove(id) }
 }
 
 /** A rate as a person reads it: two decimals, no exponent, whatever the size. */

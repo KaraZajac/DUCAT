@@ -12,6 +12,9 @@
     <string name="ceremony_accept_and_pay">Прийняти й сплатити</string>
     <string name="ceremony_no_address">У цьому запиті немає адреси — спитай, куди надсилати.</string>
     <string name="ceremony_accept_opens_confirm">«Прийняти» відкриває екран підтвердження — ніщо не рушить, доки ти там не схвалиш.</string>
+    <string name="ceremony_bill_withdrawn">%1$s відкликав(ла) цей рахунок — платити нічого.</string>
+    <string name="ceremony_bill_declined">Ви відхилили цей рахунок.</string>
+    <string name="ceremony_bill_paid">Оплачено ✓ — цей рахунок закрито.</string>
 
     <!-- PaidSplash -->
     <string name="ceremony_paid">Сплачено ✓</string>
@@ -28,14 +31,19 @@
     <string name="ceremony_plate">номер %1$s</string>
     <string name="ceremony_accept">Прийняти</string>
     <string name="ceremony_accepting_agrees_fare">Прийняття блокує вартість і вашу заставу на рахунку, який можете відкрити лише ви вдвох.</string>
+    <string name="ceremony_accepting_agrees_fare_nostake">Прийняття блокує вартість на рахунку, який можете відкрити лише ви вдвох. Така мала сума не потребує застави.</string>
     <string name="ceremony_accepting_agrees_fare_arbiter">Прийняття блокує вартість і вашу заставу на рахунку, який відкривається двома ключами з трьох: вашим, їхнім і ключем %1$s, до якого звертаються, лише якщо ви вдвох не змогли домовитися.</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter_nostake">Прийняття блокує вартість на рахунку, який відкривається двома ключами з трьох: вашим, їхнім і ключем %1$s, до якого звертаються, лише якщо ви вдвох не змогли домовитися. Така мала сума не потребує застави.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Поїздку підтверджено</string>
     <string name="ceremony_expecting_you">Внеси заставу в чаті — вони заплатять, щойно вона там буде.</string>
+    <string name="ceremony_expecting_you_nostake">На таку малу суму застави немає — вони заплатять у чаті, і там ти побачиш, коли гроші надійдуть.</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Твоє авто вже їде</string>
     <string name="ceremony_eta_in_chat">Заплати в чаті, щойно з\'явиться їхня застава — час прибуття теж там.</string>
+    <string name="ceremony_eta_in_chat_nostake">Заплати в чаті — час прибуття теж там. Така мала сума не потребує застави.</string>
     <string name="ceremony_stake_note">Ви вносите %2$s: вартість плюс застава %1$s. Водій теж вносить %1$s, і обидві повернуться наприкінці поїздки.</string>
+    <string name="ceremony_asked_you_for">просив(ла) у тебе</string>
 </resources>

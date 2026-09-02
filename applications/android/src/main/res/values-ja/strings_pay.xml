@@ -11,6 +11,8 @@
     <string name="pay_address_placeholder">5…または7…</string>
     <string name="pay_continue">続ける</string>
     <string name="pay_not_monero_address">Moneroアドレスには見えません。</string>
+    <string name="pay_scan_unknown_card">このカードはまだ連絡先にありません。先にチャットから追加してから支払ってください。</string>
+    <string name="pay_scan_not_payable">このコードはMoneroアドレスでもDUCATカードでもありません。</string>
 
     <!-- Pay.kt — amount step -->
     <string name="pay_back">戻る</string>
@@ -62,12 +64,13 @@
     <string name="pay_fee_unknown">いまは分かりません</string>
     <string name="pay_fee_unknown_confirm">いま手数料を見積もれませんでした。取引は組み立て時にかかる分を支払います。</string>
     <string name="pay_node_no_answer">Monero ノードが時間内に応答しませんでした。送金は行われていません。もう一度お試しください。別のノードを使います。</string>
+    <string name="pay_send_interrupted">支払いの途中でアプリが閉じられました。もう一度支払う前に取引明細を確認してください。</string>
     <string name="pay_not_enough">利用可能な残高が足りません — %1$s あり、ネットワーク手数料込みで %2$s 必要です。</string>
     <string name="pay_offline">まだ接続していません — この端末はネットワークへの参加を完了していません。何も送信されていません。少し待ってからもう一度お試しください。</string>
     <string name="pay_node_unreachable">Monero ノードに接続できませんでした。何も送信されていません — 接続を確認してもう一度お試しください。</string>
     <string name="board_unverified_note">Moneroノードに接続できないため、ここに表示されているものはチェーンと照合できていません。署名と支払いは済んでいます。未検証の掲示板と同じ程度の注意を払ってご覧ください。</string>
     <string name="board_needs_a_block">Moneroノードに接続できませんでした。掲示板に載るものは直近のブロックで刻印されるため、今はまだ掲示できません。接続を確認してからもう一度お試しください。</string>
-    <string name="pay_sending_why">取引を組み立てています。1分ほどかかります — どのコインがあなたのものかを隠すためのダミーを集めています。この画面を離れても止まりません。</string>
+    <string name="pay_sending_why">取引を組み立てています。1分ほどかかります — どのコインがあなたのものかを隠すためのダミーを集めています。他のアプリに切り替えても止まりません。</string>
     <string name="pay_sending_to">%1$s へ</string>
     <string name="claim_own_card">そのカードはあなた自身のものです — この端末のカードです。</string>
     <string name="pay_already_paid">このエスクローにはすでに支払い済みです。資金は入っており、再送信はされていません。</string>
@@ -78,4 +81,6 @@
     <string name="pay_repeat_monthly">毎月</string>
     <string name="pay_recur_notify">定期請求を送信しました — %1$s</string>
     <string name="pay_donation_hint">これは寄付です — 到着次第このチャットに領収書が届き、明細では「寄付」に分類されます。</string>
+    <string name="pay_relay_unconfirmed">どの Monero ノードも支払いの受け取りを確認しませんでした。それでも通る可能性があります。使ったノートはチェーンが決着をつけるまで確保されたままです。もう一度支払う前に取引明細を確認してください。</string>
+    <string name="pay_request_kept">請求を保存しました。ネットワークが戻り次第、自動的に送信されます。</string>
 </resources>

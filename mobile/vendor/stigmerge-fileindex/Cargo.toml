@@ -1,0 +1,24 @@
+# Vendored from https://github.com/cmars/stigmerge (see ../STIGMERGE-NOTICE.md).
+# Cargo.toml rewritten from the upstream workspace form to concrete versions;
+# the source tree is upstream's, modified for BLAKE3 as the notice records.
+[package]
+name = "stigmerge_fileindex"
+version = "0.6.3-ducat"
+edition = "2021"
+license = "MPL-2.0"
+description = "stigmerge file indexer (vendored for DUCAT, BLAKE3 pieces)"
+
+[lib]
+name = "stigmerge_fileindex"
+path = "src/lib.rs"
+
+[dependencies]
+anyhow = { version = "1.0", features = ["std", "backtrace"] }
+blake3 = "1"
+flume = { version = "0.11", features = ["async"] }
+num_cpus = "1.16"
+tokio = { version = "1.40", features = ["full"] }
+
+[dev-dependencies]
+hex-literal = "0.4"
+tempfile = "3.13"

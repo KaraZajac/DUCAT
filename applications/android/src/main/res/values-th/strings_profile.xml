@@ -44,6 +44,9 @@
     <string name="profile_bond_releasing">กำลังคืน — รอลายเซ็นร่วมของอีกฝ่าย…</string>
     <string name="profile_bond_cosigned">ลงนามแล้ว — การส่งอยู่ที่อีกฝ่าย</string>
     <string name="profile_bond_released">คืนเงินฝากแล้ว ✓</string>
+    <string name="profile_bond_call_off">ยกเลิกพันธบัตร</string>
+    <string name="profile_bond_holds">เอสโครว์มี %1$s อยู่ — ให้คืนเงินมัดจำแทน</string>
+    <string name="profile_bond_called_off">ยกเลิกพันธบัตรแล้ว</string>
     <string name="profile_bond_txid">ธุรกรรมการคืน</string>
     <string name="profile_bond_arbiter_q">ใครถือกุญแจดอกที่สาม?</string>
     <string name="profile_bond_arbiter_note">เมื่อมีผู้ชี้ขาด กุญแจสองในสามดอกก็ย้ายเงินฝากได้: โทรศัพท์หายก็ไม่ติดค้าง และข้อพิพาทมีทางออก ผู้ชี้ขาดเพียงลำพังเอาอะไรไปไม่ได้</string>

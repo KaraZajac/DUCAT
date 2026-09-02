@@ -21,6 +21,8 @@
     <!-- Driver: DriveScreen -->
     <string name="hail_rider_declined_title">Le passager a refusé</string>
     <string name="hail_rider_declined_body">Il a décliné ton offre. Son appel a disparu du tableau.</string>
+    <string name="hail_offer_lapsed_title">Pas de réponse à votre offre</string>
+    <string name="hail_offer_lapsed_body">Une demi-heure plus tard, le passager n\'a dit ni oui ni non. L\'offre reste dans la discussion s\'il la veut encore.</string>
     <string name="hail_ok">OK</string>
     <string name="hail_on_duty">En service</string>
     <string name="hail_net_wide">filet large — ~%1$s de large</string>
@@ -102,5 +104,10 @@
     <string name="hail_step_card">Création d’un code…</string>
     <string name="hail_search">Rechercher</string>
     <string name="hail_clear_place">Effacer</string>
+    <string name="hail_no_places">Aucun lieu trouvé pour cette recherche</string>
+    <string name="hail_search_unreachable">Recherche cartographique injoignable — vérifiez votre connexion</string>
     <string name="hail_joining_network">Connexion au réseau — les tableaux n’ont pas encore été lus.</string>
+    <string name="hail_accept_sending">Envoi de ton oui à %1$s…</string>
+    <string name="hail_accept_failed">Ton oui à %1$s n\'est pas parti. Vérifie le réseau et rouvre l\'offre.</string>
+    <string name="hail_escrow_failed">La course n\'a pas pu être mise sous séquestre. Règle ça avec le chauffeur dans la discussion.</string>
 </resources>

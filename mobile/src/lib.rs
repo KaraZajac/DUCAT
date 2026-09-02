@@ -12,10 +12,12 @@
 
 use ducat_core::{bond, float, verify};
 
+pub mod callcodec;
 pub mod ceremony;
 pub mod contacts;
 pub mod monero;
 pub mod node;
+pub mod swarm;
 
 uniffi::setup_scaffolding!();
 
@@ -439,6 +441,10 @@ pub struct BackupInput {
     /// convenience: on the two-party rung a lost share is an escrow that can
     /// never be released, by anyone, ever.
     pub escrow_shares: Vec<EscrowShareEntry>,
+    /// The whole persona roster, primary first (post-1.0 compartments).
+    /// Empty from a single-persona client; the primary always also travels
+    /// as the top-level persona secret, so old readers lose nothing.
+    pub personas: Vec<PersonaBackup>,
 }
 
 /// One relationship, across the bridge.
@@ -457,6 +463,30 @@ pub struct ContactBackup {
     pub out_seq: u64,
     pub in_prev: Option<Vec<u8>>,
     pub out_prev: Option<Vec<u8>>,
+    /// Hex of the owning persona; None from the single-persona era.
+    pub owner: Option<String>,
+}
+
+/// One of this phone's own personas, across the bridge (§4.3, post-1.0
+/// compartments).
+#[derive(uniffi::Record, Clone)]
+pub struct PersonaBackup {
+    pub secret: Vec<u8>,
+    pub name: Option<String>,
+    pub color: u64,
+    pub created: u64,
+    // §16.9 per persona — the presentation follows the hat, and so does
+    // the backup. All optional; old bundles decode with these absent.
+    pub display_name: Option<String>,
+    pub avatar: Option<Vec<u8>>,
+    pub email: Option<String>,
+    pub phone: Option<String>,
+    pub signal: Option<String>,
+    pub pronouns: Option<u64>,
+    pub car_model: Option<String>,
+    pub car_color: Option<String>,
+    pub plate: Option<String>,
+    pub share_profile: bool,
 }
 
 #[derive(uniffi::Record, Clone)]
@@ -498,6 +528,7 @@ fn contact_to_core(c: &ContactBackup) -> ducat_core::backup::BackupContact {
         out_seq: c.out_seq,
         in_prev: c.in_prev.clone(),
         out_prev: c.out_prev.clone(),
+        owner: c.owner.clone(),
     }
 }
 
@@ -516,6 +547,7 @@ fn contact_from_core(c: &ducat_core::backup::BackupContact) -> ContactBackup {
         out_seq: c.out_seq,
         in_prev: c.in_prev.clone(),
         out_prev: c.out_prev.clone(),
+        owner: c.owner.clone(),
     }
 }
 
@@ -641,6 +673,26 @@ pub fn export_backup(
         signal: input.profile.signal.clone(),
         pronouns: input.profile.pronouns.map(|p| p as u64),
         contacts: input.contacts.iter().map(contact_to_core).collect(),
+        personas: input
+            .personas
+            .iter()
+            .map(|p| ducat_core::backup::BackupPersona {
+                secret: p.secret.clone(),
+                name: p.name.clone(),
+                color: p.color,
+                created: p.created,
+                display_name: p.display_name.clone(),
+                avatar: p.avatar.clone(),
+                email: p.email.clone(),
+                phone: p.phone.clone(),
+                signal: p.signal.clone(),
+                pronouns: p.pronouns,
+                car_model: p.car_model.clone(),
+                car_color: p.car_color.clone(),
+                plate: p.plate.clone(),
+                share_profile: p.share_profile,
+            })
+            .collect(),
         prekey_signed_secret: input.prekey_signed_secret.clone(),
         prekey_one_time: input
             .prekey_one_time
@@ -725,8 +777,24 @@ fn now() -> u64 {
         .unwrap_or(0)
 }
 
-fn hex_to_bytes(s: &str) -> Option<Vec<u8>> {
-    if s.len() % 2 != 0 {
+/// A static's guard, poisoned or not.
+///
+/// The engine's state lives in `static Mutex`es, and every export runs under
+/// uniffi's catch_unwind: a panic in one reaches Kotlin as an exception and
+/// leaves whatever lock it held poisoned for the life of the process. With
+/// `lock().unwrap()` at every site, the second call to touch that lock
+/// panicked too — the node, the calls, the swarm, all reporting the first
+/// failure until the app was killed. Each of these maps holds whole values
+/// inserted or removed in one step, so a poisoned guard's contents are sound.
+pub(crate) fn lock<T>(m: &std::sync::Mutex<T>) -> std::sync::MutexGuard<'_, T> {
+    m.lock().unwrap_or_else(std::sync::PoisonError::into_inner)
+}
+
+pub(crate) fn hex_to_bytes(s: &str) -> Option<Vec<u8>> {
+    // Byte slicing below panics inside a multi-byte character, and some of
+    // this comes from the wire and from daemons: a non-ASCII "hex" string is
+    // simply not hex.
+    if s.len() % 2 != 0 || !s.is_ascii() {
         return None;
     }
     (0..s.len())
@@ -744,7 +812,7 @@ mod backup_tests {
         let w = create_wallet(2_190_000, true);
         let persona = create_persona_secret();
         let blob = export_backup(
-            BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: w.restore_height, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![] },
+            BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: w.restore_height, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![] },
             "a real passphrase".into(),
             persona.clone(),
         )
@@ -764,7 +832,7 @@ mod backup_tests {
         let w = create_wallet(1, true);
         assert!(matches!(
             export_backup(
-                BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 1, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![] },
+                BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 1, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![] },
                 "short".into(),
                 create_persona_secret(),
             ),
@@ -778,7 +846,7 @@ mod backup_tests {
     fn a_malformed_key_is_refused() {
         assert!(matches!(
             export_backup(
-                BackupInput { spend_key_hex: "nothex".into(), restore_height: 1, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![] },
+                BackupInput { spend_key_hex: "nothex".into(), restore_height: 1, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![] },
                 "a real passphrase".into(),
                 create_persona_secret(),
             ),
@@ -797,7 +865,7 @@ mod restore_height_tests {
         let w = create_wallet(1, true);
         assert!(matches!(
             export_backup(
-                BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: u64::MAX, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![] },
+                BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: u64::MAX, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![] },
                 "a real passphrase".into(),
                 create_persona_secret(),
             ),
@@ -812,7 +880,7 @@ mod restore_height_tests {
     fn genesis_is_slow_but_permitted() {
         let w = create_wallet(0, true);
         assert!(export_backup(
-            BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 0, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![] },
+            BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 0, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![] },
             "a real passphrase".into(),
             create_persona_secret(),
         )
@@ -846,6 +914,10 @@ pub struct RestoredBackup {
     /// The shares themselves. This used to be the count alone, which told a
     /// restoring device how much it had just failed to restore.
     pub escrow_shares: Vec<EscrowShareEntry>,
+    /// The persona roster, when the bundle carries one (post-1.0
+    /// compartments). Empty for older bundles: the top-level persona secret
+    /// is the only identity, exactly as it always was.
+    pub personas: Vec<PersonaBackup>,
     /// When the bundle was written, in seconds since the epoch — the thing that
     /// makes "how old is this backup" answerable.
     ///
@@ -904,6 +976,26 @@ pub fn import_backup(blob: Vec<u8>, passphrase: String) -> Result<RestoredBackup
             plate: None,
         },
         contacts: b.contacts.iter().map(contact_from_core).collect(),
+        personas: b
+            .personas
+            .iter()
+            .map(|p| PersonaBackup {
+                secret: p.secret.clone(),
+                name: p.name.clone(),
+                color: p.color,
+                created: p.created,
+                display_name: p.display_name.clone(),
+                avatar: p.avatar.clone(),
+                email: p.email.clone(),
+                phone: p.phone.clone(),
+                signal: p.signal.clone(),
+                pronouns: p.pronouns,
+                car_model: p.car_model.clone(),
+                car_color: p.car_color.clone(),
+                plate: p.plate.clone(),
+                share_profile: p.share_profile,
+            })
+            .collect(),
         prekey_signed_secret: b.prekey_signed_secret.clone(),
         prekey_one_time: b
             .prekey_one_time
@@ -965,7 +1057,7 @@ mod import_tests {
     fn a_restored_key_controls_the_same_address() {
         let w = create_wallet(1000, true);
         let blob = export_backup(
-            BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: 1000, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![] },
+            BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: 1000, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![] },
             "a real passphrase".into(),
             create_persona_secret(),
         )
@@ -983,7 +1075,7 @@ mod import_tests {
     fn a_wrong_passphrase_is_indistinguishable_from_tampering() {
         let w = create_wallet(1, true);
         let blob = export_backup(
-            BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 1, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![] },
+            BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 1, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![] },
             "a real passphrase".into(),
             create_persona_secret(),
         )
@@ -1022,6 +1114,7 @@ mod import_tests {
             signal: None,
             pronouns: None,
             contacts: vec![],
+            personas: vec![],
             prekey_signed_secret: None,
             prekey_one_time: vec![],
             prekey_next_id: 0,
@@ -1064,7 +1157,7 @@ mod import_tests {
         let w = create_wallet(1000, true);
         let before = now();
         let blob = export_backup(
-            BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 1000, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![] },
+            BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 1000, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![] },
             "a real passphrase".into(),
             create_persona_secret(),
         )

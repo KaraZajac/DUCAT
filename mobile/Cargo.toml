@@ -19,6 +19,12 @@ zeroize = "1"
 thiserror = "1"
 veilid-core = "0.5"
 tokio = { version = "1", features = ["rt-multi-thread"] }
+tokio-util = "0.7"
+blake3 = "1"
+# The swarm engine — vendored, credited, converted; see vendor/STIGMERGE-NOTICE.md.
+stigmerge_peer = { path = "vendor/stigmerge-peer" }
+stigmerge_fileindex = { path = "vendor/stigmerge-fileindex" }
+veilnet = { path = "vendor/veilnet" }
 serde_json = "1"
 curve25519-dalek = { version = "4", features = ["precomputed-tables"] }
 uniffi = { version = "0.28", features = ["cli"] }
@@ -34,6 +40,11 @@ ed25519-dalek = "2"
 modular-frost = { version = "0.11.1", features = ["ed25519"] }
 dkg-pedpop = { path = "vendor/dkg-pedpop" }
 ciphersuite = "0.4"
+unsafe-libopus = "0.2.0"
+# The swarm's tracing has to reach the node's log ring on a phone, or a
+# dying fetch says everything to nobody.
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "registry", "fmt"] }
 
 [[bin]]
 name = "uniffi-bindgen"
@@ -45,3 +56,5 @@ path = "src/bin/uniffi-bindgen.rs"
 # a mismatch here is a silent ABI difference rather than a compile error.
 [target.'cfg(target_os = "android")'.dependencies]
 jni = "0.22.4"
+
+[dev-dependencies]

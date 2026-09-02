@@ -17,8 +17,9 @@
     <string name="tab_send_receive">收付款</string>
 
     <string name="section_status">状态</string>
-    <string name="section_profile">个人资料</string>
+    <string name="section_profile">档案</string>
     <string name="section_contacts">联系人</string>
+    <string name="section_selling">销售</string>
     <string name="section_logs">日志</string>
     <string name="section_settings">设置</string>
     <string name="section_modes">工作模式</string>

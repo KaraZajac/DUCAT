@@ -14,10 +14,14 @@
     <string name="chat_voice_failed">Esa nota de voz no se grabó — vuelve a mantener presionado el micrófono.</string>
     <string name="chat_what_card">la tarjeta</string>
     <string name="chat_what_contact">el contacto</string>
+    <string name="chat_what_reaction">la reacción</string>
+    <string name="chat_what_invite">la invitación</string>
+    <string name="chat_what_note">la nota</string>
     <string name="chat_error_location_fix">no se pudo obtener tu ubicación</string>
     <string name="chat_recording_placeholder">Grabando… %1$ds</string>
     <string name="chat_message_placeholder">Mensaje</string>
     <string name="chat_take_picture">Tomar una foto</string>
+    <string name="chat_no_camera_app">no hay ninguna app de cámara en este teléfono</string>
     <string name="chat_hold_to_record">Mantén presionado para grabar una nota de voz</string>
     <string name="chat_attach">Adjuntar</string>
     <string name="chat_close">Cerrar</string>
@@ -42,6 +46,10 @@
     <!-- Retractions (kind 5) -->
     <string name="chat_you_withdrew">Retiraste un mensaje</string>
     <string name="chat_they_withdrew">%1$s retiró un mensaje</string>
+    <string name="chat_you_withdrew_bill">Retiraste una cuenta</string>
+    <string name="chat_they_withdrew_bill">%1$s retiró una cuenta</string>
+    <string name="chat_you_withdrew_call">Retiraste una llamada</string>
+    <string name="chat_they_withdrew_call">%1$s retiró una llamada</string>
     <string name="chat_you_declined">Rechazaste</string>
     <string name="chat_they_declined">%1$s rechazó</string>
     <string name="chat_retract_with_quote">%1$s — “%2$s”</string>
@@ -83,6 +91,7 @@
     <string name="chat_downloading_audio">🎤 descargando…</string>
     <string name="chat_downloading_file">📎 descargando…</string>
     <string name="chat_att_stuck">Esto no ha llegado: puede que ya no esté disponible. Se sigue intentando.</string>
+    <string name="chat_att_gone">Esto no ha llegado: puede que ya no esté disponible.</string>
     <string name="chat_att_no_space">No hay espacio suficiente en este teléfono para descargarlo.</string>
     <string name="chat_picture_desc">Foto</string>
     <string name="chat_could_not_decode">📷 (no se pudo decodificar)</string>
@@ -108,6 +117,7 @@
     <string name="chat_stop">Detener</string>
     <string name="chat_play_voice_memo">Reproducir nota de voz</string>
     <string name="chat_voice_memo">Nota de voz</string>
+    <string name="chat_play_failed">Esta nota de voz no se puede reproducir.</string>
     <string name="chat_size_kb">%1$d KB</string>
     <string name="chat_size_b">%1$d B</string>
     <string name="chat_file_fallback">archivo</string>
@@ -138,6 +148,9 @@
         <item quantity="other">Aquí faltan %1$d mensajes</item>
     </plurals>
     <string name="chat_not_sent_yet">sin enviar aún</string>
+    <string name="chat_not_sent">sin enviar</string>
     <string name="chat_cancel_request">Cancelar solicitud</string>
     <string name="chat_copied">Mensaje copiado</string>
+    <string name="chat_download_file">Descargar</string>
+    <string name="chat_file_too_big_swarm">ese archivo pesa %1$d MB — por ahora los archivos llegan hasta 64 MB</string>
 </resources>

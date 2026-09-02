@@ -11,6 +11,8 @@
     <string name="pay_address_placeholder">5… या 7…</string>
     <string name="pay_continue">आगे बढ़ें</string>
     <string name="pay_not_monero_address">यह Monero पते जैसा नहीं दिखता।</string>
+    <string name="pay_scan_unknown_card">यह कार्ड अभी आपके किसी संपर्क का नहीं है। पहले चैट से उन्हें जोड़ें, फिर भुगतान करें।</string>
+    <string name="pay_scan_not_payable">यह कोड न तो Monero पता है और न ही DUCAT कार्ड।</string>
 
     <!-- Pay.kt — amount step -->
     <string name="pay_back">वापस</string>
@@ -62,12 +64,13 @@
     <string name="pay_fee_unknown">अभी पता नहीं</string>
     <string name="pay_fee_unknown_confirm">अभी शुल्क का अनुमान नहीं लगाया जा सका। लेनदेन बनते समय जो लगेगा, वही चुकाएगा।</string>
     <string name="pay_node_no_answer">Monero नोड ने समय पर जवाब नहीं दिया। कुछ भी नहीं भेजा गया। फिर कोशिश करें — ऐप दूसरा नोड इस्तेमाल करेगा।</string>
+    <string name="pay_send_interrupted">भुगतान के बीच में ऐप बंद हो गया। दोबारा भुगतान करने से पहले विवरण देख लें।</string>
     <string name="pay_not_enough">पर्याप्त उपलब्ध राशि नहीं — आपके पास %1$s है और नेटवर्क शुल्क के साथ %2$s चाहिए।</string>
     <string name="pay_offline">अभी कनेक्ट नहीं — इस फ़ोन ने नेटवर्क से जुड़ना पूरा नहीं किया है। कुछ नहीं भेजा गया; थोड़ी देर में फिर कोशिश करें।</string>
     <string name="pay_node_unreachable">किसी भी Monero नोड से संपर्क नहीं हो सका। कुछ नहीं भेजा गया — अपना कनेक्शन जाँचें और फिर कोशिश करें।</string>
     <string name="board_unverified_note">कोई Monero नोड नहीं मिल रहा, इसलिए यहाँ जो दिख रहा है उसे चेन से जाँचा नहीं जा सका। यह अब भी हस्ताक्षरित और भुगतान किया हुआ है — बस इसे उतनी ही सावधानी से लें जितनी बिना जाँचे बोर्ड को देते।</string>
     <string name="board_needs_a_block">किसी भी Monero नोड तक नहीं पहुँच सके। बोर्ड पर जाने वाली हर चीज़ पर हाल के एक ब्लॉक की मुहर लगती है, इसलिए यह अभी नहीं जा सकता — अपना कनेक्शन जाँचें और फिर कोशिश करें।</string>
-    <string name="pay_sending_why">लेनदेन बनाया जा रहा है। इसमें लगभग एक मिनट लगता है — वॉलेट वे छद्म जुटा रहा है जो छिपाते हैं कि कौन-से सिक्के आपके हैं। आप यह स्क्रीन छोड़ सकते हैं; यह रुकेगा नहीं।</string>
+    <string name="pay_sending_why">लेनदेन बनाया जा रहा है। इसमें लगभग एक मिनट लगता है — वॉलेट वे छद्म जुटा रहा है जो छिपाते हैं कि कौन-से सिक्के आपके हैं। दूसरे ऐप पर जाने से यह रुकेगा नहीं।</string>
     <string name="pay_sending_to">%1$s को</string>
     <string name="claim_own_card">यह कार्ड आपका अपना है — यह इसी डिवाइस का है।</string>
     <string name="pay_already_paid">आप इस एस्क्रो में पहले ही भुगतान कर चुके हैं। आपका पैसा अंदर है; दोबारा कुछ नहीं भेजा गया।</string>
@@ -78,4 +81,6 @@
     <string name="pay_repeat_monthly">मासिक</string>
     <string name="pay_recur_notify">आवर्ती बिल भेजा गया — %1$s</string>
     <string name="pay_donation_hint">यह एक दान है — पहुँचते ही रसीद इसी चैट में आएगी, और आपका विवरण इसे दान के अंतर्गत दर्ज करेगा।</string>
+    <string name="pay_relay_unconfirmed">किसी Monero नोड ने भुगतान लेने की पुष्टि नहीं की। यह फिर भी पहुँच सकता है — इसमें लगे नोट तब तक आरक्षित रहेंगे जब तक चेन इसका फ़ैसला न कर दे। दोबारा भुगतान करने से पहले स्टेटमेंट देख लें।</string>
+    <string name="pay_request_kept">अनुरोध रख लिया गया — नेटवर्क लौटते ही अपने आप चला जाएगा।</string>
 </resources>

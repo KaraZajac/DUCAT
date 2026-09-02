@@ -19,6 +19,7 @@
     <string name="section_status">Trạng thái</string>
     <string name="section_profile">Hồ sơ</string>
     <string name="section_contacts">Danh bạ</string>
+    <string name="section_selling">Bán hàng</string>
     <string name="section_logs">Nhật ký</string>
     <string name="section_settings">Cài đặt</string>
     <string name="section_modes">Chế độ hoạt động</string>

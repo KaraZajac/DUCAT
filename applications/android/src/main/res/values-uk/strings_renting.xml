@@ -123,4 +123,14 @@
     <string name="rent_in_unit">в %1$s</string>
     <string name="board_chip_count">%1$s %2$d</string>
     <string name="rent_size_m2">%1$d м²</string>
+    <string name="rent_waiting_board">Ще не на дошці — спроба повториться сама</string>
+    <plurals name="rent_seats_n">
+        <item quantity="one">%1$d місце</item>
+        <item quantity="other">%1$d місць</item>
+    </plurals>
+    <plurals name="rent_rooms_n">
+        <item quantity="one">%1$d спальня</item>
+        <item quantity="other">%1$d спалень</item>
+    </plurals>
+    <string name="rent_sleeps_n">на %1$d осіб</string>
 </resources>

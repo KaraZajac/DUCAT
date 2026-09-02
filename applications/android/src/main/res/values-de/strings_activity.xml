@@ -6,6 +6,8 @@
     <!-- Pending requests -->
     <string name="activity_awaiting">Ausstehend</string>
     <string name="activity_search_none">Nichts hier passt zu „%1$s“.</string>
+    <string name="activity_period_none">Nichts in diesem Zeitraum. Wähle oben einen längeren, um frühere Vorgänge zu sehen.</string>
+    <string name="activity_filter_none">Noch nichts dieser Art. Tippe erneut auf die hervorgehobene Kachel, um alles anzuzeigen.</string>
     <string name="activity_search_clear">Suche löschen</string>
     <string name="activity_search_hint">Belege, Namen, Notizen durchsuchen</string>
     <string name="activity_they_ask">%1$s bittet um</string>
@@ -42,4 +44,23 @@
     <string name="activity_donations_filter">Spenden</string>
     <string name="activity_donation_chip">Spende</string>
     <string name="activity_donated_total">%1$s gespendet</string>
+    <string name="activity_period_today">Heute</string>
+    <string name="activity_period_7d">7 Tage</string>
+    <string name="activity_period_month">Dieser Monat</string>
+    <string name="activity_period_all">Alle</string>
+    <string name="activity_sum_in">Ein</string>
+    <string name="activity_sum_out">Aus</string>
+    <string name="activity_sum_net">Netto</string>
+    <string name="activity_sum_fees">Gebühren</string>
+    <string name="activity_business">Geschäft</string>
+    <string name="activity_sales">Verkäufe</string>
+    <string name="activity_tax_collected">Steuer eingenommen</string>
+    <string name="activity_outstanding">Offen</string>
+    <string name="activity_export_csv">CSV-Datei</string>
+    <string name="activity_export_json">JSON-Datei</string>
+    <string name="activity_door_pos">Kasse</string>
+    <string name="activity_door_bar">Deckel</string>
+    <string name="activity_door_taxi">Fahrten</string>
+    <string name="activity_door_donate">Spendenglas</string>
+    <string name="activity_door_pub">Ausgaben</string>
 </resources>

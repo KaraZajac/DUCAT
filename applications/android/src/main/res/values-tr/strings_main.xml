@@ -8,6 +8,8 @@
     <string name="main_backup_title">Yedekle</string>
     <string name="main_backup_body">Son yedeğinde olmayan kişilerin var. Geri yükleme parayı geri getirir, insanları getirmez.</string>
     <string name="main_open_backup_settings">Yedekleme ayarlarını aç</string>
+    <string name="main_notify_off_title">Bildirimler kapalı</string>
+    <string name="main_notify_off_body">Para geldiğinde, bir hesap düştüğünde ya da biri aradığında telefon sana haber veremez. Açmak için dokun.</string>
     <string name="main_recent">Son hareketler</string>
     <string name="main_see_all">Tümünü gör</string>
     <string name="main_card_link_title">Kişi eklensin mi?</string>
@@ -38,4 +40,9 @@
     <string name="err_no_keys_yet">Kart alışverişiniz henüz tamamlanmadı.</string>
     <string name="err_conversation_too_old">Kartları bu uygulama için fazla eski. Yenisini isteyin.</string>
     <string name="err_board_full">Şu anda buralarda çok fazla çağrı var. Bir dakika sonra tekrar deneyin.</string>
+    <string name="main_deals_title">Anlaşmalar</string>
+    <plurals name="main_deals_waiting">
+        <item quantity="one">%1$d anlaşma sizi bekliyor</item>
+        <item quantity="other">%1$d anlaşma sizi bekliyor</item>
+    </plurals>
 </resources>

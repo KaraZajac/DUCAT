@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_sites">Situs</string>
+    <string name="sites_intro">Halaman yang bepergian seperti terbitan: diambil utuh, terbaca luring, dicerminkan pembaca yang memilihnya. Tak ada apa pun di halaman yang bisa melihatmu.</string>
+    <string name="sites_empty_title">Belum ada situs</string>
+    <string name="sites_empty_body">Situs ducat adalah ruang tersegel — tiap gambar dan gaya ikut dalam bundel, skrip mati, hanya tautan ducat: yang bekerja. Tempel alamat untuk menyimpan satu.</string>
+    <string name="sites_add">Tambah situs</string>
+    <string name="sites_add_confirm">Tambah</string>
+    <string name="sites_add_link_title">Tambahkan situs ini?</string>
+    <string name="sites_add_link_body">Alamat ini datang lewat tautan. Menambahkannya menyimpannya di rak Anda; tidak ada yang diambil sampai Anda membukanya.</string>
+    <string name="sites_uri_label">alamat ducat:site/…</string>
+    <string name="sites_bad_uri">Itu bukan alamat ducat:site/.</string>
+    <string name="sites_fetching">Mengambil…</string>
+    <string name="sites_not_fetched">Belum diambil</string>
+    <string name="sites_update_waiting">Ada pembaruan — terbuka segar</string>
+    <string name="sites_offline_ready">Siap luring</string>
+    <string name="sites_open">Buka</string>
+    <string name="sites_keep_alive">Jaga situs ini tetap hidup untuk yang lain</string>
+    <string name="sites_remove">Hapus</string>
+</resources>

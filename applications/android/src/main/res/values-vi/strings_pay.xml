@@ -11,6 +11,8 @@
     <string name="pay_address_placeholder">5… hoặc 7…</string>
     <string name="pay_continue">Tiếp tục</string>
     <string name="pay_not_monero_address">Cái đó trông không giống một địa chỉ Monero.</string>
+    <string name="pay_scan_unknown_card">Thẻ đó chưa thuộc về liên hệ nào của bạn. Hãy thêm họ từ Chat trước, rồi thanh toán.</string>
+    <string name="pay_scan_not_payable">Mã đó không phải địa chỉ Monero cũng không phải thẻ DUCAT.</string>
 
     <!-- Pay.kt — amount step -->
     <string name="pay_back">Quay lại</string>
@@ -62,12 +64,13 @@
     <string name="pay_fee_unknown">hiện chưa rõ</string>
     <string name="pay_fee_unknown_confirm">Hiện chưa ước tính được phí. Giao dịch sẽ trả đúng mức phí khi được tạo.</string>
     <string name="pay_node_no_answer">Nút Monero không trả lời kịp. Chưa gửi gì cả. Hãy thử lại — ứng dụng sẽ dùng nút khác.</string>
+    <string name="pay_send_interrupted">Ứng dụng bị đóng giữa lúc thanh toán. Hãy xem sao kê trước khi thanh toán lại.</string>
     <string name="pay_not_enough">Số dư khả dụng không đủ — bạn có %1$s và cần %2$s kèm phí mạng.</string>
     <string name="pay_offline">Chưa kết nối — điện thoại này chưa tham gia xong mạng lưới. Chưa gửi gì cả; hãy thử lại sau giây lát.</string>
     <string name="pay_node_unreachable">Không liên hệ được nút Monero nào. Chưa gửi gì cả — hãy kiểm tra kết nối và thử lại.</string>
     <string name="board_unverified_note">Không liên hệ được nút Monero nào, nên nội dung hiển thị ở đây chưa được đối chiếu với chuỗi. Nó vẫn được ký và trả phí — chỉ cần xem xét thận trọng như với một bảng tin chưa xác minh.</string>
     <string name="board_needs_a_block">Không liên hệ được nút Monero nào. Thứ lên bảng tin được đóng dấu theo một khối gần đây, nên hiện chưa thể đăng — hãy kiểm tra kết nối rồi thử lại.</string>
-    <string name="pay_sending_why">Đang dựng giao dịch. Việc này mất khoảng một phút — ví đang thu thập các mồi nhử che giấu đồng nào là của bạn. Bạn có thể rời màn hình này; nó không dừng lại.</string>
+    <string name="pay_sending_why">Đang dựng giao dịch. Việc này mất khoảng một phút — ví đang thu thập các mồi nhử che giấu đồng nào là của bạn. Chuyển sang ứng dụng khác không làm nó dừng lại.</string>
     <string name="pay_sending_to">tới %1$s</string>
     <string name="claim_own_card">Thẻ đó là của chính bạn — nó thuộc về thiết bị này.</string>
     <string name="pay_already_paid">Bạn đã thanh toán vào ký quỹ này rồi. Tiền đã vào; không gửi lại lần nữa.</string>
@@ -78,4 +81,6 @@
     <string name="pay_repeat_monthly">Hàng tháng</string>
     <string name="pay_recur_notify">Đã gửi hóa đơn định kỳ — %1$s</string>
     <string name="pay_donation_hint">Đây là khoản quyên góp — biên nhận sẽ đến cuộc trò chuyện này khi tiền tới, và sao kê sẽ xếp nó vào mục Quyên góp.</string>
+    <string name="pay_relay_unconfirmed">Không nút Monero nào xác nhận đã nhận khoản thanh toán. Nó vẫn có thể đi qua — các tờ đã dùng vẫn được giữ lại cho đến khi chuỗi quyết định. Hãy kiểm tra sao kê trước khi trả lại lần nữa.</string>
+    <string name="pay_request_kept">Đã giữ yêu cầu — sẽ tự gửi đi ngay khi có mạng trở lại.</string>
 </resources>

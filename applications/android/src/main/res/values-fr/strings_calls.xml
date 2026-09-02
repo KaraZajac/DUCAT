@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">T\u2019a appelé</string>
+    <string name="chat_call_you_rang">Tu as appelé</string>
+    <string name="chat_call_answered">A répondu à ton appel</string>
+    <string name="chat_call_you_answered">Tu as répondu</string>
+    <string name="chat_call_missed_note">Un appel a sonné pendant ton absence.</string>
+    <string name="chatlist_preview_call">Appel</string>
+    <string name="chatlist_preview_call_answered">Appel décroché</string>
+    <string name="notify_call">%1$s appelle</string>
+    <string name="notify_call_answered">%1$s a répondu à ton appel</string>
+    <string name="call_button">Appeler</string>
+    <string name="call_calling">Appel…</string>
+    <string name="call_incoming">Appel DUCAT entrant</string>
+    <string name="call_frames">↓%1$d ↑%2$d trames</string>
+    <string name="call_answer_btn">Répondre</string>
+    <string name="call_end_btn">Raccrocher</string>
+    <string name="call_body_ring">T\u2019appelle</string>
+    <string name="call_body_answer">Répondu</string>
+    <string name="call_body_decline">Je ne peux pas parler là.</string>
+    <string name="notify_call_channel">Appels entrants</string>
+    <string name="notify_call_incoming">Appel entrant</string>
+    <string name="call_no_answer">Pas de réponse</string>
+    <string name="call_leave_message">Laisser un message</string>
+    <string name="call_dismiss">Pas maintenant</string>
+    <string name="call_body_cancel">Raccroché avant que tu répondes.</string>
+    <string name="call_connecting">Connexion…</string>
+    <string name="call_unreached">Injoignable</string>
+    <string name="call_never_connected">L\u2019appel n\u2019a pas abouti</string>
+    <string name="call_notify_calling">Appel de %1$s…</string>
+    <string name="call_notify_in_call">En appel avec %1$s</string>
+    <string name="call_notify_return">Touche pour y revenir.</string>
+</resources>

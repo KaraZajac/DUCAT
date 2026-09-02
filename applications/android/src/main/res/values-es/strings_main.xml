@@ -8,6 +8,8 @@
     <string name="main_backup_title">Respalda</string>
     <string name="main_backup_body">Tienes contactos que tu último respaldo no tiene. Una restauración devolvería el dinero pero no a las personas.</string>
     <string name="main_open_backup_settings">Abrir los ajustes de respaldo</string>
+    <string name="main_notify_off_title">Las notificaciones están desactivadas</string>
+    <string name="main_notify_off_body">El teléfono no puede avisarte cuando llega dinero, una cuenta o una llamada. Toca para activarlas.</string>
     <string name="main_recent">Reciente</string>
     <string name="main_see_all">Ver todo</string>
     <string name="main_card_link_title">¿Añadir un contacto?</string>
@@ -38,4 +40,9 @@
     <string name="err_no_keys_yet">Todavía no habéis terminado de intercambiar las tarjetas.</string>
     <string name="err_conversation_too_old">Su tarjeta es demasiado antigua para esta app. Pídeles una nueva.</string>
     <string name="err_board_full">Ahora mismo hay demasiadas peticiones por aquí. Inténtalo dentro de un minuto.</string>
+    <string name="main_deals_title">Tratos</string>
+    <plurals name="main_deals_waiting">
+        <item quantity="one">%1$d trato espera tu respuesta</item>
+        <item quantity="other">%1$d tratos esperan tu respuesta</item>
+    </plurals>
 </resources>

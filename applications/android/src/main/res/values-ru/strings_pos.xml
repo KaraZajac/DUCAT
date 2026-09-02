@@ -32,4 +32,6 @@
     <string name="pos_cancel_sale">Отменить продажу</string>
     <string name="pos_tax_at">Налог (%1$s%%)</string>
     <string name="pos_in_unit">в %1$s</string>
+    <string name="pos_error_bill_not_withdrawn">Счёт всё ещё у них на телефоне — отозвать его не удалось: %1$s</string>
+    <string name="pos_receipt_pending">Чек пока не удалось отправить — он уйдёт сам, как только появится сеть.</string>
 </resources>

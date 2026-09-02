@@ -8,6 +8,8 @@
     <string name="main_backup_title">备份</string>
     <string name="main_backup_body">你有一些联系人不在上次备份里。现在恢复的话，钱能回来，人回不来。</string>
     <string name="main_open_backup_settings">打开备份设置</string>
+    <string name="main_notify_off_title">通知已关闭</string>
+    <string name="main_notify_off_body">钱到账、账单送达或有人来电时，手机无法提醒你。点按以开启。</string>
     <string name="main_recent">最近</string>
     <string name="main_see_all">查看全部</string>
     <string name="main_card_link_title">添加联系人？</string>
@@ -38,4 +40,8 @@
     <string name="err_no_keys_yet">你们还没有完成名片交换。</string>
     <string name="err_conversation_too_old">对方的名片对本应用来说太旧了。请他们发一张新的。</string>
     <string name="err_board_full">这附近现在的叫车太多了。请过一分钟再试。</string>
+    <string name="main_deals_title">交易</string>
+    <plurals name="main_deals_waiting">
+        <item quantity="other">%1$d 笔交易等待你处理</item>
+    </plurals>
 </resources>

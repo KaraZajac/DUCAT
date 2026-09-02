@@ -8,6 +8,8 @@
     <string name="main_backup_title">Fai un backup</string>
     <string name="main_backup_body">Hai contatti che il tuo ultimo backup non ha. Un ripristino riporterebbe i soldi ma non le persone.</string>
     <string name="main_open_backup_settings">Apri le impostazioni di backup</string>
+    <string name="main_notify_off_title">Le notifiche sono disattivate</string>
+    <string name="main_notify_off_body">Il telefono non può avvisarti quando arrivano soldi, un conto o una chiamata. Tocca per attivarle.</string>
     <string name="main_recent">Recenti</string>
     <string name="main_see_all">Vedi tutto</string>
     <string name="main_card_link_title">Aggiungere un contatto?</string>
@@ -38,4 +40,9 @@
     <string name="err_no_keys_yet">Non avete ancora finito di scambiarvi le tessere.</string>
     <string name="err_conversation_too_old">La loro tessera è troppo vecchia per questa app. Chiedigliene una nuova.</string>
     <string name="err_board_full">Ci sono troppe richieste qui in questo momento. Riprova tra un minuto.</string>
+    <string name="main_deals_title">Accordi</string>
+    <plurals name="main_deals_waiting">
+        <item quantity="one">%1$d accordo attende la tua risposta</item>
+        <item quantity="other">%1$d accordi attendono la tua risposta</item>
+    </plurals>
 </resources>

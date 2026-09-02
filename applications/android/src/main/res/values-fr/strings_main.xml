@@ -8,6 +8,8 @@
     <string name="main_backup_title">Sauvegarder</string>
     <string name="main_backup_body">Tu as des contacts que ta dernière sauvegarde n\'a pas. Une restauration ramènerait l\'argent, mais pas les gens.</string>
     <string name="main_open_backup_settings">Ouvrir les réglages de sauvegarde</string>
+    <string name="main_notify_off_title">Les notifications sont désactivées</string>
+    <string name="main_notify_off_body">Le téléphone ne peut pas te prévenir quand de l\'argent arrive, qu\'une note tombe ou que quelqu\'un appelle. Touche pour les activer.</string>
     <string name="main_recent">Récent</string>
     <string name="main_see_all">Tout voir</string>
     <string name="main_card_link_title">Ajouter un contact ?</string>
@@ -38,4 +40,9 @@
     <string name="err_no_keys_yet">Vous n\'avez pas encore fini d\'échanger vos cartes.</string>
     <string name="err_conversation_too_old">Leur carte est trop ancienne pour cette application. Demandez-leur-en une nouvelle.</string>
     <string name="err_board_full">Il y a trop de demandes dans le coin en ce moment. Réessayez dans une minute.</string>
+    <string name="main_deals_title">Transactions</string>
+    <plurals name="main_deals_waiting">
+        <item quantity="one">%1$d transaction attend votre réponse</item>
+        <item quantity="other">%1$d transactions attendent votre réponse</item>
+    </plurals>
 </resources>

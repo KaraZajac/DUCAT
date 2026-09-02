@@ -32,6 +32,12 @@ object Posters {
      *  after it goes up. */
     const val SETTLED_MS = 3L * 24 * 60 * 60 * 1000
 
+    /** The last sighting rides beside the first, under `<hex>.last`. A hex
+     *  key cannot end this way, so the two never collide. */
+    private const val LAST = ".last"
+
+    private const val DAY_MS = 24L * 60 * 60 * 1000
+
     private fun prefs(context: Context) =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
@@ -45,9 +51,17 @@ object Posters {
         if (posterHex.isBlank()) return now
         val p = prefs(context)
         val first = p.getLong(posterHex, 0L)
-        if (first != 0L) return first
-        p.edit().putLong(posterHex, now).apply()
-        return now
+        if (first == 0L) {
+            p.edit().putLong(posterHex, now).putLong(posterHex + LAST, now).apply()
+            return now
+        }
+        // The last sighting is the sweep's clock, and it moves at most once a
+        // day: a board reply stamps every notice in it, and a write per
+        // scroll would make this the busiest file on the phone.
+        if (Elapsed.due(now, p.getLong(posterHex + LAST, first), DAY_MS)) {
+            p.edit().putLong(posterHex + LAST, now).apply()
+        }
+        return first
     }
 
     /** How long this poster has been known, in millis; 0 for a stranger. */
@@ -69,11 +83,20 @@ object Posters {
      * browsing. Ninety days is well past any listing's life.
      */
     fun sweep(context: Context, now: Long): Int {
-        val cutoff = now - 90L * 24 * 60 * 60 * 1000
+        val cutoff = now - 90L * DAY_MS
         val p = prefs(context)
-        val stale = p.all.filterValues { it is Long && it < cutoff }.keys
+        val all = p.all
+        // By last sighting, not first: a poster whose listing has stood for
+        // a year is the one this store exists to remember, and forgetting
+        // them at day ninety would badge them "new" on day ninety-one. An
+        // entry from before the last sighting was kept goes by its first.
+        val stale = all.keys.filter { !it.endsWith(LAST) }.filter { hex ->
+            val first = all[hex] as? Long ?: return@filter false
+            val last = all[hex + LAST] as? Long ?: first
+            last < cutoff
+        }
         if (stale.isEmpty()) return 0
-        p.edit().apply { stale.forEach { remove(it) } }.apply()
+        p.edit().apply { stale.forEach { remove(it); remove(it + LAST) } }.apply()
         return stale.size
     }
 }

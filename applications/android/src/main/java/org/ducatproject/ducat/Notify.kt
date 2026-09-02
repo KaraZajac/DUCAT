@@ -23,7 +23,9 @@ import androidx.core.app.NotificationCompat
  */
 object Notify {
     private const val CHANNEL = "ducat_activity"
-    private var nextId = 1000
+    // Posted from several poller lanes at once; a shared id would make one
+    // notification silently replace another.
+    private val nextId = java.util.concurrent.atomic.AtomicInteger(1000)
 
     private fun manager(context: Context): NotificationManager? {
         val mgr = context.getSystemService(NotificationManager::class.java) ?: return null
@@ -38,7 +40,10 @@ object Notify {
         return mgr
     }
 
-    fun post(context: Context, title: String, body: String, openChat: String? = null) {
+    fun post(
+        context: Context, title: String, body: String,
+        openChat: String? = null, openGroup: String? = null,
+    ) {
         // Android 13+ gates posting behind a runtime permission; posting
         // without it throws on some builds and is silently dropped on others.
         // Either way the caller cannot fix it here, so check and skip.
@@ -49,10 +54,11 @@ object Notify {
 
         val mgr = manager(context) ?: return
         val open = PendingIntent.getActivity(
-            context, ++reqCode,
+            context, reqCode.incrementAndGet(),
             Intent(context, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
                 openChat?.let { putExtra("open_chat", it) }
+                openGroup?.let { putExtra("open_group", it) }
             },
             // The extra varies per notification; without UPDATE_CURRENT every
             // notification reuses the first one's intent and every tap lands
@@ -74,14 +80,49 @@ object Notify {
             .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
             .setPublicVersion(fact)
             .build()
-        mgr.notify(nextId++, full)
+        mgr.notify(nextId.getAndIncrement(), full)
     }
 
     /** Distinct request codes so two threads' taps do not share one intent. */
-    private var reqCode = 100
+    private val reqCode = java.util.concurrent.atomic.AtomicInteger(100)
+
+    /**
+     * Whether what this app posts can reach the person at all.
+     *
+     * The app's own switch (which is also what a declined runtime ask
+     * leaves behind), and then each channel's: a channel turned off in the
+     * app's notification settings drops everything posted to it exactly as
+     * silently as the app switch does, and `areNotificationsEnabled` says
+     * nothing about channels. A channel that has not been created yet is
+     * one nothing has been posted to, and has no switch to be off.
+     */
+    fun muted(context: Context): Boolean {
+        val compat = androidx.core.app.NotificationManagerCompat.from(context)
+        if (!compat.areNotificationsEnabled()) return true
+        return listOf(CHANNEL, CALL_CHANNEL).any {
+            compat.getNotificationChannel(it)?.importance == NotificationManager.IMPORTANCE_NONE
+        }
+    }
 
     /** An inbound thread message, worded by what it is (§16.13's kinds). */
     fun message(context: Context, from: String, personaHex: String, m: StoredMessage) {
+        // The answer to a ring this phone is on: the call screen is showing
+        // exactly that, and "Jordan answered your call" beside "In a call
+        // with Jordan" in the shade was the record announcing itself. The
+        // same goes for one that lands while the ring's answering-machine
+        // screen is still up — Calls.noticed turns that into the call. An
+        // answer that lands after the screen is gone is news — they picked
+        // up, you were gone — and still posts.
+        if (m.kind == 15) {
+            val onIt = when (val s = Calls.state) {
+                is Calls.State.Outgoing -> s.contactHex == personaHex
+                is Calls.State.Active -> s.contactHex == personaHex
+                is Calls.State.NoAnswer ->
+                    s.contactHex == personaHex && s.why == Calls.State.Why.RANG_OUT
+                else -> false
+            }
+            if (onIt) return
+        }
         val what = when (m.kind) {
             1 -> {
                 // Their language, not ours: the placeholder body a bill
@@ -107,9 +148,122 @@ object Notify {
             8 -> context.getString(R.string.notify_escrow_setup, from)
             9 -> context.getString(R.string.notify_escrow_settle, from)
             10 -> context.getString(R.string.notify_escrow_called_off, from)
+            // A publication key (§16.20): the body is the publisher's note or
+            // nothing at all, and an empty notification reads as broken.
+            13 -> context.getString(R.string.notify_new_issue, from)
+            // §16.21: the ring that arrives while you were away IS the
+            // missed-call notification — no second channel to build.
+            14 -> context.getString(R.string.notify_call, from)
+            15 -> context.getString(R.string.notify_call_answered, from)
             else -> m.body
         }
-        post(context, from, what, openChat = personaHex)
+        // Which compartment this reached, said in the title once a second
+        // persona exists: three shops on one phone cannot share an
+        // undifferentiated "Sam paid you".
+        val personas = PersonaStore(context)
+        val title = if (personas.all().size > 1) {
+            val owner = ContactStore(context).all()
+                .firstOrNull { it.personaHex == personaHex }
+                ?.let { personas.ownerHexOf(it) }
+            val label = personas.all().firstOrNull { it.hex == owner }
+                ?.name?.ifBlank { null }
+                ?: context.getString(R.string.personas_primary)
+            "$label · $from"
+        } else from
+        // A group's line opens the group: the sender's thread keeps group
+        // rows out, so "Sam · ladder crew" tapped through to Sam and found
+        // nothing new there. A group id nobody here knows falls back to the
+        // sender — the roster may still be on its way.
+        val group = m.groupId?.takeIf { Groups.get(context, it) != null }
+        post(context, title, what, openChat = personaHex, openGroup = group)
+    }
+
+    // ----- §16.21: the takeover an incoming call is owed -----
+
+    private const val CALL_CHANNEL = "ducat_call"
+
+    /** One ring at a time, so one fixed id — cancel is exact. */
+    private const val CALL_NOTIFICATION_ID = 77
+
+    /**
+     * The full-screen ask: on a lit, unlocked phone a heads-up banner; on a
+     * dark or locked one, Android launches the activity itself — which shows
+     * [org.ducatproject.ducat.ui.CallScreen], because a live call outranks
+     * every screen. The channel is deliberately silent and still: the bell
+     * and the buzz are the engine's own (the British ring), and a channel
+     * sound would ring twice. The lock screen learns there is a call, not
+     * from whom — same rule as money.
+     */
+    private fun callManager(context: Context): NotificationManager? {
+        val mgr = context.getSystemService(NotificationManager::class.java) ?: return null
+        mgr.createNotificationChannel(
+            NotificationChannel(
+                CALL_CHANNEL, context.getString(R.string.notify_call_channel),
+                NotificationManager.IMPORTANCE_HIGH,
+            ).apply {
+                setSound(null, null)
+                enableVibration(false)
+            }
+        )
+        return mgr
+    }
+
+    /**
+     * Every channel, named in [context]'s language.
+     *
+     * A channel is named when it is created and renamed only by being
+     * created again — which the activity channel is on every post, the call
+     * channel on every ring and the node's at every process start. So after
+     * a language change each kept its old name on the phone's notification
+     * Settings page until its own next event: a call channel still in
+     * Arabic under an app in English, for as long as nobody rang. Run at
+     * every activity start, which is what a language change is.
+     */
+    fun refreshChannels(context: Context) {
+        runCatching {
+            manager(context)
+            callManager(context)
+            NodeService.ensureChannel(context)
+        }
+    }
+
+    fun ringIncoming(context: Context, from: String) {
+        if (android.os.Build.VERSION.SDK_INT >= 33 &&
+            context.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) !=
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) return
+        val mgr = callManager(context) ?: return
+        val open = PendingIntent.getActivity(
+            context, reqCode.incrementAndGet(),
+            Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            },
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+        val fact = NotificationCompat.Builder(context, CALL_CHANNEL)
+            .setSmallIcon(R.drawable.ic_cat_notify)
+            .setContentTitle(context.getString(R.string.app_name))
+            .setContentText(context.getString(R.string.notify_call_incoming))
+            .build()
+        val full = NotificationCompat.Builder(context, CALL_CHANNEL)
+            .setSmallIcon(R.drawable.ic_cat_notify)
+            .setContentTitle(from)
+            .setContentText(context.getString(R.string.notify_call_incoming))
+            .setCategory(NotificationCompat.CATEGORY_CALL)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setOngoing(true)
+            .setContentIntent(open)
+            .setFullScreenIntent(open, true)
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+            .setPublicVersion(fact)
+            .build()
+        mgr.notify(CALL_NOTIFICATION_ID, full)
+    }
+
+    /** The ring ended — answered, declined, expired, or withdrawn. */
+    fun quietIncoming(context: Context) {
+        context.getSystemService(NotificationManager::class.java)
+            ?.cancel(CALL_NOTIFICATION_ID)
     }
 
     /**

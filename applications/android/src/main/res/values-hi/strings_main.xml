@@ -8,6 +8,8 @@
     <string name="main_backup_title">बैकअप लें</string>
     <string name="main_backup_body">आपके कुछ कॉन्टैक्ट पिछले बैकअप में नहीं हैं। रीस्टोर से पैसा लौट आएगा, लोग नहीं।</string>
     <string name="main_open_backup_settings">बैकअप सेटिंग्स खोलें</string>
+    <string name="main_notify_off_title">सूचनाएँ बंद हैं</string>
+    <string name="main_notify_off_body">पैसा आने, बिल आने या किसी के कॉल करने पर फ़ोन आपको बता नहीं सकता। चालू करने के लिए टैप करें।</string>
     <string name="main_recent">हाल का</string>
     <string name="main_see_all">सब देखें</string>
     <string name="main_card_link_title">संपर्क जोड़ें?</string>
@@ -38,4 +40,9 @@
     <string name="err_no_keys_yet">आप दोनों ने अभी कार्ड का आदान-प्रदान पूरा नहीं किया है।</string>
     <string name="err_conversation_too_old">उनका कार्ड इस ऐप के लिए बहुत पुराना है। उनसे नया कार्ड माँगें।</string>
     <string name="err_board_full">इस समय यहाँ बहुत सारे अनुरोध हैं। एक मिनट बाद फिर कोशिश करें।</string>
+    <string name="main_deals_title">सौदे</string>
+    <plurals name="main_deals_waiting">
+        <item quantity="one">%1$d सौदा आपकी प्रतीक्षा में है</item>
+        <item quantity="other">%1$d सौदे आपकी प्रतीक्षा में हैं</item>
+    </plurals>
 </resources>

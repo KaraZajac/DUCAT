@@ -25,12 +25,14 @@
     <string name="bartab_back">Atrás</string>
     <string name="bartab_bill_cancelled_msg">Esa cuenta de %1$s está cancelada — no hay nada que pagar.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · la cuenta va en %3$s</string>
+    <string name="bartab_discard_notice">Cuenta descartada — no hay nada que pagar.</string>
     <string name="bartab_remove_line">Quitar</string>
     <string name="bartab_settle_bill">Cerrar — cobrar %1$s</string>
     <string name="bartab_settle_hint">Una cuenta detallada en tu conversación con %1$s. Puede pagar desde cualquier parte — el hilo no se cierra cuando se va.</string>
     <string name="bartab_discard_tab">Descartar cuenta</string>
     <string name="bartab_discard_title">¿Descartar esta cuenta?</string>
     <string name="bartab_discard_body">La cuenta y todo lo anotado en ella se borran de este teléfono. No se envía ningún cobro, y esto no se puede deshacer.</string>
+    <string name="bartab_discard_body_told">La cuenta y todo lo anotado en ella se borran de este teléfono. No se envía ningún cobro — se les avisa de que no hay nada que pagar — y esto no se puede deshacer.</string>
     <string name="bartab_discard_confirm">Descartar</string>
     <string name="bartab_keep_tab">Conservar cuenta</string>
     <string name="bartab_billed_hint">Cuenta enviada. El recibo les llega solo cuando cae el pago. Si se saldó de otra forma, indícalo aquí:</string>
@@ -40,6 +42,13 @@
     <string name="bartab_cancelled_note">Cancelada — se les avisó en la conversación.</string>
     <string name="bartab_paid_oob_note">Pagada fuera de DUCAT ✓ — recibo enviado, sin transacción adjunta.</string>
     <string name="bartab_paid_note">Pagada ✓ — recibo enviado.</string>
+    <string name="bartab_bill_pending">Cobrado, pero la cuenta sigue en este teléfono: saldrá en cuanto vuelva la red. ¿Se saldó de otra forma? Dilo aquí:</string>
+    <string name="bartab_bill_unsent">La cuenta nunca les llegó: la conversación se reinició antes de que pudiera salir. Cancélala y vuelve a cobrar, o indica aquí si se saldó de otra forma:</string>
+    <string name="bartab_cancelled_pending">Cancelada — todavía no se les ha avisado. El aviso saldrá en cuanto este teléfono encuentre la red.</string>
+    <string name="bartab_cancelled_unsent">Cancelada — pero el aviso nunca salió de este teléfono y ya no puede salir. Díselo en la conversación, o puede que aún paguen esta cuenta.</string>
+    <string name="bartab_paid_oob_pending">Pagado fuera de DUCAT ✓ — el recibo sigue en este teléfono. Saldrá en cuanto vuelva la red.</string>
+    <string name="bartab_paid_oob_unsent">Pagado fuera de DUCAT ✓ — pero el recibo no se pudo enviar.</string>
+    <string name="bartab_send_receipt">Enviar el recibo</string>
     <string name="bartab_remove_from_book">Quitar del libro de cuentas</string>
     <string name="bartab_back_to_tabs">Volver a las cuentas</string>
     <!-- What the payer reads on the bill and the receipt. Written in
@@ -55,4 +64,8 @@
     <string name="bill_note_cancelled">La cuenta de %1$s queda anulada: no hay nada que pagar.</string>
     <string name="bill_note_sale">Tu cuenta</string>
     <string name="bartab_tip_line">Propina — gracias</string>
+    <string name="bill_note_issue">Suscripción</string>
+    <string name="bartab_paid_pending">Pagada ✓ — el recibo sigue en este teléfono. Saldrá en cuanto vuelva la red.</string>
+    <string name="bartab_paid_unsent">Pagada ✓ — pero el recibo no se pudo enviar. Se volverá a intentar solo.</string>
+    <string name="bartab_removed_notice">Quitado: %1$s · la cuenta va en %2$s</string>
 </resources>

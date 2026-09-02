@@ -51,4 +51,5 @@
     <string name="book_side_hiring">Hiring</string>
     <string name="book_side_working">Working</string>
     <string name="shells_tab_deals">Deals</string>
+    <string name="shells_bookings_empty_body">When someone books one of your listings — or you book someone else\'s — the deal and its escrow land here.</string>
 </resources>

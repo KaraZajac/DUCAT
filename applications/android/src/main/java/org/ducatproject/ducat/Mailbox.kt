@@ -34,6 +34,19 @@ object Mailbox {
      *  covering slow ring-slot propagation, which force-refresh does not. */
     private const val STUCK_PATIENCE_MS = 10L * 60 * 1000
 
+    /** Failed re-push rounds before [verifyLastWrites] moves on from a
+     *  window the node will not take. */
+    private const val SLOT_FIX_GIVE_UP = 3
+
+    /** Failed poll-clock deliveries of one late slot ([lateSlot]) before it
+     *  is left for the next send to replay. An offline pass is not one. */
+    private const val LATE_SLOT_GIVE_UP = 5
+
+    /** Whether the last [poll] pass found the network dark. Read by
+     *  [verifyLastWrites], which runs later in the same pass and must not
+     *  spend its one re-push on a flood that cannot leave the phone. */
+    @Volatile private var lastPollOffline = false
+
     /** Persisted, not in-memory: the patience clock reset on every app
      *  restart, and a phone that restarts every few minutes (this one does)
      *  made a dead letter immortal — sixteen observed minutes on a ten-minute
@@ -124,6 +137,16 @@ object Mailbox {
      * gets its insurance flood one poll pass later.
      */
     fun verifyLastWrites(context: Context) {
+        // The watermark moves once, so the re-push has to happen when a
+        // flood can actually travel. Found live (2026-09-01): a bill sent
+        // with the emulator's data off was "re-pushed" on the very next
+        // pass — the node accepted the set locally exactly as it had the
+        // send, the watermark advanced, and the insurance was spent on a
+        // dark network: the one wedge this repair exists to prevent, now
+        // guaranteed. The node's own status is no help (it stayed
+        // AttachedFull throughout); the poll's reads are the only honest
+        // witness, and they run earlier in the same pass.
+        if (lastPollOffline) return
         val store = ContactStore(context)
         val c = store.all().firstOrNull { k ->
             k.outSeq > 0 && k.myOutbox.isNotEmpty() &&
@@ -151,6 +174,10 @@ object Mailbox {
                 )
                 pushed++
             }
+            // The head too: it is the write that tells the reader a seq
+            // exists, and its flood dies the same way a slot's does. Same
+            // local bytes, same idempotent re-set.
+            nodeDhtGet(c.myOutbox, 0u, false)?.let { nodeDhtSet(c.myOutbox, 0u, it) }
             if (pushed > 0) {
                 DucatLog.i(
                     TAG,
@@ -159,7 +186,23 @@ object Mailbox {
                 )
             }
             store.setLastSlotVerified(c.personaHex, c.outSeq - 1)
-        }.onFailure { DucatLog.w(TAG, "slot re-push: ${it.message}") }
+            store.setSlotFixTries(c.personaHex, 0)
+        }.onFailure {
+            // firstOrNull above picks this contact again on every pass until
+            // the watermark moves, so a record the node keeps refusing (a
+            // restored phone with no local copy to sign from) starved every
+            // other thread of its insurance flood. Three rounds, then the
+            // window is given up on; the next send re-arms it.
+            val tries = store.slotFixTries(c.personaHex) + 1
+            if (tries >= SLOT_FIX_GIVE_UP) {
+                DucatLog.w(TAG, "slot re-push: ${it.message} — giving up on seq $from..${c.outSeq - 1}")
+                store.setLastSlotVerified(c.personaHex, c.outSeq - 1)
+                store.setSlotFixTries(c.personaHex, 0)
+            } else {
+                DucatLog.w(TAG, "slot re-push: ${it.message} (try $tries)")
+                store.setSlotFixTries(c.personaHex, tries)
+            }
+        }
     }
 
     private fun recordSlotSeen(context: Context, key: String, hash: Int, seq: ULong) {
@@ -191,9 +234,14 @@ object Mailbox {
         validSecs: ULong,
         /** "profile" for the standing code, "sale" for a till/tab/ride handshake. */
         purpose: String = "profile",
+        /** Which of our personas cuts this card — the doorway choice. Null
+         *  means the worn one, which is what every existing caller meant. */
+        asPersonaHex: String? = null,
     ): IssuedHandle {
         val store = ContactStore(context)
-        val persona = PersonaStore(context).secret()
+        val personas = PersonaStore(context)
+        val ownerHex = asPersonaHex ?: personas.worn()
+        val persona = personas.secretFor(ownerHex) ?: personas.secret()
 
         val writer = generateWriterKeys()
         val inbox = nodeDhtCreateShared(writer.public)
@@ -232,7 +280,7 @@ object Mailbox {
                 // carrying a picture is a QR code nobody can scan. Scoped to
                 // the purpose — a "sale" card does not carry the till owner's
                 // phone number to every customer who claims it.
-                MyProfile(context).toWire(purpose = purpose),
+                MyProfile(context, ownerHex).toWire(purpose = purpose),
                 // Stamped so the claimant can scope their reply to match.
                 purpose,
             ),
@@ -245,6 +293,7 @@ object Mailbox {
             inbox.key, writer.public, writer.secret,
             outbox.key, outbox.ownerPublic, outbox.ownerSecret,
             card.uri, purpose, validSecs.toLong(),
+            owner = ownerHex,
         )
         DucatLog.i(TAG, "issued card: inbox=${inbox.key.take(24)}… outbox=${outbox.key.take(24)}…")
         // The inbox key rides along because it is the card's identity: a flow
@@ -281,9 +330,15 @@ object Mailbox {
         /** True only when accepting a hail: the one claim where the car —
          *  model, colour, plate — belongs in the details we publish. */
         asDriver: Boolean = false,
+        /** Which of our personas answers — the doorway choice. Null means
+         *  the worn one; a re-claim of somebody already known ignores both
+         *  and keeps the persona the relationship was born under, because a
+         *  hat worn at scan time must not silently move a friendship into
+         *  the shop. */
+        asPersonaHex: String? = null,
     ): Contact {
         val store = ContactStore(context)
-        val persona = PersonaStore(context).secret()
+        val personas = PersonaStore(context)
 
         nodeDhtOpen(scanned.inboxKey, scanned.writerPublic, scanned.writerSecret)
 
@@ -292,6 +347,28 @@ object Mailbox {
         // nowhere left to write and this is the only way to find out.
         val already = nodeDhtGet(scanned.inboxKey, 1u, true)
         if (already != null && already.isNotEmpty()) {
+            // Whose reply? If it is this device's, the card was claimed here
+            // and the thread it opened still exists — the right answer is that
+            // thread, not "somebody got there first". Observed on the board:
+            // tapping the same kayak twice (once before the first claim had
+            // opened the chat, once after coming back to the results) told the
+            // asker a stranger had just asked, and to look again in a minute.
+            // The reply names the persona that made it, and the outbox it was
+            // minted with is the one the contact record still holds — or, if
+            // a newer card from the same person has been claimed since, the
+            // persona in the card's details is the same and finds the same
+            // thread.
+            val mine = runCatching { parseContactDetails(already) }.getOrNull()
+                ?.takeIf { personas.allHexes().contains(it.persona.toHexString()) }
+            if (mine != null) {
+                val known = store.all().firstOrNull { it.myOutbox == mine.outboxKey }
+                    ?: runCatching { nodeDhtGet(scanned.inboxKey, 0u, true) }.getOrNull()
+                        ?.let { raw -> runCatching { parseContactDetails(raw) }.getOrNull() }
+                        ?.let { theirs ->
+                            store.all().firstOrNull { it.personaHex == theirs.persona.toHexString() }
+                        }
+                if (known != null) throw CardAlreadyMine(known)
+            }
             // Typed, because callers have to tell this apart from "the network
             // is not up yet" and from a genuinely malformed card, and matching
             // on English prose to do it would break in every other language.
@@ -315,9 +392,17 @@ object Mailbox {
         //
         // Claiming also burns the card's single reply slot, so a seller who
         // did this destroyed the code a real buyer was about to scan.
-        if (theirs.persona.toHexString() == PersonaStore(context).personaHex()) {
+        if (personas.allHexes().contains(theirs.persona.toHexString())) {
             throw OwnCard()
         }
+
+        // The answering persona, settled BEFORE the reply seals: the reply
+        // publishes our persona key, so a prior relationship's owner must
+        // win over the worn hat here, not after the network has been told.
+        val prior = store.all().firstOrNull { it.personaHex == theirs.persona.toHexString() }
+        val ownerHex = prior?.let { personas.ownerHexOf(it) }
+            ?: asPersonaHex ?: personas.worn()
+        val persona = personas.secretFor(ownerHex) ?: personas.secret()
 
         val outbox = createLog(context)
         val prekeys = generatePrekeys(
@@ -373,13 +458,12 @@ object Mailbox {
         // Our own outbox is genuinely new — it was created three lines up —
         // so zero is right for the sending side. Their log is only new if the
         // card names a different one, which is exactly the test below.
-        val prior = store.all().firstOrNull { it.personaHex == theirs.persona.toHexString() }
         val sameLog = prior != null && prior.theirOutbox == theirs.outboxKey
         // A card carries a persona and nothing signed over it, so it may not
         // move an address that is already working. See foldCardAddress.
         val (payto, heldPayto) = foldCardAddress(prior, theirs.payto)
 
-        val c = Contact(
+        val built = Contact(
             personaHex = theirs.persona.toHexString(),
             // A name the reader chose survives a re-claim: this argument is
             // null on every path that is not somebody typing one.
@@ -411,13 +495,73 @@ object Mailbox {
             myCardPurpose = prior?.myCardPurpose,
             myCardPurposeAt = prior?.myCardPurposeAt ?: 0L,
             myRing = NEW_RING.toInt(),
+            owner = ownerHex,
         )
-        store.add(c)
+        // Against the record as it is *now*, not `prior`: the network round
+        // trips above are seconds in which a poll can advance the inbound
+        // counters, and writing the snapshot back rewound them the same way.
+        val c = mergeRebuilt(store, built)
         if (heldPayto != null && heldPayto != prior?.pendingAddress) {
             warnAddressHeld(context, c)
         }
         DucatLog.i(TAG, "claimed: their outbox=${theirs.outboxKey.take(24)}…")
         return c
+    }
+
+    /**
+     * A rebuilt contact into the store: counters kept where the logs are
+     * the same ([keepCounters]), and the outbound bookkeeping dropped where
+     * ours is not. The slot-insurance watermark ([verifyLastWrites]) is a
+     * seq in the *old* outbox's numbering; carried across a re-claim it
+     * read the new log's first sends — as many as the old log had — as
+     * already confirmed, and the one repair that exists for a flood that
+     * died was silently off for exactly the messages after a fresh card.
+     * A pending slot is the old record's bytes under the old chain, and
+     * cannot be delivered into the new one. And their read watermark is a
+     * count of the old log: what it says about the rows already sent is
+     * frozen onto them ([ContactStore.retireOutbox]) before the rebuilt
+     * contact, which carries no watermark yet, replaces it.
+     *
+     * The inbound side has its own test — their log, which a claim of our
+     * card always replaces and a claim of theirs replaces unless the card
+     * names the log we already read — and one piece of bookkeeping in its
+     * numbering: the patience clocks per unreadable seq
+     * ([ContactStore.clearStuckClocks]).
+     */
+    private fun mergeRebuilt(store: ContactStore, built: Contact): Contact {
+        var oursRetired: Contact? = null
+        var theirsRetired = false
+        val c = store.merge(built.personaHex) { cur ->
+            oursRetired = cur?.takeIf { it.myOutbox != built.myOutbox }
+            theirsRetired = cur != null && cur.theirOutbox != built.theirOutbox
+            keepCounters(built, cur)
+        }
+        oursRetired?.let {
+            store.retireOutbox(c.personaHex, it.theirReadUpTo)
+            store.setLastSlotVerified(c.personaHex, -1L)
+            store.setSlotFixTries(c.personaHex, 0)
+            store.clearPendingSlot(c.personaHex)
+        }
+        if (theirsRetired) store.clearStuckClocks(c.personaHex)
+        return c
+    }
+
+    /**
+     * The chain counters of a rebuilt Contact, taken from the record on
+     * disk wherever the log they count is the same one (§16.12). A counter
+     * belongs to a log: our side moves with our outbox, theirs with theirs,
+     * and a new log starts at zero.
+     */
+    private fun keepCounters(built: Contact, fresh: Contact?): Contact {
+        if (fresh == null) return built
+        val ours = fresh.myOutbox == built.myOutbox
+        val theirs = fresh.theirOutbox == built.theirOutbox
+        return built.copy(
+            outSeq = if (ours) fresh.outSeq else built.outSeq,
+            outPrevLink = if (ours) fresh.outPrevLink else built.outPrevLink,
+            inSeq = if (theirs) fresh.inSeq else built.inSeq,
+            inPrevLink = if (theirs) fresh.inPrevLink else built.inPrevLink,
+        )
     }
 
     /**
@@ -431,8 +575,19 @@ object Mailbox {
 
     private const val MISSES_BEFORE_RETIRING = 5
 
-    /** The network says it has no such record — not that it could not ask. */
-    private fun isMissing(e: Exception): Boolean =
+    /**
+     * The network says it has no such record — not that it could not ask.
+     *
+     * A third answer, between [isOffline] ("we have not joined yet") and a
+     * card being spent. No node this one can reach holds a copy: their phone
+     * cut the card and never published it, or has not been online since, or
+     * the record's TTL ran out. Not private, because the claim screens need
+     * the same distinction the sweep does — a card whose record cannot be
+     * produced was being called "broken, already claimed, or no longer
+     * valid", which is the sentence that makes somebody burn a good card to
+     * ask for another.
+     */
+    fun isMissing(e: Throwable): Boolean =
         e.message?.contains("Key not found", ignoreCase = true) == true
 
     /** Marks a fetch this device could not make room for. */
@@ -477,7 +632,24 @@ object Mailbox {
         }
     }
 
+    /** One sweep at a time. The poller and every screen that waits on a
+     *  card (till, tab, hail, kiosk…) all call [collectClaims] on their own
+     *  loops; two overlapping runs each read the same unanswered card, and
+     *  each answered it — the contact written twice, the card marked twice,
+     *  and two replacement profile codes minted for one taken. The second
+     *  caller simply finds nothing, and the next tick finds it. */
+    private val claiming = java.util.concurrent.atomic.AtomicBoolean(false)
+
     fun collectClaims(context: Context): Int {
+        if (!claiming.compareAndSet(false, true)) return 0
+        try {
+            return collectClaimsLocked(context)
+        } finally {
+            claiming.set(false)
+        }
+    }
+
+    private fun collectClaimsLocked(context: Context): Int {
         val store = ContactStore(context)
         var collected = 0
         // Every outstanding card, not "the" card. A claim answers a specific
@@ -528,53 +700,62 @@ object Mailbox {
                 }
                 val theirs = parseContactDetails(raw)
                 val personaHex = theirs.persona.toHexString()
-                // The same rule as claimCard, from the issuer's side: keep the
-                // counters for whichever log has not changed underneath them.
                 val prior = store.all().firstOrNull { it.personaHex == personaHex }
-                val sameOurs = prior != null && prior.myOutbox == issued.outboxKey
-                val sameTheirs = prior != null && prior.theirOutbox == theirs.outboxKey
+                // Prior relationship keeps its persona; a new one belongs to
+                // whichever persona cut the card that was answered.
+                val ownerHex = prior?.owner?.ifBlank { null }
+                    ?: issued.owner.ifBlank { PersonaStore(context).personaHex() }
                 val (payto, heldPayto) = foldCardAddress(prior, theirs.payto)
-                store.add(
-                    Contact(
-                        personaHex = personaHex,
-                        petname = prior?.petname,
-                        assertedName = theirs.assertedName,
-                        outSeq = if (sameOurs) prior!!.outSeq else 0,
-                        outPrevLink = if (sameOurs) prior!!.outPrevLink else null,
-                        inSeq = if (sameTheirs) prior!!.inSeq else 0,
-                        inPrevLink = if (sameTheirs) prior!!.inPrevLink else null,
-                        myOutbox = issued.outboxKey,
-                        myOutboxOwnerPublic = issued.outboxOwnerPublic,
-                        myOutboxOwnerSecret = issued.outboxOwnerSecret,
-                        theirOutbox = theirs.outboxKey,
-                        theirBundle = theirs.prekeyBundle,
-                        theirAddress = payto,
-                        pendingAddress = heldPayto,
-                        avatar = theirs.profile.avatar,
-                        email = theirs.profile.email,
-                        phone = theirs.profile.phone,
-                        signal = theirs.profile.signal,
-                        pronouns = theirs.profile.pronouns?.toInt(),
-                        carModel = theirs.profile.carModel,
-                        carColor = theirs.profile.carColor,
-                        plate = theirs.profile.plate,
-                        // Two directions, two fields. What THEIR card said
-                        // survives from the prior record — this claim is of
-                        // OUR card and says nothing about theirs. What our
-                        // card said goes in its own field, with the moment it
-                        // was established: the receipt loop must never reach
-                        // back past it.
-                        cardPurpose = prior?.cardPurpose,
-                        myCardPurpose = issued.purpose.takeIf { it.isNotBlank() }
-                            ?: prior?.myCardPurpose,
-                        myCardPurposeAt =
-                            if (issued.purpose.isNotBlank() &&
-                                issued.purpose != prior?.myCardPurpose
-                            ) System.currentTimeMillis() / 1000
-                            else prior?.myCardPurposeAt ?: 0L,
-                        myRing = NEW_RING.toInt(),
-                    )
+                // The same rule as claimCard, from the issuer's side: the
+                // counters come from the record on disk at the moment of the
+                // write (keepCounters), for whichever log has not changed
+                // underneath them — not from `prior`, which the lane may
+                // have moved past since it was read.
+                val built = Contact(
+                    personaHex = personaHex,
+                    petname = prior?.petname,
+                    assertedName = theirs.assertedName,
+                    myOutbox = issued.outboxKey,
+                    myOutboxOwnerPublic = issued.outboxOwnerPublic,
+                    myOutboxOwnerSecret = issued.outboxOwnerSecret,
+                    theirOutbox = theirs.outboxKey,
+                    theirBundle = theirs.prekeyBundle,
+                    theirAddress = payto,
+                    pendingAddress = heldPayto,
+                    avatar = theirs.profile.avatar,
+                    email = theirs.profile.email,
+                    phone = theirs.profile.phone,
+                    signal = theirs.profile.signal,
+                    pronouns = theirs.profile.pronouns?.toInt(),
+                    carModel = theirs.profile.carModel,
+                    carColor = theirs.profile.carColor,
+                    plate = theirs.profile.plate,
+                    // Two directions, two fields. What THEIR card said
+                    // survives from the prior record — this claim is of
+                    // OUR card and says nothing about theirs. What our
+                    // card said goes in its own field, with the moment it
+                    // was established: the receipt loop must never reach
+                    // back past it.
+                    cardPurpose = prior?.cardPurpose,
+                    myCardPurpose = issued.purpose.takeIf { it.isNotBlank() }
+                        ?: prior?.myCardPurpose,
+                    myCardPurposeAt =
+                        if (issued.purpose.isNotBlank() &&
+                            issued.purpose != prior?.myCardPurpose
+                        ) System.currentTimeMillis() / 1000
+                        else prior?.myCardPurposeAt ?: 0L,
+                    myRing = NEW_RING.toInt(),
+                    owner = ownerHex,
                 )
+                mergeRebuilt(store, built)
+                // A publish-purpose claim is a subscription (§16.20's
+                // scan-to-subscribe): enroll, and let Publications decide
+                // whether the newcomer gets the latest issue or a bill.
+                if (issued.purpose == "publish") {
+                    runCatching {
+                        Publications.enrollFromCard(context, issued.inboxKey, personaHex)
+                    }.onFailure { DucatLog.w(TAG, "enroll: ${it.message}") }
+                }
                 if (heldPayto != null && heldPayto != prior?.pendingAddress) {
                     // firstOrNull, not first: all() drops contacts with no
                     // outbox on either side, and this record was written from
@@ -591,7 +772,17 @@ object Mailbox {
                 // handshake was for that sale, and pre-issuing another would
                 // mint records nobody will ever scan.
                 if (issued.purpose == "profile") {
-                    runCatching { issueCard(context, NameStore(context).get(), 60uL * 60uL * 24uL) }
+                    // The replacement code belongs to the same persona whose
+                    // code was just taken — the QR hub may be showing another
+                    // hat entirely by now.
+                    runCatching {
+                        issueCard(
+                            context,
+                            NameStore(context, issued.owner.ifBlank { null }).get(),
+                            60uL * 60uL * 24uL,
+                            asPersonaHex = issued.owner.ifBlank { null },
+                        )
+                    }
                         .onSuccess { DucatLog.i(TAG, "a fresh profile code is ready") }
                         .onFailure { DucatLog.w(TAG, "could not pre-issue: ${it.message}") }
                 }
@@ -626,8 +817,16 @@ object Mailbox {
                         // still be there; cut its replacement now rather than
                         // at the next handshake.
                         if (issued.purpose == "profile") {
+                            // The same owner rule as the pre-issue above: the
+                            // replacement belongs to the persona whose code
+                            // expired, not to whoever is worn right now.
                             runCatching {
-                                issueCard(context, NameStore(context).get(), 60uL * 60uL * 24uL)
+                                issueCard(
+                                    context,
+                                    NameStore(context, issued.owner.ifBlank { null }).get(),
+                                    60uL * 60uL * 24uL,
+                                    asPersonaHex = issued.owner.ifBlank { null },
+                                )
                             }.onFailure { DucatLog.w(TAG, "could not re-issue: ${it.message}") }
                         }
                     } else {
@@ -670,7 +869,6 @@ object Mailbox {
         context: Context,
         c: Contact,
         body: String,
-        minePersonaHex: String,
         kind: Int = 0,
         amountPxmr: Long? = null,
         payto: String? = null,
@@ -705,8 +903,79 @@ object Mailbox {
         groupSeq: Long? = null,
         groupReSender: ByteArray? = null,
         groupReSeq: Long? = null,
+        /** §16.20: a period's key on a kind-13 message — the period pair
+         *  together, the shelf pair together, core refuses every half. */
+        pubPeriodId: String? = null,
+        pubPeriodKey: ByteArray? = null,
+        pubRecord: String? = null,
+        pubHeadKey: ByteArray? = null,
+        /** §16.20's shipment: hex digest beside its share key, both or
+         *  neither — core refuses every half. */
+        pubSwarmKey: String? = null,
+        pubSwarmDigestHex: String? = null,
+        /** §16.21's door: route blob + 8-byte id, both or neither. */
+        callRoute: ByteArray? = null,
+        callId: ByteArray? = null,
+    ): Contact = synchronized(sendLocks.getOrPut(c.personaHex) { Any() }) {
+        sendLocked(
+            context, c, body, kind, amountPxmr, payto, txidHex, items, taxPxmr,
+            reSeq, reOwn, attachment, oob, etaSecs, payload, round, ceremonyId,
+            positionRecord, positionStreamKey, groupId, groupSeq, groupReSender,
+            groupReSeq, pubPeriodId, pubPeriodKey, pubRecord, pubHeadKey,
+            pubSwarmKey, pubSwarmDigestHex, callRoute, callId,
+        )
+    }
+
+    /**
+     * One writer per contact at a time. The re-read below retires the
+     * stale-snapshot case; it does nothing for two sends in flight at once —
+     * a reaction tapped and a photo still uploading, a location fix landing
+     * while text goes out. Both read the same `outSeq`, both spend a network
+     * round trip opening the outbox, and both seal at that seq with the same
+     * previous link: the second slot write overwrites the first and the
+     * reader keeps a fork. Same shape as [pollLocks], for the same reason.
+     */
+    private val sendLocks = java.util.concurrent.ConcurrentHashMap<String, Any>()
+
+    private fun sendLocked(
+        context: Context,
+        c: Contact,
+        body: String,
+        kind: Int,
+        amountPxmr: Long?,
+        payto: String?,
+        txidHex: String?,
+        items: List<BillItem>,
+        taxPxmr: Long?,
+        reSeq: Long?,
+        reOwn: Boolean,
+        attachment: uniffi.ducat_mobile.AttachmentRef?,
+        oob: Boolean,
+        etaSecs: Long?,
+        payload: ByteArray?,
+        round: Long?,
+        ceremonyId: ByteArray?,
+        positionRecord: String?,
+        positionStreamKey: ByteArray?,
+        groupId: ByteArray?,
+        groupSeq: Long?,
+        groupReSender: ByteArray?,
+        groupReSeq: Long?,
+        pubPeriodId: String?,
+        pubPeriodKey: ByteArray?,
+        pubRecord: String?,
+        pubHeadKey: ByteArray?,
+        pubSwarmKey: String?,
+        pubSwarmDigestHex: String?,
+        callRoute: ByteArray?,
+        callId: ByteArray?,
     ): Contact {
         val store = ContactStore(context)
+        // Who speaks is the contact's to say, not the caller's: the thread
+        // was bound to a persona at its doorway, and deriving the sender
+        // here — instead of taking it as a parameter — makes answering as
+        // somebody else not merely wrong but inexpressible.
+        val minePersonaHex = PersonaStore(context).ownerHexOf(c)
         // **The caller's copy of this contact is a snapshot, and counters move.**
         //
         // Everything numbered on the way out — the sequence, the previous
@@ -763,6 +1032,9 @@ object Mailbox {
             payload, round?.toULong(), ceremonyId,
             positionRecord, positionStreamKey,
             groupId, groupSeq?.toULong(), groupReSender, groupReSeq?.toULong(),
+            pubPeriodId, pubPeriodKey, pubRecord, pubHeadKey,
+            pubSwarmKey, pubSwarmDigestHex?.let { hexToBytes(it) },
+            callRoute, callId,
         )
         // Everything local lands before anything remote. The failure orders
         // are not symmetric: a published slot and head with the counter lost
@@ -779,7 +1051,10 @@ object Mailbox {
                 kind = kind, amountPxmr = amountPxmr ?: 0L, payto = payto,
                 txidHex = txidHex, items = items, taxPxmr = taxPxmr,
                 reSeq = reSeq, reOwn = reOwn,
-                attRecord = attachment?.recordKey, attKey = attachment?.key,
+                attRecord = attachment?.recordKey,
+                attSwarm = attachment?.swarmKey,
+                attSwarmDigest = attachment?.swarmDigest?.toHexString(),
+                attKey = attachment?.key,
                 attNonce = attachment?.nonce, attLen = attachment?.len?.toLong() ?: 0L,
                 attHash = attachment?.ctHash?.toHexString(),
                 attMime = attachment?.mime, attName = attachment?.name,
@@ -789,6 +1064,10 @@ object Mailbox {
                 groupSeq = groupSeq ?: 0L,
                 groupReSender = groupReSender?.toHexString(),
                 groupReSeq = groupReSeq,
+                pubPeriodId = pubPeriodId, pubPeriodKey = pubPeriodKey,
+                pubRecord = pubRecord, pubHeadKey = pubHeadKey,
+                pubSwarmKey = pubSwarmKey, pubSwarmDigest = pubSwarmDigestHex,
+                callRoute = callRoute?.toHexString(), callId = callId?.toHexString(),
                 // Not yet. The write is three lines below, and until it lands
                 // this row is a message that has not left the phone — which
                 // looked identical to one that had.
@@ -812,7 +1091,6 @@ object Mailbox {
                 .onSuccess { store.setTheirBundle(c.personaHex, it) }
         }
         ring = writeSlotClamped(store, c, c.outSeq.toULong(), sealed.bytes, ring)
-        store.markDelivered(c.personaHex, c.outSeq)
         // Republish our keys with every head write. Cheap — the head is read on
         // every poll anyway — and it is the only route back from an exhausted
         // supply, since the handshake inbox is a one-time artifact.
@@ -828,6 +1106,12 @@ object Mailbox {
                 ring.takeIf { it != 8u },
             ),
         )
+        // After the head, not after the slot: a slot the head does not
+        // advertise is a message the reader cannot see, and the row was
+        // being ticked "delivered" before the head went out. Left undelivered,
+        // it says what happened, and the pending slot above heals it on the
+        // next send — replaying the slot and then publishing a head past it.
+        store.markDelivered(c.personaHex, c.outSeq)
         store.clearPendingSlot(c.personaHex)
         DucatLog.i(TAG, "delivered seq ${c.outSeq} to ${c.displayName()}" +
             if (sealed.forwardSecret) "" else " (no forward secrecy — their one-time keys ran out)")
@@ -868,6 +1152,87 @@ object Mailbox {
         return ring
     }
 
+    /**
+     * Deliver the slot an interrupted send left behind, on the poll clock.
+     *
+     * A send commits its row and counters before it touches the network
+     * ([sendLocked]'s ordering), so a node that was not attached — a phone
+     * just out of a tunnel, a bar whose wifi dropped — leaves the message in
+     * the thread marked undelivered and its bytes in the pending slot. Until
+     * now those bytes waited for the *next message to the same person*,
+     * which is fine mid-conversation and not fine at all for the last thing
+     * a shop says to a customer: a bill withdrawn while the network was
+     * down reached them only if the bar happened to write to them again,
+     * and a receipt for cash across the counter never went at all. The poll
+     * clock runs whether or not anybody has anything to say, so the late
+     * slot rides it.
+     *
+     * Same lock as a send, same bytes, same seq — never a re-seal — and the
+     * head the interrupted send never published, so the reader learns the
+     * seq exists. Returns true when a slot went out. Throws what the network
+     * throws; [poll] reads a `TryAgain` here as it does anywhere else.
+     */
+    private fun flushPending(context: Context, personaHex: String): Boolean =
+        synchronized(sendLocks.getOrPut(personaHex) { Any() }) {
+            val store = ContactStore(context)
+            val (pseq, pbytes) = store.pendingSlot(personaHex) ?: return false
+            val c = store.all().firstOrNull { it.personaHex == personaHex } ?: return false
+            if (pseq >= c.outSeq) {
+                // Numbered in a log that no longer exists: a re-claim started
+                // the counter over under it. mergeRebuilt drops the slot on
+                // the way through; one written since its read is the same
+                // case, and replaying it would put a retired log's bytes
+                // under the new log's number.
+                store.clearPendingSlot(personaHex)
+                return false
+            }
+            if (c.myOutboxOwnerSecret.isEmpty()) return false
+            nodeDhtOpen(c.myOutbox, c.myOutboxOwnerPublic, c.myOutboxOwnerSecret)
+            val ring = writeSlotClamped(store, c, pseq.toULong(), pbytes, c.myRing.toUInt())
+            // The counter already stands past the slot; the head just says so.
+            nodeDhtSet(
+                c.myOutbox, 0u,
+                buildLogHead(
+                    c.outSeq.toULong(),
+                    topUpIfLow(store, c.myOutbox),
+                    if (store.readReceipts()) c.inSeq.toULong() else null,
+                    ring.takeIf { it != 8u },
+                ),
+            )
+            store.markDelivered(personaHex, pseq)
+            store.clearPendingSlot(personaHex)
+            DucatLog.i(TAG, "delivered seq $pseq to ${c.displayName()} " +
+                "left over from an interrupted send")
+            true
+        }
+
+    /**
+     * [flushPending] with a give-up, for the poll loop: a record the node
+     * keeps refusing — a restored phone with no local copy to sign from —
+     * would otherwise cost every pass a round trip for the same refusal.
+     * Counted per seq, so the next interrupted send starts from zero.
+     */
+    private fun lateSlot(context: Context, c: Contact) {
+        val (pseq, _) = ContactStore(context).pendingSlot(c.personaHex) ?: return
+        val p = waitPrefs(context)
+        val key = c.personaHex
+        val tries = if (p.getLong("lateq_$key", -1L) == pseq) p.getInt("late_$key", 0) else 0
+        if (tries >= LATE_SLOT_GIVE_UP) return
+        try {
+            flushPending(context, key)
+            p.edit().remove("late_$key").remove("lateq_$key").apply()
+        } catch (e: Exception) {
+            if (isOffline(e)) throw e
+            p.edit().putInt("late_$key", tries + 1).putLong("lateq_$key", pseq).apply()
+            DucatLog.w(
+                TAG,
+                "late slot seq $pseq to ${c.displayName()}: ${e.message}" +
+                    if (tries + 1 >= LATE_SLOT_GIVE_UP) " — leaving it for the next send"
+                    else " (try ${tries + 1})",
+            )
+        }
+    }
+
     /** Where a fetched attachment lives, named by its ciphertext hash. */
     fun attachmentFile(context: Context, ctHashHex: String): java.io.File =
         java.io.File(attachmentDir(context), ctHashHex)
@@ -893,6 +1258,10 @@ object Mailbox {
      */
     private const val ATT_FREE_FLOOR_BYTES = 500L * 1024 * 1024
 
+    /** How long a file nothing mentions yet is presumed to be a send in
+     *  progress. Longer than any upload; see [sweepAttachments]. */
+    private const val ATT_SWEEP_GRACE_MS = 60L * 60 * 1000
+
     /**
      * Delete the attachment files no message points at any more.
      *
@@ -905,6 +1274,12 @@ object Mailbox {
      * message finds its picture already on disk — so "still referenced" is
      * exactly the set of hashes some live thread still mentions.
      *
+     * Young files are left alone whatever the threads say. The sender caches
+     * its own picture under the hash *before* the send, and the send uploads
+     * the chunks — many round trips — before the message row that mentions
+     * the hash exists; a sweep in that window took the picture out from
+     * under the bubble it was about to belong to.
+     *
      * Returns the bytes reclaimed.
      */
     fun sweepAttachments(context: Context): Long {
@@ -915,14 +1290,44 @@ object Mailbox {
             }
         }
         var freed = 0L
+        val settled = System.currentTimeMillis() - ATT_SWEEP_GRACE_MS
         attachmentDir(context).listFiles()?.forEach { f ->
-            if (f.name !in live) {
+            if (f.name !in live && f.lastModified() < settled) {
                 val n = f.length()
                 if (f.delete()) freed += n
             }
         }
         if (freed > 0) DucatLog.i(TAG, "attachments: reclaimed ${freed / 1024} KiB")
+        sweepAttachmentTrouble(context, live)
         return freed
+    }
+
+    /** Counters last forgotten. Hourly, because the read below decrypts
+     *  every key in the store and this runs on a loop that has plenty to do. */
+    @Volatile private var lastTroubleSweep = 0L
+
+    /**
+     * The counters, not only the files.
+     *
+     * A picture that never arrived leaves an `att_trouble_<hash>` behind —
+     * and the ones that never arrive are exactly the ones that keep theirs:
+     * a fetch that succeeds clears its own. So a thread cleared, a message
+     * expired under its window, a picture abandoned by a sender whose
+     * record aged out all left a key in the store for the life of the
+     * install, while the file sweep beside them found nothing to delete
+     * because a picture that never arrived was never written.
+     */
+    private fun sweepAttachmentTrouble(context: Context, live: Set<String>) {
+        val now = System.currentTimeMillis()
+        if (now - lastTroubleSweep < 3_600_000L) return
+        lastTroubleSweep = now
+        val p = troublePrefs(context)
+        val stale = p.all.keys.filter {
+            it.startsWith("att_trouble_") && it.removePrefix("att_trouble_") !in live
+        }
+        if (stale.isEmpty()) return
+        p.edit().apply { stale.forEach { remove(it) } }.apply()
+        DucatLog.i(TAG, "attachments: forgot ${stale.size} counter(s) for pictures nobody holds")
     }
 
     /**
@@ -960,71 +1365,155 @@ object Mailbox {
     val fetchProgress =
         kotlinx.coroutines.flow.MutableStateFlow<Triple<String, Int, Int>?>(null)
 
+    /** The ciphertext hash of the swarm attachment being fetched, if any —
+     *  the bubble reads it to show its own bar. Manual per tap: a big file
+     *  downloads when asked, never by surprise on somebody's data plan. */
+    val swarmFetching = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
+
+    /** Fetch one swarm-road attachment (§16.15's big road), blocking.
+     *  Room-checked, hash-verified, unsealed and cached exactly like the
+     *  record road; the transfer itself rides §16.20's engine with
+     *  stay=false — a file sent to a person is for that person. */
+    fun fetchSwarmAttachment(context: Context, m: StoredMessage): Boolean {
+        val hash = m.attHash ?: return false
+        val share = m.attSwarm ?: return false
+        val digest = m.attSwarmDigest ?: return false
+        val key = m.attKey ?: return false
+        val nonce = m.attNonce ?: return false
+        val out = attachmentFile(context, hash)
+        if (out.exists()) return true
+        val dir = attachmentDir(context)
+        val used = dir.listFiles()?.sumOf { it.length() } ?: 0L
+        if (!roomForAttachment(used, dir.usableSpace, m.attLen)) {
+            attachmentTrouble(context, hash, NO_ROOM)
+            return false
+        }
+        if (!swarmFetching.compareAndSet(null, hash)) return false
+        val tmp = java.io.File(context.filesDir, "att_tmp/$hash")
+        return try {
+            tmp.mkdirs()
+            Swarm.fetch(share, digest, tmp.absolutePath, staySeeding = false)
+            val blob = tmp.walkTopDown().filter { it.isFile }
+                .maxByOrNull { it.length() }
+                ?: throw IllegalStateException("the share held no file")
+            val ct = blob.readBytes()
+            val sum = java.security.MessageDigest.getInstance("SHA-256").digest(ct)
+            if (sum.toHexString() != hash) {
+                throw IllegalStateException("ciphertext hash mismatch")
+            }
+            val plain = attachmentOpen(key, nonce, ct)
+            out.writeBytes(plain)
+            clearAttachmentTrouble(context, hash)
+            DucatLog.i(TAG, "fetched swarm attachment ${hash.take(12)}… (${plain.size} bytes)")
+            true
+        } catch (e: Throwable) {
+            DucatLog.w(TAG, "swarm attachment ${hash.take(12)}…: ${e.message}")
+            attachmentTrouble(context, hash, 1)
+            false
+        } finally {
+            tmp.deleteRecursively()
+            swarmFetching.value = null
+            ContactStore.bump()
+        }
+    }
+
+    /** Poll passes seen by [fetchOneAttachment] — the clock its backoff
+     *  counts in, since the poller's interval moves. */
+    private var attachmentPasses = 0L
+
     fun fetchOneAttachment(context: Context): Boolean {
         val store = ContactStore(context)
-        for (c in store.all()) {
-            for (m in store.thread(c.personaHex)) {
-                val hash = m.attHash ?: continue
-                val rec = m.attRecord ?: continue
-                val key = m.attKey ?: continue
-                val nonce = m.attNonce ?: continue
-                val out = attachmentFile(context, hash)
-                if (out.exists()) continue
-                // Room first. The bytes are about to be pulled off the network
-                // and written, and there is no undo — the record they came
-                // from gets deleted on the way past.
-                val dir = attachmentDir(context)
-                val used = dir.listFiles()?.sumOf { it.length() } ?: 0L
-                if (!roomForAttachment(used, dir.usableSpace, m.attLen)) {
+        val trouble = troublePrefs(context)
+        attachmentPasses++
+        // Every missing picture, least troubled first. The first candidate
+        // in thread order used to be the only one ever tried: a picture with
+        // no room for it, or one whose record the network had lost, sat at
+        // the front of the walk and every picture behind it waited for ever
+        // on a fetch that was never going to be attempted.
+        val wanted = buildList {
+            for (c in store.all()) {
+                for (m in store.thread(c.personaHex)) {
+                    val hash = m.attHash ?: continue
+                    if (m.attRecord == null || m.attKey == null || m.attNonce == null) continue
+                    if (attachmentFile(context, hash).exists()) continue
+                    add(m to trouble.getInt("att_trouble_$hash", 0))
+                }
+            }
+        }.sortedBy { (_, n) -> n.coerceAtLeast(0) }
+        for ((m, n) in wanted) {
+            val hash = m.attHash!!
+            val rec = m.attRecord!!
+            val key = m.attKey!!
+            val nonce = m.attNonce!!
+            val out = attachmentFile(context, hash)
+            // A picture the network has stopped answering for is retried
+            // less and less often — every pass was a round trip spent on a
+            // record that had aged out, ahead of pictures that would fetch.
+            if (n >= TRIES_BEFORE_SAYING_SO) {
+                val every = 1L shl minOf(n - TRIES_BEFORE_SAYING_SO + 1, 6)
+                if (attachmentPasses % every != 0L) continue
+            }
+            // Room first. The bytes are about to be pulled off the network
+            // and written, and there is no undo — the record they came
+            // from gets deleted on the way past.
+            val dir = attachmentDir(context)
+            val used = dir.listFiles()?.sumOf { it.length() } ?: 0L
+            if (!roomForAttachment(used, dir.usableSpace, m.attLen)) {
+                // Said on the bubble, not only here. A picture nobody has
+                // room for showed "downloading…" for ever, and the one
+                // person who could fix it — by deleting something — was
+                // the one not being told. Said once, though: the mark bumps
+                // every screen, and the poll loop repeats this every pass.
+                if (n != NO_ROOM) {
                     DucatLog.w(
                         TAG,
                         "attachment ${hash.take(12)}… not fetched: " +
                             "${used / 1024 / 1024} MiB of pictures, " +
                             "${dir.usableSpace / 1024 / 1024} MiB free",
                     )
-                    // Said on the bubble, not only here. A picture nobody has
-                    // room for showed "downloading…" for ever, and the one
-                    // person who could fix it — by deleting something — was
-                    // the one not being told.
                     attachmentTrouble(context, hash, NO_ROOM)
-                    return false
                 }
-                return runCatching {
-                    nodeDhtOpen(rec, null, null)
-                    val ctLen = m.attLen + 16 // AEAD tag
-                    val chunks = ((ctLen + 32_767) / 32_768).toInt()
-                    val buf = java.io.ByteArrayOutputStream()
-                    for (i in 0 until chunks) {
-                        fetchProgress.value = Triple(hash, i, chunks)
-                        val part = nodeDhtGet(rec, i.toUInt(), true)
-                            ?: throw IllegalStateException("chunk $i missing")
-                        buf.write(part)
-                    }
-                    fetchProgress.value = Triple(hash, chunks, chunks)
-                    val ct = buf.toByteArray()
-                    val digest = java.security.MessageDigest.getInstance("SHA-256").digest(ct)
-                    if (digest.toHexString() != hash) {
-                        throw IllegalStateException("ciphertext hash mismatch")
-                    }
-                    val plain = attachmentOpen(key, nonce, ct)
-                    out.writeBytes(plain)
-                    // Stewardship (§18.7): the bytes are ours now; stop being
-                    // an origin for the record that carried them.
-                    runCatching { nodeDhtDelete(rec) }
-                    DucatLog.i(TAG, "fetched attachment ${hash.take(12)}… (${plain.size} bytes)")
-                    clearAttachmentTrouble(context, hash)
-                    fetchProgress.value = null
-                    ContactStore.bump()
-                    true
-                }.getOrElse {
-                    DucatLog.w(TAG, "attachment ${hash.take(12)}…: ${it.message}")
-                    // Keep trying — a record can come back with the network —
-                    // but stop promising. Counted rather than timed because
-                    // the poller is the clock here and its interval moves.
-                    attachmentTrouble(context, hash, 1)
-                    fetchProgress.value = null
-                    false
+                // A smaller one further down may still fit.
+                continue
+            }
+            return runCatching {
+                nodeDhtOpen(rec, null, null)
+                val ctLen = m.attLen + 16 // AEAD tag
+                val chunks = ((ctLen + 32_767) / 32_768).toInt()
+                val buf = java.io.ByteArrayOutputStream()
+                for (i in 0 until chunks) {
+                    fetchProgress.value = Triple(hash, i, chunks)
+                    val part = nodeDhtGet(rec, i.toUInt(), true)
+                        ?: throw IllegalStateException("chunk $i missing")
+                    buf.write(part)
                 }
+                fetchProgress.value = Triple(hash, chunks, chunks)
+                val ct = buf.toByteArray()
+                val digest = java.security.MessageDigest.getInstance("SHA-256").digest(ct)
+                if (digest.toHexString() != hash) {
+                    throw IllegalStateException("ciphertext hash mismatch")
+                }
+                val plain = attachmentOpen(key, nonce, ct)
+                out.writeBytes(plain)
+                // Stewardship (§18.7): the bytes are ours now; stop being
+                // an origin for the record that carried them. Unless the
+                // record is ours — a picture we sent, whose cached copy went
+                // missing — because that record is the one the other side
+                // fetches from, and deleting it here takes their copy away.
+                if (!m.outgoing) runCatching { nodeDhtDelete(rec) }
+                DucatLog.i(TAG, "fetched attachment ${hash.take(12)}… (${plain.size} bytes)")
+                clearAttachmentTrouble(context, hash)
+                fetchProgress.value = null
+                ContactStore.bump()
+                true
+            }.getOrElse {
+                DucatLog.w(TAG, "attachment ${hash.take(12)}…: ${it.message}")
+                // Keep trying — a record can come back with the network —
+                // but stop promising. Counted rather than timed because
+                // the poller is the clock here and its interval moves.
+                attachmentTrouble(context, hash, 1)
+                fetchProgress.value = null
+                false
             }
         }
         return false
@@ -1275,6 +1764,19 @@ object Mailbox {
     }
 
     @Synchronized
+    /**
+     * Poll just this contact's thread — a ringing call's fast lane. The
+     * full [poll] sweeps every contact at one-to-many DHT reads each, and a
+     * 90-second ring expired with the answer still queued behind strangers.
+     */
+    fun pollContact(context: Context, c: Contact): Int {
+        val store = ContactStore(context)
+        val fresh = store.all().firstOrNull { it.personaHex == c.personaHex } ?: return 0
+        return runCatching {
+            pollOne(context, store, fresh, PersonaStore(context).ownerHexOf(fresh))
+        }.getOrDefault(0)
+    }
+
     fun poll(context: Context): Int {
         val store = ContactStore(context)
         // Before reading anyone: a restored device is advertising keys it does
@@ -1287,21 +1789,28 @@ object Mailbox {
         // take-downs); each poll is a retry until the slot is verifiably
         // not ours or the notice has expired out of everyone's sweeps.
         runCatching { org.ducatproject.ducat.ui.sweepHailTombstones(context) }
-        val mine = PersonaStore(context).personaHex()
+        val personas = PersonaStore(context)
         var got = 0
+        var offline = false
         for (c in store.all()) {
             got += try {
-                pollOne(context, store, c, mine)
+                // Ours first: a slot an interrupted send left behind is
+                // older than anything this pass will read, and the other
+                // side may be waiting on it.
+                lateSlot(context, c)
+                pollOne(context, store, c, personas.ownerHexOf(c))
             } catch (e: Exception) {
                 if (isOffline(e)) {
                     // Offline fails every contact identically; one line says it.
                     DucatLog.i(TAG, "offline — messages wait for the network")
+                    offline = true
                     break
                 }
                 DucatLog.w(TAG, "poll ${c.displayName()}: ${e.message}")
                 0
             }
         }
+        lastPollOffline = offline
         return got
     }
 
@@ -1312,7 +1821,19 @@ object Mailbox {
      * (`contacts_reply_replay`), so the screen can say it in the reader's own
      * language instead of repeating an exception message.
      */
-    class CardAlreadyUsed : IllegalStateException("card already claimed")
+    open class CardAlreadyUsed : IllegalStateException("card already claimed")
+
+    /**
+     * The card's one reply is this device's: it was claimed here before, and
+     * [contact] is the thread that claim opened.
+     *
+     * A subclass rather than a return, so a caller that has not been taught
+     * the difference still sees a spent card — a driver's second tap on a
+     * hail must not send the rider a second offer — while the scan, the
+     * link, the address book and the board can open the conversation the
+     * person already has instead of blaming a stranger for it.
+     */
+    class CardAlreadyMine(val contact: Contact) : CardAlreadyUsed()
 
     /**
      * The card is this device's own.
@@ -1345,7 +1866,21 @@ object Mailbox {
     fun isOffline(e: Throwable) =
         e.message?.contains("TryAgain", ignoreCase = true) == true
 
-    private fun pollOne(context: Context, store: ContactStore, c: Contact, minePersonaHex: String): Int {
+
+    /** One reader per contact at a time — and each reader starts from the
+     *  freshest counters. The push lane and the sweep may ask for the same
+     *  contact in the same breath: unserialized, both would read the same
+     *  new sequence numbers; serialized-but-stale, the second would re-read
+     *  what the first just advanced past. */
+    private val pollLocks = java.util.concurrent.ConcurrentHashMap<String, Any>()
+
+    private fun pollOne(context: Context, store: ContactStore, c: Contact, minePersonaHex: String): Int =
+        synchronized(pollLocks.getOrPut(c.personaHex) { Any() }) {
+            val fresh = store.all().firstOrNull { it.personaHex == c.personaHex } ?: return 0
+            pollOneLocked(context, store, fresh, minePersonaHex)
+        }
+
+    private fun pollOneLocked(context: Context, store: ContactStore, c: Contact, minePersonaHex: String): Int {
         nodeDhtOpen(c.theirOutbox, null, null)
         val headRaw = nodeDhtGet(c.theirOutbox, 0u, true) ?: return 0
         val head = parseLogHead(headRaw)
@@ -1751,6 +2286,8 @@ object Mailbox {
                 reOwn = opened.reOwn,
                 etaSecs = opened.etaSecs?.toLong(),
                 attRecord = opened.attachment?.recordKey,
+                attSwarm = opened.attachment?.swarmKey,
+                attSwarmDigest = opened.attachment?.swarmDigest?.toHexString(),
                 attKey = opened.attachment?.key,
                 attNonce = opened.attachment?.nonce,
                 attLen = opened.attachment?.len?.toLong() ?: 0L,
@@ -1761,6 +2298,14 @@ object Mailbox {
                 groupSeq = opened.groupSeq?.toLong() ?: 0L,
                 groupReSender = opened.groupReSender?.toHexString(),
                 groupReSeq = opened.groupReSeq?.toLong(),
+                pubPeriodId = opened.publication?.periodId,
+                pubPeriodKey = opened.publication?.periodKey,
+                pubRecord = opened.publication?.recordKey,
+                pubHeadKey = opened.publication?.headKey,
+                pubSwarmKey = opened.publication?.swarmKey,
+                pubSwarmDigest = opened.publication?.swarmDigest?.toHexString(),
+                callRoute = opened.callRoute?.toHexString(),
+                callId = opened.callId?.toHexString(),
             )
             // The one funnel every arrival passes through, so the notification
             // cannot be forgotten by a new screen: if it was stored, it was
@@ -1837,6 +2382,14 @@ object Mailbox {
                 runCatching {
                     Groups.absorbRoster(context, c.personaHex, opened.groupId, opened.payload)
                 }.onFailure { DucatLog.w(TAG, "group roster: ${it.message}") }
+            }
+            // §16.20: a period key filed the moment it arrives — by
+            // (publisher, period), in its own store, so deleting the
+            // conversation never deletes what it paid for.
+            if (arrived.kind == 13) {
+                runCatching {
+                    Publications.absorbKey(context, c.personaHex, arrived)
+                }.onFailure { DucatLog.w(TAG, "publication key: ${it.message}") }
             }
             // §15.12: a live-position stream offered. **Only after an accept.**
             //

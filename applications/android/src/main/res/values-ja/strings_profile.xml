@@ -44,6 +44,9 @@
     <string name="profile_bond_releasing">返却中 — 相手の署名を待っています…</string>
     <string name="profile_bond_cosigned">署名しました — 送信は相手側です。</string>
     <string name="profile_bond_released">保証金を返しました ✓</string>
+    <string name="profile_bond_call_off">ボンドを取り消す</string>
+    <string name="profile_bond_holds">エスクローに %1$s があります。代わりに預かり金を返してください</string>
+    <string name="profile_bond_called_off">ボンドは取り消されました。</string>
     <string name="profile_bond_txid">返却トランザクション</string>
     <string name="profile_bond_arbiter_q">3本目の鍵は誰が持ちますか？</string>
     <string name="profile_bond_arbiter_note">立会人がいると、3本の鍵のうち2本で保証金を動かせます。電話をなくしても詰まらず、争いにも行き先があります。立会人単独では何も持ち出せません。</string>

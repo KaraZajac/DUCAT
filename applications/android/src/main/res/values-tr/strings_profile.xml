@@ -44,6 +44,9 @@
     <string name="profile_bond_releasing">Geri alınıyor — karşı imza bekleniyor…</string>
     <string name="profile_bond_cosigned">İmzalandı — yayınlamak karşı tarafta.</string>
     <string name="profile_bond_released">Depozito geri alındı ✓</string>
+    <string name="profile_bond_call_off">Teminatı iptal et</string>
+    <string name="profile_bond_holds">Emanette %1$s var — bunun yerine depozitoyu iade et</string>
+    <string name="profile_bond_called_off">Teminat iptal edildi.</string>
     <string name="profile_bond_txid">Geri alma işlemi</string>
     <string name="profile_bond_arbiter_q">Üçüncü anahtar kimde?</string>
     <string name="profile_bond_arbiter_note">Hakemle üç anahtardan ikisi yeter: kayıp bir telefon hiçbir şeyi kilitlemez, bir anlaşmazlığın gideceği yer olur. Hakem tek başına hiçbir şey alamaz.</string>

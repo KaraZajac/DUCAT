@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -17,14 +18,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.delay
 import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.MyProfile
+import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.R
 
 private const val TAG = "QrHub"
@@ -46,11 +46,25 @@ fun QrHub(
     onClose: () -> Unit,
 ) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     var scanning by remember { mutableStateOf(true) }
     var uri by remember { mutableStateOf(ContactStore(context).currentCardUri()) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    // The scan tab's own: a claim on its way, and what the last code came
+    // to. These used to share the pair above, which only My code rendered
+    // — so a code that was neither card nor address, or a card whose claim
+    // failed, left a live preview that said nothing, with the sentence on
+    // the other tab.
+    // The claim runs off the screen (claimOffScreen), and this is which
+    // card it is for. Saveable, because a rotation mid-claim rebuilt this
+    // screen with `claiming` false and a fresh camera: the same code was
+    // read again and a second claim raced the first for the card's one
+    // reply slot, and the thread the first one opened was never shown.
+    var claimingCard by rememberSaveable { mutableStateOf<String?>(null) }
+    var claiming by remember {
+        mutableStateOf(claimingCard?.let { ThreadSends.inFlight(claimKey(it)) } ?: false)
+    }
+    var scanError by remember { mutableStateOf<String?>(null) }
     // Nothing to introduce ourselves with, and about to introduce ourselves.
     // See NameGate: the name travels on the handshake, so a blank one arrives
     // as "Unnamed contact" and neither end is told.
@@ -79,30 +93,99 @@ fun QrHub(
     // a null means the claim landed and the replacement is a moment behind,
     // and blanking the screen for that moment would be its own little lie.
     val cardsV by ContactStore.changes.collectAsState()
-    LaunchedEffect(cardsV) {
-        ContactStore(context).currentCardUri()
-            ?.takeIf { it != uri }
-            ?.let { uri = it }
-    }
+    val personas = remember { PersonaStore(context) }
+    val worn = remember(cardsV) { personas.worn() }
 
-    // Made without being asked for. A card takes seconds to publish — two DHT
-    // records — and the moment someone wants it is the moment they are holding
-    // a phone out to somebody. Waiting until then puts the wait in front of the
-    // person it is for.
-    LaunchedEffect(Unit) {
-        if (uri != null) return@LaunchedEffect
-        busy = true
-        val r = withContext(Dispatchers.IO) {
-            runCatching {
-                Mailbox.issueCard(context, MyProfile(context).name(), 60uL * 60uL * 24uL)
+    // A mint asked for by hand, after one failed. Any value above zero is
+    // "now, and skip the grace below".
+    var attempt by remember { mutableIntStateOf(0) }
+
+    // The mint is the process's (ThreadSends), keyed to the hat, and `busy`
+    // is read from there rather than kept here: kept here, a rotation
+    // mid-mint recreated this screen with busy false, and for a hat that
+    // had never had a code the effect below met no guard at all and
+    // minted a second card while the first was still being written.
+    val mintKey = "mint:$worn"
+    val tick by ThreadSends.ticks.collectAsState()
+    LaunchedEffect(tick) {
+        busy = ThreadSends.inFlight(mintKey)
+        for (o in ThreadSends.take(mintKey)) when (o) {
+            is ThreadSends.Outcome.Landed -> { o.result?.let { uri = it }; error = null }
+            is ThreadSends.Outcome.Failed -> {
+                // The link sentence is the mapper's default, and there
+                // is no link here: nothing was scanned, a record was
+                // not written.
+                error = moneyFailure(context, o.error, fallback = R.string.qrhub_issue_failed)
+                DucatLog.w(TAG, "issue: ${o.error.javaClass.simpleName}: ${o.error.message}")
             }
         }
-        busy = false
-        r.onSuccess { uri = it.uri }
-            .onFailure {
-                error = moneyFailure(context, it)
-                DucatLog.w(TAG, "issue: ${it.message}")
+    }
+    // The scanned card's claim, read back by whichever instance of this
+    // screen is up when it lands.
+    LaunchedEffect(tick, claimingCard) {
+        val k = claimingCard?.let(::claimKey) ?: return@LaunchedEffect
+        for (o in ThreadSends.take(k)) {
+            claimingCard = null
+            when (o) {
+                is ThreadSends.Outcome.Landed -> o.claimed(context)?.let(onOpenChat)
+                is ThreadSends.Outcome.Failed -> {
+                    scanError = context.getString(claimFailureRes(o.error))
+                    DucatLog.w(TAG, "claim: ${o.error.message}")
+                }
             }
+        }
+        claiming = claimingCard != null && ThreadSends.inFlight(k)
+    }
+
+    // One effect for both lives of the code. The registry answers scoped to
+    // the worn persona now, so switching hats re-reads; a hat that has NEVER
+    // had a standing code gets one minted here (the first-run case, per
+    // persona) — but a code that just got *claimed* is left alone, because
+    // collectClaims pre-issues the replacement and a second mint here would
+    // put two cards up for one hat. "Never had" and "just claimed" are told
+    // apart by whether any profile card for this hat exists at all.
+    LaunchedEffect(cardsV, worn, attempt) {
+        val store = ContactStore(context)
+        val current = store.currentCardUri()
+        if (current != null) {
+            if (current != uri) uri = current
+            return@LaunchedEffect
+        }
+        val primary = personas.personaHex()
+        val everHad = store.issuedCards().any {
+            it.purpose == "profile" &&
+                (it.owner == worn || (it.owner.isBlank() && worn == primary))
+        }
+        if (ThreadSends.inFlight(mintKey)) return@LaunchedEffect
+        if (everHad && attempt == 0) {
+            // Left alone for a while, not for good. The pre-issue is one
+            // DHT write behind the claim, and when it lands the store bumps
+            // and this effect restarts with the code in hand — but when it
+            // fails ("could not pre-issue", a line in the log and nothing
+            // else) the answered card stays in the registry for an hour,
+            // and for that hour this screen said "Publishing…" over a mint
+            // nobody was doing. A replacement that has not arrived in this
+            // long is not coming.
+            delay(REPLACEMENT_GRACE_MS)
+        }
+        // After the grace, not before it: a mint that landed during the
+        // wait restarted this effect with the code in hand.
+        if (ThreadSends.inFlight(mintKey)) return@LaunchedEffect
+        busy = true
+        error = null
+        // Its own job, not this effect's. issueCard bumps the store midway,
+        // which restarts the effect — and a restart cancelled the mint's
+        // continuation with `busy` still true, so My code spun for as long
+        // as the screen was open; an unrelated bump landing in the same
+        // seconds found no card and no history and minted a second one for
+        // the same hat. The guard above is what the restart now meets.
+        val hat = worn
+        ThreadSends.launch(store, mintKey, null) {
+            Mailbox.issueCard(
+                context, MyProfile(context).name(), 60uL * 60uL * 24uL,
+                asPersonaHex = hat,
+            ).uri
+        }
     }
 
     Dialog(
@@ -139,7 +222,11 @@ fun QrHub(
                     ) {
                         SegmentedButton(
                             selected = scanning,
-                            onClick = { scanning = true },
+                            // A fresh tab is a fresh scanner: the camera is
+                            // remounted with nothing latched, so the same
+                            // card can be tried again — and the old verdict
+                            // should not be waiting above it.
+                            onClick = { scanning = true; scanError = null },
                             shape = SegmentedButtonDefaults.itemShape(0, 2),
                             // No checkmark — the fill already says which is active,
                             // and the icon shoves the label sideways when it appears.
@@ -157,6 +244,30 @@ fun QrHub(
                         ) { Text(stringResource(R.string.qrhub_my_code), maxLines = 1, softWrap = false) }
                     }
                     if (scanning) {
+                        // What the camera is doing about the last code, above
+                        // the preview where the eye already is.
+                        if (claiming) {
+                            Row(
+                                Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                                Spacer(Modifier.width(10.dp))
+                                Text(
+                                    stringResource(R.string.contacts_reading_inbox),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                        scanError?.let {
+                            Text(
+                                it,
+                                Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                        }
                         // One scanner for both kinds. A person holding a phone at
                         // a code does not know or care which sort it is, and two
                         // buttons for "scan" would make them guess.
@@ -167,7 +278,11 @@ fun QrHub(
                             prompt = stringResource(R.string.qrhub_scan_prompt),
                             onResult = { raw ->
                                 val text = raw.trim()
-                                if (!text.startsWith("ducat:card/")) {
+                                if (claiming) {
+                                    // A second code while the first is being
+                                    // claimed would be a second claim; the
+                                    // scanner already swallows the same one.
+                                } else if (!text.startsWith("ducat:card/")) {
                                     // A Monero code. Not a contact and never
                                     // becomes one — hand it to the pay screen,
                                     // which is what the person scanning it
@@ -177,29 +292,46 @@ fun QrHub(
                                     // the payer left to retype the figure.
                                     val m = moneroUri(text)
                                     if (m != null) onScanAddress(m.first, m.second)
-                                    else error = context.getString(R.string.qrhub_not_a_code)
+                                    else scanError = context.getString(R.string.qrhub_not_a_code)
                                 } else {
                                     val go: () -> Unit = {
-                                    busy = true; error = null
-                                    scope.launch {
-                                        val r = withContext(Dispatchers.IO) {
-                                            runCatching {
-                                                val card = uniffi.ducat_mobile.readContactCard(text)
-                                                Mailbox.claimCard(context, card, null)
-                                            }
-                                        }
-                                        busy = false
-                                        r.onSuccess(onOpenChat).onFailure {
-                                            error = context.getString(claimFailureRes(it))
-                                            DucatLog.w(TAG, "claim: ${it.message}")
-                                        }
-                                    }
+                                        claiming = true; scanError = null
+                                        claimingCard = text
+                                        // Scanned this one before: the thread
+                                        // it opened is the answer, and the
+                                        // claim finds it.
+                                        claimOffScreen(context, text)
                                     }
                                     if (nameGateNeeded(context)) intro = go else go()
                                 }
                             },
                         )
                     } else {
+                        // Which hat the code belongs to, said above it —
+                        // this is the screen held out to a person, and the
+                        // one place wearing the wrong hat would bind a
+                        // stranger to the wrong compartment.
+                        val roster = remember(cardsV) { personas.all() }
+                        if (roster.size > 1) {
+                            val wornP = roster.firstOrNull { it.hex == worn }
+                            if (wornP != null) {
+                                Row(
+                                    Modifier.fillMaxWidth().padding(bottom = 6.dp),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    PersonaDot(wornP)
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(
+                                        stringResource(
+                                            R.string.qrhub_showing_as, personaLabel(wornP),
+                                        ),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            }
+                        }
                         MyCode(
                             uri = uri,
                             busy = busy,
@@ -207,6 +339,7 @@ fun QrHub(
                             onCopy = {
                                 uri?.let { copyText(context, it, context.getString(R.string.qrhub_copied)) }
                             },
+                            onRetry = { error = null; attempt++ },
                         )
                     }
                 }
@@ -215,8 +348,17 @@ fun QrHub(
     }
 }
 
+/** How long the claim's own replacement gets before this screen mints one. */
+private const val REPLACEMENT_GRACE_MS = 30_000L
+
 @Composable
-private fun MyCode(uri: String?, busy: Boolean, error: String?, onCopy: () -> Unit) {
+private fun MyCode(
+    uri: String?,
+    busy: Boolean,
+    error: String?,
+    onCopy: () -> Unit,
+    onRetry: () -> Unit,
+) {
     val context = LocalContext.current
     // While this screen shows the code, a tap serves the same card. The QR
     // and the antenna are one offer in two physics.
@@ -230,6 +372,25 @@ private fun MyCode(uri: String?, busy: Boolean, error: String?, onCopy: () -> Un
     val profileV by ContactStore.changes.collectAsState()
     val name = remember(profileV) { MyProfile(context).name() }
     val pic = remember(profileV) { MyProfile(context).avatar() }
+    // **A code on a phone that has not joined is a code nobody can take.**
+    //
+    // The two records behind it are published to the network, and until
+    // this node is on it there is nothing out there to open: the person it
+    // is handed to gets "not readable yet" and no idea whose end the
+    // trouble is at. Caught on a phone whose node never attached — it held
+    // up a perfectly ordinary-looking QR for as long as anyone cared to
+    // scan it. Optimistic default, so a screen that is about to say
+    // "connected" does not flash a warning on the way there.
+    var joined by remember { mutableStateOf(true) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            joined = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                runCatching { uniffi.ducat_mobile.nodeStatus().publicInternetReady }
+                    .getOrDefault(false)
+            }
+            delay(3_000)
+        }
+    }
 
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
@@ -241,6 +402,24 @@ private fun MyCode(uri: String?, busy: Boolean, error: String?, onCopy: () -> Un
         Spacer(Modifier.height(20.dp))
 
         when {
+            // The failure before the spinner: with no code and a mint that
+            // did not happen, this said "Publishing two records…" over the
+            // sentence explaining that nothing was being published, and
+            // the only way to try again was to leave and come back.
+            !busy && uri == null && error != null -> Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    error,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                )
+                Spacer(Modifier.height(12.dp))
+                OutlinedButton(onClick = onRetry) {
+                    Text(stringResource(R.string.qrhub_try_again))
+                }
+            }
             busy || uri == null -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 CatSpinner(Modifier.size(40.dp), tint = MaterialTheme.colorScheme.primary)
                 Spacer(Modifier.height(12.dp))
@@ -252,6 +431,15 @@ private fun MyCode(uri: String?, busy: Boolean, error: String?, onCopy: () -> Un
             }
             else -> {
                 QrBlock(uri)
+                if (!joined) {
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        stringResource(R.string.qrhub_offline),
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    )
+                }
                 Spacer(Modifier.height(16.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     OutlinedButton(onClick = onCopy) {
@@ -298,7 +486,10 @@ private fun MyCode(uri: String?, busy: Boolean, error: String?, onCopy: () -> Un
                 )
             }
         }
-        error?.let {
+        // Under a code that is still showing — the one this screen opened
+        // with, after its claim, when the mint of the next failed. With no
+        // code the branch above already said it.
+        if (uri != null || busy) error?.let {
             Spacer(Modifier.height(16.dp))
             Text(it, color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall)

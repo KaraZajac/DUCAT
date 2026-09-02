@@ -14,10 +14,14 @@
     <string name="chat_voice_failed">این پیام صوتی ضبط نشد — دوباره میکروفون را نگه دار.</string>
     <string name="chat_what_card">کارت</string>
     <string name="chat_what_contact">مخاطب</string>
+    <string name="chat_what_reaction">واکنش</string>
+    <string name="chat_what_invite">دعوت‌نامه</string>
+    <string name="chat_what_note">یادداشت</string>
     <string name="chat_error_location_fix">موقعیت‌یابی ممکن نشد</string>
     <string name="chat_recording_placeholder">در حال ضبط… %1$d ثانیه</string>
     <string name="chat_message_placeholder">پیام</string>
     <string name="chat_take_picture">گرفتن عکس</string>
+    <string name="chat_no_camera_app">برنامهٔ دوربینی روی این گوشی نیست</string>
     <string name="chat_hold_to_record">برای ضبط پیام صوتی نگه دار</string>
     <string name="chat_attach">پیوست</string>
     <string name="chat_close">بستن</string>
@@ -42,6 +46,10 @@
     <!-- Retractions (kind 5) -->
     <string name="chat_you_withdrew">پیامی را پس گرفتی</string>
     <string name="chat_they_withdrew">%1$s پیامی را پس گرفت</string>
+    <string name="chat_you_withdrew_bill">صورت‌حسابی را پس گرفتی</string>
+    <string name="chat_they_withdrew_bill">%1$s صورت‌حسابی را پس گرفت</string>
+    <string name="chat_you_withdrew_call">تماسی را پس گرفتی</string>
+    <string name="chat_they_withdrew_call">%1$s تماسی را پس گرفت</string>
     <string name="chat_you_declined">رد کردی</string>
     <string name="chat_they_declined">%1$s رد کرد</string>
     <string name="chat_retract_with_quote">%1$s — «%2$s»</string>
@@ -83,6 +91,7 @@
     <string name="chat_downloading_audio">🎤 در حال دانلود…</string>
     <string name="chat_downloading_file">📎 در حال دانلود…</string>
     <string name="chat_att_stuck">این نرسیده است — شاید دیگر در دسترس نباشد. تلاش ادامه دارد.</string>
+    <string name="chat_att_gone">این نرسیده است — شاید دیگر در دسترس نباشد.</string>
     <string name="chat_att_no_space">فضای کافی روی این تلفن برای دانلود آن نیست.</string>
     <string name="chat_picture_desc">عکس</string>
     <string name="chat_could_not_decode">📷 (قابل خواندن نبود)</string>
@@ -108,6 +117,7 @@
     <string name="chat_stop">توقف</string>
     <string name="chat_play_voice_memo">پخش پیام صوتی</string>
     <string name="chat_voice_memo">پیام صوتی</string>
+    <string name="chat_play_failed">این پیام صوتی پخش نمی‌شود.</string>
     <string name="chat_size_kb">%1$d کیلوبایت</string>
     <string name="chat_size_b">%1$d بایت</string>
     <string name="chat_file_fallback">فایل</string>
@@ -138,6 +148,9 @@
         <item quantity="other">%1$d پیام اینجا گم شده</item>
     </plurals>
     <string name="chat_not_sent_yet">هنوز ارسال نشده</string>
+    <string name="chat_not_sent">ارسال نشد</string>
     <string name="chat_cancel_request">لغو درخواست</string>
     <string name="chat_copied">پیام کپی شد</string>
+    <string name="chat_download_file">دانلود</string>
+    <string name="chat_file_too_big_swarm">این فایل %1$d مگابایت است — فعلاً فایل‌ها تا ۶۴ مگابایت</string>
 </resources>

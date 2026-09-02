@@ -27,6 +27,7 @@ import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.SafeImage
 import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.ContactStore
+import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.R
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.draw.clip
@@ -45,7 +46,12 @@ import androidx.compose.foundation.combinedClickable
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
+fun ChatListScreen(
+    personaSecret: ByteArray?,
+    onOpenChat: (Contact) -> Unit,
+    onOpenGroup: (String) -> Unit,
+    onNewGroup: () -> Unit,
+) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val store = remember { ContactStore(context) }
     var all by remember { mutableStateOf(store.all()) }
@@ -59,26 +65,19 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
     // Same reason as the chat screen: a message arriving must move this list,
     // and nothing else tells it one did.
     val version by ContactStore.changes.collectAsState()
-    LaunchedEffect(version) { all = store.all() }
-    var sheet by remember { mutableStateOf<Sheet?>(null) }
+    // Re-read once after first composition too, not only on version ticks:
+    // a bump that lands between the remember{} read and the collector
+    // arming is otherwise lost, and the screen sat on "No conversations"
+    // with five unread on the tab badge until the next unrelated bump.
+    var settled by remember { mutableStateOf(false) }
+    LaunchedEffect(version) {
+        all = store.all()
+    }
+    var sheet by rememberSaveable { mutableStateOf<Sheet?>(null) }
     var confirm by remember { mutableStateOf<Contact?>(null) }
-    // §16.19: the groups, above the pairwise threads they fan into.
-    val groups = remember(version) { org.ducatproject.ducat.Groups.all(context) }
-    var openGroup by rememberSaveable { mutableStateOf<String?>(null) }
-    var newGroup by remember { mutableStateOf(false) }
-
-    val og = openGroup
-    if (og != null) {
-        GroupChatScreen(idHex = og, onBack = { openGroup = null })
-        return
-    }
-    if (newGroup) {
-        GroupCreateScreen(
-            onDone = { made -> newGroup = false; openGroup = made },
-            onCancel = { newGroup = false },
-        )
-        return
-    }
+    // §16.19: the groups, above the pairwise threads they fan into. Every
+    // group the phone is in; the pass below keeps the worn hat's.
+    val allGroups = remember(version) { org.ducatproject.ducat.Groups.all(context) }
 
     // Most recent conversation first — the list's order *is* its meaning, and
     // "who did I talk to last" is the question it answers. Threads that have
@@ -94,26 +93,70 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
     // IO, keyed on version so a read-marker write moves the dots too.
     var rowLast by remember { mutableStateOf<Map<String, StoredMessage?>>(emptyMap()) }
     var rowUnread by remember { mutableStateOf<Set<String>>(emptySet()) }
+    // The worn compartment's contacts — what the search and the New chat
+    // sheet offer. Both used to read `all`: a shop's till searching for
+    // "invoice" turned up the owner's personal threads, and a chat begun
+    // from the sheet with somebody another hat knows landed in a list
+    // this hat does not show.
+    var mine by remember { mutableStateOf<List<Contact>>(emptyList()) }
+    // Groups with something said since they were last opened
+    // ([Groups.markSeen]). Off the same decoded threads as the rows.
+    var groupUnread by remember { mutableStateOf<Set<String>>(emptySet()) }
+    // The worn hat's groups, scoped the way the threads are: a group is
+    // joined as one persona (Groups.mineIn) and rides that persona's
+    // pairwise threads, which this list hides under another hat — so the
+    // group row was the one thing of the other compartment's showing here,
+    // with a dot the drawer's chip counted against the other hat.
+    var groups by remember { mutableStateOf<List<org.ducatproject.ducat.Groups.Group>>(emptyList()) }
     LaunchedEffect(version, all) {
-        val (sorted, lasts, unread) = withContext(kotlinx.coroutines.Dispatchers.IO) {
-            val visible = all.filter { it.chatVisible }
+        val pass = withContext(kotlinx.coroutines.Dispatchers.IO) {
+            // The worn compartment's conversations only, once a second
+            // persona exists — the switcher in the drawer is how the others
+            // are reached. One hat, one list; the single-persona era sees
+            // no change because every owner resolves to the primary.
+            val personas = PersonaStore(context)
+            val worn = personas.worn()
+            val scoped = if (personas.all().size > 1) {
+                all.filter { personas.ownerHexOf(it) == worn }
+            } else all
+            val visible = scoped.filter { it.chatVisible }
+            val groups = if (personas.all().size > 1) {
+                allGroups.filter { org.ducatproject.ducat.Groups.mineIn(context, it) == worn }
+            } else allGroups
+            val threads = HashMap<String, List<StoredMessage>>()
+            fun threadOf(hex: String) = threads.getOrPut(hex) { store.thread(hex) }
             // By the last message a person could have read, not the last
             // one the protocol wrote. Calling off an escrow sends a kind
             // 10, and that alone lifted a dormant arbiter to the top of
             // the list above conversations with actual sentences in them.
             val lasts = visible.associate { c ->
-                c.personaHex to store.thread(c.personaHex)
+                c.personaHex to threadOf(c.personaHex)
                     .lastOrNull { it.kind !in CEREMONY_KINDS && it.groupId == null }
             }
             val unread = visible
-                .filter { it.inSeq > store.chatSeen(it.personaHex) }
+                .filter { it.inSeq > store.chatSeen(it) }
                 .map { it.personaHex }.toSet()
-            Triple(
+            val loud = groups.filter { g ->
+                val rows = org.ducatproject.ducat.Groups.merge(context, g, ::threadOf)
+                org.ducatproject.ducat.Groups.unread(
+                    org.ducatproject.ducat.Groups.seenMarks(context, g.idHex),
+                    org.ducatproject.ducat.Groups.highWater(context, rows),
+                )
+            }.map { it.idHex }.toSet()
+            ListPass(
+                scoped,
                 visible.sortedByDescending { lasts[it.personaHex]?.timestamp ?: 0L },
-                lasts, unread,
+                lasts, unread, groups, loud,
             )
         }
-        shown = sorted; rowLast = lasts; rowUnread = unread
+        mine = pass.mine; shown = pass.sorted; rowLast = pass.lasts
+        rowUnread = pass.unread; groups = pass.groups; groupUnread = pass.groupUnread
+        // Settled means *this* list has landed, not the re-read above: that
+        // one never suspends, so it flipped the flag a frame after every
+        // composition — one frame of "No conversations" on each visit to
+        // the tab and each return from a thread, while the sort was still
+        // decrypting.
+        settled = true
     }
     Column(Modifier.fillMaxSize()) {
         Row(
@@ -177,21 +220,26 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                             R.plurals.group_members, g.members.size, g.members.size,
                         ),
                         null,
-                    ) { openGroup = g.idHex })
+                    ) { onOpenGroup(g.idHex) })
                 }
-                for (c in all) {
+                for (c in mine) {
                     if (q !in c.displayName().lowercase()) continue
                     add(Hit(c.displayName(), "", null) { onOpenChat(c) })
                 }
             }
-            var bodyHits by remember { mutableStateOf<List<Hit>>(emptyList()) }
+            // With the query they answer: the hits for "lad" are not the
+            // hits for "ladder", and an empty list is only "nothing
+            // matches" once it is this query's. Before that the screen
+            // said so for every keystroke, during the pause below, and
+            // then changed its mind.
+            var bodyHits by remember { mutableStateOf("" to emptyList<Hit>()) }
             LaunchedEffect(q, version) {
                 // Restarting on every keystroke is the debounce: the delay
                 // dies with the superseded effect, and only a pause reads.
                 kotlinx.coroutines.delay(120)
-                bodyHits = withContext(kotlinx.coroutines.Dispatchers.IO) {
+                bodyHits = q to withContext(kotlinx.coroutines.Dispatchers.IO) {
                 val out = ArrayList<Hit>()
-                for (c in all) {
+                for (c in mine) {
                     for (m in store.thread(c.personaHex)) {
                         if (m.kind !in setOf(0, 1, 2, 3) || m.groupId != null) continue
                         val hay = (m.body + " " + (m.attName ?: "")).lowercase()
@@ -206,14 +254,14 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                         val m = r.message
                         if (m.kind != 0) continue
                         if (q !in m.body.lowercase()) continue
-                        out.add(Hit(g.name, m.body, m.timestamp) { openGroup = g.idHex })
+                        out.add(Hit(g.name, m.body, m.timestamp) { onOpenGroup(g.idHex) })
                     }
                 }
                 out.sortedByDescending { it.ts ?: 0L }.take(50)
                 }
             }
-            val hits = nameHits + bodyHits
-            if (hits.isEmpty()) {
+            val hits = nameHits + bodyHits.second
+            if (hits.isEmpty() && bodyHits.first == q) {
                 Text(
                     stringResource(R.string.activity_search_none, search),
                     style = MaterialTheme.typography.bodySmall,
@@ -251,11 +299,13 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                     }
                 }
             }
-            return
-        }
+        } else {
+        // No early return out of the search branch: a bare `return` inside
+        // Column's lambda is the IntStack.peek2 crash the comment below
+        // describes, and it went off on the first character typed here.
         // Groups, each by name with its size. Rendered above the threads they
         // fan into so the two lists cannot be confused for one.
-        if (groups.isNotEmpty() || ContactStore(context).all().size >= 2) {
+        if (groups.isNotEmpty() || mine.size >= 2) {
             Row(
                 Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -266,18 +316,30 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(Modifier.weight(1f))
-                TextButton(onClick = { newGroup = true }) {
+                TextButton(onClick = onNewGroup) {
                     Text(stringResource(R.string.group_new))
                 }
             }
             groups.forEach { g ->
+                // The same dot as a thread's, for the same reason: this is
+                // the row that answers for what was said in the group. Its
+                // member's direct row no longer does (Groups.markSeen).
+                val loud = g.idHex in groupUnread
+                val unreadLabel = stringResource(R.string.chatlist_unread)
                 ListItem(
-                    modifier = Modifier.clickable { openGroup = g.idHex },
+                    modifier = Modifier
+                        .semantics { if (loud) stateDescription = unreadLabel }
+                        .clickable { onOpenGroup(g.idHex) },
                     colors = ListItemDefaults.colors(
                         containerColor = androidx.compose.ui.graphics.Color.Transparent,
                     ),
                     leadingContent = { Avatar(g.name, null) },
-                    headlineContent = { Text(isolate(g.name)) },
+                    headlineContent = {
+                        Text(
+                            isolate(g.name),
+                            fontWeight = if (loud) FontWeight.Bold else FontWeight.Normal,
+                        )
+                    },
                     supportingContent = {
                         Text(
                             pluralStringResource(
@@ -287,6 +349,15 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     },
+                    trailingContent = if (!loud) null else {
+                        {
+                            Box(
+                                Modifier.size(9.dp).background(
+                                    MaterialTheme.colorScheme.primary, CircleShape,
+                                )
+                            )
+                        }
+                    },
                 )
             }
             HorizontalDivider(
@@ -295,7 +366,11 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
             )
         }
 
-        if (shown.isEmpty()) {
+        // The copy waits for the first settled read: an empty list a frame
+        // after cold start is "still looking", and "no conversations" said
+        // then is a lie the badge contradicts. No early return — that shape
+        // has crashed Compose here before (IntStack.peek2).
+        if (shown.isEmpty() && settled) {
             Column(
                 Modifier.fillMaxWidth().padding(32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -316,7 +391,7 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-        } else {
+        } else if (shown.isNotEmpty()) {
             LazyColumn(Modifier.fillMaxSize()) {
                 items(shown, key = { it.personaHex }) { c ->
                     // The newest message a person would recognise. Ceremony
@@ -413,6 +488,7 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                 }
             }
         }
+        }
     }
 
     confirm?.let { c ->
@@ -451,8 +527,11 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
             store = store,
         )
         Sheet.New -> NewChatSheet(
-            contacts = all.sortedBy { it.displayName().lowercase() },
-            ambiguous = store.ambiguous(),
+            contacts = mine.sortedBy { it.displayName().lowercase() },
+            // The set computed off-main above; asking the store here
+            // re-read and decrypted the whole book on every recomposition
+            // the sheet was open for, on the main thread.
+            ambiguous = ambiguous,
             onDismiss = { sheet = null },
             onAdd = { sheet = Sheet.Add },
             onPick = {
@@ -551,7 +630,10 @@ private fun NewChatSheet(
  */
 @Composable
 internal fun Avatar(name: String, picture: ByteArray? = null, size: Int = 40) {
-    val bmp = remember(picture) {
+    // Keyed by content: the bytes come out of the store as a fresh array on
+    // every read, and an array is only ever equal to itself, so keyed by the
+    // array this decoded every avatar on every store bump.
+    val bmp = remember(picture?.size, picture?.contentHashCode()) {
         picture?.let {
             SafeImage.fromBytes(it, SafeImage.AVATAR_PIXELS)
         }
@@ -592,7 +674,17 @@ internal fun Avatar(name: String, picture: ByteArray? = null, size: Int = 40) {
  * set out of the thread itself; here it keeps them out of the preview line
  * and out of the order the list is sorted in.
  */
-private val CEREMONY_KINDS = setOf(8, 9, 10, 11, 12)
+private val CEREMONY_KINDS = ContactStore.HIDDEN_KINDS
+
+/** One walk of the store, landed as state in one go. */
+private class ListPass(
+    val mine: List<Contact>,
+    val sorted: List<Contact>,
+    val lasts: Map<String, StoredMessage?>,
+    val unread: Set<String>,
+    val groups: List<org.ducatproject.ducat.Groups.Group>,
+    val groupUnread: Set<String>,
+)
 
 /** What one message looks like from a list away (§16.13's kinds included). */
 internal fun previewOf(context: Context, m: StoredMessage): String = when {
@@ -620,7 +712,18 @@ internal fun previewOf(context: Context, m: StoredMessage): String = when {
             Amounts.show(context, m.amountPxmr).primary,
         )
     m.kind == 4 -> context.getString(R.string.chatlist_preview_reacted, isolate(m.body))
-    m.attHash != null -> context.getString(R.string.chatlist_preview_photo)
+    m.kind == 14 -> context.getString(R.string.chatlist_preview_call)
+    m.kind == 15 -> context.getString(R.string.chatlist_preview_call_answered)
+    m.kind == 13 -> context.getString(
+        R.string.chatlist_preview_issue, isolate(m.pubPeriodId ?: ""),
+    ).trim()
+    m.attHash != null -> when {
+        (m.attMime ?: "").startsWith("audio/") ->
+            context.getString(R.string.chatlist_preview_voice)
+        (m.attMime ?: "").startsWith("image/") ->
+            context.getString(R.string.chatlist_preview_photo)
+        else -> "📎 " + isolate(m.attName ?: context.getString(R.string.chat_file_fallback))
+    }
     else -> isolate(m.body)
 }
 

@@ -54,6 +54,24 @@ fun PositionCard(contact: Contact) {
     val watching = remember(version, contact.personaHex) {
         Positions.watching(context, contact.personaHex)
     }
+    // The button's own ask. Sharing is offered here and nowhere else — this
+    // thread is the one place the consent means something — so a phone that
+    // has never been asked for location has to be asked by this button;
+    // deferring to "the screens that own the permission" left it dead, a
+    // tap that logged a line and showed nothing. A permanent no goes to
+    // Settings (askForLocation) rather than to a dialog Android will not
+    // show again.
+    var asked by remember { mutableStateOf(false) }
+    val locPerm = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
+    ) { ok ->
+        asked = true
+        if (ok) start(context, contact)
+    }
+    val share = {
+        if (locationAllowed(context)) start(context, contact)
+        else askForLocation(context, asked) { locPerm.launch(it) }
+    }
     if (!sharing && !watching) {
         // Nothing running: the offer to start, and nothing else. A ride with
         // no position sharing should look like a ride, not like a feature
@@ -62,7 +80,7 @@ fun PositionCard(contact: Contact) {
             Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            TextButton(onClick = { start(context, contact) }) {
+            TextButton(onClick = share) {
                 Text(stringResource(R.string.pos_share_mine))
             }
         }
@@ -177,7 +195,7 @@ fun PositionCard(contact: Contact) {
                         Thread { Positions.stop(context, contact.personaHex) }.start()
                     }) { Text(stringResource(R.string.pos_stop_sharing)) }
                 } else {
-                    TextButton(onClick = { start(context, contact) }) {
+                    TextButton(onClick = share) {
                         Text(stringResource(R.string.pos_share_mine))
                     }
                 }
@@ -189,9 +207,8 @@ fun PositionCard(contact: Contact) {
 /** Minting a record and sealing the reference are both network work. */
 private fun start(context: android.content.Context, contact: Contact) {
     if (!locationAllowed(context)) {
-        // Asking for the position before asking for the permission would put
-        // a dead button in front of somebody. The permission flow lives on the
-        // screens that already own it; here we simply do not start.
+        // The buttons ask first; a start that still finds no permission
+        // would mint a record no fix will ever feed, so it does not start.
         org.ducatproject.ducat.DucatLog.w("PositionCard", "no location permission — not sharing")
         return
     }

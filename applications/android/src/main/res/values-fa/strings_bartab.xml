@@ -25,12 +25,14 @@
     <string name="bartab_back">بازگشت</string>
     <string name="bartab_bill_cancelled_msg">آن صورت‌حساب %1$s لغو شد — چیزی برای پرداخت نیست.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · حساب الان %3$s</string>
+    <string name="bartab_discard_notice">حساب کنار گذاشته شد — چیزی برای پرداخت نیست.</string>
     <string name="bartab_remove_line">حذف</string>
     <string name="bartab_settle_bill">تسویه — صورت‌حساب %1$s</string>
     <string name="bartab_settle_hint">یک صورت‌حساب ریز به گفتگویت با %1$s می‌رود. از هر جایی می‌توانند پرداخت کنند — با رفتن‌شان گفتگو بسته نمی‌شود.</string>
     <string name="bartab_discard_tab">دور انداختن حساب</string>
     <string name="bartab_discard_title">این حساب دور انداخته شود؟</string>
     <string name="bartab_discard_body">حساب و هر چه رویش ثبت شده از این گوشی حذف می‌شود. صورت‌حسابی فرستاده نمی‌شود و این کار برگشت‌پذیر نیست.</string>
+    <string name="bartab_discard_body_told">حساب و هر چه رویش ثبت شده از این گوشی حذف می‌شود. صورت‌حسابی فرستاده نمی‌شود — به او خبر داده می‌شود که چیزی برای پرداخت نیست — و این کار برگشت‌پذیر نیست.</string>
     <string name="bartab_discard_confirm">دور بینداز</string>
     <string name="bartab_keep_tab">نگه داشتن حساب</string>
     <string name="bartab_billed_hint">صورت‌حساب رفت. رسید بعد از نشستن پرداخت خودش می‌رود. اگر جور دیگری تسویه شد، همین‌جا بگو:</string>
@@ -40,6 +42,13 @@
     <string name="bartab_cancelled_note">لغو شد — در گفتگو به آن‌ها گفته شد.</string>
     <string name="bartab_paid_oob_note">بیرون از DUCAT پرداخت شد ✓ — رسید رفت، بدون تراکنش پیوست.</string>
     <string name="bartab_paid_note">پرداخت شد ✓ — رسید رفت.</string>
+    <string name="bartab_bill_pending">صورت‌حساب صادر شد، اما هنوز روی این گوشی است — به محض برگشتن شبکه فرستاده می‌شود. به شکل دیگری تسویه شده؟ اینجا بگویید:</string>
+    <string name="bartab_bill_unsent">صورت‌حساب هرگز به دستشان نرسید: گفتگو پیش از فرستادن آن بازنشانی شد. لغوش کنید و دوباره صادر کنید، یا اگر به شکل دیگری تسویه شده اینجا بگویید:</string>
+    <string name="bartab_cancelled_pending">لغو شد — هنوز به آنها خبر داده نشده. اعلان به محض اینکه این گوشی شبکه را پیدا کند فرستاده می‌شود.</string>
+    <string name="bartab_cancelled_unsent">لغو شد — اما اعلان هرگز از این گوشی خارج نشد و دیگر نمی‌تواند فرستاده شود. در گفتگو به آنها بگویید، وگرنه ممکن است این صورت‌حساب را بپردازند.</string>
+    <string name="bartab_paid_oob_pending">خارج از DUCAT پرداخت شد ✓ — رسید هنوز روی این گوشی است. به محض برگشتن شبکه فرستاده می‌شود.</string>
+    <string name="bartab_paid_oob_unsent">خارج از DUCAT پرداخت شد ✓ — اما رسید فرستاده نشد.</string>
+    <string name="bartab_send_receipt">فرستادن رسید</string>
     <string name="bartab_remove_from_book">حذف از دفتر حساب‌ها</string>
     <string name="bartab_back_to_tabs">بازگشت به حساب‌ها</string>
     <!-- What the payer reads on the bill and the receipt. Written in
@@ -55,4 +64,8 @@
     <string name="bill_note_cancelled">صورت‌حساب %1$s لغو شد — چیزی برای پرداخت نیست.</string>
     <string name="bill_note_sale">صورتحساب شما</string>
     <string name="bartab_tip_line">انعام — سپاسگزاریم</string>
+    <string name="bill_note_issue">اشتراک</string>
+    <string name="bartab_paid_pending">پرداخت شد ✓ — رسید هنوز روی این گوشی است. به محض برگشتن شبکه فرستاده می‌شود.</string>
+    <string name="bartab_paid_unsent">پرداخت شد ✓ — اما رسید فرستاده نشد. خودبه‌خود دوباره تلاش می‌شود.</string>
+    <string name="bartab_removed_notice">حذف شد: %1$s · حساب الان %2$s</string>
 </resources>

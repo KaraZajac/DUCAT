@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">Rang you</string>
+    <string name="chat_call_you_rang">You rang</string>
+    <string name="chat_call_answered">Answered your call</string>
+    <string name="chat_call_you_answered">You answered</string>
+    <string name="chat_call_missed_note">A call rang while you were away.</string>
+    <string name="chatlist_preview_call">Called</string>
+    <string name="chatlist_preview_call_answered">Answered a call</string>
+    <string name="notify_call">%1$s is calling</string>
+    <string name="notify_call_answered">%1$s answered your call</string>
+    <string name="call_button">Call</string>
+    <string name="call_calling">Calling…</string>
+    <string name="call_incoming">Incoming DUCAT call</string>
+    <string name="call_frames">↓%1$d ↑%2$d frames</string>
+    <string name="call_answer_btn">Answer</string>
+    <string name="call_end_btn">Hang up</string>
+    <string name="call_body_ring">Calling you</string>
+    <string name="call_body_answer">Answered</string>
+    <string name="call_body_decline">Can\u2019t talk right now.</string>
+    <string name="notify_call_channel">Incoming calls</string>
+    <string name="notify_call_incoming">Incoming call</string>
+    <string name="call_no_answer">No answer</string>
+    <string name="call_leave_message">Leave a message</string>
+    <string name="call_dismiss">Not now</string>
+    <string name="call_body_cancel">Hung up before you answered.</string>
+    <string name="call_connecting">Connecting…</string>
+    <string name="call_unreached">Couldn\u2019t reach them</string>
+    <string name="call_never_connected">Never connected</string>
+    <string name="call_notify_calling">Calling %1$s…</string>
+    <string name="call_notify_in_call">In a call with %1$s</string>
+    <string name="call_notify_return">Tap to come back to it.</string>
+</resources>

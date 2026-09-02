@@ -31,8 +31,15 @@ import java.util.Locale
  * throwable carrying an empty message set a chat's error line to `""`, which
  * drew nothing, so a picture that failed to send looked exactly like a button
  * that did not work. Blank is missing.
+ *
+ * And without the bridge showing through: UniFFI renders every error that
+ * crosses from the engine as `"v1=" + the reason` — the tuple field's own
+ * name — so `v1=not enough in the notes you picked` reached the screen from
+ * every site that had not stripped it by hand. The sentence after the prefix
+ * is the engine's, written to be read; the prefix never is.
  */
-fun Throwable.saidWhy(): String? = message?.takeIf { it.isNotBlank() }
+fun Throwable.saidWhy(): String? =
+    message?.removePrefix("v1=")?.trim()?.takeIf { it.isNotBlank() }
 
 object DucatLog {
     private const val CAP = 600

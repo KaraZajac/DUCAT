@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">Ti ha chiamato</string>
+    <string name="chat_call_you_rang">Hai chiamato</string>
+    <string name="chat_call_answered">Ha risposto alla tua chiamata</string>
+    <string name="chat_call_you_answered">Hai risposto</string>
+    <string name="chat_call_missed_note">Una chiamata è squillata mentre eri via.</string>
+    <string name="chatlist_preview_call">Ha chiamato</string>
+    <string name="chatlist_preview_call_answered">Chiamata risposta</string>
+    <string name="notify_call">%1$s sta chiamando</string>
+    <string name="notify_call_answered">%1$s ha risposto alla tua chiamata</string>
+    <string name="call_button">Chiama</string>
+    <string name="call_calling">Chiamata…</string>
+    <string name="call_incoming">Chiamata DUCAT in arrivo</string>
+    <string name="call_frames">↓%1$d ↑%2$d frame</string>
+    <string name="call_answer_btn">Rispondi</string>
+    <string name="call_end_btn">Riaggancia</string>
+    <string name="call_body_ring">Ti sta chiamando</string>
+    <string name="call_body_answer">Risposto</string>
+    <string name="call_body_decline">Ora non posso parlare.</string>
+    <string name="notify_call_channel">Chiamate in arrivo</string>
+    <string name="notify_call_incoming">Chiamata in arrivo</string>
+    <string name="call_no_answer">Nessuna risposta</string>
+    <string name="call_leave_message">Lascia un messaggio</string>
+    <string name="call_dismiss">Non ora</string>
+    <string name="call_body_cancel">Ha riattaccato prima che rispondessi.</string>
+    <string name="call_connecting">Connessione…</string>
+    <string name="call_unreached">Non raggiungibile</string>
+    <string name="call_never_connected">Non si è mai connessa</string>
+    <string name="call_notify_calling">Chiamata a %1$s…</string>
+    <string name="call_notify_in_call">In chiamata con %1$s</string>
+    <string name="call_notify_return">Tocca per tornarci.</string>
+</resources>

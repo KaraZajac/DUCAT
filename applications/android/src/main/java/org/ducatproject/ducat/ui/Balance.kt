@@ -7,6 +7,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -47,7 +50,15 @@ fun BalanceCard(
     // evaluate, a figure on the page is a fact you own. The card below holds
     // the qualifications, which are details and deserve a box.
     val ctx = androidx.compose.ui.platform.LocalContext.current
-    val shown = org.ducatproject.ducat.Amounts.show(ctx, spendablePxmr)
+    // Read the store's version here, not only upstream. The tap below flips
+    // the unit and bumps the store, but the home screen re-reads balances
+    // and hands this card the same figures it had — every parameter equal,
+    // so composition skipped it and the figure did not flip until a sync
+    // happened to change a number. The version is the input that changed.
+    val version by org.ducatproject.ducat.ContactStore.changes.collectAsState()
+    val shown = remember(version, spendablePxmr) {
+        org.ducatproject.ducat.Amounts.show(ctx, spendablePxmr)
+    }
     // Sixteen, the same as the cards under it. The figure is not in a box and
     // should not be, but it still has to start where everything else on the
     // page starts: at twenty-four it sat eight pixels right of the seven
@@ -124,7 +135,10 @@ fun BalanceCard(
     // card directly above it saying the same thing in other words. Two stacked
     // cards about one fact is how "3 notes, so about 2 more payments" ended up
     // sitting on top of "Running low on notes".
-    if (!warning || arriving) {
+    // And only over money: the empty wallet the comment above promises
+    // nothing to was still getting this card, reading "nothing unlocked
+    // yet" — a fragment that implies something is locked.
+    if (hasMoney && (!warning || arriving)) {
         Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
         Column(Modifier.padding(20.dp)) {
             // §17.2 forbids an exact promise, so the wording carries the

@@ -52,4 +52,5 @@
     <string name="book_side_hiring">Beauftragen</string>
     <string name="book_side_working">Arbeiten</string>
     <string name="shells_tab_deals">Geschäfte</string>
+    <string name="shells_bookings_empty_body">Wenn jemand eines deiner Angebote bucht — oder du eines von anderen — landen die Abmachung und ihr Treuhandbetrag hier.</string>
 </resources>

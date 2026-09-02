@@ -6,6 +6,8 @@
     <!-- Pending requests -->
     <string name="activity_awaiting">В очікуванні</string>
     <string name="activity_search_none">Тут немає нічого за запитом «%1$s».</string>
+    <string name="activity_period_none">За цей період нічого немає. Оберіть вище довший період, щоб побачити попередню активність.</string>
+    <string name="activity_filter_none">Поки що нічого такого немає. Торкніться виділеної плитки ще раз, щоб показати все.</string>
     <string name="activity_search_clear">Очистити пошук</string>
     <string name="activity_search_hint">Пошук у чеках, іменах, нотатках</string>
     <string name="activity_they_ask">%1$s просить</string>
@@ -46,4 +48,23 @@
     <string name="activity_donations_filter">Пожертви</string>
     <string name="activity_donation_chip">Пожертва</string>
     <string name="activity_donated_total">Пожертвувано %1$s</string>
+    <string name="activity_period_today">Сьогодні</string>
+    <string name="activity_period_7d">7 днів</string>
+    <string name="activity_period_month">Цей місяць</string>
+    <string name="activity_period_all">Усе</string>
+    <string name="activity_sum_in">Надходження</string>
+    <string name="activity_sum_out">Витрати</string>
+    <string name="activity_sum_net">Підсумок</string>
+    <string name="activity_sum_fees">Комісії</string>
+    <string name="activity_business">Бізнес</string>
+    <string name="activity_sales">Продажі</string>
+    <string name="activity_tax_collected">Податок зібрано</string>
+    <string name="activity_outstanding">Не сплачено</string>
+    <string name="activity_export_csv">Файл CSV</string>
+    <string name="activity_export_json">Файл JSON</string>
+    <string name="activity_door_pos">каса</string>
+    <string name="activity_door_bar">рахунки</string>
+    <string name="activity_door_taxi">поїздки</string>
+    <string name="activity_door_donate">банка</string>
+    <string name="activity_door_pub">випуски</string>
 </resources>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="personas_title">ตัวตน</string>
+    <string name="personas_body">โทรศัพท์นี้เป็นใครได้บ้าง แต่ละโปรไฟล์คือกุญแจของตัวเองพร้อมผู้ติดต่อของตัวเอง — ร้านไม่มีวันรู้จักเพื่อนของคุณ และเพื่อนไม่มีวันพบร้าน ความสัมพันธ์ใหม่เข้าโปรไฟล์ที่คุณสวมอยู่</string>
+    <string name="personas_primary">ส่วนตัว</string>
+    <string name="personas_worn">สวมอยู่</string>
+    <string name="personas_add">โปรไฟล์ใหม่</string>
+    <string name="personas_name_label">ชื่อ</string>
+    <string name="personas_name_support">ชื่อของด้านนี้ของคุณ — ร้านค้า ตลาด ท่องเว็บ</string>
+    <string name="personas_cap">สี่คือขีดจำกัด: โปรไฟล์ใช้ได้ดีเมื่อนับได้ในมือเดียว</string>
+    <string name="personas_no_delete">โปรไฟล์ลบไม่ได้ — ผู้ติดต่อของมันตอบกุญแจของมันเท่านั้น เลิกใช้แล้วมันจะเงียบไปเอง</string>
+    <string name="personas_save">บันทึก</string>
+    <string name="personas_cancel">ยกเลิก</string>
+    <string name="personas_mode_answers">ตอบในนาม %1$s</string>
+    <string name="personas_mode_answers_worn">ตอบในนามโปรไฟล์ที่สวมอยู่</string>
+    <string name="personas_contacts_scope">ผู้ติดต่อของ %1$s — สลับโปรไฟล์ในเมนูเพื่อดูที่เหลือ</string>
+    <string name="profiles_personal_sub">โปรไฟล์ส่วนตัว</string>
+    <string name="profiles_answers_for">ตอบให้ %1$s</string>
+    <string name="profiles_editing_note">โปรไฟล์ของ %1$s</string>
+    <string name="profiles_rename">เปลี่ยนชื่อ</string>
+    <string name="profiles_appears_as">ปรากฏเป็น %1$s</string>
+</resources>

@@ -32,6 +32,19 @@ object Listings {
     /** Re-post this often while the listing is live, so a board stays true. */
     const val REFRESH_SECONDS = 6L * 60 * 60
 
+    /**
+     * How long a listing that wants a board and has none waits between tries.
+     *
+     * The screen's failure sentences promise the retry — "it will go up on
+     * its own once the network is reachable", "goes up by itself when one
+     * frees" — and [needRefresh] only ever knew about listings already on a
+     * board, so neither promise was kept: a first post that met no node, or
+     * a full board, left the listing saved and never tried again. A try is
+     * seconds of Argon2 and a ladder walk that reads sixteen boards at
+     * twenty-one seconds an empty one, so not every poll.
+     */
+    const val RETRY_SECONDS = 30L * 60
+
     /** The board a listing sits on: coarse by rule (§16.18). */
     const val CELL_PRECISION = 5u
 
@@ -65,7 +78,111 @@ object Listings {
 
     private fun cacheKey(cell: String, kind: Int?) = "$cell|${kind ?: -1}"
 
-    private const val CACHE_TTL_MS = 3 * 60_000L
+    // How old a remembered board may be and still paint. Three minutes when
+    // the cache lived and died with the process; six hours now that it
+    // survives a relaunch, because that is the re-post cadence — a notice
+    // older than its board's own refresh clock is stale twice over. The
+    // window governs only the first paint: every board is still read, every
+    // answer still replaces what was painted, and a notice past its own
+    // expiry is dropped at paint time whatever the cache thinks.
+    private const val CACHE_TTL_MS = 6 * 60 * 60_000L
+
+    // The remembered boards, on disk: what makes "open Marketplace, see the
+    // neighbourhood" instant on the first open after a relaunch, not just
+    // the second in a session. Plain prefs, not securePrefs — everything in
+    // here was read off a public board.
+    private const val CACHE_PREFS = "ducat_board_cache"
+    private const val CACHE_KEEP = 48
+    @Volatile private var cacheLoaded = false
+
+    private fun rowToJson(r: uniffi.ducat_mobile.RentalInfo) = JSONObject().apply {
+        put("poster", r.poster); put("card", r.card)
+        put("kind", r.kind.toLong()); put("title", r.title); put("area", r.area)
+        r.cell?.let { put("cell", it) }
+        put("price", r.pricePxmr.toString()); put("deposit", r.depositPxmr.toString())
+        put("expiry", r.expiry.toLong())
+        r.make?.let { put("make", it) }; r.model?.let { put("model", it) }
+        r.year?.let { put("year", it.toLong()) }
+        r.gearbox?.let { put("gearbox", it.toLong()) }
+        r.fuel?.let { put("fuel", it.toLong()) }
+        r.seats?.let { put("seats", it.toLong()) }
+        r.color?.let { put("color", it) }; r.trim?.let { put("trim", it) }
+        r.rooms?.let { put("rooms", it.toLong()) }
+        r.sleeps?.let { put("sleeps", it.toLong()) }
+        r.sizeM2?.let { put("size_m2", it.toLong()) }
+        r.subtype?.let { put("subtype", it.toLong()) }
+        put("features", org.json.JSONArray(r.features))
+        put("quantity", r.quantity.toLong())
+    }
+
+    private fun rowFromJson(o: JSONObject): uniffi.ducat_mobile.RentalInfo? = runCatching {
+        uniffi.ducat_mobile.RentalInfo(
+            poster = o.getString("poster"),
+            card = o.getString("card"),
+            kind = o.getLong("kind").toULong(),
+            title = o.getString("title"),
+            area = o.optString("area"),
+            cell = if (o.has("cell")) o.getString("cell") else null,
+            pricePxmr = o.getString("price").toULong(),
+            depositPxmr = o.getString("deposit").toULong(),
+            expiry = o.getLong("expiry").toULong(),
+            make = if (o.has("make")) o.getString("make") else null,
+            model = if (o.has("model")) o.getString("model") else null,
+            year = if (o.has("year")) o.getLong("year").toULong() else null,
+            gearbox = if (o.has("gearbox")) o.getLong("gearbox").toULong() else null,
+            fuel = if (o.has("fuel")) o.getLong("fuel").toULong() else null,
+            seats = if (o.has("seats")) o.getLong("seats").toULong() else null,
+            color = if (o.has("color")) o.getString("color") else null,
+            trim = if (o.has("trim")) o.getString("trim") else null,
+            rooms = if (o.has("rooms")) o.getLong("rooms").toULong() else null,
+            sleeps = if (o.has("sleeps")) o.getLong("sleeps").toULong() else null,
+            sizeM2 = if (o.has("size_m2")) o.getLong("size_m2").toULong() else null,
+            subtype = if (o.has("subtype")) o.getLong("subtype").toULong() else null,
+            features = o.optJSONArray("features")?.let { a ->
+                (0 until a.length()).map { a.getString(it) }
+            } ?: emptyList(),
+            quantity = o.optLong("quantity", 1).toULong(),
+        )
+    }.getOrNull()
+
+    private fun loadCellCache(context: Context) {
+        if (cacheLoaded) return
+        synchronized(cellCache) {
+            if (cacheLoaded) return
+            cacheLoaded = true
+            runCatching {
+                val raw = context.getSharedPreferences(CACHE_PREFS, 0)
+                    .getString("cells", null) ?: return
+                val all = JSONObject(raw)
+                for (key in all.keys()) {
+                    val e = all.optJSONObject(key) ?: continue
+                    val rows = e.optJSONArray("rows") ?: continue
+                    val list = (0 until rows.length())
+                        .mapNotNull { i -> rows.optJSONObject(i)?.let(::rowFromJson) }
+                    cellCache.putIfAbsent(key, e.optLong("at") to list)
+                }
+            }.onFailure { DucatLog.w(TAG, "board cache load: ${it.message}") }
+        }
+    }
+
+    private fun saveCellCache(context: Context) {
+        runCatching {
+            val keep = cellCache.entries
+                .sortedByDescending { it.value.first }
+                .take(CACHE_KEEP)
+            val all = JSONObject()
+            for ((key, v) in keep) {
+                all.put(
+                    key,
+                    JSONObject()
+                        .put("at", v.first)
+                        .put("rows", org.json.JSONArray(v.second.map(::rowToJson))),
+                )
+            }
+            context.getSharedPreferences(CACHE_PREFS, 0)
+                .edit().putString("cells", all.toString()).apply()
+        }.onFailure { DucatLog.w(TAG, "board cache save: ${it.message}") }
+    }
 
     /** The same, for the second pass over boards that came back full. */
     private const val LADDER_BUDGET_MS = 90_000L
@@ -115,6 +232,36 @@ object Listings {
         save(context, all(context).filter { it.optString("id") != id } + o)
     }
 
+    /** What [post] and [unpost] own on a record: where it is, and the cards it cut. */
+    private val TENANCY = listOf("owner", "board", "subkey", "postedAt", "card", "cards", "wanted", "triedAt")
+
+    /**
+     * Save a draft over whatever record already carries its id, keeping the
+     * record's tenancy.
+     *
+     * The form re-posts the same draft after a failure — one listing per
+     * form — and a rotation mid-post cancels the screen's coroutine while
+     * the post it started runs on to the end. The second press then arrived
+     * with a fresh draft over a record that had just taken a slot: [put]
+     * dropped the board, the slot and the cards, the post walked the ladder
+     * to a *second* slot, and the first notice sat on as a ghost holding a
+     * card nothing would ever link.
+     */
+    fun putDraft(context: Context, draft: JSONObject) = synchronized(lock) {
+        get(context, draft.optString("id"))?.let { cur ->
+            for (k in TENANCY) if (cur.has(k) && !draft.has(k)) draft.put(k, cur.get(k))
+        }
+        put(context, draft)
+    }
+
+    /**
+     * One post per listing at a time. The poll's refresh, the owner's Post
+     * and a quantity tap can all ask for the same listing in the same
+     * breath; only the final write was serialised, so two walks of the
+     * ladder took two slots and the record remembered one of them.
+     */
+    private val postLocks = java.util.concurrent.ConcurrentHashMap<String, Any>()
+
     fun remove(context: Context, id: String) {
         synchronized(lock) { save(context, all(context).filter { it.optString("id") != id }) }
     }
@@ -162,6 +309,10 @@ object Listings {
             // to count down from without a migration the first time they sell.
             put("quantity", quantity.coerceIn(1L, MAX_QUANTITY))
             put("created", System.currentTimeMillis() / 1000)
+            // The doorway decision: this listing — its cards, its notice
+            // signatures, every enquiry it opens — belongs to the persona
+            // worn when it was written, forever.
+            put("owner", PersonaStore(context).worn())
             if (priceTyped != null && priceCurrency != null) {
                 put("priceTyped", priceTyped)
                 put("priceCurrency", priceCurrency)
@@ -300,16 +451,32 @@ object Listings {
         return next
     }
 
-    fun post(context: Context, id: String): Boolean {
+    fun post(context: Context, id: String): Boolean =
+        synchronized(postLocks.getOrPut(id) { Any() }) { postLocked(context, id) }
+
+    private fun postLocked(context: Context, id: String): Boolean {
+        val now = System.currentTimeMillis() / 1000
+        // Asked for a board, and asked now — written before anything can
+        // fail, so a listing that meets no node or a full board is one the
+        // poll keeps trying (needRefresh), which is what the screen promised.
+        synchronized(lock) {
+            get(context, id)?.let { it.put("wanted", true); it.put("triedAt", now); put(context, it) }
+        }
         val o = reprice(context, get(context, id) ?: return false)
         val cell = o.optString("cell")
         if (cell.isBlank()) throw IllegalStateException("this listing has no area yet")
+        val personas = PersonaStore(context)
+        // The stored owner wins; a pre-persona listing adopts the primary
+        // and has it written down from here on.
+        val ownerHex = o.optString("owner").ifBlank {
+            personas.personaHex().also { hex -> o.put("owner", hex); put(context, o) }
+        }
         val card = Mailbox.issueCard(
             context, MyProfile(context).name(), TTL_SECONDS.toULong(), purpose = "rental",
+            asPersonaHex = ownerHex,
         )
         val notice = publicNotice(o, card.uri)
-        val persona = PersonaStore(context).secret()
-        val now = System.currentTimeMillis() / 1000
+        val persona = personas.secretFor(ownerHex) ?: personas.secret()
 
         // A notice is signed for the slot it goes into and carries the proof of
         // work for that slot, so the bytes cannot be built until the slot is
@@ -352,8 +519,15 @@ object Listings {
         // only while anybody is still reading the board it is on; past a
         // rollover the whole ladder has moved and the notice has to move with
         // it, which is the ordinary walk below.
+        //
+        // Nor is a tenancy whose notice has run out. A slot holding an
+        // expired notice reads as free to every other writer (the occupancy
+        // test below, on their phone), so a device that was off for a day
+        // and refreshed "in place" wrote over whoever had honestly taken it
+        // in the meantime — their notice gone, and nothing on their side to
+        // say so. An hour short of the TTL, for their clock against ours.
         val existing = o.optString("board")
-            .takeIf { it.isNotBlank() && !standStale(it) }
+            .takeIf { it.isNotBlank() && !standStale(it) && stillHeld(o, now) }
         val existingSlot = o.optInt("subkey", -1).takeIf { it >= 0 }?.toUInt()
         if (existing != null && existingSlot != null) {
             // Refreshing in place: keep the tenancy rather than taking a
@@ -407,38 +581,70 @@ object Listings {
         // Remember the tenancy, or the notice is on the network and this
         // device has no idea where: a refresh would post a second copy and
         // "take it down" would have nothing to clear.
-        o.put("card", card.uri)
-        // Every card this listing has ever put on a board, not just the one
-        // currently on it. A live notice is re-posted every few hours and each
-        // posting mints a fresh card (a card is claimed once), so somebody who
-        // read the board before the last refresh is holding a card this device
-        // would otherwise have forgotten — and their enquiry would arrive with
-        // no idea what it was about. Caught in exactly that state on 2026-08-19.
-        val minted = o.optJSONArray("cards") ?: org.json.JSONArray()
-        minted.put(card.uri)
-        // A day's TTL over a six-hour refresh is four cards; the slack is for
-        // re-posts after a failure, and anything older cannot still be on a
-        // board to be read.
-        while (minted.length() > 8) minted.remove(0)
-        o.put("cards", minted)
-        o.put("board", board)
-        o.put("subkey", slot.toInt())
-        o.put("postedAt", now)
-        put(context, o)
+        //
+        // Onto the record as it is *now*, not the copy read before the
+        // seconds of Argon2 and the board walk: a price or a title edited
+        // in that gap was being written back over by the stale copy, and a
+        // listing taken down in it came back.
+        synchronized(lock) {
+            val cur = get(context, id)
+            if (cur == null) {
+                runCatching { uniffi.ducat_mobile.standPost(board, slot, ByteArray(0)) }
+                DucatLog.i(TAG, "listing $id was removed while posting; slot cleared")
+                return false
+            }
+            cur.put("card", card.uri)
+            // Every card this listing has ever put on a board, not just the
+            // one currently on it. A live notice is re-posted every few hours
+            // and each posting mints a fresh card (a card is claimed once), so
+            // somebody who read the board before the last refresh is holding
+            // a card this device would otherwise have forgotten — and their
+            // enquiry would arrive with no idea what it was about. Caught in
+            // exactly that state on 2026-08-19.
+            val minted = cur.optJSONArray("cards") ?: org.json.JSONArray()
+            minted.put(card.uri)
+            // A day's TTL over a six-hour refresh is four cards; the slack is
+            // for re-posts after a failure, and anything older cannot still
+            // be on a board to be read.
+            while (minted.length() > 8) minted.remove(0)
+            cur.put("cards", minted)
+            cur.put("board", board)
+            cur.put("subkey", slot.toInt())
+            cur.put("postedAt", now)
+            put(context, cur)
+        }
         DucatLog.i(TAG, "listing ${o.optString("title")} posted to $board/$slot")
         return true
     }
+
+    /**
+     * Is the notice this record says it posted still the one in that slot?
+     *
+     * Only by the clock: a notice is stamped to live [TTL_SECONDS], and past
+     * that every other writer treats the slot as free. Anything the slot
+     * holds after the notice ran out may be somebody else's, so neither a
+     * refresh nor a take-down may touch it.
+     */
+    private fun stillHeld(o: JSONObject, now: Long): Boolean =
+        now - o.optLong("postedAt") < TTL_SECONDS - 3600
 
     /** Take it down: clear the slot, forget the tenancy. */
     fun unpost(context: Context, id: String) {
         val o = get(context, id) ?: return
         val board = o.optString("board")
         val slot = o.optInt("subkey", -1)
-        if (board.isNotBlank() && slot >= 0) {
+        // Only a slot that is still ours. Past the TTL it may hold a
+        // stranger's notice (see stillHeld), and a stale board is one nobody
+        // reads — clearing either is a write that can only do harm.
+        if (board.isNotBlank() && slot >= 0 && !standStale(board) &&
+            stillHeld(o, System.currentTimeMillis() / 1000)
+        ) {
             runCatching { uniffi.ducat_mobile.standPost(board, slot.toUInt(), ByteArray(0)) }
                 .onFailure { DucatLog.w(TAG, "clearing slot: ${it.message}") }
         }
         o.remove("board"); o.remove("subkey"); o.remove("postedAt"); o.remove("card")
+        // Taken down is the owner's word: the poll stops trying to put it up.
+        o.remove("wanted"); o.remove("triedAt")
         put(context, o)
     }
 
@@ -521,9 +727,23 @@ object Listings {
         val now = System.currentTimeMillis() / 1000
         return all(context).filter {
             val board = it.optString("board")
-            board.isNotBlank() && (
-                now - it.optLong("postedAt") >= REFRESH_SECONDS || standStale(board)
-            )
+            if (board.isBlank()) {
+                // Wanted and not up: the owner pressed Post and it did not
+                // take — no node, or a full board. Spaced by RETRY_SECONDS,
+                // because a try is not cheap and the board does not free
+                // between polls.
+                it.optBoolean("wanted") &&
+                    Elapsed.dueSecs(now, it.optLong("triedAt"), RETRY_SECONDS)
+            } else {
+                // [Elapsed] rather than the subtraction, and this is the site
+                // that matters most: a stamp written while the clock was
+                // ahead never comes of age, so the notice is never re-posted,
+                // falls off the board when its day runs out, and the owner's
+                // screen goes on saying "Live on the board near you" for ever
+                // — the exact failure the refresh was added to prevent.
+                Elapsed.dueSecs(now, it.optLong("postedAt"), REFRESH_SECONDS) ||
+                    standStale(board)
+            }
         }
     }
 
@@ -567,6 +787,13 @@ object Listings {
          */
     ): Int {
         val started = System.currentTimeMillis()
+        loadCellCache(context)
+        // See browseMarket: an unattached read finds nothing honestly enough
+        // to display, but writing that nothing over remembered rows poisons
+        // the cache every airplane-mode open.
+        val attachedAtStart = runCatching {
+            uniffi.ducat_mobile.nodeStatus().publicInternetReady
+        }.getOrDefault(false)
         val replied = java.util.concurrent.atomic.AtomicInteger()
         val home = runCatching {
             uniffi.ducat_mobile.geohashEncode(latE7, lonE7, CELL_PRECISION)
@@ -595,7 +822,10 @@ object Listings {
 
         fun absorb(cell: String, fresh: List<uniffi.ducat_mobile.RentalInfo>) {
             synchronized(byCell) { byCell[cell] = fresh }
-            cellCache[cacheKey(cell, kind)] = System.currentTimeMillis() to fresh
+            if (fresh.isNotEmpty() || attachedAtStart) {
+                cellCache[cacheKey(cell, kind)] = System.currentTimeMillis() to fresh
+                saveCellCache(context)
+            }
             publish()
         }
 

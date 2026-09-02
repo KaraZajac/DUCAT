@@ -16,8 +16,9 @@
     <string name="tab_send_receive">Enviar/Recibir</string>
 
     <string name="section_status">Estado</string>
-    <string name="section_profile">Perfil</string>
+    <string name="section_profile">Perfiles</string>
     <string name="section_contacts">Contactos</string>
+    <string name="section_selling">Ventas</string>
     <string name="section_logs">Registros</string>
     <string name="section_settings">Ajustes</string>
     <string name="section_modes">Modos de operación</string>

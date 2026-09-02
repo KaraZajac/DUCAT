@@ -8,6 +8,8 @@
     <string name="main_backup_title">Sichern</string>
     <string name="main_backup_body">Du hast Kontakte, die dein letztes Backup nicht kennt. Eine Wiederherstellung brächte das Geld zurück, aber nicht die Menschen.</string>
     <string name="main_open_backup_settings">Backup-Einstellungen öffnen</string>
+    <string name="main_notify_off_title">Benachrichtigungen sind aus</string>
+    <string name="main_notify_off_body">Das Telefon kann dir nicht sagen, wenn Geld ankommt, eine Rechnung eintrifft oder jemand anruft. Tippe, um sie einzuschalten.</string>
     <string name="main_recent">Zuletzt</string>
     <string name="main_see_all">Alle ansehen</string>
     <string name="main_card_link_title">Kontakt hinzufügen?</string>
@@ -38,4 +40,9 @@
     <string name="err_no_keys_yet">Ihr habt den Kartentausch noch nicht abgeschlossen.</string>
     <string name="err_conversation_too_old">Ihre Karte ist zu alt für diese App. Bitten Sie um eine neue.</string>
     <string name="err_board_full">Hier wird gerade zu viel gerufen. Versuchen Sie es in einer Minute noch einmal.</string>
+    <string name="main_deals_title">Abmachungen</string>
+    <plurals name="main_deals_waiting">
+        <item quantity="one">%1$d Abmachung wartet auf dich</item>
+        <item quantity="other">%1$d Abmachungen warten auf dich</item>
+    </plurals>
 </resources>

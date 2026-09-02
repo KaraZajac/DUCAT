@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_sites">Sitios</string>
+    <string name="sites_intro">Páginas que viajan como publicaciones: se traen enteras, se leen sin conexión, las replican los lectores que así lo eligen. Nada en una página puede verte.</string>
+    <string name="sites_empty_title">Aún no hay sitios</string>
+    <string name="sites_empty_body">Un sitio ducat es una sala sellada: cada imagen y estilo viaja en el paquete, sin scripts, y solo funcionan los enlaces ducat:. Pega una dirección para guardar uno.</string>
+    <string name="sites_add">Añadir un sitio</string>
+    <string name="sites_add_confirm">Añadir</string>
+    <string name="sites_add_link_title">¿Añadir este sitio?</string>
+    <string name="sites_add_link_body">Esta dirección llegó por un enlace. Añadirla la guarda en tu estante; no se descarga nada hasta que la abras.</string>
+    <string name="sites_uri_label">dirección ducat:site/…</string>
+    <string name="sites_bad_uri">Eso no es una dirección ducat:site/.</string>
+    <string name="sites_fetching">Trayendo…</string>
+    <string name="sites_not_fetched">Aún sin traer</string>
+    <string name="sites_update_waiting">Hay actualización — se abrirá al día</string>
+    <string name="sites_offline_ready">Listo sin conexión</string>
+    <string name="sites_open">Abrir</string>
+    <string name="sites_keep_alive">Mantener este sitio vivo para otros</string>
+    <string name="sites_remove">Quitar</string>
+</resources>

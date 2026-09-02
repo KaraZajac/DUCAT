@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">तुम्हें कॉल किया</string>
+    <string name="chat_call_you_rang">तुमने कॉल किया</string>
+    <string name="chat_call_answered">तुम्हारा कॉल उठाया</string>
+    <string name="chat_call_you_answered">तुमने उठाया</string>
+    <string name="chat_call_missed_note">तुम्हारे न रहने पर कॉल बजा।</string>
+    <string name="chatlist_preview_call">कॉल किया</string>
+    <string name="chatlist_preview_call_answered">कॉल उठाया</string>
+    <string name="notify_call">%1$s कॉल कर रहे हैं</string>
+    <string name="notify_call_answered">%1$s ने तुम्हारा कॉल उठाया</string>
+    <string name="call_button">कॉल</string>
+    <string name="call_calling">कॉल हो रहा…</string>
+    <string name="call_incoming">आती DUCAT कॉल</string>
+    <string name="call_frames">↓%1$d ↑%2$d फ्रेम</string>
+    <string name="call_answer_btn">उठाओ</string>
+    <string name="call_end_btn">काटो</string>
+    <string name="call_body_ring">तुम्हें कॉल कर रहे</string>
+    <string name="call_body_answer">उठाया</string>
+    <string name="call_body_decline">अभी बात नहीं कर सकते।</string>
+    <string name="notify_call_channel">इनकमिंग कॉल</string>
+    <string name="notify_call_incoming">इनकमिंग कॉल</string>
+    <string name="call_no_answer">कोई जवाब नहीं</string>
+    <string name="call_leave_message">संदेश छोड़ें</string>
+    <string name="call_dismiss">अभी नहीं</string>
+    <string name="call_body_cancel">आपके जवाब देने से पहले कॉल काट दी।</string>
+    <string name="call_connecting">जुड़ रहा है…</string>
+    <string name="call_unreached">उन तक पहुँच नहीं हो सकी</string>
+    <string name="call_never_connected">कनेक्ट नहीं हो सका</string>
+    <string name="call_notify_calling">%1$s को कॉल किया जा रहा है…</string>
+    <string name="call_notify_in_call">%1$s के साथ कॉल पर</string>
+    <string name="call_notify_return">वापस जाने के लिए टैप करें।</string>
+</resources>

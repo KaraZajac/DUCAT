@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">Belde je</string>
+    <string name="chat_call_you_rang">Jij belde</string>
+    <string name="chat_call_answered">Nam je oproep aan</string>
+    <string name="chat_call_you_answered">Jij nam op</string>
+    <string name="chat_call_missed_note">Er ging een oproep over terwijl je weg was.</string>
+    <string name="chatlist_preview_call">Gebeld</string>
+    <string name="chatlist_preview_call_answered">Oproep aangenomen</string>
+    <string name="notify_call">%1$s belt</string>
+    <string name="notify_call_answered">%1$s nam je oproep aan</string>
+    <string name="call_button">Bellen</string>
+    <string name="call_calling">Bellen…</string>
+    <string name="call_incoming">Inkomende DUCAT-oproep</string>
+    <string name="call_frames">↓%1$d ↑%2$d frames</string>
+    <string name="call_answer_btn">Opnemen</string>
+    <string name="call_end_btn">Ophangen</string>
+    <string name="call_body_ring">Belt je</string>
+    <string name="call_body_answer">Opgenomen</string>
+    <string name="call_body_decline">Kan nu even niet praten.</string>
+    <string name="notify_call_channel">Inkomende oproepen</string>
+    <string name="notify_call_incoming">Inkomende oproep</string>
+    <string name="call_no_answer">Geen antwoord</string>
+    <string name="call_leave_message">Bericht achterlaten</string>
+    <string name="call_dismiss">Niet nu</string>
+    <string name="call_body_cancel">Opgehangen voordat je opnam.</string>
+    <string name="call_connecting">Verbinden…</string>
+    <string name="call_unreached">Niet bereikbaar</string>
+    <string name="call_never_connected">Geen verbinding gemaakt</string>
+    <string name="call_notify_calling">%1$s bellen…</string>
+    <string name="call_notify_in_call">In gesprek met %1$s</string>
+    <string name="call_notify_return">Tik om terug te gaan.</string>
+</resources>

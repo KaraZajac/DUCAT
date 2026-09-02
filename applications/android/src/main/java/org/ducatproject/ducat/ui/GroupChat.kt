@@ -24,13 +24,28 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.Groups
 import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.R
 import org.ducatproject.ducat.StoredMessage
+
+/** A list of hexes through a Bundle: the split sheet's picks and its billed set. */
+private val HEX_LIST_SAVER = androidx.compose.runtime.saveable.listSaver<
+    androidx.compose.runtime.snapshots.SnapshotStateList<String>, String,
+>(
+    save = { it.toList() },
+    restore = { mutableStateListOf<String>().apply { addAll(it) } },
+)
+
+/**
+ * A split that billed some of the table and not the rest. [fails] are the
+ * names for the sheet's line; [billed] hold their bill already, and the
+ * retry must skip them — the same bill twice is a duplicate, not a retry.
+ */
+private class SplitPartial(val fails: List<String>, val billed: List<String>) :
+    Exception("split: ${fails.size} not reached")
 
 /**
  * A group's conversation (§16.19): the merge of its fan-out copies across the
@@ -48,17 +63,32 @@ import org.ducatproject.ducat.StoredMessage
 @Composable
 fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
+    val store = remember { ContactStore(context) }
     val version by ContactStore.changes.collectAsState()
     val group = remember(version, idHex) { Groups.get(context, idHex) } ?: run {
         onBack(); return
     }
     // The merge reads one pairwise thread per member — work that scales
     // with the group and its history, so it happens off the main thread
-    // (the ledger ANR's lesson). Empty for a beat on first open.
+    // (the ledger ANR's lesson). Empty for a beat on first open. The
+    // contact book and the mesh check ride along: both are a decrypt and
+    // a parse of the whole book, and they ran in composition on every
+    // store bump — every message landing in any thread.
     var rows by remember(idHex) { mutableStateOf<List<Groups.Row>>(emptyList()) }
+    var contacts by remember { mutableStateOf<List<org.ducatproject.ducat.Contact>>(emptyList()) }
+    var missing by remember(idHex) { mutableStateOf<List<String>>(emptyList()) }
     LaunchedEffect(version, idHex) {
-        rows = withContext(Dispatchers.IO) { Groups.thread(context, idHex) }
+        val (fresh, book, gaps) = withContext(Dispatchers.IO) {
+            Triple(Groups.thread(context, idHex), store.all(), Groups.missing(context, idHex))
+        }
+        rows = fresh
+        contacts = book
+        missing = gaps
+        // Looking at the group is what "seen" means, as for a thread: the
+        // list's dot and the tab badge clear when the eyes arrive.
+        withContext(Dispatchers.IO) {
+            Groups.markSeen(context, idHex, Groups.highWater(context, fresh))
+        }
     }
     // Reactions and retracts decorate; only words are bubbles. Same split the
     // pairwise screen makes, with the group reference doing the naming.
@@ -88,23 +118,78 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
                 if (rs == r.senderHex) rs to rq else null
             }.toSet()
     }
-    val missing = remember(version, idHex) { Groups.missing(context, idHex) }
-    val mine = remember { PersonaStore(context).personaHex() }
-    val contacts = remember(version) { ContactStore(context).all() }
+    val mine = remember { PersonaStore(context).allHexes() }
     val youLabel = stringResource(R.string.group_you)
     fun nameOf(hex: String): String = when {
-        hex == mine -> youLabel
+        hex in mine -> youLabel
         else -> contacts.firstOrNull { it.personaHex == hex }?.displayName()
             ?: "${hex.take(8)}…"
     }
 
-    var draft by rememberSaveable { mutableStateOf("") }
+    // The group's sends live under ThreadSends like a thread's, keyed so
+    // they can never be mistaken for a persona's. A group send is a
+    // fan-out — one write per member — so it runs for as long as the
+    // largest group takes, and a screen-scoped send was cancelled by a
+    // rotation after the writes and before the composer was emptied: the
+    // words came back under a live Send button, and a second tap minted a
+    // second group counter for the same sentence.
+    val key = "group:$idHex"
+    // Kept the way a thread's is, so Back mid-sentence costs nothing.
+    var draft by rememberSaveable { mutableStateOf(store.draftOf(key)) }
+    val draftNow by rememberUpdatedState(draft)
+    DisposableEffect(idHex) {
+        onDispose {
+            val d = draftNow
+            store.saveDraft(key, if (ThreadSends.owns(key, d)) "" else d)
+        }
+    }
     var sending by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     // (sender, groupSeq) of the message being answered, if one is.
     var replyTo by rememberSaveable { mutableStateOf<String?>(null) }
     var addOpen by remember { mutableStateOf(false) }
-    var splitOpen by remember { mutableStateOf(false) }
+    // The split sheet survives a rotation: its bills go out one member at
+    // a time and it keeps the list of who has been billed (see SplitSheet),
+    // which a sheet that closed with the turn of the phone threw away.
+    var splitOpen by rememberSaveable { mutableStateOf(false) }
+
+    val send: (String?, () -> Boolean) -> Unit = { what, block ->
+        sending = true
+        error = null
+        ThreadSends.launch(store, key, what) {
+            // Groups.send says whether every copy landed; the ones that
+            // did not are queued and retried by the poller, so the
+            // message is out either way — this is a line, not a failure.
+            if (block()) null else context.getString(R.string.group_partial_queued)
+        }
+    }
+    val tick by ThreadSends.ticks.collectAsState()
+    LaunchedEffect(tick) {
+        sending = ThreadSends.inFlight(key)
+        for (o in ThreadSends.take(key)) when (o) {
+            is ThreadSends.Outcome.Landed -> {
+                // Exactly the words that went, as on the pairwise screen:
+                // the box stays live during the fan-out.
+                val d = draft.trimStart()
+                if (o.body != null && d.startsWith(o.body)) {
+                    draft = d.removePrefix(o.body).trimStart()
+                    replyTo = null
+                }
+                error = o.result
+            }
+            is ThreadSends.Outcome.Failed -> {
+                if (o.body != null && draft.isBlank()) draft = o.body
+                error = moneyFailure(context, o.error, orElse = {
+                    if (o.what != null) context.getString(R.string.chat_could_not_send_the, o.what)
+                    else context.getString(R.string.chat_could_not_send)
+                })
+                org.ducatproject.ducat.DucatLog.w(
+                    "GroupChat",
+                    "${o.what ?: "send"}: ${o.error.javaClass.simpleName}: ${o.error.message}",
+                )
+            }
+        }
+    }
 
     // The one-time disclosure, before anything else on a fresh group.
     if (!group.disclosed) {
@@ -125,8 +210,18 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
     }
 
     val listState = rememberLazyListState()
-    LaunchedEffect(rows.size) {
-        if (rows.isNotEmpty()) listState.animateScrollToItem(rows.size - 1)
+    // The bubbles, not the rows: a reaction or a withdrawal landing is a
+    // decoration on something already on screen, not a reason to pull
+    // the reader to the bottom — and the index has to be one the list has.
+    LaunchedEffect(shownRows.size) {
+        if (shownRows.isNotEmpty()) listState.animateScrollToItem(shownRows.size - 1)
+    }
+    // The keyboard opening changes no count, so the last bubble ended up
+    // behind it until it was dismissed — the pairwise screen's lesson: the
+    // IME inset is what tracks "the visible area just shrank".
+    val imeBottom = WindowInsets.ime.getBottom(androidx.compose.ui.platform.LocalDensity.current)
+    LaunchedEffect(imeBottom) {
+        if (shownRows.isNotEmpty()) listState.animateScrollToItem(shownRows.size - 1)
     }
 
     Column(Modifier.fillMaxSize()) {
@@ -210,14 +305,12 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
                                     modifier = Modifier
                                         .clickable {
                                             menuFor = null
-                                            scope.launch(Dispatchers.IO) {
-                                                runCatching {
-                                                    Groups.send(
-                                                        context, idHex, emo, kind = 4,
-                                                        reSender = r.senderHex,
-                                                        reSeq = r.message.groupSeq,
-                                                    )
-                                                }
+                                            send(context.getString(R.string.chat_what_reaction)) {
+                                                Groups.send(
+                                                    context, idHex, emo, kind = 4,
+                                                    reSender = r.senderHex,
+                                                    reSeq = r.message.groupSeq,
+                                                )
                                             }
                                         }
                                         .padding(4.dp),
@@ -240,16 +333,14 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
                         ) {
                             TextButton(onClick = {
                                 menuFor = null
-                                scope.launch(Dispatchers.IO) {
-                                    runCatching {
-                                        Groups.send(
-                                            context, idHex,
-                                            context.getString(R.string.chat_unsent),
-                                            kind = 5,
-                                            reSender = r.senderHex,
-                                            reSeq = r.message.groupSeq,
-                                        )
-                                    }
+                                send(null) {
+                                    Groups.send(
+                                        context, idHex,
+                                        context.getString(R.string.chat_unsent),
+                                        kind = 5,
+                                        reSender = r.senderHex,
+                                        reSeq = r.message.groupSeq,
+                                    )
                                 }
                             }) { Text(stringResource(R.string.chat_unsend)) }
                         }
@@ -297,8 +388,11 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
                 )
                 Spacer(Modifier.width(8.dp))
                 val (rs, rq) = target.split(":").let { it[0] to it[1].toLong() }
+                // The same reading the bubbles give a quote: withdrawn words
+                // stay withdrawn in the composer too.
                 Text(
-                    rows.firstOrNull { it.senderHex == rs && it.message.groupSeq == rq }
+                    if ((rs to rq) in unsent) stringResource(R.string.chat_unsent)
+                    else rows.firstOrNull { it.senderHex == rs && it.message.groupSeq == rq }
                         ?.message?.body ?: stringResource(R.string.chat_reply_to_gone),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -339,21 +433,16 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
                     if (body.isEmpty() || sending) return@IconButton
                     sending = true; error = null
                     val target = replyTo?.split(":")
-                    scope.launch {
-                        val r = withContext(Dispatchers.IO) {
-                            runCatching {
-                                Groups.send(
-                                    context, idHex, body,
-                                    reSender = target?.get(0),
-                                    reSeq = target?.get(1)?.toLong(),
-                                )
-                            }
-                        }
-                        sending = false
-                        r.onSuccess { all ->
-                            draft = ""; replyTo = null
-                            if (!all) error = context.getString(R.string.group_partial_queued)
-                        }.onFailure { error = moneyFailure(context, it) }
+                    // The box keeps the words until the fan-out lands;
+                    // the tick effect above empties it then, or hands
+                    // them back if nothing left the phone.
+                    ThreadSends.launch(store, key, null, body) {
+                        val all = Groups.send(
+                            context, idHex, body,
+                            reSender = target?.get(0),
+                            reSeq = target?.get(1)?.toLong(),
+                        )
+                        if (all) null else context.getString(R.string.group_partial_queued)
                     }
                 },
                 enabled = missing.isEmpty() && draft.isNotBlank() && !sending,
@@ -368,7 +457,14 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
         SplitSheet(idHex = idHex, group = group, onDone = { splitOpen = false })
     }
     if (addOpen) {
-        val candidates = contacts.filter { it.personaHex !in group.members }
+        // This persona's contacts, not the phone's: see Groups.mineIn.
+        val candidates = remember(contacts, group) {
+            val personas = PersonaStore(context)
+            val asWhom = Groups.mineIn(context, group)
+            contacts.filter {
+                it.personaHex !in group.members && personas.ownerHexOf(it) == asWhom
+            }
+        }
         AlertDialog(
             onDismissRequest = { addOpen = false },
             title = { Text(stringResource(R.string.group_add_title)) },
@@ -389,8 +485,16 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
                             Modifier.fillMaxWidth()
                                 .clickable {
                                     addOpen = false
-                                    scope.launch(Dispatchers.IO) {
-                                        runCatching { Groups.add(context, idHex, c.personaHex) }
+                                    // Under the thread's sends, not the
+                                    // screen's scope: a rotation right after
+                                    // the tap cancelled the launch before it
+                                    // ran, and nobody was added. Groups.add
+                                    // queues any roster copy that does not
+                                    // go, so what it throws is a real fault
+                                    // — shown as one, not swallowed.
+                                    send(context.getString(R.string.chat_what_invite)) {
+                                        Groups.add(context, idHex, c.personaHex)
+                                        true
                                     }
                                 }
                                 .padding(vertical = 10.dp),
@@ -483,76 +587,142 @@ private fun GroupBubble(
  * Making a group: a name, and members picked from *contacts only* — the list
  * is the constraint made visible, since fan-out can only ever reach people
  * this phone already holds. The disclosure fires on the group's first open.
+ *
+ * A screen of its own, like the group it makes: drawn inside the Chats tab
+ * it sat under the tab's bar with its own title beneath, and the back
+ * gesture — the tab shell's — left the half-filled form for Home.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupCreateScreen(onDone: (String) -> Unit, onCancel: () -> Unit) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val contacts = remember { ContactStore(context).all() }
+    // The worn persona's contacts, because the group is made as the worn
+    // persona (Groups.create) and a member has to be somebody it holds —
+    // see Groups.mineIn. The single-persona era sees the whole book.
+    val contacts = remember {
+        val personas = PersonaStore(context)
+        val all = ContactStore(context).all()
+        if (personas.all().size > 1) {
+            val worn = personas.worn()
+            all.filter { personas.ownerHexOf(it) == worn }
+        } else all
+    }
     var name by rememberSaveable { mutableStateOf("") }
-    var picked by remember { mutableStateOf(setOf<String>()) }
-    var busy by remember { mutableStateOf(false) }
-
-    Column(Modifier.fillMaxSize().padding(16.dp)) {
-        Text(stringResource(R.string.group_create_title), style = MaterialTheme.typography.titleLarge)
-        Spacer(Modifier.height(4.dp))
-        Text(
-            stringResource(R.string.group_create_note),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(Modifier.height(12.dp))
-        OutlinedTextField(
-            value = name,
-            onValueChange = { if (it.length <= 48) name = it },
-            label = { Text(stringResource(R.string.group_name_label)) },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Spacer(Modifier.height(12.dp))
-        LazyColumn(Modifier.weight(1f)) {
-            items(contacts, key = { it.personaHex }) { c ->
-                Row(
-                    Modifier.fillMaxWidth()
-                        .clickable {
-                            picked = if (c.personaHex in picked) picked - c.personaHex
-                            else picked + c.personaHex
-                        }
-                        .padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Checkbox(
-                        checked = c.personaHex in picked,
-                        onCheckedChange = null,
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(c.displayName())
-                }
-            }
+    // The picks ride the rotation with the name; a set does not fit a
+    // Bundle as itself, a list of its members does.
+    var picked by rememberSaveable(
+        stateSaver = androidx.compose.runtime.saveable.listSaver<Set<String>, String>(
+            save = { it.toList() }, restore = { it.toSet() },
+        ),
+    ) { mutableStateOf(setOf<String>()) }
+    // Making the group is a send — the roster to every member, as long as
+    // the network takes — and it ran on this screen's scope: turn the phone
+    // while the spinner was up and the form came back with the name, the
+    // picks and a live button, the group already made. A second tap made
+    // it twice. Under ThreadSends now, keyed by a ticket that rides the
+    // rotation, so the form that comes back finds the creation still going
+    // and then the id to open.
+    val ticket = rememberSaveable { java.util.UUID.randomUUID().toString() }
+    val key = "create:$ticket"
+    var busy by remember { mutableStateOf(ThreadSends.inFlight(key)) }
+    var error by remember { mutableStateOf<String?>(null) }
+    val tick by ThreadSends.ticks.collectAsState()
+    LaunchedEffect(tick) {
+        busy = ThreadSends.inFlight(key)
+        for (o in ThreadSends.take(key)) when (o) {
+            is ThreadSends.Outcome.Landed -> o.result?.let(onDone)
+            // Used to be swallowed whole: the spinner stopped and the form
+            // sat there, made of nothing.
+            is ThreadSends.Outcome.Failed -> error = moneyFailure(context, o.error)
         }
-        Row {
-            OutlinedButton(onClick = onCancel, modifier = Modifier.weight(1f)) {
-                Text(stringResource(R.string.chat_cancel))
-            }
-            Spacer(Modifier.width(12.dp))
-            Button(
-                onClick = {
-                    busy = true
-                    scope.launch {
-                        val id = withContext(Dispatchers.IO) {
-                            runCatching {
-                                Groups.create(context, name.trim(), picked.toList())
-                            }.getOrNull()
-                        }
-                        busy = false
-                        id?.let { onDone(it.idHex) }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                ),
+                title = { Text(stringResource(R.string.group_create_title)) },
+                navigationIcon = {
+                    IconButton(onClick = onCancel) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.chat_back),
+                        )
                     }
                 },
-                enabled = !busy && name.isNotBlank() && picked.size >= 2,
-                modifier = Modifier.weight(1f),
-            ) {
-                if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                else Text(stringResource(R.string.group_create_button))
+            )
+        },
+    ) { padding ->
+        // A pick that outlived its contact (deleted while the form was in
+        // the bundle) is not a member; the button counts what can be seated.
+        val chosen = picked.filter { p -> contacts.any { it.personaHex == p } }
+        Column(
+            Modifier.fillMaxSize().padding(padding)
+                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+        ) {
+            Text(
+                stringResource(R.string.group_create_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(12.dp))
+            OutlinedTextField(
+                value = name,
+                onValueChange = { if (it.length <= 48) name = it },
+                label = { Text(stringResource(R.string.group_name_label)) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(12.dp))
+            LazyColumn(Modifier.weight(1f)) {
+                items(contacts, key = { it.personaHex }) { c ->
+                    Row(
+                        Modifier.fillMaxWidth()
+                            .clickable {
+                                picked = if (c.personaHex in picked) picked - c.personaHex
+                                else picked + c.personaHex
+                            }
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Checkbox(
+                            checked = c.personaHex in picked,
+                            onCheckedChange = null,
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(c.displayName())
+                    }
+                }
+            }
+            error?.let {
+                Text(
+                    it, Modifier.padding(bottom = 8.dp),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+            Row {
+                OutlinedButton(onClick = onCancel, modifier = Modifier.weight(1f)) {
+                    Text(stringResource(R.string.chat_cancel))
+                }
+                Spacer(Modifier.width(12.dp))
+                Button(
+                    onClick = {
+                        busy = true; error = null
+                        val title = name.trim()
+                        val members = chosen
+                        ThreadSends.launch(ContactStore(context), key, null) {
+                            Groups.create(context, title, members).idHex
+                        }
+                    },
+                    enabled = !busy && name.isNotBlank() && chosen.size >= 2,
+                    modifier = Modifier.weight(1f),
+                ) {
+                    if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                    else Text(stringResource(R.string.group_create_button))
+                }
             }
         }
     }
@@ -573,13 +743,12 @@ fun GroupCreateScreen(onDone: (String) -> Unit, onCancel: () -> Unit) {
 @Composable
 private fun SplitSheet(idHex: String, group: Groups.Group, onDone: () -> Unit) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     val store = remember { ContactStore(context) }
-    val mine = remember { PersonaStore(context).personaHex() }
+    val mine = remember { PersonaStore(context).allHexes() }
     val contacts = remember { store.all() }
     val youLabel = stringResource(R.string.group_you)
     fun nameOf(hex: String): String = when {
-        hex == mine -> youLabel
+        hex in mine -> youLabel
         else -> contacts.firstOrNull { it.personaHex == hex }?.displayName()
             ?: "${hex.take(8)}…"
     }
@@ -593,13 +762,38 @@ private fun SplitSheet(idHex: String, group: Groups.Group, onDone: () -> Unit) {
     var note by rememberSaveable { mutableStateOf("") }
     // Who shares the bill — everyone until unchecked, yourself included.
     // Unchecking yourself is "I didn't eat": the total splits among the rest.
-    val checked = remember { mutableStateListOf<String>().apply { addAll(group.members) } }
-    var busy by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }
+    val checked = rememberSaveable(saver = HEX_LIST_SAVER) {
+        mutableStateListOf<String>().apply { addAll(group.members) }
+    }
+    var error by rememberSaveable { mutableStateOf<String?>(null) }
     // Debtors already billed. A partial failure retries only the rest —
     // re-sending a bill someone already has is a duplicate, not a retry.
-    val sent = remember { mutableStateListOf<String>() }
+    // Saved with the amount: this list is the one thing a rotation must
+    // not lose, since the bills it names are in people's threads already.
+    val sent = rememberSaveable(saver = HEX_LIST_SAVER) { mutableStateListOf<String>() }
     val locked = sent.isNotEmpty()
+    // The bills go out one member at a time and then the sentence to the
+    // group — as long as the network takes, times the table. Under
+    // ThreadSends so the phone turning mid-way neither loses the busy
+    // state nor the answer: whichever sheet is up when it comes reads it.
+    val key = "split:$idHex"
+    var busy by remember { mutableStateOf(ThreadSends.inFlight(key)) }
+    val tick by ThreadSends.ticks.collectAsState()
+    LaunchedEffect(tick) {
+        busy = ThreadSends.inFlight(key)
+        for (o in ThreadSends.take(key)) when (o) {
+            is ThreadSends.Outcome.Landed -> onDone()
+            is ThreadSends.Outcome.Failed -> {
+                val p = o.error as? SplitPartial
+                if (p != null) {
+                    sent.addAll(p.billed.filter { it !in sent })
+                    error = context.getString(R.string.group_split_partial, p.fails.joinToString(", "))
+                } else {
+                    error = moneyFailure(context, o.error)
+                }
+            }
+        }
+    }
 
     val pxmr = remember(typed, fiatEntry, rate) {
         val v = moneyText(typed).toBigDecimalOrNull() ?: return@remember null
@@ -609,7 +803,7 @@ private fun SplitSheet(idHex: String, group: Groups.Group, onDone: () -> Unit) {
         xmr.multiply(java.math.BigDecimal(1_000_000_000_000L)).toLong().takeIf { it > 0 }
     }
     val share = if (pxmr != null && checked.isNotEmpty()) pxmr / checked.size else null
-    val debtors = checked.filter { it != mine }
+    val debtors = checked.filter { it !in mine }
 
     // Resolved here because plurals are composition-only: the sentence the
     // group hears, e.g. "dinner — USD 20.00 · 3 ways — USD 6.67 each".
@@ -700,38 +894,35 @@ private fun SplitSheet(idHex: String, group: Groups.Group, onDone: () -> Unit) {
                 onClick = {
                     val shareNow = share ?: return@Button
                     busy = true; error = null
-                    scope.launch {
+                    val already = sent.toList()
+                    val memo = note.ifBlank { defaultNote }
+                    val sentence = announce
+                    ThreadSends.launch(store, key, context.getString(R.string.group_split)) {
                         val fails = ArrayList<String>()
-                        withContext(Dispatchers.IO) {
-                            for (d in debtors) {
-                                if (d in sent) continue
-                                val c = contacts.firstOrNull { it.personaHex == d }
-                                if (c == null) { fails.add(nameOf(d)); continue }
-                                runCatching {
-                                    org.ducatproject.ducat.Mailbox.send(
-                                        context, c,
-                                        note.ifBlank { defaultNote },
-                                        mine,
-                                        kind = 1, amountPxmr = shareNow,
-                                        payto = org.ducatproject.ducat.WalletStore(context)
-                                            .addressFor(d),
-                                    )
-                                }.onSuccess { sent.add(d) }.onFailure { fails.add(nameOf(d)) }
-                            }
-                            if (fails.isEmpty()) {
-                                // The bills are out; now the sentence everyone
-                                // can audit them against. If this fan-out only
-                                // partially lands, Groups queues the rest —
-                                // that failure mode is already handled below us.
-                                runCatching { Groups.send(context, idHex, announce) }
-                                    .onFailure { fails.add(group.name) }
-                            }
+                        val billed = ArrayList<String>()
+                        for (d in debtors) {
+                            if (d in already) continue
+                            val c = contacts.firstOrNull { it.personaHex == d }
+                            if (c == null) { fails.add(nameOf(d)); continue }
+                            runCatching {
+                                org.ducatproject.ducat.Mailbox.send(
+                                    context, c, memo,
+                                    kind = 1, amountPxmr = shareNow,
+                                    payto = org.ducatproject.ducat.WalletStore(context)
+                                        .addressFor(d),
+                                )
+                            }.onSuccess { billed.add(d) }.onFailure { fails.add(nameOf(d)) }
                         }
-                        busy = false
-                        if (fails.isEmpty()) onDone()
-                        else error = context.getString(
-                            R.string.group_split_partial, fails.joinToString(", "),
-                        )
+                        if (fails.isEmpty()) {
+                            // The bills are out; now the sentence everyone
+                            // can audit them against. If this fan-out only
+                            // partially lands, Groups queues the rest —
+                            // that failure mode is already handled below us.
+                            runCatching { Groups.send(context, idHex, sentence) }
+                                .onFailure { fails.add(group.name) }
+                        }
+                        if (fails.isNotEmpty()) throw SplitPartial(fails, billed)
+                        null
                     }
                 },
                 enabled = !busy && share != null && debtors.isNotEmpty(),

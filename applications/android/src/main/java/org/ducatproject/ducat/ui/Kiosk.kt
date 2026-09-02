@@ -28,7 +28,6 @@ import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.Mode
 import org.ducatproject.ducat.ModeStore
-import org.ducatproject.ducat.MyProfile
 import org.ducatproject.ducat.Orders
 import org.ducatproject.ducat.R
 import org.ducatproject.ducat.TabStore
@@ -58,7 +57,11 @@ import org.ducatproject.ducat.formatXmr
 fun KioskScreen() {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
-    var basket by remember { mutableStateOf(listOf<BillItem>()) }
+    // Saved the way the till's is: the counter is a tablet, and a tablet
+    // rotates when somebody bumps it. The four things they had picked were
+    // gone with the turn, and they were picking them again in front of a
+    // queue.
+    var basket by rememberSaveable(stateSaver = BasketSaver) { mutableStateOf(listOf<BillItem>()) }
     var tipPct by rememberSaveable { mutableStateOf(0) }
     // The order id rather than the order, and saveable rather than
     // remembered: a customer fumbling for their phone while the card is up is
@@ -322,36 +325,70 @@ private fun Ordering(
 @Composable
 private fun PayPanel(order: Orders.Order, onDone: () -> Unit) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     // No local copy of the order: the caller re-reads it from the store, so
     // there is one record of where this sale has got to and everybody reads
     // the same one.
-    var cardUri by remember(order.id) { mutableStateOf<String?>(null) }
-    var cardInbox by remember(order.id) { mutableStateOf<String?>(null) }
+    //
+    // The card, saved with the order id it belongs to. Remembered only, a
+    // rotation while the code was up issued a second card and waited for
+    // *its* claimant — while the customer, mid-scan of the first, claimed a
+    // card nobody was watching any more and got no bill.
+    var cardUri by rememberSaveable(order.id) { mutableStateOf<String?>(null) }
+    var cardInbox by rememberSaveable(order.id) { mutableStateOf<String?>(null) }
     var error by remember(order.id) { mutableStateOf<String?>(null) }
-    var fallback by remember(order.id) { mutableStateOf(false) }
+    // Which face this order shows, read off the record rather than off a
+    // flag held here: a bare address with no tab is the Monero fallback,
+    // whichever screen instance is looking. The flag this used to be was
+    // lost on rotation, which put the card back up over an order that had
+    // already been given a Monero address — and its anonymous twin, placed
+    // in composition, was placed again.
+    val monero = order.tabId == null && order.address.isNotEmpty()
 
     // Issued once per order. A "sale" card never auto-reissues and this flow
     // waits for *its* claimant, so somebody scanning a profile code across the
     // room is not handed the queue's coffee.
-    LaunchedEffect(order.id, fallback) {
-        if (cardUri != null || fallback || !order.unpaired) return@LaunchedEffect
-        val r = withContext(Dispatchers.IO) {
-            runCatching {
-                Mailbox.issueCard(
-                    context, MyProfile(context).name(), CARD_TTL_SECS, purpose = "sale",
-                )
-            }
-        }
-        r.onSuccess { cardUri = it.uri; cardInbox = it.inboxKey }
-            .onFailure { error = moneyFailure(context, it) }
+    LaunchedEffect(order.id, monero) {
+        if (cardUri != null || monero || !order.unpaired) return@LaunchedEffect
+        // Until it is cut: the first order of the day is often placed
+        // before the node has attached, and one refused cut used to leave
+        // the order wearing "offline" until staff gave up on it.
+        val card = issueCardPatiently(context, CARD_TTL_SECS, "sale") { error = it }
+        error = null
+        cardUri = card.uri; cardInbox = card.inboxKey
     }
 
     // The same card over NFC, for as long as it is on screen: tapping and
     // scanning are the same gesture to a customer and should be the same
-    // gesture to us.
-    DisposableEffect(cardUri) {
-        org.ducatproject.ducat.nfc.Tap.offered = cardUri
+    // gesture to us. Not once the screen shows a Monero code instead — the
+    // card went on being offered under the fallback, and a phone tapped
+    // against it while the QR was up was billed for the coffee it was about
+    // to pay for with the QR.
+    DisposableEffect(cardUri, monero) {
+        org.ducatproject.ducat.nfc.Tap.offered = cardUri.takeUnless { monero }
         onDispose { org.ducatproject.ducat.nfc.Tap.offered = null }
+    }
+
+    // Staff gave up on it. Marked now, so the poller stops reading the
+    // mempool for it and the staff list stops calling it "awaiting" —
+    // rather than half an hour later, when expiry would have found it.
+    val giveUp: () -> Unit = {
+        kioskScope.launch { runCatching { Orders.abandon(context, order.id) } }
+        onDone()
+    }
+
+    // Bound, and the bill still owed. Orders.bind commits the tab to the
+    // order before the send, so a node that is down at that moment leaves a
+    // settled tab in the store, an order that reads as billed, and a
+    // customer holding nothing — the tab's billSeq is what settle writes
+    // only after the send, so it is the record that knows. Re-derived from
+    // the store on every bump, so the panel below stops claiming the bill
+    // was sent the moment it learns otherwise, and the loop knows to bill
+    // again through the SAME tab rather than open a second one.
+    val version by ContactStore.changes.collectAsState()
+    val owed = remember(order.tabId, version) {
+        order.tabId?.let { TabStore(context).get(it) }
+            ?.takeIf { it.state in setOf("open", "settled") && it.billSeq < 0 }
     }
 
     // Claim → contact → bill.
@@ -363,13 +400,37 @@ private fun PayPanel(order: Orders.Order, onDone: () -> Unit) {
     // ever after a successful bind, and the loop went round again: another
     // tab, another bill, and a customer watching their phone fill up with
     // them. The stored record is the one that knows this sale is done.
-    LaunchedEffect(cardInbox) {
-        val inbox = cardInbox ?: return@LaunchedEffect
+    //
+    // Keyed on the order as well as the card: a rebuilt screen with an
+    // order already bound issues no card, and the bill it may still owe
+    // has to be sent from here regardless.
+    //
+    // And on the fallback, which ends it: a claim on the card this order
+    // no longer shows must not bind the order the Monero code is paying.
+    LaunchedEffect(order.id, cardInbox, monero) {
+        if (monero) return@LaunchedEffect
         while (true) {
             val current = withContext(Dispatchers.IO) {
                 Orders.all(context).firstOrNull { it.id == order.id }
             } ?: return@LaunchedEffect
+            // The bill that did not go, sent again through the tab bind
+            // already opened. A bind failure used to fall through to the
+            // exit below and the panel said "sent to your phone" over a
+            // bill nobody had received.
+            val unbilled = withContext(Dispatchers.IO) {
+                current.tabId?.let { TabStore(context).get(it) }
+            }?.takeIf { it.state in setOf("open", "settled") && it.billSeq < 0 }
+            if (unbilled != null) {
+                withContext(Dispatchers.IO) { runCatching { TabStore(context).settle(unbilled) } }
+                    .onSuccess { error = null }
+                    .onFailure {
+                        error = moneyFailure(context, it)
+                        kotlinx.coroutines.delay(5_000)
+                    }
+                continue
+            }
             if (!current.unpaired) return@LaunchedEffect
+            val inbox = cardInbox ?: return@LaunchedEffect
             val who = withContext(Dispatchers.IO) {
                 runCatching {
                     Mailbox.collectClaims(context)
@@ -381,6 +442,7 @@ private fun PayPanel(order: Orders.Order, onDone: () -> Unit) {
                 continue
             }
             withContext(Dispatchers.IO) { runCatching { Orders.bind(context, current, who) } }
+                .onSuccess { error = null }
                 .onFailure {
                     // A claim that has landed stays landed, so without a wait
                     // here a node that is down turns this into a spin: bind,
@@ -397,21 +459,64 @@ private fun PayPanel(order: Orders.Order, onDone: () -> Unit) {
         }
     }
 
-    if (fallback) return MoneroFallback(order, onDone)
+    if (monero) return PayPanelMonero(order, onDone = onDone, onCancel = giveUp)
     if (order.unpaired) {
         return PairPanel(
             order = order,
             cardUri = cardUri,
             error = error,
-            onCancel = onDone,
-            onFallback = { fallback = true },
+            onCancel = giveUp,
+            // A bare address needs its own order: the noise in the total is
+            // how a mempool sighting is told from the next customer's
+            // identical coffee, and an unpaired order has none. It takes
+            // this order's place — same id, same number — so the record
+            // above turns into the Monero face by itself. Off the main
+            // thread: placing one derives a subaddress and rewrites the
+            // store, which used to happen inside composition.
+            onFallback = {
+                scope.launch {
+                    withContext(Dispatchers.IO) {
+                        runCatching {
+                            Orders.place(context, order.lines, order.taxPxmr, replacing = order)
+                        }
+                    }.onFailure { error = moneyFailure(context, it) }
+                }
+            },
         )
     }
-    BilledPanel(order = order, onDone = onDone)
+    BilledPanel(
+        order = order,
+        owed = owed != null,
+        error = error,
+        onDone = onDone,
+        // Giving up on a bill that never went: the tab is closed without a
+        // notice (there is no bill on their phone to withdraw) and the order
+        // reads as walked away, instead of a settled tab left behind to be
+        // matched by the next payment of that size from this customer.
+        onGiveUp = {
+            owed?.let { tab ->
+                kioskScope.launch {
+                    runCatching { TabStore(context).mutate(tab.id) { it.copy(state = "cancelled") } }
+                }
+            }
+            onDone()
+        },
+    )
 }
 
 /** How long a sale card stays claimable. Two hours outlasts any queue. */
 private const val CARD_TTL_SECS: ULong = 7_200uL
+
+/**
+ * Store writes that outlive the screen making them — BarTab's tabScope,
+ * for the same reason. "Give up" launched the abandon on the screen's own
+ * scope and left the screen in the same tap; a coroutine cancelled before
+ * a worker picked it up never runs at all, and the order stayed "awaiting"
+ * for the poller to keep reading the mempool for.
+ */
+private val kioskScope = kotlinx.coroutines.CoroutineScope(
+    kotlinx.coroutines.SupervisorJob() + Dispatchers.IO,
+)
 
 /** The card, waiting to be tapped or scanned. */
 @Composable
@@ -453,50 +558,99 @@ internal fun PairPanel(
     }
 }
 
-/** Billed into their conversation; the rest happens on their phone. */
+/**
+ * Billed into their conversation; the rest happens on their phone.
+ *
+ * [owed] is the bill that has not left yet — paired, tab open, node not
+ * answering — and the panel says so instead of "sent", with the reason under
+ * it and a way for staff to give the order up.
+ */
 @Composable
-internal fun BilledPanel(order: Orders.Order, onDone: () -> Unit) {
+internal fun BilledPanel(
+    order: Orders.Order,
+    onDone: () -> Unit,
+    owed: Boolean = false,
+    error: String? = null,
+    onGiveUp: () -> Unit = onDone,
+) {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
     val state = remember(order.id, version) { Orders.stateOf(context, order) }
-    if (state != Orders.State.Awaiting) return PaidPanel(order, onDone)
+    // Paid is a sighting or the chain, and nothing else. "Anything but
+    // awaiting" also covered withdrawn: staff took the bill back from the
+    // orders list, closed the panel, and the customer's screen thanked them
+    // for money that never came. A withdrawn order is a finished one — back
+    // to the counter.
+    when (state) {
+        Orders.State.Seen, Orders.State.Confirmed -> return PaidPanel(order, onDone)
+        Orders.State.Abandoned -> {
+            LaunchedEffect(order.id) { onDone() }
+            return
+        }
+        Orders.State.Awaiting -> Unit
+    }
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Icon(
-            Icons.Filled.Check, null, Modifier.size(48.dp),
-            tint = MaterialTheme.ducat.settled,
-        )
-        Spacer(Modifier.height(8.dp))
-        Text(
-            stringResource(R.string.kiosk_bill_sent),
-            style = MaterialTheme.typography.headlineSmall,
-            textAlign = TextAlign.Center,
-        )
-        Spacer(Modifier.height(4.dp))
-        Text(
-            stringResource(R.string.kiosk_bill_sent_note),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
+        if (owed) {
+            CatSpinner(Modifier.size(48.dp), tint = MaterialTheme.colorScheme.primary)
+            Spacer(Modifier.height(8.dp))
+            Text(
+                stringResource(R.string.kiosk_bill_sending),
+                style = MaterialTheme.typography.headlineSmall,
+                textAlign = TextAlign.Center,
+            )
+            error?.let {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    stringResource(R.string.kiosk_bill_not_sent, it),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    textAlign = TextAlign.Center,
+                )
+            }
+        } else {
+            Icon(
+                Icons.Filled.Check, null, Modifier.size(48.dp),
+                tint = MaterialTheme.ducat.settled,
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                stringResource(R.string.kiosk_bill_sent),
+                style = MaterialTheme.typography.headlineSmall,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                stringResource(R.string.kiosk_bill_sent_note),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+        }
         Spacer(Modifier.height(16.dp))
         Text(
             Amounts.show(context, order.totalPxmr).primary,
             style = MaterialTheme.typography.headlineMedium,
         )
         Spacer(Modifier.height(16.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-            Spacer(Modifier.width(8.dp))
-            Text(
-                stringResource(R.string.kiosk_waiting),
-                style = MaterialTheme.typography.bodyMedium,
-            )
+        if (!owed) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    stringResource(R.string.kiosk_waiting),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            Spacer(Modifier.height(16.dp))
         }
-        Spacer(Modifier.height(16.dp))
-        TextButton(onClick = onDone) { Text(stringResource(R.string.kiosk_next_customer)) }
+        if (owed) {
+            TextButton(onClick = onGiveUp) { Text(stringResource(R.string.kiosk_cancel_order)) }
+        } else {
+            TextButton(onClick = onDone) { Text(stringResource(R.string.kiosk_next_customer)) }
+        }
     }
 }
 
@@ -529,26 +683,27 @@ private fun PaidPanel(order: Orders.Order, onDone: () -> Unit) {
     }
 }
 
-/** The old way, for a wallet with no DUCAT behind it. */
+/**
+ * The old way, for a wallet with no DUCAT behind it: the code to pay, and
+ * then the word that the money arrived.
+ */
 @Composable
-private fun MoneroFallback(order: Orders.Order, onDone: () -> Unit) {
-    val context = LocalContext.current
-    // A bare address needs its own order: the noise in the total is how a
-    // mempool sighting is told from the next customer's identical coffee, and
-    // an unpaired order has none.
-    val anon = remember(order.id) { Orders.place(context, order.lines, order.taxPxmr) }
-    PayPanelMonero(anon, onDone)
-}
-
-/** The code to pay, and then the word that the money arrived. */
-@Composable
-private fun PayPanelMonero(order: Orders.Order, onDone: () -> Unit) {
+private fun PayPanelMonero(order: Orders.Order, onDone: () -> Unit, onCancel: () -> Unit) {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
     val live = remember(order.id, version) {
         Orders.all(context).firstOrNull { it.id == order.id } ?: order
     }
-    val paid = live.state != Orders.State.Awaiting
+    // Sighted or on the chain — not merely "no longer awaiting". Expiry
+    // gives up on an unpaid order after half an hour, and a code left up
+    // that long turned into "Thank you, order #12" on its own: the poller
+    // had stopped looking for the money, and the screen said it had come.
+    // An order nobody is looking for any more goes back to the counter.
+    val paid = live.state == Orders.State.Seen || live.state == Orders.State.Confirmed
+    if (live.state == Orders.State.Abandoned) {
+        LaunchedEffect(live.id) { onDone() }
+        return
+    }
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -603,7 +758,7 @@ private fun PayPanelMonero(order: Orders.Order, onDone: () -> Unit) {
             )
         }
         Spacer(Modifier.height(16.dp))
-        TextButton(onClick = onDone) { Text(stringResource(R.string.kiosk_cancel_order)) }
+        TextButton(onClick = onCancel) { Text(stringResource(R.string.kiosk_cancel_order)) }
     }
 }
 
@@ -670,12 +825,35 @@ private fun StaffOrders() {
     // on the other one, where a swallowed failure left the shop believing a
     // bill had been withdrawn when it had not, and the customer's phone still
     // showing money to pay.
-    val working = remember { mutableStateListOf<String>() }
+    //
+    // Held by the process (ThreadSends), one key per order, not by this
+    // screen: a list kept here was empty again after a rotation while the
+    // message was still going, and the button came back live over it.
     var staffError by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     val version by ContactStore.changes.collectAsState()
-    val orders = remember(version) { Orders.all(context) }
+    // One read of the order book and one of the tab book per change. Each
+    // row used to ask [Orders.stateOf] three times, and each ask decrypted
+    // and parsed every tab the shop has ever opened — on every frame the
+    // list scrolled.
+    val (orders, states) = remember(version) {
+        val all = Orders.all(context)
+        val tabs = TabStore(context).all().associateBy { it.id }
+        all to all.associate { it.id to Orders.stateOf(it, it.tabId?.let(tabs::get)) }
+    }
+    val tick by ThreadSends.ticks.collectAsState()
+    val working = remember(tick, orders) {
+        orders.map { it.id }.filter { ThreadSends.inFlight("kiosk:$it") }.toSet()
+    }
+    LaunchedEffect(tick, orders) {
+        for (o in orders) for (out in ThreadSends.take("kiosk:${o.id}")) {
+            if (out is ThreadSends.Outcome.Failed) staffError = moneyFailure(context, out.error)
+        }
+    }
+    val staffSend: (String, () -> Unit) -> Unit = { id, block ->
+        staffError = null
+        ThreadSends.launch(ContactStore(context), "kiosk:$id", null) { block(); null }
+    }
     Column(Modifier.fillMaxSize()) {
         Spacer(Modifier.height(8.dp))
         OutlinedButton(
@@ -702,6 +880,7 @@ private fun StaffOrders() {
         }
         LazyColumn(Modifier.fillMaxSize()) {
             items(orders) { o ->
+                val state = states[o.id] ?: o.state
                 ListItem(
                     headlineContent = {
                         Text(stringResource(R.string.kiosk_paid_number, o.number))
@@ -726,7 +905,7 @@ private fun StaffOrders() {
                             Text(Amounts.show(context, o.totalPxmr).primary)
                             Text(
                                 stringResource(
-                                    when (Orders.stateOf(context, o)) {
+                                    when (state) {
                                         // Seen and settled are different
                                         // words on purpose: one is a claim,
                                         // the other is the chain.
@@ -742,23 +921,11 @@ private fun StaffOrders() {
                             // Paid and waiting: the one message the counter
                             // owes somebody who stepped outside to wait.
                             if (o.personaHex != null && o.readyAt == 0L &&
-                                Orders.stateOf(context, o) in
-                                setOf(Orders.State.Seen, Orders.State.Confirmed)
+                                (state == Orders.State.Seen || state == Orders.State.Confirmed)
                             ) {
                                 TextButton(
                                     enabled = o.id !in working,
-                                    onClick = {
-                                        working += o.id
-                                        staffError = null
-                                        scope.launch {
-                                            withContext(Dispatchers.IO) {
-                                                runCatching { Orders.sayReady(context, o) }
-                                            }.onFailure {
-                                                staffError = moneyFailure(context, it)
-                                            }
-                                            working -= o.id
-                                        }
-                                    },
+                                    onClick = { staffSend(o.id) { Orders.sayReady(context, o) } },
                                 ) {
                                     Text(
                                         stringResource(
@@ -782,28 +949,17 @@ private fun StaffOrders() {
                             // pointing at money nobody was waiting for — which
                             // is the one way a person ends up paying for
                             // something that was cancelled out loud.
-                            if (o.tabId != null &&
-                                Orders.stateOf(context, o) == Orders.State.Awaiting
-                            ) {
+                            if (o.tabId != null && state == Orders.State.Awaiting) {
                                 TextButton(
                                     enabled = o.id !in working,
+                                    // Its failure is said out loud (the tick
+                                    // effect above). A withdrawal that quietly
+                                    // failed left the customer's phone pointing
+                                    // at money nobody was waiting for.
                                     onClick = {
-                                        working += o.id
-                                        staffError = null
-                                        scope.launch {
-                                            withContext(Dispatchers.IO) {
-                                                runCatching {
-                                                    val tabs = TabStore(context)
-                                                    tabs.get(o.tabId!!)?.let { tabs.cancel(it) }
-                                                }
-                                            }.onFailure {
-                                                // Said out loud. A withdrawal
-                                                // that quietly failed left the
-                                                // customer's phone pointing at
-                                                // money nobody was waiting for.
-                                                staffError = moneyFailure(context, it)
-                                            }
-                                            working -= o.id
+                                        staffSend(o.id) {
+                                            val tabs = TabStore(context)
+                                            tabs.get(o.tabId!!)?.let { tabs.cancel(it) }
                                         }
                                     },
                                 ) {

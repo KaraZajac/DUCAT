@@ -520,7 +520,8 @@ pub async fn claim(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
             amount_pxmr: None,
             txid: None,
             payto: None,
-            position: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
+            position: None, publication: None,
+                call: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
         };
         prev = m.link();
         let (chosen, fs) = {
@@ -801,7 +802,8 @@ pub async fn say_many(count: u32, prefix: &str) -> Result<(), Box<dyn std::error
             amount_pxmr: None, txid: None, payto: None,
             items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false,
             eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None,
-            position: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
+            position: None, publication: None,
+                call: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
         };
         let (chosen, fs) = their_bundle.select();
         if !fs && !fell_back {
@@ -952,7 +954,8 @@ async fn bill_or_say(
             kind: MessageKind::Text,
             amount_pxmr: None, txid: None, payto: None,
             items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None,
-            position: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
+            position: None, publication: None,
+                call: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
         },
         Some(o) => Message {
             version: 1, suite: 1, seq, prev,
@@ -975,7 +978,8 @@ async fn bill_or_say(
             round: o.round,
             ceremony_id: o.ceremony_id,
             attachment: None,
-            position: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
+            position: None, publication: None,
+                call: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
         },
     };
     // DUCAT_SIGNED_ONLY: seal to the signed prekey even with one-time keys
@@ -1384,6 +1388,9 @@ async fn watch_log(outbox_key: &str, their_persona: &[u8]) -> Result<(), Box<dyn
                                 MessageKind::CeremonyAbort => "aborts a ceremony",
                                 MessageKind::PositionRef => "shares a live position",
                                 MessageKind::GroupRoster => "grows a group roster",
+                                MessageKind::PublicationKey => "hands over a publication period key",
+                                MessageKind::CallOffer => "offers a call",
+                                MessageKind::CallAnswer => "answers a call",
                                 MessageKind::Text => unreachable!(),
                             },
                             m.amount_pxmr

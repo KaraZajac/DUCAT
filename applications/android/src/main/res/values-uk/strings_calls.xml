@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">Дзвонив(ла) тобі</string>
+    <string name="chat_call_you_rang">Ти дзвонив(ла)</string>
+    <string name="chat_call_answered">Прийняли твій дзвінок</string>
+    <string name="chat_call_you_answered">Ти відповів(ла)</string>
+    <string name="chat_call_missed_note">Дзвінок пролунав, поки тебе не було.</string>
+    <string name="chatlist_preview_call">Дзвінок</string>
+    <string name="chatlist_preview_call_answered">Дзвінок прийнято</string>
+    <string name="notify_call">%1$s дзвонить</string>
+    <string name="notify_call_answered">%1$s прийняв(ла) твій дзвінок</string>
+    <string name="call_button">Подзвонити</string>
+    <string name="call_calling">Виклик…</string>
+    <string name="call_incoming">Вхідний дзвінок DUCAT</string>
+    <string name="call_frames">↓%1$d ↑%2$d кадрів</string>
+    <string name="call_answer_btn">Відповісти</string>
+    <string name="call_end_btn">Покласти</string>
+    <string name="call_body_ring">Дзвонить тобі</string>
+    <string name="call_body_answer">Прийнято</string>
+    <string name="call_body_decline">Зараз не можу говорити.</string>
+    <string name="notify_call_channel">Вхідні дзвінки</string>
+    <string name="notify_call_incoming">Вхідний дзвінок</string>
+    <string name="call_no_answer">Немає відповіді</string>
+    <string name="call_leave_message">Залишити повідомлення</string>
+    <string name="call_dismiss">Не зараз</string>
+    <string name="call_body_cancel">Поклав(ла) слухавку до відповіді.</string>
+    <string name="call_connecting">З\u2019єднання…</string>
+    <string name="call_unreached">Не вдалося додзвонитися</string>
+    <string name="call_never_connected">З\u2019єднання не відбулося</string>
+    <string name="call_notify_calling">Дзвонимо %1$s…</string>
+    <string name="call_notify_in_call">Розмова з %1$s</string>
+    <string name="call_notify_return">Торкнись, щоб повернутися.</string>
+</resources>

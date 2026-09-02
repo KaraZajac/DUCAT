@@ -69,4 +69,5 @@ Quando finisce, tutte e due le cauzioni tornano intere e la tariffa va all\'auti
     <string name="onb_pin_done">Il tuo PIN è impostato. Verrà chiesto prima di ogni pagamento.</string>
     <string name="onb_pin_action">Scegli un PIN</string>
     <string name="onb_pin_next">Avanti</string>
+    <string name="onb_wallet_error">Impossibile creare il portafoglio. Riprova.</string>
 </resources>

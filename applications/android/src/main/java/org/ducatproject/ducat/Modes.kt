@@ -25,10 +25,11 @@ import android.content.Context
 // jobs, and the board they share is an implementation detail of where the
 // notice lands. Appended rather than inserted — `current()` reads the name
 // out of preferences, so the order here is free but the spelling is not.
-enum class Mode { None, Pos, BarTab, Taxi, Donate, Renting, Kiosk, Marketplace, HireHelp }
+enum class Mode { None, Pos, BarTab, Taxi, Donate, Renting, Kiosk, Marketplace, HireHelp, Press }
 
 class ModeStore(context: Context) {
     private val prefs = securePrefs(context, "ducat_contacts")
+    private val app = context.applicationContext
 
     fun current(): Mode =
         runCatching { Mode.valueOf(prefs.getString("mode_current", null) ?: "None") }
@@ -57,9 +58,50 @@ class ModeStore(context: Context) {
             // door out of a decision somebody already made.
             .putBoolean("mode_browsing", browsing && m != Mode.None)
             .apply()
+        // A mode with a bound persona puts that hat on as the shift starts
+        // — the shop answers as the shop, whatever was worn on the walk in.
+        // Entry-time only, and only for a real shift: browsing changes
+        // nothing, and the switcher can still change hats mid-shift (the
+        // binding is a default, not a cage). setWorn ignores a persona
+        // that no longer exists, so a stale binding degrades to "as worn".
+        //
+        // And the walk out is a doorway too. The hat the shift put on used
+        // to stay on: close the till and your personal browsing carried on
+        // as the shop, with new claims landing in the shop's compartment.
+        // Now the doorway remembers what was worn when a binding first
+        // took over, and an unbound doorway hands it back.
+        if (!browsing) {
+            val bound = boundPersona(m)
+            val personas = PersonaStore(app)
+            if (bound != null) {
+                if (prefs.getString("worn_before_shift", null) == null) {
+                    prefs.edit()
+                        .putString("worn_before_shift", personas.worn())
+                        .apply()
+                }
+                personas.setWorn(bound)
+            } else {
+                prefs.getString("worn_before_shift", null)?.let { prior ->
+                    prefs.edit().remove("worn_before_shift").apply()
+                    personas.setWorn(prior)
+                }
+            }
+        }
         ContactStore.bump()
     }
 
     /** Whether the current mode was opened to look, rather than to work. */
     fun browsing(): Boolean = prefs.getBoolean("mode_browsing", false)
+
+    /** The persona this mode answers as, or null for "whatever is worn". */
+    fun boundPersona(m: Mode): String? =
+        prefs.getString("mode_persona_${m.name}", null)
+
+    fun bindPersona(m: Mode, hex: String?) {
+        prefs.edit().apply {
+            if (hex == null) remove("mode_persona_${m.name}")
+            else putString("mode_persona_${m.name}", hex)
+        }.apply()
+        ContactStore.bump()
+    }
 }

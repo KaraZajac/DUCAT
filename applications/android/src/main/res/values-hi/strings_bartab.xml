@@ -25,12 +25,14 @@
     <string name="bartab_back">वापस</string>
     <string name="bartab_bill_cancelled_msg">%1$s का वह बिल रद्द है — कुछ नहीं चुकाना।</string>
     <string name="bartab_drink_notice">%1$s — %2$s · टैब अब %3$s</string>
+    <string name="bartab_discard_notice">टैब हटा दिया गया — कुछ नहीं चुकाना।</string>
     <string name="bartab_remove_line">हटाएँ</string>
     <string name="bartab_settle_bill">चुकता करें — बिल %1$s</string>
     <string name="bartab_settle_hint">%1$s के साथ आपकी बातचीत में एक ब्योरेवार बिल। वे कहीं से भी चुका सकते हैं — उनके जाने पर थ्रेड बंद नहीं होता।</string>
     <string name="bartab_discard_tab">टैब मिटाएँ</string>
     <string name="bartab_discard_title">यह टैब मिटा दें?</string>
     <string name="bartab_discard_body">टैब और उस पर चढ़ी हर चीज़ इस फ़ोन से मिट जाती है। कोई बिल नहीं भेजा जाता, और यह वापस नहीं हो सकता।</string>
+    <string name="bartab_discard_body_told">टैब और उस पर चढ़ी हर चीज़ इस फ़ोन से मिट जाती है। कोई बिल नहीं भेजा जाता — उन्हें बता दिया जाता है कि कुछ नहीं चुकाना — और यह वापस नहीं हो सकता।</string>
     <string name="bartab_discard_confirm">मिटाएँ</string>
     <string name="bartab_keep_tab">टैब रखें</string>
     <string name="bartab_billed_hint">बिल भेज दिया। भुगतान पहुँचते ही रसीद अपने-आप उन तक जाएगी। अगर हिसाब किसी और तरीके से चुकता हुआ हो, तो यहाँ बताएँ:</string>
@@ -40,6 +42,13 @@
     <string name="bartab_cancelled_note">रद्द — बातचीत में उन्हें बता दिया गया।</string>
     <string name="bartab_paid_oob_note">DUCAT से बाहर चुकाया ✓ — रसीद भेजी, कोई ट्रांज़ैक्शन जुड़ा नहीं।</string>
     <string name="bartab_paid_note">चुकाया ✓ — रसीद भेज दी।</string>
+    <string name="bartab_bill_pending">बिल बना, पर वह अभी इसी फ़ोन पर है — नेटवर्क लौटते ही चला जाएगा। किसी और तरीक़े से चुकाया गया? यहाँ बताएँ:</string>
+    <string name="bartab_bill_unsent">बिल उन तक कभी पहुँचा ही नहीं: बातचीत उसके जाने से पहले रीसेट हो गई। इसे रद्द करके दोबारा बिल बनाएँ, या किसी और तरीक़े से चुकाया गया हो तो यहाँ बताएँ:</string>
+    <string name="bartab_cancelled_pending">रद्द — उन्हें अभी बताया नहीं गया है। यह फ़ोन नेटवर्क पाते ही सूचना चली जाएगी।</string>
+    <string name="bartab_cancelled_unsent">रद्द — पर सूचना इस फ़ोन से कभी निकली ही नहीं, और अब जा भी नहीं सकती। बातचीत में उन्हें बता दें, वरना वे यह बिल फिर भी चुका सकते हैं।</string>
+    <string name="bartab_paid_oob_pending">DUCAT से बाहर चुकाया ✓ — रसीद अभी इसी फ़ोन पर है। नेटवर्क लौटते ही चली जाएगी।</string>
+    <string name="bartab_paid_oob_unsent">DUCAT से बाहर चुकाया ✓ — पर रसीद भेजी नहीं जा सकी।</string>
+    <string name="bartab_send_receipt">रसीद भेजें</string>
     <string name="bartab_remove_from_book">टैब बही से हटाएँ</string>
     <string name="bartab_back_to_tabs">टैब पर वापस</string>
     <!-- What the payer reads on the bill and the receipt. Written in
@@ -55,4 +64,8 @@
     <string name="bill_note_cancelled">%1$s का वह बिल रद्द कर दिया गया — कुछ भी नहीं देना है।</string>
     <string name="bill_note_sale">आपका बिल</string>
     <string name="bartab_tip_line">टिप — धन्यवाद</string>
+    <string name="bill_note_issue">सदस्यता</string>
+    <string name="bartab_paid_pending">चुकाया ✓ — रसीद अभी इसी फ़ोन पर है। नेटवर्क लौटते ही चली जाएगी।</string>
+    <string name="bartab_paid_unsent">चुकाया ✓ — पर रसीद भेजी नहीं जा सकी। अपने आप फिर कोशिश होगी।</string>
+    <string name="bartab_removed_notice">हटाया गया: %1$s · टैब अब %2$s</string>
 </resources>

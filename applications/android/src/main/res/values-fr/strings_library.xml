@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_library">Bibliothèque</string>
+    <string name="library_empty">Rien ici pour l\'instant. Quand un éditeur t\'envoie un numéro, il est classé ici — et il reste même si la conversation est supprimée.</string>
+    <string name="library_issue">Numéro %1$s</string>
+    <string name="library_on_device">Sur cet appareil · %1$s</string>
+    <string name="library_no_shipment">Clé classée — pas encore de téléchargement proposé</string>
+    <string name="library_download">Télécharger</string>
+    <string name="library_progress">%1$s sur %2$s</string>
+    <string name="library_starting">Démarrage…</string>
+    <string name="library_failed">Échec du téléchargement : %1$s</string>
+    <string name="library_gone">ne fait plus partie de tes contacts</string>
+    <string name="chat_issue_sent_you">T\'a envoyé un numéro</string>
+    <string name="chat_issue_you_sent">Tu as envoyé un numéro</string>
+    <string name="chatlist_preview_issue">Nouveau numéro : %1$s</string>
+    <string name="notify_new_issue">%1$s a envoyé un nouveau numéro</string>
+    <string name="library_note_new_issue">Un nouveau numéro est paru.</string>
+    <string name="library_unsubscribe">Se désabonner</string>
+    <string name="library_unsub_confirm">Ne plus rien recevoir de %1$s ? Les numéros déjà en ta possession restent à toi.</string>
+    <string name="library_unsub_keep">Garder l\u2019abonnement</string>
+    <string name="library_resubscribe">Se réabonner</string>
+    <string name="library_unsubscribed">Désabonné — les nouveaux numéros ne sont plus classés</string>
+    <string name="library_unsub_note">Désabonné.</string>
+    <plurals name="main_issues_waiting">
+        <item quantity="one">%1$d nouveau numéro en attente</item>
+        <item quantity="other">%1$d nouveaux numéros en attente</item>
+    </plurals>
+    <string name="library_open">Ouvrir</string>
+    <string name="library_queued">En file d\'attente</string>
+</resources>

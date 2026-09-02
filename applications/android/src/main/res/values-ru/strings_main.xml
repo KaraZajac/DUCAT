@@ -8,6 +8,8 @@
     <string name="main_backup_title">Резервная копия</string>
     <string name="main_backup_body">У тебя есть контакты, которых нет в последней резервной копии. Восстановление вернёт деньги, но не людей.</string>
     <string name="main_open_backup_settings">Открыть настройки резервной копии</string>
+    <string name="main_notify_off_title">Уведомления выключены</string>
+    <string name="main_notify_off_body">Телефон не сможет сообщить тебе, когда придут деньги, счёт или кто-то позвонит. Нажми, чтобы включить.</string>
     <string name="main_recent">Недавнее</string>
     <string name="main_see_all">Все</string>
     <string name="main_card_link_title">Добавить контакт?</string>
@@ -40,4 +42,11 @@
     <string name="err_no_keys_yet">Вы ещё не обменялись карточками до конца.</string>
     <string name="err_conversation_too_old">Их карточка слишком старая для этого приложения. Попросите новую.</string>
     <string name="err_board_full">Сейчас здесь слишком много заказов. Попробуйте через минуту.</string>
+    <string name="main_deals_title">Сделки</string>
+    <plurals name="main_deals_waiting">
+        <item quantity="one">%1$d сделка ждёт вас</item>
+        <item quantity="few">%1$d сделки ждут вас</item>
+        <item quantity="many">%1$d сделок ждут вас</item>
+        <item quantity="other">%1$d сделок ждут вас</item>
+    </plurals>
 </resources>

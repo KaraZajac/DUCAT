@@ -168,9 +168,22 @@ object Beacons {
      * and invisible when it is wrong: a reader judging against a stale height
      * does not crash, it quietly refuses the whole board. Pinned by
      * `:desktop:boardnotice`.
+     *
+     * A reading stamped *ahead* of now is not current either. A clock wound
+     * forward and back (RateStore.isStale has the live case) leaves a stamp
+     * the phone will not catch up with for days, and a plain "younger than
+     * three minutes" test held a week-old height as the tip for as long as
+     * the skew lasted. A stamp this clock has not reached is one it cannot
+     * vouch for; a few seconds of slack covers an honest nudge.
      */
-    internal fun usableTip(stored: Long, storedAt: Long, now: Long): Long =
-        if (stored > 0 && storedAt > 0 && now - storedAt < TIP_FRESH_MS) stored else 0L
+    internal fun usableTip(stored: Long, storedAt: Long, now: Long): Long {
+        if (stored <= 0 || storedAt <= 0) return 0L
+        val age = now - storedAt
+        return if (age < TIP_FRESH_MS && age > -STAMP_SLACK_MS) stored else 0L
+    }
+
+    /** How far ahead of now a stored reading may sit before it is disbelieved. */
+    private const val STAMP_SLACK_MS = 60_000L
 
     /**
      * Whether this device has a chain view *right now*, answered from state

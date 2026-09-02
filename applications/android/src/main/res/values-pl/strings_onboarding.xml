@@ -69,4 +69,5 @@ Gdy sprawa się kończy, obie kaucje wracają w całości, a opłata trafia do k
     <string name="onb_pin_done">PIN ustawiony. Zapytamy o niego przed każdą płatnością.</string>
     <string name="onb_pin_action">Wybierz PIN</string>
     <string name="onb_pin_next">Dalej</string>
+    <string name="onb_wallet_error">Nie udało się utworzyć portfela. Spróbuj ponownie.</string>
 </resources>

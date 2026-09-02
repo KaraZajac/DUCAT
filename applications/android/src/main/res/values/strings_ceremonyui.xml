@@ -12,6 +12,9 @@
     <string name="ceremony_accept_and_pay">Accept &amp; pay</string>
     <string name="ceremony_no_address">No address in this request — ask them where to send it.</string>
     <string name="ceremony_accept_opens_confirm">Accept opens the confirm screen — nothing moves until you approve it there.</string>
+    <string name="ceremony_bill_withdrawn">%1$s withdrew this bill — there is nothing to pay.</string>
+    <string name="ceremony_bill_declined">You declined this bill.</string>
+    <string name="ceremony_bill_paid">Paid ✓ — this bill is settled.</string>
 
     <!-- PaidSplash -->
     <string name="ceremony_paid">Paid ✓</string>
@@ -26,14 +29,19 @@
     <string name="ceremony_plate">plate %1$s</string>
     <string name="ceremony_accept">Accept</string>
     <string name="ceremony_accepting_agrees_fare">Accepting locks the fare and your stake in an escrow only the two of you can open.</string>
+    <string name="ceremony_accepting_agrees_fare_nostake">Accepting locks the fare in an escrow only the two of you can open. A fare this small carries no stake.</string>
     <string name="ceremony_accepting_agrees_fare_arbiter">Accepting locks the fare and your stake in an escrow that needs two of three keys: yours, theirs, and %1$s\'s, who is asked only if the two of you cannot agree.</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter_nostake">Accepting locks the fare in an escrow that needs two of three keys: yours, theirs, and %1$s\'s, who is asked only if the two of you cannot agree. A fare this small carries no stake.</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">Ride confirmed</string>
     <string name="ceremony_expecting_you">Post your stake in the chat — they pay once it\'s in.</string>
+    <string name="ceremony_expecting_you_nostake">No stake on a fare this small — they pay in the chat, and you will see it land there.</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">Your ride is coming</string>
     <string name="ceremony_eta_in_chat">Pay in the chat once their stake is in — the ETA is there too.</string>
+    <string name="ceremony_eta_in_chat_nostake">Pay in the chat — the ETA is there too. A fare this small carries no stake.</string>
     <string name="ceremony_stake_note">You put in %2$s: the fare plus a %1$s stake. The driver stakes %1$s too, and both come back when the ride ends.</string>
+    <string name="ceremony_asked_you_for">asked you for</string>
 </resources>

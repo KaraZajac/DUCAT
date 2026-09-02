@@ -14,10 +14,14 @@
     <string name="chat_voice_failed">Die spraakmemo is niet opgenomen — houd de microfoon opnieuw ingedrukt.</string>
     <string name="chat_what_card">het kaartje</string>
     <string name="chat_what_contact">het contact</string>
+    <string name="chat_what_reaction">de reactie</string>
+    <string name="chat_what_invite">de uitnodiging</string>
+    <string name="chat_what_note">het berichtje</string>
     <string name="chat_error_location_fix">kon geen locatiebepaling krijgen</string>
     <string name="chat_recording_placeholder">Opnemen… %1$ds</string>
     <string name="chat_message_placeholder">Bericht</string>
     <string name="chat_take_picture">Maak een foto</string>
+    <string name="chat_no_camera_app">geen camera-app op deze telefoon</string>
     <string name="chat_hold_to_record">Houd ingedrukt om een spraakmemo op te nemen</string>
     <string name="chat_attach">Bijvoegen</string>
     <string name="chat_close">Sluiten</string>
@@ -42,6 +46,10 @@
     <!-- Retractions (kind 5) -->
     <string name="chat_you_withdrew">Je hebt een bericht ingetrokken</string>
     <string name="chat_they_withdrew">%1$s heeft een bericht ingetrokken</string>
+    <string name="chat_you_withdrew_bill">Je hebt een rekening ingetrokken</string>
+    <string name="chat_they_withdrew_bill">%1$s heeft een rekening ingetrokken</string>
+    <string name="chat_you_withdrew_call">Je hebt een oproep ingetrokken</string>
+    <string name="chat_they_withdrew_call">%1$s heeft een oproep ingetrokken</string>
     <string name="chat_you_declined">Je hebt afgewezen</string>
     <string name="chat_they_declined">%1$s heeft afgewezen</string>
     <string name="chat_retract_with_quote">%1$s — “%2$s”</string>
@@ -83,6 +91,7 @@
     <string name="chat_downloading_audio">🎤 downloaden…</string>
     <string name="chat_downloading_file">📎 downloaden…</string>
     <string name="chat_att_stuck">Dit is niet aangekomen — het bestaat misschien niet meer. Er wordt nog geprobeerd.</string>
+    <string name="chat_att_gone">Dit is niet aangekomen — het bestaat misschien niet meer.</string>
     <string name="chat_att_no_space">Niet genoeg ruimte op deze telefoon om dit te downloaden.</string>
     <string name="chat_picture_desc">Foto</string>
     <string name="chat_could_not_decode">📷 (kon niet decoderen)</string>
@@ -108,6 +117,7 @@
     <string name="chat_stop">Stop</string>
     <string name="chat_play_voice_memo">Spraakmemo afspelen</string>
     <string name="chat_voice_memo">Spraakmemo</string>
+    <string name="chat_play_failed">Dit spraakbericht wil niet afspelen.</string>
     <string name="chat_size_kb">%1$d KB</string>
     <string name="chat_size_b">%1$d B</string>
     <string name="chat_file_fallback">bestand</string>
@@ -138,6 +148,9 @@
         <item quantity="other">Hier ontbreken %1$d berichten</item>
     </plurals>
     <string name="chat_not_sent_yet">nog niet verzonden</string>
+    <string name="chat_not_sent">niet verzonden</string>
     <string name="chat_cancel_request">Verzoek intrekken</string>
     <string name="chat_copied">Bericht gekopieerd</string>
+    <string name="chat_download_file">Downloaden</string>
+    <string name="chat_file_too_big_swarm">dat bestand is %1$d MB — bestanden gaan voorlopig tot 64 MB</string>
 </resources>

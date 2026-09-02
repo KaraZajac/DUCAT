@@ -16,8 +16,9 @@
     <string name="tab_send_receive">ارسال/دریافت</string>
 
     <string name="section_status">وضعیت</string>
-    <string name="section_profile">پروفایل</string>
+    <string name="section_profile">نمایه‌ها</string>
     <string name="section_contacts">مخاطبین</string>
+    <string name="section_selling">فروش</string>
     <string name="section_logs">گزارش‌ها</string>
     <string name="section_settings">تنظیمات</string>
     <string name="section_modes">حالت‌های کاری</string>

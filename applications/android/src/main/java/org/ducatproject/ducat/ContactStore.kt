@@ -59,6 +59,12 @@ class ContactStore(context: Context) {
          */
         const val BURN_GRACE_MS = 30L * 60 * 1000
 
+        /** Message kinds that are protocol machinery rather than
+         *  conversation: the DKG and FROST rounds (8, 9, 11), the abort (10)
+         *  and roster traffic (12) — what the chat list leaves out of its
+         *  preview, and what does not un-hide a deleted conversation. */
+        val HIDDEN_KINDS = setOf(8, 9, 10, 11, 12)
+
         /**
          * One lock for the whole store, across every instance.
          *
@@ -145,6 +151,38 @@ class ContactStore(context: Context) {
     fun update(c: Contact) = add(c)
 
     /**
+     * Replace a record with one derived from what is on disk *now*.
+     *
+     * [add] writes the caller's Contact whole. The claim paths build theirs
+     * from a `prior` read before their network round trips — seconds in
+     * which a poll can advance the inbound counters, or a send the outbound
+     * ones — and writing that snapshot back rewound whichever had moved. A
+     * rewound counter is a thread that stops (§16.12). The lambda sees the
+     * current record, under the lock, and says what replaces it; what it
+     * said is returned, so callers hold what was written, not what they
+     * built.
+     */
+    fun merge(personaHex: String, f: (Contact?) -> Contact): Contact = synchronized(lock) {
+        val current = all().firstOrNull { it.personaHex == personaHex }
+        val next = f(current)
+        save(all().filterNot { it.personaHex == personaHex } + next)
+        next
+    }
+
+    /**
+     * The name this phone calls them, and nothing else — same read-at-write
+     * rule as [advanceOutbound]. The chat screen used to rename by writing its
+     * whole snapshot of the contact back, one keystroke at a time, and a
+     * message landing while the name was being typed had its counters undone
+     * by the next letter.
+     */
+    fun setPetname(personaHex: String, petname: String?) { synchronized(lock) {
+        val c = all().firstOrNull { it.personaHex == personaHex } ?: return
+        if (c.petname == petname) return
+        save(all().filterNot { it.personaHex == personaHex } + c.copy(petname = petname))
+    } }
+
+    /**
      * Advance only the *sending* counters, re-reading first.
      *
      * The chat screen and the responder both used to write the whole record.
@@ -185,11 +223,16 @@ class ContactStore(context: Context) {
     fun expireOld(personaHex: String, afterSecs: Long): Int {
         if (afterSecs <= 0) return 0
         val cutoff = System.currentTimeMillis() / 1000 - afterSecs
-        val kept = thread(personaHex).filter { it.timestamp >= cutoff }
-        val all = thread(personaHex)
-        if (kept.size == all.size) return 0
-        writeThread(personaHex, kept)
-        return all.size - kept.size
+        // Read and write under the one lock: this runs on the poll loop
+        // while the lane appends, and a filtered copy written back over a
+        // thread that grew in between drops the message that just landed.
+        return synchronized(lock) {
+            val all = thread(personaHex)
+            val kept = all.filter { it.timestamp >= cutoff }
+            if (kept.size == all.size) return@synchronized 0
+            writeThread(personaHex, kept)
+            all.size - kept.size
+        }
     }
 
     /**
@@ -209,13 +252,40 @@ class ContactStore(context: Context) {
         if (secs > 0) expireOld(c.personaHex, secs) else 0
     }
 
-    /** Delete one message from this device. */
-    fun deleteMessage(personaHex: String, seq: Long, outgoing: Boolean) {
+    /** The half-typed message, per thread. Chat saves it when the screen
+     *  is disposed and reads it back on entry; send clears it. */
+    fun draftOf(personaHex: String): String =
+        prefs.getString("draft_$personaHex", null) ?: ""
+
+    fun saveDraft(personaHex: String, text: String) {
+        prefs.edit().apply {
+            if (text.isBlank()) remove("draft_$personaHex")
+            else putString("draft_$personaHex", text.take(4000))
+        }.apply()
+    }
+
+    /**
+     * Delete one message from this device.
+     *
+     * Addressed by (seq, timestamp) when the caller has one: a seq is per
+     * mailbox, and a re-claimed card restarts the numbering, so one thread
+     * can hold several messages at the same seq in the same direction.
+     * Without the timestamp, deleting one deleted them all.
+     */
+    fun deleteMessage(
+        personaHex: String,
+        seq: Long,
+        outgoing: Boolean,
+        timestamp: Long? = null,
+    ) { synchronized(lock) {
         writeThread(
             personaHex,
-            thread(personaHex).filterNot { it.seq == seq && it.outgoing == outgoing },
+            thread(personaHex).filterNot {
+                it.seq == seq && it.outgoing == outgoing &&
+                    (timestamp == null || it.timestamp == timestamp)
+            },
         )
-    }
+    } }
 
     private fun writeThread(personaHex: String, msgs: List<StoredMessage>) = synchronized(lock) {
         val arr = JSONArray()
@@ -253,20 +323,20 @@ class ContactStore(context: Context) {
      * sequence their reader already accepted, and their next message is
      * refused as out of order. Deleting a thread removes what this device
      * shows, never where the protocol stands.
+     *
+     * A group's lines are not this conversation's: they ride this thread
+     * because §16.19 fans a group out over its members' pairwise logs, but
+     * they are shown in the group and are the group's to delete. "Every
+     * message with Sam is deleted" used to take Sam's half of the ladder
+     * crew with it, silently, from a screen that had not mentioned the crew.
      */
     fun deleteThread(personaHex: String) { synchronized(lock) {
-        prefs.edit().remove("thread_$personaHex").apply()
+        val kept = thread(personaHex).filter { it.groupId != null }
+        if (kept.isEmpty()) prefs.edit().remove("thread_$personaHex").apply()
+        else writeThread(personaHex, kept)
         bump()
     } }
 
-    /**
-     * Forget a person entirely: the contact, everything they said, and every
-     * per-persona key the store and the mailbox filed under them. The prefixed
-     * families ("stuck_", "slotseen_") are swept by scanning all keys, because
-     * they are keyed per-slot and per-seq and nothing else remembers which
-     * ones exist — leaving them would grow the prefs file by one orphan per
-     * forgotten conversation, forever.
-     */
     /** The newest outbound seq whose slot the network has confirmed holding
      *  (Mailbox.verifyLastWrites). -1 until anything has been. */
     fun lastSlotVerified(personaHex: String): Long =
@@ -285,11 +355,33 @@ class ContactStore(context: Context) {
         prefs.edit().putInt("slotfix_$personaHex", n).apply()
     }
 
+    /**
+     * Drop the patience clocks the mailbox keeps per unreadable inbound seq
+     * ("stuck_persona:seq"). For when their log is replaced by a re-claim:
+     * the clocks count the old log's numbering, and a clock left running
+     * for old seq 7 is what the new log's seq 7 would be judged by — an
+     * unreadable slot there declared lost on sight instead of getting its
+     * window, which is the false loss the window exists to prevent.
+     */
+    fun clearStuckClocks(personaHex: String) { synchronized(lock) {
+        val e = prefs.edit()
+        prefs.all.keys.filter { it.startsWith("stuck_$personaHex:") }.forEach { e.remove(it) }
+        e.apply()
+    } }
+
+    /**
+     * Forget a person entirely: the contact, everything they said, and every
+     * per-persona key the store and the mailbox filed under them. The prefixed
+     * families ("stuck_", "slotseen_") are swept by scanning all keys, because
+     * they are keyed per-slot and per-seq and nothing else remembers which
+     * ones exist — leaving them would grow the prefs file by one orphan per
+     * forgotten conversation, forever.
+     */
     fun forget(personaHex: String) { synchronized(lock) {
         val e = prefs.edit()
         listOf(
-            "thread_", "disappear_", "seen_", "usedtheirs_", "billseen_",
-            "pendingslot_", "slotok_", "slotfix_",
+            "thread_", "disappear_", "seen_", "seenlog_", "usedtheirs_", "billseen_",
+            "billdone_", "pendingslot_", "slotok_", "slotfix_",
         )
             .forEach { e.remove(it + personaHex) }
         prefs.all.keys.filter {
@@ -367,6 +459,14 @@ class ContactStore(context: Context) {
     fun publishAddress(): Boolean = prefs.getBoolean("publish_address", false)
 
     /**
+     * Whether anyone has answered that yet. Setup's Profile step offers the
+     * switch on and this store defaults it off, so [publishAddress] is only
+     * the person's answer once the step has been through — and a setup flow
+     * rebuilt by a rotation has to know which of the two it is showing.
+     */
+    fun publishAddressChosen(): Boolean = prefs.contains("publish_address")
+
+    /**
      * Whether this device publishes read watermarks (§16.16). **Off by
      * default**: when a message was read is behavioural data, and it leaves
      * the device by choice, not by installing a chat app.
@@ -394,12 +494,45 @@ class ContactStore(context: Context) {
      * The last inbound sequence this user has *seen* — locally, for the
      * unread dot and the tab badge. Not §16.16's watermark: this never leaves
      * the device, so it needs no opt-in.
+     *
+     * Read against the log it was set on. A seq is per mailbox: claiming a
+     * fresh card from somebody already known restarts their numbering at 0
+     * (see [org.ducatproject.ducat.Mailbox.claimCard]'s `sameLog`), and a
+     * mark of 40 left by the old card meant the next forty messages on the
+     * new one arrived without a dot — the mark is never lowered, because
+     * the writer's copy of a contact can lag the poller's, and lowering it
+     * from a stale snapshot would re-flag a thread just read. A mark from
+     * another log is simply not this log's mark: nothing seen yet.
+     *
+     * A mark written before the log was recorded is trusted unless it is
+     * above the count — on one log the mark never passes the count, so
+     * that one was set on a card since replaced. Read as this log's, it
+     * hid every message on the new card until the thread happened to be
+     * opened (found on the upgrade itself: a fresh message, no dot). Read
+     * as nothing seen, the thread flags once and the visit records the
+     * log; the dot is the cheaper mistake.
      */
-    fun chatSeen(personaHex: String): Long = prefs.getLong("seen_$personaHex", 0L)
+    fun chatSeen(c: Contact): Long {
+        val mark = prefs.getLong("seen_${c.personaHex}", 0L)
+        val log = prefs.getString("seenlog_${c.personaHex}", null)
+        return when {
+            log == null -> if (mark > c.inSeq) 0L else mark
+            log != c.theirOutbox -> 0L
+            else -> mark
+        }
+    }
 
-    fun setChatSeen(personaHex: String, v: Long) {
-        if (v <= chatSeen(personaHex)) return
-        prefs.edit().putLong("seen_$personaHex", v).apply()
+    fun setChatSeen(c: Contact) {
+        // Same log, nothing new: leave it — a lagging snapshot must not
+        // lower the mark. Any other case is written, because what it
+        // records is the log as much as the count.
+        if (prefs.getString("seenlog_${c.personaHex}", null) == c.theirOutbox &&
+            c.inSeq <= prefs.getLong("seen_${c.personaHex}", 0L)
+        ) return
+        prefs.edit()
+            .putLong("seen_${c.personaHex}", c.inSeq)
+            .putString("seenlog_${c.personaHex}", c.theirOutbox)
+            .apply()
         bump()
     }
 
@@ -425,7 +558,7 @@ class ContactStore(context: Context) {
     }
 
     /** Conversations holding messages this user has not looked at. */
-    fun unreadThreads(): Int = all().count { it.chatVisible && it.inSeq > chatSeen(it.personaHex) }
+    fun unreadThreads(): Int = all().count { it.chatVisible && it.inSeq > chatSeen(it) }
 
     fun setTheirReadUpTo(personaHex: String, v: Long) { synchronized(lock) {
         val c = all().firstOrNull { it.personaHex == personaHex } ?: return
@@ -520,8 +653,32 @@ class ContactStore(context: Context) {
         e.putString("thread_$personaHex", arr.toString())
         if (m.kind == 3) saveReceiptLocked(personaHex, m, e)
         all().firstOrNull { it.personaHex == personaHex }?.let { c ->
+            // A hidden conversation comes back when they write. Deleting one
+            // hides it (setChatVisible) and nothing un-hid it, so the next
+            // thing they said was announced by a notification that opened
+            // a thread the Chats tab still refused to list, with no badge.
+            // Machinery — ceremony rounds, roster traffic — stays quiet, as
+            // it does in the list's preview line; a person's words, a
+            // request, a payment, a call, an issue all count as writing.
+            // A group message is writing too, but not to this thread: it
+            // is the group's, and the group row is the one that answers
+            // for it ([Groups.markSeen]).
+            val surfaces = m.kind !in HIDDEN_KINDS && m.groupId == null
+            // What the thread will not show must not raise its dot. Every
+            // row advanced inSeq and the dot was inSeq against the mark, so
+            // Sam posting in the ladder crew flagged Sam's direct row and
+            // the tab badge, and opening Sam found nothing new. A thread
+            // with nothing unread steps its mark over the row; one with a
+            // direct line waiting keeps the mark where that line is.
+            if (!surfaces && chatSeen(c) >= c.inSeq) {
+                e.putLong("seen_$personaHex", newInSeq)
+                    .putString("seenlog_$personaHex", c.theirOutbox)
+            }
             putContacts(e, all().filterNot { it.personaHex == personaHex } +
-                c.copy(inSeq = newInSeq, inPrevLink = newPrevLink))
+                c.copy(
+                    inSeq = newInSeq, inPrevLink = newPrevLink,
+                    chatVisible = c.chatVisible || surfaces,
+                ))
         }
         e.apply()
         bump()
@@ -553,8 +710,19 @@ class ContactStore(context: Context) {
             JSONObject().put("seq", m.seq).put("b", b64(sealedSlot)).toString(),
         )
         all().firstOrNull { it.personaHex == personaHex }?.let { c ->
+            // Own words bring a deleted conversation back the way theirs
+            // do. Contacts, a search hit and a notification all open a
+            // hidden thread without un-hiding it, so a message written
+            // there landed in a conversation the Chats tab would not list
+            // until the other side answered — "where did what I just sent
+            // go". Same rule as inbound: a person's line to this thread,
+            // not machinery, not a group's fan-out copy.
+            val surfaces = m.kind !in HIDDEN_KINDS && m.groupId == null
             putContacts(e, all().filterNot { it.personaHex == personaHex } +
-                c.copy(outSeq = newOutSeq, outPrevLink = newPrevLink))
+                c.copy(
+                    outSeq = newOutSeq, outPrevLink = newPrevLink,
+                    chatVisible = c.chatVisible || surfaces,
+                ))
         }
         e.apply()
         bump()
@@ -587,12 +755,38 @@ class ContactStore(context: Context) {
      */
     fun markDelivered(personaHex: String, seq: Long) { synchronized(lock) {
         val thread = thread(personaHex)
-        if (thread.none { it.outgoing && it.seq == seq && !it.delivered }) return@synchronized
+        // The newest row at this seq, not every row at it: a re-claim starts
+        // our numbering over while the thread keeps the old log's rows, so
+        // "every outgoing row at seq 3" is one row per log this thread has
+        // had. A send the old log never completed — stranded when the
+        // re-claim dropped its pending slot — would be ticked as delivered
+        // the day the new log reached the same number.
+        val at = thread.indexOfLast { it.outgoing && it.seq == seq }
+        if (at < 0 || thread[at].delivered) return@synchronized
+        val arr = JSONArray()
+        thread.forEachIndexed { i, m ->
+            arr.put(if (i == at) m.copy(delivered = true).toJson() else m.toJson())
+        }
+        prefs.edit().putString("thread_$personaHex", arr.toString()).apply()
+        bump()
+    } }
+
+    /**
+     * Our outbox for this contact is being replaced (a re-claim): settle
+     * the read state of everything sent on the old one while the old
+     * watermark still describes it. [readUpTo] is their claim against the
+     * log being retired; rows already frozen by an earlier retirement are
+     * left as they are.
+     */
+    fun retireOutbox(personaHex: String, readUpTo: Long?) { synchronized(lock) {
+        val thread = thread(personaHex)
+        if (thread.none { it.outgoing && it.readByThem == null }) return@synchronized
         val arr = JSONArray()
         thread.forEach {
             arr.put(
-                if (it.outgoing && it.seq == seq) it.copy(delivered = true).toJson()
-                else it.toJson(),
+                if (it.outgoing && it.readByThem == null) {
+                    it.copy(readByThem = readUpTo != null && it.seq < readUpTo).toJson()
+                } else it.toJson(),
             )
         }
         prefs.edit().putString("thread_$personaHex", arr.toString()).apply()
@@ -633,8 +827,13 @@ class ContactStore(context: Context) {
             val o = arr.optJSONObject(i) ?: continue
             val sameTx = m.txidHex != null && !o.isNull("txid") &&
                 o.optString("txid").equals(m.txidHex, ignoreCase = true)
+            // The timestamp beside the seq: a seq is per mailbox, and a
+            // re-claimed card restarts it, so two receipts in one thread can
+            // share a number. A row written before the stamp was checked is
+            // matched the old way rather than captured again.
             val sameMsg = o.optString("hex") == personaHex &&
-                o.optLong("seq", -1L) == m.seq && o.optBoolean("mine") == m.outgoing
+                o.optLong("seq", -1L) == m.seq && o.optBoolean("mine") == m.outgoing &&
+                (!o.has("ts") || o.optLong("ts") == m.timestamp)
             if (sameTx || sameMsg) return
         }
         arr.put(JSONObject().apply {
@@ -697,6 +896,23 @@ class ContactStore(context: Context) {
         prefs.edit().putBoolean("receipts_migrated_v1", true).apply()
     } }
 
+    /**
+     * One-time stamp of [Contact.owner] onto the single-persona era.
+     *
+     * An empty owner already *resolves* to the primary persona (see
+     * [PersonaStore.ownerHexOf]), so nothing breaks without this — the stamp
+     * exists so the data says what the code assumes, before a second persona
+     * ever appears. Restore clears the flag rather than stamping inline: a
+     * restored old bundle re-arrives owner-less, and the next startup pass
+     * writes it down again.
+     */
+    fun migrateOwners(primaryHex: String) { synchronized(lock) {
+        if (prefs.getBoolean("owners_migrated_v1", false)) return
+        val stamped = all().map { if (it.owner.isBlank()) it.copy(owner = primaryHex) else it }
+        if (stamped.isNotEmpty()) save(stamped)
+        prefs.edit().putBoolean("owners_migrated_v1", true).apply()
+    } }
+
     // --- backup (§4.3) ----------------------------------------------------
 
     /**
@@ -723,6 +939,7 @@ class ContactStore(context: Context) {
             outSeq = c.outSeq.toULong(),
             inPrev = c.inPrevLink,
             outPrev = c.outPrevLink,
+            owner = c.owner.ifBlank { null },
         )
     }
 
@@ -775,10 +992,21 @@ class ContactStore(context: Context) {
      */
     private fun backupKey(k: String): Boolean =
         k.startsWith("thread_") || k.startsWith("disappear_") ||
-            k.startsWith("usedtheirs_") || k.startsWith("sub_")
+            k.startsWith("usedtheirs_") || k.startsWith("sub_") ||
+            // §1.1a: which shop the till answers as, per mode. Identity
+            // plumbing, not stance — mode_current itself stays out, so a
+            // restored phone wakes as a wallet, not mid-shift.
+            k.startsWith("mode_persona_")
 
     private val appStateKeys =
-        listOf("tabs_v1", "publish_address", "receipts_v1", "claimed_kis_v1", "issued_cards")
+        listOf(
+            "tabs_v1", "publish_address", "receipts_v1", "claimed_kis_v1", "issued_cards",
+            // The hat that was on. Found missing by backuptest's persona
+            // round: the roster restored and the phone woke wearing the
+            // primary, which for a shop that lives in its second persona
+            // is answering customers as the owner's private self.
+            "worn_persona",
+        )
 
     fun backupAppState(): ByteArray {
         val o = JSONObject()
@@ -840,6 +1068,14 @@ class ContactStore(context: Context) {
         // restoring an old backup simply finds these absent. No wire change.
         securePrefs(appContext, "ducat_listings").getString("listings", null)
             ?.let { o.put("listings_raw", it) }
+        // §16.20's two cabinets: the publisher's master secrets (without
+        // which no back-catalogue key can ever be cut again) and the
+        // subscriber's filed period keys (what the money already bought).
+        // Inside the sealed blob like everything secret here.
+        securePrefs(appContext, "ducat_publications").getString("pubs", null)
+            ?.let { o.put("publications_raw", it) }
+        securePrefs(appContext, "ducat_publications").getString("subs", null)
+            ?.let { o.put("subscriptions_raw", it) }
         securePrefs(appContext, "ducat_catalogue").getString("items", null)
             ?.let { o.put("catalogue_raw", it) }
         // Groups, for the same reason as the ceremony shares above: they
@@ -892,7 +1128,13 @@ class ContactStore(context: Context) {
                     }
                 }
                 o.optString("contacts_raw").takeIf { it.isNotEmpty() }
-                    ?.let { e.putString("contacts", it) }
+                    ?.let {
+                        e.putString("contacts", it)
+                        // A bundle from the single-persona era carries no
+                        // owner stamps; clearing the flag re-runs the
+                        // one-shot pass on the next launch.
+                        e.putBoolean("owners_migrated_v1", false)
+                    }
                 // Separate stores, separate editors — but written inside the
                 // same restore so nothing observes contacts back and the shop
                 // still empty. The poller's next pass re-posts each listing
@@ -901,6 +1143,14 @@ class ContactStore(context: Context) {
                 o.optString("listings_raw").takeIf { it.isNotEmpty() }?.let {
                     securePrefs(appContext, "ducat_listings").edit()
                         .putString("listings", it).apply()
+                }
+                o.optString("publications_raw").takeIf { it.isNotEmpty() }?.let {
+                    securePrefs(appContext, "ducat_publications").edit()
+                        .putString("pubs", it).apply()
+                }
+                o.optString("subscriptions_raw").takeIf { it.isNotEmpty() }?.let {
+                    securePrefs(appContext, "ducat_publications").edit()
+                        .putString("subs", it).apply()
                 }
                 o.optString("catalogue_raw").takeIf { it.isNotEmpty() }?.let {
                     securePrefs(appContext, "ducat_catalogue").edit()
@@ -945,6 +1195,7 @@ class ContactStore(context: Context) {
                     outSeq = c.outSeq.toLong(),
                     inPrevLink = c.inPrev,
                     outPrevLink = c.outPrev,
+                    owner = c.owner ?: existing?.owner ?: "",
                 )
             )
         }
@@ -989,12 +1240,14 @@ class ContactStore(context: Context) {
         purpose: String,
         /** Seconds the network copy lives, so pruning can follow it. */
         validSecs: Long = 0,
+        /** The persona that cut it — whoever answers is theirs (doorway rule). */
+        owner: String = "",
     ) = synchronized(lock) {
         val arr = prefs.getString("issued_cards", null)?.let { JSONArray(it) } ?: JSONArray()
         arr.put(JSONObject().apply {
             put("inbox", inboxKey); put("wpub", b64(writerPublic)); put("wsec", b64(writerSecret))
             put("outbox", outboxKey); put("opub", b64(outboxOwnerPublic)); put("osec", b64(outboxOwnerSecret))
-            put("uri", uri); put("purpose", purpose)
+            put("uri", uri); put("purpose", purpose); put("owner", owner)
             put("made", System.currentTimeMillis()); put("ttl", validSecs)
             put("answered_by", JSONObject.NULL)
         })
@@ -1015,6 +1268,7 @@ class ContactStore(context: Context) {
                 outboxOwnerSecret = unb64(o.getString("osec")),
                 uri = o.optString("uri", ""),
                 purpose = o.optString("purpose", "profile"),
+                owner = o.optString("owner", ""),
                 answeredBy = if (o.isNull("answered_by")) null else o.optString("answered_by"),
             )
         }
@@ -1090,8 +1344,8 @@ class ContactStore(context: Context) {
                 if (ttlSecs > 0) ttlSecs * 1000L + 60 * 60 * 1000L
                 else 24 * 60 * 60 * 1000L
             val stale =
-                (answered && now - made > 60 * 60 * 1000L) ||
-                    (!answered && now - made > unansweredLife)
+                if (answered) Elapsed.due(now, made, 60 * 60 * 1000L)
+                else Elapsed.due(now, made, unansweredLife)
             if (stale) dropped += o.getString("inbox") else keep.put(o)
         }
         if (dropped.isNotEmpty()) {
@@ -1109,9 +1363,24 @@ class ContactStore(context: Context) {
      * every time somebody opens the code screen would litter the network and
      * hand out a different code each glance.
      */
-    fun currentCardUri(): String? =
-        issuedCards().lastOrNull { it.purpose == "profile" && it.answeredBy == null }
-            ?.uri?.takeIf { it.isNotEmpty() }
+    fun currentCardUri(): String? = currentCardUri(null)
+
+    /**
+     * The standing code for one persona — the worn one when [ownerHex] is
+     * null. A card whose owner is blank predates the compartments and
+     * belongs to the primary; matching it by emptiness rather than
+     * rewriting the registry keeps old cards valid across the upgrade.
+     */
+    fun currentCardUri(ownerHex: String?): String? {
+        val ctx = appContext
+        val personas = PersonaStore(ctx)
+        val want = ownerHex ?: personas.worn()
+        val primary = personas.personaHex()
+        return issuedCards().lastOrNull {
+            it.purpose == "profile" && it.answeredBy == null &&
+                (it.owner == want || (it.owner.isBlank() && want == primary))
+        }?.uri?.takeIf { it.isNotEmpty() }
+    }
 
     /** Our own published bundle and its secrets. */
     /**
@@ -1313,7 +1582,14 @@ class ContactStore(context: Context) {
         val e = prefs.edit().putString("prekeys", o.toString())
         // The id lives in exactly one thread's offer; prune it there too, or
         // that head keeps advertising a key that can no longer decrypt.
-        prefs.all.keys.filter { it.startsWith("prekeys_ob_") }.forEach { k ->
+        // The offers are keyed by outbox, and every outbox belongs to a
+        // contact or to a card still waiting to be answered — named from
+        // those rather than found by scanning: `prefs.all` on the encrypted
+        // store decrypts every thread it holds, and this runs once per
+        // inbound message, under the lock.
+        val offers = (all().map { it.myOutbox } + issuedCards().map { it.outboxKey })
+            .filter { it.isNotEmpty() }.distinct().map { "prekeys_ob_$it" }
+        offers.forEach { k ->
             val blob = prefs.getString(k, null) ?: return@forEach
             runCatching {
                 uniffi.ducat_mobile.prunePrekey(unb64(blob), id.toUInt())
@@ -1471,6 +1747,18 @@ data class Contact(
      * way to tidy the list. Hidden here, deleted in Contacts.
      */
     val chatVisible: Boolean = true,
+    /**
+     * Which of OUR personas this relationship belongs to — the hex of the
+     * persona that issued or claimed the card it began with (§16.9; the
+     * post-1.0 doorway rule). Bound once, at the doorway, and inherited by
+     * every message, bill and ceremony after: there is deliberately no way
+     * to answer a thread as somebody else. Empty means "the primary
+     * persona" — the value every contact from the single-persona era
+     * carries until the one-shot stamp writes it explicitly, and the value
+     * a restored old backup arrives with. Resolve through
+     * [PersonaStore.ownerHexOf], never by reading this raw.
+     */
+    val owner: String = "",
 ) {
     /** §7.5: the petname wins. A self-asserted name is a fallback, never a name. */
     /**
@@ -1521,6 +1809,7 @@ data class Contact(
         put("in_seq", inSeq)
         put("in_prev", inPrevLink?.let { b64(it) } ?: JSONObject.NULL)
         put("chat_visible", chatVisible)
+        put("owner", owner)
     }
 
     companion object {
@@ -1553,6 +1842,7 @@ data class Contact(
             inSeq = o.optLong("in_seq"),
             inPrevLink = o.optStringOrNull("in_prev")?.let { unb64(it) },
             chatVisible = o.optBoolean("chat_visible", true),
+            owner = o.optString("owner", ""),
         )
     }
 }
@@ -1573,8 +1863,11 @@ data class StoredMessage(
     /** For a reaction (§16.14): which message, and in whose log. */
     val reSeq: Long? = null,
     val reOwn: Boolean = false,
-    /** An attachment by reference (§16.15); bytes cached by ciphertext hash. */
+    /** An attachment by reference (§16.15); bytes cached by ciphertext hash.
+     *  Exactly one transport: a record (small road) or a swarm share (big). */
     val attRecord: String? = null,
+    val attSwarm: String? = null,
+    val attSwarmDigest: String? = null,
     val attKey: ByteArray? = null,
     val attNonce: ByteArray? = null,
     val attLen: Long = 0,
@@ -1626,6 +1919,30 @@ data class StoredMessage(
      * person had said. §16.11's retraction already had the shape for this.
      */
     val deadLetter: Boolean = false,
+    /** §16.20: a publication period's key. On kind 13 only. */
+    val pubPeriodId: String? = null,
+    val pubPeriodKey: ByteArray? = null,
+    val pubRecord: String? = null,
+    val pubHeadKey: ByteArray? = null,
+    /** §16.20's shipment: a heavy period's swarm share, key + digest. */
+    val pubSwarmKey: String? = null,
+    val pubSwarmDigest: String? = null,
+    /** §16.21: a call's door, hex — route blob and 8-byte id. */
+    val callRoute: String? = null,
+    val callId: String? = null,
+    /**
+     * Whether they had read this by the time the log it was sent on was
+     * retired — frozen at that moment, for outgoing rows only.
+     *
+     * Null while the log is live: the second tick then comes from the
+     * contact's [Contact.theirReadUpTo] against [seq]. That comparison
+     * stops meaning anything once a re-claim mints a new outbox, because
+     * the thread keeps the old log's rows and the new log numbers from
+     * zero again: a fresh watermark of 2 put one tick back on every old
+     * message from the third onward, and read as the other side having
+     * un-read a month of conversation. See [ContactStore.retireOutbox].
+     */
+    val readByThem: Boolean? = null,
 ) {
     fun toJson(): JSONObject = JSONObject().apply {
         put("out", outgoing); put("seq", seq); put("body", body)
@@ -1636,8 +1953,11 @@ data class StoredMessage(
         put("txid", txidHex ?: JSONObject.NULL)
         reSeq?.let { put("re_seq", it) }
         if (reOwn) put("re_own", true)
-        attRecord?.let {
-            put("att_rec", it); put("att_key", Base64.encodeToString(attKey, Base64.NO_WRAP))
+        if (attHash != null) {
+            attRecord?.let { put("att_rec", it) }
+            attSwarm?.let { put("att_swarm", it) }
+            attSwarmDigest?.let { put("att_swarm_dig", it) }
+            put("att_key", Base64.encodeToString(attKey, Base64.NO_WRAP))
             put("att_nonce", Base64.encodeToString(attNonce, Base64.NO_WRAP))
             put("att_len", attLen); put("att_hash", attHash)
             put("att_mime", attMime); put("att_name", attName ?: JSONObject.NULL)
@@ -1654,7 +1974,18 @@ data class StoredMessage(
         groupId?.let { put("grp", it); put("gseq", groupSeq) }
         groupReSender?.let { put("gre_s", it) }
         groupReSeq?.let { put("gre_q", it) }
+        pubPeriodId?.let {
+            put("pub_period", it)
+            put("pub_key", Base64.encodeToString(pubPeriodKey, Base64.NO_WRAP))
+            pubRecord?.let { r -> put("pub_rec", r) }
+            pubHeadKey?.let { h -> put("pub_head", Base64.encodeToString(h, Base64.NO_WRAP)) }
+            pubSwarmKey?.let { k -> put("pub_swarm", k) }
+            pubSwarmDigest?.let { d -> put("pub_swarm_dig", d) }
+        }
+        callRoute?.let { r -> put("call_route", r) }
+        callId?.let { i -> put("call_id", i) }
         if (deadLetter) put("dead", true)
+        readByThem?.let { put("read", it) }
     }
 
     companion object {
@@ -1678,6 +2009,8 @@ data class StoredMessage(
             reSeq = if (o.has("re_seq")) o.getLong("re_seq") else null,
             reOwn = o.optBoolean("re_own", false),
             attRecord = o.optStringOrNull("att_rec"),
+            attSwarm = o.optStringOrNull("att_swarm"),
+            attSwarmDigest = o.optStringOrNull("att_swarm_dig"),
             attKey = o.optStringOrNull("att_key")?.let { Base64.decode(it, Base64.NO_WRAP) },
             attNonce = o.optStringOrNull("att_nonce")?.let { Base64.decode(it, Base64.NO_WRAP) },
             attLen = o.optLong("att_len", 0L),
@@ -1696,17 +2029,80 @@ data class StoredMessage(
             groupSeq = o.optLong("gseq", 0L),
             groupReSender = o.optString("gre_s", "").ifBlank { null },
             groupReSeq = if (o.has("gre_q")) o.getLong("gre_q") else null,
+            pubPeriodId = o.optStringOrNull("pub_period"),
+            pubPeriodKey = o.optStringOrNull("pub_key")?.let { Base64.decode(it, Base64.NO_WRAP) },
+            pubRecord = o.optStringOrNull("pub_rec"),
+            pubHeadKey = o.optStringOrNull("pub_head")?.let { Base64.decode(it, Base64.NO_WRAP) },
+            pubSwarmKey = o.optStringOrNull("pub_swarm"),
+            pubSwarmDigest = o.optStringOrNull("pub_swarm_dig"),
+            callRoute = o.optStringOrNull("call_route"),
+            callId = o.optStringOrNull("call_id"),
+            readByThem = if (o.has("read")) o.getBoolean("read") else null,
         )
     }
 }
 
+/** How far apart two honest clocks are allowed to be (§16.14 resolution). */
+const val CLOCK_SKEW_SECS = 900L
+
+/**
+ * The message a reference names.
+ *
+ * A reaction, a notice, a receipt or a retraction names its target by
+ * (seq, re_own) — §16.13, §16.14 — and a seq is unique in a mailbox, not in a
+ * conversation: every card cut for a hail, a sale or a listing restarts the
+ * numbering (§16.12), so one thread holds several messages numbered 0 on
+ * each side, and the reference alone cannot tell them apart. Declining a
+ * ride offer at seq 0 once marked a shop's bill "Declined" — a bill that had
+ * arrived on a later card, also at seq 0 (2026-08-24: a coffee and a
+ * croissant, USD 8.03).
+ *
+ * The honest reading is positional: the message with that seq on that side
+ * which most recently preceded the referrer. Only when nothing precedes may
+ * the answer reach *forward*, and then only within the skew two honest
+ * clocks are allowed — the two stamps come from two phones, and a bill
+ * minted by a fast clock and declined straight away sits "after" its own
+ * refusal (2026-08-27). The order matters: a flat window let the refusal
+ * of a seq reach the same seq reborn on a fresh card ten minutes later.
+ *
+ * And when every candidate sits further ahead than that, the earliest of
+ * them: one of the two clocks was simply wrong when it stamped — a phone
+ * days out, a tester's clock set forward and back — and a bill that was
+ * paid must not come back as owed because its own stamp is in the future.
+ * The reference is still what the sender meant; only the ordering is gone,
+ * and the message that existed first is the one that was there to answer.
+ *
+ * Resolved against every message, not only bills, so a reference that
+ * answered something else resolves to that something else and leaves the
+ * bills alone. The answer is an element of [this] — compare by identity.
+ */
+fun List<StoredMessage>.referent(r: StoredMessage): StoredMessage? {
+    val seq = r.reSeq ?: return null
+    // Whose log the seq belongs to: the referrer's own, or the other side's.
+    val side = if (r.reOwn) r.outgoing else !r.outgoing
+    val onSide = filter { it.outgoing == side && it.seq == seq }
+    return onSide.filter { it.timestamp <= r.timestamp }.maxByOrNull { it.timestamp }
+        ?: onSide.filter { it.timestamp <= r.timestamp + CLOCK_SKEW_SECS }
+            .minByOrNull { it.timestamp }
+        ?: onSide.minByOrNull { it.timestamp }
+}
+
 /** Our own display name, and the last card we issued. */
-class NameStore(context: Context) {
+class NameStore(context: Context, personaHex: String? = null) {
     private val prefs = securePrefs(context, "ducat_contacts")
-    fun get(): String? = prefs.getString("my_name", null)
+    // The same field MyProfile.name reads, under the same rule: the primary
+    // keeps the unsuffixed key, every other persona keys by hex, and null
+    // means the worn one.
+    private val key: String
+    init {
+        val personas = PersonaStore(context)
+        val hex = personaHex ?: personas.worn()
+        key = if (hex == personas.personaHex()) "my_name" else "my_name|$hex"
+    }
+    fun get(): String? = prefs.getString(key, null)
     /** Cleaned on the way in, because this travels on every handshake. */
     fun put(v: String) =
-        prefs.edit().putString("my_name", withoutDisplayHazards(v)).apply()
+        prefs.edit().putString(key, withoutDisplayHazards(v)).apply()
 
     /**
      * Nothing to introduce ourselves with.
@@ -1740,6 +2136,8 @@ data class IssuedCardState(
     val uri: String = "",
     /** "profile" (the standing code) or "sale" (a till/tab/ride handshake). */
     val purpose: String = "profile",
+    /** Which of our personas cut this card; empty = the primary era. */
+    val owner: String = "",
     val answeredBy: String? = null,
 )
 
@@ -1899,19 +2297,174 @@ object ContactNaming {
     }
 }
 
+/**
+ * One of our own identities: a keypair wearing a face for the switcher.
+ * `name` is empty for the primary until somebody names it — the UI supplies
+ * the word, the store never invents one (the [ContactNaming.unnamed]
+ * lesson, applied to ourselves).
+ */
+data class Persona(
+    val hex: String,
+    val name: String,
+    /** ARGB accent the UI tints the bar with; 0 means the theme default. */
+    val color: Int,
+    val createdAt: Long,
+)
+
+/**
+ * The personas this phone IS — a roster now, one entry for the whole
+ * single-persona era (post-1.0 track: compartments).
+ *
+ * The design rules, stated where the code enforces them:
+ * - **Few by construction.** [MAX_PERSONAS] is small because compartments
+ *   only work when they fit on one hand; a persona per site or per contact
+ *   is the same as none, and Monero already makes the *payments*
+ *   unlinkable.
+ * - **No deletion.** A persona's contacts are bound to it at their doorway
+ *   and cannot be re-homed (the other side sealed to that key). Deleting a
+ *   persona would strand every relationship it owns behind a key that no
+ *   longer answers — so the roster only grows, like a group's.
+ * - **The primary is entry zero, forever.** [secret]/[personaHex] keep
+ *   meaning "the primary" so the single-persona call sites keep their
+ *   meaning; the legacy `persona_secret` key is kept in step for it, so a
+ *   downgrade still finds the identity where it always was.
+ */
 class PersonaStore(context: Context) {
     private val prefs = securePrefs(context, "ducat_contacts")
 
-    /** Our own persona, in the same hex form contacts are keyed by. */
-    fun personaHex(): String =
-        uniffi.ducat_mobile.personaPublicHex(secret())
+    companion object {
+        /** Compartments that fit on one hand. */
+        const val MAX_PERSONAS = 4
+        private val lock = Any()
 
-    fun secret(): ByteArray {
-        prefs.getString("persona_secret", null)?.let { return unb64(it) }
-        val fresh = uniffi.ducat_mobile.createPersonaSecret()
-        prefs.edit().putString("persona_secret", b64(fresh)).apply()
-        return fresh
+        /** Parsed roster, keyed by the raw JSON it came from — the store is
+         *  EncryptedSharedPreferences and every read decrypts. */
+        @Volatile
+        private var cached: Pair<String, List<Pair<ByteArray, Persona>>>? = null
     }
+
+    private fun parse(raw: String): List<Pair<ByteArray, Persona>> {
+        cached?.takeIf { it.first == raw }?.let { return it.second }
+        val arr = JSONArray(raw)
+        val list = (0 until arr.length()).map { i ->
+            val o = arr.getJSONObject(i)
+            val secret = unb64(o.getString("secret"))
+            secret to Persona(
+                hex = uniffi.ducat_mobile.personaPublicHex(secret),
+                name = o.optString("name", ""),
+                color = o.optInt("color", 0),
+                createdAt = o.optLong("created", 0L),
+            )
+        }
+        cached = raw to list
+        return list
+    }
+
+    private fun writeLocked(entries: List<Pair<ByteArray, Persona>>) {
+        val arr = JSONArray()
+        for ((secret, p) in entries) {
+            arr.put(
+                JSONObject()
+                    .put("secret", b64(secret))
+                    .put("name", p.name)
+                    .put("color", p.color)
+                    .put("created", p.createdAt),
+            )
+        }
+        val raw = arr.toString()
+        // The legacy key rides along as the primary, so the Rust backup
+        // export and any downgraded build keep finding the identity.
+        prefs.edit()
+            .putString("personas", raw)
+            .putString("persona_secret", b64(entries.first().first))
+            .apply()
+        cached = raw to entries.map { it.first to it.second }
+    }
+
+    /** The roster, migrating the single-persona era on first touch. */
+    private fun rosterLocked(): List<Pair<ByteArray, Persona>> {
+        prefs.getString("personas", null)?.let { return parse(it) }
+        val secret = prefs.getString("persona_secret", null)?.let(::unb64)
+            ?: uniffi.ducat_mobile.createPersonaSecret()
+        val entry = secret to Persona(
+            hex = uniffi.ducat_mobile.personaPublicHex(secret),
+            name = "",
+            color = 0,
+            createdAt = System.currentTimeMillis() / 1000,
+        )
+        writeLocked(listOf(entry))
+        return listOf(entry)
+    }
+
+    fun all(): List<Persona> = synchronized(lock) { rosterLocked().map { it.second } }
+
+    fun allHexes(): Set<String> = all().mapTo(mutableSetOf()) { it.hex }
+
+    /** The primary persona's secret — entry zero, minted on first ever call. */
+    fun secret(): ByteArray = synchronized(lock) { rosterLocked().first().first }
+
+    /** The primary persona, in the same hex form contacts are keyed by. */
+    fun personaHex(): String = synchronized(lock) { rosterLocked().first().second.hex }
+
+    fun secretFor(hex: String): ByteArray? =
+        synchronized(lock) { rosterLocked().firstOrNull { it.second.hex == hex }?.first }
+
+    /** Mint a new compartment, or null at the cap. */
+    fun create(name: String, color: Int): Persona? = synchronized(lock) {
+        val entries = rosterLocked()
+        if (entries.size >= MAX_PERSONAS) return null
+        val secret = uniffi.ducat_mobile.createPersonaSecret()
+        val p = Persona(
+            hex = uniffi.ducat_mobile.personaPublicHex(secret),
+            name = name,
+            color = color,
+            createdAt = System.currentTimeMillis() / 1000,
+        )
+        writeLocked(entries + (secret to p))
+        p
+    }
+
+    fun rename(hex: String, name: String) = synchronized(lock) {
+        writeLocked(rosterLocked().map { (s, p) -> s to if (p.hex == hex) p.copy(name = name) else p })
+    }
+
+    fun setColor(hex: String, color: Int) = synchronized(lock) {
+        writeLocked(rosterLocked().map { (s, p) -> s to if (p.hex == hex) p.copy(color = color) else p })
+    }
+
+    // --- the worn persona --------------------------------------------------
+    //
+    // Which compartment the phone is currently BEING — what the doorways
+    // default to and what the scoped screens show. Pure UI state; nothing
+    // on the wire reads it, and a thread never consults it after birth.
+
+    fun worn(): String {
+        val w = prefs.getString("worn_persona", null)
+        return if (w != null && allHexes().contains(w)) w else personaHex()
+    }
+
+    fun setWorn(hex: String) {
+        if (!allHexes().contains(hex)) return
+        prefs.edit().putString("worn_persona", hex).apply()
+        ContactStore.bump()
+    }
+
+    // --- resolution --------------------------------------------------------
+
+    /**
+     * The persona a contact belongs to. Empty owner means the primary —
+     * the single-persona era's contacts, and anything restored from an old
+     * backup, resolve there without a migration having to touch them first.
+     */
+    fun ownerHexOf(c: Contact): String = c.owner.ifBlank { personaHex() }
+
+    /**
+     * The secret that answers for a contact. A roster never shrinks, so a
+     * stored owner always resolves; the primary is the safety net for the
+     * empty-owner era, not a silent fallback for a missing persona.
+     */
+    fun ownerSecretOf(c: Contact): ByteArray =
+        c.owner.takeIf { it.isNotBlank() }?.let { secretFor(it) } ?: secret()
 
     /**
      * Become the identity in a backup.
@@ -1920,12 +2473,92 @@ class PersonaStore(context: Context) {
      * somebody's address book: contacts are keyed by *their* persona, but every
      * message this device sends is signed by ours, so a device that recovered
      * the threads and kept its own keypair is a stranger to everyone in them.
-     * Nothing called this before it existed — `personaSecret` travelled in the
-     * bundle, was read, and was never used.
+     * Replaces the primary; [restoreRoster] carries the rest when the bundle
+     * has them.
      */
     fun restoreSecret(secret: ByteArray) {
         if (secret.isEmpty()) return
-        prefs.edit().putString("persona_secret", b64(secret)).apply()
+        synchronized(lock) {
+            val entries = rosterLocked()
+            val head = secret to entries.first().second.copy(
+                hex = uniffi.ducat_mobile.personaPublicHex(secret),
+            )
+            writeLocked(listOf(head) + entries.drop(1))
+        }
+    }
+
+    /** The roster for the typed backup leg, primary first. */
+    fun backupPersonas(context: Context): List<uniffi.ducat_mobile.PersonaBackup> =
+        synchronized(lock) {
+            rosterLocked().map { (secret, p) ->
+                // Each hat travels dressed: its own §16.9 profile rides the
+                // roster entry, so a restore returns every face, not just
+                // the primary's (which also keeps its legacy top-level copy
+                // for readers from the single-profile era).
+                val mp = MyProfile(context, p.hex)
+                uniffi.ducat_mobile.PersonaBackup(
+                    secret = secret,
+                    name = p.name.ifBlank { null },
+                    color = p.color.toULong() and 0xFFFFFFFFuL,
+                    created = p.createdAt.toULong(),
+                    displayName = mp.name(),
+                    avatar = mp.avatar(),
+                    email = mp.email(),
+                    phone = mp.phone(),
+                    signal = mp.signal(),
+                    pronouns = mp.pronouns()?.toULong(),
+                    carModel = mp.carModel(),
+                    carColor = mp.carColor(),
+                    plate = mp.plate(),
+                    shareProfile = mp.shareProfile(),
+                )
+            }
+        }
+
+    /**
+     * Restore the whole roster from a typed bundle. Wholesale replacement —
+     * a restore is becoming that phone, compartments and all. An empty list
+     * (an old bundle) leaves whatever [restoreSecret] already installed.
+     */
+    fun restoreRoster(context: Context, entries: List<uniffi.ducat_mobile.PersonaBackup>) {
+        if (entries.isEmpty()) return
+        synchronized(lock) {
+            writeLocked(entries.map { e ->
+                e.secret to Persona(
+                    hex = uniffi.ducat_mobile.personaPublicHex(e.secret),
+                    name = e.name ?: "",
+                    color = e.color.toInt(),
+                    createdAt = e.created.toLong(),
+                )
+            })
+        }
+        // The faces, after the keys. Written only for entries that carry
+        // one, so an old bundle leaves whatever the legacy top-level fields
+        // already restored — and where both exist, this per-persona copy is
+        // the newer statement and wins.
+        for (e in entries) {
+            val dressed = e.displayName != null || e.avatar != null ||
+                e.email != null || e.phone != null || e.signal != null ||
+                e.pronouns != null || e.carModel != null ||
+                e.carColor != null || e.plate != null || !e.shareProfile
+            if (!dressed) continue
+            val hex = uniffi.ducat_mobile.personaPublicHex(e.secret)
+            MyProfile(context, hex).let { p ->
+                p.setName(e.displayName)
+                p.setAvatar(e.avatar)
+                p.setEmail(e.email)
+                p.setPhone(e.phone)
+                p.setSignal(e.signal)
+                p.setPronouns(e.pronouns?.toInt())
+                p.setCarModel(e.carModel)
+                p.setCarColor(e.carColor)
+                p.setPlate(e.plate)
+                p.setShareProfile(e.shareProfile)
+            }
+            NameStore(context, hex).let { n ->
+                e.displayName?.let { n.put(it) }
+            }
+        }
     }
 }
 
@@ -1958,7 +2591,9 @@ class WalletStore(context: Context) {
     companion object {
         /**
          * Guards read-modify-write of the whole output list — the wallet's
-         * record of what it owns. See [mutateEntries].
+         * record of what it owns. See [mutateEntries]. The minor table and
+         * the send-intent / sends lists are read-modify-write of the same
+         * shape (one JSON string, or one counter, per key) and take it too.
          */
         private val walletLock = Any()
     }
@@ -1995,15 +2630,23 @@ class WalletStore(context: Context) {
         }.getOrNull() ?: address()
     }
 
-    /** This contact's minor index, allocated once. */
-    fun minorFor(personaHex: String): Int {
-        prefs.getInt("sub_minor_$personaHex", 0).takeIf { it != 0 }?.let { return it }
+    /**
+     * This contact's minor index, allocated once.
+     *
+     * Under [walletLock]: two threads reaching here for different personas
+     * at once (a claim landing while the pay screen opens) both read the
+     * same `sub_next` and hand two people one address — which is the
+     * linking the minors exist to prevent.
+     */
+    fun minorFor(personaHex: String): Int = synchronized(walletLock) {
+        val have = prefs.getInt("sub_minor_$personaHex", 0)
+        if (have != 0) return@synchronized have
         val next = prefs.getInt("sub_next", 1)
         prefs.edit()
             .putInt("sub_minor_$personaHex", next)
             .putInt("sub_next", next + 1)
             .apply()
-        return next
+        next
     }
 
     /** This contact's minor if one was ever allocated — no allocation here. */
@@ -2014,7 +2657,7 @@ class WalletStore(context: Context) {
     fun subaddressCount(): Int = prefs.getInt("sub_next", 1) - 1
 
     /** A card's minor becomes its claimant's the moment we learn who that is. */
-    fun adoptMinor(cardKey: String, personaHex: String) {
+    fun adoptMinor(cardKey: String, personaHex: String) = synchronized(walletLock) {
         val m = prefs.getInt("sub_minor_$cardKey", 0)
         if (m != 0 && prefs.getInt("sub_minor_$personaHex", 0) == 0) {
             prefs.edit()
@@ -2081,7 +2724,7 @@ class WalletStore(context: Context) {
         contactHex: String?,
         note: String?,
         donation: Boolean = false,
-    ): String {
+    ): String = synchronized(walletLock) {
         val id = java.util.UUID.randomUUID().toString()
         val arr = JSONArray(prefs.getString("send_intents", "[]"))
         arr.put(JSONObject().apply {
@@ -2100,7 +2743,7 @@ class WalletStore(context: Context) {
         // intent behind. The synchronous write costs this IO thread a
         // moment; losing the claim costs the double-pay guard its eyes.
         prefs.edit().putString("send_intents", arr.toString()).commit()
-        return id
+        id
     }
 
     data class SendIntent(
@@ -2135,10 +2778,17 @@ class WalletStore(context: Context) {
      * The send happened: the record, the spent inputs and the intent's
      * removal land in ONE commit, so no death can separate them again.
      * An empty txid is the refreshSpent recovery path — the chain proved
-     * the notes moved but the hash died with the process; the row still
-     * keeps the balance honest, and says so in its note.
+     * the notes moved but the hash died with the process. The row keeps
+     * the balance honest, and carries `recovered` plus the key images it
+     * consumed so a statement can pair it with the chain's Sent event
+     * instead of showing it pending forever (no txid ever confirms).
+     *
+     * Under [walletLock] because the outputs edit is a read-modify-write
+     * of the same list a scan rewrites; it stays one commit rather than
+     * going through [mutateEntries], which would split the record from
+     * the spent marks it must not be separated from.
      */
-    fun resolveSendIntent(id: String, txidHex: String, feePxmr: Long) {
+    fun resolveSendIntent(id: String, txidHex: String, feePxmr: Long) = synchronized(walletLock) {
         val intents = JSONArray(prefs.getString("send_intents", "[]"))
         var found: JSONObject? = null
         val keep = JSONArray()
@@ -2146,7 +2796,7 @@ class WalletStore(context: Context) {
             val o = intents.getJSONObject(i)
             if (o.getString("id") == id) found = o else keep.put(o)
         }
-        val it0 = found ?: return
+        val it0 = found ?: return@synchronized
         val kis = it0.getJSONArray("kis").let { k ->
             (0 until k.length()).map { k.getString(it) }.toSet()
         }
@@ -2158,6 +2808,10 @@ class WalletStore(context: Context) {
             put("note", it0.opt("note") ?: JSONObject.NULL)
             put("ts", System.currentTimeMillis() / 1000)
             if (it0.optBoolean("donate", false)) put("donate", true)
+            if (txidHex.isEmpty()) {
+                put("recovered", true)
+                put("kis", JSONArray(kis.toList()))
+            }
         })
         val outsRaw = prefs.getString("wallet_outputs", null)
         val e = prefs.edit()
@@ -2177,7 +2831,7 @@ class WalletStore(context: Context) {
     }
 
     /** The send provably never happened — the notes come home. */
-    fun dropSendIntent(id: String) {
+    fun dropSendIntent(id: String) { synchronized(walletLock) {
         val intents = JSONArray(prefs.getString("send_intents", "[]"))
         val keep = JSONArray()
         for (i in 0 until intents.length()) {
@@ -2185,7 +2839,7 @@ class WalletStore(context: Context) {
             if (o.getString("id") != id) keep.put(o)
         }
         prefs.edit().putString("send_intents", keep.toString()).commit()
-    }
+    } }
 
     /**
      * Transactions this wallet sent — how to tell our own money from theirs.
@@ -2214,6 +2868,10 @@ class WalletStore(context: Context) {
                 note = if (o.isNull("note")) null else o.optString("note"),
                 timestamp = o.optLong("ts", 0),
                 donation = o.optBoolean("donate", false),
+                recovered = o.optBoolean("recovered", false),
+                keyImages = o.optJSONArray("kis")?.let { k ->
+                    (0 until k.length()).map { k.getString(it) }
+                } ?: emptyList(),
             )
         }
     }
@@ -2454,6 +3112,9 @@ class RateStore(context: Context) {
             "RUB", "KRW", "SGD", "HKD", "TWD", "THB", "IDR", "PHP", "NGN",
             "ARS", "CLP", "CZK", "HUF", "ILS", "AED", "SAR", "UAH", "VND",
         )
+
+        /** How far ahead of now a stamp may sit before [isStale] disbelieves it. */
+        private const val FUTURE_SLACK_SECS = 60L
     }
 
     /**
@@ -2539,9 +3200,26 @@ class RateStore(context: Context) {
     fun storeUsd(v: Double) =
         prefs.edit().putFloat("rate_usd", v.toFloat()).apply()
 
+    /**
+     * Whether the cached rate is old enough to fetch again — or stamped at
+     * a time this clock has not reached yet, which is worse than old.
+     *
+     * Found live (2026-09-02): one phone priced XMR at 461 against a
+     * market at 520, confidently, for five days. Its clock had been wound
+     * forward for a while (the weekly-epoch tests do that), a rate was
+     * fetched under the wrong date, and when the clock came back the stamp
+     * sat *ahead* of now: never half an hour old, so never refetched, and
+     * never six hours old, so the balance never said it was old either.
+     * Nothing about the figure looked different from a fresh one. A stamp
+     * from the future is a stamp this phone cannot vouch for, and the only
+     * safe reading of it is "fetch again" — one request, and the stamp is
+     * honest from then on. The slack covers a clock nudged back by a few
+     * seconds, which is not this.
+     */
     fun isStale(maxAgeSecs: Long = 1800): Boolean {
         val at = cached()?.second ?: return true
-        return System.currentTimeMillis() / 1000 - at > maxAgeSecs
+        val age = System.currentTimeMillis() / 1000 - at
+        return age > maxAgeSecs || age < -FUTURE_SLACK_SECS
     }
 }
 
@@ -2633,4 +3311,9 @@ data class SentPayment(
     /** An unprompted payment into a thread born from a `donate` card — the
      *  statement's tax-time filter. Client-local presentation, never wire. */
     val donation: Boolean = false,
+    /** Written by refreshSpent, not by a broadcast: the chain showed the
+     *  notes spent after the process died mid-send, so [txidHex] is empty
+     *  and will never confirm. Pair it by [keyImages] instead. */
+    val recovered: Boolean = false,
+    val keyImages: List<String> = emptyList(),
 )

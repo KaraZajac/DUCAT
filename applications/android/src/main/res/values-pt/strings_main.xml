@@ -8,6 +8,8 @@
     <string name="main_backup_title">Fazer backup</string>
     <string name="main_backup_body">Você tem contatos que seu último backup não tem. Uma restauração traria de volta o dinheiro, mas não as pessoas.</string>
     <string name="main_open_backup_settings">Abrir configurações de backup</string>
+    <string name="main_notify_off_title">As notificações estão desligadas</string>
+    <string name="main_notify_off_body">O telefone não consegue avisar você quando chega dinheiro, uma conta ou uma chamada. Toque para ligá-las.</string>
     <string name="main_recent">Recentes</string>
     <string name="main_see_all">Ver tudo</string>
     <string name="main_card_link_title">Adicionar um contacto?</string>
@@ -38,4 +40,9 @@
     <string name="err_no_keys_yet">Vocês ainda não terminaram de trocar os cartões.</string>
     <string name="err_conversation_too_old">O cartão deles é antigo demais para este app. Peça um novo.</string>
     <string name="err_board_full">Há pedidos demais por aqui agora. Tente de novo daqui a um minuto.</string>
+    <string name="main_deals_title">Acordos</string>
+    <plurals name="main_deals_waiting">
+        <item quantity="one">%1$d acordo espera por você</item>
+        <item quantity="other">%1$d acordos esperam por você</item>
+    </plurals>
 </resources>

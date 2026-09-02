@@ -458,7 +458,12 @@ pub struct SealedOut {
 /// An attachment reference, across the bridge (§16.15).
 #[derive(uniffi::Record, Clone)]
 pub struct AttachmentRef {
-    pub record_key: String,
+    /// Exactly one transport (§16.15): the record road for small blobs,
+    /// or the swarm road (key + digest together) for what a record
+    /// cannot hold.
+    pub record_key: Option<String>,
+    pub swarm_key: Option<String>,
+    pub swarm_digest: Option<Vec<u8>>,
     pub key: Vec<u8>,
     pub nonce: Vec<u8>,
     pub len: u64,
@@ -526,6 +531,62 @@ pub fn position_open(
         heading: f.heading,
         captured: f.captured,
     })
+}
+
+/// A fresh publication master secret (§16.20 track). One per publication;
+/// every period's content key derives from it, so this is the only key a
+/// publisher stores or backs up.
+#[uniffi::export]
+pub fn publication_master_create() -> Vec<u8> {
+    use rand_core::{OsRng, RngCore};
+    let mut k = [0u8; 32];
+    OsRng.fill_bytes(&mut k);
+    k.to_vec()
+}
+
+/// One period's content key, derived — deterministic over (master, id), so
+/// a restored device and a paying member both arrive at the same key.
+#[uniffi::export]
+pub fn publication_period_key(master: Vec<u8>, period_id: String) -> Result<Vec<u8>, ContactError> {
+    let m: [u8; 32] = master
+        .try_into()
+        .map_err(|_| ContactError::Refused("a publication master is 32 bytes".into()))?;
+    Ok(ducat_core::publish::period_key(&m, &period_id)
+        .map_err(refuse)?
+        .to_vec())
+}
+
+/// Seal one publication chunk for one (record, subkey) landing site.
+#[uniffi::export]
+pub fn publication_seal_chunk(
+    key: Vec<u8>,
+    record_key: String,
+    subkey: u32,
+    nonce: Vec<u8>,
+    plaintext: Vec<u8>,
+) -> Result<Vec<u8>, ContactError> {
+    let k: [u8; 32] = key
+        .try_into()
+        .map_err(|_| ContactError::Refused("a period key is 32 bytes".into()))?;
+    let n: [u8; ducat_core::publish::NONCE_LEN] = nonce
+        .try_into()
+        .map_err(|_| ContactError::Refused("a publication nonce is 24 bytes".into()))?;
+    Ok(ducat_core::publish::seal_chunk(&k, &record_key, subkey, &n, &plaintext))
+}
+
+/// Open a chunk read from a record's slot; the landing site is the AAD, so
+/// pass where it was actually read from.
+#[uniffi::export]
+pub fn publication_open_chunk(
+    key: Vec<u8>,
+    record_key: String,
+    subkey: u32,
+    value: Vec<u8>,
+) -> Result<Vec<u8>, ContactError> {
+    let k: [u8; 32] = key
+        .try_into()
+        .map_err(|_| ContactError::Refused("a period key is 32 bytes".into()))?;
+    ducat_core::publish::open_chunk(&k, &record_key, subkey, &value).map_err(refuse)
 }
 
 /// Seal attachment bytes; returns the ciphertext to park in a record.
@@ -596,6 +657,19 @@ pub fn seal_message(
     group_seq: Option<u64>,
     group_re_sender: Option<Vec<u8>>,
     group_re_seq: Option<u64>,
+    // §16.20: a publication period's key on a kind-13 message. The period
+    // pair together or not at all; the shelf pair likewise; core refuses
+    // every other arrangement.
+    pub_period_id: Option<String>,
+    pub_period_key: Option<Vec<u8>>,
+    pub_record: Option<String>,
+    pub_head_key: Option<Vec<u8>>,
+    // §16.20's shipment: the swarm pair, together or not at all.
+    pub_swarm_key: Option<String>,
+    pub_swarm_digest: Option<Vec<u8>>,
+    // §16.21's door: the call route and id, together or not at all.
+    call_route: Option<Vec<u8>>,
+    call_id: Option<Vec<u8>>,
 ) -> Result<SealedOut, ContactError> {
     if body.is_empty() || body.chars().count() > MAX_MESSAGE_CHARS {
         return Err(ContactError::Refused(format!(
@@ -628,6 +702,66 @@ pub fn seal_message(
             ))
         }
     };
+    let call = match (call_route, call_id) {
+        (Some(route), Some(id)) => {
+            let id: [u8; 8] = id
+                .try_into()
+                .map_err(|_| ContactError::Refused("a call id is 8 bytes".into()))?;
+            if route.is_empty() || route.len() > ducat_core::contact::MAX_CALL_ROUTE {
+                return Err(ContactError::Refused("a call route is 1 to 4096 bytes".into()));
+            }
+            Some(ducat_core::contact::CallRef { route, id })
+        }
+        (None, None) => None,
+        _ => {
+            return Err(ContactError::Refused(
+                "a call carries its route and its id together".into(),
+            ))
+        }
+    };
+    let publication = match (pub_period_id, pub_period_key) {
+        (Some(period_id), Some(k)) => {
+            let period_key: [u8; 32] = k.try_into().map_err(|_| {
+                ContactError::Refused("a period key is 32 bytes".into())
+            })?;
+            let head_key = match (&pub_record, pub_head_key) {
+                (Some(_), Some(h)) => Some(h.try_into().map_err(|_| {
+                    ContactError::Refused("a head key is 32 bytes".into())
+                })?),
+                (None, None) => None,
+                _ => {
+                    return Err(ContactError::Refused(
+                        "a publication shelf carries its record and its head key together".into(),
+                    ))
+                }
+            };
+            let swarm_digest = match (&pub_swarm_key, pub_swarm_digest) {
+                (Some(_), Some(d)) => Some(d.try_into().map_err(|_| {
+                    ContactError::Refused("an index digest is 32 bytes".into())
+                })?),
+                (None, None) => None,
+                _ => {
+                    return Err(ContactError::Refused(
+                        "a swarm share carries its key and its index digest together".into(),
+                    ))
+                }
+            };
+            Some(ducat_core::contact::PublicationKey {
+                period_id,
+                period_key,
+                record_key: pub_record,
+                head_key,
+                swarm_key: pub_swarm_key,
+                swarm_digest,
+            })
+        }
+        (None, None) => None,
+        _ => {
+            return Err(ContactError::Refused(
+                "a publication key carries its period id and its key together".into(),
+            ))
+        }
+    };
     let msg = Message {
         version: 1, suite: 1, seq, prev, body, timestamp: now(),
         kind: match kind {
@@ -643,6 +777,9 @@ pub fn seal_message(
             10 => MessageKind::CeremonyAbort,
             11 => MessageKind::PositionRef,
             12 => MessageKind::GroupRoster,
+            13 => MessageKind::PublicationKey,
+            14 => MessageKind::CallOffer,
+            15 => MessageKind::CallAnswer,
             _ => MessageKind::Text,
         },
         amount_pxmr,
@@ -665,6 +802,10 @@ pub fn seal_message(
         },
         attachment: attachment.map(|a| ducat_core::contact::Attachment {
             record_key: a.record_key,
+            swarm_key: a.swarm_key,
+            swarm_digest: a
+                .swarm_digest
+                .map(|d| d.try_into().unwrap_or([0u8; 32])),
             key: a.key.try_into().unwrap_or([0u8; 32]),
             nonce: a.nonce.try_into().unwrap_or([0u8; 24]),
             len: a.len,
@@ -673,10 +814,12 @@ pub fn seal_message(
             name: a.name,
         }),
         position,
+        publication,
         group_id,
         group_seq,
         group_re_sender,
         group_re_seq,
+        call,
     };
     // A message this encoder produces must be one its own decoder accepts —
     // otherwise the malformation ships sealed, and it is the *recipient's*
@@ -811,6 +954,11 @@ pub struct OpenedMessage {
     pub ceremony_id: Option<Vec<u8>>,
     /// §15.12: a live-position stream reference. Present only on kind 11.
     pub position: Option<PositionRefOut>,
+    /// §16.20: a publication period's key. Present only on kind 13.
+    pub publication: Option<PublicationKeyOut>,
+    /// §16.21: a live call's door. Present only on kinds 14–15.
+    pub call_route: Option<Vec<u8>>,
+    pub call_id: Option<Vec<u8>>,
     /// §16.19: the group this message belongs to, and its name there.
     pub group_id: Option<Vec<u8>>,
     pub group_seq: Option<u64>,
@@ -823,6 +971,17 @@ pub struct OpenedMessage {
 pub struct PositionRefOut {
     pub record_key: String,
     pub stream_key: Vec<u8>,
+}
+
+/// A publication key as it crosses the bridge (§16.20).
+#[derive(uniffi::Record, Clone)]
+pub struct PublicationKeyOut {
+    pub period_id: String,
+    pub period_key: Vec<u8>,
+    pub record_key: Option<String>,
+    pub head_key: Option<Vec<u8>>,
+    pub swarm_key: Option<String>,
+    pub swarm_digest: Option<Vec<u8>>,
 }
 
 /// A group roster as it crosses the bridge (§16.19).
@@ -967,6 +1126,8 @@ pub fn open_message(
         ceremony_id: msg.ceremony_id.map(|c| c.to_vec()),
         attachment: msg.attachment.as_ref().map(|a| AttachmentRef {
             record_key: a.record_key.clone(),
+            swarm_key: a.swarm_key.clone(),
+            swarm_digest: a.swarm_digest.map(|d| d.to_vec()),
             key: a.key.to_vec(),
             nonce: a.nonce.to_vec(),
             len: a.len,
@@ -982,6 +1143,16 @@ pub fn open_message(
             record_key: p.record_key.clone(),
             stream_key: p.stream_key.to_vec(),
         }),
+        publication: msg.publication.as_ref().map(|p| PublicationKeyOut {
+            period_id: p.period_id.clone(),
+            period_key: p.period_key.to_vec(),
+            record_key: p.record_key.clone(),
+            head_key: p.head_key.map(|h| h.to_vec()),
+            swarm_key: p.swarm_key.clone(),
+            swarm_digest: p.swarm_digest.map(|d| d.to_vec()),
+        }),
+        call_route: msg.call.as_ref().map(|c| c.route.clone()),
+        call_id: msg.call.as_ref().map(|c| c.id.to_vec()),
     })
 }
 
@@ -1308,6 +1479,135 @@ pub fn rental_decode(
     info.beacon_height = o.beacon.height;
     info.beacon_hash = o.beacon.hash.iter().map(|b| format!("{b:02x}")).collect::<String>();
     Ok(info)
+}
+
+/// §16.18.2 over the bridge: what a publication listing says, in the open.
+#[derive(uniffi::Record)]
+pub struct PubListingInfo {
+    pub card: String,
+    pub title: String,
+    pub blurb: Option<String>,
+    /// Piconero a period; `None` is free, and the only spelling of it.
+    pub price_pxmr: Option<u64>,
+    pub expiry: u64,
+    /// Filled by decode: hex of the listing's own verifying key.
+    pub poster: String,
+    pub beacon_height: u64,
+    pub beacon_hash: String,
+}
+
+/// §16.22: a site head across the bridge.
+#[derive(uniffi::Record, Clone)]
+pub struct SiteHeadIo {
+    pub title: String,
+    pub share: String,
+    pub digest_hex: String,
+    pub updated: u64,
+}
+
+/// Encode a site head for the record's subkey 0.
+#[uniffi::export]
+pub fn site_head_encode(head: SiteHeadIo) -> Result<Vec<u8>, ContactError> {
+    let digest: [u8; 32] = crate::hex_to_bytes(&head.digest_hex)
+        .and_then(|v| v.try_into().ok())
+        .ok_or_else(|| ContactError::Refused("digest is 64 hex chars".into()))?;
+    let h = ducat_core::contact::SiteHead {
+        version: 1,
+        title: head.title,
+        share: head.share,
+        digest,
+        updated: head.updated,
+    };
+    // Encode-then-decode self-check, like every writer here: what we
+    // publish must be what a strict reader accepts.
+    let bytes = h.to_value().encode();
+    ducat_core::contact::SiteHead::from_value(
+        ducat_core::cbor::decode(&bytes)
+            .map_err(|e| ContactError::Refused(format!("self-check: {e:?}")))?,
+    )
+    .map_err(|e| ContactError::Refused(format!("self-check: {e:?}")))?;
+    Ok(bytes)
+}
+
+/// Decode a site head read from a record. Strict: whatever a stranger
+/// wrote is checked at the door.
+#[uniffi::export]
+pub fn site_head_decode(bytes: Vec<u8>) -> Result<SiteHeadIo, ContactError> {
+    let v = ducat_core::cbor::decode(&bytes)
+        .map_err(|e| ContactError::Refused(format!("{e:?}")))?;
+    let h = ducat_core::contact::SiteHead::from_value(v)
+        .map_err(|e| ContactError::Refused(format!("{e:?}")))?;
+    Ok(SiteHeadIo {
+        title: h.title,
+        share: h.share,
+        digest_hex: h.digest.iter().map(|b| format!("{b:02x}")).collect(),
+        updated: h.updated,
+    })
+}
+
+/// Seal a publication listing for one slot — same stamp, same price, same
+/// rules as a rental's, in this family's own field namespace. The board
+/// name carries the category (topic:) or the cell (local:), and it is
+/// inside the signature, so the same bytes cannot appear on another topic.
+#[uniffi::export]
+pub fn pub_listing_encode(
+    info: PubListingInfo,
+    persona_secret: Vec<u8>,
+    listing_id: String,
+    board: String,
+    subkey: u32,
+    beacon_height: u64,
+    beacon_hash_hex: String,
+) -> Result<Vec<u8>, ContactError> {
+    let n = ducat_core::contact::PubNotice {
+        version: 1,
+        card: info.card,
+        title: info.title,
+        blurb: info.blurb,
+        price_pxmr: info.price_pxmr,
+        expiry: info.expiry,
+    };
+    let ducat_core::cbor::Value::Map(m) = n.to_value() else { unreachable!() };
+    let seed = ducat_core::board::listing_seed(&persona_secret, &listing_id);
+    let beacon = beacon_from(beacon_height, &beacon_hash_hex)?;
+    let sealed =
+        ducat_core::board::seal(m, ducat_core::board::PUB, &seed, &board, subkey, &beacon);
+    let bytes = sealed.encode();
+    pub_listing_decode(bytes.clone(), board, subkey, 0)?;
+    Ok(bytes)
+}
+
+/// Read a publication listing off a board — same refusals as a rental's.
+#[uniffi::export]
+pub fn pub_listing_decode(
+    bytes: Vec<u8>,
+    board: String,
+    subkey: u32,
+    tip_height: u64,
+) -> Result<PubListingInfo, ContactError> {
+    let o = ducat_core::board::open(
+        decode(&bytes).map_err(refuse)?,
+        ducat_core::board::PUB,
+        &board,
+        subkey,
+    )
+    .map_err(refuse)?;
+    if tip_height > 0 && !ducat_core::board::beacon_in_window(&o.beacon, tip_height) {
+        return Err(ContactError::Refused(
+            "this notice was stamped against a block that is not recent".into(),
+        ));
+    }
+    let n = ducat_core::contact::PubNotice::from_value(o.notice).map_err(refuse)?;
+    Ok(PubListingInfo {
+        card: n.card,
+        title: n.title,
+        blurb: n.blurb,
+        price_pxmr: n.price_pxmr,
+        expiry: n.expiry,
+        poster: o.poster.iter().map(|b| format!("{b:02x}")).collect::<String>(),
+        beacon_height: o.beacon.height,
+        beacon_hash: o.beacon.hash.iter().map(|b| format!("{b:02x}")).collect::<String>(),
+    })
 }
 
 /// The hail's half of the same thing — see [`rental_encode`].

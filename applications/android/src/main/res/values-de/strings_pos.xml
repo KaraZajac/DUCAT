@@ -32,4 +32,6 @@
     <string name="pos_cancel_sale">Verkauf abbrechen</string>
     <string name="pos_tax_at">Steuer (%1$s %%)</string>
     <string name="pos_in_unit">in %1$s</string>
+    <string name="pos_error_bill_not_withdrawn">Die Rechnung ist noch auf ihrem Handy — sie konnte nicht zurückgezogen werden: %1$s</string>
+    <string name="pos_receipt_pending">Die Quittung konnte noch nicht gesendet werden — sie geht von selbst raus, sobald das Netz wieder da ist.</string>
 </resources>

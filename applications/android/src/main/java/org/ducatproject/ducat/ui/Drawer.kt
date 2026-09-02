@@ -1,6 +1,7 @@
 package org.ducatproject.ducat.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.combinedClickable
@@ -8,12 +9,21 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.ui.graphics.asImageBitmap
+import org.ducatproject.ducat.MyProfile
+import org.ducatproject.ducat.SafeImage
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.draw.clip
 import androidx.compose.runtime.*
+import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -31,6 +41,7 @@ import org.ducatproject.ducat.RateStore
 import org.ducatproject.ducat.UnitsStore
 import org.ducatproject.ducat.WalletStore
 import org.ducatproject.ducat.findActivity
+import org.ducatproject.ducat.saidWhy
 
 /**
  * What the hamburger opens.
@@ -43,6 +54,14 @@ enum class Section(val labelRes: Int) {
     Status(R.string.section_status),
     Profile(R.string.section_profile),
     Contacts(R.string.section_contacts),
+    Library(R.string.section_library),
+    Sites(R.string.section_sites),
+    Selling(R.string.section_selling),
+    // Routable but not listed: the Press mode's second tab and the
+    // market's "list yours" open it directly, and the Press room is
+    // where publishing lives now — a drawer row would be a second door
+    // to the same desk.
+    Publishing(R.string.section_publishing),
     Logs(R.string.section_logs),
     Settings(R.string.section_settings),
     Modes(R.string.section_modes),
@@ -74,9 +93,10 @@ fun DrawerContent(onPick: (Section) -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+        PersonaSwitcher(Modifier.padding(horizontal = 16.dp).padding(bottom = 12.dp))
         HorizontalDivider()
         Spacer(Modifier.height(8.dp))
-        Section.entries.forEach { s ->
+        Section.entries.filter { it != Section.Publishing }.forEach { s ->
             NavigationDrawerItem(
                 label = { Text(stringResource(s.labelRes)) },
                 icon = { Icon(iconFor(s), null) },
@@ -95,6 +115,10 @@ private fun iconFor(s: Section) = when (s) {
     Section.Status -> Icons.Filled.Lan
     Section.Profile -> Icons.Filled.Person
     Section.Contacts -> Icons.Filled.People
+    Section.Library -> Icons.Filled.LocalLibrary
+    Section.Sites -> Icons.Filled.Public
+    Section.Selling -> Icons.Filled.Storefront
+    Section.Publishing -> Icons.AutoMirrored.Filled.MenuBook
     Section.Logs -> Icons.Filled.Description
     Section.Settings -> Icons.Filled.Settings
     Section.Modes -> Icons.Filled.Tune
@@ -127,6 +151,12 @@ fun SectionScreen(
         Section.Profile -> ProfileSection()
 
         Section.Contacts -> ContactsAdminSection(onOpenChat)
+
+        Section.Library -> LibrarySection()
+
+        Section.Sites -> SitesSection()
+        Section.Selling -> SellingSection()
+        Section.Publishing -> PublishingSection()
 
         Section.Logs -> LogsScreen()
 
@@ -573,13 +603,214 @@ private fun RateSettings() {
 @Composable
 private fun ProfileSection() {
     val context = LocalContext.current
-    val persona = remember { PersonaStore(context).personaHex() }
+    val version by ContactStore.changes.collectAsState()
+    val personas = remember { PersonaStore(context) }
+    val roster = remember(version) { personas.all() }
+    val worn = remember(version) { personas.worn() }
+    val modes = remember { org.ducatproject.ducat.ModeStore(context) }
+
+    // Which profile is on the desk. Editing is not wearing: the hat is
+    // switched in the drawer header, at the doorway; this only chooses
+    // whose presentation the fields below belong to.
+    var picked by rememberSaveable { mutableStateOf<String?>(null) }
+    val editing = picked?.takeIf { h -> roster.any { it.hex == h } } ?: worn
+    // The three of them together: a flag that survives a rotation over a
+    // field that does not is worse than neither, and a name half typed into
+    // a profile is exactly the thing a turn of the phone used to eat.
+    var adding by rememberSaveable { mutableStateOf(false) }
+    var renaming by rememberSaveable { mutableStateOf(false) }
+    var newLabel by rememberSaveable { mutableStateOf("") }
+
+    val modeNames = mapOf(
+        org.ducatproject.ducat.Mode.None to stringResource(R.string.mode_personal),
+        org.ducatproject.ducat.Mode.Pos to stringResource(R.string.mode_pos),
+        org.ducatproject.ducat.Mode.BarTab to stringResource(R.string.mode_bartab),
+        org.ducatproject.ducat.Mode.Taxi to stringResource(R.string.mode_taxi),
+        org.ducatproject.ducat.Mode.Donate to stringResource(R.string.mode_donate),
+        org.ducatproject.ducat.Mode.Renting to stringResource(R.string.mode_renting),
+        org.ducatproject.ducat.Mode.Marketplace to stringResource(R.string.mode_marketplace),
+        org.ducatproject.ducat.Mode.HireHelp to stringResource(R.string.mode_hire_help),
+        org.ducatproject.ducat.Mode.Press to stringResource(R.string.mode_press),
+    )
+    val bindings = remember(version) {
+        roster.associate { p ->
+            p.hex to modeNames.keys.filter { m -> modes.boundPersona(m) == p.hex }
+        }
+    }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-        // The whole profile, including the name — it used to live here as a
-        // lone text field, and splitting "what people see of you" across two
-        // screens is how a name and a picture end up disagreeing.
-        MyProfileEditor()
+        Column(Modifier.padding(horizontal = 20.dp).padding(top = 16.dp)) {
+            Text(
+                stringResource(R.string.personas_body),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(12.dp))
+
+            roster.forEach { pr ->
+                val active = pr.hex == editing
+                // The card carries the profile's public face — the avatar
+                // and name contacts see — not the compartment label's
+                // initial. A card saying "P" above an editor saying "S"
+                // read as two different people.
+                val mp = remember(version, pr.hex) { MyProfile(context, pr.hex) }
+                val pic = remember(version, pr.hex) { mp.avatar() }
+                val publicName = remember(version, pr.hex) { mp.name() }
+                Card(
+                    Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (active) {
+                            MaterialTheme.colorScheme.primaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainerHigh
+                        },
+                    ),
+                ) {
+                    Row(
+                        Modifier.fillMaxWidth()
+                            .clickable { picked = pr.hex; renaming = false }
+                            .padding(horizontal = 14.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Box(
+                            Modifier.size(40.dp).clip(CircleShape).background(
+                                if (pr.color != 0) {
+                                    androidx.compose.ui.graphics.Color(pr.color)
+                                } else {
+                                    MaterialTheme.colorScheme.primary
+                                },
+                            ),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            val bmp = remember(pic) {
+                                pic?.let { SafeImage.fromBytes(it, SafeImage.AVATAR_PIXELS) }
+                            }
+                            if (bmp != null) {
+                                androidx.compose.foundation.Image(
+                                    bmp.asImageBitmap(), null,
+                                    Modifier.fillMaxSize(),
+                                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                                )
+                            } else {
+                                Text(
+                                    (publicName ?: personaLabel(pr)).take(1).uppercase(),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = androidx.compose.ui.graphics.Color.White,
+                                )
+                            }
+                        }
+                        Spacer(Modifier.width(12.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text(personaLabel(pr), style = MaterialTheme.typography.titleMedium)
+                            val sub = buildList {
+                                if (pr.hex == personas.personaHex()) {
+                                    add(stringResource(R.string.profiles_personal_sub))
+                                }
+                                if (publicName != null && publicName != personaLabel(pr)) {
+                                    add(stringResource(R.string.profiles_appears_as, publicName))
+                                }
+                                val bound = bindings[pr.hex].orEmpty()
+                                if (bound.isNotEmpty()) {
+                                    add(
+                                        stringResource(
+                                            R.string.profiles_answers_for,
+                                            bound.mapNotNull { modeNames[it] }.joinToString(", "),
+                                        ),
+                                    )
+                                }
+                            }
+                            if (sub.isNotEmpty()) {
+                                Text(
+                                    sub.joinToString(" · "),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                        if (pr.hex == worn) {
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                stringResource(R.string.personas_worn),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                        if (active) {
+                            // A bare icon, not an IconButton: the 48 dp
+                            // touch target of the latter squeezed the
+                            // subtitle into a wrap on the wearing card.
+                            Icon(
+                                Icons.Filled.Edit,
+                                contentDescription =
+                                    stringResource(R.string.profiles_rename),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier
+                                    .padding(start = 8.dp)
+                                    .size(18.dp)
+                                    .clickable {
+                                        newLabel = pr.name
+                                        renaming = !renaming
+                                    },
+                            )
+                        }
+                    }
+                }
+                if (active && renaming) {
+                    Row(
+                        Modifier.padding(bottom = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        OutlinedTextField(
+                            value = newLabel,
+                            onValueChange = { if (it.length <= 24) newLabel = it },
+                            label = { Text(stringResource(R.string.personas_name_label)) },
+                            singleLine = true,
+                            modifier = Modifier.weight(1f),
+                        )
+                        TextButton(onClick = {
+                            if (newLabel.isNotBlank() || pr.name.isBlank()) {
+                                personas.rename(pr.hex, newLabel.trim())
+                            }
+                            renaming = false
+                            ContactStore.bump()
+                        }) { Text(stringResource(R.string.personas_save)) }
+                    }
+                }
+            }
+            if (roster.size < PersonaStore.MAX_PERSONAS) {
+                TextButton(onClick = { adding = true }) {
+                    Text(stringResource(R.string.personas_add))
+                }
+            } else {
+                Text(
+                    stringResource(R.string.personas_cap),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.outline,
+                )
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+        // Whose desk the fields below belong to — with the label editable
+        // in place, because the card list is where the label lives.
+        val editingPersona = roster.firstOrNull { it.hex == editing }
+        if (editingPersona != null) {
+            val editingPublic = remember(version, editing) {
+                MyProfile(context, editing).name()
+            }
+            Text(
+                stringResource(
+                    R.string.profiles_editing_note,
+                    editingPublic ?: personaLabel(editingPersona),
+                ),
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.padding(horizontal = 20.dp).padding(top = 16.dp),
+            )
+        }
+
+        MyProfileEditor(personaHex = editing)
 
         Column(Modifier.padding(20.dp)) {
             PublishAddressSetting()
@@ -594,8 +825,15 @@ private fun ProfileSection() {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(8.dp))
-            SelectionContainerText(persona)
+            SelectionContainerText(editing)
         }
+    }
+
+    if (adding) {
+        NewProfileDialog(onDone = { created ->
+            adding = false
+            if (created != null) picked = created
+        })
     }
 }
 
@@ -658,9 +896,26 @@ private fun ContactsAdminSection(onOpenChat: (Contact) -> Unit) {
     // claim, or a forget made anywhere else must show here without leaving
     // and reopening the section.
     val version by ContactStore.changes.collectAsState()
-    var contacts by remember(version) { mutableStateOf(store.all()) }
+    // The worn compartment's contacts, the chat list's own rule (§1.1a):
+    // one hat, one list, and the single-persona era sees no change. The
+    // caption below is why the list can be shorter than the phone's whole
+    // address book without reading as data loss.
+    val personas = remember { PersonaStore(context) }
+    val scoped = remember(version) { personas.all().size > 1 }
+    fun scopedAll(): List<Contact> = store.all().let { all ->
+        if (personas.all().size > 1) {
+            val worn = personas.worn()
+            all.filter { personas.ownerHexOf(it) == worn }
+        } else all
+    }
+    var contacts by remember(version) { mutableStateOf(scopedAll()) }
     var confirm by remember { mutableStateOf<Contact?>(null) }
     var profileOf by remember { mutableStateOf<Contact?>(null) }
+    val wornName = remember(version) {
+        personas.all().firstOrNull { it.hex == personas.worn() }
+            ?.name?.ifBlank { null }
+            ?: context.getString(R.string.personas_primary)
+    }
 
     profileOf?.let { p ->
         // A full-screen overlay, not a nested screen: nesting put a second
@@ -669,7 +924,7 @@ private fun ContactsAdminSection(onOpenChat: (Contact) -> Unit) {
         // carries exactly one header, covers the bar beneath instead of
         // stacking, and hands its dismissal to the back button for free.
         androidx.compose.ui.window.Dialog(
-            onDismissRequest = { profileOf = null; contacts = store.all() },
+            onDismissRequest = { profileOf = null; contacts = scopedAll() },
             properties = androidx.compose.ui.window.DialogProperties(
                 usePlatformDefaultWidth = false,
             ),
@@ -680,7 +935,7 @@ private fun ContactsAdminSection(onOpenChat: (Contact) -> Unit) {
             ) {
                 ContactProfile(
                     contact = p,
-                    onBack = { profileOf = null; contacts = store.all() },
+                    onBack = { profileOf = null; contacts = scopedAll() },
                     onOpenChat = { profileOf = null; onOpenChat(it) },
                 )
             }
@@ -689,11 +944,21 @@ private fun ContactsAdminSection(onOpenChat: (Contact) -> Unit) {
 
     if (contacts.isEmpty()) {
         Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
-            Text(
-                stringResource(R.string.drawer_no_contacts),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    stringResource(R.string.drawer_no_contacts),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                if (scoped) {
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        stringResource(R.string.personas_contacts_scope, wornName),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
         }
         return
     }
@@ -703,6 +968,16 @@ private fun ContactsAdminSection(onOpenChat: (Contact) -> Unit) {
     var menuFor by remember { mutableStateOf<String?>(null) }
 
     LazyColumn(Modifier.fillMaxSize()) {
+        if (scoped) {
+            item(key = "scope-note") {
+                Text(
+                    stringResource(R.string.personas_contacts_scope, wornName),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                )
+            }
+        }
         items(contacts, key = { it.personaHex }) { c ->
             Box {
                 ListItem(
@@ -768,7 +1043,10 @@ private fun ContactsAdminSection(onOpenChat: (Contact) -> Unit) {
             confirmButton = {
                 TextButton(onClick = {
                     store.forget(c.personaHex)
-                    contacts = store.all()
+                    // Still the worn hat's list — this was the whole book,
+                    // every other persona's contacts included, and only
+                    // the store's bump re-scoping it kept that off screen.
+                    contacts = scopedAll()
                     confirm = null
                 }) {
                     Text(stringResource(R.string.drawer_forget_confirm),
@@ -840,9 +1118,15 @@ fun ModesScreen() {
     var pinFor by remember { mutableStateOf<org.ducatproject.ducat.Mode?>(null) }
 
     fun choose(m: org.ducatproject.ducat.Mode) {
+        val armed = current == org.ducatproject.ducat.Mode.Kiosk
         if (m == org.ducatproject.ducat.Mode.Kiosk &&
             !org.ducatproject.ducat.Pin.isSet(context)
         ) {
+            pinFor = m
+        } else if (armed && m != org.ducatproject.ducat.Mode.Kiosk) {
+            // Leaving is the staff door's question, whichever way this
+            // list was reached. The shell no longer lets a kiosk open the
+            // drawer at all; this is the same rule kept at the picker.
             pinFor = m
         } else {
             pick(m)
@@ -882,6 +1166,11 @@ fun ModesScreen() {
             stringResource(R.string.mode_donate_desc),
         ),
         Triple(
+            org.ducatproject.ducat.Mode.Press,
+            stringResource(R.string.mode_press),
+            stringResource(R.string.mode_press_desc),
+        ),
+        Triple(
             org.ducatproject.ducat.Mode.Marketplace,
             stringResource(R.string.mode_marketplace),
             stringResource(R.string.mode_marketplace_desc),
@@ -911,28 +1200,449 @@ fun ModesScreen() {
         )
         Spacer(Modifier.height(16.dp))
 
-        Card(Modifier.fillMaxWidth()) {
-            Column(Modifier.padding(vertical = 4.dp)) {
-                options.forEachIndexed { i, (mode, title, detail) ->
-                    if (i > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                    Row(
-                        Modifier.fillMaxWidth()
-                            .clickable { choose(mode) }
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+        options.forEach { (mode, title, detail) ->
+            val active = current == mode
+            Card(
+                Modifier.fillMaxWidth().padding(bottom = 10.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (active) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.surfaceContainerHigh
+                    },
+                ),
+            ) {
+                Row(
+                    Modifier.fillMaxWidth()
+                        .clickable { choose(mode) }
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Box(
+                        Modifier.size(42.dp)
+                            .clip(CircleShape)
+                            .background(
+                                if (active) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceVariant
+                                },
+                            ),
+                        contentAlignment = Alignment.Center,
                     ) {
-                        RadioButton(selected = current == mode, onClick = { choose(mode) })
+                        Icon(
+                            modeIcon(mode),
+                            contentDescription = null,
+                            tint = if (active) {
+                                MaterialTheme.colorScheme.onPrimary
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            },
+                        )
+                    }
+                    Spacer(Modifier.width(14.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text(title, style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            detail,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        // Which hat the shift starts in (§15.11 meets the
+                        // roster): a bar answering as the bar however the
+                        // phone arrived. Only once a second persona
+                        // exists — one persona has nothing to choose.
+                        ModePersonaBinding(mode)
+                    }
+                    if (active) {
                         Spacer(Modifier.width(8.dp))
-                        Column(Modifier.weight(1f)) {
-                            Text(title, style = MaterialTheme.typography.titleMedium)
-                            Text(
-                                detail,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        Icon(
+                            Icons.Filled.CheckCircle,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun modeIcon(mode: org.ducatproject.ducat.Mode) = when (mode) {
+    org.ducatproject.ducat.Mode.None -> Icons.Filled.Person
+    org.ducatproject.ducat.Mode.Pos -> Icons.Filled.PointOfSale
+    org.ducatproject.ducat.Mode.BarTab -> Icons.Filled.LocalBar
+    org.ducatproject.ducat.Mode.Taxi -> Icons.Filled.LocalTaxi
+    org.ducatproject.ducat.Mode.Donate -> Icons.Filled.VolunteerActivism
+    org.ducatproject.ducat.Mode.Renting -> Icons.Filled.House
+    org.ducatproject.ducat.Mode.Kiosk -> Icons.Filled.Storefront
+    org.ducatproject.ducat.Mode.Marketplace -> Icons.Filled.Sell
+    org.ducatproject.ducat.Mode.HireHelp -> Icons.Filled.Handyman
+    org.ducatproject.ducat.Mode.Press -> Icons.AutoMirrored.Filled.MenuBook
+}
+
+/** Opens the sealed-room viewer for a fetched site. Injected: WebView is
+ *  the phone's business (see MainActivity); the desk compiles a no-op. */
+var siteOpen: (android.content.Context, String) -> Unit = { _, _ -> }
+
+/** A ducat:site/ address arriving from a deep link or paste, waiting for
+ *  the section to add it. */
+val pendingSiteAdd = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
+
+/** The [ThreadSends] key the add runs under — one at a time, and a word a
+ *  record key can never be. */
+private const val SITE_ADD_JOB = "add"
+
+/**
+ * §16.22 on the phone: saved sites, each a stable address whose bundle
+ * travels whole and renders in a sealed room. Adding is pasting an
+ * address; opening fetches if the head moved and hands the bundle to the
+ * viewer; keeping one alive is the mirroring gift, given knowingly.
+ */
+@Composable
+fun SitesSection() {
+    val context = LocalContext.current
+    val version by ContactStore.changes.collectAsState()
+    val sites = remember(version) { org.ducatproject.ducat.Sites.all(context) }
+    var adding by rememberSaveable { mutableStateOf(false) }
+    // A site address is pasted or read off something; retyping it is the
+    // whole cost of losing it.
+    var addText by rememberSaveable { mutableStateOf("") }
+    // The add and each site's fetch run under process-level jobs, keyed
+    // "site:<record key>" (the add under a word no key can be), and this
+    // section reads which one is out rather than owning it. They ran in
+    // this section's scope: a rotation or a call while a bundle of
+    // hundreds of files came down took the scope with it, the fetch
+    // finished into the store, and the hand-off to the viewer — a
+    // `withContext(Main)` — was the one line cancellation could skip. The
+    // site was fetched and never opened, over a button that offered to
+    // fetch it again. Whoever is up when it lands opens it.
+    fun siteJobs(): List<String> = listOf(SITE_ADD_JOB) + sites.map { it.recordKey }
+    var busy by remember {
+        mutableStateOf(siteJobs().firstOrNull { ThreadSends.inFlight("site:$it") })
+    }
+    var word by remember { mutableStateOf<String?>(null) }
+    val tick by ThreadSends.ticks.collectAsState()
+    LaunchedEffect(tick, sites) {
+        val keys = siteJobs()
+        busy = keys.firstOrNull { ThreadSends.inFlight("site:$it") }
+        for (k in keys) for (o in ThreadSends.take("site:$k")) when (o) {
+            is ThreadSends.Outcome.Landed -> {
+                word = null
+                o.result?.let { siteOpen(context, it) }
+            }
+            is ThreadSends.Outcome.Failed -> {
+                word = o.error.saidWhy() ?: o.error.javaClass.simpleName
+            }
+        }
+    }
+
+    fun addByUri(uri: String) {
+        val rec = org.ducatproject.ducat.Sites.parseUri(uri.trim())
+        if (rec == null) {
+            word = context.getString(R.string.sites_bad_uri)
+            return
+        }
+        busy = SITE_ADD_JOB
+        ThreadSends.launch(ContactStore(context), "site:$SITE_ADD_JOB", null) {
+            org.ducatproject.ducat.Sites.add(context, rec)
+            null
+        }
+    }
+
+    // A link is not a paste. Unlike an address typed in here, a link can be
+    // sent by anyone, and a site is a page that gets opened — so the address
+    // is shown and the person asked, the way a tapped card is (MainActivity).
+    var linkAsk by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(Unit) {
+        pendingSiteAdd.collect { uri ->
+            if (uri != null) {
+                pendingSiteAdd.value = null
+                linkAsk = uri
+            }
+        }
+    }
+    linkAsk?.let { uri ->
+        AlertDialog(
+            onDismissRequest = { linkAsk = null },
+            title = { Text(stringResource(R.string.sites_add_link_title)) },
+            text = {
+                Column {
+                    Text(stringResource(R.string.sites_add_link_body))
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        uri,
+                        fontFamily = FontFamily.Monospace,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { linkAsk = null; addByUri(uri) }) {
+                    Text(stringResource(R.string.sites_add_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { linkAsk = null }) {
+                    Text(stringResource(R.string.common_cancel))
+                }
+            },
+        )
+    }
+
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
+        Text(
+            stringResource(R.string.sites_intro),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(12.dp))
+
+        if (sites.isEmpty()) {
+            Column(
+                Modifier.fillMaxWidth().padding(top = 48.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Box(
+                    Modifier.size(72.dp).clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        Icons.Filled.Public, null, Modifier.size(36.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    stringResource(R.string.sites_empty_title),
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    stringResource(R.string.sites_empty_body),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                )
+                Spacer(Modifier.height(20.dp))
+                Button(onClick = { adding = true }) {
+                    Text(stringResource(R.string.sites_add))
+                }
+            }
+        } else {
+            sites.forEach { site ->
+                Card(
+                    Modifier.fillMaxWidth().padding(bottom = 10.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    ),
+                ) {
+                    Column(Modifier.padding(14.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Column(Modifier.weight(1f)) {
+                                Text(site.title, style = MaterialTheme.typography.titleMedium)
+                                Text(
+                                    if (busy == site.recordKey) {
+                                        stringResource(R.string.sites_fetching)
+                                    } else if (site.fetchedDigestHex == null) {
+                                        stringResource(R.string.sites_not_fetched)
+                                    } else if (site.fetchedDigestHex != site.digestHex) {
+                                        stringResource(R.string.sites_update_waiting)
+                                    } else {
+                                        stringResource(R.string.sites_offline_ready)
+                                    },
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            Button(
+                                enabled = busy == null,
+                                onClick = {
+                                    busy = site.recordKey
+                                    ThreadSends.launch(
+                                        ContactStore(context), "site:${site.recordKey}", null,
+                                    ) {
+                                        // Head first: an updated site is
+                                        // noticed at the door, fetched
+                                        // behind it, rendered fresh.
+                                        val latest = runCatching {
+                                            org.ducatproject.ducat.Sites.add(
+                                                context, site.recordKey,
+                                            )
+                                        }.getOrDefault(site)
+                                        org.ducatproject.ducat.Sites.fetchBundle(
+                                            context, latest,
+                                        )
+                                        // The landing opens it — on the
+                                        // main thread, from whichever
+                                        // section is up to hear it.
+                                        site.recordKey
+                                    }
+                                },
+                            ) { Text(stringResource(R.string.sites_open)) }
+                        }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            // Off the main thread, both: the store is an
+                            // encrypted table read back whole, and remove
+                            // deletes a bundle that can be hundreds of files.
+                            Checkbox(
+                                checked = site.keepAlive,
+                                onCheckedChange = { keep ->
+                                    ThreadSends.launch(
+                                        ContactStore(context), "site:${site.recordKey}", null,
+                                    ) {
+                                        org.ducatproject.ducat.Sites.setKeepAlive(
+                                            context, site.recordKey, keep,
+                                        )
+                                        null
+                                    }
+                                },
                             )
+                            Text(
+                                stringResource(R.string.sites_keep_alive),
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.weight(1f),
+                            )
+                            TextButton(onClick = {
+                                ThreadSends.launch(
+                                    ContactStore(context), "site:${site.recordKey}", null,
+                                ) {
+                                    org.ducatproject.ducat.Sites.remove(context, site.recordKey)
+                                    null
+                                }
+                            }) { Text(stringResource(R.string.sites_remove)) }
                         }
                     }
                 }
+            }
+            TextButton(onClick = { adding = true }) {
+                Text(stringResource(R.string.sites_add))
+            }
+        }
+
+        word?.let {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                it,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+    }
+
+    if (adding) {
+        AlertDialog(
+            onDismissRequest = { adding = false },
+            title = { Text(stringResource(R.string.sites_add)) },
+            text = {
+                OutlinedTextField(
+                    addText, { addText = it },
+                    label = { Text(stringResource(R.string.sites_uri_label)) },
+                    singleLine = true,
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = addText.isNotBlank(),
+                    onClick = {
+                        adding = false
+                        addByUri(addText)
+                        addText = ""
+                    },
+                ) { Text(stringResource(R.string.sites_add_confirm)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { adding = false }) {
+                    Text(stringResource(R.string.common_cancel))
+                }
+            },
+        )
+    }
+}
+
+/**
+ * Everything this phone offers, one desk: the listings across every kind
+ * (a room, a car, a kayak, a bicycle for sale, an afternoon's help) and
+ * the publications. Management without a mode switch — a shift is for
+ * working a counter, not for editing a price.
+ */
+@Composable
+fun SellingSection() {
+    var tab by rememberSaveable { mutableStateOf(0) }
+    Column(Modifier.fillMaxSize()) {
+        Row(
+            Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            FilterChip(
+                selected = tab == 0,
+                onClick = { tab = 0 },
+                label = { Text(stringResource(R.string.shells_tab_listings)) },
+            )
+            FilterChip(
+                selected = tab == 1,
+                onClick = { tab = 1 },
+                label = { Text(stringResource(R.string.section_publishing)) },
+            )
+        }
+        if (tab == 0) {
+            RentingScreen(kinds = org.ducatproject.ducat.Listings.KINDS)
+        } else {
+            PublishingSection()
+        }
+    }
+}
+
+@Composable
+private fun ModePersonaBinding(mode: org.ducatproject.ducat.Mode) {
+    val context = LocalContext.current
+    val version by ContactStore.changes.collectAsState()
+    val personas = remember { PersonaStore(context) }
+    val roster = remember(version) { personas.all() }
+    if (roster.size < 2) return
+    val modes = remember { org.ducatproject.ducat.ModeStore(context) }
+    val bound = remember(version) { modes.boundPersona(mode) }
+    var open by remember { mutableStateOf(false) }
+
+    val nameOf: (String) -> String = { hex ->
+        roster.firstOrNull { it.hex == hex }?.name?.ifBlank { null }
+            ?: context.getString(R.string.personas_primary)
+    }
+    Box {
+        // A control, dressed as one: the bare text link sat exactly where
+        // a thumb taps the card to choose the mode, and swallowed the tap.
+        // The arrow says "this opens something" and the row hugs its text.
+        Row(
+            Modifier.clickable { open = true }.padding(top = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                if (bound != null) {
+                    stringResource(R.string.personas_mode_answers, nameOf(bound))
+                } else {
+                    stringResource(R.string.personas_mode_answers_worn)
+                },
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Icon(
+                Icons.Filled.ArrowDropDown,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(16.dp),
+            )
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.personas_mode_answers_worn)) },
+                onClick = { modes.bindPersona(mode, null); open = false },
+            )
+            roster.forEach { p ->
+                DropdownMenuItem(
+                    text = { Text(nameOf(p.hex)) },
+                    onClick = { modes.bindPersona(mode, p.hex); open = false },
+                )
             }
         }
     }

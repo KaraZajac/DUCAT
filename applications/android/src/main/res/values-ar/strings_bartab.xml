@@ -29,12 +29,14 @@
     <string name="bartab_back">رجوع</string>
     <string name="bartab_bill_cancelled_msg">أُلغيت تلك الفاتورة البالغة %1$s — لا شيء للدفع.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · الحساب الآن %3$s</string>
+    <string name="bartab_discard_notice">أُلغي الحساب — لا شيء للدفع.</string>
     <string name="bartab_remove_line">إزالة</string>
     <string name="bartab_settle_bill">تسوية — فاتورة بـ %1$s</string>
     <string name="bartab_settle_hint">فاتورة مفصّلة واحدة تصل إلى محادثتك مع %1$s. يمكنهم الدفع من أي مكان — المحادثة لا تُغلق عند مغادرتهم.</string>
     <string name="bartab_discard_tab">حذف الحساب</string>
     <string name="bartab_discard_title">أتحذف هذا الحساب؟</string>
     <string name="bartab_discard_body">يُحذف الحساب وكل ما سُجّل عليه من هذا الهاتف. لا تُرسل فاتورة، ولا يمكن التراجع عن هذا.</string>
+    <string name="bartab_discard_body_told">يُحذف الحساب وكل ما سُجّل عليه من هذا الهاتف. لا تُرسل فاتورة — يُبلَّغون بأن لا شيء للدفع — ولا يمكن التراجع عن هذا.</string>
     <string name="bartab_discard_confirm">حذف</string>
     <string name="bartab_keep_tab">الإبقاء على الحساب</string>
     <string name="bartab_billed_hint">صدرت الفاتورة. يصلهم الإيصال من تلقاء نفسه عند وصول الدفعة. إن سُوّي الحساب بطريقة أخرى، فقل ذلك هنا:</string>
@@ -44,6 +46,13 @@
     <string name="bartab_cancelled_note">أُلغيت — وقد أُخبروا بذلك في المحادثة.</string>
     <string name="bartab_paid_oob_note">دُفع خارج DUCAT ✓ — أُرسل الإيصال، بلا معاملة مرفقة.</string>
     <string name="bartab_paid_note">مدفوع ✓ — أُرسل الإيصال.</string>
+    <string name="bartab_bill_pending">صدرت الفاتورة، لكنها ما زالت على هذا الهاتف — ستخرج فور عودة الشبكة. سُوّي الحساب بطريقة أخرى؟ قل ذلك هنا:</string>
+    <string name="bartab_bill_unsent">لم تصلهم الفاتورة قط: أُعيد ضبط المحادثة قبل أن تخرج. ألغِها وأصدرها من جديد، أو بيّن هنا إن تمت التسوية بطريقة أخرى:</string>
+    <string name="bartab_cancelled_pending">أُلغيت — ولم يُخبروا بعد. سيخرج الإشعار فور أن يجد هذا الهاتف الشبكة.</string>
+    <string name="bartab_cancelled_unsent">أُلغيت — لكن الإشعار لم يغادر هذا الهاتف قط، ولم يعد بوسعه الخروج. أخبرهم في المحادثة، وإلا فقد يدفعون هذه الفاتورة.</string>
+    <string name="bartab_paid_oob_pending">دُفع خارج DUCAT ✓ — الإيصال ما زال على هذا الهاتف. سيخرج فور عودة الشبكة.</string>
+    <string name="bartab_paid_oob_unsent">دُفع خارج DUCAT ✓ — لكن تعذّر إرسال الإيصال.</string>
+    <string name="bartab_send_receipt">إرسال الإيصال</string>
     <string name="bartab_remove_from_book">إزالة من دفتر الحسابات</string>
     <string name="bartab_back_to_tabs">العودة إلى الحسابات</string>
     <!-- What the payer reads on the bill and the receipt. Written in
@@ -59,4 +68,8 @@
     <string name="bill_note_cancelled">أُلغيت الفاتورة البالغة %1$s — لا شيء للدفع.</string>
     <string name="bill_note_sale">فاتورتك</string>
     <string name="bartab_tip_line">إكرامية — شكرًا</string>
+    <string name="bill_note_issue">الاشتراك</string>
+    <string name="bartab_paid_pending">مدفوع ✓ — الإيصال ما زال على هذا الهاتف. سيخرج فور عودة الشبكة.</string>
+    <string name="bartab_paid_unsent">مدفوع ✓ — لكن تعذّر إرسال الإيصال. ستُعاد المحاولة تلقائيًا.</string>
+    <string name="bartab_removed_notice">أُزيل: %1$s · الحساب الآن %2$s</string>
 </resources>

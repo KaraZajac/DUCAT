@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -47,7 +48,7 @@ fun AccountsScreen() {
     val wallet = remember { WalletStore(context) }
     val address = wallet.address()
     var showQr by remember { mutableStateOf(false) }
-    var rescanOpen by remember { mutableStateOf(false) }
+    var rescanOpen by rememberSaveable { mutableStateOf(false) }
 
     if (rescanOpen) {
         SkipAheadDialog(
@@ -275,7 +276,9 @@ internal fun SkipAheadDialog(tip: Long, onPick: (Long) -> Unit, onDismiss: () ->
         5_040L to stringResource(R.string.accounts_about_a_week_ago),
         21_600L to stringResource(R.string.accounts_about_a_month_ago),
     )
-    var custom by remember { mutableStateOf("") }
+    // Saveable with the dialog that holds it: a block height is a number
+    // somebody looked up, not one they can retype from memory.
+    var custom by rememberSaveable { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.accounts_skip_ahead_title)) },

@@ -6,6 +6,8 @@
     <!-- Richieste in sospeso -->
     <string name="activity_awaiting">In attesa</string>
     <string name="activity_search_none">Qui non corrisponde nulla a «%1$s».</string>
+    <string name="activity_period_none">Niente in questo periodo. Scegline uno più lungo qui sopra per vedere l’attività precedente.</string>
+    <string name="activity_filter_none">Ancora niente di questo tipo. Tocca di nuovo il riquadro evidenziato per mostrare tutto.</string>
     <string name="activity_search_clear">Cancella la ricerca</string>
     <string name="activity_search_hint">Cerca in ricevute, nomi, note</string>
     <string name="activity_they_ask">%1$s ti chiede</string>
@@ -42,4 +44,23 @@
     <string name="activity_donations_filter">Donazioni</string>
     <string name="activity_donation_chip">Donazione</string>
     <string name="activity_donated_total">%1$s donati</string>
+    <string name="activity_period_today">Oggi</string>
+    <string name="activity_period_7d">7 giorni</string>
+    <string name="activity_period_month">Questo mese</string>
+    <string name="activity_period_all">Tutto</string>
+    <string name="activity_sum_in">Entrate</string>
+    <string name="activity_sum_out">Uscite</string>
+    <string name="activity_sum_net">Netto</string>
+    <string name="activity_sum_fees">Commissioni</string>
+    <string name="activity_business">Attività</string>
+    <string name="activity_sales">Vendite</string>
+    <string name="activity_tax_collected">Imposte incassate</string>
+    <string name="activity_outstanding">In sospeso</string>
+    <string name="activity_export_csv">File CSV</string>
+    <string name="activity_export_json">File JSON</string>
+    <string name="activity_door_pos">cassa</string>
+    <string name="activity_door_bar">conti</string>
+    <string name="activity_door_taxi">corse</string>
+    <string name="activity_door_donate">salvadanaio</string>
+    <string name="activity_door_pub">numeri</string>
 </resources>

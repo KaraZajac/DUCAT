@@ -20,6 +20,7 @@
     <string name="chatlist_preview_receipt">🧾 收据 — %1$s</string>
     <string name="chatlist_preview_reacted">回应了 %1$s</string>
     <string name="chatlist_preview_photo">📷 照片</string>
+    <string name="chatlist_preview_voice">🎤 语音消息</string>
     <string name="chatlist_time_now">刚刚</string>
     <string name="chatlist_time_minutes">%1$d分</string>
     <string name="chatlist_time_hours">%1$d时</string>

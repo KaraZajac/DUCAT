@@ -173,14 +173,14 @@ dependencies {
  */
 val nativeFreshness = tasks.register("nativeFreshness") {
     val libDir = File(projectDir, "src/main/jniLibs").absolutePath
-    val rustDirs = listOf("core/src", "mobile/src")
+    val rustDirs = listOf("core/src", "mobile/src", "mobile/vendor")
         .map { File(rootProject.projectDir.parentFile, it).absolutePath }
     doLast {
         val libs = File(libDir).walkTopDown()
             .filter { it.name == "libducat_mobile.so" }.toList()
         if (libs.isEmpty()) return@doLast
         val sources = rustDirs.map(::File).filter { it.isDirectory }
-            .flatMap { it.walkTopDown().filter { f -> f.isFile }.toList() }
+            .flatMap { it.walkTopDown().filter { f -> f.isFile && (f.extension == "rs" || f.extension == "toml") }.toList() }
         val newest = sources.maxByOrNull { it.lastModified() } ?: return@doLast
         val oldestLib = libs.minByOrNull { it.lastModified() } ?: return@doLast
         if (newest.lastModified() > oldestLib.lastModified()) {

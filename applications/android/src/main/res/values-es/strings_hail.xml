@@ -21,6 +21,8 @@
     <!-- Driver: DriveScreen -->
     <string name="hail_rider_declined_title">El pasajero rechazó</string>
     <string name="hail_rider_declined_body">Pasó de tu oferta. Su pedido ya no está en el tablero.</string>
+    <string name="hail_offer_lapsed_title">Sin respuesta a tu oferta</string>
+    <string name="hail_offer_lapsed_body">Media hora después, el pasajero no ha dicho ni sí ni no. La oferta sigue en el chat por si aún la quiere.</string>
     <string name="hail_ok">OK</string>
     <string name="hail_on_duty">En servicio</string>
     <string name="hail_net_wide">red amplia — ~%1$s de ancho</string>
@@ -102,5 +104,10 @@
     <string name="hail_step_card">Creando un código…</string>
     <string name="hail_search">Buscar</string>
     <string name="hail_clear_place">Borrar</string>
+    <string name="hail_no_places">No se encontró ningún lugar</string>
+    <string name="hail_search_unreachable">No se pudo acceder a la búsqueda de mapas: revisa tu conexión</string>
     <string name="hail_joining_network">Uniéndose a la red: aún no se han leído los tablones.</string>
+    <string name="hail_accept_sending">Diciéndole que sí a %1$s…</string>
+    <string name="hail_accept_failed">Tu sí a %1$s no se envió. Revisa la red y vuelve a ver la oferta.</string>
+    <string name="hail_escrow_failed">La tarifa no se pudo poner en custodia. Arréglalo con el conductor en el chat.</string>
 </resources>

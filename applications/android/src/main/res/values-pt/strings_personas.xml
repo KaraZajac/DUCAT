@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="personas_title">Personas</string>
+    <string name="personas_body">Quem este telefone pode ser. Cada perfil é a sua própria chave com os seus próprios contatos — a loja nunca conhece os seus amigos, e os seus amigos nunca conhecem a loja. Relações novas entram no perfil que você estiver usando.</string>
+    <string name="personas_primary">Pessoal</string>
+    <string name="personas_worn">Em uso</string>
+    <string name="personas_add">Novo perfil</string>
+    <string name="personas_name_label">Nome</string>
+    <string name="personas_name_support">Como este seu lado se chama — Loja, Feira, Navegação.</string>
+    <string name="personas_cap">Quatro é o limite: perfis só funcionam se couberem numa mão.</string>
+    <string name="personas_no_delete">Um perfil não pode ser excluído — os contatos dele respondem só à sua chave. Pare de usá-lo e ele silencia.</string>
+    <string name="personas_save">Salvar</string>
+    <string name="personas_cancel">Cancelar</string>
+    <string name="personas_mode_answers">Responde como %1$s</string>
+    <string name="personas_mode_answers_worn">Responde como o perfil em uso</string>
+    <string name="personas_contacts_scope">Contatos de %1$s — troque de perfil no menu para ver os demais.</string>
+    <string name="profiles_personal_sub">O perfil pessoal</string>
+    <string name="profiles_answers_for">Responde por %1$s</string>
+    <string name="profiles_editing_note">Perfil de %1$s</string>
+    <string name="profiles_rename">Renomear</string>
+    <string name="profiles_appears_as">Aparece como %1$s</string>
+</resources>

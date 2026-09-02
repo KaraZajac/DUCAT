@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">اتصل بك</string>
+    <string name="chat_call_you_rang">اتصلت</string>
+    <string name="chat_call_answered">ردّ على مكالمتك</string>
+    <string name="chat_call_you_answered">رددت</string>
+    <string name="chat_call_missed_note">رنّت مكالمة أثناء غيابك.</string>
+    <string name="chatlist_preview_call">مكالمة</string>
+    <string name="chatlist_preview_call_answered">ردّ على مكالمة</string>
+    <string name="notify_call">%1$s يتصل</string>
+    <string name="notify_call_answered">ردّ %1$s على مكالمتك</string>
+    <string name="call_button">اتصال</string>
+    <string name="call_calling">جارٍ الاتصال…</string>
+    <string name="call_incoming">مكالمة DUCAT واردة</string>
+    <string name="call_frames">⁦↓%1$d ↑%2$d⁩ إطارًا</string>
+    <string name="call_answer_btn">ردّ</string>
+    <string name="call_end_btn">إنهاء</string>
+    <string name="call_body_ring">يتصل بك</string>
+    <string name="call_body_answer">تم الرد</string>
+    <string name="call_body_decline">لا أستطيع الكلام الآن.</string>
+    <string name="notify_call_channel">المكالمات الواردة</string>
+    <string name="notify_call_incoming">مكالمة واردة</string>
+    <string name="call_no_answer">لا إجابة</string>
+    <string name="call_leave_message">اترك رسالة</string>
+    <string name="call_dismiss">ليس الآن</string>
+    <string name="call_body_cancel">أُغلق الخط قبل أن تجيب.</string>
+    <string name="call_connecting">جارٍ التوصيل…</string>
+    <string name="call_unreached">تعذّر الوصول إليه</string>
+    <string name="call_never_connected">لم يتم الاتصال</string>
+    <string name="call_notify_calling">جارٍ الاتصال بـ %1$s…</string>
+    <string name="call_notify_in_call">في مكالمة مع %1$s</string>
+    <string name="call_notify_return">انقر للعودة إليها.</string>
+</resources>

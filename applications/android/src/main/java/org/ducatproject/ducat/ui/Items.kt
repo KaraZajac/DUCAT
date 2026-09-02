@@ -83,7 +83,10 @@ fun ItemsScreen() {
                     Catalogue.put(context, Catalogue.draft(context, name.trim(), price.trim()))
                     name = ""; price = ""
                 },
-                enabled = name.isNotBlank() && price.isNotBlank(),
+                // A price, not just characters in the price box: "." or "0"
+                // passed the old test and put an item on the till that
+                // failed with "unpriceable" the first time it was rung up.
+                enabled = name.isNotBlank() && Amounts.parse(price)?.signum() == 1,
                 modifier = Modifier.padding(top = 2.dp).height(52.dp),
             ) { Text(stringResource(R.string.items_add)) }
         }

@@ -25,12 +25,14 @@
     <string name="bartab_back">Indietro</string>
     <string name="bartab_bill_cancelled_msg">Quel conto da %1$s è annullato — non c\'è niente da pagare.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · conto ora a %3$s</string>
+    <string name="bartab_discard_notice">Conto scartato — non c\'è niente da pagare.</string>
     <string name="bartab_remove_line">Rimuovi</string>
     <string name="bartab_settle_bill">Chiudi — conto %1$s</string>
     <string name="bartab_settle_hint">Un unico conto dettagliato nella tua conversazione con %1$s. Possono pagare da qualsiasi posto — il filo non si chiude quando se ne vanno.</string>
     <string name="bartab_discard_tab">Elimina conto</string>
     <string name="bartab_discard_title">Eliminare questo conto?</string>
     <string name="bartab_discard_body">Il conto e tutto ciò che vi è stato battuto vengono cancellati da questo telefono. Nessun conto viene inviato, e non si può annullare.</string>
+    <string name="bartab_discard_body_told">Il conto e tutto ciò che vi è stato battuto vengono cancellati da questo telefono. Nessun conto viene inviato — viene avvisato che non c\'è niente da pagare — e non si può annullare.</string>
     <string name="bartab_discard_confirm">Elimina</string>
     <string name="bartab_keep_tab">Tieni il conto</string>
     <string name="bartab_billed_hint">Conto presentato. La ricevuta gli arriva da sola quando il pagamento va a segno. Se è stato saldato in altro modo, segnalalo qui:</string>
@@ -40,6 +42,13 @@
     <string name="bartab_cancelled_note">Annullato — glielo abbiamo detto nella conversazione.</string>
     <string name="bartab_paid_oob_note">Pagato fuori da DUCAT ✓ — ricevuta inviata, nessuna transazione allegata.</string>
     <string name="bartab_paid_note">Pagato ✓ — ricevuta inviata.</string>
+    <string name="bartab_bill_pending">Addebitato, ma il conto è ancora su questo telefono: partirà appena torna la rete. Saldato in altro modo? Dillo qui:</string>
+    <string name="bartab_bill_unsent">Il conto non è mai arrivato: la conversazione è stata azzerata prima che potesse partire. Annullalo e addebita di nuovo, oppure indica qui se è stato saldato in altro modo:</string>
+    <string name="bartab_cancelled_pending">Annullato — non sono ancora stati avvisati. L\'avviso partirà appena questo telefono ritrova la rete.</string>
+    <string name="bartab_cancelled_unsent">Annullato — ma l\'avviso non ha mai lasciato questo telefono e ormai non può partire. Diglielo nella conversazione, o potrebbero ancora pagare questo conto.</string>
+    <string name="bartab_paid_oob_pending">Pagato fuori da DUCAT ✓ — la ricevuta è ancora su questo telefono. Partirà appena torna la rete.</string>
+    <string name="bartab_paid_oob_unsent">Pagato fuori da DUCAT ✓ — ma la ricevuta non è stata inviata.</string>
+    <string name="bartab_send_receipt">Invia la ricevuta</string>
     <string name="bartab_remove_from_book">Rimuovi dal registro</string>
     <string name="bartab_back_to_tabs">Torna ai conti</string>
     <!-- What the payer reads on the bill and the receipt. Written in
@@ -55,4 +64,8 @@
     <string name="bill_note_cancelled">Il conto da %1$s è annullato — non c\'è nulla da pagare.</string>
     <string name="bill_note_sale">Il tuo conto</string>
     <string name="bartab_tip_line">Mancia — grazie</string>
+    <string name="bill_note_issue">Abbonamento</string>
+    <string name="bartab_paid_pending">Pagato ✓ — la ricevuta è ancora su questo telefono. Partirà appena torna la rete.</string>
+    <string name="bartab_paid_unsent">Pagato ✓ — ma la ricevuta non è stata inviata. Verrà ritentata da sola.</string>
+    <string name="bartab_removed_notice">Tolto: %1$s · conto ora a %2$s</string>
 </resources>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_library">라이브러리</string>
+    <string name="library_empty">아직 아무것도 없어요. 발행인이 호를 보내오면 여기에 보관돼요 — 채팅을 삭제해도 남아 있어요.</string>
+    <string name="library_issue">%1$s호</string>
+    <string name="library_on_device">이 기기에 저장됨 · %1$s</string>
+    <string name="library_no_shipment">키 보관됨 — 아직 제공된 다운로드 없음</string>
+    <string name="library_download">다운로드</string>
+    <string name="library_progress">%2$s 중 %1$s</string>
+    <string name="library_starting">시작하는 중…</string>
+    <string name="library_failed">다운로드 실패: %1$s</string>
+    <string name="library_gone">더 이상 연락처에 없음</string>
+    <string name="chat_issue_sent_you">호를 보내왔어요</string>
+    <string name="chat_issue_you_sent">호를 보냈어요</string>
+    <string name="chatlist_preview_issue">새 호: %1$s</string>
+    <string name="notify_new_issue">%1$s님이 새 호를 보냈어요</string>
+    <string name="library_note_new_issue">새 호가 나왔어요.</string>
+    <string name="library_unsubscribe">구독 해지</string>
+    <string name="library_unsub_confirm">%1$s에게서 그만 받을까요? 이미 가진 호는 그대로 남습니다.</string>
+    <string name="library_unsub_keep">구독 유지</string>
+    <string name="library_resubscribe">다시 구독</string>
+    <string name="library_unsubscribed">해지됨 — 새 호는 보관되지 않아요</string>
+    <string name="library_unsub_note">구독을 해지했습니다.</string>
+    <plurals name="main_issues_waiting">
+        <item quantity="other">새 호 %1$d개 대기 중</item>
+    </plurals>
+    <string name="library_open">열기</string>
+    <string name="library_queued">대기 중</string>
+</resources>

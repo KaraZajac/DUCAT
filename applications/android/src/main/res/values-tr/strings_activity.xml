@@ -6,6 +6,8 @@
     <!-- Pending requests -->
     <string name="activity_awaiting">Bekleyen</string>
     <string name="activity_search_none">Burada “%1$s” ile eşleşen bir şey yok.</string>
+    <string name="activity_period_none">Bu dönemde bir şey yok. Önceki hareketleri görmek için yukarıdan daha uzun bir dönem seçin.</string>
+    <string name="activity_filter_none">Henüz bu türden bir şey yok. Her şeyi göstermek için vurgulanan kutucuğa yeniden dokunun.</string>
     <string name="activity_search_clear">Aramayı temizle</string>
     <string name="activity_search_hint">Fişlerde, adlarda, notlarda ara</string>
     <string name="activity_they_ask">%1$s istiyor</string>
@@ -42,4 +44,23 @@
     <string name="activity_donations_filter">Bağışlar</string>
     <string name="activity_donation_chip">Bağış</string>
     <string name="activity_donated_total">%1$s bağışlandı</string>
+    <string name="activity_period_today">Bugün</string>
+    <string name="activity_period_7d">7 gün</string>
+    <string name="activity_period_month">Bu ay</string>
+    <string name="activity_period_all">Tümü</string>
+    <string name="activity_sum_in">Gelen</string>
+    <string name="activity_sum_out">Giden</string>
+    <string name="activity_sum_net">Net</string>
+    <string name="activity_sum_fees">Ücretler</string>
+    <string name="activity_business">İşletme</string>
+    <string name="activity_sales">Satışlar</string>
+    <string name="activity_tax_collected">Toplanan vergi</string>
+    <string name="activity_outstanding">Bekleyen</string>
+    <string name="activity_export_csv">CSV dosyası</string>
+    <string name="activity_export_json">JSON dosyası</string>
+    <string name="activity_door_pos">kasa</string>
+    <string name="activity_door_bar">hesaplar</string>
+    <string name="activity_door_taxi">yolculuklar</string>
+    <string name="activity_door_donate">kumbara</string>
+    <string name="activity_door_pub">sayılar</string>
 </resources>

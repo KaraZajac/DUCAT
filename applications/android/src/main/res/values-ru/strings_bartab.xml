@@ -27,12 +27,14 @@
     <string name="bartab_back">Назад</string>
     <string name="bartab_bill_cancelled_msg">Счёт на %1$s отменён — платить нечего.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · на счету уже %3$s</string>
+    <string name="bartab_discard_notice">Счёт закрыт без оплаты — платить нечего.</string>
     <string name="bartab_remove_line">Убрать</string>
     <string name="bartab_settle_bill">Рассчитать — счёт %1$s</string>
     <string name="bartab_settle_hint">Один детализированный счёт в переписку с %1$s. Оплатить можно откуда угодно — переписка не закрывается, когда гость уходит.</string>
     <string name="bartab_discard_tab">Выбросить счёт</string>
     <string name="bartab_discard_title">Выбросить этот счёт?</string>
     <string name="bartab_discard_body">Счёт и всё, что на него записано, удаляются с этого телефона. Ничего не отправляется гостю, и отменить это нельзя.</string>
+    <string name="bartab_discard_body_told">Счёт и всё, что на него записано, удаляются с этого телефона. Счёт к оплате не отправляется — гостю сообщат, что платить нечего, — и отменить это нельзя.</string>
     <string name="bartab_discard_confirm">Выбросить</string>
     <string name="bartab_keep_tab">Оставить счёт</string>
     <string name="bartab_billed_hint">Счёт выставлен. Чек уйдёт гостю сам, когда придёт платёж. Если рассчитались как-то иначе — отметь здесь:</string>
@@ -42,6 +44,13 @@
     <string name="bartab_cancelled_note">Отменён — гостю сообщили в переписке.</string>
     <string name="bartab_paid_oob_note">Оплачен вне DUCAT ✓ — чек отправлен, транзакция не прикреплена.</string>
     <string name="bartab_paid_note">Оплачен ✓ — чек отправлен.</string>
+    <string name="bartab_bill_pending">Счёт выставлен, но он всё ещё на этом телефоне — уйдёт, как только появится сеть. Расплатились иначе? Отметьте здесь:</string>
+    <string name="bartab_bill_unsent">Счёт так и не дошёл: разговор был сброшен раньше, чем он успел уйти. Отмените его и выставьте заново или отметьте здесь, что оплачено иначе:</string>
+    <string name="bartab_cancelled_pending">Отменён — им ещё не сообщили. Уведомление уйдёт, как только этот телефон найдёт сеть.</string>
+    <string name="bartab_cancelled_unsent">Отменён — но уведомление так и не покинуло этот телефон, и теперь уже не уйдёт. Скажите им в разговоре, иначе они могут всё же оплатить этот счёт.</string>
+    <string name="bartab_paid_oob_pending">Оплачено вне DUCAT ✓ — чек всё ещё на этом телефоне. Уйдёт, как только появится сеть.</string>
+    <string name="bartab_paid_oob_unsent">Оплачено вне DUCAT ✓ — но чек отправить не удалось.</string>
+    <string name="bartab_send_receipt">Отправить чек</string>
     <string name="bartab_remove_from_book">Убрать из книги счетов</string>
     <string name="bartab_back_to_tabs">К счетам</string>
     <!-- What the payer reads on the bill and the receipt. Written in
@@ -57,4 +66,8 @@
     <string name="bill_note_cancelled">Счёт на %1$s отменён — платить нечего.</string>
     <string name="bill_note_sale">Ваш счёт</string>
     <string name="bartab_tip_line">Чаевые — спасибо</string>
+    <string name="bill_note_issue">Подписка</string>
+    <string name="bartab_paid_pending">Оплачен ✓ — чек всё ещё на этом телефоне. Уйдёт, как только появится сеть.</string>
+    <string name="bartab_paid_unsent">Оплачен ✓ — но чек отправить не удалось. Попытка повторится сама.</string>
+    <string name="bartab_removed_notice">Убрано: %1$s · на счету уже %2$s</string>
 </resources>

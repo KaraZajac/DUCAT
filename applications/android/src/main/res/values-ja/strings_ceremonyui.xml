@@ -12,6 +12,9 @@
     <string name="ceremony_accept_and_pay">承認して支払う</string>
     <string name="ceremony_no_address">この請求にはアドレスがありません — 送り先を相手に確認してください。</string>
     <string name="ceremony_accept_opens_confirm">「承認」を押すと確認画面が開きます — そこで承認するまで、お金は動きません。</string>
+    <string name="ceremony_bill_withdrawn">%1$s がこの請求を取り下げました — 支払うものはありません。</string>
+    <string name="ceremony_bill_declined">この請求を辞退しました。</string>
+    <string name="ceremony_bill_paid">支払い済み ✓ — この請求は精算済みです。</string>
 
     <!-- PaidSplash -->
     <string name="ceremony_paid">支払い済み ✓</string>
@@ -25,14 +28,19 @@
     <string name="ceremony_plate">ナンバー %1$s</string>
     <string name="ceremony_accept">承認</string>
     <string name="ceremony_accepting_agrees_fare">承諾すると、運賃とあなたの預り金は二人だけで開ける預託先に入ります。</string>
+    <string name="ceremony_accepting_agrees_fare_nostake">承諾すると、運賃は二人だけで開ける預託先に入ります。これほど小さな運賃には預り金はありません。</string>
     <string name="ceremony_accepting_agrees_fare_arbiter">承諾すると、運賃とあなたの預り金は三つのうち二つの鍵で開く預託先に入ります。あなたの鍵、相手の鍵、そして二人で折り合えないときにだけ頼まれる%1$sの鍵です。</string>
+    <string name="ceremony_accepting_agrees_fare_arbiter_nostake">承諾すると、運賃は三つのうち二つの鍵で開く預託先に入ります。あなたの鍵、相手の鍵、そして二人で折り合えないときにだけ頼まれる%1$sの鍵です。これほど小さな運賃には預り金はありません。</string>
 
     <!-- RideConfirmed -->
     <string name="ceremony_ride_confirmed">配車が確定しました</string>
     <string name="ceremony_expecting_you">保証金をチャットで預けてください — 入り次第、相手が支払います。</string>
+    <string name="ceremony_expecting_you_nostake">これほど小さな運賃には保証金はありません — 相手はチャットで支払い、入金はそこで確認できます。</string>
 
     <!-- DriverFound -->
     <string name="ceremony_ride_coming">車が向かっています</string>
     <string name="ceremony_eta_in_chat">相手の保証金が入ったらチャットで支払ってください — 到着予定もそこにあります。</string>
+    <string name="ceremony_eta_in_chat_nostake">チャットで支払ってください — 到着予定もそこにあります。これほど小さな運賃には保証金はありません。</string>
     <string name="ceremony_stake_note">あなたは %2$s を預けます。運賃に %1$s の預り金を足した額です。ドライバーも %1$s を預け、乗車が終われば両方戻ります。</string>
+    <string name="ceremony_asked_you_for">からの請求でした</string>
 </resources>

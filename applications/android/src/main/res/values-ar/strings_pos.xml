@@ -32,4 +32,6 @@
     <string name="pos_cancel_sale">إلغاء البيع</string>
     <string name="pos_tax_at">الضريبة (%1$s%%)</string>
     <string name="pos_in_unit">بـ %1$s</string>
+    <string name="pos_error_bill_not_withdrawn">الفاتورة ما زالت على هاتفهم — تعذّر سحبها: %1$s</string>
+    <string name="pos_receipt_pending">تعذّر إرسال الإيصال بعد — سيخرج تلقائيًا فور عودة الشبكة.</string>
 </resources>

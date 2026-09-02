@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="personas_title">شخصیت‌ها</string>
+    <string name="personas_body">این تلفن چه کسانی می‌تواند باشد. هر نمایه کلید خودش را دارد با مخاطبان خودش — مغازه هرگز دوستانت را نمی‌شناسد و دوستانت هرگز مغازه را نمی‌بینند. روابط تازه به نمایه‌ای می‌پیوندند که پوشیده‌ای.</string>
+    <string name="personas_primary">شخصی</string>
+    <string name="personas_worn">بر تن</string>
+    <string name="personas_add">نمایهٔ تازه</string>
+    <string name="personas_name_label">نام</string>
+    <string name="personas_name_support">نام این سوی تو — فروشگاه، بازار، وب‌گردی.</string>
+    <string name="personas_cap">چهار حد است: نمایه‌ها فقط وقتی کار می‌کنند که در یک دست جا شوند.</string>
+    <string name="personas_no_delete">نمایه حذف‌شدنی نیست — مخاطبانش فقط به کلید خودش پاسخ می‌دهند. کنارش بگذاری، خاموش می‌شود.</string>
+    <string name="personas_save">ذخیره</string>
+    <string name="personas_cancel">لغو</string>
+    <string name="personas_mode_answers">به نام %1$s پاسخ می‌دهد</string>
+    <string name="personas_mode_answers_worn">با نمایهٔ پوشیده پاسخ می‌دهد</string>
+    <string name="personas_contacts_scope">مخاطبان %1$s — برای بقیه از منو نمایه را عوض کنید.</string>
+    <string name="profiles_personal_sub">نمایهٔ شخصی</string>
+    <string name="profiles_answers_for">پاسخ‌گو برای %1$s</string>
+    <string name="profiles_editing_note">نمایهٔ %1$s</string>
+    <string name="profiles_rename">تغییر نام</string>
+    <string name="profiles_appears_as">با نام %1$s دیده می‌شود</string>
+</resources>

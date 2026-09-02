@@ -93,8 +93,31 @@ object Groups {
      * invitation. Members must already be contacts — the screen only offers
      * contacts, and the send below would have nowhere to write otherwise.
      */
+    /**
+     * Which of our personas a roster names. A group is joined AS somebody —
+     * the persona whose pairwise edges carry it — and with more than one
+     * persona on the phone, "me" is a per-group fact read from the roster,
+     * not a global. Falls back to the primary for a roster that predates
+     * the compartments (it can only name the primary anyway).
+     */
+    private fun myHexIn(context: Context, members: List<String>): String {
+        val ours = PersonaStore(context).allHexes()
+        return members.firstOrNull { it in ours } ?: PersonaStore(context).personaHex()
+    }
+
+    /**
+     * Who this phone is in a group — for the screens that offer people to
+     * add. A member can only be somebody this persona holds: the roster
+     * reaches them down their pairwise thread, signed by whichever of our
+     * personas owns that contact, and a roster from one hat naming another
+     * as "me" is a member the recipient does not hold — their mesh check
+     * then refuses the whole group.
+     */
+    fun mineIn(context: Context, g: Group): String = myHexIn(context, g.members)
+
     fun create(context: Context, name: String, memberHexes: List<String>): Group {
-        val mine = PersonaStore(context).personaHex()
+        // The doorway: a group made now belongs to the worn persona.
+        val mine = PersonaStore(context).worn()
         val id = ByteArray(16).also { java.security.SecureRandom().nextBytes(it) }
         val members = (memberHexes + mine).distinct()
         val g = Group(id.toHexString(), name, members, 0L, disclosed = false)
@@ -137,8 +160,8 @@ object Groups {
         }
         val known = get(context, idHex)
         if (known == null) {
-            val mine = PersonaStore(context).personaHex()
-            if (mine !in members) {
+            val ours = PersonaStore(context).allHexes()
+            if (members.none { it in ours }) {
                 // A roster for a group we are not in is somebody else's list.
                 DucatLog.w(TAG, "roster for a group we are not in — ignored")
                 return
@@ -177,7 +200,7 @@ object Groups {
      * changes included.
      */
     private fun sendRoster(context: Context, g: Group) {
-        val mine = PersonaStore(context).personaHex()
+        val mine = myHexIn(context, g.members)
         val payload = uniffi.ducat_mobile.groupRosterEncode(
             g.name, g.members.map { hexToBytes(it)!! },
         )
@@ -189,7 +212,7 @@ object Groups {
             val c = store.all().firstOrNull { it.personaHex == m } ?: continue
             runCatching {
                 Mailbox.send(
-                    context, c, "group: ${g.name}", mine,
+                    context, c, "group: ${g.name}",
                     kind = 12,
                     payload = payload,
                     groupId = hexToBytes(g.idHex),
@@ -208,13 +231,13 @@ object Groups {
             arr.put(JSONObject().apply {
                 put("g", idHex); put("m", memberHex); put("roster", true); put("s", seq)
             })
-            prefs(context).edit().putString("retry", arr.toString()).apply()
+            prefs(context).edit().putString("retry", trimQueue(context, arr).toString()).apply()
         }
 
     /** The local mesh check: members we do not hold as contacts. */
     fun missing(context: Context, idHex: String): List<String> {
         val g = get(context, idHex) ?: return emptyList()
-        val mine = PersonaStore(context).personaHex()
+        val mine = myHexIn(context, g.members)
         val contacts = ContactStore(context).all().map { it.personaHex }.toSet()
         return g.members.filter { it != mine && it !in contacts }
     }
@@ -243,7 +266,7 @@ object Groups {
         if (gaps.isNotEmpty()) {
             throw IllegalStateException("the group's mesh is incomplete")
         }
-        val mine = PersonaStore(context).personaHex()
+        val mine = myHexIn(context, g.members)
         val seq = g.myGroupSeq + 1
         upsert(context, g.copy(myGroupSeq = seq))
         val store = ContactStore(context)
@@ -252,7 +275,7 @@ object Groups {
             val c = store.all().firstOrNull { it.personaHex == m } ?: continue
             runCatching {
                 Mailbox.send(
-                    context, c, body, mine,
+                    context, c, body,
                     kind = kind,
                     groupId = hexToBytes(idHex),
                     groupSeq = seq,
@@ -280,6 +303,36 @@ object Groups {
         prefs(context).getString("retry", null)?.let { runCatching { JSONArray(it) }.getOrNull() }
             ?: JSONArray()
 
+    /**
+     * How many parked copies one pass may try.
+     *
+     * The queue was replayed whole, every pass, with a round trip for each
+     * entry — so a member whose phone had been off all week cost the poll
+     * one timeout per message they had missed, on the same loop that
+     * delivers everybody else's mail. A backlog drains over several passes
+     * instead, taken in turn so nothing at the back waits for ever.
+     */
+    private const val RETRIES_PER_PASS = 8
+
+    /** How many are kept at all. Past this the oldest go, the way a
+     *  listing keeps only its last few minted cards: the queue is replayed
+     *  on every pass for as long as it exists, so unbounded here is
+     *  unbounded work as well as unbounded storage. */
+    private const val MAX_QUEUED = 200
+
+    /** Where the last pass stopped. */
+    private var retryCursor = 0
+
+    /** Newest kept, oldest dropped, and said out loud — a copy quietly
+     *  abandoned is a message somebody will never see and never hear about. */
+    private fun trimQueue(context: Context, arr: JSONArray): JSONArray {
+        if (arr.length() <= MAX_QUEUED) return arr
+        var dropped = 0
+        while (arr.length() > MAX_QUEUED) { arr.remove(0); dropped++ }
+        DucatLog.w(TAG, "retry queue full — $dropped undelivered copy(s) dropped")
+        return arr
+    }
+
     private fun queueRetry(
         context: Context, idHex: String, memberHex: String, body: String,
         kind: Int, seq: Long, reSender: String?, reSeq: Long?,
@@ -290,24 +343,30 @@ object Groups {
             put("k", kind); put("s", seq)
             reSender?.let { put("rs", it) }; reSeq?.let { put("rq", it) }
         })
-        prefs(context).edit().putString("retry", arr.toString()).apply()
+        prefs(context).edit().putString("retry", trimQueue(context, arr).toString()).apply()
     }
 
     /** Poller hook: replay what did not land. Quietly — the queue is the news. */
     fun retryOutbox(context: Context) {
         val arr = retries(context)
-        if (arr.length() == 0) return
-        val mine = PersonaStore(context).personaHex()
+        val n = arr.length()
+        if (n == 0) return
         val store = ContactStore(context)
-        val keep = JSONArray()
-        for (i in 0 until arr.length()) {
-            val o = arr.getJSONObject(i)
-            val c = store.all().firstOrNull { it.personaHex == o.getString("m") }
+        // Read once, not once per entry: `all()` decrypts the whole book,
+        // and this loop asked it for every parked copy in the queue.
+        val book = store.all()
+        val landed = ArrayList<JSONObject>()
+        if (retryCursor >= n) retryCursor = 0
+        var at = retryCursor
+        repeat(minOf(RETRIES_PER_PASS, n)) {
+            val o = arr.getJSONObject(at % n)
+            at++
+            val c = book.firstOrNull { it.personaHex == o.getString("m") }
             if (o.optBoolean("roster")) {
                 val g = get(context, o.getString("g"))
                 val ok = c != null && g != null && runCatching {
                     Mailbox.send(
-                        context, c, "group: ${g.name}", mine,
+                        context, c, "group: ${g.name}",
                         kind = 12,
                         payload = uniffi.ducat_mobile.groupRosterEncode(
                             g.name, g.members.map { hexToBytes(it)!! },
@@ -316,12 +375,12 @@ object Groups {
                         groupSeq = o.getLong("s"),
                     )
                 }.isSuccess
-                if (!ok) keep.put(o)
-                continue
+                if (ok) landed.add(o)
+                return@repeat
             }
             val ok = c != null && runCatching {
                 Mailbox.send(
-                    context, c, o.getString("b"), mine,
+                    context, c, o.getString("b"),
                     kind = o.optInt("k"),
                     groupId = hexToBytes(o.getString("g")),
                     groupSeq = o.getLong("s"),
@@ -329,10 +388,27 @@ object Groups {
                     groupReSeq = if (o.has("rq")) o.getLong("rq") else null,
                 )
             }.isSuccess
-            if (!ok) keep.put(o)
-            else DucatLog.i(TAG, "group retry landed for ${o.getString("m").take(8)}…")
+            if (ok) {
+                landed.add(o)
+                DucatLog.i(TAG, "group retry landed for ${o.getString("m").take(8)}…")
+            }
         }
+        retryCursor = at % n
+        if (landed.isEmpty()) return
+        // Struck from the queue as it stands now, not the snapshot replayed:
+        // the sends above take as long as the network does, and a message
+        // that failed to a member meanwhile queued itself behind the
+        // snapshot — writing the snapshot back dropped it.
+        fun same(a: JSONObject, b: JSONObject) =
+            a.optString("g") == b.optString("g") && a.optString("m") == b.optString("m") &&
+                a.optLong("s") == b.optLong("s") && a.optBoolean("roster") == b.optBoolean("roster")
         synchronized(lock) {
+            val cur = retries(context)
+            val keep = JSONArray()
+            for (i in 0 until cur.length()) {
+                val o = cur.getJSONObject(i)
+                if (landed.none { same(it, o) }) keep.put(o)
+            }
             prefs(context).edit().putString("retry", keep.toString()).apply()
         }
     }
@@ -349,12 +425,22 @@ object Groups {
     fun thread(context: Context, idHex: String): List<Row> {
         val g = get(context, idHex) ?: return emptyList()
         val store = ContactStore(context)
-        val mine = PersonaStore(context).personaHex()
+        return merge(context, g) { store.thread(it) }
+    }
+
+    /**
+     * [thread] over threads already in hand. The chat list decodes every
+     * visible conversation once per store bump to sort them; asking each
+     * group to decode its members again on top was one decrypt per member
+     * per group per bump, on the tab that is open most.
+     */
+    fun merge(context: Context, g: Group, threadOf: (String) -> List<StoredMessage>): List<Row> {
+        val mine = myHexIn(context, g.members)
         val seen = HashSet<Pair<String, Long>>()
         val out = ArrayList<Row>()
         for (m in g.members.filter { it != mine }) {
-            for (msg in store.thread(m)) {
-                if (msg.groupId != idHex) continue
+            for (msg in threadOf(m)) {
+                if (msg.groupId != g.idHex) continue
                 // The roster is machinery, not conversation: its effect is the
                 // member count in the top bar, and a bubble reading
                 // "group: name" is internal words about nothing a person can
@@ -373,5 +459,86 @@ object Groups {
     fun markDisclosed(context: Context, idHex: String) {
         val g = get(context, idHex) ?: return
         if (!g.disclosed) upsert(context, g.copy(disclosed = true))
+    }
+
+    // --- read marks ---------------------------------------------------------
+    //
+    // A group had no notion of having been looked at. Its rows arrive in the
+    // members' pairwise threads, so what a group message raised was the
+    // *sender's* direct row: Sam posting in the ladder crew put the dot and
+    // the tab badge on Sam, whose conversation then opened on nothing new,
+    // while the group row — where the words were — showed no change. The
+    // pairwise mark now steps over group rows (see ContactStore
+    // .appendAndAdvance) and the group keeps a mark of its own here.
+    //
+    // The mark is each member's group counter as of the last look — the
+    // half of (sender, group_seq) that names their messages for everyone,
+    // which only ever climbs. Not the pairwise seq (it restarts with every
+    // fresh card), not a timestamp (their clock), and not a row count: rows
+    // also leave — a retention window sweeps them on every poll, a long
+    // press deletes one — and a count that moved would have raised the dot
+    // over nothing said. A row that is gone lowers nothing; the next word
+    // still carries a higher number than any look has recorded.
+
+    /** Everybody else's newest word, by who said it: their group counter. */
+    fun highWater(context: Context, rows: List<Row>): Map<String, Long> {
+        val ours = PersonaStore(context).allHexes()
+        val out = HashMap<String, Long>()
+        for (r in rows) {
+            if (r.senderHex in ours) continue
+            out[r.senderHex] = maxOf(out[r.senderHex] ?: 0L, r.message.groupSeq)
+        }
+        return out
+    }
+
+    /** The marks as of the last look; empty for a group never opened. */
+    fun seenMarks(context: Context, idHex: String): Map<String, Long> =
+        prefs(context).getString("seen_$idHex", null)?.let { raw ->
+            runCatching {
+                val o = JSONObject(raw)
+                o.keys().asSequence().associateWith { o.getLong(it) }
+            }.getOrNull()
+        } ?: emptyMap()
+
+    /** Whether anybody has said something since the last look. */
+    fun unread(seen: Map<String, Long>, now: Map<String, Long>): Boolean =
+        now.any { (m, s) -> s > (seen[m] ?: 0L) }
+
+    /**
+     * Looking at the group is what "seen" means, as for a thread. A mark
+     * never comes down: what was looked at stays looked at even after the
+     * rows that carried it have been swept.
+     */
+    fun markSeen(context: Context, idHex: String, now: Map<String, Long>) {
+        val seen = seenMarks(context, idHex)
+        val merged = (seen.keys + now.keys).associateWith { maxOf(seen[it] ?: 0L, now[it] ?: 0L) }
+        if (merged == seen) return
+        prefs(context).edit().putString("seen_$idHex", JSONObject(merged).toString()).apply()
+        ContactStore.bump()
+    }
+
+    /** Groups with something unlooked-at, for the tab badge. */
+    fun unreadGroups(context: Context): Int = unreadGroupIds(context).size
+
+    /**
+     * The same groups, each under the hat that is in it ([mineIn]) — the
+     * drawer's per-persona chips, which have to add up to the tab badge.
+     */
+    fun unreadGroupsByOwner(context: Context): Map<String, Int> {
+        val unread = unreadGroupIds(context)
+        if (unread.isEmpty()) return emptyMap()
+        return all(context).filter { it.idHex in unread }
+            .groupingBy { mineIn(context, it) }.eachCount()
+    }
+
+    private fun unreadGroupIds(context: Context): Set<String> {
+        val groups = all(context)
+        if (groups.isEmpty()) return emptySet()
+        val store = ContactStore(context)
+        val threads = HashMap<String, List<StoredMessage>>()
+        return groups.filter { g ->
+            val rows = merge(context, g) { hex -> threads.getOrPut(hex) { store.thread(hex) } }
+            unread(seenMarks(context, g.idHex), highWater(context, rows))
+        }.mapTo(HashSet()) { it.idHex }
     }
 }

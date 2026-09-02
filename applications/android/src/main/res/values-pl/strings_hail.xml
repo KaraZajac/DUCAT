@@ -21,6 +21,8 @@
     <!-- Driver: DriveScreen -->
     <string name="hail_rider_declined_title">Pasażer odmówił</string>
     <string name="hail_rider_declined_body">Nie skorzystali z twojej oferty. Ich wezwanie zniknęło z tablicy.</string>
+    <string name="hail_offer_lapsed_title">Brak odpowiedzi na twoją ofertę</string>
+    <string name="hail_offer_lapsed_body">Po pół godzinie pasażer nie powiedział ani tak, ani nie. Oferta zostaje w czacie, jeśli nadal jej chce.</string>
     <string name="hail_ok">OK</string>
     <string name="hail_on_duty">Na służbie</string>
     <string name="hail_net_wide">szeroka sieć — ~%1$s średnicy</string>
@@ -102,5 +104,10 @@
     <string name="hail_step_card">Tworzenie kodu…</string>
     <string name="hail_search">Szukaj</string>
     <string name="hail_clear_place">Wyczyść</string>
+    <string name="hail_no_places">Nie znaleziono takich miejsc</string>
+    <string name="hail_search_unreachable">Nie udało się połączyć z wyszukiwarką map — sprawdź połączenie</string>
     <string name="hail_joining_network">Łączenie z siecią — tablice nie zostały jeszcze odczytane.</string>
+    <string name="hail_accept_sending">Wysyłanie zgody do %1$s…</string>
+    <string name="hail_accept_failed">Twoja zgoda do %1$s nie została wysłana. Sprawdź sieć i otwórz ofertę ponownie.</string>
+    <string name="hail_escrow_failed">Nie udało się złożyć opłaty w depozycie. Dogadaj się z kierowcą na czacie.</string>
 </resources>

@@ -49,7 +49,7 @@ fun main() {
     check(nodeStatus().publicInternetReady) { "RINGTEST_FAIL node never became ready" }
 
     val stamp = System.currentTimeMillis()
-    Mailbox.send(context, to, "ring $stamp", PersonaStore(context).personaHex())
+    Mailbox.send(context, to, "ring $stamp")
     println("RINGTEST_OK sent \"ring $stamp\" to ${to.displayName()} (${to.personaHex.take(8)}…)")
     nodeStop()
 }

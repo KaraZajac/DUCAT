@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="personas_title">Персони</string>
+    <string name="personas_body">Ким може бути цей телефон. Кожен профіль — власний ключ зі своїми контактами: крамниця ніколи не дізнається про ваших друзів, а друзі ніколи не зустрінуть крамницю. Нові стосунки потрапляють у профіль, який ви носите.</string>
+    <string name="personas_primary">Особиста</string>
+    <string name="personas_worn">Одягнена</string>
+    <string name="personas_add">Новий профіль</string>
+    <string name="personas_name_label">Імʼя</string>
+    <string name="personas_name_support">Як зветься цей твій бік — Крамниця, Ринок, Перегляд.</string>
+    <string name="personas_cap">Чотири — це межа: профілі працюють, лише поки вміщаються на одній руці.</string>
+    <string name="personas_no_delete">Профіль не можна видалити — його контакти відповідають лише його ключу. Припиніть користуватися, і він замовкне.</string>
+    <string name="personas_save">Зберегти</string>
+    <string name="personas_cancel">Скасувати</string>
+    <string name="personas_mode_answers">Відповідає як %1$s</string>
+    <string name="personas_mode_answers_worn">Відповідає як одягнений профіль</string>
+    <string name="personas_contacts_scope">Контакти %1$s — змініть профіль у меню, щоб побачити решту.</string>
+    <string name="profiles_personal_sub">Особистий профіль</string>
+    <string name="profiles_answers_for">Відповідає за: %1$s</string>
+    <string name="profiles_editing_note">Профіль %1$s</string>
+    <string name="profiles_rename">Перейменувати</string>
+    <string name="profiles_appears_as">Відображається як %1$s</string>
+</resources>

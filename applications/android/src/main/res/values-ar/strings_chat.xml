@@ -14,10 +14,14 @@
     <string name="chat_voice_failed">لم تُسجَّل هذه الرسالة الصوتية — جرّب الضغط مطوّلاً على الميكروفون مرة أخرى.</string>
     <string name="chat_what_card">البطاقة</string>
     <string name="chat_what_contact">جهة الاتصال</string>
+    <string name="chat_what_reaction">التفاعل</string>
+    <string name="chat_what_invite">الدعوة</string>
+    <string name="chat_what_note">الملاحظة</string>
     <string name="chat_error_location_fix">تعذّر تحديد الموقع</string>
     <string name="chat_recording_placeholder">جارٍ التسجيل… %1$d ث</string>
     <string name="chat_message_placeholder">رسالة</string>
     <string name="chat_take_picture">التقاط صورة</string>
+    <string name="chat_no_camera_app">لا يوجد تطبيق كاميرا على هذا الهاتف</string>
     <string name="chat_hold_to_record">اضغط مطوّلًا لتسجيل رسالة صوتية</string>
     <string name="chat_attach">إرفاق</string>
     <string name="chat_close">إغلاق</string>
@@ -42,6 +46,10 @@
     <!-- Retractions (kind 5) -->
     <string name="chat_you_withdrew">سحبت رسالة</string>
     <string name="chat_they_withdrew">سحب %1$s رسالة</string>
+    <string name="chat_you_withdrew_bill">سحبت فاتورة</string>
+    <string name="chat_they_withdrew_bill">سحب %1$s فاتورة</string>
+    <string name="chat_you_withdrew_call">سحبت مكالمة</string>
+    <string name="chat_they_withdrew_call">سحب %1$s مكالمة</string>
     <string name="chat_you_declined">رفضت</string>
     <string name="chat_they_declined">رفض %1$s</string>
     <string name="chat_retract_with_quote">%1$s — “%2$s”</string>
@@ -83,6 +91,7 @@
     <string name="chat_downloading_audio">🎤 جارٍ التنزيل…</string>
     <string name="chat_downloading_file">📎 جارٍ التنزيل…</string>
     <string name="chat_att_stuck">لم يصل هذا — قد لا يكون متاحًا بعد الآن. ما زالت المحاولة جارية.</string>
+    <string name="chat_att_gone">لم يصل هذا — قد لا يكون متاحًا بعد الآن.</string>
     <string name="chat_att_no_space">لا توجد مساحة كافية على هذا الهاتف لتنزيله.</string>
     <string name="chat_picture_desc">صورة</string>
     <string name="chat_could_not_decode">📷 (تعذّر فك الترميز)</string>
@@ -108,6 +117,7 @@
     <string name="chat_stop">إيقاف</string>
     <string name="chat_play_voice_memo">تشغيل الرسالة الصوتية</string>
     <string name="chat_voice_memo">رسالة صوتية</string>
+    <string name="chat_play_failed">لا يمكن تشغيل هذه الرسالة الصوتية.</string>
     <string name="chat_size_kb">%1$d ك.ب</string>
     <string name="chat_size_b">%1$d بايت</string>
     <string name="chat_file_fallback">ملف</string>
@@ -142,6 +152,9 @@
         <item quantity="other">%1$d رسالة مفقودة هنا</item>
     </plurals>
     <string name="chat_not_sent_yet">لم يُرسل بعد</string>
+    <string name="chat_not_sent">لم يُرسل</string>
     <string name="chat_cancel_request">إلغاء الطلب</string>
     <string name="chat_copied">نُسخت الرسالة</string>
+    <string name="chat_download_file">تنزيل</string>
+    <string name="chat_file_too_big_swarm">حجم هذا الملف %1$d م.ب — الملفات حتى 64 م.ب حاليًا</string>
 </resources>

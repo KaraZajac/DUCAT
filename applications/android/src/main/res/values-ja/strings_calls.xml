@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">着信がありました</string>
+    <string name="chat_call_you_rang">発信しました</string>
+    <string name="chat_call_answered">通話に応答しました</string>
+    <string name="chat_call_you_answered">応答しました</string>
+    <string name="chat_call_missed_note">不在の間に着信がありました。</string>
+    <string name="chatlist_preview_call">発信</string>
+    <string name="chatlist_preview_call_answered">通話応答</string>
+    <string name="notify_call">%1$sから着信</string>
+    <string name="notify_call_answered">%1$sが応答しました</string>
+    <string name="call_button">発信</string>
+    <string name="call_calling">呼び出し中…</string>
+    <string name="call_incoming">DUCAT着信</string>
+    <string name="call_frames">↓%1$d ↑%2$d フレーム</string>
+    <string name="call_answer_btn">応答</string>
+    <string name="call_end_btn">切る</string>
+    <string name="call_body_ring">呼び出しています</string>
+    <string name="call_body_answer">応答しました</string>
+    <string name="call_body_decline">いま話せません。</string>
+    <string name="notify_call_channel">着信</string>
+    <string name="notify_call_incoming">着信</string>
+    <string name="call_no_answer">応答なし</string>
+    <string name="call_leave_message">メッセージを残す</string>
+    <string name="call_dismiss">今はしない</string>
+    <string name="call_body_cancel">応答の前に切りました。</string>
+    <string name="call_connecting">接続中…</string>
+    <string name="call_unreached">相手につながりませんでした</string>
+    <string name="call_never_connected">つながりませんでした</string>
+    <string name="call_notify_calling">%1$sに発信中…</string>
+    <string name="call_notify_in_call">%1$sと通話中</string>
+    <string name="call_notify_return">タップして通話に戻る</string>
+</resources>

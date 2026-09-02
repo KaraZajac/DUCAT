@@ -270,7 +270,7 @@ private fun customer(context: android.content.Context, node: () -> String?) {
                 // §16.13: name the transaction, or they are back to guessing.
                 Mailbox.send(
                     context, ContactStore(context).all().first { it.personaHex == shop.personaHex },
-                    "Order", PersonaStore(context).personaHex(),
+                    "Order",
                     kind = 2, amountPxmr = bill.amountPxmr, txidHex = sentRes.txidHex,
                 )
                 paid = true

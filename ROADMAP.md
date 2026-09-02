@@ -149,7 +149,8 @@ stays off master until rc1 ships.
   proposal can only pay the driver at the address the driver published;
   near-total refunds flip the fee to the rider's side. FROST_ROUND round 0
   MAY carry the claimed amount now — the second implementation caught the
-  rule drift (O21 doing its job) and both agree on 328 vectors. **The 2-of-2
+  rule drift (O21 doing its job) and both implementations agree across
+  the whole suite. **The 2-of-2
   accept flow and the settlement UI both had their live two-client pass on
   2026-08-25** — two emulators, live Veilid, live stagenet: a ride
   (`112e0983`), a marketplace sale (`284eb311`) and a two-day gear hire

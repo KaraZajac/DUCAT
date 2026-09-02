@@ -19,43 +19,59 @@ import uniffi.ducat_mobile.Profile
  * does is *mirror* those rules so a person is told at the keyboard rather than
  * refused after publishing.
  */
-class MyProfile(context: Context) {
+class MyProfile(context: Context, personaHex: String? = null) {
     private val prefs = securePrefs(context, "ducat_contacts")
 
-    fun name(): String? = prefs.getString("my_name", null)
-    fun setName(v: String?) = put("my_name", v?.trim()?.ifBlank { null })
+    // One profile per persona (the profiles design): the presentation
+    // follows the hat. The primary wears the unsuffixed keys the app has
+    // always used — no migration, and the backup bundle's shape is
+    // untouched — while every other persona keys its fields by its hex.
+    // Null means the worn persona, which since the doorway rule (a mode
+    // with a binding wears its persona on entry) is the acting identity
+    // everywhere a profile is shown or sent.
+    private val hex: String
+    private val legacyKeys: Boolean
+    init {
+        val personas = PersonaStore(context)
+        hex = personaHex ?: personas.worn()
+        legacyKeys = hex == personas.personaHex()
+    }
+    private fun k(base: String) = if (legacyKeys) base else "$base|$hex"
 
-    fun email(): String? = prefs.getString("my_email", null)
-    fun setEmail(v: String?) = put("my_email", v?.trim()?.ifBlank { null })
+    fun name(): String? = prefs.getString(k("my_name"), null)
+    fun setName(v: String?) = put(k("my_name"), v?.trim()?.ifBlank { null })
 
-    fun phone(): String? = prefs.getString("my_phone", null)
-    fun setPhone(v: String?) = put("my_phone", v?.trim()?.ifBlank { null })
+    fun email(): String? = prefs.getString(k("my_email"), null)
+    fun setEmail(v: String?) = put(k("my_email"), v?.trim()?.ifBlank { null })
 
-    fun signal(): String? = prefs.getString("my_signal", null)
-    fun setSignal(v: String?) = put("my_signal", v?.trim()?.ifBlank { null })
+    fun phone(): String? = prefs.getString(k("my_phone"), null)
+    fun setPhone(v: String?) = put(k("my_phone"), v?.trim()?.ifBlank { null })
+
+    fun signal(): String? = prefs.getString(k("my_signal"), null)
+    fun setSignal(v: String?) = put(k("my_signal"), v?.trim()?.ifBlank { null })
 
     // The car (§15.12): what a rider looks for at the curb. Claims, like the
     // rest of this file — the rider's check is the bumper.
-    fun carModel(): String? = prefs.getString("my_car_model", null)
-    fun setCarModel(v: String?) = put("my_car_model", v?.trim()?.ifBlank { null })
-    fun carColor(): String? = prefs.getString("my_car_color", null)
-    fun setCarColor(v: String?) = put("my_car_color", v?.trim()?.ifBlank { null })
-    fun plate(): String? = prefs.getString("my_plate", null)
-    fun setPlate(v: String?) = put("my_plate", v?.trim()?.ifBlank { null })
+    fun carModel(): String? = prefs.getString(k("my_car_model"), null)
+    fun setCarModel(v: String?) = put(k("my_car_model"), v?.trim()?.ifBlank { null })
+    fun carColor(): String? = prefs.getString(k("my_car_color"), null)
+    fun setCarColor(v: String?) = put(k("my_car_color"), v?.trim()?.ifBlank { null })
+    fun plate(): String? = prefs.getString(k("my_plate"), null)
+    fun setPlate(v: String?) = put(k("my_plate"), v?.trim()?.ifBlank { null })
 
     /** 1..6, matching `pronounOptions()`. Null means not set, which is not a
      *  failure state — someone with none renders like anyone else. */
-    fun pronouns(): Int? = prefs.getInt("my_pronouns", 0).takeIf { it in 1..6 }
+    fun pronouns(): Int? = prefs.getInt(k("my_pronouns"), 0).takeIf { it in 1..6 }
     fun setPronouns(v: Int?) {
-        prefs.edit().putInt("my_pronouns", v ?: 0).apply(); ContactStore.bump()
+        prefs.edit().putInt(k("my_pronouns"), v ?: 0).apply(); ContactStore.bump()
     }
 
-    fun avatar(): ByteArray? = prefs.getString("my_avatar", null)
+    fun avatar(): ByteArray? = prefs.getString(k("my_avatar"), null)
         ?.let { Base64.decode(it, Base64.NO_WRAP) }
 
     fun setAvatar(v: ByteArray?) {
         prefs.edit()
-            .putString("my_avatar", v?.let { Base64.encodeToString(it, Base64.NO_WRAP) })
+            .putString(k("my_avatar"), v?.let { Base64.encodeToString(it, Base64.NO_WRAP) })
             .apply()
         ContactStore.bump()
     }
@@ -71,9 +87,9 @@ class MyProfile(context: Context) {
      * over in the same gesture anyway. The address is the one with a lasting
      * cost, and it has its own switch.
      */
-    fun shareProfile(): Boolean = prefs.getBoolean("share_profile", true)
+    fun shareProfile(): Boolean = prefs.getBoolean(k("share_profile"), true)
     fun setShareProfile(v: Boolean) {
-        prefs.edit().putBoolean("share_profile", v).apply(); ContactStore.bump()
+        prefs.edit().putBoolean(k("share_profile"), v).apply(); ContactStore.bump()
     }
 
     /** What actually goes on the record, after the share switch.

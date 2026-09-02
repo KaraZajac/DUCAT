@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_library">Библиотека</string>
+    <string name="library_empty">Пока здесь пусто. Когда издатель пришлёт тебе выпуск, он сохранится здесь — и останется, даже если чат удалён.</string>
+    <string name="library_issue">Выпуск %1$s</string>
+    <string name="library_on_device">На этом устройстве · %1$s</string>
+    <string name="library_no_shipment">Ключ сохранён — загрузка пока не предложена</string>
+    <string name="library_download">Скачать</string>
+    <string name="library_progress">%1$s из %2$s</string>
+    <string name="library_starting">Запуск…</string>
+    <string name="library_failed">Загрузка не удалась: %1$s</string>
+    <string name="library_gone">больше не в твоих контактах</string>
+    <string name="chat_issue_sent_you">Тебе прислали выпуск</string>
+    <string name="chat_issue_you_sent">Выпуск отправлен</string>
+    <string name="chatlist_preview_issue">Новый выпуск: %1$s</string>
+    <string name="notify_new_issue">Новый выпуск от %1$s</string>
+    <string name="library_note_new_issue">Вышел новый выпуск.</string>
+    <string name="library_unsubscribe">Отписаться</string>
+    <string name="library_unsub_confirm">Больше не получать от %1$s? Выпуски, что уже у тебя, остаются твоими.</string>
+    <string name="library_unsub_keep">Оставить подписку</string>
+    <string name="library_resubscribe">Подписаться снова</string>
+    <string name="library_unsubscribed">Отписано — новые выпуски не сохраняются</string>
+    <string name="library_unsub_note">Отписка.</string>
+    <plurals name="main_issues_waiting">
+        <item quantity="one">%1$d новый выпуск ждёт</item>
+        <item quantity="few">%1$d новых выпуска ждут</item>
+        <item quantity="many">%1$d новых выпусков ждут</item>
+        <item quantity="other">%1$d нового выпуска ждёт</item>
+    </plurals>
+    <string name="library_open">Открыть</string>
+    <string name="library_queued">В очереди</string>
+</resources>

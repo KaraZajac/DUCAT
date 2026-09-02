@@ -25,12 +25,14 @@
     <string name="bartab_back">Back</string>
     <string name="bartab_bill_cancelled_msg">That bill for %1$s is cancelled — nothing to pay.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · tab now %3$s</string>
+    <string name="bartab_discard_notice">Tab discarded — nothing to pay.</string>
     <string name="bartab_remove_line">Remove</string>
     <string name="bartab_settle_bill">Settle — bill %1$s</string>
     <string name="bartab_settle_hint">One itemised bill into your conversation with %1$s. They can pay from anywhere — the thread does not close when they leave.</string>
     <string name="bartab_discard_tab">Discard tab</string>
     <string name="bartab_discard_title">Discard this tab?</string>
     <string name="bartab_discard_body">The tab and everything rung up on it are deleted from this phone. No bill is sent, and this cannot be undone.</string>
+    <string name="bartab_discard_body_told">The tab and everything rung up on it are deleted from this phone. No bill is sent — they are told there is nothing to pay — and this cannot be undone.</string>
     <string name="bartab_discard_confirm">Discard</string>
     <string name="bartab_keep_tab">Keep tab</string>
     <string name="bartab_billed_hint">Billed. The receipt goes to them by itself when the payment lands. If it was settled some other way, say so here:</string>
@@ -40,6 +42,13 @@
     <string name="bartab_cancelled_note">Cancelled — they were told in the conversation.</string>
     <string name="bartab_paid_oob_note">Paid outside DUCAT ✓ — receipt sent, no transaction attached.</string>
     <string name="bartab_paid_note">Paid ✓ — receipt sent.</string>
+    <string name="bartab_bill_pending">Billed, but the bill is still on this phone — it goes out as soon as the network is back. If it was settled some other way, say so here:</string>
+    <string name="bartab_bill_unsent">The bill never reached them: the conversation was reset before it could go. Cancel it and bill them again, or say so here if it was settled another way:</string>
+    <string name="bartab_cancelled_pending">Cancelled — they have not been told yet. The notice goes out as soon as this phone finds the network.</string>
+    <string name="bartab_cancelled_unsent">Cancelled — but the notice never left this phone, and it cannot go now. Tell them in the conversation, or they may still pay this bill.</string>
+    <string name="bartab_paid_oob_pending">Paid outside DUCAT ✓ — the receipt is still on this phone. It goes out as soon as the network is back.</string>
+    <string name="bartab_paid_oob_unsent">Paid outside DUCAT ✓ — but the receipt could not be sent.</string>
+    <string name="bartab_send_receipt">Send the receipt</string>
     <string name="bartab_remove_from_book">Remove from tab book</string>
     <string name="bartab_back_to_tabs">Back to tabs</string>
     <!-- What the payer reads on the bill and the receipt. Written in
@@ -55,4 +64,8 @@
     <string name="bill_note_cancelled">That bill for %1$s is cancelled — nothing to pay.</string>
     <string name="bill_note_sale">Your bill</string>
     <string name="bartab_tip_line">Tip — thank you</string>
+    <string name="bill_note_issue">Subscription</string>
+    <string name="bartab_paid_pending">Paid ✓ — the receipt is still on this phone. It goes out as soon as the network is back.</string>
+    <string name="bartab_paid_unsent">Paid ✓ — but the receipt could not be sent. It is tried again by itself.</string>
+    <string name="bartab_removed_notice">Taken off: %1$s · tab now %2$s</string>
 </resources>

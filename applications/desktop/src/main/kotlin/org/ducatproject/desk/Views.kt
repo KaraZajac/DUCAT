@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Favorite
@@ -56,6 +57,7 @@ enum class Room(val label: String, val icon: ImageVector) {
     Activity("Activity", Icons.Filled.Receipt),
     Wallet("Wallet", Icons.Filled.AccountBalanceWallet),
     Ride("Ride", Icons.Filled.LocalTaxi),
+    Publish("Publish", Icons.AutoMirrored.Filled.MenuBook),
     Codes("Codes", Icons.Filled.QrCode),
     Me("Me", Icons.Filled.Person),
     Settings("Settings", Icons.Filled.Settings),

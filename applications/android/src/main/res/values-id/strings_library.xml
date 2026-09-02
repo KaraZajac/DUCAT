@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_library">Perpustakaan</string>
+    <string name="library_empty">Belum ada apa-apa di sini. Saat penerbit mengirimimu edisi, edisi itu disimpan di sini — dan tetap ada meski chat dihapus.</string>
+    <string name="library_issue">Edisi %1$s</string>
+    <string name="library_on_device">Di perangkat ini · %1$s</string>
+    <string name="library_no_shipment">Kunci tersimpan — belum ada unduhan yang ditawarkan</string>
+    <string name="library_download">Unduh</string>
+    <string name="library_progress">%1$s dari %2$s</string>
+    <string name="library_starting">Memulai…</string>
+    <string name="library_failed">Unduhan gagal: %1$s</string>
+    <string name="library_gone">tidak lagi ada di kontakmu</string>
+    <string name="chat_issue_sent_you">Mengirimimu edisi</string>
+    <string name="chat_issue_you_sent">Kamu mengirim edisi</string>
+    <string name="chatlist_preview_issue">Edisi baru: %1$s</string>
+    <string name="notify_new_issue">%1$s mengirim edisi baru</string>
+    <string name="library_note_new_issue">Edisi baru sudah terbit.</string>
+    <string name="library_unsubscribe">Berhenti langganan</string>
+    <string name="library_unsub_confirm">Berhenti menerima dari %1$s? Edisi yang sudah kamu pegang tetap milikmu.</string>
+    <string name="library_unsub_keep">Pertahankan</string>
+    <string name="library_resubscribe">Langganan lagi</string>
+    <string name="library_unsubscribed">Berhenti — edisi baru tidak disimpan</string>
+    <string name="library_unsub_note">Berhenti berlangganan.</string>
+    <plurals name="main_issues_waiting">
+        <item quantity="other">%1$d edisi baru menunggu</item>
+    </plurals>
+    <string name="library_open">Buka</string>
+    <string name="library_queued">Dalam antrean</string>
+</resources>

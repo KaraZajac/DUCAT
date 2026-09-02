@@ -124,8 +124,8 @@ jobs:
           DUCAT_DESK_STATE: ${{ runner.temp }}/desk-vault
         run: cd applications && ./gradlew --no-daemon :desktop:vaulttest
 
-      - name: backup round-trip and profile scoping
-        run: cd applications && ./gradlew --no-daemon :desktop:backuptest :desktop:profilescope
+      - name: backup round-trip, profile scoping, read marks
+        run: cd applications && ./gradlew --no-daemon :desktop:backuptest :desktop:profilescope :desktop:markstest
 
       # Compiling is not drawing. This renders every hosted screen with no
       # display attached and fails on a blank rectangle — it is what caught

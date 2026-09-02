@@ -44,6 +44,9 @@
     <string name="profile_bond_releasing">Restitution — en attente de leur cosignature…</string>
     <string name="profile_bond_cosigned">Cosigné — la diffusion est de leur côté.</string>
     <string name="profile_bond_released">Dépôt restitué ✓</string>
+    <string name="profile_bond_call_off">Annuler le dépôt</string>
+    <string name="profile_bond_holds">Le séquestre contient %1$s — restitue plutôt le dépôt</string>
+    <string name="profile_bond_called_off">Dépôt annulé.</string>
     <string name="profile_bond_txid">Transaction de restitution</string>
     <string name="profile_bond_arbiter_q">Qui détient la troisième clé ?</string>
     <string name="profile_bond_arbiter_note">Avec un arbitre, deux des trois clés suffisent à déplacer le dépôt : un téléphone perdu ne bloque rien et un litige a un recours. L\'arbitre seul ne peut rien prendre.</string>

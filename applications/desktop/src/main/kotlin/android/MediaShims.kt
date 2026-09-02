@@ -85,6 +85,28 @@ class MediaPlayer {
 
     fun setOnCompletionListener(l: (MediaPlayer) -> Unit) { onComplete = l }
 
+    private var onError: ((MediaPlayer, Int, Int) -> Boolean)? = null
+    private var onPrepared: ((MediaPlayer) -> Unit)? = null
+
+    fun setOnErrorListener(l: (MediaPlayer, Int, Int) -> Boolean) { onError = l }
+    fun setOnPreparedListener(l: (MediaPlayer) -> Unit) { onPrepared = l }
+
+    /**
+     * [prepare] off the calling thread, the listeners told on the UI one —
+     * the order Android keeps: the caller's own block finishes before either
+     * callback runs, so state it sets after asking (a "playing" flag the
+     * prepared listener reads) is in place when the answer comes.
+     */
+    fun prepareAsync() {
+        Thread {
+            val r = runCatching { prepare() }
+            javax.swing.SwingUtilities.invokeLater {
+                r.onSuccess { onPrepared?.invoke(this) }
+                    .onFailure { onError?.invoke(this, 1, 0) }
+            }
+        }.apply { isDaemon = true }.start()
+    }
+
     fun prepare() {
         val f = source ?: error("no source")
         val stream = runCatching { AudioSystem.getAudioInputStream(f) }.getOrElse {

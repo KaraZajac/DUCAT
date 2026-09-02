@@ -16,8 +16,9 @@
     <string name="tab_send_receive">भेजें/पाएँ</string>
 
     <string name="section_status">स्थिति</string>
-    <string name="section_profile">प्रोफ़ाइल</string>
+    <string name="section_profile">प्रोफ़ाइलें</string>
     <string name="section_contacts">कॉन्टैक्ट</string>
+    <string name="section_selling">बिक्री</string>
     <string name="section_logs">लॉग</string>
     <string name="section_settings">सेटिंग्स</string>
     <string name="section_modes">ऑपरेटिंग मोड</string>

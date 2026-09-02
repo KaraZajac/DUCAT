@@ -14,6 +14,7 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,9 +25,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.ContactStore
@@ -56,11 +54,28 @@ import uniffi.ducat_mobile.readContactCard
 @Composable
 internal fun ShareCardSheet(personaSecret: ByteArray?, onDismiss: () -> Unit) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    var name by remember { mutableStateOf(NameStore(context).get() ?: "") }
-    var uri by remember { mutableStateOf<String?>(null) }
+    // The card outlives a turn of the phone: the activity is recreated on
+    // rotation, and the QR just published went with it — the next tap
+    // minted a second card for the same inbox.
+    var name by rememberSaveable { mutableStateOf(NameStore(context).get() ?: "") }
+    var uri by rememberSaveable { mutableStateOf<String?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
-    var busy by remember { mutableStateOf(false) }
+    // The mint itself outlives the turn too (ThreadSends), under the same
+    // key QrHub mints the standing code with — it is the same card. Saved
+    // `uri` covered a mint that had finished; one still going came back
+    // to a sheet with `busy` false and the button live, and the card it
+    // was writing landed a moment later as the first of two.
+    val mintKey = "mint:${remember { org.ducatproject.ducat.PersonaStore(context).worn() }}"
+    var busy by remember { mutableStateOf(ThreadSends.inFlight(mintKey)) }
+    val tick by ThreadSends.ticks.collectAsState()
+    LaunchedEffect(tick) {
+        busy = ThreadSends.inFlight(mintKey)
+        for (o in ThreadSends.take(mintKey)) when (o) {
+            is ThreadSends.Outcome.Landed -> o.result?.let { NameStore(context).put(name); uri = it }
+            is ThreadSends.Outcome.Failed ->
+                error = o.error.saidWhy() ?: context.getString(R.string.contacts_error_make_card)
+        }
+    }
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.padding(20.dp).verticalScroll(rememberScrollState())) {
@@ -92,23 +107,11 @@ internal fun ShareCardSheet(personaSecret: ByteArray?, onDismiss: () -> Unit) {
                     onClick = {
                         busy = true
                         error = null
-                        scope.launch {
-                            val r = withContext(Dispatchers.IO) {
-                                runCatching {
-                                    // Records, not a route: the card names an
-                                    // inbox that outlives this process (§16.12).
-                                    Mailbox.issueCard(
-                                        context,
-                                        name.ifBlank { null },
-                                        60uL * 60uL * 24uL,
-                                    )
-                                }
-                            }
-                            busy = false
-                            r.onSuccess {
-                                NameStore(context).put(name)
-                                uri = it.uri
-                            }.onFailure { error = it.saidWhy() ?: context.getString(R.string.contacts_error_make_card) }
+                        val shown = name.ifBlank { null }
+                        ThreadSends.launch(ContactStore(context), mintKey, null) {
+                            // Records, not a route: the card names an
+                            // inbox that outlives this process (§16.12).
+                            Mailbox.issueCard(context, shown, 60uL * 60uL * 24uL).uri
                         }
                     },
                     enabled = !busy && personaSecret != null,
@@ -174,9 +177,17 @@ internal fun ShareCardSheet(personaSecret: ByteArray?, onDismiss: () -> Unit) {
 @Composable
 internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: ContactStore) {
     val clipboard = LocalClipboardManager.current
-    var text by remember { mutableStateOf("") }
-    var scanned by remember { mutableStateOf<uniffi.ducat_mobile.ScannedCard?>(null) }
-    var petname by remember { mutableStateOf("") }
+    // The sheet itself outlives a rotation (its host keeps it in the bundle);
+    // what was typed into it did not, so it came back open and blank, and a
+    // card just scanned came back as the paste box.
+    var text by rememberSaveable { mutableStateOf("") }
+    // The card as the text it was read from, not the parsed object: the text
+    // fits a Bundle and the parse is cheap enough to redo on the far side.
+    var cardRaw by rememberSaveable { mutableStateOf<String?>(null) }
+    val scanned = remember(cardRaw) {
+        cardRaw?.let { runCatching { readContactCard(it) }.getOrNull() }
+    }
+    var petname by rememberSaveable { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
 
     // Nothing to introduce ourselves with, and about to introduce ourselves.
@@ -188,10 +199,29 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
         onDismiss = { intro = null },
         onNamed = { val go = intro; intro = null; go?.invoke() },
     )
-    var adding by remember { mutableStateOf(false) }
     var scanning by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    // The claim runs off the sheet (claimOffScreen), under the card it is
+    // for. The sheet survives a rotation and so did the claim — it was
+    // the line after it that the turn cancelled, so the contact was in the
+    // book while the sheet sat there offering to add them, and a second tap
+    // was what closed it. Now the rebuilt sheet reads the outcome itself.
+    var claimingCard by rememberSaveable { mutableStateOf<String?>(null) }
+    var adding by remember {
+        mutableStateOf(claimingCard?.let { ThreadSends.inFlight(claimKey(it)) } ?: false)
+    }
+    val tick by ThreadSends.ticks.collectAsState()
+    LaunchedEffect(tick, claimingCard) {
+        val k = claimingCard?.let(::claimKey) ?: return@LaunchedEffect
+        for (o in ThreadSends.take(k)) {
+            claimingCard = null
+            when (o) {
+                is ThreadSends.Outcome.Landed -> onAdded()
+                is ThreadSends.Outcome.Failed -> error = context.getString(claimFailureRes(o.error))
+            }
+        }
+        adding = claimingCard != null && ThreadSends.inFlight(k)
+    }
 
     if (scanning) {
         QrScanner(
@@ -204,7 +234,7 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
                 runCatching { readContactCard(raw) }
                     .onSuccess {
                         if (it.expired) error = context.getString(R.string.contacts_card_expired_ask_new)
-                        else { scanned = it; petname = it.assertedName ?: "" }
+                        else { cardRaw = raw; petname = it.assertedName ?: "" }
                     }
                     .onFailure { error = context.getString(R.string.contacts_not_a_card); text = raw }
             },
@@ -245,7 +275,7 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
                                 if (it.expired) {
                                     error = context.getString(R.string.contacts_card_expired_ask_them)
                                 } else {
-                                    scanned = it
+                                    cardRaw = text
                                     petname = it.assertedName ?: ""
                                 }
                             }
@@ -255,7 +285,7 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
                     modifier = Modifier.fillMaxWidth(),
                 ) { Text(stringResource(R.string.contacts_read_card)) }
             } else {
-                val s = scanned!!
+                val s = scanned
                 // §16.9 requires the asserted name be shown as unverified. A
                 // card that arrived through a messaging app was authenticated by
                 // *that app*, and the UI must not launder that into a claim
@@ -311,19 +341,24 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
                       val go: () -> Unit = {
                         adding = true
                         error = null
-                        scope.launch {
-                            val r = withContext(Dispatchers.IO) {
-                                // §16.3's rule holds for cards too: a contact is
-                                // mutual or it is not one. Claiming publishes
-                                // *our* details in the reply subkey, which is
-                                // also what tells the issuer their card is spent.
-                                runCatching {
-                                    Mailbox.claimCard(context, s, petname.ifBlank { null })
-                                }
-                            }
-                            adding = false
-                            r.onSuccess { onAdded() }
-                                .onFailure { error = context.getString(claimFailureRes(it)) }
+                        val name = petname.trim()
+                        // The text the card was read from: `s` is its parse,
+                        // and the parse is redone off the screen.
+                        cardRaw?.let { raw ->
+                            claimingCard = raw
+                            // §16.3's rule holds for cards too: a contact is
+                            // mutual or it is not one. Claiming publishes
+                            // *our* details in the reply subkey, which is
+                            // also what tells the issuer their card is spent.
+                            claimOffScreen(
+                                context, raw, petname = name.ifBlank { null },
+                                // Already in the book from this very card:
+                                // keep the name typed here, and call it
+                                // added — it is.
+                                onAgain = { mine ->
+                                    ContactStore(context).setPetname(mine.personaHex, name)
+                                },
+                            )
                         }
                       }
                       if (nameGateNeeded(context)) intro = go else go()

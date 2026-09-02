@@ -65,9 +65,13 @@ data class RunningTab(
      * for "the last outgoing bill with this total", which is a guess that a
      * second identical bill makes wrong. The receipt names it (§16.14), and
      * so do the two screens that need to know whether the customer refused
-     * it. Zero for a tab settled before this was kept.
+     * it. -1 for a tab settled before this was kept: zero is a REAL
+     * sequence — the first message of a fresh thread — and using it as the
+     * sentinel made the reconciler read a correctly-named notice for a
+     * seq-0 bill as naming a *different* bill, blocking settlement forever.
+     * Found live by pubsettletest, where the bill IS the first message.
      */
-    val billSeq: Long = 0,
+    val billSeq: Long = -1,
     /**
      * What actually arrived, which is the bill plus whatever was tipped on
      * top of it. Zero until the payment is matched, and on tabs written
@@ -82,9 +86,35 @@ data class RunningTab(
      * the margin read its own till short by every tip it took.
      */
     val paidPxmr: Long = 0,
+    /**
+     * The sequence of the word that closed this tab — the cancellation
+     * notice, or the receipt, whichever rail the money took — in our own
+     * outbox. Kept for the reason [billSeq] is: the tab book has to say
+     * whether the customer has actually been told, and the row in the
+     * thread is the only thing that knows (a send commits its row before
+     * the network, so a closed tab can sit ahead of its own notice for as
+     * long as the phone is out of range). -1 when nothing is known — a tab
+     * closed before this was kept, or one whose contact was gone by then.
+     * [WORD_UNSENT] when the send failed before any row existed: nothing
+     * left the phone, and nothing will unless it is sent again.
+     */
+    val wordSeq: Long = -1,
 ) {
     val totalPxmr: Long get() =
         if (state == "open") lines.sumOf { it.amountPxmr } + (taxPxmr ?: 0L) else settledTotal
+
+    /**
+     * Whether another record still reads this tab after it closes.
+     *
+     * A kiosk order derives its state from its tab (Orders.stateOf): with
+     * the tab gone, a paid coffee reads "awaiting" with a Withdraw button
+     * that does nothing. A subscription's issue is owed on the tab's "paid"
+     * (Publications.dueSettled): gone before the period ships, the
+     * subscriber paid for nothing. The till's and the taxi's day sums are
+     * read from theirs (Shells.SettledList). The tab book's Clear is
+     * bookkeeping for the bar's own evening; these are somebody else's books.
+     */
+    val keptElsewhere: Boolean get() = origin != "bar"
 
     /** What this tab actually brought in — the bill, or the payment when one
      *  has landed and may have carried a tip. */
@@ -92,6 +122,36 @@ data class RunningTab(
 
     /** Paid over the bill. Zero unless a payment has landed above it. */
     val tipPxmr: Long get() = (paidPxmr - settledTotal).coerceAtLeast(0)
+
+    /**
+     * The bill settle() sent for this tab, found in [thread].
+     *
+     * By the seq settle recorded — and, among the bills at that seq, the one
+     * sent when this tab was settled. A seq is per card: every re-claimed
+     * card restarts the numbering, so a repeat customer's second visit can
+     * be billed at the same number as their first, and "the last outgoing
+     * bill at this seq" named the newer visit's bill for the older tab —
+     * the older tab, still awaiting payment, then read the newer bill's
+     * notice as its own and swallowed a payment meant for the other. A tab
+     * from before the seq was kept falls back to the last outgoing bill of
+     * this exact total, the read-back settle() itself performs. Null only
+     * when no such bill exists; without the fallback a tab with an unknown
+     * seq read every *named* notice as naming a different bill, and a
+     * correctly-paid tab could never settle.
+     *
+     * Compare by identity against [thread]'s own elements — what
+     * [referent] hands back.
+     */
+    fun billIn(thread: List<StoredMessage>): StoredMessage? {
+        val bills = thread.filter { it.outgoing && it.kind == 1 }
+        if (billSeq < 0) return bills.lastOrNull { it.amountPxmr == settledTotal }
+        val atSeq = bills.filter { it.seq == billSeq }
+        // The settle state is written just before the bill goes out, both
+        // on this phone's clock; the slack is only for the second's rounding.
+        return atSeq.filter { it.timestamp * 1000 >= settledAt - 60_000 }
+            .minByOrNull { it.timestamp }
+            ?: atSeq.lastOrNull()
+    }
 
     fun toJson(): JSONObject = JSONObject().apply {
         put("id", id); put("origin", origin); put("persona", personaHex)
@@ -107,10 +167,14 @@ data class RunningTab(
         put("tip_at_bill", tipAtBill)
         put("paid_total", paidPxmr)
         billedMinor?.let { put("billed_minor", it) }
-        if (billSeq > 0) put("bill_seq", billSeq)
+        if (billSeq >= 0) put("bill_seq", billSeq)
+        if (wordSeq != -1L) put("word_seq", wordSeq)
     }
 
     companion object {
+        /** [wordSeq] for a closing word that never left the phone. */
+        const val WORD_UNSENT = -2L
+
         fun from(o: JSONObject) = RunningTab(
             id = o.getString("id"),
             origin = o.optString("origin", "bar"),
@@ -134,7 +198,8 @@ data class RunningTab(
             tipAtBill = o.optLong("tip_at_bill", 0),
             paidPxmr = o.optLong("paid_total", 0),
             billedMinor = o.optInt("billed_minor", -1).takeIf { it >= 0 },
-            billSeq = o.optLong("bill_seq", 0L),
+            billSeq = o.optLong("bill_seq", -1L),
+            wordSeq = o.optLong("word_seq", -1L),
         )
     }
 }
@@ -165,6 +230,20 @@ class TabStore(private val context: Context) {
         )
         save(all() + t)
         t
+    }
+
+    /**
+     * The open tab this person already has with this origin, or a new one.
+     *
+     * A regular tapped twice — the bartender forgot the tab was running, or
+     * the same card was scanned again — got two tabs, and the evening's
+     * drinks split between them into two bills. One running account per
+     * customer is the tab book's whole definition (§15.11).
+     */
+    fun openOrResume(personaHex: String, origin: String): RunningTab = guarded {
+        all().firstOrNull {
+            it.personaHex == personaHex && it.origin == origin && it.state == "open"
+        } ?: open(personaHex, origin)
     }
 
     fun update(t: RunningTab) = guarded { save(all().map { if (it.id == t.id) t else it }) }
@@ -275,30 +354,58 @@ class TabStore(private val context: Context) {
                 tipAtBill = wallet.tip(),
             )
         } ?: throw IllegalStateException("that tab is gone")
-        Mailbox.send(
-            context, contact,
-            // The shop's own language, not the reader's. This line is the
-            // shop speaking — a paper receipt from a Berlin cafe is in
-            // German — and the sender cannot know what the payer reads
-            // anyway. Every label around it is already localised for them.
-            context.getString(
-                when (tab.origin) {
-                    "taxi" -> R.string.bill_note_fare
-                    Orders.ORIGIN -> R.string.bill_note_order
-                    // A counter sale is not a tab. Only the bar opens one of
-                    // those; the till, the taxi and the kiosk each hand over
-                    // something with its own name, and "Your tab" was what a
-                    // shop's customer saw above a flat white they had already
-                    // paid for at the counter.
-                    "pos" -> R.string.bill_note_sale
-                    else -> R.string.bill_note_tab
-                },
-            ),
-            PersonaStore(context).personaHex(),
-            kind = 1, amountPxmr = total,
-            payto = payto,
-            items = tab.lines, taxPxmr = tab.taxPxmr,
-        )
+        val contacts = ContactStore(context)
+        val seqBefore = contacts.all().firstOrNull { it.personaHex == tab.personaHex }?.outSeq
+            ?: contact.outSeq
+        try {
+            Mailbox.send(
+                context, contact,
+                // The shop's own language, not the reader's. This line is the
+                // shop speaking — a paper receipt from a Berlin cafe is in
+                // German — and the sender cannot know what the payer reads
+                // anyway. Every label around it is already localised for them.
+                context.getString(
+                    when (tab.origin) {
+                        "taxi" -> R.string.bill_note_fare
+                        Orders.ORIGIN -> R.string.bill_note_order
+                        // A counter sale is not a tab. Only the bar opens one of
+                        // those; the till, the taxi and the kiosk each hand over
+                        // something with its own name, and "Your tab" was what a
+                        // shop's customer saw above a flat white they had already
+                        // paid for at the counter.
+                        "pos" -> R.string.bill_note_sale
+                        // A subscription period billed by the Publish room.
+                        Publications.ORIGIN -> R.string.bill_note_issue
+                        else -> R.string.bill_note_tab
+                    },
+                ),
+                kind = 1, amountPxmr = total,
+                payto = payto,
+                items = tab.lines, taxPxmr = tab.taxPxmr,
+            )
+        } catch (e: Exception) {
+            // What the failed send left behind decides what the tab is. A
+            // send commits its row before the network: a bill with a row
+            // in the thread is on its way — the poll delivers it
+            // (Mailbox.lateSlot) — and the tab is billed, whatever the
+            // exception says. One with no row never left the phone, and
+            // "settled" over it was a bill nobody held: it sat in the
+            // billed list with nothing to wait for, the till's retry loop
+            // billed it again on top of the slot it had not yet replayed,
+            // and the bar's only ways out were to cancel a bill that was
+            // never sent or leave it. Back to open, then — the lines are
+            // pinned already — and the failure is the caller's to show.
+            if (!billCommitted(contacts, tab.personaHex, total, seqBefore)) {
+                mutate(tab.id) {
+                    if (it.state == "settled" && it.seenTx == null) it.copy(state = "open") else it
+                }
+                throw e
+            }
+            DucatLog.w(
+                TAG,
+                "bill to ${contact.displayName()} is committed but not delivered: ${e.message}",
+            )
+        }
         // Pinned to what was billed, not to what the tab says now: the customer
         // has the itemised request in their hand, and a drink poured between
         // that going out and this landing is not on it. The tab must agree with
@@ -307,7 +414,7 @@ class TabStore(private val context: Context) {
         // re-reads the contact and takes the seq it finds, so a counter held
         // from before the call can be one behind the message it just sent.
         val billSeq = ContactStore(context).thread(tab.personaHex)
-            .lastOrNull { it.outgoing && it.kind == 1 }?.seq ?: 0L
+            .lastOrNull { it.outgoing && it.kind == 1 }?.seq ?: -1L
         val settled = mutate(tab.id) {
             it.copy(
                 billSeq = billSeq,
@@ -334,37 +441,201 @@ class TabStore(private val context: Context) {
     }
 
     /**
+     * Whether a bill for [total] is in the thread from [seqBefore] on and
+     * still waiting for the network — the row a send commits before it
+     * writes the slot, which the poll then delivers.
+     */
+    private fun billCommitted(
+        contacts: ContactStore,
+        personaHex: String,
+        total: Long,
+        seqBefore: Long,
+    ): Boolean =
+        contacts.thread(personaHex).lastOrNull { it.outgoing }?.let {
+            it.kind == 1 && it.amountPxmr == total && it.seq >= seqBefore && !it.delivered
+        } == true
+
+    /**
+     * Close a billed tab with a word to the customer.
+     *
+     * The word is the part that matters: their app holds an actionable
+     * request (§15.11), and a state change on this phone alone leaves it
+     * pointing at money nobody is watching for. [state] is written first —
+     * the reconciler must stop matching payments to the tab — and [word]
+     * then sends the notice or the receipt.
+     *
+     * Only a tab still billed and unpaid. One whose payment has been sighted
+     * in the mempool is settling whether the counter likes it or not, and
+     * closing it would strand the receipt; the buttons hide themselves, and
+     * this refuses what a stale screen still offers. Null then, and when the
+     * tab is gone.
+     *
+     * What the send leaves behind decides the rest. A send that persisted its
+     * row and failed at the network has committed the word: the poll delivers
+     * it (Mailbox.lateSlot), the tab stays closed, and [RunningTab.wordSeq]
+     * names the row so the book can say "not sent yet" until it is. A send
+     * that threw with no row never left the phone: with [revert], the state
+     * goes back to "settled" and the failure is the caller's to show — a bill
+     * the customer can still pay must not read "cancelled" here; without it,
+     * the tab stays closed with [RunningTab.WORD_UNSENT] and the failure
+     * still goes to the caller, so the counter is told the receipt did not
+     * go and can send it again.
+     */
+    fun close(
+        tab: RunningTab,
+        state: String,
+        revert: Boolean,
+        word: (Contact) -> Contact,
+    ): RunningTab? {
+        var applied = false
+        val closed = mutate(tab.id) {
+            if (it.state == "settled" && it.seenTx == null) {
+                applied = true
+                it.copy(
+                    state = state,
+                    // Cash across the bar settles the bill exactly; there is
+                    // no chain output to read a tip from.
+                    paidPxmr = if (state == "paid_oob") it.settledTotal else it.paidPxmr,
+                )
+            } else it
+        } ?: return null
+        if (!applied) return null
+        val contacts = ContactStore(context)
+        val contact = contacts.all().firstOrNull { it.personaHex == tab.personaHex }
+        if (contact == null) {
+            // Nobody to tell: the conversation was forgotten under the tab.
+            DucatLog.w(TAG, "${tab.origin} tab closed as $state with its contact gone")
+            return closed
+        }
+        val seqBefore = contact.outSeq
+        val sent = try {
+            word(contact)
+        } catch (e: Exception) {
+            val row = contacts.thread(tab.personaHex).lastOrNull { it.outgoing }
+                ?.takeIf { it.seq >= seqBefore && !it.delivered }
+            if (row != null) {
+                DucatLog.w(TAG, "$state word to ${contact.displayName()} is committed but not delivered: ${e.message}")
+                return mutate(tab.id) { it.copy(wordSeq = row.seq) }
+            }
+            if (revert) {
+                mutate(tab.id) {
+                    if (it.state == state) it.copy(state = "settled", paidPxmr = 0) else it
+                }
+            } else {
+                mutate(tab.id) { it.copy(wordSeq = RunningTab.WORD_UNSENT) }
+            }
+            throw e
+        }
+        return mutate(tab.id) { it.copy(wordSeq = sent.outSeq - 1) }
+    }
+
+    /**
      * The bill was settled outside DUCAT — cash across the bar, a card.
      *
      * Still gets a receipt, because the customer's record should not depend on
      * which rail the money took: a `RECEIPT` without a transaction is legal on
      * the wire (the txid is optional) and simply says what the payee is
-     * acknowledging. Best-effort — an offline node must not stop the bartender
-     * from closing out the night, so the tab is marked first and the receipt
-     * failure is logged rather than blocking.
+     * acknowledging. An offline node must not stop the bartender from closing
+     * out the night, so the tab is marked first and stays marked — but the
+     * failure is thrown, not logged: the screen that used to say "closed" over
+     * a receipt that had gone nowhere now says so, and offers [sendOobReceipt].
      */
-    fun markPaidOutside(tab: RunningTab) {
-        // Cash across the bar settles the bill exactly; there is no chain
-        // output to read a tip from.
-        update(tab.copy(state = "paid_oob", paidPxmr = tab.settledTotal))
-        val contact = ContactStore(context).all()
-            .firstOrNull { it.personaHex == tab.personaHex } ?: return
-        runCatching {
-            Mailbox.send(
-                context, contact, context.getString(R.string.receipt_note_oob),
-                PersonaStore(context).personaHex(),
-                kind = 3, amountPxmr = tab.settledTotal,
-                // §16.14: the request this receipts. `reOwn`, because the
-                // party issuing a receipt is the party that sent the bill.
-                reSeq = tab.billSeq.takeIf { it > 0 }, reOwn = tab.billSeq > 0,
-                items = tab.lines, taxPxmr = tab.taxPxmr,
-                // The money took another rail; the record must say so, or the
-                // ledger goes looking for a chain event that does not exist.
-                oob = true,
-            )
-        }.onFailure { DucatLog.w(TAG, "oob receipt: ${it.message}") }
-        DucatLog.i(TAG, "${tab.origin} tab settled outside DUCAT (${formatXmr(tab.settledTotal)} XMR)")
+    fun markPaidOutside(tab: RunningTab): RunningTab? =
+        close(tab, "paid_oob", revert = false) { contact -> oobReceipt(tab, contact) }
+            ?.also {
+                DucatLog.i(TAG, "${tab.origin} tab settled outside DUCAT (${formatXmr(tab.settledTotal)} XMR)")
+            }
+
+    /**
+     * The receipt [markPaidOutside] could not send, sent again. For a tab
+     * whose word is [RunningTab.WORD_UNSENT]; anything else already has one
+     * on its way.
+     */
+    fun sendOobReceipt(tab: RunningTab): RunningTab? {
+        if (tab.state != "paid_oob" || tab.wordSeq != RunningTab.WORD_UNSENT) return tab
+        val contact = ContactStore(context).all().firstOrNull { it.personaHex == tab.personaHex }
+            ?: throw IllegalStateException("that contact is gone")
+        return word(tab, contact) { oobReceipt(tab, contact) }
     }
+
+    /**
+     * The receipt [reconcile] could not send, sent again — the chain-paid
+     * twin of [sendOobReceipt]. The payment stands (markPaid holds it, and
+     * the key image with it); only the word is owed. The transaction is read
+     * back from the wallet by the output that paid, since the tab keeps the
+     * key image and not the txid, and the tip is what arrived over the bill,
+     * exactly as the first attempt computed it.
+     *
+     * A tab whose contact is gone has nobody to tell: its word is marked
+     * unknown, as [close] does, so the retry stops asking.
+     */
+    fun sendChainReceipt(tab: RunningTab): RunningTab? {
+        if (tab.state != "paid" || tab.wordSeq != RunningTab.WORD_UNSENT) return tab
+        val contacts = ContactStore(context)
+        val contact = contacts.all().firstOrNull { it.personaHex == tab.personaHex }
+        if (contact == null) {
+            DucatLog.w(TAG, "${tab.origin} tab paid with its contact gone; no receipt")
+            return mutate(tab.id) { it.copy(wordSeq = -1) }
+        }
+        val paid = if (tab.paidPxmr > 0) tab.paidPxmr else tab.settledTotal
+        val tip = paid - tab.settledTotal
+        val lines =
+            if (tip > 0) tab.lines + BillItem(context.getString(R.string.bartab_tip_line), tip)
+            else tab.lines
+        val txid = tab.paidKi?.let { ki ->
+            WalletStore(context).entries().firstOrNull { it.keyImage == ki }?.txHashHex
+        }?.ifEmpty { null }
+        val bill = tab.billIn(contacts.thread(tab.personaHex))
+        return word(tab, contact) {
+            Mailbox.send(
+                context, contact, context.getString(R.string.receipt_note),
+                kind = 3, amountPxmr = paid,
+                items = lines, taxPxmr = tab.taxPxmr,
+                txidHex = txid,
+                reSeq = bill?.seq, reOwn = bill != null,
+            )
+        }.also { DucatLog.i(TAG, "${tab.origin} receipt sent on retry") }
+    }
+
+    /**
+     * Send a word for [tab] and record which row it became.
+     *
+     * The same reading of a failed send [close] makes: one that threw after
+     * committing its row has left the phone as far as the thread is
+     * concerned — the poll delivers it — and the tab records that row, so
+     * the book can say "not sent yet" until it is. One that left no row
+     * rethrows, and the tab still owes it. Without this, a resend that
+     * failed at the network after its commit was offered again, and the
+     * customer got the receipt twice once the network came back.
+     */
+    private fun word(tab: RunningTab, contact: Contact, send: () -> Contact): RunningTab? {
+        val seqBefore = contact.outSeq
+        val sent = try {
+            send()
+        } catch (e: Exception) {
+            val row = ContactStore(context).thread(tab.personaHex).lastOrNull { it.outgoing }
+                ?.takeIf { it.seq >= seqBefore && !it.delivered }
+            if (row != null) {
+                DucatLog.w(TAG, "receipt to ${contact.displayName()} is committed but not delivered: ${e.message}")
+                return mutate(tab.id) { it.copy(wordSeq = row.seq) }
+            }
+            throw e
+        }
+        return mutate(tab.id) { it.copy(wordSeq = sent.outSeq - 1) }
+    }
+
+    private fun oobReceipt(tab: RunningTab, contact: Contact): Contact =
+        Mailbox.send(
+            context, contact, context.getString(R.string.receipt_note_oob),
+            kind = 3, amountPxmr = tab.settledTotal,
+            // §16.14: the request this receipts. `reOwn`, because the
+            // party issuing a receipt is the party that sent the bill.
+            reSeq = tab.billSeq.takeIf { it >= 0 }, reOwn = tab.billSeq >= 0,
+            items = tab.lines, taxPxmr = tab.taxPxmr,
+            // The money took another rail; the record must say so, or the
+            // ledger goes looking for a chain event that does not exist.
+            oob = true,
+        )
 
     /**
      * Withdraw the bill.
@@ -373,13 +644,13 @@ class TabStore(private val context: Context) {
      * "Review payment" button pointing at money the payee no longer expects —
      * so cancelling MUST say so in the thread (§15.11), or they can pay a
      * bill nobody is watching for. The message is the cancellation; the state
-     * change just stops reconciliation matching it.
+     * change just stops reconciliation matching it — which is why a notice
+     * that never left the phone puts the state back ([close]'s revert): a
+     * tab reading "cancelled" over a bill they can still pay is the payment
+     * into the void this exists to prevent.
      */
-    fun cancel(tab: RunningTab) {
-        update(tab.copy(state = "cancelled"))
-        val contact = ContactStore(context).all()
-            .firstOrNull { it.personaHex == tab.personaHex } ?: return
-        runCatching {
+    fun cancel(tab: RunningTab): RunningTab? =
+        close(tab, "cancelled", revert = true) { contact ->
             Mailbox.send(
                 context, contact,
                 // The shop's language, like the bill and the receipt. This
@@ -389,11 +660,10 @@ class TabStore(private val context: Context) {
                     R.string.bill_note_cancelled,
                     Amounts.show(context, tab.settledTotal).primary,
                 ),
-                PersonaStore(context).personaHex(),
             )
-        }.onFailure { DucatLog.w(TAG, "cancel notice: ${it.message}") }
-        DucatLog.i(TAG, "${tab.origin} tab cancelled (${formatXmr(tab.settledTotal)} XMR)")
-    }
+        }?.also {
+            DucatLog.i(TAG, "${tab.origin} tab cancelled (${formatXmr(tab.settledTotal)} XMR)")
+        }
 
     companion object {
         /**
@@ -491,7 +761,9 @@ class TabStore(private val context: Context) {
                 // notice from a visit last month still widened what would
                 // match — and a payer chooses both the amount and the
                 // timestamp, so without the bound they choose the set.
-                val said = contacts.thread(tab.personaHex)
+                val thread = contacts.thread(tab.personaHex)
+                val bill = tab.billIn(thread)
+                val said = thread
                     .filter {
                         !it.outgoing && it.kind == 2 &&
                             it.timestamp * 1000 >= tab.settledAt - 60_000 &&
@@ -505,7 +777,7 @@ class TabStore(private val context: Context) {
                             // only the tab it names; an unnamed one keeps
                             // the old behaviour.
                             (it.reSeq == null ||
-                                (!it.reOwn && tab.billSeq > 0 && it.reSeq == tab.billSeq))
+                                (bill != null && thread.referent(it) === bill))
                     }
                     .map { it.amountPxmr }.toSet()
                 // The same subaddress rule reconcile applies. It matters more
@@ -565,7 +837,9 @@ class TabStore(private val context: Context) {
                 // would never find it. Still §17.5 — the notice nominates an
                 // amount, the chain confirms it; a notice with no matching
                 // output settles nothing.
-                val said = contacts.thread(tab.personaHex)
+                val thread = contacts.thread(tab.personaHex)
+                val bill = tab.billIn(thread)
+                val said = thread
                     .filter {
                         !it.outgoing && it.kind == 2 &&
                             it.timestamp * 1000 >= tab.settledAt - 60_000 &&
@@ -579,7 +853,7 @@ class TabStore(private val context: Context) {
                             // only the tab it names; an unnamed one keeps
                             // the old behaviour.
                             (it.reSeq == null ||
-                                (!it.reOwn && tab.billSeq > 0 && it.reSeq == tab.billSeq))
+                                (bill != null && thread.referent(it) === bill))
                     }
                     .map { it.amountPxmr }
                     .toSet()
@@ -590,11 +864,11 @@ class TabStore(private val context: Context) {
                 // thread pointed at another obligation on the same
                 // subaddress — a recurring bill, a split share — closing two
                 // debts with one payment and shorting the shop the other.
-                val namedElsewhere = contacts.thread(tab.personaHex)
+                val namedElsewhere = thread
                     .filter {
                         !it.outgoing && it.kind == 2 && it.reSeq != null &&
                             !it.reOwn &&
-                            !(tab.billSeq > 0 && it.reSeq == tab.billSeq) &&
+                            !(bill != null && thread.referent(it) === bill) &&
                             it.timestamp * 1000 >= tab.settledAt - 60_000
                     }
                     .map { it.amountPxmr }.toSet()
@@ -655,35 +929,39 @@ class TabStore(private val context: Context) {
                 // the claim ride one commit (markPaid) for the same reason.
                 store.markPaid(tab.id, hit.keyImage, hit.amountPxmr)
                     ?: continue
-                runCatching {
-                    Mailbox.send(
-                        context, contact, context.getString(R.string.receipt_note),
-                        PersonaStore(context).personaHex(),
-                        kind = 3, amountPxmr = hit.amountPxmr,
-                        items = receiptLines, taxPxmr = tab.taxPxmr,
-                        txidHex = hit.txHashHex.ifEmpty { null },
-                        // §16.14: the bill this settles, ours to name.
-                        reSeq = tab.billSeq.takeIf { it > 0 }, reOwn = tab.billSeq > 0,
-                    )
-                }.onSuccess {
-                    Notify.post(
-                        context,
+                // The payment is real whatever becomes of the receipt, and
+                // the vendor is told so here, not inside the send's success
+                // — a receipt that failed used to take the "Sam paid" with it.
+                Notify.post(
+                    context,
+                    context.getString(
+                        R.string.notify_paid_title, contact.displayName(),
+                    ),
+                    if (tip > 0) {
                         context.getString(
-                            R.string.notify_paid_title, contact.displayName(),
-                        ),
-                        if (tip > 0) {
-                            context.getString(
-                                R.string.notify_paid_body_tip,
-                                Amounts.show(context, hit.amountPxmr).primary,
-                                Amounts.show(context, tip).primary,
-                            )
-                        } else {
-                            context.getString(
-                                R.string.notify_paid_body,
-                                Amounts.show(context, hit.amountPxmr).primary,
-                            )
-                        },
-                    )
+                            R.string.notify_paid_body_tip,
+                            Amounts.show(context, hit.amountPxmr).primary,
+                            Amounts.show(context, tip).primary,
+                        )
+                    } else {
+                        context.getString(
+                            R.string.notify_paid_body,
+                            Amounts.show(context, hit.amountPxmr).primary,
+                        )
+                    },
+                )
+                runCatching {
+                    store.word(tab, contact) {
+                        Mailbox.send(
+                            context, contact, context.getString(R.string.receipt_note),
+                            kind = 3, amountPxmr = hit.amountPxmr,
+                            items = receiptLines, taxPxmr = tab.taxPxmr,
+                            txidHex = hit.txHashHex.ifEmpty { null },
+                            // §16.14: the bill this settles, ours to name.
+                            reSeq = bill?.seq, reOwn = bill != null,
+                        )
+                    }
+                }.onSuccess {
                     DucatLog.i(
                         TAG,
                         "${tab.origin} paid ${formatXmr(hit.amountPxmr)} XMR" +
@@ -692,12 +970,52 @@ class TabStore(private val context: Context) {
                     )
                 }.onFailure {
                     // The payment is real and now recorded; a receipt that
-                    // failed to leave is logged rather than blocking — the
-                    // same trade markPaidOutside documents. (Retrying it here
-                    // would mean matching the paid output a second time.)
+                    // failed to leave must not block it — the same trade
+                    // markPaidOutside documents. It used to be logged and
+                    // forgotten, and the till read "Receipt sent to Sam"
+                    // over a receipt Sam never got: the tab now records
+                    // that it owes one, the screens say so, and the next
+                    // pass sends it (sendChainReceipt) — matching nothing
+                    // again, since the mark and the key image already hold.
+                    store.mutate(tab.id) { it.copy(wordSeq = RunningTab.WORD_UNSENT) }
                     DucatLog.w(TAG, "receipt failed after mark: ${it.message}")
                 }
             }
+        }
+
+        /** The owed tab the last pass tried. See [sendOwedReceipts]. */
+        private var lastOwed: String? = null
+
+        /**
+         * A receipt owed from an earlier pass, sent now.
+         *
+         * One per pass, on the poll clock: a node that is down costs the
+         * poll one attempt, not one per tab, and the rest go on the passes
+         * after. Ahead of the matching in [reconcile], and regardless of
+         * whether anything is left to match — the tab that owes the word is
+         * already paid.
+         *
+         * **Taken in turn, not from the front.** It used to retry whichever
+         * owed tab came first, for ever, which is fine while a failure is
+         * the network having a bad minute and fatal when it is not: a
+         * customer whose prekeys have never arrived (Mailbox.NoKeysYet)
+         * cannot be sent to *at all* until they publish some, and one such
+         * tab at the head of the list meant nobody else's receipt was ever
+         * attempted again. The stuck tab still gets its turn — the bundle
+         * may yet land — it simply no longer gets everybody else's.
+         */
+        fun sendOwedReceipts(context: Context) {
+            val store = TabStore(context)
+            val owed = store.all().filter {
+                it.state == "paid" && it.wordSeq == RunningTab.WORD_UNSENT
+            }
+            if (owed.isEmpty()) return
+            // The one after last time's, wrapping — and the first when that
+            // tab is gone (indexOfFirst gives -1, so this lands on 0).
+            val pick = owed[(owed.indexOfFirst { it.id == lastOwed } + 1) % owed.size]
+            lastOwed = pick.id
+            runCatching { store.sendChainReceipt(pick) }
+                .onFailure { DucatLog.w(TAG, "receipt retry for ${pick.origin} tab: ${it.message}") }
         }
     }
 

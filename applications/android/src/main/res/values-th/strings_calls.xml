@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_call_rang_you">โทรหาคุณ</string>
+    <string name="chat_call_you_rang">คุณโทรออก</string>
+    <string name="chat_call_answered">รับสายของคุณ</string>
+    <string name="chat_call_you_answered">คุณรับสาย</string>
+    <string name="chat_call_missed_note">มีสายเรียกเข้าตอนคุณไม่อยู่</string>
+    <string name="chatlist_preview_call">โทร</string>
+    <string name="chatlist_preview_call_answered">รับสายแล้ว</string>
+    <string name="notify_call">%1$s กำลังโทร</string>
+    <string name="notify_call_answered">%1$s รับสายของคุณ</string>
+    <string name="call_button">โทร</string>
+    <string name="call_calling">กำลังโทร…</string>
+    <string name="call_incoming">สายเรียกเข้า DUCAT</string>
+    <string name="call_frames">↓%1$d ↑%2$d เฟรม</string>
+    <string name="call_answer_btn">รับสาย</string>
+    <string name="call_end_btn">วางสาย</string>
+    <string name="call_body_ring">กำลังโทรหาคุณ</string>
+    <string name="call_body_answer">รับแล้ว</string>
+    <string name="call_body_decline">ตอนนี้คุยไม่สะดวก</string>
+    <string name="notify_call_channel">สายเรียกเข้า</string>
+    <string name="notify_call_incoming">สายเรียกเข้า</string>
+    <string name="call_no_answer">ไม่มีผู้รับสาย</string>
+    <string name="call_leave_message">ฝากข้อความ</string>
+    <string name="call_dismiss">ไว้ทีหลัง</string>
+    <string name="call_body_cancel">วางสายก่อนคุณรับ</string>
+    <string name="call_connecting">กำลังเชื่อมต่อ…</string>
+    <string name="call_unreached">ติดต่อไม่ได้</string>
+    <string name="call_never_connected">เชื่อมต่อไม่สำเร็จ</string>
+    <string name="call_notify_calling">กำลังโทรหา %1$s…</string>
+    <string name="call_notify_in_call">กำลังคุยกับ %1$s</string>
+    <string name="call_notify_return">แตะเพื่อกลับไปที่สาย</string>
+</resources>

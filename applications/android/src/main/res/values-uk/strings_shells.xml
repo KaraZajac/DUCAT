@@ -52,4 +52,5 @@
     <string name="book_side_hiring">Наймання</string>
     <string name="book_side_working">Робота</string>
     <string name="shells_tab_deals">Угоди</string>
+    <string name="shells_bookings_empty_body">Коли хтось бронює ваше оголошення — або ви бронюєте чуже — угода та її застава з\'являються тут.</string>
 </resources>

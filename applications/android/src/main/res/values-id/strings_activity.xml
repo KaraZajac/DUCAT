@@ -6,6 +6,8 @@
     <!-- Pending requests -->
     <string name="activity_awaiting">Menunggu</string>
     <string name="activity_search_none">Tidak ada yang cocok dengan “%1$s”.</string>
+    <string name="activity_period_none">Tidak ada apa pun dalam periode ini. Pilih periode yang lebih panjang di atas untuk melihat aktivitas sebelumnya.</string>
+    <string name="activity_filter_none">Belum ada yang seperti itu. Ketuk lagi kotak yang disorot untuk menampilkan semuanya.</string>
     <string name="activity_search_clear">Hapus pencarian</string>
     <string name="activity_search_hint">Cari struk, nama, catatan</string>
     <string name="activity_they_ask">%1$s meminta</string>
@@ -41,4 +43,23 @@
     <string name="activity_donations_filter">Donasi</string>
     <string name="activity_donation_chip">Donasi</string>
     <string name="activity_donated_total">%1$s didonasikan</string>
+    <string name="activity_period_today">Hari ini</string>
+    <string name="activity_period_7d">7 hari</string>
+    <string name="activity_period_month">Bulan ini</string>
+    <string name="activity_period_all">Semua</string>
+    <string name="activity_sum_in">Masuk</string>
+    <string name="activity_sum_out">Keluar</string>
+    <string name="activity_sum_net">Bersih</string>
+    <string name="activity_sum_fees">Biaya</string>
+    <string name="activity_business">Usaha</string>
+    <string name="activity_sales">Penjualan</string>
+    <string name="activity_tax_collected">Pajak terkumpul</string>
+    <string name="activity_outstanding">Belum dibayar</string>
+    <string name="activity_export_csv">Berkas CSV</string>
+    <string name="activity_export_json">Berkas JSON</string>
+    <string name="activity_door_pos">kasir</string>
+    <string name="activity_door_bar">bon</string>
+    <string name="activity_door_taxi">perjalanan</string>
+    <string name="activity_door_donate">celengan</string>
+    <string name="activity_door_pub">edisi</string>
 </resources>

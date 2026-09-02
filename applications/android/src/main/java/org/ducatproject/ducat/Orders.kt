@@ -227,12 +227,28 @@ object Orders {
      * bill and a receipt. The address is this order's alone and the total
      * carries its noise, so that when a payment appears there is no question
      * which order it was for.
+     *
+     * [replacing] is the unpaired order this one takes the place of — the
+     * counter's basket that waited for a tap and got a Monero wallet
+     * instead. Same id and same number, so the screen holding the id goes
+     * on holding it, and the day's list does not show one coffee twice:
+     * once "walked away" and once paid.
+     *
+     * A wallet with no address cannot be paid at a counter, and an order
+     * that quietly recorded "" as its address put a code on screen that no
+     * wallet could read. That is a failure, and it is thrown as one.
      */
-    fun place(context: Context, lines: List<BillItem>, taxPxmr: Long? = null): Order {
-        val id = java.util.UUID.randomUUID().toString()
+    fun place(
+        context: Context,
+        lines: List<BillItem>,
+        taxPxmr: Long? = null,
+        replacing: Order? = null,
+    ): Order {
+        val id = replacing?.id ?: java.util.UUID.randomUUID().toString()
         val plain = lines.sumOf { it.amountPxmr } + (taxPxmr ?: 0L)
         val noise = java.security.SecureRandom().nextInt(TAG_RANGE.toInt()).toLong()
-        val next = (all(context).maxOfOrNull { it.number } ?: 0) % 999 + 1
+        val next = replacing?.number
+            ?: ((all(context).maxOfOrNull { it.number } ?: 0) % 999 + 1)
         val slot = synchronized(lock) {
             val n = prefs(context).getInt("slot_next", 0)
             prefs(context).edit().putInt("slot_next", (n + 1) % ADDRESS_SLOTS).apply()
@@ -240,13 +256,14 @@ object Orders {
         }
         val wallet = WalletStore(context)
         val payto = wallet.addressFor("order_slot_$slot")
+            ?: throw IllegalStateException("no wallet address to be paid at")
         val order = Order(
             id = id,
             number = next,
             lines = lines,
             totalPxmr = plain + noise,
             taxPxmr = taxPxmr?.takeIf { it > 0 },
-            address = payto ?: "",
+            address = payto,
             // The minor of the address this order actually hands out. Checked
             // against `payto` because `addressFor` allocates a minor *before*
             // it can still fall back to the main address, and an order that
@@ -254,13 +271,30 @@ object Orders {
             // sighted. Null then — the permissive rule, and correct, since
             // minor 0 is where that payment will land.
             billedMinor = wallet.minorOf("order_slot_$slot")
-                ?.takeIf { payto != null && payto != wallet.address() },
+                ?.takeIf { payto != wallet.address() },
             state = State.Awaiting,
             placedAt = System.currentTimeMillis() / 1000,
         )
         update(context, order)
         DucatLog.i(TAG, "order #${order.number}: ${formatXmr(order.totalPxmr)} XMR")
         return order
+    }
+
+    /**
+     * Staff gave up on it: the customer changed their mind, or never had a
+     * wallet to pay with.
+     *
+     * Said now rather than found in half an hour by [expire]: until then the
+     * poller went on reading the mempool for money nobody was going to send,
+     * and the staff list showed a coffee "awaiting" that the counter had
+     * already stopped waiting for. Only an order still waiting — one whose
+     * payment was sighted in the same second keeps its sighting, since the
+     * money is real whatever the counter decided.
+     */
+    fun abandon(context: Context, id: String) = mutate(context) { orders ->
+        orders.map {
+            if (it.id == id && it.state == State.Awaiting) it.copy(state = State.Abandoned) else it
+        }
     }
 
     /** The origin every kiosk tab carries, so a shop can tell them apart. */
@@ -353,7 +387,6 @@ object Orders {
         Mailbox.send(
             context, contact,
             context.getString(R.string.kiosk_ready_message, order.number),
-            PersonaStore(context).personaHex(),
         )
         update(context, order.copy(readyAt = System.currentTimeMillis() / 1000))
         DucatLog.i(TAG, "order #${order.number} called as ready")
@@ -365,8 +398,17 @@ object Orders {
      * Derived rather than copied, deliberately: two records of one fact
      * drift, and the one the customer's receipt depends on is the tab's.
      */
-    fun stateOf(context: Context, order: Order): State {
-        val tab = order.tabId?.let { TabStore(context).get(it) } ?: return order.state
+    fun stateOf(context: Context, order: Order): State =
+        stateOf(order, order.tabId?.let { TabStore(context).get(it) })
+
+    /**
+     * The same answer from a tab already in hand. [TabStore.get] decrypts
+     * and parses the whole book per call, and the staff list was asking
+     * three times per row per frame; a list reads the book once and asks
+     * this.
+     */
+    fun stateOf(order: Order, tab: RunningTab?): State {
+        if (order.tabId == null || tab == null) return order.state
         return when {
             tab.state == "paid" || tab.state == "paid_oob" -> State.Confirmed
             tab.state == "cancelled" -> State.Abandoned

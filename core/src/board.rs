@@ -125,6 +125,15 @@ pub const RENTAL: NoticeFields = NoticeFields {
     beacon_hash: crate::wire::f::RN_BEACON_HASH,
 };
 
+/// §16.18.2's publication listing.
+pub const PUB: NoticeFields = NoticeFields {
+    poster: crate::wire::f::PN_POSTER,
+    sig: crate::wire::f::PN_SIG,
+    pow: crate::wire::f::PN_POW,
+    beacon_height: crate::wire::f::PN_BEACON_HEIGHT,
+    beacon_hash: crate::wire::f::PN_BEACON_HASH,
+};
+
 /// §16.17's hail.
 pub const HAIL: NoticeFields = NoticeFields {
     poster: crate::wire::f::HN_POSTER,

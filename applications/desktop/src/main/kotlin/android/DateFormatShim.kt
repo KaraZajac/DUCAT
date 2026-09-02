@@ -8,6 +8,30 @@ package android.text.format
  * holding the phone, not to their country. A desk has no such setting, so it
  * takes the JVM's locale default, which is the nearest true thing available.
  */
+/**
+ * Byte counts the way Android words them ("25 MB"), for the Library screen.
+ * Android rounds to short, human units; String.format on the JVM does the
+ * same arithmetic with the reader's locale separators.
+ */
+object Formatter {
+    @JvmStatic
+    fun formatShortFileSize(context: android.content.Context?, bytes: Long): String {
+        var v = bytes.toDouble()
+        var unit = "B"
+        for (u in listOf("kB", "MB", "GB", "TB")) {
+            if (v < 999.5) break
+            v /= 1000.0
+            unit = u
+        }
+        val shown = if (v < 9.95 && unit != "B") {
+            String.format(java.util.Locale.getDefault(), "%.1f", v)
+        } else {
+            String.format(java.util.Locale.getDefault(), "%.0f", v)
+        }
+        return "$shown $unit"
+    }
+}
+
 object DateFormat {
     @JvmStatic
     fun getTimeFormat(context: android.content.Context?): java.text.DateFormat =

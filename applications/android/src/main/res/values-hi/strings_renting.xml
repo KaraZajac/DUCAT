@@ -123,4 +123,14 @@
     <string name="rent_in_unit">%1$s में</string>
     <string name="board_chip_count">%1$s %2$d</string>
     <string name="rent_size_m2">%1$d वर्ग मीटर</string>
+    <string name="rent_waiting_board">अभी बोर्ड पर नहीं — अपने आप फिर कोशिश होगी</string>
+    <plurals name="rent_seats_n">
+        <item quantity="one">%1$d सीट</item>
+        <item quantity="other">%1$d सीटें</item>
+    </plurals>
+    <plurals name="rent_rooms_n">
+        <item quantity="one">%1$d बेडरूम</item>
+        <item quantity="other">%1$d बेडरूम</item>
+    </plurals>
+    <string name="rent_sleeps_n">%1$d लोगों के लिए</string>
 </resources>

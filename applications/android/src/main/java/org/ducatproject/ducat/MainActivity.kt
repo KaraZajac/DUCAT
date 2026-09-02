@@ -27,12 +27,15 @@ import org.ducatproject.ducat.ui.BalanceCard
 import org.ducatproject.ducat.ui.NetworkPanel
 import org.ducatproject.ducat.ui.Onboarding
 import org.ducatproject.ducat.ui.OnboardingFlow
+import org.ducatproject.ducat.ui.setupBackupFile
 import org.ducatproject.ducat.ui.Step
 import org.ducatproject.ducat.ui.DucatTheme
 import org.ducatproject.ducat.ui.ThemeMode
 import org.ducatproject.ducat.ui.ThemePreference
 import org.ducatproject.ducat.ui.ducat
 import org.ducatproject.ducat.ui.BridgeSelfTest
+import org.ducatproject.ducat.ui.claimOffScreen
+import org.ducatproject.ducat.ui.claimed
 import androidx.activity.compose.BackHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -76,6 +79,13 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
          */
         val openChat = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
 
+        /** The group a notification named ("Sam · ladder crew"). Its own
+         *  channel because the sender's thread does not show what was
+         *  announced: a group's rows live in the members' pairwise logs and
+         *  the pairwise screen keeps them out, so opening Sam on a tap that
+         *  promised the ladder crew landed on nothing new. */
+        val openGroup = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
+
         /**
          * Which noun Renting's board should open on.
          *
@@ -88,15 +98,32 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
 
         /** A tapped ducat: link, waiting for the shell to show who it is. */
         val claimLink = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
+
+        /** "List yours" from an empty market shelf: open the press room. */
+        val openPublishing = kotlinx.coroutines.flow.MutableStateFlow(false)
+
+        /** A ducat:site/ link asking for the Sites shelf. */
+        val openSites = kotlinx.coroutines.flow.MutableStateFlow(false)
     }
 
     private fun readIntent(i: android.content.Intent?) {
-        i?.getStringExtra("open_chat")?.let { openChat.value = it }
+        i?.getStringExtra("open_group")?.let { openGroup.value = it }
+            ?: i?.getStringExtra("open_chat")?.let { openChat.value = it }
         // §18.7 token mode: the manifest registers ducat: links, and this URI
         // used to stop right here, read by nobody — a tapped card opened the
         // app to Home, silently. It now reaches the same claim the scanner
         // runs, behind one confirm.
-        if (i?.data?.scheme == "ducat") claimLink.value = i.dataString
+        if (i?.data?.scheme == "ducat") {
+            val uri = i.dataString
+            // §16.22 addresses route to the Sites shelf; everything else is
+            // a card and takes the claim road it always has.
+            if (uri != null && uri.startsWith("ducat:site/")) {
+                org.ducatproject.ducat.ui.pendingSiteAdd.value = uri
+                openSites.value = true
+            } else {
+                claimLink.value = uri
+            }
+        }
     }
 
     // The chosen language is applied here, before any resource is read, so a
@@ -108,6 +135,9 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
 
     override fun onNewIntent(intent: android.content.Intent) {
         super.onNewIntent(intent)
+        // Recorded as the current one: a recreate after this would otherwise
+        // read the *launch* intent back, not the latest.
+        setIntent(intent)
         readIntent(intent)
     }
 
@@ -120,10 +150,103 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
         // already applied the chosen language, and a language change recreates
         // this activity, so the placeholder follows it.
         ContactNaming.unnamed = getString(R.string.contact_unnamed)
+        // And the notification channels' names on the phone's Settings page,
+        // for the same reason.
+        Notify.refreshChannels(this)
         // The half of DeviceLock that knows what an Activity is. Installed
         // here because the shared sources cannot name it — see DeviceLock.
         DeviceLock.backend = org.ducatproject.ducat.platform.DeviceLockAndroid
-        readIntent(intent)
+        // §16.21's ears and mouth, same pattern for the same reason.
+        Calls.audio = org.ducatproject.ducat.platform.CallAudioAndroid
+        // A worldwide-market Subscribe is an ordinary card claim: hand the
+        // row's ducat: URI to the same sheet a scanned code opens.
+        // §16.22: the sealed-room viewer is an Activity; the shared screen
+        // only holds the hook.
+        org.ducatproject.ducat.ui.siteOpen = { ctx, recordKey ->
+            ctx.startActivity(
+                android.content.Intent(ctx, SiteViewerActivity::class.java)
+                    .putExtra("record", recordKey),
+            )
+        }
+        // The answering machine's road home: the leave-a-message button
+        // opens the thread whose mic is the recorder.
+        org.ducatproject.ducat.ui.callOpenThread = { hex -> openChat.value = hex }
+        org.ducatproject.ducat.ui.marketSubscribe = { claimLink.value = it }
+        // The Library's Open: view first, share sheet when nothing on the
+        // device claims the type. Lives here because FileProvider and the
+        // chooser are Android; the shared screen only holds the hook.
+        // Counter etiquette: full brightness while any QR is on screen, put
+        // back the moment the last one leaves. Refcounted — two codes can
+        // overlap during a transition and the first to close must not dim
+        // the one still up.
+        var qrsUp = 0
+        org.ducatproject.ducat.ui.qrLit = { on ->
+            runOnUiThread {
+                qrsUp = (qrsUp + if (on) 1 else -1).coerceAtLeast(0)
+                val lp = window.attributes
+                lp.screenBrightness = if (qrsUp > 0) {
+                    1f
+                } else {
+                    android.view.WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+                }
+                window.attributes = lp
+            }
+        }
+        org.ducatproject.ducat.ui.libraryOpen = { ctx, publisherHex, period ->
+            val dir = java.io.File(ctx.filesDir, "publications/$publisherHex/$period")
+            val file = dir.walkTopDown()
+                .filter { it.isFile && !it.name.endsWith(".part") }
+                .maxByOrNull { it.length() }
+            if (file != null) {
+                val uri = androidx.core.content.FileProvider.getUriForFile(
+                    ctx, "${ctx.packageName}.backups", file,
+                )
+                val mime = android.webkit.MimeTypeMap.getSingleton()
+                    .getMimeTypeFromExtension(file.extension.lowercase()) ?: "*/*"
+                val view = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
+                    setDataAndType(uri, mime)
+                    addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                runCatching { ctx.startActivity(view) }.onFailure {
+                    val send = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                        type = mime
+                        putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                        addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
+                    runCatching {
+                        ctx.startActivity(
+                            android.content.Intent.createChooser(send, file.name),
+                        )
+                    }
+                }
+            }
+        }
+        org.ducatproject.ducat.ui.marketListYours = { openPublishing.value = true }
+        Calls.shell = object : Calls.Shell {
+            override fun takeover(context: android.content.Context, from: String) {
+                // A lit, watched app already shows CallScreen by itself.
+                if (!AppVisibility.foreground) Notify.ringIncoming(context, from)
+            }
+            override fun release(context: android.content.Context) {
+                Notify.quietIncoming(context)
+            }
+            // The node's own service, wearing the microphone type for the
+            // length of the call — see NodeService.inCall.
+            override fun connected(context: android.content.Context, from: String) {
+                NodeService.inCall(context, from)
+            }
+            override fun calling(context: android.content.Context, to: String) {
+                NodeService.inCall(context, to, ringing = true)
+            }
+            override fun ended(context: android.content.Context) {
+                NodeService.callEnded(context)
+            }
+        }
+        // First creation only. A rotation or a language change recreates the
+        // activity with the same intent, and reading it again re-opened the
+        // tapped card's confirm — or the notification's thread — on top of
+        // wherever the person had since gone.
+        if (savedInstanceState == null) readIntent(intent)
         val prefs = ThemePreference(this)
         setContent {
             // Follows the system unless the user has said otherwise (Menu).
@@ -140,26 +263,80 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
             // killed between the wallet and the PIN resumed at the backup
             // step, walked to Done, and left a funded wallet with no PIN on
             // it, for ever. Ask what is actually missing instead of assuming.
-            var setup by remember {
+            //
+            // Saveable, with the stores as the fallback rather than the rule.
+            // The stores know which steps are *answered*; they cannot tell
+            // the Profile step from the Persona step before it, or the Trust
+            // explainer from the Backup step after it, so rebuilding from
+            // them on every rotation sent a person who had just typed a name
+            // back to "Create your identity". The saved state carries the
+            // step across a rotation; the computation below is for when
+            // there is none — a killed process, a first launch.
+            var setup by rememberSaveable(stateSaver = Onboarding.Saver) {
                 mutableStateOf(
-                    when {
-                        WalletStore(this@MainActivity).address() == null -> Onboarding()
-                        !Pin.isSet(this@MainActivity) -> Onboarding(step = Step.Pin)
-                        // Ask about the backup too, rather than assuming it is
-                        // the thing still outstanding. A restore records one —
-                        // the file that got them here — and so does making one
-                        // at the last step, so this is answerable from the same
-                        // durable state the two checks above use.
-                        //
-                        // Assuming it left a restored phone being marched
-                        // through Trust and Backup to produce a bundle it did
-                        // not need, and could not leave setup until it did.
-                        // Whether that happened at all came down to whether the
-                        // process had been killed since the restore, which is
-                        // not something onboarding should vary on.
-                        ContactStore(this@MainActivity).backupExportedAt() > 0L ->
-                            Onboarding(step = Step.Done, backupConfirmed = true)
-                        else -> Onboarding(step = Step.Backup)
+                    run {
+                        val store = ContactStore(this@MainActivity)
+                        // The Profile step's answers, if it has been through
+                        // (a restore records the bundle's); the flow's own
+                        // defaults before then. Both are written the moment
+                        // they are given, so a rebuilt flow shows what was
+                        // said rather than the switch's opening position —
+                        // which is on, over a choice that may have been no.
+                        val name = NameStore(this@MainActivity).get()
+                        val publish =
+                            if (store.publishAddressChosen()) store.publishAddress()
+                            else Onboarding().publishPayto
+                        when {
+                            WalletStore(this@MainActivity).address() == null ->
+                                Onboarding(displayName = name, publishPayto = publish)
+                            // A restore lands here too — wallet in place, PIN
+                            // still to choose — and it has already recorded the
+                            // backup that got it here. Resuming with the defaults
+                            // marched a restored phone through Trust and Backup
+                            // again, and Done then wrote the default "publish my
+                            // address" over the choice the backup carried.
+                            !Pin.isSet(this@MainActivity) ->
+                                Onboarding(
+                                    step = Step.Pin,
+                                    backupConfirmed = store.backupExportedAt() > 0L,
+                                    displayName = name,
+                                    publishPayto = publish,
+                                )
+                            // Ask about the backup too, rather than assuming it is
+                            // the thing still outstanding. A restore records one —
+                            // the file that got them here — and so does making one
+                            // at the last step, so this is answerable from the same
+                            // durable state the two checks above use.
+                            //
+                            // Assuming it left a restored phone being marched
+                            // through Trust and Backup to produce a bundle it did
+                            // not need, and could not leave setup until it did.
+                            // Whether that happened at all came down to whether the
+                            // process had been killed since the restore, which is
+                            // not something onboarding should vary on.
+                            //
+                            // Recorded by setup's own write, though, the step is
+                            // not over: the file is in app-private storage and
+                            // the row offering to send it somewhere is the rest
+                            // of that step. Resuming at Done skipped it, and
+                            // the only copy of the backup stayed on the phone
+                            // whose loss it is for. A restore leaves no such
+                            // file, so the two are told apart by its presence.
+                            store.backupExportedAt() > 0L &&
+                                !setupBackupFile(this@MainActivity).exists() ->
+                                Onboarding(
+                                    step = Step.Done,
+                                    backupConfirmed = true,
+                                    displayName = name,
+                                    publishPayto = publish,
+                                )
+                            else ->
+                                Onboarding(
+                                    step = Step.Backup,
+                                    displayName = name,
+                                    publishPayto = publish,
+                                )
+                        }
                     }
                 )
             }
@@ -171,16 +348,15 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
                     OnboardingFlow(setup) { next ->
                         setup = next
                         if (next.step == Step.Done && next.backupConfirmed) {
-                            // The persona and wallet were persisted at creation
-                            // (so a rotation could not lose or regenerate them);
-                            // only the profile choices, which are settings and
-                            // not keys, are committed here — and the gate flag,
+                            // Everything the flow made is already in the stores
+                            // — the persona and wallet at creation, the name and
+                            // the address choice as the Profile step was
+                            // answered (a restore's, as the bundle was applied)
+                            // — so a rotation can neither lose nor regenerate
+                            // any of it. Only the gate flag is committed here,
                             // which is what actually opens the funded wallet.
-                            next.displayName?.let {
-                                NameStore(this@MainActivity).put(it)
-                            }
-                            ContactStore(this@MainActivity)
-                                .setPublishAddress(next.publishPayto)
+                            // Writing the choices back from `next` as well
+                            // wrote a rebuilt flow's default over the answer.
                             prefs.onboarded = true
                             onboarded = true
                         }
@@ -200,6 +376,14 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
 private sealed interface Overlay {
     data object None : Overlay
     data class Chat(val contact: Contact) : Overlay
+    /** A group's conversation (§16.19). An overlay like a pairwise one: it
+     *  used to be drawn inside the Chats tab, under the tab's own bar — two
+     *  headers stacked on a chat, and the back gesture, which the tab shell
+     *  owns, left it for Home rather than for the list it came from. */
+    data class Group(val idHex: String) : Overlay
+    /** The form that makes one — the same story as [Group], with a half-filled
+     *  form lost to the back gesture instead of a conversation. */
+    data object GroupNew : Overlay
     /** [jumpToBackup] lands on the backup card rather than the top of a long
      *  settings screen — the nudge that sent you there was about backups. */
     data class Drawer(val section: Section, val jumpToBackup: Boolean = false) : Overlay
@@ -211,6 +395,13 @@ enum class Tab(val labelRes: Int) {
     Activity(R.string.tab_activity),
     Chat(R.string.tab_chat),
 }
+
+/** The card-link question — the link and the name it asserts — as a Bundle
+ *  holds it. An empty list is "no question", which the saver reads as null. */
+private val cardAskSaver = androidx.compose.runtime.saveable.listSaver<Pair<String, String>?, String>(
+    save = { it?.let { (uri, who) -> listOf(uri, who) } ?: emptyList() },
+    restore = { if (it.size == 2) it[0] to it[1] else null },
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -233,6 +424,8 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                 when (it) {
                     is Overlay.None -> ""
                     is Overlay.Chat -> "chat:${it.contact.personaHex}"
+                    is Overlay.Group -> "group:${it.idHex}"
+                    is Overlay.GroupNew -> "groupnew"
                     is Overlay.Drawer -> "drawer:${it.section.name}"
                 }
             },
@@ -241,6 +434,10 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                     s.startsWith("chat:") -> ContactStore(context).all()
                         .firstOrNull { it.personaHex == s.removePrefix("chat:") }
                         ?.let { Overlay.Chat(it) } ?: Overlay.None
+                    s.startsWith("group:") -> s.removePrefix("group:")
+                        .takeIf { Groups.get(context, it) != null }
+                        ?.let { Overlay.Group(it) } ?: Overlay.None
+                    s == "groupnew" -> Overlay.GroupNew
                     s.startsWith("drawer:") -> runCatching {
                         Overlay.Drawer(Section.valueOf(s.removePrefix("drawer:")))
                     }.getOrDefault(Overlay.None)
@@ -257,6 +454,18 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
     val drawer = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val persona = remember { PersonaStore(context).secret() }
+
+    // The mode owns the whole scaffold (§15.11): a till is a different app
+    // from a wallet, and the drawer is the one shared door between them.
+    val modeV by ContactStore.changes.collectAsState()
+    val appMode = remember(modeV) { ModeStore(context).current() }
+    // A kiosk is an unattended device in a shop, and its one way out is the
+    // staff door behind the PIN. So nothing else that can reach this screen
+    // — the drawer's edge swipe, a tapped link, a notification's thread, a
+    // ring, a bill — may take the surface from it. Each is answered below
+    // the way an empty shop answers it, rather than held for whoever next
+    // types the PIN.
+    val kiosk = appMode == Mode.Kiosk
 
     // Android 13+ gates notifications behind a runtime ask. Once, up front:
     // this app's whole point includes "your phone tells you when money moves",
@@ -278,25 +487,106 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
     LaunchedEffect(wanted) {
         val hex = wanted ?: return@LaunchedEffect
         MainActivity.openChat.value = null
+        if (kiosk) return@LaunchedEffect
         ContactStore(context).all().firstOrNull { it.personaHex == hex }
             ?.let { overlay = Overlay.Chat(it) }
+    }
+    val wantedGroup by MainActivity.openGroup.collectAsState()
+    LaunchedEffect(wantedGroup) {
+        val hex = wantedGroup ?: return@LaunchedEffect
+        MainActivity.openGroup.value = null
+        if (kiosk) return@LaunchedEffect
+        if (Groups.get(context, hex) != null) overlay = Overlay.Group(hex)
     }
 
     // A tapped ducat: link (a chat app, an email, an NDEF sticker's browser
     // fallback). Unlike a scan — aimed at a code in front of you — a link can
     // be sent by anyone, so the card is named before it becomes a contact.
     // The name shown is the card's own claim (§16.9), like every name here.
+    val wantPublishing by MainActivity.openPublishing.collectAsState()
+    LaunchedEffect(wantPublishing) {
+        if (wantPublishing) {
+            if (!kiosk) overlay = Overlay.Drawer(Section.Publishing)
+            MainActivity.openPublishing.value = false
+        }
+    }
+    val wantSites by MainActivity.openSites.collectAsState()
+    LaunchedEffect(wantSites) {
+        if (wantSites) {
+            if (kiosk) {
+                // The address the link carried is waiting on the section
+                // it will never reach; drop it with the request.
+                org.ducatproject.ducat.ui.pendingSiteAdd.value = null
+            } else {
+                overlay = Overlay.Drawer(Section.Sites)
+            }
+            MainActivity.openSites.value = false
+        }
+    }
     val tappedCard by MainActivity.claimLink.collectAsState()
-    var cardAsk by remember { mutableStateOf<Pair<String, String>?>(null) }
+    // The question, and the answer being typed into it, outlive a turn of
+    // the phone: the link was tapped in another app, and a dialog that
+    // vanished on rotation left the person with no card and no way back to
+    // it but the other app.
+    var cardAsk by rememberSaveable(stateSaver = cardAskSaver) {
+        mutableStateOf<Pair<String, String>?>(null)
+    }
     // Not a new person. A card naming somebody already in the list is the
     // ordinary way a contact comes back after losing their phone — and it is
     // also how an attacker reaches an existing record, since a card carries a
     // persona with nothing signed over it. Either way "Add Sam?" is the wrong
-    // question, so the dialog asks the right one.
-    var cardKnown by remember { mutableStateOf<Contact?>(null) }
+    // question, so the dialog asks the right one. Looked up from the card
+    // each time it is shown: a parse and a read of the book, both cheap.
+    val cardKnown = remember(cardAsk?.first) {
+        cardAsk?.first?.let { uri ->
+            runCatching {
+                val card = uniffi.ducat_mobile.readContactCard(uri)
+                val hex = card.persona.joinToString("") { "%02x".format(it) }
+                ContactStore(context).all().firstOrNull { it.personaHex == hex }
+            }.getOrNull()
+        }
+    }
     var cardFail by remember { mutableStateOf<Int?>(null) }
+    // The claim a tapped Add started, by its link. It runs off the screen
+    // (claimOffScreen): it always finished — the contact in the book, the
+    // reply written — but the line after it that opened the thread was
+    // cancelled by a rotation in the seconds it took, and the dialog had
+    // already closed, so nothing on the screen said anything had happened.
+    // The dialog now stays up with a spinner until the claim lands, and
+    // whichever instance of this screen is up then opens the thread.
+    var cardClaim by rememberSaveable { mutableStateOf<String?>(null) }
+    val claimTick by org.ducatproject.ducat.ui.ThreadSends.ticks.collectAsState()
+    LaunchedEffect(claimTick, cardClaim) {
+        val k = cardClaim?.let { org.ducatproject.ducat.ui.claimKey(it) } ?: return@LaunchedEffect
+        for (o in org.ducatproject.ducat.ui.ThreadSends.take(k)) {
+            if (cardAsk?.first == cardClaim) cardAsk = null
+            cardClaim = null
+            when (o) {
+                is org.ducatproject.ducat.ui.ThreadSends.Outcome.Landed ->
+                    o.claimed(context)?.let { overlay = Overlay.Chat(it) }
+                is org.ducatproject.ducat.ui.ThreadSends.Outcome.Failed -> {
+                    DucatLog.w("Main", "card link claim: ${o.error.message}")
+                    // A node that has not finished connecting is not a bad
+                    // card. Saying "broken, already claimed, or no longer
+                    // valid" over a claim that failed offline sends someone
+                    // back to ask for a replacement — burning the good card
+                    // they are holding, since a card is claim-once.
+                    cardFail = org.ducatproject.ducat.ui.claimFailureRes(o.error)
+                }
+            }
+        }
+        // A claim the process died under has no answer coming, and the
+        // restored dialog must not spin for it. It shows its plain body
+        // again — with "already in your book" if the claim had landed —
+        // and a second Add finds the thread the first one made.
+        if (cardClaim != null && !org.ducatproject.ducat.ui.ThreadSends.inFlight(k)) cardClaim = null
+    }
     LaunchedEffect(tappedCard) {
         val uri = tappedCard ?: return@LaunchedEffect
+        if (kiosk) {
+            MainActivity.claimLink.value = null
+            return@LaunchedEffect
+        }
         // Cleared at the end, not here: this effect is keyed on the flow, so
         // emptying it first changes the key and cancels the read below at its
         // first suspension point. Reading a card is fast enough to usually win
@@ -306,10 +596,6 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         }.onSuccess { card ->
             if (card.expired) cardFail = R.string.main_card_link_expired
             else cardAsk = uri to card.assertedName.orEmpty()
-            cardKnown = runCatching {
-                val hex = card.persona.joinToString("") { "%02x".format(it) }
-                ContactStore(context).all().firstOrNull { it.personaHex == hex }
-            }.getOrNull()
         }.onFailure {
             DucatLog.w("Main", "card link unreadable: ${it.message}")
             cardFail = org.ducatproject.ducat.ui.claimFailureRes(it)
@@ -323,7 +609,8 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         // is the one moment the person is standing right there to be asked
         // about. Prefilled with what the card says, so the common case is one
         // tap and nothing to read.
-        var naming by remember(uri) { mutableStateOf(who) }
+        var naming by rememberSaveable(uri) { mutableStateOf(who) }
+        val claiming = cardClaim == uri
         // The other half of the same question, asked in the same breath.
         //
         // This dialog exists because claiming a card is the one moment the
@@ -334,12 +621,24 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         // "Unnamed contact". A second modal stacked on this one would be a
         // worse way to ask than a second field.
         val needMine = remember(uri) { org.ducatproject.ducat.ui.nameGateNeeded(context) }
-        var mine by remember(uri) { mutableStateOf("") }
+        var mine by rememberSaveable(uri) { mutableStateOf("") }
         AlertDialog(
             onDismissRequest = { cardAsk = null },
             title = { Text(androidx.compose.ui.res.stringResource(R.string.main_card_link_title)) },
             text = {
-                Column {
+                if (claiming) {
+                    // The claim is reading their inbox and writing ours
+                    // into it, which takes a node and a few seconds — or,
+                    // on a node still attaching, a good deal longer. The
+                    // dialog says so rather than closing on a tap that
+                    // then did nothing anybody could see; Not now hides
+                    // it, and the thread still opens when the claim lands.
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                        Spacer(Modifier.width(12.dp))
+                        Text(androidx.compose.ui.res.stringResource(R.string.contacts_reading_inbox))
+                    }
+                } else Column {
                     Text(
                         androidx.compose.ui.res.stringResource(
                             if (who.isBlank()) R.string.main_card_link_body_unnamed
@@ -392,7 +691,7 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                 }
             },
             confirmButton = {
-                TextButton(onClick = {
+                if (!claiming) TextButton(onClick = {
                     val petname = naming.trim().takeIf { it.isNotBlank() && it != who }
                     // Before the claim, not after: claimCard reads the name
                     // store to decide what to assert about us, and a write
@@ -402,31 +701,20 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                         mine.trim().takeIf { it.isNotBlank() }?.let { store.put(it) }
                         store.markAsked()
                     }
-                    cardAsk = null
-                    cardKnown = null
-                    scope.launch {
-                        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                            runCatching {
-                                val card = uniffi.ducat_mobile.readContactCard(uri)
-                                Mailbox.claimCard(context, card, petname)
-                            }
-                        }.onSuccess { overlay = Overlay.Chat(it) }
-                            .onFailure {
-                                DucatLog.w("Main", "card link claim: ${it.message}")
-                                // A node that has not finished connecting is
-                                // not a bad card. Saying "broken, already
-                                // claimed, or no longer valid" over a claim
-                                // that failed offline sends someone back to ask
-                                // for a replacement — burning the good card
-                                // they are holding, since a card is claim-once.
-                                cardFail = org.ducatproject.ducat.ui
-                                    .claimFailureRes(it)
-                            }
-                    }
+                    cardClaim = uri
+                    claimOffScreen(
+                        context, uri, petname = petname,
+                        // The same link opened twice: the thread the first
+                        // one made is the answer, under the name just
+                        // chosen if one was.
+                        onAgain = { mine ->
+                            petname?.let { ContactStore(context).setPetname(mine.personaHex, it) }
+                        },
+                    )
                 }) { Text(androidx.compose.ui.res.stringResource(R.string.main_card_link_add)) }
             },
             dismissButton = {
-                TextButton(onClick = { cardAsk = null; cardKnown = null }) {
+                TextButton(onClick = { cardAsk = null }) {
                     Text(androidx.compose.ui.res.stringResource(R.string.main_card_link_not_now))
                 }
             },
@@ -447,10 +735,70 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         )
     }
 
-    // The mode owns the whole scaffold (§15.11): a till is a different app
-    // from a wallet, and the drawer is the one shared door between them.
-    val modeV by ContactStore.changes.collectAsState()
-    val appMode = remember(modeV) { ModeStore(context).current() }
+    // §16.21: a live call outranks every other screen — a telephone that
+    // hides its own call behind a till is not a telephone. The observer
+    // rides the store's own change signal, so a ring lands the moment the
+    // poller files it.
+    val callV by ContactStore.changes.collectAsState()
+    // Off the main thread: noticing means reading every thread in the store
+    // on every change to it, and the poller already calls this from its own.
+    LaunchedEffect(callV) {
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            Calls.noticed(context)
+        }
+    }
+    // While a call exists, this activity may be woken by the full-screen
+    // ask on a dark, locked phone — it must show over the keyguard and
+    // light the screen, and must stop doing either the moment the call
+    // ends: these flags on an idle wallet would put balances above locks.
+    val callState = Calls.state
+    val inCall = callState != Calls.State.Idle
+    LaunchedEffect(inCall, kiosk) {
+        (context as? android.app.Activity)?.let {
+            if (android.os.Build.VERSION.SDK_INT >= 27) {
+                it.setShowWhenLocked(inCall && !kiosk)
+                it.setTurnScreenOn(inCall && !kiosk)
+            }
+            // A telephone does not go dark mid-sentence: the screen stays
+            // on for the call and goes back to its timeout after it.
+            val keepOn = android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+            if (inCall && !kiosk) it.window.addFlags(keepOn) else it.window.clearFlags(keepOn)
+        }
+    }
+    // A kiosk has nobody to pick up. The ring is declined — the caller
+    // hears the till's own word for "no", not a phone that rings out —
+    // and the answering-machine screen it would leave behind is dismissed,
+    // because the call screen is the one door here with no PIN on it.
+    LaunchedEffect(callState, kiosk) {
+        if (!kiosk) return@LaunchedEffect
+        when (callState) {
+            Calls.State.Idle -> {}
+            is Calls.State.NoAnswer -> Calls.dismissNoAnswer()
+            is Calls.State.Incoming -> {
+                val (c, offer) = kotlinx.coroutines.withContext(
+                    kotlinx.coroutines.Dispatchers.IO,
+                ) {
+                    val store = ContactStore(context)
+                    val c = store.all().firstOrNull { it.personaHex == callState.contactHex }
+                    // By id as well as seq: a fresh card restarts the
+                    // numbering, so one thread can hold several rows at
+                    // the offer's seq, and a decline naming the wrong one
+                    // withdraws nothing.
+                    c to c?.let { store.thread(it.personaHex) }
+                        ?.lastOrNull {
+                            it.seq == callState.offerSeq && !it.outgoing &&
+                                it.callId == callState.callId
+                        }
+                }
+                if (c != null && offer != null) Calls.decline(context, c, offer) else Calls.hangUp()
+            }
+            else -> Calls.hangUp()
+        }
+    }
+    if (inCall && !kiosk) {
+        org.ducatproject.ducat.ui.CallScreen()
+        return
+    }
 
     // Android's back gesture is a system behaviour, not a widget: without a
     // handler it goes straight to the activity and closes the app. Every screen
@@ -480,53 +828,114 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
     var billPrompt by remember {
         mutableStateOf<Pair<Contact, StoredMessage>?>(null)
     }
-    var billPay by remember { mutableStateOf<Triple<Contact, Long, Long>?>(null) }
+    var billPay by remember { mutableStateOf<Pair<Contact, StoredMessage>?>(null) }
     val billPrefs = remember {
         securePrefs(context, "ducat_contacts")
     }
     val billV by ContactStore.changes.collectAsState()
+    // What became of the bill on screen, read again on every store bump.
+    // Found live (2026-09-01): the bar withdrew a bill while this prompt had
+    // it up; the retraction arrived and was stored, the thread underneath
+    // knew, and the prompt — a snapshot taken when the bill landed — went
+    // on offering "Accept & pay" for money nobody was watching for (§15.11).
+    // The same read pulls the confirm sheet down if the bill is withdrawn
+    // under it, and puts this prompt back up to say so.
+    var billOver by remember { mutableStateOf<Ledger.BillOutcome?>(null) }
+    LaunchedEffect(billV, billPrompt, billPay) {
+        val shown = billPrompt ?: billPay
+        val outcome = shown?.let { (c, m) ->
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                val thread = ContactStore(context).thread(c.personaHex)
+                // The bill as the thread holds it now: `billOutcome`
+                // compares by identity within the list it is given.
+                thread.firstOrNull {
+                    it.kind == 1 && !it.outgoing &&
+                        it.seq == m.seq && it.timestamp == m.timestamp
+                }?.let { Ledger.billOutcome(thread, it) }
+            }
+        }
+        if (billPay != null && outcome == Ledger.BillOutcome.Withdrawn) {
+            // Only withdrawn: our own payment lands in the thread before
+            // the sheet's paid splash, and closing on Paid would cut the
+            // splash off. Declined cannot happen from behind the sheet.
+            billPrompt = billPay
+            billPay = null
+        }
+        billOver = outcome
+    }
     // Keyed on the flows a bill can be behind, not just the store: one
     // takeover at a time, so a bill arriving while another bill's prompt or
     // payment screen is up waits unseen — and the re-key runs this again the
     // moment the current flow closes, which is when the queued one appears.
-    LaunchedEffect(billV, billPrompt, billPay, payOpen) {
+    LaunchedEffect(billV, billPrompt, billPay, payOpen, kiosk) {
         if (billPrompt != null || billPay != null || payOpen) return@LaunchedEffect
-        val store = ContactStore(context)
-        val now = System.currentTimeMillis() / 1000
-        for (c in store.all()) {
-            val thread = store.thread(c.personaHex)
-            val m = thread.lastOrNull { !it.outgoing && it.kind == 1 } ?: continue
-            // Not one that is already settled. `billseen_` only records bills
-            // this prompt itself handled, so paying or declining one from the
-            // thread left it unmarked — and inside the five-minute freshness
-            // window the prompt then took the screen over to offer a bill that
-            // had just been paid.
-            if (Ledger.billAnswered(thread, m)) continue
-            val seen = billPrefs.getLong("billseen_${c.personaHex}", -1L)
-            // Fresh only: reinstalls and restores must not replay history as
-            // a stack of surprise take-overs. Both directions — the stamp is
-            // the asker's clock, and a bill stamped ahead of ours (fast
-            // clock, or worse) otherwise counts as "fresh" until its stamp
-            // passes, taking the screen over at every launch until then.
-            if (m.seq > seen && kotlin.math.abs(now - m.timestamp) < 300) {
-                billPrompt = c to m
-                break
+        // A kiosk pays nobody: the bill stays in the thread for the staff,
+        // where it would have gone anyway once dismissed, and the till's
+        // wallet is not offered to whoever is standing at the counter.
+        if (kiosk) return@LaunchedEffect
+        // Every thread in the store, read on each change to it — off the
+        // main thread, which was drawing the screen the bill takes over.
+        val found = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            val store = ContactStore(context)
+            val now = System.currentTimeMillis() / 1000
+            var hit: Pair<Contact, StoredMessage>? = null
+            for (c in store.all()) {
+                val thread = store.thread(c.personaHex)
+                val m = thread.lastOrNull { !it.outgoing && it.kind == 1 } ?: continue
+                // Not one that is already settled. `billdone_` only records
+                // bills this prompt itself handled, so paying or declining
+                // one from the thread left it unmarked — and inside the
+                // five-minute freshness window the prompt then took the
+                // screen over to offer a bill that had just been paid.
+                if (Ledger.billAnswered(thread, m)) continue
+                // The bill itself, not "anything past this number": a seq
+                // is per card, and a till mints a card per sale, so a
+                // repeat customer's next bill arrives numbered *below* the
+                // one they paid last week — and never took the screen.
+                val seen = billPrefs.getString("billdone_${c.personaHex}", null)
+                // Fresh only: reinstalls and restores must not replay history
+                // as a stack of surprise take-overs. Both directions — the
+                // stamp is the asker's clock, and a bill stamped ahead of
+                // ours (fast clock, or worse) otherwise counts as "fresh"
+                // until its stamp passes, taking the screen over at every
+                // launch until then.
+                if (seen != "${m.seq}:${m.timestamp}" &&
+                    kotlin.math.abs(now - m.timestamp) < 300
+                ) {
+                    hit = c to m
+                    break
+                }
             }
+            hit
         }
+        if (found != null) billPrompt = found
     }
     billPrompt?.let { (c, m) ->
         val markSeen = {
-            billPrefs.edit().putLong("billseen_${c.personaHex}", m.seq).apply()
+            billPrefs.edit()
+                .putString("billdone_${c.personaHex}", "${m.seq}:${m.timestamp}")
+                .apply()
             billPrompt = null
         }
         org.ducatproject.ducat.ui.BillScreen(
             m = m,
             contact = c,
+            over = when (billOver) {
+                Ledger.BillOutcome.Paid ->
+                    androidx.compose.ui.res.stringResource(R.string.ceremony_bill_paid)
+                Ledger.BillOutcome.Declined ->
+                    androidx.compose.ui.res.stringResource(R.string.ceremony_bill_declined)
+                Ledger.BillOutcome.Withdrawn -> androidx.compose.ui.res.stringResource(
+                    R.string.ceremony_bill_withdrawn,
+                    org.ducatproject.ducat.ui.isolate(c.displayName()),
+                )
+                null -> null
+            },
             // The seq rides along: a payment that names its bill is the
             // whole of §16.14's attribution, and this prompt is the path
             // most payments take — dropping it here silently re-opened the
             // two-identical-bills ambiguity everywhere downstream.
-            onPay = { markSeen(); billPay = Triple(c, m.amountPxmr, m.seq) },
+            onPay = { markSeen(); billPay = c to m },
             onDecline = {
                 markSeen()
                 val mine = PersonaStore(context).personaHex()
@@ -547,7 +956,7 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                 val decline: () -> Result<Unit> = {
                     runCatching {
                         Mailbox.send(
-                            context, c, body, mine,
+                            context, c, body,
                             kind = 5, reSeq = m.seq, reOwn = false,
                         )
                         Unit
@@ -571,10 +980,10 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
             onClose = markSeen,
         )
     }
-    billPay?.let { (c, amt, seq) ->
+    billPay?.let { (c, m) ->
         PaySheet(
-            prefillContact = c, prefillAmountPxmr = amt,
-            answersSeq = seq,
+            prefillContact = c, prefillAmountPxmr = m.amountPxmr,
+            answersSeq = m.seq,
         ) { billPay = null }
     }
 
@@ -583,10 +992,20 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         (overlay as? Overlay.Drawer)?.let {
             if (it.section == Section.Modes) overlay = Overlay.None
         }
+        // Nothing may be left standing over a kiosk: whatever section or
+        // thread was up when the mode was chosen, and the drawer itself.
+        if (appMode == Mode.Kiosk) {
+            overlay = Overlay.None
+            if (drawer.isOpen) drawer.close()
+        }
     }
 
     ModalNavigationDrawer(
         drawerState = drawer,
+        // The kiosk draws no menu button, but the drawer also opens on an
+        // edge swipe — every section, Modes included, one gesture from the
+        // counter. The drawer is a door for staff; in a kiosk the PIN is.
+        gesturesEnabled = !kiosk,
         drawerContent = {
             DrawerContent { section ->
                 scope.launch { drawer.close() }
@@ -594,9 +1013,28 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
             }
         },
     ) {
+        // The screens under an overlay keep their saveable state while the
+        // overlay is up, and the personal tabs keep theirs across a tab
+        // switch. Both used to be rebuilt from nothing: the overlay and the
+        // `when (tab)` below drop the screen out of composition, and a
+        // `rememberSaveable` with no holder only ever restores from the
+        // activity's bundle — a scroll position, a half-typed search, the
+        // sale a till was ringing up when a notification opened a chat.
+        val kept = androidx.compose.runtime.saveable.rememberSaveableStateHolder()
         when (val o = overlay) {
             is Overlay.Chat -> {
                 ChatScreen(o.contact) { overlay = Overlay.None }
+                return@ModalNavigationDrawer
+            }
+            is Overlay.Group -> {
+                org.ducatproject.ducat.ui.GroupChatScreen(o.idHex) { overlay = Overlay.None }
+                return@ModalNavigationDrawer
+            }
+            is Overlay.GroupNew -> {
+                org.ducatproject.ducat.ui.GroupCreateScreen(
+                    onDone = { overlay = Overlay.Group(it) },
+                    onCancel = { overlay = Overlay.None },
+                )
                 return@ModalNavigationDrawer
             }
             is Overlay.Drawer -> {
@@ -639,7 +1077,9 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         // already returned above, so a notification can still drop the till
         // into the conversation it names and back lands in the shell.
         if (appMode != Mode.None) {
-            org.ducatproject.ducat.ui.ModeShell(appMode) { scope.launch { drawer.open() } }
+            kept.SaveableStateProvider("mode:${appMode.name}") {
+                org.ducatproject.ducat.ui.ModeShell(appMode) { scope.launch { drawer.open() } }
+            }
             return@ModalNavigationDrawer
         }
 
@@ -792,7 +1232,11 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                             // the app's life.
                             val unread by produceState(0, unv) {
                                 value = withContext(Dispatchers.IO) {
-                                    ContactStore(context).unreadThreads()
+                                    // Groups count as their own rows now
+                                    // that their traffic no longer flags
+                                    // the sender's thread (Groups.markSeen).
+                                    ContactStore(context).unreadThreads() +
+                                        org.ducatproject.ducat.Groups.unreadGroups(context)
                                 }
                             }
                             NavigationBarItem(
@@ -849,31 +1293,40 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
             },
         ) { padding ->
             Box(Modifier.padding(padding).fillMaxSize()) {
-                when (tab) {
-                    // Only the scrolling screens get a scroll wrapper. Chat owns
-                    // a LazyColumn, and nesting one inside a vertical scroll
-                    // gives it unbounded height — it renders every row at once
-                    // and the list stops being lazy.
-                    //
-                    // In POS mode the Home tab *is* the till. A mode is a
-                    // stance, not a feature: the person behind a counter rings
-                    // up sale after sale, and making them navigate to it before
-                    // every customer is making them do it forty times a shift.
-                    Tab.Home -> Column(Modifier.verticalScroll(rememberScrollState())) {
-                        HomeScreen(
-                            onTopUp = { tab = Tab.Accounts },
-                            onSeeActivity = { tab = Tab.Activity },
-                            onBackup = {
-                                overlay = Overlay.Drawer(
-                                    Section.Settings, jumpToBackup = true,
-                                )
-                            },
+                kept.SaveableStateProvider(tab.name) {
+                    when (tab) {
+                        // Only the scrolling screens get a scroll wrapper. Chat
+                        // owns a LazyColumn, and nesting one inside a vertical
+                        // scroll gives it unbounded height — it renders every
+                        // row at once and the list stops being lazy.
+                        //
+                        // In POS mode the Home tab *is* the till. A mode is a
+                        // stance, not a feature: the person behind a counter
+                        // rings up sale after sale, and making them navigate to
+                        // it before every customer is making them do it forty
+                        // times a shift.
+                        Tab.Home -> Column(Modifier.verticalScroll(rememberScrollState())) {
+                            HomeScreen(
+                                onTopUp = { tab = Tab.Accounts },
+                                onSeeActivity = { tab = Tab.Activity },
+                                onBackup = {
+                                    overlay = Overlay.Drawer(
+                                        Section.Settings, jumpToBackup = true,
+                                    )
+                                },
+                                onOpenChat = { overlay = Overlay.Chat(it) },
+                                onLibrary = { overlay = Overlay.Drawer(Section.Library) },
+                            )
+                        }
+                        Tab.Accounts -> AccountsScreen()
+                        Tab.Activity -> ActivityScreen()
+                        Tab.Chat -> ChatListScreen(
+                            persona,
                             onOpenChat = { overlay = Overlay.Chat(it) },
+                            onOpenGroup = { overlay = Overlay.Group(it) },
+                            onNewGroup = { overlay = Overlay.GroupNew },
                         )
                     }
-                    Tab.Accounts -> AccountsScreen()
-                    Tab.Activity -> ActivityScreen()
-                    Tab.Chat -> ChatListScreen(persona) { overlay = Overlay.Chat(it) }
                 }
             }
         }
@@ -883,6 +1336,7 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
 @Composable
 private fun HomeScreen(
     onTopUp: () -> Unit,
+    onLibrary: () -> Unit,
     onSeeActivity: () -> Unit,
     onBackup: () -> Unit,
     onOpenChat: (Contact) -> Unit,
@@ -897,35 +1351,53 @@ private fun HomeScreen(
     LaunchedEffect(version) {
         loaded = withContext(Dispatchers.IO) { Wallet.balances(context) }
     }
-    val b = loaded ?: return
-
-    // The capacity comes from `core::float` across the bridge, so the one number
-    // §17.2 forbids overstating is computed by the same code the conformance
-    // vectors and the harness run, rather than a second implementation in Kotlin.
-    val float = Float(
-        spendablePxmr = b.spendablePxmr,
-        lockedPxmr = b.lockedPxmr,
-        blocksToUnlock = b.blocksToUnlock.toInt(),
-        unlockedOutputs = b.spendableOutputs,
-    )
-    val approx = remember(b.spendableOutputs) {
-        approxPaymentsSupported(b.spendableOutputs.toUInt()).toInt()
+    // Until the first figure lands the balance is a wait, said as one; the
+    // tiles and cards below need no wallet arithmetic and draw at once. This
+    // used to return here, which left the whole home screen empty for as
+    // long as the first decrypt of a large wallet took — several seconds
+    // of a blank page on every cold start.
+    val b = loaded
+    if (b == null) {
+        Box(
+            Modifier.fillMaxWidth().padding(vertical = 48.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            org.ducatproject.ducat.ui.CatSpinner(
+                Modifier.size(40.dp), tint = MaterialTheme.colorScheme.primary,
+            )
+        }
+    } else {
+        // The capacity comes from `core::float` across the bridge, so the one
+        // number §17.2 forbids overstating is computed by the same code the
+        // conformance vectors and the harness run, rather than a second
+        // implementation in Kotlin.
+        val float = Float(
+            spendablePxmr = b.spendablePxmr,
+            lockedPxmr = b.lockedPxmr,
+            blocksToUnlock = b.blocksToUnlock.toInt(),
+            unlockedOutputs = b.spendableOutputs,
+        )
+        val approx = remember(b.spendableOutputs) {
+            approxPaymentsSupported(b.spendableOutputs.toUInt()).toInt()
+        }
+        BalanceCard(
+            spendablePxmr = b.spendablePxmr,
+            capacity = Capacity(approxPayments = approx),
+            float = float,
+            locked = Money(b.lockedPxmr / 1_000_000L, symbol = "", exponent = 6),
+            onTopUp = onTopUp,
+            sync = b,
+        )
     }
-    BalanceCard(
-        spendablePxmr = b.spendablePxmr,
-        capacity = Capacity(approxPayments = approx),
-        float = float,
-        locked = Money(b.lockedPxmr / 1_000_000L, symbol = "", exponent = 6),
-        onTopUp = onTopUp,
-        sync = b,
-    )
 
     // The three jobs that belong on the personal screen, as one row of
     // squares. Hailing is a rider's moment rather than an operating mode, and
     // looking for a car or a place is the same shape of moment — things a
     // person does occasionally, not jobs they run. The modes are for whoever
     // *has* a car or a room to let (§16.18).
-    val hailSheet = remember { mutableStateOf(false) }
+    // Saveable, or a rotation closed the sheet over a form whose every field
+    // had been taught to survive one.
+    val hailSheet = rememberSaveable { mutableStateOf(false) }
     Spacer(Modifier.height(12.dp))
     org.ducatproject.ducat.ui.HomeTiles(
         onHail = { hailSheet.value = true },
@@ -1022,7 +1494,11 @@ private fun HomeScreen(
     // Renting mode, three taps down a drawer. Somebody who sold a bicycle
     // from the Marketplace screen would have had nowhere to go to take it
     // down again, which is half a feature. Tapping this hands the app to that
-    // mode, the same as choosing it from the drawer.
+    // mode — as a look, not a shift: this row is on the wallet's own home
+    // screen, and it used to enter the mode the way the drawer does, which
+    // put the bound persona's hat on, gave Back nothing to return to (it
+    // left the app, and relaunching came back into Marketplace), and opened
+    // on Browse when the row had promised the listings.
     // One row per mode that holds any, because they are managed in two places
     // now: a bicycle for sale in Marketplace, a room in Renting. A single row
     // would have to guess which, and would be wrong for anybody who offers
@@ -1049,7 +1525,12 @@ private fun HomeScreen(
         ) {
             Row(
                 Modifier
-                    .clickable { org.ducatproject.ducat.ModeStore(context).set(m) }
+                    .clickable {
+                        org.ducatproject.ducat.ModeStore(context).set(m, browsing = true)
+                        // What you are offering sits second in all three
+                        // shells; the shell honours this after it composes.
+                        org.ducatproject.ducat.ui.shellTabRequest.value = 1
+                    }
                     .padding(14.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -1069,6 +1550,114 @@ private fun HomeScreen(
                     Text(
                         androidx.compose.ui.res.pluralStringResource(
                             R.plurals.main_listings_count, n, n,
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
+                Icon(
+                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+
+    // §16.20 on the front porch: a subscription whose issues arrive while
+    // the phone is pocketed must not depend on someone remembering a
+    // drawer. One card, only when something is actually waiting.
+    val waitingIssues = remember(version) {
+        org.ducatproject.ducat.Publications.subscribedPublishers(context)
+            .filterNot { org.ducatproject.ducat.Publications.isMuted(context, it) }
+            .sumOf { pub ->
+                val sub = org.ducatproject.ducat.Publications.subscription(context, pub)
+                sub?.third?.keys?.count { period ->
+                    org.ducatproject.ducat.ui.LibraryFetch
+                        .fetchedBytes(context, pub, period) == null
+                } ?: 0
+            }
+    }
+    if (waitingIssues > 0) {
+        Spacer(Modifier.height(12.dp))
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            shape = MaterialTheme.shapes.large,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        ) {
+            Row(
+                Modifier.clickable { onLibrary() }.padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        androidx.compose.ui.res.stringResource(R.string.section_library),
+                        style = MaterialTheme.typography.titleSmall,
+                    )
+                    Text(
+                        androidx.compose.ui.res.pluralStringResource(
+                            R.plurals.main_issues_waiting, waitingIssues, waitingIssues,
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
+                Icon(
+                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+
+
+    // The deal that cannot move without you, said where you already look.
+    // waitingOnMe is precise about whose turn it is — "waiting to be
+    // funded" is true of both sides and useful to neither — and the row
+    // routes to the Deals tab of the mode whose job the deal was.
+    val waitingDeals = remember(version) {
+        runCatching {
+            org.ducatproject.ducat.Ceremony.waitingOnMe(context).filter {
+                it.optInt("kind") == org.ducatproject.ducat.Ceremony.KIND_RESERVATION
+            }
+        }.getOrDefault(emptyList())
+    }
+    if (waitingDeals.isNotEmpty()) {
+        Spacer(Modifier.height(12.dp))
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            shape = MaterialTheme.shapes.large,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        ) {
+            Row(
+                Modifier.clickable {
+                    val about = waitingDeals.first().optInt("aboutKind", 0)
+                    val mode = when (about) {
+                        org.ducatproject.ducat.Listings.KIND_SALE ->
+                            org.ducatproject.ducat.Mode.Marketplace
+                        org.ducatproject.ducat.Listings.KIND_SKILL ->
+                            org.ducatproject.ducat.Mode.HireHelp
+                        else -> org.ducatproject.ducat.Mode.Renting
+                    }
+                    org.ducatproject.ducat.ModeStore(context).set(mode, browsing = true)
+                    // Their Deals tabs all sit third; the shell honours this
+                    // after it composes.
+                    org.ducatproject.ducat.ui.shellTabRequest.value = 2
+                }.padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        androidx.compose.ui.res.stringResource(R.string.main_deals_title),
+                        style = MaterialTheme.typography.titleSmall,
+                    )
+                    Text(
+                        androidx.compose.ui.res.pluralStringResource(
+                            R.plurals.main_deals_waiting,
+                            waitingDeals.size, waitingDeals.size,
                         ),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1115,6 +1704,69 @@ private fun HomeScreen(
                     Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = androidx.compose.ui.res
                         .stringResource(R.string.main_open_backup_settings),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+
+    // The other half of the runtime ask above: a decline is silent, and
+    // after it the app is muted — no bill, no ring, no receipt — while
+    // looking exactly as it does when nothing is happening. Said here, once,
+    // as a card with the way back; re-read on every resume so it leaves the
+    // moment they turn them back on in Settings. Notify.muted, not the app
+    // switch alone: a channel turned off on the same Settings page mutes
+    // the same bills and calls, and the card was blind to it.
+    val lifecycle = androidx.compose.ui.platform.LocalLifecycleOwner.current
+    var notifyOff by remember { mutableStateOf(Notify.muted(context)) }
+    DisposableEffect(lifecycle) {
+        val watch = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                notifyOff = Notify.muted(context)
+            }
+        }
+        lifecycle.lifecycle.addObserver(watch)
+        onDispose { lifecycle.lifecycle.removeObserver(watch) }
+    }
+    if (notifyOff) {
+        Spacer(Modifier.height(12.dp))
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            shape = MaterialTheme.shapes.large,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        ) {
+            Row(
+                Modifier
+                    .clickable {
+                        runCatching {
+                            context.startActivity(
+                                android.content.Intent(
+                                    android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS,
+                                ).putExtra(
+                                    android.provider.Settings.EXTRA_APP_PACKAGE,
+                                    context.packageName,
+                                ),
+                            )
+                        }
+                    }
+                    .padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        androidx.compose.ui.res.stringResource(R.string.main_notify_off_title),
+                        style = MaterialTheme.typography.titleSmall,
+                    )
+                    Text(
+                        androidx.compose.ui.res.stringResource(R.string.main_notify_off_body),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
+                Icon(
+                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }

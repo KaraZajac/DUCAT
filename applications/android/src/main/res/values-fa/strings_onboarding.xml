@@ -69,4 +69,5 @@
     <string name="onb_pin_done">پین تو تنظیم شد. پیش از هر پرداخت پرسیده می‌شود.</string>
     <string name="onb_pin_action">انتخاب پین</string>
     <string name="onb_pin_next">بعدی</string>
+    <string name="onb_wallet_error">کیف پول ساخته نشد. دوباره تلاش کن.</string>
 </resources>

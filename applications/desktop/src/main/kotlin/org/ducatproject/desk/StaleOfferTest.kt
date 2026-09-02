@@ -1,7 +1,9 @@
 package org.ducatproject.desk
 
 import org.ducatproject.ducat.StoredMessage
+import org.ducatproject.ducat.ui.answerTo
 import org.ducatproject.ducat.ui.freshRideOffer
+import org.ducatproject.ducat.ui.liveOfferAt
 import org.ducatproject.ducat.ui.offerAwaiting
 import org.ducatproject.ducat.ui.offerStillOpen
 import org.ducatproject.ducat.ui.rideOfferMark
@@ -32,6 +34,12 @@ private fun offer(seq: Long, ts: Long, pxmr: Long, outgoing: Boolean = false) =
         outgoing = outgoing, seq = seq, body = "on my way", timestamp = ts,
         kind = 6, amountPxmr = pxmr,
     )
+
+/** Hail.kt's HAIL_SKEW_SECS: the grace every window there gives another
+ *  phone's clock. Repeated rather than imported because it is private to the
+ *  screen, and a test that widens with the constant would not notice the
+ *  constant being widened by mistake. */
+private const val skew = 900L
 
 fun main() {
     val first = offer(seq = 0, ts = 1_000, pxmr = 13_611_646_250)
@@ -144,9 +152,17 @@ fun main() {
         "AWAIT_FAIL a declined offer was offered again"
     }
     // Older than the hail could possibly be: last ride's, and it stays gone.
-    val ancient = offer(seq = 0, ts = nowS - ttlSecs - 1, pxmr = 41_913_000_000)
+    // "Possibly" includes the skew grace every window in Hail.kt wears — a
+    // driver's stamp is the driver's clock, and phones disagree by minutes
+    // as a matter of course — so the line is the hail's life plus that.
+    val ancient = offer(seq = 0, ts = nowS - ttlSecs - skew - 1, pxmr = 41_913_000_000)
     check(offerAwaiting(listOf(ancient), nowS, ttlSecs) == null) {
         "AWAIT_FAIL a fare older than a hail's whole life came back"
+    }
+    // Inside the grace, a slow clock is not an expiry.
+    val slowClock = offer(seq = 0, ts = nowS - ttlSecs - skew + 60, pxmr = 41_913_000_000)
+    check(offerAwaiting(listOf(slowClock), nowS, ttlSecs) != null) {
+        "AWAIT_FAIL a driver with a slow clock read as expired"
     }
     // Two offers in the window, one already answered: the live one wins.
     check(
@@ -191,13 +207,38 @@ fun main() {
         "OPEN_FAIL an older ride's yes answered this ride's offer"
     }
 
-    // Past the time a hail stands for, it is not a fare any more.
-    val dead = offer(seq = 0, ts = now - ttl - 1, pxmr = 41_913_000_000)
+    // Past the time a hail stands for — and the skew grace beyond it — it is
+    // not a fare any more.
+    val dead = offer(seq = 0, ts = now - ttl - skew - 1, pxmr = 41_913_000_000)
     check(offerStillOpen(listOf(dead), 0, now, ttl) == null) { "OPEN_FAIL expired" }
+    check(liveOfferAt(listOf(dead), 0, now, ttl) == null) { "OPEN_FAIL expired (live)" }
 
     // A sender's clock running ahead must not hide a live offer.
     val ahead = offer(seq = 0, ts = now + 90, pxmr = 41_913_000_000)
     check(offerStillOpen(listOf(ahead), 0, now, ttl) != null) { "OPEN_FAIL clock skew" }
+
+    // ---- and a yes the network has not taken yet is still a yes ----
+    //
+    // A send persists its row before it writes the slot, and a refused write
+    // leaves the row in the thread marked undelivered with its bytes in the
+    // pending slot for the poll clock to retry. That row is the answer this
+    // device gave: the offer is not open, and accepting it again would seal
+    // a second yes under the next seq.
+    val queued = accept.copy(delivered = false)
+    check(offerStillOpen(listOf(live, queued), 0, now, ttl) == null) {
+        "OPEN_FAIL an undelivered yes left the offer open"
+    }
+    check(answerTo(listOf(live, queued), live)?.seq == 0L) {
+        "OPEN_FAIL the undelivered yes was not found as the answer"
+    }
+    check(answerTo(listOf(live, oldAccept), live) == null) {
+        "OPEN_FAIL last ride's yes was taken as this ride's answer"
+    }
+    // The offer itself is still there to be shown behind that answer — which
+    // is how a restart inside the accept finds its way back to the fare.
+    check(liveOfferAt(listOf(live, queued), 0, now, ttl)?.amountPxmr == 41_913_000_000L) {
+        "OPEN_FAIL an answered offer could not be looked up"
+    }
 
     println("STALE_OK a second hail is quoted its own fare, and a fare outlives its screen")
 }
