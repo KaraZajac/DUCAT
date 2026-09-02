@@ -223,8 +223,14 @@ object Calls {
      *  teardown paths need to quiet a notification with no caller handy. */
     @Volatile private var appCtx: Context? = null
 
-    private var myCallId: ByteArray? = null
-    private var theirRoute: ByteArray? = null
+    // Both volatile, because both cross threads without a lock between
+    // the write and the read. `theirRoute` is the one that matters: the
+    // ear thread re-aims it on a RENEW and the mouth thread reads it on
+    // every frame — the whole point of reading the field rather than a
+    // captured route — and without this the mouth is allowed to go on
+    // seeing the old door for as long as it likes.
+    @Volatile private var myCallId: ByteArray? = null
+    @Volatile private var theirRoute: ByteArray? = null
     private var pump: Thread? = null
     @Volatile private var running = false
 
@@ -241,7 +247,7 @@ object Calls {
         val st = State.Outgoing(c.personaHex)
         state = st
         val ep = epoch.incrementAndGet()
-        audio?.ring(app, incoming = false)
+        runCatching { audio?.ring(app, incoming = false) }
         runCatching { shell?.calling(app, c.displayName()) }
             .onFailure { DucatLog.w("Calls", "calling hook: ${it.message}") }
         Thread {
@@ -568,7 +574,7 @@ object Calls {
         if (state != State.Idle) return false
         val st = State.Incoming(c.personaHex, offer.seq, offer.callId!!)
         state = st
-        audio?.ring(context.applicationContext, incoming = true)
+        runCatching { audio?.ring(context.applicationContext, incoming = true) }
         // Nobody may be looking at the app: the ring must open it — the
         // full-screen ask on a dark phone, a banner on a lit one. The shell
         // decides; the desk has none.
@@ -629,7 +635,16 @@ object Calls {
                     }
                 }
                 goActive(from, from.contactHex, route, initiator = true)
-            }.onFailure { DucatLog.w("Calls", "reopen: ${it.message}") }
+            }.onFailure {
+                DucatLog.w("Calls", "reopen: ${it.message}")
+                // Let the next bump try again. This latch is "a door is
+                // already being built for this screen", and a route that
+                // failed to build — a node still finding its feet, which
+                // is when this happens — left it latched for the life of
+                // the answering-machine screen: the answer sat in the
+                // thread, every bump saw it, and nothing was ever built.
+                synchronized(this) { if (reopening === from) reopening = null }
+            }
         }.apply { isDaemon = true }.start()
     }
 

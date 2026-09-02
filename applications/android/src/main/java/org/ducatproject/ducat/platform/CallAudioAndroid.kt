@@ -108,7 +108,12 @@ object CallAudioAndroid : Calls.Audio {
     }
 
     override fun play(frame: ByteArray) {
-        track?.write(frame, 0, frame.size)
+        // The track can be released under this write: the ear thread plays
+        // and the hang-up releases, and they are not the same thread. A
+        // released track throws, and the throw was landing on the ear
+        // thread — which is also the call's watchdog, so a call could be
+        // left up, deaf, with nothing left running to notice.
+        runCatching { track?.write(frame, 0, frame.size) }
     }
 
     @Synchronized
@@ -125,7 +130,28 @@ object CallAudioAndroid : Calls.Audio {
     @Volatile private var bell: AudioTrack? = null
     @Volatile private var buzzer: Vibrator? = null
 
+    /**
+     * **Nothing in here may throw.** The bell is the one part of a call
+     * that is decoration, and it was the part that could take the call
+     * down: `place` rings before it dials and `startRinging` rings before
+     * it shows the ask, neither behind a catch, so an AudioTrack that will
+     * not build — an unusual audio HAL, a ringtone stream held by
+     * something else — crashed the app at the exact moment somebody made
+     * or received a call. Synchronized with [quiet] for the same reason
+     * [start] and [stop] are: two rings racing leave one track playing
+     * with nothing left holding it.
+     *
+     * A phone that cannot ring still connects. That is the contract the
+     * interface states ("hosts without a bell inherit silence") and this
+     * is where it has to be kept.
+     */
+    @Synchronized
     override fun ring(context: Context, incoming: Boolean) {
+        runCatching { rings(context, incoming) }
+            .onFailure { DucatLog.w("CallAudio", "no bell: ${it.message}") }
+    }
+
+    private fun rings(context: Context, incoming: Boolean) {
         quiet()
         val app = context.applicationContext
         val am = app.getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -167,10 +193,11 @@ object CallAudioAndroid : Calls.Audio {
         DucatLog.i("CallAudio", "ring: ${if (incoming) "bell" else "ringback"} on")
     }
 
+    @Synchronized
     override fun quiet() {
-        bell?.let { runCatching { it.stop() }; it.release() }
+        bell?.let { runCatching { it.stop() }; runCatching { it.release() } }
         bell = null
-        buzzer?.cancel()
+        runCatching { buzzer?.cancel() }
         buzzer = null
     }
 
@@ -183,7 +210,10 @@ object CallAudioAndroid : Calls.Audio {
             @Suppress("DEPRECATION")
             app.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         }
-        v.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 400, 200, 400, 2_000), 0))
+        // Held before it is started: the waveform repeats until something
+        // cancels it, and a quiet() that arrived between the two lines left
+        // a phone buzzing with nothing on screen and no handle on it.
         buzzer = v
+        v.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 400, 200, 400, 2_000), 0))
     }
 }
