@@ -830,6 +830,15 @@ tasks.register<JavaExec>("listtest") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// What a finished pass of recurring bills leaves behind — the lost write
+// that put a cancelled subscription back on the books.
+// `./gradlew :desktop:recurtest`.
+tasks.register<JavaExec>("recurtest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.RecurTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // The stake arithmetic the whole trust argument rests on.
 // `./gradlew :desktop:staketest`.
 tasks.register<JavaExec>("staketest") {

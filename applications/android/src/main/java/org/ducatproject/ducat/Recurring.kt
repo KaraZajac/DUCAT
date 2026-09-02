@@ -37,6 +37,21 @@ object Recurring {
     // points into.
     private fun prefs(context: Context) = securePrefs(context, "ducat_recurring")
 
+    /**
+     * Guards read-modify-write of the schedule list, like every other store
+     * that rewrites its array whole ([TabStore]'s is the one this copies).
+     *
+     * Without it the poller and a screen wrote from lists read before each
+     * other's change, and the one that matters is the *stop*: cancelling a
+     * subscription while [runDue] was mid-send meant the poller's write put
+     * it back, with its next date advanced, and it billed somebody again a
+     * month later. The user did the one thing they could do and the app
+     * undid it silently.
+     */
+    private val lock = Any()
+
+    private fun <T> guarded(f: () -> T): T = synchronized(lock) { f() }
+
     fun all(context: Context): List<Bill> {
         val raw = prefs(context).getString("bills", null) ?: return emptyList()
         return runCatching {
@@ -84,13 +99,12 @@ object Recurring {
             monthly = monthly,
             nextAt = advance(now, monthly),
         )
-        save(context, all(context) + b)
+        guarded { save(context, all(context) + b) }
         DucatLog.i(TAG, "scheduled ${if (monthly) "monthly" else "weekly"} bill for ${personaHex.take(8)}")
     }
 
-    fun stop(context: Context, id: String) {
-        save(context, all(context).filterNot { it.id == id })
-    }
+    fun stop(context: Context, id: String) =
+        guarded { save(context, all(context).filterNot { it.id == id }) }
 
     private fun advance(from: Long, monthly: Boolean): Long =
         if (monthly) {
@@ -117,25 +131,27 @@ object Recurring {
         val now = System.currentTimeMillis()
         val bills = all(context)
         if (bills.none { it.nextAt <= now }) return
-        val store = ContactStore(context)
-        val mine = PersonaStore(context).personaHex()
-        val out = bills.map { b ->
-            if (b.nextAt > now) return@map b
-            val c = store.all().firstOrNull { it.personaHex == b.personaHex }
+        // Read once, not once per bill: `all()` decrypts the whole book.
+        val book = ContactStore(context).all()
+        val advanced = HashMap<String, Long>()
+        val forgotten = HashSet<String>()
+        for (b in bills) {
+            if (b.nextAt > now) continue
+            val c = book.firstOrNull { it.personaHex == b.personaHex }
             if (c == null) {
                 // The contact was forgotten; a bill to nobody stops itself.
                 DucatLog.w(TAG, "recurring bill points at a forgotten contact; dropping")
-                return@map null
+                forgotten += b.id
+                continue
             }
-            val sent = runCatching {
+            runCatching {
                 Mailbox.send(
                     context, c,
                     b.note.ifBlank { context.getString(R.string.pay_payment_request) },
                     kind = 1, amountPxmr = b.amountPxmr,
                     payto = WalletStore(context).addressFor(b.personaHex),
                 )
-            }
-            sent.fold(
+            }.fold(
                 onSuccess = {
                     Notify.post(
                         context, c.displayName(),
@@ -145,14 +161,46 @@ object Recurring {
                         ),
                         openChat = b.personaHex,
                     )
-                    b.copy(nextAt = advance(b.nextAt, b.monthly))
+                    advanced[b.id] = advance(b.nextAt, b.monthly)
                 },
-                onFailure = {
-                    DucatLog.w(TAG, "recurring bill not sent: ${it.message}")
-                    b
-                },
+                onFailure = { DucatLog.w(TAG, "recurring bill not sent: ${it.message}") },
             )
-        }.filterNotNull()
-        if (out != bills) save(context, out)
+        }
+        if (advanced.isEmpty() && forgotten.isEmpty()) return
+        // **Written against the list as it stands now, not the snapshot the
+        // sending started from.** A request is network-seconds, and in that
+        // time somebody may have stopped a schedule or added one; writing
+        // the whole snapshot back put the stopped one on the books again —
+        // with its date advanced, so it billed again next period — and
+        // dropped the new one. Only the schedules this pass actually acted
+        // on are touched, by id, and a schedule that is no longer there is
+        // simply not put back.
+        guarded {
+            val cur = all(context)
+            val next = applyRun(cur, advanced, forgotten)
+            if (next != cur) save(context, next)
+        }
+    }
+
+    /**
+     * The list a finished pass leaves behind, given the list as it stands
+     * *now* and what the pass actually did.
+     *
+     * Pulled out because it is the whole of the fix and none of it needs a
+     * network: a schedule stopped while its request was in flight must not
+     * come back, one added meanwhile must survive, and only the ones this
+     * pass really sent may move their date. The old code wrote its own
+     * snapshot back over all three.
+     */
+    internal fun applyRun(
+        current: List<Bill>,
+        advanced: Map<String, Long>,
+        forgotten: Set<String>,
+    ): List<Bill> = current.mapNotNull { b ->
+        when {
+            b.id in forgotten -> null
+            advanced.containsKey(b.id) -> b.copy(nextAt = advanced.getValue(b.id))
+            else -> b
+        }
     }
 }
