@@ -123,4 +123,12 @@
     <string name="rent_in_unit">bằng %1$s</string>
     <string name="board_chip_count">%1$s %2$d</string>
     <string name="rent_size_m2">%1$d m²</string>
+    <string name="rent_waiting_board">Chưa lên bảng — sẽ tự thử lại</string>
+    <plurals name="rent_seats_n">
+        <item quantity="other">%1$d chỗ ngồi</item>
+    </plurals>
+    <plurals name="rent_rooms_n">
+        <item quantity="other">%1$d phòng ngủ</item>
+    </plurals>
+    <string name="rent_sleeps_n">cho %1$d người</string>
 </resources>

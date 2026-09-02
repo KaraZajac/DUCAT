@@ -25,7 +25,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.Amounts
@@ -34,6 +38,7 @@ import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.Listings
 import org.ducatproject.ducat.R
 import org.ducatproject.ducat.Stakes
+import org.ducatproject.ducat.standStale
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -326,8 +331,12 @@ private fun MyListingCard(
     // true; this is what it says when the poller has not been able to (a
     // phone off for a day, a node that never attached), instead of claiming
     // a listing is somewhere it is not.
-    val live = o.optString("board").isNotBlank() &&
+    // And on a board somebody still reads: past a weekly rollover the notice
+    // is on last week's, which the poll moves on its next pass.
+    val live = o.optString("board").isNotBlank() && !standStale(o.optString("board")) &&
         System.currentTimeMillis() / 1000 - o.optLong("postedAt") < Listings.TTL_SECONDS
+    // Asked for a board and not on one: the poll is trying (Listings.needRefresh).
+    val waiting = !live && o.optBoolean("wanted")
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(14.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -369,7 +378,8 @@ private fun MyListingCard(
                 style = MaterialTheme.typography.bodySmall,
             )
             Text(
-                o.optString("area").ifBlank { stringResource(R.string.rent_no_area) },
+                o.optString("area").takeIf { it.isNotBlank() }?.let { isolate(it) }
+                    ?: stringResource(R.string.rent_no_area),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -401,7 +411,13 @@ private fun MyListingCard(
             }
             Spacer(Modifier.height(8.dp))
             Text(
-                stringResource(if (live) R.string.rent_live else R.string.rent_not_posted),
+                stringResource(
+                    when {
+                        live -> R.string.rent_live
+                        waiting -> R.string.rent_waiting_board
+                        else -> R.string.rent_not_posted
+                    },
+                ),
                 style = MaterialTheme.typography.labelMedium,
                 color = if (live) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -505,6 +521,39 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
     // a failed board write must re-post the same draft, not save a second copy
     // that the poller then puts up beside the first.
     var draftId by rememberSaveable { mutableStateOf<String?>(null) }
+    // The post in flight, if any, so the screen that comes back after a
+    // rotation collects what the one that left started. The post itself
+    // runs in ListingPosts and finishes either way; what died with the
+    // screen was the answer — `posting` came back false over a walk still
+    // going, and a second press met a record mid-tenancy (Listings.putDraft
+    // for what that cost).
+    var postingId by rememberSaveable { mutableStateOf<String?>(null) }
+    LaunchedEffect(postingId) {
+        val id = postingId ?: return@LaunchedEffect
+        posting = true
+        val r = ListingPosts.await(id)
+        when {
+            // Nothing under the id: the process died with the post in it.
+            // The record says what happened; the list shows it.
+            r == null -> {}
+            // A full board answers false rather than throwing, and the
+            // screen closed on it as though the thing were up.
+            r.isSuccess -> if (!r.getOrThrow()) error = context.getString(R.string.rent_board_full)
+            else -> {
+                DucatLog.w("Renting", "post: ${r.exceptionOrNull()?.message}")
+                // The listing is saved either way and the poller will try
+                // again — but a person who cannot post because no node is
+                // reachable should be told that, not left looking at a
+                // screen that closed.
+                error = moneyFailure(context, r.exceptionOrNull()!!, R.string.rent_post_failed)
+            }
+        }
+        posting = false
+        ListingPosts.forget(id)
+        // Last: this is the effect's own key, and clearing it restarts it.
+        postingId = null
+        if (error == null) onDone()
+    }
     val started = listOf(
         title, area, price, make, model, year, color, seats, trim,
         rooms, sleeps, sizeM2, tags, details,
@@ -886,30 +935,14 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
                     draftId?.let { draft.put("id", it) } ?: run { draftId = draft.optString("id") }
                     error = null
                     posting = true
-                    scope.launch {
-                        withContext(Dispatchers.IO) {
-                            runCatching {
-                                Listings.put(context, draft)
-                                Listings.post(context, draft.optString("id"))
-                            }
-                        }
-                            // A full board answers false rather than throwing,
-                            // and the screen closed on it as though the thing
-                            // were up.
-                            .onSuccess {
-                                if (!it) error = context.getString(R.string.rent_board_full)
-                            }
-                            .onFailure {
-                                DucatLog.w("Renting", "post: ${it.message}")
-                                // The listing is saved either way and the poller
-                                // will try again — but a person who cannot post
-                                // because no node is reachable should be told
-                                // that, not left looking at a screen that closed.
-                                error = moneyFailure(context, it, R.string.rent_post_failed)
-                            }
-                        posting = false
-                        if (error == null) onDone()
+                    val id = draft.optString("id")
+                    ListingPosts.start(id, context) { app ->
+                        // Over the record, not instead of it: a retry keeps
+                        // the tenancy the first attempt may have taken.
+                        Listings.putDraft(app, draft)
+                        Listings.post(app, id)
                     }
+                    postingId = id
                 },
                 modifier = Modifier.weight(1f).height(48.dp),
             ) {
@@ -960,4 +993,30 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
         }
         Spacer(Modifier.height(24.dp))
     }
+}
+
+/**
+ * Posts in flight, outliving the screen that started them.
+ *
+ * A board post is seconds of Argon2 and a ladder walk that can read sixteen
+ * boards, and the form ran it in `rememberCoroutineScope` — cancelled by a
+ * rotation, while the blocking post inside ran on regardless. Keyed by the
+ * listing's id, which the form saves, so the instance that comes back finds
+ * the job the one that left started and takes its result. Same shape as
+ * Pay's sends, for the same reason.
+ */
+private object ListingPosts {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val jobs = java.util.concurrent.ConcurrentHashMap<String, Deferred<Result<Boolean>>>()
+
+    /** Start one if it is not already running; the body gets the application. */
+    fun start(id: String, context: android.content.Context, block: (android.content.Context) -> Boolean) {
+        val app = context.applicationContext
+        jobs.getOrPut(id) { scope.async { runCatching { block(app) } } }
+    }
+
+    /** Null when nothing runs under that id: the process died with it. */
+    suspend fun await(id: String): Result<Boolean>? = jobs[id]?.await()
+
+    fun forget(id: String) { jobs.remove(id) }
 }

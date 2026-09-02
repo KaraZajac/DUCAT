@@ -123,4 +123,14 @@
     <string name="rent_in_unit">بـ %1$s</string>
     <string name="board_chip_count">%1$s %2$d</string>
     <string name="rent_size_m2">%1$d م²</string>
+    <string name="rent_waiting_board">ليس على لوحة بعد — تُعاد المحاولة تلقائيًا</string>
+    <plurals name="rent_seats_n">
+        <item quantity="one">%1$d مقعد</item>
+        <item quantity="other">%1$d مقاعد</item>
+    </plurals>
+    <plurals name="rent_rooms_n">
+        <item quantity="one">%1$d غرفة نوم</item>
+        <item quantity="other">%1$d غرف نوم</item>
+    </plurals>
+    <string name="rent_sleeps_n">يتّسع لـ %1$d</string>
 </resources>

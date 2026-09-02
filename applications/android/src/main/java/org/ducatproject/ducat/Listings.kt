@@ -32,6 +32,19 @@ object Listings {
     /** Re-post this often while the listing is live, so a board stays true. */
     const val REFRESH_SECONDS = 6L * 60 * 60
 
+    /**
+     * How long a listing that wants a board and has none waits between tries.
+     *
+     * The screen's failure sentences promise the retry — "it will go up on
+     * its own once the network is reachable", "goes up by itself when one
+     * frees" — and [needRefresh] only ever knew about listings already on a
+     * board, so neither promise was kept: a first post that met no node, or
+     * a full board, left the listing saved and never tried again. A try is
+     * seconds of Argon2 and a ladder walk that reads sixteen boards at
+     * twenty-one seconds an empty one, so not every poll.
+     */
+    const val RETRY_SECONDS = 30L * 60
+
     /** The board a listing sits on: coarse by rule (§16.18). */
     const val CELL_PRECISION = 5u
 
@@ -218,6 +231,36 @@ object Listings {
         val id = o.optString("id")
         save(context, all(context).filter { it.optString("id") != id } + o)
     }
+
+    /** What [post] and [unpost] own on a record: where it is, and the cards it cut. */
+    private val TENANCY = listOf("owner", "board", "subkey", "postedAt", "card", "cards", "wanted", "triedAt")
+
+    /**
+     * Save a draft over whatever record already carries its id, keeping the
+     * record's tenancy.
+     *
+     * The form re-posts the same draft after a failure — one listing per
+     * form — and a rotation mid-post cancels the screen's coroutine while
+     * the post it started runs on to the end. The second press then arrived
+     * with a fresh draft over a record that had just taken a slot: [put]
+     * dropped the board, the slot and the cards, the post walked the ladder
+     * to a *second* slot, and the first notice sat on as a ghost holding a
+     * card nothing would ever link.
+     */
+    fun putDraft(context: Context, draft: JSONObject) = synchronized(lock) {
+        get(context, draft.optString("id"))?.let { cur ->
+            for (k in TENANCY) if (cur.has(k) && !draft.has(k)) draft.put(k, cur.get(k))
+        }
+        put(context, draft)
+    }
+
+    /**
+     * One post per listing at a time. The poll's refresh, the owner's Post
+     * and a quantity tap can all ask for the same listing in the same
+     * breath; only the final write was serialised, so two walks of the
+     * ladder took two slots and the record remembered one of them.
+     */
+    private val postLocks = java.util.concurrent.ConcurrentHashMap<String, Any>()
 
     fun remove(context: Context, id: String) {
         synchronized(lock) { save(context, all(context).filter { it.optString("id") != id }) }
@@ -408,7 +451,17 @@ object Listings {
         return next
     }
 
-    fun post(context: Context, id: String): Boolean {
+    fun post(context: Context, id: String): Boolean =
+        synchronized(postLocks.getOrPut(id) { Any() }) { postLocked(context, id) }
+
+    private fun postLocked(context: Context, id: String): Boolean {
+        val now = System.currentTimeMillis() / 1000
+        // Asked for a board, and asked now — written before anything can
+        // fail, so a listing that meets no node or a full board is one the
+        // poll keeps trying (needRefresh), which is what the screen promised.
+        synchronized(lock) {
+            get(context, id)?.let { it.put("wanted", true); it.put("triedAt", now); put(context, it) }
+        }
         val o = reprice(context, get(context, id) ?: return false)
         val cell = o.optString("cell")
         if (cell.isBlank()) throw IllegalStateException("this listing has no area yet")
@@ -424,7 +477,6 @@ object Listings {
         )
         val notice = publicNotice(o, card.uri)
         val persona = personas.secretFor(ownerHex) ?: personas.secret()
-        val now = System.currentTimeMillis() / 1000
 
         // A notice is signed for the slot it goes into and carries the proof of
         // work for that slot, so the bytes cannot be built until the slot is
@@ -467,8 +519,15 @@ object Listings {
         // only while anybody is still reading the board it is on; past a
         // rollover the whole ladder has moved and the notice has to move with
         // it, which is the ordinary walk below.
+        //
+        // Nor is a tenancy whose notice has run out. A slot holding an
+        // expired notice reads as free to every other writer (the occupancy
+        // test below, on their phone), so a device that was off for a day
+        // and refreshed "in place" wrote over whoever had honestly taken it
+        // in the meantime — their notice gone, and nothing on their side to
+        // say so. An hour short of the TTL, for their clock against ours.
         val existing = o.optString("board")
-            .takeIf { it.isNotBlank() && !standStale(it) }
+            .takeIf { it.isNotBlank() && !standStale(it) && stillHeld(o, now) }
         val existingSlot = o.optInt("subkey", -1).takeIf { it >= 0 }?.toUInt()
         if (existing != null && existingSlot != null) {
             // Refreshing in place: keep the tenancy rather than taking a
@@ -558,16 +617,34 @@ object Listings {
         return true
     }
 
+    /**
+     * Is the notice this record says it posted still the one in that slot?
+     *
+     * Only by the clock: a notice is stamped to live [TTL_SECONDS], and past
+     * that every other writer treats the slot as free. Anything the slot
+     * holds after the notice ran out may be somebody else's, so neither a
+     * refresh nor a take-down may touch it.
+     */
+    private fun stillHeld(o: JSONObject, now: Long): Boolean =
+        now - o.optLong("postedAt") < TTL_SECONDS - 3600
+
     /** Take it down: clear the slot, forget the tenancy. */
     fun unpost(context: Context, id: String) {
         val o = get(context, id) ?: return
         val board = o.optString("board")
         val slot = o.optInt("subkey", -1)
-        if (board.isNotBlank() && slot >= 0) {
+        // Only a slot that is still ours. Past the TTL it may hold a
+        // stranger's notice (see stillHeld), and a stale board is one nobody
+        // reads — clearing either is a write that can only do harm.
+        if (board.isNotBlank() && slot >= 0 && !standStale(board) &&
+            stillHeld(o, System.currentTimeMillis() / 1000)
+        ) {
             runCatching { uniffi.ducat_mobile.standPost(board, slot.toUInt(), ByteArray(0)) }
                 .onFailure { DucatLog.w(TAG, "clearing slot: ${it.message}") }
         }
         o.remove("board"); o.remove("subkey"); o.remove("postedAt"); o.remove("card")
+        // Taken down is the owner's word: the poll stops trying to put it up.
+        o.remove("wanted"); o.remove("triedAt")
         put(context, o)
     }
 
@@ -650,9 +727,15 @@ object Listings {
         val now = System.currentTimeMillis() / 1000
         return all(context).filter {
             val board = it.optString("board")
-            board.isNotBlank() && (
+            if (board.isBlank()) {
+                // Wanted and not up: the owner pressed Post and it did not
+                // take — no node, or a full board. Spaced by RETRY_SECONDS,
+                // because a try is not cheap and the board does not free
+                // between polls.
+                it.optBoolean("wanted") && now - it.optLong("triedAt") >= RETRY_SECONDS
+            } else {
                 now - it.optLong("postedAt") >= REFRESH_SECONDS || standStale(board)
-            )
+            }
         }
     }
 

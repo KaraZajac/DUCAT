@@ -123,4 +123,12 @@
     <string name="rent_in_unit">%1$s로</string>
     <string name="board_chip_count">%1$s %2$d</string>
     <string name="rent_size_m2">%1$d㎡</string>
+    <string name="rent_waiting_board">아직 게시판에 없음 — 자동으로 다시 시도합니다</string>
+    <plurals name="rent_seats_n">
+        <item quantity="other">%1$d인승</item>
+    </plurals>
+    <plurals name="rent_rooms_n">
+        <item quantity="other">침실 %1$d개</item>
+    </plurals>
+    <string name="rent_sleeps_n">%1$d명 숙박</string>
 </resources>
