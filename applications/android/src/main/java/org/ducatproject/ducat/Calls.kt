@@ -173,8 +173,15 @@ object Calls {
         }
         data class Incoming(val contactHex: String, val offerSeq: Long, val callId: String) : State
         /** Answer tapped: the bell is off and our door is on its way. The
-         *  window's expiry and a second tap both find this, not Incoming. */
-        data class Answering(val contactHex: String) : State
+         *  window's expiry and a second tap both find this, not Incoming.
+         *  Carries the offer's coordinates because a hang-up from here is
+         *  a decline, and the decline names the offer. */
+        data class Answering(
+            val contactHex: String,
+            val offerSeq: Long,
+            val callId: String,
+            val door: String,
+        ) : State
         data class Active(val contactHex: String, val sinceMs: Long) : State
     }
 
@@ -233,13 +240,20 @@ object Calls {
         myCallId = id
         val st = State.Outgoing(c.personaHex)
         state = st
-        epoch.incrementAndGet()
+        val ep = epoch.incrementAndGet()
         audio?.ring(app, incoming = false)
         runCatching { shell?.calling(app, c.displayName()) }
             .onFailure { DucatLog.w("Calls", "calling hook: ${it.message}") }
         Thread {
             runCatching {
                 val mine = uniffi.ducat_mobile.nodeCallRoute()
+                // Hung up while the door was being built: an offer sent
+                // now rings their phone with a dead door, until the
+                // withdrawal catches up with it. Nothing goes out.
+                if (state !== st) {
+                    if (epoch.get() == ep) runCatching { uniffi.ducat_mobile.nodeCallClose() }
+                    return@runCatching
+                }
                 DucatLog.i("Calls", "ringing with id=${id.toHexLower()}")
                 Mailbox.send(
                     app, c, app.getString(R.string.call_body_ring),
@@ -313,6 +327,10 @@ object Calls {
     @Synchronized
     fun answer(context: Context, c: Contact, offer: StoredMessage) {
         if (state !is State.Incoming) return
+        // A ring is only ever started on an offer that has both (see
+        // `noticed`); one without is nothing to answer.
+        val doorHex = offer.callRoute ?: return
+        val idHex = offer.callId ?: return
         val app = context.applicationContext
         appCtx = app
         // The bell stops at the tap, not when the door is built: our route
@@ -320,18 +338,26 @@ object Calls {
         // invited a second tap — and let the window expire under the first.
         audio?.quiet()
         runCatching { shell?.release(app) }
-        offer.callId?.let { dealtWith.add(it) }
-        val st = State.Answering(c.personaHex)
+        dealtWith.add(idHex)
+        val st = State.Answering(c.personaHex, offer.seq, idHex, doorHex)
         state = st
-        epoch.incrementAndGet()
+        val ep = epoch.incrementAndGet()
         Thread {
             runCatching {
                 val mine = uniffi.ducat_mobile.nodeCallRoute()
-                val id = hexToBytes(offer.callId!!)
+                // Hung up while the door was being built — seconds, tens
+                // of them on a young node. An ANSWER sent now would open
+                // the caller's mouth into a room nobody is in; the hang-up
+                // was a decline (endInternal), and they have heard it.
+                if (state !== st) {
+                    if (epoch.get() == ep) runCatching { uniffi.ducat_mobile.nodeCallClose() }
+                    return@runCatching
+                }
+                val id = hexToBytes(idHex)
                 myCallId = id
                 // Through the door first — the caller connects in a route
                 // trip; the sealed kind-15 below remains the record.
-                val door = hexToBytes(offer.callRoute!!)
+                val door = hexToBytes(doorHex)
                 repeat(2) {
                     runCatching {
                         uniffi.ducat_mobile.nodeCallSend(door, controlFrame(CTRL_ANSWER, id, mine))
@@ -342,6 +368,7 @@ object Calls {
                 // mailbox-seconds, and an ear opened after it threw those
                 // seconds away.
                 if (!goActive(st, c.personaHex, door, initiator = false, patienceMs = patienceFor(offer))) {
+                    if (epoch.get() == ep) runCatching { uniffi.ducat_mobile.nodeCallClose() }
                     return@runCatching
                 }
                 runCatching {
@@ -394,27 +421,37 @@ object Calls {
     fun decline(context: Context, c: Contact, offer: StoredMessage) {
         if (state !is State.Incoming) return
         val app = context.applicationContext
+        appCtx = app
         audio?.quiet()
         runCatching { shell?.release(app) }
         offer.callId?.let { dealtWith.add(it) }
         state = State.Idle
         Thread {
-            runCatching {
-                val door = offer.callRoute?.let { hexToBytes(it) }
-                val id = offer.callId?.let { hexToBytes(it) }
-                if (door != null && id != null) {
-                    repeat(2) {
-                        runCatching {
-                            uniffi.ducat_mobile.nodeCallSend(door, controlFrame(CTRL_DECLINE, id))
-                        }
+            refuse(c.personaHex, offer.seq, offer.callId, offer.callRoute)
+        }.apply { isDaemon = true }.start()
+    }
+
+    /** The "no" itself: at the door, where the caller's ring hears it in a
+     *  route trip, and by mailbox, which is the record. Off the UI thread. */
+    private fun refuse(contactHex: String, offerSeq: Long, idHex: String?, doorHex: String?) {
+        val app = appCtx ?: return
+        runCatching {
+            val door = doorHex?.let { hexToBytes(it) }
+            val id = idHex?.let { hexToBytes(it) }
+            if (door != null && id != null) {
+                repeat(2) {
+                    runCatching {
+                        uniffi.ducat_mobile.nodeCallSend(door, controlFrame(CTRL_DECLINE, id))
                     }
                 }
-                Mailbox.send(
-                    app, c, app.getString(R.string.call_body_decline),
-                    kind = 5, reSeq = offer.seq, reOwn = false,
-                )
-            }.onFailure { DucatLog.w("Calls", "decline: ${it.message}") }
-        }.apply { isDaemon = true }.start()
+            }
+            val c = ContactStore(app).all().firstOrNull { it.personaHex == contactHex }
+                ?: return@runCatching
+            Mailbox.send(
+                app, c, app.getString(R.string.call_body_decline),
+                kind = 5, reSeq = offerSeq, reOwn = false,
+            )
+        }.onFailure { DucatLog.w("Calls", "decline: ${it.message}") }
     }
 
     fun hangUp() = endInternal()
@@ -789,6 +826,11 @@ object Calls {
         // Hung up on our own ring: the offer is still ringing in their
         // pocket, for the rest of the window, unless we take it back.
         val withdraw = ringing?.contactHex?.takeIf { !noAnswer }
+        // Hung up on our own answer, while the door was still being built:
+        // their phone is still ringing, and this is a "no" — the same one
+        // the decline button says, which stops it. Not when the watchdog
+        // ended it: that call was answered, and nothing arrived.
+        val refusing = (state as? State.Answering)?.takeIf { !silent }
         val sayBye = running
         val route = theirRoute
         val id = myCallId
@@ -825,6 +867,10 @@ object Calls {
                     }
                 }
                 Thread.sleep(250) // let the queue drain before close purges it
+            }
+            if (refusing != null) {
+                refuse(refusing.contactHex, refusing.offerSeq, refusing.callId, refusing.door)
+                Thread.sleep(250)
             }
             if (withdraw != null && id != null) withdrawOffer(withdraw, id.toHexLower())
             if (epoch.get() == ep) {
