@@ -2383,7 +2383,21 @@ class PersonaStore(context: Context) {
 
     /** The roster, migrating the single-persona era on first touch. */
     private fun rosterLocked(): List<Pair<ByteArray, Persona>> {
-        prefs.getString("personas", null)?.let { return parse(it) }
+        // **Empty is not a roster.** `secret()` and `personaHex()` take entry
+        // zero and are called on every send, every card and every ceremony,
+        // so a stored `[]` is not one bad screen — it is the app throwing
+        // NoSuchElementException everywhere at once, for good, with a
+        // reinstall the only way out. Nothing here writes an empty list, but
+        // a restore writes whatever the bundle carried.
+        //
+        // Deliberately narrow: a roster that *fails to parse* still throws.
+        // Minting over a corrupt one would hand this phone a new identity
+        // and silently orphan every contact it has, which is worse than a
+        // crash — an empty one has no identity to lose.
+        prefs.getString("personas", null)
+            ?.let { parse(it) }
+            ?.takeIf { it.isNotEmpty() }
+            ?.let { return it }
         val secret = prefs.getString("persona_secret", null)?.let(::unb64)
             ?: uniffi.ducat_mobile.createPersonaSecret()
         val entry = secret to Persona(

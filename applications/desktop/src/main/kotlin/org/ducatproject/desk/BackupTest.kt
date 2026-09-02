@@ -149,6 +149,24 @@ private fun personaRound() {
         "BACKUPTEST_FAIL the shop's card name diverged from its profile"
     }
 
+    // **An empty roster is not a roster.** `personaHex()` and `secret()` take
+    // entry zero and are called on every send, card and ceremony, so a stored
+    // `[]` used to be NoSuchElementException everywhere at once, permanently,
+    // with a reinstall the only way out. Nothing writes an empty list — but a
+    // restore writes whatever the bundle carried, which is this file's
+    // subject. A roster that fails to *parse* still throws, deliberately:
+    // minting over a corrupt one would hand this phone a new identity and
+    // orphan every contact it has.
+    run {
+        val blanked = org.ducatproject.ducat.securePrefs(dst, "ducat_contacts")
+        blanked.edit().putString("personas", "[]").apply()
+        val after = runCatching { org.ducatproject.ducat.PersonaStore(dst).personaHex() }
+        check(after.isSuccess && after.getOrNull()?.length == 64) {
+            "BACKUPTEST_FAIL an empty persona roster did not mint: ${after.exceptionOrNull()}"
+        }
+        println("BACKUPTEST_OK empty roster minted rather than thrown")
+    }
+
     println(
         "BACKUPTEST_OK personas: roster=2 worn=shop binding=till→shop " +
             "walls=held faces=dressed",
