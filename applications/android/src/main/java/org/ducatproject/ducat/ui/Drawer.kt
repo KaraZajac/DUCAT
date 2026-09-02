@@ -1309,7 +1309,7 @@ fun SitesSection() {
         busy = rec
         scope.launch(kotlinx.coroutines.Dispatchers.IO) {
             runCatching { org.ducatproject.ducat.Sites.add(context, rec) }
-                .onFailure { word = it.saidWhy() }
+                .onFailure { word = it.saidWhy() ?: it.javaClass.simpleName }
             busy = null
         }
     }
@@ -1442,7 +1442,9 @@ fun SitesSection() {
                                             ) {
                                                 siteOpen(context, site.recordKey)
                                             }
-                                        }.onFailure { word = it.saidWhy() }
+                                        }.onFailure {
+                                            word = it.saidWhy() ?: it.javaClass.simpleName
+                                        }
                                         busy = null
                                     }
                                 },

@@ -359,7 +359,7 @@ private fun PublisherHeader(publisherHex: String, publisherName: String?) {
                 Text(
                     stringResource(
                         R.string.library_unsub_confirm,
-                        publisherName ?: "${publisherHex.take(12)}…",
+                        isolate(publisherName ?: "${publisherHex.take(12)}…"),
                     ),
                 )
             },

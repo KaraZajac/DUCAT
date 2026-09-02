@@ -27,6 +27,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -288,7 +289,7 @@ fun PublishingSection() {
                                     subCode = card.uri
                                 }.onFailure {
                                     DucatLog.w("Publishing", "code: ${it.message}")
-                                    lastWord = it.saidWhy()
+                                    lastWord = it.saidWhy() ?: it.javaClass.simpleName
                                 }
                                 minting = false
                             }
@@ -337,44 +338,69 @@ fun PublishingSection() {
                             style = MaterialTheme.typography.bodySmall,
                         )
                     }
+                    // One listing per tap, for the same reason as one card:
+                    // the listing is a card mint and a ladder of stand
+                    // posts, seconds of DHT, and the button stayed live
+                    // through them.
+                    var listing by remember { mutableStateOf(false) }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         OutlinedButton(
-                            enabled = busy == null,
+                            enabled = busy == null && !listing,
                             onClick = {
+                                listing = true
                                 scope.launch(Dispatchers.IO) {
-                                    val lang = java.util.Locale.getDefault().language
-                                    // The town paper's own cell, when asked
-                                    // for: a fix at click time, skipped
-                                    // without complaint if none arrives.
-                                    var cell: String? = null
-                                    if (alsoLocal) {
-                                        val gate = java.util.concurrent.CountDownLatch(1)
-                                        org.ducatproject.ducat.ui.grabFix(context) { fix ->
-                                            cell = fix?.let {
-                                                runCatching {
-                                                    uniffi.ducat_mobile.geohashEncode(
-                                                        it.first, it.second,
-                                                        org.ducatproject.ducat.Listings.CELL_PRECISION,
-                                                    )
-                                                }.getOrNull()
+                                    try {
+                                        val lang = java.util.Locale.getDefault().language
+                                        // The town paper's own cell, when
+                                        // asked for: a fix at click time. The
+                                        // worldwide half goes up either way;
+                                        // the local half that did not is
+                                        // said, not skipped — a ticked box
+                                        // and a listing with no cell looked
+                                        // like the shelf was broken.
+                                        var cell: String? = null
+                                        if (alsoLocal) {
+                                            val gate = java.util.concurrent.CountDownLatch(1)
+                                            org.ducatproject.ducat.ui.grabFix(context) { fix ->
+                                                cell = fix?.let {
+                                                    runCatching {
+                                                        uniffi.ducat_mobile.geohashEncode(
+                                                            it.first, it.second,
+                                                            org.ducatproject.ducat.Listings.CELL_PRECISION,
+                                                        )
+                                                    }.getOrNull()
+                                                }
+                                                gate.countDown()
                                             }
-                                            gate.countDown()
+                                            gate.await(10, java.util.concurrent.TimeUnit.SECONDS)
                                         }
-                                        gate.await(10, java.util.concurrent.TimeUnit.SECONDS)
+                                        val ok = runCatching {
+                                            Publications.listOnMarket(
+                                                context, pubId, catPick,
+                                                lang.takeIf { it.isNotBlank() },
+                                                blurbText.takeIf { it.isNotBlank() },
+                                                cell,
+                                            )
+                                        }.getOrDefault(false)
+                                        lastWord = when {
+                                            !ok -> context.getString(R.string.market_list_failed)
+                                            alsoLocal && cell == null ->
+                                                context.getString(R.string.market_no_fix)
+                                            else -> null
+                                        }
+                                        org.ducatproject.ducat.ContactStore.bump()
+                                    } finally {
+                                        listing = false
                                     }
-                                    val ok = runCatching {
-                                        Publications.listOnMarket(
-                                            context, pubId, catPick,
-                                            lang.takeIf { it.isNotBlank() },
-                                            blurbText.takeIf { it.isNotBlank() },
-                                            cell,
-                                        )
-                                    }.getOrDefault(false)
-                                    if (!ok) lastWord = context.getString(R.string.market_list_failed)
-                                    org.ducatproject.ducat.ContactStore.bump()
                                 }
                             },
-                        ) { Text(stringResource(R.string.market_list_btn)) }
+                        ) {
+                            if (listing) {
+                                CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                            } else {
+                                Text(stringResource(R.string.market_list_btn))
+                            }
+                        }
                         if (mktCat != null) {
                             Spacer(Modifier.width(8.dp))
                             TextButton(onClick = {
@@ -479,7 +505,7 @@ fun PublishingSection() {
                         stagedPath = dst.absolutePath
                     }.onFailure {
                         DucatLog.w("Publishing", "stage: ${it.message}")
-                        lastWord = it.saidWhy()
+                        lastWord = it.saidWhy() ?: it.javaClass.simpleName
                     }
                 }
             }
@@ -579,7 +605,7 @@ fun PublishingSection() {
                                     stagedPath = null
                                 } catch (e: Throwable) {
                                     DucatLog.w("Publishing", "issue $p: ${e.message}")
-                                    lastWord = e.saidWhy()
+                                    lastWord = e.saidWhy() ?: e.javaClass.simpleName
                                 } finally {
                                     busy = null
                                 }
@@ -614,6 +640,12 @@ fun PublishingSection() {
                                             lastWord = context.getString(
                                                 R.string.pub_billed_word, n,
                                             )
+                                        } catch (e: Throwable) {
+                                            // Uncaught here it would have
+                                            // been uncaught everywhere: the
+                                            // scope is the screen's.
+                                            DucatLog.w("Publishing", "bill $period: ${e.message}")
+                                            lastWord = e.saidWhy() ?: e.javaClass.simpleName
                                         } finally {
                                             busy = null
                                         }
@@ -709,6 +741,10 @@ fun PublishingSection() {
                                                         "Publishing",
                                                         "re-seed: ${e.message}",
                                                     )
+                                                    // The log alone left the
+                                                    // button springing back
+                                                    // with nothing said.
+                                                    lastWord = e.saidWhy() ?: e.javaClass.simpleName
                                                 } finally {
                                                     busy = null
                                                 }
