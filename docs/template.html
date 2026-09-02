@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>{{page.01}}</title>
+<meta content="{{meta.01}}" name="description"/>
+<link href="https://ducatproject.org/" rel="canonical"/>
+<meta content="website" property="og:type"/>
+<meta content="https://ducatproject.org/" property="og:url"/>
+<meta content="{{meta.02}}" property="og:title"/>
+<meta content="{{meta.03}}" property="og:description"/>
+<meta content="https://ducatproject.org/og.png" property="og:image"/>
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="{{meta.04}}" name="twitter:title"/>
+<meta content="{{meta.05}}" name="twitter:description"/>
+<meta content="https://ducatproject.org/og.png" name="twitter:image"/>
+<link href="mascot.png" rel="icon" type="image/png"/>
+<link href="mascot.png" rel="apple-touch-icon"/>
+<script>
+/* apply the remembered theme before first paint (Mocha is the default) */
+(function () {
+  try {
+    if (localStorage.getItem('ducat-theme') === 'latte') {
+      document.documentElement.setAttribute('data-theme', 'latte');
+    }
+  } catch (e) { /* private mode */ }
+})();
+</script>
+<link href="style.css" rel="stylesheet"/>
+</head>
+<body>
+<div aria-hidden="true" class="bg-mesh">
+<div class="mesh-blob mesh-blob-1"></div>
+<div class="mesh-blob mesh-blob-2"></div>
+<div class="mesh-blob mesh-blob-3"></div>
+</div>
+<!-- ============================ NAV ============================ -->
+<nav class="nav">
+<div class="container nav-inner">
+<a class="nav-brand" href="#top">
+<img alt="" height="26" src="mascot.png" width="26"/>
+      DUCAT
+    </a>
+<div class="nav-links">
+<a href="#wallet">{{nav.01}}</a>
+<a href="#people">{{nav.02}}</a>
+<a href="#commerce">{{nav.03}}</a>
+<a href="#trust">{{nav.04}}</a>
+<a href="#spec">{{nav.05}}</a>
+<a href="#downloads">{{nav.06}}</a>
+<a aria-label="{{nav.attr.02}}" class="nav-icon-btn" href="https://github.com/KaraZajac/DUCAT" title="{{nav.attr.01}}">
+<svg aria-hidden="true" fill="currentColor" height="18" viewbox="0 0 16 16" width="18"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.5 7.5 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg>
+</a>
+<button aria-label="{{nav.attr.04}}" class="nav-icon-btn" id="theme-toggle" title="{{nav.attr.03}}">
+<span aria-hidden="true" class="tt-mocha">☀</span>
+<span aria-hidden="true" class="tt-latte">☾</span>
+</button>
+</div>
+</div>
+</nav>
+<!-- ============================ HERO ============================ -->
+<header class="hero" id="top">
+<div class="container hero-inner">
+<img alt="{{top.attr.01}}" class="hero-mascot" height="148" src="mascot.png" width="148"/>
+<div class="hero-eyebrow">{{top.05}}</div>
+<h1 class="hero-title">{{top.01}}</h1>
+<p class="hero-tag">{{top.02}}</p>
+<p class="hero-sub">{{top.03}}</p>
+<div class="stats-row" id="stats-row">{{top.06}}</div>
+<div class="cta-row">{{top.07}}</div>
+<p class="hero-warn">{{top.04}}</p>
+</div>
+</header>
+<!-- ============================ TRUST STRIP ============================ -->
+<div class="trust-strip">
+<div class="container trust-row">
+<span class="trust-label">{{page.07}}</span>
+<ul class="trust-items">
+<li>{{page.02}}</li>
+<li>{{page.03}}</li>
+<li>{{page.04}}</li>
+<li>{{page.05}}</li>
+<li>{{page.06}}</li>
+</ul>
+</div>
+</div>
+<!-- ============================ NO OPERATOR ============================ -->
+<section class="section" id="protocol">
+<div class="container">
+<div class="section-head reveal">
+<span class="section-tag">{{protocol.13}}</span>
+<h2>{{protocol.01}}</h2>
+<p class="lead">{{protocol.02}}</p>
+</div>
+<div class="bento">
+<div class="bento-card bento-lg reveal">
+<div class="bento-icon">🐱</div>
+<h3>{{protocol.03}}</h3>
+<p>{{protocol.04}}</p>
+</div>
+<div class="bento-card reveal">
+<div class="bento-icon">🔑</div>
+<h3>{{protocol.05}}</h3>
+<p>{{protocol.06}}</p>
+</div>
+<div class="bento-card reveal">
+<div class="bento-icon">🎫</div>
+<h3>{{protocol.07}}</h3>
+<p>{{protocol.08}}</p>
+</div>
+<div class="bento-card reveal">
+<div class="bento-icon">🔒</div>
+<h3>{{protocol.09}}</h3>
+<p>{{protocol.10}}</p>
+</div>
+<div class="bento-card bento-lg reveal">
+<div class="bento-icon">💬</div>
+<h3>{{protocol.11}}</h3>
+<p>{{protocol.12}}</p>
+</div>
+</div>
+</div>
+</section>
+<!-- ============================ ONBOARDING ============================ -->
+<section class="section section-alt" id="setup">
+<div class="container">
+<div class="section-head centered reveal">
+<span class="section-tag">{{setup.08}}</span>
+<h2>{{setup.01}}</h2>
+<p class="lead">{{setup.02}}</p>
+</div>
+<div class="phone-row reveal">
+<figure class="phone">
+<img alt="{{setup.attr.01}}" height="2400" loading="lazy" src="images/onboarding-1.png" width="1080"/>
+<figcaption>{{setup.03}}</figcaption>
+</figure>
+<figure class="phone">
+<img alt="{{setup.attr.02}}" height="2400" loading="lazy" src="images/onboarding-3.png" width="1080"/>
+<figcaption>{{setup.04}}</figcaption>
+</figure>
+<figure class="phone">
+<img alt="{{setup.attr.03}}" height="2400" loading="lazy" src="images/onboarding-4.png" width="1080"/>
+<figcaption>{{setup.05}}</figcaption>
+</figure>
+<figure class="phone">
+<img alt="{{setup.attr.04}}" height="2400" loading="lazy" src="images/onboarding-5.png" width="1080"/>
+<figcaption>{{setup.06}}</figcaption>
+</figure>
+</div>
+<div class="feature-copy reveal" style="max-width:760px;margin:0 auto;text-align:center;">
+<p>{{setup.07}}</p>
+</div>
+</div>
+</section>
+<!-- ============================ WALLET ============================ -->
+<section class="section" id="wallet">
+<div class="container">
+<div class="section-head reveal">
+<span class="section-tag">{{wallet.09}}</span>
+<h2>{{wallet.01}}</h2>
+<p class="lead">{{wallet.02}}</p>
+</div>
+<div class="phone-row reveal">
+<figure class="phone">
+<img alt="{{wallet.attr.01}}" height="2400" loading="lazy" src="images/home.png" width="1080"/>
+<figcaption>{{wallet.03}}</figcaption>
+</figure>
+<figure class="phone">
+<img alt="{{wallet.attr.02}}" height="2400" loading="lazy" src="images/pay.png" width="1080"/>
+<figcaption>{{wallet.04}}</figcaption>
+</figure>
+<figure class="phone">
+<img alt="{{wallet.attr.03}}" height="2400" loading="lazy" src="images/activity.png" width="1080"/>
+<figcaption>{{wallet.05}}</figcaption>
+</figure>
+<figure class="phone">
+<img alt="{{wallet.attr.04}}" height="2400" loading="lazy" src="images/send-receive.png" width="1080"/>
+<figcaption>{{wallet.06}}</figcaption>
+</figure>
+</div>
+<div class="feature-copy reveal" style="max-width:780px;margin:0 auto;">
+<p>{{wallet.07}}</p>
+<p>{{wallet.08}}</p>
+</div>
+</div>
+</section>
+<!-- ============================ PEOPLE ============================ -->
+<section class="section section-alt" id="people">
+<div class="container">
+<div class="section-head reveal">
+<span class="section-tag">{{people.09}}</span>
+<h2>{{people.01}}</h2>
+<p class="lead">{{people.02}}</p>
+</div>
+<div class="phone-row reveal">
+<figure class="phone">
+<img alt="{{people.attr.01}}" height="2400" loading="lazy" src="images/my-card.png" width="1080"/>
+<figcaption>{{people.03}}</figcaption>
+</figure>
+<figure class="phone">
+<img alt="{{people.attr.02}}" height="2400" loading="lazy" src="images/chat-thread.png" width="1080"/>
+<figcaption>{{people.04}}</figcaption>
+</figure>
+<figure class="phone">
+<img alt="{{people.attr.03}}" height="2400" loading="lazy" src="images/group-chat.png" width="1080"/>
+<figcaption>{{people.05}}</figcaption>
+</figure>
+<figure class="phone">
+<img alt="{{people.attr.04}}" height="2400" loading="lazy" src="images/chat-search.png" width="1080"/>
+<figcaption>{{people.06}}</figcaption>
+</figure>
+</div>
+<div class="feature-copy reveal" style="max-width:780px;margin:0 auto;">
+<p>{{people.07}}</p>
+<p>{{people.08}}</p>
+</div>
+</div>
+</section>
+<!-- ============================ COMMERCE ============================ -->
+<section class="section" id="commerce">
+<div class="container">
+<div class="section-head reveal">
+<span class="section-tag">{{commerce.26}}</span>
+<h2>{{commerce.01}}</h2>
+<p class="lead">{{commerce.02}}</p>
+</div>
+<div class="phone-row reveal">
+<figure class="phone">
+<img alt="{{commerce.attr.01}}" height="2400" loading="lazy" src="images/modes.png" width="1080"/>
+<figcaption>{{commerce.03}}</figcaption>
+</figure>
+<figure class="phone">
+<img alt="{{commerce.attr.02}}" height="2400" loading="lazy" src="images/pos.png" width="1080"/>
+<figcaption>{{commerce.04}}</figcaption>
+</figure>
+<figure class="phone">
+<img alt="{{commerce.attr.03}}" height="2400" loading="lazy" src="images/pos-charge.png" width="1080"/>
+<figcaption>{{commerce.05}}</figcaption>
+</figure>
+</div>
+<div class="phone-row reveal">
+<figure class="phone">
+<img alt="{{commerce.attr.04}}" height="2400" loading="lazy" src="images/bar-tab.png" width="1080"/>
+<figcaption>{{commerce.06}}</figcaption>
+</figure>
+<figure class="phone">
+<img alt="{{commerce.attr.05}}" height="2400" loading="lazy" src="images/kiosk.png" width="1080"/>
+<figcaption>{{commerce.07}}</figcaption>
+</figure>
+<figure class="phone">
+<img alt="{{commerce.attr.06}}" height="2400" loading="lazy" src="images/kiosk-staff.png" width="1080"/>
+<figcaption>{{commerce.08}}</figcaption>
+</figure>
+<figure class="phone">
+<img alt="{{commerce.attr.07}}" height="2400" loading="lazy" src="images/donations.png" width="1080"/>
+<figcaption>{{commerce.09}}</figcaption>
+</figure>
+</div>
+<div class="feature-copy reveal" style="max-width:820px;margin:2rem auto 0;">
+<p>{{commerce.10}}</p>
+</div>
+<div class="feature-split reveal" style="margin-top:3.5rem;">
+<div class="feature-copy">
+<span class="section-tag">{{commerce.27}}</span>
+<h3>{{commerce.11}}</h3>
+<p>{{commerce.12}}</p>
+<p>{{commerce.13}}</p>
+<p>{{commerce.14}}</p>
+</div>
+<div class="phone-row" style="margin:0;">
+<figure class="phone">
+<img alt="{{commerce.attr.08}}" height="2400" loading="lazy" src="images/hail.png" width="1080"/>
+<figcaption>{{commerce.15}}</figcaption>
+</figure>
+<figure class="phone">
+<img alt="{{commerce.attr.09}}" height="2400" loading="lazy" src="images/taxi-meter.png" width="1080"/>
+<figcaption>{{commerce.16}}</figcaption>
+</figure>
+</div>
+</div>
+<div class="feature-split flip reveal" style="margin-top:3.5rem;">
+<div class="feature-copy">
+<span class="section-tag">{{commerce.28}}</span>
+<h3>{{commerce.17}}</h3>
+<p>{{commerce.18}}</p>
+<p>{{commerce.19}}</p>
+</div>
+<div class="phone-row" style="margin:0;">
+<figure class="phone">
+<img alt="{{commerce.attr.10}}" height="2400" loading="lazy" src="images/marketplace.png" width="1080"/>
+<figcaption>{{commerce.20}}</figcaption>
+</figure>
+<figure class="phone">
+<img alt="{{commerce.attr.11}}" height="2400" loading="lazy" src="images/hire-help.png" width="1080"/>
+<figcaption>{{commerce.21}}</figcaption>
+</figure>
+</div>
+</div>
+<div class="phone-row reveal" style="margin-top:3rem;">
+<figure class="phone">
+<img alt="{{commerce.attr.12}}" height="2400" loading="lazy" src="images/renting-form.png" width="1080"/>
+<figcaption>{{commerce.22}}</figcaption>
+</figure>
+<figure class="phone">
+<img alt="{{commerce.attr.13}}" height="2400" loading="lazy" src="images/renting-private.png" width="1080"/>
+<figcaption>{{commerce.23}}</figcaption>
+</figure>
+<figure class="phone">
+<img alt="{{commerce.attr.14}}" height="2400" loading="lazy" src="images/rent-search.png" width="1080"/>
+<figcaption>{{commerce.24}}</figcaption>
+</figure>
+</div>
+<div class="feature-copy reveal" style="max-width:820px;margin:1.5rem auto 0;">
+<p>{{commerce.25}}</p>
+</div>
+</div>
+</section>
+<!-- ============================ TRUST ============================ -->
+<section class="section section-alt" id="trust">
+<div class="container">
+<div class="section-head centered reveal">
+<span class="section-tag">{{trust.07}}</span>
+<h2>{{trust.01}}</h2>
+<p class="lead">{{trust.02}}</p>
+</div>
+<div class="stakes reveal">
+<div class="stake-card">{{trust.08}}</div>
+<div class="stake-card">{{trust.09}}</div>
+<div class="stake-card">{{trust.10}}</div>
+</div>
+<div class="feature-copy reveal" style="max-width:780px;margin:0 auto 2.5rem;">
+<p>{{trust.03}}</p>
+</div>
+<div class="callout reveal">
+<div class="callout-mark">⅔</div>
+<div>
+<h3>{{trust.04}}</h3>
+<p>{{trust.05}}</p>
+<p>{{trust.06}}</p>
+</div>
+</div>
+</div>
+</section>
+<!-- ============================ BEHAVES LIKE AN APP ============================ -->
+<section class="section" id="craft">
+<div class="container">
+<div class="section-head reveal">
+<span class="section-tag">{{craft.09}}</span>
+<h2>{{craft.01}}</h2>
+<p class="lead">{{craft.02}}</p>
+</div>
+<div class="phone-row reveal">
+<figure class="phone">
+<img alt="{{craft.attr.01}}" height="2400" loading="lazy" src="images/profile-privacy.png" width="1080"/>
+<figcaption>{{craft.03}}</figcaption>
+</figure>
+<figure class="phone">
+<img alt="{{craft.attr.02}}" height="2400" loading="lazy" src="images/home-dark.png" width="1080"/>
+<figcaption>{{craft.04}}</figcaption>
+</figure>
+<figure class="phone">
+<img alt="{{craft.attr.03}}" height="2400" loading="lazy" src="images/home-arabic.png" width="1080"/>
+<figcaption>{{craft.05}}</figcaption>
+</figure>
+<figure class="phone">
+<img alt="{{craft.attr.04}}" height="2400" loading="lazy" src="images/settings-business.png" width="1080"/>
+<figcaption>{{craft.06}}</figcaption>
+</figure>
+</div>
+<div class="feature-copy reveal" style="max-width:820px;margin:0 auto;">
+<p>{{craft.07}}</p>
+<p>{{craft.08}}</p>
+</div>
+</div>
+</section>
+<!-- ============================ HONESTY ============================ -->
+<section class="section section-alt" id="honesty">
+<div class="container">
+<div class="section-head reveal">
+<span class="section-tag">{{honesty.16}}</span>
+<h2>{{honesty.01}}</h2>
+<p class="lead">{{honesty.02}}</p>
+</div>
+<div class="proof-grid reveal">
+<div class="proof-col proof-yes">
+<span class="proof-tag">{{honesty.17}}</span>
+<ul>
+<li>{{honesty.03}}</li>
+<li>{{honesty.04}}</li>
+<li>{{honesty.05}}</li>
+<li>{{honesty.06}}</li>
+<li>{{honesty.07}}</li>
+<li>{{honesty.08}}</li>
+</ul>
+</div>
+<div class="proof-col proof-no">
+<span class="proof-tag">{{honesty.18}}</span>
+<ul>
+<li>{{honesty.09}}</li>
+<li>{{honesty.10}}</li>
+<li>{{honesty.11}}</li>
+<li>{{honesty.12}}</li>
+<li>{{honesty.13}}</li>
+</ul>
+</div>
+</div>
+<div class="callout callout-warn reveal" style="margin-top:2.5rem;">
+<div class="callout-mark">!</div>
+<div>
+<h3>{{honesty.14}}</h3>
+<p>{{honesty.15}}</p>
+</div>
+</div>
+</div>
+</section>
+<!-- ============================ SPEC ============================ -->
+<section class="section" id="spec">
+<div class="container">
+<div class="section-head reveal">
+<span class="section-tag">{{spec.09}}</span>
+<h2>{{spec.01}}</h2>
+<p class="lead">{{spec.02}}</p>
+</div>
+<div class="feature-split reveal">
+<pre class="repo-tree"><span class="rt-star">★</span> <span class="rt-dir">ducat-protocol.md</span>   <span class="rt-desc">{{spec.10}}</span>
+  <span class="rt-dir">core/</span>               <span class="rt-desc">{{spec.11}}</span>
+  <span class="rt-dir">vectors/</span>            <span class="rt-desc">{{spec.12}}</span>
+  <span class="rt-dir">conformance/</span>        <span class="rt-desc">{{spec.13}}</span>
+  <span class="rt-dir">harness/</span>            <span class="rt-desc">{{spec.14}}</span>
+  <span class="rt-dir">sim/</span>                <span class="rt-desc">{{spec.15}}</span>
+  <span class="rt-dir">applications/</span>       <span class="rt-desc">{{spec.16}}</span>
+  <span class="rt-dir">mobile/</span>             <span class="rt-desc">{{spec.17}}</span>
+  <span class="rt-dir">research/</span>           <span class="rt-desc">{{spec.18}}</span></pre>
+<div class="feature-copy">
+<h3>{{spec.03}}</h3>
+<ul class="check-list">
+<li>{{spec.04}}</li>
+<li>{{spec.05}}</li>
+<li>{{spec.06}}</li>
+<li>{{spec.07}}</li>
+</ul>
+<p style="margin-top:1.25rem;">{{spec.08}}</p>
+</div>
+</div>
+</div>
+</section>
+<!-- ============================ DOWNLOADS ============================ -->
+<section class="section section-alt" id="downloads">
+<div class="container">
+<div class="section-head centered reveal">
+<span class="section-tag">{{downloads.12}}</span>
+<h2>{{downloads.01}}</h2>
+<p class="lead">{{downloads.02}}</p>
+</div>
+<div class="dl-grid reveal">
+<div class="dl-card">
+<h3>{{downloads.03}}</h3>
+<p>{{downloads.04}}</p>
+<div class="dl-links">{{downloads.13}}</div>
+</div>
+<div class="dl-card">
+<h3>{{downloads.05}}</h3>
+<p>{{downloads.06}}</p>
+<div class="dl-links">{{downloads.14}}</div>
+</div>
+<div class="dl-card">
+<h3>{{downloads.07}}</h3>
+<p>{{downloads.08}}</p>
+<div class="dl-links">{{downloads.15}}</div>
+</div>
+<div class="dl-card">
+<h3>{{downloads.09}}</h3>
+<p>{{downloads.10}}</p>
+<div class="dl-links">{{downloads.16}}</div>
+</div>
+</div>
+<p class="dl-note reveal">{{downloads.11}}</p>
+</div>
+</section>
+<!-- ============================ FOOTER ============================ -->
+<footer class="footer">
+<div class="container footer-inner">
+<div>
+<span class="footer-brand"><img alt="" src="mascot.png"/>DUCAT</span>
+<p class="footer-tag">{{footer.01}}</p>
+</div>
+<div class="footer-col">
+<h4>{{footer.02}}</h4>
+<ul>
+<li>{{footer.03}}</li>
+<li>{{footer.04}}</li>
+<li>{{footer.05}}</li>
+<li>{{footer.06}}</li>
+</ul>
+</div>
+<div class="footer-col">
+<h4>{{footer.07}}</h4>
+<ul>
+<li>{{footer.08}}</li>
+<li>{{footer.09}}</li>
+<li>{{footer.10}}</li>
+</ul>
+</div>
+<div class="footer-col">
+<h4>{{footer.11}}</h4>
+<ul>
+<li>{{footer.12}}</li>
+<li>{{footer.13}}</li>
+<li>{{footer.14}}</li>
+<li>{{footer.15}}</li>
+</ul>
+</div>
+</div>
+<div class="footer-bottom">
+{{__langs__}}
+<p>{{footer.16}}</p>
+<p>{{footer.17}}</p>
+<div class="onion-line">{{footer.18}}</div>
+</div>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>

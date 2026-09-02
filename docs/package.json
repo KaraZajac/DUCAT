@@ -4,6 +4,7 @@
   "private": true,
   "description": "ducatproject.org — assembles the page in docs/ together with the shared images/ gallery, which lives at the repo root because the README cites it from there.",
   "scripts": {
-    "build": "rm -rf dist && mkdir -p dist && cp index.html style.css app.js mascot.png og.png dist/ && cp -R ../images dist/images && rm -f dist/images/README.md"
+    "build": "node build.mjs",
+    "check": "node build.mjs --check"
   }
 }
