@@ -75,15 +75,13 @@ fun BarTabScreen(
             // refuses a bill sends a kind-5 naming it; this list — the one a
             // counter actually works from — must not read that as "billed,
             // unpaid", indistinguishable from somebody who has not got round
-            // to it. The bill is found by the seq settle stored; the amount
-            // match only covers tabs billed before it existed.
+            // to it. The bill is the one settle sent for the tab
+            // (RunningTab.billIn); the amount match only covers tabs billed
+            // before the seq was kept.
             val refused = tabs.filter { it.state == "settled" }.mapNotNull { t ->
                 val thread = contacts.thread(t.personaHex)
-                thread.lastOrNull {
-                    it.outgoing && it.kind == 1 &&
-                        if (t.billSeq >= 0) it.seq == t.billSeq
-                        else it.amountPxmr == t.settledTotal
-                }?.takeIf { (it.seq to it.timestamp) in billAnswers(thread).refused }
+                t.billIn(thread)
+                    ?.takeIf { (it.seq to it.timestamp) in billAnswers(thread).refused }
                     ?.let { t.id }
             }.toSet()
             byHex to refused
@@ -649,13 +647,10 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                 val wasRefused by produceState(false, tab.id, v) {
                     value = withContext(Dispatchers.IO) {
                         val thread = ContactStore(context).thread(tab.personaHex)
-                        // Same preference as the list rows: the seq settle
-                        // stored, amount only for tabs that predate it.
-                        thread.lastOrNull {
-                            it.outgoing && it.kind == 1 &&
-                                if (tab.billSeq >= 0) it.seq == tab.billSeq
-                                else it.amountPxmr == tab.settledTotal
-                        }?.let { (it.seq to it.timestamp) in billAnswers(thread).refused } ?: false
+                        // Same bill as the list rows find.
+                        tab.billIn(thread)
+                            ?.let { (it.seq to it.timestamp) in billAnswers(thread).refused }
+                            ?: false
                     }
                 }
                 Text(

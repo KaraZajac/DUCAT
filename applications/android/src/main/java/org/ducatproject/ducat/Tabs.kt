@@ -97,6 +97,36 @@ data class RunningTab(
     /** Paid over the bill. Zero unless a payment has landed above it. */
     val tipPxmr: Long get() = (paidPxmr - settledTotal).coerceAtLeast(0)
 
+    /**
+     * The bill settle() sent for this tab, found in [thread].
+     *
+     * By the seq settle recorded — and, among the bills at that seq, the one
+     * sent when this tab was settled. A seq is per card: every re-claimed
+     * card restarts the numbering, so a repeat customer's second visit can
+     * be billed at the same number as their first, and "the last outgoing
+     * bill at this seq" named the newer visit's bill for the older tab —
+     * the older tab, still awaiting payment, then read the newer bill's
+     * notice as its own and swallowed a payment meant for the other. A tab
+     * from before the seq was kept falls back to the last outgoing bill of
+     * this exact total, the read-back settle() itself performs. Null only
+     * when no such bill exists; without the fallback a tab with an unknown
+     * seq read every *named* notice as naming a different bill, and a
+     * correctly-paid tab could never settle.
+     *
+     * Compare by identity against [thread]'s own elements — what
+     * [referent] hands back.
+     */
+    fun billIn(thread: List<StoredMessage>): StoredMessage? {
+        val bills = thread.filter { it.outgoing && it.kind == 1 }
+        if (billSeq < 0) return bills.lastOrNull { it.amountPxmr == settledTotal }
+        val atSeq = bills.filter { it.seq == billSeq }
+        // The settle state is written just before the bill goes out, both
+        // on this phone's clock; the slack is only for the second's rounding.
+        return atSeq.filter { it.timestamp * 1000 >= settledAt - 60_000 }
+            .minByOrNull { it.timestamp }
+            ?: atSeq.lastOrNull()
+    }
+
     fun toJson(): JSONObject = JSONObject().apply {
         put("id", id); put("origin", origin); put("persona", personaHex)
         put("opened", openedAt); put("state", state)
@@ -494,8 +524,9 @@ class TabStore(private val context: Context) {
                 // notice from a visit last month still widened what would
                 // match — and a payer chooses both the amount and the
                 // timestamp, so without the bound they choose the set.
-                val billSeq = knownBillSeq(contacts, tab)
-                val said = contacts.thread(tab.personaHex)
+                val thread = contacts.thread(tab.personaHex)
+                val bill = tab.billIn(thread)
+                val said = thread
                     .filter {
                         !it.outgoing && it.kind == 2 &&
                             it.timestamp * 1000 >= tab.settledAt - 60_000 &&
@@ -509,7 +540,7 @@ class TabStore(private val context: Context) {
                             // only the tab it names; an unnamed one keeps
                             // the old behaviour.
                             (it.reSeq == null ||
-                                (!it.reOwn && billSeq >= 0 && it.reSeq == billSeq))
+                                (bill != null && thread.referent(it) === bill))
                     }
                     .map { it.amountPxmr }.toSet()
                 // The same subaddress rule reconcile applies. It matters more
@@ -538,18 +569,6 @@ class TabStore(private val context: Context) {
                 DucatLog.i(TAG, "pool sighting for ${tab.origin} tab: ${hit.txHashHex.take(16)}…")
             }
         }
-
-        /** The bill's sequence as settle() recorded it — or, for a tab
-         *  from before the field was kept, re-derived by the same read-back
-         *  settle() performs (last outgoing bill of this exact total). -1
-         *  only when no such bill exists; without this, a tab with an
-         *  unknown seq read every *named* notice as naming a different
-         *  bill, and a correctly-paid tab could never settle. */
-        private fun knownBillSeq(contacts: ContactStore, tab: RunningTab): Long =
-            if (tab.billSeq >= 0) tab.billSeq
-            else contacts.thread(tab.personaHex)
-                .lastOrNull { it.outgoing && it.kind == 1 && it.amountPxmr == tab.settledTotal }
-                ?.seq ?: -1L
 
         fun reconcile(context: Context) {
             val store = TabStore(context)
@@ -581,8 +600,9 @@ class TabStore(private val context: Context) {
                 // would never find it. Still §17.5 — the notice nominates an
                 // amount, the chain confirms it; a notice with no matching
                 // output settles nothing.
-                val billSeq = knownBillSeq(contacts, tab)
-                val said = contacts.thread(tab.personaHex)
+                val thread = contacts.thread(tab.personaHex)
+                val bill = tab.billIn(thread)
+                val said = thread
                     .filter {
                         !it.outgoing && it.kind == 2 &&
                             it.timestamp * 1000 >= tab.settledAt - 60_000 &&
@@ -596,7 +616,7 @@ class TabStore(private val context: Context) {
                             // only the tab it names; an unnamed one keeps
                             // the old behaviour.
                             (it.reSeq == null ||
-                                (!it.reOwn && billSeq >= 0 && it.reSeq == billSeq))
+                                (bill != null && thread.referent(it) === bill))
                     }
                     .map { it.amountPxmr }
                     .toSet()
@@ -607,11 +627,11 @@ class TabStore(private val context: Context) {
                 // thread pointed at another obligation on the same
                 // subaddress — a recurring bill, a split share — closing two
                 // debts with one payment and shorting the shop the other.
-                val namedElsewhere = contacts.thread(tab.personaHex)
+                val namedElsewhere = thread
                     .filter {
                         !it.outgoing && it.kind == 2 && it.reSeq != null &&
                             !it.reOwn &&
-                            !(billSeq >= 0 && it.reSeq == billSeq) &&
+                            !(bill != null && thread.referent(it) === bill) &&
                             it.timestamp * 1000 >= tab.settledAt - 60_000
                     }
                     .map { it.amountPxmr }.toSet()
@@ -679,7 +699,7 @@ class TabStore(private val context: Context) {
                         items = receiptLines, taxPxmr = tab.taxPxmr,
                         txidHex = hit.txHashHex.ifEmpty { null },
                         // §16.14: the bill this settles, ours to name.
-                        reSeq = billSeq.takeIf { it >= 0 }, reOwn = billSeq >= 0,
+                        reSeq = bill?.seq, reOwn = bill != null,
                     )
                 }.onSuccess {
                     Notify.post(
