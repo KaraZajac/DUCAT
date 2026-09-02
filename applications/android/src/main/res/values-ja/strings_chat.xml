@@ -16,6 +16,7 @@
     <string name="chat_what_contact">連絡先</string>
     <string name="chat_what_reaction">リアクション</string>
     <string name="chat_what_invite">招待</string>
+    <string name="chat_what_note">メモ</string>
     <string name="chat_error_location_fix">現在地を取得できませんでした</string>
     <string name="chat_recording_placeholder">録音中… %1$d秒</string>
     <string name="chat_message_placeholder">メッセージ</string>

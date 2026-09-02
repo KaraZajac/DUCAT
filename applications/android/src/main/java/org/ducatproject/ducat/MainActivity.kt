@@ -34,6 +34,8 @@ import org.ducatproject.ducat.ui.ThemeMode
 import org.ducatproject.ducat.ui.ThemePreference
 import org.ducatproject.ducat.ui.ducat
 import org.ducatproject.ducat.ui.BridgeSelfTest
+import org.ducatproject.ducat.ui.claimOffScreen
+import org.ducatproject.ducat.ui.claimed
 import androidx.activity.compose.BackHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -394,6 +396,13 @@ enum class Tab(val labelRes: Int) {
     Chat(R.string.tab_chat),
 }
 
+/** The card-link question — the link and the name it asserts — as a Bundle
+ *  holds it. An empty list is "no question", which the saver reads as null. */
+private val cardAskSaver = androidx.compose.runtime.saveable.listSaver<Pair<String, String>?, String>(
+    save = { it?.let { (uri, who) -> listOf(uri, who) } ?: emptyList() },
+    restore = { if (it.size == 2) it[0] to it[1] else null },
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
@@ -515,14 +524,63 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         }
     }
     val tappedCard by MainActivity.claimLink.collectAsState()
-    var cardAsk by remember { mutableStateOf<Pair<String, String>?>(null) }
+    // The question, and the answer being typed into it, outlive a turn of
+    // the phone: the link was tapped in another app, and a dialog that
+    // vanished on rotation left the person with no card and no way back to
+    // it but the other app.
+    var cardAsk by rememberSaveable(stateSaver = cardAskSaver) {
+        mutableStateOf<Pair<String, String>?>(null)
+    }
     // Not a new person. A card naming somebody already in the list is the
     // ordinary way a contact comes back after losing their phone — and it is
     // also how an attacker reaches an existing record, since a card carries a
     // persona with nothing signed over it. Either way "Add Sam?" is the wrong
-    // question, so the dialog asks the right one.
-    var cardKnown by remember { mutableStateOf<Contact?>(null) }
+    // question, so the dialog asks the right one. Looked up from the card
+    // each time it is shown: a parse and a read of the book, both cheap.
+    val cardKnown = remember(cardAsk?.first) {
+        cardAsk?.first?.let { uri ->
+            runCatching {
+                val card = uniffi.ducat_mobile.readContactCard(uri)
+                val hex = card.persona.joinToString("") { "%02x".format(it) }
+                ContactStore(context).all().firstOrNull { it.personaHex == hex }
+            }.getOrNull()
+        }
+    }
     var cardFail by remember { mutableStateOf<Int?>(null) }
+    // The claim a tapped Add started, by its link. It runs off the screen
+    // (claimOffScreen): it always finished — the contact in the book, the
+    // reply written — but the line after it that opened the thread was
+    // cancelled by a rotation in the seconds it took, and the dialog had
+    // already closed, so nothing on the screen said anything had happened.
+    // The dialog now stays up with a spinner until the claim lands, and
+    // whichever instance of this screen is up then opens the thread.
+    var cardClaim by rememberSaveable { mutableStateOf<String?>(null) }
+    val claimTick by org.ducatproject.ducat.ui.ThreadSends.ticks.collectAsState()
+    LaunchedEffect(claimTick, cardClaim) {
+        val k = cardClaim?.let { org.ducatproject.ducat.ui.claimKey(it) } ?: return@LaunchedEffect
+        for (o in org.ducatproject.ducat.ui.ThreadSends.take(k)) {
+            if (cardAsk?.first == cardClaim) cardAsk = null
+            cardClaim = null
+            when (o) {
+                is org.ducatproject.ducat.ui.ThreadSends.Outcome.Landed ->
+                    o.claimed(context)?.let { overlay = Overlay.Chat(it) }
+                is org.ducatproject.ducat.ui.ThreadSends.Outcome.Failed -> {
+                    DucatLog.w("Main", "card link claim: ${o.error.message}")
+                    // A node that has not finished connecting is not a bad
+                    // card. Saying "broken, already claimed, or no longer
+                    // valid" over a claim that failed offline sends someone
+                    // back to ask for a replacement — burning the good card
+                    // they are holding, since a card is claim-once.
+                    cardFail = org.ducatproject.ducat.ui.claimFailureRes(o.error)
+                }
+            }
+        }
+        // A claim the process died under has no answer coming, and the
+        // restored dialog must not spin for it. It shows its plain body
+        // again — with "already in your book" if the claim had landed —
+        // and a second Add finds the thread the first one made.
+        if (cardClaim != null && !org.ducatproject.ducat.ui.ThreadSends.inFlight(k)) cardClaim = null
+    }
     LaunchedEffect(tappedCard) {
         val uri = tappedCard ?: return@LaunchedEffect
         if (kiosk) {
@@ -538,10 +596,6 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         }.onSuccess { card ->
             if (card.expired) cardFail = R.string.main_card_link_expired
             else cardAsk = uri to card.assertedName.orEmpty()
-            cardKnown = runCatching {
-                val hex = card.persona.joinToString("") { "%02x".format(it) }
-                ContactStore(context).all().firstOrNull { it.personaHex == hex }
-            }.getOrNull()
         }.onFailure {
             DucatLog.w("Main", "card link unreadable: ${it.message}")
             cardFail = org.ducatproject.ducat.ui.claimFailureRes(it)
@@ -555,7 +609,8 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         // is the one moment the person is standing right there to be asked
         // about. Prefilled with what the card says, so the common case is one
         // tap and nothing to read.
-        var naming by remember(uri) { mutableStateOf(who) }
+        var naming by rememberSaveable(uri) { mutableStateOf(who) }
+        val claiming = cardClaim == uri
         // The other half of the same question, asked in the same breath.
         //
         // This dialog exists because claiming a card is the one moment the
@@ -566,12 +621,24 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         // "Unnamed contact". A second modal stacked on this one would be a
         // worse way to ask than a second field.
         val needMine = remember(uri) { org.ducatproject.ducat.ui.nameGateNeeded(context) }
-        var mine by remember(uri) { mutableStateOf("") }
+        var mine by rememberSaveable(uri) { mutableStateOf("") }
         AlertDialog(
             onDismissRequest = { cardAsk = null },
             title = { Text(androidx.compose.ui.res.stringResource(R.string.main_card_link_title)) },
             text = {
-                Column {
+                if (claiming) {
+                    // The claim is reading their inbox and writing ours
+                    // into it, which takes a node and a few seconds — or,
+                    // on a node still attaching, a good deal longer. The
+                    // dialog says so rather than closing on a tap that
+                    // then did nothing anybody could see; Not now hides
+                    // it, and the thread still opens when the claim lands.
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                        Spacer(Modifier.width(12.dp))
+                        Text(androidx.compose.ui.res.stringResource(R.string.contacts_reading_inbox))
+                    }
+                } else Column {
                     Text(
                         androidx.compose.ui.res.stringResource(
                             if (who.isBlank()) R.string.main_card_link_body_unnamed
@@ -624,7 +691,7 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                 }
             },
             confirmButton = {
-                TextButton(onClick = {
+                if (!claiming) TextButton(onClick = {
                     val petname = naming.trim().takeIf { it.isNotBlank() && it != who }
                     // Before the claim, not after: claimCard reads the name
                     // store to decide what to assert about us, and a write
@@ -634,38 +701,20 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                         mine.trim().takeIf { it.isNotBlank() }?.let { store.put(it) }
                         store.markAsked()
                     }
-                    cardAsk = null
-                    cardKnown = null
-                    scope.launch {
-                        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                            runCatching {
-                                val card = uniffi.ducat_mobile.readContactCard(uri)
-                                Mailbox.claimCard(context, card, petname)
-                            }.recoverCatching { e ->
-                                // The same link opened twice: the thread the
-                                // first one made is the answer, under the name
-                                // just chosen if one was.
-                                val mine = (e as? Mailbox.CardAlreadyMine)?.contact ?: throw e
-                                petname?.let { ContactStore(context).setPetname(mine.personaHex, it) }
-                                mine
-                            }
-                        }.onSuccess { overlay = Overlay.Chat(it) }
-                            .onFailure {
-                                DucatLog.w("Main", "card link claim: ${it.message}")
-                                // A node that has not finished connecting is
-                                // not a bad card. Saying "broken, already
-                                // claimed, or no longer valid" over a claim
-                                // that failed offline sends someone back to ask
-                                // for a replacement — burning the good card
-                                // they are holding, since a card is claim-once.
-                                cardFail = org.ducatproject.ducat.ui
-                                    .claimFailureRes(it)
-                            }
-                    }
+                    cardClaim = uri
+                    claimOffScreen(
+                        context, uri, petname = petname,
+                        // The same link opened twice: the thread the first
+                        // one made is the answer, under the name just
+                        // chosen if one was.
+                        onAgain = { mine ->
+                            petname?.let { ContactStore(context).setPetname(mine.personaHex, it) }
+                        },
+                    )
                 }) { Text(androidx.compose.ui.res.stringResource(R.string.main_card_link_add)) }
             },
             dismissButton = {
-                TextButton(onClick = { cardAsk = null; cardKnown = null }) {
+                TextButton(onClick = { cardAsk = null }) {
                     Text(androidx.compose.ui.res.stringResource(R.string.main_card_link_not_now))
                 }
             },

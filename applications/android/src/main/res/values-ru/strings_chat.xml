@@ -16,6 +16,7 @@
     <string name="chat_what_contact">контакт</string>
     <string name="chat_what_reaction">реакцию</string>
     <string name="chat_what_invite">приглашение</string>
+    <string name="chat_what_note">заметку</string>
     <string name="chat_error_location_fix">не удалось определить местоположение</string>
     <string name="chat_recording_placeholder">Запись… %1$d с</string>
     <string name="chat_message_placeholder">Сообщение</string>

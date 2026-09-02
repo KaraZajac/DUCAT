@@ -25,9 +25,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.ContactStore
@@ -202,10 +199,29 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
         onDismiss = { intro = null },
         onNamed = { val go = intro; intro = null; go?.invoke() },
     )
-    var adding by remember { mutableStateOf(false) }
     var scanning by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    // The claim runs off the sheet (claimOffScreen), under the card it is
+    // for. The sheet survives a rotation and so did the claim — it was
+    // the line after it that the turn cancelled, so the contact was in the
+    // book while the sheet sat there offering to add them, and a second tap
+    // was what closed it. Now the rebuilt sheet reads the outcome itself.
+    var claimingCard by rememberSaveable { mutableStateOf<String?>(null) }
+    var adding by remember {
+        mutableStateOf(claimingCard?.let { ThreadSends.inFlight(claimKey(it)) } ?: false)
+    }
+    val tick by ThreadSends.ticks.collectAsState()
+    LaunchedEffect(tick, claimingCard) {
+        val k = claimingCard?.let(::claimKey) ?: return@LaunchedEffect
+        for (o in ThreadSends.take(k)) {
+            claimingCard = null
+            when (o) {
+                is ThreadSends.Outcome.Landed -> onAdded()
+                is ThreadSends.Outcome.Failed -> error = context.getString(claimFailureRes(o.error))
+            }
+        }
+        adding = claimingCard != null && ThreadSends.inFlight(k)
+    }
 
     if (scanning) {
         QrScanner(
@@ -325,26 +341,24 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
                       val go: () -> Unit = {
                         adding = true
                         error = null
-                        scope.launch {
-                            val r = withContext(Dispatchers.IO) {
-                                // §16.3's rule holds for cards too: a contact is
-                                // mutual or it is not one. Claiming publishes
-                                // *our* details in the reply subkey, which is
-                                // also what tells the issuer their card is spent.
-                                runCatching {
-                                    Mailbox.claimCard(context, s, petname.ifBlank { null })
-                                }.recoverCatching { e ->
-                                    // Already in the book from this very card:
-                                    // keep the name typed here, and call it
-                                    // added — it is.
-                                    val mine = (e as? Mailbox.CardAlreadyMine)?.contact ?: throw e
-                                    ContactStore(context).setPetname(mine.personaHex, petname.trim())
-                                    mine
-                                }
-                            }
-                            adding = false
-                            r.onSuccess { onAdded() }
-                                .onFailure { error = context.getString(claimFailureRes(it)) }
+                        val name = petname.trim()
+                        // The text the card was read from: `s` is its parse,
+                        // and the parse is redone off the screen.
+                        cardRaw?.let { raw ->
+                            claimingCard = raw
+                            // §16.3's rule holds for cards too: a contact is
+                            // mutual or it is not one. Claiming publishes
+                            // *our* details in the reply subkey, which is
+                            // also what tells the issuer their card is spent.
+                            claimOffScreen(
+                                context, raw, petname = name.ifBlank { null },
+                                // Already in the book from this very card:
+                                // keep the name typed here, and call it
+                                // added — it is.
+                                onAgain = { mine ->
+                                    ContactStore(context).setPetname(mine.personaHex, name)
+                                },
+                            )
                         }
                       }
                       if (nameGateNeeded(context)) intro = go else go()

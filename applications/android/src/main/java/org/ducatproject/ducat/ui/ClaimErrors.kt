@@ -231,3 +231,57 @@ suspend fun issueCardPatiently(
         wait = (wait * 2).coerceAtMost(30_000L)
     }
 }
+
+/**
+ * The registry key a claim of [text] runs under: one per card, so the
+ * screen that comes back after a rotation finds the claim it started and
+ * does not start another against the same reply slot.
+ */
+fun claimKey(text: String): String = "claim:" + text.trim()
+
+/**
+ * Claim a card where the screen cannot cancel it.
+ *
+ * Four screens claim a card somebody is holding out — a tapped link, the
+ * scanner, the contacts sheet, a listing's "Ask about it" — and each ran
+ * the claim in its own scope. The claim itself always finished (the reply
+ * subkey written, the contact in the book); it was the line after it that
+ * a rotation or a call in those seconds skipped, so the thread it opened
+ * was never shown and the card sat on the screen as if nothing had
+ * happened. A second tap found the thread (CardAlreadyMine), which is why
+ * nobody lost a card — but nobody was told either, and a scanner that
+ * came back with `claiming` false read the same code again and raced its
+ * own first claim for the one reply slot.
+ *
+ * Under [ThreadSends] the claim finishes regardless, and whichever
+ * instance of the screen is up reads the outcome under [claimKey]: the
+ * persona hex of the thread for a landing (see [claimed]), the throwable
+ * for a failure ([claimFailureRes] has the words).
+ *
+ * [onFresh] runs after a first claim only; the same card claimed again
+ * from this phone goes to [onAgain] with the thread it already opened.
+ * Both run on the job's thread, before the outcome is filed.
+ */
+fun claimOffScreen(
+    context: android.content.Context,
+    text: String,
+    petname: String? = null,
+    onFresh: (org.ducatproject.ducat.Contact) -> Unit = {},
+    onAgain: (org.ducatproject.ducat.Contact) -> Unit = {},
+) {
+    ThreadSends.launch(org.ducatproject.ducat.ContactStore(context), claimKey(text), null) {
+        runCatching {
+            val card = uniffi.ducat_mobile.readContactCard(text.trim())
+            Mailbox.claimCard(context, card, petname).also(onFresh)
+        }.recoverCatching { e ->
+            ((e as? Mailbox.CardAlreadyMine)?.contact ?: throw e).also(onAgain)
+        }.getOrThrow().personaHex
+    }
+}
+
+/** The thread a landed claim opened, looked up fresh: the outcome carries
+ *  the persona hex, and the record may have moved on since. */
+fun ThreadSends.Outcome.Landed.claimed(context: android.content.Context): org.ducatproject.ducat.Contact? =
+    result?.let { hex ->
+        org.ducatproject.ducat.ContactStore(context).all().firstOrNull { it.personaHex == hex }
+    }

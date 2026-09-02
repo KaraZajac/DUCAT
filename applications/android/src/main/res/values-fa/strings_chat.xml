@@ -16,6 +16,7 @@
     <string name="chat_what_contact">مخاطب</string>
     <string name="chat_what_reaction">واکنش</string>
     <string name="chat_what_invite">دعوت‌نامه</string>
+    <string name="chat_what_note">یادداشت</string>
     <string name="chat_error_location_fix">موقعیت‌یابی ممکن نشد</string>
     <string name="chat_recording_placeholder">در حال ضبط… %1$d ثانیه</string>
     <string name="chat_message_placeholder">پیام</string>

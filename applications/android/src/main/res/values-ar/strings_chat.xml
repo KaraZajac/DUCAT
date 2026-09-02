@@ -16,6 +16,7 @@
     <string name="chat_what_contact">جهة الاتصال</string>
     <string name="chat_what_reaction">التفاعل</string>
     <string name="chat_what_invite">الدعوة</string>
+    <string name="chat_what_note">الملاحظة</string>
     <string name="chat_error_location_fix">تعذّر تحديد الموقع</string>
     <string name="chat_recording_placeholder">جارٍ التسجيل… %1$d ث</string>
     <string name="chat_message_placeholder">رسالة</string>

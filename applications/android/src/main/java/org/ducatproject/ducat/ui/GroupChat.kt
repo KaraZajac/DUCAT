@@ -24,7 +24,6 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.Groups
@@ -64,7 +63,6 @@ private class SplitPartial(val fails: List<String>, val billed: List<String>) :
 @Composable
 fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     val store = remember { ContactStore(context) }
     val version by ContactStore.changes.collectAsState()
     val group = remember(version, idHex) { Groups.get(context, idHex) } ?: run {
@@ -487,8 +485,16 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
                             Modifier.fillMaxWidth()
                                 .clickable {
                                     addOpen = false
-                                    scope.launch(Dispatchers.IO) {
-                                        runCatching { Groups.add(context, idHex, c.personaHex) }
+                                    // Under the thread's sends, not the
+                                    // screen's scope: a rotation right after
+                                    // the tap cancelled the launch before it
+                                    // ran, and nobody was added. Groups.add
+                                    // queues any roster copy that does not
+                                    // go, so what it throws is a real fault
+                                    // — shown as one, not swallowed.
+                                    send(context.getString(R.string.chat_what_invite)) {
+                                        Groups.add(context, idHex, c.personaHex)
+                                        true
                                     }
                                 }
                                 .padding(vertical = 10.dp),

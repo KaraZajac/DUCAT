@@ -16,6 +16,7 @@
     <string name="chat_what_contact">kontakt</string>
     <string name="chat_what_reaction">reakcję</string>
     <string name="chat_what_invite">zaproszenie</string>
+    <string name="chat_what_note">notatkę</string>
     <string name="chat_error_location_fix">nie udało się ustalić lokalizacji</string>
     <string name="chat_recording_placeholder">Nagrywanie… %1$ds</string>
     <string name="chat_message_placeholder">Wiadomość</string>

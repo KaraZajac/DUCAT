@@ -37,7 +37,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import java.io.File
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.Publications
@@ -349,7 +348,6 @@ private fun PublisherHeader(publisherHex: String, publisherName: String?) {
     val context = LocalContext.current
     val muted = Publications.isMuted(context, publisherHex)
     var confirm by remember { mutableStateOf(false) }
-    val scope = androidx.compose.runtime.rememberCoroutineScope()
 
     if (confirm) {
         androidx.compose.material3.AlertDialog(
@@ -370,15 +368,19 @@ private fun PublisherHeader(publisherHex: String, publisherName: String?) {
                     // The courtesy note, protocol-written in OUR language
                     // (the bill placeholder's rule): the publisher is told
                     // in words, and their roster is theirs to tidy.
+                    // Under the thread's sends, not this header's scope: a
+                    // turn of the phone between the tap and the dispatch
+                    // cancelled the launch before it ran, and the publisher
+                    // went on posting to a cabinet nobody read. A failure
+                    // lands on their chat screen as "could not send the
+                    // note", if it is up; the log has it either way.
                     val note = context.getString(R.string.library_unsub_note)
-                    scope.launch(kotlinx.coroutines.Dispatchers.IO) {
-                        runCatching {
-                            org.ducatproject.ducat.ContactStore(context).all()
-                                .firstOrNull { it.personaHex == publisherHex }
-                                ?.let { org.ducatproject.ducat.Mailbox.send(context, it, note) }
-                        }.onFailure {
-                            DucatLog.w("Library", "unsub note: ${it.message}")
-                        }
+                    val store = org.ducatproject.ducat.ContactStore(context)
+                    ThreadSends.launch(store, publisherHex, context.getString(R.string.chat_what_note)) {
+                        store.all().firstOrNull { it.personaHex == publisherHex }?.let {
+                            org.ducatproject.ducat.Mailbox.send(context, it, note)
+                        } ?: DucatLog.w("Library", "unsub note: ${publisherHex.take(8)}… is not a contact")
+                        null
                     }
                 }) { Text(stringResource(R.string.library_unsubscribe)) }
             },

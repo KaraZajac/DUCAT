@@ -16,6 +16,7 @@
     <string name="chat_what_contact">कॉन्टैक्ट</string>
     <string name="chat_what_reaction">रिएक्शन</string>
     <string name="chat_what_invite">निमंत्रण</string>
+    <string name="chat_what_note">नोट</string>
     <string name="chat_error_location_fix">लोकेशन नहीं मिल पाई</string>
     <string name="chat_recording_placeholder">रिकॉर्डिंग… %1$d सेकंड</string>
     <string name="chat_message_placeholder">मैसेज</string>

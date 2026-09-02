@@ -16,6 +16,7 @@
     <string name="chat_what_contact">liên hệ</string>
     <string name="chat_what_reaction">phản ứng</string>
     <string name="chat_what_invite">lời mời</string>
+    <string name="chat_what_note">lời nhắn</string>
     <string name="chat_error_location_fix">không định vị được</string>
     <string name="chat_recording_placeholder">Đang ghi âm… %1$d giây</string>
     <string name="chat_message_placeholder">Tin nhắn</string>

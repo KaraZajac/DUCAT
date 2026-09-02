@@ -16,6 +16,7 @@
     <string name="chat_what_contact">het contact</string>
     <string name="chat_what_reaction">de reactie</string>
     <string name="chat_what_invite">de uitnodiging</string>
+    <string name="chat_what_note">het berichtje</string>
     <string name="chat_error_location_fix">kon geen locatiebepaling krijgen</string>
     <string name="chat_recording_placeholder">Opnemen… %1$ds</string>
     <string name="chat_message_placeholder">Bericht</string>

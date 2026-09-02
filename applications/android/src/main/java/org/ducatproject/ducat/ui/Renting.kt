@@ -492,7 +492,6 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
     var details by rememberSaveable { mutableStateOf("") }
     var fix by remember { mutableStateOf<Pair<Long, Long>?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
-    val scope = rememberCoroutineScope()
 
     // Back closes the form — but not over the top of a half-written listing.
     //

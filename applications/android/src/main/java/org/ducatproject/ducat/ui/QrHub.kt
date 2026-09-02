@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -17,10 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.DucatLog
@@ -48,7 +46,6 @@ fun QrHub(
     onClose: () -> Unit,
 ) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     var scanning by remember { mutableStateOf(true) }
     var uri by remember { mutableStateOf(ContactStore(context).currentCardUri()) }
     var busy by remember { mutableStateOf(false) }
@@ -58,7 +55,15 @@ fun QrHub(
     // — so a code that was neither card nor address, or a card whose claim
     // failed, left a live preview that said nothing, with the sentence on
     // the other tab.
-    var claiming by remember { mutableStateOf(false) }
+    // The claim runs off the screen (claimOffScreen), and this is which
+    // card it is for. Saveable, because a rotation mid-claim rebuilt this
+    // screen with `claiming` false and a fresh camera: the same code was
+    // read again and a second claim raced the first for the card's one
+    // reply slot, and the thread the first one opened was never shown.
+    var claimingCard by rememberSaveable { mutableStateOf<String?>(null) }
+    var claiming by remember {
+        mutableStateOf(claimingCard?.let { ThreadSends.inFlight(claimKey(it)) } ?: false)
+    }
     var scanError by remember { mutableStateOf<String?>(null) }
     // Nothing to introduce ourselves with, and about to introduce ourselves.
     // See NameGate: the name travels on the handshake, so a blank one arrives
@@ -114,6 +119,22 @@ fun QrHub(
                 DucatLog.w(TAG, "issue: ${o.error.javaClass.simpleName}: ${o.error.message}")
             }
         }
+    }
+    // The scanned card's claim, read back by whichever instance of this
+    // screen is up when it lands.
+    LaunchedEffect(tick, claimingCard) {
+        val k = claimingCard?.let(::claimKey) ?: return@LaunchedEffect
+        for (o in ThreadSends.take(k)) {
+            claimingCard = null
+            when (o) {
+                is ThreadSends.Outcome.Landed -> o.claimed(context)?.let(onOpenChat)
+                is ThreadSends.Outcome.Failed -> {
+                    scanError = context.getString(claimFailureRes(o.error))
+                    DucatLog.w(TAG, "claim: ${o.error.message}")
+                }
+            }
+        }
+        claiming = claimingCard != null && ThreadSends.inFlight(k)
     }
 
     // One effect for both lives of the code. The registry answers scoped to
@@ -274,24 +295,12 @@ fun QrHub(
                                     else scanError = context.getString(R.string.qrhub_not_a_code)
                                 } else {
                                     val go: () -> Unit = {
-                                    claiming = true; scanError = null
-                                    scope.launch {
-                                        val r = withContext(Dispatchers.IO) {
-                                            runCatching {
-                                                val card = uniffi.ducat_mobile.readContactCard(text)
-                                                Mailbox.claimCard(context, card, null)
-                                            }.recoverCatching { e ->
-                                                // Scanned this one before: the
-                                                // thread it opened is the answer.
-                                                (e as? Mailbox.CardAlreadyMine)?.contact ?: throw e
-                                            }
-                                        }
-                                        claiming = false
-                                        r.onSuccess(onOpenChat).onFailure {
-                                            scanError = context.getString(claimFailureRes(it))
-                                            DucatLog.w(TAG, "claim: ${it.message}")
-                                        }
-                                    }
+                                        claiming = true; scanError = null
+                                        claimingCard = text
+                                        // Scanned this one before: the thread
+                                        // it opened is the answer, and the
+                                        // claim finds it.
+                                        claimOffScreen(context, text)
                                     }
                                     if (nameGateNeeded(context)) intro = go else go()
                                 }

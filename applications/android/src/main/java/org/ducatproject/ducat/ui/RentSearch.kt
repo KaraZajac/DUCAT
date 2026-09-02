@@ -129,6 +129,37 @@ private fun RentSearchScreen(
         onNamed = { val go = intro; intro = null; go?.invoke() },
     )
 
+    // The claim a tap on "Ask about it" starts, by the card it is for. Off
+    // the screen (claimOffScreen), because this one was cancelled in a way
+    // no rotation showed: the scope further down is disposed with the rest
+    // of the list when the listing form opens over it, so a claim out at
+    // that moment finished — contact added, question sent — while `busy`,
+    // remembered up here, stayed true for as long as the search was open
+    // and every Ask button with it. Saveable, so the screen a rotation
+    // rebuilds is the one that reads the outcome and opens the thread.
+    var asking by rememberSaveable { mutableStateOf<String?>(null) }
+    val claimTick by ThreadSends.ticks.collectAsState()
+    LaunchedEffect(claimTick, asking) {
+        val k = asking?.let(::claimKey) ?: return@LaunchedEffect
+        for (o in ThreadSends.take(k)) {
+            asking = null
+            when (o) {
+                is ThreadSends.Outcome.Landed -> o.claimed(context)?.let(onOpenChat)
+                is ThreadSends.Outcome.Failed -> {
+                    DucatLog.w("RentSearch", "claim: ${o.error.message}")
+                    error = context.getString(
+                        // "Ask them for a new one" is the right thing to
+                        // say to someone holding a scanned card and the
+                        // wrong thing entirely here: asking is what they
+                        // were trying to do.
+                        claimFailureRes(o.error, alreadyUsed = R.string.rent_already_asked),
+                    )
+                }
+            }
+        }
+        busy = asking != null && ThreadSends.inFlight(k)
+    }
+
     // The form owns the screen while it is open, exactly as it does on the
     // Renting side — a half-filled listing over a live search behind it is
     // two jobs at once.
@@ -532,75 +563,44 @@ private fun RentSearchScreen(
                                 onAsk = {
                                   val go: () -> Unit = {
                                     busy = true; error = null
-                                    scope.launch {
-                                        val r = withContext(Dispatchers.IO) {
-                                            runCatching {
-                                                val card = uniffi.ducat_mobile
-                                                    .readContactCard(info.card)
-                                                val c = Mailbox.claimCard(context, card, null)
-                                                // This side knows the subject
-                                                // without being told: they
-                                                // tapped it.
-                                                org.ducatproject.ducat.Enquiries.remember(
-                                                    context, c.personaHex,
-                                                    org.ducatproject.ducat.Enquiries.About(
-                                                        title = info.title,
-                                                        pricePxmr = info.pricePxmr.toLong(),
-                                                        depositPxmr = info.depositPxmr.toLong(),
-                                                        kind = info.kind.toInt(),
-                                                    ),
-                                                )
-                                                // Say what this is about.
-                                                //
-                                                // The claim alone opened an
-                                                // empty thread with a stranger:
-                                                // the owner got somebody
-                                                // arriving with nothing said,
-                                                // and the asker got a blank
-                                                // screen and had to remember
-                                                // which of the cars they had
-                                                // tapped. "Ask about it" is a
-                                                // question; this is the
-                                                // question.
-                                                runCatching {
-                                                    Mailbox.send(
-                                                        context, c,
-                                                        context.getString(
-                                                            R.string.rent_asking_about,
-                                                            isolate(info.title),
-                                                        ),
-                                                    )
-                                                }
-                                                c
-                                            }.recoverCatching { e ->
-                                                // Asked from this phone already:
-                                                // the card's reply is ours and
-                                                // the thread it opened is still
-                                                // here. Go to it, and say
-                                                // nothing again — the question
-                                                // is already in it.
-                                                (e as? Mailbox.CardAlreadyMine)?.contact ?: throw e
-                                            }
+                                    asking = info.card
+                                    // Asked from this phone already: the
+                                    // card's reply is ours and the thread it
+                                    // opened is still here. The claim goes to
+                                    // it, and says nothing again — the
+                                    // question is already in it.
+                                    claimOffScreen(context, info.card, onFresh = { c ->
+                                        // This side knows the subject without
+                                        // being told: they tapped it.
+                                        org.ducatproject.ducat.Enquiries.remember(
+                                            context, c.personaHex,
+                                            org.ducatproject.ducat.Enquiries.About(
+                                                title = info.title,
+                                                pricePxmr = info.pricePxmr.toLong(),
+                                                depositPxmr = info.depositPxmr.toLong(),
+                                                kind = info.kind.toInt(),
+                                            ),
+                                        )
+                                        // Say what this is about.
+                                        //
+                                        // The claim alone opened an empty
+                                        // thread with a stranger: the owner
+                                        // got somebody arriving with nothing
+                                        // said, and the asker got a blank
+                                        // screen and had to remember which of
+                                        // the cars they had tapped. "Ask about
+                                        // it" is a question; this is the
+                                        // question.
+                                        runCatching {
+                                            Mailbox.send(
+                                                context, c,
+                                                context.getString(
+                                                    R.string.rent_asking_about,
+                                                    isolate(info.title),
+                                                ),
+                                            )
                                         }
-                                        busy = false
-                                        r.onSuccess { onOpenChat(it) }
-                                            .onFailure {
-                                                DucatLog.w("RentSearch", "claim: ${it.message}")
-                                                error = context.getString(
-                                                    // "Ask them for a new one"
-                                                    // is the right thing to say
-                                                    // to someone holding a
-                                                    // scanned card and the
-                                                    // wrong thing entirely
-                                                    // here: asking is what
-                                                    // they were trying to do.
-                                                    claimFailureRes(
-                                                        it,
-                                                        alreadyUsed = R.string.rent_already_asked,
-                                                    ),
-                                                )
-                                            }
-                                    }
+                                    })
                                   }
                                   if (nameGateNeeded(context)) intro = go else go()
                                 },
