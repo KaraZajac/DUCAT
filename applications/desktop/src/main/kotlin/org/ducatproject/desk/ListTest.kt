@@ -356,12 +356,28 @@ fun main() {
         val claimed = cars.asSequence().mapNotNull { c ->
             runCatching {
                 val card = uniffi.ducat_mobile.readContactCard(c.card)
-                org.ducatproject.ducat.Mailbox.claimCard(context, card, null)
+                c.card to org.ducatproject.ducat.Mailbox.claimCard(context, card, null)
             }.getOrNull()
         }.firstOrNull()
         if (claimed != null) {
-            check("the card turns into a conversation", claimed.personaHex.isNotEmpty(),
-                claimed.displayName())
+            val (uri, contact) = claimed
+            check("the card turns into a conversation", contact.personaHex.isNotEmpty(),
+                contact.displayName())
+            // The same card again, from the same seeker — a second tap on the
+            // listing. The reply in its slot is this seeker's own, so the
+            // answer is the thread already opened, named, and not a stranger
+            // who "asked just before you".
+            val again = runCatching {
+                org.ducatproject.ducat.Mailbox.claimCard(
+                    context, uniffi.ducat_mobile.readContactCard(uri), null,
+                )
+            }.exceptionOrNull()
+            check(
+                "claiming it twice names the thread it made",
+                (again as? org.ducatproject.ducat.Mailbox.CardAlreadyMine)
+                    ?.contact?.personaHex == contact.personaHex,
+                again?.toString() ?: "claimed twice",
+            )
         } else {
             println("LIST skip  every card on the board was already claimed")
         }
