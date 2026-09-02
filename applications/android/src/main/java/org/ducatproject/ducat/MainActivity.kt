@@ -139,6 +139,9 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
         // already applied the chosen language, and a language change recreates
         // this activity, so the placeholder follows it.
         ContactNaming.unnamed = getString(R.string.contact_unnamed)
+        // And the notification channels' names on the phone's Settings page,
+        // for the same reason.
+        Notify.refreshChannels(this)
         // The half of DeviceLock that knows what an Activity is. Installed
         // here because the shared sources cannot name it — see DeviceLock.
         DeviceLock.backend = org.ducatproject.ducat.platform.DeviceLockAndroid
@@ -1511,19 +1514,15 @@ private fun HomeScreen(
     // after it the app is muted — no bill, no ring, no receipt — while
     // looking exactly as it does when nothing is happening. Said here, once,
     // as a card with the way back; re-read on every resume so it leaves the
-    // moment they turn them back on in Settings.
+    // moment they turn them back on in Settings. Notify.muted, not the app
+    // switch alone: a channel turned off on the same Settings page mutes
+    // the same bills and calls, and the card was blind to it.
     val lifecycle = androidx.compose.ui.platform.LocalLifecycleOwner.current
-    var notifyOff by remember {
-        mutableStateOf(
-            !androidx.core.app.NotificationManagerCompat.from(context)
-                .areNotificationsEnabled(),
-        )
-    }
+    var notifyOff by remember { mutableStateOf(Notify.muted(context)) }
     DisposableEffect(lifecycle) {
         val watch = androidx.lifecycle.LifecycleEventObserver { _, event ->
             if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
-                notifyOff = !androidx.core.app.NotificationManagerCompat.from(context)
-                    .areNotificationsEnabled()
+                notifyOff = Notify.muted(context)
             }
         }
         lifecycle.lifecycle.addObserver(watch)

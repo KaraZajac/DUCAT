@@ -72,31 +72,50 @@ class NodeService : Service() {
         fun stop(context: Context) {
             context.stopService(Intent(context, NodeService::class.java))
         }
-    }
 
-    override fun onBind(intent: Intent?): IBinder? = null
-
-    override fun onCreate() {
-        super.onCreate()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val mgr = getSystemService(NotificationManager::class.java)
+        /**
+         * The channel, named in [context]'s language. Creating a channel
+         * that exists renames it, which is the only way its name in the
+         * phone's Settings ever changes — see [Notify.refreshChannels].
+         */
+        fun ensureChannel(context: Context) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+            val mgr = context.getSystemService(NotificationManager::class.java) ?: return
             mgr.createNotificationChannel(
                 NotificationChannel(
                     CHANNEL,
-                    getString(R.string.nodeservice_channel_name),
+                    context.getString(R.string.nodeservice_channel_name),
                     // Low: it is a status, not an event. IMPORTANCE_MIN would
                     // hide it, which the system does not allow for a foreground
                     // service anyway.
                     NotificationManager.IMPORTANCE_LOW,
                 ).apply {
-                    description = getString(R.string.nodeservice_channel_desc)
+                    description = context.getString(R.string.nodeservice_channel_desc)
                     setShowBadge(false)
                 }
             )
         }
     }
 
+    override fun onBind(intent: Intent?): IBinder? = null
+
+    /**
+     * Where this service's words come from. A service's own context is the
+     * system's, not the Application's wrapped one, so `getString` here
+     * spoke the phone's language while every screen spoke the chosen one —
+     * "Staying reachable" in English under an app in Arabic. Wrapped fresh
+     * per command rather than once at attach, because a language change
+     * recreates the activity and leaves a running service where it was.
+     */
+    private fun words(): Context = LocaleWrapper.wrap(this)
+
+    override fun onCreate() {
+        super.onCreate()
+        ensureChannel(words())
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val words = words()
         val inCallWith = if (intent?.action == ACTION_HANG_UP) {
             Calls.hangUp()
             null
@@ -120,14 +139,14 @@ class NodeService : Service() {
             .apply {
                 if (inCallWith != null) {
                     setContentTitle(
-                        getString(
+                        words.getString(
                             if (ringing) R.string.call_notify_calling else R.string.call_notify_in_call,
                             inCallWith,
                         ),
                     )
-                    setContentText(getString(R.string.call_notify_return))
+                    setContentText(words.getString(R.string.call_notify_return))
                     addAction(
-                        0, getString(R.string.call_end_btn),
+                        0, words.getString(R.string.call_end_btn),
                         PendingIntent.getService(
                             this@NodeService, 1,
                             Intent(this@NodeService, NodeService::class.java).setAction(ACTION_HANG_UP),
@@ -135,8 +154,8 @@ class NodeService : Service() {
                         ),
                     )
                 } else {
-                    setContentTitle(getString(R.string.nodeservice_notification_title))
-                    setContentText(getString(R.string.nodeservice_notification_text))
+                    setContentTitle(words.getString(R.string.nodeservice_notification_title))
+                    setContentText(words.getString(R.string.nodeservice_notification_text))
                 }
             }
             .build()

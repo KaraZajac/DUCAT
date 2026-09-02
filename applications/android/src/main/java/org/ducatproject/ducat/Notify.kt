@@ -82,6 +82,24 @@ object Notify {
     /** Distinct request codes so two threads' taps do not share one intent. */
     private val reqCode = java.util.concurrent.atomic.AtomicInteger(100)
 
+    /**
+     * Whether what this app posts can reach the person at all.
+     *
+     * The app's own switch (which is also what a declined runtime ask
+     * leaves behind), and then each channel's: a channel turned off in the
+     * app's notification settings drops everything posted to it exactly as
+     * silently as the app switch does, and `areNotificationsEnabled` says
+     * nothing about channels. A channel that has not been created yet is
+     * one nothing has been posted to, and has no switch to be off.
+     */
+    fun muted(context: Context): Boolean {
+        val compat = androidx.core.app.NotificationManagerCompat.from(context)
+        if (!compat.areNotificationsEnabled()) return true
+        return listOf(CHANNEL, CALL_CHANNEL).any {
+            compat.getNotificationChannel(it)?.importance == NotificationManager.IMPORTANCE_NONE
+        }
+    }
+
     /** An inbound thread message, worded by what it is (§16.13's kinds). */
     fun message(context: Context, from: String, personaHex: String, m: StoredMessage) {
         // The answer to a ring this phone is on: the call screen is showing
@@ -163,12 +181,8 @@ object Notify {
      * sound would ring twice. The lock screen learns there is a call, not
      * from whom — same rule as money.
      */
-    fun ringIncoming(context: Context, from: String) {
-        if (android.os.Build.VERSION.SDK_INT >= 33 &&
-            context.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) !=
-            android.content.pm.PackageManager.PERMISSION_GRANTED
-        ) return
-        val mgr = context.getSystemService(NotificationManager::class.java) ?: return
+    private fun callManager(context: Context): NotificationManager? {
+        val mgr = context.getSystemService(NotificationManager::class.java) ?: return null
         mgr.createNotificationChannel(
             NotificationChannel(
                 CALL_CHANNEL, context.getString(R.string.notify_call_channel),
@@ -178,6 +192,34 @@ object Notify {
                 enableVibration(false)
             }
         )
+        return mgr
+    }
+
+    /**
+     * Every channel, named in [context]'s language.
+     *
+     * A channel is named when it is created and renamed only by being
+     * created again — which the activity channel is on every post, the call
+     * channel on every ring and the node's at every process start. So after
+     * a language change each kept its old name on the phone's notification
+     * Settings page until its own next event: a call channel still in
+     * Arabic under an app in English, for as long as nobody rang. Run at
+     * every activity start, which is what a language change is.
+     */
+    fun refreshChannels(context: Context) {
+        runCatching {
+            manager(context)
+            callManager(context)
+            NodeService.ensureChannel(context)
+        }
+    }
+
+    fun ringIncoming(context: Context, from: String) {
+        if (android.os.Build.VERSION.SDK_INT >= 33 &&
+            context.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) !=
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) return
+        val mgr = callManager(context) ?: return
         val open = PendingIntent.getActivity(
             context, reqCode.incrementAndGet(),
             Intent(context, MainActivity::class.java).apply {
