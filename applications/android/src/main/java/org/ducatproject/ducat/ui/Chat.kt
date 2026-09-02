@@ -3312,7 +3312,41 @@ private fun RideBondBanner(contact: Contact) {
     val counterFiat = remember(counterRateV) { Amounts.enterFiat(context) }
     val counterCur = remember(counterRateV) { Amounts.currency(context) }
     var counterXmr by remember { mutableStateOf("") }
-    val scope = rememberCoroutineScope()
+    // **Every button on this banner runs off the screen.**
+    //
+    // Funding, signing, proposing and calling off are seconds of node each,
+    // and they ran on this composable's scope inside a chat — the screen a
+    // call arrives on top of, that a rotation recreates, that Back leaves.
+    // The blocking call itself always finished; what was cancelled was the
+    // line after it, which is the only line that says whether it worked. A
+    // signature that failed said nothing at all, on the screen holding
+    // somebody's fare.
+    //
+    // It also makes `busy` outlive the turn: before this, rotating during a
+    // fund brought back a live button, and a second tap started a second
+    // one.
+    val sends = remember { ContactStore(context) }
+    val rideKey = "ride:$idHex"
+    // The counter has a key of its own for one reason: its landing closes
+    // the editor the figure was typed into, and no other action's should.
+    val counterKey = "$rideKey:counter"
+    val sendTick by ThreadSends.ticks.collectAsState()
+    LaunchedEffect(sendTick, idHex) {
+        for (o in ThreadSends.take(counterKey)) when (o) {
+            is ThreadSends.Outcome.Landed -> countering = false
+            is ThreadSends.Outcome.Failed -> error = trouble(context, o.error)
+        }
+        for (o in ThreadSends.take(rideKey)) {
+            if (o is ThreadSends.Outcome.Failed) error = trouble(context, o.error)
+        }
+        busy = ThreadSends.inFlight(rideKey) || ThreadSends.inFlight(counterKey)
+    }
+    /** One of this banner's acts, run where the screen cannot cancel it. */
+    val act: (String, () -> Unit) -> Unit = { key, body ->
+        busy = true
+        error = null
+        ThreadSends.launch(sends, key, null) { body(); null }
+    }
     // Whatever is waiting on the PIN. Held rather than run, so that the only
     // path from tapping to spending goes through the gate below.
     var pinAction by remember { mutableStateOf<(() -> Unit)?>(null) }
@@ -3374,13 +3408,7 @@ private fun RideBondBanner(contact: Contact) {
     // Money leaving, so it goes behind the PIN; `proposeNow` does not,
     // because proposing a split spends nothing — the signature does.
     val fundReally: () -> Unit = {
-        busy = true; error = null
-        scope.launch {
-            withContext(Dispatchers.IO) {
-                runCatching { org.ducatproject.ducat.Ceremony.fundRide(context, idHex) }
-            }.onFailure { error = trouble(context, it) }
-            busy = false
-        }
+        act(rideKey) { org.ducatproject.ducat.Ceremony.fundRide(context, idHex) }
     }
     val fundNow: () -> Unit = { pinAction = fundReally }
     // Send the proposal again — *the* proposal, not a fresh default one.
@@ -3399,45 +3427,24 @@ private fun RideBondBanner(contact: Contact) {
     // the resend the button promises. Fresh nonces either way, which is what
     // makes a retry useful after a broadcast that never landed.
     val proposeNow: () -> Unit = {
-        busy = true; error = null
-        scope.launch {
-            withContext(Dispatchers.IO) {
-                runCatching {
-                    val standing = ride.optLong("myRiderBack", -1L)
-                    if (standing >= 0) {
-                        org.ducatproject.ducat.Ceremony
-                            .proposeRideSplit(context, idHex, standing)
-                    } else {
-                        org.ducatproject.ducat.Ceremony.proposeRideRelease(context, idHex)
-                    }
-                }
-            }.onFailure { error = trouble(context, it) }
-            busy = false
+        act(rideKey) {
+            val standing = ride.optLong("myRiderBack", -1L)
+            if (standing >= 0) {
+                org.ducatproject.ducat.Ceremony.proposeRideSplit(context, idHex, standing)
+            } else {
+                org.ducatproject.ducat.Ceremony.proposeRideRelease(context, idHex)
+            }
         }
     }
     val signReally: () -> Unit = {
-        busy = true; error = null
-        scope.launch {
-            withContext(Dispatchers.IO) {
-                runCatching {
-                    org.ducatproject.ducat.Ceremony.approveRideRelease(context, idHex)
-                }
-            }.onFailure { error = trouble(context, it) }
-            busy = false
-        }
+        act(rideKey) { org.ducatproject.ducat.Ceremony.approveRideRelease(context, idHex) }
     }
     val signNow: () -> Unit = { pinAction = signReally }
     // Saying no, and saying it to the other phone rather than only to this
     // one. Ceremony.callOff refuses once there is money in the escrow — that
     // one ends with two signatures or an arbiter, never with a local flag.
     val callOffNow: () -> Unit = {
-        busy = true; error = null
-        scope.launch {
-            withContext(Dispatchers.IO) {
-                runCatching { org.ducatproject.ducat.Ceremony.callOff(context, idHex) }
-            }.onFailure { error = trouble(context, it) }
-            busy = false
-        }
+        act(rideKey) { org.ducatproject.ducat.Ceremony.callOff(context, idHex) }
     }
     // Whether that button belongs on the screen at all: callOff's own first
     // test, read from the same scan. The rider's step offered it beside
@@ -3760,21 +3767,10 @@ private fun RideBondBanner(contact: Contact) {
                         context, org.ducatproject.ducat.Ceremony.mySharePxmr(ride),
                     ).primary
                     Button(
-                        // Behind the PIN: this is money leaving.
-                        onClick = {
-                            pinAction = {
-                                busy = true; error = null
-                                scope.launch {
-                                    withContext(Dispatchers.IO) {
-                                        runCatching {
-                                            org.ducatproject.ducat.Ceremony
-                                                .fundRide(context, idHex)
-                                        }
-                                    }.onFailure { error = trouble(context, it) }
-                                    busy = false
-                                }
-                            }
-                        },
+                        // Behind the PIN: this is money leaving. The same
+                        // path the step's button takes, so the two cannot
+                        // drift about what funding does.
+                        onClick = fundNow,
                         enabled = !busy,
                         modifier = Modifier.fillMaxWidth().height(44.dp),
                     ) {
@@ -3816,10 +3812,7 @@ private fun RideBondBanner(contact: Contact) {
                         Spacer(Modifier.height(4.dp))
                         OutlinedButton(
                             onClick = {
-                                busy = true; error = null
-                                scope.launch {
-                                    withContext(Dispatchers.IO) {
-                                        runCatching {
+                                act(rideKey) {
                                             // The stranded rider asks for
                                             // everything back; the arbiter
                                             // judges, and can decline by
@@ -3839,12 +3832,8 @@ private fun RideBondBanner(contact: Contact) {
                                             // itself, so asking for more than
                                             // exists is exactly how you ask
                                             // for all of it.
-                                            org.ducatproject.ducat.Ceremony.proposeRideSplit(
-                                                context, idHex, Long.MAX_VALUE,
-                                                toArbiter = true)
-                                        }
-                                    }.onFailure { error = trouble(context, it) }
-                                    busy = false
+                                    org.ducatproject.ducat.Ceremony.proposeRideSplit(
+                                        context, idHex, Long.MAX_VALUE, toArbiter = true)
                                 }
                             },
                             enabled = !busy,
@@ -3883,21 +3872,10 @@ private fun RideBondBanner(contact: Contact) {
                         context, org.ducatproject.ducat.Ceremony.mySharePxmr(ride),
                     ).primary
                     Button(
-                        // Behind the PIN: this is money leaving.
-                        onClick = {
-                            pinAction = {
-                                busy = true; error = null
-                                scope.launch {
-                                    withContext(Dispatchers.IO) {
-                                        runCatching {
-                                            org.ducatproject.ducat.Ceremony
-                                                .fundRide(context, idHex)
-                                        }
-                                    }.onFailure { error = trouble(context, it) }
-                                    busy = false
-                                }
-                            }
-                        },
+                        // Behind the PIN: this is money leaving. The same
+                        // path the step's button takes, so the two cannot
+                        // drift about what funding does.
+                        onClick = fundNow,
                         enabled = !busy,
                         modifier = Modifier.fillMaxWidth().height(44.dp),
                     ) {
@@ -3926,15 +3904,8 @@ private fun RideBondBanner(contact: Contact) {
                     Spacer(Modifier.height(6.dp))
                     Button(
                         onClick = {
-                            busy = true; error = null
-                            scope.launch {
-                                withContext(Dispatchers.IO) {
-                                    runCatching {
-                                        org.ducatproject.ducat.Ceremony
-                                            .proposeRideRelease(context, idHex)
-                                    }
-                                }.onFailure { error = trouble(context, it) }
-                                busy = false
+                            act(rideKey) {
+                                org.ducatproject.ducat.Ceremony.proposeRideRelease(context, idHex)
                             }
                         },
                         enabled = !busy,
@@ -3957,17 +3928,7 @@ private fun RideBondBanner(contact: Contact) {
                             Spacer(Modifier.height(6.dp))
                             OutlinedButton(
                                 onClick = {
-                                    busy = true; error = null
-                                    scope.launch {
-                                        withContext(Dispatchers.IO) {
-                                            runCatching {
-                                                Mailbox.send(
-                                                    context, contact, details,
-                                                )
-                                            }
-                                        }.onFailure { error = trouble(context, it) }
-                                        busy = false
-                                    }
+                                    act(rideKey) { Mailbox.send(context, contact, details) }
                                 },
                                 enabled = !busy,
                                 modifier = Modifier.fillMaxWidth().height(40.dp),
@@ -3990,17 +3951,11 @@ private fun RideBondBanner(contact: Contact) {
                         Spacer(Modifier.height(4.dp))
                         OutlinedButton(
                             onClick = {
-                                busy = true; error = null
                                 val back = ride.optLong("myRiderBack",
                                     (funded - fare).coerceAtLeast(0L))
-                                scope.launch {
-                                    withContext(Dispatchers.IO) {
-                                        runCatching {
-                                            org.ducatproject.ducat.Ceremony.proposeRideSplit(
-                                                context, idHex, back, toArbiter = true)
-                                        }
-                                    }.onFailure { error = trouble(context, it) }
-                                    busy = false
+                                act(rideKey) {
+                                    org.ducatproject.ducat.Ceremony.proposeRideSplit(
+                                        context, idHex, back, toArbiter = true)
                                 }
                             },
                             enabled = !busy,
@@ -4068,18 +4023,15 @@ private fun RideBondBanner(contact: Contact) {
                     )
                     Spacer(Modifier.height(6.dp))
                     Button(
-                        onClick = {
-                            busy = true; error = null
-                            scope.launch {
-                                withContext(Dispatchers.IO) {
-                                    runCatching {
-                                        org.ducatproject.ducat.Ceremony
-                                            .approveRideRelease(context, idHex)
-                                    }
-                                }.onFailure { error = trouble(context, it) }
-                                busy = false
-                            }
-                        },
+                        // **Behind the PIN, like its twin.** This is the same
+                        // signature the full-screen step asks for — the one
+                        // that moves the escrow — and the step has asked for
+                        // the PIN since the gate went in. This rendering
+                        // (shown on every visit after the step has been seen
+                        // once, so it is the one most people actually press)
+                        // called the ceremony directly, so the gate could be
+                        // walked around by closing a screen.
+                        onClick = signNow,
                         enabled = !busy,
                         modifier = Modifier.fillMaxWidth().height(44.dp),
                     ) { Text(stringResource(R.string.bond_sign_split)) }
@@ -4120,18 +4072,12 @@ private fun RideBondBanner(contact: Contact) {
                             Button(
                                 onClick = {
                                     val pxmr = offerToPxmr(counterXmr, counterFiat, counterRate)
-                                    if (pxmr != null) {
-                                        busy = true; error = null
-                                        scope.launch {
-                                            withContext(Dispatchers.IO) {
-                                                runCatching {
-                                                    org.ducatproject.ducat.Ceremony
-                                                        .proposeRideSplit(context, idHex, pxmr)
-                                                }
-                                            }.onFailure { error = trouble(context, it) }
-                                            busy = false
-                                            countering = false
-                                        }
+                                    // Under its own key, so the editor closes
+                                    // when *this* lands — and stays open, with
+                                    // the figure still in it, when it does not.
+                                    if (pxmr != null) act(counterKey) {
+                                        org.ducatproject.ducat.Ceremony
+                                            .proposeRideSplit(context, idHex, pxmr)
                                     }
                                 },
                                 enabled = !busy && counterXmr.isNotBlank(),

@@ -16,7 +16,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.ContactStore
@@ -338,11 +337,44 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
 @Composable
 private fun BondSection(c: Contact) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     val version by ContactStore.changes.collectAsState()
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var choosingArbiter by remember { mutableStateOf(false) }
+    // **The bond's four acts run off the screen.**
+    //
+    // Each is a ceremony round or a chain scan — seconds, sometimes tens of
+    // them — and they ran on this section's own scope, inside a sheet over
+    // a chat. Turning the phone, or a call arriving, cancelled the line
+    // that shows what happened; the round itself finished. A deposit whose
+    // return failed said nothing, and the button came back live for a
+    // second attempt at something that may have been in flight.
+    val bondKey = "bond:${c.personaHex}"
+    val sendTick by ThreadSends.ticks.collectAsState()
+    LaunchedEffect(sendTick, c.personaHex) {
+        for (o in ThreadSends.take(bondKey)) when (o) {
+            // A landing with something to say says it: the call-off that
+            // found money still in the escrow answers with that sentence.
+            is ThreadSends.Outcome.Landed -> error = o.result
+            is ThreadSends.Outcome.Failed -> {
+                // The screen speaks in sentences; the log keeps the
+                // exception, or the sentence is all anyone ever learns.
+                org.ducatproject.ducat.DucatLog.w(
+                    "Profile",
+                    "bond: ${o.error.javaClass.simpleName}: ${o.error.message}",
+                )
+                error = moneyFailure(context, o.error)
+            }
+        }
+        busy = ThreadSends.inFlight(bondKey)
+    }
+    /** One of this section's acts, run where the screen cannot cancel it.
+     *  Whatever it returns is shown as the answer. */
+    val act: (() -> String?) -> Unit = { body ->
+        busy = true
+        error = null
+        ThreadSends.launch(ContactStore(context), bondKey, null) { body() }
+    }
     // produceState on IO, not remember: Ceremony.all decrypts the whole
     // ceremony store, and this ran on the main thread — keyed on `busy`, so
     // every button press paid for it twice.
@@ -373,15 +405,10 @@ private fun BondSection(c: Contact) {
     }
 
     fun post(arbiter: org.ducatproject.ducat.Contact?) {
-        busy = true; error = null; choosingArbiter = false
-        scope.launch {
-            val r = withContext(Dispatchers.IO) {
-                runCatching {
-                    org.ducatproject.ducat.Ceremony.startBond(context, c, arbiter)
-                }
-            }
-            r.onFailure { error = moneyFailure(context, it) }
-            busy = false
+        choosingArbiter = false
+        act {
+            org.ducatproject.ducat.Ceremony.startBond(context, c, arbiter)
+            null
         }
     }
 
@@ -489,24 +516,9 @@ private fun BondSection(c: Contact) {
             Button(
                 enabled = !busy,
                 onClick = {
-                    busy = true; error = null
-                    scope.launch {
-                        val r = withContext(Dispatchers.IO) {
-                            runCatching {
-                                org.ducatproject.ducat.Ceremony.releaseBond(context, c)
-                            }
-                        }
-                        r.onFailure {
-                            // The screen speaks in sentences; the log keeps
-                            // the exception, or the sentence is all anyone
-                            // ever learns.
-                            org.ducatproject.ducat.DucatLog.w(
-                                "Profile",
-                                "release: ${it.javaClass.simpleName}: ${it.message}",
-                            )
-                            error = moneyFailure(context, it)
-                        }
-                        busy = false
+                    act {
+                        org.ducatproject.ducat.Ceremony.releaseBond(context, c)
+                        null
                     }
                 },
             ) {
@@ -528,39 +540,28 @@ private fun BondSection(c: Contact) {
                 onClick = {
                     val o = ceremony ?: return@TextButton
                     val idHex = o.optString("id")
-                    busy = true; error = null
-                    scope.launch {
-                        val held = withContext(Dispatchers.IO) {
-                            runCatching {
-                                val keys = org.ducatproject.ducat.hexToBytes(o.optString("keys"))
-                                    ?: throw IllegalStateException("this device holds no key share")
-                                val nodeUrl = org.ducatproject.ducat.NodeStore(context).lastGood()
-                                    ?: runCatching {
-                                        uniffi.ducat_mobile.moneroPickNode(
-                                            uniffi.ducat_mobile.moneroDefaultNodes(null), "stagenet", 8000u,
-                                        ).url
-                                    }.getOrNull()
-                                    ?: throw org.ducatproject.ducat.Ceremony.NoNode()
-                                val from = o.optLong("scanFrom").takeIf { it > 0 }
-                                    ?: org.ducatproject.ducat.WalletStore(context).restoreHeight().toLong()
-                                val bal = uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
-                                if (bal == 0L) org.ducatproject.ducat.Ceremony.callOff(context, idHex)
-                                bal
-                            }
-                        }
-                        held.onSuccess { bal ->
-                            if (bal > 0) error = context.getString(
+                    act {
+                        val keys = org.ducatproject.ducat.hexToBytes(o.optString("keys"))
+                            ?: throw IllegalStateException("this device holds no key share")
+                        val nodeUrl = org.ducatproject.ducat.NodeStore(context).lastGood()
+                            ?: runCatching {
+                                uniffi.ducat_mobile.moneroPickNode(
+                                    uniffi.ducat_mobile.moneroDefaultNodes(null), "stagenet", 8000u,
+                                ).url
+                            }.getOrNull()
+                            ?: throw org.ducatproject.ducat.Ceremony.NoNode()
+                        val from = o.optLong("scanFrom").takeIf { it > 0 }
+                            ?: org.ducatproject.ducat.WalletStore(context).restoreHeight().toLong()
+                        val bal = uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
+                        if (bal == 0L) org.ducatproject.ducat.Ceremony.callOff(context, idHex)
+                        // Money still in there is the answer, not a failure:
+                        // it is why the bond cannot simply be dropped.
+                        if (bal > 0) {
+                            context.getString(
                                 R.string.profile_bond_holds,
                                 org.ducatproject.ducat.Amounts.show(context, bal).primary,
                             )
-                        }.onFailure {
-                            org.ducatproject.ducat.DucatLog.w(
-                                "Profile",
-                                "call off: ${it.javaClass.simpleName}: ${it.message}",
-                            )
-                            error = moneyFailure(context, it)
-                        }
-                        busy = false
+                        } else null
                     }
                 },
             ) { Text(stringResource(R.string.profile_bond_call_off)) }
@@ -610,17 +611,12 @@ private fun BondSection(c: Contact) {
                 onDismiss = { pinAsk = false },
                 onPassed = {
                     pinAsk = false
-                    busy = true; error = null
-                    scope.launch {
-                        val r = withContext(Dispatchers.IO) {
-                            runCatching {
-                                org.ducatproject.ducat.Ceremony.approveRideRelease(
-                                    context, ceremony!!.optString("id"),
-                                )
-                            }
-                        }
-                        r.onFailure { error = moneyFailure(context, it) }
-                        busy = false
+                    // Read here, not inside the act: by the time that runs
+                    // this screen may be gone and its ceremony with it.
+                    val idHex = ceremony?.optString("id").orEmpty()
+                    act {
+                        org.ducatproject.ducat.Ceremony.approveRideRelease(context, idHex)
+                        null
                     }
                 },
             )
