@@ -30,8 +30,6 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.DucatLog
@@ -156,6 +154,10 @@ internal fun categoryLabel(kind: Int, n: Int): Int = when (kind) {
     else -> R.string.cat_other
 }
 
+/** The key this screen's board writes run under (see [ThreadSends]). The
+ *  only thing it must not collide with is a persona's hex, which it cannot. */
+private const val LISTING_WORK = "listings"
+
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 /**
  * The things you are offering, and the buttons to offer more.
@@ -177,7 +179,22 @@ fun RentingScreen(kinds: List<Int> = Listings.KINDS) {
     // threw somebody out of a half-filled listing back to the list.
     var composing by rememberSaveable { mutableStateOf<Int?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
-    val scope = rememberCoroutineScope()
+    // The board writes run off the screen, under the same registry as every
+    // other slow thing the app starts. Posting walks the stands and mints a
+    // card — seconds of network — and on this screen's own scope a turn of
+    // the phone in the middle of one cancelled whatever came after it. For
+    // the count that meant the new number in the store and the old one still
+    // on the board: the "two left" that is really none, which is the whole
+    // reason the count is on the notice. One key for the screen, because
+    // there is one error line and this is one hand on one list.
+    val sends = remember { ContactStore(context) }
+    val tick by ThreadSends.ticks.collectAsState()
+    LaunchedEffect(tick) {
+        for (o in ThreadSends.take(LISTING_WORK)) when (o) {
+            is ThreadSends.Outcome.Landed -> error = o.result
+            is ThreadSends.Outcome.Failed -> error = moneyFailure(context, o.error)
+        }
+    }
 
     composing?.let { kind ->
         ListingForm(kind = kind, onDone = { composing = null })
@@ -247,62 +264,56 @@ fun RentingScreen(kinds: List<Int> = Listings.KINDS) {
                     MyListingCard(
                         o = o,
                         onPost = {
-                            scope.launch {
-                                error = null
-                                withContext(Dispatchers.IO) {
-                                    runCatching { Listings.post(context, o.optString("id")) }
-                                }
-                                    // **False is a failure too.** post() throws
-                                    // when it cannot reach a node, and returns
-                                    // false when every shard of the board is
-                                    // taken — and only the throw was being
-                                    // reported. A seller pressed Post on a busy
-                                    // board, nothing appeared, and the listing
-                                    // was not up.
-                                    .onSuccess {
-                                        if (!it) error = context.getString(R.string.rent_board_full)
-                                    }
-                                    .onFailure { error = moneyFailure(context, it) }
+                            error = null
+                            val id = o.optString("id")
+                            ThreadSends.launch(sends, LISTING_WORK, null) {
+                                // **False is a failure too.** post() throws
+                                // when it cannot reach a node, and returns
+                                // false when every shard of the board is
+                                // taken — and only the throw was being
+                                // reported. A seller pressed Post on a busy
+                                // board, nothing appeared, and the listing
+                                // was not up.
+                                if (Listings.post(context, id)) null
+                                else context.getString(R.string.rent_board_full)
                             }
                         },
                         onStop = {
-                            scope.launch {
-                                withContext(Dispatchers.IO) {
-                                    runCatching { Listings.unpost(context, o.optString("id")) }
-                                }.onFailure { error = moneyFailure(context, it) }
+                            error = null
+                            val id = o.optString("id")
+                            ThreadSends.launch(sends, LISTING_WORK, null) {
+                                Listings.unpost(context, id)
+                                null
                             }
                         },
                         onDelete = {
-                            scope.launch {
-                                withContext(Dispatchers.IO) {
-                                    if (o.optString("board").isNotBlank()) {
-                                        runCatching { Listings.unpost(context, o.optString("id")) }
-                                    }
-                                    Listings.remove(context, o.optString("id"))
-                                }
+                            error = null
+                            val id = o.optString("id")
+                            val posted = o.optString("board").isNotBlank()
+                            ThreadSends.launch(sends, LISTING_WORK, null) {
+                                // A slot that cannot be cleared is not a
+                                // reason to keep the listing: it runs out on
+                                // its own, and the owner asked for this gone.
+                                if (posted) runCatching { Listings.unpost(context, id) }
+                                Listings.remove(context, id)
+                                null
                             }
                         },
                         onQuantity = { n ->
-                            scope.launch {
-                                // The store is an encrypted blob read whole and
-                                // written back; off the main thread like every
-                                // other write on this screen.
-                                withContext(Dispatchers.IO) {
-                                    Listings.setQuantity(context, o.optString("id"), n)
-                                }
-                                // Straight onto the board rather than at the next
-                                // six-hourly refresh: the count is what a reader
-                                // is deciding on, and "two left" that is really
-                                // none is the reason to have it at all.
-                                if (o.optString("board").isNotBlank()) {
-                                    withContext(Dispatchers.IO) {
-                                        runCatching { Listings.post(context, o.optString("id")) }
-                                    }
-                                        .onSuccess {
-                                            if (!it) error = context.getString(R.string.rent_board_full)
-                                        }
-                                        .onFailure { error = moneyFailure(context, it) }
-                                }
+                            error = null
+                            val id = o.optString("id")
+                            val posted = o.optString("board").isNotBlank()
+                            ThreadSends.launch(sends, LISTING_WORK, null) {
+                                // The store is an encrypted blob read whole
+                                // and written back; off the main thread like
+                                // every other write on this screen. Then
+                                // straight onto the board rather than at the
+                                // next six-hourly refresh: the count is what
+                                // a reader is deciding on.
+                                Listings.setQuantity(context, id, n)
+                                if (!posted) null
+                                else if (Listings.post(context, id)) null
+                                else context.getString(R.string.rent_board_full)
                             }
                         },
                     )

@@ -104,6 +104,8 @@
     <string name="hail_step_card">A criar um código…</string>
     <string name="hail_search">Buscar</string>
     <string name="hail_clear_place">Limpar</string>
+    <string name="hail_no_places">Nenhum lugar encontrado</string>
+    <string name="hail_search_unreachable">Não foi possível acessar a busca no mapa — verifique sua conexão</string>
     <string name="hail_joining_network">A entrar na rede — os quadros ainda não foram lidos.</string>
     <string name="hail_accept_sending">Dizendo sim para %1$s…</string>
     <string name="hail_accept_failed">Seu sim para %1$s não foi enviado. Verifique a rede e veja a oferta de novo.</string>

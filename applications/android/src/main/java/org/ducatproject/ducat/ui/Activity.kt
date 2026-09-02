@@ -34,6 +34,7 @@ import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.Ledger
 import org.ducatproject.ducat.NodeStore
 import org.ducatproject.ducat.R
+import org.ducatproject.ducat.saidWhy
 import org.ducatproject.ducat.Wallet
 
 /**
@@ -281,22 +282,31 @@ fun ActivityScreen() {
                         f.writeText(body)
                         f
                     }
-                }.onSuccess { f ->
-                    runCatching {
-                        val uri = androidx.core.content.FileProvider.getUriForFile(
-                            context, "${context.packageName}.backups", f,
-                        )
-                        val send = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                            type = if (json) "application/json" else "text/csv"
-                            putExtra(android.content.Intent.EXTRA_STREAM, uri)
-                            addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                        }
-                        context.startActivity(
-                            android.content.Intent.createChooser(
-                                send, context.getString(R.string.activity_export_share),
-                            ),
-                        )
+                }.mapCatching { f ->
+                    val uri = androidx.core.content.FileProvider.getUriForFile(
+                        context, "${context.packageName}.backups", f,
+                    )
+                    val send = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                        type = if (json) "application/json" else "text/csv"
+                        putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                        addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     }
+                    context.startActivity(
+                        android.content.Intent.createChooser(
+                            send, context.getString(R.string.activity_export_share),
+                        ),
+                    )
+                }.onFailure {
+                    // Both halves were swallowed: a ledger that would not
+                    // serialise, a disk with no room, a phone with nothing
+                    // that opens a CSV. Every one of them looked exactly
+                    // like tapping Export and having the menu close.
+                    org.ducatproject.ducat.DucatLog.w("Activity", "export: ${it.message}")
+                    android.widget.Toast.makeText(
+                        context,
+                        it.saidWhy() ?: context.getString(R.string.backup_export_failed),
+                        android.widget.Toast.LENGTH_SHORT,
+                    ).show()
                 }
             }
         }

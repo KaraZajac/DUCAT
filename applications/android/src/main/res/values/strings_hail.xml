@@ -104,6 +104,8 @@
     <string name="hail_step_card">Making a code…</string>
     <string name="hail_search">Search</string>
     <string name="hail_clear_place">Clear</string>
+    <string name="hail_no_places">No places found for that</string>
+    <string name="hail_search_unreachable">Could not reach the map search — check your connection</string>
     <string name="hail_joining_network">Joining the network — the boards have not been read yet.</string>
     <string name="hail_accept_sending">Telling %1$s yes…</string>
     <string name="hail_accept_failed">Your yes to %1$s did not send. Check the network and view the offer again.</string>

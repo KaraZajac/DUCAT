@@ -104,6 +104,8 @@
     <string name="hail_step_card">Code maken…</string>
     <string name="hail_search">Zoeken</string>
     <string name="hail_clear_place">Wissen</string>
+    <string name="hail_no_places">Geen plaatsen gevonden</string>
+    <string name="hail_search_unreachable">Kaartzoeken niet bereikbaar — controleer je verbinding</string>
     <string name="hail_joining_network">Verbinden met het netwerk — de borden zijn nog niet gelezen.</string>
     <string name="hail_accept_sending">Je ja gaat naar %1$s…</string>
     <string name="hail_accept_failed">Je ja aan %1$s is niet verzonden. Controleer het netwerk en bekijk het bod opnieuw.</string>

@@ -104,6 +104,8 @@
     <string name="hail_step_card">正在生成代码…</string>
     <string name="hail_search">搜索</string>
     <string name="hail_clear_place">清除</string>
+    <string name="hail_no_places">没有找到相关地点</string>
+    <string name="hail_search_unreachable">无法连接地图搜索 — 请检查网络连接</string>
     <string name="hail_joining_network">正在加入网络——还没有读取这些板。</string>
     <string name="hail_accept_sending">正在答应 %1$s…</string>
     <string name="hail_accept_failed">给 %1$s 的答应没有发出。检查网络后再看一次报价。</string>

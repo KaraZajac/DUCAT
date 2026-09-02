@@ -104,6 +104,8 @@
     <string name="hail_step_card">Code wird erstellt…</string>
     <string name="hail_search">Suchen</string>
     <string name="hail_clear_place">Löschen</string>
+    <string name="hail_no_places">Dazu wurden keine Orte gefunden</string>
+    <string name="hail_search_unreachable">Die Kartensuche war nicht erreichbar — prüfe deine Verbindung</string>
     <string name="hail_joining_network">Verbindet sich mit dem Netz — die Bretter wurden noch nicht gelesen.</string>
     <string name="hail_accept_sending">Sage %1$s zu…</string>
     <string name="hail_accept_failed">Deine Zusage an %1$s wurde nicht gesendet. Prüfe das Netz und öffne das Angebot noch einmal.</string>

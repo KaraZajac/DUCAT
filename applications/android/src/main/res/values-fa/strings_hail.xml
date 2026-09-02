@@ -104,6 +104,8 @@
     <string name="hail_step_card">در حال ساخت کد…</string>
     <string name="hail_search">جستجو</string>
     <string name="hail_clear_place">پاک کردن</string>
+    <string name="hail_no_places">مکانی با این مشخصات پیدا نشد</string>
+    <string name="hail_search_unreachable">جستجوی نقشه در دسترس نبود — اتصال خود را بررسی کنید</string>
     <string name="hail_joining_network">در حال پیوستن به شبکه — هنوز تابلوها خوانده نشده‌اند.</string>
     <string name="hail_accept_sending">در حال اعلام موافقت به %1$s…</string>
     <string name="hail_accept_failed">موافقتت به %1$s فرستاده نشد. شبکه را بررسی کن و پیشنهاد را دوباره ببین.</string>

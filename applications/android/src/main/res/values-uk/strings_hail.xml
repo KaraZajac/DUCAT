@@ -104,6 +104,8 @@
     <string name="hail_step_card">Створюємо код…</string>
     <string name="hail_search">Пошук</string>
     <string name="hail_clear_place">Очистити</string>
+    <string name="hail_no_places">Таких місць не знайдено</string>
+    <string name="hail_search_unreachable">Не вдалося зв’язатися з пошуком на карті — перевірте з’єднання</string>
     <string name="hail_joining_network">Підключення до мережі — дошки ще не прочитано.</string>
     <string name="hail_accept_sending">Надсилаємо згоду %1$s…</string>
     <string name="hail_accept_failed">Твоя згода для %1$s не надіслалася. Перевір мережу й відкрий пропозицію знову.</string>

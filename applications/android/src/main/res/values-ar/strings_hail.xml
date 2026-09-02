@@ -104,6 +104,8 @@
     <string name="hail_step_card">إنشاء رمز…</string>
     <string name="hail_search">بحث</string>
     <string name="hail_clear_place">مسح</string>
+    <string name="hail_no_places">لم يُعثر على أي مكان بهذا الاسم</string>
+    <string name="hail_search_unreachable">تعذّر الوصول إلى بحث الخرائط — تحقّق من اتصالك</string>
     <string name="hail_joining_network">جارٍ الانضمام إلى الشبكة — لم تُقرأ اللوحات بعد.</string>
     <string name="hail_accept_sending">جارٍ إبلاغ %1$s بالموافقة…</string>
     <string name="hail_accept_failed">لم تُرسَل موافقتك إلى %1$s. تحقّق من الشبكة وافتح العرض من جديد.</string>

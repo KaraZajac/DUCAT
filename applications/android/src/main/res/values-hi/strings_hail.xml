@@ -104,6 +104,8 @@
     <string name="hail_step_card">कोड बनाया जा रहा…</string>
     <string name="hail_search">खोजें</string>
     <string name="hail_clear_place">साफ़ करें</string>
+    <string name="hail_no_places">इसके लिए कोई जगह नहीं मिली</string>
+    <string name="hail_search_unreachable">नक्शा खोज तक नहीं पहुँच सके — अपना कनेक्शन जाँचें</string>
     <string name="hail_joining_network">नेटवर्क से जुड़ रहे हैं — बोर्ड अभी पढ़े नहीं गए हैं।</string>
     <string name="hail_accept_sending">%1$s को हाँ भेजी जा रही है…</string>
     <string name="hail_accept_failed">%1$s को आपकी हाँ नहीं भेजी जा सकी। नेटवर्क जाँचें और पेशकश फिर से देखें।</string>

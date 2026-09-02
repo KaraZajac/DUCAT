@@ -42,8 +42,15 @@ object Geo {
      * is sent, unbounded — prefer nearby, never refuse the airport across
      * town. Labels lead with the POI's name when it has one, because a
      * business is looked up by what the sign says, not by its street number.
+     *
+     * **Empty and null are different answers.** An empty list is the
+     * geocoder saying nothing matches those words; null is not having heard
+     * from it at all — no network, the service down, a body that would not
+     * parse. Both used to come back as no results, so a phone with no
+     * signal told the rider their address does not exist, and the fix for
+     * that is to check the connection, not to retype the street.
      */
-    fun search(query: String, near: Pair<Long, Long>? = null): List<Hit> {
+    fun search(query: String, near: Pair<Long, Long>? = null): List<Hit>? {
         val q = URLEncoder.encode(query, "UTF-8")
         val bias = near?.let { (la, lo) ->
             // Snapped to a coarse grid first. The box is what biases the
@@ -66,7 +73,7 @@ object Geo {
         } ?: ""
         val body = get(
             "https://nominatim.openstreetmap.org/search?q=$q&format=jsonv2&limit=6$bias"
-        ) ?: return emptyList()
+        ) ?: return null
         return runCatching {
             val arr = JSONArray(body)
             (0 until arr.length()).map { i ->
@@ -87,7 +94,7 @@ object Geo {
                     lonE7 = (o.getString("lon").toDouble() * 1e7).toLong(),
                 )
             }
-        }.getOrElse { emptyList() }
+        }.onFailure { DucatLog.w("Geo", "search parse: ${it.message}") }.getOrNull()
     }
 
     /**

@@ -104,6 +104,8 @@
     <string name="hail_step_card">コードを作成中…</string>
     <string name="hail_search">検索</string>
     <string name="hail_clear_place">消去</string>
+    <string name="hail_no_places">該当する場所は見つかりませんでした</string>
+    <string name="hail_search_unreachable">地図検索に接続できませんでした — 通信状態を確認してください</string>
     <string name="hail_joining_network">ネットワークに参加中 — 掲示板はまだ読めていません。</string>
     <string name="hail_accept_sending">%1$sに承諾を伝えています…</string>
     <string name="hail_accept_failed">%1$sへの承諾を送れませんでした。ネットワークを確認して、オファーをもう一度開いてください。</string>

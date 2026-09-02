@@ -2617,12 +2617,22 @@ private fun AddressField(
 ) {
     val context = LocalContext.current
     val scope = androidx.compose.runtime.rememberCoroutineScope()
-    var query by remember { mutableStateOf("") }
+    // Saveable: a half-typed address is somebody's actual street, and a turn
+    // of the phone emptied the box and left them retyping it.
+    var query by rememberSaveable { mutableStateOf("") }
     var hits by remember { mutableStateOf<List<org.ducatproject.ducat.Geo.Hit>>(emptyList()) }
     var searching by remember { mutableStateOf(false) }
+    // Why the list under the box is empty, when it is. A search that found
+    // nothing and a search that never reached the geocoder both left the
+    // spinner stopping and the screen unchanged — indistinguishable from a
+    // tap that missed the button, and pointing at the address rather than
+    // at the connection, which is the thing that is actually wrong.
+    var noLuck by remember { mutableStateOf<Int?>(null) }
     // The whole label, not the first 48 characters of it. The field is single
     // line and scrolls; truncating only hid the half that says which town.
-    LaunchedEffect(chosen) { if (chosen != null) { query = chosen.label; hits = emptyList() } }
+    LaunchedEffect(chosen) {
+        if (chosen != null) { query = chosen.label; hits = emptyList(); noLuck = null }
+    }
 
     fun search() {
         // A resolved place is not a query. The box shows the label of somewhere
@@ -2633,9 +2643,16 @@ private fun AddressField(
         // pickup to another continent without a word.
         if (query.isBlank() || chosen != null) return
         searching = true
+        noLuck = null
         scope.launch {
-            hits = withContext(Dispatchers.IO) {
+            val found = withContext(Dispatchers.IO) {
                 org.ducatproject.ducat.Geo.search(query.trim(), near)
+            }
+            hits = found.orEmpty()
+            noLuck = when {
+                found == null -> R.string.hail_search_unreachable
+                found.isEmpty() -> R.string.hail_no_places
+                else -> null
             }
             searching = false
         }
@@ -2644,7 +2661,7 @@ private fun AddressField(
     Row(verticalAlignment = Alignment.CenterVertically) {
         OutlinedTextField(
             value = query,
-            onValueChange = { query = it; if (chosen != null) onChosen(null) },
+            onValueChange = { query = it; noLuck = null; if (chosen != null) onChosen(null) },
             label = { Text(label) },
             placeholder = { hint?.let { Text(it) } },
             modifier = Modifier.weight(1f), singleLine = true,
@@ -2669,7 +2686,9 @@ private fun AddressField(
                         // Once somewhere is chosen the field holds an answer,
                         // so the button that searches becomes the button that
                         // takes the answer back.
-                        IconButton(onClick = { onChosen(null); query = ""; hits = emptyList() }) {
+                        IconButton(onClick = {
+                            onChosen(null); query = ""; hits = emptyList(); noLuck = null
+                        }) {
                             Icon(Icons.Filled.Close, stringResource(R.string.hail_clear_place))
                         }
                     } else {
@@ -2705,6 +2724,14 @@ private fun AddressField(
     // far each one is, and lets the person decide which of those they cared
     // about. See the note in Geo.metersBetween on why it is the crow's
     // distance and not the road's.
+    noLuck?.let {
+        Text(
+            stringResource(it),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp),
+        )
+    }
     // Laid out, when there is more than one to lay out. See ResultsMap.
     if (hits.size >= 2) {
         Spacer(Modifier.height(8.dp))

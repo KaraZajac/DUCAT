@@ -104,6 +104,8 @@
     <string name="hail_step_card">Membuat kode…</string>
     <string name="hail_search">Cari</string>
     <string name="hail_clear_place">Hapus</string>
+    <string name="hail_no_places">Tidak ada tempat yang cocok</string>
+    <string name="hail_search_unreachable">Pencarian peta tidak terjangkau — periksa koneksi Anda</string>
     <string name="hail_joining_network">Bergabung ke jaringan — papan belum dibaca.</string>
     <string name="hail_accept_sending">Menyampaikan ya ke %1$s…</string>
     <string name="hail_accept_failed">Jawaban ya-mu ke %1$s tidak terkirim. Periksa jaringan dan lihat tawarannya lagi.</string>
