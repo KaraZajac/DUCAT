@@ -12,6 +12,9 @@
     <string name="ceremony_accept_and_pay">Annehmen &amp; zahlen</string>
     <string name="ceremony_no_address">Keine Adresse in dieser Anfrage — frag nach, wohin das Geld soll.</string>
     <string name="ceremony_accept_opens_confirm">Annehmen öffnet den Bestätigungsbildschirm — nichts bewegt sich, bevor du es dort freigibst.</string>
+    <string name="ceremony_bill_withdrawn">%1$s hat diese Rechnung zurückgezogen — es gibt nichts zu zahlen.</string>
+    <string name="ceremony_bill_declined">Du hast diese Rechnung abgelehnt.</string>
+    <string name="ceremony_bill_paid">Bezahlt ✓ — diese Rechnung ist beglichen.</string>
 
     <!-- PaidSplash -->
     <string name="ceremony_paid">Bezahlt ✓</string>

@@ -59,7 +59,18 @@ import org.ducatproject.ducat.formatXmr
  * thing between a message and money leaving.
  */
 
-/** A bill, full screen: the decision gets the whole display. */
+/**
+ * A bill, full screen: the decision gets the whole display.
+ *
+ * [over] is the sentence that says the decision has already been made —
+ * withdrawn by its sender, declined here, or paid — and with one the
+ * screen offers nothing to press. Found live (2026-09-01): the bar
+ * withdrew a bill while the customer had it open; the retraction arrived,
+ * the bubble underneath greyed to "Cancelled", and this screen went on
+ * offering "Accept & pay" for money nobody was watching for (§15.11),
+ * one tap from the confirm screen. The caller works the verdict out from
+ * the thread as it stands *now*; this screen only shows it.
+ */
 @Composable
 fun BillScreen(
     m: StoredMessage,
@@ -67,6 +78,7 @@ fun BillScreen(
     onPay: () -> Unit,
     onDecline: () -> Unit,
     onClose: () -> Unit,
+    over: String? = null,
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     Dialog(
@@ -144,31 +156,43 @@ fun BillScreen(
 
                 Spacer(Modifier.weight(1f))
                 Column(Modifier.fillMaxWidth().padding(24.dp)) {
-                    Button(
-                        onClick = onPay,
-                        enabled = m.payto != null,
-                        modifier = Modifier.fillMaxWidth().height(54.dp),
-                    ) { Text(stringResource(R.string.ceremony_accept_and_pay),
-                        style = MaterialTheme.typography.titleMedium) }
-                    if (m.payto == null) {
+                    if (over != null) {
+                        // Nothing to decide any more, so nothing to press:
+                        // the verdict where the buttons were, and Close in
+                        // the corner as the only way out.
                         Text(
-                            stringResource(R.string.ceremony_no_address),
+                            over,
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    } else {
+                        Button(
+                            onClick = onPay,
+                            enabled = m.payto != null,
+                            modifier = Modifier.fillMaxWidth().height(54.dp),
+                        ) { Text(stringResource(R.string.ceremony_accept_and_pay),
+                            style = MaterialTheme.typography.titleMedium) }
+                        if (m.payto == null) {
+                            Text(
+                                stringResource(R.string.ceremony_no_address),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.outline,
+                            )
+                        }
+                        Spacer(Modifier.height(8.dp))
+                        OutlinedButton(
+                            onClick = onDecline,
+                            modifier = Modifier.fillMaxWidth().height(48.dp),
+                        ) { Text(stringResource(R.string.ceremony_decline),
+                            color = MaterialTheme.colorScheme.error) }
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            stringResource(R.string.ceremony_accept_opens_confirm),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.outline,
                         )
                     }
-                    Spacer(Modifier.height(8.dp))
-                    OutlinedButton(
-                        onClick = onDecline,
-                        modifier = Modifier.fillMaxWidth().height(48.dp),
-                    ) { Text(stringResource(R.string.ceremony_decline),
-                        color = MaterialTheme.colorScheme.error) }
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        stringResource(R.string.ceremony_accept_opens_confirm),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.outline,
-                    )
                 }
             }
         }

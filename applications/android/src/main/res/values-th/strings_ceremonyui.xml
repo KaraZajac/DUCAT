@@ -12,6 +12,9 @@
     <string name="ceremony_accept_and_pay">ยอมรับและจ่าย</string>
     <string name="ceremony_no_address">คำขอนี้ไม่มีที่อยู่ — ถามเขาว่าให้ส่งไปที่ไหน</string>
     <string name="ceremony_accept_opens_confirm">การยอมรับจะเปิดหน้ายืนยัน — จะไม่มีเงินเคลื่อนไหวจนกว่าคุณจะอนุมัติที่นั่น</string>
+    <string name="ceremony_bill_withdrawn">%1$s ถอนบิลนี้แล้ว — ไม่มีอะไรต้องจ่าย</string>
+    <string name="ceremony_bill_declined">คุณปฏิเสธบิลนี้แล้ว</string>
+    <string name="ceremony_bill_paid">ชำระแล้ว ✓ — บิลนี้เคลียร์แล้ว</string>
 
     <!-- PaidSplash -->
     <string name="ceremony_paid">ชำระแล้ว ✓</string>

@@ -12,6 +12,9 @@
     <string name="ceremony_accept_and_pay">Aceptar y pagar</string>
     <string name="ceremony_no_address">No hay dirección en esta solicitud — pregúntale adónde enviarlo.</string>
     <string name="ceremony_accept_opens_confirm">Aceptar abre la pantalla de confirmación — nada se mueve hasta que lo apruebes ahí.</string>
+    <string name="ceremony_bill_withdrawn">%1$s retiró esta cuenta: no hay nada que pagar.</string>
+    <string name="ceremony_bill_declined">Rechazaste esta cuenta.</string>
+    <string name="ceremony_bill_paid">Pagado ✓ — esta cuenta está saldada.</string>
 
     <!-- PaidSplash -->
     <string name="ceremony_paid">Pagado ✓</string>

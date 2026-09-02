@@ -742,11 +742,41 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
     var billPrompt by remember {
         mutableStateOf<Pair<Contact, StoredMessage>?>(null)
     }
-    var billPay by remember { mutableStateOf<Triple<Contact, Long, Long>?>(null) }
+    var billPay by remember { mutableStateOf<Pair<Contact, StoredMessage>?>(null) }
     val billPrefs = remember {
         securePrefs(context, "ducat_contacts")
     }
     val billV by ContactStore.changes.collectAsState()
+    // What became of the bill on screen, read again on every store bump.
+    // Found live (2026-09-01): the bar withdrew a bill while this prompt had
+    // it up; the retraction arrived and was stored, the thread underneath
+    // knew, and the prompt — a snapshot taken when the bill landed — went
+    // on offering "Accept & pay" for money nobody was watching for (§15.11).
+    // The same read pulls the confirm sheet down if the bill is withdrawn
+    // under it, and puts this prompt back up to say so.
+    var billOver by remember { mutableStateOf<Ledger.BillOutcome?>(null) }
+    LaunchedEffect(billV, billPrompt, billPay) {
+        val shown = billPrompt ?: billPay
+        val outcome = shown?.let { (c, m) ->
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                val thread = ContactStore(context).thread(c.personaHex)
+                // The bill as the thread holds it now: `billOutcome`
+                // compares by identity within the list it is given.
+                thread.firstOrNull {
+                    it.kind == 1 && !it.outgoing &&
+                        it.seq == m.seq && it.timestamp == m.timestamp
+                }?.let { Ledger.billOutcome(thread, it) }
+            }
+        }
+        if (billPay != null && outcome == Ledger.BillOutcome.Withdrawn) {
+            // Only withdrawn: our own payment lands in the thread before
+            // the sheet's paid splash, and closing on Paid would cut the
+            // splash off. Declined cannot happen from behind the sheet.
+            billPrompt = billPay
+            billPay = null
+        }
+        billOver = outcome
+    }
     // Keyed on the flows a bill can be behind, not just the store: one
     // takeover at a time, so a bill arriving while another bill's prompt or
     // payment screen is up waits unseen — and the re-key runs this again the
@@ -804,11 +834,22 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         org.ducatproject.ducat.ui.BillScreen(
             m = m,
             contact = c,
+            over = when (billOver) {
+                Ledger.BillOutcome.Paid ->
+                    androidx.compose.ui.res.stringResource(R.string.ceremony_bill_paid)
+                Ledger.BillOutcome.Declined ->
+                    androidx.compose.ui.res.stringResource(R.string.ceremony_bill_declined)
+                Ledger.BillOutcome.Withdrawn -> androidx.compose.ui.res.stringResource(
+                    R.string.ceremony_bill_withdrawn,
+                    org.ducatproject.ducat.ui.isolate(c.displayName()),
+                )
+                null -> null
+            },
             // The seq rides along: a payment that names its bill is the
             // whole of §16.14's attribution, and this prompt is the path
             // most payments take — dropping it here silently re-opened the
             // two-identical-bills ambiguity everywhere downstream.
-            onPay = { markSeen(); billPay = Triple(c, m.amountPxmr, m.seq) },
+            onPay = { markSeen(); billPay = c to m },
             onDecline = {
                 markSeen()
                 val mine = PersonaStore(context).personaHex()
@@ -853,10 +894,10 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
             onClose = markSeen,
         )
     }
-    billPay?.let { (c, amt, seq) ->
+    billPay?.let { (c, m) ->
         PaySheet(
-            prefillContact = c, prefillAmountPxmr = amt,
-            answersSeq = seq,
+            prefillContact = c, prefillAmountPxmr = m.amountPxmr,
+            answersSeq = m.seq,
         ) { billPay = null }
     }
 

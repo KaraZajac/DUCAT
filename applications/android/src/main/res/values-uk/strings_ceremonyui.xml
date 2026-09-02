@@ -12,6 +12,9 @@
     <string name="ceremony_accept_and_pay">Прийняти й сплатити</string>
     <string name="ceremony_no_address">У цьому запиті немає адреси — спитай, куди надсилати.</string>
     <string name="ceremony_accept_opens_confirm">«Прийняти» відкриває екран підтвердження — ніщо не рушить, доки ти там не схвалиш.</string>
+    <string name="ceremony_bill_withdrawn">%1$s відкликав(ла) цей рахунок — платити нічого.</string>
+    <string name="ceremony_bill_declined">Ви відхилили цей рахунок.</string>
+    <string name="ceremony_bill_paid">Оплачено ✓ — цей рахунок закрито.</string>
 
     <!-- PaidSplash -->
     <string name="ceremony_paid">Сплачено ✓</string>

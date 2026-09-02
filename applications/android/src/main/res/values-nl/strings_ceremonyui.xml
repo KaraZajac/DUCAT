@@ -12,6 +12,9 @@
     <string name="ceremony_accept_and_pay">Accepteren &amp; betalen</string>
     <string name="ceremony_no_address">Geen adres in dit verzoek — vraag ze waar je het naartoe moet sturen.</string>
     <string name="ceremony_accept_opens_confirm">Accepteren opent het bevestigingsscherm — er gaat niets weg totdat je het daar goedkeurt.</string>
+    <string name="ceremony_bill_withdrawn">%1$s heeft deze rekening ingetrokken — er valt niets te betalen.</string>
+    <string name="ceremony_bill_declined">Je hebt deze rekening geweigerd.</string>
+    <string name="ceremony_bill_paid">Betaald ✓ — deze rekening is voldaan.</string>
 
     <!-- PaidSplash -->
     <string name="ceremony_paid">Betaald ✓</string>

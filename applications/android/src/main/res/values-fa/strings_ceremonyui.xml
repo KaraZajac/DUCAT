@@ -12,6 +12,9 @@
     <string name="ceremony_accept_and_pay">قبول و پرداخت</string>
     <string name="ceremony_no_address">در این درخواست نشانی نیست — بپرس کجا بفرستی.</string>
     <string name="ceremony_accept_opens_confirm">«قبول» صفحهٔ تأیید را باز می‌کند — تا آنجا تأیید نکنی چیزی جابه‌جا نمی‌شود.</string>
+    <string name="ceremony_bill_withdrawn">%1$s این صورت‌حساب را پس گرفت — چیزی برای پرداخت نیست.</string>
+    <string name="ceremony_bill_declined">این صورت‌حساب را رد کردید.</string>
+    <string name="ceremony_bill_paid">پرداخت شد ✓ — این صورت‌حساب تسویه شده است.</string>
 
     <!-- PaidSplash -->
     <string name="ceremony_paid">پرداخت شد ✓</string>

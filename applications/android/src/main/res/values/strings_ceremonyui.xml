@@ -12,6 +12,9 @@
     <string name="ceremony_accept_and_pay">Accept &amp; pay</string>
     <string name="ceremony_no_address">No address in this request — ask them where to send it.</string>
     <string name="ceremony_accept_opens_confirm">Accept opens the confirm screen — nothing moves until you approve it there.</string>
+    <string name="ceremony_bill_withdrawn">%1$s withdrew this bill — there is nothing to pay.</string>
+    <string name="ceremony_bill_declined">You declined this bill.</string>
+    <string name="ceremony_bill_paid">Paid ✓ — this bill is settled.</string>
 
     <!-- PaidSplash -->
     <string name="ceremony_paid">Paid ✓</string>

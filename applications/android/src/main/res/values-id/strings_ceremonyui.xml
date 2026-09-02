@@ -12,6 +12,9 @@
     <string name="ceremony_accept_and_pay">Terima &amp; bayar</string>
     <string name="ceremony_no_address">Tidak ada alamat di permintaan ini — tanyakan ke mereka harus dikirim ke mana.</string>
     <string name="ceremony_accept_opens_confirm">Terima membuka layar konfirmasi — tidak ada yang berpindah sebelum kamu menyetujuinya di sana.</string>
+    <string name="ceremony_bill_withdrawn">%1$s menarik tagihan ini — tidak ada yang perlu dibayar.</string>
+    <string name="ceremony_bill_declined">Anda menolak tagihan ini.</string>
+    <string name="ceremony_bill_paid">Dibayar ✓ — tagihan ini sudah lunas.</string>
 
     <!-- PaidSplash -->
     <string name="ceremony_paid">Lunas ✓</string>

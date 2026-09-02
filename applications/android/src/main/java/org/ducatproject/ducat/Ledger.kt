@@ -297,6 +297,9 @@ object Ledger {
         val timestamp: Long,
     )
 
+    /** How a bill was answered — see [billOutcome]. */
+    enum class BillOutcome { Paid, Withdrawn, Declined }
+
     /**
      * Whether a bill has been answered — paid, receipted, withdrawn or declined.
      *
@@ -309,7 +312,19 @@ object Ledger {
      * `m` must be the kind-1 bill; `thread` is the conversation it sits in.
      */
     fun billAnswered(thread: List<StoredMessage>, m: StoredMessage): Boolean =
-        thread.any { p ->
+        billOutcome(thread, m) != null
+
+    /**
+     * [billAnswered] with the answer: which of the three things happened to
+     * the bill, or null while it is still open. The screens that show a
+     * bill after it was answered need the word, not just the fact — a
+     * take-over prompt that greys out has to say why.
+     *
+     * Paid wins over a retraction (money talks). Same-side retraction is the
+     * issuer taking the bill back; other-side is the payer refusing it.
+     */
+    fun billOutcome(thread: List<StoredMessage>, m: StoredMessage): BillOutcome? {
+        val paid = thread.any { p ->
             p.kind == 2 && p.outgoing != m.outgoing &&
                 // §16.14 first, arithmetic second — the till's rule (see
                 // Tabs' said-sets). A payment that names a bill answers the
@@ -334,14 +349,18 @@ object Ledger {
                 } else {
                     p.timestamp >= m.timestamp && p.amountPxmr >= m.amountPxmr
                 }
-        } || thread.any { p ->
-            // §16.13's Retract closes it too — the issuer taking their own
-            // bill back, or the payer refusing it; [referent] tells which
-            // bill, and whose. Matching by seq alone here let a declined
-            // ride offer at seq 0 close a later card's bill at seq 0 on the
-            // Activity screen, the same fault the chat fixed on 2026-08-24.
-            p.kind == 5 && thread.referent(p) === m
         }
+        if (paid) return BillOutcome.Paid
+        // §16.13's Retract closes it too — the issuer taking their own
+        // bill back, or the payer refusing it; [referent] tells which
+        // bill, and whose. Matching by seq alone here let a declined
+        // ride offer at seq 0 close a later card's bill at seq 0 on the
+        // Activity screen, the same fault the chat fixed on 2026-08-24.
+        val retract = thread.firstOrNull { p -> p.kind == 5 && thread.referent(p) === m }
+            ?: return null
+        return if (retract.outgoing == m.outgoing) BillOutcome.Withdrawn
+        else BillOutcome.Declined
+    }
 
     fun openRequests(context: Context): List<OpenRequest> {
         val contacts = ContactStore(context)

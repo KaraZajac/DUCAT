@@ -12,6 +12,9 @@
     <string name="ceremony_accept_and_pay">Принять и оплатить</string>
     <string name="ceremony_no_address">В запросе нет адреса — спроси, куда отправить.</string>
     <string name="ceremony_accept_opens_confirm">«Принять» открывает экран подтверждения — ничего не уйдёт, пока ты там не одобришь.</string>
+    <string name="ceremony_bill_withdrawn">%1$s отозвал(а) этот счёт — платить нечего.</string>
+    <string name="ceremony_bill_declined">Вы отклонили этот счёт.</string>
+    <string name="ceremony_bill_paid">Оплачено ✓ — этот счёт закрыт.</string>
 
     <!-- PaidSplash -->
     <string name="ceremony_paid">Оплачено ✓</string>

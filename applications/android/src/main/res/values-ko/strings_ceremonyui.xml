@@ -12,6 +12,9 @@
     <string name="ceremony_accept_and_pay">수락하고 결제</string>
     <string name="ceremony_no_address">이 요청에는 주소가 없어요 — 어디로 보낼지 물어보세요.</string>
     <string name="ceremony_accept_opens_confirm">수락하면 확인 화면이 열려요 — 거기서 승인하기 전까지는 아무것도 움직이지 않아요.</string>
+    <string name="ceremony_bill_withdrawn">%1$s 님이 이 청구서를 철회했습니다 — 결제할 것이 없습니다.</string>
+    <string name="ceremony_bill_declined">이 청구서를 거절했습니다.</string>
+    <string name="ceremony_bill_paid">결제됨 ✓ — 이 청구서는 정산되었습니다.</string>
 
     <!-- PaidSplash -->
     <string name="ceremony_paid">결제 완료 ✓</string>

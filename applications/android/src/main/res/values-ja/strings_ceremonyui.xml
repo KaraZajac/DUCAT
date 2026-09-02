@@ -12,6 +12,9 @@
     <string name="ceremony_accept_and_pay">承認して支払う</string>
     <string name="ceremony_no_address">この請求にはアドレスがありません — 送り先を相手に確認してください。</string>
     <string name="ceremony_accept_opens_confirm">「承認」を押すと確認画面が開きます — そこで承認するまで、お金は動きません。</string>
+    <string name="ceremony_bill_withdrawn">%1$s がこの請求を取り下げました — 支払うものはありません。</string>
+    <string name="ceremony_bill_declined">この請求を辞退しました。</string>
+    <string name="ceremony_bill_paid">支払い済み ✓ — この請求は精算済みです。</string>
 
     <!-- PaidSplash -->
     <string name="ceremony_paid">支払い済み ✓</string>

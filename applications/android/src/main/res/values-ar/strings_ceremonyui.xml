@@ -12,6 +12,9 @@
     <string name="ceremony_accept_and_pay">قبول ودفع</string>
     <string name="ceremony_no_address">لا عنوان في هذا الطلب — اسألهم أين تُرسل المال.</string>
     <string name="ceremony_accept_opens_confirm">القبول يفتح شاشة التأكيد — لا يتحرك شيء حتى توافق هناك.</string>
+    <string name="ceremony_bill_withdrawn">سحب %1$s هذه الفاتورة — لا شيء للدفع.</string>
+    <string name="ceremony_bill_declined">رفضت هذه الفاتورة.</string>
+    <string name="ceremony_bill_paid">مدفوعة ✓ — هذه الفاتورة مسوّاة.</string>
 
     <!-- PaidSplash -->
     <string name="ceremony_paid">تم الدفع ✓</string>

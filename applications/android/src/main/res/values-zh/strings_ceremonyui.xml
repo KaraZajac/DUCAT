@@ -12,6 +12,9 @@
     <string name="ceremony_accept_and_pay">接受并付款</string>
     <string name="ceremony_no_address">这个请求里没有地址 — 问问对方要把钱发到哪里。</string>
     <string name="ceremony_accept_opens_confirm">点「接受」会打开确认页 — 在那里批准之前，钱不会动。</string>
+    <string name="ceremony_bill_withdrawn">%1$s 已撤回此账单 — 无需支付。</string>
+    <string name="ceremony_bill_declined">你已拒绝此账单。</string>
+    <string name="ceremony_bill_paid">已付 ✓ — 此账单已结清。</string>
 
     <!-- PaidSplash -->
     <string name="ceremony_paid">已付 ✓</string>

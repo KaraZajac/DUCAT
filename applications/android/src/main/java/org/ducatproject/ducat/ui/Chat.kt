@@ -220,6 +220,52 @@ internal fun billAnswers(messages: List<StoredMessage>): BillAnswers {
     return BillAnswers(withdrawn, refused, unsent, quiet)
 }
 
+/**
+ * Whether a bill in [messages] has been paid — the bubble's rule, and the
+ * full-screen bill's, so a bill can never read "Paid" in one place and
+ * offer "Accept & pay" in the other. The identity test (`=== m`) means [m]
+ * must be an element of [messages], not an older copy of it.
+ *
+ * Answered, said rather than guessed: a payment names the request it settles
+ * and a receipt names the request it receipts (§16.14), so the first test is
+ * whether anything points here. The amount rule stays for messages that
+ * predate the reference, and it errs toward "paid" on purpose — the
+ * alternative is a live button one tap from paying twice — but only on the
+ * payer's copy. The asker's own copy flips on an explicit reference alone,
+ * because erring toward "paid" is safe where it kills a spend button and a
+ * lie where it tells the person owed money they were paid.
+ */
+internal fun billPaid(messages: List<StoredMessage>, m: StoredMessage): Boolean {
+    if (m.kind != 1) return false
+    return if (m.outgoing) {
+        // An incoming payment naming this request (their re_own=false: our
+        // log), or our own receipt for it (re_own=true), is not a guess.
+        messages.any {
+            ((it.kind == 2 && !it.outgoing) || (it.kind == 3 && it.outgoing)) &&
+                messages.referent(it) === m
+        }
+    } else {
+        messages.any {
+            val answers = ((it.kind == 2 && it.outgoing) ||
+                (it.kind == 3 && !it.outgoing))
+            if (!answers) false
+            else if (it.reSeq != null) {
+                // The bill is theirs, so it lives in their outbox — and
+                // `re_own` means "the sender's own log". Our payment
+                // answering it says false; their receipt for it says true;
+                // `referent` reads either.
+                messages.referent(it) === m
+            } else {
+                // At least this much, later: a bill paid with a tip on top
+                // must still settle, and this is the rule the payee's own
+                // reconciliation uses.
+                it.amountPxmr >= m.amountPxmr &&
+                    it.timestamp >= m.timestamp
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(contact: Contact, onBack: () -> Unit) {
@@ -1102,25 +1148,9 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         // Which bill a reference names is `referent`'s
                         // reading — positional, since a seq is per card —
                         // and the reference's own re_own says whose log.
-                        paid = (m.kind == 1 && m.outgoing && messages.any {
-                            ((it.kind == 2 && !it.outgoing) || (it.kind == 3 && it.outgoing)) &&
-                                messages.referent(it) === m
-                        }) || (m.kind == 1 && !m.outgoing && messages.any {
-                            val answers = ((it.kind == 2 && it.outgoing) ||
-                                (it.kind == 3 && !it.outgoing))
-                            if (!answers) false
-                            else if (it.reSeq != null) {
-                                // The bill is theirs, so it lives in their
-                                // outbox — and `re_own` means "the sender's
-                                // own log". Our payment answering it says
-                                // false; their receipt for it says true;
-                                // `referent` reads either.
-                                messages.referent(it) === m
-                            } else {
-                                it.amountPxmr >= m.amountPxmr &&
-                                    it.timestamp >= m.timestamp
-                            }
-                        }),
+                        // The rule itself is `billPaid`, shared with the
+                        // full-screen bill so the two can never disagree.
+                        paid = billPaid(messages, m),
                         // The sender's own retract (kind 5, reOwn) withdraws
                         // the bill, and the payer's refusal is the same
                         // mechanism from the other end. Both are resolved in
@@ -1177,13 +1207,33 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
         )
     }
 
-    billView?.let { b ->
+    billView?.let { opened ->
         // The bill gets the whole screen (Ceremony.kt): a decision, not a
         // bubble. Accept leads to the same confirm screen as ever — §15.5
         // survives every coat of paint.
+        //
+        // The bill as the thread holds it *now*, not the row that was
+        // tapped: `messages` is re-read on every store bump, and the verdicts
+        // below compare by identity within that list. The tapped copy is an
+        // element of an older list, so it would read as never answered —
+        // which is how the screen went on offering to pay a withdrawn bill
+        // while the bubble under it said "Cancelled".
+        val b = messages.firstOrNull {
+            it.kind == 1 && !it.outgoing &&
+                it.seq == opened.seq && it.timestamp == opened.timestamp
+        } ?: opened
+        val key = b.seq to b.timestamp
+        val over = when {
+            billPaid(messages, b) -> stringResource(R.string.ceremony_bill_paid)
+            key in answers.refused -> stringResource(R.string.ceremony_bill_declined)
+            key in answers.withdrawn ->
+                stringResource(R.string.ceremony_bill_withdrawn, isolate(c.displayName()))
+            else -> null
+        }
         BillScreen(
             m = b,
             contact = c,
+            over = over,
             onPay = { billView = null; payRequest = b },
             onDecline = {
                 billView = null
@@ -1219,18 +1269,33 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     }
 
     payRequest?.let { r ->
-        // The contact rides along, not just the address. Paying a request as a
-        // bare address silently dropped the payment notice — the vendor never
-        // learned which transaction answered their bill, and nothing could be
-        // marked paid. The request's own payto is already on the contact:
-        // receiving a request stores it as their freshest address (§16.12).
-        PaySheet(
-            prefillContact = c,
-            prefillAmountPxmr = r.amountPxmr,
-            // The bill being answered, so the payment can name it rather than
-            // leave the two to be matched on their amounts.
-            answersSeq = r.seq,
-        ) { payRequest = null }
+        if ((r.seq to r.timestamp) in answers.withdrawn) {
+            // Withdrawn under the confirm screen: the sheet was showing an
+            // amount and a Send button for a bill its sender had just
+            // taken back, with the bubble that says so hidden behind it.
+            // Down it comes, and the thread's error line says why. Paid is
+            // deliberately not a reason here — our own payment lands in
+            // the thread before the paid splash, and this would cut the
+            // splash off; declined cannot happen from behind the sheet.
+            LaunchedEffect(r) {
+                payRequest = null
+                error = context.getString(R.string.ceremony_bill_withdrawn, c.displayName())
+            }
+        } else {
+            // The contact rides along, not just the address. Paying a
+            // request as a bare address silently dropped the payment notice
+            // — the vendor never learned which transaction answered their
+            // bill, and nothing could be marked paid. The request's own
+            // payto is already on the contact: receiving a request stores
+            // it as their freshest address (§16.12).
+            PaySheet(
+                prefillContact = c,
+                prefillAmountPxmr = r.amountPxmr,
+                // The bill being answered, so the payment can name it rather
+                // than leave the two to be matched on their amounts.
+                answersSeq = r.seq,
+            ) { payRequest = null }
+        }
     }
 
     // The same sheet the send/request button opens, with the contact already

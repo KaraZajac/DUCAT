@@ -12,6 +12,9 @@
     <string name="ceremony_accept_and_pay">Chấp nhận &amp; trả</string>
     <string name="ceremony_no_address">Yêu cầu này không kèm địa chỉ — hãy hỏi họ gửi về đâu.</string>
     <string name="ceremony_accept_opens_confirm">Chấp nhận sẽ mở màn hình xác nhận — chưa có gì được chuyển cho tới khi bạn duyệt ở đó.</string>
+    <string name="ceremony_bill_withdrawn">%1$s đã rút lại hóa đơn này — không có gì phải trả.</string>
+    <string name="ceremony_bill_declined">Bạn đã từ chối hóa đơn này.</string>
+    <string name="ceremony_bill_paid">Đã trả ✓ — hóa đơn này đã được thanh toán.</string>
 
     <!-- PaidSplash -->
     <string name="ceremony_paid">Đã trả ✓</string>

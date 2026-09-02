@@ -12,6 +12,9 @@
     <string name="ceremony_accept_and_pay">Kabul et ve öde</string>
     <string name="ceremony_no_address">Bu istekte adres yok — nereye göndereceğini onlara sor.</string>
     <string name="ceremony_accept_opens_confirm">Kabul, onay ekranını açar — sen orada onaylamadan hiçbir şey gitmez.</string>
+    <string name="ceremony_bill_withdrawn">%1$s bu hesabı geri çekti — ödenecek bir şey yok.</string>
+    <string name="ceremony_bill_declined">Bu hesabı reddettin.</string>
+    <string name="ceremony_bill_paid">Ödendi ✓ — bu hesap kapandı.</string>
 
     <!-- PaidSplash -->
     <string name="ceremony_paid">Ödendi ✓</string>

@@ -12,6 +12,9 @@
     <string name="ceremony_accept_and_pay">Przyjmij i zapłać</string>
     <string name="ceremony_no_address">W tej prośbie nie ma adresu — zapytaj, dokąd wysłać.</string>
     <string name="ceremony_accept_opens_confirm">Przyjęcie otwiera ekran potwierdzenia — nic nie ruszy, dopóki tam nie zatwierdzisz.</string>
+    <string name="ceremony_bill_withdrawn">%1$s wycofał(a) ten rachunek — nie ma nic do zapłaty.</string>
+    <string name="ceremony_bill_declined">Odrzucono ten rachunek.</string>
+    <string name="ceremony_bill_paid">Zapłacono ✓ — ten rachunek jest rozliczony.</string>
 
     <!-- PaidSplash -->
     <string name="ceremony_paid">Zapłacono ✓</string>

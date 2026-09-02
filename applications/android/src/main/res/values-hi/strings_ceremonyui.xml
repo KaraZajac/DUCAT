@@ -12,6 +12,9 @@
     <string name="ceremony_accept_and_pay">स्वीकारें &amp; चुकाएँ</string>
     <string name="ceremony_no_address">इस अनुरोध में कोई पता नहीं — उनसे पूछें कि कहाँ भेजना है।</string>
     <string name="ceremony_accept_opens_confirm">स्वीकारने पर पुष्टि स्क्रीन खुलती है — वहाँ आपकी मंज़ूरी से पहले कुछ नहीं हिलता।</string>
+    <string name="ceremony_bill_withdrawn">%1$s ने यह बिल वापस ले लिया — चुकाने को कुछ नहीं है।</string>
+    <string name="ceremony_bill_declined">आपने यह बिल अस्वीकार किया।</string>
+    <string name="ceremony_bill_paid">चुकाया ✓ — यह बिल निपट गया।</string>
 
     <!-- PaidSplash -->
     <string name="ceremony_paid">चुकाया ✓</string>
