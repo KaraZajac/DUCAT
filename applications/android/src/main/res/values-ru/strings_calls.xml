@@ -26,6 +26,7 @@
     <string name="call_body_cancel">Повесил(а) трубку до ответа.</string>
     <string name="call_connecting">Соединение…</string>
     <string name="call_unreached">Не удалось дозвониться</string>
+    <string name="call_never_connected">Соединение не установилось</string>
     <string name="call_notify_calling">Звоним %1$s…</string>
     <string name="call_notify_in_call">Разговор с %1$s</string>
     <string name="call_notify_return">Нажми, чтобы вернуться.</string>

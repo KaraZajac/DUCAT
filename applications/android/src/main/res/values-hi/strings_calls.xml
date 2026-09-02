@@ -26,6 +26,7 @@
     <string name="call_body_cancel">आपके जवाब देने से पहले कॉल काट दी।</string>
     <string name="call_connecting">जुड़ रहा है…</string>
     <string name="call_unreached">उन तक पहुँच नहीं हो सकी</string>
+    <string name="call_never_connected">कनेक्ट नहीं हो सका</string>
     <string name="call_notify_calling">%1$s को कॉल किया जा रहा है…</string>
     <string name="call_notify_in_call">%1$s के साथ कॉल पर</string>
     <string name="call_notify_return">वापस जाने के लिए टैप करें।</string>

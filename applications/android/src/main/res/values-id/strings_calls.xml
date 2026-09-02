@@ -26,6 +26,7 @@
     <string name="call_body_cancel">Ditutup sebelum kamu menjawab.</string>
     <string name="call_connecting">Menghubungkan…</string>
     <string name="call_unreached">Tidak bisa dihubungi</string>
+    <string name="call_never_connected">Tidak pernah tersambung</string>
     <string name="call_notify_calling">Menelepon %1$s…</string>
     <string name="call_notify_in_call">Sedang menelepon %1$s</string>
     <string name="call_notify_return">Ketuk untuk kembali.</string>

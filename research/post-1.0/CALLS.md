@@ -161,3 +161,36 @@ at ~409 frames (the connect ramp), i.e. zero steady-state loss for
 fifty minutes; phone memory sawtoothed 169–182 MB and ended at 178 —
 garbage collection, not a leak. Roughly twenty megabytes of voice each
 way through onion routes at a hard-constant 60 bytes a frame.
+
+
+## 2026-09-01: the answer that lands after the ring
+
+The ninety-second window is the caller's; the callee's ring lasts the
+window plus the skew allowance from the offer's *timestamp*, so a callee
+who picked up in the last seconds of a bell — or any time on a phone
+whose offer took forty seconds to arrive — sent an answer the caller no
+longer listened for. On the emulators, Sam's ring ran out at +88 s and
+Jordan's kind-15 landed at +94 s: six seconds late, and the caller was
+on the answering-machine screen watching "No answer" while the callee
+sat in "Connecting…" for a minute and a half and then fell back to the
+wallet with no word. The shade posted "Jordan answered your call" beside
+it.
+
+Two changes. The answering-machine screen is now the caller still
+standing there: while it is up (45 s), the ring's per-contact poll keeps
+going, and an answer quoting our call id becomes the call — our door
+went with the ring, so a fresh one goes over as the RENEW the answerer's
+pump already understands, ahead of the first frame (the answerer holds
+its tongue until it hears us, so the re-aim is always in time). Live:
+gave up at +88, answered at +92, answer read at +94, door rebuilt and
+handed over at +99, and 1029/1029 frames each way until a clean BYE.
+Dismiss the screen and the same answer is the shade's news, as before.
+
+And the answerer's side stops pretending. "Connecting…" until the first
+frame instead of a running timer over silence; then, if nothing ever
+came, "Never connected" on the answering-machine screen — leave a
+message, or not now — rather than a silent jump home. Its patience is
+no longer a flat ninety seconds but the rest of the caller's own
+listening life: window + skew + linger from the offer's timestamp, plus
+a poll and a route trip, floored at ten seconds. A ring answered at the
+end of its life waits less; a fresh ring from a slow clock, more.

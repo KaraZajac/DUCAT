@@ -26,6 +26,7 @@
     <string name="call_body_cancel">応答の前に切りました。</string>
     <string name="call_connecting">接続中…</string>
     <string name="call_unreached">相手につながりませんでした</string>
+    <string name="call_never_connected">つながりませんでした</string>
     <string name="call_notify_calling">%1$sに発信中…</string>
     <string name="call_notify_in_call">%1$sと通話中</string>
     <string name="call_notify_return">タップして通話に戻る</string>

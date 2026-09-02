@@ -26,6 +26,7 @@
     <string name="call_body_cancel">أُغلق الخط قبل أن تجيب.</string>
     <string name="call_connecting">جارٍ التوصيل…</string>
     <string name="call_unreached">تعذّر الوصول إليه</string>
+    <string name="call_never_connected">لم يتم الاتصال</string>
     <string name="call_notify_calling">جارٍ الاتصال بـ %1$s…</string>
     <string name="call_notify_in_call">في مكالمة مع %1$s</string>
     <string name="call_notify_return">انقر للعودة إليها.</string>

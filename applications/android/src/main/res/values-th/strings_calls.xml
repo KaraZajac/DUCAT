@@ -26,6 +26,7 @@
     <string name="call_body_cancel">วางสายก่อนคุณรับ</string>
     <string name="call_connecting">กำลังเชื่อมต่อ…</string>
     <string name="call_unreached">ติดต่อไม่ได้</string>
+    <string name="call_never_connected">เชื่อมต่อไม่สำเร็จ</string>
     <string name="call_notify_calling">กำลังโทรหา %1$s…</string>
     <string name="call_notify_in_call">กำลังคุยกับ %1$s</string>
     <string name="call_notify_return">แตะเพื่อกลับไปที่สาย</string>

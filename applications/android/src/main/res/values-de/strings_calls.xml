@@ -26,6 +26,7 @@
     <string name="call_body_cancel">Aufgelegt, bevor du rangegangen bist.</string>
     <string name="call_connecting">Verbinde…</string>
     <string name="call_unreached">Nicht erreichbar</string>
+    <string name="call_never_connected">Keine Verbindung zustande gekommen</string>
     <string name="call_notify_calling">Rufe %1$s an…</string>
     <string name="call_notify_in_call">Im Gespräch mit %1$s</string>
     <string name="call_notify_return">Tippen, um zurückzukehren.</string>

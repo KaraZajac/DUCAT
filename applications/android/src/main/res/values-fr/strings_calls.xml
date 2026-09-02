@@ -26,6 +26,7 @@
     <string name="call_body_cancel">Raccroché avant que tu répondes.</string>
     <string name="call_connecting">Connexion…</string>
     <string name="call_unreached">Injoignable</string>
+    <string name="call_never_connected">L\u2019appel n\u2019a pas abouti</string>
     <string name="call_notify_calling">Appel de %1$s…</string>
     <string name="call_notify_in_call">En appel avec %1$s</string>
     <string name="call_notify_return">Touche pour y revenir.</string>

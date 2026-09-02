@@ -26,6 +26,7 @@
     <string name="call_body_cancel">Sen açmadan kapattı.</string>
     <string name="call_connecting">Bağlanıyor…</string>
     <string name="call_unreached">Ulaşılamadı</string>
+    <string name="call_never_connected">Bağlantı kurulamadı</string>
     <string name="call_notify_calling">%1$s aranıyor…</string>
     <string name="call_notify_in_call">%1$s ile görüşmede</string>
     <string name="call_notify_return">Geri dönmek için dokun.</string>

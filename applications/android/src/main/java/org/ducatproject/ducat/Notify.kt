@@ -104,13 +104,17 @@ object Notify {
     fun message(context: Context, from: String, personaHex: String, m: StoredMessage) {
         // The answer to a ring this phone is on: the call screen is showing
         // exactly that, and "Jordan answered your call" beside "In a call
-        // with Jordan" in the shade was the record announcing itself. An
-        // answer that lands after the ring was given up on is news — they
-        // picked up, you were gone — and still posts.
+        // with Jordan" in the shade was the record announcing itself. The
+        // same goes for one that lands while the ring's answering-machine
+        // screen is still up — Calls.noticed turns that into the call. An
+        // answer that lands after the screen is gone is news — they picked
+        // up, you were gone — and still posts.
         if (m.kind == 15) {
             val onIt = when (val s = Calls.state) {
                 is Calls.State.Outgoing -> s.contactHex == personaHex
                 is Calls.State.Active -> s.contactHex == personaHex
+                is Calls.State.NoAnswer ->
+                    s.contactHex == personaHex && s.why == Calls.State.Why.RANG_OUT
                 else -> false
             }
             if (onIt) return

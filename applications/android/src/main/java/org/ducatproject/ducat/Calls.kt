@@ -36,6 +36,15 @@ object Calls {
      */
     const val RING_WINDOW_SECS = 90L
 
+    /**
+     * How long the answering-machine screen stays up on its own — and so
+     * how long after the ring an answer can still become the call: on a
+     * phone the offer's trip alone can take most of the window, and an
+     * answer given within a minute of the bell lands after the caller's
+     * ninety seconds. The screen is the caller still standing there.
+     */
+    const val NO_ANSWER_LINGER_SECS = 45L
+
     /** The platform's ears and mouth; null on hosts without either. */
     interface Audio {
         /** Start capturing; deliver each 640-byte frame to [onFrame].
@@ -148,10 +157,20 @@ object Calls {
         data class Outgoing(val contactHex: String) : State
         /** Rang the window out, or they declined: the moment a telephone
          *  answering machine would pick up. The screen offers the thread's
-         *  recorder; dismissing goes back to Idle. [unreached] is the third
-         *  way here — the offer never left this phone — and the screen says
-         *  so instead of pretending somebody let it ring. */
-        data class NoAnswer(val contactHex: String, val unreached: Boolean = false) : State
+         *  recorder; dismissing goes back to Idle. [why] is what the screen
+         *  says instead of pretending somebody let it ring: the offer never
+         *  left this phone, or the call was answered — here or there — and
+         *  no sound ever arrived. */
+        data class NoAnswer(val contactHex: String, val why: Why = Why.RANG_OUT) : State
+        enum class Why {
+            RANG_OUT,
+            UNREACHED,
+            /** Answered, then silence until the watchdog: the answerer of a
+             *  stale ring whose caller had already given up, or a caller
+             *  whose answerer's door never worked. Either way the two just
+             *  missed each other, which is what the recorder is for. */
+            NEVER_CONNECTED,
+        }
         data class Incoming(val contactHex: String, val offerSeq: Long, val callId: String) : State
         /** Answer tapped: the bell is off and our door is on its way. The
          *  window's expiry and a second tap both find this, not Incoming. */
@@ -235,9 +254,14 @@ object Calls {
         // A ringing call cannot wait for the background poll clock: the
         // answer is mailbox-borne and the window is finite. Poll THIS
         // contact only — the full sweep reads every contact's records and
-        // once outlasted the whole ring; the thread dies with the state.
+        // once outlasted the whole ring; the thread dies with the state —
+        // or with the answering-machine screen the ring ends on, which is
+        // where a late answer is still worth something (see `noticed`).
         Thread {
-            while (state === st) {
+            fun on() = state === st || (state as? State.NoAnswer)?.let {
+                it.contactHex == st.contactHex && it.why == State.Why.RANG_OUT
+            } == true
+            while (on()) {
                 // The open door may answer before the mailbox does
                 // (§16.21 control frames): the callee's ANSWER or DECLINE
                 // arrives on the route the offer carried out.
@@ -265,7 +289,7 @@ object Calls {
                     if (state !== st) break
                     f = uniffi.ducat_mobile.nodeCallRecv(0u)
                 }
-                if (state !== st) break
+                if (!on()) break
                 runCatching { Mailbox.pollContact(app, c) }
                 noticed(app)
                 Thread.sleep(2_000)
@@ -317,7 +341,9 @@ object Calls {
                 // door and is already talking into ours; the kind-15 takes
                 // mailbox-seconds, and an ear opened after it threw those
                 // seconds away.
-                if (!goActive(st, c.personaHex, door, initiator = false)) return@runCatching
+                if (!goActive(st, c.personaHex, door, initiator = false, patienceMs = patienceFor(offer))) {
+                    return@runCatching
+                }
                 runCatching {
                     Mailbox.send(
                         app, c, app.getString(R.string.call_body_answer),
@@ -328,14 +354,39 @@ object Calls {
                 }.onFailure { DucatLog.w("Calls", "answer record: ${it.message}") }
             }.onFailure {
                 DucatLog.w("Calls", "answer: ${it.message}")
-                if (state === st) endInternal()
+                if (state === st) endInternal(silent = true)
             }
         }.apply { isDaemon = true }.start()
     }
 
-    /** Leave the answering-machine screen without leaving a message. */
+    /**
+     * How long the answerer waits for the caller's first frame before
+     * calling the silence a call that never was. Its ANSWER through the
+     * door may have been lost, and the caller then finds our route in the
+     * kind-15 — which it reads only while its ring, and then its
+     * answering-machine screen, are still up: the window and the linger
+     * from the offer's timestamp, by the caller's clock, which may lag
+     * ours by the skew allowance. Past that, plus a poll and a route trip,
+     * no first frame is coming; before it, giving up would abandon a
+     * caller seconds from connecting. A flat window did both — the full
+     * ninety seconds of "Connecting…" for a ring answered at the end of
+     * its life, whose caller was long gone, and too little for a fresh
+     * ring from a slow clock.
+     */
+    private fun patienceFor(offer: StoredMessage): Long {
+        val theirs = RING_WINDOW_SECS + CALL_SKEW_SECS + NO_ANSWER_LINGER_SECS
+        return ((offer.timestamp + theirs) * 1000 - System.currentTimeMillis() + 10_000)
+            .coerceIn(10_000, theirs * 1000)
+    }
+
+    /** Leave the answering-machine screen without leaving a message. An
+     *  answer from here on is the shade's news, not a call. */
+    @Synchronized
     fun dismissNoAnswer() {
-        if (state is State.NoAnswer) state = State.Idle
+        if (state is State.NoAnswer) {
+            myCallId = null
+            state = State.Idle
+        }
     }
 
     /** Decline is §16.13's Retract naming the offer — the till's own word. */
@@ -409,6 +460,25 @@ object Calls {
                 ) {
                     DucatLog.i("Calls", "declined")
                     endInternal(noAnswer = true)
+                }
+            }
+            is State.NoAnswer -> {
+                // The answer that lands after the ring ran out, while the
+                // answering-machine screen is still up: they picked up, we
+                // are still here, and the only thing missing is our door,
+                // which went with the ring. A fresh one goes over as the
+                // RENEW their pump already understands, and the call goes
+                // up as if the answer had been on time. Once the screen is
+                // dismissed the same answer is news for the shade instead.
+                val id = myCallId
+                if (s.why != State.Why.RANG_OUT || id == null) return
+                val answer = store.thread(s.contactHex).lastOrNull {
+                    !it.outgoing && it.kind == 15 &&
+                        it.callId == id.toHexLower() &&
+                        now - it.timestamp < RING_WINDOW_SECS * 2 + CALL_SKEW_SECS
+                }
+                if (answer?.callRoute != null) {
+                    reopen(s, hexToBytes(answer.callRoute), id)
                 }
             }
             is State.Incoming -> {
@@ -489,15 +559,61 @@ object Calls {
         state = State.Idle
     }
 
+    /** The answering-machine screen a late answer is already being built
+     *  for: every store bump finds the same answer, and one door is enough. */
+    private var reopening: State? = null
+
+    /**
+     * A late answer's door. Ours was released with the ring, so build
+     * another and hand it over before the first word — the answerer's
+     * mouth aims wherever the last RENEW said, and holds its tongue until
+     * it hears us, so the RENEW ahead of our first frame is in time. Off
+     * the caller's thread: a route takes seconds, and on a node that only
+     * just attached, tens of them; a screen dismissed meanwhile gets its
+     * door taken down again — unless a newer call has begun, whose own
+     * teardown then owns every route.
+     */
+    @Synchronized
+    private fun reopen(from: State.NoAnswer, route: ByteArray, id: ByteArray) {
+        if (state !== from || reopening === from) return
+        reopening = from
+        val ep = epoch.get()
+        Thread {
+            runCatching {
+                val fresh = uniffi.ducat_mobile.nodeCallRoute()
+                if (state !== from) {
+                    if (epoch.get() == ep) runCatching { uniffi.ducat_mobile.nodeCallClose() }
+                    return@runCatching
+                }
+                DucatLog.i("Calls", "answered late (id=${id.toHexLower()}) — reopening our door")
+                repeat(3) {
+                    runCatching {
+                        uniffi.ducat_mobile.nodeCallSend(route, controlFrame(CTRL_RENEW, id, fresh))
+                    }
+                }
+                goActive(from, from.contactHex, route, initiator = true)
+            }.onFailure { DucatLog.w("Calls", "reopen: ${it.message}") }
+        }.apply { isDaemon = true }.start()
+    }
+
     /**
      * Sound both ways, from [from] — the ring or the answer this call grew
      * out of. False when that moment has passed: the ring was hung up on
      * while the door was being built, or the door's ANSWER and the mailbox's
      * kind-15 both arrived and the second found the call already up — or
-     * when there is no microphone to speak into.
+     * when there is no microphone to speak into. [patienceMs] is how long
+     * the first frame may take before the silence is read as nobody there:
+     * a route trip for the caller, who holds the answer in hand; for the
+     * answerer, see [patienceFor].
      */
     @Synchronized
-    private fun goActive(from: State, contactHex: String, route: ByteArray, initiator: Boolean): Boolean {
+    private fun goActive(
+        from: State,
+        contactHex: String,
+        route: ByteArray,
+        initiator: Boolean,
+        patienceMs: Long = 10_000L,
+    ): Boolean {
         if (state !== from) return false
         audio?.quiet()
         appCtx?.let { ctx -> runCatching { shell?.release(ctx) } }
@@ -562,12 +678,12 @@ object Calls {
         // also keeps the frames after the gap decoding clean. Ten seconds
         // of silence is the other side gone — the swarm's own watchdog
         // reflex, on a faster clock. Before the first frame the answering
-        // side waits the ring window instead: its ANSWER at the door may
-        // have been lost, and the caller then finds our route in the
-        // kind-15, which is mailbox-seconds behind.
+        // side waits longer instead — [patienceMs], the rest of the
+        // caller's own window: its ANSWER at the door may have been lost,
+        // and the caller then finds our route in the kind-15, which is
+        // mailbox-seconds behind.
         pump = Thread {
             var lastHeard = System.currentTimeMillis()
-            val patience = if (initiator) 10_000L else RING_WINDOW_SECS * 1000
             var lastSeq = -1L
             // The bad-draw watch (§16.21 RENEW): some routes lose most of a
             // direction while the reverse runs clean. When arrivals starve
@@ -642,22 +758,34 @@ object Calls {
                     runCatching {
                         uniffi.ducat_mobile.callDecode(f.copyOfRange(8, f.size))
                     }.onSuccess { audio?.play(it) }
-                } else if (System.currentTimeMillis() - lastHeard > (if (rxFrames == 0) patience else 10_000L)) {
+                } else if (System.currentTimeMillis() - lastHeard > (if (rxFrames == 0) patienceMs else 10_000L)) {
                     DucatLog.i("Calls", "silence — the far side hung up (rx=$rxFrames tx=$txFrames)")
-                    endInternal()
+                    // Not one frame: the screen says the call never was,
+                    // rather than a timer that ran and then a wallet.
+                    endInternal(silent = rxFrames == 0)
                 }
             }
         }.apply { isDaemon = true; name = "call-rx"; start() }
         return true
     }
 
+    /**
+     * [silent]: answered — here or there — and not one frame arrived.
+     * The same screen as a ring nobody picked up, worded for what it was:
+     * the person is one tap from the recorder either way.
+     */
     @Synchronized
-    private fun endInternal(noAnswer: Boolean = false, unreached: Boolean = false) {
+    private fun endInternal(noAnswer: Boolean = false, unreached: Boolean = false, silent: Boolean = false) {
         // Where the answering machine lives: an outgoing ring that never
         // became a call ends on the leave-a-message screen, not on a
         // silent jump back to wherever the phone was.
         val ringing = state as? State.Outgoing
         val unanswered = ringing?.contactHex?.takeIf { noAnswer }
+        val unheard = when (val s = state) {
+            is State.Active -> s.contactHex
+            is State.Answering -> s.contactHex
+            else -> null
+        }?.takeIf { silent }
         // Hung up on our own ring: the offer is still ringing in their
         // pocket, for the rest of the window, unless we take it back.
         val withdraw = ringing?.contactHex?.takeIf { !noAnswer }
@@ -672,10 +800,18 @@ object Calls {
         appCtx?.let { ctx -> runCatching { shell?.release(ctx) } }
         audio?.stop()
         appCtx?.let { ctx -> runCatching { shell?.ended(ctx) } }
-        myCallId = null
+        // The id outlives a ring that ran out: it is how a late answer is
+        // known for ours while the answering-machine screen is up.
+        myCallId = if (unanswered != null && !unreached) myCallId else null
         theirRoute = null
         pump = null
-        state = unanswered?.let { State.NoAnswer(it, unreached) } ?: State.Idle
+        reopening = null
+        state = when {
+            unanswered != null ->
+                State.NoAnswer(unanswered, if (unreached) State.Why.UNREACHED else State.Why.RANG_OUT)
+            unheard != null -> State.NoAnswer(unheard, State.Why.NEVER_CONNECTED)
+            else -> State.Idle
+        }
         // The goodbye and the teardown leave together, off this thread —
         // hangUp arrives on a UI click. BYE goes out three times because
         // it is fire-and-forget; the far side's watchdog remains the

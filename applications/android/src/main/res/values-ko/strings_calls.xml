@@ -26,6 +26,7 @@
     <string name="call_body_cancel">받기 전에 끊었어요.</string>
     <string name="call_connecting">연결 중…</string>
     <string name="call_unreached">연결할 수 없었어요</string>
+    <string name="call_never_connected">연결되지 않았어요</string>
     <string name="call_notify_calling">%1$s에게 전화 거는 중…</string>
     <string name="call_notify_in_call">%1$s님과 통화 중</string>
     <string name="call_notify_return">탭하면 통화로 돌아가요.</string>

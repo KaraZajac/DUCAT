@@ -66,10 +66,12 @@ fun CallScreen() {
         is Calls.State.NoAnswer -> state.contactHex
         else -> return
     }
-    // The answering-machine screen does not linger in a pocket.
+    // The answering-machine screen does not linger in a pocket — but it
+    // lingers: while it is up, an answer that lands late still becomes
+    // the call (Calls.noticed), and the screen turns into it.
     if (state is Calls.State.NoAnswer) {
         LaunchedEffect(state) {
-            delay(45_000)
+            delay(Calls.NO_ANSWER_LINGER_SECS * 1000)
             Calls.dismissNoAnswer()
         }
     }
@@ -133,9 +135,21 @@ fun CallScreen() {
                         is Calls.State.Incoming -> stringResource(R.string.call_incoming)
                         is Calls.State.Answering -> stringResource(R.string.call_connecting)
                         is Calls.State.NoAnswer -> stringResource(
-                            if (state.unreached) R.string.call_unreached else R.string.call_no_answer,
+                            when (state.why) {
+                                Calls.State.Why.UNREACHED -> R.string.call_unreached
+                                Calls.State.Why.NEVER_CONNECTED -> R.string.call_never_connected
+                                Calls.State.Why.RANG_OUT -> R.string.call_no_answer
+                            },
                         )
-                        is Calls.State.Active -> {
+                        // The clock starts at the answer, as a telephone's
+                        // does, but runs on screen only once something has
+                        // been heard: a timer over silence said the call was
+                        // up when nothing had arrived — for the answerer of
+                        // a ring whose caller had gone, a minute and a half
+                        // of it.
+                        is Calls.State.Active -> if (Calls.rxFrames == 0) {
+                            stringResource(R.string.call_connecting)
+                        } else {
                             val secs = (nowMs - state.sinceMs) / 1000
                             "%d:%02d".format(secs / 60, secs % 60)
                         }

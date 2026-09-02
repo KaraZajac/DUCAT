@@ -26,6 +26,7 @@
     <string name="call_body_cancel">Ha riattaccato prima che rispondessi.</string>
     <string name="call_connecting">Connessione…</string>
     <string name="call_unreached">Non raggiungibile</string>
+    <string name="call_never_connected">Non si è mai connessa</string>
     <string name="call_notify_calling">Chiamata a %1$s…</string>
     <string name="call_notify_in_call">In chiamata con %1$s</string>
     <string name="call_notify_return">Tocca per tornarci.</string>
