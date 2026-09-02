@@ -6,6 +6,8 @@
     <!-- Pending requests -->
     <string name="activity_awaiting">Menunggu</string>
     <string name="activity_search_none">Tidak ada yang cocok dengan “%1$s”.</string>
+    <string name="activity_period_none">Tidak ada apa pun dalam periode ini. Pilih periode yang lebih panjang di atas untuk melihat aktivitas sebelumnya.</string>
+    <string name="activity_filter_none">Belum ada yang seperti itu. Ketuk lagi kotak yang disorot untuk menampilkan semuanya.</string>
     <string name="activity_search_clear">Hapus pencarian</string>
     <string name="activity_search_hint">Cari struk, nama, catatan</string>
     <string name="activity_they_ask">%1$s meminta</string>

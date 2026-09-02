@@ -6,6 +6,8 @@
     <!-- Pending requests -->
     <string name="activity_awaiting">प्रतीक्षा में</string>
     <string name="activity_search_none">यहाँ “%1$s” से कुछ मेल नहीं खाता।</string>
+    <string name="activity_period_none">इस अवधि में कुछ नहीं। पहले की गतिविधि देखने के लिए ऊपर लंबी अवधि चुनें।</string>
+    <string name="activity_filter_none">अभी ऐसा कुछ नहीं है। सब कुछ देखने के लिए हाइलाइट की गई टाइल पर फिर से टैप करें।</string>
     <string name="activity_search_clear">खोज साफ़ करें</string>
     <string name="activity_search_hint">रसीदें, नाम, नोट खोजें</string>
     <string name="activity_they_ask">%1$s माँग रहे हैं</string>

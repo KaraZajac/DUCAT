@@ -6,6 +6,8 @@
     <!-- Pending requests -->
     <string name="activity_awaiting">In afwachting</string>
     <string name="activity_search_none">Niets hier komt overeen met “%1$s”.</string>
+    <string name="activity_period_none">Niets in deze periode. Kies hierboven een langere om eerdere activiteit te zien.</string>
+    <string name="activity_filter_none">Nog niets van dat soort. Tik nogmaals op de gemarkeerde tegel om alles te tonen.</string>
     <string name="activity_search_clear">Zoekopdracht wissen</string>
     <string name="activity_search_hint">Zoek bonnen, namen, notities</string>
     <string name="activity_they_ask">%1$s vraagt om</string>

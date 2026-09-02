@@ -6,6 +6,8 @@
     <!-- Pending requests -->
     <string name="activity_awaiting">รอดำเนินการ</string>
     <string name="activity_search_none">ไม่มีอะไรตรงกับ “%1$s”</string>
+    <string name="activity_period_none">ไม่มีรายการในช่วงเวลานี้ เลือกช่วงที่ยาวขึ้นด้านบนเพื่อดูรายการก่อนหน้า</string>
+    <string name="activity_filter_none">ยังไม่มีรายการประเภทนี้ แตะช่องที่ไฮไลต์อีกครั้งเพื่อแสดงทั้งหมด</string>
     <string name="activity_search_clear">ล้างการค้นหา</string>
     <string name="activity_search_hint">ค้นหาใบเสร็จ ชื่อ บันทึก</string>
     <string name="activity_they_ask">%1$s ขอ</string>

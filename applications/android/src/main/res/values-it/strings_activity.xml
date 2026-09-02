@@ -6,6 +6,8 @@
     <!-- Richieste in sospeso -->
     <string name="activity_awaiting">In attesa</string>
     <string name="activity_search_none">Qui non corrisponde nulla a «%1$s».</string>
+    <string name="activity_period_none">Niente in questo periodo. Scegline uno più lungo qui sopra per vedere l’attività precedente.</string>
+    <string name="activity_filter_none">Ancora niente di questo tipo. Tocca di nuovo il riquadro evidenziato per mostrare tutto.</string>
     <string name="activity_search_clear">Cancella la ricerca</string>
     <string name="activity_search_hint">Cerca in ricevute, nomi, note</string>
     <string name="activity_they_ask">%1$s ti chiede</string>

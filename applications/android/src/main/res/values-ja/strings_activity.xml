@@ -6,6 +6,8 @@
     <!-- Pending requests -->
     <string name="activity_awaiting">待機中</string>
     <string name="activity_search_none">「%1$s」に一致するものはありません。</string>
+    <string name="activity_period_none">この期間には何もありません。以前の履歴を見るには、上でより長い期間を選んでください。</string>
+    <string name="activity_filter_none">該当する記録はまだありません。強調表示されたタイルをもう一度タップするとすべて表示されます。</string>
     <string name="activity_search_clear">検索をクリア</string>
     <string name="activity_search_hint">レシート・名前・メモを検索</string>
     <string name="activity_they_ask">%1$sからの請求</string>

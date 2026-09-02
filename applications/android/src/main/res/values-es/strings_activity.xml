@@ -6,6 +6,8 @@
     <!-- Pending requests -->
     <string name="activity_awaiting">En espera</string>
     <string name="activity_search_none">Aquí no hay nada que coincida con «%1$s».</string>
+    <string name="activity_period_none">Nada en este periodo. Elige uno más largo arriba para ver actividad anterior.</string>
+    <string name="activity_filter_none">Todavía no hay nada de ese tipo. Toca de nuevo el recuadro resaltado para mostrar todo.</string>
     <string name="activity_search_clear">Borrar la búsqueda</string>
     <string name="activity_search_hint">Buscar en recibos, nombres, notas</string>
     <string name="activity_they_ask">%1$s te pide</string>

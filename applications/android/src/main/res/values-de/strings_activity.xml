@@ -6,6 +6,8 @@
     <!-- Pending requests -->
     <string name="activity_awaiting">Ausstehend</string>
     <string name="activity_search_none">Nichts hier passt zu „%1$s“.</string>
+    <string name="activity_period_none">Nichts in diesem Zeitraum. Wähle oben einen längeren, um frühere Vorgänge zu sehen.</string>
+    <string name="activity_filter_none">Noch nichts dieser Art. Tippe erneut auf die hervorgehobene Kachel, um alles anzuzeigen.</string>
     <string name="activity_search_clear">Suche löschen</string>
     <string name="activity_search_hint">Belege, Namen, Notizen durchsuchen</string>
     <string name="activity_they_ask">%1$s bittet um</string>

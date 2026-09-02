@@ -6,6 +6,8 @@
     <!-- Pending requests -->
     <string name="activity_awaiting">В ожидании</string>
     <string name="activity_search_none">Здесь нет ничего по запросу «%1$s».</string>
+    <string name="activity_period_none">За этот период ничего нет. Выберите выше более длинный период, чтобы увидеть более раннюю активность.</string>
+    <string name="activity_filter_none">Пока ничего такого нет. Нажмите выделенную плитку ещё раз, чтобы показать всё.</string>
     <string name="activity_search_clear">Очистить поиск</string>
     <string name="activity_search_hint">Поиск по чекам, именам, заметкам</string>
     <string name="activity_they_ask">%1$s просит</string>

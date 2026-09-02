@@ -483,9 +483,18 @@ fun ActivityScreen() {
         }
         Spacer(Modifier.height(4.dp))
     }
-    if (q.isNotEmpty() && shownEvents.isEmpty() && shownPending.isEmpty()) {
+    if (shownEvents.isEmpty() && shownPending.isEmpty()) {
+        // The ledger has rows (the "Nothing yet" screen would have taken
+        // an empty one), so an empty list here is a narrowing: the search,
+        // the period, or a tile. Say which — four zero tiles over blank
+        // space on the first of the month, "This month" selected by
+        // default, read as a wallet that had lost its history.
         Text(
-            stringResource(R.string.activity_search_none, query),
+            when {
+                q.isNotEmpty() -> stringResource(R.string.activity_search_none, query)
+                period != 3 -> stringResource(R.string.activity_period_none)
+                else -> stringResource(R.string.activity_filter_none)
+            },
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp),

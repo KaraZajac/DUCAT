@@ -6,6 +6,8 @@
     <!-- Pending requests -->
     <string name="activity_awaiting">Bekleyen</string>
     <string name="activity_search_none">Burada “%1$s” ile eşleşen bir şey yok.</string>
+    <string name="activity_period_none">Bu dönemde bir şey yok. Önceki hareketleri görmek için yukarıdan daha uzun bir dönem seçin.</string>
+    <string name="activity_filter_none">Henüz bu türden bir şey yok. Her şeyi göstermek için vurgulanan kutucuğa yeniden dokunun.</string>
     <string name="activity_search_clear">Aramayı temizle</string>
     <string name="activity_search_hint">Fişlerde, adlarda, notlarda ara</string>
     <string name="activity_they_ask">%1$s istiyor</string>

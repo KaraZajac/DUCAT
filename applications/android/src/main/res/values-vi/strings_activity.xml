@@ -6,6 +6,8 @@
     <!-- Pending requests -->
     <string name="activity_awaiting">Đang chờ</string>
     <string name="activity_search_none">Không có gì khớp với “%1$s”.</string>
+    <string name="activity_period_none">Không có gì trong khoảng thời gian này. Chọn khoảng dài hơn ở trên để xem hoạt động trước đó.</string>
+    <string name="activity_filter_none">Chưa có gì thuộc loại này. Chạm lại ô đang được tô sáng để hiển thị tất cả.</string>
     <string name="activity_search_clear">Xoá tìm kiếm</string>
     <string name="activity_search_hint">Tìm biên nhận, tên, ghi chú</string>
     <string name="activity_they_ask">%1$s yêu cầu</string>

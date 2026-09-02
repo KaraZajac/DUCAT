@@ -6,6 +6,8 @@
     <!-- Pending requests -->
     <string name="activity_awaiting">در انتظار</string>
     <string name="activity_search_none">چیزی اینجا با «%1$s» مطابقت ندارد.</string>
+    <string name="activity_period_none">در این بازه چیزی نیست. برای دیدن فعالیت‌های قبلی، بازه‌ای طولانی‌تر را در بالا انتخاب کنید.</string>
+    <string name="activity_filter_none">هنوز چیزی از این نوع نیست. برای نمایش همه، دوباره روی کاشی برجسته ضربه بزنید.</string>
     <string name="activity_search_clear">پاک کردن جست‌وجو</string>
     <string name="activity_search_hint">جست‌وجو در رسیدها، نام‌ها، یادداشت‌ها</string>
     <string name="activity_they_ask">%1$s درخواست می‌کند</string>

@@ -6,6 +6,8 @@
     <!-- Pending requests -->
     <string name="activity_awaiting">Awaiting</string>
     <string name="activity_search_none">Nothing here matches “%1$s”.</string>
+    <string name="activity_period_none">Nothing in this period. Choose a longer one above to see earlier activity.</string>
+    <string name="activity_filter_none">Nothing of that kind yet. Tap the highlighted tile again to show everything.</string>
     <string name="activity_search_clear">Clear the search</string>
     <string name="activity_search_hint">Search receipts, names, notes</string>
     <string name="activity_they_ask">%1$s asks for</string>

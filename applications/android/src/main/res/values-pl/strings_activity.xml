@@ -6,6 +6,8 @@
     <!-- Pending requests -->
     <string name="activity_awaiting">Oczekujące</string>
     <string name="activity_search_none">Nic tu nie pasuje do „%1$s”.</string>
+    <string name="activity_period_none">Nic w tym okresie. Wybierz powyżej dłuższy okres, aby zobaczyć wcześniejszą aktywność.</string>
+    <string name="activity_filter_none">Nic takiego jeszcze nie ma. Stuknij ponownie wyróżniony kafelek, aby pokazać wszystko.</string>
     <string name="activity_search_clear">Wyczyść wyszukiwanie</string>
     <string name="activity_search_hint">Szukaj w paragonach, nazwach, notatkach</string>
     <string name="activity_they_ask">%1$s prosi o</string>

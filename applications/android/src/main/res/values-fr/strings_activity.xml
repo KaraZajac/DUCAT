@@ -6,6 +6,8 @@
     <!-- Pending requests -->
     <string name="activity_awaiting">En attente</string>
     <string name="activity_search_none">Rien ici ne correspond à « %1$s ».</string>
+    <string name="activity_period_none">Rien sur cette période. Choisissez-en une plus longue ci-dessus pour voir l’activité antérieure.</string>
+    <string name="activity_filter_none">Rien de ce type pour l’instant. Touchez à nouveau la tuile en surbrillance pour tout afficher.</string>
     <string name="activity_search_clear">Effacer la recherche</string>
     <string name="activity_search_hint">Rechercher reçus, noms, notes</string>
     <string name="activity_they_ask">%1$s demande</string>
