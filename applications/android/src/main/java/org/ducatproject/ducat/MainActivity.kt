@@ -734,20 +734,26 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
             for (c in store.all()) {
                 val thread = store.thread(c.personaHex)
                 val m = thread.lastOrNull { !it.outgoing && it.kind == 1 } ?: continue
-                // Not one that is already settled. `billseen_` only records
+                // Not one that is already settled. `billdone_` only records
                 // bills this prompt itself handled, so paying or declining
                 // one from the thread left it unmarked — and inside the
                 // five-minute freshness window the prompt then took the
                 // screen over to offer a bill that had just been paid.
                 if (Ledger.billAnswered(thread, m)) continue
-                val seen = billPrefs.getLong("billseen_${c.personaHex}", -1L)
+                // The bill itself, not "anything past this number": a seq
+                // is per card, and a till mints a card per sale, so a
+                // repeat customer's next bill arrives numbered *below* the
+                // one they paid last week — and never took the screen.
+                val seen = billPrefs.getString("billdone_${c.personaHex}", null)
                 // Fresh only: reinstalls and restores must not replay history
                 // as a stack of surprise take-overs. Both directions — the
                 // stamp is the asker's clock, and a bill stamped ahead of
                 // ours (fast clock, or worse) otherwise counts as "fresh"
                 // until its stamp passes, taking the screen over at every
                 // launch until then.
-                if (m.seq > seen && kotlin.math.abs(now - m.timestamp) < 300) {
+                if (seen != "${m.seq}:${m.timestamp}" &&
+                    kotlin.math.abs(now - m.timestamp) < 300
+                ) {
                     hit = c to m
                     break
                 }
@@ -758,7 +764,9 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
     }
     billPrompt?.let { (c, m) ->
         val markSeen = {
-            billPrefs.edit().putLong("billseen_${c.personaHex}", m.seq).apply()
+            billPrefs.edit()
+                .putString("billdone_${c.personaHex}", "${m.seq}:${m.timestamp}")
+                .apply()
             billPrompt = null
         }
         org.ducatproject.ducat.ui.BillScreen(

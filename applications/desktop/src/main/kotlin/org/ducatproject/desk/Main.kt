@@ -326,13 +326,13 @@ private fun runDesk(deskDir: File) = application {
                     val store = ContactStore(context)
                     contacts = store.all().sortedBy { it.displayName().lowercase() }
                     unread = contacts
-                        .filter { it.inSeq > store.chatSeen(it.personaHex) }
+                        .filter { it.inSeq > store.chatSeen(it) }
                         .map { it.personaHex }.toSet()
                     selected?.let { sel ->
                         thread = store.thread(sel)
                         // Watching the thread is reading it.
                         contacts.firstOrNull { it.personaHex == sel }
-                            ?.let { store.setChatSeen(sel, it.inSeq) }
+                            ?.let { store.setChatSeen(it) }
                     }
                 }
                 tick++
@@ -453,7 +453,7 @@ private fun runDesk(deskDir: File) = application {
                                         selected = c.personaHex
                                         val store = ContactStore(context)
                                         thread = store.thread(c.personaHex)
-                                        store.setChatSeen(c.personaHex, c.inSeq)
+                                        store.setChatSeen(c)
                                         unread = unread - c.personaHex
                                     },
                                     modifier = Modifier.fillMaxWidth(),

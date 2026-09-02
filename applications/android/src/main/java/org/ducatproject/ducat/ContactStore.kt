@@ -352,8 +352,8 @@ class ContactStore(context: Context) {
     fun forget(personaHex: String) { synchronized(lock) {
         val e = prefs.edit()
         listOf(
-            "thread_", "disappear_", "seen_", "usedtheirs_", "billseen_",
-            "pendingslot_", "slotok_", "slotfix_",
+            "thread_", "disappear_", "seen_", "seenlog_", "usedtheirs_", "billseen_",
+            "billdone_", "pendingslot_", "slotok_", "slotfix_",
         )
             .forEach { e.remove(it + personaHex) }
         prefs.all.keys.filter {
@@ -458,12 +458,45 @@ class ContactStore(context: Context) {
      * The last inbound sequence this user has *seen* — locally, for the
      * unread dot and the tab badge. Not §16.16's watermark: this never leaves
      * the device, so it needs no opt-in.
+     *
+     * Read against the log it was set on. A seq is per mailbox: claiming a
+     * fresh card from somebody already known restarts their numbering at 0
+     * (see [org.ducatproject.ducat.Mailbox.claimCard]'s `sameLog`), and a
+     * mark of 40 left by the old card meant the next forty messages on the
+     * new one arrived without a dot — the mark is never lowered, because
+     * the writer's copy of a contact can lag the poller's, and lowering it
+     * from a stale snapshot would re-flag a thread just read. A mark from
+     * another log is simply not this log's mark: nothing seen yet.
+     *
+     * A mark written before the log was recorded is trusted unless it is
+     * above the count — on one log the mark never passes the count, so
+     * that one was set on a card since replaced. Read as this log's, it
+     * hid every message on the new card until the thread happened to be
+     * opened (found on the upgrade itself: a fresh message, no dot). Read
+     * as nothing seen, the thread flags once and the visit records the
+     * log; the dot is the cheaper mistake.
      */
-    fun chatSeen(personaHex: String): Long = prefs.getLong("seen_$personaHex", 0L)
+    fun chatSeen(c: Contact): Long {
+        val mark = prefs.getLong("seen_${c.personaHex}", 0L)
+        val log = prefs.getString("seenlog_${c.personaHex}", null)
+        return when {
+            log == null -> if (mark > c.inSeq) 0L else mark
+            log != c.theirOutbox -> 0L
+            else -> mark
+        }
+    }
 
-    fun setChatSeen(personaHex: String, v: Long) {
-        if (v <= chatSeen(personaHex)) return
-        prefs.edit().putLong("seen_$personaHex", v).apply()
+    fun setChatSeen(c: Contact) {
+        // Same log, nothing new: leave it — a lagging snapshot must not
+        // lower the mark. Any other case is written, because what it
+        // records is the log as much as the count.
+        if (prefs.getString("seenlog_${c.personaHex}", null) == c.theirOutbox &&
+            c.inSeq <= prefs.getLong("seen_${c.personaHex}", 0L)
+        ) return
+        prefs.edit()
+            .putLong("seen_${c.personaHex}", c.inSeq)
+            .putString("seenlog_${c.personaHex}", c.theirOutbox)
+            .apply()
         bump()
     }
 
@@ -489,7 +522,7 @@ class ContactStore(context: Context) {
     }
 
     /** Conversations holding messages this user has not looked at. */
-    fun unreadThreads(): Int = all().count { it.chatVisible && it.inSeq > chatSeen(it.personaHex) }
+    fun unreadThreads(): Int = all().count { it.chatVisible && it.inSeq > chatSeen(it) }
 
     fun setTheirReadUpTo(personaHex: String, v: Long) { synchronized(lock) {
         val c = all().firstOrNull { it.personaHex == personaHex } ?: return

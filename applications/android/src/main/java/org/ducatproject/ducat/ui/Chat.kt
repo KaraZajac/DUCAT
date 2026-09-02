@@ -292,7 +292,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
         fresh?.let { c = it }
         // Looking at the thread is what "seen" means; the dot and the badge
         // clear the moment the eyes arrive, not when a reply goes out.
-        withContext(Dispatchers.IO) { store.setChatSeen(c.personaHex, c.inSeq) }
+        withContext(Dispatchers.IO) { store.setChatSeen(c) }
     }
 
     LaunchedEffect(messages.size) {

@@ -459,11 +459,36 @@ object Mailbox {
         // Against the record as it is *now*, not `prior`: the network round
         // trips above are seconds in which a poll can advance the inbound
         // counters, and writing the snapshot back rewound them the same way.
-        val c = store.merge(built.personaHex) { keepCounters(built, it) }
+        val c = mergeRebuilt(store, built)
         if (heldPayto != null && heldPayto != prior?.pendingAddress) {
             warnAddressHeld(context, c)
         }
         DucatLog.i(TAG, "claimed: their outbox=${theirs.outboxKey.take(24)}…")
+        return c
+    }
+
+    /**
+     * A rebuilt contact into the store: counters kept where the logs are
+     * the same ([keepCounters]), and the outbound bookkeeping dropped where
+     * ours is not. The slot-insurance watermark ([verifyLastWrites]) is a
+     * seq in the *old* outbox's numbering; carried across a re-claim it
+     * read the new log's first sends — as many as the old log had — as
+     * already confirmed, and the one repair that exists for a flood that
+     * died was silently off for exactly the messages after a fresh card.
+     * A pending slot is the old record's bytes under the old chain, and
+     * cannot be delivered into the new one.
+     */
+    private fun mergeRebuilt(store: ContactStore, built: Contact): Contact {
+        var newOutbox = false
+        val c = store.merge(built.personaHex) { cur ->
+            newOutbox = cur != null && cur.myOutbox != built.myOutbox
+            keepCounters(built, cur)
+        }
+        if (newOutbox) {
+            store.setLastSlotVerified(c.personaHex, -1L)
+            store.setSlotFixTries(c.personaHex, 0)
+            store.clearPendingSlot(c.personaHex)
+        }
         return c
     }
 
@@ -657,7 +682,7 @@ object Mailbox {
                     myRing = NEW_RING.toInt(),
                     owner = ownerHex,
                 )
-                store.merge(personaHex) { keepCounters(built, it) }
+                mergeRebuilt(store, built)
                 // A publish-purpose claim is a subscription (§16.20's
                 // scan-to-subscribe): enroll, and let Publications decide
                 // whether the newcomer gets the latest issue or a bill.

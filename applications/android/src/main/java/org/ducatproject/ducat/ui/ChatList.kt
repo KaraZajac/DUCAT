@@ -124,7 +124,7 @@ fun ChatListScreen(personaSecret: ByteArray?, onOpenChat: (Contact) -> Unit) {
                     .lastOrNull { it.kind !in CEREMONY_KINDS && it.groupId == null }
             }
             val unread = visible
-                .filter { it.inSeq > store.chatSeen(it.personaHex) }
+                .filter { it.inSeq > store.chatSeen(it) }
                 .map { it.personaHex }.toSet()
             Triple(
                 visible.sortedByDescending { lasts[it.personaHex]?.timestamp ?: 0L },
