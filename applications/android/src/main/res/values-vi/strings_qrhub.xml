@@ -17,4 +17,5 @@
     <string name="qrhub_showing_as">Đang hiển thị là %1$s</string>
     <string name="qrhub_issue_failed">Không công bố được mã của bạn. Kiểm tra mạng rồi thử lại.</string>
     <string name="qrhub_try_again">Thử lại</string>
+    <string name="qrhub_offline">Chưa kết nối — không ai lấy được mã này cho tới khi máy tham gia mạng.</string>
 </resources>

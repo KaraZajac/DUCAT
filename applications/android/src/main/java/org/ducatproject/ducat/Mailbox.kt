@@ -575,8 +575,19 @@ object Mailbox {
 
     private const val MISSES_BEFORE_RETIRING = 5
 
-    /** The network says it has no such record — not that it could not ask. */
-    private fun isMissing(e: Exception): Boolean =
+    /**
+     * The network says it has no such record — not that it could not ask.
+     *
+     * A third answer, between [isOffline] ("we have not joined yet") and a
+     * card being spent. No node this one can reach holds a copy: their phone
+     * cut the card and never published it, or has not been online since, or
+     * the record's TTL ran out. Not private, because the claim screens need
+     * the same distinction the sweep does — a card whose record cannot be
+     * produced was being called "broken, already claimed, or no longer
+     * valid", which is the sentence that makes somebody burn a good card to
+     * ask for another.
+     */
+    fun isMissing(e: Throwable): Boolean =
         e.message?.contains("Key not found", ignoreCase = true) == true
 
     /** Marks a fetch this device could not make room for. */
@@ -1825,6 +1836,7 @@ object Mailbox {
      */
     fun isOffline(e: Throwable) =
         e.message?.contains("TryAgain", ignoreCase = true) == true
+
 
     /** One reader per contact at a time — and each reader starts from the
      *  freshest counters. The push lane and the sweep may ask for the same

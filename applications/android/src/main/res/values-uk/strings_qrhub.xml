@@ -17,4 +17,5 @@
     <string name="qrhub_showing_as">Показано як %1$s</string>
     <string name="qrhub_issue_failed">Не вдалося опублікувати твій код. Перевір мережу й спробуй ще раз.</string>
     <string name="qrhub_try_again">Повторити</string>
+    <string name="qrhub_offline">Ще не під’єднано — ніхто не зможе взяти цей код, доки телефон не приєднається до мережі.</string>
 </resources>

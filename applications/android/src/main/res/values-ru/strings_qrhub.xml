@@ -17,4 +17,5 @@
     <string name="qrhub_showing_as">Показано как %1$s</string>
     <string name="qrhub_issue_failed">Не удалось опубликовать твой код. Проверь сеть и повтори попытку.</string>
     <string name="qrhub_try_again">Повторить</string>
+    <string name="qrhub_offline">Пока нет связи — никто не сможет взять этот код, пока телефон не подключится к сети.</string>
 </resources>

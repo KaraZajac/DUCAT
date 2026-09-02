@@ -17,4 +17,5 @@
     <string name="qrhub_showing_as">%1$sとして表示中</string>
     <string name="qrhub_issue_failed">コードを公開できませんでした。ネットワークを確認して、もう一度お試しください。</string>
     <string name="qrhub_try_again">もう一度</string>
+    <string name="qrhub_offline">まだ接続していません — この端末がネットワークに参加するまで、このコードは誰も受け取れません。</string>
 </resources>

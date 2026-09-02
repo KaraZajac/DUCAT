@@ -17,4 +17,5 @@
     <string name="qrhub_showing_as">Ditampilkan sebagai %1$s</string>
     <string name="qrhub_issue_failed">Kodemu tidak bisa diterbitkan. Periksa jaringan dan coba lagi.</string>
     <string name="qrhub_try_again">Coba lagi</string>
+    <string name="qrhub_offline">Belum terhubung — tidak ada yang bisa mengambil kode ini sampai ponsel ini bergabung ke jaringan.</string>
 </resources>

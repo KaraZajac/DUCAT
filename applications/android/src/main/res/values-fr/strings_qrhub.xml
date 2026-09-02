@@ -17,4 +17,5 @@
     <string name="qrhub_showing_as">Présenté comme %1$s</string>
     <string name="qrhub_issue_failed">Ton code n\'a pas pu être publié. Vérifie le réseau et réessaie.</string>
     <string name="qrhub_try_again">Réessayer</string>
+    <string name="qrhub_offline">Pas encore connecté — personne ne peut prendre ce code tant que ce téléphone n\'a pas rejoint le réseau.</string>
 </resources>

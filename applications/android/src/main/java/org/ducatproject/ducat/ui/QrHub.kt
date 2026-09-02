@@ -372,6 +372,25 @@ private fun MyCode(
     val profileV by ContactStore.changes.collectAsState()
     val name = remember(profileV) { MyProfile(context).name() }
     val pic = remember(profileV) { MyProfile(context).avatar() }
+    // **A code on a phone that has not joined is a code nobody can take.**
+    //
+    // The two records behind it are published to the network, and until
+    // this node is on it there is nothing out there to open: the person it
+    // is handed to gets "not readable yet" and no idea whose end the
+    // trouble is at. Caught on a phone whose node never attached — it held
+    // up a perfectly ordinary-looking QR for as long as anyone cared to
+    // scan it. Optimistic default, so a screen that is about to say
+    // "connected" does not flash a warning on the way there.
+    var joined by remember { mutableStateOf(true) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            joined = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                runCatching { uniffi.ducat_mobile.nodeStatus().publicInternetReady }
+                    .getOrDefault(false)
+            }
+            delay(3_000)
+        }
+    }
 
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
@@ -412,6 +431,15 @@ private fun MyCode(
             }
             else -> {
                 QrBlock(uri)
+                if (!joined) {
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        stringResource(R.string.qrhub_offline),
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    )
+                }
                 Spacer(Modifier.height(16.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     OutlinedButton(onClick = onCopy) {

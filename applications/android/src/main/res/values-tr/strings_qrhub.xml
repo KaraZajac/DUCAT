@@ -17,4 +17,5 @@
     <string name="qrhub_showing_as">%1$s olarak gösteriliyor</string>
     <string name="qrhub_issue_failed">Kodun yayımlanamadı. Ağı kontrol edip tekrar dene.</string>
     <string name="qrhub_try_again">Tekrar dene</string>
+    <string name="qrhub_offline">Henüz bağlı değil — bu telefon ağa katılana kadar bu kodu kimse alamaz.</string>
 </resources>

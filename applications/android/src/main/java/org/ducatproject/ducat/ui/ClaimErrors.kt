@@ -20,6 +20,9 @@ import org.ducatproject.ducat.saidWhy
  *  - **already used** — a card is good for one person (§7.5). Ask for another.
  *  - **not published yet** — the card is real but its details have not landed;
  *    a till mints one per sale and a customer can outrun the write. Scan again.
+ *  - **no such record** — the same answer from one step earlier: the card
+ *    names an inbox the network cannot produce, because the phone that cut
+ *    it has not published it or has not been online since.
  *  - anything else — the honest three maybes.
  *
  * [alreadyUsed] exists because one caller means something specific by it: a
@@ -37,6 +40,11 @@ fun claimFailureRes(
     // ("broken, already claimed, or no longer valid") and none of them is
     // true here — the card is fine, it is simply this device's.
     t is Mailbox.OwnCard -> R.string.claim_own_card
+    // Last, so a typed answer above always wins: this one is read off an
+    // error string, and "the network has no copy of that record" is the
+    // same story as details that have not landed — wait, or ask them to
+    // open the app. See Mailbox.isMissing.
+    Mailbox.isMissing(t) -> R.string.main_card_link_not_ready
     else -> R.string.main_card_link_failed_body
 }
 

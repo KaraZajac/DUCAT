@@ -17,4 +17,5 @@
     <string name="qrhub_showing_as">Getoond als %1$s</string>
     <string name="qrhub_issue_failed">Je code kon niet worden gepubliceerd. Controleer het netwerk en probeer het opnieuw.</string>
     <string name="qrhub_try_again">Opnieuw proberen</string>
+    <string name="qrhub_offline">Nog niet verbonden — niemand kan deze code aannemen tot deze telefoon zich bij het netwerk heeft gevoegd.</string>
 </resources>
