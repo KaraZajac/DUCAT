@@ -149,7 +149,16 @@ fun MoneroPanel() {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(
                         onClick = {
-                            store.setOwnUrl(ownUrl.ifBlank { null })
+                            // "192.168.1.10:38081" is how a node is written
+                            // everywhere else (monero-wallet-cli's --daemon-
+                            // address, most node lists) and the probe needs
+                            // a scheme: without one it posted to a URL ureq
+                            // could not parse and the panel said "bad url"
+                            // about a node that was up.
+                            val typed = ownUrl.trim()
+                            val url = if ("://" in typed) typed else "http://$typed"
+                            ownUrl = url
+                            store.setOwnUrl(url.ifBlank { null })
                             editing = false
                             refresh()
                         },

@@ -1303,7 +1303,11 @@ private fun HomeScreen(
     // Renting mode, three taps down a drawer. Somebody who sold a bicycle
     // from the Marketplace screen would have had nowhere to go to take it
     // down again, which is half a feature. Tapping this hands the app to that
-    // mode, the same as choosing it from the drawer.
+    // mode — as a look, not a shift: this row is on the wallet's own home
+    // screen, and it used to enter the mode the way the drawer does, which
+    // put the bound persona's hat on, gave Back nothing to return to (it
+    // left the app, and relaunching came back into Marketplace), and opened
+    // on Browse when the row had promised the listings.
     // One row per mode that holds any, because they are managed in two places
     // now: a bicycle for sale in Marketplace, a room in Renting. A single row
     // would have to guess which, and would be wrong for anybody who offers
@@ -1330,7 +1334,12 @@ private fun HomeScreen(
         ) {
             Row(
                 Modifier
-                    .clickable { org.ducatproject.ducat.ModeStore(context).set(m) }
+                    .clickable {
+                        org.ducatproject.ducat.ModeStore(context).set(m, browsing = true)
+                        // What you are offering sits second in all three
+                        // shells; the shell honours this after it composes.
+                        org.ducatproject.ducat.ui.shellTabRequest.value = 1
+                    }
                     .padding(14.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
