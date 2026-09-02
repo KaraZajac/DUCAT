@@ -219,7 +219,7 @@ fun HailCard(
      * three identical squares, and everything below — the sheet, the wait for
      * a driver, the offer, the ride — is this composable's business.
      */
-    sheetState: MutableState<Boolean> = remember { mutableStateOf(false) },
+    sheetState: MutableState<Boolean> = rememberSaveable { mutableStateOf(false) },
 ) {
     var sheetOpen by sheetState
     var driverFound by remember { mutableStateOf<org.ducatproject.ducat.Contact?>(null) }

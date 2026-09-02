@@ -50,6 +50,7 @@ fun ChatListScreen(
     personaSecret: ByteArray?,
     onOpenChat: (Contact) -> Unit,
     onOpenGroup: (String) -> Unit,
+    onNewGroup: () -> Unit,
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val store = remember { ContactStore(context) }
@@ -76,15 +77,6 @@ fun ChatListScreen(
     var confirm by remember { mutableStateOf<Contact?>(null) }
     // §16.19: the groups, above the pairwise threads they fan into.
     val groups = remember(version) { org.ducatproject.ducat.Groups.all(context) }
-    var newGroup by remember { mutableStateOf(false) }
-
-    if (newGroup) {
-        GroupCreateScreen(
-            onDone = { made -> newGroup = false; onOpenGroup(made) },
-            onCancel = { newGroup = false },
-        )
-        return
-    }
 
     // Most recent conversation first — the list's order *is* its meaning, and
     // "who did I talk to last" is the question it answers. Threads that have
@@ -314,7 +306,7 @@ fun ChatListScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(Modifier.weight(1f))
-                TextButton(onClick = { newGroup = true }) {
+                TextButton(onClick = onNewGroup) {
                     Text(stringResource(R.string.group_new))
                 }
             }
@@ -628,7 +620,10 @@ private fun NewChatSheet(
  */
 @Composable
 internal fun Avatar(name: String, picture: ByteArray? = null, size: Int = 40) {
-    val bmp = remember(picture) {
+    // Keyed by content: the bytes come out of the store as a fresh array on
+    // every read, and an array is only ever equal to itself, so keyed by the
+    // array this decoded every avatar on every store bump.
+    val bmp = remember(picture?.size, picture?.contentHashCode()) {
         picture?.let {
             SafeImage.fromBytes(it, SafeImage.AVATAR_PIXELS)
         }

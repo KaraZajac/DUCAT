@@ -509,7 +509,12 @@ private fun GroupBubble(
  * Making a group: a name, and members picked from *contacts only* — the list
  * is the constraint made visible, since fan-out can only ever reach people
  * this phone already holds. The disclosure fires on the group's first open.
+ *
+ * A screen of its own, like the group it makes: drawn inside the Chats tab
+ * it sat under the tab's bar with its own title beneath, and the back
+ * gesture — the tab shell's — left the half-filled form for Home.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupCreateScreen(onDone: (String) -> Unit, onCancel: () -> Unit) {
     val context = LocalContext.current
@@ -526,69 +531,98 @@ fun GroupCreateScreen(onDone: (String) -> Unit, onCancel: () -> Unit) {
         } else all
     }
     var name by rememberSaveable { mutableStateOf("") }
-    var picked by remember { mutableStateOf(setOf<String>()) }
+    // The picks ride the rotation with the name; a set does not fit a
+    // Bundle as itself, a list of its members does.
+    var picked by rememberSaveable(
+        stateSaver = androidx.compose.runtime.saveable.listSaver<Set<String>, String>(
+            save = { it.toList() }, restore = { it.toSet() },
+        ),
+    ) { mutableStateOf(setOf<String>()) }
     var busy by remember { mutableStateOf(false) }
 
-    Column(Modifier.fillMaxSize().padding(16.dp)) {
-        Text(stringResource(R.string.group_create_title), style = MaterialTheme.typography.titleLarge)
-        Spacer(Modifier.height(4.dp))
-        Text(
-            stringResource(R.string.group_create_note),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(Modifier.height(12.dp))
-        OutlinedTextField(
-            value = name,
-            onValueChange = { if (it.length <= 48) name = it },
-            label = { Text(stringResource(R.string.group_name_label)) },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Spacer(Modifier.height(12.dp))
-        LazyColumn(Modifier.weight(1f)) {
-            items(contacts, key = { it.personaHex }) { c ->
-                Row(
-                    Modifier.fillMaxWidth()
-                        .clickable {
-                            picked = if (c.personaHex in picked) picked - c.personaHex
-                            else picked + c.personaHex
-                        }
-                        .padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Checkbox(
-                        checked = c.personaHex in picked,
-                        onCheckedChange = null,
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(c.displayName())
-                }
-            }
-        }
-        Row {
-            OutlinedButton(onClick = onCancel, modifier = Modifier.weight(1f)) {
-                Text(stringResource(R.string.chat_cancel))
-            }
-            Spacer(Modifier.width(12.dp))
-            Button(
-                onClick = {
-                    busy = true
-                    scope.launch {
-                        val id = withContext(Dispatchers.IO) {
-                            runCatching {
-                                Groups.create(context, name.trim(), picked.toList())
-                            }.getOrNull()
-                        }
-                        busy = false
-                        id?.let { onDone(it.idHex) }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                ),
+                title = { Text(stringResource(R.string.group_create_title)) },
+                navigationIcon = {
+                    IconButton(onClick = onCancel) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.chat_back),
+                        )
                     }
                 },
-                enabled = !busy && name.isNotBlank() && picked.size >= 2,
-                modifier = Modifier.weight(1f),
-            ) {
-                if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                else Text(stringResource(R.string.group_create_button))
+            )
+        },
+    ) { padding ->
+        // A pick that outlived its contact (deleted while the form was in
+        // the bundle) is not a member; the button counts what can be seated.
+        val chosen = picked.filter { p -> contacts.any { it.personaHex == p } }
+        Column(
+            Modifier.fillMaxSize().padding(padding)
+                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+        ) {
+            Text(
+                stringResource(R.string.group_create_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(12.dp))
+            OutlinedTextField(
+                value = name,
+                onValueChange = { if (it.length <= 48) name = it },
+                label = { Text(stringResource(R.string.group_name_label)) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(12.dp))
+            LazyColumn(Modifier.weight(1f)) {
+                items(contacts, key = { it.personaHex }) { c ->
+                    Row(
+                        Modifier.fillMaxWidth()
+                            .clickable {
+                                picked = if (c.personaHex in picked) picked - c.personaHex
+                                else picked + c.personaHex
+                            }
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Checkbox(
+                            checked = c.personaHex in picked,
+                            onCheckedChange = null,
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(c.displayName())
+                    }
+                }
+            }
+            Row {
+                OutlinedButton(onClick = onCancel, modifier = Modifier.weight(1f)) {
+                    Text(stringResource(R.string.chat_cancel))
+                }
+                Spacer(Modifier.width(12.dp))
+                Button(
+                    onClick = {
+                        busy = true
+                        scope.launch {
+                            val id = withContext(Dispatchers.IO) {
+                                runCatching {
+                                    Groups.create(context, name.trim(), chosen)
+                                }.getOrNull()
+                            }
+                            busy = false
+                            id?.let { onDone(it.idHex) }
+                        }
+                    },
+                    enabled = !busy && name.isNotBlank() && chosen.size >= 2,
+                    modifier = Modifier.weight(1f),
+                ) {
+                    if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                    else Text(stringResource(R.string.group_create_button))
+                }
             }
         }
     }

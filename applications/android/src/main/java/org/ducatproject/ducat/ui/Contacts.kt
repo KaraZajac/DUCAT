@@ -178,9 +178,17 @@ internal fun ShareCardSheet(personaSecret: ByteArray?, onDismiss: () -> Unit) {
 @Composable
 internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: ContactStore) {
     val clipboard = LocalClipboardManager.current
-    var text by remember { mutableStateOf("") }
-    var scanned by remember { mutableStateOf<uniffi.ducat_mobile.ScannedCard?>(null) }
-    var petname by remember { mutableStateOf("") }
+    // The sheet itself outlives a rotation (its host keeps it in the bundle);
+    // what was typed into it did not, so it came back open and blank, and a
+    // card just scanned came back as the paste box.
+    var text by rememberSaveable { mutableStateOf("") }
+    // The card as the text it was read from, not the parsed object: the text
+    // fits a Bundle and the parse is cheap enough to redo on the far side.
+    var cardRaw by rememberSaveable { mutableStateOf<String?>(null) }
+    val scanned = remember(cardRaw) {
+        cardRaw?.let { runCatching { readContactCard(it) }.getOrNull() }
+    }
+    var petname by rememberSaveable { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
 
     // Nothing to introduce ourselves with, and about to introduce ourselves.
@@ -208,7 +216,7 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
                 runCatching { readContactCard(raw) }
                     .onSuccess {
                         if (it.expired) error = context.getString(R.string.contacts_card_expired_ask_new)
-                        else { scanned = it; petname = it.assertedName ?: "" }
+                        else { cardRaw = raw; petname = it.assertedName ?: "" }
                     }
                     .onFailure { error = context.getString(R.string.contacts_not_a_card); text = raw }
             },
@@ -249,7 +257,7 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
                                 if (it.expired) {
                                     error = context.getString(R.string.contacts_card_expired_ask_them)
                                 } else {
-                                    scanned = it
+                                    cardRaw = text
                                     petname = it.assertedName ?: ""
                                 }
                             }
@@ -259,7 +267,7 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
                     modifier = Modifier.fillMaxWidth(),
                 ) { Text(stringResource(R.string.contacts_read_card)) }
             } else {
-                val s = scanned!!
+                val s = scanned
                 // §16.9 requires the asserted name be shown as unverified. A
                 // card that arrived through a messaging app was authenticated by
                 // *that app*, and the UI must not launder that into a claim

@@ -482,14 +482,27 @@ object Groups {
     }
 
     /** Groups with something unlooked-at, for the tab badge. */
-    fun unreadGroups(context: Context): Int {
+    fun unreadGroups(context: Context): Int = unreadGroupIds(context).size
+
+    /**
+     * The same groups, each under the hat that is in it ([mineIn]) — the
+     * drawer's per-persona chips, which have to add up to the tab badge.
+     */
+    fun unreadGroupsByOwner(context: Context): Map<String, Int> {
+        val unread = unreadGroupIds(context)
+        if (unread.isEmpty()) return emptyMap()
+        return all(context).filter { it.idHex in unread }
+            .groupingBy { mineIn(context, it) }.eachCount()
+    }
+
+    private fun unreadGroupIds(context: Context): Set<String> {
         val groups = all(context)
-        if (groups.isEmpty()) return 0
+        if (groups.isEmpty()) return emptySet()
         val store = ContactStore(context)
         val threads = HashMap<String, List<StoredMessage>>()
-        return groups.count { g ->
+        return groups.filter { g ->
             val rows = merge(context, g) { hex -> threads.getOrPut(hex) { store.thread(hex) } }
             unread(seenMarks(context, g.idHex), highWater(context, rows))
-        }
+        }.mapTo(HashSet()) { it.idHex }
     }
 }

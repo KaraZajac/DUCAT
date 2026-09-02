@@ -146,6 +146,25 @@ fun main() {
     check(contact(jordan).chatVisible) { "MARKSTEST_FAIL their line did not bring the conversation back" }
     check(store.unreadThreads() == 1) { "MARKSTEST_FAIL their line came back without its dot" }
 
+    // 7) Deleting the conversation with Jordan takes Jordan's words to us,
+    //    not Jordan's words to the crew: those are shown in the group and
+    //    are the group's to delete.
+    val crewBefore = Groups.thread(ctx, gidHex).size
+    check(crewBefore > 0) { "MARKSTEST_FAIL no crew rows to keep" }
+    store.deleteThread(jordan)
+    check(store.thread(jordan).none { it.groupId == null }) { "MARKSTEST_FAIL a deleted conversation kept a direct line" }
+    check(Groups.thread(ctx, gidHex).size == crewBefore) {
+        "MARKSTEST_FAIL deleting the conversation took the crew's rows with it " +
+            "(${Groups.thread(ctx, gidHex).size} of $crewBefore left)"
+    }
+    // And a thread with nothing but direct lines is gone outright.
+    store.deleteThread(sam)
+    check(store.thread(sam).none { it.groupId == null }) { "MARKSTEST_FAIL Sam's direct lines survived the delete" }
+    // Sam's crew rows, minus the one deleted in step 4, are still the crew's.
+    check(Groups.thread(ctx, gidHex).size == crewBefore) {
+        "MARKSTEST_FAIL deleting Sam's conversation took Sam's crew rows"
+    }
+
     println(
         "MARKSTEST_OK group=${Groups.get(ctx, gidHex)?.name} " +
             "marks=${Groups.seenMarks(ctx, gidHex).mapKeys { it.key.take(4) }} " +

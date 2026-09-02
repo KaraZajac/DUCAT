@@ -191,10 +191,13 @@ fun main() {
         gidHex
     }
     render("chatlist") {
-        org.ducatproject.ducat.ui.ChatListScreen(personaSecret = null, onOpenChat = {}, onOpenGroup = {})
+        org.ducatproject.ducat.ui.ChatListScreen(personaSecret = null, onOpenChat = {}, onOpenGroup = {}, onNewGroup = {})
     }
     render("groupchat") {
         org.ducatproject.ducat.ui.GroupChatScreen(idHex = groupHex, onBack = {})
+    }
+    render("groupnew") {
+        org.ducatproject.ducat.ui.GroupCreateScreen(onDone = {}, onCancel = {})
     }
     render("scanner") {
         org.ducatproject.ducat.ui.QrScannerContent("Scan a card", onResult = {})
@@ -400,7 +403,7 @@ fun main() {
         }
     }
     render("chatlist-priced") {
-        org.ducatproject.ducat.ui.ChatListScreen(personaSecret = null, onOpenChat = {}, onOpenGroup = {})
+        org.ducatproject.ducat.ui.ChatListScreen(personaSecret = null, onOpenChat = {}, onOpenGroup = {}, onNewGroup = {})
     }
     // Activity, with money in it.
     //

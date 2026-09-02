@@ -349,6 +349,9 @@ private sealed interface Overlay {
      *  headers stacked on a chat, and the back gesture, which the tab shell
      *  owns, left it for Home rather than for the list it came from. */
     data class Group(val idHex: String) : Overlay
+    /** The form that makes one — the same story as [Group], with a half-filled
+     *  form lost to the back gesture instead of a conversation. */
+    data object GroupNew : Overlay
     /** [jumpToBackup] lands on the backup card rather than the top of a long
      *  settings screen — the nudge that sent you there was about backups. */
     data class Drawer(val section: Section, val jumpToBackup: Boolean = false) : Overlay
@@ -383,6 +386,7 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                     is Overlay.None -> ""
                     is Overlay.Chat -> "chat:${it.contact.personaHex}"
                     is Overlay.Group -> "group:${it.idHex}"
+                    is Overlay.GroupNew -> "groupnew"
                     is Overlay.Drawer -> "drawer:${it.section.name}"
                 }
             },
@@ -394,6 +398,7 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                     s.startsWith("group:") -> s.removePrefix("group:")
                         .takeIf { Groups.get(context, it) != null }
                         ?.let { Overlay.Group(it) } ?: Overlay.None
+                    s == "groupnew" -> Overlay.GroupNew
                     s.startsWith("drawer:") -> runCatching {
                         Overlay.Drawer(Section.valueOf(s.removePrefix("drawer:")))
                     }.getOrDefault(Overlay.None)
@@ -898,6 +903,13 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                 org.ducatproject.ducat.ui.GroupChatScreen(o.idHex) { overlay = Overlay.None }
                 return@ModalNavigationDrawer
             }
+            is Overlay.GroupNew -> {
+                org.ducatproject.ducat.ui.GroupCreateScreen(
+                    onDone = { overlay = Overlay.Group(it) },
+                    onCancel = { overlay = Overlay.None },
+                )
+                return@ModalNavigationDrawer
+            }
             is Overlay.Drawer -> {
                 Scaffold(
                     topBar = {
@@ -1185,6 +1197,7 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                             persona,
                             onOpenChat = { overlay = Overlay.Chat(it) },
                             onOpenGroup = { overlay = Overlay.Group(it) },
+                            onNewGroup = { overlay = Overlay.GroupNew },
                         )
                     }
                 }
@@ -1255,7 +1268,9 @@ private fun HomeScreen(
     // looking for a car or a place is the same shape of moment — things a
     // person does occasionally, not jobs they run. The modes are for whoever
     // *has* a car or a room to let (§16.18).
-    val hailSheet = remember { mutableStateOf(false) }
+    // Saveable, or a rotation closed the sheet over a form whose every field
+    // had been taught to survive one.
+    val hailSheet = rememberSaveable { mutableStateOf(false) }
     Spacer(Modifier.height(12.dp))
     org.ducatproject.ducat.ui.HomeTiles(
         onHail = { hailSheet.value = true },

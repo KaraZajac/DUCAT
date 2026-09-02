@@ -323,9 +323,17 @@ class ContactStore(context: Context) {
      * sequence their reader already accepted, and their next message is
      * refused as out of order. Deleting a thread removes what this device
      * shows, never where the protocol stands.
+     *
+     * A group's lines are not this conversation's: they ride this thread
+     * because §16.19 fans a group out over its members' pairwise logs, but
+     * they are shown in the group and are the group's to delete. "Every
+     * message with Sam is deleted" used to take Sam's half of the ladder
+     * crew with it, silently, from a screen that had not mentioned the crew.
      */
     fun deleteThread(personaHex: String) { synchronized(lock) {
-        prefs.edit().remove("thread_$personaHex").apply()
+        val kept = thread(personaHex).filter { it.groupId != null }
+        if (kept.isEmpty()) prefs.edit().remove("thread_$personaHex").apply()
+        else writeThread(personaHex, kept)
         bump()
     } }
 

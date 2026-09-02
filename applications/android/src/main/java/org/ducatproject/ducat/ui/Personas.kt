@@ -100,10 +100,16 @@ fun PersonaSwitcher(modifier: Modifier = Modifier) {
     val waiting by produceState(emptyMap<String, Int>(), version) {
         value = withContext(Dispatchers.IO) {
             val contacts = ContactStore(context)
-            contacts.all()
+            val threads = contacts.all()
                 .filter { it.chatVisible && it.inSeq > contacts.chatSeen(it) }
                 .groupingBy { store.ownerHexOf(it) }
                 .eachCount()
+            // Plus the groups, under the hat that sits in each — the tab
+            // badge counts them, so the chips have to.
+            val groups = org.ducatproject.ducat.Groups.unreadGroupsByOwner(context)
+            (threads.keys + groups.keys).associateWith {
+                (threads[it] ?: 0) + (groups[it] ?: 0)
+            }
         }
     }
     val unreadLabel = stringResource(R.string.chatlist_unread)
