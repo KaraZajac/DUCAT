@@ -125,8 +125,18 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
     }
 
     val listState = rememberLazyListState()
-    LaunchedEffect(rows.size) {
-        if (rows.isNotEmpty()) listState.animateScrollToItem(rows.size - 1)
+    // The bubbles, not the rows: a reaction or a withdrawal landing is a
+    // decoration on something already on screen, not a reason to pull
+    // the reader to the bottom — and the index has to be one the list has.
+    LaunchedEffect(shownRows.size) {
+        if (shownRows.isNotEmpty()) listState.animateScrollToItem(shownRows.size - 1)
+    }
+    // The keyboard opening changes no count, so the last bubble ended up
+    // behind it until it was dismissed — the pairwise screen's lesson: the
+    // IME inset is what tracks "the visible area just shrank".
+    val imeBottom = WindowInsets.ime.getBottom(androidx.compose.ui.platform.LocalDensity.current)
+    LaunchedEffect(imeBottom) {
+        if (shownRows.isNotEmpty()) listState.animateScrollToItem(shownRows.size - 1)
     }
 
     Column(Modifier.fillMaxSize()) {
@@ -297,8 +307,11 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
                 )
                 Spacer(Modifier.width(8.dp))
                 val (rs, rq) = target.split(":").let { it[0] to it[1].toLong() }
+                // The same reading the bubbles give a quote: withdrawn words
+                // stay withdrawn in the composer too.
                 Text(
-                    rows.firstOrNull { it.senderHex == rs && it.message.groupSeq == rq }
+                    if ((rs to rq) in unsent) stringResource(R.string.chat_unsent)
+                    else rows.firstOrNull { it.senderHex == rs && it.message.groupSeq == rq }
                         ?.message?.body ?: stringResource(R.string.chat_reply_to_gone),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
