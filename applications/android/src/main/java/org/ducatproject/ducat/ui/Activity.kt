@@ -289,6 +289,9 @@ fun ActivityScreen() {
                     val send = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
                         type = if (json) "application/json" else "text/csv"
                         putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                        clipData = android.content.ClipData.newUri(
+                            context.contentResolver, f.name, uri,
+                        )
                         addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     }
                     context.startActivity(

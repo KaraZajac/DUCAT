@@ -211,12 +211,30 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
                     val send = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
                         type = mime
                         putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                        // See the note in BackupSettings.share: the sheet
+                        // builds its preview from ClipData, and the grant is
+                        // unambiguous only when it is there.
+                        clipData = android.content.ClipData.newUri(
+                            ctx.contentResolver, file.name, uri,
+                        )
                         addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     }
                     runCatching {
                         ctx.startActivity(
                             android.content.Intent.createChooser(send, file.name),
                         )
+                    }.onFailure {
+                        // Neither a viewer nor anything to hand it to. The
+                        // tap did nothing at all before — on a phone with a
+                        // bare launcher that is every issue in the library,
+                        // and the reader is left tapping Open at a screen
+                        // that never changes.
+                        DucatLog.w("Library", "nothing can open ${file.name}: ${it.message}")
+                        android.widget.Toast.makeText(
+                            ctx,
+                            ctx.getString(R.string.library_no_viewer),
+                            android.widget.Toast.LENGTH_LONG,
+                        ).show()
                     }
                 }
             }

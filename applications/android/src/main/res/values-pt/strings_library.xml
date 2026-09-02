@@ -27,4 +27,5 @@
     </plurals>
     <string name="library_open">Abrir</string>
     <string name="library_queued">Na fila</string>
+    <string name="library_no_viewer">Nada neste telefone consegue abrir esse ficheiro. Partilha-o com uma app que consiga, ou copia-o para fora do telefone.</string>
 </resources>

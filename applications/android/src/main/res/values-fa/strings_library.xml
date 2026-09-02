@@ -27,4 +27,5 @@
     </plurals>
     <string name="library_open">باز کردن</string>
     <string name="library_queued">در صف</string>
+    <string name="library_no_viewer">هیچ برنامه‌ای روی این گوشی نمی‌تواند این فایل را باز کند. آن را با برنامه‌ای که می‌تواند به اشتراک بگذارید یا از گوشی کپی کنید.</string>
 </resources>

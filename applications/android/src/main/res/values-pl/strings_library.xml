@@ -29,4 +29,5 @@
     </plurals>
     <string name="library_open">Otwórz</string>
     <string name="library_queued">W kolejce</string>
+    <string name="library_no_viewer">Nic na tym telefonie nie otworzy tego pliku. Udostępnij go aplikacji, która potrafi, albo skopiuj poza telefon.</string>
 </resources>

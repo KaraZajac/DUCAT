@@ -27,4 +27,5 @@
     </plurals>
     <string name="library_open">Ouvrir</string>
     <string name="library_queued">En file d\'attente</string>
+    <string name="library_no_viewer">Rien sur ce téléphone ne peut ouvrir ce fichier. Partagez-le avec une application qui le peut, ou copiez-le hors du téléphone.</string>
 </resources>

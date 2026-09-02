@@ -26,4 +26,5 @@
     </plurals>
     <string name="library_open">開く</string>
     <string name="library_queued">待機中</string>
+    <string name="library_no_viewer">この端末にはこのファイルを開けるものがありません。開けるアプリに共有するか、端末の外にコピーしてください。</string>
 </resources>

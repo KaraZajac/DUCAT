@@ -26,4 +26,5 @@
     </plurals>
     <string name="library_open">เปิด</string>
     <string name="library_queued">อยู่ในคิว</string>
+    <string name="library_no_viewer">ไม่มีแอปในเครื่องนี้ที่เปิดไฟล์นั้นได้ แชร์ไปยังแอปที่เปิดได้ หรือคัดลอกออกจากเครื่อง</string>
 </resources>

@@ -364,6 +364,15 @@ private fun share(context: Context, file: File) {
     val send = Intent(Intent.ACTION_SEND).apply {
         type = "application/octet-stream"
         putExtra(Intent.EXTRA_STREAM, uri)
+        // **With ClipData, not only the extra.** Android grants the read
+        // through whichever of the two it finds, and the share sheet builds
+        // its preview from ClipData alone — without it the receiving app can
+        // be handed a URI it may not open, over a sheet showing a blank tile.
+        // The phone says so in the log every time ("call Intent#setClipData
+        // to ensure that the sharesheet is given permission"), which is where
+        // this was found: opening a publication on a phone with no viewer for
+        // it, watching the sheet come up empty.
+        clipData = android.content.ClipData.newUri(context.contentResolver, file.name, uri)
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
     context.startActivity(

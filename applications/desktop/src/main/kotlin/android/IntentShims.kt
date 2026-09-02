@@ -18,6 +18,17 @@ class Intent(val action: String? = null, val data: android.net.Uri? = null) {
         if (name == EXTRA_STREAM) stream = value
     }
 
+    /**
+     * The clip a share intent carries.
+     *
+     * Android reads the URI grant from the extra *or* this, and builds the
+     * share sheet's preview from this alone — so the phone sets both, and
+     * the shared code that does it has to compile here too. The desk hands
+     * a file to a window rather than to a chooser, so nothing reads it back;
+     * it exists so the two clients can keep one implementation.
+     */
+    var clipData: ClipData? = null
+
     /** The file a share intent carries, if it carries one. */
     val streamUri: android.net.Uri? get() = stream ?: data
 

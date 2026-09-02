@@ -27,4 +27,5 @@
     </plurals>
     <string name="library_open">Openen</string>
     <string name="library_queued">In de wachtrij</string>
+    <string name="library_no_viewer">Niets op deze telefoon kan dat bestand openen. Deel het met een app die dat wel kan, of kopieer het van de telefoon.</string>
 </resources>

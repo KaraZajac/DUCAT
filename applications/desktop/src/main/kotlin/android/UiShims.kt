@@ -6,11 +6,21 @@
 
 package android.content
 
-class ClipData private constructor(val text: String) {
+class ClipData private constructor(
+    val text: String,
+    /** A clip can carry a file instead of words — see [Intent.clipData],
+     *  which the phone sets so a share sheet can preview what it is about
+     *  to hand over. Nothing here reads it; the desk shares to a window. */
+    val uri: android.net.Uri? = null,
+) {
     companion object {
         @JvmStatic
         fun newPlainText(label: CharSequence?, text: CharSequence?): ClipData =
             ClipData(text?.toString().orEmpty())
+
+        @JvmStatic
+        fun newUri(resolver: Any?, label: CharSequence?, uri: android.net.Uri?): ClipData =
+            ClipData(label?.toString().orEmpty(), uri)
     }
 }
 

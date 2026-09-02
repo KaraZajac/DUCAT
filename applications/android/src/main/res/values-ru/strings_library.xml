@@ -29,4 +29,5 @@
     </plurals>
     <string name="library_open">Открыть</string>
     <string name="library_queued">В очереди</string>
+    <string name="library_no_viewer">На этом телефоне нечем открыть этот файл. Поделитесь им с приложением, которое умеет, или скопируйте с телефона.</string>
 </resources>

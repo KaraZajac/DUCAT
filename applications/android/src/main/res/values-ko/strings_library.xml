@@ -26,4 +26,5 @@
     </plurals>
     <string name="library_open">열기</string>
     <string name="library_queued">대기 중</string>
+    <string name="library_no_viewer">이 휴대폰에는 그 파일을 열 수 있는 앱이 없어요. 열 수 있는 앱으로 공유하거나 휴대폰 밖으로 복사하세요.</string>
 </resources>

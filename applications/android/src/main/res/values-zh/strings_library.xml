@@ -26,4 +26,5 @@
     </plurals>
     <string name="library_open">打开</string>
     <string name="library_queued">排队中</string>
+    <string name="library_no_viewer">这台手机上没有能打开该文件的应用。分享给能打开它的应用，或把它复制出手机。</string>
 </resources>

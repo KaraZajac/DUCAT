@@ -27,4 +27,5 @@
     </plurals>
     <string name="library_open">खोलें</string>
     <string name="library_queued">कतार में</string>
+    <string name="library_no_viewer">इस फ़ोन पर उस फ़ाइल को खोलने वाला कुछ नहीं है। इसे किसी सक्षम ऐप से साझा करें, या फ़ोन से कॉपी कर लें।</string>
 </resources>

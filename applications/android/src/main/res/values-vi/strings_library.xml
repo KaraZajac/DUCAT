@@ -26,4 +26,5 @@
     </plurals>
     <string name="library_open">Mở</string>
     <string name="library_queued">Trong hàng đợi</string>
+    <string name="library_no_viewer">Không có ứng dụng nào trên máy mở được tệp đó. Hãy chia sẻ tới ứng dụng mở được, hoặc chép ra khỏi máy.</string>
 </resources>
