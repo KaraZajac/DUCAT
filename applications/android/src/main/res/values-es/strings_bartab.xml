@@ -25,12 +25,14 @@
     <string name="bartab_back">Atrás</string>
     <string name="bartab_bill_cancelled_msg">Esa cuenta de %1$s está cancelada — no hay nada que pagar.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · la cuenta va en %3$s</string>
+    <string name="bartab_discard_notice">Cuenta descartada — no hay nada que pagar.</string>
     <string name="bartab_remove_line">Quitar</string>
     <string name="bartab_settle_bill">Cerrar — cobrar %1$s</string>
     <string name="bartab_settle_hint">Una cuenta detallada en tu conversación con %1$s. Puede pagar desde cualquier parte — el hilo no se cierra cuando se va.</string>
     <string name="bartab_discard_tab">Descartar cuenta</string>
     <string name="bartab_discard_title">¿Descartar esta cuenta?</string>
     <string name="bartab_discard_body">La cuenta y todo lo anotado en ella se borran de este teléfono. No se envía ningún cobro, y esto no se puede deshacer.</string>
+    <string name="bartab_discard_body_told">La cuenta y todo lo anotado en ella se borran de este teléfono. No se envía ningún cobro — se les avisa de que no hay nada que pagar — y esto no se puede deshacer.</string>
     <string name="bartab_discard_confirm">Descartar</string>
     <string name="bartab_keep_tab">Conservar cuenta</string>
     <string name="bartab_billed_hint">Cuenta enviada. El recibo les llega solo cuando cae el pago. Si se saldó de otra forma, indícalo aquí:</string>

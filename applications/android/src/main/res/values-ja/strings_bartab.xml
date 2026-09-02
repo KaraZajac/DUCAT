@@ -24,12 +24,14 @@
     <string name="bartab_back">戻る</string>
     <string name="bartab_bill_cancelled_msg">%1$sの請求はキャンセルされました — 支払いは不要です。</string>
     <string name="bartab_drink_notice">%1$s — %2$s · ツケ合計 %3$s</string>
+    <string name="bartab_discard_notice">ツケは取り消されました — 支払いは不要です。</string>
     <string name="bartab_remove_line">削除</string>
     <string name="bartab_settle_bill">精算 — 請求 %1$s</string>
     <string name="bartab_settle_hint">明細付きの請求を1通、%1$sとの会話へ送ります。相手はどこからでも支払えます — 店を出てもスレッドは閉じません。</string>
     <string name="bartab_discard_tab">ツケを破棄</string>
     <string name="bartab_discard_title">このツケを破棄しますか？</string>
     <string name="bartab_discard_body">ツケと、そこに付けた注文はすべてこの端末から削除されます。請求は送られず、元に戻すこともできません。</string>
+    <string name="bartab_discard_body_told">ツケと、そこに付けた注文はすべてこの端末から削除されます。請求は送られず — 支払いは不要だと相手に伝わります — 元に戻すこともできません。</string>
     <string name="bartab_discard_confirm">破棄</string>
     <string name="bartab_keep_tab">ツケを残す</string>
     <string name="bartab_billed_hint">請求済みです。支払いが着金するとレシートは自動で相手へ届きます。別の方法で精算した場合は、ここで指定してください:</string>

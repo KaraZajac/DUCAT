@@ -24,12 +24,14 @@
     <string name="bartab_back">กลับ</string>
     <string name="bartab_bill_cancelled_msg">บิล %1$s นั้นถูกยกเลิกแล้ว — ไม่ต้องชำระ</string>
     <string name="bartab_drink_notice">%1$s — %2$s · ยอดบิลตอนนี้ %3$s</string>
+    <string name="bartab_discard_notice">ยกเลิกบิลแล้ว — ไม่ต้องชำระ</string>
     <string name="bartab_remove_line">ลบออก</string>
     <string name="bartab_settle_bill">เช็คบิล — เรียกเก็บ %1$s</string>
     <string name="bartab_settle_hint">บิลแยกรายการหนึ่งใบส่งเข้าบทสนทนากับ %1$s เขาจ่ายจากที่ไหนก็ได้ — บทสนทนาไม่ปิดแม้เขาจะกลับไปแล้ว</string>
     <string name="bartab_discard_tab">ทิ้งบิล</string>
     <string name="bartab_discard_title">ทิ้งบิลนี้?</string>
     <string name="bartab_discard_body">บิลและทุกรายการที่ลงไว้จะถูกลบจากโทรศัพท์เครื่องนี้ จะไม่มีการส่งบิลเรียกเก็บ และย้อนกลับไม่ได้</string>
+    <string name="bartab_discard_body_told">บิลและทุกรายการที่ลงไว้จะถูกลบจากโทรศัพท์เครื่องนี้ จะไม่มีการส่งบิลเรียกเก็บ — ลูกค้าจะได้รับแจ้งว่าไม่ต้องชำระ — และย้อนกลับไม่ได้</string>
     <string name="bartab_discard_confirm">ทิ้ง</string>
     <string name="bartab_keep_tab">เก็บบิลไว้</string>
     <string name="bartab_billed_hint">เรียกเก็บแล้ว ใบเสร็จจะส่งถึงเขาเองเมื่อเงินเข้า หากชำระด้วยวิธีอื่นไปแล้ว แจ้งไว้ที่นี่:</string>

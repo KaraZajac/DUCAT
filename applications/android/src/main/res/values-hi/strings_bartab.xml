@@ -25,12 +25,14 @@
     <string name="bartab_back">वापस</string>
     <string name="bartab_bill_cancelled_msg">%1$s का वह बिल रद्द है — कुछ नहीं चुकाना।</string>
     <string name="bartab_drink_notice">%1$s — %2$s · टैब अब %3$s</string>
+    <string name="bartab_discard_notice">टैब हटा दिया गया — कुछ नहीं चुकाना।</string>
     <string name="bartab_remove_line">हटाएँ</string>
     <string name="bartab_settle_bill">चुकता करें — बिल %1$s</string>
     <string name="bartab_settle_hint">%1$s के साथ आपकी बातचीत में एक ब्योरेवार बिल। वे कहीं से भी चुका सकते हैं — उनके जाने पर थ्रेड बंद नहीं होता।</string>
     <string name="bartab_discard_tab">टैब मिटाएँ</string>
     <string name="bartab_discard_title">यह टैब मिटा दें?</string>
     <string name="bartab_discard_body">टैब और उस पर चढ़ी हर चीज़ इस फ़ोन से मिट जाती है। कोई बिल नहीं भेजा जाता, और यह वापस नहीं हो सकता।</string>
+    <string name="bartab_discard_body_told">टैब और उस पर चढ़ी हर चीज़ इस फ़ोन से मिट जाती है। कोई बिल नहीं भेजा जाता — उन्हें बता दिया जाता है कि कुछ नहीं चुकाना — और यह वापस नहीं हो सकता।</string>
     <string name="bartab_discard_confirm">मिटाएँ</string>
     <string name="bartab_keep_tab">टैब रखें</string>
     <string name="bartab_billed_hint">बिल भेज दिया। भुगतान पहुँचते ही रसीद अपने-आप उन तक जाएगी। अगर हिसाब किसी और तरीके से चुकता हुआ हो, तो यहाँ बताएँ:</string>

@@ -25,12 +25,14 @@
     <string name="bartab_back">Voltar</string>
     <string name="bartab_bill_cancelled_msg">Aquela conta de %1$s foi cancelada — nada a pagar.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · comanda agora em %3$s</string>
+    <string name="bartab_discard_notice">Comanda descartada — nada a pagar.</string>
     <string name="bartab_remove_line">Remover</string>
     <string name="bartab_settle_bill">Fechar — conta %1$s</string>
     <string name="bartab_settle_hint">Uma conta detalhada na sua conversa com %1$s. A pessoa pode pagar de onde estiver — a conversa não fecha quando ela vai embora.</string>
     <string name="bartab_discard_tab">Descartar comanda</string>
     <string name="bartab_discard_title">Descartar esta comanda?</string>
     <string name="bartab_discard_body">A comanda e tudo o que foi lançado nela são apagados deste telefone. Nenhuma conta é enviada, e isso não pode ser desfeito.</string>
+    <string name="bartab_discard_body_told">A comanda e tudo o que foi lançado nela são apagados deste telefone. Nenhuma conta é enviada — a pessoa é avisada de que não há nada a pagar — e isso não pode ser desfeito.</string>
     <string name="bartab_discard_confirm">Descartar</string>
     <string name="bartab_keep_tab">Manter comanda</string>
     <string name="bartab_billed_hint">Conta enviada. O recibo vai para a pessoa sozinho quando o pagamento chegar. Se foi acertado de outro jeito, diga aqui:</string>

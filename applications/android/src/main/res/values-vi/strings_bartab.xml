@@ -24,12 +24,14 @@
     <string name="bartab_back">Quay lại</string>
     <string name="bartab_bill_cancelled_msg">Hóa đơn %1$s đó đã hủy — không cần trả gì.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · tab hiện %3$s</string>
+    <string name="bartab_discard_notice">Tab đã hủy — không cần trả gì.</string>
     <string name="bartab_remove_line">Xóa</string>
     <string name="bartab_settle_bill">Tất toán — hóa đơn %1$s</string>
     <string name="bartab_settle_hint">Một hóa đơn liệt kê từng món gửi vào cuộc trò chuyện với %1$s. Họ có thể trả từ bất cứ đâu — luồng trò chuyện không đóng khi họ rời đi.</string>
     <string name="bartab_discard_tab">Bỏ tab</string>
     <string name="bartab_discard_title">Bỏ tab này?</string>
     <string name="bartab_discard_body">Tab và mọi thứ đã ghi trên đó sẽ bị xóa khỏi điện thoại này. Không hóa đơn nào được gửi, và việc này không hoàn tác được.</string>
+    <string name="bartab_discard_body_told">Tab và mọi thứ đã ghi trên đó sẽ bị xóa khỏi điện thoại này. Không hóa đơn nào được gửi — họ được báo là không cần trả gì — và việc này không hoàn tác được.</string>
     <string name="bartab_discard_confirm">Bỏ</string>
     <string name="bartab_keep_tab">Giữ tab</string>
     <string name="bartab_billed_hint">Đã gửi hóa đơn. Biên nhận sẽ tự gửi cho khách khi tiền về. Nếu đã thanh toán theo cách khác, hãy ghi nhận ở đây:</string>

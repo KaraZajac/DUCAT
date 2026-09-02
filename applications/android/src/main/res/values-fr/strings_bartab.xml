@@ -25,12 +25,14 @@
     <string name="bartab_back">Retour</string>
     <string name="bartab_bill_cancelled_msg">Cette addition de %1$s est annulée — rien à payer.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · ardoise à %3$s</string>
+    <string name="bartab_discard_notice">Ardoise abandonnée — rien à payer.</string>
     <string name="bartab_remove_line">Retirer</string>
     <string name="bartab_settle_bill">Clôturer — addition %1$s</string>
     <string name="bartab_settle_hint">Une addition détaillée dans ta conversation avec %1$s. Le paiement peut se faire de n\'importe où — le fil ne se ferme pas quand la personne s\'en va.</string>
     <string name="bartab_discard_tab">Jeter l\'ardoise</string>
     <string name="bartab_discard_title">Jeter cette ardoise ?</string>
     <string name="bartab_discard_body">L\'ardoise et tout ce qui y a été inscrit sont supprimés de ce téléphone. Aucune addition n\'est envoyée, et c\'est irréversible.</string>
+    <string name="bartab_discard_body_told">L\'ardoise et tout ce qui y a été inscrit sont supprimés de ce téléphone. Aucune addition n\'est envoyée — la personne est prévenue qu\'il n\'y a rien à payer — et c\'est irréversible.</string>
     <string name="bartab_discard_confirm">Jeter</string>
     <string name="bartab_keep_tab">Garder l\'ardoise</string>
     <string name="bartab_billed_hint">Facturée. Le reçu leur parvient tout seul quand le paiement arrive. Si elle a été réglée autrement, indique-le ici :</string>

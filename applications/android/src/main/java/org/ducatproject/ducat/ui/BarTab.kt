@@ -39,6 +39,30 @@ private const val TAG = "BarTab"
 private val CLOSED_STATES = setOf("paid", "paid_oob", "cancelled")
 
 /**
+ * Word to the customer that outlives the screen saying it. The tab detail
+ * leaves in the same tap that discards a tab, and a notice launched in that
+ * screen's own scope was cancelled before a worker had picked it up. One
+ * scope for the file, as Hail keeps for its board writes.
+ */
+private val tabScope = kotlinx.coroutines.CoroutineScope(
+    kotlinx.coroutines.SupervisorJob() + Dispatchers.IO,
+)
+
+/**
+ * A plain text to the tab's customer, best-effort: the till must not stall
+ * on the network between two orders, so a notice that fails is logged and
+ * the next one goes anyway. Off the caller's scope for the reason above.
+ */
+private fun tellCustomer(context: android.content.Context, personaHex: String, text: String) {
+    tabScope.launch {
+        runCatching {
+            val c = ContactStore(context).all().first { it.personaHex == personaHex }
+            Mailbox.send(context, c, text)
+        }.onFailure { DucatLog.w(TAG, "tab notice: ${it.message}") }
+    }
+}
+
+/**
  * Whether one of this tab's own messages has left the phone.
  *
  * A send commits its row before the network (Mailbox.sendLocked), so a row
@@ -581,23 +605,16 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                 // Tell them, so the tab is never a surprise at close. A text
                 // message, deliberately — §15.11 forbids per-line payment
                 // requests, because five confirm screens for one evening is
-                // five where one was owed. Best-effort: a notice that fails
-                // must not block the next order.
-                scope.launch(Dispatchers.IO) {
-                    runCatching {
-                        val c = ContactStore(context).all()
-                            .first { it.personaHex == tab.personaHex }
-                        Mailbox.send(
-                            context, c,
-                            context.getString(
-                                R.string.bartab_drink_notice,
-                                d,
-                                Amounts.show(context, a).primary,
-                                Amounts.show(context, updated.totalPxmr).primary,
-                            ),
-                        )
-                    }.onFailure { DucatLog.w(TAG, "drink notice: ${it.message}") }
-                }
+                // five where one was owed.
+                tellCustomer(
+                    context, tab.personaHex,
+                    context.getString(
+                        R.string.bartab_drink_notice,
+                        d,
+                        Amounts.show(context, a).primary,
+                        Amounts.show(context, updated.totalPxmr).primary,
+                    ),
+                )
             }
             ItemPicker { name, pxmr -> addLine(name, pxmr) }
             PosAddLine { d, a -> addLine(d, a) }
@@ -701,11 +718,42 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                         onDismissRequest = { confirmDiscard = false },
                         title = { Text(stringResource(R.string.bartab_discard_title)) },
                         text = {
-                            Text(stringResource(R.string.bartab_discard_body))
+                            Text(
+                                stringResource(
+                                    if (tab.lines.isEmpty()) R.string.bartab_discard_body
+                                    else R.string.bartab_discard_body_told,
+                                ),
+                            )
                         },
                         confirmButton = {
                             TextButton(onClick = {
-                                confirmDiscard = false; store.delete(tab.id); onBack()
+                                confirmDiscard = false
+                                // The customer heard about every drink as it
+                                // was poured (addLine) and heard nothing about
+                                // the tab going away: their thread ended on
+                                // "tab now 12.00" and they waited for a bill
+                                // that was never coming — or, tapped on the
+                                // list by mistake from their sofa, wondered
+                                // about the espresso they never had. Told
+                                // whenever something was said: a line still
+                                // on the tab, or a notice for one struck off
+                                // since. A tab nobody rang anything on said
+                                // nothing and says nothing now. The words are
+                                // resolved here, on the screen's own context:
+                                // the app's locale rides the activity.
+                                val hex = tab.personaHex
+                                val rang = tab.lines.isNotEmpty()
+                                val since = tab.openedAt / 1000
+                                val notice = context.getString(R.string.bartab_discard_notice)
+                                store.delete(tab.id)
+                                tabScope.launch {
+                                    val told = rang || runCatching {
+                                        ContactStore(context).thread(hex)
+                                            .any { it.outgoing && it.kind == 0 && it.timestamp >= since }
+                                    }.getOrDefault(false)
+                                    if (told) tellCustomer(context, hex, notice)
+                                }
+                                onBack()
                             }) { Text(stringResource(R.string.bartab_discard_confirm), color = MaterialTheme.colorScheme.error) }
                         },
                         dismissButton = {

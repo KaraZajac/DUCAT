@@ -25,12 +25,14 @@
     <string name="bartab_back">Terug</string>
     <string name="bartab_bill_cancelled_msg">Die rekening van %1$s is geannuleerd — er hoeft niets betaald te worden.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · tab nu %3$s</string>
+    <string name="bartab_discard_notice">Tab weggegooid — er hoeft niets betaald te worden.</string>
     <string name="bartab_remove_line">Verwijderen</string>
     <string name="bartab_settle_bill">Afrekenen — rekening %1$s</string>
     <string name="bartab_settle_hint">Eén gespecificeerde rekening in je gesprek met %1$s. Ze kunnen overal vandaan betalen — het gesprek sluit niet als ze weggaan.</string>
     <string name="bartab_discard_tab">Tab weggooien</string>
     <string name="bartab_discard_title">Deze tab weggooien?</string>
     <string name="bartab_discard_body">De tab en alles wat erop is aangeslagen worden van deze telefoon verwijderd. Er wordt geen rekening gestuurd, en dit kan niet ongedaan worden gemaakt.</string>
+    <string name="bartab_discard_body_told">De tab en alles wat erop is aangeslagen worden van deze telefoon verwijderd. Er wordt geen rekening gestuurd — ze horen dat er niets betaald hoeft te worden — en dit kan niet ongedaan worden gemaakt.</string>
     <string name="bartab_discard_confirm">Weggooien</string>
     <string name="bartab_keep_tab">Tab houden</string>
     <string name="bartab_billed_hint">Rekening gestuurd. De bon gaat vanzelf naar ze zodra de betaling binnenkomt. Is er op een andere manier afgerekend, geef dat dan hier aan:</string>

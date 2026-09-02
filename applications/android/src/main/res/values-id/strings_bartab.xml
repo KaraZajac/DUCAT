@@ -24,12 +24,14 @@
     <string name="bartab_back">Kembali</string>
     <string name="bartab_bill_cancelled_msg">Tagihan %1$s itu dibatalkan — tidak ada yang perlu dibayar.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · bon sekarang %3$s</string>
+    <string name="bartab_discard_notice">Bon dibuang — tidak ada yang perlu dibayar.</string>
     <string name="bartab_remove_line">Hapus</string>
     <string name="bartab_settle_bill">Tutup — tagih %1$s</string>
     <string name="bartab_settle_hint">Satu tagihan terperinci masuk ke percakapanmu dengan %1$s. Mereka bisa membayar dari mana saja — utasnya tidak tertutup saat mereka pergi.</string>
     <string name="bartab_discard_tab">Buang bon</string>
     <string name="bartab_discard_title">Buang bon ini?</string>
     <string name="bartab_discard_body">Bon dan semua yang tercatat di dalamnya dihapus dari ponsel ini. Tidak ada tagihan yang dikirim, dan ini tidak bisa dibatalkan.</string>
+    <string name="bartab_discard_body_told">Bon dan semua yang tercatat di dalamnya dihapus dari ponsel ini. Tidak ada tagihan yang dikirim — mereka diberi tahu tidak ada yang perlu dibayar — dan ini tidak bisa dibatalkan.</string>
     <string name="bartab_discard_confirm">Buang</string>
     <string name="bartab_keep_tab">Simpan bon</string>
     <string name="bartab_billed_hint">Sudah ditagih. Struk terkirim sendiri ke mereka saat pembayaran masuk. Kalau diselesaikan dengan cara lain, catat di sini:</string>

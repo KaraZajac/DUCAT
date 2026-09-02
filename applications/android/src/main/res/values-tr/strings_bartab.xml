@@ -25,12 +25,14 @@
     <string name="bartab_back">Geri</string>
     <string name="bartab_bill_cancelled_msg">%1$s tutarındaki o hesap iptal edildi — ödenecek bir şey yok.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · adisyon şimdi %3$s</string>
+    <string name="bartab_discard_notice">Adisyon iptal edildi — ödenecek bir şey yok.</string>
     <string name="bartab_remove_line">Kaldır</string>
     <string name="bartab_settle_bill">Kapat — hesap %1$s</string>
     <string name="bartab_settle_hint">%1$s ile sohbetine tek bir dökümlü hesap düşer. İstedikleri yerden ödeyebilirler — onlar çıkınca konuşma kapanmaz.</string>
     <string name="bartab_discard_tab">Adisyonu sil</string>
     <string name="bartab_discard_title">Bu adisyon silinsin mi?</string>
     <string name="bartab_discard_body">Adisyon ve üzerine yazılan her şey bu telefondan silinir. Hesap gönderilmez ve bu geri alınamaz.</string>
+    <string name="bartab_discard_body_told">Adisyon ve üzerine yazılan her şey bu telefondan silinir. Hesap gönderilmez — ödenecek bir şey olmadığı kendilerine bildirilir — ve bu geri alınamaz.</string>
     <string name="bartab_discard_confirm">Sil</string>
     <string name="bartab_keep_tab">Adisyonu tut</string>
     <string name="bartab_billed_hint">Hesap gönderildi. Ödeme düşünce makbuz kendiliğinden onlara gider. Başka bir yolla ödendiyse burada belirt:</string>

@@ -24,12 +24,14 @@
     <string name="bartab_back">뒤로</string>
     <string name="bartab_bill_cancelled_msg">%1$s 계산서는 취소됐어요 — 결제할 것 없어요.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · 현재 탭 %3$s</string>
+    <string name="bartab_discard_notice">탭이 취소됐어요 — 결제할 것 없어요.</string>
     <string name="bartab_remove_line">삭제</string>
     <string name="bartab_settle_bill">정산 — 계산서 %1$s</string>
     <string name="bartab_settle_hint">%1$s님과의 대화로 항목별 계산서 하나가 들어가요. 어디서든 결제할 수 있고, 손님이 떠나도 대화는 닫히지 않아요.</string>
     <string name="bartab_discard_tab">탭 버리기</string>
     <string name="bartab_discard_title">이 탭을 버릴까요?</string>
     <string name="bartab_discard_body">탭과 거기에 적힌 모든 항목이 이 휴대폰에서 삭제돼요. 계산서는 보내지 않고, 되돌릴 수 없어요.</string>
+    <string name="bartab_discard_body_told">탭과 거기에 적힌 모든 항목이 이 휴대폰에서 삭제돼요. 계산서는 보내지 않고 — 결제할 것이 없다고 알려드려요 — 되돌릴 수 없어요.</string>
     <string name="bartab_discard_confirm">버리기</string>
     <string name="bartab_keep_tab">탭 유지</string>
     <string name="bartab_billed_hint">계산서를 보냈어요. 결제가 도착하면 영수증이 저절로 가요. 다른 방법으로 정산했다면 여기서 알려 주세요:</string>

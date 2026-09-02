@@ -25,12 +25,14 @@
     <string name="bartab_back">Indietro</string>
     <string name="bartab_bill_cancelled_msg">Quel conto da %1$s è annullato — non c\'è niente da pagare.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · conto ora a %3$s</string>
+    <string name="bartab_discard_notice">Conto scartato — non c\'è niente da pagare.</string>
     <string name="bartab_remove_line">Rimuovi</string>
     <string name="bartab_settle_bill">Chiudi — conto %1$s</string>
     <string name="bartab_settle_hint">Un unico conto dettagliato nella tua conversazione con %1$s. Possono pagare da qualsiasi posto — il filo non si chiude quando se ne vanno.</string>
     <string name="bartab_discard_tab">Elimina conto</string>
     <string name="bartab_discard_title">Eliminare questo conto?</string>
     <string name="bartab_discard_body">Il conto e tutto ciò che vi è stato battuto vengono cancellati da questo telefono. Nessun conto viene inviato, e non si può annullare.</string>
+    <string name="bartab_discard_body_told">Il conto e tutto ciò che vi è stato battuto vengono cancellati da questo telefono. Nessun conto viene inviato — viene avvisato che non c\'è niente da pagare — e non si può annullare.</string>
     <string name="bartab_discard_confirm">Elimina</string>
     <string name="bartab_keep_tab">Tieni il conto</string>
     <string name="bartab_billed_hint">Conto presentato. La ricevuta gli arriva da sola quando il pagamento va a segno. Se è stato saldato in altro modo, segnalalo qui:</string>

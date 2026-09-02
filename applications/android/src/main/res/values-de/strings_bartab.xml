@@ -25,12 +25,14 @@
     <string name="bartab_back">Zurück</string>
     <string name="bartab_bill_cancelled_msg">Die Rechnung über %1$s ist storniert — nichts zu zahlen.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · Deckel jetzt %3$s</string>
+    <string name="bartab_discard_notice">Deckel verworfen — nichts zu zahlen.</string>
     <string name="bartab_remove_line">Entfernen</string>
     <string name="bartab_settle_bill">Abrechnen — Rechnung %1$s</string>
     <string name="bartab_settle_hint">Eine aufgeschlüsselte Rechnung in deine Unterhaltung mit %1$s. Bezahlt werden kann von überall — der Thread schließt nicht, wenn der Gast geht.</string>
     <string name="bartab_discard_tab">Deckel verwerfen</string>
     <string name="bartab_discard_title">Diesen Deckel verwerfen?</string>
     <string name="bartab_discard_body">Der Deckel und alles, was darauf gebongt wurde, werden von diesem Telefon gelöscht. Es geht keine Rechnung raus, und rückgängig machen lässt es sich nicht.</string>
+    <string name="bartab_discard_body_told">Der Deckel und alles, was darauf gebongt wurde, werden von diesem Telefon gelöscht. Es geht keine Rechnung raus — sie erfahren, dass nichts zu zahlen ist — und rückgängig machen lässt es sich nicht.</string>
     <string name="bartab_discard_confirm">Verwerfen</string>
     <string name="bartab_keep_tab">Deckel behalten</string>
     <string name="bartab_billed_hint">Abgerechnet. Die Quittung geht von selbst raus, sobald die Zahlung eintrifft. Wurde anders beglichen? Dann sag es hier:</string>

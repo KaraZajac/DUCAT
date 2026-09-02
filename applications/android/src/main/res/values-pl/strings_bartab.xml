@@ -27,12 +27,14 @@
     <string name="bartab_back">Wstecz</string>
     <string name="bartab_bill_cancelled_msg">To rozliczenie na %1$s jest anulowane — nie ma nic do zapłaty.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · rachunek: %3$s</string>
+    <string name="bartab_discard_notice">Rachunek odrzucony — nie ma nic do zapłaty.</string>
     <string name="bartab_remove_line">Usuń</string>
     <string name="bartab_settle_bill">Zamknij — rozliczenie na %1$s</string>
     <string name="bartab_settle_hint">Jedno rozliczenie z listą pozycji trafia do rozmowy z %1$s. Mogą zapłacić skądkolwiek — wątek nie zamyka się, gdy wyjdą.</string>
     <string name="bartab_discard_tab">Odrzuć rachunek</string>
     <string name="bartab_discard_title">Odrzucić ten rachunek?</string>
     <string name="bartab_discard_body">Rachunek i wszystko na nim nabite zostaną usunięte z tego telefonu. Rozliczenie nie zostanie wysłane i nie da się tego cofnąć.</string>
+    <string name="bartab_discard_body_told">Rachunek i wszystko na nim nabite zostaną usunięte z tego telefonu. Rozliczenie nie zostanie wysłane — gość dowie się, że nie ma nic do zapłaty — i nie da się tego cofnąć.</string>
     <string name="bartab_discard_confirm">Odrzuć</string>
     <string name="bartab_keep_tab">Zachowaj rachunek</string>
     <string name="bartab_billed_hint">Rozliczenie wysłane. Paragon trafi do nich sam, gdy płatność dojdzie. Jeśli zapłacono inaczej, zaznacz to tutaj:</string>

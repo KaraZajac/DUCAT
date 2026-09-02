@@ -25,12 +25,14 @@
     <string name="bartab_back">بازگشت</string>
     <string name="bartab_bill_cancelled_msg">آن صورت‌حساب %1$s لغو شد — چیزی برای پرداخت نیست.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · حساب الان %3$s</string>
+    <string name="bartab_discard_notice">حساب کنار گذاشته شد — چیزی برای پرداخت نیست.</string>
     <string name="bartab_remove_line">حذف</string>
     <string name="bartab_settle_bill">تسویه — صورت‌حساب %1$s</string>
     <string name="bartab_settle_hint">یک صورت‌حساب ریز به گفتگویت با %1$s می‌رود. از هر جایی می‌توانند پرداخت کنند — با رفتن‌شان گفتگو بسته نمی‌شود.</string>
     <string name="bartab_discard_tab">دور انداختن حساب</string>
     <string name="bartab_discard_title">این حساب دور انداخته شود؟</string>
     <string name="bartab_discard_body">حساب و هر چه رویش ثبت شده از این گوشی حذف می‌شود. صورت‌حسابی فرستاده نمی‌شود و این کار برگشت‌پذیر نیست.</string>
+    <string name="bartab_discard_body_told">حساب و هر چه رویش ثبت شده از این گوشی حذف می‌شود. صورت‌حسابی فرستاده نمی‌شود — به او خبر داده می‌شود که چیزی برای پرداخت نیست — و این کار برگشت‌پذیر نیست.</string>
     <string name="bartab_discard_confirm">دور بینداز</string>
     <string name="bartab_keep_tab">نگه داشتن حساب</string>
     <string name="bartab_billed_hint">صورت‌حساب رفت. رسید بعد از نشستن پرداخت خودش می‌رود. اگر جور دیگری تسویه شد، همین‌جا بگو:</string>

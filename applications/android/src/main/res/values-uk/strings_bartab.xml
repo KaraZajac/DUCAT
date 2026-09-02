@@ -27,12 +27,14 @@
     <string name="bartab_back">Назад</string>
     <string name="bartab_bill_cancelled_msg">Той рахунок на %1$s скасовано — платити нічого.</string>
     <string name="bartab_drink_notice">%1$s — %2$s · на рахунку вже %3$s</string>
+    <string name="bartab_discard_notice">Рахунок закрито без оплати — платити нічого.</string>
     <string name="bartab_remove_line">Прибрати</string>
     <string name="bartab_settle_bill">Розрахувати — рахунок %1$s</string>
     <string name="bartab_settle_hint">Один рахунок із переліком позицій у твою розмову з %1$s. Сплатити можна звідки завгодно — розмова не закривається, коли вони йдуть.</string>
     <string name="bartab_discard_tab">Викинути рахунок</string>
     <string name="bartab_discard_title">Викинути цей рахунок?</string>
     <string name="bartab_discard_body">Рахунок і все, що на нього записано, буде видалено з цього телефона. Нічого не надсилається, і цю дію не скасувати.</string>
+    <string name="bartab_discard_body_told">Рахунок і все, що на нього записано, буде видалено з цього телефона. Рахунок до оплати не надсилається — гостю повідомлять, що платити нічого, — і цю дію не скасувати.</string>
     <string name="bartab_discard_confirm">Викинути</string>
     <string name="bartab_keep_tab">Залишити</string>
     <string name="bartab_billed_hint">Виставлено. Чек надішлеться їм сам, коли платіж надійде. Якщо розрахувалися якось інакше — познач це тут:</string>
