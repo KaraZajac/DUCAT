@@ -562,7 +562,9 @@ private fun AmountStep(
         }
     }
 
-    val tipPxmr = remember(tipTyped, fiatLive, rate) {
+    val tipPxmr = remember(tipTyped, fiatLive, rate, target) {
+        // Only a contact can be told about a tip; see the field below.
+        if (target !is PayTarget.ToContact) return@remember 0L
         val v = moneyText(tipTyped).toBigDecimalOrNull() ?: return@remember 0L
         val xmr = if (fiatLive) {
             v.divide(BigDecimal.valueOf(rate!!), 12, java.math.RoundingMode.DOWN)
@@ -686,23 +688,34 @@ private fun AmountStep(
                 Text(it, style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Spacer(Modifier.height(14.dp))
-            OutlinedTextField(
-                value = tipTyped,
-                onValueChange = { tipTyped = it.filter { c -> Amounts.isNumberChar(c) } },
-                label = { Text(stringResource(R.string.pay_add_tip, if (fiatLive) cur else "XMR")) },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                modifier = Modifier.fillMaxWidth(),
-            )
-            if (tipPxmr > 0) {
-                Spacer(Modifier.height(6.dp))
-                val t = Amounts.show(context, pxmr ?: 0L)
-                Text(
-                    stringResource(R.string.pay_total_with_tip, t.primary) +
-                        (t.secondary?.let { " · $it" } ?: ""),
-                    style = MaterialTheme.typography.titleMedium,
+            // A tip only where the payee can be told about it. On a bill
+            // from a contact the PAYMENT_SENT notice names what was sent,
+            // and their reconciler matches the bill plus the tip by it. A
+            // `monero:` code names an address and an exact amount and
+            // nothing else can reach it: the kiosk attributes an order by
+            // that amount down to its sub-cent tag (moneroUri), so a tipped
+            // payment landed in the wallet and the order sat at Awaiting
+            // for good — the very hazard that docstring describes, offered
+            // as a field.
+            if (target is PayTarget.ToContact) {
+                Spacer(Modifier.height(14.dp))
+                OutlinedTextField(
+                    value = tipTyped,
+                    onValueChange = { tipTyped = it.filter { c -> Amounts.isNumberChar(c) } },
+                    label = { Text(stringResource(R.string.pay_add_tip, if (fiatLive) cur else "XMR")) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.fillMaxWidth(),
                 )
+                if (tipPxmr > 0) {
+                    Spacer(Modifier.height(6.dp))
+                    val t = Amounts.show(context, pxmr ?: 0L)
+                    Text(
+                        stringResource(R.string.pay_total_with_tip, t.primary) +
+                            (t.secondary?.let { " · $it" } ?: ""),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                }
             }
         }
         Row(verticalAlignment = Alignment.CenterVertically) {

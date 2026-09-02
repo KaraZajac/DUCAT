@@ -1040,7 +1040,10 @@ private fun ContactsAdminSection(onOpenChat: (Contact) -> Unit) {
             confirmButton = {
                 TextButton(onClick = {
                     store.forget(c.personaHex)
-                    contacts = store.all()
+                    // Still the worn hat's list — this was the whole book,
+                    // every other persona's contacts included, and only
+                    // the store's bump re-scoping it kept that off screen.
+                    contacts = scopedAll()
                     confirm = null
                 }) {
                     Text(stringResource(R.string.drawer_forget_confirm),
