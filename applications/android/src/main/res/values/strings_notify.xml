@@ -30,4 +30,8 @@
     <string name="notify_escrow_setup">%1$s is setting up the escrow.</string>
     <string name="notify_escrow_settle">%1$s wants to settle up.</string>
     <string name="notify_escrow_called_off">%1$s called it off.</string>
+    <string name="notify_ride_accepted_title">The ride is on</string>
+    <string name="notify_ride_accepted_body">%1$s accepted your offer. They are waiting for you.</string>
+    <string name="notify_unbonded_title">The ride is not bonded</string>
+    <string name="notify_unbonded_body">You agreed the ride with %1$s, but the fare could not be put in escrow. It stands on your word to each other — sort it out in the chat.</string>
 </resources>

@@ -30,4 +30,8 @@
     <string name="notify_escrow_called_off">%1$s a annulé.</string>
     <string name="notify_card_contested_title">Ce code a reçu deux réponses</string>
     <string name="notify_card_contested_body">Plusieurs réponses y ont été écrites : impossible de savoir laquelle venait de la bonne personne. Personne n\'a été ajouté. Affichez un nouveau code pour réessayer.</string>
+    <string name="notify_ride_accepted_title">La course est confirmée</string>
+    <string name="notify_ride_accepted_body">%1$s a accepté votre offre et vous attend.</string>
+    <string name="notify_unbonded_title">Course sans dépôt</string>
+    <string name="notify_unbonded_body">Vous avez convenu de la course avec %1$s, mais le prix n\'a pas pu être mis sous séquestre. Elle repose sur votre parole — réglez cela dans la discussion.</string>
 </resources>

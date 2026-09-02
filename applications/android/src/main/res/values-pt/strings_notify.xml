@@ -30,4 +30,8 @@
     <string name="notify_escrow_called_off">%1$s cancelou o acordo.</string>
     <string name="notify_card_contested_title">Esse código foi respondido duas vezes</string>
     <string name="notify_card_contested_body">Mais de uma resposta foi escrita nele, então não há como saber qual era a pessoa que você queria. Ninguém foi adicionado. Mostre um código novo para tentar de novo.</string>
+    <string name="notify_ride_accepted_title">A viagem está confirmada</string>
+    <string name="notify_ride_accepted_body">%1$s aceitou a tua oferta e está à tua espera.</string>
+    <string name="notify_unbonded_title">Viagem sem depósito</string>
+    <string name="notify_unbonded_body">Combinaste a viagem com %1$s, mas o preço não pôde ficar em depósito. Fica na palavra de ambos — resolvam no chat.</string>
 </resources>

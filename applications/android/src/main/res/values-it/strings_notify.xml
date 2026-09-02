@@ -30,4 +30,8 @@
     <string name="notify_escrow_called_off">%1$s ha annullato.</string>
     <string name="notify_card_contested_title">Quel codice ha ricevuto due risposte</string>
     <string name="notify_card_contested_body">Ci è stata scritta più di una risposta, quindi non si può sapere quale fosse la persona giusta. Non è stato aggiunto nessuno. Mostra un nuovo codice per riprovare.</string>
+    <string name="notify_ride_accepted_title">La corsa è confermata</string>
+    <string name="notify_ride_accepted_body">%1$s ha accettato la tua offerta e ti sta aspettando.</string>
+    <string name="notify_unbonded_title">Corsa senza deposito</string>
+    <string name="notify_unbonded_body">Hai concordato la corsa con %1$s, ma la tariffa non è stata messa in deposito. Regge sulla parola di entrambi: chiaritelo in chat.</string>
 </resources>

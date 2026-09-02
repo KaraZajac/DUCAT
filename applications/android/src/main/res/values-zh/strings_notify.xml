@@ -30,4 +30,8 @@
     <string name="notify_escrow_called_off">%1$s 取消了这笔交易。</string>
     <string name="notify_card_contested_title">那个码被回应了两次</string>
     <string name="notify_card_contested_body">上面被写入了不止一个回应，无法判断哪一个来自你要找的人。没有添加任何人。请出示一个新的码再试一次。</string>
+    <string name="notify_ride_accepted_title">行程已确认</string>
+    <string name="notify_ride_accepted_body">%1$s接受了你的报价，正在等你。</string>
+    <string name="notify_unbonded_title">此行程没有押金</string>
+    <string name="notify_unbonded_body">你和%1$s谈好了这趟行程，但车费没能进入托管。现在只靠彼此的承诺 — 在聊天里说清楚。</string>
 </resources>

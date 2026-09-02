@@ -30,4 +30,8 @@
     <string name="notify_escrow_called_off">%1$s ألغى الاتفاق.</string>
     <string name="notify_card_contested_title">رُدَّ على ذلك الرمز مرتين</string>
     <string name="notify_card_contested_body">كُتب فيه أكثر من ردّ، فلا سبيل لمعرفة أيّها من الشخص الذي قصدته. لم يُضَف أحد. اعرض رمزًا جديدًا للمحاولة مرة أخرى.</string>
+    <string name="notify_ride_accepted_title">الرحلة مؤكدة</string>
+    <string name="notify_ride_accepted_body">قبل %1$s عرضك، وهم بانتظارك.</string>
+    <string name="notify_unbonded_title">الرحلة بلا ضمان</string>
+    <string name="notify_unbonded_body">اتفقت على الرحلة مع %1$s، لكن تعذّر وضع الأجرة في الضمان. الاتفاق قائم على كلمة كل منكما — رتّبا ذلك في المحادثة.</string>
 </resources>

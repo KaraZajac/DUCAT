@@ -30,4 +30,8 @@
     <string name="notify_escrow_called_off">%1$s отменил сделку.</string>
     <string name="notify_card_contested_title">На этот код ответили дважды</string>
     <string name="notify_card_contested_body">В него записали больше одного ответа, поэтому нельзя понять, который из них от нужного человека. Никто не добавлен. Покажите новый код, чтобы попробовать снова.</string>
+    <string name="notify_ride_accepted_title">Поездка подтверждена</string>
+    <string name="notify_ride_accepted_body">%1$s принял ваше предложение и ждёт вас.</string>
+    <string name="notify_unbonded_title">Поездка без залога</string>
+    <string name="notify_unbonded_body">Вы договорились о поездке с %1$s, но плату не удалось поместить в эскроу. Всё держится на слове — обсудите это в переписке.</string>
 </resources>

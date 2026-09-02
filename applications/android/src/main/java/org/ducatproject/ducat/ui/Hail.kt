@@ -755,6 +755,21 @@ fun HailCard(
                             // The yes went; the money did not. The ride
                             // stands on the chat, but a rider who hears
                             // nothing assumes the bond is in.
+                            //
+                            // **And the screen is the wrong place to say it
+                            // once.** This is not a broken state — §15.12
+                            // calls a hail without an escrow the unbonded
+                            // mutual promise it always was — but it is a
+                            // different deal from the one they thought they
+                            // were making, and the only telling was a line
+                            // on a screen they are about to leave for the
+                            // chat. It goes to the shade as well, where it
+                            // waits to be read. Not a retry: `start` sends
+                            // round 0 before it writes anything down, so a
+                            // second attempt is a second ceremony on the
+                            // driver's phone rather than a resumption of
+                            // this one.
+                            org.ducatproject.ducat.notifyUnbonded(context, d.displayName())
                             withContext(Dispatchers.Main) {
                                 error = moneyFailure(context, it, fallback = R.string.hail_escrow_failed)
                             }

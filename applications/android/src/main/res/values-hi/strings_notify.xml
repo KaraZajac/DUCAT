@@ -30,4 +30,8 @@
     <string name="notify_escrow_called_off">%1$s ने सौदा रद्द कर दिया।</string>
     <string name="notify_card_contested_title">उस कोड का दो बार जवाब आया</string>
     <string name="notify_card_contested_body">उसमें एक से ज़्यादा जवाब लिखे गए, इसलिए यह बताना मुमकिन नहीं कि कौन-सा आपके इच्छित व्यक्ति का था। किसी को नहीं जोड़ा गया। दोबारा कोशिश करने के लिए नया कोड दिखाएँ।</string>
+    <string name="notify_ride_accepted_title">सवारी तय हो गई</string>
+    <string name="notify_ride_accepted_body">%1$s ने आपका प्रस्ताव स्वीकार कर लिया। वे आपका इंतज़ार कर रहे हैं।</string>
+    <string name="notify_unbonded_title">सवारी बिना जमा के है</string>
+    <string name="notify_unbonded_body">आपने %1$s के साथ सवारी तय की, लेकिन किराया एस्क्रो में नहीं रखा जा सका। यह आप दोनों के भरोसे पर है — चैट में तय कर लें।</string>
 </resources>

@@ -30,4 +30,8 @@
     <string name="notify_escrow_called_off">%1$s odwołał transakcję.</string>
     <string name="notify_card_contested_title">Ten kod otrzymał dwie odpowiedzi</string>
     <string name="notify_card_contested_body">Zapisano w nim więcej niż jedną odpowiedź, więc nie sposób stwierdzić, która pochodziła od właściwej osoby. Nikogo nie dodano. Pokaż nowy kod, aby spróbować ponownie.</string>
+    <string name="notify_ride_accepted_title">Kurs potwierdzony</string>
+    <string name="notify_ride_accepted_body">%1$s przyjął twoją ofertę i czeka.</string>
+    <string name="notify_unbonded_title">Kurs bez depozytu</string>
+    <string name="notify_unbonded_body">Umówiłeś kurs z %1$s, ale opłaty nie udało się złożyć w depozycie. Opiera się na waszym słowie — dogadajcie to na czacie.</string>
 </resources>

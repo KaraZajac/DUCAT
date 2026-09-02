@@ -30,4 +30,8 @@
     <string name="notify_escrow_called_off">%1$s скасував угоду.</string>
     <string name="notify_card_contested_title">На цей код відповіли двічі</string>
     <string name="notify_card_contested_body">У нього записали більш ніж одну відповідь, тож неможливо визначити, яка з них від потрібної людини. Нікого не додано. Покажіть новий код, щоб спробувати ще раз.</string>
+    <string name="notify_ride_accepted_title">Поїздку підтверджено</string>
+    <string name="notify_ride_accepted_body">%1$s прийняв вашу пропозицію й чекає на вас.</string>
+    <string name="notify_unbonded_title">Поїздка без застави</string>
+    <string name="notify_unbonded_body">Ви домовилися про поїздку з %1$s, але плату не вдалося помістити в ескроу. Тримається на вашому слові — залагодьте це в чаті.</string>
 </resources>

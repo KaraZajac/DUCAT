@@ -30,4 +30,8 @@
     <string name="notify_escrow_called_off">%1$s membatalkan kesepakatan.</string>
     <string name="notify_card_contested_title">Kode itu dijawab dua kali</string>
     <string name="notify_card_contested_body">Lebih dari satu balasan ditulis ke dalamnya, jadi tidak bisa diketahui mana yang berasal dari orang yang Anda maksud. Tidak ada yang ditambahkan. Tunjukkan kode baru untuk mencoba lagi.</string>
+    <string name="notify_ride_accepted_title">Perjalanan jadi</string>
+    <string name="notify_ride_accepted_body">%1$s menerima tawaran Anda dan sedang menunggu.</string>
+    <string name="notify_unbonded_title">Perjalanan tanpa jaminan</string>
+    <string name="notify_unbonded_body">Anda menyepakati perjalanan dengan %1$s, tetapi tarifnya tidak bisa dititipkan. Ini bersandar pada kata kalian berdua — bereskan di obrolan.</string>
 </resources>

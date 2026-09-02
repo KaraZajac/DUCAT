@@ -2374,6 +2374,37 @@ object Mailbox {
                     }
                 }.onFailure { DucatLog.w(TAG, "ceremony abort: ${it.message}") }
             }
+            // §15.12: **the rider said yes.** Worth waking a phone for, and
+            // until now nothing did.
+            //
+            // The accept is the moment a ride becomes a ride — somebody is
+            // standing at a curb expecting a car — and the only thing that
+            // noticed it was a `LaunchedEffect` on the Drive screen. A driver
+            // who made an offer and pocketed the phone, or opened the drawer,
+            // or took a call, learned nothing until they came back to that
+            // screen. The state survives (the offer is reloaded from the
+            // store and the wait resumes); what was lost was the minutes in
+            // between, which on a taxi job is the whole of it.
+            //
+            // Only for an accept answering *our* offer: `referent` reads the
+            // reference positionally, so a kind 7 that names some other
+            // message — or an old card's seq — cannot ring this.
+            if (arrived.kind == 7) {
+                runCatching {
+                    val thread = store.thread(c.personaHex)
+                    val mine = thread.referent(arrived)
+                    if (mine != null && mine.outgoing && mine.kind == 6) {
+                        Notify.post(
+                            context,
+                            context.getString(R.string.notify_ride_accepted_title),
+                            context.getString(
+                                R.string.notify_ride_accepted_body,
+                                c.displayName(),
+                            ),
+                        )
+                    }
+                }.onFailure { DucatLog.w(TAG, "accept notice: ${it.message}") }
+            }
             // §16.19: the membership, stated — or grown. Groups.absorbRoster
             // holds the admission rule (an update to a known group is taken
             // only from an existing member), so a stranger who learned the id

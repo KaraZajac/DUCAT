@@ -30,4 +30,8 @@
     <string name="notify_escrow_called_off">%1$s ยกเลิกข้อตกลงแล้ว</string>
     <string name="notify_card_contested_title">รหัสนั้นถูกตอบกลับสองครั้ง</string>
     <string name="notify_card_contested_body">มีการเขียนคำตอบลงไปมากกว่าหนึ่งรายการ จึงบอกไม่ได้ว่าอันไหนมาจากคนที่คุณตั้งใจไว้ ไม่มีใครถูกเพิ่ม แสดงรหัสใหม่เพื่อลองอีกครั้ง</string>
+    <string name="notify_ride_accepted_title">การเดินทางยืนยันแล้ว</string>
+    <string name="notify_ride_accepted_body">%1$s ตอบรับข้อเสนอของคุณแล้ว และกำลังรออยู่</string>
+    <string name="notify_unbonded_title">การเดินทางไม่มีเงินมัดจำ</string>
+    <string name="notify_unbonded_body">คุณตกลงการเดินทางกับ %1$s แล้ว แต่ไม่สามารถนำค่าโดยสารเข้าเอสโครว์ได้ ตอนนี้ขึ้นอยู่กับคำพูดของทั้งสองฝ่าย — คุยกันในแชท</string>
 </resources>

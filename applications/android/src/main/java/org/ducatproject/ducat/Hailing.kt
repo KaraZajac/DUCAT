@@ -79,6 +79,27 @@ fun standCell(board: String): String =
  * person should decide: the screens still choose when to post, what to
  * charge and what to do about what comes back.
  */
+/**
+ * The ride is agreed and the escrow is not.
+ *
+ * Lives here rather than on the screen that discovers it, for two reasons.
+ * The desk compiles that screen and reaches [Notify] through a package-level
+ * extension a `ui` file cannot see; and this is news about the *deal*, which
+ * is this file's business. §15.12 calls a hail without an escrow the
+ * unbonded mutual promise it always was — a real state, not a broken one —
+ * but it is a different deal from the one the rider thought they were
+ * making, and the only telling was a line on a screen they are about to
+ * leave for the chat.
+ */
+fun notifyUnbonded(context: Context, driverName: String) {
+    DucatLog.w("Hailing", "ride agreed with no escrow — telling the rider")
+    Notify.post(
+        context,
+        context.getString(R.string.notify_unbonded_title),
+        context.getString(R.string.notify_unbonded_body, driverName),
+    )
+}
+
 object Hailing {
 
     /** Every slot on every shard of this cell is taken by a live hail. */

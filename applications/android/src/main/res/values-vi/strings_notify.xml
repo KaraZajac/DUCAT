@@ -30,4 +30,8 @@
     <string name="notify_escrow_called_off">%1$s đã hủy giao dịch.</string>
     <string name="notify_card_contested_title">Mã đó đã được trả lời hai lần</string>
     <string name="notify_card_contested_body">Có nhiều hơn một phản hồi được ghi vào đó, nên không thể biết cái nào là của người bạn muốn. Không ai được thêm vào. Hãy hiện một mã mới để thử lại.</string>
+    <string name="notify_ride_accepted_title">Chuyến đi đã được nhận</string>
+    <string name="notify_ride_accepted_body">%1$s đã nhận lời đề nghị của bạn và đang chờ.</string>
+    <string name="notify_unbonded_title">Chuyến đi không có ký quỹ</string>
+    <string name="notify_unbonded_body">Bạn đã thỏa thuận chuyến đi với %1$s, nhưng tiền cước không vào được ký quỹ. Nó dựa trên lời hứa của hai bên — hãy trao đổi trong cuộc trò chuyện.</string>
 </resources>
