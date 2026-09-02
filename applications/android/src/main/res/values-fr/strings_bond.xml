@@ -77,6 +77,7 @@
     <string name="bond_close_all_to_them">%1$s demande à clore la caution et à prendre tout le dépôt — %2$s. Rien ne vous revient.</string>
     <string name="escrow_not_confirmed">Vérification du séquestre avec tout le monde. Cela prend généralement un instant.</string>
     <string name="escrow_disagreed">Les participants n\'ont pas formé le même portefeuille. N\'y versez rien — recommencez.</string>
+    <string name="bond_holds_money">Le séquestre contient déjà %1$s — l\'argent qui s\'y trouve ne peut qu\'être libéré, pas annulé.</string>
     <string name="split_back_to_you">Proposition : %1$s te revient, %2$s pour %3$s.</string>
     <string name="split_back_to_them">Proposition : %1$s revient à %3$s, %2$s pour toi.</string>
     <string name="split_fee_yours">Les frais de réseau sortent de votre part : il arrivera un peu moins que cela.</string>

@@ -76,6 +76,7 @@
     <string name="bond_close_all_to_them">%1$s ขอปิดเงินประกันและรับไปทั้งหมด — %2$s คุณจะไม่ได้รับคืนเลย</string>
     <string name="escrow_not_confirmed">กำลังตรวจสอบเอสโครว์กับทุกคน โดยปกติใช้เวลาสักครู่</string>
     <string name="escrow_disagreed">ผู้ร่วมทั้งหมดไม่ได้สร้างกระเป๋าเดียวกัน อย่าจ่ายเข้าไป — เริ่มใหม่</string>
+    <string name="bond_holds_money">เอสโครว์มี %1$s อยู่แล้ว — เงินในนั้นทำได้เพียงปล่อยออก ยกเลิกข้อตกลงไม่ได้</string>
     <string name="split_back_to_you">ข้อเสนอ: %1$s คืนให้คุณ %2$s ให้ %3$s</string>
     <string name="split_back_to_them">ข้อเสนอ: %1$s คืนให้ %3$s %2$s ให้คุณ</string>
     <string name="split_fee_yours">ค่าธรรมเนียมเครือข่ายหักจากส่วนของคุณ จึงได้รับน้อยกว่านั้นเล็กน้อย</string>

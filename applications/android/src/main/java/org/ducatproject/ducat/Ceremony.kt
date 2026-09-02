@@ -1707,6 +1707,19 @@ object Ceremony {
     class AlreadyPaid : IllegalStateException("you have already paid into this escrow")
 
     /**
+     * The escrow holds money, so "call it off" is not an ending it has.
+     *
+     * Typed for the same reason as [AlreadyPaid]: this is reached by
+     * circumstance, not by a bug. The banner hides the button once this
+     * device's scan has seen the other side's stake, but the scan runs every
+     * nine seconds and a stake is paid in one — so the tap that lands in
+     * between is ordinary, and used to be answered with the card-link
+     * sentence ("the link may be broken, already claimed…") because nothing
+     * in `moneyFailure` recognised the refusal.
+     */
+    class HoldsMoney(val pxmr: Long) : IllegalStateException("there is money in this escrow")
+
+    /**
      * Call this deal off, and say so.
      *
      * `MessageKind::CeremonyAbort` has been in the wire format the whole time
@@ -1723,6 +1736,20 @@ object Ceremony {
      * same reason and read from the same three places: this device's own scan
      * of the escrow address plus the two txids it would have written itself.
      *
+     * **And then the chain, once there is an address to ask.** The three
+     * markers are what this device has seen, and the scan behind the first
+     * runs every nine seconds while the thread is open and never while it is
+     * not. A rider who tapped "Call it off" in the gap after the driver's
+     * stake landed passed all three, marked their own record aborted, and
+     * lost the co-signing path the driver's stake needs to come home: the
+     * driver's phone rightly ignores an abort against money it has paid
+     * ([onAbort]), so the two records disagreed for good, with the money on
+     * the side that could no longer be asked to release it. The Profile
+     * screen's bond call-off has asked the address first since it existed;
+     * this is the same rule, in the one place both callers pass through.
+     * An address that cannot be read is not called empty ([NoNode]) — the
+     * cost of refusing is a retry, and the cost of guessing was the stake.
+     *
      * The message is best-effort and the local record is not. A peer who is
      * offline learns about this on their next poll; a peer who never comes
      * back leaves an escrow that goes stale on its own, which is what
@@ -1732,9 +1759,32 @@ object Ceremony {
     fun callOff(context: Context, idHex: String) {
         val o = load(context, idHex) ?: throw IllegalStateException("no such ceremony")
         check(!isFinished(o)) { "this escrow is already over" }
-        check(o.optLong("fundedPxmr") == 0L) { "there is money in this escrow" }
+        if (o.optLong("fundedPxmr") > 0) throw HoldsMoney(o.optLong("fundedPxmr"))
         check(o.optString("fundTxid").isEmpty()) { "there is money in this escrow" }
         check(o.optString("hostFundTxid").isEmpty()) { "there is money in this escrow" }
+        // A release requires funding by construction, whatever this device's
+        // scan last said — the same refusal [onAbort] gives the other side.
+        check(o.optString("stage") !in listOf("releasing", "release_pending", "release_cosigned")) {
+            "a release is in progress"
+        }
+        hexToBytes(o.optString("keys"))?.let { keys ->
+            val nodeUrl = node(context) ?: throw NoNode()
+            val from = o.optLong("scanFrom").takeIf { it > 0 }
+                ?: WalletStore(context).restoreHeight().toLong()
+            val bal = runCatching {
+                uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
+            }.getOrElse {
+                DucatLog.w(TAG, "escrow $idHex: call-off could not read the address: ${it.message}")
+                throw NoNode()
+            }
+            // Not written to `fundedPxmr`: one node's word is enough to
+            // refuse an abort and not enough to show money as secured —
+            // that figure waits for [checkRideFunding]'s second opinion.
+            if (bal > 0) {
+                DucatLog.w(TAG, "escrow $idHex: call-off refused — the address holds ${formatXmr(bal)} XMR")
+                throw HoldsMoney(bal)
+            }
+        }
 
         val id = hexToBytes(o.optString("id")) ?: throw IllegalStateException("no ceremony id")
         val mineHex = PersonaStore(context).personaHex()

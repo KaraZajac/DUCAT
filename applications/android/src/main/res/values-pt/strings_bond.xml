@@ -77,6 +77,7 @@
     <string name="bond_close_all_to_them">%1$s está pedindo para encerrar o depósito e levar tudo — %2$s. Nada volta para você.</string>
     <string name="escrow_not_confirmed">Ainda conferindo a custódia com todos. Costuma levar um instante.</string>
     <string name="escrow_disagreed">Os participantes não formaram a mesma carteira. Não pague nela — comece outra.</string>
+    <string name="bond_holds_money">A caução já contém %1$s — o dinheiro que está nela só pode ser libertado, não cancelado.</string>
     <string name="split_back_to_you">Proposta: %1$s de volta para você, %2$s para %3$s.</string>
     <string name="split_back_to_them">Proposta: %1$s de volta para %3$s, %2$s para você.</string>
     <string name="split_fee_yours">A taxa da rede sai da sua parte, por isso chega um pouco menos.</string>

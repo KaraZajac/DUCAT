@@ -77,6 +77,7 @@
     <string name="bond_close_all_to_them">%1$s बॉन्ड बंद करके पूरी जमा राशि लेना चाहते हैं — %2$s। आपको कुछ वापस नहीं आएगा।</string>
     <string name="escrow_not_confirmed">एस्क्रो की जाँच अभी सबके साथ चल रही है। आमतौर पर इसमें एक पल लगता है।</string>
     <string name="escrow_disagreed">सभी प्रतिभागियों ने एक ही वॉलेट नहीं बनाया। इसमें भुगतान न करें — नया शुरू करें।</string>
+    <string name="bond_holds_money">एस्क्रो में पहले से %1$s है — इसमें रखा पैसा केवल जारी किया जा सकता है, सौदा रद्द नहीं किया जा सकता।</string>
     <string name="split_back_to_you">प्रस्ताव: %1$s आपको वापस, %2$s %3$s को।</string>
     <string name="split_back_to_them">प्रस्ताव: %1$s %3$s को वापस, %2$s आपको।</string>
     <string name="split_fee_yours">नेटवर्क शुल्क आपके हिस्से से कटता है, इसलिए उससे थोड़ा कम पहुँचेगा।</string>

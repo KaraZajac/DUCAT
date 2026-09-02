@@ -77,6 +77,7 @@
     <string name="bond_close_all_to_them">%1$s vraagt de borg af te sluiten en het hele bedrag te nemen — %2$s. Er komt niets naar u terug.</string>
     <string name="escrow_not_confirmed">De escrow wordt nog met iedereen gecontroleerd. Dat duurt meestal even.</string>
     <string name="escrow_disagreed">De deelnemers hebben niet dezelfde wallet gevormd. Betaal er niets in — begin opnieuw.</string>
+    <string name="bond_holds_money">De escrow bevat al %1$s — geld dat erin zit kan alleen worden vrijgegeven, niet afgeblazen.</string>
     <string name="split_back_to_you">Voorstel: %1$s terug naar jou, %2$s naar %3$s.</string>
     <string name="split_back_to_them">Voorstel: %1$s terug naar %3$s, %2$s naar jou.</string>
     <string name="split_fee_yours">De netwerkkosten gaan van jouw deel af, dus er komt iets minder binnen.</string>

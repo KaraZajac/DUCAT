@@ -81,6 +81,7 @@
     <string name="bond_close_all_to_them">يطلب %1$s إغلاق الضمان وأخذ كامل الوديعة — %2$s. لن يعود إليك شيء.</string>
     <string name="escrow_not_confirmed">لا يزال يجري التحقق من الضمان مع الجميع. عادةً ما يستغرق ذلك لحظة.</string>
     <string name="escrow_disagreed">لم يُنشئ المشاركون في هذا الضمان المحفظة نفسها. لا تدفع فيه — ابدأ ضمانًا جديدًا.</string>
+    <string name="bond_holds_money">يحتوي الضمان بالفعل على %1$s — المال الذي بداخله لا يمكن إلا تحريره، لا إلغاء الاتفاق.</string>
     <string name="split_back_to_you">المقترح: %1$s تعود إليك، و%2$s إلى %3$s.</string>
     <string name="split_back_to_them">المقترح: %1$s تعود إلى %3$s، و%2$s إليك.</string>
     <string name="split_fee_yours">‏رسوم الشبكة تُخصم من حصتك، لذا يصل أقل قليلاً من ذلك.</string>

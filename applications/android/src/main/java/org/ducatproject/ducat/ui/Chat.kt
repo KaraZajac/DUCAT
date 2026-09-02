@@ -3378,6 +3378,14 @@ private fun RideBondBanner(contact: Contact) {
             busy = false
         }
     }
+    // Whether that button belongs on the screen at all: callOff's own first
+    // test, read from the same scan. The rider's step offered it beside
+    // "secure the fare" once the driver's stake was visible — the exact
+    // moment it could no longer work — and the refusal came back worded for
+    // a card link. A stake in the escrow leaves by a release, and until the
+    // banner can propose one from here the honest thing is no button, not a
+    // button that apologises.
+    val canCallOff = funded == 0L
 
     // Ten blocks is the chain's answer, not a refusal.
     //
@@ -3445,8 +3453,8 @@ private fun RideBondBanner(contact: Contact) {
                 Amounts.show(context, myShare).primary,
             ),
             onAction = fundNow,
-            secondary = stringResource(R.string.bond_call_off),
-            onSecondary = callOffNow,
+            secondary = if (canCallOff) stringResource(R.string.bond_call_off) else null,
+            onSecondary = if (canCallOff) callOffNow else null,
         )
         // The rider putting the fare and their stake in — but not while still
         // waiting on the other side's, which is a wait, not a decision.
@@ -3469,8 +3477,8 @@ private fun RideBondBanner(contact: Contact) {
                 Amounts.show(context, myShare).primary,
             ),
             onAction = fundNow,
-            secondary = stringResource(R.string.bond_call_off),
-            onSecondary = callOffNow,
+            secondary = if (canCallOff) stringResource(R.string.bond_call_off) else null,
+            onSecondary = if (canCallOff) callOffNow else null,
         )
         // The driver ending the ride and asking for the fare.
         stage == "done" && !rider && funded >= need -> Step(
@@ -3664,12 +3672,15 @@ private fun RideBondBanner(contact: Contact) {
                     // The one wait in this flow with no end of its own: the
                     // far side may simply never answer, and until there was a
                     // way to say so the only exits were to abandon the thread
-                    // or wait for ever.
-                    TextButton(
-                        onClick = callOffNow,
-                        enabled = !busy,
-                        contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
-                    ) { Text(stringResource(R.string.bond_call_off)) }
+                    // or wait for ever. Only while the address is still empty
+                    // — a partial stake is money, and money is released.
+                    if (canCallOff) {
+                        TextButton(
+                            onClick = callOffNow,
+                            enabled = !busy,
+                            contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
+                        ) { Text(stringResource(R.string.bond_call_off)) }
+                    }
                 }
 
                 stage == "done" && rider && ride.optString("fundTxid").isEmpty() -> {

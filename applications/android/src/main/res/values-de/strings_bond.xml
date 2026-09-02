@@ -77,6 +77,7 @@
     <string name="bond_close_all_to_them">%1$s möchte den Bond auflösen und die ganze Kaution nehmen — %2$s. An Sie geht nichts zurück.</string>
     <string name="escrow_not_confirmed">Die Treuhand wird noch mit allen abgeglichen. Das dauert meist nur einen Moment.</string>
     <string name="escrow_disagreed">Die Beteiligten haben nicht dieselbe Wallet gebildet. Zahlen Sie nichts ein — beginnen Sie neu.</string>
+    <string name="bond_holds_money">Die Treuhand enthält bereits %1$s — Geld darin kann nur freigegeben werden, nicht abgebrochen.</string>
     <string name="split_back_to_you">Vorschlag: %1$s zurück an dich, %2$s an %3$s.</string>
     <string name="split_back_to_them">Vorschlag: %1$s zurück an %3$s, %2$s an dich.</string>
     <string name="split_fee_yours">Die Netzgebühr geht von deinem Anteil ab, es kommt also etwas weniger an.</string>

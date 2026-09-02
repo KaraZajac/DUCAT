@@ -79,6 +79,7 @@
     <string name="bond_close_all_to_them">%1$s prosi o zamknięcie depozytu i zabranie całej kwoty — %2$s. Do ciebie nic nie wróci.</string>
     <string name="escrow_not_confirmed">Trwa sprawdzanie depozytu ze wszystkimi. Zwykle chwilę to zajmuje.</string>
     <string name="escrow_disagreed">Uczestnicy nie utworzyli tego samego portfela. Nie wpłacaj — zacznij od nowa.</string>
+    <string name="bond_holds_money">Depozyt zawiera już %1$s — pieniądze w nim można tylko uwolnić, nie odwołać.</string>
     <string name="split_back_to_you">Propozycja: %1$s wraca do ciebie, %2$s dla %3$s.</string>
     <string name="split_back_to_them">Propozycja: %1$s wraca do %3$s, %2$s dla ciebie.</string>
     <string name="split_fee_yours">Opłata sieciowa schodzi z twojej części, więc dotrze nieco mniej.</string>

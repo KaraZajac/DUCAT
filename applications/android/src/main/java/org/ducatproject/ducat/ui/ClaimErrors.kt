@@ -111,13 +111,20 @@ fun moneyFailure(
     // release proposed before the routing table was ready reached the person
     // waiting to be paid as the word "TryAgain".
     Mailbox.isOffline(t) -> context.getString(org.ducatproject.ducat.R.string.pay_offline)
-    // The two failures in Ceremony a person meets by circumstance rather than
-    // by something being broken. Everything else that throws in there is an
-    // invariant, and its English sentence is for whoever reads the bug report.
+    // The three failures in Ceremony a person meets by circumstance rather
+    // than by something being broken. Everything else that throws in there is
+    // an invariant, and its English sentence is for whoever reads the bug
+    // report.
     t is org.ducatproject.ducat.Ceremony.NoNode ->
         context.getString(org.ducatproject.ducat.R.string.pay_node_unreachable)
     t is org.ducatproject.ducat.Ceremony.AlreadyPaid ->
         context.getString(org.ducatproject.ducat.R.string.pay_already_paid)
+    // The third: "call it off" tapped in the seconds between the other
+    // side's stake landing and this device's scan noticing it.
+    t is org.ducatproject.ducat.Ceremony.HoldsMoney -> context.getString(
+        org.ducatproject.ducat.R.string.bond_holds_money,
+        org.ducatproject.ducat.Amounts.show(context, t.pxmr).primary,
+    )
     // §16.18.1: a board notice is stamped against a recent Monero block, so
     // posting one needs a node even though *reading* boards never does. Its
     // own sentence rather than pay_node_unreachable's, which ends "nothing

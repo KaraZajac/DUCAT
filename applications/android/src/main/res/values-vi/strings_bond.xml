@@ -76,6 +76,7 @@
     <string name="bond_close_all_to_them">%1$s muốn đóng khoản đặt cọc và lấy toàn bộ — %2$s. Bạn sẽ không nhận lại gì.</string>
     <string name="escrow_not_confirmed">Vẫn đang đối chiếu ký quỹ với mọi người. Thường chỉ mất một lát.</string>
     <string name="escrow_disagreed">Những người tham gia không tạo ra cùng một ví. Đừng nạp tiền — hãy bắt đầu lại.</string>
+    <string name="bond_holds_money">Ký quỹ đã có %1$s — tiền trong đó chỉ có thể được giải phóng, không thể hủy.</string>
     <string name="split_back_to_you">Đề xuất: %1$s trả lại cho bạn, %2$s cho %3$s.</string>
     <string name="split_back_to_them">Đề xuất: %1$s trả lại cho %3$s, %2$s cho bạn.</string>
     <string name="split_fee_yours">Phí mạng trừ vào phần của bạn, nên số đến sẽ ít hơn một chút.</string>
