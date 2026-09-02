@@ -2560,6 +2560,17 @@ object Ceremony {
         mutate(context, idHex) { cur ->
             if (cur.optLong("wantReleaseAt") > 0) cur
             else cur.put("wantRelease", back)
+                // **How the number was reached, not only the number.** A
+                // refund is derived from the balance at the moment of
+                // proposing, so a retry that replays the figure replays a
+                // reading of the escrow that may have moved: a stranded
+                // provider's "nothing back to the payer" is correct while
+                // the escrow holds only their stake and is a claim on the
+                // payer's money the second it does not. Recomputed on
+                // every retry when it was a refund; replayed verbatim when
+                // it was a negotiated number, which is what a counter-offer
+                // means.
+                .put("wantRefundBoth", refundBoth)
                 .put("wantReleaseAt", System.currentTimeMillis())
         }
         val margin = MIN_ESCROW_PXMR
@@ -2644,7 +2655,12 @@ object Ceremony {
                 DucatLog.i(TAG, "escrow $idHex: gave up retrying the release")
                 continue
             }
-            runCatching { proposeRideSplit(context, idHex, o.optLong("wantRelease")) }
+            runCatching {
+                proposeRideSplit(
+                    context, idHex, o.optLong("wantRelease"),
+                    refundBoth = o.optBoolean("wantRefundBoth"),
+                )
+            }
                 .onSuccess { n += 1; DucatLog.i(TAG, "escrow $idHex: release proposed on a retry") }
         }
         return n
