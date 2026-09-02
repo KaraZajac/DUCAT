@@ -139,8 +139,8 @@ fun ChatListScreen(
             val loud = groups.filter { g ->
                 val rows = org.ducatproject.ducat.Groups.merge(context, g, ::threadOf)
                 org.ducatproject.ducat.Groups.unread(
-                    org.ducatproject.ducat.Groups.seenMarks(context, g.idHex),
-                    org.ducatproject.ducat.Groups.highWater(context, rows),
+                    org.ducatproject.ducat.Groups.seenLook(context, g.idHex),
+                    org.ducatproject.ducat.Groups.lookAt(context, rows),
                 )
             }.map { it.idHex }.toSet()
             ListPass(

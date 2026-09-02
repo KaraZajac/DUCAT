@@ -87,7 +87,7 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
         // Looking at the group is what "seen" means, as for a thread: the
         // list's dot and the tab badge clear when the eyes arrive.
         withContext(Dispatchers.IO) {
-            Groups.markSeen(context, idHex, Groups.highWater(context, fresh))
+            Groups.markSeen(context, idHex, Groups.lookAt(context, fresh))
         }
     }
     // Reactions and retracts decorate; only words are bubbles. Same split the

@@ -65,7 +65,7 @@ fun main() {
         )
     }
     fun samSeen() = store.chatSeen(contact(sam))
-    fun look() = Groups.markSeen(ctx, gidHex, Groups.highWater(ctx, Groups.thread(ctx, gidHex)))
+    fun look() = Groups.markSeen(ctx, gidHex, Groups.lookAt(ctx, Groups.thread(ctx, gidHex)))
 
     // 1) A group message from a fully-read contact: the group's dot, not Sam's.
     fromSam("who has the ladder", groupSeq = 2)
@@ -95,14 +95,62 @@ fun main() {
     check(Groups.thread(ctx, gidHex).size == 1) { "MARKSTEST_FAIL the deletion did not take" }
     check(Groups.unreadGroups(ctx) == 0) { "MARKSTEST_FAIL a deleted row raised the group's dot" }
     look()
-    check(Groups.seenMarks(ctx, gidHex)[sam] == 3L) {
-        "MARKSTEST_FAIL the mark came down with the deleted row: ${Groups.seenMarks(ctx, gidHex)}"
+    check(Groups.seenLook(ctx, gidHex).high[sam] == 3L) {
+        "MARKSTEST_FAIL the mark came down with the deleted row: ${Groups.seenLook(ctx, gidHex).high}"
     }
     fromSam("never mind, borrowed one", groupSeq = 4)
     check(Groups.unreadGroups(ctx) == 1) { "MARKSTEST_FAIL a word after a sweep did not flag the group" }
     look()
 
-    // 5) Our own copies fanned into a member's thread are not news to us.
+    // 5) A gap filled in late — a word that arrives *under* the mark.
+    //
+    //    A group message is fanned out per member, so one member's copy can
+    //    fail while the rest land. The sender retries, and the message
+    //    reaches this phone after the words that followed it, carrying its
+    //    original group counter: a number below the high-water mark this
+    //    group has already been looked at. Nobody here has ever seen it.
+    //
+    //    A mark that is only a maximum cannot tell that from a duplicate —
+    //    which `merge` drops on (sender, groupSeq) and is right to. So the
+    //    words land quietly in the middle of the thread, above everything
+    //    the reader has already read past, and the group says nothing.
+    check(Groups.thread(ctx, gidHex).none { it.senderHex == sam && it.message.groupSeq == 1L }) {
+        "MARKSTEST_FAIL the gap this step fills is not a gap"
+    }
+    fromSam("bringing the ladder round at six", groupSeq = 1)
+    check(Groups.thread(ctx, gidHex).any { it.senderHex == sam && it.message.groupSeq == 1L }) {
+        "MARKSTEST_FAIL the late word did not reach the merged view at all"
+    }
+    check(Groups.unreadGroups(ctx) == 1) {
+        "MARKSTEST_FAIL a word that landed under the mark did not flag the group"
+    }
+    look()
+    check(Groups.unreadGroups(ctx) == 0) { "MARKSTEST_FAIL the look did not clear the late word" }
+
+    //    And the duplicate the retry may also produce is still not news: the
+    //    same (sender, groupSeq) is one row however many times it arrives.
+    fromSam("bringing the ladder round at six", groupSeq = 1)
+    check(Groups.unreadGroups(ctx) == 0) { "MARKSTEST_FAIL a duplicate copy raised the dot" }
+
+    //    A phone that upgrades into the counts has marks and no counts, and
+    //    reading an absent count as zero would flag every group it has ever
+    //    been in — once, for nothing, on a screen the user did not touch.
+    //    Dropping the key is exactly what that phone looks like.
+    org.ducatproject.ducat.securePrefs(ctx, "ducat_groups")
+        .edit().remove("rows_$gidHex").apply()
+    check(Groups.seenLook(ctx, gidHex).rows.isEmpty()) { "MARKSTEST_FAIL the counts did not go" }
+    check(Groups.unreadGroups(ctx) == 0) {
+        "MARKSTEST_FAIL marks without counts flagged a group nobody had spoken in"
+    }
+    //    …and the first look after the upgrade writes them, so the check
+    //    starts working from there rather than never.
+    look()
+    check(Groups.seenLook(ctx, gidHex).rows[sam] == 3L) {
+        "MARKSTEST_FAIL the first look after an upgrade did not record the counts: " +
+            "${Groups.seenLook(ctx, gidHex).rows}"
+    }
+
+    // 6) Our own copies fanned into a member's thread are not news to us.
     store.appendAndAdvanceOutbound(
         sam,
         StoredMessage(
@@ -114,7 +162,7 @@ fun main() {
     check(Groups.thread(ctx, gidHex).any { it.senderHex == me }) { "MARKSTEST_FAIL our own row is not in the merged view" }
     check(Groups.unreadGroups(ctx) == 0) { "MARKSTEST_FAIL our own words flagged the group" }
 
-    // 6) A deleted conversation comes back for a person's words — theirs or
+    // 7) A deleted conversation comes back for a person's words — theirs or
     //    ours — and stays gone for machinery and for a group's fan-out copy.
     store.setChatVisible(jordan, false)
     store.appendAndAdvance(
@@ -146,7 +194,7 @@ fun main() {
     check(contact(jordan).chatVisible) { "MARKSTEST_FAIL their line did not bring the conversation back" }
     check(store.unreadThreads() == 1) { "MARKSTEST_FAIL their line came back without its dot" }
 
-    // 7) Deleting the conversation with Jordan takes Jordan's words to us,
+    // 8) Deleting the conversation with Jordan takes Jordan's words to us,
     //    not Jordan's words to the crew: those are shown in the group and
     //    are the group's to delete.
     val crewBefore = Groups.thread(ctx, gidHex).size
@@ -167,7 +215,7 @@ fun main() {
 
     println(
         "MARKSTEST_OK group=${Groups.get(ctx, gidHex)?.name} " +
-            "marks=${Groups.seenMarks(ctx, gidHex).mapKeys { it.key.take(4) }} " +
+            "marks=${Groups.seenLook(ctx, gidHex).high.mapKeys { it.key.take(4) }} " +
             "sam.seen=${samSeen()} unread=${store.unreadThreads()}"
     )
 }

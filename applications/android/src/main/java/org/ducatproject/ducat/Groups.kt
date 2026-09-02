@@ -474,46 +474,91 @@ object Groups {
     // The mark is each member's group counter as of the last look — the
     // half of (sender, group_seq) that names their messages for everyone,
     // which only ever climbs. Not the pairwise seq (it restarts with every
-    // fresh card), not a timestamp (their clock), and not a row count: rows
-    // also leave — a retention window sweeps them on every poll, a long
-    // press deletes one — and a count that moved would have raised the dot
-    // over nothing said. A row that is gone lowers nothing; the next word
-    // still carries a higher number than any look has recorded.
+    // fresh card) and not a timestamp (their clock).
+    //
+    // **A maximum alone is not enough, though.** A group message is fanned
+    // out per member, so one member's copy can fail while the rest land, and
+    // the sender's retry arrives carrying its original counter — a number
+    // *below* a mark this group has already been looked at. Nobody here has
+    // ever seen those words, and the max says nothing changed: they land in
+    // the middle of the thread, above everything already read past, silent.
+    //
+    // So a look also records how many of each member's words were on the
+    // phone at the time. A raw count was rejected here once, for a good
+    // reason — rows leave, a retention window sweeps them on every poll, a
+    // long press deletes one, and a count that *moved* would raise the dot
+    // over nothing said. Two things make it safe now. It is counted off the
+    // merged view, which is already deduplicated on (sender, group_seq), so
+    // a retry of something we have is not a row. And it is only ever read as
+    // "more than last time": a sweep lowers it, the next look writes the
+    // lower number down, and nothing is flagged either way.
 
-    /** Everybody else's newest word, by who said it: their group counter. */
-    fun highWater(context: Context, rows: List<Row>): Map<String, Long> {
+    /** What one look at a group recorded. */
+    data class Look(
+        /** Everybody else's newest word, by who said it: their group counter. */
+        val high: Map<String, Long>,
+        /** How many of their words were on this phone at the time. */
+        val rows: Map<String, Long>,
+    )
+
+    /** Read [rows] — a merged group view — as a look at it. */
+    fun lookAt(context: Context, rows: List<Row>): Look {
         val ours = PersonaStore(context).allHexes()
-        val out = HashMap<String, Long>()
+        val high = HashMap<String, Long>()
+        val count = HashMap<String, Long>()
         for (r in rows) {
             if (r.senderHex in ours) continue
-            out[r.senderHex] = maxOf(out[r.senderHex] ?: 0L, r.message.groupSeq)
+            high[r.senderHex] = maxOf(high[r.senderHex] ?: 0L, r.message.groupSeq)
+            count[r.senderHex] = (count[r.senderHex] ?: 0L) + 1
         }
-        return out
+        return Look(high, count)
     }
 
-    /** The marks as of the last look; empty for a group never opened. */
-    fun seenMarks(context: Context, idHex: String): Map<String, Long> =
-        prefs(context).getString("seen_$idHex", null)?.let { raw ->
+    private fun marks(context: Context, key: String): Map<String, Long> =
+        prefs(context).getString(key, null)?.let { raw ->
             runCatching {
                 val o = JSONObject(raw)
                 o.keys().asSequence().associateWith { o.getLong(it) }
             }.getOrNull()
         } ?: emptyMap()
 
-    /** Whether anybody has said something since the last look. */
-    fun unread(seen: Map<String, Long>, now: Map<String, Long>): Boolean =
-        now.any { (m, s) -> s > (seen[m] ?: 0L) }
+    /** The look last taken; empty for a group never opened. */
+    fun seenLook(context: Context, idHex: String): Look =
+        Look(marks(context, "seen_$idHex"), marks(context, "rows_$idHex"))
+
+    /**
+     * Whether anybody has said something since the last look.
+     *
+     * The counts are consulted only for a member the last look actually
+     * recorded one for. A phone upgrading into this has marks but no
+     * counts, and reading absent as zero would flag every group it has
+     * ever been in, once, for nothing — the first look on each writes the
+     * count and the check starts working from there.
+     */
+    fun unread(seen: Look, now: Look): Boolean =
+        now.high.any { (m, s) -> s > (seen.high[m] ?: 0L) } ||
+            now.rows.any { (m, n) -> seen.rows[m]?.let { n > it } == true }
 
     /**
      * Looking at the group is what "seen" means, as for a thread. A mark
      * never comes down: what was looked at stays looked at even after the
      * rows that carried it have been swept.
+     *
+     * The counts beside them do the opposite — they are written as they are
+     * found, sweep and all. They mean "this many of their words were here
+     * when it was looked at", so a mark held above a sweep would leave a
+     * number no future count can exceed, and the next gap filled in under
+     * it would go unannounced.
      */
-    fun markSeen(context: Context, idHex: String, now: Map<String, Long>) {
-        val seen = seenMarks(context, idHex)
-        val merged = (seen.keys + now.keys).associateWith { maxOf(seen[it] ?: 0L, now[it] ?: 0L) }
-        if (merged == seen) return
-        prefs(context).edit().putString("seen_$idHex", JSONObject(merged).toString()).apply()
+    fun markSeen(context: Context, idHex: String, now: Look) {
+        val seen = seenLook(context, idHex)
+        val merged = (seen.high.keys + now.high.keys)
+            .associateWith { maxOf(seen.high[it] ?: 0L, now.high[it] ?: 0L) }
+        if (merged == seen.high && now.rows == seen.rows) return
+        prefs(context).edit()
+            .putString("seen_$idHex", JSONObject(merged).toString())
+            .putString("rows_$idHex", JSONObject(now.rows).toString())
+            .apply()
         ContactStore.bump()
     }
 
@@ -538,7 +583,7 @@ object Groups {
         val threads = HashMap<String, List<StoredMessage>>()
         return groups.filter { g ->
             val rows = merge(context, g) { hex -> threads.getOrPut(hex) { store.thread(hex) } }
-            unread(seenMarks(context, g.idHex), highWater(context, rows))
+            unread(seenLook(context, g.idHex), lookAt(context, rows))
         }.mapTo(HashSet()) { it.idHex }
     }
 }
