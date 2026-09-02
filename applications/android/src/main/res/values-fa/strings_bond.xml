@@ -83,6 +83,7 @@
     <string name="bond_close_ask">بستن ودیعه؟</string>
     <string name="bond_close_all_to_them">%1$s می‌خواهد ودیعه را ببندد و کل مبلغ را بردارد — %2$s. چیزی به شما بازنمی‌گردد.</string>
     <string name="escrow_not_confirmed">هنوز در حال بررسی امانت با همه است. معمولاً لحظه‌ای طول می‌کشد.</string>
+    <string name="escrow_behind">نمای این گوشی از امانت هنوز بخشی از آنچه واریز شده را ندارد. چیزی پیشنهاد نشد — یک دقیقه بعد که گوشی با زنجیره هماهنگ شد دوباره تلاش کنید.</string>
     <string name="escrow_disagreed">شرکت‌کنندگان کیف پول یکسانی نساخته‌اند. پرداخت نکنید — یکی تازه شروع کنید.</string>
     <string name="bond_holds_money">این ضمانت هم‌اکنون %1$s دارد — پولی که در آن است فقط می‌تواند آزاد شود، نه لغو.</string>
     <string name="split_back_to_you">پیشنهاد: %1$s به شما برمی‌گردد، %2$s به %3$s.</string>

@@ -82,6 +82,7 @@
     <string name="bond_close_ask">ボンドを解消しますか？</string>
     <string name="bond_close_all_to_them">%1$s がボンドを解消し、預り金の全額 %2$s を受け取ろうとしています。あなたには何も戻りません。</string>
     <string name="escrow_not_confirmed">エスクローを全員と照合しています。通常はすぐ終わります。</string>
+    <string name="escrow_behind">この端末から見たエスクローには、入金の一部がまだ映っていません。何も提案していません。チェーンに追いついてから、1分ほど後にもう一度お試しください。</string>
     <string name="escrow_disagreed">参加者が同じウォレットを作成していません。入金せず、新しく始めてください。</string>
     <string name="bond_holds_money">このエスクローにはすでに %1$s が入っています。中の資金は解放することしかできず、取引をやめることはできません。</string>
     <string name="split_back_to_you">提案：%1$s があなたに戻り、%2$s が %3$s に。</string>

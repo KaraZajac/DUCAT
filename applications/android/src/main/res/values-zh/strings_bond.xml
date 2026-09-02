@@ -82,6 +82,7 @@
     <string name="bond_close_ask">结束保证金？</string>
     <string name="bond_close_all_to_them">%1$s 请求结束保证金并取走全部 %2$s。你不会收到任何退还。</string>
     <string name="escrow_not_confirmed">仍在与各方核对托管。通常只需片刻。</string>
+    <string name="escrow_behind">这台手机看到的托管里还缺少一部分已存入的金额。没有提出任何方案 — 等它跟上链之后，过一分钟再试。</string>
     <string name="escrow_disagreed">参与者创建的钱包并不相同。请勿付款，请重新开始。</string>
     <string name="bond_holds_money">托管中已有 %1$s——其中的资金只能释放，不能取消交易。</string>
     <string name="split_back_to_you">提议：%1$s 退还给你，%2$s 给 %3$s。</string>

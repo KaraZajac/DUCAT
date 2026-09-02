@@ -158,6 +158,11 @@ fun moneyFailure(
         context.getString(org.ducatproject.ducat.R.string.escrow_not_confirmed)
     t is org.ducatproject.ducat.Ceremony.EscrowDisagreed ->
         context.getString(org.ducatproject.ducat.R.string.escrow_disagreed)
+    // A third of the same family, and the one that is nobody's fault: this
+    // device's view of the escrow is missing money it knows went in, so a
+    // refund cannot be divided from it yet. A wait, not an accusation.
+    t is org.ducatproject.ducat.Ceremony.EscrowBehind ->
+        context.getString(org.ducatproject.ducat.R.string.escrow_behind)
     // Before node trouble, which it would otherwise match on the timeout
     // quoted inside it: signed and pushed, and no node confirmed. "Nothing
     // was sent" is the one thing this does not know.

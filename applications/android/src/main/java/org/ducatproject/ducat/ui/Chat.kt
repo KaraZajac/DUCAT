@@ -4198,6 +4198,17 @@ private fun RideBondBanner(contact: Contact) {
                         ) { Text(stringResource(R.string.bond_ask_again)) }
                         BondNote(stringResource(R.string.bond_ask_again_note))
                     }
+                    // **A proposal on the table is not a decision made.**
+                    //
+                    // Everything this branch offered sent the *standing*
+                    // number again — "ask again" is explicitly that — so a
+                    // proposer who wanted to change their mind, or who had
+                    // proposed a figure they no longer stood behind, had
+                    // nowhere to go but the counter field on the other
+                    // side's phone. The engine has always allowed a
+                    // proposal to supersede one's own (stage "releasing" is
+                    // in its accepted list); only the screen did not.
+                    RefundBoth()
                 }
                 stage == "release_pending" -> {
                     // A proposal stands, from the other side (either side may
@@ -4386,7 +4397,14 @@ private fun RideBondBanner(contact: Contact) {
             // The retry itself was never in memory: the poller works from
             // `wantRelease` on the escrow, which is why it fires with the
             // phone away. This reads the same field the poller does.
-            if (error == null && ride.optLong("wantReleaseAt") > 0) {
+            // And only where a retry is still a thing that can happen. The
+            // record is cleared at the end now, but a promise this specific
+            // ("it keeps trying") should be read off the stage as well as
+            // the field — the two disagreeing is what put this sentence
+            // under the word "Settled".
+            if (error == null && ride.optLong("wantReleaseAt") > 0 &&
+                stage in setOf("done", "releasing", "release_pending", "release_cosigned")
+            ) {
                 Spacer(Modifier.height(4.dp))
                 Text(
                     stringResource(R.string.bond_release_asked),

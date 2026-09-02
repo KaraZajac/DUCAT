@@ -161,8 +161,15 @@ fun main() {
         check("and hands back the fare that landed meanwhile",
             driverRaced == fare + stake, formatXmr(driverRaced))
 
+        // A view of the escrow that is SHORT of this party's own payment is
+        // the one case refundBack must never be asked about: clamping there
+        // is how a refund became a gift on the first live run (see
+        // Ceremony.EscrowBehind, which proposeRideSplit now throws instead).
+        // Kept as an assertion about the clamp so the shape cannot come
+        // back by accident: it still clamps, and the caller must not let it.
         val short = org.ducatproject.ducat.Ceremony.refundBack(ride(true), stake)
-        check("nobody may claim more than the escrow holds", short == stake)
+        check("a short reading clamps — which is why the caller refuses first",
+            short == stake, formatXmr(short))
 
         // The same split read the other way: a funded escrow unwound by
         // agreement. Both sides must compute the identical number, or the

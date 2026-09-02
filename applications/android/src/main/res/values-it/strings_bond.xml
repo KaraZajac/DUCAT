@@ -83,6 +83,7 @@
     <string name="bond_close_ask">Chiudere il vincolo?</string>
     <string name="bond_close_all_to_them">%1$s chiede di chiudere il vincolo e prendere tutto il deposito — %2$s. A te non torna nulla.</string>
     <string name="escrow_not_confirmed">Verifica del deposito con tutti in corso. Di solito è questione di un attimo.</string>
+    <string name="escrow_behind">La tua vista del deposito non mostra ancora tutto ciò che è entrato. Non è stato proposto nulla: riprova tra un minuto, quando questo telefono avrà raggiunto la catena.</string>
     <string name="escrow_disagreed">I partecipanti non hanno formato lo stesso portafoglio. Non pagarci nulla: ricomincia.</string>
     <string name="bond_holds_money">Il deposito contiene già %1$s: il denaro al suo interno può solo essere rilasciato, non annullato.</string>
     <string name="split_back_to_you">Proposta: %1$s torna a te, %2$s a %3$s.</string>

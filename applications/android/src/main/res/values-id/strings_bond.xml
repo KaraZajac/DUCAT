@@ -82,6 +82,7 @@
     <string name="bond_close_ask">Tutup bond?</string>
     <string name="bond_close_all_to_them">%1$s meminta menutup bond dan mengambil seluruh deposit — %2$s. Tidak ada yang kembali ke Anda.</string>
     <string name="escrow_not_confirmed">Masih memeriksa escrow dengan semua pihak. Biasanya sebentar saja.</string>
+    <string name="escrow_behind">Tampilan escrow di ponsel ini belum memuat semua yang masuk. Tidak ada yang diusulkan — coba lagi semenit lagi, saat ponsel ini menyusul rantai.</string>
     <string name="escrow_disagreed">Para peserta tidak membentuk dompet yang sama. Jangan bayar ke sana — mulai yang baru.</string>
     <string name="bond_holds_money">Escrow sudah berisi %1$s — uang di dalamnya hanya bisa dilepaskan, bukan dibatalkan.</string>
     <string name="split_back_to_you">Usulan: %1$s kembali ke Anda, %2$s untuk %3$s.</string>

@@ -85,6 +85,7 @@
     <string name="bond_close_ask">Закрыть залог?</string>
     <string name="bond_close_all_to_them">%1$s просит закрыть залог и забрать его целиком — %2$s. Вам не вернётся ничего.</string>
     <string name="escrow_not_confirmed">Депозит ещё сверяется со всеми. Обычно это занимает мгновение.</string>
+    <string name="escrow_behind">Ваш взгляд на эскроу пока не показывает всё, что в него внесли. Ничего не предложено — попробуйте через минуту, когда телефон догонит цепочку.</string>
     <string name="escrow_disagreed">Участники создали разные кошельки. Не платите в него — начните заново.</string>
     <string name="bond_holds_money">В эскроу уже есть %1$s — деньги в нём можно только выпустить, а не отменить сделку.</string>
     <string name="split_back_to_you">Предложено: %1$s обратно тебе, %2$s — %3$s.</string>

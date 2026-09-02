@@ -2022,13 +2022,50 @@ object Ceremony {
     }
 
     /** Stamp the moment an escrow stopped needing anyone. */
+    /**
+     * A ceremony reaching its last stage, and letting go of what it was
+     * still trying to do.
+     *
+     * The parked release intent dies here too. It is cleared where a
+     * proposal succeeds, which is the common path — but not the only one: a
+     * release can land through the *other* side's broadcast, and the merge
+     * that records it can carry a snapshot taken before the clear. Seen on
+     * the first live refund, where a settled escrow went on promising "it
+     * keeps trying on its own until it goes through" underneath the words
+     * "Settled — USD 3.66 to you". A finished ceremony has nothing left to
+     * retry, whichever way it finished, so the end is the honest place to
+     * say so.
+     */
     private fun settle(o: JSONObject, stage: String): JSONObject =
-        o.put("stage", stage).put("settledAt", System.currentTimeMillis() / 1000)
+        o.put("stage", stage)
+            .put("settledAt", System.currentTimeMillis() / 1000)
+            .put("wantReleaseAt", 0L)
 
     /** The rider pays the fare into the escrow — an ordinary wallet send to
      *  an address that happens to need two of three keys to leave. */
     /** Nobody has disagreed *yet* — the roster has not all reported. */
     class EscrowNotConfirmed : IllegalStateException("waiting for the roster to agree")
+
+    /**
+     * The escrow is not showing what this party is known to have put in.
+     *
+     * **Found live, 2026-09-02, and it very nearly cost the money it was
+     * built to protect.** A refund divides the balance read at the moment of
+     * proposing, and the number it divides was clamped to that balance — so
+     * a reading that came back *short* did not fail, it produced a smaller
+     * refund and quietly gave the difference to the other side. On a
+     * reservation whose guest had paid 0.0072 and whose host had staked
+     * 0.0006, one node behind another was enough: the guest proposed 0.0006
+     * back to themselves and 0.0072 to the host, under a button that says
+     * each side gets back what it put in.
+     *
+     * Two readings of one escrow may honestly differ — nodes catch up at
+     * their own pace — so the shortfall is not an accusation. It is a
+     * refusal: an amount that decides where money goes may not be guessed
+     * from a view that is missing some of it.
+     */
+    class EscrowBehind(val saw: Long, val mine: Long) :
+        IllegalStateException("the escrow shows $saw, less than the $mine this party put in")
 
     /** Somebody formed a different wallet. This escrow is not what it claims. */
     class EscrowDisagreed : IllegalStateException("participants formed different wallets")
@@ -2528,7 +2565,17 @@ object Ceremony {
         val total = runCatching {
             uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
         }.getOrDefault(0L)
-        val back = if (refundBoth) refundBack(o, total) else riderBackPxmr.coerceIn(0L, total)
+        val back = if (refundBoth) {
+            // Refuse rather than divide a balance that cannot be this
+            // escrow's whole story. See [EscrowBehind] — this check is the
+            // whole reason it exists, and a `coerceIn` standing here
+            // instead is how a refund became a gift.
+            val mine = mySharePxmr(o)
+            if (total < mine) throw EscrowBehind(total, mine)
+            refundBack(o, total)
+        } else {
+            riderBackPxmr.coerceIn(0L, total)
+        }
         // Two shapes, one meaning: normally the rider's slice is fixed and
         // the driver is residual; when the driver's remainder could not
         // cover the fee, the driver's slice is fixed (possibly zero) and

@@ -82,6 +82,7 @@
     <string name="bond_close_ask">본드를 종료할까요?</string>
     <string name="bond_close_all_to_them">%1$s 님이 본드를 종료하고 보증금 전액 %2$s을(를) 가져가려 합니다. 회원님께는 아무것도 돌아오지 않습니다.</string>
     <string name="escrow_not_confirmed">에스크로를 모두와 확인하는 중입니다. 보통 잠시면 끝납니다.</string>
+    <string name="escrow_behind">이 기기에서 보는 에스크로에 들어온 금액의 일부가 아직 없어요. 아무것도 제안하지 않았어요. 체인을 따라잡은 뒤 1분쯤 후에 다시 시도하세요.</string>
     <string name="escrow_disagreed">참여자들이 같은 지갑을 만들지 않았습니다. 입금하지 말고 새로 시작하세요.</string>
     <string name="bond_holds_money">에스크로에 이미 %1$s이(가) 들어 있습니다. 안에 있는 돈은 해제만 할 수 있고, 거래를 취소할 수는 없습니다.</string>
     <string name="split_back_to_you">제안: %1$s 당신에게 반환, %2$s %3$s에게.</string>

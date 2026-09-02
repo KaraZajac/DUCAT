@@ -83,6 +83,7 @@
     <string name="bond_close_ask">Borg afsluiten?</string>
     <string name="bond_close_all_to_them">%1$s vraagt de borg af te sluiten en het hele bedrag te nemen — %2$s. Er komt niets naar u terug.</string>
     <string name="escrow_not_confirmed">De escrow wordt nog met iedereen gecontroleerd. Dat duurt meestal even.</string>
+    <string name="escrow_behind">Jouw beeld van de escrow mist nog een deel van wat erin ging. Er is niets voorgesteld — probeer het over een minuut opnieuw, als deze telefoon de keten heeft ingehaald.</string>
     <string name="escrow_disagreed">De deelnemers hebben niet dezelfde wallet gevormd. Betaal er niets in — begin opnieuw.</string>
     <string name="bond_holds_money">De escrow bevat al %1$s — geld dat erin zit kan alleen worden vrijgegeven, niet afgeblazen.</string>
     <string name="split_back_to_you">Voorstel: %1$s terug naar jou, %2$s naar %3$s.</string>

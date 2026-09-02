@@ -85,6 +85,7 @@
     <string name="bond_close_ask">Закрити заставу?</string>
     <string name="bond_close_all_to_them">%1$s просить закрити заставу й забрати її повністю — %2$s. Вам не повернеться нічого.</string>
     <string name="escrow_not_confirmed">Депозит ще звіряється з усіма. Зазвичай це триває мить.</string>
+    <string name="escrow_behind">Ваш перегляд ескроу ще не показує всього, що туди внесли. Нічого не запропоновано — спробуйте за хвилину, коли телефон наздожене ланцюг.</string>
     <string name="escrow_disagreed">Учасники створили різні гаманці. Не платіть туди — почніть заново.</string>
     <string name="bond_holds_money">В ескроу вже є %1$s — гроші в ньому можна лише вивільнити, а не скасувати угоду.</string>
     <string name="split_back_to_you">Пропозиція: %1$s назад тобі, %2$s — %3$s.</string>

@@ -83,6 +83,7 @@
     <string name="bond_close_ask">Teminat kapatılsın mı?</string>
     <string name="bond_close_all_to_them">%1$s teminatı kapatıp tamamını almak istiyor — %2$s. Size hiçbir şey dönmeyecek.</string>
     <string name="escrow_not_confirmed">Emanet hâlâ herkesle karşılaştırılıyor. Genelde bir an sürer.</string>
+    <string name="escrow_behind">Bu telefondaki emanet görünümü, yatırılanların bir kısmını henüz göstermiyor. Hiçbir şey önerilmedi — telefon zinciri yakaladığında, bir dakika sonra tekrar dene.</string>
     <string name="escrow_disagreed">Katılımcılar aynı cüzdanı oluşturmadı. Buraya ödeme yapmayın — yenisini başlatın.</string>
     <string name="bond_holds_money">Emanet hesabında zaten %1$s var — içindeki para yalnızca serbest bırakılabilir, iptal edilemez.</string>
     <string name="split_back_to_you">Öneri: %1$s sana geri, %2$s %3$s tarafına.</string>

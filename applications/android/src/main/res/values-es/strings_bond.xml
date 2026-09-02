@@ -83,6 +83,7 @@
     <string name="bond_close_ask">¿Cerrar el bono?</string>
     <string name="bond_close_all_to_them">%1$s pide cerrar el bono y llevarse todo el depósito: %2$s. A ti no vuelve nada.</string>
     <string name="escrow_not_confirmed">Todavía se está comprobando el depósito con todos. Suele tardar un momento.</string>
+    <string name="escrow_behind">Tu vista del depósito aún no incluye todo lo que se ingresó. No se propuso nada: inténtalo en un minuto, cuando este teléfono se haya puesto al día con la cadena.</string>
     <string name="escrow_disagreed">Los participantes no crearon la misma cartera. No pagues en él: empieza uno nuevo.</string>
     <string name="bond_holds_money">El depósito ya contiene %1$s: el dinero que hay en él solo puede liberarse, no cancelarse.</string>
     <string name="split_back_to_you">Propuesta: %1$s de vuelta para ti, %2$s para %3$s.</string>
