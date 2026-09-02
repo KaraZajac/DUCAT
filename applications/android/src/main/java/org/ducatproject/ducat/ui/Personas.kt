@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Badge
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -23,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -30,8 +32,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.Persona
 import org.ducatproject.ducat.PersonaStore
@@ -85,17 +91,47 @@ fun PersonaSwitcher(modifier: Modifier = Modifier) {
     val personas = remember(version) { store.all() }
     if (personas.size < 2) return
     val worn = remember(version) { store.worn() }
+    // Which hats have a conversation waiting. The Chat tab's badge counts
+    // every compartment and the list shows one, so a "4" over a list with
+    // a single dot left the other three findable only by trying each chip
+    // in turn; the mark belongs where the other compartments are reached.
+    // Off the main thread — this decrypts the contact book, and the drawer
+    // header is composed whether or not the drawer is open.
+    val waiting by produceState(emptyMap<String, Int>(), version) {
+        value = withContext(Dispatchers.IO) {
+            val contacts = ContactStore(context)
+            contacts.all()
+                .filter { it.chatVisible && it.inSeq > contacts.chatSeen(it) }
+                .groupingBy { store.ownerHexOf(it) }
+                .eachCount()
+        }
+    }
+    val unreadLabel = stringResource(R.string.chatlist_unread)
     Row(
         modifier,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         for (p in personas) {
+            val unread = waiting[p.hex] ?: 0
             FilterChip(
                 selected = p.hex == worn,
                 onClick = { store.setWorn(p.hex) },
                 leadingIcon = { PersonaDot(p) },
                 label = { Text(personaLabel(p)) },
+                // The Chat tab's badge, on the hat, so the two add up. Not
+                // the list's dot: the primary's accent is the same colour,
+                // and "Personal" between two identical dots read as trim.
+                // The count is for the eye; a reader gets the word, merged
+                // into the chip's label ahead of the selected state it
+                // already announces.
+                trailingIcon = if (unread > 0) {
+                    {
+                        Badge(Modifier.semantics { contentDescription = unreadLabel }) {
+                            Text(org.ducatproject.ducat.Amounts.count(unread.toLong()))
+                        }
+                    }
+                } else null,
             )
         }
     }
