@@ -75,8 +75,9 @@ fun ChatListScreen(
     }
     var sheet by rememberSaveable { mutableStateOf<Sheet?>(null) }
     var confirm by remember { mutableStateOf<Contact?>(null) }
-    // §16.19: the groups, above the pairwise threads they fan into.
-    val groups = remember(version) { org.ducatproject.ducat.Groups.all(context) }
+    // §16.19: the groups, above the pairwise threads they fan into. Every
+    // group the phone is in; the pass below keeps the worn hat's.
+    val allGroups = remember(version) { org.ducatproject.ducat.Groups.all(context) }
 
     // Most recent conversation first — the list's order *is* its meaning, and
     // "who did I talk to last" is the question it answers. Threads that have
@@ -101,6 +102,12 @@ fun ChatListScreen(
     // Groups with something said since they were last opened
     // ([Groups.markSeen]). Off the same decoded threads as the rows.
     var groupUnread by remember { mutableStateOf<Set<String>>(emptySet()) }
+    // The worn hat's groups, scoped the way the threads are: a group is
+    // joined as one persona (Groups.mineIn) and rides that persona's
+    // pairwise threads, which this list hides under another hat — so the
+    // group row was the one thing of the other compartment's showing here,
+    // with a dot the drawer's chip counted against the other hat.
+    var groups by remember { mutableStateOf<List<org.ducatproject.ducat.Groups.Group>>(emptyList()) }
     LaunchedEffect(version, all) {
         val pass = withContext(kotlinx.coroutines.Dispatchers.IO) {
             // The worn compartment's conversations only, once a second
@@ -113,6 +120,9 @@ fun ChatListScreen(
                 all.filter { personas.ownerHexOf(it) == worn }
             } else all
             val visible = scoped.filter { it.chatVisible }
+            val groups = if (personas.all().size > 1) {
+                allGroups.filter { org.ducatproject.ducat.Groups.mineIn(context, it) == worn }
+            } else allGroups
             val threads = HashMap<String, List<StoredMessage>>()
             fun threadOf(hex: String) = threads.getOrPut(hex) { store.thread(hex) }
             // By the last message a person could have read, not the last
@@ -136,11 +146,11 @@ fun ChatListScreen(
             ListPass(
                 scoped,
                 visible.sortedByDescending { lasts[it.personaHex]?.timestamp ?: 0L },
-                lasts, unread, loud,
+                lasts, unread, groups, loud,
             )
         }
         mine = pass.mine; shown = pass.sorted; rowLast = pass.lasts
-        rowUnread = pass.unread; groupUnread = pass.groupUnread
+        rowUnread = pass.unread; groups = pass.groups; groupUnread = pass.groupUnread
         // Settled means *this* list has landed, not the re-read above: that
         // one never suspends, so it flipped the flag a frame after every
         // composition — one frame of "No conversations" on each visit to
@@ -672,6 +682,7 @@ private class ListPass(
     val sorted: List<Contact>,
     val lasts: Map<String, StoredMessage?>,
     val unread: Set<String>,
+    val groups: List<org.ducatproject.ducat.Groups.Group>,
     val groupUnread: Set<String>,
 )
 
