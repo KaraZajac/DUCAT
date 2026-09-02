@@ -289,6 +289,10 @@ fun LibrarySection() {
         }
     }
 
+    // One read for the screen, not two per publisher per frame: see
+    // Publications.mutedPublishers.
+    val muted = remember(v) { Publications.mutedPublishers(context) }
+
     val shown = rows ?: return
     if (shown.isEmpty()) {
         Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
@@ -322,11 +326,11 @@ fun LibrarySection() {
             item(key = "c:$pub") {
                 androidx.compose.material3.Card(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(horizontal = 14.dp, vertical = 8.dp)) {
-                        PublisherHeader(pub, issues.first().publisherName)
+                        PublisherHeader(pub, issues.first().publisherName, pub in muted)
                         // An unsubscribed shelf keeps what it holds and shows
                         // nothing new — the rows return with Resubscribe,
                         // nothing re-fetched.
-                        if (!Publications.isMuted(context, pub)) {
+                        if (pub !in muted) {
                             issues.forEach { row ->
                                 IssueLine(row, tick)
                             }
@@ -344,9 +348,8 @@ fun LibrarySection() {
 var libraryOpen: (android.content.Context, String, String) -> Unit = { _, _, _ -> }
 
 @Composable
-private fun PublisherHeader(publisherHex: String, publisherName: String?) {
+private fun PublisherHeader(publisherHex: String, publisherName: String?, muted: Boolean) {
     val context = LocalContext.current
-    val muted = Publications.isMuted(context, publisherHex)
     var confirm by remember { mutableStateOf(false) }
 
     if (confirm) {

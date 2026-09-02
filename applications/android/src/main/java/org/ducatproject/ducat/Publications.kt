@@ -106,6 +106,24 @@ object Publications {
         ContactStore.bump()
     }
 
+    /**
+     * Every publisher this phone has unsubscribed from, in one read.
+     *
+     * [isMuted] answers for one publisher and costs a decrypt of the whole
+     * subs blob plus a JSON parse — which is fine for a decision and wrong
+     * for a list. The library asked it twice per publisher per
+     * recomposition, and it recomposes on a half-second heartbeat while
+     * anything is downloading.
+     */
+    fun mutedPublishers(context: Context): Set<String> {
+        val subs = prefs(context).getString("subs", null)
+            ?.let { runCatching { JSONObject(it) }.getOrNull() }
+            ?: return emptySet()
+        return subs.keys().asSequence()
+            .filter { subs.optJSONObject(it)?.optBoolean("muted", false) == true }
+            .toSet()
+    }
+
     fun isMuted(context: Context, publisherHex: String): Boolean =
         prefs(context).getString("subs", null)?.let { JSONObject(it) }
             ?.optJSONObject(publisherHex)?.optBoolean("muted", false) ?: false
