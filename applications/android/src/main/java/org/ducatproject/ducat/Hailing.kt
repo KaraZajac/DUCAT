@@ -295,15 +295,25 @@ object Hailing {
                 wide to s2
             }
         }.getOrNull() ?: return null
-        RideStore(context).save(
-            RideStore.PostedRide(
-                board = s.board, subkey = s.subkey,
-                inboxKey = s.inboxKey, cardUri = s.cardUri,
-                expiry = s.expiry, notice = s.notice,
-                board2 = second.first, subkey2 = second.second,
-                owner = s.owner,
-            ),
-        )
+        // Recorded against the hail as it stands *now*, not the standing this
+        // was handed. The copy is two round trips behind the post, and in
+        // that time the Home card may have moved the notice down a shard —
+        // saving the standing's board here would have put the record back on
+        // the slot it had just left — or the rider may have taken the hail
+        // down, or a driver claimed it, and the record is gone.
+        val rides = RideStore(context)
+        val cur = rides.load()?.takeIf { it.cardUri == s.cardUri }
+        if (cur == null) {
+            // Nothing will ever clear this slot: the record that would have
+            // named it no longer exists. Tombstone it and let the poller's
+            // sweep retire it, the way a take-down that failed offline is.
+            rides.addTombstone(
+                RideStore.Tombstone(second.first, second.second, s.cardUri, s.expiry),
+            )
+            DucatLog.i(TAG, "hail reach: 5-cell copy at ${second.first} landed after the hail came down — retiring it")
+            return null
+        }
+        rides.save(cur.copy(board2 = second.first, subkey2 = second.second))
         DucatLog.i(TAG, "hail reach: 5-cell copy at ${second.first}")
         return second
     }

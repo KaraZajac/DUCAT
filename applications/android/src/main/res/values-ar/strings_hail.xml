@@ -21,6 +21,8 @@
     <!-- Driver: DriveScreen -->
     <string name="hail_rider_declined_title">رفض الراكب</string>
     <string name="hail_rider_declined_body">لم يقبلوا عرضك. زال نداؤهم عن اللوحة.</string>
+    <string name="hail_offer_lapsed_title">لا رد على عرضك</string>
+    <string name="hail_offer_lapsed_body">مرّ نصف ساعة ولم يقل الراكب نعم أو لا. يبقى العرض في الدردشة إن كان لا يزال يريده.</string>
     <string name="hail_ok">حسنًا</string>
     <string name="hail_on_duty">في الخدمة</string>
     <string name="hail_net_wide">شبكة واسعة — عرضها ~%1$s</string>

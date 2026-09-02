@@ -21,6 +21,8 @@
     <!-- Driver: DriveScreen -->
     <string name="hail_rider_declined_title">Пасажир відмовився</string>
     <string name="hail_rider_declined_body">Твою пропозицію відхилили. Їхній виклик зник з дошки.</string>
+    <string name="hail_offer_lapsed_title">Немає відповіді на вашу пропозицію</string>
+    <string name="hail_offer_lapsed_body">Минуло пів години, а пасажир не сказав ні так, ні ні. Пропозиція лишається в чаті, якщо вона йому ще потрібна.</string>
     <string name="hail_ok">Гаразд</string>
     <string name="hail_on_duty">На зміні</string>
     <string name="hail_net_wide">широка сітка — ~%1$s упоперек</string>

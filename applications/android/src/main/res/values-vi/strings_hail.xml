@@ -21,6 +21,8 @@
     <!-- Driver: DriveScreen -->
     <string name="hail_rider_declined_title">Khách đã từ chối</string>
     <string name="hail_rider_declined_body">Họ không nhận đề nghị của bạn. Lượt vẫy của họ đã rời khỏi bảng.</string>
+    <string name="hail_offer_lapsed_title">Không có trả lời cho đề nghị của bạn</string>
+    <string name="hail_offer_lapsed_body">Nửa giờ trôi qua, hành khách chưa nói có hay không. Đề nghị vẫn còn trong cuộc trò chuyện nếu họ vẫn muốn.</string>
     <string name="hail_ok">OK</string>
     <string name="hail_on_duty">Đang trực</string>
     <string name="hail_net_wide">lưới rộng — ngang ~%1$s</string>

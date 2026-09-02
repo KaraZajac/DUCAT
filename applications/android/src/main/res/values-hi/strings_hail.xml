@@ -21,6 +21,8 @@
     <!-- Driver: DriveScreen -->
     <string name="hail_rider_declined_title">राइडर ने मना किया</string>
     <string name="hail_rider_declined_body">उन्होंने आपकी पेशकश छोड़ दी। उनकी पुकार बोर्ड से हट गई है।</string>
+    <string name="hail_offer_lapsed_title">आपके प्रस्ताव का कोई जवाब नहीं</string>
+    <string name="hail_offer_lapsed_body">आधा घंटा बीत गया, सवारी ने न हाँ कहा न ना। अगर वे अब भी चाहें तो प्रस्ताव चैट में बना हुआ है।</string>
     <string name="hail_ok">ठीक है</string>
     <string name="hail_on_duty">ड्यूटी पर</string>
     <string name="hail_net_wide">चौड़ा जाल — आर-पार ~%1$s</string>

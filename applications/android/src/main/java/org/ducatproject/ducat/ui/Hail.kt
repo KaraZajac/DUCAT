@@ -101,6 +101,32 @@ private fun clearAllSlots(context: android.content.Context, p: PostedHail) {
 }
 
 /**
+ * A hail is over — claimed, withdrawn or lapsed: drop the local record, then
+ * retire every slot it stood on.
+ *
+ * The record goes first because this screen rehydrates from it on launch: a
+ * phone killed inside a slow clear came back announcing "waiting for a
+ * driver" over the offer from the driver who had already taken it, and
+ * started polling a slot it had itself spent.
+ *
+ * And the record is *read* before it goes, because the notice in hand can be
+ * behind it. The 5-cell copy lands on its own coroutine, after the sheet has
+ * already handed this card its `posted` — so the copy's slot is known to the
+ * store and not to the value the button holds. Cleared from memory alone,
+ * a withdrawn hail's copy stood on the wide board until it expired: up to
+ * fifteen minutes for a driver kilometres away to take a ride nobody wanted.
+ */
+private fun retireHail(context: android.content.Context, p: PostedHail) {
+    val rides = RideStore(context)
+    val stored = rides.load()?.takeIf { it.cardUri == p.card }?.asPosted()
+    rides.clear()
+    val whole = if (p.cell2 == null && stored?.cell2 != null) {
+        p.copy(cell2 = stored.cell2, subkey2 = stored.subkey2)
+    } else p
+    clearAllSlots(context, whole)
+}
+
+/**
  * Try every recorded clear; drop the ones that verifiably took, and the ones
  * whose notice has expired — sweeps filter expired notices and writers treat
  * their slots as free, so past expiry the board heals itself.
@@ -142,8 +168,18 @@ private fun clearOwnSlot(board: String, subkey: UInt, myCardUri: String): Boolea
  * nothing lower is free or the landing could not be confirmed.
  */
 private fun migrateDown(context: android.content.Context, p: PostedHail): PostedHail? {
-    val base = p.cell.substringBeforeLast('-')
     val myShard = p.cell.substringAfterLast('-').toUIntOrNull() ?: return null
+    val here = p.cell.substringBeforeLast('-')
+    // Where a notice for this corner goes *now*. Boards are named for their
+    // generation and generations turn over weekly (see standNow), and a
+    // driver's sweep reads the generation that is current — so a hail posted
+    // just before the turn lived out the rest of its fifteen minutes on a
+    // board nobody was reading any more. Once the generation has moved,
+    // every shard of the new one is a better address than any of the old,
+    // and the walk covers all of them; otherwise only the shards below ours.
+    val base = org.ducatproject.ducat.standNow(here.substringBefore('@'))
+    val turned = base != here
+    val shards = if (turned) 0u until uniffi.ducat_mobile.maxStandShards() else 0u until myShard
     val now = System.currentTimeMillis() / 1000
     // A notice is signed for its slot, so moving one means signing it again
     // for where it is going. Recovered by opening our own copy, which is the
@@ -153,7 +189,7 @@ private fun migrateDown(context: android.content.Context, p: PostedHail): Posted
     val persona = p.owner.takeIf { it.isNotBlank() }?.let { personas.secretFor(it) }
         ?: personas.secret()
     return runCatching {
-        for (shard in 0u until myShard) {
+        for (shard in shards) {
             val name = uniffi.ducat_mobile.standShardName(base, shard)
             val tip = org.ducatproject.ducat.Beacons.tip(context).toULong()
             val taken = standRead(name).mapNotNull { n ->
@@ -177,6 +213,7 @@ private fun migrateDown(context: android.content.Context, p: PostedHail): Posted
             }.getOrNull() ?: continue
             if (runCatching { standPost(name, free, sealed) }.isSuccess) {
                 clearOwnSlot(p.cell, p.subkey, p.card)
+                if (turned) DucatLog.i(TAG, "hail generation turned over: moved from ${p.cell} to $name")
                 return@runCatching p.copy(cell = name, subkey = free, notice = sealed)
             }
         }
@@ -271,11 +308,12 @@ fun HailCard(
         if (rideOffer != null || parkedOffer != null) return@LaunchedEffect
         val found = withContext(Dispatchers.IO) {
             runCatchingCancellable {
-                val (persona, seq) = offeredMark(context) ?: return@runCatchingCancellable null
+                val mark = offeredMark(context) ?: return@runCatchingCancellable Resumed.Spent
                 val store = ContactStore(context)
-                val c = store.all().firstOrNull { it.personaHex == persona }
-                    ?: return@runCatchingCancellable null
+                val c = store.all().firstOrNull { it.personaHex == mark.personaHex }
+                    ?: return@runCatchingCancellable Resumed.Spent
                 val nowS = System.currentTimeMillis() / 1000
+                val thread = store.thread(mark.personaHex)
                 // A negative seq is a claim with no fare against it yet: the
                 // mark is written when the driver takes the hail, not when
                 // their number arrives, because the two are minutes apart and
@@ -283,17 +321,44 @@ fun HailCard(
                 // offer landed while this screen was elsewhere had no screen
                 // that would show it and no way to say yes, while the driver
                 // sat under "waiting for Jordan" (found live 2026-08-25).
-                val o = if (seq < 0) {
-                    offerAwaiting(store.thread(persona), nowS, HAIL_TTL_SECS)
+                if (mark.seq < 0) {
+                    offerAwaiting(thread, nowS, HAIL_TTL_SECS)
+                        ?.let { return@runCatchingCancellable Resumed.Offer(c, it) }
+                    // Nothing from them yet. Inside the hail's own lifetime
+                    // that is the wait this screen was showing when it died,
+                    // and it goes back up; past it, the driver has had their
+                    // fifteen minutes and the chat is where anything further
+                    // happens.
+                    if (mark.hailAt >= nowS - HAIL_TTL_SECS - HAIL_SKEW_SECS) {
+                        Resumed.Waiting(c, mark.hailAt)
+                    } else Resumed.Spent
                 } else {
-                    offerStillOpen(store.thread(persona), seq, nowS, HAIL_TTL_SECS)
+                    val o = liveOfferAt(thread, mark.seq, nowS, HAIL_TTL_SECS)
+                        ?: return@runCatchingCancellable Resumed.Spent
+                    val answer = answerTo(thread, o)
+                    // Still open — or answered by a yes this device committed
+                    // and never got to announce. A send persists its row
+                    // before the network takes it, so a process death inside
+                    // the accept leaves the thread saying "accepted" while
+                    // nothing that follows a yes (the driver-found card, the
+                    // escrow) ever ran. The offer comes back parked, and
+                    // accepting it again does not send twice: see onAccept.
+                    if (answer == null || (mark.accepting && answer.kind == 7)) {
+                        Resumed.Offer(c, o)
+                    } else Resumed.Spent
                 }
-                o?.let { c to it }
             }.getOrNull()
+        } ?: return@LaunchedEffect
+        when (found) {
+            // Answered or expired while we were away: stop keeping the address.
+            Resumed.Spent -> withContext(Dispatchers.IO) { runCatching { forgetOffered(context) } }
+            is Resumed.Offer ->
+                if (rideOffer == null && parkedOffer == null) parkedOffer = found.contact to found.offer
+            is Resumed.Waiting -> if (awaitingOffer == null) {
+                hailPostedAt = found.hailAt
+                awaitingOffer = found.contact
+            }
         }
-        // Answered or expired while we were away: stop keeping the address.
-        if (found == null) withContext(Dispatchers.IO) { runCatching { forgetOffered(context) } }
-        else if (rideOffer == null && parkedOffer == null) parkedOffer = found
     }
 
     // The wait: the card's inbox answers when a driver claims (§16.9's
@@ -311,29 +376,27 @@ fun HailCard(
             if (tick % 10 == 0 && p.cell.contains('-') && p.notice.isNotEmpty()) {
                 val moved = withContext(Dispatchers.IO) { migrateDown(context, p) }
                 if (moved != null) {
-                    RideStore(context).save(
-                        RideStore.PostedRide(
-                            board = moved.cell, subkey = moved.subkey,
-                            inboxKey = moved.inboxKey, cardUri = moved.card,
-                            expiry = moved.expiry, notice = moved.notice,
-                            owner = moved.owner,
-                        )
-                    )
+                    // The 5-cell copy comes across unchanged: it is not the
+                    // slot that moved, and it may be known only to the store
+                    // (see [retireHail]). A record saved without it forgot
+                    // the copy the moment the notice stepped down a shard.
+                    val copy = rides.load()?.takeIf { it.cardUri == p.card }
+                    val next = if (moved.cell2 == null && copy?.board2 != null) {
+                        moved.copy(cell2 = copy.board2, subkey2 = copy.subkey2)
+                    } else moved
+                    rides.save(next.asStored())
                     DucatLog.i(TAG, "hail moved down to ${moved.cell} slot ${moved.subkey}")
                     // Reassigning `posted` restarts this effect with the new
                     // tenancy — and everything else reading it (the take-down
                     // button above all) must see the slot we actually hold.
-                    posted = moved
+                    posted = next
                     break
                 }
             }
             if (System.currentTimeMillis() / 1000 > p.expiry) {
                 // Dead either way: retire the notice and say so. The clear
                 // rides hailScope so leaving Home cannot cancel it.
-                hailScope.launch {
-                    rides.clear()
-                    clearAllSlots(context, p)
-                }
+                hailScope.launch { retireHail(context, p) }
                 DucatLog.i(TAG, "hail expired unclaimed")
                 status = context.getString(R.string.hail_expired_unclaimed)
                 expired = true
@@ -347,25 +410,18 @@ fun HailCard(
                 }.getOrNull()
             }
             if (claimant != null) {
-                // Stewardship (§15.12): the notice is spent; clear the slot.
-                //
-                // The local record goes first. Clearing the board slot is a
-                // DHT write and can take seconds, and this screen rehydrates
-                // from the local record on launch: a phone killed inside that
-                // window came back announcing "waiting for a driver" directly
-                // above the offer from the driver who had already taken it,
-                // and started polling a slot it had itself spent.
-                hailScope.launch {
-                    rides.clear()
-                    clearAllSlots(context, p)
-                }
+                // Stewardship (§15.12): the notice is spent; clear the slots
+                // — record first, for the reason [retireHail] gives.
+                hailScope.launch { retireHail(context, p) }
                 val d = ContactStore(context).all().firstOrNull { it.personaHex == claimant }
                 DucatLog.i(TAG, "hail claimed by ${d?.displayName() ?: "a driver"}")
                 hailPostedAt = p.expiry - HAIL_TTL_SECS
                 // Durable from here, not from the offer screen. Everything
                 // above this line is Compose state that a backgrounded app
                 // loses; the driver has spent the hail and is committed.
-                if (d != null) runCatching { rememberOffered(context, d.personaHex, -1L) }
+                if (d != null) {
+                    runCatching { rememberOffered(context, d.personaHex, -1L, hailAt = hailPostedAt) }
+                }
                 posted = null
                 // "Posted. Waiting for a driver…" is not true any more, and
                 // it was left standing directly under "Sam took your hail —
@@ -504,10 +560,7 @@ fun HailCard(
                 onClick = {
                     val gone = p
                     posted = null; status = null
-                    hailScope.launch {
-                        rides.clear()
-                        clearAllSlots(context, gone)
-                    }
+                    hailScope.launch { retireHail(context, gone) }
                 },
                 modifier = Modifier.fillMaxWidth(),
             ) { Text(stringResource(R.string.hail_take_it_down)) }
@@ -528,8 +581,14 @@ fun HailCard(
             OutlinedButton(
                 // Sends nothing on purpose: the slot is already cleared and
                 // the thread stands — the driver can still say hello there.
-                // This only stops the wait.
-                onClick = { awaitingOffer = null; status = null },
+                // This only stops the wait — on this launch and the next:
+                // the mark keeps the driver's address, so a fare that lands
+                // after this can still be parked, but it drops the hail's
+                // moment, so a restart does not put the wait back up.
+                onClick = {
+                    awaitingOffer = null; status = null
+                    runCatching { rememberOffered(context, d.personaHex, -1L) }
+                },
                 modifier = Modifier.fillMaxWidth(),
             ) { Text(stringResource(R.string.hail_cancel)) }
         }
@@ -603,30 +662,50 @@ fun HailCard(
             onAccept = {
                 rideOffer = null
                 error = null
-                status = context.getString(R.string.hail_accept_sending, d.displayName())
+                status = context.getString(R.string.hail_accept_sending, isolate(d.displayName()))
                 // The accept echoes the offer's fare and names its seq —
                 // that echo is what lets the driver's client hold the two
                 // to the same number. On hailScope: leaving Home must not
                 // lose the yes mid-send.
                 //
-                // Nothing is committed until the yes has left the phone.
+                // Nothing is announced until the yes has left the phone.
                 // Forgetting the offer and announcing the driver before the
                 // send meant a write the network refused left the rider
                 // told "Sam is on the way" while Sam was still waiting for
                 // an answer that no screen could give any more. A failed
                 // send puts the offer back where the Back button parks it.
+                //
+                // But "failed" is not "not sent". A send persists its row —
+                // seq, bytes, all of it — before it writes the slot, so a
+                // write the network refused leaves the yes committed in the
+                // thread and its bytes in the pending slot, which the poll
+                // clock retries. Accepting the parked offer again after that
+                // used to seal a second yes under the next seq: two "You
+                // accepted the ride" bubbles on both phones. The thread is
+                // asked first now, and a yes already in it goes straight on
+                // to what follows a yes.
                 hailScope.launch {
+                    rememberAccepting(context)
                     val sent = runCatchingCancellable {
-                        Mailbox.send(
-                            context, d, context.getString(R.string.hail_accept_message),
-                            kind = 7, amountPxmr = offer.amountPxmr,
-                            reSeq = offer.seq,
-                        )
+                        val already = answerTo(ContactStore(context).thread(d.personaHex), offer)
+                            ?.takeIf { it.kind == 7 }
+                        if (already != null) {
+                            DucatLog.i(TAG, "ride accept: seq ${already.seq} is already in the thread" +
+                                if (already.delivered) "" else " (still to deliver)")
+                        } else {
+                            Mailbox.send(
+                                context, d, context.getString(R.string.hail_accept_message),
+                                kind = 7, amountPxmr = offer.amountPxmr,
+                                reSeq = offer.seq,
+                            )
+                        }
                     }.onFailure { DucatLog.w(TAG, "ride accept: ${it.message}") }
                     if (sent.isFailure) {
                         withContext(Dispatchers.Main) {
                             status = null
-                            error = context.getString(R.string.hail_accept_failed, d.displayName())
+                            error = context.getString(
+                                R.string.hail_accept_failed, isolate(d.displayName()),
+                            )
                             if (rideOffer == null && parkedOffer == null) parkedOffer = d to offer
                         }
                         return@launch
@@ -734,6 +813,9 @@ private data class PostedHail(
 private fun RideStore.PostedRide.asPosted() =
     PostedHail(board, subkey, inboxKey, cardUri, expiry, notice, board2, subkey2, owner)
 
+private fun PostedHail.asStored() =
+    RideStore.PostedRide(cell, subkey, inboxKey, card, expiry, notice, cell2, subkey2, owner)
+
 /**
  * The driver's offer in flight: persona, our seq, the fare.
  *
@@ -779,6 +861,7 @@ private fun clearDriveOffer(context: android.content.Context) {
         .remove("driveoffer_persona")
         .remove("driveoffer_seq")
         .remove("driveoffer_fare")
+        .remove("driveoffer_sent")
         .apply()
 }
 
@@ -796,23 +879,72 @@ private fun clearDriveOffer(context: android.content.Context) {
  * Only the address of the message is kept. The message itself lives in the
  * thread, which is where the amount must be read from anyway — a second copy
  * of a fare is a second thing that can disagree about it.
+ *
+ * Two more facts ride beside the address, each for a restart at a different
+ * moment. [hailAt] — when the hail went up — lets a wait that had no offer
+ * yet be resumed rather than abandoned: killed between the claim and the
+ * fare, the screen used to conclude "nothing to show" and drop the mark, so
+ * the fare that landed a minute later reached the rider as a chat bubble
+ * with no button on it. [accepting] is written the moment the rider says yes
+ * and cleared once the yes has gone and the ride is announced, so a restart
+ * inside that send does not read its own committed accept as "answered, done"
+ * and skip the escrow the yes was supposed to start.
  */
-private fun rememberOffered(context: android.content.Context, personaHex: String, seq: Long) {
+private data class OfferMark(
+    val personaHex: String,
+    val seq: Long,
+    /** Epoch seconds the hail this belongs to went up; 0 when not recorded. */
+    val hailAt: Long,
+    /** This device tapped Accept and has not yet announced the ride. */
+    val accepting: Boolean,
+)
+
+private fun rememberOffered(
+    context: android.content.Context,
+    personaHex: String,
+    seq: Long,
+    hailAt: Long = 0L,
+) {
     ridePrefs(context).edit()
         .putString("takenoffer_persona", personaHex)
         .putLong("takenoffer_seq", seq)
+        .putLong("takenoffer_hail", hailAt)
+        .remove("takenoffer_accepting")
         .apply()
+}
+
+/** The yes is on its way — see [OfferMark.accepting]. */
+private fun rememberAccepting(context: android.content.Context) {
+    ridePrefs(context).edit().putBoolean("takenoffer_accepting", true).apply()
 }
 
 private fun forgetOffered(context: android.content.Context) {
     ridePrefs(context).edit()
-        .remove("takenoffer_persona").remove("takenoffer_seq").apply()
+        .remove("takenoffer_persona").remove("takenoffer_seq")
+        .remove("takenoffer_hail").remove("takenoffer_accepting")
+        .apply()
 }
 
-private fun offeredMark(context: android.content.Context): Pair<String, Long>? {
+private fun offeredMark(context: android.content.Context): OfferMark? {
     val p = ridePrefs(context)
     val persona = p.getString("takenoffer_persona", null) ?: return null
-    return persona to p.getLong("takenoffer_seq", 0)
+    return OfferMark(
+        persona, p.getLong("takenoffer_seq", 0),
+        p.getLong("takenoffer_hail", 0L), p.getBoolean("takenoffer_accepting", false),
+    )
+}
+
+/** What the mark resolves to on a fresh screen. */
+private sealed class Resumed {
+    /** Answered, lapsed, or never anything: the mark is spent. */
+    object Spent : Resumed()
+    /** A fare still owed an answer. */
+    class Offer(
+        val contact: org.ducatproject.ducat.Contact,
+        val offer: StoredMessage,
+    ) : Resumed()
+    /** The driver claimed the hail; their fare has not come yet. */
+    class Waiting(val contact: org.ducatproject.ducat.Contact, val hailAt: Long) : Resumed()
 }
 
 
@@ -902,6 +1034,7 @@ fun DriveScreen() {
         mutableStateOf<Pair<org.ducatproject.ducat.Contact, Long>?>(null)
     }
     var riderDeclined by remember { mutableStateOf(false) }
+    var offerLapsed by remember { mutableStateOf(false) }
     // What "Drive here" was doing when it stopped to ask for location, so a
     // yes carries straight on instead of leaving the driver to tap the same
     // button again — the dialog used to close onto a screen that had not
@@ -1096,6 +1229,21 @@ fun DriveScreen() {
         val po = pendingOffer ?: return@LaunchedEffect
         while (true) {
             delay(3_000)
+            // An offer stops being answerable on the rider's side once it is
+            // older than a hail's life plus the skew grace (offerStillOpen);
+            // past the same line here there is no word left to wait for. The
+            // wait used to run until the process died and come back on
+            // relaunch — a driver whose rider walked off carried "waiting
+            // for Jordan" on the map for the rest of the shift.
+            if (po.sentAt > 0 &&
+                System.currentTimeMillis() / 1000 > po.sentAt + HAIL_TTL_SECS + HAIL_SKEW_SECS
+            ) {
+                clearDriveOffer(context)
+                pendingOffer = null
+                offerLapsed = true
+                DucatLog.i(TAG, "ride offer lapsed unanswered")
+                break
+            }
             val answer = withContext(Dispatchers.IO) {
                 runCatchingCancellable {
                     Mailbox.poll(context)
@@ -1143,6 +1291,16 @@ fun DriveScreen() {
             text = { Text(stringResource(R.string.hail_rider_declined_body)) },
             confirmButton = {
                 TextButton(onClick = { riderDeclined = false }) { Text(stringResource(R.string.hail_ok)) }
+            },
+        )
+    }
+    if (offerLapsed) {
+        AlertDialog(
+            onDismissRequest = { offerLapsed = false },
+            title = { Text(stringResource(R.string.hail_offer_lapsed_title)) },
+            text = { Text(stringResource(R.string.hail_offer_lapsed_body)) },
+            confirmButton = {
+                TextButton(onClick = { offerLapsed = false }) { Text(stringResource(R.string.hail_ok)) }
             },
         )
     }
@@ -1340,13 +1498,20 @@ fun DriveScreen() {
             ) {
                 Column(Modifier.weight(1f)) {
                     Text(stringResource(R.string.hail_on_duty), style = MaterialTheme.typography.titleMedium)
+                    // The net is the range that was chosen, not the size of
+                    // the watch list: driveHere adds the nine 5-cell boards
+                    // to every range as background reach, so counting boards
+                    // called a one-cell shift "watching ~3.5 km across". A
+                    // board typed in by hand is one cell whatever the range.
                     val n = watching?.size ?: 0
                     val distCtx = androidx.compose.ui.platform.LocalContext.current
                     Text(
                         when {
-                            n >= 25 -> stringResource(R.string.hail_net_wide,
+                            n <= 1 -> stringResource(R.string.hail_net_here,
+                                org.ducatproject.ducat.Units.distance(distCtx, 1200.0))
+                            range >= 5 -> stringResource(R.string.hail_net_wide,
                                 org.ducatproject.ducat.Units.distance(distCtx, 6000.0))
-                            n >= 9 -> stringResource(R.string.hail_net_nearby,
+                            range >= 3 -> stringResource(R.string.hail_net_nearby,
                                 org.ducatproject.ducat.Units.distance(distCtx, 3500.0))
                             else -> stringResource(R.string.hail_net_here,
                                 org.ducatproject.ducat.Units.distance(distCtx, 1200.0))
@@ -1388,8 +1553,11 @@ fun DriveScreen() {
                 }
             }
             pendingOffer?.let {
-                OfferWaitCard(it, Modifier.fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp))
+                OfferWaitCard(
+                    it,
+                    onStop = { clearDriveOffer(context); pendingOffer = null },
+                    Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+                )
             }
             androidx.compose.foundation.layout.Box(Modifier.weight(1f).fillMaxWidth()) {
                 // Pins keep the index of the notice they stand for: a hail
@@ -1493,7 +1661,11 @@ fun DriveScreen() {
         )
         pendingOffer?.let {
             Spacer(Modifier.height(12.dp))
-            OfferWaitCard(it, Modifier.fillMaxWidth())
+            OfferWaitCard(
+                it,
+                onStop = { clearDriveOffer(context); pendingOffer = null },
+                Modifier.fillMaxWidth(),
+            )
         }
         Spacer(Modifier.height(16.dp))
 
@@ -1700,6 +1872,15 @@ internal fun offerStillOpen(
     seq: Long,
     nowSecs: Long,
     ttlSecs: Long,
+): org.ducatproject.ducat.StoredMessage? =
+    liveOfferAt(thread, seq, nowSecs, ttlSecs)?.takeIf { answerTo(thread, it) == null }
+
+/** The offer at [seq], if it is young enough to still mean something. */
+internal fun liveOfferAt(
+    thread: List<org.ducatproject.ducat.StoredMessage>,
+    seq: Long,
+    nowSecs: Long,
+    ttlSecs: Long,
 ): org.ducatproject.ducat.StoredMessage? {
     val o = thread
         .filter { !it.outgoing && it.kind == 6 && it.seq == seq }
@@ -1708,13 +1889,25 @@ internal fun offerStillOpen(
     // driver honestly minutes slow must not read as expired — and our own
     // answer honestly stamped "before" a fast driver's offer must still
     // count as an answer, or a settled fare comes back from the dead.
-    if (o.timestamp < nowSecs - ttlSecs - HAIL_SKEW_SECS) return null
-    val answered = thread.any {
-        it.outgoing && it.reSeq == o.seq &&
-            it.timestamp >= o.timestamp - HAIL_SKEW_SECS &&
-            (it.kind == 7 || it.kind == 5)
-    }
-    return o.takeIf { !answered }
+    return o.takeIf { it.timestamp >= nowSecs - ttlSecs - HAIL_SKEW_SECS }
+}
+
+/**
+ * This device's answer to offer [o], if it gave one: the accept or decline
+ * naming the offer's seq, stamped no earlier than the offer less skew.
+ *
+ * Delivered or not. A send's row is in the thread before the network takes
+ * its bytes, and stays there — the same seq, the same bytes, retried on the
+ * poll clock — so an undelivered yes is still the answer this device gave,
+ * and the one it must not give twice.
+ */
+internal fun answerTo(
+    thread: List<org.ducatproject.ducat.StoredMessage>,
+    o: org.ducatproject.ducat.StoredMessage,
+): org.ducatproject.ducat.StoredMessage? = thread.firstOrNull {
+    it.outgoing && it.reSeq == o.seq &&
+        it.timestamp >= o.timestamp - HAIL_SKEW_SECS &&
+        (it.kind == 7 || it.kind == 5)
 }
 
 /**
@@ -1737,13 +1930,7 @@ internal fun offerAwaiting(
             it.timestamp >= nowSecs - ttlSecs - HAIL_SKEW_SECS
     }
     .sortedByDescending { it.timestamp }
-    .firstOrNull { o ->
-        thread.none {
-            it.outgoing && it.reSeq == o.seq &&
-                it.timestamp >= o.timestamp - HAIL_SKEW_SECS &&
-                (it.kind == 7 || it.kind == 5)
-        }
-    }
+    .firstOrNull { o -> answerTo(thread, o) == null }
 
 /** The kind-6 offers a thread already held, as (seq, timestamp) pairs. */
 internal fun rideOfferMark(thread: List<org.ducatproject.ducat.StoredMessage>): Set<Pair<Long, Long>> =
@@ -1950,15 +2137,19 @@ private fun FareDetail(
                                 val cur = Amounts.currency(context)
                                 // In the reader's money, not the table's: this
                                 // printed a dollar figure beside their own
-                                // currency code.
-                                val uberDriver =
-                                    org.ducatproject.ducat.Fare.usdToReader(context, uberDriverUsd)
-                                Text(
-                                    stringResource(R.string.hail_keep_all_vs_rideshare,
-                                        cur, uberDriver ?: 0.0),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.ducat.settled,
-                                )
+                                // currency code. And no rate means no
+                                // comparison, not "~USD 0": a fresh install
+                                // with nothing cached yet told every driver a
+                                // rideshare would have paid them nothing.
+                                org.ducatproject.ducat.Fare.usdToReader(context, uberDriverUsd)
+                                    ?.let { uberDriver ->
+                                        Text(
+                                            stringResource(R.string.hail_keep_all_vs_rideshare,
+                                                cur, uberDriver),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.ducat.settled,
+                                        )
+                                    }
                             }
                         } ?: Text(stringResource(R.string.hail_rider_asks_quote),
                             style = MaterialTheme.typography.titleMedium)
@@ -2030,7 +2221,11 @@ private fun FareDetail(
  * decides, and a full-screen wait would say otherwise.
  */
 @Composable
-private fun OfferWaitCard(po: DriveOffer, modifier: Modifier = Modifier) {
+private fun OfferWaitCard(
+    po: DriveOffer,
+    onStop: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val context = LocalContext.current
     val name = remember(po.personaHex) {
         ContactStore(context).all()
@@ -2041,11 +2236,20 @@ private fun OfferWaitCard(po: DriveOffer, modifier: Modifier = Modifier) {
             Text(
                 stringResource(R.string.hail_offered_waiting,
                     Amounts.show(context, po.farePxmr).primary,
-                    name ?: stringResource(R.string.hail_the_rider)),
+                    name?.let { isolate(it) } ?: stringResource(R.string.hail_the_rider)),
                 style = MaterialTheme.typography.bodyMedium,
             )
             Spacer(Modifier.height(6.dp))
             DucatBar(progress = null)
+            // The rider's wait has had a Cancel all along; this one had none,
+            // so a driver whose rider went quiet either took another fare or
+            // carried the card. Sends nothing, like the rider's: the offer
+            // stands in the thread and a late yes still lands there — the
+            // escrow banner in the chat picks it up. This only stops the wait.
+            TextButton(
+                onClick = onStop,
+                modifier = Modifier.align(Alignment.End),
+            ) { Text(stringResource(R.string.hail_cancel)) }
         }
     }
 }
@@ -2239,14 +2443,18 @@ fun HailSheet(
                                 r.seconds / 60),
                             style = MaterialTheme.typography.titleMedium,
                         )
-                        est?.let { (fiat, _) ->
+                        if (est != null) {
                             val (uberUsd, driverUsd, taxiUsd) =
                                 org.ducatproject.ducat.Fare.competitors(context, r.meters, r.seconds)
-                            fun here(d: Double) =
-                                org.ducatproject.ducat.Fare.usdToReader(context, d) ?: 0.0
-                            Text(
+                            val uber = org.ducatproject.ducat.Fare.usdToReader(context, uberUsd)
+                            val taxi = org.ducatproject.ducat.Fare.usdToReader(context, taxiUsd)
+                            val driver = org.ducatproject.ducat.Fare.usdToReader(context, driverUsd)
+                            // The estimate needed the same two rates, so these
+                            // are only null if the cache went between the two
+                            // reads — and then the line goes, not "~USD 0".
+                            if (uber != null && taxi != null && driver != null) Text(
                                 stringResource(R.string.hail_vs_competitors,
-                                    cur, here(uberUsd), here(taxiUsd), here(driverUsd)),
+                                    cur, uber, taxi, driver),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.ducat.settled,
                             )

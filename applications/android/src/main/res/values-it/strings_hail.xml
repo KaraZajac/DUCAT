@@ -21,6 +21,8 @@
     <!-- Autista: DriveScreen -->
     <string name="hail_rider_declined_title">Il passeggero ha rifiutato</string>
     <string name="hail_rider_declined_body">Ha lasciato perdere la tua offerta. La sua chiamata è sparita dalla bacheca.</string>
+    <string name="hail_offer_lapsed_title">Nessuna risposta alla tua offerta</string>
+    <string name="hail_offer_lapsed_body">Dopo mezz\'ora il passeggero non ha detto né sì né no. L\'offerta resta nella chat, se la vuole ancora.</string>
     <string name="hail_ok">OK</string>
     <string name="hail_on_duty">In servizio</string>
     <string name="hail_net_wide">rete larga — ~%1$s di diametro</string>

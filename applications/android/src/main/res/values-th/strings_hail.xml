@@ -21,6 +21,8 @@
     <!-- Driver: DriveScreen -->
     <string name="hail_rider_declined_title">ผู้โดยสารปฏิเสธ</string>
     <string name="hail_rider_declined_body">เขาไม่รับข้อเสนอของคุณ การเรียกของเขาหายไปจากกระดานแล้ว</string>
+    <string name="hail_offer_lapsed_title">ไม่มีคำตอบสำหรับข้อเสนอของคุณ</string>
+    <string name="hail_offer_lapsed_body">ผ่านไปครึ่งชั่วโมง ผู้โดยสารยังไม่ตอบรับหรือปฏิเสธ ข้อเสนอยังอยู่ในแชทหากยังต้องการ</string>
     <string name="hail_ok">ตกลง</string>
     <string name="hail_on_duty">กำลังรับงาน</string>
     <string name="hail_net_wide">วงกว้าง — กว้างราว %1$s</string>

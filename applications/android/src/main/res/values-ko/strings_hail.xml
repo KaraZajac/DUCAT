@@ -21,6 +21,8 @@
     <!-- Driver: DriveScreen -->
     <string name="hail_rider_declined_title">승객이 거절했어요</string>
     <string name="hail_rider_declined_body">제안을 넘겼어요. 그 호출은 게시판에서 사라졌어요.</string>
+    <string name="hail_offer_lapsed_title">제안에 답이 없습니다</string>
+    <string name="hail_offer_lapsed_body">30분이 지났지만 승객이 예도 아니오도 하지 않았습니다. 아직 원한다면 제안은 대화에 남아 있습니다.</string>
     <string name="hail_ok">확인</string>
     <string name="hail_on_duty">운행 중</string>
     <string name="hail_net_wide">넓은 그물 — 약 %1$s 범위</string>

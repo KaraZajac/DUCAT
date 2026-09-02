@@ -21,6 +21,8 @@
     <!-- Driver: DriveScreen -->
     <string name="hail_rider_declined_title">Yolcu reddetti</string>
     <string name="hail_rider_declined_body">Teklifini geri çevirdiler. Çağrıları panodan kalktı.</string>
+    <string name="hail_offer_lapsed_title">Teklifine yanıt yok</string>
+    <string name="hail_offer_lapsed_body">Yarım saat geçti, yolcu ne evet dedi ne hayır. Hâlâ isterse teklif sohbette duruyor.</string>
     <string name="hail_ok">Tamam</string>
     <string name="hail_on_duty">Görevde</string>
     <string name="hail_net_wide">geniş ağ — ~%1$s genişliğinde</string>

@@ -21,6 +21,8 @@
     <!-- Driver: DriveScreen -->
     <string name="hail_rider_declined_title">Penumpang menolak</string>
     <string name="hail_rider_declined_body">Mereka melewatkan tawaranmu. Panggilan mereka sudah hilang dari papan.</string>
+    <string name="hail_offer_lapsed_title">Tidak ada jawaban atas tawaranmu</string>
+    <string name="hail_offer_lapsed_body">Setengah jam berlalu, penumpang belum bilang ya atau tidak. Tawaran tetap ada di obrolan kalau mereka masih mau.</string>
     <string name="hail_ok">OK</string>
     <string name="hail_on_duty">Sedang bertugas</string>
     <string name="hail_net_wide">jaring lebar — ~%1$s melintang</string>

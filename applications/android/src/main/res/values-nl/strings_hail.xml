@@ -21,6 +21,8 @@
     <!-- Driver: DriveScreen -->
     <string name="hail_rider_declined_title">Passagier heeft afgewezen</string>
     <string name="hail_rider_declined_body">Ze zijn niet op je bod ingegaan. Hun oproep is van het bord verdwenen.</string>
+    <string name="hail_offer_lapsed_title">Geen antwoord op je aanbod</string>
+    <string name="hail_offer_lapsed_body">Een half uur later heeft de passagier ja noch nee gezegd. Het aanbod blijft in de chat staan als die het nog wil.</string>
     <string name="hail_ok">OK</string>
     <string name="hail_on_duty">In dienst</string>
     <string name="hail_net_wide">wijd net — ~%1$s breed</string>

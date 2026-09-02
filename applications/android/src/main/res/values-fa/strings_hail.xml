@@ -21,6 +21,8 @@
     <!-- Driver: DriveScreen -->
     <string name="hail_rider_declined_title">مسافر رد کرد</string>
     <string name="hail_rider_declined_body">پیشنهادت را نپذیرفت. درخواستش از تابلو رفته است.</string>
+    <string name="hail_offer_lapsed_title">پاسخی به پیشنهادت نیامد</string>
+    <string name="hail_offer_lapsed_body">نیم ساعت گذشت و مسافر نه بله گفت نه نه. پیشنهاد در گفتگو می‌ماند، اگر هنوز بخواهد.</string>
     <string name="hail_ok">باشه</string>
     <string name="hail_on_duty">سر کار</string>
     <string name="hail_net_wide">تور گسترده — حدود %1$s پهنا</string>

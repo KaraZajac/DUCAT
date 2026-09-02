@@ -21,6 +21,8 @@
     <!-- Driver: DriveScreen -->
     <string name="hail_rider_declined_title">Pasażer odmówił</string>
     <string name="hail_rider_declined_body">Nie skorzystali z twojej oferty. Ich wezwanie zniknęło z tablicy.</string>
+    <string name="hail_offer_lapsed_title">Brak odpowiedzi na twoją ofertę</string>
+    <string name="hail_offer_lapsed_body">Po pół godzinie pasażer nie powiedział ani tak, ani nie. Oferta zostaje w czacie, jeśli nadal jej chce.</string>
     <string name="hail_ok">OK</string>
     <string name="hail_on_duty">Na służbie</string>
     <string name="hail_net_wide">szeroka sieć — ~%1$s średnicy</string>

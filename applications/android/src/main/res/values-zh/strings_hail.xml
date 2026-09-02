@@ -21,6 +21,8 @@
     <!-- Driver: DriveScreen -->
     <string name="hail_rider_declined_title">乘客拒绝了</string>
     <string name="hail_rider_declined_body">对方没要你的报价。这条叫车已从板上消失。</string>
+    <string name="hail_offer_lapsed_title">你的报价没有回应</string>
+    <string name="hail_offer_lapsed_body">半小时过去了，乘客既没说好也没说不。如果他们还想要，报价仍留在聊天里。</string>
     <string name="hail_ok">好</string>
     <string name="hail_on_duty">接单中</string>
     <string name="hail_net_wide">大范围 — 横跨约 %1$s</string>

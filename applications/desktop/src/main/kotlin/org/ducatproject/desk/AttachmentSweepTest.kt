@@ -44,8 +44,15 @@ fun main() {
     store.append(jo, msg(1, "keep-jos-picture"))
 
     val att = java.io.File(dir, "files/att").apply { mkdirs() }
-    fun file(name: String, bytes: Int) =
-        java.io.File(att, name).apply { writeBytes(ByteArray(bytes)) }
+    // Every file here is old enough to have settled: a file nothing mentions
+    // is presumed a send in progress for an hour after it was written, since
+    // the bytes land on disk before the message that names them is appended.
+    val twoHoursAgo = System.currentTimeMillis() - 2 * 60 * 60 * 1000L
+    fun file(name: String, bytes: Int, at: Long = twoHoursAgo) =
+        java.io.File(att, name).apply {
+            writeBytes(ByteArray(bytes))
+            check(setLastModified(at)) { "ATTSWEEP_FAIL could not age $name" }
+        }
 
     file("keep-sams-picture", 3000)
     file("keep-jos-picture", 5000)
@@ -53,6 +60,10 @@ fun main() {
     // was cleared. Nothing can ever show these again.
     file("orphan-expired", 4000)
     file("orphan-cleared", 6000)
+    // Written a moment ago and mentioned by nothing yet: an upload whose
+    // message has not been appended. Sweeping it would delete the picture
+    // out from under the bubble it is about to belong to.
+    file("upload-in-progress", 7000, at = System.currentTimeMillis())
 
     val freed = Mailbox.sweepAttachments(ctx)
     check(freed == 10_000L) { "ATTSWEEP_FAIL reclaimed $freed, expected 10000" }
@@ -66,6 +77,9 @@ fun main() {
         check(java.io.File(att, n).exists()) {
             "ATTSWEEP_FAIL the sweep took '$n', which no one can fetch again"
         }
+    }
+    check(java.io.File(att, "upload-in-progress").exists()) {
+        "ATTSWEEP_FAIL the sweep took a send in progress"
     }
     // A second pass finds nothing, or the sweep is doing work every poll.
     check(Mailbox.sweepAttachments(ctx) == 0L) { "ATTSWEEP_FAIL not idempotent" }
@@ -94,5 +108,5 @@ fun main() {
         "ATTSWEEP_FAIL one byte over the budget was let through"
     }
 
-    println("ATTSWEEP_OK freed=10000 kept=2 idempotent room=budget+floor")
+    println("ATTSWEEP_OK freed=10000 kept=2 inflight=kept idempotent room=budget+floor")
 }
