@@ -399,7 +399,15 @@ private fun AmountStep(
     var fiatEntry by rememberSaveable { mutableStateOf(Amounts.enterFiat(context)) }
     val rate = remember(version) { RateStore(context).cached()?.first }
     val cur = remember { Amounts.currency(context) }
-    var priority by remember { mutableIntStateOf(1) }
+    // Saveable: the speed prices the fee, and a rotation that reset it to
+    // Normal under a "Slow" the person had chosen changed what the send
+    // would cost without a word.
+    var priority by rememberSaveable { mutableIntStateOf(1) }
+    // Whether typed money is the local currency *right now*: the entry
+    // preference, and a rate to convert at. The two came apart in places —
+    // a tip labelled in dollars was computed as nothing when the rate was
+    // missing, while the amount beside it fell back to XMR.
+    val fiatLive = fiatEntry && rate != null && rate > 0
 
     // A prefilled amount is a *bill* — somebody else's number, answered rather
     // than edited. What stays yours is the tip. Editing the bill down and
@@ -503,17 +511,17 @@ private fun AmountStep(
     // Sticky: once someone has asked for the maximum, changing the speed
     // changes the fee, and the amount has to follow or the screen is showing a
     // number that is no longer the maximum it just promised.
-    var maxLocked by remember { mutableStateOf(false) }
+    var maxLocked by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(version, priority) {
         maxPxmr = withContext(Dispatchers.IO) { Wallet.maxSendable(context, priority) }
     }
-    LaunchedEffect(maxPxmr, maxLocked, fiatEntry) {
+    LaunchedEffect(maxPxmr, maxLocked, fiatLive) {
         if (maxLocked && maxPxmr > 0) {
             // This text is re-parsed as the amount, so it is pinned to the
             // dot the parser expects rather than the locale's separator, and
             // floored to the cent — a rounded-up cent would convert back to
             // more than the maximum just promised.
-            typed = if (fiatEntry && rate != null) {
+            typed = if (fiatLive) {
                 "%.2f".format(
                     java.util.Locale.US,
                     kotlin.math.floor(maxPxmr / 1e12 * rate * 100) / 100,
@@ -522,18 +530,18 @@ private fun AmountStep(
         }
     }
 
-    val tipPxmr = remember(tipTyped, fiatEntry, rate) {
+    val tipPxmr = remember(tipTyped, fiatLive, rate) {
         val v = moneyText(tipTyped).toBigDecimalOrNull() ?: return@remember 0L
-        val xmr = if (fiatEntry && rate != null && rate > 0) {
-            v.divide(BigDecimal.valueOf(rate), 12, java.math.RoundingMode.DOWN)
-        } else if (fiatEntry) return@remember 0L else v
+        val xmr = if (fiatLive) {
+            v.divide(BigDecimal.valueOf(rate!!), 12, java.math.RoundingMode.DOWN)
+        } else v
         Amounts.toPxmr(xmr)?.coerceAtLeast(0) ?: 0L
     }
-    val pxmr = remember(typed, fiatEntry, rate, tipPxmr, billed) {
+    val pxmr = remember(typed, fiatLive, rate, tipPxmr, billed) {
         if (billed) return@remember prefillAmountPxmr + tipPxmr
         val v = moneyText(typed).toBigDecimalOrNull() ?: return@remember null
-        val xmr = if (fiatEntry && rate != null && rate > 0) {
-            v.divide(BigDecimal.valueOf(rate), 12, java.math.RoundingMode.DOWN)
+        val xmr = if (fiatLive) {
+            v.divide(BigDecimal.valueOf(rate!!), 12, java.math.RoundingMode.DOWN)
         } else v
         // toPxmr, not toLong: toLong keeps the low 64 bits of an overflow,
         // and an absurd figure typed by mistake came out as a plausible one.
@@ -650,7 +658,7 @@ private fun AmountStep(
             OutlinedTextField(
                 value = tipTyped,
                 onValueChange = { tipTyped = it.filter { c -> Amounts.isNumberChar(c) } },
-                label = { Text(stringResource(R.string.pay_add_tip, if (fiatEntry) cur else "XMR")) },
+                label = { Text(stringResource(R.string.pay_add_tip, if (fiatLive) cur else "XMR")) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth(),
@@ -692,7 +700,7 @@ private fun AmountStep(
                     typed = ""
                     maxLocked = wasMax
                 },
-                    label = { Text(if (fiatEntry) cur else "XMR") },
+                    label = { Text(if (fiatLive) cur else "XMR") },
                     trailingIcon = { Icon(Icons.Filled.SwapVert, null, Modifier.size(16.dp)) },
                 )
             } else if (!billed) {
@@ -713,7 +721,7 @@ private fun AmountStep(
         // on a bill with no tip it sat directly under the first one.
         if (!billed) pxmr?.let {
             Text(
-                if (fiatEntry) "${formatXmr(it)} XMR"
+                if (fiatLive) "${formatXmr(it)} XMR"
                 else Amounts.show(context, it).secondary.orEmpty(),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -734,7 +742,7 @@ private fun AmountStep(
         } else {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                stringResource(R.string.pay_up_to_after_fees, inUnit(context, maxPxmr, fiatEntry, rate, cur)),
+                stringResource(R.string.pay_up_to_after_fees, inUnit(context, maxPxmr, fiatLive, rate, cur)),
                 style = MaterialTheme.typography.bodySmall,
                 color = if (overMax) MaterialTheme.colorScheme.error
                         else MaterialTheme.colorScheme.onSurfaceVariant,

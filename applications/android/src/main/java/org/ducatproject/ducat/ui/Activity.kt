@@ -80,7 +80,15 @@ fun ActivityScreen() {
     // has been read, change from an outgoing payment is indistinguishable from
     // an incoming one, and this is the screen where that distinction is the
     // entire content.
-    LaunchedEffect(version) {
+    //
+    // Keyed on the rows, not the store version: the rows arrive from the
+    // read above some time after the version moved, and an effect keyed on
+    // the version ran before they did, found the previous list, and left
+    // the first look at this screen to wait for the poll after all. Each
+    // enrichment that resolves something bumps the store, which rebuilds
+    // the rows, which runs this again over whatever is still open; one
+    // that resolves nothing bumps nothing, so there is no chasing.
+    LaunchedEffect(events) {
         // Only what a fetch could actually resolve. Keying on "chain == null"
         // would also match rows that have no transaction id to look up, so the
         // condition would never go false and the screen would re-enrich on
@@ -193,7 +201,11 @@ fun ActivityScreen() {
                 Amounts.show(context, it.amountPxmr).primary.lowercase().contains(q)
         }
 
-    if (events.isEmpty()) {
+    // Nothing settled *and* nothing awaiting: a bill that arrived before the
+    // wallet's first transaction is exactly the uncleared half this
+    // statement shows, and "Nothing yet" over it said the wallet was new
+    // while somebody was waiting to be paid.
+    if (events.isEmpty() && pending.isEmpty()) {
         // "Nothing yet" waits for the ledger to have actually been built
         // once: a history-sized read runs off-main, and the empty copy
         // painted during it told a wallet with months of history it was
