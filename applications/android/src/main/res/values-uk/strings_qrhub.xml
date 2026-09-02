@@ -15,4 +15,6 @@
     <string name="qrhub_name_travels">З нею їдуть твоє ім\'я і фото. Усе інше, чим ти ділишся, приходить пізніше, через з\'єднання, яке вона відкриває.</string>
     <string name="qrhub_copied">Посилання скопійовано</string>
     <string name="qrhub_showing_as">Показано як %1$s</string>
+    <string name="qrhub_issue_failed">Не вдалося опублікувати твій код. Перевір мережу й спробуй ще раз.</string>
+    <string name="qrhub_try_again">Повторити</string>
 </resources>

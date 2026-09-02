@@ -15,4 +15,6 @@
     <string name="qrhub_name_travels">اسمك وصورتك يسافران معها. وكل ما تشاركه غير ذلك يصل لاحقًا، عبر الاتصال الذي تفتحه.</string>
     <string name="qrhub_copied">نُسخ الرابط</string>
     <string name="qrhub_showing_as">معروض بصفة %1$s</string>
+    <string name="qrhub_issue_failed">تعذّر نشر رمزك. تحقّق من الشبكة وأعد المحاولة.</string>
+    <string name="qrhub_try_again">أعد المحاولة</string>
 </resources>

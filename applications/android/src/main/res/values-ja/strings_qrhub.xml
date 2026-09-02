@@ -15,4 +15,6 @@
     <string name="qrhub_name_travels">名前と写真はカードと一緒に渡ります。それ以外に共有するものは、カードが開いた接続を通じて後から届きます。</string>
     <string name="qrhub_copied">リンクをコピーしました</string>
     <string name="qrhub_showing_as">%1$sとして表示中</string>
+    <string name="qrhub_issue_failed">コードを公開できませんでした。ネットワークを確認して、もう一度お試しください。</string>
+    <string name="qrhub_try_again">もう一度</string>
 </resources>

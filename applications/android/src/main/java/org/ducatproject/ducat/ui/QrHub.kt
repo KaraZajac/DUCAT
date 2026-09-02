@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.Contact
@@ -90,6 +91,10 @@ fun QrHub(
     val personas = remember { PersonaStore(context) }
     val worn = remember(cardsV) { personas.worn() }
 
+    // A mint asked for by hand, after one failed. Any value above zero is
+    // "now, and skip the grace below".
+    var attempt by remember { mutableIntStateOf(0) }
+
     // One effect for both lives of the code. The registry answers scoped to
     // the worn persona now, so switching hats re-reads; a hat that has NEVER
     // had a standing code gets one minted here (the first-run case, per
@@ -97,7 +102,7 @@ fun QrHub(
     // collectClaims pre-issues the replacement and a second mint here would
     // put two cards up for one hat. "Never had" and "just claimed" are told
     // apart by whether any profile card for this hat exists at all.
-    LaunchedEffect(cardsV, worn) {
+    LaunchedEffect(cardsV, worn, attempt) {
         val store = ContactStore(context)
         val current = store.currentCardUri()
         if (current != null) {
@@ -109,8 +114,20 @@ fun QrHub(
             it.purpose == "profile" &&
                 (it.owner == worn || (it.owner.isBlank() && worn == primary))
         }
-        if (everHad || busy) return@LaunchedEffect
+        if (busy) return@LaunchedEffect
+        if (everHad && attempt == 0) {
+            // Left alone for a while, not for good. The pre-issue is one
+            // DHT write behind the claim, and when it lands the store bumps
+            // and this effect restarts with the code in hand — but when it
+            // fails ("could not pre-issue", a line in the log and nothing
+            // else) the answered card stays in the registry for an hour,
+            // and for that hour this screen said "Publishing…" over a mint
+            // nobody was doing. A replacement that has not arrived in this
+            // long is not coming.
+            delay(REPLACEMENT_GRACE_MS)
+        }
         busy = true
+        error = null
         // Its own job, not this effect's. issueCard bumps the store midway,
         // which restarts the effect — and a restart cancelled the mint's
         // continuation with `busy` still true, so My code spun for as long
@@ -127,10 +144,13 @@ fun QrHub(
                 }
             }
             busy = false
-            r.onSuccess { uri = it.uri }
+            r.onSuccess { uri = it.uri; error = null }
                 .onFailure {
-                    error = moneyFailure(context, it)
-                    DucatLog.w(TAG, "issue: ${it.message}")
+                    // The link sentence is the mapper's default, and there
+                    // is no link here: nothing was scanned, a record was
+                    // not written.
+                    error = moneyFailure(context, it, fallback = R.string.qrhub_issue_failed)
+                    DucatLog.w(TAG, "issue: ${it.javaClass.simpleName}: ${it.message}")
                 }
         }
     }
@@ -294,6 +314,7 @@ fun QrHub(
                             onCopy = {
                                 uri?.let { copyText(context, it, context.getString(R.string.qrhub_copied)) }
                             },
+                            onRetry = { error = null; attempt++ },
                         )
                     }
                 }
@@ -302,8 +323,17 @@ fun QrHub(
     }
 }
 
+/** How long the claim's own replacement gets before this screen mints one. */
+private const val REPLACEMENT_GRACE_MS = 30_000L
+
 @Composable
-private fun MyCode(uri: String?, busy: Boolean, error: String?, onCopy: () -> Unit) {
+private fun MyCode(
+    uri: String?,
+    busy: Boolean,
+    error: String?,
+    onCopy: () -> Unit,
+    onRetry: () -> Unit,
+) {
     val context = LocalContext.current
     // While this screen shows the code, a tap serves the same card. The QR
     // and the antenna are one offer in two physics.
@@ -328,6 +358,24 @@ private fun MyCode(uri: String?, busy: Boolean, error: String?, onCopy: () -> Un
         Spacer(Modifier.height(20.dp))
 
         when {
+            // The failure before the spinner: with no code and a mint that
+            // did not happen, this said "Publishing two records…" over the
+            // sentence explaining that nothing was being published, and
+            // the only way to try again was to leave and come back.
+            !busy && uri == null && error != null -> Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    error,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                )
+                Spacer(Modifier.height(12.dp))
+                OutlinedButton(onClick = onRetry) {
+                    Text(stringResource(R.string.qrhub_try_again))
+                }
+            }
             busy || uri == null -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 CatSpinner(Modifier.size(40.dp), tint = MaterialTheme.colorScheme.primary)
                 Spacer(Modifier.height(12.dp))
@@ -385,7 +433,10 @@ private fun MyCode(uri: String?, busy: Boolean, error: String?, onCopy: () -> Un
                 )
             }
         }
-        error?.let {
+        // Under a code that is still showing — the one this screen opened
+        // with, after its claim, when the mint of the next failed. With no
+        // code the branch above already said it.
+        if (uri != null || busy) error?.let {
             Spacer(Modifier.height(16.dp))
             Text(it, color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall)

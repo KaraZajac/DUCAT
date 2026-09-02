@@ -15,4 +15,6 @@
     <string name="qrhub_name_travels">Seu nome e sua foto viajam com ele. Todo o resto que você compartilha chega depois, pela conexão que ele abre.</string>
     <string name="qrhub_copied">Link copiado</string>
     <string name="qrhub_showing_as">Mostrando como %1$s</string>
+    <string name="qrhub_issue_failed">Não foi possível publicar seu código. Verifique a rede e tente de novo.</string>
+    <string name="qrhub_try_again">Tentar de novo</string>
 </resources>

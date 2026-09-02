@@ -15,4 +15,6 @@
     <string name="qrhub_name_travels">نام و عکست همراهش می‌رود. باقیِ آنچه به اشتراک می‌گذاری بعداً می‌رسد، از روی اتصالی که باز می‌کند.</string>
     <string name="qrhub_copied">لینک کپی شد</string>
     <string name="qrhub_showing_as">در حال نمایش به‌عنوان %1$s</string>
+    <string name="qrhub_issue_failed">کد تو منتشر نشد. شبکه را بررسی کن و دوباره تلاش کن.</string>
+    <string name="qrhub_try_again">تلاش دوباره</string>
 </resources>

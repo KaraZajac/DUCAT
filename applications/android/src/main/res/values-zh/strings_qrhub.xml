@@ -15,4 +15,6 @@
     <string name="qrhub_name_travels">你的名字和照片随它一起送出。其余你分享的内容随后经它打开的连接送达。</string>
     <string name="qrhub_copied">已复制链接</string>
     <string name="qrhub_showing_as">正以%1$s展示</string>
+    <string name="qrhub_issue_failed">无法发布你的码。请检查网络后重试。</string>
+    <string name="qrhub_try_again">重试</string>
 </resources>

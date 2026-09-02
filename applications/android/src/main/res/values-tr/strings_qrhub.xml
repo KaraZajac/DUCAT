@@ -15,4 +15,6 @@
     <string name="qrhub_name_travels">Adın ve resmin kartla birlikte gider. Paylaştığın geri kalan her şey sonradan, kartın açtığı bağlantı üzerinden ulaşır.</string>
     <string name="qrhub_copied">Bağlantı kopyalandı</string>
     <string name="qrhub_showing_as">%1$s olarak gösteriliyor</string>
+    <string name="qrhub_issue_failed">Kodun yayımlanamadı. Ağı kontrol edip tekrar dene.</string>
+    <string name="qrhub_try_again">Tekrar dene</string>
 </resources>

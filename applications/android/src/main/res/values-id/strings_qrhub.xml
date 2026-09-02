@@ -15,4 +15,6 @@
     <string name="qrhub_name_travels">Nama dan fotomu ikut bersamanya. Hal lain yang kamu bagikan menyusul kemudian, lewat koneksi yang dibukanya.</string>
     <string name="qrhub_copied">Tautan disalin</string>
     <string name="qrhub_showing_as">Ditampilkan sebagai %1$s</string>
+    <string name="qrhub_issue_failed">Kodemu tidak bisa diterbitkan. Periksa jaringan dan coba lagi.</string>
+    <string name="qrhub_try_again">Coba lagi</string>
 </resources>
