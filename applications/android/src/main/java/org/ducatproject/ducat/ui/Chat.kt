@@ -3298,7 +3298,10 @@ private fun RideBondBanner(contact: Contact) {
     // is written by whichever side proposed, so its presence is exactly the
     // question — have I already proposed here — and it answers all three.
     val iHaveProposed = ride.optLong("myRiderBack", -1L) >= 0
-    var countering by remember { mutableStateOf(false) }
+    // Saveable, with the figure in it. A failed counter now leaves the
+    // editor open so the number can go again (see the counter's own key in
+    // ThreadSends), which is worth nothing if turning the phone empties it.
+    var countering by rememberSaveable { mutableStateOf(false) }
     // The counter is a money field, so it reads money the way the rest of the
     // app does. It asked for XMR — directly under a line saying "USD 2.23 back
     // to you" — which made the one field in the settlement a person types into
@@ -3311,7 +3314,7 @@ private fun RideBondBanner(contact: Contact) {
     }
     val counterFiat = remember(counterRateV) { Amounts.enterFiat(context) }
     val counterCur = remember(counterRateV) { Amounts.currency(context) }
-    var counterXmr by remember { mutableStateOf("") }
+    var counterXmr by rememberSaveable { mutableStateOf("") }
     // **Every button on this banner runs off the screen.**
     //
     // Funding, signing, proposing and calling off are seconds of node each,

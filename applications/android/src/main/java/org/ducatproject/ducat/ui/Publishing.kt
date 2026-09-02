@@ -93,7 +93,9 @@ fun PublishingSection() {
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        var creating by remember { mutableStateOf(false) }
+        // Saveable, with the title inside it: a rotation closed the dialog
+        // and took the name somebody was typing with it.
+        var creating by rememberSaveable { mutableStateOf(false) }
 
         // --- which publication, and the door to a new one -----------------
         //
@@ -170,7 +172,7 @@ fun PublishingSection() {
             }
         }
         if (creating) {
-            var newTitle by remember { mutableStateOf("") }
+            var newTitle by rememberSaveable { mutableStateOf("") }
             AlertDialog(
                 onDismissRequest = { creating = false },
                 title = { Text(stringResource(R.string.pub_new_name)) },

@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -55,7 +56,13 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
     val c = remember(version, contact.personaHex) {
         store.all().firstOrNull { it.personaHex == contact.personaHex } ?: contact
     }
-    var petname by remember { mutableStateOf(contact.petname.orEmpty()) }
+    // Saveable, keyed by whose profile this is: the field starts at what
+    // they are called now, and what is in it after that is an edit somebody
+    // is part-way through — which a turn of the phone silently reverted to
+    // the stored name, with the Save button greying out to match.
+    var petname by rememberSaveable(contact.personaHex) {
+        mutableStateOf(contact.petname.orEmpty())
+    }
     var saved by remember { mutableStateOf(false) }
 
     Scaffold(

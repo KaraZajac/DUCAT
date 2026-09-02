@@ -614,9 +614,12 @@ private fun ProfileSection() {
     // whose presentation the fields below belong to.
     var picked by rememberSaveable { mutableStateOf<String?>(null) }
     val editing = picked?.takeIf { h -> roster.any { it.hex == h } } ?: worn
-    var adding by remember { mutableStateOf(false) }
-    var renaming by remember { mutableStateOf(false) }
-    var newLabel by remember { mutableStateOf("") }
+    // The three of them together: a flag that survives a rotation over a
+    // field that does not is worse than neither, and a name half typed into
+    // a profile is exactly the thing a turn of the phone used to eat.
+    var adding by rememberSaveable { mutableStateOf(false) }
+    var renaming by rememberSaveable { mutableStateOf(false) }
+    var newLabel by rememberSaveable { mutableStateOf("") }
 
     val modeNames = mapOf(
         org.ducatproject.ducat.Mode.None to stringResource(R.string.mode_personal),
@@ -1301,8 +1304,10 @@ fun SitesSection() {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
     val sites = remember(version) { org.ducatproject.ducat.Sites.all(context) }
-    var adding by remember { mutableStateOf(false) }
-    var addText by remember { mutableStateOf("") }
+    var adding by rememberSaveable { mutableStateOf(false) }
+    // A site address is pasted or read off something; retyping it is the
+    // whole cost of losing it.
+    var addText by rememberSaveable { mutableStateOf("") }
     // The add and each site's fetch run under process-level jobs, keyed
     // "site:<record key>" (the add under a word no key can be), and this
     // section reads which one is out rather than owning it. They ran in

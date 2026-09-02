@@ -26,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -152,8 +153,11 @@ fun PersonaSwitcher(modifier: Modifier = Modifier) {
 internal fun NewProfileDialog(onDone: (String?) -> Unit) {
     val context = LocalContext.current
     val store = remember { PersonaStore(context) }
-    var name by remember { mutableStateOf("") }
-    var color by remember { mutableStateOf(ACCENTS.first()) }
+    // Both saveable: the caller's flag survives a rotation now, so the
+    // dialog comes back — and it used to come back empty, over a name and a
+    // colour somebody had just chosen.
+    var name by rememberSaveable { mutableStateOf("") }
+    var color by rememberSaveable { mutableStateOf(ACCENTS.first()) }
     androidx.compose.material3.AlertDialog(
         onDismissRequest = { onDone(null) },
         title = { Text(stringResource(R.string.personas_add)) },

@@ -63,6 +63,10 @@ fun PinGate(
     LaunchedEffect(deviceLock) {
         if (deviceLock && DeviceLock.preferred(context)) asking = true
     }
+    // **Deliberately not saveable, unlike every other field in the app.**
+    // Saved state is handed to system_server and can be written to disk;
+    // a PIN is the one thing on this phone that must not travel that way,
+    // and re-entering four digits after a rotation costs a second.
     var entered by remember { mutableStateOf("") }
     var again by remember { mutableStateOf("") }
     var busy by remember { mutableStateOf(false) }

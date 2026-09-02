@@ -282,9 +282,6 @@ fun HailCard(
         mutableStateOf<Pair<org.ducatproject.ducat.Contact, StoredMessage>?>(null)
     }
     val context = LocalContext.current
-    var cell by remember { mutableStateOf("") }
-    var dest by remember { mutableStateOf("") }
-    var fareXmr by remember { mutableStateOf("") }
     val rides = remember { RideStore(context) }
     // The posted hail is DHT state, not screen state: rehydrate from the
     // store so a process restart resumes watching the same slot.
@@ -964,7 +961,9 @@ private sealed class Resumed {
 @Composable
 fun DriveScreen() {
     val context = LocalContext.current
-    var cell by remember { mutableStateOf("") }
+    // Saveable: this is a stand's name, typed by a driver at a rank, and a
+    // turn of the phone emptied the field they were halfway through.
+    var cell by rememberSaveable { mutableStateOf("") }
     // The watch set: one named stand, or a geocell and its 8 neighbours —
     // §15.12's 3×3, because a rider fifty metres over a border is otherwise
     // invisible.
