@@ -29,6 +29,32 @@ object Publications {
     // --- the subscriber's cabinet -----------------------------------------
 
     /**
+     * Whether a period id may be used as a directory name.
+     *
+     * A period id is the publisher's own string — §16.20 asks only that it
+     * be non-empty and at most 64 bytes, and the protocol is right not to
+     * care what is in it. The *reader* cares, because the library files a
+     * downloaded issue at `publications/<publisherHex>/<period>`: a period
+     * id of `../../veilid` is a valid id by every rule the wire has, and it
+     * names the node's keystore. What waits there is not a wrong path but
+     * `deleteRecursively`, then a fetch writing into whatever it made room
+     * for — reachable by any contact this phone has not muted, and sprung
+     * by the reader tapping an issue they were told they had.
+     *
+     * So the id stays whatever the publisher said, and this is the question
+     * asked before it is ever allowed to be part of a path. A denylist, not
+     * an allowlist, because the protocol permits any 64 bytes and refusing
+     * an honest publisher's naming scheme is its own bug.
+     */
+    fun isSafePeriodId(id: String): Boolean =
+        id.isNotEmpty() && id.length <= MAX_PERIOD_ID_BYTES &&
+            id != "." && id != ".." &&
+            id.none { it == '/' || it == '\\' || it == '\u0000' }
+
+    /** §16.20's ceiling, mirrored from core::publish. */
+    private const val MAX_PERIOD_ID_BYTES = 64
+
+    /**
      * File an arriving kind-13. Called from the poll loop's arrival funnel,
      * like the group roster — if it was stored, it was filed.
      *
@@ -40,6 +66,15 @@ object Publications {
     fun absorbKey(context: Context, publisherHex: String, m: StoredMessage) {
         val period = m.pubPeriodId ?: return
         val key = m.pubPeriodKey ?: return
+        // Refused here so it is never filed, never listed, and never tapped.
+        if (!isSafePeriodId(period)) {
+            DucatLog.w(
+                "Publications",
+                "refused a period id from ${publisherHex.take(8)}… that is not a name: " +
+                    period.take(72),
+            )
+            return
+        }
         // An unsubscribed reader stops FILING, not holding: what was paid
         // for stays theirs (§16.20 — no revocation), but a publisher who
         // keeps sending into a closed door does not quietly reopen it.
@@ -82,8 +117,14 @@ object Publications {
         val all = prefs(context).getString("subs", null)?.let { JSONObject(it) } ?: return null
         val mine = all.optJSONObject(publisherHex) ?: return null
         val periods = mine.optJSONObject("periods") ?: JSONObject()
+        // Filtered on the way out as well as on the way in: absorbKey now
+        // refuses these, but a phone that ran an older build may already
+        // have one filed, and this is the boundary every reader goes
+        // through to list, fetch or open an issue.
         val map = buildMap {
-            for (k in periods.keys()) put(k, unb64(periods.getString(k)))
+            for (k in periods.keys()) {
+                if (isSafePeriodId(k)) put(k, unb64(periods.getString(k)))
+            }
         }
         return Triple(
             mine.optString("record", "").ifBlank { null },

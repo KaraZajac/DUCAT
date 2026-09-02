@@ -111,12 +111,28 @@ object LibraryFetch {
         }
     }
 
-    fun dirFor(context: Context, publisherHex: String, period: String): File =
-        File(context.filesDir, "publications/$publisherHex/$period")
+    /**
+     * Where one issue lands. The last of the three places that check the
+     * period id is a name and not a route out of the library — the other
+     * two being Publications.absorbKey, which will not file one, and
+     * Publications.subscription, which will not hand one back. This one
+     * cannot be reasoned past: what runs here is `deleteRecursively` and a
+     * fetch that writes, so it asks the filesystem itself.
+     */
+    fun dirFor(context: Context, publisherHex: String, period: String): File {
+        val root = File(context.filesDir, "publications")
+        val d = File(root, "$publisherHex/$period")
+        require(d.canonicalPath.startsWith(root.canonicalPath + File.separator)) {
+            "a period id may not leave the library"
+        }
+        return d
+    }
 
     /** Bytes on disk for a finished fetch, or null if none landed. */
     fun fetchedBytes(context: Context, publisherHex: String, period: String): Long? {
-        val d = dirFor(context, publisherHex, period)
+        // This one runs while the list draws, so a refused id is "nothing
+        // downloaded" rather than a screen that will not open.
+        val d = runCatching { dirFor(context, publisherHex, period) }.getOrNull() ?: return null
         if (!d.isDirectory) return null
         val files = d.walkTopDown().filter { it.isFile }.toList()
         if (files.isEmpty()) return null

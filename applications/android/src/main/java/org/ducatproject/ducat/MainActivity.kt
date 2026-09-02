@@ -193,7 +193,10 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
             }
         }
         org.ducatproject.ducat.ui.libraryOpen = { ctx, publisherHex, period ->
-            val dir = java.io.File(ctx.filesDir, "publications/$publisherHex/$period")
+            // Through the library's own path builder, which is the one that
+            // refuses a period id that would leave the library — this had
+            // its own copy of the join and so its own way past the check.
+            val dir = org.ducatproject.ducat.ui.LibraryFetch.dirFor(ctx, publisherHex, period)
             val file = dir.walkTopDown()
                 .filter { it.isFile && !it.name.endsWith(".part") }
                 .maxByOrNull { it.length() }
