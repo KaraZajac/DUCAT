@@ -3340,7 +3340,16 @@ private fun RideBondBanner(contact: Contact) {
             is ThreadSends.Outcome.Failed -> error = trouble(context, o.error)
         }
         for (o in ThreadSends.take(rideKey)) {
-            if (o is ThreadSends.Outcome.Failed) error = trouble(context, o.error)
+            if (o is ThreadSends.Outcome.Failed) {
+                // Said in the log as well as on the screen. Diagnosing a
+                // wrong split from a live run meant reasoning backwards from
+                // one number, because a refusal here left no trace at all.
+                org.ducatproject.ducat.DucatLog.w(
+                    "RideBanner",
+                    "escrow $idHex: ${o.error.javaClass.simpleName}: ${o.error.message}",
+                )
+                error = trouble(context, o.error)
+            }
         }
         busy = ThreadSends.inFlight(rideKey) || ThreadSends.inFlight(counterKey)
     }
@@ -3508,11 +3517,26 @@ private fun RideBondBanner(contact: Contact) {
     //
     // User-initiated by construction: `error` is null until somebody presses
     // the button, so this can only ever be continuing something already begun.
+    // **Whatever was asked for, not whatever this screen proposes by
+    // default.** This retried through `proposeNow`, which is the *settlement*
+    // — fare to the provider, deposit home — and that was right when
+    // completing the deal was the only thing a proposal could be. It is now
+    // one of three. So pressing "call it off — refund both" against an
+    // escrow the chain calls too young meant a refusal, and then, thirty
+    // seconds later, the screen proposing to pay the provider in full: the
+    // opposite of what the button said, arriving at the other side's phone
+    // as an ordinary settlement to sign. Found live on the second walk.
+    //
+    // The parked intent already knows what was wanted — it is recorded
+    // before the attempt, figure and refund-flag both — so the retry is the
+    // poller's own, aimed at this one ceremony.
     LaunchedEffect(idHex, error?.waiting) {
         if (error?.waiting != true) return@LaunchedEffect
         while (error?.waiting == true) {
             kotlinx.coroutines.delay(30_000)
-            if (!busy) proposeNow()
+            if (!busy) act(rideKey) {
+                org.ducatproject.ducat.Ceremony.retryRelease(context, idHex)
+            }
         }
     }
     // What actually comes back to me, read from the escrow rather than worked

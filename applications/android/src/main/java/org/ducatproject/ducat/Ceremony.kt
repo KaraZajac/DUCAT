@@ -2719,10 +2719,11 @@ object Ceremony {
      * re-sends the number that was asked for, never a freshly computed
      * default, for the reason "Ask again" learned the hard way.
      */
-    fun retryRelease(context: Context): Int {
+    fun retryRelease(context: Context, onlyId: String? = null): Int {
         val now = System.currentTimeMillis()
         var n = 0
         for (o in all(context)) {
+            if (onlyId != null && o.optString("id") != onlyId) continue
             // Every stage a proposal is legal from — the same list
             // proposeRideSplit accepts. Gating on "done" alone meant a
             // counter-offer that failed at release_pending recorded an
