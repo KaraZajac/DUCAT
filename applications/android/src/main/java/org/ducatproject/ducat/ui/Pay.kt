@@ -424,6 +424,20 @@ private fun AmountStep(
 ) {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
+    // The contact as the store has it now, not as it was when the sheet
+    // opened. The target is a saved snapshot, and everything below that
+    // decides whether a payment can go — their address, a held one — read
+    // it: a request of theirs landing with their address while this screen
+    // sat on it left Send disabled over "they have not shared an address"
+    // until the sheet was reopened. The poll had it; the snapshot never
+    // would. A contact forgotten under the screen keeps the snapshot: the
+    // address on it is still theirs.
+    @Suppress("NAME_SHADOWING") val target = remember(target, version) {
+        (target as? PayTarget.ToContact)?.let { t ->
+            ContactStore(context).all().firstOrNull { it.personaHex == t.contact.personaHex }
+                ?.let { PayTarget.ToContact(it) }
+        } ?: target
+    }
     // No balances read here: nothing on this step used it, and it decrypted
     // every wallet output on the main thread, in composition, on every
     // store bump — a hitch on the amount screen that grew with the wallet.
