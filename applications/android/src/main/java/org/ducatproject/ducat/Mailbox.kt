@@ -640,23 +640,63 @@ object Mailbox {
      *  caller simply finds nothing, and the next tick finds it. */
     private val claiming = java.util.concurrent.atomic.AtomicBoolean(false)
 
-    fun collectClaims(context: Context): Int {
+    /**
+     * Adopt whoever answered a card we handed out.
+     *
+     * [only] is one card's inbox key: the screen that is holding a code up
+     * to somebody asks about *that* code, which is one read. Everything
+     * else — the poller's sweep — takes the whole registry in turns, at
+     * most [CLAIMS_PER_PASS] of them.
+     *
+     * Because the two want different things. A till waiting on the card in
+     * front of a customer wants an answer in seconds and does not care
+     * about the other nine cards this phone has outstanding; the sweep
+     * wants every card looked at eventually and must not spend a round trip
+     * per card per pass to do it. Before this they shared one loop, so a
+     * bartender who opened "Start a tab" ten times in a shift left ten
+     * twelve-hour cards behind, and every poll paid ten DHT reads for the
+     * one the screen actually cared about.
+     */
+    fun collectClaims(context: Context, only: String? = null): Int {
         if (!claiming.compareAndSet(false, true)) return 0
         try {
-            return collectClaimsLocked(context)
+            return collectClaimsLocked(context, only)
         } finally {
             claiming.set(false)
         }
     }
 
-    private fun collectClaimsLocked(context: Context): Int {
+    /** How many outstanding cards one sweep looks at. Taken in turns, so a
+     *  registry longer than this is covered over consecutive passes rather
+     *  than starving its tail — the same rule the receipts and the group
+     *  queue follow. */
+    private const val CLAIMS_PER_PASS = 8
+
+    /** Where the last sweep stopped. */
+    private var claimCursor = 0
+
+    private fun collectClaimsLocked(context: Context, only: String?): Int {
         val store = ContactStore(context)
         var collected = 0
         // Every outstanding card, not "the" card. A claim answers a specific
         // card, and the registry is what lets a till's handshake and the
         // profile code be outstanding at once without either stealing the
         // other's claimant.
-        for (issued in store.issuedCards().filter { it.answeredBy == null }) {
+        val outstanding = store.issuedCards().filter { it.answeredBy == null }
+        val looking = when {
+            only != null -> outstanding.filter { it.inboxKey == only }
+            outstanding.size <= CLAIMS_PER_PASS -> outstanding
+            else -> {
+                // In turns, from where the last sweep stopped.
+                if (claimCursor >= outstanding.size) claimCursor = 0
+                val take = (0 until CLAIMS_PER_PASS).map {
+                    outstanding[(claimCursor + it) % outstanding.size]
+                }
+                claimCursor = (claimCursor + CLAIMS_PER_PASS) % outstanding.size
+                take
+            }
+        }
+        for (issued in looking) {
             try {
                 nodeDhtOpen(issued.inboxKey, null, null)
                 missingCard.remove(issued.inboxKey)

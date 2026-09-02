@@ -224,7 +224,7 @@ private fun NewRideScreen(rides: RideStore) {
             delay(2_000)
             val fresh = withContext(Dispatchers.IO) {
                 runCatching {
-                    Mailbox.collectClaims(context)
+                    Mailbox.collectClaims(context, inbox)
                     ContactStore(context).claimantOf(inbox)?.let { hex ->
                         ContactStore(context).all().firstOrNull { it.personaHex == hex }
                     }

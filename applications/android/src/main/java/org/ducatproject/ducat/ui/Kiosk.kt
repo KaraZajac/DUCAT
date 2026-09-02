@@ -433,7 +433,7 @@ private fun PayPanel(order: Orders.Order, onDone: () -> Unit) {
             val inbox = cardInbox ?: return@LaunchedEffect
             val who = withContext(Dispatchers.IO) {
                 runCatching {
-                    Mailbox.collectClaims(context)
+                    Mailbox.collectClaims(context, inbox)
                     ContactStore(context).claimantOf(inbox)
                 }.getOrNull()
             }

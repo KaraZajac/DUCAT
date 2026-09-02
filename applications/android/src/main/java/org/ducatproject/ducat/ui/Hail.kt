@@ -441,7 +441,7 @@ fun HailCard(
             }
             val claimant = withContext(Dispatchers.IO) {
                 runCatchingCancellable {
-                    Mailbox.collectClaims(context)
+                    Mailbox.collectClaims(context, p.inboxKey)
                     ContactStore(context).claimantOf(p.inboxKey)
                 }.getOrNull()
             }

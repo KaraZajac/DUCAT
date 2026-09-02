@@ -103,7 +103,7 @@ fun DonateScreen() {
             }
             val claimed = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
                 runCatching {
-                    org.ducatproject.ducat.Mailbox.collectClaims(context)
+                    org.ducatproject.ducat.Mailbox.collectClaims(context, inbox)
                     ContactStore(context).claimantOf(inbox) != null
                 }.getOrDefault(false)
             }

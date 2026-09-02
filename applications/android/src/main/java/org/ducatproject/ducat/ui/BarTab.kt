@@ -163,7 +163,17 @@ fun BarTabScreen(
     val awaiting = tabs.filter { it.state == "settled" }
     // Everything finished, cancelled included — a cancelled tab that appears
     // nowhere is not gone, it is just unmanageable.
+    //
+    // **Newest first, unlike the two lists above it.** Those are work: the
+    // tab that has been running longest is the one to look at, and the
+    // oldest unpaid bill is the most overdue. This one is history, and the
+    // store hands its tabs back in the order they were opened — so the tab
+    // just closed went to the bottom, under every night that came before
+    // it, on the one screen somebody checks to see what they took today.
+    // By the moment it was billed, falling back to when it was opened: a
+    // tab cancelled before any bill has no settling time to sort by.
     val done = tabs.filter { it.state in CLOSED_STATES }
+        .sortedByDescending { maxOf(it.settledAt, it.openedAt) }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         if (section != "closed") {
@@ -379,7 +389,7 @@ private fun OpenTab(onOpened: (RunningTab) -> Unit, onBack: () -> Unit) {
             delay(2_000)
             val fresh = withContext(Dispatchers.IO) {
                 runCatching {
-                    Mailbox.collectClaims(context)
+                    Mailbox.collectClaims(context, inbox)
                     ContactStore(context).claimantOf(inbox)?.let { hex ->
                         ContactStore(context).all().firstOrNull { it.personaHex == hex }
                     }
