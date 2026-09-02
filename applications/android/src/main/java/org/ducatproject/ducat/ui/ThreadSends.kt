@@ -41,14 +41,16 @@ import java.util.concurrent.ConcurrentLinkedQueue
 internal object ThreadSends {
     sealed interface Outcome {
         /**
-         * A text send whose words are in the thread now. Delivered — or
-         * persisted as "not sent yet", which the poll delivers later: a
-         * send commits its row before the network write, so a failure
-         * after that point has still put the words in a bubble. Either
-         * way the composer is done with them; kept there, they went out a
-         * second time under a second number.
+         * The send is done. For a text send [body] is its words, in the
+         * thread now — delivered, or persisted as "not sent yet", which
+         * the poll delivers later: a send commits its row before the
+         * network write, so a failure after that point has still put the
+         * words in a bubble. Either way the composer is done with them;
+         * kept there, they went out a second time under a second number.
+         * [result] is whatever the block handed back: a line for the
+         * screen to show, an id for it to open, or nothing.
          */
-        data class Landed(val body: String) : Outcome
+        data class Landed(val body: String?, val result: String? = null) : Outcome
 
         /**
          * Nothing left the phone. [what] is the thing that did not go, in
@@ -100,18 +102,21 @@ internal object ThreadSends {
     /**
      * Run one send off the screen.
      *
-     * [body] is the composer's text for a text send, already trimmed, so
-     * the outcome can say it landed; null for everything else. [block]
-     * does the sending, and is handed a progress callback for attachments.
-     * Failures come back as [Outcome.Failed] rather than being thrown —
-     * nobody is awaiting this.
+     * [personaHex] names the thread — or, for the group screens, the key
+     * they chose ("group:…", "split:…"), which only has to be one a
+     * persona's hex can never be. [body] is the composer's text for a text
+     * send, already trimmed, so the outcome can say it landed; null for
+     * everything else. [block] does the sending, is handed a progress
+     * callback for attachments, and whatever it returns rides the landing
+     * as [Outcome.Landed.result]. Failures come back as [Outcome.Failed]
+     * rather than being thrown — nobody is awaiting this.
      */
     fun launch(
         store: ContactStore,
         personaHex: String,
         what: String?,
         body: String? = null,
-        block: (progress: (Int, Int) -> Unit) -> Unit,
+        block: (progress: (Int, Int) -> Unit) -> String?,
     ) {
         counts.merge(personaHex, 1, Int::plus)
         if (body != null) bodies[personaHex] = body
@@ -126,8 +131,8 @@ internal object ThreadSends {
                     tick()
                 }
             }
-            val outcome = r.fold(
-                onSuccess = { body?.let(Outcome::Landed) },
+            val outcome: Outcome = r.fold(
+                onSuccess = { result -> Outcome.Landed(body, result) },
                 onFailure = { e ->
                     // The row is what says whether the words left the
                     // composer: Mailbox.send persists it before the network
@@ -156,10 +161,9 @@ internal object ThreadSends {
                 when (outcome) {
                     is Outcome.Landed -> if (saved.trim() == body) store.saveDraft(personaHex, "")
                     is Outcome.Failed -> if (saved.isBlank()) store.saveDraft(personaHex, body)
-                    null -> Unit
                 }
             }
-            outcome?.let { outcomes.getOrPut(personaHex) { ConcurrentLinkedQueue() }.add(it) }
+            outcomes.getOrPut(personaHex) { ConcurrentLinkedQueue() }.add(outcome)
             if (body != null) bodies.remove(personaHex, body)
             counts.merge(personaHex, -1, Int::plus)
             progress.remove(personaHex)

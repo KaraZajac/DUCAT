@@ -410,7 +410,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     val send: (String?, ((Int, Int) -> Unit) -> Unit) -> Unit = { what, block ->
         sending = true
         error = null
-        ThreadSends.launch(store, c.personaHex, what, block = block)
+        ThreadSends.launch(store, c.personaHex, what) { progress -> block(progress); null }
     }
     // ...and the landing, read back by whichever instance of this screen is
     // up when the send finishes. The thread itself needs no refresh here:
@@ -430,7 +430,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                 // typed after them stays, and a sentence typed over them
                 // is not the one that went.
                 val d = draft.trimStart()
-                if (d.startsWith(o.body)) {
+                if (o.body != null && d.startsWith(o.body)) {
                     draft = d.removePrefix(o.body).trimStart()
                     replyTo = null; replyToOwn = false
                 }
@@ -529,6 +529,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         error = null
                         ThreadSends.launch(store, to.personaHex, null, body) {
                             sendOne(context, to, body, reSeq, reOwn)
+                            null
                         }
                     }
 
