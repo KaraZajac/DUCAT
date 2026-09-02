@@ -11,6 +11,8 @@
     <string name="pay_address_placeholder">5… hoặc 7…</string>
     <string name="pay_continue">Tiếp tục</string>
     <string name="pay_not_monero_address">Cái đó trông không giống một địa chỉ Monero.</string>
+    <string name="pay_scan_unknown_card">Thẻ đó chưa thuộc về liên hệ nào của bạn. Hãy thêm họ từ Chat trước, rồi thanh toán.</string>
+    <string name="pay_scan_not_payable">Mã đó không phải địa chỉ Monero cũng không phải thẻ DUCAT.</string>
 
     <!-- Pay.kt — amount step -->
     <string name="pay_back">Quay lại</string>

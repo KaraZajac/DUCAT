@@ -11,6 +11,8 @@
     <string name="pay_address_placeholder">5… lub 7…</string>
     <string name="pay_continue">Dalej</string>
     <string name="pay_not_monero_address">To nie wygląda na adres Monero.</string>
+    <string name="pay_scan_unknown_card">Ta karta nie należy jeszcze do żadnego z Twoich kontaktów. Najpierw dodaj tę osobę w Czacie, potem zapłać.</string>
+    <string name="pay_scan_not_payable">Ten kod nie jest ani adresem Monero, ani kartą DUCAT.</string>
 
     <!-- Pay.kt — amount step -->
     <string name="pay_back">Wstecz</string>

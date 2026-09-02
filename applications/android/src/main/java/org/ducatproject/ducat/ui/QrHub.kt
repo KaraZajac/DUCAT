@@ -52,6 +52,13 @@ fun QrHub(
     var uri by remember { mutableStateOf(ContactStore(context).currentCardUri()) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    // The scan tab's own: a claim on its way, and what the last code came
+    // to. These used to share the pair above, which only My code rendered
+    // — so a code that was neither card nor address, or a card whose claim
+    // failed, left a live preview that said nothing, with the sentence on
+    // the other tab.
+    var claiming by remember { mutableStateOf(false) }
+    var scanError by remember { mutableStateOf<String?>(null) }
     // Nothing to introduce ourselves with, and about to introduce ourselves.
     // See NameGate: the name travels on the handshake, so a blank one arrives
     // as "Unnamed contact" and neither end is told.
@@ -102,22 +109,30 @@ fun QrHub(
             it.purpose == "profile" &&
                 (it.owner == worn || (it.owner.isBlank() && worn == primary))
         }
-        if (everHad) return@LaunchedEffect
+        if (everHad || busy) return@LaunchedEffect
         busy = true
-        val r = withContext(Dispatchers.IO) {
-            runCatching {
-                Mailbox.issueCard(
-                    context, MyProfile(context).name(), 60uL * 60uL * 24uL,
-                    asPersonaHex = worn,
-                )
+        // Its own job, not this effect's. issueCard bumps the store midway,
+        // which restarts the effect — and a restart cancelled the mint's
+        // continuation with `busy` still true, so My code spun for as long
+        // as the screen was open; an unrelated bump landing in the same
+        // seconds found no card and no history and minted a second one for
+        // the same hat. The guard above is what the restart now meets.
+        scope.launch {
+            val r = withContext(Dispatchers.IO) {
+                runCatching {
+                    Mailbox.issueCard(
+                        context, MyProfile(context).name(), 60uL * 60uL * 24uL,
+                        asPersonaHex = worn,
+                    )
+                }
             }
+            busy = false
+            r.onSuccess { uri = it.uri }
+                .onFailure {
+                    error = moneyFailure(context, it)
+                    DucatLog.w(TAG, "issue: ${it.message}")
+                }
         }
-        busy = false
-        r.onSuccess { uri = it.uri }
-            .onFailure {
-                error = moneyFailure(context, it)
-                DucatLog.w(TAG, "issue: ${it.message}")
-            }
     }
 
     Dialog(
@@ -154,7 +169,11 @@ fun QrHub(
                     ) {
                         SegmentedButton(
                             selected = scanning,
-                            onClick = { scanning = true },
+                            // A fresh tab is a fresh scanner: the camera is
+                            // remounted with nothing latched, so the same
+                            // card can be tried again — and the old verdict
+                            // should not be waiting above it.
+                            onClick = { scanning = true; scanError = null },
                             shape = SegmentedButtonDefaults.itemShape(0, 2),
                             // No checkmark — the fill already says which is active,
                             // and the icon shoves the label sideways when it appears.
@@ -172,6 +191,30 @@ fun QrHub(
                         ) { Text(stringResource(R.string.qrhub_my_code), maxLines = 1, softWrap = false) }
                     }
                     if (scanning) {
+                        // What the camera is doing about the last code, above
+                        // the preview where the eye already is.
+                        if (claiming) {
+                            Row(
+                                Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                                Spacer(Modifier.width(10.dp))
+                                Text(
+                                    stringResource(R.string.contacts_reading_inbox),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                        scanError?.let {
+                            Text(
+                                it,
+                                Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                        }
                         // One scanner for both kinds. A person holding a phone at
                         // a code does not know or care which sort it is, and two
                         // buttons for "scan" would make them guess.
@@ -182,7 +225,11 @@ fun QrHub(
                             prompt = stringResource(R.string.qrhub_scan_prompt),
                             onResult = { raw ->
                                 val text = raw.trim()
-                                if (!text.startsWith("ducat:card/")) {
+                                if (claiming) {
+                                    // A second code while the first is being
+                                    // claimed would be a second claim; the
+                                    // scanner already swallows the same one.
+                                } else if (!text.startsWith("ducat:card/")) {
                                     // A Monero code. Not a contact and never
                                     // becomes one — hand it to the pay screen,
                                     // which is what the person scanning it
@@ -192,10 +239,10 @@ fun QrHub(
                                     // the payer left to retype the figure.
                                     val m = moneroUri(text)
                                     if (m != null) onScanAddress(m.first, m.second)
-                                    else error = context.getString(R.string.qrhub_not_a_code)
+                                    else scanError = context.getString(R.string.qrhub_not_a_code)
                                 } else {
                                     val go: () -> Unit = {
-                                    busy = true; error = null
+                                    claiming = true; scanError = null
                                     scope.launch {
                                         val r = withContext(Dispatchers.IO) {
                                             runCatching {
@@ -203,9 +250,9 @@ fun QrHub(
                                                 Mailbox.claimCard(context, card, null)
                                             }
                                         }
-                                        busy = false
+                                        claiming = false
                                         r.onSuccess(onOpenChat).onFailure {
-                                            error = context.getString(claimFailureRes(it))
+                                            scanError = context.getString(claimFailureRes(it))
                                             DucatLog.w(TAG, "claim: ${it.message}")
                                         }
                                     }

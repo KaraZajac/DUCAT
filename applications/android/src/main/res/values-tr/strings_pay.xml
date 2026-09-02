@@ -11,6 +11,8 @@
     <string name="pay_address_placeholder">5… veya 7…</string>
     <string name="pay_continue">Devam</string>
     <string name="pay_not_monero_address">Bu bir Monero adresine benzemiyor.</string>
+    <string name="pay_scan_unknown_card">Bu kart henüz kişilerinizden birine ait değil. Önce Sohbet\'ten ekleyin, sonra ödeyin.</string>
+    <string name="pay_scan_not_payable">Bu kod ne bir Monero adresi ne de bir DUCAT kartı.</string>
 
     <!-- Pay.kt — amount step -->
     <string name="pay_back">Geri</string>

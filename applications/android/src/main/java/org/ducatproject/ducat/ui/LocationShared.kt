@@ -23,8 +23,15 @@ fun askForLocation(
     context: android.content.Context,
     asked: Boolean,
     launch: (String) -> Unit,
+) = askForPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION, asked, launch)
+
+/** The same road for any permission — the camera's "Allow" walks it too. */
+fun askForPermission(
+    context: android.content.Context,
+    perm: String,
+    asked: Boolean,
+    launch: (String) -> Unit,
 ) {
-    val perm = android.Manifest.permission.ACCESS_FINE_LOCATION
     // Compose hands screens whatever context wraps the activity, which is
     // often not the activity itself; an unwrapped cast quietly comes back
     // null and this button would never find its way to Settings.

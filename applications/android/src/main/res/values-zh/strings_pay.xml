@@ -11,6 +11,8 @@
     <string name="pay_address_placeholder">5… 或 7…</string>
     <string name="pay_continue">继续</string>
     <string name="pay_not_monero_address">这看起来不像 Monero 地址。</string>
+    <string name="pay_scan_unknown_card">这张卡片还不属于你的任何联系人。请先在聊天中添加对方，再付款。</string>
+    <string name="pay_scan_not_payable">这个码既不是 Monero 地址，也不是 DUCAT 卡片。</string>
 
     <!-- Pay.kt — amount step -->
     <string name="pay_back">返回</string>

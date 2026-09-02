@@ -110,8 +110,15 @@ fun PaySheet(
     // What a code scanned *here* asked for. The sheet's own parameter covers a
     // scan made from the codes screen; this covers the scanner inside it, and
     // without it the amount survived one route into this screen and not the
-    // other.
-    var scannedPxmr by remember { mutableStateOf(0L) }
+    // other. Saveable like the target above it: a bill scanned in here and
+    // then rotated came back as a bare address with the amount editable —
+    // the billed mode and the tip gone, and a sum the till could never
+    // match to its order one keystroke away.
+    var scannedPxmr by rememberSaveable { mutableStateOf(0L) }
+    // Why the last scan chose nothing. A card that is not yet a contact, or
+    // a code that is neither, used to land back on the chooser in silence —
+    // the same screen, no word for why.
+    var scanError by rememberSaveable { mutableStateOf<Int?>(null) }
 
     if (scanning) {
         QrScanner(
@@ -120,6 +127,11 @@ fun PaySheet(
                 scanning = false
                 target = readScan(context, raw)
                 scannedPxmr = moneroUri(raw)?.second ?: 0L
+                scanError = when {
+                    target != null -> null
+                    raw.trim().startsWith("ducat:card/") -> R.string.pay_scan_unknown_card
+                    else -> R.string.pay_scan_not_payable
+                }
             },
             onDismiss = { scanning = false },
         )
@@ -154,6 +166,7 @@ fun PaySheet(
                 null -> ChooseTarget(
                     onPick = { t, amt -> target = t; scannedPxmr = amt },
                     onScan = { scanning = true },
+                    scanError = scanError,
                     onClose = onDismiss,
                 )
                 else -> AmountStep(
@@ -210,11 +223,17 @@ internal fun moneroUri(raw: String): Pair<String, Long>? {
     val q = t.substringAfter("?", "")
     // Only tx_amount. `amount` is not a Monero URI field, and guessing at one
     // would be inventing a request nobody made.
+    // The decode is inside the catch with the parse: this runs in
+    // composition on every keystroke of the address field, and a stray "%"
+    // in a pasted amount ("1%") made URLDecoder throw and the app die.
     val amount = q.split('&')
         .firstOrNull { it.startsWith("tx_amount=") }
         ?.removePrefix("tx_amount=")
-        ?.let { java.net.URLDecoder.decode(it, "UTF-8") }
-        ?.let { v -> runCatching { Amounts.toPxmr(java.math.BigDecimal(v)) }.getOrNull() }
+        ?.let { v ->
+            runCatching {
+                Amounts.toPxmr(java.math.BigDecimal(java.net.URLDecoder.decode(v, "UTF-8")))
+            }.getOrNull()
+        }
         ?.takeIf { it > 0 }
         ?: 0L
     return addr to amount
@@ -237,6 +256,8 @@ private fun readScan(context: android.content.Context, raw: String): PayTarget? 
 private fun ChooseTarget(
     onPick: (PayTarget, Long) -> Unit,
     onScan: () -> Unit,
+    /** What the last scan came to, when it came to nothing. */
+    scanError: Int? = null,
     onClose: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -287,6 +308,14 @@ private fun ChooseTarget(
             Icon(Icons.Filled.QrCodeScanner, null, Modifier.size(18.dp))
             Spacer(Modifier.width(8.dp))
             Text(stringResource(R.string.pay_scan_a_code))
+        }
+        scanError?.let {
+            Spacer(Modifier.height(6.dp))
+            Text(
+                stringResource(it),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
         }
 
         if (contacts.isNotEmpty()) {
@@ -395,7 +424,10 @@ private fun AmountStep(
 ) {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
-    val b = remember(version) { Wallet.balances(context) }
+    // No balances read here: nothing on this step used it, and it decrypted
+    // every wallet output on the main thread, in composition, on every
+    // store bump — a hitch on the amount screen that grew with the wallet.
+    // The quote below asks the wallet what it needs, on IO.
     var fiatEntry by rememberSaveable { mutableStateOf(Amounts.enterFiat(context)) }
     val rate = remember(version) { RateStore(context).cached()?.first }
     val cur = remember { Amounts.currency(context) }
@@ -1026,7 +1058,10 @@ private fun AmountStep(
         // The minute the money is in flight, on the whole screen rather than
         // inside a button. The paid splash is this same object resolving, so
         // one becomes the other without the eye losing what it was following.
-        if (busy && pxmr != null && paidPxmr == null) {
+        // A request is busy too — the DHT write — and it wore this splash:
+        // "Building the transaction… gathering the decoys", undismissable,
+        // over money that was not leaving. Asking keeps to its button.
+        if (busy && !asking && pxmr != null && paidPxmr == null) {
             SendingSplash(
                 amountPxmr = pxmr,
                 toName = (target as? PayTarget.ToContact)?.contact?.displayName(),
