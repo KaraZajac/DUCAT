@@ -239,6 +239,21 @@ class Poller(private val context: Context) {
                     .onFailure { DucatLog.w(TAG, "receipts: ${it.message}") }
                 runCatching { TabStore.reconcile(context) }
                     .onFailure { DucatLog.w(TAG, "tabs: ${it.message}") }
+                // And the tabs opened for bills that never went out. A tab
+                // is committed before its bill leaves on purpose (Orders.bind
+                // says why), so a failed send strands one every time — none
+                // of which the tab book lists, because its open half is the
+                // bar's. The keep-set is assembled here rather than in the
+                // store: an order reads its state through its tab and a
+                // subscription owes its issue on one, and TabStore knowing
+                // about either would be the dependency upside down.
+                runCatching {
+                    TabStore(context).sweepAbandoned(
+                        System.currentTimeMillis(),
+                        keep = Orders.all(context).mapNotNull { it.tabId }.toSet() +
+                            Publications.billedTabIds(context),
+                    )
+                }.onFailure { DucatLog.w(TAG, "tab sweep: ${it.message}") }
                 // Donation threads get their receipts on the same clock the
                 // tabs do — see Donations for why the payer wants the record.
                 runCatching { Donations.reconcile(context) }

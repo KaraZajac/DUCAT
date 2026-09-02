@@ -862,6 +862,19 @@ object Publications {
     }
 
     /** Tabs billed for a period: personaHex → tab id. */
+    /**
+     * Every tab a subscription still reads, for [TabStore.sweepAbandoned].
+     *
+     * A period's issue is owed on its tab going paid ([dueSettled]), so a
+     * tab named here is load-bearing however old and however unbilled it
+     * looks from the tab store — which knows nothing about publications and
+     * is told instead.
+     */
+    fun billedTabIds(context: Context): Set<String> =
+        publications(context).flatMap { (pubId, _) ->
+            issues(context, pubId).flatMap { billedFor(context, pubId, it.periodId).values }
+        }.toSet()
+
     fun billedFor(context: Context, pubId: String, periodId: String): Map<String, String> {
         val o = readPub(context, pubId)?.optJSONObject("issues")
             ?.optJSONObject(periodId)?.optJSONObject("billed") ?: return emptyMap()

@@ -282,6 +282,64 @@ class TabStore(private val context: Context) {
     fun delete(id: String) = guarded { save(all().filterNot { it.id == id }) }
 
     /**
+     * Forget open tabs that nothing can bill and nothing can resume.
+     *
+     * A tab is opened before its bill goes out, deliberately: Orders.bind
+     * commits the link first because the other order left a paid coffee with
+     * no tab at all. The cost it names — "a re-billable open tab on the same
+     * death" — is only cheap if something eventually collects them, and
+     * nothing did. A till whose bill fails to send opens a fresh tab on the
+     * next try (Pos uses `open`, not `openOrResume`), so a bad afternoon of
+     * network leaves one per attempt, and the tab book's open list shows the
+     * bar's own origin only. They are invisible and permanent, and `all()`
+     * decrypts every one of them on every call — which the tab book already
+     * pays per change.
+     *
+     * Three guards, because every one of these tabs looks like debris right
+     * up until it is not:
+     *
+     * - **"bar" is never swept.** An open bar tab *is* the running account.
+     *   It is meant to sit open all evening, the tab book shows it, and
+     *   [openOrResume] hands it back to the next round.
+     * - **[keep] is never swept.** An order reads its state through its tab
+     *   (Orders.stateOf) and a subscription owes its issue on the tab's paid
+     *   (Publications.dueSettled) — this is [RunningTab.keptElsewhere] said
+     *   as a set. The caller assembles it, so the store keeps knowing nothing
+     *   about either.
+     * - **Nothing recent.** A day is far past a counter sale, a kiosk order
+     *   or the longest ride, and well short of anything a person would still
+     *   call live.
+     *
+     * That last one is a plain subtraction and *not* [Elapsed.due], which is
+     * the house rule for every other timer here. Elapsed reads a stamp from
+     * the future as due on the grounds that "doing the thing once too often
+     * costs a round trip and never doing it again costs the feature" — true
+     * of a refresh, backwards for a delete. A clock nudged forward and back
+     * would make this sweep eat a tab opened seconds ago. The cost of the
+     * other mistake is one leaked tab, so a stamp this device cannot vouch
+     * for keeps its tab instead.
+     *
+     * Only `state == "open"`: no bill has left the phone, so nobody is owed
+     * anything and there is nothing to cancel or settle. A billed tab is the
+     * tab book's, whatever its origin.
+     */
+    fun sweepAbandoned(now: Long, keep: Set<String>): Int = guarded {
+        val cur = all()
+        val dead = cur.filter {
+            it.state == "open" && it.origin != "bar" && it.id !in keep &&
+                now - it.openedAt >= ABANDONED_MS
+        }
+        if (dead.isEmpty()) return@guarded 0
+        save(cur - dead.toSet())
+        DucatLog.i(
+            TAG,
+            "swept ${dead.size} abandoned tab(s): " +
+                dead.groupingBy { it.origin }.eachCount(),
+        )
+        dead.size
+    }
+
+    /**
      * Key images ever matched to a bill, kept apart from the tabs themselves:
      * deleting a paid tab must not release its output back into the matching
      * pool, or a still-billed tab for the same amount could later "find" a
@@ -672,6 +730,10 @@ class TabStore(private val context: Context) {
         }
 
     companion object {
+        /** How long an unbilled non-bar tab may sit before [sweepAbandoned]
+         *  treats it as debris. */
+        const val ABANDONED_MS = 24L * 60 * 60 * 1000
+
         /**
          * Guards read-modify-write of the tab list.
          *

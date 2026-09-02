@@ -159,6 +159,12 @@ fun BarTabScreen(
         return
     }
 
+    // The open half is the bar's alone, unlike the two lists below it. An
+    // open tab elsewhere is not a running account somebody is adding to —
+    // it is the moment between opening a tab and the bill leaving, and its
+    // own shell is showing it. The ones a failed send strands there are
+    // swept a day later (TabStore.sweepAbandoned) rather than listed here,
+    // where Cancel on an order's tab would stand its kiosk order up.
     val open = tabs.filter { it.state == "open" && it.origin == "bar" }
     val awaiting = tabs.filter { it.state == "settled" }
     // Everything finished, cancelled included — a cancelled tab that appears

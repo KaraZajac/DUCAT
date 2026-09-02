@@ -833,6 +833,14 @@ tasks.register<JavaExec>("listtest") {
 // What a finished pass of recurring bills leaves behind — the lost write
 // that put a cancelled subscription back on the books.
 // `./gradlew :desktop:recurtest`.
+// What the abandoned-tab sweep may take, and the five things it may not.
+// `DUCAT_DESK_STATE=<dir> ./gradlew :desktop:sweeptest`.
+tasks.register<JavaExec>("sweeptest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.SweepTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 tasks.register<JavaExec>("recurtest") {
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "org.ducatproject.desk.RecurTestKt"
