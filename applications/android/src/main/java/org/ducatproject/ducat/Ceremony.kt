@@ -1645,6 +1645,24 @@ object Ceremony {
     private fun myFundTxid(o: JSONObject): String =
         if (isFunder(o)) o.optString("fundTxid") else o.optString("hostFundTxid")
 
+    /**
+     * When this party's own money went in, or 0.
+     *
+     * The clock the banner's stranded branches run on: an escrow only half
+     * funded leaves whoever paid first exposed, and §9.3.4's rule — in a
+     * system with no operator, "nothing happens" is not a safe default —
+     * means that exposure has to name the moment it becomes a way out.
+     * Records written before this field existed answer 0, which reads as
+     * "long enough", and that is the right side to be wrong on: the money
+     * is already in and the offer is only ever an offer.
+     */
+    /** Whether this party's own money is in the escrow. */
+    fun myFundTxidPresent(o: JSONObject): Boolean =
+        myFundTxid(o).let { it.isNotEmpty() && it != SENDING }
+
+    fun myFundedAt(o: JSONObject): Long =
+        if (isFunder(o)) o.optLong("fundTxidAt") else o.optLong("hostFundTxidAt")
+
     fun rideWith(context: Context, peerHex: String): JSONObject? =
         dealWith(context, peerHex)?.takeIf { bannerWorthy(it) }
 
@@ -2109,7 +2127,14 @@ object Ceremony {
         // function started with — rounds arrive on the poller while a
         // transaction is being built, and writing the old object back put the
         // ceremony into a state the protocol had already left.
-        mutate(context, idHex) { cur -> cur.put(mine, r.txidHex) }
+        // With the moment, not only the txid. Half a funded escrow is a
+        // party exposed until the other side follows, and how long they have
+        // been exposed is the whole question when deciding whether to offer
+        // them a way out (see the banner's stranded branches). Per party,
+        // because each is exposed from its own payment.
+        mutate(context, idHex) { cur ->
+            cur.put(mine, r.txidHex).put("${mine}At", System.currentTimeMillis())
+        }
         ContactStore.bump()
         DucatLog.i(TAG, "escrow $idHex: ${formatXmr(share)} XMR sent — ${r.txidHex.take(16)}…")
         return r.txidHex
@@ -2394,6 +2419,21 @@ object Ceremony {
          *  arbiter instead — their co-signature IS the ruling. The split's
          *  destinations do not change; only who is asked to agree does. */
         toArbiter: Boolean = false,
+        /**
+         * Ignore [riderBackPxmr] and ask for exactly what this device put
+         * in, leaving everything else where it belongs.
+         *
+         * For the half-funded escrow, where one side has staked and the
+         * other has not come. "Everything back to me" is the wrong claim
+         * there and dangerous to make: the balance is read here, at the
+         * moment of proposing, and if the other side funded in the seconds
+         * between the button and this line, a claim for the whole escrow is
+         * a claim for their money too — arriving at an arbiter who has no
+         * way to know it was meant innocently. Asking for one's own
+         * contribution is the same claim in the case that matters and a
+         * harmless one in the case that raced.
+         */
+        refundMineOnly: Boolean = false,
     ): Long {
         val o = load(context, idHex) ?: throw IllegalStateException("no such ceremony")
         // done → first proposal; releasing → retry or self-supersede;
@@ -2453,7 +2493,16 @@ object Ceremony {
         val total = runCatching {
             uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
         }.getOrDefault(0L)
-        val back = riderBackPxmr.coerceIn(0L, total)
+        // Against the live balance, never the caller's scan: the whole point
+        // of [refundMineOnly] is that a stale figure is what makes the claim
+        // wrong. The funder's own money is the rider's slice; everybody
+        // else's is the residual, so their own share is what is left after it.
+        val mine = mySharePxmr(o)
+        val back = when {
+            !refundMineOnly -> riderBackPxmr.coerceIn(0L, total)
+            isFunder(o) -> mine.coerceIn(0L, total)
+            else -> (total - mine).coerceAtLeast(0L)
+        }
         // Two shapes, one meaning: normally the rider's slice is fixed and
         // the driver is residual; when the driver's remainder could not
         // cover the fee, the driver's slice is fixed (possibly zero) and
@@ -2484,7 +2533,7 @@ object Ceremony {
         // a proposal lands (just below).
         mutate(context, idHex) { cur ->
             if (cur.optLong("wantReleaseAt") > 0) cur
-            else cur.put("wantRelease", riderBackPxmr)
+            else cur.put("wantRelease", back)
                 .put("wantReleaseAt", System.currentTimeMillis())
         }
         val margin = MIN_ESCROW_PXMR

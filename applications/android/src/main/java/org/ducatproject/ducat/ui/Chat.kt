@@ -3344,6 +3344,17 @@ private fun RideBondBanner(contact: Contact) {
         }
         busy = ThreadSends.inFlight(rideKey) || ThreadSends.inFlight(counterKey)
     }
+    // A clock for the stranded exit below, which appears when a wait is
+    // over: without something moving, the banner would only notice on the
+    // next store bump, and a phone left on that screen would never see it.
+    var nowTick by remember { mutableStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(idHex) {
+        while (true) {
+            kotlinx.coroutines.delay(20_000)
+            nowTick = System.currentTimeMillis()
+        }
+    }
+
     /** One of this banner's acts, run where the screen cannot cancel it. */
     val act: (String, () -> Unit) -> Unit = { key, body ->
         busy = true
@@ -3490,6 +3501,53 @@ private fun RideBondBanner(contact: Contact) {
             Amounts.show(context, myStakeShown).primary,
         )
     } else null
+
+    // **A half-funded escrow with nobody coming.**
+    //
+    // One side has paid and the other has not, and until now that state was
+    // a spinner and a line of text — no buttons, for ever, over money that
+    // is already in a shared address. §9.3.4 is explicit that this is the
+    // one thing a protocol with no operator may not do: "in a system with
+    // no operator, 'nothing happens' is not a safe default. Every deadline
+    // must name the action it triggers, because there is nobody to sort out
+    // the mess afterwards."
+    //
+    // So the deadline names one. With an arbiter there is a real way out —
+    // their co-signature is the ruling (§9.3.2) — and it asks for exactly
+    // what this device put in, never for the whole escrow: see
+    // `refundMineOnly`. Without an arbiter there is nothing the app can do
+    // and the honest thing is to say so, rather than spin and let somebody
+    // discover it themselves.
+    //
+    // Not offered at once. The other side may be three seconds from paying,
+    // and a way out that appears immediately is an invitation to take it.
+    // The wait is the app's existing sense of "this has stalled" for a ride;
+    // a booking is a slower thing and gets an hour, because a guest who has
+    // not paid in three minutes is not a guest who has gone.
+    @Composable
+    fun StrandedExit(sinceMs: Long) {
+        val waited = sinceMs <= 0L || org.ducatproject.ducat.Elapsed.due(
+            nowTick, sinceMs, if (reservation) 60L * 60 * 1000 else 3L * 60 * 1000,
+        )
+        if (!waited) return
+        Spacer(Modifier.height(6.dp))
+        if (ride.optInt("arbiterIdx") != 0) {
+            OutlinedButton(
+                onClick = {
+                    act(rideKey) {
+                        org.ducatproject.ducat.Ceremony.proposeRideSplit(
+                            context, idHex, 0L, toArbiter = true, refundMineOnly = true,
+                        )
+                    }
+                },
+                enabled = !busy,
+                modifier = Modifier.fillMaxWidth().height(40.dp),
+            ) { Text(stringResource(R.string.bond_ask_back)) }
+            BondNote(stringResource(R.string.bond_ask_back_note))
+        } else {
+            BondNote(stringResource(R.string.bond_stranded_no_arbiter))
+        }
+    }
 
     data class Step(
         val title: String,
@@ -3800,7 +3858,7 @@ private fun RideBondBanner(contact: Contact) {
                         )
                     }
                 }
-                stage == "done" && rider && funded < need ->
+                stage == "done" && rider && funded < need -> {
                     BondLine(
                         spin = true,
                         text = stringResource(
@@ -3808,6 +3866,8 @@ private fun RideBondBanner(contact: Contact) {
                             else R.string.bond_fare_sent,
                         ),
                     )
+                    StrandedExit(org.ducatproject.ducat.Ceremony.myFundedAt(ride))
+                }
                 stage == "done" && rider -> {
                     BondLine(spin = false, text = stringResource(
                         if (reservation) R.string.res_secured else R.string.bond_fare_secured))
@@ -3893,7 +3953,7 @@ private fun RideBondBanner(contact: Contact) {
                     Spacer(Modifier.height(4.dp))
                     BondNote(stringResource(R.string.bond_stake_refunded, myShown))
                 }
-                stage == "done" && !rider && funded < need ->
+                stage == "done" && !rider && funded < need -> {
                     BondLine(
                         spin = true,
                         text = stringResource(
@@ -3901,6 +3961,14 @@ private fun RideBondBanner(contact: Contact) {
                             else R.string.bond_waiting_funding,
                         ),
                     )
+                    // Only once this side's own money is actually in. Before
+                    // that there is nothing stranded and nothing to ask for
+                    // — the branch above offers the stake, and a provider who
+                    // never funds has simply declined (§15.12).
+                    if (org.ducatproject.ducat.Ceremony.myFundTxidPresent(ride)) {
+                        StrandedExit(org.ducatproject.ducat.Ceremony.myFundedAt(ride))
+                    }
+                }
                 stage == "done" && !rider -> {
                     BondLine(spin = false, text = stringResource(
                         if (reservation) R.string.res_secured else R.string.bond_fare_secured))

@@ -25,6 +25,9 @@
     <string name="bond_back_to_them">Wraca do %1$s (%2$s)</string>
     <string name="bond_counter">Zaproponuj</string>
     <string name="bond_ask_arbiter">Poproś arbitra o decyzję</string>
+    <string name="bond_ask_back">Poproś arbitra o zwrot pieniędzy</string>
+    <string name="bond_ask_back_note">Nie wpłacili swojej części. Arbiter może współpodpisać zwrot samej twojej wpłaty; nie prosisz o niczyje inne pieniądze.</string>
+    <string name="bond_stranded_no_arbiter">Twoje pieniądze są pod wspólnym adresem, a ich przeniesienie wymaga też ich podpisu. Ten depozyt nie ma arbitra, więc jedyne wyjście to skontaktować się z nimi.</string>
     <string name="res_tray">Rezerwacja</string>
     <string name="res_title">Zaproponuj rezerwację</string>
     <string name="res_note">Kwota i oba depozyty trafiają do jednego depozytu. Ty wpłacasz kwotę + swój; ich akceptacją jest wpłata ich. Depozyty wracają przy zwolnieniu.</string>

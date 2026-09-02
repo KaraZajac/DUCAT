@@ -25,6 +25,9 @@
     <string name="bond_back_to_them">به %1$s برمی‌گردد (%2$s)</string>
     <string name="bond_counter">پیشنهاد</string>
     <string name="bond_ask_arbiter">از داور بخواهید حکم کند</string>
+    <string name="bond_ask_back">از داور بخواهید پول شما را برگرداند</string>
+    <string name="bond_ask_back_note">آن‌ها سهم خود را نگذاشته‌اند. داور می‌تواند بازگشت سهم خودتان را هم‌امضا کند؛ پول کس دیگری خواسته نمی‌شود.</string>
+    <string name="bond_stranded_no_arbiter">پول شما در یک نشانی مشترک است و جابه‌جایی آن به امضای آن‌ها هم نیاز دارد. این امانت داوری ندارد، پس راه خروج تماس با آن‌هاست.</string>
     <string name="res_tray">رزرو</string>
     <string name="res_title">پیشنهاد رزرو</string>
     <string name="res_note">مبلغ و هر دو ودیعه در یک امانت. شما مبلغ + ودیعه خود را می‌پردازید؛ پذیرش آن‌ها پرداخت ودیعه خودشان است. ودیعه‌ها هنگام آزادسازی بازمی‌گردند.</string>

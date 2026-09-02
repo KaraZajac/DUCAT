@@ -25,6 +25,9 @@
     <string name="bond_back_to_them">Обратно %1$s (%2$s)</string>
     <string name="bond_counter">Предложить</string>
     <string name="bond_ask_arbiter">Попросить арбитра решить</string>
+    <string name="bond_ask_back">Попросить арбитра вернуть ваши деньги</string>
+    <string name="bond_ask_back_note">Они не внесли свою часть. Арбитр может подписать возврат именно вашего взноса; чужих денег вы не просите.</string>
+    <string name="bond_stranded_no_arbiter">Ваши деньги на общем адресе, и переместить их можно только с их подписью. У этого эскроу нет арбитра, поэтому выход — связаться с ними.</string>
     <string name="res_tray">Бронирование</string>
     <string name="res_title">Предложить бронирование</string>
     <string name="res_note">Сумма и оба залога идут в одно эскроу. Вы вносите сумму + свой залог; их согласие — внести свой. Залоги возвращаются при выпуске.</string>

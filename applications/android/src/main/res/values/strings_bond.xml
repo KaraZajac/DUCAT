@@ -25,6 +25,9 @@
     <string name="bond_back_to_them">Back to %1$s (%2$s)</string>
     <string name="bond_counter">Propose</string>
     <string name="bond_ask_arbiter">Ask the arbiter to rule</string>
+    <string name="bond_ask_back">Ask the arbiter for your money back</string>
+    <string name="bond_ask_back_note">They have not put their side in. The arbiter can co-sign your own contribution back to you; nobody else\'s money is asked for.</string>
+    <string name="bond_stranded_no_arbiter">Your money is in a shared address, and moving it needs their signature too. There is no arbiter on this escrow, so the way out is to reach them.</string>
     <string name="res_tray">Reservation</string>
     <string name="res_title">Propose a reservation</string>
     <string name="res_note">The price and both deposits go into one escrow. You fund the price + your deposit; their acceptance is funding theirs. Deposits come home in the release.</string>

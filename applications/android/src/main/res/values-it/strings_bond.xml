@@ -25,6 +25,9 @@
     <string name="bond_back_to_them">Torna a %1$s (%2$s)</string>
     <string name="bond_counter">Proponi</string>
     <string name="bond_ask_arbiter">Chiedi all’arbitro di decidere</string>
+    <string name="bond_ask_back">Chiedi all\'arbitro di restituirti il denaro</string>
+    <string name="bond_ask_back_note">Non hanno versato la loro parte. L\'arbitro può controfirmare la restituzione del tuo solo versamento; non si chiede il denaro di nessun altro.</string>
+    <string name="bond_stranded_no_arbiter">Il tuo denaro è in un indirizzo condiviso e spostarlo richiede anche la loro firma. Questo deposito non ha un arbitro: l\'unica via è contattarli.</string>
     <string name="res_tray">Prenotazione</string>
     <string name="res_title">Proponi una prenotazione</string>
     <string name="res_note">Il prezzo e le due cauzioni vanno in un unico deposito. Tu versi il prezzo + la tua; la loro accettazione è versare la loro. Le cauzioni tornano allo sblocco.</string>

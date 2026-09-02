@@ -25,6 +25,9 @@
     <string name="bond_back_to_them">%1$s に戻る（%2$s）</string>
     <string name="bond_counter">提案</string>
     <string name="bond_ask_arbiter">仲裁者に裁定を依頼</string>
+    <string name="bond_ask_back">仲裁人に返金を求める</string>
+    <string name="bond_ask_back_note">相手はまだ自分の分を入れていません。仲裁人はあなた自身の入金分の返金に連署できます。他人のお金は求めません。</string>
+    <string name="bond_stranded_no_arbiter">あなたのお金は共有アドレスにあり、動かすには相手の署名も必要です。このエスクローには仲裁人がいないため、出口は相手に連絡することだけです。</string>
     <string name="res_tray">予約</string>
     <string name="res_title">予約を提案</string>
     <string name="res_note">代金と双方のデポジットは一つのエスクローへ。あなたは代金+自分のデポジット、相手の受諾は相手のデポジットの入金。リリースでデポジットは戻ります。</string>

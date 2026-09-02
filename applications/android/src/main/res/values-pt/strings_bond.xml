@@ -25,6 +25,9 @@
     <string name="bond_back_to_them">De volta para %1$s (%2$s)</string>
     <string name="bond_counter">Propor</string>
     <string name="bond_ask_arbiter">Pedir ao árbitro para decidir</string>
+    <string name="bond_ask_back">Peça ao árbitro o seu dinheiro de volta</string>
+    <string name="bond_ask_back_note">Eles não puseram a parte deles. O árbitro pode coassinar a devolução da sua própria contribuição; não se pede o dinheiro de mais ninguém.</string>
+    <string name="bond_stranded_no_arbiter">O seu dinheiro está num endereço partilhado, e movê-lo precisa também da assinatura deles. Este depósito não tem árbitro, por isso a saída é falar com eles.</string>
     <string name="res_tray">Reserva</string>
     <string name="res_title">Propor uma reserva</string>
     <string name="res_note">O preço e ambas as cauções vão para uma só caução. Tu pões o preço + a tua; a aceitação deles é porem a deles. As cauções voltam na libertação.</string>

@@ -25,6 +25,9 @@
     <string name="bond_back_to_them">Zurück an %1$s (%2$s)</string>
     <string name="bond_counter">Vorschlagen</string>
     <string name="bond_ask_arbiter">Die Schiedsperson entscheiden lassen</string>
+    <string name="bond_ask_back">Den Schiedsmann um dein Geld bitten</string>
+    <string name="bond_ask_back_note">Sie haben ihren Teil nicht eingezahlt. Der Schiedsmann kann deinen eigenen Beitrag zurück mitunterschreiben; fremdes Geld wird nicht verlangt.</string>
+    <string name="bond_stranded_no_arbiter">Dein Geld liegt in einer gemeinsamen Adresse, und es zu bewegen braucht auch ihre Unterschrift. Dieses Treuhandkonto hat keinen Schiedsmann — der Weg hinaus führt über sie.</string>
     <string name="res_tray">Reservierung</string>
     <string name="res_title">Reservierung vorschlagen</string>
     <string name="res_note">Der Preis und beide Kautionen gehen in eine Treuhand. Du zahlst den Preis + deine Kaution; ihre Annahme ist das Einzahlen ihrer. Kautionen kommen bei der Freigabe zurück.</string>

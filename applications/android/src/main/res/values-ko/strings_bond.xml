@@ -25,6 +25,9 @@
     <string name="bond_back_to_them">%1$s에게 반환 (%2$s)</string>
     <string name="bond_counter">제안</string>
     <string name="bond_ask_arbiter">중재자에게 판정 요청</string>
+    <string name="bond_ask_back">중재인에게 돈을 돌려달라고 요청</string>
+    <string name="bond_ask_back_note">상대가 아직 자기 몫을 넣지 않았어요. 중재인은 당신이 넣은 몫만 돌려주는 데 공동 서명할 수 있어요. 다른 사람의 돈은 요구하지 않아요.</string>
+    <string name="bond_stranded_no_arbiter">당신의 돈은 공동 주소에 있고, 옮기려면 상대의 서명도 필요해요. 이 에스크로에는 중재인이 없으니 방법은 상대에게 연락하는 것뿐이에요.</string>
     <string name="res_tray">예약</string>
     <string name="res_title">예약 제안</string>
     <string name="res_note">금액과 양쪽 보증금이 하나의 에스크로로. 당신은 금액+보증금을, 상대의 수락은 그들의 보증금 입금. 해제 시 보증금은 돌아옵니다.</string>

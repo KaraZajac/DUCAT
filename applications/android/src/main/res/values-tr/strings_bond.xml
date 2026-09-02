@@ -25,6 +25,9 @@
     <string name="bond_back_to_them">%1$s kişisine geri (%2$s)</string>
     <string name="bond_counter">Öner</string>
     <string name="bond_ask_arbiter">Hakemden karar iste</string>
+    <string name="bond_ask_back">Hakemden paranı geri iste</string>
+    <string name="bond_ask_back_note">Kendi paylarını yatırmadılar. Hakem yalnızca senin yatırdığını sana geri döndürmek üzere ortak imza atabilir; kimsenin başka parası istenmiyor.</string>
+    <string name="bond_stranded_no_arbiter">Paran ortak bir adreste ve onu hareket ettirmek onların imzasını da gerektiriyor. Bu emanette hakem yok; tek çıkış onlara ulaşmak.</string>
     <string name="res_tray">Rezervasyon</string>
     <string name="res_title">Rezervasyon öner</string>
     <string name="res_note">Tutar ve iki depozito tek emanete girer. Sen tutarı + depozitonu yatırırsın; kabulleri kendi depozitolarını yatırmaktır. Depozitolar serbest bırakmada döner.</string>

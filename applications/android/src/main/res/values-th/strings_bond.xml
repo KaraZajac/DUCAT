@@ -25,6 +25,9 @@
     <string name="bond_back_to_them">คืนให้ %1$s (%2$s)</string>
     <string name="bond_counter">เสนอ</string>
     <string name="bond_ask_arbiter">ขอให้ผู้ชี้ขาดตัดสิน</string>
+    <string name="bond_ask_back">ขอให้ผู้ไกล่เกลี่ยคืนเงินของคุณ</string>
+    <string name="bond_ask_back_note">อีกฝ่ายยังไม่ได้ใส่ส่วนของตน ผู้ไกล่เกลี่ยร่วมลงนามคืนเฉพาะเงินที่คุณใส่ไว้ได้ ไม่ได้ขอเงินของใครอื่น</string>
+    <string name="bond_stranded_no_arbiter">เงินของคุณอยู่ในที่อยู่ร่วม การย้ายต้องใช้ลายเซ็นของอีกฝ่ายด้วย เอสโครว์นี้ไม่มีผู้ไกล่เกลี่ย ทางออกคือติดต่อพวกเขา</string>
     <string name="res_tray">การจอง</string>
     <string name="res_title">เสนอการจอง</string>
     <string name="res_note">ราคาและมัดจำทั้งสองเข้าเอสโครว์เดียว คุณจ่ายราคา+มัดจำของคุณ การยอมรับของเขาคือจ่ายของเขา มัดจำคืนเมื่อปล่อย</string>

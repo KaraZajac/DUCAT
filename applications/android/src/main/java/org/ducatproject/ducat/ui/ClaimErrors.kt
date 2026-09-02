@@ -289,7 +289,9 @@ fun claimOffScreen(
 
 /** The thread a landed claim opened, looked up fresh: the outcome carries
  *  the persona hex, and the record may have moved on since. */
-fun ThreadSends.Outcome.Landed.claimed(context: android.content.Context): org.ducatproject.ducat.Contact? =
+internal fun ThreadSends.Outcome.Landed.claimed(
+    context: android.content.Context,
+): org.ducatproject.ducat.Contact? =
     result?.let { hex ->
         org.ducatproject.ducat.ContactStore(context).all().firstOrNull { it.personaHex == hex }
     }

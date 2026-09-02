@@ -25,6 +25,9 @@
     <string name="bond_back_to_them">Назад %1$s (%2$s)</string>
     <string name="bond_counter">Запропонувати</string>
     <string name="bond_ask_arbiter">Попросити арбітра вирішити</string>
+    <string name="bond_ask_back">Попросити арбітра повернути ваші гроші</string>
+    <string name="bond_ask_back_note">Вони не внесли свою частину. Арбітр може підписати повернення саме вашого внеску; чужих грошей ви не просите.</string>
+    <string name="bond_stranded_no_arbiter">Ваші гроші на спільній адресі, і перемістити їх можна лише з їхнім підписом. У цього ескроу немає арбітра, тож вихід — зв\'язатися з ними.</string>
     <string name="res_tray">Бронювання</string>
     <string name="res_title">Запропонувати бронювання</string>
     <string name="res_note">Сума й обидві застави йдуть в одне ескроу. Ви вносите суму + свою заставу; їхня згода — внести свою. Застави повертаються при випуску.</string>

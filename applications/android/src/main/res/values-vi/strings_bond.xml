@@ -25,6 +25,9 @@
     <string name="bond_back_to_them">Trả lại cho %1$s (%2$s)</string>
     <string name="bond_counter">Đề xuất</string>
     <string name="bond_ask_arbiter">Nhờ trọng tài phân xử</string>
+    <string name="bond_ask_back">Nhờ trọng tài trả lại tiền của bạn</string>
+    <string name="bond_ask_back_note">Họ chưa góp phần của mình. Trọng tài có thể đồng ký trả lại đúng phần bạn đã góp; không đòi tiền của ai khác.</string>
+    <string name="bond_stranded_no_arbiter">Tiền của bạn nằm ở một địa chỉ chung, và muốn chuyển thì cần cả chữ ký của họ. Ký quỹ này không có trọng tài, nên lối ra là liên hệ với họ.</string>
     <string name="res_tray">Đặt chỗ</string>
     <string name="res_title">Đề xuất đặt chỗ</string>
     <string name="res_note">Số tiền và cả hai khoản cọc vào một ký quỹ. Bạn nạp số tiền + cọc của bạn; họ chấp nhận bằng cách nạp cọc của họ. Cọc về lại khi giải phóng.</string>
