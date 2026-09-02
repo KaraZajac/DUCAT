@@ -511,7 +511,13 @@ fun HailCard(
             Spacer(Modifier.width(10.dp))
             Column(Modifier.weight(1f)) {
                 Text(stringResource(R.string.hail_card_title), style = MaterialTheme.typography.titleMedium)
-                Text(
+                // Only while it is true. This line stood over every state
+                // the card has — "waiting for a driver" above "Jordan offers
+                // USD 6.94", and above "Nobody took your hail before it
+                // expired." Once the notice is down, the line below the
+                // header says what is happening, and this one said the
+                // opposite.
+                if (posted != null) Text(
                     stringResource(R.string.hail_card_standing),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
