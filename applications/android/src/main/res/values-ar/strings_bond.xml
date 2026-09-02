@@ -25,8 +25,10 @@
     <string name="bond_back_to_them">تعود إلى %1$s (%2$s)</string>
     <string name="bond_counter">اقتراح</string>
     <string name="bond_ask_arbiter">اطلب من الحَكَم أن يفصل</string>
-    <string name="bond_ask_back">اطلب من المحكّم إعادة أموالك</string>
-    <string name="bond_ask_back_note">لم يضعوا حصتهم بعد. يمكن للمحكّم التوقيع المشترك لإعادة مساهمتك وحدها؛ ولا يُطلب مال أي شخص آخر.</string>
+    <string name="bond_ask_back">اطلب استعادة أموالك</string>
+    <string name="bond_ask_back_note">لم يضعوا حصتهم. هذا يطلب ما وضعته أنت بالضبط، ولا شيء من مال غيرك.</string>
+    <string name="bond_decline_theirs">اطلب منهم استرداد وديعتهم</string>
+    <string name="bond_decline_theirs_note">أنت لم تدفع، وأموالهم موجودة بالفعل في الضمان. هذا يطلب منهم توقيع إعادتها إلى أنفسهم، وهو ما ينهي الاتفاق بنظافة لكليكما.</string>
     <string name="bond_stranded_no_arbiter">أموالك في عنوان مشترك، وتحريكها يحتاج توقيعهم أيضًا. لا يوجد محكّم لهذه الوديعة، لذا السبيل الوحيد هو التواصل معهم.</string>
     <string name="res_tray">حجز</string>
     <string name="res_title">اقتراح حجز</string>

@@ -25,8 +25,10 @@
     <string name="bond_back_to_them">%1$s को वापस (%2$s)</string>
     <string name="bond_counter">प्रस्ताव</string>
     <string name="bond_ask_arbiter">मध्यस्थ से निर्णय माँगें</string>
-    <string name="bond_ask_back">मध्यस्थ से अपना पैसा वापस माँगें</string>
-    <string name="bond_ask_back_note">उन्होंने अपना हिस्सा नहीं डाला है। मध्यस्थ आपके अपने योगदान की वापसी पर सह-हस्ताक्षर कर सकता है; किसी और का पैसा नहीं माँगा जाता।</string>
+    <string name="bond_ask_back">अपना पैसा वापस माँगें</string>
+    <string name="bond_ask_back_note">उन्होंने अपना हिस्सा नहीं डाला। यह ठीक उतना ही माँगता है जितना आपने डाला, किसी और का कुछ नहीं।</string>
+    <string name="bond_decline_theirs">उनसे वापस लेने को कहें</string>
+    <string name="bond_decline_theirs_note">आपने भुगतान नहीं किया है, और उनका पैसा पहले ही एस्क्रो में है। यह उनसे कहता है कि वे उसे अपने पास वापस हस्ताक्षरित करें — इससे सौदा दोनों के लिए साफ़ ख़त्म होता है।</string>
     <string name="bond_stranded_no_arbiter">आपका पैसा साझा पते में है, और उसे हटाने के लिए उनका हस्ताक्षर भी चाहिए। इस एस्क्रो पर कोई मध्यस्थ नहीं है, इसलिए रास्ता उन्हीं तक पहुँचना है।</string>
     <string name="res_tray">आरक्षण</string>
     <string name="res_title">आरक्षण प्रस्तावित करें</string>

@@ -3531,7 +3531,26 @@ private fun RideBondBanner(contact: Contact) {
         )
         if (!waited) return
         Spacer(Modifier.height(6.dp))
+        // **The counterparty first, the arbiter after.** A half-funded
+        // escrow holds one person's money, so the other side signing it
+        // home costs them nothing and needs no third party — it is the
+        // ordinary release, with the whole balance going one way. The
+        // arbiter is for when they have stopped answering, which is a
+        // different problem and a slower one.
+        OutlinedButton(
+            onClick = {
+                act(rideKey) {
+                    org.ducatproject.ducat.Ceremony.proposeRideSplit(
+                        context, idHex, 0L, refundMineOnly = true,
+                    )
+                }
+            },
+            enabled = !busy,
+            modifier = Modifier.fillMaxWidth().height(40.dp),
+        ) { Text(stringResource(R.string.bond_ask_back)) }
+        BondNote(stringResource(R.string.bond_ask_back_note))
         if (ride.optInt("arbiterIdx") != 0) {
+            Spacer(Modifier.height(4.dp))
             OutlinedButton(
                 onClick = {
                     act(rideKey) {
@@ -3542,11 +3561,38 @@ private fun RideBondBanner(contact: Contact) {
                 },
                 enabled = !busy,
                 modifier = Modifier.fillMaxWidth().height(40.dp),
-            ) { Text(stringResource(R.string.bond_ask_back)) }
-            BondNote(stringResource(R.string.bond_ask_back_note))
+            ) { Text(stringResource(R.string.bond_ask_arbiter)) }
         } else {
             BondNote(stringResource(R.string.bond_stranded_no_arbiter))
         }
+    }
+
+    /**
+     * The other half of the same moment: **I have changed my mind, and
+     * their money is already in.**
+     *
+     * A reservation's host accepts by funding their deposit (§15.12), and
+     * from that instant the guest's "call it off" disappeared — `callOff`
+     * refuses once there is money in the escrow, correctly, because a local
+     * flag cannot move a 2-of-2. So the only way to decline was to walk
+     * away and leave the host's deposit stranded, which is the failure the
+     * banner above exists to unwind and a rude way to start.
+     *
+     * A release costs the decliner nothing and gives the host their money
+     * back in one signature: everything to them, proposed by the person who
+     * owes nothing. No wait on this one — deciding not to buy something is
+     * not a state that needs to ripen.
+     */
+    @Composable
+    fun DeclineTheirs() {
+        if (funded <= 0L) return
+        Spacer(Modifier.height(6.dp))
+        OutlinedButton(
+            onClick = { act(rideKey) { org.ducatproject.ducat.Ceremony.proposeRideSplit(context, idHex, 0L) } },
+            enabled = !busy,
+            modifier = Modifier.fillMaxWidth().height(40.dp),
+        ) { Text(stringResource(R.string.bond_decline_theirs)) }
+        BondNote(stringResource(R.string.bond_decline_theirs_note))
     }
 
     data class Step(
@@ -3582,8 +3628,26 @@ private fun RideBondBanner(contact: Contact) {
                 Amounts.show(context, myShare).primary,
             ),
             onAction = fundNow,
-            secondary = if (canCallOff) stringResource(R.string.bond_call_off) else null,
-            onSecondary = if (canCallOff) callOffNow else null,
+            // Two different noes, and the step used to offer only the first.
+            // With nothing in the escrow, calling off is local and instant.
+            // Once the other side's money is in, a local flag cannot move a
+            // 2-of-2 — so the honest decline is a release that hands their
+            // money back, which they sign. Before, this simply disappeared
+            // and the only way to decline was to walk away and strand them.
+            secondary = when {
+                canCallOff -> stringResource(R.string.bond_call_off)
+                funded > 0 -> stringResource(R.string.bond_decline_theirs)
+                else -> null
+            },
+            onSecondary = when {
+                canCallOff -> callOffNow
+                funded > 0 -> ({
+                    act(rideKey) {
+                        org.ducatproject.ducat.Ceremony.proposeRideSplit(context, idHex, 0L)
+                    }
+                })
+                else -> null
+            },
         )
         // The rider putting the fare and their stake in — but not while still
         // waiting on the other side's, which is a wait, not a decision.
@@ -3606,8 +3670,26 @@ private fun RideBondBanner(contact: Contact) {
                 Amounts.show(context, myShare).primary,
             ),
             onAction = fundNow,
-            secondary = if (canCallOff) stringResource(R.string.bond_call_off) else null,
-            onSecondary = if (canCallOff) callOffNow else null,
+            // Two different noes, and the step used to offer only the first.
+            // With nothing in the escrow, calling off is local and instant.
+            // Once the other side's money is in, a local flag cannot move a
+            // 2-of-2 — so the honest decline is a release that hands their
+            // money back, which they sign. Before, this simply disappeared
+            // and the only way to decline was to walk away and strand them.
+            secondary = when {
+                canCallOff -> stringResource(R.string.bond_call_off)
+                funded > 0 -> stringResource(R.string.bond_decline_theirs)
+                else -> null
+            },
+            onSecondary = when {
+                canCallOff -> callOffNow
+                funded > 0 -> ({
+                    act(rideKey) {
+                        org.ducatproject.ducat.Ceremony.proposeRideSplit(context, idHex, 0L)
+                    }
+                })
+                else -> null
+            },
         )
         // The driver ending the ride and asking for the fare.
         stage == "done" && !rider && funded >= need -> Step(
@@ -3798,6 +3880,7 @@ private fun RideBondBanner(contact: Contact) {
                     ride.optLong("hostDepPxmr") > 0 &&
                     funded < ride.optLong("hostDepPxmr") -> {
                     BondLine(spin = true, text = stringResource(R.string.bond_await_their_stake))
+                    DeclineTheirs()
                     // The one wait in this flow with no end of its own: the
                     // far side may simply never answer, and until there was a
                     // way to say so the only exits were to abandon the thread
@@ -3847,6 +3930,11 @@ private fun RideBondBanner(contact: Contact) {
                     // rather than in a help page nobody opens — and read from
                     // the escrow, not worked out again with a room's twenty
                     // percent for every kind of deal there is.
+                    // Beneath the pay button, not instead of it: the deal
+                    // is still the first thing offered, and this is the
+                    // answer for somebody who has decided against it while
+                    // the other side's money is already in.
+                    DeclineTheirs()
                     val myStake = org.ducatproject.ducat.Ceremony.myStakePxmr(ride)
                     if (myStake > 0) {
                         Spacer(Modifier.height(4.dp))

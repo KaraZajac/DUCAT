@@ -25,8 +25,10 @@
     <string name="bond_back_to_them">Kembali ke %1$s (%2$s)</string>
     <string name="bond_counter">Usulkan</string>
     <string name="bond_ask_arbiter">Minta arbiter memutuskan</string>
-    <string name="bond_ask_back">Minta arbiter mengembalikan uang Anda</string>
-    <string name="bond_ask_back_note">Mereka belum menaruh bagiannya. Arbiter dapat ikut menandatangani pengembalian kontribusi Anda sendiri; tidak ada uang orang lain yang diminta.</string>
+    <string name="bond_ask_back">Minta uang Anda kembali</string>
+    <string name="bond_ask_back_note">Mereka belum menaruh bagiannya. Ini meminta persis yang Anda taruh, dan bukan uang orang lain.</string>
+    <string name="bond_decline_theirs">Minta mereka menariknya kembali</string>
+    <string name="bond_decline_theirs_note">Anda belum membayar, dan uang mereka sudah ada di escrow. Ini meminta mereka menandatangani pengembaliannya kepada diri sendiri, sehingga kesepakatan berakhir bersih bagi kalian berdua.</string>
     <string name="bond_stranded_no_arbiter">Uang Anda ada di alamat bersama, dan memindahkannya butuh tanda tangan mereka juga. Escrow ini tidak punya arbiter, jadi jalan keluarnya adalah menghubungi mereka.</string>
     <string name="res_tray">Reservasi</string>
     <string name="res_title">Usulkan reservasi</string>

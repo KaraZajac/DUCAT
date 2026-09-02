@@ -25,8 +25,10 @@
     <string name="bond_back_to_them">退还给 %1$s（%2$s）</string>
     <string name="bond_counter">提议</string>
     <string name="bond_ask_arbiter">请仲裁人裁决</string>
-    <string name="bond_ask_back">请仲裁人退回你的钱</string>
-    <string name="bond_ask_back_note">对方还没有放入自己的那一份。仲裁人可以联署把你自己投入的部分退还给你；不会索取任何他人的钱。</string>
+    <string name="bond_ask_back">要求退回你的钱</string>
+    <string name="bond_ask_back_note">对方没有放入自己的那一份。这只索取你自己投入的部分，不涉及任何他人的钱。</string>
+    <string name="bond_decline_theirs">请对方收回</string>
+    <string name="bond_decline_theirs_note">你还没有付款，而对方的钱已经在托管里。这请对方签名把钱退回给自己，交易就为双方干净地结束。</string>
     <string name="bond_stranded_no_arbiter">你的钱在一个共享地址里，要动它还需要对方的签名。这笔托管没有仲裁人，唯一的出路是联系他们。</string>
     <string name="res_tray">预订</string>
     <string name="res_title">提议预订</string>

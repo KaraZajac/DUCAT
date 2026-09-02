@@ -25,8 +25,10 @@
     <string name="bond_back_to_them">Qui revient à %1$s (%2$s)</string>
     <string name="bond_counter">Proposer</string>
     <string name="bond_ask_arbiter">Demander à l’arbitre de trancher</string>
-    <string name="bond_ask_back">Demander à l\'arbitre de vous rendre votre argent</string>
-    <string name="bond_ask_back_note">Ils n\'ont pas versé leur part. L\'arbitre peut cosigner le retour de votre propre versement ; l\'argent de personne d\'autre n\'est demandé.</string>
+    <string name="bond_ask_back">Demander le remboursement</string>
+    <string name="bond_ask_back_note">Ils n\'ont pas versé leur part. Ceci demande exactement ce que vous avez versé, et rien de l\'argent d\'autrui.</string>
+    <string name="bond_decline_theirs">Leur demander de le reprendre</string>
+    <string name="bond_decline_theirs_note">Vous n\'avez pas payé, et leur argent est déjà sous séquestre. Ceci leur demande de se le resigner, ce qui met fin proprement à l\'accord pour vous deux.</string>
     <string name="bond_stranded_no_arbiter">Votre argent est dans une adresse partagée, et le déplacer demande aussi leur signature. Cet entiercement n\'a pas d\'arbitre : la sortie passe par eux.</string>
     <string name="res_tray">Réservation</string>
     <string name="res_title">Proposer une réservation</string>

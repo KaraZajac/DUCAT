@@ -25,8 +25,10 @@
     <string name="bond_back_to_them">Zurück an %1$s (%2$s)</string>
     <string name="bond_counter">Vorschlagen</string>
     <string name="bond_ask_arbiter">Die Schiedsperson entscheiden lassen</string>
-    <string name="bond_ask_back">Den Schiedsmann um dein Geld bitten</string>
-    <string name="bond_ask_back_note">Sie haben ihren Teil nicht eingezahlt. Der Schiedsmann kann deinen eigenen Beitrag zurück mitunterschreiben; fremdes Geld wird nicht verlangt.</string>
+    <string name="bond_ask_back">Dein Geld zurückfordern</string>
+    <string name="bond_ask_back_note">Sie haben ihren Teil nicht eingezahlt. Dies fordert genau deinen eigenen Einsatz zurück und nichts von fremdem Geld.</string>
+    <string name="bond_decline_theirs">Sie bitten, es zurückzunehmen</string>
+    <string name="bond_decline_theirs_note">Du hast nicht bezahlt, und ihr Geld liegt schon im Treuhandkonto. Dies bittet sie, es sich selbst zurückzuzeichnen — damit endet der Handel für beide sauber.</string>
     <string name="bond_stranded_no_arbiter">Dein Geld liegt in einer gemeinsamen Adresse, und es zu bewegen braucht auch ihre Unterschrift. Dieses Treuhandkonto hat keinen Schiedsmann — der Weg hinaus führt über sie.</string>
     <string name="res_tray">Reservierung</string>
     <string name="res_title">Reservierung vorschlagen</string>

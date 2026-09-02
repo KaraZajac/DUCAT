@@ -25,8 +25,10 @@
     <string name="bond_back_to_them">%1$s kişisine geri (%2$s)</string>
     <string name="bond_counter">Öner</string>
     <string name="bond_ask_arbiter">Hakemden karar iste</string>
-    <string name="bond_ask_back">Hakemden paranı geri iste</string>
-    <string name="bond_ask_back_note">Kendi paylarını yatırmadılar. Hakem yalnızca senin yatırdığını sana geri döndürmek üzere ortak imza atabilir; kimsenin başka parası istenmiyor.</string>
+    <string name="bond_ask_back">Paranı geri iste</string>
+    <string name="bond_ask_back_note">Kendi paylarını yatırmadılar. Bu tam olarak senin yatırdığını ister, kimsenin başka parasını değil.</string>
+    <string name="bond_decline_theirs">Geri almalarını iste</string>
+    <string name="bond_decline_theirs_note">Sen ödemedin ve onların parası çoktan emanette. Bu, parayı kendilerine geri imzalamalarını ister; anlaşma ikiniz için de temizce biter.</string>
     <string name="bond_stranded_no_arbiter">Paran ortak bir adreste ve onu hareket ettirmek onların imzasını da gerektiriyor. Bu emanette hakem yok; tek çıkış onlara ulaşmak.</string>
     <string name="res_tray">Rezervasyon</string>
     <string name="res_title">Rezervasyon öner</string>

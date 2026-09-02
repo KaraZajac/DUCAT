@@ -25,8 +25,10 @@
     <string name="bond_back_to_them">Назад %1$s (%2$s)</string>
     <string name="bond_counter">Запропонувати</string>
     <string name="bond_ask_arbiter">Попросити арбітра вирішити</string>
-    <string name="bond_ask_back">Попросити арбітра повернути ваші гроші</string>
-    <string name="bond_ask_back_note">Вони не внесли свою частину. Арбітр може підписати повернення саме вашого внеску; чужих грошей ви не просите.</string>
+    <string name="bond_ask_back">Попросити повернути гроші</string>
+    <string name="bond_ask_back_note">Вони не внесли свою частину. Це просить рівно те, що внесли ви, і нічого чужого.</string>
+    <string name="bond_decline_theirs">Попросити їх забрати назад</string>
+    <string name="bond_decline_theirs_note">Ви не платили, а їхні гроші вже в ескроу. Це просить їх підписати повернення собі — угода чисто завершується для вас обох.</string>
     <string name="bond_stranded_no_arbiter">Ваші гроші на спільній адресі, і перемістити їх можна лише з їхнім підписом. У цього ескроу немає арбітра, тож вихід — зв\'язатися з ними.</string>
     <string name="res_tray">Бронювання</string>
     <string name="res_title">Запропонувати бронювання</string>

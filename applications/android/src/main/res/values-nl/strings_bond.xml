@@ -25,8 +25,10 @@
     <string name="bond_back_to_them">Terug naar %1$s (%2$s)</string>
     <string name="bond_counter">Voorstellen</string>
     <string name="bond_ask_arbiter">De arbiter laten beslissen</string>
-    <string name="bond_ask_back">Vraag de arbiter je geld terug</string>
-    <string name="bond_ask_back_note">Zij hebben hun deel niet ingelegd. De arbiter kan je eigen inleg mede-ondertekenen terug naar jou; er wordt niemands andere geld gevraagd.</string>
+    <string name="bond_ask_back">Vraag je geld terug</string>
+    <string name="bond_ask_back_note">Zij hebben hun deel niet ingelegd. Dit vraagt precies jouw eigen inleg, en niets van andermans geld.</string>
+    <string name="bond_decline_theirs">Vraag hen het terug te nemen</string>
+    <string name="bond_decline_theirs_note">Jij hebt niet betaald en hun geld staat al in escrow. Dit vraagt hen het naar zichzelf terug te tekenen, waarmee de afspraak voor jullie beiden netjes eindigt.</string>
     <string name="bond_stranded_no_arbiter">Je geld staat op een gedeeld adres, en verplaatsen vraagt ook hun handtekening. Deze escrow heeft geen arbiter, dus de uitweg loopt via hen.</string>
     <string name="res_tray">Reservering</string>
     <string name="res_title">Reservering voorstellen</string>
