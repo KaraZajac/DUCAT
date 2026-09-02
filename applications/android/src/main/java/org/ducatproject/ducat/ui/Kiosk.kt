@@ -58,7 +58,11 @@ import org.ducatproject.ducat.formatXmr
 fun KioskScreen() {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
-    var basket by remember { mutableStateOf(listOf<BillItem>()) }
+    // Saved the way the till's is: the counter is a tablet, and a tablet
+    // rotates when somebody bumps it. The four things they had picked were
+    // gone with the turn, and they were picking them again in front of a
+    // queue.
+    var basket by rememberSaveable(stateSaver = BasketSaver) { mutableStateOf(listOf<BillItem>()) }
     var tipPct by rememberSaveable { mutableStateOf(0) }
     // The order id rather than the order, and saveable rather than
     // remembered: a customer fumbling for their phone while the card is up is
@@ -322,19 +326,31 @@ private fun Ordering(
 @Composable
 private fun PayPanel(order: Orders.Order, onDone: () -> Unit) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     // No local copy of the order: the caller re-reads it from the store, so
     // there is one record of where this sale has got to and everybody reads
     // the same one.
-    var cardUri by remember(order.id) { mutableStateOf<String?>(null) }
-    var cardInbox by remember(order.id) { mutableStateOf<String?>(null) }
+    //
+    // The card, saved with the order id it belongs to. Remembered only, a
+    // rotation while the code was up issued a second card and waited for
+    // *its* claimant — while the customer, mid-scan of the first, claimed a
+    // card nobody was watching any more and got no bill.
+    var cardUri by rememberSaveable(order.id) { mutableStateOf<String?>(null) }
+    var cardInbox by rememberSaveable(order.id) { mutableStateOf<String?>(null) }
     var error by remember(order.id) { mutableStateOf<String?>(null) }
-    var fallback by remember(order.id) { mutableStateOf(false) }
+    // Which face this order shows, read off the record rather than off a
+    // flag held here: a bare address with no tab is the Monero fallback,
+    // whichever screen instance is looking. The flag this used to be was
+    // lost on rotation, which put the card back up over an order that had
+    // already been given a Monero address — and its anonymous twin, placed
+    // in composition, was placed again.
+    val monero = order.tabId == null && order.address.isNotEmpty()
 
     // Issued once per order. A "sale" card never auto-reissues and this flow
     // waits for *its* claimant, so somebody scanning a profile code across the
     // room is not handed the queue's coffee.
-    LaunchedEffect(order.id, fallback) {
-        if (cardUri != null || fallback || !order.unpaired) return@LaunchedEffect
+    LaunchedEffect(order.id, monero) {
+        if (cardUri != null || monero || !order.unpaired) return@LaunchedEffect
         val r = withContext(Dispatchers.IO) {
             runCatching {
                 Mailbox.issueCard(
@@ -348,10 +364,21 @@ private fun PayPanel(order: Orders.Order, onDone: () -> Unit) {
 
     // The same card over NFC, for as long as it is on screen: tapping and
     // scanning are the same gesture to a customer and should be the same
-    // gesture to us.
-    DisposableEffect(cardUri) {
-        org.ducatproject.ducat.nfc.Tap.offered = cardUri
+    // gesture to us. Not once the screen shows a Monero code instead — the
+    // card went on being offered under the fallback, and a phone tapped
+    // against it while the QR was up was billed for the coffee it was about
+    // to pay for with the QR.
+    DisposableEffect(cardUri, monero) {
+        org.ducatproject.ducat.nfc.Tap.offered = cardUri.takeUnless { monero }
         onDispose { org.ducatproject.ducat.nfc.Tap.offered = null }
+    }
+
+    // Staff gave up on it. Marked now, so the poller stops reading the
+    // mempool for it and the staff list stops calling it "awaiting" —
+    // rather than half an hour later, when expiry would have found it.
+    val giveUp: () -> Unit = {
+        scope.launch(Dispatchers.IO) { runCatching { Orders.abandon(context, order.id) } }
+        onDone()
     }
 
     // Bound, and the bill still owed. Orders.bind commits the tab to the
@@ -381,7 +408,11 @@ private fun PayPanel(order: Orders.Order, onDone: () -> Unit) {
     // Keyed on the order as well as the card: a rebuilt screen with an
     // order already bound issues no card, and the bill it may still owe
     // has to be sent from here regardless.
-    LaunchedEffect(order.id, cardInbox) {
+    //
+    // And on the fallback, which ends it: a claim on the card this order
+    // no longer shows must not bind the order the Monero code is paying.
+    LaunchedEffect(order.id, cardInbox, monero) {
+        if (monero) return@LaunchedEffect
         while (true) {
             val current = withContext(Dispatchers.IO) {
                 Orders.all(context).firstOrNull { it.id == order.id }
@@ -432,14 +463,29 @@ private fun PayPanel(order: Orders.Order, onDone: () -> Unit) {
         }
     }
 
-    if (fallback) return MoneroFallback(order, onDone)
+    if (monero) return PayPanelMonero(order, onDone = onDone, onCancel = giveUp)
     if (order.unpaired) {
         return PairPanel(
             order = order,
             cardUri = cardUri,
             error = error,
-            onCancel = onDone,
-            onFallback = { fallback = true },
+            onCancel = giveUp,
+            // A bare address needs its own order: the noise in the total is
+            // how a mempool sighting is told from the next customer's
+            // identical coffee, and an unpaired order has none. It takes
+            // this order's place — same id, same number — so the record
+            // above turns into the Monero face by itself. Off the main
+            // thread: placing one derives a subaddress and rewrites the
+            // store, which used to happen inside composition.
+            onFallback = {
+                scope.launch {
+                    withContext(Dispatchers.IO) {
+                        runCatching {
+                            Orders.place(context, order.lines, order.taxPxmr, replacing = order)
+                        }
+                    }.onFailure { error = moneyFailure(context, it) }
+                }
+            },
         )
     }
     BilledPanel(
@@ -453,7 +499,9 @@ private fun PayPanel(order: Orders.Order, onDone: () -> Unit) {
         // matched by the next payment of that size from this customer.
         onGiveUp = {
             owed?.let { tab ->
-                TabStore(context).mutate(tab.id) { it.copy(state = "cancelled") }
+                scope.launch(Dispatchers.IO) {
+                    runCatching { TabStore(context).mutate(tab.id) { it.copy(state = "cancelled") } }
+                }
             }
             onDone()
         },
@@ -521,7 +569,19 @@ internal fun BilledPanel(
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
     val state = remember(order.id, version) { Orders.stateOf(context, order) }
-    if (state != Orders.State.Awaiting) return PaidPanel(order, onDone)
+    // Paid is a sighting or the chain, and nothing else. "Anything but
+    // awaiting" also covered withdrawn: staff took the bill back from the
+    // orders list, closed the panel, and the customer's screen thanked them
+    // for money that never came. A withdrawn order is a finished one — back
+    // to the counter.
+    when (state) {
+        Orders.State.Seen, Orders.State.Confirmed -> return PaidPanel(order, onDone)
+        Orders.State.Abandoned -> {
+            LaunchedEffect(order.id) { onDone() }
+            return
+        }
+        Orders.State.Awaiting -> Unit
+    }
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -616,26 +676,27 @@ private fun PaidPanel(order: Orders.Order, onDone: () -> Unit) {
     }
 }
 
-/** The old way, for a wallet with no DUCAT behind it. */
+/**
+ * The old way, for a wallet with no DUCAT behind it: the code to pay, and
+ * then the word that the money arrived.
+ */
 @Composable
-private fun MoneroFallback(order: Orders.Order, onDone: () -> Unit) {
-    val context = LocalContext.current
-    // A bare address needs its own order: the noise in the total is how a
-    // mempool sighting is told from the next customer's identical coffee, and
-    // an unpaired order has none.
-    val anon = remember(order.id) { Orders.place(context, order.lines, order.taxPxmr) }
-    PayPanelMonero(anon, onDone)
-}
-
-/** The code to pay, and then the word that the money arrived. */
-@Composable
-private fun PayPanelMonero(order: Orders.Order, onDone: () -> Unit) {
+private fun PayPanelMonero(order: Orders.Order, onDone: () -> Unit, onCancel: () -> Unit) {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
     val live = remember(order.id, version) {
         Orders.all(context).firstOrNull { it.id == order.id } ?: order
     }
-    val paid = live.state != Orders.State.Awaiting
+    // Sighted or on the chain — not merely "no longer awaiting". Expiry
+    // gives up on an unpaid order after half an hour, and a code left up
+    // that long turned into "Thank you, order #12" on its own: the poller
+    // had stopped looking for the money, and the screen said it had come.
+    // An order nobody is looking for any more goes back to the counter.
+    val paid = live.state == Orders.State.Seen || live.state == Orders.State.Confirmed
+    if (live.state == Orders.State.Abandoned) {
+        LaunchedEffect(live.id) { onDone() }
+        return
+    }
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -690,7 +751,7 @@ private fun PayPanelMonero(order: Orders.Order, onDone: () -> Unit) {
             )
         }
         Spacer(Modifier.height(16.dp))
-        TextButton(onClick = onDone) { Text(stringResource(R.string.kiosk_cancel_order)) }
+        TextButton(onClick = onCancel) { Text(stringResource(R.string.kiosk_cancel_order)) }
     }
 }
 
@@ -762,7 +823,15 @@ private fun StaffOrders() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val version by ContactStore.changes.collectAsState()
-    val orders = remember(version) { Orders.all(context) }
+    // One read of the order book and one of the tab book per change. Each
+    // row used to ask [Orders.stateOf] three times, and each ask decrypted
+    // and parsed every tab the shop has ever opened — on every frame the
+    // list scrolled.
+    val (orders, states) = remember(version) {
+        val all = Orders.all(context)
+        val tabs = TabStore(context).all().associateBy { it.id }
+        all to all.associate { it.id to Orders.stateOf(it, it.tabId?.let(tabs::get)) }
+    }
     Column(Modifier.fillMaxSize()) {
         Spacer(Modifier.height(8.dp))
         OutlinedButton(
@@ -789,6 +858,7 @@ private fun StaffOrders() {
         }
         LazyColumn(Modifier.fillMaxSize()) {
             items(orders) { o ->
+                val state = states[o.id] ?: o.state
                 ListItem(
                     headlineContent = {
                         Text(stringResource(R.string.kiosk_paid_number, o.number))
@@ -813,7 +883,7 @@ private fun StaffOrders() {
                             Text(Amounts.show(context, o.totalPxmr).primary)
                             Text(
                                 stringResource(
-                                    when (Orders.stateOf(context, o)) {
+                                    when (state) {
                                         // Seen and settled are different
                                         // words on purpose: one is a claim,
                                         // the other is the chain.
@@ -829,8 +899,7 @@ private fun StaffOrders() {
                             // Paid and waiting: the one message the counter
                             // owes somebody who stepped outside to wait.
                             if (o.personaHex != null && o.readyAt == 0L &&
-                                Orders.stateOf(context, o) in
-                                setOf(Orders.State.Seen, Orders.State.Confirmed)
+                                (state == Orders.State.Seen || state == Orders.State.Confirmed)
                             ) {
                                 TextButton(
                                     enabled = o.id !in working,
@@ -869,9 +938,7 @@ private fun StaffOrders() {
                             // pointing at money nobody was waiting for — which
                             // is the one way a person ends up paying for
                             // something that was cancelled out loud.
-                            if (o.tabId != null &&
-                                Orders.stateOf(context, o) == Orders.State.Awaiting
-                            ) {
+                            if (o.tabId != null && state == Orders.State.Awaiting) {
                                 TextButton(
                                     enabled = o.id !in working,
                                     onClick = {

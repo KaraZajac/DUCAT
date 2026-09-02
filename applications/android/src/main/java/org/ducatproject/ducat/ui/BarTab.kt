@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -88,8 +89,11 @@ fun BarTabScreen(
         }
         contactsByHex = byHex; refusedIds = refused
     }
-    var openId by remember { mutableStateOf<String?>(null) }
-    var opening by remember { mutableStateOf(false) }
+    // Saveable, like the till's sale: a bartender who turned the phone while
+    // a customer was scanning the code was back on the list, with the code
+    // gone and a 12-hour card out that nothing was watching any more.
+    var openId by rememberSaveable { mutableStateOf<String?>(null) }
+    var opening by rememberSaveable { mutableStateOf(false) }
 
     openId?.let { id ->
         val tab = tabs.firstOrNull { it.id == id }
@@ -192,7 +196,12 @@ fun BarTabScreen(
                 modifier = Modifier.padding(16.dp),
             )
         }
-        if (section != "closed" && tabs.isEmpty()) {
+        // Nothing running *on this page* — not nothing in the book. Once the
+        // first tab of the night had closed, the Tabs page showed a total of
+        // zero over a blank space with no word on it.
+        if (section != "closed" && open.isEmpty() && awaiting.isEmpty() &&
+            (section == "open" || done.isEmpty())
+        ) {
             Text(
                 stringResource(R.string.bartab_no_tabs),
                 style = MaterialTheme.typography.bodySmall,
@@ -283,8 +292,11 @@ private fun TabRow(
 private fun OpenTab(onOpened: (RunningTab) -> Unit, onBack: () -> Unit) {
     val context = LocalContext.current
     val store = remember { TabStore(context) }
-    var cardUri by remember { mutableStateOf<String?>(null) }
-    var cardInbox by remember { mutableStateOf<String?>(null) }
+    // The card outlives the screen instance: issued once per opening, not
+    // once per rotation, so the code the customer is already scanning stays
+    // the code this screen waits on.
+    var cardUri by rememberSaveable { mutableStateOf<String?>(null) }
+    var cardInbox by rememberSaveable { mutableStateOf<String?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
 
     BackHandler(onBack = onBack)
@@ -295,6 +307,7 @@ private fun OpenTab(onOpened: (RunningTab) -> Unit, onBack: () -> Unit) {
     }
 
     LaunchedEffect(Unit) {
+        if (cardUri != null) return@LaunchedEffect
         val r = withContext(Dispatchers.IO) {
             runCatching {
                 Mailbox.issueCard(

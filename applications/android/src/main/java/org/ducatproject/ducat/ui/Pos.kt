@@ -48,7 +48,7 @@ private const val TAG = "POS"
 /** The basket across recreation and process death: a till is a tablet that
  *  rotates and a phone Android reclaims mid-rush, and a rung-up sale is real
  *  work. Flattened to [desc, amount, desc, amount, …] — both bundle-safe. */
-private val BasketSaver = androidx.compose.runtime.saveable.listSaver<List<BillItem>, Any>(
+internal val BasketSaver = androidx.compose.runtime.saveable.listSaver<List<BillItem>, Any>(
     save = { it.flatMap { b -> listOf(b.description, b.amountPxmr) } },
     restore = { flat -> flat.chunked(2).map { (d, a) -> BillItem(d as String, a as Long) } },
 )
@@ -235,7 +235,10 @@ fun PosScreen() {
                         // occasional seller quoting one odd levy is a different
                         // person from a business with a standing percentage.
                         val subtotal = basket.sumOf { it.amountPxmr }
-                        LaunchedEffect(subtotal) {
+                        // Keyed on the rate too (Tax.set bumps the store):
+                        // a rate changed in Settings mid-sale used to leave
+                        // the old figure on the bill until the basket moved.
+                        LaunchedEffect(subtotal, rateVersion) {
                             taxPxmr = org.ducatproject.ducat.Tax.on(context, subtotal)
                         }
                         Row(
@@ -601,10 +604,14 @@ private fun PresentScreen(
     // phone for a sale the till had already forgotten.
     //
     // Sighted and paid sales are exempt for the reason the Cancel button
-    // gives below: the money is in flight, and retracting now orphans it.
+    // gives below: the money is in flight, and retracting now orphans it —
+    // and for those the gesture is the "New sale" button, not the Back one
+    // the screen no longer shows. Returning to the basket with the sold
+    // items still in it rang the next customer up for the last one's
+    // coffee.
     BackHandler {
-        if (stage == Sale.Waiting || stage == Sale.Billed) abandon()
-        onBack()
+        if (stage == Sale.Waiting || stage == Sale.Billed) { abandon(); onBack() }
+        else onDone()
     }
 
     // While the code is up, a tap offers the same sale card.

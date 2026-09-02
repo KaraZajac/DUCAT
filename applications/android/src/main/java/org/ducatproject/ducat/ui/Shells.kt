@@ -544,8 +544,15 @@ private fun Shell(
             }
         },
     ) { padding ->
+        // Each tab's saveable state is kept while another tab is showing.
+        // Without the holder, `rememberSaveable` in a tab's screen only ever
+        // restores from the activity's bundle: leaving the Sales tab for
+        // Orders and coming back rebuilt the basket empty, and a half-typed
+        // search was gone.
+        val kept = androidx.compose.runtime.saveable.rememberSaveableStateHolder()
+        val shown = current.coerceIn(tabs.indices)
         Box(Modifier.padding(padding).fillMaxSize()) {
-            tabs[current.coerceIn(tabs.indices)].content()
+            kept.SaveableStateProvider(shown) { tabs[shown].content() }
         }
     }
 }

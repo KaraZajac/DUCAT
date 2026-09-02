@@ -209,14 +209,17 @@ fun ActivityScreen() {
         // "Nothing yet" waits for the ledger to have actually been built
         // once: a history-sized read runs off-main, and the empty copy
         // painted during it told a wallet with months of history it was
-        // new. A quiet spinner is the honest interim.
+        // new. A quiet spinner is the honest interim — the app's own, which
+        // is drawn whole on its first frame. The stock indicator starts
+        // from a zero-length arc, and the desk's one-frame render of this
+        // screen ("every screen draws") came back a blank rectangle.
         if (!settled) {
             Column(
                 Modifier.fillMaxSize().padding(32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
-                CircularProgressIndicator()
+                CatSpinner(Modifier.size(48.dp), tint = MaterialTheme.colorScheme.primary)
             }
             return
         }

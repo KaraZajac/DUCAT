@@ -857,6 +857,14 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
             }
         },
     ) {
+        // The screens under an overlay keep their saveable state while the
+        // overlay is up, and the personal tabs keep theirs across a tab
+        // switch. Both used to be rebuilt from nothing: the overlay and the
+        // `when (tab)` below drop the screen out of composition, and a
+        // `rememberSaveable` with no holder only ever restores from the
+        // activity's bundle — a scroll position, a half-typed search, the
+        // sale a till was ringing up when a notification opened a chat.
+        val kept = androidx.compose.runtime.saveable.rememberSaveableStateHolder()
         when (val o = overlay) {
             is Overlay.Chat -> {
                 ChatScreen(o.contact) { overlay = Overlay.None }
@@ -902,7 +910,9 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
         // already returned above, so a notification can still drop the till
         // into the conversation it names and back lands in the shell.
         if (appMode != Mode.None) {
-            org.ducatproject.ducat.ui.ModeShell(appMode) { scope.launch { drawer.open() } }
+            kept.SaveableStateProvider("mode:${appMode.name}") {
+                org.ducatproject.ducat.ui.ModeShell(appMode) { scope.launch { drawer.open() } }
+            }
             return@ModalNavigationDrawer
         }
 
@@ -1112,32 +1122,35 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
             },
         ) { padding ->
             Box(Modifier.padding(padding).fillMaxSize()) {
-                when (tab) {
-                    // Only the scrolling screens get a scroll wrapper. Chat owns
-                    // a LazyColumn, and nesting one inside a vertical scroll
-                    // gives it unbounded height — it renders every row at once
-                    // and the list stops being lazy.
-                    //
-                    // In POS mode the Home tab *is* the till. A mode is a
-                    // stance, not a feature: the person behind a counter rings
-                    // up sale after sale, and making them navigate to it before
-                    // every customer is making them do it forty times a shift.
-                    Tab.Home -> Column(Modifier.verticalScroll(rememberScrollState())) {
-                        HomeScreen(
-                            onTopUp = { tab = Tab.Accounts },
-                            onSeeActivity = { tab = Tab.Activity },
-                            onBackup = {
-                                overlay = Overlay.Drawer(
-                                    Section.Settings, jumpToBackup = true,
-                                )
-                            },
-                            onOpenChat = { overlay = Overlay.Chat(it) },
-                            onLibrary = { overlay = Overlay.Drawer(Section.Library) },
-                        )
+                kept.SaveableStateProvider(tab.name) {
+                    when (tab) {
+                        // Only the scrolling screens get a scroll wrapper. Chat
+                        // owns a LazyColumn, and nesting one inside a vertical
+                        // scroll gives it unbounded height — it renders every
+                        // row at once and the list stops being lazy.
+                        //
+                        // In POS mode the Home tab *is* the till. A mode is a
+                        // stance, not a feature: the person behind a counter
+                        // rings up sale after sale, and making them navigate to
+                        // it before every customer is making them do it forty
+                        // times a shift.
+                        Tab.Home -> Column(Modifier.verticalScroll(rememberScrollState())) {
+                            HomeScreen(
+                                onTopUp = { tab = Tab.Accounts },
+                                onSeeActivity = { tab = Tab.Activity },
+                                onBackup = {
+                                    overlay = Overlay.Drawer(
+                                        Section.Settings, jumpToBackup = true,
+                                    )
+                                },
+                                onOpenChat = { overlay = Overlay.Chat(it) },
+                                onLibrary = { overlay = Overlay.Drawer(Section.Library) },
+                            )
+                        }
+                        Tab.Accounts -> AccountsScreen()
+                        Tab.Activity -> ActivityScreen()
+                        Tab.Chat -> ChatListScreen(persona) { overlay = Overlay.Chat(it) }
                     }
-                    Tab.Accounts -> AccountsScreen()
-                    Tab.Activity -> ActivityScreen()
-                    Tab.Chat -> ChatListScreen(persona) { overlay = Overlay.Chat(it) }
                 }
             }
         }

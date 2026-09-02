@@ -341,6 +341,41 @@ fun main() {
         Orders.all(context).first { it.id == bound.id }.state != Orders.State.Abandoned,
     )
 
+    // The counter's way out when nobody taps: the same order, now wearing a
+    // Monero address. Same id, so the screen holding it goes on holding it;
+    // same number, so the one the customer was told is still the one on the
+    // board — and the board does not show one coffee twice.
+    val stuck = Orders.begin(context, basket)
+    val onBoard = Orders.all(context).size
+    val swapped = Orders.place(context, basket, replacing = stuck)
+    check(
+        "falling back to a wallet keeps the order's identity",
+        swapped.id == stuck.id && swapped.number == stuck.number,
+        "#${stuck.number} became #${swapped.number}",
+    )
+    check("and gives it somewhere to be paid", swapped.address.isNotEmpty())
+    check(
+        "without a second entry on the board",
+        Orders.all(context).size == onBoard,
+        "${Orders.all(context).size} for $onBoard",
+    )
+    check(
+        "and the board holds the addressed copy",
+        Orders.all(context).first { it.id == stuck.id }.address == swapped.address,
+    )
+
+    // Walking away is said at once, not found by the expiry sweep later.
+    Orders.abandon(context, swapped.id)
+    check(
+        "a waiting order can be given up on",
+        Orders.all(context).first { it.id == swapped.id }.state == Orders.State.Abandoned,
+    )
+    Orders.abandon(context, first.id)
+    check(
+        "but a sighted one keeps its sighting",
+        Orders.all(context).first { it.id == first.id }.state == Orders.State.Seen,
+    )
+
     // --- sold out, and calling an order ready ------------------------------
 
     check(
