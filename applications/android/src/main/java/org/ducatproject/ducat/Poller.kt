@@ -542,6 +542,11 @@ class Poller(private val context: Context) {
         stagingSwept = true
         val freed = Publications.sweepStaging(context)
         if (freed > 0) DucatLog.i(TAG, "swept ${freed / 1024} KiB of staged issues nothing will publish")
+        // Site bundles nothing claims, on the same once-per-process clock and
+        // for the same reason: this one is pure filesystem, so unlike the
+        // reseed above it does not wait for a node.
+        runCatching { Sites.sweepOrphans(context) }
+            .onFailure { DucatLog.w(TAG, "site sweep: ${it.message}") }
     }
 
     @Volatile private var sitesReseeded = false

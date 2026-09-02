@@ -80,8 +80,53 @@ object Sites {
         ContactStore.bump()
     }
 
+    /**
+     * Where a site's bundle lives, named by a digest of its address.
+     *
+     * This was `recordKey.hashCode()`, which is thirty-two bits of a
+     * non-cryptographic hash standing between one publisher's pages and
+     * another's. Two addresses that collide share a directory, and the
+     * consequences are not "a cache miss": `fetchBundle` returns the cached
+     * directory whenever the *site's own* fetched digest matches its head,
+     * so the second site's bundle is served under the first site's address,
+     * in the sealed room, with nothing on screen to say so. `remove` then
+     * deletes the other one's files.
+     *
+     * Chance alone would rarely do it. But `String.hashCode` is trivial to
+     * aim: somebody who wants their pages rendered as yours grinds record
+     * keys until the low thirty-two bits agree, and substitution is exactly
+     * the attack §16.22's room is built against ([Posters] says the same
+     * about boards). Every other cache here is named by a full identifier —
+     * `publications/<publisherHex>/<period>`, `swarm_out/<digestHex>` — and
+     * this was the one place that was not.
+     */
     fun bundleDir(context: Context, recordKey: String): File =
-        File(context.filesDir, "sites/${recordKey.hashCode().toUInt()}/current")
+        File(context.filesDir, "sites/${dirNameOf(recordKey)}/current")
+
+    private fun dirNameOf(recordKey: String): String =
+        java.security.MessageDigest.getInstance("SHA-256")
+            .digest(recordKey.toByteArray()).toHexString()
+
+    /**
+     * Drop bundle directories no saved site claims.
+     *
+     * Two of them: the ones the old name left behind, which no longer
+     * answer to anything and would otherwise sit on the phone for good, and
+     * any bundle whose site went away while its files did not. A site whose
+     * cache is missing re-fetches on the next open, so removing too much
+     * costs a download and never a wrong page.
+     */
+    fun sweepOrphans(context: Context): Int {
+        val root = File(context.filesDir, "sites")
+        if (!root.isDirectory) return 0
+        val keep = all(context).mapTo(HashSet()) { dirNameOf(it.recordKey) }
+        val gone = root.listFiles()?.filter { it.isDirectory && it.name !in keep } ?: return 0
+        for (d in gone) d.deleteRecursively()
+        if (gone.isNotEmpty()) {
+            DucatLog.i("Sites", "swept ${gone.size} orphaned bundle(s)")
+        }
+        return gone.size
+    }
 
     /** Read the head at a record key — the resolve a saved or pasted
      *  address runs. The record must be openable read-only. */
@@ -208,6 +253,6 @@ object Sites {
         synchronized(lock) {
             save(context, all(context).filterNot { it.recordKey == recordKey })
         }
-        File(context.filesDir, "sites/${recordKey.hashCode().toUInt()}").deleteRecursively()
+        File(context.filesDir, "sites/${dirNameOf(recordKey)}").deleteRecursively()
     }
 }

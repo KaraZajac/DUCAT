@@ -833,6 +833,22 @@ tasks.register<JavaExec>("listtest") {
 // What a finished pass of recurring bills leaves behind — the lost write
 // that put a cancelled subscription back on the books.
 // `./gradlew :desktop:recurtest`.
+// A publisher's period id must not be able to name a path.
+// `DUCAT_DESK_STATE=<dir> ./gradlew :desktop:periodidtest`.
+tasks.register<JavaExec>("periodidtest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.PeriodIdTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
+// One site's bundle must never render under another site's address.
+// `DUCAT_DESK_STATE=<dir> ./gradlew :desktop:sitedirtest`.
+tasks.register<JavaExec>("sitedirtest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.SiteDirTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // What the abandoned-tab sweep may take, and the five things it may not.
 // `DUCAT_DESK_STATE=<dir> ./gradlew :desktop:sweeptest`.
 tasks.register<JavaExec>("sweeptest") {
