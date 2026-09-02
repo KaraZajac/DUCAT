@@ -81,4 +81,6 @@
     <string name="pay_repeat_monthly">Hàng tháng</string>
     <string name="pay_recur_notify">Đã gửi hóa đơn định kỳ — %1$s</string>
     <string name="pay_donation_hint">Đây là khoản quyên góp — biên nhận sẽ đến cuộc trò chuyện này khi tiền tới, và sao kê sẽ xếp nó vào mục Quyên góp.</string>
+    <string name="pay_relay_unconfirmed">Không nút Monero nào xác nhận đã nhận khoản thanh toán. Nó vẫn có thể đi qua — các tờ đã dùng vẫn được giữ lại cho đến khi chuỗi quyết định. Hãy kiểm tra sao kê trước khi trả lại lần nữa.</string>
+    <string name="pay_request_kept">Đã giữ yêu cầu — sẽ tự gửi đi ngay khi có mạng trở lại.</string>
 </resources>

@@ -81,4 +81,6 @@
     <string name="pay_repeat_monthly">Mensile</string>
     <string name="pay_recur_notify">Conto ricorrente inviato — %1$s</string>
     <string name="pay_donation_hint">Questa è una donazione: la ricevuta arriverà in questa chat appena ricevuta, e l’estratto la archivierà sotto Donazioni.</string>
+    <string name="pay_relay_unconfirmed">Nessun nodo Monero ha confermato di aver preso il pagamento. Potrebbe passare lo stesso: le banconote usate restano riservate finché la catena non decide. Controlla l’estratto prima di pagare di nuovo.</string>
+    <string name="pay_request_kept">Richiesta conservata: partirà da sola appena torna la rete.</string>
 </resources>

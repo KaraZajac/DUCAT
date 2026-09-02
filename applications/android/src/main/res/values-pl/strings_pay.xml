@@ -81,4 +81,6 @@
     <string name="pay_repeat_monthly">Co miesiąc</string>
     <string name="pay_recur_notify">Wysłano cykliczny rachunek — %1$s</string>
     <string name="pay_donation_hint">To darowizna — pokwitowanie trafi do tego czatu po dotarciu wpłaty, a wyciąg zapisze ją w Darowiznach.</string>
+    <string name="pay_relay_unconfirmed">Żaden węzeł Monero nie potwierdził przyjęcia płatności. Mimo to może przejść — użyte banknoty pozostają zarezerwowane, dopóki łańcuch tego nie rozstrzygnie. Sprawdź wyciąg, zanim zapłacisz ponownie.</string>
+    <string name="pay_request_kept">Prośba zachowana — wyjdzie sama, gdy tylko wróci sieć.</string>
 </resources>

@@ -514,6 +514,9 @@ private fun AmountStep(
         val r = PaySends.await(id)
         when {
             r == null -> error = context.getString(R.string.pay_send_interrupted)
+            // Done, in the sense that matters here: the bill is in the thread
+            // and nothing on this screen should offer to write it again.
+            r.exceptionOrNull() is RequestKept -> done = context.getString(R.string.pay_request_kept)
             r.isFailure -> error = sendFailure(context, r.exceptionOrNull()!!)
             id.startsWith("pay:") -> paidPxmr = r.getOrThrow()
             else -> done = context.getString(R.string.pay_request_sent)
@@ -778,7 +781,7 @@ private fun AmountStep(
             Text(
                 stringResource(
                     R.string.pay_asking_explainer,
-                    (target as? PayTarget.ToContact)?.contact?.displayName()
+                    (target as? PayTarget.ToContact)?.contact?.displayName()?.let(::isolate)
                         ?: stringResource(R.string.pay_them),
                 ),
                 style = MaterialTheme.typography.bodySmall,
@@ -993,25 +996,43 @@ private fun AmountStep(
                         // activity for the life of the process.
                         val app = context.applicationContext
                         PaySends.start(id) {
-                            Mailbox.send(
-                                app, target.contact,
-                                memo.ifBlank { app.getString(R.string.pay_payment_request) },
-                                kind = 1, amountPxmr = amt,
-                                payto = WalletStore(app)
-                                    .addressFor(target.contact.personaHex),
-                            )
+                            val hex = target.contact.personaHex
+                            // The counter before, from the store rather than
+                            // this screen's snapshot: send re-reads it too,
+                            // and a snapshot behind by a message would call
+                            // that message the request.
+                            val seqBefore = ContactStore(app).all()
+                                .firstOrNull { it.personaHex == hex }?.outSeq ?: target.contact.outSeq
+                            val kept = try {
+                                Mailbox.send(
+                                    app, target.contact,
+                                    memo.ifBlank { app.getString(R.string.pay_payment_request) },
+                                    kind = 1, amountPxmr = amt,
+                                    payto = WalletStore(app).addressFor(hex),
+                                )
+                                false
+                            } catch (e: Exception) {
+                                // Committed under the throw? Then it is a
+                                // late slot, not a failure — see RequestKept.
+                                val row = ContactStore(app).thread(hex).lastOrNull { it.outgoing }
+                                    ?.takeIf { it.seq >= seqBefore && it.kind == 1 && !it.delivered }
+                                    ?: throw e
+                                DucatLog.w("Pay", "request seq ${row.seq} kept for the poll: ${e.message}")
+                                true
+                            }
                             // Registered only after the first request truly
                             // went: a schedule whose opening bill failed
                             // would start the cadence on a debt nobody has
-                            // heard of.
+                            // heard of. A kept one will be heard of.
                             if (cadence != 0) {
                                 runCatching {
                                     Recurring.add(
-                                        app, target.contact.personaHex,
+                                        app, hex,
                                         amt, memo, monthly = cadence == 2,
                                     )
                                 }.onFailure { DucatLog.w("Pay", "asked, but not scheduled: ${it.message}") }
                             }
+                            if (kept) throw RequestKept()
                             amt
                         }
                         sendId = id
@@ -1059,7 +1080,7 @@ private fun AmountStep(
         ) {
             Spacer(Modifier.height(8.dp))
             Text(
-                stringResource(R.string.pay_no_address_hint, target.contact.displayName()),
+                stringResource(R.string.pay_no_address_hint, isolate(target.contact.displayName())),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -1280,7 +1301,7 @@ private fun ConfirmSend(
         },
         text = {
             Column {
-                contactName?.let { Text(stringResource(R.string.pay_to, it), style = MaterialTheme.typography.bodyMedium) }
+                contactName?.let { Text(stringResource(R.string.pay_to, isolate(it)), style = MaterialTheme.typography.bodyMedium) }
                 destination?.let {
                     Spacer(Modifier.height(6.dp))
                     Text(it, fontFamily = FontFamily.Monospace,
@@ -1325,11 +1346,32 @@ private fun ConfirmSend(
  * to do with the wallet, the amount, or the address, and nothing a person can
  * act on as written. The app has already demoted that node by the time this
  * runs, so the useful thing to say is: try again, it will use another.
+ *
+ * Through [moneyFailure], which knows the typed ones — not enough with the
+ * fee, no keys yet, our own node not up — and the one shape of node trouble
+ * that is *not* "nothing was sent" (`Wallet.relayUnconfirmed`). This used to
+ * test node trouble alone and hand everything else the engine's sentence,
+ * so `NotEnough` reached the screen as its English constructor message with
+ * both numbers in XMR, and a request from a phone still joining read
+ * "TryAgain". The engine's own sentence stays the last resort: "could not
+ * build the transaction: …" is something to paste into a bug report, and
+ * "could not send" is not.
  */
-private fun sendFailure(context: android.content.Context, t: Throwable): String = when {
-    Wallet.isNodeTrouble(t) -> context.getString(R.string.pay_node_no_answer)
-    else -> t.saidWhy() ?: context.getString(R.string.pay_could_not_send)
-}
+private fun sendFailure(context: android.content.Context, t: Throwable): String =
+    moneyFailure(context, t, R.string.pay_could_not_send) { t.saidWhy() }
+
+/**
+ * A request the network refused after the thread had already kept it.
+ *
+ * [Mailbox.send] commits the row and the counters before it writes the slot,
+ * so a node that was not attached leaves the bill in the thread, undelivered,
+ * for the poll to carry (`Mailbox.flushPending`). The screen read the throw
+ * as "could not send", cleared `busy` and handed Request back — and the
+ * second tap wrote a second bill behind the first, which the poll then
+ * delivered too. Two identical bills in the customer's thread, a minute
+ * apart, from one person pressing a button that said it had not worked.
+ */
+private class RequestKept : Exception("request kept for the poll")
 
 /**
  * Sends in flight, outliving the screen that started them.

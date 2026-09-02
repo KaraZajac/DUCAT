@@ -81,4 +81,6 @@
     <string name="pay_repeat_monthly">Щомісяця</string>
     <string name="pay_recur_notify">Регулярний рахунок надіслано — %1$s</string>
     <string name="pay_donation_hint">Це пожертва — квитанція надійде в цей чат після отримання, а виписка запише її в «Пожертви».</string>
+    <string name="pay_relay_unconfirmed">Жоден вузол Monero не підтвердив, що прийняв платіж. Він усе ж може пройти — використані купюри залишаються зарезервованими, доки ланцюжок не вирішить. Перевірте виписку, перш ніж платити знову.</string>
+    <string name="pay_request_kept">Запит збережено — він піде сам, щойно з’явиться мережа.</string>
 </resources>

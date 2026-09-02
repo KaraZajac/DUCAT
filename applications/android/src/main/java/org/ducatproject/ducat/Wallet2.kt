@@ -573,6 +573,23 @@ object Wallet {
     }
 
     /**
+     * Did the send fail *after* signing, with no node confirming the relay?
+     *
+     * The opposite of [neverLeftThePhone], and the one failure that is not
+     * "nothing was sent": a relay that timed out after taking the bytes has
+     * the transaction and will propagate it, and the phone only knows that
+     * nobody *confirmed*. The intent stays claimed for exactly this case —
+     * the chain settles it either way (refreshSpent). The screen was reading
+     * the timeout inside the core's parenthesis, matching it as node
+     * trouble, and saying "Nothing was sent. Try again" — the one thing not
+     * known, and the one thing not to do: the retry either met "not enough"
+     * over the reserved notes or, with other notes to hand, paid twice.
+     */
+    fun relayUnconfirmed(t: Throwable): Boolean =
+        (t as? uniffi.ducat_mobile.MoneroException.Failed)?.v1
+            ?.startsWith("signed, but no node confirmed taking it") == true
+
+    /**
      * There is not enough unlocked to cover the amount and its fee.
      *
      * Typed, because the sentence it replaces was English in an app that ships

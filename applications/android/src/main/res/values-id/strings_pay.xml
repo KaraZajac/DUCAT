@@ -81,4 +81,6 @@
     <string name="pay_repeat_monthly">Bulanan</string>
     <string name="pay_recur_notify">Tagihan berulang terkirim — %1$s</string>
     <string name="pay_donation_hint">Ini donasi — kuitansi akan tiba di obrolan ini begitu diterima, dan laporan Anda mencatatnya di bawah Donasi.</string>
+    <string name="pay_relay_unconfirmed">Tidak ada node Monero yang mengonfirmasi menerima pembayaran ini. Bisa jadi tetap sampai — catatan yang dipakai tetap dicadangkan sampai rantai memutuskannya. Periksa laporan sebelum membayar lagi.</string>
+    <string name="pay_request_kept">Permintaan disimpan — akan terkirim dengan sendirinya begitu jaringan kembali.</string>
 </resources>

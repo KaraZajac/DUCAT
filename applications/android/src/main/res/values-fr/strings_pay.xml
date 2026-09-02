@@ -81,4 +81,6 @@
     <string name="pay_repeat_monthly">Mensuelle</string>
     <string name="pay_recur_notify">Facture récurrente envoyée — %1$s</string>
     <string name="pay_donation_hint">Ceci est un don — votre reçu arrivera dans cette conversation dès réception, et votre relevé le classera dans Dons.</string>
+    <string name="pay_relay_unconfirmed">Aucun nœud Monero n’a confirmé avoir pris le paiement. Il peut quand même passer : les billets utilisés restent réservés jusqu’à ce que la chaîne tranche. Vérifiez le relevé avant de payer à nouveau.</string>
+    <string name="pay_request_kept">Demande conservée : elle partira toute seule dès que le réseau sera de retour.</string>
 </resources>

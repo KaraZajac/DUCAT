@@ -81,4 +81,6 @@
     <string name="pay_repeat_monthly">मासिक</string>
     <string name="pay_recur_notify">आवर्ती बिल भेजा गया — %1$s</string>
     <string name="pay_donation_hint">यह एक दान है — पहुँचते ही रसीद इसी चैट में आएगी, और आपका विवरण इसे दान के अंतर्गत दर्ज करेगा।</string>
+    <string name="pay_relay_unconfirmed">किसी Monero नोड ने भुगतान लेने की पुष्टि नहीं की। यह फिर भी पहुँच सकता है — इसमें लगे नोट तब तक आरक्षित रहेंगे जब तक चेन इसका फ़ैसला न कर दे। दोबारा भुगतान करने से पहले स्टेटमेंट देख लें।</string>
+    <string name="pay_request_kept">अनुरोध रख लिया गया — नेटवर्क लौटते ही अपने आप चला जाएगा।</string>
 </resources>

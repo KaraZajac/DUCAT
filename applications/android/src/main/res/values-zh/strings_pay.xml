@@ -81,4 +81,6 @@
     <string name="pay_repeat_monthly">每月</string>
     <string name="pay_recur_notify">已发送周期账单 — %1$s</string>
     <string name="pay_donation_hint">这是一笔捐赠 — 到账后收据会送到此对话，账单会将其归入捐赠类。</string>
+    <string name="pay_relay_unconfirmed">没有任何 Monero 节点确认收下这笔付款。它仍可能成功——所用的票据会一直保留，直到链上给出结果。再次付款前请先查看对账单。</string>
+    <string name="pay_request_kept">请求已保存——网络恢复后会自动发出。</string>
 </resources>

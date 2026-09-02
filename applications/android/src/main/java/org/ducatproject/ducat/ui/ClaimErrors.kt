@@ -105,6 +105,12 @@ fun moneyFailure(
      * the only sentence that fits everywhere.
      */
     fallback: Int = org.ducatproject.ducat.R.string.main_card_link_failed_body,
+    /**
+     * What to say instead of [fallback] when the throwable is none of the
+     * kinds below — for a screen that would rather show the engine's own
+     * sentence than a blank one. Null (the default) shows [fallback].
+     */
+    orElse: (() -> String?)? = null,
 ): String = when {
     // Our own node, not the Monero one. `claimFailureRes` has said this since
     // the first card that would not claim; the money screens never did, so a
@@ -144,6 +150,11 @@ fun moneyFailure(
         context.getString(org.ducatproject.ducat.R.string.escrow_not_confirmed)
     t is org.ducatproject.ducat.Ceremony.EscrowDisagreed ->
         context.getString(org.ducatproject.ducat.R.string.escrow_disagreed)
+    // Before node trouble, which it would otherwise match on the timeout
+    // quoted inside it: signed and pushed, and no node confirmed. "Nothing
+    // was sent" is the one thing this does not know.
+    org.ducatproject.ducat.Wallet.relayUnconfirmed(t) ->
+        context.getString(org.ducatproject.ducat.R.string.pay_relay_unconfirmed)
     org.ducatproject.ducat.Wallet.isNodeTrouble(t) ->
         context.getString(org.ducatproject.ducat.R.string.pay_node_no_answer)
     // Short, with both numbers. Typed rather than matched on wording, because
@@ -168,5 +179,5 @@ fun moneyFailure(
         context.getString(org.ducatproject.ducat.R.string.err_conversation_too_old)
     t is org.ducatproject.ducat.Hailing.BoardFull ->
         context.getString(org.ducatproject.ducat.R.string.err_board_full)
-    else -> context.getString(fallback)
+    else -> orElse?.invoke() ?: context.getString(fallback)
 }

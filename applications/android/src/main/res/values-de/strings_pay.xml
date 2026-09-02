@@ -81,4 +81,6 @@
     <string name="pay_repeat_monthly">Monatlich</string>
     <string name="pay_recur_notify">Wiederkehrende Rechnung gesendet — %1$s</string>
     <string name="pay_donation_hint">Das ist eine Spende — deine Quittung landet in diesem Chat, sobald sie ankommt, und dein Kontoauszug führt sie unter Spenden.</string>
+    <string name="pay_relay_unconfirmed">Kein Monero-Knoten hat bestätigt, die Zahlung angenommen zu haben. Sie kann trotzdem durchgehen — die verwendeten Noten bleiben reserviert, bis die Chain es entscheidet. Prüfe den Kontoauszug, bevor du noch einmal zahlst.</string>
+    <string name="pay_request_kept">Anfrage gespeichert — sie geht von selbst raus, sobald das Netz wieder da ist.</string>
 </resources>

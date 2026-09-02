@@ -81,4 +81,6 @@
     <string name="pay_repeat_monthly">شهريًا</string>
     <string name="pay_recur_notify">أُرسلت فاتورة دورية — %1$s</string>
     <string name="pay_donation_hint">هذا تبرع — سيصلك الإيصال في هذه المحادثة فور وصوله، وسيُدرجه كشف حسابك ضمن التبرعات.</string>
+    <string name="pay_relay_unconfirmed">لم تؤكد أي عقدة Monero استلام الدفعة. قد تمرّ رغم ذلك — تبقى الأوراق التي استُخدمت محجوزة حتى تحسمها السلسلة. راجع كشف الحساب قبل أن تدفع مرة أخرى.</string>
+    <string name="pay_request_kept">حُفظ الطلب — سيخرج تلقائيًا فور عودة الشبكة.</string>
 </resources>

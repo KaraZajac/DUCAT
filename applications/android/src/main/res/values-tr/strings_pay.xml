@@ -81,4 +81,6 @@
     <string name="pay_repeat_monthly">Aylık</string>
     <string name="pay_recur_notify">Yinelenen hesap gönderildi — %1$s</string>
     <string name="pay_donation_hint">Bu bir bağış — makbuzunuz ulaştığında bu sohbete gelecek ve ekstreniz onu Bağışlar altında listeleyecek.</string>
+    <string name="pay_relay_unconfirmed">Hiçbir Monero düğümü ödemeyi aldığını onaylamadı. Yine de geçebilir — kullanılan banknotlar zincir karar verene kadar ayrılmış kalır. Yeniden ödemeden önce hesap özetini kontrol et.</string>
+    <string name="pay_request_kept">İstek saklandı — ağ gelir gelmez kendiliğinden gidecek.</string>
 </resources>

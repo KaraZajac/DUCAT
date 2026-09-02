@@ -81,4 +81,6 @@
     <string name="pay_repeat_monthly">ماهانه</string>
     <string name="pay_recur_notify">صورت‌حساب دوره‌ای ارسال شد — %1$s</string>
     <string name="pay_donation_hint">این یک اهداست — رسید شما پس از رسیدن در همین گفتگو می‌آید و صورت‌حساب آن را زیر «اهداها» ثبت می‌کند.</string>
+    <string name="pay_relay_unconfirmed">هیچ گره Monero تأیید نکرد که پرداخت را گرفته است. ممکن است باز هم انجام شود — برگه‌های استفاده‌شده تا زمانی که زنجیره تکلیفش را روشن کند رزرو می‌مانند. پیش از پرداخت دوباره، صورت‌حساب را بررسی کنید.</string>
+    <string name="pay_request_kept">درخواست نگه داشته شد — به محض برگشتن شبکه خودش فرستاده می‌شود.</string>
 </resources>

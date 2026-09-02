@@ -81,4 +81,6 @@
     <string name="pay_repeat_monthly">รายเดือน</string>
     <string name="pay_recur_notify">ส่งบิลประจำแล้ว — %1$s</string>
     <string name="pay_donation_hint">นี่คือการบริจาค — ใบเสร็จจะมาถึงแชตนี้เมื่อเงินเข้า และรายการเดินบัญชีจะบันทึกไว้ในหมวดการบริจาค</string>
+    <string name="pay_relay_unconfirmed">ไม่มีโหนด Monero ใดยืนยันว่ารับการชำระเงินนี้ แต่ก็อาจผ่านได้อยู่ — ธนบัตรที่ใช้จะถูกกันไว้จนกว่าเชนจะตัดสิน โปรดตรวจสอบรายการเดินบัญชีก่อนชำระอีกครั้ง</string>
+    <string name="pay_request_kept">เก็บคำขอไว้แล้ว — จะส่งออกเองทันทีที่เครือข่ายกลับมา</string>
 </resources>

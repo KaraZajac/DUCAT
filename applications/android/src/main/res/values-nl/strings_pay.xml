@@ -81,4 +81,6 @@
     <string name="pay_repeat_monthly">Maandelijks</string>
     <string name="pay_recur_notify">Terugkerende rekening verzonden — %1$s</string>
     <string name="pay_donation_hint">Dit is een donatie — je bewijs landt in deze chat zodra het binnen is, en je overzicht zet het onder Donaties.</string>
+    <string name="pay_relay_unconfirmed">Geen enkele Monero-node heeft bevestigd de betaling te hebben aangenomen. Hij kan alsnog doorgaan — de gebruikte biljetten blijven gereserveerd tot de chain het beslist. Controleer het overzicht voordat je opnieuw betaalt.</string>
+    <string name="pay_request_kept">Verzoek bewaard — het gaat vanzelf weg zodra het netwerk er weer is.</string>
 </resources>

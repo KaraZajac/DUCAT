@@ -81,4 +81,6 @@
     <string name="pay_repeat_monthly">毎月</string>
     <string name="pay_recur_notify">定期請求を送信しました — %1$s</string>
     <string name="pay_donation_hint">これは寄付です — 到着次第このチャットに領収書が届き、明細では「寄付」に分類されます。</string>
+    <string name="pay_relay_unconfirmed">どの Monero ノードも支払いの受け取りを確認しませんでした。それでも通る可能性があります。使ったノートはチェーンが決着をつけるまで確保されたままです。もう一度支払う前に取引明細を確認してください。</string>
+    <string name="pay_request_kept">請求を保存しました。ネットワークが戻り次第、自動的に送信されます。</string>
 </resources>
