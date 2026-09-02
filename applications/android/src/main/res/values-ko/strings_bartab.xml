@@ -64,4 +64,6 @@
     <string name="bill_note_sale">결제 금액</string>
     <string name="bartab_tip_line">팁 — 감사합니다</string>
     <string name="bill_note_issue">구독</string>
+    <string name="bartab_paid_pending">결제 완료 ✓ — 영수증이 아직 이 휴대폰에 있습니다. 네트워크가 돌아오는 대로 발송됩니다.</string>
+    <string name="bartab_paid_unsent">결제 완료 ✓ — 하지만 영수증을 보내지 못했습니다. 자동으로 다시 시도합니다.</string>
 </resources>

@@ -32,4 +32,6 @@
     <string name="pos_cancel_sale">Verkoop annuleren</string>
     <string name="pos_tax_at">Belasting (%1$s%%)</string>
     <string name="pos_in_unit">in %1$s</string>
+    <string name="pos_error_bill_not_withdrawn">De rekening staat nog op hun telefoon — ze kon niet worden ingetrokken: %1$s</string>
+    <string name="pos_receipt_pending">De bon kon nog niet worden verzonden — hij gaat vanzelf weg zodra het netwerk er weer is.</string>
 </resources>

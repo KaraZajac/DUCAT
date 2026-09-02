@@ -65,4 +65,6 @@
     <string name="bill_note_sale">صورتحساب شما</string>
     <string name="bartab_tip_line">انعام — سپاسگزاریم</string>
     <string name="bill_note_issue">اشتراک</string>
+    <string name="bartab_paid_pending">پرداخت شد ✓ — رسید هنوز روی این گوشی است. به محض برگشتن شبکه فرستاده می‌شود.</string>
+    <string name="bartab_paid_unsent">پرداخت شد ✓ — اما رسید فرستاده نشد. خودبه‌خود دوباره تلاش می‌شود.</string>
 </resources>

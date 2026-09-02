@@ -65,4 +65,6 @@
     <string name="bill_note_sale">A sua conta</string>
     <string name="bartab_tip_line">Gorjeta — obrigado</string>
     <string name="bill_note_issue">Assinatura</string>
+    <string name="bartab_paid_pending">Pago ✓ — o recibo ainda está neste telefone. Sai assim que a rede voltar.</string>
+    <string name="bartab_paid_unsent">Pago ✓ — mas o recibo não pôde ser enviado. Será tentado de novo sozinho.</string>
 </resources>

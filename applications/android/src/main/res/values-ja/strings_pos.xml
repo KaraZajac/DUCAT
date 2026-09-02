@@ -32,4 +32,6 @@
     <string name="pos_cancel_sale">会計をキャンセル</string>
     <string name="pos_tax_at">税（%1$s%%）</string>
     <string name="pos_in_unit">%1$sで</string>
+    <string name="pos_error_bill_not_withdrawn">請求はまだ相手の端末に残っています — 取り下げできませんでした: %1$s</string>
+    <string name="pos_receipt_pending">レシートはまだ送信できていません — ネットワークが戻り次第、自動的に送信されます。</string>
 </resources>

@@ -67,4 +67,6 @@
     <string name="bill_note_sale">Twój rachunek</string>
     <string name="bartab_tip_line">Napiwek — dziękujemy</string>
     <string name="bill_note_issue">Prenumerata</string>
+    <string name="bartab_paid_pending">Zapłacone ✓ — paragon wciąż jest na tym telefonie. Wyjdzie, gdy tylko wróci sieć.</string>
+    <string name="bartab_paid_unsent">Zapłacone ✓ — ale paragonu nie udało się wysłać. Próba zostanie ponowiona sama.</string>
 </resources>

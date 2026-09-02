@@ -32,4 +32,6 @@
     <string name="pos_cancel_sale">Cancel sale</string>
     <string name="pos_tax_at">Tax (%1$s%%)</string>
     <string name="pos_in_unit">in %1$s</string>
+    <string name="pos_error_bill_not_withdrawn">The bill is still on their phone — it could not be withdrawn: %1$s</string>
+    <string name="pos_receipt_pending">The receipt could not be sent yet — it goes out by itself when the network is back.</string>
 </resources>

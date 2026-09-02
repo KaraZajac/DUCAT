@@ -32,4 +32,6 @@
     <string name="pos_cancel_sale">لغو فروش</string>
     <string name="pos_tax_at">مالیات (%1$s%%)</string>
     <string name="pos_in_unit">به %1$s</string>
+    <string name="pos_error_bill_not_withdrawn">صورت‌حساب هنوز روی گوشی‌شان است — پس گرفته نشد: %1$s</string>
+    <string name="pos_receipt_pending">رسید هنوز فرستاده نشده — به محض برگشتن شبکه خودش فرستاده می‌شود.</string>
 </resources>

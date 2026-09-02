@@ -862,13 +862,18 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 24.dp),
             )
-            "paid_oob" -> Column(Modifier.padding(horizontal = 24.dp)) {
+            // Paid on either rail: the receipt's fate is the tab's word, and
+            // "receipt sent" is said only when it is true. A chain payment's
+            // receipt used to be asserted from the state alone, over a send
+            // that had failed and would never be retried.
+            else -> Column(Modifier.padding(horizontal = 24.dp)) {
+                val oob = tab.state == "paid_oob"
                 Text(
                     stringResource(
                         when (said.word) {
-                            Sent.Yes -> R.string.bartab_paid_oob_note
-                            Sent.Later -> R.string.bartab_paid_oob_pending
-                            Sent.Never -> R.string.bartab_paid_oob_unsent
+                            Sent.Yes -> if (oob) R.string.bartab_paid_oob_note else R.string.bartab_paid_note
+                            Sent.Later -> if (oob) R.string.bartab_paid_oob_pending else R.string.bartab_paid_pending
+                            Sent.Never -> if (oob) R.string.bartab_paid_oob_unsent else R.string.bartab_paid_unsent
                         },
                     ),
                     style = MaterialTheme.typography.titleMedium,
@@ -877,7 +882,9 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                 // The receipt that did not go, offered again from the tab
                 // that owes it — the money is already in the till, and the
                 // customer's record should not depend on the bar's wifi at
-                // the moment the cash changed hands.
+                // the moment the cash changed hands. (The poll retries the
+                // chain-paid one by itself; this is for the bartender who
+                // is looking at it now.)
                 if (said.word == Sent.Never) {
                     TextButton(
                         enabled = !busy,
@@ -885,7 +892,10 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                             busy = true; error = null
                             scope.launch {
                                 withContext(Dispatchers.IO) {
-                                    runCatching { store.sendOobReceipt(tab) }
+                                    runCatching {
+                                        if (oob) store.sendOobReceipt(tab)
+                                        else store.sendChainReceipt(tab)
+                                    }
                                 }.onFailure { error = moneyFailure(context, it) }
                                 busy = false
                             }
@@ -893,12 +903,6 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                     ) { Text(stringResource(R.string.bartab_send_receipt)) }
                 }
             }
-            else -> Text(
-                stringResource(R.string.bartab_paid_note),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.ducat.settled,
-                modifier = Modifier.padding(horizontal = 24.dp),
-            )
         }
 
         if (tab.state in CLOSED_STATES && !tab.keptElsewhere) {

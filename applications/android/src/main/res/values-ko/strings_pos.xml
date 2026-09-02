@@ -32,4 +32,6 @@
     <string name="pos_cancel_sale">판매 취소</string>
     <string name="pos_tax_at">세금(%1$s%%)</string>
     <string name="pos_in_unit">%1$s로</string>
+    <string name="pos_error_bill_not_withdrawn">계산서가 아직 상대 폰에 남아 있어요 — 철회하지 못했어요: %1$s</string>
+    <string name="pos_receipt_pending">영수증을 아직 보내지 못했어요 — 네트워크가 돌아오면 자동으로 발송됩니다.</string>
 </resources>

@@ -603,6 +603,15 @@ tasks.register<JavaExec>("cardaddress") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// A receipt the reconciler could not send is owed, not forgotten: the debt
+// survives a failed retry, writes no row, and is released when nobody is left
+// to tell. `./gradlew :desktop:receiptowed`.
+tasks.register<JavaExec>("receiptowed") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.ReceiptOwedTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // Two contacts a person cannot tell apart: the confusable-name fold and the
 // store query that drives the warning. `./gradlew :desktop:confusable`.
 tasks.register<JavaExec>("confusable") {

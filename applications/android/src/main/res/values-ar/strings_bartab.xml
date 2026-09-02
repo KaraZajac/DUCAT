@@ -69,4 +69,6 @@
     <string name="bill_note_sale">فاتورتك</string>
     <string name="bartab_tip_line">إكرامية — شكرًا</string>
     <string name="bill_note_issue">الاشتراك</string>
+    <string name="bartab_paid_pending">مدفوع ✓ — الإيصال ما زال على هذا الهاتف. سيخرج فور عودة الشبكة.</string>
+    <string name="bartab_paid_unsent">مدفوع ✓ — لكن تعذّر إرسال الإيصال. ستُعاد المحاولة تلقائيًا.</string>
 </resources>

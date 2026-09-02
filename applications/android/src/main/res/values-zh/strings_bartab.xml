@@ -64,4 +64,6 @@
     <string name="bill_note_sale">你的账单</string>
     <string name="bartab_tip_line">小费 — 谢谢</string>
     <string name="bill_note_issue">订阅</string>
+    <string name="bartab_paid_pending">已付 ✓ — 收据仍在这部手机上。网络恢复后立即发出。</string>
+    <string name="bartab_paid_unsent">已付 ✓ — 但收据未能发出。会自动重试。</string>
 </resources>

@@ -64,4 +64,6 @@
     <string name="bill_note_sale">お会計</string>
     <string name="bartab_tip_line">チップ — ありがとうございます</string>
     <string name="bill_note_issue">定期購読</string>
+    <string name="bartab_paid_pending">支払い済み ✓ — レシートはまだこの端末にあります。ネットワークが戻り次第送信されます。</string>
+    <string name="bartab_paid_unsent">支払い済み ✓ — ただしレシートを送信できませんでした。自動的に再試行されます。</string>
 </resources>

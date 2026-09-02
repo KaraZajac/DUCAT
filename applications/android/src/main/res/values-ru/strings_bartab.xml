@@ -67,4 +67,6 @@
     <string name="bill_note_sale">Ваш счёт</string>
     <string name="bartab_tip_line">Чаевые — спасибо</string>
     <string name="bill_note_issue">Подписка</string>
+    <string name="bartab_paid_pending">Оплачен ✓ — чек всё ещё на этом телефоне. Уйдёт, как только появится сеть.</string>
+    <string name="bartab_paid_unsent">Оплачен ✓ — но чек отправить не удалось. Попытка повторится сама.</string>
 </resources>

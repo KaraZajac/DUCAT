@@ -64,4 +64,6 @@
     <string name="bill_note_sale">Tagihanmu</string>
     <string name="bartab_tip_line">Tip — terima kasih</string>
     <string name="bill_note_issue">Langganan</string>
+    <string name="bartab_paid_pending">Lunas ✓ — struknya masih di ponsel ini. Akan terkirim begitu jaringan kembali.</string>
+    <string name="bartab_paid_unsent">Lunas ✓ — tapi struknya tidak bisa dikirim. Akan dicoba lagi dengan sendirinya.</string>
 </resources>

@@ -65,4 +65,6 @@
     <string name="bill_note_sale">Your bill</string>
     <string name="bartab_tip_line">Tip — thank you</string>
     <string name="bill_note_issue">Subscription</string>
+    <string name="bartab_paid_pending">Paid ✓ — the receipt is still on this phone. It goes out as soon as the network is back.</string>
+    <string name="bartab_paid_unsent">Paid ✓ — but the receipt could not be sent. It is tried again by itself.</string>
 </resources>

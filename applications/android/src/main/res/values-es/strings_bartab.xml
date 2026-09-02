@@ -65,4 +65,6 @@
     <string name="bill_note_sale">Tu cuenta</string>
     <string name="bartab_tip_line">Propina — gracias</string>
     <string name="bill_note_issue">Suscripción</string>
+    <string name="bartab_paid_pending">Pagada ✓ — el recibo sigue en este teléfono. Saldrá en cuanto vuelva la red.</string>
+    <string name="bartab_paid_unsent">Pagada ✓ — pero el recibo no se pudo enviar. Se volverá a intentar solo.</string>
 </resources>

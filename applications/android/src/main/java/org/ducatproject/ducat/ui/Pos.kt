@@ -30,6 +30,7 @@ import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.MyProfile
 import org.ducatproject.ducat.R
 import org.ducatproject.ducat.RateStore
+import org.ducatproject.ducat.RunningTab
 import org.ducatproject.ducat.TabStore
 import org.ducatproject.ducat.formatXmr
 import java.math.BigDecimal
@@ -533,6 +534,9 @@ private fun PresentScreen(
     // on the next payment of that size from that customer, none of them
     // withdrawn by leaving the screen, which only knew about the last.
     var pendingTabId by rememberSaveable { mutableStateOf<String?>(null) }
+    // When the sale went up, so its own bill can be told from an older one
+    // to the same customer for the same things.
+    val presentedAt = rememberSaveable { System.currentTimeMillis() }
     val customer: Contact? = remember(customerHex, version) {
         customerHex?.let { h -> ContactStore(context).all().firstOrNull { it.personaHex == h } }
     }
@@ -541,55 +545,81 @@ private fun PresentScreen(
     // drives — so a sale marked paid while this screen was backgrounded shows
     // paid the moment it returns, and the receipt logic lives in exactly one
     // place (TabStore.reconcile) for every vendor mode.
+    val saleTab = remember(version, saleTabId) { saleTabId?.let { TabStore(context).get(it) } }
     val stage = when {
-        saleTabId != null -> remember(version, saleTabId) {
-            val t = TabStore(context).get(saleTabId!!)
-            when {
-                t?.state == "paid" -> Sale.Paid
-                t?.seenTx != null -> Sale.Seen
-                else -> Sale.Billed
-            }
+        saleTabId != null -> when {
+            saleTab?.state == "paid" -> Sale.Paid
+            saleTab?.seenTx != null -> Sale.Seen
+            else -> Sale.Billed
         }
         else -> Sale.Waiting
     }
+    // Whether the receipt actually left. "Receipt sent" used to be read
+    // off the paid state alone, over a send the reconciler had logged as
+    // failed and forgotten; the tab now owes it, and the poll sends it.
+    val receiptOwed = saleTab?.wordSeq == RunningTab.WORD_UNSENT
 
     val scope = rememberCoroutineScope()
+    var leaving by remember { mutableStateOf(false) }
     // Leaving a billed sale must withdraw the bill, not just the screen.
     // The settled record would otherwise sit in the store forever, and a
     // later unrelated payment of the same amount would match it — a
     // receipt fired into a dead sale's thread.
-    fun abandon() {
+    //
+    // And the screen waits for the word to go. It used to fire the retract
+    // and leave in the same tap, which was the same bug on a timer: a node
+    // that refused the send failed inside a coroutine nobody was watching
+    // (or one the departing screen had already cancelled), TabStore.close
+    // put the tab back to "settled" as it must, and the till returned to
+    // its basket with the bill live on the customer's phone and the claim
+    // live in the store — now with no screen that knew about either. The
+    // Bar Tab's cancel stays until the word is out or says why it is not;
+    // this does the same, and the buttons are the retry.
+    fun leave(then: () -> Unit) {
         val billed = saleTabId
         val pending = pendingTabId
-        if (billed == null && pending == null) return
-        scope.launch(Dispatchers.IO) {
-            runCatching {
-                val store = TabStore(context)
-                if (billed != null) {
-                    store.get(billed)
-                        ?.takeIf { it.state == "settled" }
-                        // The retract path: the customer's Review button
-                        // greys out by itself when the bill can be named.
-                        ?.let { cancelTabWithRetract(context, store, it) }
-                } else {
-                    // Opened, never billed — unless one attempt's bill did
-                    // leave and only the bookkeeping after it failed, in
-                    // which case the thread holds it and it is withdrawn
-                    // like any other. Otherwise there is nothing on their
-                    // phone to withdraw, and a "your bill was cancelled" for
-                    // a bill they never saw would only puzzle them: the tab
-                    // is closed quietly so no later payment can match it.
-                    val tab = store.get(pending!!) ?: return@runCatching
-                    val went = ContactStore(context).thread(tab.personaHex).any {
-                        it.outgoing && it.kind == 1 && it.amountPxmr == tab.settledTotal
-                    }
-                    if (went) {
-                        cancelTabWithRetract(context, store, tab)
+        if (billed == null && pending == null) { then(); return }
+        if (leaving) return
+        leaving = true
+        error = null
+        scope.launch {
+            val r = withContext(Dispatchers.IO) {
+                runCatching {
+                    val store = TabStore(context)
+                    if (billed != null) {
+                        store.get(billed)
+                            ?.takeIf { it.state == "settled" }
+                            // The retract path: the customer's Review button
+                            // greys out by itself when the bill can be named.
+                            ?.let { cancelTabWithRetract(context, store, it) }
                     } else {
-                        store.mutate(tab.id) { it.copy(state = "cancelled") }
+                        // Opened, never billed — unless one attempt's bill did
+                        // leave and only the bookkeeping after it failed, in
+                        // which case the thread holds it and it is withdrawn
+                        // like any other. Otherwise there is nothing on their
+                        // phone to withdraw, and a "your bill was cancelled" for
+                        // a bill they never saw would only puzzle them: the tab
+                        // is closed quietly so no later payment can match it.
+                        val tab = store.get(pending!!) ?: return@runCatching
+                        val went = ContactStore(context).thread(tab.personaHex).any {
+                            it.outgoing && it.kind == 1 && it.amountPxmr == tab.settledTotal
+                        }
+                        if (went) {
+                            cancelTabWithRetract(context, store, tab)
+                        } else {
+                            store.mutate(tab.id) { it.copy(state = "cancelled") }
+                        }
                     }
                 }
             }
+            leaving = false
+            r.onSuccess { then() }
+                .onFailure {
+                    error = context.getString(
+                        R.string.pos_error_bill_not_withdrawn, moneyFailure(context, it),
+                    )
+                    DucatLog.e(TAG, "withdraw: ${it.message}")
+                }
         }
     }
 
@@ -610,7 +640,7 @@ private fun PresentScreen(
     // items still in it rang the next customer up for the last one's
     // coffee.
     BackHandler {
-        if (stage == Sale.Waiting || stage == Sale.Billed) { abandon(); onBack() }
+        if (stage == Sale.Waiting || stage == Sale.Billed) leave(onBack)
         else onDone()
     }
 
@@ -661,6 +691,21 @@ private fun PresentScreen(
             withContext(Dispatchers.IO) {
                 runCatching {
                     val store = TabStore(context)
+                    // A bill this screen already sent and then lost track
+                    // of. The saved state is written when the activity
+                    // stops — a locked screen, a call — and this loop keeps
+                    // running after that, so the bill can go out with no
+                    // bundle to record it; if Android then reclaims the
+                    // process, the restored screen holds the card and the
+                    // claimant and none of the ids, and billed the same
+                    // customer the same coffee again. The tab is in the
+                    // store whatever the bundle says: this sale's own,
+                    // billed and unpaid, opened since the sale went up.
+                    store.all().firstOrNull {
+                        it.origin == "pos" && it.personaHex == fresh.personaHex &&
+                            it.state == "settled" && it.openedAt >= presentedAt &&
+                            it.lines == items && it.taxPxmr == taxPxmr
+                    }?.let { return@runCatching it.id }
                     // The same tab on every try; a retry re-sends the bill
                     // through it rather than opening another.
                     val id = pendingTabId?.takeIf { store.get(it) != null }
@@ -781,7 +826,7 @@ private fun PresentScreen(
                 Text(
                     stringResource(
                         R.string.pos_bill_sent_to,
-                        customer?.displayName() ?: stringResource(R.string.pos_the_customer),
+                        customer?.let { isolate(it.displayName()) } ?: stringResource(R.string.pos_the_customer),
                     ),
                     style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(6.dp))
@@ -799,12 +844,14 @@ private fun PresentScreen(
                     color = MaterialTheme.ducat.settled)
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    stringResource(
+                    if (receiptOwed) stringResource(R.string.pos_receipt_pending)
+                    else stringResource(
                         R.string.pos_receipt_sent_to,
-                        customer?.displayName() ?: stringResource(R.string.pos_the_customer),
+                        customer?.let { isolate(it.displayName()) } ?: stringResource(R.string.pos_the_customer),
                     ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                 )
             }
         }
@@ -819,18 +866,23 @@ private fun PresentScreen(
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             if (stage == Sale.Waiting || stage == Sale.Billed) {
                 OutlinedButton(
-                    onClick = { abandon(); onBack() },
+                    onClick = { leave(onBack) },
+                    enabled = !leaving,
                     modifier = Modifier.weight(1f).height(48.dp),
-                ) { Text(stringResource(R.string.pos_back)) }
+                ) {
+                    if (leaving) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                    else Text(stringResource(R.string.pos_back))
+                }
             }
             Button(
                 onClick = {
                     // Once a payment is sighted, the money is in flight and
                     // cancelling the bill would orphan it — the way out is
                     // letting it settle.
-                    if (stage == Sale.Waiting || stage == Sale.Billed) abandon()
-                    onDone()
+                    if (stage == Sale.Waiting || stage == Sale.Billed) leave(onDone)
+                    else onDone()
                 },
+                enabled = !leaving,
                 modifier = Modifier.weight(1f).height(48.dp),
             ) {
                 Text(

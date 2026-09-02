@@ -235,11 +235,14 @@ class Poller(private val context: Context) {
                 // Settled tabs and fares: payment seen on chain, receipt into
                 // the thread. Here rather than on a screen, because the payment
                 // lands when it lands and the vendor is busy (§15.11).
+                runCatching { TabStore.sendOwedReceipts(context) }
+                    .onFailure { DucatLog.w(TAG, "receipts: ${it.message}") }
                 runCatching { TabStore.reconcile(context) }
+                    .onFailure { DucatLog.w(TAG, "tabs: ${it.message}") }
                 // Donation threads get their receipts on the same clock the
                 // tabs do — see Donations for why the payer wants the record.
                 runCatching { Donations.reconcile(context) }
-                    .onFailure { DucatLog.w(TAG, "tabs: ${it.message}") }
+                    .onFailure { DucatLog.w(TAG, "donations: ${it.message}") }
                 // Paid subscribers get their issue on the same clock too:
                 // the tab just went "paid" above, and §15.11 says delivery
                 // follows settlement, not the operator's attention.

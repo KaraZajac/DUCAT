@@ -65,4 +65,6 @@
     <string name="bill_note_sale">Deine Rechnung</string>
     <string name="bartab_tip_line">Trinkgeld — danke</string>
     <string name="bill_note_issue">Abo</string>
+    <string name="bartab_paid_pending">Bezahlt ✓ — die Quittung ist noch auf diesem Telefon. Sie geht raus, sobald das Netz wieder da ist.</string>
+    <string name="bartab_paid_unsent">Bezahlt ✓ — aber die Quittung konnte nicht gesendet werden. Es wird von selbst erneut versucht.</string>
 </resources>

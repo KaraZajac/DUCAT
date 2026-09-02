@@ -65,4 +65,6 @@
     <string name="bill_note_sale">Votre ticket</string>
     <string name="bartab_tip_line">Pourboire — merci</string>
     <string name="bill_note_issue">Abonnement</string>
+    <string name="bartab_paid_pending">Payée ✓ — le reçu est encore sur ce téléphone. Il partira dès que le réseau sera de retour.</string>
+    <string name="bartab_paid_unsent">Payée ✓ — mais le reçu n\'a pas pu être envoyé. Il sera réessayé tout seul.</string>
 </resources>

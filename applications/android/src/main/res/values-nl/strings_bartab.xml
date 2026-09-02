@@ -65,4 +65,6 @@
     <string name="bill_note_sale">Je rekening</string>
     <string name="bartab_tip_line">Fooi — bedankt</string>
     <string name="bill_note_issue">Abonnement</string>
+    <string name="bartab_paid_pending">Betaald ✓ — de bon staat nog op deze telefoon. Hij gaat weg zodra het netwerk er weer is.</string>
+    <string name="bartab_paid_unsent">Betaald ✓ — maar de bon kon niet worden verzonden. Het wordt vanzelf opnieuw geprobeerd.</string>
 </resources>

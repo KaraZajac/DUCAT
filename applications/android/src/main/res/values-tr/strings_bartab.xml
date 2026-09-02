@@ -65,4 +65,6 @@
     <string name="bill_note_sale">Hesabın</string>
     <string name="bartab_tip_line">Bahşiş — teşekkürler</string>
     <string name="bill_note_issue">Abonelik</string>
+    <string name="bartab_paid_pending">Ödendi ✓ — makbuz hâlâ bu telefonda. Ağ gelir gelmez gidecek.</string>
+    <string name="bartab_paid_unsent">Ödendi ✓ — ama makbuz gönderilemedi. Kendiliğinden yeniden denenecek.</string>
 </resources>

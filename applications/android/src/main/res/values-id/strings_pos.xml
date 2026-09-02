@@ -32,4 +32,6 @@
     <string name="pos_cancel_sale">Batalkan penjualan</string>
     <string name="pos_tax_at">Pajak (%1$s%%)</string>
     <string name="pos_in_unit">dalam %1$s</string>
+    <string name="pos_error_bill_not_withdrawn">Tagihannya masih di ponsel mereka — tidak bisa ditarik: %1$s</string>
+    <string name="pos_receipt_pending">Struknya belum bisa dikirim — akan terkirim dengan sendirinya begitu jaringan kembali.</string>
 </resources>

@@ -32,4 +32,6 @@
     <string name="pos_cancel_sale">Annuler la vente</string>
     <string name="pos_tax_at">Taxe (%1$s %%)</string>
     <string name="pos_in_unit">en %1$s</string>
+    <string name="pos_error_bill_not_withdrawn">La facture est toujours sur leur téléphone — elle n\'a pas pu être retirée : %1$s</string>
+    <string name="pos_receipt_pending">Le reçu n\'a pas encore pu être envoyé — il partira tout seul dès que le réseau sera de retour.</string>
 </resources>

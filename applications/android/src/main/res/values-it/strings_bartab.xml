@@ -65,4 +65,6 @@
     <string name="bill_note_sale">Il tuo conto</string>
     <string name="bartab_tip_line">Mancia — grazie</string>
     <string name="bill_note_issue">Abbonamento</string>
+    <string name="bartab_paid_pending">Pagato ✓ — la ricevuta è ancora su questo telefono. Partirà appena torna la rete.</string>
+    <string name="bartab_paid_unsent">Pagato ✓ — ma la ricevuta non è stata inviata. Verrà ritentata da sola.</string>
 </resources>
