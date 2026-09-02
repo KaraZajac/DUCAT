@@ -141,6 +141,7 @@
         <item quantity="other">ここでメッセージが %1$d 件抜けています</item>
     </plurals>
     <string name="chat_not_sent_yet">未送信</string>
+    <string name="chat_not_sent">送信されませんでした</string>
     <string name="chat_cancel_request">リクエストを取り消す</string>
     <string name="chat_copied">メッセージをコピーしました</string>
     <string name="chat_download_file">ダウンロード</string>

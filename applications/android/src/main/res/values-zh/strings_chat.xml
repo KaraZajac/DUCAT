@@ -141,6 +141,7 @@
         <item quantity="other">这里少了 %1$d 条消息</item>
     </plurals>
     <string name="chat_not_sent_yet">尚未发送</string>
+    <string name="chat_not_sent">未发送</string>
     <string name="chat_cancel_request">撤销请求</string>
     <string name="chat_copied">已复制消息</string>
     <string name="chat_download_file">下载</string>

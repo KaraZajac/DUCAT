@@ -146,6 +146,7 @@
         <item quantity="other">%1$d رسالة مفقودة هنا</item>
     </plurals>
     <string name="chat_not_sent_yet">لم يُرسل بعد</string>
+    <string name="chat_not_sent">لم يُرسل</string>
     <string name="chat_cancel_request">إلغاء الطلب</string>
     <string name="chat_copied">نُسخت الرسالة</string>
     <string name="chat_download_file">تنزيل</string>

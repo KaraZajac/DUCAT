@@ -2197,9 +2197,18 @@ private fun Bubble(
                 // Ahead of the ticks and instead of them: a message that has
                 // not left cannot have been read, so showing both would be
                 // saying two things at once.
+                //
+                // "Yet" is a promise the next send keeps — unless the log it
+                // was numbered in has been retired by a re-claim since, which
+                // dropped the pending slot with it (Mailbox.mergeRebuilt): no
+                // send will ever carry it. The frozen read mark is what says a
+                // row is from a retired log.
                 if (!m.delivered) {
                     Text(
-                        stringResource(R.string.chat_not_sent_yet),
+                        stringResource(
+                            if (m.readByThem != null) R.string.chat_not_sent
+                            else R.string.chat_not_sent_yet,
+                        ),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.error,
                     )

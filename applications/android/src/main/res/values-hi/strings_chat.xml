@@ -142,6 +142,7 @@
         <item quantity="other">यहाँ %1$d संदेश गायब हैं</item>
     </plurals>
     <string name="chat_not_sent_yet">अभी भेजा नहीं गया</string>
+    <string name="chat_not_sent">भेजा नहीं गया</string>
     <string name="chat_cancel_request">अनुरोध रद्द करें</string>
     <string name="chat_copied">मैसेज कॉपी हो गया</string>
     <string name="chat_download_file">डाउनलोड</string>

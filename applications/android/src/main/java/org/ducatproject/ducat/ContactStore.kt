@@ -323,14 +323,6 @@ class ContactStore(context: Context) {
         bump()
     } }
 
-    /**
-     * Forget a person entirely: the contact, everything they said, and every
-     * per-persona key the store and the mailbox filed under them. The prefixed
-     * families ("stuck_", "slotseen_") are swept by scanning all keys, because
-     * they are keyed per-slot and per-seq and nothing else remembers which
-     * ones exist — leaving them would grow the prefs file by one orphan per
-     * forgotten conversation, forever.
-     */
     /** The newest outbound seq whose slot the network has confirmed holding
      *  (Mailbox.verifyLastWrites). -1 until anything has been. */
     fun lastSlotVerified(personaHex: String): Long =
@@ -349,6 +341,28 @@ class ContactStore(context: Context) {
         prefs.edit().putInt("slotfix_$personaHex", n).apply()
     }
 
+    /**
+     * Drop the patience clocks the mailbox keeps per unreadable inbound seq
+     * ("stuck_persona:seq"). For when their log is replaced by a re-claim:
+     * the clocks count the old log's numbering, and a clock left running
+     * for old seq 7 is what the new log's seq 7 would be judged by — an
+     * unreadable slot there declared lost on sight instead of getting its
+     * window, which is the false loss the window exists to prevent.
+     */
+    fun clearStuckClocks(personaHex: String) { synchronized(lock) {
+        val e = prefs.edit()
+        prefs.all.keys.filter { it.startsWith("stuck_$personaHex:") }.forEach { e.remove(it) }
+        e.apply()
+    } }
+
+    /**
+     * Forget a person entirely: the contact, everything they said, and every
+     * per-persona key the store and the mailbox filed under them. The prefixed
+     * families ("stuck_", "slotseen_") are swept by scanning all keys, because
+     * they are keyed per-slot and per-seq and nothing else remembers which
+     * ones exist — leaving them would grow the prefs file by one orphan per
+     * forgotten conversation, forever.
+     */
     fun forget(personaHex: String) { synchronized(lock) {
         val e = prefs.edit()
         listOf(
@@ -684,13 +698,17 @@ class ContactStore(context: Context) {
      */
     fun markDelivered(personaHex: String, seq: Long) { synchronized(lock) {
         val thread = thread(personaHex)
-        if (thread.none { it.outgoing && it.seq == seq && !it.delivered }) return@synchronized
+        // The newest row at this seq, not every row at it: a re-claim starts
+        // our numbering over while the thread keeps the old log's rows, so
+        // "every outgoing row at seq 3" is one row per log this thread has
+        // had. A send the old log never completed — stranded when the
+        // re-claim dropped its pending slot — would be ticked as delivered
+        // the day the new log reached the same number.
+        val at = thread.indexOfLast { it.outgoing && it.seq == seq }
+        if (at < 0 || thread[at].delivered) return@synchronized
         val arr = JSONArray()
-        thread.forEach {
-            arr.put(
-                if (it.outgoing && it.seq == seq) it.copy(delivered = true).toJson()
-                else it.toJson(),
-            )
+        thread.forEachIndexed { i, m ->
+            arr.put(if (i == at) m.copy(delivered = true).toJson() else m.toJson())
         }
         prefs.edit().putString("thread_$personaHex", arr.toString()).apply()
         bump()

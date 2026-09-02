@@ -144,6 +144,7 @@
         <item quantity="other">Тут бракує %1$d повідомлень</item>
     </plurals>
     <string name="chat_not_sent_yet">ще не надіслано</string>
+    <string name="chat_not_sent">не надіслано</string>
     <string name="chat_cancel_request">Скасувати запит</string>
     <string name="chat_copied">Повідомлення скопійовано</string>
     <string name="chat_download_file">Завантажити</string>

@@ -142,6 +142,7 @@
         <item quantity="other">Faltam %1$d mensagens aqui</item>
     </plurals>
     <string name="chat_not_sent_yet">ainda não enviado</string>
+    <string name="chat_not_sent">não enviado</string>
     <string name="chat_cancel_request">Cancelar pedido</string>
     <string name="chat_copied">Mensagem copiada</string>
     <string name="chat_download_file">Baixar</string>

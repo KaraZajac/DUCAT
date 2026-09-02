@@ -141,6 +141,7 @@
         <item quantity="other">여기 메시지 %1$d개가 빠져 있어</item>
     </plurals>
     <string name="chat_not_sent_yet">아직 전송 안 됨</string>
+    <string name="chat_not_sent">전송 안 됨</string>
     <string name="chat_cancel_request">요청 취소</string>
     <string name="chat_copied">메시지를 복사했어요</string>
     <string name="chat_download_file">다운로드</string>

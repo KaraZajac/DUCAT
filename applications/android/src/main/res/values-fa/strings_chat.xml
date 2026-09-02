@@ -142,6 +142,7 @@
         <item quantity="other">%1$d پیام اینجا گم شده</item>
     </plurals>
     <string name="chat_not_sent_yet">هنوز ارسال نشده</string>
+    <string name="chat_not_sent">ارسال نشد</string>
     <string name="chat_cancel_request">لغو درخواست</string>
     <string name="chat_copied">پیام کپی شد</string>
     <string name="chat_download_file">دانلود</string>

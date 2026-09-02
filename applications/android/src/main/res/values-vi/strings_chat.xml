@@ -141,6 +141,7 @@
         <item quantity="other">Thiếu %1$d tin nhắn ở đây</item>
     </plurals>
     <string name="chat_not_sent_yet">chưa gửi</string>
+    <string name="chat_not_sent">không được gửi</string>
     <string name="chat_cancel_request">Hủy yêu cầu</string>
     <string name="chat_copied">Đã sao chép tin nhắn</string>
     <string name="chat_download_file">Tải xuống</string>

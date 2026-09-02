@@ -480,19 +480,28 @@ object Mailbox {
      * count of the old log: what it says about the rows already sent is
      * frozen onto them ([ContactStore.retireOutbox]) before the rebuilt
      * contact, which carries no watermark yet, replaces it.
+     *
+     * The inbound side has its own test — their log, which a claim of our
+     * card always replaces and a claim of theirs replaces unless the card
+     * names the log we already read — and one piece of bookkeeping in its
+     * numbering: the patience clocks per unreadable seq
+     * ([ContactStore.clearStuckClocks]).
      */
     private fun mergeRebuilt(store: ContactStore, built: Contact): Contact {
-        var retired: Contact? = null
+        var oursRetired: Contact? = null
+        var theirsRetired = false
         val c = store.merge(built.personaHex) { cur ->
-            retired = cur?.takeIf { it.myOutbox != built.myOutbox }
+            oursRetired = cur?.takeIf { it.myOutbox != built.myOutbox }
+            theirsRetired = cur != null && cur.theirOutbox != built.theirOutbox
             keepCounters(built, cur)
         }
-        retired?.let {
+        oursRetired?.let {
             store.retireOutbox(c.personaHex, it.theirReadUpTo)
             store.setLastSlotVerified(c.personaHex, -1L)
             store.setSlotFixTries(c.personaHex, 0)
             store.clearPendingSlot(c.personaHex)
         }
+        if (theirsRetired) store.clearStuckClocks(c.personaHex)
         return c
     }
 
