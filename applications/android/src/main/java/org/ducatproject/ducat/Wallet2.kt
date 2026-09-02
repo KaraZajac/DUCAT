@@ -742,10 +742,35 @@ data class FiatView(
 )
 
 object Rates {
+    /** When the last fetch failed, so the next one can wait its turn. */
+    @Volatile private var lastFailedAt = 0L
+
+    /**
+     * After a failed fetch, how long before the next try.
+     *
+     * The poll pass runs every ten seconds in the foreground and this used
+     * to try on every one of them while the cache was stale: four venues,
+     * twelve seconds of timeout each, so a phone behind a firewall that
+     * black-holes the price APIs spent up to forty-eight seconds of every
+     * pass waiting on them — with the wallet scan, the tab reconciler and
+     * the escrow nudges queued behind. A minute between tries bounds that
+     * at well under half the loop's time, and a rate a minute late is
+     * still a rate.
+     */
+    private const val RETRY_AFTER_MS = 60_000L
+
     /** Refresh if the cache is stale and the user has not turned it off. */
     fun refresh(context: Context) {
         val store = RateStore(context)
         if (!store.enabled() || !store.isStale()) return
+        if (System.currentTimeMillis() - lastFailedAt < RETRY_AFTER_MS) return
+        // Said once, because it names a phone whose clock has been moved —
+        // see RateStore.isStale — and the figure it was showing meanwhile
+        // looked exactly like a fresh one.
+        store.cached()?.second
+            ?.let { it - System.currentTimeMillis() / 1000 }
+            ?.takeIf { it > 0 }
+            ?.let { DucatLog.w(TAG, "rate stamped $it s in the future — fetching again") }
         try {
             // The last rate we trusted rides along: a lone quote nothing
             // corroborates is believed only if it is close to it, and on a
@@ -756,6 +781,7 @@ object Rates {
                 store.currency(), 12_000u, store.cached()?.first,
             )
             store.store(r.perXmr, r.fetchedAt.toLong(), r.source)
+            lastFailedAt = 0L
             // The dollar too, because §15.12's fare table is in dollars and a
             // dollar figure needs the dollar's rate. One extra call, and none
             // at all for somebody already reading in dollars.
@@ -769,6 +795,7 @@ object Rates {
                     .onFailure { DucatLog.w(TAG, "usd rate: ${it.message}") }
             }
         } catch (e: Exception) {
+            lastFailedAt = System.currentTimeMillis()
             DucatLog.w(TAG, "rate: ${e.message}")
         }
     }

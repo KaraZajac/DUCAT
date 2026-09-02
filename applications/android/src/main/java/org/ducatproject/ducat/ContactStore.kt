@@ -3104,6 +3104,9 @@ class RateStore(context: Context) {
             "RUB", "KRW", "SGD", "HKD", "TWD", "THB", "IDR", "PHP", "NGN",
             "ARS", "CLP", "CZK", "HUF", "ILS", "AED", "SAR", "UAH", "VND",
         )
+
+        /** How far ahead of now a stamp may sit before [isStale] disbelieves it. */
+        private const val FUTURE_SLACK_SECS = 60L
     }
 
     /**
@@ -3189,9 +3192,26 @@ class RateStore(context: Context) {
     fun storeUsd(v: Double) =
         prefs.edit().putFloat("rate_usd", v.toFloat()).apply()
 
+    /**
+     * Whether the cached rate is old enough to fetch again — or stamped at
+     * a time this clock has not reached yet, which is worse than old.
+     *
+     * Found live (2026-09-02): one phone priced XMR at 461 against a
+     * market at 520, confidently, for five days. Its clock had been wound
+     * forward for a while (the weekly-epoch tests do that), a rate was
+     * fetched under the wrong date, and when the clock came back the stamp
+     * sat *ahead* of now: never half an hour old, so never refetched, and
+     * never six hours old, so the balance never said it was old either.
+     * Nothing about the figure looked different from a fresh one. A stamp
+     * from the future is a stamp this phone cannot vouch for, and the only
+     * safe reading of it is "fetch again" — one request, and the stamp is
+     * honest from then on. The slack covers a clock nudged back by a few
+     * seconds, which is not this.
+     */
     fun isStale(maxAgeSecs: Long = 1800): Boolean {
         val at = cached()?.second ?: return true
-        return System.currentTimeMillis() / 1000 - at > maxAgeSecs
+        val age = System.currentTimeMillis() / 1000 - at
+        return age > maxAgeSecs || age < -FUTURE_SLACK_SECS
     }
 }
 
