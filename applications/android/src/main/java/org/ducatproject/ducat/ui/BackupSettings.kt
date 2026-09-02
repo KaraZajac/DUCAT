@@ -19,9 +19,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import java.io.File
-import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.Ceremony
 import org.ducatproject.ducat.NameStore
@@ -62,7 +59,7 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
     // enough to jank the frame if run on the main thread, and both used to,
     // with no sign the tap had landed. One flag disables both and shows a
     // spinner so a slow encrypt reads as working, not frozen.
-    var importing by remember { mutableStateOf(false) }
+    var importing by remember { mutableStateOf(ThreadSends.inFlight(RestoreRun.KEY)) }
     // The export runs off the screen, under the key setup's export uses —
     // see [BACKUP_EXPORT_KEY]. It used to run in this screen's scope, and
     // a rotation or a call landing while Argon2id ground took the scope
@@ -73,6 +70,25 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
     val busy = importing || exporting
     val tick by ThreadSends.ticks.collectAsState()
     LaunchedEffect(tick) {
+        importing = ThreadSends.inFlight(RestoreRun.KEY)
+        for (o in ThreadSends.take(RestoreRun.KEY)) when (o) {
+            is ThreadSends.Outcome.Landed -> {
+                restored = RestoreRun.landed?.second
+                message = o.result
+            }
+            is ThreadSends.Outcome.Failed -> {
+                // A wrong passphrase and a tampered file are the same error,
+                // on purpose: telling them apart would say whether a guess was
+                // close. The class name goes to the log so that a failure
+                // which is *neither* — an unreadable file, no room — can still
+                // be told apart by whoever reads it.
+                DucatLog.w(
+                    "Backup",
+                    "import failed: ${o.error.javaClass.simpleName}: ${o.error.message}",
+                )
+                message = context.getString(R.string.backup_could_not_open)
+            }
+        }
         exporting = ThreadSends.inFlight(BACKUP_EXPORT_KEY)
         for (o in ThreadSends.take(BACKUP_EXPORT_KEY)) when (o) {
             is ThreadSends.Outcome.Landed -> {
@@ -211,51 +227,52 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
         }
     }
 
+    // The import runs off this screen, under the same key setup's restore
+    // uses — it is the same act, and two at once would be a disaster. The
+    // effect only hands it over, so `pendingImport` can be cleared at once:
+    // it was cleared last, because clearing it changed this effect's key and
+    // cancelled the restore mid-write, which reached the user as "wrong
+    // passphrase, or the file has been altered" — a lie about their backup
+    // at the worst possible moment. What replaced that fix is stronger:
+    // nothing this screen does can cancel the work at all.
     LaunchedEffect(pendingImport) {
         val uri = pendingImport ?: return@LaunchedEffect
+        val phrase = passphrase
         importing = true
-        // NonCancellable, and `pendingImport` is cleared at the very end.
-        //
-        // This effect is keyed on `pendingImport`, so clearing it *first* — as
-        // this did — changed the key and cancelled the coroutine that was
-        // running the restore. Argon2id is deliberately slow, so it lost that
-        // race every time: every import died as LeftCompositionCancellationException
-        // and was reported to the user as "wrong passphrase, or the file has
-        // been altered", which is a lie about their backup at the worst
-        // possible moment.
-        //
-        // The writes below are the other reason. A restore puts back the name,
-        // the publish choice, the profile and every contact; interrupted
-        // halfway it leaves a device that is neither the old identity nor the
-        // new one, with nothing to say so.
-        val outcome = withContext(Dispatchers.IO + NonCancellable) {
-            runCatching {
-                val bytes = context.contentResolver.openInputStream(uri)!!
-                    .use { it.readBytes() }
-                applyBackup(context, bytes, passphrase)
-            }
+        ThreadSends.launch(ContactStore(context), RestoreRun.KEY, null) {
+            val bytes = context.contentResolver.openInputStream(uri)!!.use { it.readBytes() }
+            val landed = applyBackup(context, bytes, phrase)
+            RestoreRun.landed = landed
+            val (r, _) = landed
+            DucatLog.i("Backup", "imported: ${r.contacts.size} contact(s), " +
+                "${r.prekeyOneTime.size} prekey(s), escrow ${r.escrowCount}")
+            context.getString(R.string.backup_opened,
+                r.escrowCount.toInt(), r.restoreHeight.toLong())
         }
-        message = outcome.fold(
-            onSuccess = { (r, address) ->
-                DucatLog.i("Backup", "imported: ${r.contacts.size} contact(s), " +
-                    "${r.prekeyOneTime.size} prekey(s), escrow ${r.escrowCount}")
-                restored = address
-                context.getString(R.string.backup_opened,
-                    r.escrowCount.toInt(), r.restoreHeight.toLong())
-            },
-            onFailure = { t ->
-                // A wrong passphrase and a tampered file are the same error, on
-                // purpose: telling them apart would say whether a guess was
-                // close. The class name goes to the log so that a failure which
-                // is *neither* — the cancellation above, an unreadable file —
-                // can still be told apart by whoever reads it.
-                DucatLog.w("Backup", "import failed: ${t.javaClass.simpleName}: ${t.message}")
-                context.getString(R.string.backup_could_not_open)
-            },
-        )
-        importing = false
         pendingImport = null
     }
+}
+
+/**
+ * The import that is running, and what it found, held by the process.
+ *
+ * `applyBackup` is uncancellable — it has to be, since it rewrites this
+ * device's keys and stores mid-way — but the line after it that shows the
+ * result was not. A turn of the phone while Argon2 ground therefore put the
+ * whole backup on the device and then drew the "pick a file" card over it
+ * again, with Cancel live: and Cancel from there goes back to "Create a
+ * persona", which offers to mint a fresh identity on top of a wallet that
+ * has just been restored. On the one screen somebody only reaches by having
+ * already lost a phone.
+ *
+ * ThreadSends carries whether it is running and whether it failed; this
+ * carries the answer itself, which is a uniffi object and not a string.
+ */
+internal object RestoreRun {
+    const val KEY = "restore:import"
+
+    @Volatile
+    var landed: Pair<uniffi.ducat_mobile.RestoredBackup, String>? = null
 }
 
 /**
@@ -267,8 +284,9 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
  * two features wearing one name, and the parts that were missing here were
  * missing quietly.
  *
- * Blocking and order-sensitive: call it off the main thread, and inside
- * `NonCancellable`. It writes several stores, and interrupted halfway it
+ * Blocking and order-sensitive: call it off the main thread, and somewhere
+ * no screen can cancel it — both doors hand it to [ThreadSends] under
+ * [RestoreRun.KEY]. It writes several stores, and interrupted halfway it
  * leaves a device that is neither the old identity nor the new one.
  */
 internal fun applyBackup(

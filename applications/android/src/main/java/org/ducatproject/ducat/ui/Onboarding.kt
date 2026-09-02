@@ -540,11 +540,12 @@ private fun RestoreStep(
     // reported as the wrong passphrase.
     var passphrase by rememberSaveable { mutableStateOf("") }
     var pending by remember { mutableStateOf<android.net.Uri?>(null) }
-    var busy by remember { mutableStateOf(false) }
+    // All three start from what the process already knows, so a card rebuilt
+    // by a rotation mid-import comes back to the import rather than to the
+    // form that starts one. See RestoreRun.
+    var busy by remember { mutableStateOf(ThreadSends.inFlight(RestoreRun.KEY)) }
     var error by remember { mutableStateOf<String?>(null) }
-    var done by remember {
-        mutableStateOf<Pair<uniffi.ducat_mobile.RestoredBackup, String>?>(null)
-    }
+    var done by remember { mutableStateOf(RestoreRun.landed) }
 
     val picker = rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.OpenDocument()
@@ -560,33 +561,39 @@ private fun RestoreStep(
     //
     // It follows the button rather than the flag, in both directions the
     // button is unavailable. Mid-import there is nothing to cancel — the work
-    // is NonCancellable for the reason the effect above gives — and once the
-    // backup is *in*, the wallet is on this device: going back to "Create a
-    // persona" would offer to mint a fresh one over the top of it, and the
+    // is off the screen entirely, for the reason RestoreRun gives — and once
+    // the backup is *in*, the wallet is on this device: going back to "Create
+    // a persona" would offer to mint a fresh one over the top of it, and the
     // only honest way on is Continue.
     BackHandler { if (!busy && done == null) onCancel() }
 
-    // `pending` is cleared last and the work is NonCancellable — clearing it
-    // first would change this effect's key and cancel the restore it started.
+    // The import runs off the card. `pending` can be cleared as soon as it is
+    // handed over, because what carries the work is no longer this effect.
     LaunchedEffect(pending) {
         val uri = pending ?: return@LaunchedEffect
+        val phrase = passphrase
         busy = true
         error = null
-        val outcome = withContext(Dispatchers.IO + kotlinx.coroutines.NonCancellable) {
-            runCatching {
-                val bytes = context.contentResolver.openInputStream(uri)!!
-                    .use { it.readBytes() }
-                applyBackup(context, bytes, passphrase)
+        ThreadSends.launch(ContactStore(context), RestoreRun.KEY, null) {
+            val bytes = context.contentResolver.openInputStream(uri)!!.use { it.readBytes() }
+            RestoreRun.landed = applyBackup(context, bytes, phrase)
+            null
+        }
+        pending = null
+    }
+    val tick by ThreadSends.ticks.collectAsState()
+    LaunchedEffect(tick) {
+        busy = ThreadSends.inFlight(RestoreRun.KEY)
+        for (o in ThreadSends.take(RestoreRun.KEY)) when (o) {
+            is ThreadSends.Outcome.Landed -> { done = RestoreRun.landed; error = null }
+            is ThreadSends.Outcome.Failed -> {
+                org.ducatproject.ducat.DucatLog.w(
+                    "Backup",
+                    "setup restore: ${o.error.javaClass.simpleName}: ${o.error.message}",
+                )
+                error = context.getString(R.string.backup_could_not_open)
             }
         }
-        outcome.onSuccess { done = it }.onFailure {
-            org.ducatproject.ducat.DucatLog.w(
-                "Backup", "setup restore: ${it.javaClass.simpleName}: ${it.message}",
-            )
-            error = context.getString(R.string.backup_could_not_open)
-        }
-        busy = false
-        pending = null
     }
 
     Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
@@ -653,7 +660,7 @@ private fun RestoreStep(
                     fontFamily = FontFamily.Monospace,
                 )
                 Spacer(Modifier.height(16.dp))
-                Button(onClick = { onRestored(restored.first) }) {
+                Button(onClick = { RestoreRun.landed = null; onRestored(restored.first) }) {
                     Text(stringResource(R.string.onb_restore_continue))
                 }
             }
