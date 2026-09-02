@@ -69,4 +69,5 @@
     <string name="onb_pin_done">PIN задан. Его спросят перед каждым платежом.</string>
     <string name="onb_pin_action">Выбрать PIN</string>
     <string name="onb_pin_next">Дальше</string>
+    <string name="onb_wallet_error">Не удалось создать кошелёк. Попробуй ещё раз.</string>
 </resources>

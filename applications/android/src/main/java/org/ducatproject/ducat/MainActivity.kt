@@ -27,6 +27,7 @@ import org.ducatproject.ducat.ui.BalanceCard
 import org.ducatproject.ducat.ui.NetworkPanel
 import org.ducatproject.ducat.ui.Onboarding
 import org.ducatproject.ducat.ui.OnboardingFlow
+import org.ducatproject.ducat.ui.setupBackupFile
 import org.ducatproject.ducat.ui.Step
 import org.ducatproject.ducat.ui.DucatTheme
 import org.ducatproject.ducat.ui.ThemeMode
@@ -260,50 +261,80 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
             // killed between the wallet and the PIN resumed at the backup
             // step, walked to Done, and left a funded wallet with no PIN on
             // it, for ever. Ask what is actually missing instead of assuming.
-            var setup by remember {
+            //
+            // Saveable, with the stores as the fallback rather than the rule.
+            // The stores know which steps are *answered*; they cannot tell
+            // the Profile step from the Persona step before it, or the Trust
+            // explainer from the Backup step after it, so rebuilding from
+            // them on every rotation sent a person who had just typed a name
+            // back to "Create your identity". The saved state carries the
+            // step across a rotation; the computation below is for when
+            // there is none — a killed process, a first launch.
+            var setup by rememberSaveable(stateSaver = Onboarding.Saver) {
                 mutableStateOf(
-                    when {
-                        WalletStore(this@MainActivity).address() == null -> Onboarding()
-                        // A restore lands here too — wallet in place, PIN
-                        // still to choose — and it has already recorded the
-                        // backup that got it here. Resuming with the defaults
-                        // marched a restored phone through Trust and Backup
-                        // again, and Done then wrote the default "publish my
-                        // address" over the choice the backup carried.
-                        !Pin.isSet(this@MainActivity) -> {
-                            val store = ContactStore(this@MainActivity)
-                            val restored = store.backupExportedAt() > 0L
-                            Onboarding(
-                                step = Step.Pin,
-                                backupConfirmed = restored,
-                                publishPayto = if (restored) {
-                                    store.publishAddress()
-                                } else {
-                                    Onboarding().publishPayto
-                                },
-                            )
+                    run {
+                        val store = ContactStore(this@MainActivity)
+                        // The Profile step's answers, if it has been through
+                        // (a restore records the bundle's); the flow's own
+                        // defaults before then. Both are written the moment
+                        // they are given, so a rebuilt flow shows what was
+                        // said rather than the switch's opening position —
+                        // which is on, over a choice that may have been no.
+                        val name = NameStore(this@MainActivity).get()
+                        val publish =
+                            if (store.publishAddressChosen()) store.publishAddress()
+                            else Onboarding().publishPayto
+                        when {
+                            WalletStore(this@MainActivity).address() == null ->
+                                Onboarding(displayName = name, publishPayto = publish)
+                            // A restore lands here too — wallet in place, PIN
+                            // still to choose — and it has already recorded the
+                            // backup that got it here. Resuming with the defaults
+                            // marched a restored phone through Trust and Backup
+                            // again, and Done then wrote the default "publish my
+                            // address" over the choice the backup carried.
+                            !Pin.isSet(this@MainActivity) ->
+                                Onboarding(
+                                    step = Step.Pin,
+                                    backupConfirmed = store.backupExportedAt() > 0L,
+                                    displayName = name,
+                                    publishPayto = publish,
+                                )
+                            // Ask about the backup too, rather than assuming it is
+                            // the thing still outstanding. A restore records one —
+                            // the file that got them here — and so does making one
+                            // at the last step, so this is answerable from the same
+                            // durable state the two checks above use.
+                            //
+                            // Assuming it left a restored phone being marched
+                            // through Trust and Backup to produce a bundle it did
+                            // not need, and could not leave setup until it did.
+                            // Whether that happened at all came down to whether the
+                            // process had been killed since the restore, which is
+                            // not something onboarding should vary on.
+                            //
+                            // Recorded by setup's own write, though, the step is
+                            // not over: the file is in app-private storage and
+                            // the row offering to send it somewhere is the rest
+                            // of that step. Resuming at Done skipped it, and
+                            // the only copy of the backup stayed on the phone
+                            // whose loss it is for. A restore leaves no such
+                            // file, so the two are told apart by its presence.
+                            store.backupExportedAt() > 0L &&
+                                !setupBackupFile(this@MainActivity).exists() ->
+                                Onboarding(
+                                    step = Step.Done,
+                                    backupConfirmed = true,
+                                    displayName = name,
+                                    publishPayto = publish,
+                                )
+                            else ->
+                                Onboarding(
+                                    step = Step.Backup,
+                                    displayName = name,
+                                    publishPayto = publish,
+                                )
                         }
-                        // Ask about the backup too, rather than assuming it is
-                        // the thing still outstanding. A restore records one —
-                        // the file that got them here — and so does making one
-                        // at the last step, so this is answerable from the same
-                        // durable state the two checks above use.
-                        //
-                        // Assuming it left a restored phone being marched
-                        // through Trust and Backup to produce a bundle it did
-                        // not need, and could not leave setup until it did.
-                        // Whether that happened at all came down to whether the
-                        // process had been killed since the restore, which is
-                        // not something onboarding should vary on.
-                        ContactStore(this@MainActivity).backupExportedAt() > 0L ->
-                            Onboarding(
-                                step = Step.Done, backupConfirmed = true,
-                                // Finish writes this back; carry the stored
-                                // choice rather than the default.
-                                publishPayto = ContactStore(this@MainActivity)
-                                    .publishAddress(),
-                            )
-                        else -> Onboarding(step = Step.Backup)
                     }
                 )
             }
@@ -315,16 +346,15 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
                     OnboardingFlow(setup) { next ->
                         setup = next
                         if (next.step == Step.Done && next.backupConfirmed) {
-                            // The persona and wallet were persisted at creation
-                            // (so a rotation could not lose or regenerate them);
-                            // only the profile choices, which are settings and
-                            // not keys, are committed here — and the gate flag,
+                            // Everything the flow made is already in the stores
+                            // — the persona and wallet at creation, the name and
+                            // the address choice as the Profile step was
+                            // answered (a restore's, as the bundle was applied)
+                            // — so a rotation can neither lose nor regenerate
+                            // any of it. Only the gate flag is committed here,
                             // which is what actually opens the funded wallet.
-                            next.displayName?.let {
-                                NameStore(this@MainActivity).put(it)
-                            }
-                            ContactStore(this@MainActivity)
-                                .setPublishAddress(next.publishPayto)
+                            // Writing the choices back from `next` as well
+                            // wrote a rebuilt flow's default over the answer.
                             prefs.onboarded = true
                             onboarded = true
                         }

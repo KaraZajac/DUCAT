@@ -69,4 +69,5 @@ Quando termina, as duas cauções voltam inteiras e o valor vai para o condutor.
     <string name="onb_pin_done">Seu PIN está pronto. Será pedido antes de qualquer pagamento.</string>
     <string name="onb_pin_action">Escolher um PIN</string>
     <string name="onb_pin_next">Avançar</string>
+    <string name="onb_wallet_error">Não foi possível criar a carteira. Tente de novo.</string>
 </resources>

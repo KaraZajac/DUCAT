@@ -459,6 +459,14 @@ class ContactStore(context: Context) {
     fun publishAddress(): Boolean = prefs.getBoolean("publish_address", false)
 
     /**
+     * Whether anyone has answered that yet. Setup's Profile step offers the
+     * switch on and this store defaults it off, so [publishAddress] is only
+     * the person's answer once the step has been through — and a setup flow
+     * rebuilt by a rotation has to know which of the two it is showing.
+     */
+    fun publishAddressChosen(): Boolean = prefs.contains("publish_address")
+
+    /**
      * Whether this device publishes read watermarks (§16.16). **Off by
      * default**: when a message was read is behavioural data, and it leaves
      * the device by choice, not by installing a chat app.

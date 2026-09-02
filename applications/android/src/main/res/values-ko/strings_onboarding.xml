@@ -69,4 +69,5 @@
     <string name="onb_pin_done">PIN이 설정되었습니다. 결제 전에 항상 묻습니다.</string>
     <string name="onb_pin_action">PIN 정하기</string>
     <string name="onb_pin_next">다음</string>
+    <string name="onb_wallet_error">지갑을 만들 수 없습니다. 다시 시도해 주세요.</string>
 </resources>

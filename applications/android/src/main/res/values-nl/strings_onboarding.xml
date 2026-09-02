@@ -69,4 +69,5 @@ Is het klaar, dan komen beide borgen volledig terug en gaat de ritprijs naar de 
     <string name="onb_pin_done">Je pincode staat. Hij wordt voor elke betaling gevraagd.</string>
     <string name="onb_pin_action">Pincode kiezen</string>
     <string name="onb_pin_next">Verder</string>
+    <string name="onb_wallet_error">De wallet kon niet worden aangemaakt. Probeer het opnieuw.</string>
 </resources>
