@@ -29,8 +29,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.Publications
@@ -104,6 +102,12 @@ private fun ShelfBody(
     looking: String,
     refreshing: Boolean = false,
     onRefresh: (() -> Unit)? = null,
+    /** The node never attached, so no board was read. With rows from last
+     *  time on screen they stay; with none, this is said instead of
+     *  "nothing on this shelf yet" — an empty answer from a device that
+     *  could not ask is a confident lie, and the lie was the only thing a
+     *  phone still joining ever saw here. */
+    noNetwork: Boolean = false,
 ) {
     val context = LocalContext.current
     // One column of our own: the callers place this body in containers
@@ -136,13 +140,30 @@ private fun ShelfBody(
                 Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                CircularProgressIndicator(Modifier.height(18.dp))
+                // Sized, not merely bounded in height: with only the
+                // height set the ring kept its default width and drew at
+                // twice the line it sits beside.
+                CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
                 Spacer(Modifier.padding(6.dp))
                 Text(
                     looking,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+            }
+        } else if (rows.isEmpty() && noNetwork) {
+            Column(Modifier.padding(24.dp)) {
+                Text(
+                    stringResource(R.string.rent_search_no_network),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                if (onRefresh != null) {
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedButton(onClick = onRefresh) {
+                        Text(stringResource(R.string.rent_search_retry))
+                    }
+                }
             }
         } else if (rows.isEmpty()) {
             // Scrollable so the pull gesture works from the empty answer —
@@ -225,9 +246,24 @@ fun WorldwideShelf(cat: String, myLangOnly: Boolean) {
     var rows by remember { mutableStateOf<List<Publications.MarketRow>>(emptyList()) }
     var looked by remember { mutableStateOf(false) }
     var refreshing by remember { mutableStateOf(false) }
+    var noNetwork by remember { mutableStateOf(false) }
     var attempt by remember { mutableStateOf(0) }
+    // Set by the pull gesture, consumed by the effect: a pull keeps what is
+    // on screen under the pull's own spinner, where a new category or Try
+    // again starts over from the looking line. The spinner also has to be
+    // told it is refreshing — the pull box parks its indicator at the
+    // threshold on release and only puts it away when `isRefreshing` goes
+    // true and then false, so a pull that never said so sat there for good.
+    var pulled by remember { mutableStateOf(false) }
     LaunchedEffect(cat, myLangOnly, attempt) {
-        looked = false
+        noNetwork = false
+        if (pulled) {
+            pulled = false
+            refreshing = true
+        } else {
+            looked = false
+            refreshing = false
+        }
         val wanted = if (myLangOnly) lang else null
         // What this shelf said last time paints now; the live read replaces
         // it. The remembered choice is also what the background warmer keeps
@@ -244,22 +280,27 @@ fun WorldwideShelf(cat: String, myLangOnly: Boolean) {
             refreshing = true
         }
         if (withContext(Dispatchers.IO) { awaitAttached(120_000) }) {
+            // A read that threw is not an empty shelf: the remembered rows
+            // stay, the same way an unattached read leaves them alone.
             val fresh = withContext(Dispatchers.IO) {
                 runCatching {
                     Publications.browseMarket(context, cat, wanted)
-                }.getOrDefault(emptyList())
+                }.getOrNull()
             }
-            rows = fresh
+            if (fresh != null) rows = fresh
+        } else {
+            noNetwork = true
         }
         refreshing = false
         looked = true
     }
-    ShelfPull(refreshing = refreshing, onRefresh = { attempt++ }) {
+    ShelfPull(refreshing = refreshing, onRefresh = { pulled = true; attempt++ }) {
         ShelfBody(
             rows, looked,
             stringResource(R.string.market_looking, marketCategoryLabel(cat)),
             refreshing = refreshing,
             onRefresh = { attempt++ },
+            noNetwork = noNetwork,
         )
     }
 }
@@ -273,45 +314,59 @@ fun LocalShelf() {
     var looked by remember { mutableStateOf(false) }
     var progress by remember { mutableStateOf(0 to 9) }
     var noFix by remember { mutableStateOf(false) }
+    var noNetwork by remember { mutableStateOf(false) }
     var refreshing by remember { mutableStateOf(false) }
     // Bumped by Try again: a missing fix is often momentary — location
     // just switched on, or the phone found the sky — and a dead end with
     // no door back was the only place in the market you could get stuck.
     var attempt by remember { mutableStateOf(0) }
+    // Same pull handshake as the worldwide shelf: see the note there.
+    var pulled by remember { mutableStateOf(false) }
+    // All of it inside the effect. The read used to run on a MainScope of
+    // its own once the fix arrived, so leaving the shelf — or pulling to
+    // ask again — left the old job browsing nine boards in the background
+    // and writing its answer over the newer one's when it finished last.
     LaunchedEffect(attempt) {
         noFix = false
-        looked = false
-        grabFix(context) { fix ->
-            if (fix == null) {
-                noFix = true
-                looked = true
-                return@grabFix
-            }
-            MainScope().launch(Dispatchers.IO) {
-                val warm = runCatching {
-                    Publications.cachedLocalPubs(context, fix.first, fix.second)
-                }.getOrNull()
-                if (!warm.isNullOrEmpty()) {
-                    withContext(Dispatchers.Main) {
-                        rows = warm
-                        looked = true
-                        refreshing = true
-                    }
-                }
-                if (awaitAttached(120_000)) {
-                    val got = runCatching {
-                        Publications.browseLocalPubs(context, fix.first, fix.second) { k, n ->
-                            progress = k to n
-                        }
-                    }.getOrDefault(emptyList())
-                    withContext(Dispatchers.Main) { rows = got }
-                }
-                withContext(Dispatchers.Main) {
-                    looked = true
-                    refreshing = false
-                }
-            }
+        noNetwork = false
+        if (pulled) {
+            pulled = false
+            refreshing = true
+        } else {
+            looked = false
+            refreshing = false
         }
+        val fix = awaitFix(context)
+        if (fix == null) {
+            noFix = true
+            looked = true
+            refreshing = false
+            return@LaunchedEffect
+        }
+        val warm = withContext(Dispatchers.IO) {
+            runCatching {
+                Publications.cachedLocalPubs(context, fix.first, fix.second)
+            }.getOrNull()
+        }
+        if (!warm.isNullOrEmpty()) {
+            rows = warm
+            looked = true
+            refreshing = true
+        }
+        if (withContext(Dispatchers.IO) { awaitAttached(120_000) }) {
+            val got = withContext(Dispatchers.IO) {
+                runCatching {
+                    Publications.browseLocalPubs(context, fix.first, fix.second) { k, n ->
+                        progress = k to n
+                    }
+                }.getOrNull()
+            }
+            if (got != null) rows = got
+        } else {
+            noNetwork = true
+        }
+        looked = true
+        refreshing = false
     }
     if (noFix) {
         Column(Modifier.padding(24.dp)) {
@@ -327,12 +382,13 @@ fun LocalShelf() {
         }
         return
     }
-    ShelfPull(refreshing = refreshing, onRefresh = { attempt++ }) {
+    ShelfPull(refreshing = refreshing, onRefresh = { pulled = true; attempt++ }) {
         ShelfBody(
             rows, looked,
             stringResource(R.string.market_looking_local, progress.first, progress.second),
             refreshing = refreshing,
             onRefresh = { attempt++ },
+            noNetwork = noNetwork,
         )
     }
 }
