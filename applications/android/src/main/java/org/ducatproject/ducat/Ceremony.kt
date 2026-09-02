@@ -1657,20 +1657,23 @@ object Ceremony {
      * is already in and the offer is only ever an offer.
      */
     /**
-     * The rider's slice of a "give me back what I put in" proposal.
+     * The rider's slice when an escrow is unwound and each side takes back
+     * its own contribution.
      *
-     * Split out because it is the arithmetic the claim rests on, and
+     * Split out because it is the arithmetic the whole thing rests on, and
      * arithmetic that decides where money goes should be checkable without
      * a chain. [total] is the escrow's live balance, read at the moment of
      * proposing and never a caller's older scan: that is the whole point.
-     * The funder's own money is the rider's slice, so they ask for it
+     * The funder's own money is the rider's slice, so it is theirs
      * directly; everybody else is the residual, so their own share is what
      * is left once the rider's is taken out.
      *
-     * The case this exists for is the half-funded escrow, where [total] is
-     * one party's contribution. The case it must not break is the race —
-     * the other side funding between the button and this line — where
-     * asking for the whole escrow would be asking for their money too.
+     * **Both sides compute the same number**, which is what makes the
+     * refund an agreement rather than a claim. On a funded escrow it is the
+     * mutual refund; on a half-funded one it is the only contribution there
+     * is, coming home. And it is what keeps the race honest — the other
+     * side funding between the button and the proposal — where asking for
+     * the whole balance would be asking for their money too.
      */
     internal fun refundBack(o: JSONObject, total: Long): Long {
         val mine = mySharePxmr(o)
@@ -2441,20 +2444,31 @@ object Ceremony {
          *  destinations do not change; only who is asked to agree does. */
         toArbiter: Boolean = false,
         /**
-         * Ignore [riderBackPxmr] and ask for exactly what this device put
-         * in, leaving everything else where it belongs.
+         * Ignore [riderBackPxmr]: **unwind the escrow, each side taking
+         * back exactly what it put in.**
          *
-         * For the half-funded escrow, where one side has staked and the
-         * other has not come. "Everything back to me" is the wrong claim
-         * there and dangerous to make: the balance is read here, at the
-         * moment of proposing, and if the other side funded in the seconds
-         * between the button and this line, a claim for the whole escrow is
-         * a claim for their money too — arriving at an arbiter who has no
-         * way to know it was meant innocently. Asking for one's own
-         * contribution is the same claim in the case that matters and a
-         * harmless one in the case that raced.
+         * One split with two readings, and both are wanted. On a fully
+         * funded escrow it is the mutual refund — the deal called off by
+         * agreement, the fare and the payer's deposit home, the provider's
+         * stake home, nobody up and nobody down. On a half-funded one it is
+         * the stranded party's own money coming back, because the only
+         * contribution in there is theirs.
+         *
+         * Either side computes the identical split (see [refundBack]),
+         * which is what makes it an *agreement* rather than a claim: the
+         * proposer cannot express a better deal for themselves through this
+         * door, and the signer is looking at the same arithmetic they would
+         * have produced.
+         *
+         * It is also the safe shape for the stranded case. "Everything back
+         * to me" would be the obvious implementation and a dangerous one:
+         * the balance is read here, at the moment of proposing, so if the
+         * other side funded in the seconds between the button and this
+         * line, a claim for the whole escrow is a claim for their money —
+         * arriving at an arbiter with no way to know it was meant
+         * innocently.
          */
-        refundMineOnly: Boolean = false,
+        refundBoth: Boolean = false,
     ): Long {
         val o = load(context, idHex) ?: throw IllegalStateException("no such ceremony")
         // done → first proposal; releasing → retry or self-supersede;
@@ -2514,8 +2528,7 @@ object Ceremony {
         val total = runCatching {
             uniffi.ducat_mobile.escrowBalance(keys, nodeUrl, from.toULong()).toLong()
         }.getOrDefault(0L)
-        val back =
-            if (refundMineOnly) refundBack(o, total) else riderBackPxmr.coerceIn(0L, total)
+        val back = if (refundBoth) refundBack(o, total) else riderBackPxmr.coerceIn(0L, total)
         // Two shapes, one meaning: normally the rider's slice is fixed and
         // the driver is residual; when the driver's remainder could not
         // cover the fee, the driver's slice is fixed (possibly zero) and

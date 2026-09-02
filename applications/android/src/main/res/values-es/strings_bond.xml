@@ -75,6 +75,8 @@
     <string name="bond_will_retry">Se volverá a intentar automáticamente.</string>
     <string name="bond_release_asked">Ya lo has pedido. Seguirá intentándolo por su cuenta hasta que salga — puedes salir de la app.</string>
     <string name="bond_call_off">Cancelar el trato</string>
+    <string name="bond_refund_both">Cancelar y devolver a ambos</string>
+    <string name="bond_refund_both_note">Cada uno recibe exactamente lo que puso. Nada se mueve hasta que la otra parte acepte, y pulsarlo desde cualquier lado propone el mismo reparto.</string>
     <string name="bond_build_lost">Este teléfono ha perdido el hilo del depósito en construcción y no puede terminarlo. Cancélalo y empieza de nuevo: no se ha pagado nada.</string>
     <string name="bond_build_slow">Esto está tardando más de lo que debería. No se ha pagado nada: puedes cancelarlo y empezar de nuevo.</string>
     <string name="bond_retry_in">Se volverá a intentar automáticamente: quedan %1$s.</string>

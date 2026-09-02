@@ -74,6 +74,8 @@
     <string name="bond_will_retry">Akan mencoba lagi sendiri.</string>
     <string name="bond_release_asked">Anda sudah memintanya. Aplikasi terus mencoba sendiri sampai berhasil — Anda boleh menutupnya.</string>
     <string name="bond_call_off">Batalkan kesepakatan</string>
+    <string name="bond_refund_both">Batalkan — kembalikan ke keduanya</string>
+    <string name="bond_refund_both_note">Masing-masing menerima kembali persis yang ditaruhnya. Tidak ada yang berpindah sampai mereka setuju — dan ditekan dari sisi mana pun mengusulkan pembagian yang sama.</string>
     <string name="bond_build_lost">Ponsel ini kehilangan jejak escrow yang sedang dibuat dan tidak bisa menyelesaikannya. Batalkan dan mulai lagi — belum ada yang dibayar.</string>
     <string name="bond_build_slow">Ini memakan waktu lebih lama dari seharusnya. Belum ada yang dibayar — Anda bisa membatalkan dan mulai lagi.</string>
     <string name="bond_retry_in">Akan mencoba lagi sendiri — tersisa %1$s.</string>

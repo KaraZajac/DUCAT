@@ -77,6 +77,8 @@
     <string name="bond_will_retry">Спробує ще раз саме.</string>
     <string name="bond_release_asked">Ви вже це запросили. Застосунок сам продовжить спроби, доки не вдасться — його можна закрити.</string>
     <string name="bond_call_off">Скасувати угоду</string>
+    <string name="bond_refund_both">Скасувати — повернути обом</string>
+    <string name="bond_refund_both_note">Кожен отримує назад рівно те, що вніс. Нічого не рухається, доки інша сторона не погодиться, і з будь-якого боку це пропонує той самий поділ.</string>
     <string name="bond_build_lost">Цей телефон загубив нитку депозиту, що будувався, і не може його завершити. Скасуйте й почніть заново — нічого не сплачено.</string>
     <string name="bond_build_slow">Це триває довше, ніж мало б. Нічого не сплачено — можна скасувати й почати заново.</string>
     <string name="bond_retry_in">Спробує ще раз саме — лишилося %1$s.</string>

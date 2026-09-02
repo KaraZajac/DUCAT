@@ -75,6 +75,8 @@
     <string name="bond_will_retry">Het probeert het vanzelf opnieuw.</string>
     <string name="bond_release_asked">Je hebt dit al gevraagd. Het blijft vanzelf proberen tot het lukt — je kunt de app sluiten.</string>
     <string name="bond_call_off">Afblazen</string>
+    <string name="bond_refund_both">Afblazen — beiden terugbetalen</string>
+    <string name="bond_refund_both_note">Ieder krijgt precies terug wat hij heeft ingelegd. Er beweegt niets tot de ander akkoord gaat — en vanaf beide kanten stelt dit dezelfde verdeling voor.</string>
     <string name="bond_build_lost">Deze telefoon is de draad kwijt van het escrow dat werd opgebouwd en kan het niet afmaken. Blaas het af en begin opnieuw — er is niets betaald.</string>
     <string name="bond_build_slow">Dit duurt langer dan het hoort. Er is niets betaald — je kunt het afblazen en opnieuw beginnen.</string>
     <string name="bond_retry_in">Het probeert het vanzelf opnieuw — nog %1$s.</string>

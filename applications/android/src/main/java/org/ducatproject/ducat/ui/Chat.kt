@@ -3454,6 +3454,29 @@ private fun RideBondBanner(contact: Contact) {
         act(rideKey) { org.ducatproject.ducat.Ceremony.approveRideRelease(context, idHex) }
     }
     val signNow: () -> Unit = { pinAction = signReally }
+    /**
+     * **Called off by agreement, with everybody's money going home.**
+     *
+     * A deal that stops being a deal after the escrow is funded — the car
+     * never came, the room fell through, both of you simply changed your
+     * minds — had no name in this app. The machinery was always there: a
+     * split is any two numbers the pair agree on, and "each side takes back
+     * what it put in" is one of them. But reaching it meant knowing that,
+     * opening the counter field, and typing the right figure to the
+     * piconero, in the one state that offers a counter.
+     *
+     * It is a proposal, not an act: nothing moves until the other side
+     * signs, which is exactly what "both parties agree" means here. And
+     * either side gets the same arithmetic out of it, so there is no
+     * advantage to being the one who presses it — see Ceremony.refundBack.
+     */
+    val refundBothNow: () -> Unit = {
+        act(rideKey) {
+            org.ducatproject.ducat.Ceremony.proposeRideSplit(
+                context, idHex, 0L, refundBoth = true,
+            )
+        }
+    }
     // Saying no, and saying it to the other phone rather than only to this
     // one. Ceremony.callOff refuses once there is money in the escrow — that
     // one ends with two signatures or an arbiter, never with a local flag.
@@ -3541,7 +3564,7 @@ private fun RideBondBanner(contact: Contact) {
             onClick = {
                 act(rideKey) {
                     org.ducatproject.ducat.Ceremony.proposeRideSplit(
-                        context, idHex, 0L, refundMineOnly = true,
+                        context, idHex, 0L, refundBoth = true,
                     )
                 }
             },
@@ -3555,7 +3578,7 @@ private fun RideBondBanner(contact: Contact) {
                 onClick = {
                     act(rideKey) {
                         org.ducatproject.ducat.Ceremony.proposeRideSplit(
-                            context, idHex, 0L, toArbiter = true, refundMineOnly = true,
+                            context, idHex, 0L, toArbiter = true, refundBoth = true,
                         )
                     }
                 },
@@ -3565,6 +3588,19 @@ private fun RideBondBanner(contact: Contact) {
         } else {
             BondNote(stringResource(R.string.bond_stranded_no_arbiter))
         }
+    }
+
+    /** The mutual refund, offered wherever a funded escrow has not yet
+     *  been released. */
+    @Composable
+    fun RefundBoth() {
+        Spacer(Modifier.height(6.dp))
+        OutlinedButton(
+            onClick = refundBothNow,
+            enabled = !busy,
+            modifier = Modifier.fillMaxWidth().height(40.dp),
+        ) { Text(stringResource(R.string.bond_refund_both)) }
+        BondNote(stringResource(R.string.bond_refund_both_note))
     }
 
     /**
@@ -3702,6 +3738,12 @@ private fun RideBondBanner(contact: Contact) {
                 if (reservation) R.string.res_settle else R.string.bond_complete_ride,
             ),
             onAction = proposeNow,
+            // The free slot on the one screen where somebody is deciding
+            // what to do with a funded escrow. Settling is the ordinary
+            // answer; calling it off with everyone made whole is the other
+            // one, and it had no name anywhere before.
+            secondary = stringResource(R.string.bond_refund_both),
+            onSecondary = refundBothNow,
         )
         // A split on the table, from either side.
         stage == "release_pending" -> {
@@ -3959,6 +4001,7 @@ private fun RideBondBanner(contact: Contact) {
                 stage == "done" && rider -> {
                     BondLine(spin = false, text = stringResource(
                         if (reservation) R.string.res_secured else R.string.bond_fare_secured))
+                    RefundBoth()
                     if (ride.optInt("arbiterIdx") != 0) {
                         Spacer(Modifier.height(4.dp))
                         OutlinedButton(
@@ -4071,6 +4114,7 @@ private fun RideBondBanner(contact: Contact) {
                         modifier = Modifier.fillMaxWidth().height(44.dp),
                     ) { Text(stringResource(
                         if (reservation) R.string.res_settle else R.string.bond_complete_ride)) }
+                    RefundBoth()
                     // The address, the door code, where the keys are. It has
                     // been sitting on the listing since it was written, never
                     // on a board, waiting for exactly this moment — and until

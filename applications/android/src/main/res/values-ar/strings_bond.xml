@@ -79,6 +79,8 @@
     <string name="bond_will_retry">سيحاول مرة أخرى من تلقاء نفسه.</string>
     <string name="bond_release_asked">لقد طلبت ذلك بالفعل. سيستمر في المحاولة من تلقاء نفسه حتى ينجح — يمكنك مغادرة التطبيق.</string>
     <string name="bond_call_off">إلغاء الاتفاق</string>
+    <string name="bond_refund_both">إلغاء — استرداد للطرفين</string>
+    <string name="bond_refund_both_note">يستعيد كل منكما بالضبط ما وضعه. لا شيء يتحرك حتى يوافقا — والضغط عليه من أي جانب يقترح التقسيم نفسه.</string>
     <string name="bond_build_lost">فقد هذا الهاتف تتبُّع الضمان قيد الإنشاء ولا يمكنه إكماله. ألغِ العملية وابدأ من جديد — لم يُدفع شيء.</string>
     <string name="bond_build_slow">هذا يستغرق وقتًا أطول مما ينبغي. لم يُدفع شيء — يمكنك الإلغاء والبدء من جديد.</string>
     <string name="bond_retry_in">سيحاول مرة أخرى من تلقاء نفسه — بقي %1$s.</string>

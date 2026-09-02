@@ -163,6 +163,21 @@ fun main() {
 
         val short = org.ducatproject.ducat.Ceremony.refundBack(ride(true), stake)
         check("nobody may claim more than the escrow holds", short == stake)
+
+        // The same split read the other way: a funded escrow unwound by
+        // agreement. Both sides must compute the identical number, or the
+        // "refund" would mean something different depending on who pressed
+        // it — and one of the two would be proposing a deal in their own
+        // favour under a button that says it is even.
+        val pot = fare + stake + stake
+        val fromRider = org.ducatproject.ducat.Ceremony.refundBack(ride(true), pot)
+        val fromDriver = org.ducatproject.ducat.Ceremony.refundBack(ride(false), pot)
+        check("a mutual refund is the same split from either side",
+            fromRider == fromDriver, formatXmr(fromRider))
+        check("the payer gets their fare and their stake",
+            fromRider == fare + stake, formatXmr(fromRider))
+        check("and the provider is left exactly their own stake",
+            pot - fromRider == stake, formatXmr(pot - fromRider))
     }
 
     println(if (failures == 0) "STAKETEST OK" else "STAKETEST FAILED ($failures)")

@@ -74,6 +74,8 @@
     <string name="bond_will_retry">ระบบจะลองใหม่ให้เอง</string>
     <string name="bond_release_asked">คุณขอไปแล้ว ระบบจะลองเองเรื่อย ๆ จนกว่าจะสำเร็จ — ปิดแอปได้</string>
     <string name="bond_call_off">ยกเลิกข้อตกลง</string>
+    <string name="bond_refund_both">ยกเลิก — คืนเงินทั้งสองฝ่าย</string>
+    <string name="bond_refund_both_note">แต่ละฝ่ายได้คืนเท่าที่ใส่ไว้พอดี ไม่มีอะไรขยับจนกว่าอีกฝ่ายจะตกลง และกดจากฝั่งไหนก็เสนอการแบ่งแบบเดียวกัน</string>
     <string name="bond_build_lost">เครื่องนี้ตามการสร้างเอสโครว์ไม่ทันแล้วและทำต่อไม่ได้ ยกเลิกแล้วเริ่มใหม่ — ยังไม่มีการจ่ายเงินใด ๆ</string>
     <string name="bond_build_slow">ใช้เวลานานกว่าที่ควร ยังไม่มีการจ่ายเงิน — ยกเลิกแล้วเริ่มใหม่ได้</string>
     <string name="bond_retry_in">ระบบจะลองใหม่ให้เอง — เหลืออีก %1$s</string>

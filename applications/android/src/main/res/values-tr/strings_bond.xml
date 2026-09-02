@@ -75,6 +75,8 @@
     <string name="bond_will_retry">Kendiliğinden tekrar deneyecek.</string>
     <string name="bond_release_asked">Bunu zaten istediniz. Geçene kadar kendi kendine denemeye devam eder — uygulamadan çıkabilirsiniz.</string>
     <string name="bond_call_off">Anlaşmayı iptal et</string>
+    <string name="bond_refund_both">İptal et — ikisine de iade</string>
+    <string name="bond_refund_both_note">Her biriniz tam olarak yatırdığınızı geri alır. Karşı taraf kabul edene kadar hiçbir şey hareket etmez — ve hangi taraftan basılırsa basılsın aynı paylaşımı önerir.</string>
     <string name="bond_build_lost">Bu telefon kurulmakta olan emanetin izini kaybetti ve tamamlayamıyor. İptal edip yeniden başlayın — hiçbir ödeme yapılmadı.</string>
     <string name="bond_build_slow">Bu olması gerekenden uzun sürüyor. Hiçbir ödeme yapılmadı — iptal edip yeniden başlayabilirsiniz.</string>
     <string name="bond_retry_in">Kendiliğinden tekrar deneyecek — %1$s kaldı.</string>

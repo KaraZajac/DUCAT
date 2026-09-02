@@ -75,6 +75,8 @@
     <string name="bond_will_retry">Riproverà da solo.</string>
     <string name="bond_release_asked">L\'hai già richiesto. Continua a riprovare da solo finché non passa: puoi uscire dall\'app.</string>
     <string name="bond_call_off">Annulla l\'accordo</string>
+    <string name="bond_refund_both">Annulla — rimborso a entrambi</string>
+    <string name="bond_refund_both_note">Ognuno riprende esattamente quanto ha versato. Nulla si muove finché l\'altra parte non accetta, e premerlo da un lato o dall\'altro propone la stessa divisione.</string>
     <string name="bond_build_lost">Questo telefono ha perso il filo del deposito in costruzione e non può finirlo. Annulla e ricomincia: non è stato pagato nulla.</string>
     <string name="bond_build_slow">Sta impiegando più del dovuto. Non è stato pagato nulla: puoi annullare e ricominciare.</string>
     <string name="bond_retry_in">Riproverà da solo — mancano %1$s.</string>

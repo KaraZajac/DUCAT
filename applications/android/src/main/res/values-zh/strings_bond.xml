@@ -74,6 +74,8 @@
     <string name="bond_will_retry">它会自动重试。</string>
     <string name="bond_release_asked">你已经提出请求了。它会自己不断重试直到成功 — 可以退出应用。</string>
     <string name="bond_call_off">取消这笔交易</string>
+    <string name="bond_refund_both">取消 — 双方退款</string>
+    <string name="bond_refund_both_note">双方各自拿回自己投入的部分。在对方同意之前不会有任何转账，而且从任一方按下都会提出同样的分配。</string>
     <string name="bond_build_lost">这台手机丢失了正在建立的托管的线索，无法完成。请取消后重新开始 — 尚未支付任何款项。</string>
     <string name="bond_build_slow">这比预期久。尚未支付任何款项 — 你可以取消后重新开始。</string>
     <string name="bond_retry_in">它会自动重试——还需 %1$s。</string>

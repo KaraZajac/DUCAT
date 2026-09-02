@@ -75,6 +75,8 @@
     <string name="bond_will_retry">It will try again on its own.</string>
     <string name="bond_release_asked">You have asked for this. It keeps trying on its own until it goes through — you can leave the app.</string>
     <string name="bond_call_off">Call it off</string>
+    <string name="bond_refund_both">Call it off — refund both</string>
+    <string name="bond_refund_both_note">Each of you gets back exactly what you put in. Nothing moves until they agree — and pressing this from either side proposes the same split.</string>
     <string name="bond_build_lost">This phone lost track of the escrow being built — it cannot finish it. Call it off and start again; nothing has been paid.</string>
     <string name="bond_build_slow">This is taking longer than it should. Nothing has been paid — you can call it off and start again.</string>
     <string name="bond_retry_in">It will try again on its own — %1$s left.</string>

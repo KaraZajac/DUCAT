@@ -75,6 +75,8 @@
     <string name="bond_will_retry">خودش دوباره تلاش می‌کند.</string>
     <string name="bond_release_asked">شما این را درخواست کرده‌اید. خودش تا زمان انجام شدن تلاش را ادامه می‌دهد — می‌توانید از برنامه خارج شوید.</string>
     <string name="bond_call_off">لغو معامله</string>
+    <string name="bond_refund_both">لغو — بازگشت به هر دو</string>
+    <string name="bond_refund_both_note">هر کدام دقیقاً همان چیزی را پس می‌گیرد که گذاشته است. تا وقتی طرف مقابل موافقت نکند چیزی جابه‌جا نمی‌شود — و از هر طرف که فشرده شود همان تقسیم را پیشنهاد می‌دهد.</string>
     <string name="bond_build_lost">این تلفن رشتهٔ ساخت امانت را گم کرده و نمی‌تواند آن را تمام کند. لغو کنید و از نو شروع کنید — چیزی پرداخت نشده است.</string>
     <string name="bond_build_slow">این بیش از حد طول کشیده است. چیزی پرداخت نشده — می‌توانید لغو کنید و از نو شروع کنید.</string>
     <string name="bond_retry_in">خودش دوباره تلاش می‌کند — %1$s باقی مانده است.</string>

@@ -75,6 +75,8 @@
     <string name="bond_will_retry">Vai tentar de novo sozinho.</string>
     <string name="bond_release_asked">Já pediu isto. Continua a tentar sozinho até passar — pode sair da aplicação.</string>
     <string name="bond_call_off">Cancelar o acordo</string>
+    <string name="bond_refund_both">Cancelar — devolver a ambos</string>
+    <string name="bond_refund_both_note">Cada um recebe de volta exatamente o que pôs. Nada se move até a outra parte concordar — e premido de qualquer lado propõe a mesma divisão.</string>
     <string name="bond_build_lost">Este telemóvel perdeu o fio do depósito em construção e não o consegue terminar. Cancele e comece de novo — não foi pago nada.</string>
     <string name="bond_build_slow">Isto está a demorar mais do que devia. Não foi pago nada — pode cancelar e começar de novo.</string>
     <string name="bond_retry_in">Vai tentar de novo sozinho — faltam %1$s.</string>

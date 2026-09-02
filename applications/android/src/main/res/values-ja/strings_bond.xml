@@ -74,6 +74,8 @@
     <string name="bond_will_retry">自動でもう一度試します。</string>
     <string name="bond_release_asked">すでに依頼されています。通るまで自動で試み続けます — アプリを閉じてかまいません。</string>
     <string name="bond_call_off">この取引をやめる</string>
+    <string name="bond_refund_both">取りやめる — 双方に返金</string>
+    <string name="bond_refund_both_note">それぞれが入れた分をそのまま取り戻します。相手が同意するまで何も動きません。どちらの側から押しても同じ配分を提案します。</string>
     <string name="bond_build_lost">この端末は作成中のエスクローを見失いました。完了できません。取り消してやり直してください — まだ何も支払われていません。</string>
     <string name="bond_build_slow">想定より時間がかかっています。まだ何も支払われていません — 取りやめてやり直せます。</string>
     <string name="bond_retry_in">自動でもう一度試します — 残り %1$s。</string>
