@@ -44,6 +44,10 @@
     <!-- Retractions (kind 5) -->
     <string name="chat_you_withdrew">Retiraste un mensaje</string>
     <string name="chat_they_withdrew">%1$s retiró un mensaje</string>
+    <string name="chat_you_withdrew_bill">Retiraste una cuenta</string>
+    <string name="chat_they_withdrew_bill">%1$s retiró una cuenta</string>
+    <string name="chat_you_withdrew_call">Retiraste una llamada</string>
+    <string name="chat_they_withdrew_call">%1$s retiró una llamada</string>
     <string name="chat_you_declined">Rechazaste</string>
     <string name="chat_they_declined">%1$s rechazó</string>
     <string name="chat_retract_with_quote">%1$s — “%2$s”</string>

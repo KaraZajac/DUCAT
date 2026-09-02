@@ -44,6 +44,10 @@
     <!-- Retractions (kind 5) -->
     <string name="chat_you_withdrew">메시지를 회수했어요</string>
     <string name="chat_they_withdrew">%1$s님이 메시지를 회수했어요</string>
+    <string name="chat_you_withdrew_bill">청구서를 회수했어요</string>
+    <string name="chat_they_withdrew_bill">%1$s님이 청구서를 회수했어요</string>
+    <string name="chat_you_withdrew_call">통화를 회수했어요</string>
+    <string name="chat_they_withdrew_call">%1$s님이 통화를 회수했어요</string>
     <string name="chat_you_declined">거절했어요</string>
     <string name="chat_they_declined">%1$s님이 거절했어요</string>
     <string name="chat_retract_with_quote">%1$s — “%2$s”</string>

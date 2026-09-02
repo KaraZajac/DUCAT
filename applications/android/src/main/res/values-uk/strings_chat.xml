@@ -44,6 +44,10 @@
     <!-- Retractions (kind 5) -->
     <string name="chat_you_withdrew">Повідомлення відкликано тобою</string>
     <string name="chat_they_withdrew">Повідомлення відкликано: %1$s</string>
+    <string name="chat_you_withdrew_bill">Рахунок відкликано тобою</string>
+    <string name="chat_they_withdrew_bill">Рахунок відкликано: %1$s</string>
+    <string name="chat_you_withdrew_call">Дзвінок відкликано тобою</string>
+    <string name="chat_they_withdrew_call">Дзвінок відкликано: %1$s</string>
     <string name="chat_you_declined">Відхилено тобою</string>
     <string name="chat_they_declined">Відхилено: %1$s</string>
     <string name="chat_retract_with_quote">%1$s — “%2$s”</string>

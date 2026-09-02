@@ -44,6 +44,10 @@
     <!-- Retractions (kind 5) -->
     <string name="chat_you_withdrew">你撤回了一条消息</string>
     <string name="chat_they_withdrew">%1$s 撤回了一条消息</string>
+    <string name="chat_you_withdrew_bill">你撤回了一张账单</string>
+    <string name="chat_they_withdrew_bill">%1$s 撤回了一张账单</string>
+    <string name="chat_you_withdrew_call">你撤回了一个来电</string>
+    <string name="chat_they_withdrew_call">%1$s 撤回了一个来电</string>
     <string name="chat_you_declined">你拒绝了</string>
     <string name="chat_they_declined">%1$s 拒绝了</string>
     <string name="chat_retract_with_quote">%1$s — “%2$s”</string>

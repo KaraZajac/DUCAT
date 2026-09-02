@@ -44,6 +44,10 @@
     <!-- Retractions (kind 5) -->
     <string name="chat_you_withdrew">メッセージを取り消しました</string>
     <string name="chat_they_withdrew">%1$sがメッセージを取り消しました</string>
+    <string name="chat_you_withdrew_bill">請求を取り消しました</string>
+    <string name="chat_they_withdrew_bill">%1$sが請求を取り消しました</string>
+    <string name="chat_you_withdrew_call">通話を取り消しました</string>
+    <string name="chat_they_withdrew_call">%1$sが通話を取り消しました</string>
     <string name="chat_you_declined">断りました</string>
     <string name="chat_they_declined">%1$sが断りました</string>
     <string name="chat_retract_with_quote">%1$s — 「%2$s」</string>

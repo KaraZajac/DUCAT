@@ -44,6 +44,10 @@
     <!-- Retractions (kind 5) -->
     <string name="chat_you_withdrew">Kamu menarik sebuah pesan</string>
     <string name="chat_they_withdrew">%1$s menarik sebuah pesan</string>
+    <string name="chat_you_withdrew_bill">Kamu menarik sebuah tagihan</string>
+    <string name="chat_they_withdrew_bill">%1$s menarik sebuah tagihan</string>
+    <string name="chat_you_withdrew_call">Kamu menarik sebuah panggilan</string>
+    <string name="chat_they_withdrew_call">%1$s menarik sebuah panggilan</string>
     <string name="chat_you_declined">Kamu menolak</string>
     <string name="chat_they_declined">%1$s menolak</string>
     <string name="chat_retract_with_quote">%1$s — “%2$s”</string>

@@ -1073,9 +1073,28 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     // A retraction is a remark about the thread, not a message
                     // in it: one quiet centred line, no bubble and no buttons —
                     // the bill or offer it names greys out where it stands.
+                    //
+                    // Named by what it takes back. "Sam withdrew a message —
+                    // ‘That bill for USD 4.33 is cancelled — nothing to pay.’"
+                    // read as Sam unsaying the cancellation, the opposite of
+                    // what happened, because the quote is the retraction's own
+                    // words and a *message* is the one thing a visible
+                    // withdrawal never names (BillAnswers.quiet). A bill is a
+                    // bill, a ring is a call; only a target this phone cannot
+                    // find keeps the generic word.
                     val retractLine = if (m.reOwn) {
-                        if (m.outgoing) stringResource(R.string.chat_you_withdrew)
-                        else stringResource(R.string.chat_they_withdrew, isolate(c.displayName()))
+                        val took = messages.referent(m)?.kind
+                        stringResource(
+                            when {
+                                took == 1 && m.outgoing -> R.string.chat_you_withdrew_bill
+                                took == 1 -> R.string.chat_they_withdrew_bill
+                                took == 14 && m.outgoing -> R.string.chat_you_withdrew_call
+                                took == 14 -> R.string.chat_they_withdrew_call
+                                m.outgoing -> R.string.chat_you_withdrew
+                                else -> R.string.chat_they_withdrew
+                            },
+                            isolate(c.displayName()),
+                        )
                     } else {
                         if (m.outgoing) stringResource(R.string.chat_you_declined)
                         else stringResource(R.string.chat_they_declined, isolate(c.displayName()))

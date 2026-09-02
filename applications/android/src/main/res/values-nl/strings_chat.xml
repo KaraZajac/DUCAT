@@ -44,6 +44,10 @@
     <!-- Retractions (kind 5) -->
     <string name="chat_you_withdrew">Je hebt een bericht ingetrokken</string>
     <string name="chat_they_withdrew">%1$s heeft een bericht ingetrokken</string>
+    <string name="chat_you_withdrew_bill">Je hebt een rekening ingetrokken</string>
+    <string name="chat_they_withdrew_bill">%1$s heeft een rekening ingetrokken</string>
+    <string name="chat_you_withdrew_call">Je hebt een oproep ingetrokken</string>
+    <string name="chat_they_withdrew_call">%1$s heeft een oproep ingetrokken</string>
     <string name="chat_you_declined">Je hebt afgewezen</string>
     <string name="chat_they_declined">%1$s heeft afgewezen</string>
     <string name="chat_retract_with_quote">%1$s — “%2$s”</string>

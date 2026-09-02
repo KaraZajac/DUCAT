@@ -44,6 +44,10 @@
     <!-- Retractions (kind 5) -->
     <string name="chat_you_withdrew">پیامی را پس گرفتی</string>
     <string name="chat_they_withdrew">%1$s پیامی را پس گرفت</string>
+    <string name="chat_you_withdrew_bill">صورت‌حسابی را پس گرفتی</string>
+    <string name="chat_they_withdrew_bill">%1$s صورت‌حسابی را پس گرفت</string>
+    <string name="chat_you_withdrew_call">تماسی را پس گرفتی</string>
+    <string name="chat_they_withdrew_call">%1$s تماسی را پس گرفت</string>
     <string name="chat_you_declined">رد کردی</string>
     <string name="chat_they_declined">%1$s رد کرد</string>
     <string name="chat_retract_with_quote">%1$s — «%2$s»</string>

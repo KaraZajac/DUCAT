@@ -44,6 +44,10 @@
     <!-- Retractions (kind 5) -->
     <string name="chat_you_withdrew">سحبت رسالة</string>
     <string name="chat_they_withdrew">سحب %1$s رسالة</string>
+    <string name="chat_you_withdrew_bill">سحبت فاتورة</string>
+    <string name="chat_they_withdrew_bill">سحب %1$s فاتورة</string>
+    <string name="chat_you_withdrew_call">سحبت مكالمة</string>
+    <string name="chat_they_withdrew_call">سحب %1$s مكالمة</string>
     <string name="chat_you_declined">رفضت</string>
     <string name="chat_they_declined">رفض %1$s</string>
     <string name="chat_retract_with_quote">%1$s — “%2$s”</string>

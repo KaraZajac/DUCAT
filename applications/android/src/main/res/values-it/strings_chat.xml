@@ -44,6 +44,10 @@
     <!-- Ritiri (kind 5) -->
     <string name="chat_you_withdrew">Hai ritirato un messaggio</string>
     <string name="chat_they_withdrew">%1$s ha ritirato un messaggio</string>
+    <string name="chat_you_withdrew_bill">Hai ritirato un conto</string>
+    <string name="chat_they_withdrew_bill">%1$s ha ritirato un conto</string>
+    <string name="chat_you_withdrew_call">Hai ritirato una chiamata</string>
+    <string name="chat_they_withdrew_call">%1$s ha ritirato una chiamata</string>
     <string name="chat_you_declined">Hai rifiutato</string>
     <string name="chat_they_declined">%1$s ha rifiutato</string>
     <string name="chat_retract_with_quote">%1$s — “%2$s”</string>

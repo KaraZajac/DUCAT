@@ -44,6 +44,10 @@
     <!-- Retractions (kind 5) -->
     <string name="chat_you_withdrew">Bạn đã rút lại một tin nhắn</string>
     <string name="chat_they_withdrew">%1$s đã rút lại một tin nhắn</string>
+    <string name="chat_you_withdrew_bill">Bạn đã rút lại một hóa đơn</string>
+    <string name="chat_they_withdrew_bill">%1$s đã rút lại một hóa đơn</string>
+    <string name="chat_you_withdrew_call">Bạn đã rút lại một cuộc gọi</string>
+    <string name="chat_they_withdrew_call">%1$s đã rút lại một cuộc gọi</string>
     <string name="chat_you_declined">Bạn đã từ chối</string>
     <string name="chat_they_declined">%1$s đã từ chối</string>
     <string name="chat_retract_with_quote">%1$s — “%2$s”</string>
