@@ -347,6 +347,28 @@ object Mailbox {
         // nowhere left to write and this is the only way to find out.
         val already = nodeDhtGet(scanned.inboxKey, 1u, true)
         if (already != null && already.isNotEmpty()) {
+            // Whose reply? If it is this device's, the card was claimed here
+            // and the thread it opened still exists — the right answer is that
+            // thread, not "somebody got there first". Observed on the board:
+            // tapping the same kayak twice (once before the first claim had
+            // opened the chat, once after coming back to the results) told the
+            // asker a stranger had just asked, and to look again in a minute.
+            // The reply names the persona that made it, and the outbox it was
+            // minted with is the one the contact record still holds — or, if
+            // a newer card from the same person has been claimed since, the
+            // persona in the card's details is the same and finds the same
+            // thread.
+            val mine = runCatching { parseContactDetails(already) }.getOrNull()
+                ?.takeIf { personas.allHexes().contains(it.persona.toHexString()) }
+            if (mine != null) {
+                val known = store.all().firstOrNull { it.myOutbox == mine.outboxKey }
+                    ?: runCatching { nodeDhtGet(scanned.inboxKey, 0u, true) }.getOrNull()
+                        ?.let { raw -> runCatching { parseContactDetails(raw) }.getOrNull() }
+                        ?.let { theirs ->
+                            store.all().firstOrNull { it.personaHex == theirs.persona.toHexString() }
+                        }
+                if (known != null) throw CardAlreadyMine(known)
+            }
             // Typed, because callers have to tell this apart from "the network
             // is not up yet" and from a genuinely malformed card, and matching
             // on English prose to do it would break in every other language.
@@ -1759,7 +1781,19 @@ object Mailbox {
      * (`contacts_reply_replay`), so the screen can say it in the reader's own
      * language instead of repeating an exception message.
      */
-    class CardAlreadyUsed : IllegalStateException("card already claimed")
+    open class CardAlreadyUsed : IllegalStateException("card already claimed")
+
+    /**
+     * The card's one reply is this device's: it was claimed here before, and
+     * [contact] is the thread that claim opened.
+     *
+     * A subclass rather than a return, so a caller that has not been taught
+     * the difference still sees a spent card — a driver's second tap on a
+     * hail must not send the rider a second offer — while the scan, the
+     * link, the address book and the board can open the conversation the
+     * person already has instead of blaming a stranger for it.
+     */
+    class CardAlreadyMine(val contact: Contact) : CardAlreadyUsed()
 
     /**
      * The card is this device's own.

@@ -268,6 +268,10 @@ fun QrHub(
                                             runCatching {
                                                 val card = uniffi.ducat_mobile.readContactCard(text)
                                                 Mailbox.claimCard(context, card, null)
+                                            }.recoverCatching { e ->
+                                                // Scanned this one before: the
+                                                // thread it opened is the answer.
+                                                (e as? Mailbox.CardAlreadyMine)?.contact ?: throw e
                                             }
                                         }
                                         claiming = false

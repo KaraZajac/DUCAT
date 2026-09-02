@@ -331,6 +331,13 @@ internal fun AddContactSheet(onDismiss: () -> Unit, onAdded: () -> Unit, store: 
                                 // also what tells the issuer their card is spent.
                                 runCatching {
                                     Mailbox.claimCard(context, s, petname.ifBlank { null })
+                                }.recoverCatching { e ->
+                                    // Already in the book from this very card:
+                                    // keep the name typed here, and call it
+                                    // added — it is.
+                                    val mine = (e as? Mailbox.CardAlreadyMine)?.contact ?: throw e
+                                    ContactStore(context).setPetname(mine.personaHex, petname.trim())
+                                    mine
                                 }
                             }
                             adding = false

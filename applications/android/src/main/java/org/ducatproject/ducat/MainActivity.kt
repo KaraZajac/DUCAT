@@ -611,6 +611,13 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                             runCatching {
                                 val card = uniffi.ducat_mobile.readContactCard(uri)
                                 Mailbox.claimCard(context, card, petname)
+                            }.recoverCatching { e ->
+                                // The same link opened twice: the thread the
+                                // first one made is the answer, under the name
+                                // just chosen if one was.
+                                val mine = (e as? Mailbox.CardAlreadyMine)?.contact ?: throw e
+                                petname?.let { ContactStore(context).setPetname(mine.personaHex, it) }
+                                mine
                             }
                         }.onSuccess { overlay = Overlay.Chat(it) }
                             .onFailure {

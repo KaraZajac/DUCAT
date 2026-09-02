@@ -16,6 +16,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
@@ -139,9 +140,11 @@ private fun RentSearchScreen(
     // Compose does not warn about, it throws. The first tap on "Sell
     // something" took the whole app down.
     //
-    // Returning rather than stacking: the search's state lives in this
-    // function and survives not emitting its own Dialog, so closing the form
-    // comes back to the results already read rather than searching again.
+    // Returning rather than stacking. What is remembered above this line
+    // survives the form; what is remembered below it — the attempt counter
+    // and the effect keyed on it — is disposed and made afresh, so closing
+    // the form starts the search over (see the note on `found` below, which
+    // is where that restart once bit).
     composing?.let { k ->
         androidx.compose.ui.window.Dialog(
             onDismissRequest = { composing = null },
@@ -369,8 +372,19 @@ private fun RentSearchScreen(
                 //
                 // Outside the chips' condition: a screen pinned to one noun
                 // has no chips and still has something to offer.
+                //
+                // Not while an ask is in flight. Opening the form takes this
+                // function down the early return above, which disposes
+                // everything remembered after it — the coroutine scope the
+                // ask runs in included. The claim itself is blocking work on
+                // an IO thread and completes regardless, so the thread was
+                // opened; but the line that clears `busy` and the one that
+                // opens the chat are after the suspension and never ran.
+                // Coming back from the form found every card greyed out for
+                // good, and the person never told they had already asked.
                 if (found != null && stalled == null) {
                     OutlinedButton(
+                        enabled = !busy,
                         onClick = { composing = if (showing == 0) Listings.KIND_SALE else showing },
                         modifier = Modifier.padding(bottom = 8.dp).height(40.dp),
                     ) {
@@ -558,6 +572,14 @@ private fun RentSearchScreen(
                                                     )
                                                 }
                                                 c
+                                            }.recoverCatching { e ->
+                                                // Asked from this phone already:
+                                                // the card's reply is ours and
+                                                // the thread it opened is still
+                                                // here. Go to it, and say
+                                                // nothing again — the question
+                                                // is already in it.
+                                                (e as? Mailbox.CardAlreadyMine)?.contact ?: throw e
                                             }
                                         }
                                         busy = false
@@ -933,11 +955,19 @@ private fun ListingCard(info: RentalInfo, busy: Boolean, onAsk: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+            // Numbers say what they count. A car's line ended "Hybrid LE · 5"
+            // and a room's began "1 · 2 · 28 m²" — the seats, bedrooms and
+            // sleeping places, which the form labels and the card did not.
+            //
+            // And what the owner typed is isolated from what this phone
+            // says: the make, model, trim and tags come off a public board,
+            // and a right-to-left one beside a localised "automatic" would
+            // otherwise reorder the whole line.
             val specs = buildList {
                 if (vehicle) {
                     info.year?.let { add(it.toString()) }
-                    info.make?.let { add(it) }
-                    info.model?.let { add(it) }
+                    info.make?.let { add(isolate(it)) }
+                    info.model?.let { add(isolate(it)) }
                     info.gearbox?.let {
                         add(stringResource(
                             if (it.toInt() == 1) R.string.rent_manual else R.string.rent_automatic,
@@ -951,11 +981,15 @@ private fun ListingCard(info: RentalInfo, busy: Boolean, onAsk: () -> Unit) {
                             else -> R.string.rent_petrol
                         }))
                     }
-                    info.trim?.let { add(it) }
-                    info.seats?.let { add(Amounts.count(it.toLong())) }
+                    info.trim?.let { add(isolate(it)) }
+                    info.seats?.let {
+                        add(pluralStringResource(R.plurals.rent_seats_n, it.toInt(), it.toInt()))
+                    }
                 } else if (place) {
-                    info.rooms?.let { add(Amounts.count(it.toLong())) }
-                    info.sleeps?.let { add(Amounts.count(it.toLong())) }
+                    info.rooms?.let {
+                        add(pluralStringResource(R.plurals.rent_rooms_n, it.toInt(), it.toInt()))
+                    }
+                    info.sleeps?.let { add(stringResource(R.string.rent_sleeps_n, it.toInt())) }
                     info.sizeM2?.let { add(stringResource(R.string.rent_size_m2, it.toInt())) }
                     info.subtype?.let {
                         add(stringResource(
@@ -970,7 +1004,7 @@ private fun ListingCard(info: RentalInfo, busy: Boolean, onAsk: () -> Unit) {
                     // Sport category read "Whole place".
                     info.subtype?.let { add(stringResource(categoryLabel(kind, it.toInt()))) }
                 }
-                addAll(info.features)
+                addAll(info.features.map { isolate(it) })
                 // Only when there is more than one. Somebody deciding whether
                 // to ask wants to know they are not competing for the last
                 // one — and for the listing that *is* one thing, which is
