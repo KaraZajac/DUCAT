@@ -828,13 +828,36 @@ object Ledger {
         return BusinessSummary(by, tax, outC, outP)
     }
 
+    /**
+     * One cell of the statement, safe to hand to a spreadsheet.
+     *
+     * **A spreadsheet reads a cell beginning `=`, `+`, `-` or `@` as a
+     * formula**, and two of the statement's columns are somebody else's
+     * words: the counterparty is their card's asserted name unless the
+     * reader renamed them, and the note is the text of their message. So a
+     * contact could call themselves `=HYPERLINK(…)` and have it run when a
+     * shop opened its own books — the same trick [isolate] exists to stop
+     * on a screen, arriving by a file instead.
+     *
+     * Quoting is not the fix: Excel parses a quoted cell that begins with
+     * `=` as a formula anyway. A leading apostrophe is, and it is what a
+     * spreadsheet strips again on the way in. Only text comes through here
+     * — every amount in the statement is written by its own formatter, so
+     * nothing numeric is touched.
+     */
+    internal fun csvCell(v: String): String {
+        val safe =
+            if (v.firstOrNull() in listOf('=', '+', '-', '@', '\t', '\r')) "'" + v else v
+        return if (safe.any { it == ',' || it == '"' || it == '\n' || it == '\r' }) {
+            "\"" + safe.replace("\"", "\"\"") + "\""
+        } else {
+            safe
+        }
+    }
+
     fun exportCsv(context: android.content.Context): String {
         fun xmr(pxmr: Long): String =
             java.math.BigDecimal(pxmr).movePointLeft(12).toPlainString()
-        fun esc(v: String): String =
-            if (v.any { it == ',' || it == '"' || it == '\n' || it == '\r' })
-                "\"" + v.replace("\"", "\"\"") + "\""
-            else v
         val fmt = java.time.format.DateTimeFormatter.ISO_INSTANT
         val sb = StringBuilder()
         sb.append("date_utc,direction,counterparty,note,items,amount_xmr,fee_xmr,")
@@ -843,11 +866,11 @@ object Ledger {
         // column only adds up in the order the money moved.
         for (e in build(context).asReversed()) {
             if (e.pending) continue
-            sb.append(esc(fmt.format(java.time.Instant.ofEpochSecond(e.timestamp)))).append(',')
+            sb.append(csvCell(fmt.format(java.time.Instant.ofEpochSecond(e.timestamp)))).append(',')
             sb.append(if (e.direction == Direction.Sent) "out" else "in").append(',')
-            sb.append(esc(e.counterparty ?: "")).append(',')
-            sb.append(esc(e.note ?: "")).append(',')
-            sb.append(esc(e.items.joinToString("; ") {
+            sb.append(csvCell(e.counterparty ?: "")).append(',')
+            sb.append(csvCell(e.note ?: "")).append(',')
+            sb.append(csvCell(e.items.joinToString("; ") {
                 "${it.description} ${xmr(it.amountPxmr)}"
             })).append(',')
             sb.append(xmr(e.amountPxmr)).append(',')
@@ -857,7 +880,7 @@ object Ledger {
             // The tax-time filter, in the export the accountant actually
             // reads: yes when this send went into a donate-card thread.
             sb.append(if (e.donation) "yes" else "").append(',')
-            sb.append(esc(e.txid)).append(',')
+            sb.append(csvCell(e.txid)).append(',')
             sb.append(e.height).append(',')
             sb.append(xmr(e.balanceAfterPxmr)).append('\n')
         }

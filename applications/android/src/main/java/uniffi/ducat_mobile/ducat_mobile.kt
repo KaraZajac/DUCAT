@@ -1824,7 +1824,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_monero_scan_view_only() != 42386.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_monero_send() != 9105.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_send() != 56657.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_spent() != 3803.toShort()) {
@@ -7852,6 +7852,22 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
          * spend, because that choice is §17.2's whole subject — one output pays one
          * person at a time, and a wallet that silently consolidates has decided
          * something about the user's privacy on their behalf.
+         * Spend notes to an address.
+         *
+         * **The wording of the errors in here is load-bearing, and not only for a
+         * reader.** The phone decides whether a failed send freed its notes or
+         * still owns them by matching the *prefix* of what this returns: see
+         * `Wallet.builtNothing` and `neverLeftThePhone` in Wallet2.kt. Everything
+         * raised before the relay says "nothing was built, the notes are free
+         * again"; the relay's own "signed, but no node confirmed taking it" says
+         * the opposite, because a node may have taken the bytes and the intent has
+         * to keep its claim or a retry pays twice.
+         *
+         * So: rewording an error here is a behaviour change on the phone. An
+         * unrecognised text is read as "it may have gone", which is the safe
+         * direction — the cost is notes pinned for half an hour and a retry told
+         * "not enough" — but it is a cost, and it happens silently. Add the new
+         * prefix to that list in the same commit.
          */
     @Throws(MoneroException::class) fun `moneroSend`(`nodeUrl`: kotlin.String, `spendKeyHex`: kotlin.String, `inputBlobs`: List<kotlin.ByteArray>, `toAddress`: kotlin.String, `amountPxmr`: kotlin.ULong, `priority`: kotlin.UInt): SendResult {
             return FfiConverterTypeSendResult.lift(
