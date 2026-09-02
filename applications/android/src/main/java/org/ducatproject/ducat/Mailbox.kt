@@ -476,15 +476,19 @@ object Mailbox {
      * already confirmed, and the one repair that exists for a flood that
      * died was silently off for exactly the messages after a fresh card.
      * A pending slot is the old record's bytes under the old chain, and
-     * cannot be delivered into the new one.
+     * cannot be delivered into the new one. And their read watermark is a
+     * count of the old log: what it says about the rows already sent is
+     * frozen onto them ([ContactStore.retireOutbox]) before the rebuilt
+     * contact, which carries no watermark yet, replaces it.
      */
     private fun mergeRebuilt(store: ContactStore, built: Contact): Contact {
-        var newOutbox = false
+        var retired: Contact? = null
         val c = store.merge(built.personaHex) { cur ->
-            newOutbox = cur != null && cur.myOutbox != built.myOutbox
+            retired = cur?.takeIf { it.myOutbox != built.myOutbox }
             keepCounters(built, cur)
         }
-        if (newOutbox) {
+        retired?.let {
+            store.retireOutbox(c.personaHex, it.theirReadUpTo)
             store.setLastSlotVerified(c.personaHex, -1L)
             store.setSlotFixTries(c.personaHex, 0)
             store.clearPendingSlot(c.personaHex)

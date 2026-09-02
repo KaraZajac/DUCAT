@@ -2222,7 +2222,12 @@ private fun Bubble(
                     // nothing about them, and a message that stays on one tick
                     // for good is the honest picture of a reader who has not
                     // told us — not a claim that they have not read it.
-                    val read = theirReadUpTo != null && theirReadUpTo > m.seq
+                    //
+                    // A row from a log since retired keeps the answer it had
+                    // when the log was: the watermark now counts a different
+                    // numbering (StoredMessage.readByThem).
+                    val read = m.readByThem
+                        ?: (theirReadUpTo != null && theirReadUpTo > m.seq)
                     Text(
                         if (read) "✓✓" else "✓",
                         style = MaterialTheme.typography.labelSmall,

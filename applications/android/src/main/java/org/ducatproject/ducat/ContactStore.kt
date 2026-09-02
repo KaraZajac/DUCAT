@@ -696,6 +696,28 @@ class ContactStore(context: Context) {
         bump()
     } }
 
+    /**
+     * Our outbox for this contact is being replaced (a re-claim): settle
+     * the read state of everything sent on the old one while the old
+     * watermark still describes it. [readUpTo] is their claim against the
+     * log being retired; rows already frozen by an earlier retirement are
+     * left as they are.
+     */
+    fun retireOutbox(personaHex: String, readUpTo: Long?) { synchronized(lock) {
+        val thread = thread(personaHex)
+        if (thread.none { it.outgoing && it.readByThem == null }) return@synchronized
+        val arr = JSONArray()
+        thread.forEach {
+            arr.put(
+                if (it.outgoing && it.readByThem == null) {
+                    it.copy(readByThem = readUpTo != null && it.seq < readUpTo).toJson()
+                } else it.toJson(),
+            )
+        }
+        prefs.edit().putString("thread_$personaHex", arr.toString()).apply()
+        bump()
+    } }
+
     /** A receipt, kept apart from the conversation it arrived in. */
     data class ReceiptRecord(
         val txidHex: String?,
@@ -1833,6 +1855,19 @@ data class StoredMessage(
     /** §16.21: a call's door, hex — route blob and 8-byte id. */
     val callRoute: String? = null,
     val callId: String? = null,
+    /**
+     * Whether they had read this by the time the log it was sent on was
+     * retired — frozen at that moment, for outgoing rows only.
+     *
+     * Null while the log is live: the second tick then comes from the
+     * contact's [Contact.theirReadUpTo] against [seq]. That comparison
+     * stops meaning anything once a re-claim mints a new outbox, because
+     * the thread keeps the old log's rows and the new log numbers from
+     * zero again: a fresh watermark of 2 put one tick back on every old
+     * message from the third onward, and read as the other side having
+     * un-read a month of conversation. See [ContactStore.retireOutbox].
+     */
+    val readByThem: Boolean? = null,
 ) {
     fun toJson(): JSONObject = JSONObject().apply {
         put("out", outgoing); put("seq", seq); put("body", body)
@@ -1875,6 +1910,7 @@ data class StoredMessage(
         callRoute?.let { r -> put("call_route", r) }
         callId?.let { i -> put("call_id", i) }
         if (deadLetter) put("dead", true)
+        readByThem?.let { put("read", it) }
     }
 
     companion object {
@@ -1926,6 +1962,7 @@ data class StoredMessage(
             pubSwarmDigest = o.optStringOrNull("pub_swarm_dig"),
             callRoute = o.optStringOrNull("call_route"),
             callId = o.optStringOrNull("call_id"),
+            readByThem = if (o.has("read")) o.getBoolean("read") else null,
         )
     }
 }
