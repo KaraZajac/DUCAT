@@ -38,6 +38,10 @@ object Mailbox {
      *  window the node will not take. */
     private const val SLOT_FIX_GIVE_UP = 3
 
+    /** Failed poll-clock deliveries of one late slot ([lateSlot]) before it
+     *  is left for the next send to replay. An offline pass is not one. */
+    private const val LATE_SLOT_GIVE_UP = 5
+
     /** Persisted, not in-memory: the patience clock reset on every app
      *  restart, and a phone that restarts every few minutes (this one does)
      *  made a dead letter immortal — sixteen observed minutes on a ten-minute
@@ -1100,6 +1104,87 @@ object Mailbox {
         return ring
     }
 
+    /**
+     * Deliver the slot an interrupted send left behind, on the poll clock.
+     *
+     * A send commits its row and counters before it touches the network
+     * ([sendLocked]'s ordering), so a node that was not attached — a phone
+     * just out of a tunnel, a bar whose wifi dropped — leaves the message in
+     * the thread marked undelivered and its bytes in the pending slot. Until
+     * now those bytes waited for the *next message to the same person*,
+     * which is fine mid-conversation and not fine at all for the last thing
+     * a shop says to a customer: a bill withdrawn while the network was
+     * down reached them only if the bar happened to write to them again,
+     * and a receipt for cash across the counter never went at all. The poll
+     * clock runs whether or not anybody has anything to say, so the late
+     * slot rides it.
+     *
+     * Same lock as a send, same bytes, same seq — never a re-seal — and the
+     * head the interrupted send never published, so the reader learns the
+     * seq exists. Returns true when a slot went out. Throws what the network
+     * throws; [poll] reads a `TryAgain` here as it does anywhere else.
+     */
+    private fun flushPending(context: Context, personaHex: String): Boolean =
+        synchronized(sendLocks.getOrPut(personaHex) { Any() }) {
+            val store = ContactStore(context)
+            val (pseq, pbytes) = store.pendingSlot(personaHex) ?: return false
+            val c = store.all().firstOrNull { it.personaHex == personaHex } ?: return false
+            if (pseq >= c.outSeq) {
+                // Numbered in a log that no longer exists: a re-claim started
+                // the counter over under it. mergeRebuilt drops the slot on
+                // the way through; one written since its read is the same
+                // case, and replaying it would put a retired log's bytes
+                // under the new log's number.
+                store.clearPendingSlot(personaHex)
+                return false
+            }
+            if (c.myOutboxOwnerSecret.isEmpty()) return false
+            nodeDhtOpen(c.myOutbox, c.myOutboxOwnerPublic, c.myOutboxOwnerSecret)
+            val ring = writeSlotClamped(store, c, pseq.toULong(), pbytes, c.myRing.toUInt())
+            // The counter already stands past the slot; the head just says so.
+            nodeDhtSet(
+                c.myOutbox, 0u,
+                buildLogHead(
+                    c.outSeq.toULong(),
+                    topUpIfLow(store, c.myOutbox),
+                    if (store.readReceipts()) c.inSeq.toULong() else null,
+                    ring.takeIf { it != 8u },
+                ),
+            )
+            store.markDelivered(personaHex, pseq)
+            store.clearPendingSlot(personaHex)
+            DucatLog.i(TAG, "delivered seq $pseq to ${c.displayName()} " +
+                "left over from an interrupted send")
+            true
+        }
+
+    /**
+     * [flushPending] with a give-up, for the poll loop: a record the node
+     * keeps refusing — a restored phone with no local copy to sign from —
+     * would otherwise cost every pass a round trip for the same refusal.
+     * Counted per seq, so the next interrupted send starts from zero.
+     */
+    private fun lateSlot(context: Context, c: Contact) {
+        val (pseq, _) = ContactStore(context).pendingSlot(c.personaHex) ?: return
+        val p = waitPrefs(context)
+        val key = c.personaHex
+        val tries = if (p.getLong("lateq_$key", -1L) == pseq) p.getInt("late_$key", 0) else 0
+        if (tries >= LATE_SLOT_GIVE_UP) return
+        try {
+            flushPending(context, key)
+            p.edit().remove("late_$key").remove("lateq_$key").apply()
+        } catch (e: Exception) {
+            if (isOffline(e)) throw e
+            p.edit().putInt("late_$key", tries + 1).putLong("lateq_$key", pseq).apply()
+            DucatLog.w(
+                TAG,
+                "late slot seq $pseq to ${c.displayName()}: ${e.message}" +
+                    if (tries + 1 >= LATE_SLOT_GIVE_UP) " — leaving it for the next send"
+                    else " (try ${tries + 1})",
+            )
+        }
+    }
+
     /** Where a fetched attachment lives, named by its ciphertext hash. */
     fun attachmentFile(context: Context, ctHashHex: String): java.io.File =
         java.io.File(attachmentDir(context), ctHashHex)
@@ -1631,6 +1716,10 @@ object Mailbox {
         var got = 0
         for (c in store.all()) {
             got += try {
+                // Ours first: a slot an interrupted send left behind is
+                // older than anything this pass will read, and the other
+                // side may be waiting on it.
+                lateSlot(context, c)
                 pollOne(context, store, c, personas.ownerHexOf(c))
             } catch (e: Exception) {
                 if (isOffline(e)) {

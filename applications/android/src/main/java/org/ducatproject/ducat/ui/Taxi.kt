@@ -371,7 +371,11 @@ private fun MeterScreen(rides: RideStore, personaHex: String) {
                     val r = withContext(Dispatchers.IO) {
                         runCatching {
                             val store = TabStore(context)
-                            val tab = store.open(personaHex, "taxi")
+                            // Resumed, not opened again: a fare whose bill
+                            // never left the phone goes back to an open tab
+                            // (TabStore.settle), and the second press bills
+                            // through it rather than leaving an orphan.
+                            val tab = store.openOrResume(personaHex, "taxi")
                             store.settle(store.mutate(tab.id) { it.copy(lines = lines) }!!)
                         }
                     }

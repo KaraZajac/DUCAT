@@ -39,6 +39,13 @@
     <string name="bartab_cancelled_note">Đã hủy — khách đã được báo trong cuộc trò chuyện.</string>
     <string name="bartab_paid_oob_note">Trả ngoài DUCAT ✓ — đã gửi biên nhận, không kèm giao dịch.</string>
     <string name="bartab_paid_note">Đã trả ✓ — đã gửi biên nhận.</string>
+    <string name="bartab_bill_pending">Đã lập hóa đơn, nhưng hóa đơn vẫn còn trên điện thoại này — sẽ gửi đi ngay khi có mạng trở lại. Đã thanh toán bằng cách khác? Ghi nhận tại đây:</string>
+    <string name="bartab_bill_unsent">Hóa đơn chưa bao giờ đến được với họ: cuộc trò chuyện đã bị đặt lại trước khi hóa đơn kịp gửi đi. Hủy và lập lại hóa đơn, hoặc ghi nhận tại đây nếu đã thanh toán bằng cách khác:</string>
+    <string name="bartab_cancelled_pending">Đã hủy — họ chưa được báo. Thông báo sẽ gửi đi ngay khi điện thoại này tìm thấy mạng.</string>
+    <string name="bartab_cancelled_unsent">Đã hủy — nhưng thông báo chưa bao giờ rời khỏi điện thoại này, và giờ không thể gửi được nữa. Hãy nói với họ trong cuộc trò chuyện, nếu không họ vẫn có thể trả hóa đơn này.</string>
+    <string name="bartab_paid_oob_pending">Trả ngoài DUCAT ✓ — biên nhận vẫn còn trên điện thoại này. Sẽ gửi đi ngay khi có mạng trở lại.</string>
+    <string name="bartab_paid_oob_unsent">Trả ngoài DUCAT ✓ — nhưng không gửi được biên nhận.</string>
+    <string name="bartab_send_receipt">Gửi biên nhận</string>
     <string name="bartab_remove_from_book">Xóa khỏi sổ tab</string>
     <string name="bartab_back_to_tabs">Về danh sách tab</string>
     <!-- What the payer reads on the bill and the receipt. Written in

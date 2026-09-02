@@ -2191,15 +2191,17 @@ private fun Bubble(
                 // writes the slot — the sealed bytes are committed from that
                 // moment, so a re-seal is not allowed — which means a failed
                 // write leaves a bubble that has not gone anywhere and used to
-                // look exactly like one that had. It goes out with the next
-                // message to this contact, and the mark clears itself then.
+                // look exactly like one that had. It goes out on the next
+                // poll that finds the network (Mailbox.lateSlot), or with the
+                // next message to this contact, whichever comes first, and
+                // the mark clears itself then.
                 //
                 // Ahead of the ticks and instead of them: a message that has
                 // not left cannot have been read, so showing both would be
                 // saying two things at once.
                 //
-                // "Yet" is a promise the next send keeps — unless the log it
-                // was numbered in has been retired by a re-claim since, which
+                // "Yet" is a promise the poll keeps — unless the log it was
+                // numbered in has been retired by a re-claim since, which
                 // dropped the pending slot with it (Mailbox.mergeRebuilt): no
                 // send will ever carry it. The frozen read mark is what says a
                 // row is from a retired log.

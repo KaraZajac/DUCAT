@@ -40,6 +40,13 @@
     <string name="bartab_cancelled_note">Cancelled — they were told in the conversation.</string>
     <string name="bartab_paid_oob_note">Paid outside DUCAT ✓ — receipt sent, no transaction attached.</string>
     <string name="bartab_paid_note">Paid ✓ — receipt sent.</string>
+    <string name="bartab_bill_pending">Billed, but the bill is still on this phone — it goes out as soon as the network is back. If it was settled some other way, say so here:</string>
+    <string name="bartab_bill_unsent">The bill never reached them: the conversation was reset before it could go. Cancel it and bill them again, or say so here if it was settled another way:</string>
+    <string name="bartab_cancelled_pending">Cancelled — they have not been told yet. The notice goes out as soon as this phone finds the network.</string>
+    <string name="bartab_cancelled_unsent">Cancelled — but the notice never left this phone, and it cannot go now. Tell them in the conversation, or they may still pay this bill.</string>
+    <string name="bartab_paid_oob_pending">Paid outside DUCAT ✓ — the receipt is still on this phone. It goes out as soon as the network is back.</string>
+    <string name="bartab_paid_oob_unsent">Paid outside DUCAT ✓ — but the receipt could not be sent.</string>
+    <string name="bartab_send_receipt">Send the receipt</string>
     <string name="bartab_remove_from_book">Remove from tab book</string>
     <string name="bartab_back_to_tabs">Back to tabs</string>
     <!-- What the payer reads on the bill and the receipt. Written in

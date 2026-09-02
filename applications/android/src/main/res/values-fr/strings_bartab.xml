@@ -40,6 +40,13 @@
     <string name="bartab_cancelled_note">Annulée — la personne a été prévenue dans la conversation.</string>
     <string name="bartab_paid_oob_note">Payée hors DUCAT ✓ — reçu envoyé, aucune transaction attachée.</string>
     <string name="bartab_paid_note">Payée ✓ — reçu envoyé.</string>
+    <string name="bartab_bill_pending">Facturée, mais l\'addition est encore sur ce téléphone : elle partira dès que le réseau sera de retour. Réglée autrement ? Dites-le ici :</string>
+    <string name="bartab_bill_unsent">L\'addition ne leur est jamais parvenue : la conversation a été réinitialisée avant qu\'elle ne parte. Annulez-la et refacturez, ou indiquez ici si elle a été réglée autrement :</string>
+    <string name="bartab_cancelled_pending">Annulée — ils ne sont pas encore prévenus. L\'avis partira dès que ce téléphone retrouvera le réseau.</string>
+    <string name="bartab_cancelled_unsent">Annulée — mais l\'avis n\'a jamais quitté ce téléphone et ne peut plus partir. Prévenez-les dans la conversation, sinon ils risquent de payer cette addition.</string>
+    <string name="bartab_paid_oob_pending">Payée hors DUCAT ✓ — le reçu est encore sur ce téléphone. Il partira dès que le réseau sera de retour.</string>
+    <string name="bartab_paid_oob_unsent">Payée hors DUCAT ✓ — mais le reçu n\'a pas pu être envoyé.</string>
+    <string name="bartab_send_receipt">Envoyer le reçu</string>
     <string name="bartab_remove_from_book">Retirer du carnet d\'ardoises</string>
     <string name="bartab_back_to_tabs">Retour aux ardoises</string>
     <!-- What the payer reads on the bill and the receipt. Written in

@@ -40,6 +40,13 @@
     <string name="bartab_cancelled_note">Cancelada — a pessoa foi avisada na conversa.</string>
     <string name="bartab_paid_oob_note">Pago fora do DUCAT ✓ — recibo enviado, sem transação anexada.</string>
     <string name="bartab_paid_note">Pago ✓ — recibo enviado.</string>
+    <string name="bartab_bill_pending">Cobrado, mas a conta ainda está neste telefone: sai assim que a rede voltar. Foi acertada de outra forma? Diga aqui:</string>
+    <string name="bartab_bill_unsent">A conta nunca chegou a eles: a conversa foi reiniciada antes de ela sair. Cancele e cobre de novo, ou indique aqui se foi acertada de outra forma:</string>
+    <string name="bartab_cancelled_pending">Cancelada — eles ainda não foram avisados. O aviso sai assim que este telefone encontrar a rede.</string>
+    <string name="bartab_cancelled_unsent">Cancelada — mas o aviso nunca saiu deste telefone e já não pode sair. Diga a eles na conversa, ou podem acabar pagando esta conta.</string>
+    <string name="bartab_paid_oob_pending">Pago fora do DUCAT ✓ — o recibo ainda está neste telefone. Sai assim que a rede voltar.</string>
+    <string name="bartab_paid_oob_unsent">Pago fora do DUCAT ✓ — mas o recibo não pôde ser enviado.</string>
+    <string name="bartab_send_receipt">Enviar o recibo</string>
     <string name="bartab_remove_from_book">Remover do livro de comandas</string>
     <string name="bartab_back_to_tabs">Voltar às comandas</string>
     <!-- What the payer reads on the bill and the receipt. Written in

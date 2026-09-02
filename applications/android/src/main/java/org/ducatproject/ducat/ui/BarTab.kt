@@ -39,6 +39,30 @@ private const val TAG = "BarTab"
 private val CLOSED_STATES = setOf("paid", "paid_oob", "cancelled")
 
 /**
+ * Whether one of this tab's own messages has left the phone.
+ *
+ * A send commits its row before the network (Mailbox.sendLocked), so a row
+ * can sit undelivered for as long as the phone is out of range — `Later`,
+ * and the poll delivers it — or for ever, when the log it was numbered in
+ * has been retired by a re-claim since: the frozen read mark is what says
+ * so (StoredMessage.readByThem), and that is `Never`.
+ */
+private enum class Sent { Yes, Later, Never }
+
+private fun sentState(m: org.ducatproject.ducat.StoredMessage): Sent = when {
+    m.delivered -> Sent.Yes
+    m.readByThem == null -> Sent.Later
+    else -> Sent.Never
+}
+
+/** What the thread says about a tab: see [TabDetail]. */
+private data class TabSaid(
+    val refused: Boolean = false,
+    val bill: Sent = Sent.Yes,
+    val word: Sent = Sent.Yes,
+)
+
+/**
  * The tab book (§15.11): one running account per customer, settled as one bill.
  *
  * The evening's shape: open a tab when someone orders their first drink — a
@@ -179,8 +203,15 @@ fun BarTabScreen(
                 Spacer(Modifier.weight(1f))
                 // Local bookkeeping only: the receipts already live in the
                 // threads, which is where the record of the night belongs.
-                TextButton(onClick = { done.forEach { store.delete(it.id) } }) {
-                    Text(stringResource(R.string.bartab_clear), style = MaterialTheme.typography.labelMedium)
+                // The bar's own tabs; a kiosk order or a subscription reads
+                // its tab after it closes (RunningTab.keptElsewhere), and
+                // clearing those put a paid coffee back to "awaiting" on the
+                // kiosk and lost a paid subscriber their issue.
+                val clearable = done.filterNot { it.keptElsewhere }
+                if (clearable.isNotEmpty()) {
+                    TextButton(onClick = { clearable.forEach { store.delete(it.id) } }) {
+                        Text(stringResource(R.string.bartab_clear), style = MaterialTheme.typography.labelMedium)
+                    }
                 }
             }
             Card(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
@@ -335,7 +366,11 @@ private fun OpenTab(onOpened: (RunningTab) -> Unit, onBack: () -> Unit) {
                 }.getOrNull()
             } ?: continue
             DucatLog.i(TAG, "tab opened by ${fresh.displayName()}")
-            onOpened(store.open(fresh.personaHex, "bar"))
+            // Resumed if they already have one running: a regular who
+            // scanned the code instead of being tapped on the list — or was
+            // tapped, then scanned — must not end the night with two tabs
+            // and two bills.
+            onOpened(store.openOrResume(fresh.personaHex, "bar"))
             break
         }
     }
@@ -390,7 +425,7 @@ private fun OpenTab(onOpened: (RunningTab) -> Unit, onBack: () -> Unit) {
                     regulars.forEach { c ->
                         Row(
                             Modifier.fillMaxWidth()
-                                .clickable { onOpened(store.open(c.personaHex, "bar")) }
+                                .clickable { onOpened(store.openOrResume(c.personaHex, "bar")) }
                                 .padding(horizontal = 16.dp, vertical = 10.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
@@ -432,26 +467,27 @@ private fun OpenTab(onOpened: (RunningTab) -> Unit, onBack: () -> Unit) {
  * cancellation goes out exactly as before (§15.11: telling them imperfectly
  * still beats not telling them). A Retract carries no amount; core refuses
  * one that does.
+ *
+ * Through [TabStore.close], like the plain cancellation: a retract that
+ * never left the phone puts the tab back to billed and throws, because the
+ * failure used to be logged and walked away from — the screen said
+ * "cancelled" over a bill the customer could still pay. Null when the tab
+ * was not there to cancel, or not billed and unpaid any more.
  */
 internal fun cancelTabWithRetract(
     context: android.content.Context,
     store: TabStore,
     tab: RunningTab,
-) {
+): RunningTab? {
     val contacts = ContactStore(context)
-    val contact = contacts.all().firstOrNull { it.personaHex == tab.personaHex }
     // The stored seq when the tab has one; the amount match only for tabs
     // billed before settle recorded it.
     val billSeq = tab.billSeq.takeIf { it >= 0 }
         ?: contacts.thread(tab.personaHex)
             .lastOrNull { it.outgoing && it.kind == 1 && it.amountPxmr == tab.settledTotal }
             ?.seq
-    if (contact == null || billSeq == null) {
-        store.cancel(tab)
-        return
-    }
-    store.mutate(tab.id) { it.copy(state = "cancelled") }
-    runCatching {
+        ?: return store.cancel(tab)
+    return store.close(tab, "cancelled", revert = true) { contact ->
         Mailbox.send(
             context, contact,
             context.getString(
@@ -460,8 +496,9 @@ internal fun cancelTabWithRetract(
             ),
             kind = 5, reSeq = billSeq, reOwn = true,
         )
-    }.onFailure { DucatLog.w(TAG, "cancel retract: ${it.message}") }
-    DucatLog.i(TAG, "${tab.origin} tab cancelled (${formatXmr(tab.settledTotal)} XMR)")
+    }?.also {
+        DucatLog.i(TAG, "${tab.origin} tab cancelled (${formatXmr(tab.settledTotal)} XMR)")
+    }
 }
 
 /** One tab: its lines, and the one button that bills it. */
@@ -480,6 +517,30 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
         }
     }
     val name = contact?.displayName() ?: "${tab.personaHex.take(8)}…"
+    // What the thread says about this tab's own messages — whether the bill
+    // was refused, and whether the bill or the closing word has actually
+    // left the phone. Read off the main thread, and again on every store
+    // change: the poll delivers a late slot and the mark clears itself.
+    val v by ContactStore.changes.collectAsState()
+    val said by produceState(TabSaid(), tab.id, tab.state, tab.wordSeq, v) {
+        value = withContext(Dispatchers.IO) {
+            val thread = ContactStore(context).thread(tab.personaHex)
+            val bill = tab.billIn(thread)
+            TabSaid(
+                refused = bill?.let { (it.seq to it.timestamp) in billAnswers(thread).refused } ?: false,
+                bill = bill?.let { sentState(it) } ?: Sent.Yes,
+                word = when {
+                    tab.wordSeq == RunningTab.WORD_UNSENT -> Sent.Never
+                    tab.wordSeq < 0 -> Sent.Yes
+                    // The newest row at that seq, the rule markDelivered
+                    // ticks by: a re-claim restarts the numbering and the
+                    // thread keeps the old log's rows.
+                    else -> thread.lastOrNull { it.outgoing && it.seq == tab.wordSeq }
+                        ?.let { sentState(it) } ?: Sent.Yes
+                },
+            )
+        }
+    }
 
     BackHandler(onBack = onBack)
 
@@ -621,7 +682,9 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                     else Text(stringResource(R.string.bartab_settle_bill, Amounts.show(context, tab.totalPxmr + standingTax).primary))
                 }
                 Text(
-                    stringResource(R.string.bartab_settle_hint, name),
+                    // Fenced: a name that runs the other way took the rest
+                    // of the sentence with it.
+                    stringResource(R.string.bartab_settle_hint, isolate(name)),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.outline,
                     modifier = Modifier.padding(horizontal = 24.dp, vertical = 6.dp),
@@ -651,25 +714,36 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                     )
                 }
             }
-            "settled" -> Column(Modifier.padding(horizontal = 16.dp)) {
+            // Their payment is in the network. The till's own words for it:
+            // the receipt sends itself when the chain agrees, and the two
+            // exits below are gone — cancelling now would strand a payment
+            // that is already on its way (TabStore.close refuses it too),
+            // and "paid outside" would receipt the wrong rail.
+            "settled" -> if (tab.seenTx != null) Column(Modifier.padding(horizontal = 24.dp)) {
+                Text(
+                    stringResource(R.string.pos_payment_seen),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.ducat.changePending,
+                )
+                Text(
+                    stringResource(R.string.pos_payment_settling),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            } else Column(Modifier.padding(horizontal = 16.dp)) {
                 // The same news the list carries, on the screen somebody opens
                 // to decide what to do about it. Promising a receipt "when the
                 // payment lands" to a counter whose customer has refused the
-                // bill is the wrong sentence twice over.
-                val v by ContactStore.changes.collectAsState()
-                val wasRefused by produceState(false, tab.id, v) {
-                    value = withContext(Dispatchers.IO) {
-                        val thread = ContactStore(context).thread(tab.personaHex)
-                        // Same bill as the list rows find.
-                        tab.billIn(thread)
-                            ?.let { (it.seq to it.timestamp) in billAnswers(thread).refused }
-                            ?: false
-                    }
-                }
+                // bill is the wrong sentence twice over — and to one whose
+                // bill is still on this phone, the wrong one once more.
                 Text(
                     stringResource(
-                        if (wasRefused) R.string.bartab_declined_hint
-                        else R.string.bartab_billed_hint,
+                        when {
+                            said.refused -> R.string.bartab_declined_hint
+                            said.bill == Sent.Yes -> R.string.bartab_billed_hint
+                            said.bill == Sent.Later -> R.string.bartab_bill_pending
+                            else -> R.string.bartab_bill_unsent
+                        },
                     ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -724,18 +798,53 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                     modifier = Modifier.fillMaxWidth().height(48.dp),
                 ) { Text(stringResource(R.string.bartab_cancel_bill), color = MaterialTheme.colorScheme.error) }
             }
+            // "They were told" only once the notice has left the phone. Until
+            // the poll delivers it, the tab is closed and they are not — and
+            // a notice numbered in a log a re-claim has since retired will
+            // never go: nothing for it but to say so in the conversation.
             "cancelled" -> Text(
-                stringResource(R.string.bartab_cancelled_note),
+                stringResource(
+                    when (said.word) {
+                        Sent.Yes -> R.string.bartab_cancelled_note
+                        Sent.Later -> R.string.bartab_cancelled_pending
+                        Sent.Never -> R.string.bartab_cancelled_unsent
+                    },
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 24.dp),
             )
-            "paid_oob" -> Text(
-                stringResource(R.string.bartab_paid_oob_note),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.ducat.settled,
-                modifier = Modifier.padding(horizontal = 24.dp),
-            )
+            "paid_oob" -> Column(Modifier.padding(horizontal = 24.dp)) {
+                Text(
+                    stringResource(
+                        when (said.word) {
+                            Sent.Yes -> R.string.bartab_paid_oob_note
+                            Sent.Later -> R.string.bartab_paid_oob_pending
+                            Sent.Never -> R.string.bartab_paid_oob_unsent
+                        },
+                    ),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.ducat.settled,
+                )
+                // The receipt that did not go, offered again from the tab
+                // that owes it — the money is already in the till, and the
+                // customer's record should not depend on the bar's wifi at
+                // the moment the cash changed hands.
+                if (said.word == Sent.Never) {
+                    TextButton(
+                        enabled = !busy,
+                        onClick = {
+                            busy = true; error = null
+                            scope.launch {
+                                withContext(Dispatchers.IO) {
+                                    runCatching { store.sendOobReceipt(tab) }
+                                }.onFailure { error = moneyFailure(context, it) }
+                                busy = false
+                            }
+                        },
+                    ) { Text(stringResource(R.string.bartab_send_receipt)) }
+                }
+            }
             else -> Text(
                 stringResource(R.string.bartab_paid_note),
                 style = MaterialTheme.typography.titleMedium,
@@ -744,11 +853,13 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
             )
         }
 
-        if (tab.state in CLOSED_STATES) {
+        if (tab.state in CLOSED_STATES && !tab.keptElsewhere) {
             // Only closed tabs: an open tab has "Discard", a billed one must
             // exit through cancel or paid-outside so the customer is told —
             // deleting it here would leave their app pointing at a bill nobody
-            // is watching for.
+            // is watching for. And only the bar's own: a kiosk order or a
+            // subscription still reads its tab after it closes
+            // (RunningTab.keptElsewhere).
             TextButton(
                 onClick = { store.delete(tab.id); onBack() },
                 modifier = Modifier.padding(horizontal = 16.dp),

@@ -42,6 +42,13 @@
     <string name="bartab_cancelled_note">Отменён — гостю сообщили в переписке.</string>
     <string name="bartab_paid_oob_note">Оплачен вне DUCAT ✓ — чек отправлен, транзакция не прикреплена.</string>
     <string name="bartab_paid_note">Оплачен ✓ — чек отправлен.</string>
+    <string name="bartab_bill_pending">Счёт выставлен, но он всё ещё на этом телефоне — уйдёт, как только появится сеть. Расплатились иначе? Отметьте здесь:</string>
+    <string name="bartab_bill_unsent">Счёт так и не дошёл: разговор был сброшен раньше, чем он успел уйти. Отмените его и выставьте заново или отметьте здесь, что оплачено иначе:</string>
+    <string name="bartab_cancelled_pending">Отменён — им ещё не сообщили. Уведомление уйдёт, как только этот телефон найдёт сеть.</string>
+    <string name="bartab_cancelled_unsent">Отменён — но уведомление так и не покинуло этот телефон, и теперь уже не уйдёт. Скажите им в разговоре, иначе они могут всё же оплатить этот счёт.</string>
+    <string name="bartab_paid_oob_pending">Оплачено вне DUCAT ✓ — чек всё ещё на этом телефоне. Уйдёт, как только появится сеть.</string>
+    <string name="bartab_paid_oob_unsent">Оплачено вне DUCAT ✓ — но чек отправить не удалось.</string>
+    <string name="bartab_send_receipt">Отправить чек</string>
     <string name="bartab_remove_from_book">Убрать из книги счетов</string>
     <string name="bartab_back_to_tabs">К счетам</string>
     <!-- What the payer reads on the bill and the receipt. Written in

@@ -40,6 +40,13 @@
     <string name="bartab_cancelled_note">İptal edildi — sohbette kendilerine bildirildi.</string>
     <string name="bartab_paid_oob_note">DUCAT dışında ödendi ✓ — makbuz gönderildi, işlem eklenmedi.</string>
     <string name="bartab_paid_note">Ödendi ✓ — makbuz gönderildi.</string>
+    <string name="bartab_bill_pending">Hesap kesildi ama fiş hâlâ bu telefonda — ağ gelir gelmez gidecek. Başka bir yolla ödendi mi? Burada belirt:</string>
+    <string name="bartab_bill_unsent">Hesap onlara hiç ulaşmadı: sohbet, hesap gidemeden sıfırlandı. İptal edip yeniden kes ya da başka bir yolla ödendiyse burada belirt:</string>
+    <string name="bartab_cancelled_pending">İptal edildi — henüz haberleri yok. Bildirim, bu telefon ağı bulur bulmaz gidecek.</string>
+    <string name="bartab_cancelled_unsent">İptal edildi — ama bildirim bu telefondan hiç çıkmadı ve artık gidemez. Sohbette söyle, yoksa bu hesabı yine de ödeyebilirler.</string>
+    <string name="bartab_paid_oob_pending">DUCAT dışında ödendi ✓ — makbuz hâlâ bu telefonda. Ağ gelir gelmez gidecek.</string>
+    <string name="bartab_paid_oob_unsent">DUCAT dışında ödendi ✓ — ama makbuz gönderilemedi.</string>
+    <string name="bartab_send_receipt">Makbuzu gönder</string>
     <string name="bartab_remove_from_book">Adisyon defterinden kaldır</string>
     <string name="bartab_back_to_tabs">Adisyonlara dön</string>
     <!-- What the payer reads on the bill and the receipt. Written in

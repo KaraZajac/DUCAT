@@ -42,6 +42,13 @@
     <string name="bartab_cancelled_note">Скасовано — їм повідомлено в розмові.</string>
     <string name="bartab_paid_oob_note">Сплачено поза DUCAT ✓ — чек надіслано, транзакції не додано.</string>
     <string name="bartab_paid_note">Сплачено ✓ — чек надіслано.</string>
+    <string name="bartab_bill_pending">Рахунок виставлено, але він досі на цьому телефоні — піде, щойно з’явиться мережа. Розрахувалися інакше? Позначте тут:</string>
+    <string name="bartab_bill_unsent">Рахунок так і не дійшов: розмову було скинуто раніше, ніж він встиг піти. Скасуйте його й виставте знову або позначте тут, що оплачено інакше:</string>
+    <string name="bartab_cancelled_pending">Скасовано — їм ще не повідомили. Сповіщення піде, щойно цей телефон знайде мережу.</string>
+    <string name="bartab_cancelled_unsent">Скасовано — але сповіщення так і не залишило цей телефон, і тепер уже не піде. Скажіть їм у розмові, інакше вони можуть усе ж оплатити цей рахунок.</string>
+    <string name="bartab_paid_oob_pending">Оплачено поза DUCAT ✓ — чек досі на цьому телефоні. Піде, щойно з’явиться мережа.</string>
+    <string name="bartab_paid_oob_unsent">Оплачено поза DUCAT ✓ — але чек надіслати не вдалося.</string>
+    <string name="bartab_send_receipt">Надіслати чек</string>
     <string name="bartab_remove_from_book">Прибрати з книги рахунків</string>
     <string name="bartab_back_to_tabs">Назад до рахунків</string>
     <!-- What the payer reads on the bill and the receipt. Written in

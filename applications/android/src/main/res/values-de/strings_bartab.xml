@@ -40,6 +40,13 @@
     <string name="bartab_cancelled_note">Storniert — der Gast wurde in der Unterhaltung informiert.</string>
     <string name="bartab_paid_oob_note">Außerhalb von DUCAT bezahlt ✓ — Quittung gesendet, keine Transaktion angehängt.</string>
     <string name="bartab_paid_note">Bezahlt ✓ — Quittung gesendet.</string>
+    <string name="bartab_bill_pending">Abgerechnet, aber die Rechnung ist noch auf diesem Telefon — sie geht raus, sobald das Netz wieder da ist. Wurde anders beglichen? Dann sag es hier:</string>
+    <string name="bartab_bill_unsent">Die Rechnung ist nie angekommen: Die Unterhaltung wurde zurückgesetzt, bevor sie rausgehen konnte. Storniere sie und rechne neu ab, oder halte hier fest, dass anders bezahlt wurde:</string>
+    <string name="bartab_cancelled_pending">Storniert — der Gast weiß es noch nicht. Die Nachricht geht raus, sobald dieses Telefon das Netz wieder findet.</string>
+    <string name="bartab_cancelled_unsent">Storniert — aber die Nachricht hat dieses Telefon nie verlassen und kann jetzt nicht mehr raus. Sag es dem Gast in der Unterhaltung, sonst zahlt er diese Rechnung womöglich noch.</string>
+    <string name="bartab_paid_oob_pending">Außerhalb von DUCAT bezahlt ✓ — die Quittung ist noch auf diesem Telefon. Sie geht raus, sobald das Netz wieder da ist.</string>
+    <string name="bartab_paid_oob_unsent">Außerhalb von DUCAT bezahlt ✓ — aber die Quittung konnte nicht gesendet werden.</string>
+    <string name="bartab_send_receipt">Quittung senden</string>
     <string name="bartab_remove_from_book">Aus dem Deckelbuch entfernen</string>
     <string name="bartab_back_to_tabs">Zurück zu den Deckeln</string>
     <!-- What the payer reads on the bill and the receipt. Written in

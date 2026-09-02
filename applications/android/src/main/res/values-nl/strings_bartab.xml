@@ -40,6 +40,13 @@
     <string name="bartab_cancelled_note">Geannuleerd — ze zijn in het gesprek op de hoogte gebracht.</string>
     <string name="bartab_paid_oob_note">Buiten DUCAT betaald ✓ — bon verstuurd, geen transactie gekoppeld.</string>
     <string name="bartab_paid_note">Betaald ✓ — bon verstuurd.</string>
+    <string name="bartab_bill_pending">Afgerekend, maar de rekening staat nog op deze telefoon: ze gaat weg zodra het netwerk er weer is. Anders afgerekend? Zeg het hier:</string>
+    <string name="bartab_bill_unsent">De rekening is nooit aangekomen: het gesprek is gereset voordat ze kon vertrekken. Annuleer ze en reken opnieuw af, of geef hier aan dat er anders is betaald:</string>
+    <string name="bartab_cancelled_pending">Geannuleerd — ze weten het nog niet. Het bericht gaat weg zodra deze telefoon het netwerk weer vindt.</string>
+    <string name="bartab_cancelled_unsent">Geannuleerd — maar het bericht heeft deze telefoon nooit verlaten en kan nu niet meer weg. Zeg het ze in het gesprek, anders betalen ze deze rekening misschien nog.</string>
+    <string name="bartab_paid_oob_pending">Buiten DUCAT betaald ✓ — de bon staat nog op deze telefoon. Hij gaat weg zodra het netwerk er weer is.</string>
+    <string name="bartab_paid_oob_unsent">Buiten DUCAT betaald ✓ — maar de bon kon niet worden verzonden.</string>
+    <string name="bartab_send_receipt">Bon verzenden</string>
     <string name="bartab_remove_from_book">Uit het tabboek verwijderen</string>
     <string name="bartab_back_to_tabs">Terug naar tabs</string>
     <!-- What the payer reads on the bill and the receipt. Written in

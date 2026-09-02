@@ -39,6 +39,13 @@
     <string name="bartab_cancelled_note">已取消 — 已在对话中告知对方。</string>
     <string name="bartab_paid_oob_note">在 DUCAT 之外付清 ✓ — 收据已发送，未附交易。</string>
     <string name="bartab_paid_note">已付 ✓ — 收据已发送。</string>
+    <string name="bartab_bill_pending">已开单，但账单仍在这部手机上 — 网络恢复后立即发出。若已通过其他方式结清，请在此注明：</string>
+    <string name="bartab_bill_unsent">账单从未送达对方：对话在账单发出前被重置了。请取消并重新开单，或若已通过其他方式结清，在此注明：</string>
+    <string name="bartab_cancelled_pending">已取消 — 对方尚未收到通知。这部手机一连上网络，通知就会发出。</string>
+    <string name="bartab_cancelled_unsent">已取消 — 但通知从未离开这部手机，现在也无法再发出。请在对话中告诉对方，否则他们可能仍会支付这笔账单。</string>
+    <string name="bartab_paid_oob_pending">在 DUCAT 之外付清 ✓ — 收据仍在这部手机上。网络恢复后立即发出。</string>
+    <string name="bartab_paid_oob_unsent">在 DUCAT 之外付清 ✓ — 但收据未能发出。</string>
+    <string name="bartab_send_receipt">发送收据</string>
     <string name="bartab_remove_from_book">从挂账簿中移除</string>
     <string name="bartab_back_to_tabs">返回挂账列表</string>
     <!-- What the payer reads on the bill and the receipt. Written in

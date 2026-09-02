@@ -39,6 +39,13 @@
     <string name="bartab_cancelled_note">キャンセルしました — 会話で相手に伝えられました。</string>
     <string name="bartab_paid_oob_note">DUCAT外で支払い ✓ — レシート送信済み、トランザクションの添付なし。</string>
     <string name="bartab_paid_note">支払い済み ✓ — レシート送信済み。</string>
+    <string name="bartab_bill_pending">請求済みですが、請求書はまだこの端末にあります — ネットワークが戻り次第送信されます。別の方法で精算した場合は、ここで指定してください:</string>
+    <string name="bartab_bill_unsent">請求書は相手に届きませんでした。送信される前に会話がリセットされています。取り消して再度請求するか、別の方法で精算済みならここで記録してください:</string>
+    <string name="bartab_cancelled_pending">キャンセルしました — 相手にはまだ伝わっていません。この端末がネットワークを見つけ次第、通知が送信されます。</string>
+    <string name="bartab_cancelled_unsent">キャンセルしました — ただし通知はこの端末から送信されておらず、もう送信できません。会話で相手に伝えてください。さもないと、この請求が支払われてしまうかもしれません。</string>
+    <string name="bartab_paid_oob_pending">DUCAT外で支払い ✓ — レシートはまだこの端末にあります。ネットワークが戻り次第送信されます。</string>
+    <string name="bartab_paid_oob_unsent">DUCAT外で支払い ✓ — ただしレシートを送信できませんでした。</string>
+    <string name="bartab_send_receipt">レシートを送信</string>
     <string name="bartab_remove_from_book">ツケ帳から削除</string>
     <string name="bartab_back_to_tabs">ツケ一覧に戻る</string>
     <!-- What the payer reads on the bill and the receipt. Written in
