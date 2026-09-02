@@ -390,6 +390,45 @@ fun HailCard(
                     break
                 }
             }
+            // **The deserted-corner copy's board turns over too.**
+            //
+            // `migrateDown` moves the notice when the generation turns, and
+            // carries the copy's coordinates across unchanged — deliberately,
+            // because it is not the slot that moved. But the copy sits on a
+            // 5-cell board that is generation-stamped exactly like the first
+            // one, so after a turn it is pinned to a board nobody reads: the
+            // reach it exists to buy is gone, silently, on the one hail that
+            // needed it most (a corner deserted enough to warrant a copy).
+            //
+            // Re-posted rather than moved. The old slot is on a stale board,
+            // and clearing one of those is the write Listings.unpost already
+            // refuses — nobody reads it, and it may not be ours by the time
+            // anyone looks.
+            if (tick % 10 == 0 && p.cell2 != null && org.ducatproject.ducat.standStale(p.cell2) &&
+                p.notice.isNotEmpty()
+            ) {
+                val home = org.ducatproject.ducat.standCell(p.cell)
+                val again = withContext(Dispatchers.IO) {
+                    runCatching {
+                        org.ducatproject.ducat.Hailing.wideCopy(
+                            context,
+                            org.ducatproject.ducat.Hailing.Standing(
+                                board = p.cell, subkey = p.subkey, inboxKey = p.inboxKey,
+                                cardUri = p.card, expiry = p.expiry, notice = p.notice,
+                                owner = p.owner, aloneHere = false, originCell = home,
+                            ),
+                            rehoming = true,
+                        )
+                    }.onFailure { DucatLog.w(TAG, "wide copy re-home: ${it.message}") }.getOrNull()
+                }
+                if (again != null) {
+                    val next = p.copy(cell2 = again.first, subkey2 = again.second)
+                    rides.save(next.asStored())
+                    posted = next
+                    DucatLog.i(TAG, "wide copy re-homed to ${again.first} slot ${again.second}")
+                    break
+                }
+            }
             if (System.currentTimeMillis() / 1000 > p.expiry) {
                 // Dead either way: retire the notice and say so. The clear
                 // rides hailScope so leaving Home cannot cancel it.

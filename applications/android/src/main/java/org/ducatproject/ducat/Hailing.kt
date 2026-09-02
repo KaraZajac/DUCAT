@@ -292,8 +292,13 @@ object Hailing {
      * Same card: claim-once referees the two copies the way it referees a
      * migration's.
      */
-    fun wideCopy(context: Context, s: Standing): Pair<String, UInt>? {
-        if (!s.aloneHere || s.originCell.length != 6) return null
+    fun wideCopy(context: Context, s: Standing, rehoming: Boolean = false): Pair<String, UInt>? {
+        // `aloneHere` decides whether a copy is *earned*; it says nothing
+        // about whether one that already exists should be kept alive. A
+        // re-home is the second case: the copy was warranted when it was
+        // made, and its board has since turned over.
+        if (s.originCell.length != 6) return null
+        if (!rehoming && !s.aloneHere) return null
         val wide = standNow("geo:${s.originCell.take(5)}")
         // The same hail, signed again for where it is going. A notice is bound
         // to its slot, so the first board's bytes are not valid on the second
