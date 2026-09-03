@@ -44,7 +44,14 @@ if [ "$(id -u)" != 0 ]; then
   exit 1
 fi
 
-TAPS="tap-ducat tap-ducat2"
+# One word per phone. Everything below is derived from this list — table
+# number, conntrack mark and fwmark rule are all "100 + position", so a
+# fourth phone is a fourth word here and nothing else. It used to be two,
+# with the marks and rules written out by hand; a third emulator was then
+# launched by hand as well, got no tap, and fell back to SLIRP — where
+# reads work and writes die in fanout, which is the hardest failure in
+# this file to recognise from inside the guest.
+TAPS="tap-ducat tap-ducat2 tap-ducat3"
 
 down() {
   # Both generations: v1 ran one dnsmasq per tap (…tap-ducat / …tap-ducat2),
@@ -59,8 +66,11 @@ down() {
   for PREF in 100 101; do
     while ip rule del pref $PREF 2>/dev/null; do :; done
   done
-  ip route flush table 101 2>/dev/null || true
-  ip route flush table 102 2>/dev/null || true
+  i=1
+  for TAP in $TAPS; do
+    ip route flush table $((100 + i)) 2>/dev/null || true
+    i=$((i + 1))
+  done
   iptables -t mangle -F DUCAT_TAPS 2>/dev/null || true
   iptables -t mangle -D PREROUTING -j DUCAT_TAPS 2>/dev/null || true
   iptables -t mangle -D OUTPUT -j DUCAT_TAPS_OUT 2>/dev/null || true
@@ -105,15 +115,22 @@ done
 # stamp, and the fwmark rules below send them out the right tap.
 iptables -t mangle -N DUCAT_TAPS
 iptables -t mangle -A PREROUTING -j DUCAT_TAPS
-iptables -t mangle -A DUCAT_TAPS -i tap-ducat  -j CONNMARK --set-mark $((MARK + 1))
-iptables -t mangle -A DUCAT_TAPS -i tap-ducat2 -j CONNMARK --set-mark $((MARK + 2))
+# Per-tap stamps first, then the restore — order in the chain is the rule.
+i=1
+for TAP in $TAPS; do
+  iptables -t mangle -A DUCAT_TAPS -i $TAP -j CONNMARK --set-mark $((MARK + i))
+  i=$((i + 1))
+done
 iptables -t mangle -A DUCAT_TAPS -m connmark ! --mark 0 -j CONNMARK --restore-mark
 iptables -t mangle -N DUCAT_TAPS_OUT
 iptables -t mangle -A OUTPUT -j DUCAT_TAPS_OUT
 iptables -t mangle -A DUCAT_TAPS_OUT -m connmark ! --mark 0 -j CONNMARK --restore-mark
 
-ip rule add fwmark $((MARK + 1)) table 101 pref 100
-ip rule add fwmark $((MARK + 2)) table 102 pref 100
+i=1
+for TAP in $TAPS; do
+  ip rule add fwmark $((MARK + i)) table $((100 + i)) pref 100
+  i=$((i + 1))
+done
 
 # One resolver for both guests, on the address they are baked to ask.
 dnsmasq --listen-address=10.0.2.3 --bind-interfaces --except-interface=lo \
@@ -129,5 +146,5 @@ if ! ss -lun | grep -q '10\.0\.2\.3:53'; then
   exit 1
 fi
 
-echo "ready: both taps speak the guest's native 10.0.2 dialect"
-echo "launch: scripts/emulator.sh [1|2]"
+echo "ready: $(echo $TAPS | wc -w) taps speak the guest's native 10.0.2 dialect"
+echo "launch: scripts/emulator.sh [1|2|3]"

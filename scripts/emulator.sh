@@ -27,7 +27,9 @@
 #                      undoes it.
 #   -feature -Vulkan   the bundled Vulkan loader fails the same way
 #   TAP networking     SLIRP cannot carry a Veilid node (reads yes, writes
-#                      never) — scripts/emulator-tap.sh raises two TAPs
+#                      never) — scripts/emulator-tap.sh raises one TAP per
+#                      phone. Launch through THIS script: an emulator started
+#                      by hand gets no tap and says nothing about it.
 #   wifi disabled      the emulated WiFi is SLIRP behind netsim; when it wins
 #                      default-network election, apps (Veilid included)
 #                      follow it into an IPv6 black hole and never dial.
@@ -48,7 +50,8 @@ N=${1:-1}
 case "$N" in
   1) AVD=ducat;  TAP=tap-ducat;  SERIAL=emulator-5554; PORT=5554 ;;
   2) AVD=ducat2; TAP=tap-ducat2; SERIAL=emulator-5556; PORT=5556 ;;
-  *) echo "usage: $0 [1|2] [install]"; exit 1 ;;
+  3) AVD=ducatfresh; TAP=tap-ducat3; SERIAL=emulator-5558; PORT=5558 ;;
+  *) echo "usage: $0 [1|2|3] [install]"; exit 1 ;;
 esac
 
 NETFLAGS=""
