@@ -1562,6 +1562,23 @@ fun SitesSection() {
                                             org.ducatproject.ducat.Sites.add(
                                                 context, site.recordKey,
                                             )
+                                        }.onFailure {
+                                            // Falling back to the row we have
+                                            // is right — a reader with the
+                                            // bundle should still get to read
+                                            // it when the network is away —
+                                            // but silence here makes a failed
+                                            // head read look exactly like "no
+                                            // update": both render yesterday's
+                                            // page with nothing said. Only the
+                                            // log can tell them apart
+                                            // afterwards.
+                                            org.ducatproject.ducat.DucatLog.w(
+                                                "Sites",
+                                                "could not re-read the head for " +
+                                                    "${site.recordKey.take(12)}… — " +
+                                                    "opening the copy on disk: ${it.message}",
+                                            )
                                         }.getOrDefault(site)
                                         org.ducatproject.ducat.Sites.fetchBundle(
                                             context, latest,
