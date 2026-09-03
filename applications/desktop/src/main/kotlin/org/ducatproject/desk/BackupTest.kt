@@ -1,5 +1,7 @@
 package org.ducatproject.desk
 
+import org.ducatproject.ducat.Recurring
+import org.ducatproject.ducat.Catalogue
 import org.ducatproject.ducat.Sites
 import org.ducatproject.ducat.Ceremony
 import org.ducatproject.ducat.ContactStore
@@ -209,7 +211,12 @@ private fun appState() {
     // a listing's id is what its signing key is derived from, so losing it
     // also resets the seller's "established a while" signal to zero.
     val listings = """[{"id":"L1","title":"Vintage record player","quantity":2}]"""
-    val catalogue = """[{"name":"Flat white","minor":450}]"""
+    // Catalogue.all requires a non-blank id and reads `price`/`currency`,
+    // not `minor`; the old fixture parsed to an empty list, so the check
+    // below compared one unreadable string to another and passed.
+    val catalogue = """[{"id":"c1","name":"Flat white","price":"4.50",""" +
+        """"currency":"USD","category":"Coffee","archived":false,""" +
+        """"soldout":false,"sort":1}]"""
     src.getSharedPreferences("ducat_listings", 0).edit()
         .putString("listings", listings).apply()
     src.getSharedPreferences("ducat_catalogue", 0).edit()
@@ -239,7 +246,13 @@ private fun appState() {
     // thread is *about*; donation_receipted is a charity's only guard
     // against receipting every past donation a second time.
     val subcards = """{"VLD0:inbox-a":"pub-1"}"""
-    val bills = """[{"id":"B1","personaHex":"aa","amountPxmr":1000,"monthly":true}]"""
+    // The names Recurring.save writes — who/amt/m/next, all of them read
+    // with getX and so all required. The old fixture spelled them out in
+    // full (personaHex, amountPxmr, monthly) and named nothing the parser
+    // looks for, so Recurring.all's runCatching swallowed it to an empty
+    // list every time.
+    val bills = """[{"id":"B1","who":"aa","amt":1000,"note":"rent",""" +
+        """"m":true,"next":1788000000000}]"""
     src.getSharedPreferences("ducat_publications", 0).edit()
         .putString("subcards", subcards).apply()
     src.getSharedPreferences("ducat_recurring", 0).edit()
@@ -329,6 +342,19 @@ private fun appState() {
         "BACKUPTEST_FAIL a site came back with no way to update it"
     }
     check(backSite.mine) { "BACKUPTEST_FAIL the restored site is not owned by this phone" }
+
+    // The same question of the other two stores that cannot be retyped from
+    // anything: a standing bill is somebody's arrangement, and a catalogue
+    // is the till's whole menu. String equality above proves the bundle
+    // carried the bytes; these prove the bytes are still a bill and an item.
+    val backBills = Recurring.all(dst)
+    check(backBills.size == 1 && backBills[0].personaHex == "aa" &&
+        backBills[0].amountPxmr == 1000L && backBills[0].monthly
+    ) { "BACKUPTEST_FAIL recurring bill did not parse back: $backBills" }
+    val backCat = Catalogue.all(dst)
+    check(backCat.size == 1 && backCat[0].name == "Flat white" && backCat[0].price == "4.50") {
+        "BACKUPTEST_FAIL catalogue item did not parse back: $backCat"
+    }
 
     // A bundle carrying keys the export would never write must not be able to
     // put them in this store — it is the same file as wallet_spend and
