@@ -14,7 +14,6 @@
     <string name="pages_address_copied">주소를 복사했습니다</string>
     <string name="pages_preview">미리보기</string>
     <string name="pages_edit">페이지 편집</string>
-    <string name="pages_more">외 %1$d개</string>
     <string name="pages_room_new">페이지를 쓰세요</string>
     <string name="pages_room_update">페이지를 업데이트하세요</string>
     <string name="pages_room_body">여기 적은 것은 모두 페이지에 실립니다. 빈 칸은 빠집니다.</string>
@@ -29,4 +28,6 @@
     <string name="pages_zip_title">이미 페이지가 있나요?</string>
     <string name="pages_zip_body">루트에 index.html이 있는 .zip을 고르세요. 바깥의 무엇도 참조하면 안 됩니다. 네트워크로 손을 뻗는 페이지는 남의 기기에서 깨지기 전에 여기서 거부됩니다.</string>
     <string name="pages_zip_pick">.zip 고르기</string>
+    <string name="pages_start_another">다른 페이지 만들기</string>
+    <string name="pages_start_cancel">새 페이지 취소</string>
 </resources>

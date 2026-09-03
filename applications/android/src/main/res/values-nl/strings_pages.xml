@@ -14,7 +14,6 @@
     <string name="pages_address_copied">Adres gekopieerd</string>
     <string name="pages_preview">Voorbeeld</string>
     <string name="pages_edit">Pagina bewerken</string>
-    <string name="pages_more">en nog %1$d</string>
     <string name="pages_room_new">Schrijf je pagina</string>
     <string name="pages_room_update">Werk je pagina bij</string>
     <string name="pages_room_body">Alles hier komt op de pagina. Een leeg veld blijft weg.</string>
@@ -29,4 +28,6 @@
     <string name="pages_zip_title">Heb je al een pagina?</string>
     <string name="pages_zip_body">Kies een .zip met index.html in de hoofdmap. Hij mag niets van buiten aanhalen — een pagina die het netwerk opzoekt wordt hier geweigerd in plaats van stuk te gaan op andermans telefoon.</string>
     <string name="pages_zip_pick">Een .zip kiezen</string>
+    <string name="pages_start_another">Nog een pagina maken</string>
+    <string name="pages_start_cancel">Nieuwe pagina annuleren</string>
 </resources>

@@ -14,7 +14,6 @@
     <string name="pages_address_copied">نشانی کپی شد</string>
     <string name="pages_preview">پیش‌نمایش</string>
     <string name="pages_edit">ویرایش صفحه</string>
-    <string name="pages_more">و %1$d تای دیگر</string>
     <string name="pages_room_new">صفحه‌تان را بنویسید</string>
     <string name="pages_room_update">صفحه‌تان را به‌روز کنید</string>
     <string name="pages_room_body">هرچه اینجاست روی صفحه می‌رود. فیلد خالی کنار گذاشته می‌شود.</string>
@@ -29,4 +28,6 @@
     <string name="pages_zip_title">از قبل صفحه دارید؟</string>
     <string name="pages_zip_body">یک ‎.zip با index.html در ریشه‌اش انتخاب کنید. نباید به چیزی بیرون از خودش ارجاع دهد — صفحه‌ای که به شبکه دست می‌برد اینجا رد می‌شود، نه اینکه روی گوشی دیگری خراب شود.</string>
     <string name="pages_zip_pick">انتخاب ‎.zip</string>
+    <string name="pages_start_another">صفحهٔ دیگری بساز</string>
+    <string name="pages_start_cancel">لغو صفحهٔ جدید</string>
 </resources>

@@ -14,7 +14,6 @@
     <string name="pages_address_copied">Đã sao chép địa chỉ</string>
     <string name="pages_preview">Xem trước</string>
     <string name="pages_edit">Sửa trang</string>
-    <string name="pages_more">và %1$d nữa</string>
     <string name="pages_room_new">Viết trang của bạn</string>
     <string name="pages_room_update">Cập nhật trang của bạn</string>
     <string name="pages_room_body">Mọi thứ ở đây đều lên trang. Ô để trống thì bỏ qua.</string>
@@ -29,4 +28,6 @@
     <string name="pages_zip_title">Đã có sẵn một trang?</string>
     <string name="pages_zip_body">Chọn tệp .zip có index.html ở gốc. Nó không được tham chiếu bất cứ thứ gì bên ngoài — một trang với tay ra mạng sẽ bị từ chối ở đây, thay vì hỏng trên máy người khác.</string>
     <string name="pages_zip_pick">Chọn tệp .zip</string>
+    <string name="pages_start_another">Tạo trang khác</string>
+    <string name="pages_start_cancel">Huỷ trang mới</string>
 </resources>

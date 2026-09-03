@@ -14,7 +14,6 @@
     <string name="pages_address_copied">Endereço copiado</string>
     <string name="pages_preview">Pré-visualizar</string>
     <string name="pages_edit">Editar página</string>
-    <string name="pages_more">e mais %1$d</string>
     <string name="pages_room_new">Escreva a sua página</string>
     <string name="pages_room_update">Atualize a sua página</string>
     <string name="pages_room_body">Tudo o que está aqui vai para a página. Um campo vazio fica de fora.</string>
@@ -29,4 +28,6 @@
     <string name="pages_zip_title">Já tem uma página?</string>
     <string name="pages_zip_body">Escolha um .zip com index.html na raiz. Não pode referenciar nada externo — uma página que alcança a rede é recusada aqui em vez de falhar no telemóvel de outra pessoa.</string>
     <string name="pages_zip_pick">Escolher um .zip</string>
+    <string name="pages_start_another">Criar outra página</string>
+    <string name="pages_start_cancel">Cancelar a nova página</string>
 </resources>

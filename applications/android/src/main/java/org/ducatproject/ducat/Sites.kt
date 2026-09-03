@@ -265,6 +265,24 @@ object Sites {
     // ----- the publisher's half (§16.22) -----------------------------------
 
     /**
+     * Which of this phone's own pages the Pages mode is showing.
+     *
+     * Press's `pressPub` exactly, and self-healing the same way: a stored
+     * id that no longer names a page this phone owns reads as unset, so
+     * deleting the page that was forward does not leave the mode pointing
+     * at nothing.
+     */
+    fun frontPage(context: Context): String? =
+        prefs(context).getString("front", null)
+            ?.takeIf { key -> all(context).any { it.recordKey == key && it.mine } }
+
+    fun setFrontPage(context: Context, recordKey: String) {
+        prefs(context).edit().putString("front", recordKey).apply()
+        ContactStore.bump()
+    }
+
+
+    /**
      * A page that reaches for the clearnet, and where.
      *
      * §16.22 says a publisher tool SHOULD refuse to seed a bundle that

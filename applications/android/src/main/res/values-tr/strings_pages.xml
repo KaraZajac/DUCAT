@@ -14,7 +14,6 @@
     <string name="pages_address_copied">Adres kopyalandı</string>
     <string name="pages_preview">Önizleme</string>
     <string name="pages_edit">Sayfayı düzenle</string>
-    <string name="pages_more">ve %1$d tane daha</string>
     <string name="pages_room_new">Sayfanızı yazın</string>
     <string name="pages_room_update">Sayfanızı güncelleyin</string>
     <string name="pages_room_body">Buradaki her şey sayfaya gider. Boş bırakılan alan dışarıda kalır.</string>
@@ -29,4 +28,6 @@
     <string name="pages_zip_title">Zaten bir sayfanız var mı?</string>
     <string name="pages_zip_body">Kökünde index.html olan bir .zip seçin. Dışarıdan hiçbir şeye başvurmamalı — ağa uzanan bir sayfa, başkasının telefonunda bozulmak yerine burada reddedilir.</string>
     <string name="pages_zip_pick">Bir .zip seç</string>
+    <string name="pages_start_another">Başka bir sayfa oluştur</string>
+    <string name="pages_start_cancel">Yeni sayfayı iptal et</string>
 </resources>

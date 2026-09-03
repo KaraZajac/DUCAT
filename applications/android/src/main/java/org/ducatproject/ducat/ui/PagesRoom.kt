@@ -99,21 +99,32 @@ fun PagesRoom() {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
     val mine = remember(version) { Sites.all(context).filter { it.mine } }
-    val existing = mine.firstOrNull()
+    // The page the Address tab has forward, so the two halves of the mode
+    // are talking about the same one.
+    val front = remember(version, mine) { Sites.frontPage(context) }
+    // `starting` is a deliberate "none of them": without it this room could
+    // only ever edit a page, never begin a second, because `existing` was
+    // whichever one happened to be first and publish() treats a record key
+    // as an update. One page per phone was never a rule, only what the UI
+    // could reach.
+    var starting by rememberSaveable { mutableStateOf(false) }
+    val existing = if (starting) null else mine.firstOrNull { it.recordKey == front } ?: mine.firstOrNull()
 
     // Seeded from what was typed last time, not from the page that was
     // generated out of it. Keyed on the record so a second site starts
     // clean, and *not* on `existing` itself — the row is rewritten by
     // every publish, and re-keying on it would empty the boxes the moment
     // the site came into being.
-    val saved = remember(existing?.recordKey) { PageTemplate.fromJson(existing?.page) }
-    var title by rememberSaveable(existing?.recordKey) {
+    val saved = remember(existing?.recordKey, starting) {
+        if (starting) null else PageTemplate.fromJson(existing?.page)
+    }
+    var title by rememberSaveable(existing?.recordKey, starting) {
         mutableStateOf(saved?.title ?: existing?.title.orEmpty())
     }
-    var tagline by rememberSaveable(existing?.recordKey) { mutableStateOf(saved?.tagline ?: "") }
-    var body by rememberSaveable(existing?.recordKey) { mutableStateOf(saved?.body ?: "") }
-    var hours by rememberSaveable(existing?.recordKey) { mutableStateOf(saved?.hours ?: "") }
-    var contact by rememberSaveable(existing?.recordKey) { mutableStateOf(saved?.contact ?: "") }
+    var tagline by rememberSaveable(existing?.recordKey, starting) { mutableStateOf(saved?.tagline ?: "") }
+    var body by rememberSaveable(existing?.recordKey, starting) { mutableStateOf(saved?.body ?: "") }
+    var hours by rememberSaveable(existing?.recordKey, starting) { mutableStateOf(saved?.hours ?: "") }
+    var contact by rememberSaveable(existing?.recordKey, starting) { mutableStateOf(saved?.contact ?: "") }
     var word by remember { mutableStateOf<String?>(null) }
 
     // One fixed key, and this is not cosmetic. Built from the site, it
@@ -122,6 +133,29 @@ fun PagesRoom() {
     // key nothing was draining, and a publish that worked perfectly left
     // the room sitting there saying nothing. One page is published at a
     // time here; one key is the truth.
+    // Re-seeded when the page being edited changes, explicitly.
+    //
+    // The keys on those rememberSaveables ought to be enough, and across a
+    // rotation they are. Across a *tab switch* they are not: this room
+    // leaves composition when the Address tab is shown and its text is
+    // saved, so picking a different page there and coming back restored
+    // the words belonging to the page no longer selected — the two halves
+    // of the mode disagreeing about which page is which, with an Update
+    // button under it. Found by switching chips on the phone; a relaunch
+    // agreed with itself, which is what said the logic was right and the
+    // composition was stale.
+    //
+    // Keyed on the selection alone, so it fires exactly when the answer to
+    // "which page is this" changes and never while somebody is typing.
+    LaunchedEffect(existing?.recordKey, starting) {
+        val p = if (starting) null else PageTemplate.fromJson(existing?.page)
+        title = p?.title ?: existing?.title.orEmpty()
+        tagline = p?.tagline.orEmpty()
+        body = p?.body.orEmpty()
+        hours = p?.hours.orEmpty()
+        contact = p?.contact.orEmpty()
+    }
+
     val key = "page:publish"
     val tick by ThreadSends.ticks.collectAsState()
     val busy = ThreadSends.inFlight(key)
@@ -129,6 +163,10 @@ fun PagesRoom() {
         for (o in ThreadSends.take(key)) when (o) {
             is ThreadSends.Outcome.Landed -> {
                 word = context.getString(R.string.pages_published)
+                // A page just made is the one to show; an update leaves the
+                // choice alone. Either way this sheet is no longer blank.
+                (o.result as? String)?.let { Sites.setFrontPage(context, it) }
+                starting = false
                 shellTabRequest.value = 0
             }
             is ThreadSends.Outcome.Failed ->
@@ -143,9 +181,9 @@ fun PagesRoom() {
             dir.deleteRecursively()
             dir.mkdirs()
             build(dir)
-            Sites.publish(context, dir, title.trim(), existing?.recordKey, answers)
+            val made = Sites.publish(context, dir, title.trim(), existing?.recordKey, answers)
             dir.deleteRecursively()
-            null
+            made.recordKey
         }
     }
 
@@ -160,9 +198,9 @@ fun PagesRoom() {
             val dir = File(stagingDir(context), "current")
             val n = unpack(context, uri, dir)
             DucatLog.i("Pages", "unpacked $n file(s) from a picked archive")
-            Sites.publish(context, dir, title.trim(), existing?.recordKey)
+            val made = Sites.publish(context, dir, title.trim(), existing?.recordKey)
             dir.deleteRecursively()
-            null
+            made.recordKey
         }
     }
 
@@ -249,6 +287,21 @@ fun PagesRoom() {
         word?.let {
             Spacer(Modifier.height(10.dp))
             Text(it, style = MaterialTheme.typography.bodySmall)
+        }
+
+        if (mine.isNotEmpty()) {
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(
+                enabled = !busy,
+                onClick = { starting = !starting },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(
+                    stringResource(
+                        if (starting) R.string.pages_start_cancel else R.string.pages_start_another,
+                    ),
+                )
+            }
         }
 
         Spacer(Modifier.height(24.dp))

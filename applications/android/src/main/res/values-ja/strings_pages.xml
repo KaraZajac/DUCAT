@@ -14,7 +14,6 @@
     <string name="pages_address_copied">住所をコピーしました</string>
     <string name="pages_preview">プレビュー</string>
     <string name="pages_edit">ページを編集</string>
-    <string name="pages_more">ほか %1$d 件</string>
     <string name="pages_room_new">ページを書く</string>
     <string name="pages_room_update">ページを更新する</string>
     <string name="pages_room_body">ここに書いたものはすべてページに載ります。空欄は省かれます。</string>
@@ -29,4 +28,6 @@
     <string name="pages_zip_title">すでにページがありますか？</string>
     <string name="pages_zip_body">ルートに index.html がある .zip を選んでください。外部を参照してはいけません。ネットワークに手を伸ばすページは、他人の端末で壊れる前にここで拒否されます。</string>
     <string name="pages_zip_pick">.zip を選ぶ</string>
+    <string name="pages_start_another">別のページを作る</string>
+    <string name="pages_start_cancel">新しいページをやめる</string>
 </resources>

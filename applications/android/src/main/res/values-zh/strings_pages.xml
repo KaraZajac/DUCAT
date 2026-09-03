@@ -14,7 +14,6 @@
     <string name="pages_address_copied">地址已复制</string>
     <string name="pages_preview">预览</string>
     <string name="pages_edit">编辑页面</string>
-    <string name="pages_more">另有 %1$d 个</string>
     <string name="pages_room_new">写你的页面</string>
     <string name="pages_room_update">更新你的页面</string>
     <string name="pages_room_body">这里的内容都会出现在页面上。留空的字段会被略去。</string>
@@ -29,4 +28,6 @@
     <string name="pages_zip_title">已经有页面了？</string>
     <string name="pages_zip_body">选择根目录含 index.html 的 .zip。它不得引用任何外部内容——伸手去网络的页面会在这里被拒绝，而不是在别人手机上出错。</string>
     <string name="pages_zip_pick">选择 .zip</string>
+    <string name="pages_start_another">再建一个页面</string>
+    <string name="pages_start_cancel">取消新页面</string>
 </resources>

@@ -1,6 +1,8 @@
 package org.ducatproject.ducat.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.material3.FilterChip
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -102,13 +104,36 @@ fun PagesScreen() {
         return
     }
 
-    val site = mine.first()
+    // Which page is forward, remembered across both tabs — Press keeps
+    // its publication the same way. Falls back to the first, so a phone
+    // that has never chosen still opens on something.
+    val front = remember(version, mine) { Sites.frontPage(context) }
+    val site = mine.firstOrNull { it.recordKey == front } ?: mine.first()
     val uri = Sites.uriOf(site.recordKey)
 
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        // More than one page: say which, and let it be changed. This
+        // used to be a line reading "and N more" with no way to reach
+        // them — and nothing could produce a second page anyway, so it
+        // was a promise about a state the app could not enter.
+        if (mine.size > 1) {
+            Row(
+                Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                mine.forEach { p ->
+                    FilterChip(
+                        selected = p.recordKey == site.recordKey,
+                        onClick = { Sites.setFrontPage(context, p.recordKey) },
+                        label = { Text(p.title.ifBlank { p.recordKey.take(8) }) },
+                    )
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+        }
         Text(site.title, style = MaterialTheme.typography.headlineSmall)
         Spacer(Modifier.height(4.dp))
         Text(
@@ -161,13 +186,5 @@ fun PagesScreen() {
             modifier = Modifier.fillMaxWidth(),
         ) { Text(stringResource(R.string.pages_edit)) }
 
-        if (mine.size > 1) {
-            Spacer(Modifier.height(16.dp))
-            Text(
-                stringResource(R.string.pages_more, mine.size - 1),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
     }
 }

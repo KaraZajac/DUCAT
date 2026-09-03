@@ -14,7 +14,6 @@
     <string name="pages_address_copied">نُسخ العنوان</string>
     <string name="pages_preview">معاينة</string>
     <string name="pages_edit">تحرير الصفحة</string>
-    <string name="pages_more">و%1$d غيرها</string>
     <string name="pages_room_new">اكتب صفحتك</string>
     <string name="pages_room_update">حدّث صفحتك</string>
     <string name="pages_room_body">كل ما هنا يظهر على الصفحة. والحقل الفارغ يُترك.</string>
@@ -29,4 +28,6 @@
     <string name="pages_zip_title">ألديك صفحة بالفعل؟</string>
     <string name="pages_zip_body">اختر ملف ‎.zip فيه index.html في جذره. يجب ألّا يشير إلى شيء خارجه — الصفحة التي تمتد إلى الشبكة تُرفض هنا بدل أن تتعطّل على هاتف شخص آخر.</string>
     <string name="pages_zip_pick">اختر ملف ‎.zip</string>
+    <string name="pages_start_another">ابدأ صفحة أخرى</string>
+    <string name="pages_start_cancel">إلغاء الصفحة الجديدة</string>
 </resources>

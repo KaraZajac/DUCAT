@@ -14,7 +14,6 @@
     <string name="pages_address_copied">पता कॉपी हुआ</string>
     <string name="pages_preview">झलक</string>
     <string name="pages_edit">पन्ना संपादित करें</string>
-    <string name="pages_more">और %1$d अन्य</string>
     <string name="pages_room_new">अपना पन्ना लिखें</string>
     <string name="pages_room_update">अपना पन्ना अपडेट करें</string>
     <string name="pages_room_body">यहाँ का सब कुछ पन्ने पर जाता है। खाली छोड़ा गया खाना छूट जाता है।</string>
@@ -29,4 +28,6 @@
     <string name="pages_zip_title">पहले से पन्ना है?</string>
     <string name="pages_zip_body">ऐसा .zip चुनें जिसकी जड़ में index.html हो। वह अपने बाहर किसी चीज़ का संदर्भ न दे — नेटवर्क तक पहुँचने वाला पन्ना यहीं अस्वीकार होता है, किसी और के फ़ोन पर टूटने के बजाय।</string>
     <string name="pages_zip_pick">.zip चुनें</string>
+    <string name="pages_start_another">एक और पन्ना शुरू करें</string>
+    <string name="pages_start_cancel">नया पन्ना रद्द करें</string>
 </resources>

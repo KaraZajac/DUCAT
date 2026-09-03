@@ -14,7 +14,6 @@
     <string name="pages_address_copied">Address copied</string>
     <string name="pages_preview">Preview</string>
     <string name="pages_edit">Edit page</string>
-    <string name="pages_more">and %1$d more</string>
     <string name="pages_room_new">Write your page</string>
     <string name="pages_room_update">Update your page</string>
     <string name="pages_room_body">Everything here goes on the page. Leave a field blank and it is left out.</string>
@@ -29,4 +28,6 @@
     <string name="pages_zip_title">Already have a page?</string>
     <string name="pages_zip_body">Pick a .zip with index.html at its root. It must not reference anything outside itself — a page that reaches the network is refused here rather than breaking on someone else\'s phone.</string>
     <string name="pages_zip_pick">Choose a .zip</string>
+    <string name="pages_start_another">Start another page</string>
+    <string name="pages_start_cancel">Cancel the new page</string>
 </resources>

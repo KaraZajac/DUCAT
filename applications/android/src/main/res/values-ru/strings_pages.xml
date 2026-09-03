@@ -14,7 +14,6 @@
     <string name="pages_address_copied">Адрес скопирован</string>
     <string name="pages_preview">Предпросмотр</string>
     <string name="pages_edit">Изменить страницу</string>
-    <string name="pages_more">и ещё %1$d</string>
     <string name="pages_room_new">Напишите свою страницу</string>
     <string name="pages_room_update">Обновите свою страницу</string>
     <string name="pages_room_body">Всё отсюда попадает на страницу. Пустое поле не выводится.</string>
@@ -29,4 +28,6 @@
     <string name="pages_zip_title">Уже есть страница?</string>
     <string name="pages_zip_body">Выберите .zip с index.html в корне. Он не должен ссылаться ни на что внешнее — страница, тянущаяся в сеть, отклоняется здесь, а не ломается на чужом телефоне.</string>
     <string name="pages_zip_pick">Выбрать .zip</string>
+    <string name="pages_start_another">Создать ещё страницу</string>
+    <string name="pages_start_cancel">Отменить новую страницу</string>
 </resources>

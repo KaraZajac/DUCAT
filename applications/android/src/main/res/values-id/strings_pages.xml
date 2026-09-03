@@ -14,7 +14,6 @@
     <string name="pages_address_copied">Alamat disalin</string>
     <string name="pages_preview">Pratinjau</string>
     <string name="pages_edit">Ubah halaman</string>
-    <string name="pages_more">dan %1$d lagi</string>
     <string name="pages_room_new">Tulis halaman Anda</string>
     <string name="pages_room_update">Perbarui halaman Anda</string>
     <string name="pages_room_body">Semua di sini masuk ke halaman. Bidang kosong ditinggalkan.</string>
@@ -29,4 +28,6 @@
     <string name="pages_zip_title">Sudah punya halaman?</string>
     <string name="pages_zip_body">Pilih .zip dengan index.html di akarnya. Tidak boleh merujuk apa pun dari luar — halaman yang menjangkau jaringan ditolak di sini alih-alih rusak di ponsel orang lain.</string>
     <string name="pages_zip_pick">Pilih .zip</string>
+    <string name="pages_start_another">Buat halaman lain</string>
+    <string name="pages_start_cancel">Batalkan halaman baru</string>
 </resources>

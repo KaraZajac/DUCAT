@@ -14,7 +14,6 @@
     <string name="pages_address_copied">คัดลอกที่อยู่แล้ว</string>
     <string name="pages_preview">ดูตัวอย่าง</string>
     <string name="pages_edit">แก้ไขหน้าเพจ</string>
-    <string name="pages_more">และอีก %1$d</string>
     <string name="pages_room_new">เขียนหน้าเพจของคุณ</string>
     <string name="pages_room_update">อัปเดตหน้าเพจของคุณ</string>
     <string name="pages_room_body">ทุกอย่างตรงนี้จะขึ้นบนหน้าเพจ ช่องที่เว้นว่างจะถูกละไว้</string>
@@ -29,4 +28,6 @@
     <string name="pages_zip_title">มีหน้าเพจอยู่แล้ว?</string>
     <string name="pages_zip_body">เลือกไฟล์ .zip ที่มี index.html อยู่ที่ราก ต้องไม่อ้างอิงสิ่งใดภายนอก — หน้าเพจที่เอื้อมไปหาเครือข่ายจะถูกปฏิเสธที่นี่ แทนที่จะพังบนเครื่องของคนอื่น</string>
     <string name="pages_zip_pick">เลือกไฟล์ .zip</string>
+    <string name="pages_start_another">สร้างอีกหน้า</string>
+    <string name="pages_start_cancel">ยกเลิกหน้าใหม่</string>
 </resources>
