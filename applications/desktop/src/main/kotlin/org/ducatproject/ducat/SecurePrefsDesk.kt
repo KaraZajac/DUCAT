@@ -93,21 +93,66 @@ object DeskVault {
         clearPrefsCache()
     }
 
-    /** Every plaintext store becomes an encrypted one, then stops existing. */
-    private fun migratePlaintext(dir: File, k: ByteArray) {
-        val prefs = File(dir, "prefs")
-        prefs.listFiles { f: File -> f.name.endsWith(".json") }?.forEach { plain ->
-            val name = plain.name.removeSuffix(".json")
-            val enc = File(prefs, "$name.enc")
-            runCatching {
-                val body = plain.readText()
-                writeEncrypted(enc, k, body)
-                // Read it back before letting go of the only other copy.
-                check(readEncrypted(enc, k) == body) { "re-read did not match" }
-                plain.delete()
-                DucatLog.i("DeskVault", "encrypted $name")
-            }.onFailure { DucatLog.w("DeskVault", "migrating $name: ${it.message}") }
+    /**
+     * The names securePrefs has been asked for, so migration knows which
+     * files in prefs/ are its business.
+     *
+     * The sweep used to glob every `*.json` in that directory, and
+     * DeskContext writes *every* store there — including the ones that are
+     * deliberately plain: ducat_locale, ducat_units, ducat_rides,
+     * ducat_business, ducat_market_cache, ducat.ui, board_posters,
+     * second_opinion, the listings cache. Those got encrypted and deleted
+     * too, after which the plain reader that owns them opened `<name>.json`,
+     * found nothing, and read as empty — a desk reverting to the system
+     * language with the operator's choice still on disk in a file nothing
+     * would ever open again.
+     *
+     * An exclusion list would have to be kept in step with every new plain
+     * store, silently, for ever. This is the same question asked from the
+     * other side: a store is sealed if securePrefs was asked for it, which
+     * is a fact the code produces rather than one somebody has to remember.
+     * The desk runs unsealed before a vault exists, so by the time anybody
+     * sets a passphrase every sealed store has already been named here.
+     */
+    private fun sealedNamesFile(root: File) = File(root, "prefs/.sealed-names")
+
+    internal fun noteSealed(root: File, name: String) {
+        runCatching {
+            val f = sealedNamesFile(root)
+            val have = if (f.isFile) f.readLines().toMutableSet() else mutableSetOf()
+            if (have.add(name)) {
+                f.parentFile?.mkdirs()
+                f.writeText(have.sorted().joinToString("\n"))
+            }
         }
+    }
+
+    private fun sealedNames(root: File): List<String> =
+        runCatching { sealedNamesFile(root).takeIf { it.isFile }?.readLines() }
+            .getOrNull().orEmpty().filter { it.isNotBlank() }
+
+    /** Every *sealed* store's plaintext becomes an encrypted one, then stops
+     *  existing. Eager, because a vault whose secrets are still readable on
+     *  disk until each store next happens to be opened is not a vault. */
+    private fun migratePlaintext(dir: File, k: ByteArray) {
+        for (name in sealedNames(dir)) migrateOne(dir, name, k)
+    }
+
+    /** One store, by name — also the lazy path for a name recorded after a
+     *  vault already existed. */
+    internal fun migrateOne(root: File, name: String, k: ByteArray) {
+        val prefs = File(root, "prefs")
+        val plain = File(prefs, "$name.json")
+        val enc = File(prefs, "$name.enc")
+        if (!plain.isFile || enc.isFile) return
+        runCatching {
+            val body = plain.readText()
+            writeEncrypted(enc, k, body)
+            // Read it back before letting go of the only other copy.
+            check(readEncrypted(enc, k) == body) { "re-read did not match" }
+            plain.delete()
+            DucatLog.i("DeskVault", "encrypted $name")
+        }.onFailure { DucatLog.w("DeskVault", "migrating $name: ${it.message}") }
     }
 
     internal fun writeEncrypted(file: File, k: ByteArray, body: String) {
@@ -225,9 +270,22 @@ fun securePrefs(context: Context, name: String): SharedPreferences {
         check(root == null || !DeskVault.exists(root)) {
             "this desk is locked; unlock it before reading $name"
         }
+        // Recorded even here: this is the unsealed desk, and it is exactly
+        // when the list has to be built — a store first touched before a
+        // vault exists is the common case, not the exception.
+        if (root != null) DeskVault.noteSealed(root, name)
         return context.getSharedPreferences(name, 0)
     }
-    return cache.getOrPut(name) { VaultPreferences(File(root, "prefs/$name.enc"), k) }
+    return cache.getOrPut(name) {
+        // A vault made before this store existed still has its plaintext
+        // beside it; encrypt that one, here, where we know the name is a
+        // sealed store rather than one of the deliberately plain ones.
+        if (root != null) {
+            DeskVault.noteSealed(root, name)
+            DeskVault.migrateOne(root, name, k)
+        }
+        VaultPreferences(File(root, "prefs/$name.enc"), k)
+    }
 }
 
 internal fun clearPrefsCache() = cache.clear()

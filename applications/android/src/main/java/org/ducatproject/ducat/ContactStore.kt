@@ -1014,6 +1014,11 @@ class ContactStore(context: Context) {
     private val appStateKeys =
         listOf(
             "tabs_v1", "publish_address", "receipts_v1", "claimed_kis_v1", "issued_cards",
+            // The donation box's replay guard: the only thing standing
+            // between a restored charity and a second receipt for every
+            // donation it ever took. It lives in this store, so it costs
+            // one name rather than a block.
+            "donation_receipted",
             // The hat that was on. Found missing by backuptest's persona
             // round: the roster restored and the phone woke wearing the
             // primary, which for a shop that lives in its second persona
@@ -1100,6 +1105,33 @@ class ContactStore(context: Context) {
         // longer knew.
         securePrefs(appContext, "ducat_groups").getString("groups", null)
             ?.let { o.put("groups_raw", it) }
+        // The publish card's binding. `subcards` is the only mapping from
+        // an inbox key to the publication it enrols into, and the standing
+        // press code is minted once and left on a counter for a week — so a
+        // restore that brings back `pubs` (with its unexpired press_code, so
+        // nothing re-mints) and `issued_cards` (so the printed QR still
+        // resolves) but not this leaves every scan landing in enrollFromCard's
+        // `?: return`. The customer becomes an ordinary contact, is never
+        // enrolled, never billed and never sent the issue, and nothing is
+        // logged because the log line sits after the early return.
+        securePrefs(appContext, "ducat_publications").getString("subcards", null)
+            ?.let { o.put("subcards_raw", it) }
+        // Standing bills: who pays, how much, how often, next due. Typed in
+        // by hand, derivable from nothing, and their absence is silent —
+        // the poller simply stops minting requests and the money stops
+        // arriving a month later.
+        securePrefs(appContext, "ducat_recurring").getString("bills", null)
+            ?.let { o.put("recurring_raw", it) }
+        // What a thread is *about* — the listing behind an enquiry, which is
+        // how the address and key handover get offered once there is a
+        // booking to give them to. Without it a restored host has threads
+        // whose subject nothing on the device knows.
+        org.json.JSONObject().let { enq ->
+            securePrefs(appContext, "ducat_enquiries").all.forEach { (k, v) ->
+                if (v is String) enq.put(k, v)
+            }
+            if (enq.length() > 0) o.put("enquiries_raw", enq.toString())
+        }
         // §16.22's addresses, and — once a phone can publish one — the
         // owner keypair that is the site's write authority.
         //
@@ -1190,6 +1222,22 @@ class ContactStore(context: Context) {
                 o.optString("sites_raw").takeIf { it.isNotEmpty() }?.let {
                     securePrefs(appContext, "ducat_sites").edit()
                         .putString("sites", it).apply()
+                }
+                o.optString("subcards_raw").takeIf { it.isNotEmpty() }?.let {
+                    securePrefs(appContext, "ducat_publications").edit()
+                        .putString("subcards", it).apply()
+                }
+                o.optString("recurring_raw").takeIf { it.isNotEmpty() }?.let {
+                    securePrefs(appContext, "ducat_recurring").edit()
+                        .putString("bills", it).apply()
+                }
+                o.optString("enquiries_raw").takeIf { it.isNotEmpty() }?.let { raw ->
+                    runCatching {
+                        val enq = JSONObject(raw)
+                        val e2 = securePrefs(appContext, "ducat_enquiries").edit()
+                        enq.keys().forEach { k -> e2.putString(k, enq.getString(k)) }
+                        e2.apply()
+                    }
                 }
                 appStateKeys.forEach { k ->
                     if (o.has(k)) when (val v = o.get(k)) {

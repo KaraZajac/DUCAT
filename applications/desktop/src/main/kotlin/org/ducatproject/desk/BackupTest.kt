@@ -225,6 +225,23 @@ private fun appState() {
         """"digest":"aa","updated":1,"added":1,"keep":true,"sec":"owner-secret"}]"""
     src.getSharedPreferences("ducat_sites", 0).edit().putString("sites", sites).apply()
 
+    // Four more stores the bundle never named, each holding something the
+    // user cannot be handed again. subcards is the only inboxKey->pubId
+    // mapping, so without it a publish card already on a counter enrols
+    // nobody; bills are typed-in standing payments; enquiries is what a
+    // thread is *about*; donation_receipted is a charity's only guard
+    // against receipting every past donation a second time.
+    val subcards = """{"VLD0:inbox-a":"pub-1"}"""
+    val bills = """[{"id":"B1","personaHex":"aa","amountPxmr":1000,"monthly":true}]"""
+    src.getSharedPreferences("ducat_publications", 0).edit()
+        .putString("subcards", subcards).apply()
+    src.getSharedPreferences("ducat_recurring", 0).edit()
+        .putString("bills", bills).apply()
+    src.getSharedPreferences("ducat_enquiries", 0).edit()
+        .putString("about_aa11", """{"title":"Kayak","listingId":"L1"}""").apply()
+    src.getSharedPreferences("ducat_contacts", 0).edit()
+        .putString("donation_receipted", """["txid-one","txid-two"]""").apply()
+
     val blob = ContactStore(src).backupAppState()
 
     val restored = RestoredBackup(
@@ -284,6 +301,16 @@ private fun appState() {
     check(cat == catalogue) { "BACKUPTEST_FAIL catalogue: got $cat" }
     val sit = dst.getSharedPreferences("ducat_sites", 0).getString("sites", null)
     check(sit == sites) { "BACKUPTEST_FAIL sites: got $sit" }
+    val sc = dst.getSharedPreferences("ducat_publications", 0).getString("subcards", null)
+    check(sc == subcards) { "BACKUPTEST_FAIL subcards: got $sc" }
+    val bl = dst.getSharedPreferences("ducat_recurring", 0).getString("bills", null)
+    check(bl == bills) { "BACKUPTEST_FAIL recurring bills: got $bl" }
+    val en = dst.getSharedPreferences("ducat_enquiries", 0).getString("about_aa11", null)
+    check(en != null && en.contains("L1")) { "BACKUPTEST_FAIL enquiry subject: got $en" }
+    val dr = dst.getSharedPreferences("ducat_contacts", 0).getString("donation_receipted", null)
+    check(dr != null && dr.contains("txid-two")) {
+        "BACKUPTEST_FAIL donation replay guard: got $dr"
+    }
     check(sit?.contains("owner-secret") == true) {
         "BACKUPTEST_FAIL a site came back with no way to update it"
     }

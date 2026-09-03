@@ -197,7 +197,20 @@ object Ceremony {
     fun backupShares(context: Context): List<uniffi.ducat_mobile.EscrowShareEntry> =
         all(context)
             .asSequence()
-            .filterNot { isFinished(it) }
+            // "released" and "aborted" only — NOT isFinished, which also
+            // matches `release_cosigned`, and this file already says what
+            // that stage means: the co-signer has written itself finished
+            // and both screens read as settled "while the money sits in the
+            // escrow. Found exactly that way, with a settled banner on one
+            // phone and a stuck one on the other." A proposer that died
+            // before broadcasting re-proposes, which is the designed
+            // recovery — and onFrostRound gives up at `load(...) ?: return`
+            // if this device restored without the record. Dropping it makes
+            // a two-party deposit permanently unspendable, with nothing on
+            // either screen to say so. sweep() refuses to delete any record
+            // holding a share for the same reason; the backup was throwing
+            // away precisely what the sweep keeps for ever.
+            .filterNot { it.optString("stage") in setOf("released", "aborted") }
             .mapNotNull { o ->
                 val id = hexToBytes(o.optString("id")) ?: return@mapNotNull null
                 // No key package yet means the DKG never finished, so there is

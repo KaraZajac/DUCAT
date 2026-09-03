@@ -40,6 +40,9 @@ fun main() {
     val spend = "a".repeat(64)
     WalletStore(context).save("5Test", spend, 2_190_000uL, true)
     val persona = PersonaStore(context).secret()
+    // A store that is deliberately plain, written before the vault exists —
+    // exactly how ducat_locale, ducat_units and the rest are used.
+    context.getSharedPreferences("ducat_locale", 0).edit().putString("lang", "fr").apply()
     check("plaintext desk still works", WalletStore(context).spendKeyHex() == spend)
     check("and its secret is visibly on disk", onDisk().contains(spend),
         "which is what the vault is for")
@@ -47,8 +50,33 @@ fun main() {
     // 2. Setting a passphrase encrypts what is already there.
     val made = DeskVault.create(base, "correct horse battery")
     check("vault created", made.isSuccess, made.exceptionOrNull()?.message ?: "")
-    check("plaintext store is gone", base.walk().none { it.name.endsWith(".json") && it.parentFile.name == "prefs" })
+    // The *sealed* stores' plaintext is gone. Not "no .json at all": the
+    // deliberately-plain stores live in the same directory and must survive,
+    // which is the bug the check below covers. The security property is the
+    // two checks after this one — the spend key and the persona secret are
+    // no longer readable — not the absence of every file.
+    check(
+        "the sealed store's plaintext is gone",
+        !File(base, "prefs/ducat_contacts.json").isFile,
+    )
     check("sealed store exists", base.walk().any { it.name.endsWith(".enc") })
+
+    // A store that is deliberately NOT sealed must survive the vault being
+    // created. DeskContext writes every store as prefs/<name>.json, so the
+    // migration used to glob the lot — encrypting and deleting the plain
+    // ones too, after which their own reader opened <name>.json, found
+    // nothing, and read as empty: a desk reverting to the system language
+    // with the operator's choice still on disk in a file nothing would ever
+    // open again. Only names securePrefs has been asked for are its
+    // business now.
+    run {
+        val plainStore = context.getSharedPreferences("ducat_locale", 0)
+        check(plainStore.getString("lang", null) == "fr") {
+            "VAULT_FAIL a deliberately-plain store was eaten by the vault: " +
+                "lang=${plainStore.getString("lang", null)}"
+        }
+        println("VAULT ok   a deliberately-plain store is left alone")
+    }
     val after = onDisk()
     check("spend key no longer on disk in the clear", !after.contains(spend))
     check("persona secret no longer on disk in the clear",
