@@ -554,7 +554,16 @@ pub fn node_status() -> NodeStatus {
     match node.rt.block_on(node.api.get_state()) {
         Ok(s) => NodeStatus {
             running: true,
-            attached: !matches!(s.attachment.state, AttachmentState::Detached),
+            // veilid's own test, not "anything but Detached". Attaching is
+            // not attached — its own doc says "not yet able to perform
+            // network operations" — and it is the state a node sits in when
+            // it cannot reach the network at all. Reported as attached, the
+            // status screen put a tick beside the one line whose whole job
+            // is to say whether the transport is up, on a phone showing
+            // "0 live, 0 reliable" two rows below it. is_attached() excludes
+            // Detached, Attaching and Detaching, and cannot drift from the
+            // enum the way a hand-written match can.
+            attached: s.attachment.state.is_attached(),
             public_internet_ready: s.attachment.public_internet_ready,
             peers: u64::from(s.attachment.live_peer_count) as u32,
             reliable_peers: u64::from(s.attachment.reliable_peer_count) as u32,
