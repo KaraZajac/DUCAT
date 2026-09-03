@@ -1087,6 +1087,20 @@ class ContactStore(context: Context) {
         // longer knew.
         securePrefs(appContext, "ducat_groups").getString("groups", null)
             ?.let { o.put("groups_raw", it) }
+        // §16.22's addresses, and — once a phone can publish one — the
+        // owner keypair that is the site's write authority.
+        //
+        // The reader's half of this is mild: a site's address is public, so
+        // a restored phone that has forgotten one can be handed it again.
+        // The publisher's half is not recoverable by anyone. `ducat:site/…`
+        // *is* the record key, readers keep it across every update, and the
+        // owner secret is the only thing that can rewrite the head. Lose it
+        // and the address keeps serving the last bundle it was pointed at,
+        // for as long as anyone mirrors it, with no way for the person who
+        // made it to correct a word — which is the failure this line exists
+        // to prevent. Carried whole, like the publisher's masters above.
+        securePrefs(appContext, "ducat_sites").getString("sites", null)
+            ?.let { o.put("sites_raw", it) }
         return o.toString().toByteArray(Charsets.UTF_8)
     }
 
@@ -1159,6 +1173,10 @@ class ContactStore(context: Context) {
                 o.optString("groups_raw").takeIf { it.isNotEmpty() }?.let {
                     securePrefs(appContext, "ducat_groups").edit()
                         .putString("groups", it).apply()
+                }
+                o.optString("sites_raw").takeIf { it.isNotEmpty() }?.let {
+                    securePrefs(appContext, "ducat_sites").edit()
+                        .putString("sites", it).apply()
                 }
                 appStateKeys.forEach { k ->
                     if (o.has(k)) when (val v = o.get(k)) {

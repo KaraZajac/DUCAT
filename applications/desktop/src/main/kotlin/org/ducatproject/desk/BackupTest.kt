@@ -214,6 +214,17 @@ private fun appState() {
     src.getSharedPreferences("ducat_catalogue", 0).edit()
         .putString("items", catalogue).apply()
 
+    // §16.22's store, which is a third one outside ducat_contacts. The saved
+    // addresses are the mild half — a site's address is public and can be
+    // handed over again. The `sec` below is the half nothing can replace:
+    // the record's owner secret is the only key that can rewrite a site's
+    // head, `ducat:site/<key>` is the address strangers have saved, and
+    // without it the address serves its last bundle for ever with no way for
+    // the person who made it to change a word.
+    val sites = """[{"rec":"VLD0:abc","title":"The Corner Shop","share":"VLD0:s",""" +
+        """"digest":"aa","updated":1,"added":1,"keep":true,"sec":"owner-secret"}]"""
+    src.getSharedPreferences("ducat_sites", 0).edit().putString("sites", sites).apply()
+
     val blob = ContactStore(src).backupAppState()
 
     val restored = RestoredBackup(
@@ -271,6 +282,11 @@ private fun appState() {
     check(lst == listings) { "BACKUPTEST_FAIL listings: got $lst" }
     val cat = dst.getSharedPreferences("ducat_catalogue", 0).getString("items", null)
     check(cat == catalogue) { "BACKUPTEST_FAIL catalogue: got $cat" }
+    val sit = dst.getSharedPreferences("ducat_sites", 0).getString("sites", null)
+    check(sit == sites) { "BACKUPTEST_FAIL sites: got $sit" }
+    check(sit?.contains("owner-secret") == true) {
+        "BACKUPTEST_FAIL a site came back with no way to update it"
+    }
 
     // A bundle carrying keys the export would never write must not be able to
     // put them in this store — it is the same file as wallet_spend and
