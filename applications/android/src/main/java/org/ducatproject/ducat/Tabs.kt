@@ -408,7 +408,26 @@ class TabStore(private val context: Context) {
                 taxPxmr = tab.taxPxmr,
                 settledTotal = total,
                 settledAt = System.currentTimeMillis(),
-                knownKis = wallet.entries().map { e -> e.keyImage },
+                // Only what the height test cannot already rule out.
+                //
+                // This snapshotted every key image the wallet held, and
+                // wallet_outputs keeps spent ones — so a till's tab store
+                // grew by the whole wallet per sale, and a month in, one
+                // sale's row carried thousands of 64-hex strings. `all()`
+                // decrypts and parses the lot on every read.
+                //
+                // The matcher below requires `e.height > tab.tipAtBill`, so
+                // an entry at or below the tip at bill time can never match
+                // whatever this list says. Excluding those changes no
+                // outcome and leaves the handful that could actually
+                // collide: the unconfirmed, and anything mined since. When
+                // the tip is unknown (0) the height test is disabled and
+                // this list is the only guard, so it stays whole.
+                knownKis = wallet.tip().let { tip ->
+                    wallet.entries()
+                        .filter { e -> tip == 0L || e.height == 0L || e.height > tip }
+                        .map { e -> e.keyImage }
+                },
                 tipAtBill = wallet.tip(),
             )
         } ?: throw IllegalStateException("that tab is gone")

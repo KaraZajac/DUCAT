@@ -25,6 +25,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.Groups
 import org.ducatproject.ducat.PersonaStore
@@ -808,7 +809,11 @@ private fun SplitSheet(idHex: String, group: Groups.Group, onDone: () -> Unit) {
         val xmr = if (fiatEntry && rate != null && rate > 0) {
             v.divide(java.math.BigDecimal.valueOf(rate), 12, java.math.RoundingMode.DOWN)
         } else v
-        xmr.multiply(java.math.BigDecimal(1_000_000_000_000L)).toLong().takeIf { it > 0 }
+        // Amounts.toPxmr, which is longValueExact and returns null rather
+        // than wrapping. `.toLong()` is longValue(): it keeps the low 64
+        // bits, so a pasted 2^64+1 came through as exactly 1 XMR and the
+        // sheet split a number nobody typed.
+        Amounts.toPxmr(xmr)?.takeIf { it > 0 }
     }
     val share = if (pxmr != null && checked.isNotEmpty()) pxmr / checked.size else null
     val debtors = checked.filter { it !in mine }

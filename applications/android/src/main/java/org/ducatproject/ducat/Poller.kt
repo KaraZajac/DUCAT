@@ -260,8 +260,22 @@ class Poller(private val context: Context) {
                 runCatching {
                     TabStore(context).sweepAbandoned(
                         System.currentTimeMillis(),
+                        // A taxi's live tab belongs here too. A bill that
+                        // fails to send puts the tab back to "open" and
+                        // leaves the ride running (Tabs.settle's catch), so
+                        // a driver whose phone was offline at the kerb has
+                        // an open taxi tab with a meter still attached — and
+                        // a day later this deleted it, taking the fare with
+                        // it while the ride screen went on showing one.
                         keep = Orders.all(context).mapNotNull { it.tabId }.toSet() +
-                            Publications.billedTabIds(context),
+                            Publications.billedTabIds(context) +
+                            // Read straight from the store: the ride's own
+                            // RideStore is private to the taxi screen, and
+                            // this is one key.
+                            setOfNotNull(
+                                securePrefs(context, "ducat_contacts")
+                                    .getString("ride_tab", null),
+                            ),
                     )
                 }.onFailure { DucatLog.w(TAG, "tab sweep: ${it.message}") }
                 // Donation threads get their receipts on the same clock the

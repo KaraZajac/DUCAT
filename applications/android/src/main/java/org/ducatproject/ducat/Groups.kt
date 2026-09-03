@@ -209,7 +209,15 @@ object Groups {
         upsert(context, fresh.copy(myGroupSeq = seq))
         val store = ContactStore(context)
         for (m in g.members.filter { it != mine }) {
-            val c = store.all().firstOrNull { it.personaHex == m } ?: continue
+            val c = store.all().firstOrNull { it.personaHex == m }
+            if (c == null) {
+                // Said, not swallowed. A member this phone does not hold is
+                // exactly the mesh gap `missing` exists to report, and
+                // dropping them here quietly meant a roster that reached
+                // everyone but the person it was about to add.
+                DucatLog.w(TAG, "roster: ${m.take(8)}… is not a contact — not sent")
+                continue
+            }
             runCatching {
                 Mailbox.send(
                     context, c, "group: ${g.name}",
@@ -281,7 +289,15 @@ object Groups {
         val store = ContactStore(context)
         var failed = 0
         for (m in g.members.filter { it != mine }) {
-            val c = store.all().firstOrNull { it.personaHex == m } ?: continue
+            val c = store.all().firstOrNull { it.personaHex == m }
+            if (c == null) {
+                // Said, not swallowed. Fan-out reaches a member through
+                // the pairwise thread, so one this phone does not hold gets
+                // no copy at all — the mesh gap `missing` exists to report,
+                // arriving here as a member who silently never received it.
+                DucatLog.w(TAG, "send: ${m.take(8)}… is not a contact — their copy not written")
+                continue
+            }
             runCatching {
                 Mailbox.send(
                     context, c, body,

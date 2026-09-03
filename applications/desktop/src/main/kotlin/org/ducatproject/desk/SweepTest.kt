@@ -50,7 +50,15 @@ fun main() {
     // of now, which Elapsed.due would read as due.
     val future = tab("pos", now + TabStore.ABANDONED_MS + TabStore.ABANDONED_MS / 2)
 
-    val took = store.sweepAbandoned(now, keep = setOf(staleOrder))
+    // A taxi whose bill failed to send: settle's catch puts the tab back to
+    // "open" and leaves the ride running, so a driver who was offline at the
+    // kerb has an open taxi tab with a live meter behind it. The sweep sees
+    // "open", not "bar", older than a day — and deleting it takes the fare
+    // while the ride screen still shows one. The poller passes it in the
+    // keep-set; this is that contract.
+    val liveRide = tab("taxi", old)
+
+    val took = store.sweepAbandoned(now, keep = setOf(staleOrder, liveRide))
     val left = store.all().map { it.id }.toSet()
 
     check("the abandoned counter sale goes", staleSale !in left)
@@ -58,26 +66,27 @@ fun main() {
     check("a sale from a minute ago stays", freshSale in left)
     check("the bar's running account stays", staleBar in left)
     check("a tab an order still reads stays", staleOrder in left)
+    check("and the tab a running ride is billing through", liveRide in left)
     check("a billed tab stays, whatever its origin", staleBilled in left)
     check("a stamp from the future stays", future in left)
 
     // Idempotent: nothing left to take, and the second pass says so rather
     // than reporting work it did not do.
-    check("a second pass takes nothing", store.sweepAbandoned(now, keep = setOf(staleOrder)) == 0)
+    check("a second pass takes nothing", store.sweepAbandoned(now, keep = setOf(staleOrder, liveRide)) == 0)
 
     // A day later the fresh one has aged into debris, and the guarded ones
     // have not moved.
     val later = now + TabStore.ABANDONED_MS + 1
     check(
         "the sale ages into the sweep",
-        store.sweepAbandoned(later, keep = setOf(staleOrder)) == 1,
+        store.sweepAbandoned(later, keep = setOf(staleOrder, liveRide)) == 1,
     )
     val end = store.all().map { it.id }.toSet()
-    check("and the guards still hold a day on", end == setOf(staleBar, staleOrder, staleBilled, future))
+    check("and the guards still hold a day on", end == setOf(staleBar, staleOrder, staleBilled, future, liveRide))
 
     // Dropping the keep-set is what an order being finished looks like.
     check("an unreferenced order tab goes once nothing reads it",
-        store.sweepAbandoned(later, keep = emptySet()) == 1)
+        store.sweepAbandoned(later, keep = emptySet()) == 2)
     check("leaving the bar and the billed tab", store.all().map { it.id }.toSet() == setOf(staleBar, staleBilled, future))
 
     if (failures > 0) {
