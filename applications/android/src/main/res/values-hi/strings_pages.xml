@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mode_pages">पन्ने</string>
+    <string name="mode_pages_desc">नेटवर्क पर एक पन्ना रखें, ऐसे पते पर जो आपका है। ऑफ़लाइन पढ़ा जाता है, जो चाहे उसे मिरर करता है।</string>
+    <string name="pages_tab_address">पता</string>
+    <string name="pages_tab_room">पन्ना</string>
+    <string name="pages_none_title">अभी कोई पन्ना नहीं</string>
+    <string name="pages_none_body">पन्ना एक छोटी साइट है, ऐसे पते पर जो हमेशा आपका रहेगा। एक लिखिए और जिसके पास पता है वह पढ़ सकेगा।</string>
+    <string name="pages_open_room">पन्ना लिखें</string>
+    <string name="pages_address_hint">जिसके पास यह पता है, वह आपका पन्ना पढ़ सकता है।</string>
+    <string name="pages_serving_title">इसी फ़ोन से परोसा जा रहा है</string>
+    <string name="pages_serving_body">पन्ना वहीं जीता है जहाँ कोई उसे परोसे। जब तक कोई पाठक उसे जीवित रखना न चुने, वह कोई यही फ़ोन है — DUCAT बंद कीजिए और पन्ना दोबारा खोलने तक चुप हो जाएगा।</string>
+    <string name="pages_copy_address">पता कॉपी करें</string>
+    <string name="pages_address_copied">पता कॉपी हुआ</string>
+    <string name="pages_preview">झलक</string>
+    <string name="pages_edit">पन्ना संपादित करें</string>
+    <string name="pages_more">और %1$d अन्य</string>
+    <string name="pages_room_new">अपना पन्ना लिखें</string>
+    <string name="pages_room_update">अपना पन्ना अपडेट करें</string>
+    <string name="pages_room_body">यहाँ का सब कुछ पन्ने पर जाता है। खाली छोड़ा गया खाना छूट जाता है।</string>
+    <string name="pages_field_title">नाम</string>
+    <string name="pages_field_tagline">इसके बारे में एक पंक्ति</string>
+    <string name="pages_field_body">आप जो कहना चाहते हैं</string>
+    <string name="pages_field_hours">समय (वैकल्पिक)</string>
+    <string name="pages_field_contact">आप कहाँ मिलेंगे (वैकल्पिक)</string>
+    <string name="pages_publish">प्रकाशित करें</string>
+    <string name="pages_update">अपडेट करें</string>
+    <string name="pages_published">प्रकाशित। पता नहीं बदला है।</string>
+    <string name="pages_zip_title">पहले से पन्ना है?</string>
+    <string name="pages_zip_body">ऐसा .zip चुनें जिसकी जड़ में index.html हो। वह अपने बाहर किसी चीज़ का संदर्भ न दे — नेटवर्क तक पहुँचने वाला पन्ना यहीं अस्वीकार होता है, किसी और के फ़ोन पर टूटने के बजाय।</string>
+    <string name="pages_zip_pick">.zip चुनें</string>
+</resources>

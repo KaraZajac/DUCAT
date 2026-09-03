@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mode_pages">Sayfalar</string>
+    <string name="mode_pages_desc">Ağa, size ait bir adreste bir sayfa koyun. Çevrimdışı okunur, isteyen herkesçe yansılanır.</string>
+    <string name="pages_tab_address">Adres</string>
+    <string name="pages_tab_room">Sayfa</string>
+    <string name="pages_none_title">Henüz sayfa yok</string>
+    <string name="pages_none_body">Sayfa, kalıcı olarak size ait bir adresteki küçük bir sitedir. Bir tane yazın; adrese sahip herkes okuyabilsin.</string>
+    <string name="pages_open_room">Sayfa yaz</string>
+    <string name="pages_address_hint">Bu adrese sahip herkes sayfanızı okuyabilir.</string>
+    <string name="pages_serving_title">Bu telefondan sunuluyor</string>
+    <string name="pages_serving_body">Bir sayfa, birileri onu sunduğu sürece yaşar. Bir okur onu canlı tutmayı seçene dek o birileri bu telefondur — DUCAT’ı kapatın, sayfa siz yeniden açana dek susar.</string>
+    <string name="pages_copy_address">Adresi kopyala</string>
+    <string name="pages_address_copied">Adres kopyalandı</string>
+    <string name="pages_preview">Önizleme</string>
+    <string name="pages_edit">Sayfayı düzenle</string>
+    <string name="pages_more">ve %1$d tane daha</string>
+    <string name="pages_room_new">Sayfanızı yazın</string>
+    <string name="pages_room_update">Sayfanızı güncelleyin</string>
+    <string name="pages_room_body">Buradaki her şey sayfaya gider. Boş bırakılan alan dışarıda kalır.</string>
+    <string name="pages_field_title">Ad</string>
+    <string name="pages_field_tagline">Hakkında tek satır</string>
+    <string name="pages_field_body">Söylemek istedikleriniz</string>
+    <string name="pages_field_hours">Saatler (isteğe bağlı)</string>
+    <string name="pages_field_contact">Sizi nerede bulacakları (isteğe bağlı)</string>
+    <string name="pages_publish">Yayımla</string>
+    <string name="pages_update">Güncelle</string>
+    <string name="pages_published">Yayımlandı. Adres değişmedi.</string>
+    <string name="pages_zip_title">Zaten bir sayfanız var mı?</string>
+    <string name="pages_zip_body">Kökünde index.html olan bir .zip seçin. Dışarıdan hiçbir şeye başvurmamalı — ağa uzanan bir sayfa, başkasının telefonunda bozulmak yerine burada reddedilir.</string>
+    <string name="pages_zip_pick">Bir .zip seç</string>
+</resources>

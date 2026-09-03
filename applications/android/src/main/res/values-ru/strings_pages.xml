@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mode_pages">Страницы</string>
+    <string name="mode_pages_desc">Разместите страницу в сети по адресу, который принадлежит вам. Читается офлайн, зеркалится теми, кто захочет.</string>
+    <string name="pages_tab_address">Адрес</string>
+    <string name="pages_tab_room">Страница</string>
+    <string name="pages_none_title">Страницы пока нет</string>
+    <string name="pages_none_body">Страница — небольшой сайт по адресу, который навсегда ваш. Напишите её, и любой, у кого есть адрес, сможет её прочитать.</string>
+    <string name="pages_open_room">Написать страницу</string>
+    <string name="pages_address_hint">Любой, у кого есть этот адрес, может прочитать вашу страницу.</string>
+    <string name="pages_serving_title">Раздаётся с этого телефона</string>
+    <string name="pages_serving_body">Страница живёт там, где её кто-то раздаёт. Пока читатель не решит её поддерживать, это ваш телефон — закройте DUCAT, и страница замолчит до следующего запуска.</string>
+    <string name="pages_copy_address">Скопировать адрес</string>
+    <string name="pages_address_copied">Адрес скопирован</string>
+    <string name="pages_preview">Предпросмотр</string>
+    <string name="pages_edit">Изменить страницу</string>
+    <string name="pages_more">и ещё %1$d</string>
+    <string name="pages_room_new">Напишите свою страницу</string>
+    <string name="pages_room_update">Обновите свою страницу</string>
+    <string name="pages_room_body">Всё отсюда попадает на страницу. Пустое поле не выводится.</string>
+    <string name="pages_field_title">Название</string>
+    <string name="pages_field_tagline">Строка о ней</string>
+    <string name="pages_field_body">Что вы хотите сказать</string>
+    <string name="pages_field_hours">Часы работы (необязательно)</string>
+    <string name="pages_field_contact">Где вас найти (необязательно)</string>
+    <string name="pages_publish">Опубликовать</string>
+    <string name="pages_update">Обновить</string>
+    <string name="pages_published">Опубликовано. Адрес не изменился.</string>
+    <string name="pages_zip_title">Уже есть страница?</string>
+    <string name="pages_zip_body">Выберите .zip с index.html в корне. Он не должен ссылаться ни на что внешнее — страница, тянущаяся в сеть, отклоняется здесь, а не ломается на чужом телефоне.</string>
+    <string name="pages_zip_pick">Выбрать .zip</string>
+</resources>

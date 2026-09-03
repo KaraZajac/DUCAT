@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mode_pages">Pages</string>
+    <string name="mode_pages_desc">Put a page on the network at an address you own. Readable offline, mirrored by whoever chooses to.</string>
+    <string name="pages_tab_address">Address</string>
+    <string name="pages_tab_room">Page</string>
+    <string name="pages_none_title">No page yet</string>
+    <string name="pages_none_body">A page is a small site at an address that is yours for good. Write one and anyone with the address can read it.</string>
+    <string name="pages_open_room">Write a page</string>
+    <string name="pages_address_hint">Anyone with this address can read your page.</string>
+    <string name="pages_serving_title">Served from this phone</string>
+    <string name="pages_serving_body">A page lives where someone serves it. Until a reader chooses to keep it alive, that is this phone — close DUCAT and the page goes quiet until you open it again.</string>
+    <string name="pages_copy_address">Copy address</string>
+    <string name="pages_address_copied">Address copied</string>
+    <string name="pages_preview">Preview</string>
+    <string name="pages_edit">Edit page</string>
+    <string name="pages_more">and %1$d more</string>
+    <string name="pages_room_new">Write your page</string>
+    <string name="pages_room_update">Update your page</string>
+    <string name="pages_room_body">Everything here goes on the page. Leave a field blank and it is left out.</string>
+    <string name="pages_field_title">Name</string>
+    <string name="pages_field_tagline">One line about it</string>
+    <string name="pages_field_body">What you want to say</string>
+    <string name="pages_field_hours">Hours (optional)</string>
+    <string name="pages_field_contact">Where to find you (optional)</string>
+    <string name="pages_publish">Publish</string>
+    <string name="pages_update">Update</string>
+    <string name="pages_published">Published. The address has not changed.</string>
+    <string name="pages_zip_title">Already have a page?</string>
+    <string name="pages_zip_body">Pick a .zip with index.html at its root. It must not reference anything outside itself — a page that reaches the network is refused here rather than breaking on someone else\'s phone.</string>
+    <string name="pages_zip_pick">Choose a .zip</string>
+</resources>

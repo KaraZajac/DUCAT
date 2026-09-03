@@ -43,6 +43,9 @@ object Sites {
          */
         val ownerPublic: ByteArray? = null,
         val ownerSecret: ByteArray? = null,
+        /** The answers a page was written from, when it came from the
+         *  form rather than a picked archive — see PageTemplate. */
+        val page: String? = null,
     ) {
         /** Whether this phone can rewrite this site's head. */
         val mine: Boolean get() = ownerPublic != null && ownerSecret != null
@@ -58,7 +61,7 @@ object Sites {
                 fetchedDigestHex == other.fetchedDigestHex &&
                 fetchedShare == other.fetchedShare &&
                 ownerPublic.contentEquals(other.ownerPublic) &&
-                ownerSecret.contentEquals(other.ownerSecret)
+                ownerSecret.contentEquals(other.ownerSecret) && page == other.page
 
         override fun hashCode(): Int =
             recordKey.hashCode() * 31 + (ownerPublic?.contentHashCode() ?: 0)
@@ -95,6 +98,7 @@ object Sites {
                 fetchedShare = o.optString("fetched_share").ifBlank { null },
                 ownerPublic = o.optString("own_pub").ifBlank { null }?.let(::unb64),
                 ownerSecret = o.optString("own_sec").ifBlank { null }?.let(::unb64),
+                page = o.optString("page").ifBlank { null },
             )
         }
     }
@@ -121,7 +125,8 @@ object Sites {
                     .put("fetched", s.fetchedDigestHex ?: "")
                     .put("fetched_share", s.fetchedShare ?: "")
                     .put("own_pub", s.ownerPublic?.let(::b64) ?: "")
-                    .put("own_sec", s.ownerSecret?.let(::b64) ?: ""),
+                    .put("own_sec", s.ownerSecret?.let(::b64) ?: "")
+                    .put("page", s.page ?: ""),
             )
         }
         prefs(context).edit().putString("sites", arr.toString()).apply()
@@ -211,6 +216,7 @@ object Sites {
                 // the site frozen for good at whatever it last said.
                 ownerPublic = prior?.ownerPublic,
                 ownerSecret = prior?.ownerSecret,
+                page = prior?.page,
             )
             save(context, rest + entry)
             entry
@@ -312,6 +318,10 @@ object Sites {
         source: File,
         title: String,
         recordKey: String? = null,
+        /** The form answers this page was written from, when it was.
+         *  Kept so the composer can offer them back — a page written
+         *  from a picked archive has none and passes null. */
+        page: String? = null,
     ): Site {
         require(File(source, "index.html").isFile) { "a site needs an index.html at its root" }
         clearnetIn(source)?.let {
@@ -359,6 +369,7 @@ object Sites {
             fetchedShare = prior?.fetchedShare,
             ownerPublic = pub,
             ownerSecret = sec,
+            page = page ?: prior?.page,
         )
         synchronized(lock) {
             save(context, all(context).filterNot { it.recordKey == key } + base)

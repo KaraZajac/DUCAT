@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mode_pages">页面</string>
+    <string name="mode_pages_desc">把一个页面放到网络上，用属于你的地址。可离线阅读，愿意的人来镜像。</string>
+    <string name="pages_tab_address">地址</string>
+    <string name="pages_tab_room">页面</string>
+    <string name="pages_none_title">还没有页面</string>
+    <string name="pages_none_body">页面是放在一个永远属于你的地址上的小站点。写一个，任何拿到地址的人都能读。</string>
+    <string name="pages_open_room">写一个页面</string>
+    <string name="pages_address_hint">任何拿到这个地址的人都能读你的页面。</string>
+    <string name="pages_serving_title">由这台手机提供</string>
+    <string name="pages_serving_body">页面只在有人提供它时存在。在读者选择保留它之前，那个人就是这台手机——关掉 DUCAT，页面就安静下来，直到你再次打开。</string>
+    <string name="pages_copy_address">复制地址</string>
+    <string name="pages_address_copied">地址已复制</string>
+    <string name="pages_preview">预览</string>
+    <string name="pages_edit">编辑页面</string>
+    <string name="pages_more">另有 %1$d 个</string>
+    <string name="pages_room_new">写你的页面</string>
+    <string name="pages_room_update">更新你的页面</string>
+    <string name="pages_room_body">这里的内容都会出现在页面上。留空的字段会被略去。</string>
+    <string name="pages_field_title">名称</string>
+    <string name="pages_field_tagline">一句话介绍</string>
+    <string name="pages_field_body">你想说的话</string>
+    <string name="pages_field_hours">营业时间（可选）</string>
+    <string name="pages_field_contact">在哪里找到你（可选）</string>
+    <string name="pages_publish">发布</string>
+    <string name="pages_update">更新</string>
+    <string name="pages_published">已发布。地址没有变。</string>
+    <string name="pages_zip_title">已经有页面了？</string>
+    <string name="pages_zip_body">选择根目录含 index.html 的 .zip。它不得引用任何外部内容——伸手去网络的页面会在这里被拒绝，而不是在别人手机上出错。</string>
+    <string name="pages_zip_pick">选择 .zip</string>
+</resources>

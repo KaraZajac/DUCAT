@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mode_pages">ページ</string>
+    <string name="mode_pages_desc">自分の住所でページをネットワークに置きます。オフラインでも読め、望む人がミラーします。</string>
+    <string name="pages_tab_address">住所</string>
+    <string name="pages_tab_room">ページ</string>
+    <string name="pages_none_title">まだページがありません</string>
+    <string name="pages_none_body">ページは、ずっとあなたのものである住所に置く小さなサイトです。書けば、住所を知る人は誰でも読めます。</string>
+    <string name="pages_open_room">ページを書く</string>
+    <string name="pages_address_hint">この住所を知っている人は誰でもあなたのページを読めます。</string>
+    <string name="pages_serving_title">この端末から配信中</string>
+    <string name="pages_serving_body">ページは誰かが配信している間だけ生きています。読者が保持を選ぶまで、その誰かはこの端末です。DUCAT を閉じるとページは次に開くまで黙ります。</string>
+    <string name="pages_copy_address">住所をコピー</string>
+    <string name="pages_address_copied">住所をコピーしました</string>
+    <string name="pages_preview">プレビュー</string>
+    <string name="pages_edit">ページを編集</string>
+    <string name="pages_more">ほか %1$d 件</string>
+    <string name="pages_room_new">ページを書く</string>
+    <string name="pages_room_update">ページを更新する</string>
+    <string name="pages_room_body">ここに書いたものはすべてページに載ります。空欄は省かれます。</string>
+    <string name="pages_field_title">名前</string>
+    <string name="pages_field_tagline">ひとことで</string>
+    <string name="pages_field_body">伝えたいこと</string>
+    <string name="pages_field_hours">営業時間（任意）</string>
+    <string name="pages_field_contact">居場所（任意）</string>
+    <string name="pages_publish">公開</string>
+    <string name="pages_update">更新</string>
+    <string name="pages_published">公開しました。住所は変わっていません。</string>
+    <string name="pages_zip_title">すでにページがありますか？</string>
+    <string name="pages_zip_body">ルートに index.html がある .zip を選んでください。外部を参照してはいけません。ネットワークに手を伸ばすページは、他人の端末で壊れる前にここで拒否されます。</string>
+    <string name="pages_zip_pick">.zip を選ぶ</string>
+</resources>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mode_pages">Pagina’s</string>
+    <string name="mode_pages_desc">Zet een pagina op het netwerk, op een adres dat van jou is. Offline leesbaar, gespiegeld door wie dat wil.</string>
+    <string name="pages_tab_address">Adres</string>
+    <string name="pages_tab_room">Pagina</string>
+    <string name="pages_none_title">Nog geen pagina</string>
+    <string name="pages_none_body">Een pagina is een kleine site op een adres dat blijvend van jou is. Schrijf er een en iedereen met het adres kan hem lezen.</string>
+    <string name="pages_open_room">Een pagina schrijven</string>
+    <string name="pages_address_hint">Iedereen met dit adres kan je pagina lezen.</string>
+    <string name="pages_serving_title">Vanaf deze telefoon geserveerd</string>
+    <string name="pages_serving_body">Een pagina leeft waar iemand hem serveert. Tot een lezer hem in leven houdt, is dat deze telefoon — sluit DUCAT en de pagina zwijgt tot je hem weer opent.</string>
+    <string name="pages_copy_address">Adres kopiëren</string>
+    <string name="pages_address_copied">Adres gekopieerd</string>
+    <string name="pages_preview">Voorbeeld</string>
+    <string name="pages_edit">Pagina bewerken</string>
+    <string name="pages_more">en nog %1$d</string>
+    <string name="pages_room_new">Schrijf je pagina</string>
+    <string name="pages_room_update">Werk je pagina bij</string>
+    <string name="pages_room_body">Alles hier komt op de pagina. Een leeg veld blijft weg.</string>
+    <string name="pages_field_title">Naam</string>
+    <string name="pages_field_tagline">Eén regel erover</string>
+    <string name="pages_field_body">Wat je wilt zeggen</string>
+    <string name="pages_field_hours">Openingstijden (optioneel)</string>
+    <string name="pages_field_contact">Waar je te vinden bent (optioneel)</string>
+    <string name="pages_publish">Publiceren</string>
+    <string name="pages_update">Bijwerken</string>
+    <string name="pages_published">Gepubliceerd. Het adres is niet veranderd.</string>
+    <string name="pages_zip_title">Heb je al een pagina?</string>
+    <string name="pages_zip_body">Kies een .zip met index.html in de hoofdmap. Hij mag niets van buiten aanhalen — een pagina die het netwerk opzoekt wordt hier geweigerd in plaats van stuk te gaan op andermans telefoon.</string>
+    <string name="pages_zip_pick">Een .zip kiezen</string>
+</resources>

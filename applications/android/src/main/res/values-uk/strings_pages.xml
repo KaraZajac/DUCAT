@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mode_pages">Сторінки</string>
+    <string name="mode_pages_desc">Розмістіть сторінку в мережі за адресою, що належить вам. Читається офлайн, дзеркалиться охочими.</string>
+    <string name="pages_tab_address">Адреса</string>
+    <string name="pages_tab_room">Сторінка</string>
+    <string name="pages_none_title">Сторінки ще немає</string>
+    <string name="pages_none_body">Сторінка — невеликий сайт за адресою, яка назавжди ваша. Напишіть її, і кожен, хто має адресу, зможе прочитати.</string>
+    <string name="pages_open_room">Написати сторінку</string>
+    <string name="pages_address_hint">Кожен, хто має цю адресу, може прочитати вашу сторінку.</string>
+    <string name="pages_serving_title">Роздається з цього телефона</string>
+    <string name="pages_serving_body">Сторінка живе там, де хтось її роздає. Доки читач не вирішить підтримати її, це ваш телефон — закрийте DUCAT, і сторінка змовкне до наступного запуску.</string>
+    <string name="pages_copy_address">Копіювати адресу</string>
+    <string name="pages_address_copied">Адресу скопійовано</string>
+    <string name="pages_preview">Перегляд</string>
+    <string name="pages_edit">Змінити сторінку</string>
+    <string name="pages_more">і ще %1$d</string>
+    <string name="pages_room_new">Напишіть свою сторінку</string>
+    <string name="pages_room_update">Оновіть свою сторінку</string>
+    <string name="pages_room_body">Усе звідси потрапляє на сторінку. Порожнє поле не виводиться.</string>
+    <string name="pages_field_title">Назва</string>
+    <string name="pages_field_tagline">Рядок про неї</string>
+    <string name="pages_field_body">Що ви хочете сказати</string>
+    <string name="pages_field_hours">Години (необов’язково)</string>
+    <string name="pages_field_contact">Де вас знайти (необов’язково)</string>
+    <string name="pages_publish">Опублікувати</string>
+    <string name="pages_update">Оновити</string>
+    <string name="pages_published">Опубліковано. Адреса не змінилася.</string>
+    <string name="pages_zip_title">Уже маєте сторінку?</string>
+    <string name="pages_zip_body">Виберіть .zip з index.html у корені. Він не має посилатися ні на що зовнішнє — сторінка, що тягнеться в мережу, відхиляється тут, а не ламається на чужому телефоні.</string>
+    <string name="pages_zip_pick">Вибрати .zip</string>
+</resources>

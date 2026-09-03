@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mode_pages">หน้าเพจ</string>
+    <string name="mode_pages_desc">วางหน้าเพจไว้บนเครือข่าย ที่อยู่ซึ่งเป็นของคุณ อ่านออฟไลน์ได้ และใครก็ช่วยมิเรอร์ได้</string>
+    <string name="pages_tab_address">ที่อยู่</string>
+    <string name="pages_tab_room">หน้าเพจ</string>
+    <string name="pages_none_title">ยังไม่มีหน้าเพจ</string>
+    <string name="pages_none_body">หน้าเพจคือเว็บเล็ก ๆ บนที่อยู่ที่เป็นของคุณตลอดไป เขียนสักหน้า แล้วใครที่มีที่อยู่ก็อ่านได้</string>
+    <string name="pages_open_room">เขียนหน้าเพจ</string>
+    <string name="pages_address_hint">ใครก็ตามที่มีที่อยู่นี้อ่านหน้าเพจของคุณได้</string>
+    <string name="pages_serving_title">ให้บริการจากเครื่องนี้</string>
+    <string name="pages_serving_body">หน้าเพจอยู่ได้เมื่อมีคนให้บริการมัน จนกว่าผู้อ่านจะเลือกช่วยเก็บไว้ คนนั้นคือเครื่องนี้ — ปิด DUCAT แล้วหน้าเพจจะเงียบไปจนกว่าคุณจะเปิดอีกครั้ง</string>
+    <string name="pages_copy_address">คัดลอกที่อยู่</string>
+    <string name="pages_address_copied">คัดลอกที่อยู่แล้ว</string>
+    <string name="pages_preview">ดูตัวอย่าง</string>
+    <string name="pages_edit">แก้ไขหน้าเพจ</string>
+    <string name="pages_more">และอีก %1$d</string>
+    <string name="pages_room_new">เขียนหน้าเพจของคุณ</string>
+    <string name="pages_room_update">อัปเดตหน้าเพจของคุณ</string>
+    <string name="pages_room_body">ทุกอย่างตรงนี้จะขึ้นบนหน้าเพจ ช่องที่เว้นว่างจะถูกละไว้</string>
+    <string name="pages_field_title">ชื่อ</string>
+    <string name="pages_field_tagline">หนึ่งบรรทัดเกี่ยวกับมัน</string>
+    <string name="pages_field_body">สิ่งที่คุณอยากบอก</string>
+    <string name="pages_field_hours">เวลาทำการ (ไม่บังคับ)</string>
+    <string name="pages_field_contact">จะพบคุณได้ที่ไหน (ไม่บังคับ)</string>
+    <string name="pages_publish">เผยแพร่</string>
+    <string name="pages_update">อัปเดต</string>
+    <string name="pages_published">เผยแพร่แล้ว ที่อยู่ไม่เปลี่ยน</string>
+    <string name="pages_zip_title">มีหน้าเพจอยู่แล้ว?</string>
+    <string name="pages_zip_body">เลือกไฟล์ .zip ที่มี index.html อยู่ที่ราก ต้องไม่อ้างอิงสิ่งใดภายนอก — หน้าเพจที่เอื้อมไปหาเครือข่ายจะถูกปฏิเสธที่นี่ แทนที่จะพังบนเครื่องของคนอื่น</string>
+    <string name="pages_zip_pick">เลือกไฟล์ .zip</string>
+</resources>

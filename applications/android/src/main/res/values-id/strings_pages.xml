@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mode_pages">Halaman</string>
+    <string name="mode_pages_desc">Taruh halaman di jaringan, di alamat milik Anda. Terbaca luring, disalin siapa pun yang mau.</string>
+    <string name="pages_tab_address">Alamat</string>
+    <string name="pages_tab_room">Halaman</string>
+    <string name="pages_none_title">Belum ada halaman</string>
+    <string name="pages_none_body">Halaman adalah situs kecil di alamat yang jadi milik Anda selamanya. Tulis satu dan siapa pun yang punya alamatnya bisa membacanya.</string>
+    <string name="pages_open_room">Tulis halaman</string>
+    <string name="pages_address_hint">Siapa pun dengan alamat ini bisa membaca halaman Anda.</string>
+    <string name="pages_serving_title">Disajikan dari ponsel ini</string>
+    <string name="pages_serving_body">Halaman hidup di tempat seseorang menyajikannya. Sampai ada pembaca yang memilih menjaganya, itu adalah ponsel ini — tutup DUCAT dan halaman diam sampai Anda membukanya lagi.</string>
+    <string name="pages_copy_address">Salin alamat</string>
+    <string name="pages_address_copied">Alamat disalin</string>
+    <string name="pages_preview">Pratinjau</string>
+    <string name="pages_edit">Ubah halaman</string>
+    <string name="pages_more">dan %1$d lagi</string>
+    <string name="pages_room_new">Tulis halaman Anda</string>
+    <string name="pages_room_update">Perbarui halaman Anda</string>
+    <string name="pages_room_body">Semua di sini masuk ke halaman. Bidang kosong ditinggalkan.</string>
+    <string name="pages_field_title">Nama</string>
+    <string name="pages_field_tagline">Satu baris tentangnya</string>
+    <string name="pages_field_body">Yang ingin Anda sampaikan</string>
+    <string name="pages_field_hours">Jam buka (opsional)</string>
+    <string name="pages_field_contact">Tempat menemukan Anda (opsional)</string>
+    <string name="pages_publish">Terbitkan</string>
+    <string name="pages_update">Perbarui</string>
+    <string name="pages_published">Terbit. Alamatnya tidak berubah.</string>
+    <string name="pages_zip_title">Sudah punya halaman?</string>
+    <string name="pages_zip_body">Pilih .zip dengan index.html di akarnya. Tidak boleh merujuk apa pun dari luar — halaman yang menjangkau jaringan ditolak di sini alih-alih rusak di ponsel orang lain.</string>
+    <string name="pages_zip_pick">Pilih .zip</string>
+</resources>

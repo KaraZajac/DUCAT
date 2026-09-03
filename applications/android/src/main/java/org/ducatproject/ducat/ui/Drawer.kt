@@ -631,6 +631,7 @@ private fun ProfileSection() {
         org.ducatproject.ducat.Mode.Marketplace to stringResource(R.string.mode_marketplace),
         org.ducatproject.ducat.Mode.HireHelp to stringResource(R.string.mode_hire_help),
         org.ducatproject.ducat.Mode.Press to stringResource(R.string.mode_press),
+        org.ducatproject.ducat.Mode.Pages to stringResource(R.string.mode_pages),
     )
     val bindings = remember(version) {
         roster.associate { p ->
@@ -1171,6 +1172,11 @@ fun ModesScreen() {
             stringResource(R.string.mode_press_desc),
         ),
         Triple(
+            org.ducatproject.ducat.Mode.Pages,
+            stringResource(R.string.mode_pages),
+            stringResource(R.string.mode_pages_desc),
+        ),
+        Triple(
             org.ducatproject.ducat.Mode.Marketplace,
             stringResource(R.string.mode_marketplace),
             stringResource(R.string.mode_marketplace_desc),
@@ -1279,6 +1285,7 @@ private fun modeIcon(mode: org.ducatproject.ducat.Mode) = when (mode) {
     org.ducatproject.ducat.Mode.Marketplace -> Icons.Filled.Sell
     org.ducatproject.ducat.Mode.HireHelp -> Icons.Filled.Handyman
     org.ducatproject.ducat.Mode.Press -> Icons.AutoMirrored.Filled.MenuBook
+    org.ducatproject.ducat.Mode.Pages -> Icons.Filled.Public
 }
 
 /** Opens the sealed-room viewer for a fetched site. Injected: WebView is

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mode_pages">الصفحات</string>
+    <string name="mode_pages_desc">ضع صفحة على الشبكة، على عنوان يخصّك. تُقرأ دون اتصال، ويعكسها من يشاء.</string>
+    <string name="pages_tab_address">العنوان</string>
+    <string name="pages_tab_room">الصفحة</string>
+    <string name="pages_none_title">لا صفحة بعد</string>
+    <string name="pages_none_body">الصفحة موقع صغير على عنوان يبقى لك. اكتب واحدة، وكل من يملك العنوان يستطيع قراءتها.</string>
+    <string name="pages_open_room">اكتب صفحة</string>
+    <string name="pages_address_hint">كل من يملك هذا العنوان يستطيع قراءة صفحتك.</string>
+    <string name="pages_serving_title">تُقدَّم من هذا الهاتف</string>
+    <string name="pages_serving_body">الصفحة تحيا حيث يقدّمها أحد. وإلى أن يختار قارئ إبقاءها حيّة، فهذا الهاتف هو ذلك الأحد — أغلق DUCAT وتصمت الصفحة حتى تفتحه ثانية.</string>
+    <string name="pages_copy_address">نسخ العنوان</string>
+    <string name="pages_address_copied">نُسخ العنوان</string>
+    <string name="pages_preview">معاينة</string>
+    <string name="pages_edit">تحرير الصفحة</string>
+    <string name="pages_more">و%1$d غيرها</string>
+    <string name="pages_room_new">اكتب صفحتك</string>
+    <string name="pages_room_update">حدّث صفحتك</string>
+    <string name="pages_room_body">كل ما هنا يظهر على الصفحة. والحقل الفارغ يُترك.</string>
+    <string name="pages_field_title">الاسم</string>
+    <string name="pages_field_tagline">سطر واحد عنها</string>
+    <string name="pages_field_body">ما تريد قوله</string>
+    <string name="pages_field_hours">المواعيد (اختياري)</string>
+    <string name="pages_field_contact">أين تجدك (اختياري)</string>
+    <string name="pages_publish">انشر</string>
+    <string name="pages_update">حدّث</string>
+    <string name="pages_published">نُشرت. لم يتغيّر العنوان.</string>
+    <string name="pages_zip_title">ألديك صفحة بالفعل؟</string>
+    <string name="pages_zip_body">اختر ملف ‎.zip فيه index.html في جذره. يجب ألّا يشير إلى شيء خارجه — الصفحة التي تمتد إلى الشبكة تُرفض هنا بدل أن تتعطّل على هاتف شخص آخر.</string>
+    <string name="pages_zip_pick">اختر ملف ‎.zip</string>
+</resources>

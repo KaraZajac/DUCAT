@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mode_pages">صفحه‌ها</string>
+    <string name="mode_pages_desc">صفحه‌ای روی شبکه بگذارید، روی نشانی‌ای که از آنِ شماست. آفلاین خواندنی، و هرکه بخواهد آن را بازتاب می‌دهد.</string>
+    <string name="pages_tab_address">نشانی</string>
+    <string name="pages_tab_room">صفحه</string>
+    <string name="pages_none_title">هنوز صفحه‌ای نیست</string>
+    <string name="pages_none_body">صفحه سایتی کوچک روی نشانی‌ای است که همیشه مال شماست. یکی بنویسید تا هرکس نشانی را دارد بتواند بخواند.</string>
+    <string name="pages_open_room">نوشتن صفحه</string>
+    <string name="pages_address_hint">هرکس این نشانی را داشته باشد می‌تواند صفحهٔ شما را بخواند.</string>
+    <string name="pages_serving_title">از همین گوشی ارائه می‌شود</string>
+    <string name="pages_serving_body">صفحه آنجا زنده است که کسی ارائه‌اش کند. تا وقتی خواننده‌ای نگه‌داشتنش را انتخاب نکند، آن کس همین گوشی است — DUCAT را ببندید و صفحه تا باز کردن دوباره خاموش می‌ماند.</string>
+    <string name="pages_copy_address">کپی نشانی</string>
+    <string name="pages_address_copied">نشانی کپی شد</string>
+    <string name="pages_preview">پیش‌نمایش</string>
+    <string name="pages_edit">ویرایش صفحه</string>
+    <string name="pages_more">و %1$d تای دیگر</string>
+    <string name="pages_room_new">صفحه‌تان را بنویسید</string>
+    <string name="pages_room_update">صفحه‌تان را به‌روز کنید</string>
+    <string name="pages_room_body">هرچه اینجاست روی صفحه می‌رود. فیلد خالی کنار گذاشته می‌شود.</string>
+    <string name="pages_field_title">نام</string>
+    <string name="pages_field_tagline">یک خط دربارهٔ آن</string>
+    <string name="pages_field_body">آنچه می‌خواهید بگویید</string>
+    <string name="pages_field_hours">ساعت‌ها (اختیاری)</string>
+    <string name="pages_field_contact">کجا پیدایتان کنند (اختیاری)</string>
+    <string name="pages_publish">انتشار</string>
+    <string name="pages_update">به‌روزرسانی</string>
+    <string name="pages_published">منتشر شد. نشانی تغییر نکرده است.</string>
+    <string name="pages_zip_title">از قبل صفحه دارید؟</string>
+    <string name="pages_zip_body">یک ‎.zip با index.html در ریشه‌اش انتخاب کنید. نباید به چیزی بیرون از خودش ارجاع دهد — صفحه‌ای که به شبکه دست می‌برد اینجا رد می‌شود، نه اینکه روی گوشی دیگری خراب شود.</string>
+    <string name="pages_zip_pick">انتخاب ‎.zip</string>
+</resources>

@@ -25,7 +25,14 @@ import android.content.Context
 // jobs, and the board they share is an implementation detail of where the
 // notice lands. Appended rather than inserted — `current()` reads the name
 // out of preferences, so the order here is free but the spelling is not.
-enum class Mode { None, Pos, BarTab, Taxi, Donate, Renting, Kiosk, Marketplace, HireHelp, Press }
+// Pages is §16.22's publisher stance, and it sits beside Press for the
+// same reason the two are separate: a publication is delivered to the
+// people who paid for it and a page is left somewhere anyone can come
+// and read. Appended, like the rest — current() reads the name out of
+// preferences, so the order is free and the spelling is not.
+enum class Mode {
+    None, Pos, BarTab, Taxi, Donate, Renting, Kiosk, Marketplace, HireHelp, Press, Pages,
+}
 
 class ModeStore(context: Context) {
     private val prefs = securePrefs(context, "ducat_contacts")

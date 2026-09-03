@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mode_pages">Pagine</string>
+    <string name="mode_pages_desc">Metti una pagina in rete, a un indirizzo che è tuo. Leggibile offline, replicata da chi vuole.</string>
+    <string name="pages_tab_address">Indirizzo</string>
+    <string name="pages_tab_room">Pagina</string>
+    <string name="pages_none_title">Ancora nessuna pagina</string>
+    <string name="pages_none_body">Una pagina è un piccolo sito a un indirizzo tuo per sempre. Scrivine una e chiunque abbia l’indirizzo potrà leggerla.</string>
+    <string name="pages_open_room">Scrivi una pagina</string>
+    <string name="pages_address_hint">Chiunque abbia questo indirizzo può leggere la tua pagina.</string>
+    <string name="pages_serving_title">Servita da questo telefono</string>
+    <string name="pages_serving_body">Una pagina vive dove qualcuno la serve. Finché un lettore non sceglie di tenerla viva, quel qualcuno è questo telefono: chiudi DUCAT e la pagina tace finché non lo riapri.</string>
+    <string name="pages_copy_address">Copia indirizzo</string>
+    <string name="pages_address_copied">Indirizzo copiato</string>
+    <string name="pages_preview">Anteprima</string>
+    <string name="pages_edit">Modifica pagina</string>
+    <string name="pages_more">e altre %1$d</string>
+    <string name="pages_room_new">Scrivi la tua pagina</string>
+    <string name="pages_room_update">Aggiorna la tua pagina</string>
+    <string name="pages_room_body">Tutto quello che è qui finisce sulla pagina. Un campo vuoto viene omesso.</string>
+    <string name="pages_field_title">Nome</string>
+    <string name="pages_field_tagline">Una riga di presentazione</string>
+    <string name="pages_field_body">Quello che vuoi dire</string>
+    <string name="pages_field_hours">Orari (facoltativo)</string>
+    <string name="pages_field_contact">Dove trovarti (facoltativo)</string>
+    <string name="pages_publish">Pubblica</string>
+    <string name="pages_update">Aggiorna</string>
+    <string name="pages_published">Pubblicata. L’indirizzo non è cambiato.</string>
+    <string name="pages_zip_title">Hai già una pagina?</string>
+    <string name="pages_zip_body">Scegli uno .zip con index.html nella radice. Non deve referenziare nulla di esterno: una pagina che raggiunge la rete viene rifiutata qui invece di rompersi sul telefono di un altro.</string>
+    <string name="pages_zip_pick">Scegli uno .zip</string>
+</resources>

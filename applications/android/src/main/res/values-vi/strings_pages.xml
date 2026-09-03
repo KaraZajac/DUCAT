@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mode_pages">Trang</string>
+    <string name="mode_pages_desc">Đặt một trang lên mạng, tại địa chỉ thuộc về bạn. Đọc được ngoại tuyến, ai muốn thì nhân bản.</string>
+    <string name="pages_tab_address">Địa chỉ</string>
+    <string name="pages_tab_room">Trang</string>
+    <string name="pages_none_title">Chưa có trang nào</string>
+    <string name="pages_none_body">Trang là một site nhỏ tại địa chỉ mãi mãi là của bạn. Viết một trang, ai có địa chỉ đều đọc được.</string>
+    <string name="pages_open_room">Viết một trang</string>
+    <string name="pages_address_hint">Bất cứ ai có địa chỉ này đều đọc được trang của bạn.</string>
+    <string name="pages_serving_title">Được phục vụ từ máy này</string>
+    <string name="pages_serving_body">Trang sống ở nơi có người phục vụ nó. Cho tới khi một người đọc chọn giữ nó sống, người đó là máy này — đóng DUCAT và trang im lặng cho tới khi bạn mở lại.</string>
+    <string name="pages_copy_address">Sao chép địa chỉ</string>
+    <string name="pages_address_copied">Đã sao chép địa chỉ</string>
+    <string name="pages_preview">Xem trước</string>
+    <string name="pages_edit">Sửa trang</string>
+    <string name="pages_more">và %1$d nữa</string>
+    <string name="pages_room_new">Viết trang của bạn</string>
+    <string name="pages_room_update">Cập nhật trang của bạn</string>
+    <string name="pages_room_body">Mọi thứ ở đây đều lên trang. Ô để trống thì bỏ qua.</string>
+    <string name="pages_field_title">Tên</string>
+    <string name="pages_field_tagline">Một dòng về nó</string>
+    <string name="pages_field_body">Điều bạn muốn nói</string>
+    <string name="pages_field_hours">Giờ mở cửa (tuỳ chọn)</string>
+    <string name="pages_field_contact">Tìm bạn ở đâu (tuỳ chọn)</string>
+    <string name="pages_publish">Đăng</string>
+    <string name="pages_update">Cập nhật</string>
+    <string name="pages_published">Đã đăng. Địa chỉ không đổi.</string>
+    <string name="pages_zip_title">Đã có sẵn một trang?</string>
+    <string name="pages_zip_body">Chọn tệp .zip có index.html ở gốc. Nó không được tham chiếu bất cứ thứ gì bên ngoài — một trang với tay ra mạng sẽ bị từ chối ở đây, thay vì hỏng trên máy người khác.</string>
+    <string name="pages_zip_pick">Chọn tệp .zip</string>
+</resources>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mode_pages">Seiten</string>
+    <string name="mode_pages_desc">Stell eine Seite ins Netz, unter einer Adresse, die dir gehört. Offline lesbar, gespiegelt von wem auch immer will.</string>
+    <string name="pages_tab_address">Adresse</string>
+    <string name="pages_tab_room">Seite</string>
+    <string name="pages_none_title">Noch keine Seite</string>
+    <string name="pages_none_body">Eine Seite ist eine kleine Website unter einer Adresse, die dauerhaft dir gehört. Schreib eine, und jede Person mit der Adresse kann sie lesen.</string>
+    <string name="pages_open_room">Eine Seite schreiben</string>
+    <string name="pages_address_hint">Alle mit dieser Adresse können deine Seite lesen.</string>
+    <string name="pages_serving_title">Von diesem Telefon bereitgestellt</string>
+    <string name="pages_serving_body">Eine Seite lebt dort, wo jemand sie bereitstellt. Bis eine Leserin sie am Leben hält, ist das dieses Telefon – schließ DUCAT, und die Seite verstummt, bis du es wieder öffnest.</string>
+    <string name="pages_copy_address">Adresse kopieren</string>
+    <string name="pages_address_copied">Adresse kopiert</string>
+    <string name="pages_preview">Vorschau</string>
+    <string name="pages_edit">Seite bearbeiten</string>
+    <string name="pages_more">und %1$d weitere</string>
+    <string name="pages_room_new">Schreib deine Seite</string>
+    <string name="pages_room_update">Aktualisiere deine Seite</string>
+    <string name="pages_room_body">Alles hier kommt auf die Seite. Ein leeres Feld bleibt weg.</string>
+    <string name="pages_field_title">Name</string>
+    <string name="pages_field_tagline">Eine Zeile dazu</string>
+    <string name="pages_field_body">Was du sagen möchtest</string>
+    <string name="pages_field_hours">Öffnungszeiten (optional)</string>
+    <string name="pages_field_contact">Wo man dich findet (optional)</string>
+    <string name="pages_publish">Veröffentlichen</string>
+    <string name="pages_update">Aktualisieren</string>
+    <string name="pages_published">Veröffentlicht. Die Adresse ist gleich geblieben.</string>
+    <string name="pages_zip_title">Schon eine Seite?</string>
+    <string name="pages_zip_body">Wähle eine .zip mit index.html im Wurzelverzeichnis. Sie darf nichts Externes referenzieren – eine Seite, die ins Netz greift, wird hier abgelehnt, statt auf dem Telefon einer anderen Person kaputtzugehen.</string>
+    <string name="pages_zip_pick">Eine .zip wählen</string>
+</resources>
