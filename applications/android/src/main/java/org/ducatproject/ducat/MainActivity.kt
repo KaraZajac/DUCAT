@@ -1175,6 +1175,11 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                 // this once was, which covered the number someone was about to
                 // act on.
                 Box(Modifier.fillMaxWidth()) {
+                    // Whether the bar still has the slack the centre label
+                    // borrows from its neighbours — see the note on its
+                    // modifier below.
+                    val roomyBar =
+                        androidx.compose.ui.platform.LocalDensity.current.fontScale <= 1.15f
                     Column {
                         Spacer(Modifier.height(18.dp))
                         NavigationBar(
@@ -1239,7 +1244,29 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                                         // here. The neighbours' labels end
                                         // well short of this slot, so the few
                                         // pixels it takes back are empty ones.
-                                        modifier = Modifier.wrapContentWidth(unbounded = true),
+                                        // ...but only while that is still
+                                        // true. It is at the default text
+                                        // size; it stops being true the
+                                        // moment somebody turns text up. At
+                                        // 1.5x the other four fill their
+                                        // slots, so an unbounded centre label
+                                        // runs straight into its neighbour and
+                                        // the bar reads "Send/ReceiveActivity"
+                                        // — worse than the cut letter this was
+                                        // avoiding, and worse for exactly the
+                                        // person who needed the larger text.
+                                        // Past that point the lesser evil
+                                        // flips back to an ellipsis.
+                                        overflow = if (roomyBar) {
+                                            androidx.compose.ui.text.style.TextOverflow.Clip
+                                        } else {
+                                            androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                        },
+                                        modifier = if (roomyBar) {
+                                            Modifier.wrapContentWidth(unbounded = true)
+                                        } else {
+                                            Modifier
+                                        },
                                     )
                                 },
                             )
@@ -1899,6 +1926,15 @@ private fun RowScope.NavItem(
                 style = MaterialTheme.typography.labelSmall,
                 maxLines = 1,
                 softWrap = false,
+                // Ellipsis, because Compose's default is Clip and clipping
+                // is what turns this bar into nonsense at a large font
+                // scale: the five labels are cut mid-word with no mark to
+                // say so, and "Accounts Send/Receive Activity" ran together
+                // as "AccountSend/ReceiveActivity". The size was chosen for
+                // the default scale — somebody who has turned text up is
+                // going to lose the ends of these words either way, and the
+                // only question is whether the app says so.
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
             )
         },
     )
