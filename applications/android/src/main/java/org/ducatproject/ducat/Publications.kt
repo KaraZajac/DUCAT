@@ -173,6 +173,22 @@ object Publications {
             all.put(publisherHex, mine)
             p.edit().putString("subs", all.toString()).apply()
         }
+        // The box acts now, not at the next restart — Sites.setKeepAlive's
+        // shape, and for the reason that made this a visible choice at all.
+        // Writing the flag alone left every already-parked share serving and
+        // *announcing*, for the life of a foreground-service process, while
+        // the checkbox read unticked: a peer asking the swarm who holds this
+        // publication still learned that this device does. Withdrawing the
+        // statement is the thing the control claims to do.
+        if (!on) {
+            val sub = subscription(context, publisherHex) ?: return
+            for (period in sub.third.keys) {
+                val ship = shipment(context, publisherHex, period) ?: continue
+                runCatching { Swarm.stopShare(ship.first) }
+                    .onFailure { DucatLog.w("Publications", "stop mirror: ${it.message}") }
+            }
+            DucatLog.i("Publications", "stopped mirroring ${publisherHex.take(8)}…")
+        }
         ContactStore.bump()
     }
 

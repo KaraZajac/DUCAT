@@ -457,6 +457,15 @@ object Sites {
         if (!dir.isDirectory || !dir.walkTopDown().any { it.isFile }) return
         Thread {
             runCatching {
+                // Re-checked in here, not only on the caller's thread. Every
+                // precondition above was read before this thread started, and
+                // `remove` can land in between: it stops the share, drops the
+                // row and deletes the bundle — and then this fetch downloads
+                // it again and parks a seeder over a site the user deleted,
+                // with nothing left in the store to ever stop it again.
+                if (all(context).none { it.recordKey == recordKey && it.keepAlive }) {
+                    return@runCatching
+                }
                 // Stop-then-stay: parking the same share twice would strand
                 // the first task; stopping a share nobody serves is a no-op.
                 Swarm.stopShare(share)

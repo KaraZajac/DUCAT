@@ -194,6 +194,14 @@ object LibraryFetch {
             // actually happens.
             if (!Publications.mirroring(app, job.publisherHex)) return
             val share = source as Source.Swarm
+            // Verify-only over complete files, so this downloads nothing and
+            // the live directory is the right place — but only while it IS
+            // complete. A publisher who re-shipped a period leaves a digest
+            // this bundle does not match, and then this is an ordinary fetch
+            // writing into the directory the reader reads from: the
+            // half-overwritten issue the ordinary path below takes a .part
+            // dir to avoid. Nothing to verify against means nothing to do.
+            if (!done.isDirectory || done.walkTopDown().none { it.isFile }) return
             runCatching {
                 Swarm.fetch(
                     share.shareKey, share.digestHex, done.absolutePath,

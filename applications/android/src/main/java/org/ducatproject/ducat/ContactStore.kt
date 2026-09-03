@@ -1220,6 +1220,16 @@ class ContactStore(context: Context) {
                         .putString("groups", it).apply()
                 }
                 o.optString("sites_raw").takeIf { it.isNotEmpty() }?.let {
+                    // Whatever this device was already serving is about to
+                    // stop being described by the table it was serving from.
+                    // Unparked first, or the node goes on announcing shares
+                    // for bundles the restored store has never heard of,
+                    // until the process ends.
+                    runCatching {
+                        Sites.all(appContext).forEach { s ->
+                            Swarm.stopShare(s.fetchedShare ?: s.share)
+                        }
+                    }
                     securePrefs(appContext, "ducat_sites").edit()
                         .putString("sites", it).apply()
                 }

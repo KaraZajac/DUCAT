@@ -102,6 +102,16 @@ class Poller(private val context: Context) {
                     if (!s.running && at - lastRevive > REVIVE_EVERY_MS) {
                         lastRevive = at
                         DucatLog.w(TAG, "transport is down — starting the node again")
+                        // A node restart takes every parked share with it —
+                        // node_stop drops the seed registry — and these are
+                        // once-per-process flags, so nothing ever put them
+                        // back: a phone that lost its node at 9am served
+                        // nothing for the rest of the day while every
+                        // checkbox still said it was sharing. Cleared here so
+                        // the sweeps below re-park what was promised.
+                        reseeded = false
+                        outboxReseeded = false
+                        sitesReseeded = false
                         runCatching {
                             uniffi.ducat_mobile.nodeStart(
                                 "${context.filesDir.absolutePath}/veilid",
@@ -515,10 +525,24 @@ class Poller(private val context: Context) {
         val root = java.io.File(context.filesDir, "swarm_out")
         val weekAgo = System.currentTimeMillis() / 1000 - 7 * 24 * 3600
         root.listFiles()?.forEach { dir ->
+            // A directory with no readable share.json is a send that died
+            // between writing the blob and seeding it — the key is only
+            // known after Swarm.seed returns, so there is a window where
+            // the bytes are on disk and nothing describes them. That read
+            // used to throw inside the runCatching below and be swallowed,
+            // so the orphan was skipped on every pass for ever. It has no
+            // `sent` to age, so it ages by its own mtime.
+            val meta = runCatching {
+                org.json.JSONObject(java.io.File(dir, "share.json").readText())
+            }.getOrNull()
+            if (meta == null) {
+                if (dir.lastModified() / 1000 < weekAgo) {
+                    DucatLog.i(TAG, "swept an outbox blob nothing ever described")
+                    dir.deleteRecursively()
+                }
+                return@forEach
+            }
             runCatching {
-                val meta = org.json.JSONObject(
-                    java.io.File(dir, "share.json").readText(),
-                )
                 if (meta.optLong("sent") < weekAgo) {
                     // A week unserved is a transfer nobody is coming for.
                     dir.deleteRecursively()
