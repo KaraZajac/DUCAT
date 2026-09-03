@@ -79,4 +79,5 @@
     <string name="press_no_code_body">Publiceer iets om een code te maken — die scannen lezers om zich te abonneren.</string>
     <string name="press_open_room">Persruimte openen</string>
     <string name="market_refreshing">Controleren op wijzigingen…</string>
+    <string name="pub_period_not_a_name">Een periode is een naam, geen map — geen schuine strepen, en niet alleen punten.</string>
 </resources>

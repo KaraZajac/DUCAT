@@ -79,4 +79,5 @@
     <string name="press_no_code_body">무언가를 발행하면 코드가 만들어집니다 — 독자는 그것을 스캔해 구독합니다.</string>
     <string name="press_open_room">프레스룸 열기</string>
     <string name="market_refreshing">변경 사항 확인 중…</string>
+    <string name="pub_period_not_a_name">기간은 폴더가 아니라 이름입니다. 슬래시를 쓸 수 없고, 점만으로도 안 됩니다.</string>
 </resources>

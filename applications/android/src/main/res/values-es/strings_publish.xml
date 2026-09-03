@@ -79,4 +79,5 @@
     <string name="press_no_code_body">Publica algo para crear un código: es lo que los lectores escanean para suscribirse.</string>
     <string name="press_open_room">Abrir la sala de prensa</string>
     <string name="market_refreshing">Buscando cambios…</string>
+    <string name="pub_period_not_a_name">Un periodo es un nombre, no una carpeta: sin barras, y no solo puntos.</string>
 </resources>

@@ -79,4 +79,5 @@
     <string name="press_no_code_body">Опубликуйте что-нибудь, чтобы создать код — его сканируют читатели, чтобы подписаться.</string>
     <string name="press_open_room">Открыть пресс-зал</string>
     <string name="market_refreshing">Проверка изменений…</string>
+    <string name="pub_period_not_a_name">Период — это имя, а не папка: без косых черт и не только точки.</string>
 </resources>

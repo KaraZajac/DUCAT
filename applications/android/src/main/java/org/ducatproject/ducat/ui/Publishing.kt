@@ -536,10 +536,20 @@ fun PublishingSection() {
             }
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(12.dp)) {
+                    val periodOk = Publications.isSafePeriodId(period.trim())
                     OutlinedTextField(
                         period, { if (it.length <= 64) period = it },
                         label = { Text(stringResource(R.string.pub_period_label)) },
                         singleLine = true,
+                        isError = period.isNotBlank() && !periodOk,
+                        // Said here rather than left to a greyed-out button:
+                        // the reason is about these characters, and it is
+                        // this field that has to change.
+                        supportingText = if (period.isNotBlank() && !periodOk) {
+                            { Text(stringResource(R.string.pub_period_not_a_name)) }
+                        } else {
+                            null
+                        },
                     )
                     Spacer(Modifier.height(6.dp))
                     OutlinedTextField(
@@ -568,8 +578,14 @@ fun PublishingSection() {
                     }
                     Spacer(Modifier.height(8.dp))
                     Button(
+                        // The same rule the reader applies, asked here so a
+                        // publisher does not spend a seed and a send on an
+                        // issue no conforming reader will file. This screen
+                        // reported "sent to 1 subscriber(s)" for a period id
+                        // that every one of them refused on arrival.
                         enabled = busy == null && staged != null &&
-                            period.isNotBlank() && roster.isNotEmpty(),
+                            Publications.isSafePeriodId(period.trim()) &&
+                            roster.isNotEmpty(),
                         onClick = {
                             val f = staged!!
                             val p = period.trim()

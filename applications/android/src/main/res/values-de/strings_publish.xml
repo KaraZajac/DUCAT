@@ -79,4 +79,5 @@
     <string name="press_no_code_body">Veröffentliche etwas, um einen Code zu erstellen — ihn scannen Leser, um zu abonnieren.</string>
     <string name="press_open_room">Presseraum öffnen</string>
     <string name="market_refreshing">Prüfe auf Änderungen…</string>
+    <string name="pub_period_not_a_name">Ein Zeitraum ist ein Name, kein Ordner – keine Schrägstriche, und nicht nur Punkte.</string>
 </resources>

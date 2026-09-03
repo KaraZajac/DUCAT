@@ -79,4 +79,5 @@
     <string name="press_no_code_body">Kod oluşturmak için bir şey yayımlayın — okurlar abone olmak için onu tarar.</string>
     <string name="press_open_room">Basın odasını aç</string>
     <string name="market_refreshing">Değişiklikler denetleniyor…</string>
+    <string name="pub_period_not_a_name">Dönem bir klasör değil, bir addır — eğik çizgi olmaz, sadece nokta da olmaz.</string>
 </resources>

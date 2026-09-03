@@ -79,4 +79,5 @@
     <string name="press_no_code_body">เผยแพร่บางอย่างเพื่อสร้างรหัส — ผู้อ่านสแกนรหัสนี้เพื่อสมัครสมาชิก</string>
     <string name="press_open_room">เปิดห้องข่าว</string>
     <string name="market_refreshing">กำลังตรวจหาความเปลี่ยนแปลง…</string>
+    <string name="pub_period_not_a_name">ช่วงเวลาคือชื่อ ไม่ใช่โฟลเดอร์ — ห้ามใช้เครื่องหมายทับ และห้ามเป็นจุดล้วน</string>
 </resources>
