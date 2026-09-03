@@ -85,7 +85,19 @@ object Groups {
     }
 
     private fun upsert(context: Context, g: Group) = synchronized(lock) {
-        save(context, all(context).filterNot { it.idHex == g.idHex } + g)
+        // In place: the chat list shows groups in stored order (it sorts
+        // only the pairwise threads below them), so appending on every
+        // update walked a group to the bottom of its section each time
+        // anything about it changed.
+        val cur = all(context)
+        save(
+            context,
+            if (cur.none { it.idHex == g.idHex }) {
+                cur + g
+            } else {
+                cur.map { if (it.idHex == g.idHex) g else it }
+            },
+        )
     }
 
     /**
@@ -283,7 +295,8 @@ object Groups {
         val seq = synchronized(lock) {
             val fresh = get(context, idHex) ?: g
             val n = fresh.myGroupSeq + 1
-            save(context, all(context).filterNot { it.idHex == idHex } + fresh.copy(myGroupSeq = n))
+            val advanced = fresh.copy(myGroupSeq = n)
+            save(context, all(context).map { if (it.idHex == idHex) advanced else it })
             n
         }
         val store = ContactStore(context)

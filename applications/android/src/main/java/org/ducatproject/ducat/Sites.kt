@@ -418,7 +418,17 @@ object Sites {
             page = page ?: prior?.page,
         )
         synchronized(lock) {
-            save(context, all(context).filterNot { it.recordKey == key } + base)
+            // In place — see the note in `add`. Publishing a page must not
+            // move it in the Pages chooser under the hand that published it.
+            val curBase = all(context)
+            save(
+                context,
+                if (curBase.none { it.recordKey == key }) {
+                    curBase + base
+                } else {
+                    curBase.map { if (it.recordKey == key) base else it }
+                },
+            )
         }
 
         // 3. Into the same place a fetched bundle lives, so the viewer, the
@@ -446,7 +456,17 @@ object Sites {
             fetchedShare = share.shareKey,
         )
         synchronized(lock) {
-            save(context, all(context).filterNot { it.recordKey == key } + entry)
+            // In place — see the note in `add`. Publishing a page must not
+            // move it in the Pages chooser under the hand that published it.
+            val curEntry = all(context)
+            save(
+                context,
+                if (curEntry.none { it.recordKey == key }) {
+                    curEntry + entry
+                } else {
+                    curEntry.map { if (it.recordKey == key) entry else it }
+                },
+            )
         }
         uniffi.ducat_mobile.nodeDhtSet(
             key,

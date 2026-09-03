@@ -229,7 +229,22 @@ object Listings {
 
     fun put(context: Context, o: JSONObject) = synchronized(lock) {
         val id = o.optString("id")
-        save(context, all(context).filter { it.optString("id") != id } + o)
+        // Replaced where it stands, appended only when new. `all` returns
+        // stored order and the listings screen does not sort, so rebuilding
+        // the table as "everything else, then this" moved the row to the
+        // bottom every time it changed. Seen on the phone: two listings with
+        // the same title swapping places under a quantity stepper, so three
+        // taps on "one more" raised two different listings and neither of
+        // them by three.
+        val cur = all(context)
+        save(
+            context,
+            if (cur.none { it.optString("id") == id }) {
+                cur + o
+            } else {
+                cur.map { if (it.optString("id") == id) o else it }
+            },
+        )
     }
 
     /** What [post] and [unpost] own on a record: where it is, and the cards it cut. */
