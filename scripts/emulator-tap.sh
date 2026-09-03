@@ -39,6 +39,62 @@ set -e
 
 OWNER=${SUDO_USER:-kara}
 
+# `check` needs no privileges, and needs to come before the root gate: the
+# whole point is that anyone (or any agent) can ask "is this actually up?"
+# without a password.
+#
+# It exists because the answer is not obvious. The taps, the ip rules, the
+# routing tables and the mangle chains are ours and survive anything; the
+# masquerade and the interface's zone belong to firewalld and are RUNTIME
+# ONLY — no --permanent below, deliberately, so nothing here outlives a
+# reboot. A firewalld reload (a dnf update, a NetworkManager event) drops
+# both without touching the rest, and what is left looks perfectly healthy:
+# three taps up, three rules, three tables. The guests can still reach
+# 10.0.2.2 and 10.0.2.3, because that is the host. They simply cannot reach
+# the internet. Seen 2026-09-03, an hour after a good run, and it reads
+# exactly like the SLIRP failure it is not.
+if [ "$1" = "check" ]; then
+  BAD=0
+  for TAP in tap-ducat tap-ducat2 tap-ducat3; do
+    if ip link show "$TAP" >/dev/null 2>&1; then
+      echo "  ok    $TAP exists"
+    else
+      echo "  MISSING $TAP"; BAD=1
+    fi
+    # Prints "no zone" AND exits non-zero when unassigned, so take the
+    # words and ignore the status.
+    ZONE=$(firewall-cmd --get-zone-of-interface="$TAP" 2>/dev/null) || true
+    ZONE=${ZONE:-unknown}
+    if [ "$ZONE" = "trusted" ]; then
+      echo "  ok    $TAP is in the trusted zone"
+    else
+      echo "  WRONG $TAP zone is '$ZONE', want 'trusted'"; BAD=1
+    fi
+  done
+  if [ "$(firewall-cmd --query-masquerade 2>/dev/null)" = "yes" ]; then
+    echo "  ok    masquerade on in $(firewall-cmd --get-default-zone 2>/dev/null)"
+  else
+    echo "  OFF   masquerade is not on in the default zone"; BAD=1
+  fi
+  if [ "$(cat /proc/sys/net/ipv4/ip_forward 2>/dev/null)" = "1" ]; then
+    echo "  ok    ip_forward"
+  else
+    echo "  OFF   net.ipv4.ip_forward"; BAD=1
+  fi
+  if ss -lun 2>/dev/null | grep -q '10\.0\.2\.3:53'; then
+    echo "  ok    dnsmasq on 10.0.2.3:53"
+  else
+    echo "  OFF   nothing is listening on 10.0.2.3:53"; BAD=1
+  fi
+  if [ $BAD = 0 ]; then
+    echo "tap networking looks healthy."
+  else
+    echo "tap networking is NOT healthy — sudo bash scripts/emulator-tap.sh" >&2
+    exit 1
+  fi
+  exit 0
+fi
+
 if [ "$(id -u)" != 0 ]; then
   echo "run me with sudo" >&2
   exit 1
@@ -146,5 +202,11 @@ if ! ss -lun | grep -q '10\.0\.2\.3:53'; then
   exit 1
 fi
 
+# Say it out of the same mouth that checks it later, so "ready" and "healthy"
+# cannot drift apart.
+bash "$0" check
+
 echo "ready: $(echo $TAPS | wc -w) taps speak the guest's native 10.0.2 dialect"
 echo "launch: scripts/emulator.sh [1|2|3]"
+echo "later:  bash scripts/emulator-tap.sh check   (no sudo — a firewalld"
+echo "        reload silently drops the masquerade and the taps' zone)"
