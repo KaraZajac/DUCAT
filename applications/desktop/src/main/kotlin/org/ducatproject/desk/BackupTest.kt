@@ -1,5 +1,6 @@
 package org.ducatproject.desk
 
+import org.ducatproject.ducat.Sites
 import org.ducatproject.ducat.Ceremony
 import org.ducatproject.ducat.ContactStore
 import uniffi.ducat_mobile.BackupInput
@@ -221,8 +222,14 @@ private fun appState() {
     // head, `ducat:site/<key>` is the address strangers have saved, and
     // without it the address serves its last bundle for ever with no way for
     // the person who made it to change a word.
+    // The field names Sites.save actually writes, not an approximation of
+    // them. With a made-up key the assertions below still passed — the
+    // bundle carries this store as an opaque string, so a fixture that no
+    // parser would accept round-trips just as happily as a real one, and
+    // the test proved the transport while saying nothing about the schema.
     val sites = """[{"rec":"VLD0:abc","title":"The Corner Shop","share":"VLD0:s",""" +
-        """"digest":"aa","updated":1,"added":1,"keep":true,"sec":"owner-secret"}]"""
+        """"digest":"aa","updated":1,"added":1,"keep":true,""" +
+        """"own_pub":"cHVi","own_sec":"c2Vj"}]"""
     src.getSharedPreferences("ducat_sites", 0).edit().putString("sites", sites).apply()
 
     // Four more stores the bundle never named, each holding something the
@@ -311,9 +318,17 @@ private fun appState() {
     check(dr != null && dr.contains("txid-two")) {
         "BACKUPTEST_FAIL donation replay guard: got $dr"
     }
-    check(sit?.contains("owner-secret") == true) {
+    // Asked of the store, not of the string. Containment proves the bytes
+    // survived the bundle; it does not prove anything can still read them
+    // back into a key. `mine` is the property that matters — it is what
+    // decides whether the owner is ever offered "update your page" again —
+    // and it is true only when both halves of the keypair parse.
+    val backSite = Sites.all(dst).firstOrNull { it.recordKey == "VLD0:abc" }
+    check(backSite != null) { "BACKUPTEST_FAIL the site did not come back at all" }
+    check(backSite.ownerSecret != null && backSite.ownerPublic != null) {
         "BACKUPTEST_FAIL a site came back with no way to update it"
     }
+    check(backSite.mine) { "BACKUPTEST_FAIL the restored site is not owned by this phone" }
 
     // A bundle carrying keys the export would never write must not be able to
     // put them in this store — it is the same file as wallet_spend and
