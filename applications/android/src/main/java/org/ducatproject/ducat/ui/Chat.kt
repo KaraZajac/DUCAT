@@ -2788,9 +2788,24 @@ private fun sendFile(
         val i = cur.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
         if (i >= 0 && cur.moveToFirst()) cur.getString(i) else null
     } ?: context.getString(R.string.chat_file_fallback)
-    val bytes = resolver.openInputStream(uri)?.use { it.readBytes() }
-        ?: throw IllegalArgumentException(context.getString(R.string.chat_could_not_read_file))
     val mime = resolver.getType(uri) ?: "application/octet-stream"
+    // A picture goes out as pixels, never as the file that was picked.
+    //
+    // Every phone camera writes GPS into a photo by default, to a few
+    // metres, and this path sent the picked bytes through untouched — so
+    // sending somebody a photograph of the thing you are selling also sent
+    // them the doorstep it was photographed on. Which matters more here
+    // than in most places: §16.18 puts a listing on a board at about five
+    // kilometres on purpose and forbids photographs there outright, and a
+    // thread is exactly where the stranger who answered that advertisement
+    // is standing.
+    //
+    // Anything that is not a picture we can faithfully re-encode comes
+    // back null and travels as it was picked — a document's own metadata
+    // is its own business and mangling it would be worse.
+    val bytes = SafeImage.stripped({ resolver.openInputStream(uri) }, mime)
+        ?: resolver.openInputStream(uri)?.use { it.readBytes() }
+        ?: throw IllegalArgumentException(context.getString(R.string.chat_could_not_read_file))
     if (bytes.size <= MAX_FILE_BYTES) {
         sendAttachmentBytes(context, c, bytes, mime, name, "📎 $name", onChunk)
         return

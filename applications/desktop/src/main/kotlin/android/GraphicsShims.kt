@@ -66,6 +66,46 @@ class Bitmap internal constructor(
         @JvmStatic
         fun createBitmap(w: Int, h: Int, config: Config): Bitmap = Bitmap(w, h)
 
+        /**
+         * The same crop with a transform applied — SafeImage.stripped uses
+         * it to bake an EXIF rotation into the pixels before the metadata
+         * carrying it is dropped.
+         */
+        @JvmStatic
+        fun createBitmap(
+            src: Bitmap,
+            x: Int,
+            y: Int,
+            w: Int,
+            h: Int,
+            m: Matrix,
+            filter: Boolean,
+        ): Bitmap {
+            val img = src.image?.getSubimage(x, y, w, h) ?: return Bitmap(w, h)
+            val tx = java.awt.geom.AffineTransform()
+            // Applied in the order postRotate/postScale recorded them, which
+            // for these eight cases is rotate-then-mirror.
+            if (m.rotation != 0f) tx.rotate(Math.toRadians(m.rotation.toDouble()))
+            if (m.scaleX != 1f || m.scaleY != 1f) tx.scale(m.scaleX.toDouble(), m.scaleY.toDouble())
+            // Move the result back into positive coordinates: a rotation
+            // about the origin puts most of the picture off the canvas.
+            val corners = tx.createTransformedShape(
+                java.awt.Rectangle(0, 0, img.width, img.height),
+            ).bounds2D
+            val place = java.awt.geom.AffineTransform
+                .getTranslateInstance(-corners.minX, -corners.minY)
+            place.concatenate(tx)
+            val out = java.awt.image.BufferedImage(
+                Math.ceil(corners.width).toInt().coerceAtLeast(1),
+                Math.ceil(corners.height).toInt().coerceAtLeast(1),
+                java.awt.image.BufferedImage.TYPE_INT_ARGB,
+            )
+            val g = out.createGraphics()
+            g.drawImage(img, place, null)
+            g.dispose()
+            return Bitmap(out.width, out.height, out)
+        }
+
         /** The crop the avatar editor takes before scaling: a square middle. */
         @JvmStatic
         fun createBitmap(src: Bitmap, x: Int, y: Int, w: Int, h: Int): Bitmap {
@@ -167,4 +207,20 @@ object BitmapFactory {
         if (data == null || length <= 0) return null
         return decode({ java.io.ByteArrayInputStream(data, offset, length) }, opts)
     }
+}
+
+/**
+ * android.graphics.Matrix, in the two calls the shared image path makes:
+ * a quarter-turn and a mirror. It records rather than multiplies, because
+ * the eight EXIF orientations are the only combinations asked for and
+ * AffineTransform does the actual arithmetic on the other side.
+ */
+class Matrix {
+    internal var rotation = 0f
+    internal var scaleX = 1f
+    internal var scaleY = 1f
+
+    fun postRotate(deg: Float) { rotation = (rotation + deg) % 360f }
+
+    fun postScale(sx: Float, sy: Float) { scaleX *= sx; scaleY *= sy }
 }

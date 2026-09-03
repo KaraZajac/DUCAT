@@ -134,3 +134,29 @@ class MediaPlayer {
     fun stop() { runCatching { clip?.stop() } }
     fun release() { runCatching { clip?.close() }; clip = null }
 }
+
+/**
+ * android.media.ExifInterface, enough for SafeImage.stripped to ask the
+ * one question it asks.
+ *
+ * Always upright. The desk decodes through ImageIO, which — like
+ * BitmapFactory on the phone — ignores EXIF orientation, so there is no
+ * tag being honoured here that dropping the metadata would contradict.
+ * A desk that grew a real reader would fix nothing that is currently
+ * wrong; it would only start rotating pictures it does not rotate today.
+ */
+class ExifInterface(@Suppress("UNUSED_PARAMETER") stream: java.io.InputStream) {
+    fun getAttributeInt(@Suppress("UNUSED_PARAMETER") tag: String, fallback: Int): Int = fallback
+
+    companion object {
+        const val TAG_ORIENTATION = "Orientation"
+        const val ORIENTATION_NORMAL = 1
+        const val ORIENTATION_FLIP_HORIZONTAL = 2
+        const val ORIENTATION_ROTATE_180 = 3
+        const val ORIENTATION_FLIP_VERTICAL = 4
+        const val ORIENTATION_TRANSPOSE = 5
+        const val ORIENTATION_ROTATE_90 = 6
+        const val ORIENTATION_TRANSVERSE = 7
+        const val ORIENTATION_ROTATE_270 = 8
+    }
+}

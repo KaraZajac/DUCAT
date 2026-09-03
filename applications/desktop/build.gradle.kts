@@ -845,6 +845,14 @@ tasks.register<JavaExec>("sitepublishtest") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// A picture leaves as pixels: no GPS, no maker notes, nothing but the image.
+// `DUCAT_DESK_STATE=<dir> ./gradlew :desktop:exiftest`.
+tasks.register<JavaExec>("exiftest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.ExifTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // A publisher's period id must not be able to name a path.
 // `DUCAT_DESK_STATE=<dir> ./gradlew :desktop:periodidtest`.
 tasks.register<JavaExec>("periodidtest") {

@@ -292,7 +292,10 @@ private fun squareThumbnail(context: android.content.Context, uri: Uri): ByteArr
     // Picked from the gallery, which is also where anything shared into the
     // phone lands — and this one is on the way to becoming an avatar other
     // people's phones will decode.
-    val src = SafeImage.fromStream(
+    // Upright, not merely decoded: this crops to a square middle, and the
+    // middle of a sideways picture is somebody's ear. The re-encode below
+    // already dropped the tag that would have said which way round it went.
+    val src = SafeImage.upright(
         { context.contentResolver.openInputStream(uri) }, SafeImage.COMPOSE_PIXELS,
     ) ?: throw IllegalArgumentException("not an image")
 

@@ -127,16 +127,18 @@ jobs:
       - name: backup round-trip, profile scoping, read marks
         run: cd applications && ./gradlew --no-daemon :desktop:backuptest :desktop:profilescope :desktop:markstest
 
-      # Two of these guard what a stranger's bytes are allowed to name. A
-      # publisher's period id becomes a directory under the reader's
-      # library, and a site's address becomes the directory its bundle
-      # renders from — both were reachable from the network and neither had
-      # anything watching them. The third is the one thing in the tab store
-      # that deletes without being asked.
-      - name: a stranger's bytes cannot name a path
+      # What bytes are allowed to carry, in and out. Two guard what a
+      # stranger's bytes may *name*: a publisher's period id becomes a
+      # directory under the reader's library, a site's address becomes the
+      # directory its bundle renders from, and both were reachable from the
+      # network with nothing watching them. One guards what our own bytes
+      # take *with* them — a photo leaves as pixels, not as a file with the
+      # photographer's doorstep written into it. And one covers the only
+      # thing in the tab store that deletes without being asked.
+      - name: what bytes may name, and what they may carry
         env:
           DUCAT_DESK_STATE: ${{ runner.temp }}/desk-paths
-        run: cd applications && ./gradlew --no-daemon :desktop:periodidtest :desktop:sitedirtest :desktop:sweeptest
+        run: cd applications && ./gradlew --no-daemon :desktop:periodidtest :desktop:sitedirtest :desktop:sweeptest :desktop:exiftest
 
       # Compiling is not drawing. This renders every hosted screen with no
       # display attached and fails on a blank rectangle — it is what caught
