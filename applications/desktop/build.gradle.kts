@@ -833,6 +833,15 @@ tasks.register<JavaExec>("listtest") {
 // What a finished pass of recurring bills leaves behind — the lost write
 // that put a cancelled subscription back on the books.
 // `./gradlew :desktop:recurtest`.
+// The publisher's half of §16.22: the sealed-room lint, and the keypair
+// that is a site's only write authority surviving the store.
+// `DUCAT_DESK_STATE=<dir> ./gradlew :desktop:sitepublishtest`.
+tasks.register<JavaExec>("sitepublishtest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.SitePublishTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // A publisher's period id must not be able to name a path.
 // `DUCAT_DESK_STATE=<dir> ./gradlew :desktop:periodidtest`.
 tasks.register<JavaExec>("periodidtest") {

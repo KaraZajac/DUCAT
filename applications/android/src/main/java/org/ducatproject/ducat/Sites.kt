@@ -28,7 +28,41 @@ object Sites {
         // can rotate ahead of the disk; a mirror serves what it has, under
         // the key it was fetched from.
         val fetchedShare: String? = null,
-    )
+        /**
+         * The record's owner keypair — this site's write authority — or
+         * null for the ordinary case of a site somebody else made.
+         *
+         * §16.22: updating a site is re-seeding a bundle and rewriting the
+         * head in place, and the head is the record's subkey 0. A reader
+         * opens the record with no writer at all (see [readHead]), so a
+         * write is not refused by a rule anybody could relax — there is
+         * nothing to sign it with. Only the holder of this can change what
+         * `ducat:site/<key>` points at, which is the property a site
+         * wants and also the one thing about it that cannot be replaced.
+         * It rides the backup with the store (ContactStore.backupAppState).
+         */
+        val ownerPublic: ByteArray? = null,
+        val ownerSecret: ByteArray? = null,
+    ) {
+        /** Whether this phone can rewrite this site's head. */
+        val mine: Boolean get() = ownerPublic != null && ownerSecret != null
+
+        // A data class with ByteArray members gets identity equality for
+        // them, which would make two reads of the same store unequal and
+        // is a trap in a class that ends up in Compose state.
+        override fun equals(other: Any?): Boolean =
+            other is Site && recordKey == other.recordKey &&
+                title == other.title && share == other.share &&
+                digestHex == other.digestHex && updated == other.updated &&
+                addedAt == other.addedAt && keepAlive == other.keepAlive &&
+                fetchedDigestHex == other.fetchedDigestHex &&
+                fetchedShare == other.fetchedShare &&
+                ownerPublic.contentEquals(other.ownerPublic) &&
+                ownerSecret.contentEquals(other.ownerSecret)
+
+        override fun hashCode(): Int =
+            recordKey.hashCode() * 31 + (ownerPublic?.contentHashCode() ?: 0)
+    }
 
     private fun prefs(context: Context) = securePrefs(context, "ducat_sites")
 
@@ -59,11 +93,23 @@ object Sites {
                 keepAlive = o.optBoolean("keep", false),
                 fetchedDigestHex = o.optString("fetched").ifBlank { null },
                 fetchedShare = o.optString("fetched_share").ifBlank { null },
+                ownerPublic = o.optString("own_pub").ifBlank { null }?.let(::unb64),
+                ownerSecret = o.optString("own_sec").ifBlank { null }?.let(::unb64),
             )
         }
     }
 
-    private fun save(context: Context, sites: List<Site>) {
+    private fun b64(b: ByteArray): String =
+        android.util.Base64.encodeToString(b, android.util.Base64.NO_WRAP)
+
+    private fun unb64(s: String): ByteArray =
+        android.util.Base64.decode(s, android.util.Base64.NO_WRAP)
+
+    // Internal rather than private for sitepublishtest, which drives the
+    // store's round trip directly: publish() needs a node and the property
+    // worth pinning — that a site's owner keypair survives being written
+    // and read back — does not.
+    internal fun save(context: Context, sites: List<Site>) {
         val arr = JSONArray()
         for (s in sites) {
             arr.put(
@@ -73,7 +119,9 @@ object Sites {
                     .put("updated", s.updated).put("added", s.addedAt)
                     .put("keep", s.keepAlive)
                     .put("fetched", s.fetchedDigestHex ?: "")
-                    .put("fetched_share", s.fetchedShare ?: ""),
+                    .put("fetched_share", s.fetchedShare ?: "")
+                    .put("own_pub", s.ownerPublic?.let(::b64) ?: "")
+                    .put("own_sec", s.ownerSecret?.let(::b64) ?: ""),
             )
         }
         prefs(context).edit().putString("sites", arr.toString()).apply()
@@ -154,6 +202,15 @@ object Sites {
                 keepAlive = prior?.keepAlive ?: false,
                 fetchedDigestHex = prior?.fetchedDigestHex,
                 fetchedShare = prior?.fetchedShare,
+                // Carried, and the reason is the whole of §16.22's ownership
+                // model: this rebuilds the row from the head, and the head is
+                // public. A publisher who pastes their own address — or taps
+                // a ducat:site link to their own page, which is the obvious
+                // way to check it looks right — would otherwise come back
+                // from that with the write authority gone and no warning,
+                // the site frozen for good at whatever it last said.
+                ownerPublic = prior?.ownerPublic,
+                ownerSecret = prior?.ownerSecret,
             )
             save(context, rest + entry)
             entry
@@ -197,6 +254,161 @@ object Sites {
         // The choice as it stands now, not as it stood when the fetch began.
         reseed(context, site.recordKey)
         return dir
+    }
+
+    // ----- the publisher's half (§16.22) -----------------------------------
+
+    /**
+     * A page that reaches for the clearnet, and where.
+     *
+     * §16.22 says a publisher tool SHOULD refuse to seed a bundle that
+     * references external resources, and gives the reasons: one external
+     * fetch hands the reader's address and timing to a third party, a
+     * per-visitor URL makes that targeted, an unfetched resource is
+     * unsigned content inside a digest-verified page, and a bundle with
+     * clearnet dependencies neither works offline nor survives its
+     * publisher. The viewer already refuses these at render (every
+     * request is answered from the bundle or not at all), so this is not
+     * a second wall — it is the wall being hit at the keyboard, by the
+     * one person who can fix it, instead of silently on a stranger's
+     * phone where the page just looks broken.
+     *
+     * Returns null when the bundle is sealed, or "<file>: <the offending
+     * text>" for the first thing that is not.
+     */
+    fun clearnetIn(dir: File): String? {
+        val external = Regex(
+            """(?i)(src|href)\s*=\s*["'](https?:)?//|""" +
+                """url\(\s*["']?(https?:)?//|@import\s+["'](https?:)?//""",
+        )
+        for (f in dir.walkTopDown()) {
+            if (!f.isFile) continue
+            if (f.extension.lowercase() !in setOf("html", "htm", "css", "svg")) continue
+            val hit = external.find(runCatching { f.readText() }.getOrDefault("")) ?: continue
+            return "${f.relativeTo(dir)}: ${hit.value.trim()}"
+        }
+        return null
+    }
+
+    /**
+     * Publish [dir] as this phone's site, or update one it already owns.
+     *
+     * The desk has done this since §16.22 landed (desk/SitePublish.kt) and
+     * this is the same four steps: lint, seed the bundle, mint or reopen
+     * the record, write the head. What differs is only that a phone keeps
+     * the owner keypair in its own store rather than a file beside the
+     * bundle, and that [recordKey] being non-null is what makes this an
+     * update — same record, same address, new bundle, head rewritten in
+     * place. Readers who saved the address are not disturbed by that;
+     * §16.22 is explicit that they keep it across every update.
+     *
+     * The bundle stays seeded from here: unlike an issue, which is
+     * delivered into a thread and then owned by whoever holds it, a site
+     * exists only while somebody serves it. This phone is the origin
+     * until a mirror takes over or the site goes quiet.
+     */
+    fun publish(
+        context: Context,
+        source: File,
+        title: String,
+        recordKey: String? = null,
+    ): Site {
+        require(File(source, "index.html").isFile) { "a site needs an index.html at its root" }
+        clearnetIn(source)?.let {
+            throw IllegalArgumentException("that page reaches the network — $it")
+        }
+
+        // 1. The address, first, because everything below is named after it.
+        val prior = recordKey?.let { k -> all(context).firstOrNull { it.recordKey == k } }
+        val key: String
+        val pub: ByteArray
+        val sec: ByteArray
+        if (prior != null && prior.mine) {
+            key = prior.recordKey
+            pub = prior.ownerPublic!!
+            sec = prior.ownerSecret!!
+            uniffi.ducat_mobile.nodeDhtOpen(key, pub, sec)
+        } else {
+            // One subkey: the head is subkey 0 and the record holds nothing
+            // else. Minted once per site and never again — the record key
+            // *is* the address, so a second mint is a second site.
+            val rec = uniffi.ducat_mobile.nodeDhtCreate(1u)
+            key = rec.key
+            pub = rec.ownerPublic
+            sec = rec.ownerSecret
+        }
+
+        // 2. Committed before anything else can fail, and the order is the
+        //    one Orders.bind argues for. A death after this costs a record
+        //    with no head yet, which the next publish rewrites. A death
+        //    before it, having minted, would cost a record this phone owns
+        //    and can no longer prove it owns: an address that answers
+        //    nothing, for ever, with the only key that could fix it gone.
+        val now = System.currentTimeMillis() / 1000
+        val base = Site(
+            recordKey = key,
+            title = title,
+            share = prior?.share.orEmpty(),
+            digestHex = prior?.digestHex.orEmpty(),
+            updated = now,
+            addedAt = prior?.addedAt ?: now,
+            // A publisher mirrors their own site by definition; the
+            // checkbox is about hosting somebody else's.
+            keepAlive = true,
+            fetchedDigestHex = prior?.fetchedDigestHex,
+            fetchedShare = prior?.fetchedShare,
+            ownerPublic = pub,
+            ownerSecret = sec,
+        )
+        synchronized(lock) {
+            save(context, all(context).filterNot { it.recordKey == key } + base)
+        }
+
+        // 3. Into the same place a fetched bundle lives, so the viewer, the
+        //    reseed and fetchBundle all treat a page we wrote exactly like
+        //    one we were given. Seeded from its final path, never from a
+        //    staging dir — a share parked over a directory about to be
+        //    replaced is the trap fetchBundle documents.
+        val dir = bundleDir(context, key)
+        val fresh = File(dir.parentFile, "next")
+        fresh.deleteRecursively()
+        fresh.mkdirs()
+        source.copyRecursively(fresh, overwrite = true)
+        val old = all(context).firstOrNull { it.recordKey == key }?.fetchedShare
+        if (old != null) runCatching { Swarm.stopShare(old) }
+        dir.deleteRecursively()
+        check(fresh.renameTo(dir)) { "could not move the page into place" }
+        val share = Swarm.seed(dir.absolutePath)
+
+        // 4. The head last: until it is written the address points at
+        //    nothing, and after it the whole network can read the new page.
+        val entry = base.copy(
+            share = share.shareKey,
+            digestHex = share.indexDigestHex,
+            fetchedDigestHex = share.indexDigestHex,
+            fetchedShare = share.shareKey,
+        )
+        synchronized(lock) {
+            save(context, all(context).filterNot { it.recordKey == key } + entry)
+        }
+        uniffi.ducat_mobile.nodeDhtSet(
+            key,
+            0u,
+            uniffi.ducat_mobile.siteHeadEncode(
+                uniffi.ducat_mobile.SiteHeadIo(
+                    title = title,
+                    share = share.shareKey,
+                    digestHex = share.indexDigestHex,
+                    updated = now.toULong(),
+                ),
+            ),
+        )
+        DucatLog.i(
+            "Sites",
+            "published '$title' at ${uriOf(key)} " +
+                "(${if (prior?.mine == true) "update" else "new"})",
+        )
+        return entry
     }
 
     /**
