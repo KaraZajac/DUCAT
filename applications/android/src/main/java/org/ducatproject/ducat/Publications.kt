@@ -135,6 +135,47 @@ object Publications {
 
     /** The reader's door, closed or open. Muting stops new keys from being
      *  filed and hides the shelf's future — held periods stay held. */
+    /**
+     * Whether this phone keeps serving a publication's issues after it has
+     * finished downloading them.
+     *
+     * §16.22 makes this a visible choice for sites — "hosting somebody's
+     * storefront is a small gift a person should knowingly give" — and the
+     * reasoning does not stop at pages. It was hardcoded on here: fetching
+     * an issue left the reader a permanent seeder for it, in three places
+     * that never asked (the post-fetch stay, the reseed branch, and the
+     * poller's restart sweep). §16.20's "every peer a seeder" is about
+     * serving pieces *during* a fetch, which is how a swarm works at all;
+     * staying afterwards is a separate thing to agree to.
+     *
+     * Two costs, and the second is the sharper one. An issue can be
+     * hundreds of megabytes where a page is kilobytes, so the bandwidth is
+     * real — but a seed also *announces*. A peer asking the swarm who
+     * holds a share learns who mirrors it, which for a publication is a
+     * statement about what this device subscribes to. That is not a thing
+     * to opt somebody into.
+     *
+     * Off by default, therefore, and per publication rather than per
+     * issue: a reader joins a club, they do not audit a back catalogue.
+     * Stored beside the mute flag, so it rides the backup already.
+     */
+    fun mirroring(context: Context, publisherHex: String): Boolean =
+        prefs(context).getString("subs", null)
+            ?.let { runCatching { JSONObject(it) }.getOrNull() }
+            ?.optJSONObject(publisherHex)?.optBoolean("mirror", false) ?: false
+
+    fun setMirroring(context: Context, publisherHex: String, on: Boolean) {
+        synchronized(lock) {
+            val p = prefs(context)
+            val all = p.getString("subs", null)?.let { JSONObject(it) } ?: JSONObject()
+            val mine = all.optJSONObject(publisherHex) ?: JSONObject()
+            if (on) mine.put("mirror", true) else mine.remove("mirror")
+            all.put(publisherHex, mine)
+            p.edit().putString("subs", all.toString()).apply()
+        }
+        ContactStore.bump()
+    }
+
     fun setMuted(context: Context, publisherHex: String, muted: Boolean) {
         synchronized(lock) {
             val p = prefs(context)

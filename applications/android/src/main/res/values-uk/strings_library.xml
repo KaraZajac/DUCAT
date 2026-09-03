@@ -30,4 +30,5 @@
     <string name="library_open">Відкрити</string>
     <string name="library_queued">У черзі</string>
     <string name="library_no_viewer">На цьому телефоні немає чим відкрити цей файл. Поділіться ним із застосунком, який може, або скопіюйте з телефона.</string>
+    <string name="library_mirror">Допомагати роздавати це видання іншим читачам</string>
 </resources>

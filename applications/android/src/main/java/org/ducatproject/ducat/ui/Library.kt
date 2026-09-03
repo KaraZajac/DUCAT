@@ -187,7 +187,12 @@ object LibraryFetch {
     private fun runOne(app: Context, job: Job, source: Source, reseed: Boolean) {
         val done = dirFor(app, job.publisherHex, job.period)
         if (reseed) {
-            // In place and already whole: verify and stay serving.
+            // In place and already whole: verify and stay serving — but
+            // only for a publication the reader agreed to help share.
+            // Nothing calls this for one they did not (the poller checks
+            // too); this is the same question asked where the seeding
+            // actually happens.
+            if (!Publications.mirroring(app, job.publisherHex)) return
             val share = source as Source.Swarm
             runCatching {
                 Swarm.fetch(
@@ -219,9 +224,13 @@ object LibraryFetch {
             }
             done.deleteRecursively()
             check(part.renameTo(done)) { "could not move the download into place" }
-            // The reader joins the club: what just arrived whole is served
-            // onward from its final path. Verification-only, then parked.
-            if (source is Source.Swarm) {
+            // The reader joins the club — if they said they would. This
+            // used to be unconditional, which made downloading an issue a
+            // standing commitment to serve it: bandwidth the reader never
+            // agreed to, and an announcement to the swarm that this device
+            // holds that publication. §16.22 says the same choice out loud
+            // for sites; a publication is heavier and says more.
+            if (source is Source.Swarm && Publications.mirroring(app, job.publisherHex)) {
                 runCatching {
                     Swarm.fetch(
                         source.shareKey, source.digestHex, done.absolutePath,
@@ -365,6 +374,7 @@ var libraryOpen: (android.content.Context, String, String) -> Unit = { _, _, _ -
 
 @Composable
 private fun PublisherHeader(publisherHex: String, publisherName: String?, muted: Boolean) {
+    val version by org.ducatproject.ducat.ContactStore.changes.collectAsState()
     val context = LocalContext.current
     var confirm by remember { mutableStateOf(false) }
 
@@ -446,6 +456,35 @@ private fun PublisherHeader(publisherHex: String, publisherName: String?, muted:
                     if (muted) R.string.library_resubscribe
                     else R.string.library_unsubscribe,
                 ),
+            )
+        }
+    }
+    // The same gift the sites screen asks about, asked here for the same
+    // reason and in the same words. Offered only once something has been
+    // downloaded — there is nothing to share otherwise, and a checkbox
+    // over an empty shelf is a question about nothing.
+    val holds = remember(version, publisherHex) {
+        Publications.subscription(context, publisherHex)?.third?.keys
+            ?.any { LibraryFetch.fetchedBytes(context, publisherHex, it) != null } == true
+    }
+    if (holds && !muted) {
+        val mirroring = remember(version, publisherHex) {
+            Publications.mirroring(context, publisherHex)
+        }
+        Row(
+            Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            androidx.compose.material3.Checkbox(
+                checked = mirroring,
+                onCheckedChange = { on ->
+                    Publications.setMirroring(context, publisherHex, on)
+                },
+            )
+            Text(
+                stringResource(R.string.library_mirror),
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.weight(1f),
             )
         }
     }

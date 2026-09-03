@@ -31,4 +31,5 @@
     <string name="library_open">Open</string>
     <string name="library_queued">Queued</string>
     <string name="library_no_viewer">Nothing on this phone can open that file. Share it to an app that can, or copy it off the phone.</string>
+    <string name="library_mirror">Help share this publication with other readers</string>
 </resources>

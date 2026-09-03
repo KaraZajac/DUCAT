@@ -32,4 +32,5 @@
     <string name="library_open">فتح</string>
     <string name="library_queued">في قائمة الانتظار</string>
     <string name="library_no_viewer">لا يوجد على هذا الهاتف ما يفتح هذا الملف. شاركه مع تطبيق يستطيع فتحه، أو انسخه خارج الهاتف.</string>
+    <string name="library_mirror">ساعِد في مشاركة هذه النشرة مع قراء آخرين</string>
 </resources>

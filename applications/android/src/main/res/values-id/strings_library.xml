@@ -27,4 +27,5 @@
     <string name="library_open">Buka</string>
     <string name="library_queued">Dalam antrean</string>
     <string name="library_no_viewer">Tidak ada di ponsel ini yang bisa membuka berkas itu. Bagikan ke aplikasi yang bisa, atau salin keluar dari ponsel.</string>
+    <string name="library_mirror">Bantu bagikan publikasi ini ke pembaca lain</string>
 </resources>

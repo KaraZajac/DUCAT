@@ -27,4 +27,5 @@
     <string name="library_open">เปิด</string>
     <string name="library_queued">อยู่ในคิว</string>
     <string name="library_no_viewer">ไม่มีแอปในเครื่องนี้ที่เปิดไฟล์นั้นได้ แชร์ไปยังแอปที่เปิดได้ หรือคัดลอกออกจากเครื่อง</string>
+    <string name="library_mirror">ช่วยแบ่งปันสิ่งพิมพ์นี้ให้ผู้อ่านคนอื่น</string>
 </resources>

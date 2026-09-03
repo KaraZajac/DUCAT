@@ -28,4 +28,5 @@
     <string name="library_open">Abrir</string>
     <string name="library_queued">En cola</string>
     <string name="library_no_viewer">Nada en este teléfono puede abrir ese archivo. Compártelo con una app que pueda, o cópialo fuera del teléfono.</string>
+    <string name="library_mirror">Ayuda a compartir esta publicación con otros lectores</string>
 </resources>

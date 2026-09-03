@@ -28,4 +28,5 @@
     <string name="library_open">Aç</string>
     <string name="library_queued">Sırada</string>
     <string name="library_no_viewer">Bu telefonda o dosyayı açabilecek bir şey yok. Açabilen bir uygulamaya paylaş ya da telefondan kopyala.</string>
+    <string name="library_mirror">Bu yayını başka okurlarla paylaşmaya yardım et</string>
 </resources>

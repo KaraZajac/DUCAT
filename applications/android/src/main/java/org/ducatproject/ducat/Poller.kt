@@ -479,6 +479,11 @@ class Poller(private val context: Context) {
         val newestPerPub = 2
         for (pub in Publications.subscribedPublishers(context)) {
             if (Publications.isMuted(context, pub)) continue
+            // And only what the reader offered to help share. Without
+            // this the checkbox would mean "until my next reboot" in
+            // reverse — unticked, and the restart puts it back on the
+            // wire anyway.
+            if (!Publications.mirroring(context, pub)) continue
             val sub = Publications.subscription(context, pub) ?: continue
             for (period in sub.third.keys.sortedDescending().take(newestPerPub)) {
                 val ship = Publications.shipment(context, pub, period) ?: continue
