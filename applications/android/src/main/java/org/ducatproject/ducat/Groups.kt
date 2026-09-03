@@ -267,8 +267,17 @@ object Groups {
             throw IllegalStateException("the group's mesh is incomplete")
         }
         val mine = myHexIn(context, g.members)
-        val seq = g.myGroupSeq + 1
-        upsert(context, g.copy(myGroupSeq = seq))
+        // The counter from what the store says *now*, written under the same
+        // lock. `g` was read before the mesh check, and upsert writes the
+        // whole group back — so a roster that arrived in between (a member
+        // added while this send was being prepared) was dropped, and the
+        // member vanished from the group on this device only.
+        val seq = synchronized(lock) {
+            val fresh = get(context, idHex) ?: g
+            val n = fresh.myGroupSeq + 1
+            save(context, all(context).filterNot { it.idHex == idHex } + fresh.copy(myGroupSeq = n))
+            n
+        }
         val store = ContactStore(context)
         var failed = 0
         for (m in g.members.filter { it != mine }) {

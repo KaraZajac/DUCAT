@@ -38,11 +38,26 @@ object Donations {
         return (0 until arr.length()).map { arr.getString(it) }.toSet()
     }
 
+    /**
+     * How many receipted donations to remember.
+     *
+     * This is the only replay guard in the loop, and it is parsed on every
+     * poll pass — so it cannot grow without end: a busy donation box would
+     * make each pass re-parse a list one entry longer than the last, for
+     * ever. Newest kept, because a second receipt is only possible while the
+     * donation is still one the reconciler looks at; a transaction thousands
+     * of donations old is not coming back round.
+     */
+    private const val RECEIPTED_KEPT = 2_000
+
     private fun markReceipted(context: Context, txid: String) {
         val prefs = securePrefs(context, "ducat_contacts")
         val arr = JSONArray(prefs.getString("donation_receipted", "[]"))
         arr.put(txid)
-        prefs.edit().putString("donation_receipted", arr.toString()).apply()
+        val bounded = if (arr.length() <= RECEIPTED_KEPT) arr else JSONArray().also { out ->
+            for (i in arr.length() - RECEIPTED_KEPT until arr.length()) out.put(arr.getString(i))
+        }
+        prefs.edit().putString("donation_receipted", bounded.toString()).apply()
     }
 
     fun reconcile(context: Context) {

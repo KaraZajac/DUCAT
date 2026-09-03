@@ -164,6 +164,27 @@ object Positions {
         ContactStore.bump()
     }
 
+    /**
+     * Guards read-modify-write of one persona's position record.
+     *
+     * Every writer here reads the whole record, does something that takes
+     * time — sealing, a DHT set, a delete — and writes its *pre-network*
+     * copy back. push's counter bump landed after a round trip and put back
+     * a record from before it, erasing the inbound stream reference that
+     * arrived meanwhile; and stop's removal was undone by a push already in
+     * flight, so "stop sharing" left the record alive and the phone still
+     * publishing.
+     */
+    private val lock = Any()
+
+    /** Change one field, from what the record says *now*. */
+    private fun mutate(context: Context, personaHex: String, f: (JSONObject) -> Unit) =
+        synchronized(lock) {
+            val fresh = load(context, personaHex)
+            f(fresh)
+            save(context, personaHex, fresh)
+        }
+
     // ---- sending ----------------------------------------------------------
 
     /** True while this device is sharing its position with that contact. */
@@ -256,8 +277,13 @@ object Positions {
             uniffi.ducat_mobile.nodeDhtSet(record, 0u, value)
         }.onFailure { note(personaHex, "write position: ${it.message}") }.isSuccess
         if (ok) {
-            o.put("send_counter", next)
-            save(context, personaHex, o)
+            // The counter alone, re-read, and never over a stream that was
+            // stopped while this push was out: `o` is from before the round
+            // trip above, and writing it whole put back a record that
+            // predates whatever landed during it — a stop included.
+            mutate(context, personaHex) {
+                if (!it.optBoolean("stopped", false)) it.put("send_counter", next)
+            }
         }
         return ok
     }
@@ -411,7 +437,18 @@ object Positions {
      * rebuilt pairwise exactly what §5.2.3 refused publicly.
      */
     fun stop(context: Context, personaHex: String) {
-        val o = load(context, personaHex)
+        // Marked stopped before the network work, under the lock, so a push
+        // already in flight finds it on the way out. Removing the record at
+        // the end was not enough: push's counter write landed after the
+        // removal and put the whole stream back, so "stop sharing" left the
+        // phone publishing — a consent the user had withdrawn, still being
+        // acted on.
+        val o = synchronized(lock) {
+            val fresh = load(context, personaHex)
+            fresh.put("stopped", true)
+            save(context, personaHex, fresh)
+            fresh
+        }
         o.optString("send_record").takeIf { it.isNotEmpty() }?.let { rec ->
             runCatching {
                 // Both halves or neither — see the note in [pull].
@@ -427,7 +464,7 @@ object Positions {
             runCatching { uniffi.ducat_mobile.nodeDhtDelete(rec) }
         }
         if (o.length() > 0) {
-            prefs(context).edit().remove(key(personaHex)).apply()
+            synchronized(lock) { prefs(context).edit().remove(key(personaHex)).apply() }
             ContactStore.bump()
             DucatLog.i(TAG, "position stream ended for ${personaHex.take(8)}…")
         }

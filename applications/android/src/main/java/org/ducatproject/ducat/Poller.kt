@@ -576,6 +576,28 @@ class Poller(private val context: Context) {
         // reseed above it does not wait for a node.
         runCatching { Sites.sweepOrphans(context) }
             .onFailure { DucatLog.w(TAG, "site sweep: ${it.message}") }
+        // And the library's abandoned part-downloads. A `.part` is kept after
+        // a failure on purpose — the swarm engine checks pieces on disk, so a
+        // retry resumes rather than starting over — but nothing ever collected
+        // one for an issue the reader stopped retrying, and an issue can be
+        // hundreds of megabytes. A fortnight is far past any resume somebody
+        // is still waiting on.
+        runCatching {
+            val root = java.io.File(context.filesDir, "publications")
+            val old = System.currentTimeMillis() - 14L * 24 * 3600_000
+            var freed = 0L
+            root.listFiles()?.forEach { pub ->
+                pub.listFiles()?.forEach { d ->
+                    if (d.isDirectory && d.name.endsWith(".part") && d.lastModified() < old) {
+                        freed += d.walkBottomUp().filter { it.isFile }.sumOf { it.length() }
+                        d.deleteRecursively()
+                    }
+                }
+            }
+            if (freed > 0) {
+                DucatLog.i(TAG, "swept ${freed / 1024} KiB of abandoned part-downloads")
+            }
+        }.onFailure { DucatLog.w(TAG, "part sweep: ${it.message}") }
     }
 
     @Volatile private var sitesReseeded = false

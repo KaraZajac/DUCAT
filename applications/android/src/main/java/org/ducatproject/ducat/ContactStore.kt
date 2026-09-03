@@ -395,10 +395,19 @@ class ContactStore(context: Context) {
         listOf(
             "thread_", "disappear_", "seen_", "seenlog_", "usedtheirs_", "billseen_",
             "billdone_", "pendingslot_", "slotok_", "slotfix_",
+            // The draft: a deleted conversation comes back when they write
+            // again, and it used to come back with the words typed before
+            // the delete sitting in the composer under a live Send button.
+            "draft_",
         )
             .forEach { e.remove(it + personaHex) }
         prefs.all.keys.filter {
-            it.startsWith("stuck_$personaHex:") || it.startsWith("slotseen_$personaHex:")
+            it.startsWith("stuck_$personaHex:") ||
+                it.startsWith("slotseen_$personaHex:") ||
+                // slotseenq_ too — the ring keeps one per slot, so a busy
+                // thread left up to 32 orphans nothing would ever name again,
+                // which is the growth this scan exists to prevent.
+                it.startsWith("slotseenq_$personaHex:")
         }.forEach { e.remove(it) }
         // The thread's prekey offer dies with the thread; its unconsumed ids
         // are never reassigned (the id counter only climbs), so the secrets
@@ -3187,7 +3196,15 @@ class WalletStore(context: Context) {
      * double — but leaving stale entries from a range about to be re-read makes
      * "what has this scan actually seen" unanswerable.
      */
-    fun rescanFrom(height: Long) {
+    fun rescanFrom(height: Long) = synchronized(walletLock) {
+        // Under the same lock as every other wallet write. This clears the
+        // outputs and rewinds the scan mark; the poller's recordScan runs on
+        // its own thread and writes both back from a snapshot read before
+        // the reset. Unlocked, the interleaving that loses is the ordinary
+        // one — a scan finishing mid-rescan restores the outputs and the
+        // mark the user just asked to abandon, so the rescan silently does
+        // not happen and the screen reports a balance from the range being
+        // skipped.
         prefs.edit()
             .putString("wallet_height", height.toString())
             .putLong("wallet_scanned_to", height)
