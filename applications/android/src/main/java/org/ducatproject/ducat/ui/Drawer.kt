@@ -1563,6 +1563,16 @@ fun SitesSection() {
                                 },
                             ) { Text(stringResource(R.string.sites_open)) }
                         }
+                        // Not on your own page. The box means "mirror
+                        // somebody else's", and on a page this phone
+                        // publishes it is the origin's own seed — unticking
+                        // it ran stopShare on the bundle the published head
+                        // names, and nothing puts that back: reseed returns
+                        // early on !keepAlive and so does the poller's
+                        // restart sweep. The address stayed live in the DHT
+                        // with no seeder behind it, while Pages went on
+                        // saying "Served from this phone".
+                        if (!site.mine) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             // Off the main thread, both: the store is an
                             // encrypted table read back whole, and remove
@@ -1604,6 +1614,7 @@ fun SitesSection() {
                                     }
                                 }
                             }) { Text(stringResource(R.string.sites_remove)) }
+                        }
                         }
                     }
                 }

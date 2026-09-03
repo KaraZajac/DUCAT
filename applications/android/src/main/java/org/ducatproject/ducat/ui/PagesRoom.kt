@@ -133,27 +133,33 @@ fun PagesRoom() {
     // key nothing was draining, and a publish that worked perfectly left
     // the room sitting there saying nothing. One page is published at a
     // time here; one key is the truth.
-    // Re-seeded when the page being edited changes, explicitly.
+    // Re-seeded when the page being edited *changes*, and only then.
     //
-    // The keys on those rememberSaveables ought to be enough, and across a
-    // rotation they are. Across a *tab switch* they are not: this room
-    // leaves composition when the Address tab is shown and its text is
-    // saved, so picking a different page there and coming back restored
-    // the words belonging to the page no longer selected — the two halves
-    // of the mode disagreeing about which page is which, with an Update
-    // button under it. Found by switching chips on the phone; a relaunch
-    // agreed with itself, which is what said the logic was right and the
-    // composition was stale.
+    // Two wrong tools were tried before this one. Keying the
+    // rememberSaveables on the selection looks right and survives a
+    // rotation, but not a tab switch: the Shell composes one tab at a time
+    // (Shells.SaveableStateProvider), so this room leaves composition, its
+    // text is saved, and coming back restores words belonging to whichever
+    // page was chosen when they were saved. Replacing that with a
+    // LaunchedEffect on the selection was worse — an effect runs its block
+    // whenever it *enters composition*, keys unchanged or not, so every
+    // return from the Address tab silently reverted the form to the last
+    // published text with several paragraphs of unsaved typing in it.
     //
-    // Keyed on the selection alone, so it fires exactly when the answer to
-    // "which page is this" changes and never while somebody is typing.
-    LaunchedEffect(existing?.recordKey, starting) {
+    // So the question is not "did the keys change" but "have I already
+    // seeded this page in this form", which is a fact that has to outlive
+    // composition — hence a saveable marker rather than an effect key.
+    var seededFor by rememberSaveable { mutableStateOf<String?>(null) }
+    val wants = if (starting) "\u0000new" else existing?.recordKey
+    LaunchedEffect(wants) {
+        if (seededFor == wants) return@LaunchedEffect
         val p = if (starting) null else PageTemplate.fromJson(existing?.page)
         title = p?.title ?: existing?.title.orEmpty()
         tagline = p?.tagline.orEmpty()
         body = p?.body.orEmpty()
         hours = p?.hours.orEmpty()
         contact = p?.contact.orEmpty()
+        seededFor = wants
     }
 
     val key = "page:publish"
