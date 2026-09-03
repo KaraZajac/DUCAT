@@ -10,7 +10,13 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-DRAFT=$(grep -m1 -oP '^\*\*Draft \K[0-9.]+' ducat-protocol.md)
+# Everything up to the space, not just digits and dots: the draft has read
+# "1.1.0-dev6" since the publications track opened, and `[0-9.]+` stopped at
+# the hyphen and handed back "1.1.0". That names a dev build after the final
+# version it is a draft of — beside a protocol line that says in the same
+# breath which release is the frozen one. Every tag on this branch is
+# v1.1.0-dev6.N, so the bare script had stopped agreeing with its own history.
+DRAFT=$(grep -m1 -oP '^\*\*Draft \K[^ ]+' ducat-protocol.md)
 # Build number between draft and hash, so names sort the way time does.
 # The hash alone made the releases page a shuffle: GitHub orders it by tag
 # name, a hash is random, so v0.72-cf... sat above the newer v0.72-cd... and
