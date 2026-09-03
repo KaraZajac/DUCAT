@@ -131,4 +131,7 @@
         <item quantity="other">%1$d phòng ngủ</item>
     </plurals>
     <string name="rent_sleeps_n">cho %1$d người</string>
+    <string name="rent_delete_title">Xoá tin đăng này?</string>
+    <string name="rent_delete_body">Gỡ xuống sẽ cất nó cùng lịch sử. Xoá là vĩnh viễn — và tin đăng gõ lại được tính là người bán mới, dù tin này đã đứng bao lâu.</string>
+    <string name="rent_delete_keep">Giữ lại</string>
 </resources>

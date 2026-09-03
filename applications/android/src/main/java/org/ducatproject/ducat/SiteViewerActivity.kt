@@ -89,7 +89,21 @@ class SiteViewerActivity : ComponentActivity() {
                             startActivity(
                                 android.content.Intent(
                                     android.content.Intent.ACTION_VIEW, url,
-                                ).setPackage(packageName),
+                                ).setPackage(packageName)
+                                    // …and stay open behind them, which is
+                                    // what the comment above promises and
+                                    // what did not happen: MainActivity is
+                                    // singleTop in the same task, so this
+                                    // brought it to the front and finished
+                                    // the room. Following a link out of a
+                                    // page ended the page, and Back went to
+                                    // wherever the app had been rather than
+                                    // to what was being read. A new task
+                                    // keeps the room where it was.
+                                    .addFlags(
+                                        android.content.Intent.FLAG_ACTIVITY_NEW_TASK or
+                                            android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT,
+                                    ),
                             )
                         }
                         true

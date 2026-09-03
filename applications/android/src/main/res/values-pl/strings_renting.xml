@@ -133,4 +133,7 @@
         <item quantity="other">%1$d sypialni</item>
     </plurals>
     <string name="rent_sleeps_n">dla %1$d osób</string>
+    <string name="rent_delete_title">Usunąć to ogłoszenie?</string>
+    <string name="rent_delete_body">Zdjęcie odkłada je wraz z historią. Usunięcie jest trwałe — a przepisane ogłoszenie liczy się jako nowy sprzedawca, niezależnie od tego, jak długo stało to.</string>
+    <string name="rent_delete_keep">Zostaw</string>
 </resources>

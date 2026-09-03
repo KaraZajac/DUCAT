@@ -1320,6 +1320,23 @@ fun DriveScreen() {
             clearDriveOffer(context)
             pendingOffer = null
             if (answer.kind == 7) {
+                // §15.12: a RIDE_ACCEPT names the offer and *echoes the
+                // fare*, and the echo is only worth carrying if somebody
+                // reads it. Nothing did — the driver confirmed on the offer's
+                // own number whatever the accept said, so an accept naming a
+                // different figure was taken as agreement to the driver's,
+                // and the two sides walked to the kerb holding different
+                // prices. A mismatch is not a deal; it is refused and said.
+                val echoed = answer.amountPxmr
+                if (echoed > 0 && echoed != po.farePxmr) {
+                    DucatLog.w(
+                        TAG,
+                        "accept echoed ${formatXmr(echoed)} XMR against an offer of " +
+                            "${formatXmr(po.farePxmr)} — not a deal",
+                    )
+                    riderDeclined = true
+                    break
+                }
                 confirmedRide = ContactStore(context).all()
                     .firstOrNull { it.personaHex == po.personaHex }
                     ?.let { it to po.farePxmr }

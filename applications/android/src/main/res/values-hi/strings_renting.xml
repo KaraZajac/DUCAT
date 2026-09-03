@@ -133,4 +133,7 @@
         <item quantity="other">%1$d बेडरूम</item>
     </plurals>
     <string name="rent_sleeps_n">%1$d लोगों के लिए</string>
+    <string name="rent_delete_title">यह लिस्टिंग मिटाएँ?</string>
+    <string name="rent_delete_body">हटाने से वह इतिहास सहित रख ली जाती है। मिटाना स्थायी है — और दोबारा लिखी लिस्टिंग नया विक्रेता मानी जाती है, चाहे यह कितनी भी पुरानी रही हो।</string>
+    <string name="rent_delete_keep">रहने दें</string>
 </resources>

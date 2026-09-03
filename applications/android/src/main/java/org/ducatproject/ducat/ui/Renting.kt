@@ -443,7 +443,33 @@ private fun MyListingCard(
                 Spacer(Modifier.width(8.dp))
                 // Deleting a live listing takes it off the board on the way
                 // out — one gesture, not a two-step the owner has to know.
-                TextButton(onClick = onDelete) { Text(stringResource(R.string.rent_delete)) }
+                // But it asks first, and not out of caution about the words:
+                // a listing's signing key is derived from its *id*
+                // (board::listing_seed), so a re-typed listing signs as a
+                // brand-new author and the "established a while" signal a
+                // careful buyer reads resets to zero. That is unrecoverable,
+                // and this sits 8dp from "Take down", which is not.
+                var confirmDrop by remember { mutableStateOf(false) }
+                if (confirmDrop) {
+                    AlertDialog(
+                        onDismissRequest = { confirmDrop = false },
+                        title = { Text(stringResource(R.string.rent_delete_title)) },
+                        text = { Text(stringResource(R.string.rent_delete_body)) },
+                        confirmButton = {
+                            TextButton(onClick = { confirmDrop = false; onDelete() }) {
+                                Text(stringResource(R.string.rent_delete))
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { confirmDrop = false }) {
+                                Text(stringResource(R.string.rent_delete_keep))
+                            }
+                        },
+                    )
+                }
+                TextButton(onClick = { confirmDrop = true }) {
+                    Text(stringResource(R.string.rent_delete))
+                }
             }
         }
     }

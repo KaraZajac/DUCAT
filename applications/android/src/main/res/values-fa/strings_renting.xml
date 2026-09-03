@@ -131,4 +131,7 @@
         <item quantity="other">%1$d اتاق خواب</item>
     </plurals>
     <string name="rent_sleeps_n">گنجایش %1$d نفر</string>
+    <string name="rent_delete_title">این آگهی حذف شود؟</string>
+    <string name="rent_delete_body">برداشتن آن را کنار می‌گذارد و تاریخچه‌اش را نگه می‌دارد. حذف همیشگی است — و آگهی دوباره‌نوشته فروشنده‌ای تازه به حساب می‌آید، هر چقدر هم این یکی مانده باشد.</string>
+    <string name="rent_delete_keep">نگه دار</string>
 </resources>

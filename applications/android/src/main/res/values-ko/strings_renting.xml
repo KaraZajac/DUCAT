@@ -131,4 +131,7 @@
         <item quantity="other">침실 %1$d개</item>
     </plurals>
     <string name="rent_sleeps_n">%1$d명 숙박</string>
+    <string name="rent_delete_title">이 등록을 삭제할까요?</string>
+    <string name="rent_delete_body">내리면 이력과 함께 보관됩니다. 삭제는 되돌릴 수 없고, 다시 쓴 등록은 새 판매자로 취급되어 그동안의 기간이 남지 않습니다.</string>
+    <string name="rent_delete_keep">보관</string>
 </resources>

@@ -303,7 +303,12 @@ internal fun applyBackup(
     // and the privacy choice has quietly changed both, and the user has no way
     // to notice — publishing especially, where the wrong direction is a silent
     // disclosure.
-    r.displayName?.let { NameStore(context).put(it) }
+    // Under the *primary's* key, which is where the export read it
+    // (NameStore(context, personaHex())). Unqualified, NameStore falls
+    // through to the worn persona — and at this point in the restore that is
+    // still the old device's worn hex, so the bundle's name landed on a
+    // persona the roster replacement then erased.
+    r.displayName?.let { NameStore(context, PersonaStore(context).personaHex()).put(it) }
     ContactStore(context).setPublishAddress(r.publishPayto)
     // §16.9's profile with it. A persona that comes back with the right money
     // and no face is not the same person to anyone who knew them, and nothing

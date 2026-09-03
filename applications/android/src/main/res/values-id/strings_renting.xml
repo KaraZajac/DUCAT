@@ -131,4 +131,7 @@
         <item quantity="other">%1$d kamar tidur</item>
     </plurals>
     <string name="rent_sleeps_n">untuk %1$d orang</string>
+    <string name="rent_delete_title">Hapus iklan ini?</string>
+    <string name="rent_delete_body">Menurunkannya menyimpannya beserta riwayatnya. Menghapus bersifat permanen — dan iklan yang diketik ulang dihitung sebagai penjual baru, seberapa pun lamanya yang ini bertahan.</string>
+    <string name="rent_delete_keep">Simpan</string>
 </resources>

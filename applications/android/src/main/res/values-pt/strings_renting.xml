@@ -133,4 +133,7 @@
         <item quantity="other">%1$d quartos</item>
     </plurals>
     <string name="rent_sleeps_n">para %1$d pessoas</string>
+    <string name="rent_delete_title">Eliminar este anúncio?</string>
+    <string name="rent_delete_body">Retirá-lo guarda-o com o seu historial. Eliminar é definitivo — e um anúncio reescrito conta como um vendedor novo, por mais tempo que este tenha estado no ar.</string>
+    <string name="rent_delete_keep">Manter</string>
 </resources>

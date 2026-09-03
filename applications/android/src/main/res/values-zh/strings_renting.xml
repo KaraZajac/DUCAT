@@ -131,4 +131,7 @@
         <item quantity="other">%1$d间卧室</item>
     </plurals>
     <string name="rent_sleeps_n">可住%1$d人</string>
+    <string name="rent_delete_title">删除这条信息？</string>
+    <string name="rent_delete_body">下架会连同历史一起保留。删除不可撤销——重新填写的信息算作新卖家，无论这条挂了多久。</string>
+    <string name="rent_delete_keep">保留</string>
 </resources>

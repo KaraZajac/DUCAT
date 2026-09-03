@@ -133,4 +133,7 @@
         <item quantity="other">%1$d спален</item>
     </plurals>
     <string name="rent_sleeps_n">на %1$d чел.</string>
+    <string name="rent_delete_title">Удалить это объявление?</string>
+    <string name="rent_delete_body">Снятие откладывает его вместе с историей. Удаление необратимо — а переписанное объявление считается новым продавцом, сколько бы это ни провисело.</string>
+    <string name="rent_delete_keep">Оставить</string>
 </resources>

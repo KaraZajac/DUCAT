@@ -131,4 +131,7 @@
         <item quantity="other">%1$d yatak odası</item>
     </plurals>
     <string name="rent_sleeps_n">%1$d kişilik</string>
+    <string name="rent_delete_title">Bu ilan silinsin mi?</string>
+    <string name="rent_delete_body">Kaldırmak onu geçmişiyle birlikte saklar. Silmek kalıcıdır — ve yeniden yazılan ilan yeni bir satıcı sayılır, bu ne kadar süredir durursa dursun.</string>
+    <string name="rent_delete_keep">Kalsın</string>
 </resources>

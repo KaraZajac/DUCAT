@@ -131,4 +131,7 @@
         <item quantity="other">寝室%1$d室</item>
     </plurals>
     <string name="rent_sleeps_n">%1$d人まで</string>
+    <string name="rent_delete_title">この出品を削除しますか？</string>
+    <string name="rent_delete_body">取り下げれば履歴ごと残ります。削除は元に戻せません。書き直した出品は新しい出品者として扱われるので、これまでの期間は残りません。</string>
+    <string name="rent_delete_keep">残す</string>
 </resources>

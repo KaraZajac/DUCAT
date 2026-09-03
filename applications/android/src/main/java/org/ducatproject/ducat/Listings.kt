@@ -642,10 +642,16 @@ object Listings {
             runCatching { uniffi.ducat_mobile.standPost(board, slot.toUInt(), ByteArray(0)) }
                 .onFailure { DucatLog.w(TAG, "clearing slot: ${it.message}") }
         }
-        o.remove("board"); o.remove("subkey"); o.remove("postedAt"); o.remove("card")
+        // Re-read before writing. `o` is from before the board write above,
+        // and `put` writes the whole listing back — so a price edit, a
+        // re-post stamp or a quantity change made while that round trip was
+        // out was silently reverted by taking the listing down.
+        val fresh = get(context, id) ?: o
+        fresh.remove("board"); fresh.remove("subkey")
+        fresh.remove("postedAt"); fresh.remove("card")
         // Taken down is the owner's word: the poll stops trying to put it up.
-        o.remove("wanted"); o.remove("triedAt")
-        put(context, o)
+        fresh.remove("wanted"); fresh.remove("triedAt")
+        put(context, fresh)
     }
 
     /**

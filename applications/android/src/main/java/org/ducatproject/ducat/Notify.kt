@@ -25,7 +25,15 @@ object Notify {
     private const val CHANNEL = "ducat_activity"
     // Posted from several poller lanes at once; a shared id would make one
     // notification silently replace another.
-    private val nextId = java.util.concurrent.atomic.AtomicInteger(1000)
+    // Seeded from the clock, not from a constant. These are object fields
+    // reinitialised at class load, so after a process restart the counter
+    // began at 1000 again and the next notification replaced the one still
+    // in the shade from before — a missed call or an arrived payment
+    // silently overwritten by an unrelated one. Anything that separates two
+    // runs will do; the low bits of the clock are always to hand.
+    private val nextId = java.util.concurrent.atomic.AtomicInteger(
+        1000 + ((System.currentTimeMillis() / 1000) % 100_000).toInt(),
+    )
 
     private fun manager(context: Context): NotificationManager? {
         val mgr = context.getSystemService(NotificationManager::class.java) ?: return null
@@ -84,7 +92,9 @@ object Notify {
     }
 
     /** Distinct request codes so two threads' taps do not share one intent. */
-    private val reqCode = java.util.concurrent.atomic.AtomicInteger(100)
+    private val reqCode = java.util.concurrent.atomic.AtomicInteger(
+        100 + ((System.currentTimeMillis() / 1000) % 100_000).toInt(),
+    )
 
     /**
      * Whether what this app posts can reach the person at all.

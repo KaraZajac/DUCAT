@@ -131,4 +131,7 @@
         <item quantity="other">%1$d ห้องนอน</item>
     </plurals>
     <string name="rent_sleeps_n">พักได้ %1$d คน</string>
+    <string name="rent_delete_title">ลบประกาศนี้?</string>
+    <string name="rent_delete_body">การนำลงจะเก็บไว้พร้อมประวัติ การลบเป็นการถาวร — และประกาศที่พิมพ์ใหม่นับเป็นผู้ขายรายใหม่ ไม่ว่าอันนี้จะอยู่มานานแค่ไหน</string>
+    <string name="rent_delete_keep">เก็บไว้</string>
 </resources>
