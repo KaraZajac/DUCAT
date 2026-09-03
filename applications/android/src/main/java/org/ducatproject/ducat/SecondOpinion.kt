@@ -80,7 +80,12 @@ object SecondOpinion {
         // another eight seconds of the reconciler's time on it: a node that is
         // behind will not have caught up since the last poll.
         val asked = prefs.getLong("asked_$key", 0L)
-        if (asked != 0L && now - asked < REASK_MS) return false
+        // Elapsed, as this file already does for the alarm four lines below
+        // the write. A raw subtraction here means an `asked_` stamp ahead of
+        // now holds the gate closed for ever, and the only path to "settled"
+        // runs through the call this returns before — so a paid sale never
+        // settles, silently, with the screen still saying it is waiting.
+        if (asked != 0L && !Elapsed.due(now, asked, REASK_MS)) return false
 
         return decide(
             context, key, onTx(context, key), now,
@@ -124,7 +129,12 @@ object SecondOpinion {
 
         val now = System.currentTimeMillis()
         val asked = prefs.getLong("asked_$key", 0L)
-        if (asked != 0L && now - asked < REASK_MS) return false
+        // Elapsed, as this file already does for the alarm four lines below
+        // the write. A raw subtraction here means an `asked_` stamp ahead of
+        // now holds the gate closed for ever, and the only path to "settled"
+        // runs through the call this returns before — so a paid sale never
+        // settles, silently, with the screen still saying it is waiting.
+        if (asked != 0L && !Elapsed.due(now, asked, REASK_MS)) return false
 
         return decide(
             context, key, onEscrow(keys, fromHeight, claimed, nodeInUse), now,

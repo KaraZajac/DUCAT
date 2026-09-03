@@ -228,7 +228,20 @@ class ContactStore(context: Context) {
         // thread that grew in between drops the message that just landed.
         return synchronized(lock) {
             val all = thread(personaHex)
-            val kept = all.filter { it.timestamp >= cutoff }
+            // The stamp on an inbound row is the *sender's*, and a raw
+            // comparison lets them decide whether this setting works at
+            // all: stamped ahead, a message is permanently newer than any
+            // cutoff and the plaintext stays for ever, which is the exact
+            // failure the docstring above says was already fixed once.
+            //
+            // Elapsed, therefore, with its future rule doing real work
+            // rather than being tolerated: a stamp this device cannot
+            // vouch for is treated as past its window and goes on the next
+            // sweep. That errs towards deleting a message early, and for a
+            // feature whose entire purpose is not keeping plaintext around
+            // that is the right direction to err in.
+            val nowSecs = System.currentTimeMillis() / 1000
+            val kept = all.filter { !Elapsed.dueSecs(nowSecs, it.timestamp, afterSecs) }
             if (kept.size == all.size) return@synchronized 0
             writeThread(personaHex, kept)
             all.size - kept.size
@@ -1361,9 +1374,21 @@ class ContactStore(context: Context) {
             val unansweredLife =
                 if (ttlSecs > 0) ttlSecs * 1000L + 60 * 60 * 1000L
                 else 24 * 60 * 60 * 1000L
+            // Plain subtractions, not Elapsed, and this is the same
+            // inversion TabStore.sweepAbandoned writes out. Elapsed reads a
+            // stamp from the future as *due*, on the stated grounds that
+            // doing a thing once too often costs a round trip — true of a
+            // refresh, backwards for a delete. `made` is this device's own
+            // clock at issue, so a clock wound forward and back leaves every
+            // live card stamped ahead of now: under Elapsed the next sweep
+            // reads all of them as stale, drops them, and forgets their DHT
+            // records — every card out on a counter dies at once, and a
+            // customer's claim lands nowhere. Ageing a card an hour late is
+            // the cheaper mistake.
+            val age = now - made
             val stale =
-                if (answered) Elapsed.due(now, made, 60 * 60 * 1000L)
-                else Elapsed.due(now, made, unansweredLife)
+                if (answered) age >= 60 * 60 * 1000L
+                else age >= unansweredLife
             if (stale) dropped += o.getString("inbox") else keep.put(o)
         }
         if (dropped.isNotEmpty()) {
@@ -1530,7 +1555,12 @@ class ContactStore(context: Context) {
         val o = prefs.getString("prekeys", null)?.let { JSONObject(it) } ?: return false
         if (!o.has("signed")) return false
         val at = o.optLong("signed_at", 0L)
-        return at == 0L || System.currentTimeMillis() - at >= SIGNED_PREKEY_LIFETIME_MS
+        // Elapsed, because a signed key that never rotates again is the
+        // exact thing this function exists to prevent: hpke.rs promises
+        // forward secrecy from the next rotation, and a stamp written while
+        // the clock was ahead would mean there is never a next one. Silent,
+        // and for the life of the install.
+        return at == 0L || Elapsed.due(System.currentTimeMillis(), at, SIGNED_PREKEY_LIFETIME_MS)
     }
 
     fun oneTimeSecret(id: Int): ByteArray? {

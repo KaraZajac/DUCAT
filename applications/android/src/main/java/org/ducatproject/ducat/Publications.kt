@@ -1295,7 +1295,13 @@ object Publications {
         val p = prefs(context)
         val last = p.getLong("shelf_tended", 0L)
         val now = System.currentTimeMillis()
-        if (now - last < 60 * 60_000L) return
+        // Elapsed, like tendMarket on the same poll clock. A raw subtraction
+        // never fires again once `shelf_tended` sits ahead of now — a clock
+        // wound forward once and corrected leaves this permanently gated,
+        // and what it is gating is the thing that stops a TTL eating the
+        // back catalogue. The failure is silent and its symptom arrives
+        // weeks later as a subscriber's issue that will not fetch.
+        if (!Elapsed.due(now, last, 60 * 60_000L)) return
         p.edit().putLong("shelf_tended", now).apply()
         for ((pubId, _) in publications(context)) {
             if (shelfOf(context, pubId) == null) continue

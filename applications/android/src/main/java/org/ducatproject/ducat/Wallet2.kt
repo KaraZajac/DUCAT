@@ -293,7 +293,16 @@ object Wallet {
                         DucatLog.w(TAG, "send intent ${intent.id} resolved by chain — recording without txid")
                         store.resolveSendIntent(intent.id, "", 0L)
                     }
-                    Elapsed.dueSecs(now, intent.ts, INTENT_GIVE_UP_SECS) &&
+                    // A plain subtraction: this releases the notes of a
+                    // payment that may still be in flight, which is the one
+                    // shape Elapsed is wrong for. Its rule — a future stamp
+                    // reads as due — is written for refreshes; here it would
+                    // collapse the whole give-up window to zero the moment
+                    // the clock moved backwards, dropping the intent for a
+                    // send that had just left. resolveSendIntent is the only
+                    // writer of wallet_sends, so an intent dropped early is a
+                    // relayed payment with no record of it at all.
+                    now - intent.ts >= INTENT_GIVE_UP_SECS &&
                         kis.isNotEmpty() && kis.all { it in chainAnswered && it !in chainSpent } -> {
                         DucatLog.w(TAG, "send intent ${intent.id} never relayed — releasing its notes")
                         store.dropSendIntent(intent.id)

@@ -112,7 +112,11 @@ object Beacons {
     fun tip(context: Context): Long {
         val now = System.currentTimeMillis()
         synchronized(this) {
-            if (tipHeight > 0 && now - tipAt < TIP_FRESH_MS) return tipHeight
+            // Both bounds, matching the persisted twin below (usableTip):
+            // a reading stamped *ahead* of now is not current either, and a
+            // clock wound forward and back would otherwise freeze a stale
+            // tip in memory for the life of the process.
+            if (tipHeight > 0 && !Elapsed.due(now, tipAt, TIP_FRESH_MS)) return tipHeight
         }
         // **A tip this device could not refresh is not a tip.**
         //
@@ -198,7 +202,7 @@ object Beacons {
      * precedent: an insecure connection still loads, marked.
      */
     fun hasChainView(): Boolean = synchronized(this) {
-        tipHeight > 0 && System.currentTimeMillis() - tipAt < TIP_FRESH_MS
+        tipHeight > 0 && !Elapsed.due(System.currentTimeMillis(), tipAt, TIP_FRESH_MS)
     }
 
     /** The tip and its hash, for stamping something about to be posted. */

@@ -845,6 +845,14 @@ tasks.register<JavaExec>("sitepublishtest") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// Three questions about a clock: refresh, irreversible action, and a stamp
+// somebody else wrote. `DUCAT_DESK_STATE=<dir> ./gradlew :desktop:clocktest`.
+tasks.register<JavaExec>("clocktest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.ClockTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // A picture leaves as pixels: no GPS, no maker notes, nothing but the image.
 // `DUCAT_DESK_STATE=<dir> ./gradlew :desktop:exiftest`.
 tasks.register<JavaExec>("exiftest") {

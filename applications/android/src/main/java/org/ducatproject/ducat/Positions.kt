@@ -96,7 +96,16 @@ object Positions {
         // (Mailbox writes currentTimeMillis()/1000), and mixing the two here
         // reads every accept as expired — a card that never appears, which
         // looks exactly like this predicate working.
-        if (System.currentTimeMillis() / 1000 - accept.timestamp > LIVE_FOR_SECS) return false
+        // Elapsed, because this stamp is the counterparty's and all three
+        // of §15.12's bounds anchor on it — the twelve hours here, a receipt
+        // after the accept, the escrow ending. An accept stamped ahead
+        // defeated every one of them at once and left this phone offering a
+        // stream nothing would ever stop. A stamp this device cannot vouch
+        // for reads as expired, which for a location share is the only safe
+        // direction to be wrong in.
+        if (Elapsed.dueSecs(System.currentTimeMillis() / 1000, accept.timestamp, LIVE_FOR_SECS)) {
+            return false
+        }
         // A receipt after the accept is the ride paid for and over.
         if (thread.any { it.kind == 3 && it.timestamp >= accept.timestamp }) return false
         // And a bonded ride ends when its escrow does, whoever released it.

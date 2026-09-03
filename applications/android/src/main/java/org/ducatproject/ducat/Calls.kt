@@ -546,7 +546,18 @@ object Calls {
                     val thread = store.thread(c.personaHex)
                     val offer = thread.lastOrNull {
                         !it.outgoing && it.kind == 14 &&
-                            now - it.timestamp < RING_WINDOW_SECS + CALL_SKEW_SECS &&
+                            // Fresh means "not yet due", which is where
+                            // Elapsed's future rule earns its place: this
+                            // stamp is the *caller's*, CALL_SKEW_SECS
+                            // forgives one running behind, and nothing
+                            // bounded one running ahead — an offer stamped
+                            // in the future stayed fresh for ever and rang
+                            // this phone on every start for a call nobody
+                            // was on. A stamp this phone cannot vouch for
+                            // is not a ringing telephone.
+                            !Elapsed.dueSecs(
+                                now, it.timestamp, RING_WINDOW_SECS + CALL_SKEW_SECS,
+                            ) &&
                             it.callRoute != null && it.callId != null &&
                             it.callId !in dealtWith &&
                             // A ring already answered, declined or withdrawn
