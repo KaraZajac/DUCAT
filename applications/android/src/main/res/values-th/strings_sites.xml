@@ -17,4 +17,8 @@
     <string name="sites_keep_alive">ช่วยให้ไซต์นี้อยู่ต่อเพื่อคนอื่น</string>
     <string name="sites_remove">เอาออก</string>
     <string name="sites_fetching_waiting">กำลังดึงข้อมูล — รอให้มีคนแบ่งปัน…</string>
+    <string name="sites_drop_mine_title">ลบหน้าเพจของคุณ?</string>
+    <string name="sites_drop_mine_body">“%1$s” เป็นของคุณ การลบตรงนี้จะทิ้งกุญแจเดียวที่เปลี่ยนมันได้ — ที่อยู่จะยังส่งรุ่นล่าสุดให้ทุกคนที่ยังแบ่งปันอยู่ และจะไม่มีอะไรอัปเดตมันได้อีก</string>
+    <string name="sites_drop_mine_go">ลบ</string>
+    <string name="sites_drop_keep">เก็บไว้</string>
 </resources>

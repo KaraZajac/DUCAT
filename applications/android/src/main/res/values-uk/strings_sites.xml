@@ -17,4 +17,8 @@
     <string name="sites_keep_alive">Тримати цей сайт живим для інших</string>
     <string name="sites_remove">Прибрати</string>
     <string name="sites_fetching_waiting">Завантаження — чекаємо на того, хто роздає…</string>
+    <string name="sites_drop_mine_title">Видалити вашу сторінку?</string>
+    <string name="sites_drop_mine_body">«%1$s» — ваша. Видалення тут викидає єдиний ключ, яким її можна змінити: адреса й далі віддаватиме останню версію всім, хто її роздає, і оновити її вже буде нічим.</string>
+    <string name="sites_drop_mine_go">Видалити</string>
+    <string name="sites_drop_keep">Залишити</string>
 </resources>

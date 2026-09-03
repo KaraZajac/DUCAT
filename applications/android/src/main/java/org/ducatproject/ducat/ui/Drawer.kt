@@ -1334,6 +1334,10 @@ fun SitesSection() {
     // that is going nowhere never does. Off the main thread — this reaches
     // into the node.
     var siteProgress by remember { mutableStateOf<org.ducatproject.ducat.Swarm.Progress?>(null) }
+    // A site awaiting a "yes, really" before it goes. Only ever set for
+    // one this phone owns: removing somebody else's costs a re-fetch,
+    // removing your own costs the only key that can ever update it.
+    var dropping by remember { mutableStateOf<org.ducatproject.ducat.Sites.Site?>(null) }
     val fetching = busy?.takeIf { it != SITE_ADD_JOB }
     LaunchedEffect(fetching) {
         val share = fetching?.let { key -> sites.firstOrNull { it.recordKey == key }?.share }
@@ -1361,6 +1365,29 @@ fun SitesSection() {
                 word = o.error.saidWhy() ?: o.error.javaClass.simpleName
             }
         }
+    }
+
+    dropping?.let { site ->
+        AlertDialog(
+            onDismissRequest = { dropping = null },
+            title = { Text(stringResource(R.string.sites_drop_mine_title)) },
+            text = { Text(stringResource(R.string.sites_drop_mine_body, site.title)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    val key = site.recordKey
+                    dropping = null
+                    ThreadSends.launch(ContactStore(context), "site:$key", null) {
+                        org.ducatproject.ducat.Sites.remove(context, key)
+                        null
+                    }
+                }) { Text(stringResource(R.string.sites_drop_mine_go)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { dropping = null }) {
+                    Text(stringResource(R.string.sites_drop_keep))
+                }
+            },
+        )
     }
 
     fun addByUri(uri: String) {
@@ -1559,11 +1586,22 @@ fun SitesSection() {
                                 modifier = Modifier.weight(1f),
                             )
                             TextButton(onClick = {
-                                ThreadSends.launch(
-                                    ContactStore(context), "site:${site.recordKey}", null,
-                                ) {
-                                    org.ducatproject.ducat.Sites.remove(context, site.recordKey)
-                                    null
+                                // Somebody else's page is a cache: dropping
+                                // it costs a re-fetch and the address still
+                                // works. Your own is the write authority —
+                                // the address keeps serving its last bundle
+                                // to anyone mirroring it, and nothing can
+                                // ever change it again. Only the second one
+                                // is worth stopping a hand for.
+                                if (site.mine) {
+                                    dropping = site
+                                } else {
+                                    ThreadSends.launch(
+                                        ContactStore(context), "site:${site.recordKey}", null,
+                                    ) {
+                                        org.ducatproject.ducat.Sites.remove(context, site.recordKey)
+                                        null
+                                    }
                                 }
                             }) { Text(stringResource(R.string.sites_remove)) }
                         }

@@ -17,4 +17,8 @@
     <string name="sites_keep_alive">Bu siteyi başkaları için yaşat</string>
     <string name="sites_remove">Kaldır</string>
     <string name="sites_fetching_waiting">Alınıyor — sunacak birini bekliyor…</string>
+    <string name="sites_drop_mine_title">Sayfanız silinsin mi?</string>
+    <string name="sites_drop_mine_body">“%1$s” sizin. Burada silmek, onu değiştirebilecek tek anahtarı atmak demek — adres, paylaşan herkese son sürümü vermeye devam eder ve artık hiçbir şey onu güncelleyemez.</string>
+    <string name="sites_drop_mine_go">Sil</string>
+    <string name="sites_drop_keep">Kalsın</string>
 </resources>

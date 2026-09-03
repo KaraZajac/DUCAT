@@ -17,4 +17,8 @@
     <string name="sites_keep_alive">このサイトを他の人のために生かしておく</string>
     <string name="sites_remove">削除</string>
     <string name="sites_fetching_waiting">取得中 — 配信してくれる相手を待っています…</string>
+    <string name="sites_drop_mine_title">あなたのページを削除しますか？</string>
+    <string name="sites_drop_mine_body">「%1$s」はあなたのものです。ここで削除すると、変更できる唯一の鍵が失われます。共有している人には最後の版が届き続け、以後は誰にも更新できません。</string>
+    <string name="sites_drop_mine_go">削除する</string>
+    <string name="sites_drop_keep">残す</string>
 </resources>

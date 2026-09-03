@@ -17,4 +17,8 @@
     <string name="sites_keep_alive">Jaga situs ini tetap hidup untuk yang lain</string>
     <string name="sites_remove">Hapus</string>
     <string name="sites_fetching_waiting">Mengambil — menunggu seseorang menyajikannya…</string>
+    <string name="sites_drop_mine_title">Hapus halaman Anda?</string>
+    <string name="sites_drop_mine_body">“%1$s” milik Anda. Menghapusnya di sini membuang satu-satunya kunci yang bisa mengubahnya — alamatnya tetap menyajikan versi terakhir kepada siapa pun yang masih membagikannya, dan tak ada lagi yang bisa memperbaruinya.</string>
+    <string name="sites_drop_mine_go">Hapus</string>
+    <string name="sites_drop_keep">Simpan</string>
 </resources>

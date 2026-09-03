@@ -17,4 +17,8 @@
     <string name="sites_keep_alive">Utrzymuj tę stronę przy życiu dla innych</string>
     <string name="sites_remove">Usuń</string>
     <string name="sites_fetching_waiting">Pobieranie — czekanie, aż ktoś to udostępni…</string>
+    <string name="sites_drop_mine_title">Usunąć Twoją stronę?</string>
+    <string name="sites_drop_mine_body">„%1$s” należy do Ciebie. Usunięcie jej tutaj wyrzuca jedyny klucz, który może ją zmienić — adres nadal poda ostatnią wersję każdemu, kto ją udostępnia, i nic już jej nie zaktualizuje.</string>
+    <string name="sites_drop_mine_go">Usuń</string>
+    <string name="sites_drop_keep">Zostaw</string>
 </resources>

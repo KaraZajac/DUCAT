@@ -17,4 +17,8 @@
     <string name="sites_keep_alive">أبقِ هذا الموقع حيًا للآخرين</string>
     <string name="sites_remove">إزالة</string>
     <string name="sites_fetching_waiting">جارٍ الجلب — في انتظار من يقدّمه…</string>
+    <string name="sites_drop_mine_title">حذف صفحتك؟</string>
+    <string name="sites_drop_mine_body">«%1$s» صفحتك. حذفها هنا يتخلّص من المفتاح الوحيد القادر على تغييرها — يظل العنوان يقدّم آخر نسخة لمن يشاركها، ولا شيء يستطيع تحديثها بعد ذلك.</string>
+    <string name="sites_drop_mine_go">احذفها</string>
+    <string name="sites_drop_keep">احتفظ بها</string>
 </resources>

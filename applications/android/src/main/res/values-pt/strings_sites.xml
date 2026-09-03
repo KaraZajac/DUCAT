@@ -17,4 +17,8 @@
     <string name="sites_keep_alive">Manter este site vivo para os outros</string>
     <string name="sites_remove">Remover</string>
     <string name="sites_fetching_waiting">A obter — à espera de alguém que o sirva…</string>
+    <string name="sites_drop_mine_title">Eliminar a sua página?</string>
+    <string name="sites_drop_mine_body">“%1$s” é sua. Eliminá-la aqui deita fora a única chave que a pode alterar — o endereço continua a servir a última versão a quem a partilhe, e nada a poderá atualizar de novo.</string>
+    <string name="sites_drop_mine_go">Eliminar</string>
+    <string name="sites_drop_keep">Manter</string>
 </resources>

@@ -17,4 +17,8 @@
     <string name="sites_keep_alive">यह साइट दूसरों के लिए जीवित रखें</string>
     <string name="sites_remove">हटाएँ</string>
     <string name="sites_fetching_waiting">लाया जा रहा है — कोई इसे परोसे, इसका इंतज़ार…</string>
+    <string name="sites_drop_mine_title">अपना पन्ना मिटाएँ?</string>
+    <string name="sites_drop_mine_body">“%1$s” आपका है। इसे यहाँ मिटाने से वही एकमात्र कुंजी चली जाती है जो इसे कभी बदल सकती है — पता उन सबको अपना आख़िरी रूप परोसता रहेगा जो इसे साझा कर रहे हैं, और कुछ भी इसे दोबारा अपडेट नहीं कर सकेगा।</string>
+    <string name="sites_drop_mine_go">मिटाएँ</string>
+    <string name="sites_drop_keep">रहने दें</string>
 </resources>

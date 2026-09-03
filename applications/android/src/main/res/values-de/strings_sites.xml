@@ -17,4 +17,8 @@
     <string name="sites_keep_alive">Diese Seite für andere am Leben halten</string>
     <string name="sites_remove">Entfernen</string>
     <string name="sites_fetching_waiting">Wird geholt – warten auf jemanden, der es bereitstellt …</string>
+    <string name="sites_drop_mine_title">Deine Seite löschen?</string>
+    <string name="sites_drop_mine_body">„%1$s“ gehört dir. Sie hier zu löschen wirft den einzigen Schlüssel weg, der sie je ändern kann – die Adresse liefert weiter ihre letzte Fassung an alle, die sie noch teilen, und nichts kann sie mehr aktualisieren.</string>
+    <string name="sites_drop_mine_go">Löschen</string>
+    <string name="sites_drop_keep">Behalten</string>
 </resources>

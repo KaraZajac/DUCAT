@@ -17,4 +17,8 @@
     <string name="sites_keep_alive">Giữ trang này sống cho người khác</string>
     <string name="sites_remove">Xóa</string>
     <string name="sites_fetching_waiting">Đang tải — chờ ai đó chia sẻ…</string>
+    <string name="sites_drop_mine_title">Xoá trang của bạn?</string>
+    <string name="sites_drop_mine_body">“%1$s” là của bạn. Xoá ở đây là vứt đi chiếc khoá duy nhất có thể thay đổi nó — địa chỉ vẫn phục vụ bản cuối cho những ai còn chia sẻ, và không gì cập nhật được nữa.</string>
+    <string name="sites_drop_mine_go">Xoá</string>
+    <string name="sites_drop_keep">Giữ lại</string>
 </resources>

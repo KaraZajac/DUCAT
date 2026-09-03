@@ -17,4 +17,8 @@
     <string name="sites_keep_alive">Deze site voor anderen in leven houden</string>
     <string name="sites_remove">Verwijderen</string>
     <string name="sites_fetching_waiting">Ophalen — wachten tot iemand het aanbiedt…</string>
+    <string name="sites_drop_mine_title">Je pagina verwijderen?</string>
+    <string name="sites_drop_mine_body">‘%1$s’ is van jou. Hem hier verwijderen gooit de enige sleutel weg die hem ooit kan wijzigen — het adres blijft zijn laatste versie serveren aan wie hem deelt, en niets kan hem nog bijwerken.</string>
+    <string name="sites_drop_mine_go">Verwijderen</string>
+    <string name="sites_drop_keep">Behouden</string>
 </resources>

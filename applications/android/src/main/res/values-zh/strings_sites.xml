@@ -17,4 +17,8 @@
     <string name="sites_keep_alive">为他人保持此站点存活</string>
     <string name="sites_remove">移除</string>
     <string name="sites_fetching_waiting">正在获取 — 等待有人提供…</string>
+    <string name="sites_drop_mine_title">删除你的页面？</string>
+    <string name="sites_drop_mine_body">“%1$s”是你的。在这里删除会丢掉唯一能改动它的密钥——地址仍会把最后一版提供给还在分享的人，而此后没有任何东西能更新它。</string>
+    <string name="sites_drop_mine_go">删除</string>
+    <string name="sites_drop_keep">保留</string>
 </resources>

@@ -17,4 +17,8 @@
     <string name="sites_keep_alive">این سایت را برای دیگران زنده نگه دار</string>
     <string name="sites_remove">حذف</string>
     <string name="sites_fetching_waiting">در حال دریافت — در انتظار کسی که آن را ارائه دهد…</string>
+    <string name="sites_drop_mine_title">صفحه‌تان حذف شود؟</string>
+    <string name="sites_drop_mine_body">«%1$s» از آنِ شماست. حذف آن اینجا تنها کلیدی را دور می‌اندازد که می‌تواند تغییرش دهد — نشانی همچنان آخرین نسخه را به هرکه آن را به اشتراک می‌گذارد می‌دهد و دیگر هیچ‌چیز نمی‌تواند به‌روزش کند.</string>
+    <string name="sites_drop_mine_go">حذف کن</string>
+    <string name="sites_drop_keep">نگه دار</string>
 </resources>

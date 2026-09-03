@@ -17,4 +17,8 @@
     <string name="sites_keep_alive">Keep this site alive for others</string>
     <string name="sites_remove">Remove</string>
     <string name="sites_fetching_waiting">Fetching — waiting for someone to serve it…</string>
+    <string name="sites_drop_mine_title">Delete your page?</string>
+    <string name="sites_drop_mine_body">“%1$s” is yours. Deleting it here throws away the only key that can ever change it — the address keeps serving its last version to anyone still sharing it, and nothing can update it again.</string>
+    <string name="sites_drop_mine_go">Delete it</string>
+    <string name="sites_drop_keep">Keep it</string>
 </resources>

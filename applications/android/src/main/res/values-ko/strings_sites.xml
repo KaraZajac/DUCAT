@@ -17,4 +17,8 @@
     <string name="sites_keep_alive">다른 사람을 위해 이 사이트를 살려두기</string>
     <string name="sites_remove">제거</string>
     <string name="sites_fetching_waiting">가져오는 중 — 제공해 줄 상대를 기다리는 중…</string>
+    <string name="sites_drop_mine_title">내 페이지를 삭제할까요?</string>
+    <string name="sites_drop_mine_body">“%1$s”은(는) 당신 것입니다. 여기서 삭제하면 이를 바꿀 수 있는 유일한 키가 사라집니다 — 주소는 공유 중인 사람들에게 마지막 판을 계속 전하고, 다시는 무엇도 갱신할 수 없습니다.</string>
+    <string name="sites_drop_mine_go">삭제</string>
+    <string name="sites_drop_keep">보관</string>
 </resources>
