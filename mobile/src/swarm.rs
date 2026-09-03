@@ -364,6 +364,18 @@ async fn fetch_once(
         // frozen peer list's corpses, and a teardown would erase the
         // failure scores it just paid for. A progressing attempt gets
         // three quiet windows before the axe; a dry one still gets one.
+        //
+        // Measured end to end on two phones, 2026-09-02, fetching a site
+        // whose only seeder could not be routed to: ShareInfo, one
+        // FetchProgress at zero, then nothing. Watchdog at 90s, six
+        // attempts, "giving up — the swarm went quiet" about nine minutes
+        // after the tap. Worth writing down because veilid's own tracing
+        // is busy throughout — LeaseRejected, advertise failures, a
+        // `resuming delay=11.4s` every few seconds — and reads like a loop
+        // that never returns. Those are its internal logs, not events on
+        // this stream; the stream really does go quiet and this really
+        // does terminate. Do not add a second timer on the strength of
+        // the log alone.
         let ev = tokio::time::timeout(
             std::time::Duration::from_secs(90),
             events.recv(),
