@@ -133,7 +133,6 @@
     <string name="chat_nothing_recorded">چیزی ضبط نشد</string>
     <string name="chat_memo_too_long">این پیام صوتی خیلی بلند است — چند دقیقه بیشترین حد است</string>
     <string name="chat_could_not_read_file">آن فایل خوانده نشد</string>
-    <string name="chat_file_too_big">آن فایل %1$d کیلوبایت است — پیوست‌ها تا 1 مگابایت جا دارند</string>
 
     <!-- Share-contact dialog -->
     <string name="chat_share">اشتراک‌گذاری</string>

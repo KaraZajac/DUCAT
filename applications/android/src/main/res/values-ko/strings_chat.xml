@@ -133,7 +133,6 @@
     <string name="chat_nothing_recorded">녹음된 게 없어요</string>
     <string name="chat_memo_too_long">메모가 너무 길어요 — 길어야 몇 분까지예요</string>
     <string name="chat_could_not_read_file">그 파일을 읽지 못했어요</string>
-    <string name="chat_file_too_big">그 파일은 %1$d KB예요 — 첨부는 1 MB까지예요</string>
 
     <!-- Share-contact dialog -->
     <string name="chat_share">공유</string>

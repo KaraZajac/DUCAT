@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="personas_title">पर्सोना</string>
     <string name="personas_body">यह फ़ोन कौन-कौन हो सकता है। हर प्रोफ़ाइल की अपनी कुंजी और अपने संपर्क हैं — दुकान को आपके दोस्त कभी पता नहीं चलते, और दोस्तों को दुकान कभी नहीं मिलती। नए रिश्ते उसी प्रोफ़ाइल में जुड़ते हैं जो आपने पहनी है।</string>
     <string name="personas_primary">निजी</string>
     <string name="personas_worn">पहनी हुई</string>

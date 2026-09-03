@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="personas_title">ペルソナ</string>
     <string name="personas_body">この電話がなれる顔ぶれ。プロフィールごとに鍵と連絡先が独立しています — 店はあなたの友人を知らず、友人は店に出会いません。新しい関係は、いま身につけているプロフィールに加わります。</string>
     <string name="personas_primary">個人</string>
     <string name="personas_worn">着用中</string>

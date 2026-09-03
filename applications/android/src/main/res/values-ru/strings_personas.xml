@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="personas_title">Персоны</string>
     <string name="personas_body">Кем может быть этот телефон. Каждый профиль — свой ключ со своими контактами: магазин никогда не узнает ваших друзей, а друзья никогда не встретят магазин. Новые связи попадают в тот профиль, который надет.</string>
     <string name="personas_primary">Личная</string>
     <string name="personas_worn">Надета</string>

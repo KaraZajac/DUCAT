@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="personas_title">Nhân dạng</string>
     <string name="personas_body">Chiếc điện thoại này có thể là những ai. Mỗi hồ sơ là một khóa riêng với danh bạ riêng — cửa hàng không bao giờ biết bạn bè của bạn, và bạn bè không bao giờ gặp cửa hàng. Quan hệ mới vào hồ sơ bạn đang mang.</string>
     <string name="personas_primary">Cá nhân</string>
     <string name="personas_worn">Đang mang</string>

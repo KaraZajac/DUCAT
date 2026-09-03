@@ -133,7 +133,6 @@
     <string name="chat_nothing_recorded">ничего не записалось</string>
     <string name="chat_memo_too_long">слишком длинное голосовое — максимум несколько минут</string>
     <string name="chat_could_not_read_file">не удалось прочитать этот файл</string>
-    <string name="chat_file_too_big">файл весит %1$d КБ — вложения до 1 МБ</string>
 
     <!-- Share-contact dialog -->
     <string name="chat_share">Поделиться</string>

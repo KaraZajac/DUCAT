@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="personas_title">Persona</string>
     <string name="personas_body">Siapa saja ponsel ini bisa menjadi. Setiap profil adalah kunci tersendiri dengan kontaknya sendiri — toko tak pernah tahu teman-temanmu, dan temanmu tak pernah bertemu toko. Hubungan baru masuk ke profil yang sedang kaupakai.</string>
     <string name="personas_primary">Pribadi</string>
     <string name="personas_worn">Dikenakan</string>

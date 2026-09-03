@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="personas_title">Персони</string>
     <string name="personas_body">Ким може бути цей телефон. Кожен профіль — власний ключ зі своїми контактами: крамниця ніколи не дізнається про ваших друзів, а друзі ніколи не зустрінуть крамницю. Нові стосунки потрапляють у профіль, який ви носите.</string>
     <string name="personas_primary">Особиста</string>
     <string name="personas_worn">Одягнена</string>

@@ -133,7 +133,6 @@
     <string name="chat_nothing_recorded">tidak ada yang terekam</string>
     <string name="chat_memo_too_long">pesan suara itu terlalu panjang — paling lama beberapa menit</string>
     <string name="chat_could_not_read_file">tidak bisa membaca file itu</string>
-    <string name="chat_file_too_big">file itu %1$d KB — lampiran maksimal 1 MB</string>
 
     <!-- Share-contact dialog -->
     <string name="chat_share">Bagikan</string>

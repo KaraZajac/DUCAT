@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="personas_title">شخصیت‌ها</string>
     <string name="personas_body">این تلفن چه کسانی می‌تواند باشد. هر نمایه کلید خودش را دارد با مخاطبان خودش — مغازه هرگز دوستانت را نمی‌شناسد و دوستانت هرگز مغازه را نمی‌بینند. روابط تازه به نمایه‌ای می‌پیوندند که پوشیده‌ای.</string>
     <string name="personas_primary">شخصی</string>
     <string name="personas_worn">بر تن</string>

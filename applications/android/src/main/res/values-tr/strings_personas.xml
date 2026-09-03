@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="personas_title">Kişilikler</string>
     <string name="personas_body">Bu telefonun kim olabileceği. Her profil kendi anahtarı ve kendi kişileriyle gelir — dükkân arkadaşlarını asla öğrenmez, arkadaşların da dükkânla asla tanışmaz. Yeni ilişkiler o an taktığın profile girer.</string>
     <string name="personas_primary">Kişisel</string>
     <string name="personas_worn">Takılı</string>

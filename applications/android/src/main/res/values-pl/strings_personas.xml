@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="personas_title">Persony</string>
     <string name="personas_body">Kim może być ten telefon. Każdy profil to własny klucz z własnymi kontaktami — sklep nigdy nie pozna twoich przyjaciół, a przyjaciele nigdy nie spotkają sklepu. Nowe znajomości trafiają do profilu, który masz na sobie.</string>
     <string name="personas_primary">Osobista</string>
     <string name="personas_worn">Noszona</string>

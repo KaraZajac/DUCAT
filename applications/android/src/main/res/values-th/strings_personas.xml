@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="personas_title">ตัวตน</string>
     <string name="personas_body">โทรศัพท์นี้เป็นใครได้บ้าง แต่ละโปรไฟล์คือกุญแจของตัวเองพร้อมผู้ติดต่อของตัวเอง — ร้านไม่มีวันรู้จักเพื่อนของคุณ และเพื่อนไม่มีวันพบร้าน ความสัมพันธ์ใหม่เข้าโปรไฟล์ที่คุณสวมอยู่</string>
     <string name="personas_primary">ส่วนตัว</string>
     <string name="personas_worn">สวมอยู่</string>

@@ -133,7 +133,6 @@
     <string name="chat_nothing_recorded">chưa ghi được gì</string>
     <string name="chat_memo_too_long">đoạn ghi âm đó quá dài — nhiều nhất chỉ vài phút</string>
     <string name="chat_could_not_read_file">không đọc được tệp đó</string>
-    <string name="chat_file_too_big">tệp đó %1$d KB — tệp đính kèm tối đa 1 MB</string>
 
     <!-- Share-contact dialog -->
     <string name="chat_share">Chia sẻ</string>

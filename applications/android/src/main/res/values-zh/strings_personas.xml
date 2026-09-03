@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="personas_title">身份</string>
     <string name="personas_body">这部手机可以是谁。每个档案都有自己的密钥和自己的联系人——店铺永远不认识你的朋友，朋友也永远遇不到店铺。新关系加入你正戴着的档案。</string>
     <string name="personas_primary">个人</string>
     <string name="personas_worn">当前</string>

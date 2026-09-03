@@ -133,7 +133,6 @@
     <string name="chat_nothing_recorded">कुछ रिकॉर्ड नहीं हुआ</string>
     <string name="chat_memo_too_long">वह मैसेज बहुत लंबा है — ज़्यादा-से-ज़्यादा कुछ मिनट</string>
     <string name="chat_could_not_read_file">वह फ़ाइल पढ़ी नहीं जा सकी</string>
-    <string name="chat_file_too_big">वह फ़ाइल %1$d KB की है — अटैचमेंट 1 MB तक जाते हैं</string>
 
     <!-- Share-contact dialog -->
     <string name="chat_share">शेयर करें</string>

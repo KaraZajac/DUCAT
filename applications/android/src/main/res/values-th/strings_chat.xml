@@ -133,7 +133,6 @@
     <string name="chat_nothing_recorded">ไม่มีเสียงถูกอัดไว้</string>
     <string name="chat_memo_too_long">ข้อความเสียงนั้นยาวเกินไป — ได้มากสุดไม่กี่นาที</string>
     <string name="chat_could_not_read_file">อ่านไฟล์นั้นไม่ได้</string>
-    <string name="chat_file_too_big">ไฟล์นั้นมีขนาด %1$d KB — ไฟล์แนบได้ไม่เกิน 1 MB</string>
 
     <!-- Share-contact dialog -->
     <string name="chat_share">แชร์</string>

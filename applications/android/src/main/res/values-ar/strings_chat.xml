@@ -133,7 +133,6 @@
     <string name="chat_nothing_recorded">لم يُسجَّل شيء</string>
     <string name="chat_memo_too_long">تلك الرسالة الصوتية طويلة جدًا — بضع دقائق هي الحد الأقصى</string>
     <string name="chat_could_not_read_file">تعذّرت قراءة ذلك الملف</string>
-    <string name="chat_file_too_big">حجم ذلك الملف %1$d ك.ب — الحد الأقصى للمرفقات 1 م.ب</string>
 
     <!-- Share-contact dialog -->
     <string name="chat_share">مشاركة</string>

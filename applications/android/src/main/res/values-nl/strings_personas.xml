@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="personas_title">Persona\'s</string>
     <string name="personas_body">Wie deze telefoon kan zijn. Elk profiel is een eigen sleutel met eigen contacten — de winkel leert je vrienden nooit kennen, en je vrienden ontmoeten nooit de winkel. Nieuwe relaties komen in het profiel dat je draagt.</string>
     <string name="personas_primary">Persoonlijk</string>
     <string name="personas_worn">Gedragen</string>

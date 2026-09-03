@@ -133,7 +133,6 @@
     <string name="chat_nothing_recorded">什么也没录到</string>
     <string name="chat_memo_too_long">这条语音太长了 — 最多几分钟</string>
     <string name="chat_could_not_read_file">无法读取那个文件</string>
-    <string name="chat_file_too_big">那个文件有 %1$d KB — 附件上限 1 MB</string>
 
     <!-- Share-contact dialog -->
     <string name="chat_share">分享</string>

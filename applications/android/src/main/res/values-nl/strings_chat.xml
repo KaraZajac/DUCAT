@@ -133,7 +133,6 @@
     <string name="chat_nothing_recorded">er is niets opgenomen</string>
     <string name="chat_memo_too_long">die memo is te lang — een paar minuten is het maximum</string>
     <string name="chat_could_not_read_file">kon dat bestand niet lezen</string>
-    <string name="chat_file_too_big">dat bestand is %1$d KB — bijlagen mogen tot 1 MB</string>
 
     <!-- Share-contact dialog -->
     <string name="chat_share">Delen</string>

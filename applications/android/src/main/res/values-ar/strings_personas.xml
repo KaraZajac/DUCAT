@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="personas_title">الشخصيات</string>
     <string name="personas_body">من يمكن أن يكون هذا الهاتف. كل ملف شخصي مفتاح مستقل بجهات اتصاله — المتجر لا يعرف أصدقاءك أبدًا، وأصدقاؤك لا يقابلون المتجر أبدًا. العلاقات الجديدة تنضم إلى الملف الذي ترتديه.</string>
     <string name="personas_primary">شخصية</string>
     <string name="personas_worn">المرتداة</string>

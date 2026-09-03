@@ -133,7 +133,6 @@
     <string name="chat_nothing_recorded">何も録音されませんでした</string>
     <string name="chat_memo_too_long">メモが長すぎます — 上限は数分です</string>
     <string name="chat_could_not_read_file">そのファイルを読み込めませんでした</string>
-    <string name="chat_file_too_big">このファイルは%1$d KBあります — 添付は1 MBまでです</string>
 
     <!-- Share-contact dialog -->
     <string name="chat_share">共有</string>

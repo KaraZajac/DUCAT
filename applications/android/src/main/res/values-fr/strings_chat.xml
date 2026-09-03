@@ -133,7 +133,6 @@
     <string name="chat_nothing_recorded">rien n\'a été enregistré</string>
     <string name="chat_memo_too_long">ce mémo est trop long — quelques minutes au maximum</string>
     <string name="chat_could_not_read_file">impossible de lire ce fichier</string>
-    <string name="chat_file_too_big">ce fichier fait %1$d Ko — les pièces jointes vont jusqu\'à 1 Mo</string>
 
     <!-- Share-contact dialog -->
     <string name="chat_share">Partager</string>

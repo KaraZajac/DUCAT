@@ -133,7 +133,6 @@
     <string name="chat_nothing_recorded">nic się nie nagrało</string>
     <string name="chat_memo_too_long">ta notatka jest za długa — maksimum to kilka minut</string>
     <string name="chat_could_not_read_file">nie udało się odczytać tego pliku</string>
-    <string name="chat_file_too_big">ten plik ma %1$d KB — załączniki mogą mieć do 1 MB</string>
 
     <!-- Share-contact dialog -->
     <string name="chat_share">Udostępnij</string>
