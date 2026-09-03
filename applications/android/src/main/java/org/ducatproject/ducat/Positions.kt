@@ -359,20 +359,27 @@ object Positions {
             // Two in a row, because one empty read from a replica that has not
             // caught up would otherwise end a live stream.
             if (o.optLong("recv_counter") > 0) {
-                val blanks = o.optInt("recv_blanks") + 1
+                // Counted from the record as it stands, and only this field
+                // written back. `o` was read before a DHT round trip that
+                // takes a second populated and twenty-one empty, and this
+                // one record holds BOTH directions — so saving it whole
+                // here put the *sending* half back as it was: a stream this
+                // device stopped while the read was out came back to life,
+                // and the counter push had just advanced went backwards.
+                var blanks = 0
+                mutate(context, personaHex) {
+                    blanks = it.optInt("recv_blanks") + 1
+                    it.put("recv_blanks", blanks)
+                }
                 if (blanks >= BLANKS_BEFORE_LETTING_GO) {
                     forgetReceived(context, personaHex)
                     DucatLog.i(TAG, "position stream closed by ${personaHex.take(8)}…")
-                } else {
-                    o.put("recv_blanks", blanks)
-                    save(context, personaHex, o)
                 }
             }
             return null
         }
         if (o.optInt("recv_blanks") != 0) {
-            o.put("recv_blanks", 0)
-            save(context, personaHex, o)
+            mutate(context, personaHex) { it.put("recv_blanks", 0) }
         }
         val frame = runCatching {
             uniffi.ducat_mobile.positionOpen(streamKey, record, raw)
@@ -410,8 +417,13 @@ object Positions {
             return null
         }
         if (seen > known) {
-            o.put("recv_counter", seen)
-            save(context, personaHex, o)
+            // Never *lower* what another pass has already recorded: two
+            // polls can be in flight over the same record, and the slower
+            // one returning an older frame must not rewind the counter that
+            // decides what counts as a replay.
+            mutate(context, personaHex) {
+                if (seen > it.optLong("recv_counter")) it.put("recv_counter", seen)
+            }
         }
         return Fix(frame.latE7, frame.lonE7, frame.heading?.toInt(), frame.captured.toLong())
     }
@@ -423,10 +435,12 @@ object Positions {
      * driver does not, so the end of one says nothing about the other.
      */
     private fun forgetReceived(context: Context, personaHex: String) {
-        val o = load(context, personaHex)
-        o.remove("recv_record"); o.remove("recv_key")
-        o.remove("recv_counter"); o.remove("recv_blanks")
-        save(context, personaHex, o)
+        // Their half only, under the lock — the sending half lives in this
+        // same record and is none of this function's business.
+        mutate(context, personaHex) {
+            it.remove("recv_record"); it.remove("recv_key")
+            it.remove("recv_counter"); it.remove("recv_blanks")
+        }
         ContactStore.bump()
     }
 
