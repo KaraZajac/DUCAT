@@ -374,7 +374,14 @@ fun ActivityScreen() {
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Text(
-                        Amounts.show(context, pxmr).primary,
+                        // Fenced, because `net` is the one tile here that can
+                        // come out negative, and Amounts.show writes the
+                        // currency first: "USD -5.48". The minus is
+                        // bidi-neutral, so an Arabic layout resolved it to the
+                        // paragraph and stranded it between the digits and the
+                        // code — "٥٫٤٨- USD", a figure whose sign has drifted
+                        // away from the number it belongs to.
+                        isolate(Amounts.show(context, pxmr).primary),
                         style = MaterialTheme.typography.labelMedium,
                         maxLines = 1,
                         color = tint ?: MaterialTheme.colorScheme.onSurface,
@@ -628,7 +635,15 @@ private fun EventRow(e: Ledger.Event, onClick: () -> Unit) {
         headlineContent = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    "${if (sent) "−" else "+"}${amount.primary}",
+                    // Fenced, so the sign stays with the figure. The
+                    // leading "−" is bidi-neutral: in an Arabic or Farsi
+                    // layout it resolves to the paragraph direction and is
+                    // laid out at the *far end* of the line, so a debit read
+                    // as "٢٫٦٤ USD−" — the minus adrift at the wrong end of
+                    // an amount, which is the one piece of punctuation here
+                    // that changes what the number means. isolate() gives it
+                    // its own run, and the sign travels with the digits.
+                    isolate("${if (sent) "−" else "+"}${amount.primary}"),
                     fontWeight = FontWeight.SemiBold,
                 )
                 Spacer(Modifier.weight(1f))

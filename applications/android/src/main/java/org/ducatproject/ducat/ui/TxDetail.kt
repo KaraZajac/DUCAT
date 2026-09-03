@@ -81,7 +81,15 @@ fun TxDetailScreen(e: Ledger.Event, tip: Long, onClose: () -> Unit) {
         ) {
             val amount = Amounts.show(context, e.amountPxmr)
             Text(
-                "${if (sent) "−" else "+"}${amount.primary}",
+                // Fenced, so the sign stays with the figure. The
+            // leading "−" is bidi-neutral: in an Arabic or Farsi
+            // layout it resolves to the paragraph direction and is
+            // laid out at the *far end* of the line, so a debit read
+            // as "٢٫٦٤ USD−" — the minus adrift at the wrong end of
+            // an amount, which is the one piece of punctuation here
+            // that changes what the number means. isolate() gives it
+            // its own run, and the sign travels with the digits.
+            isolate("${if (sent) "−" else "+"}${amount.primary}"),
                 style = MaterialTheme.typography.displayMedium,
             )
             amount.secondary?.let {
