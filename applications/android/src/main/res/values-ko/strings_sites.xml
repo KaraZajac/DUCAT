@@ -10,11 +10,11 @@
     <string name="sites_add_link_body">이 주소는 링크를 통해 왔습니다. 추가하면 선반에 저장되며, 열기 전까지는 아무것도 가져오지 않습니다.</string>
     <string name="sites_uri_label">ducat:site/… 주소</string>
     <string name="sites_bad_uri">ducat:site/ 주소가 아닙니다.</string>
-    <string name="sites_fetching">가져오는 중…</string>
     <string name="sites_not_fetched">아직 안 가져옴</string>
     <string name="sites_update_waiting">업데이트 있음 — 새로 열립니다</string>
     <string name="sites_offline_ready">오프라인 준비됨</string>
     <string name="sites_open">열기</string>
     <string name="sites_keep_alive">다른 사람을 위해 이 사이트를 살려두기</string>
     <string name="sites_remove">제거</string>
+    <string name="sites_fetching_waiting">가져오는 중 — 제공해 줄 상대를 기다리는 중…</string>
 </resources>

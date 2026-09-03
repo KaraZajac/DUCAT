@@ -10,11 +10,11 @@
     <string name="sites_add_link_body">Este endereço chegou por um link. Adicionar o guarda na sua estante; nada é baixado até você abri-lo.</string>
     <string name="sites_uri_label">endereço ducat:site/…</string>
     <string name="sites_bad_uri">Isso não é um endereço ducat:site/.</string>
-    <string name="sites_fetching">Buscando…</string>
     <string name="sites_not_fetched">Ainda não buscado</string>
     <string name="sites_update_waiting">Atualização disponível — abrirá em dia</string>
     <string name="sites_offline_ready">Pronto offline</string>
     <string name="sites_open">Abrir</string>
     <string name="sites_keep_alive">Manter este site vivo para os outros</string>
     <string name="sites_remove">Remover</string>
+    <string name="sites_fetching_waiting">A obter — à espera de alguém que o sirva…</string>
 </resources>

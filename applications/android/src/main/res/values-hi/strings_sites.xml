@@ -10,11 +10,11 @@
     <string name="sites_add_link_body">यह पता एक लिंक से आया है। जोड़ने पर यह आपकी शेल्फ़ में सहेज लिया जाता है; जब तक आप इसे खोलें नहीं, कुछ भी डाउनलोड नहीं होता।</string>
     <string name="sites_uri_label">ducat:site/… पता</string>
     <string name="sites_bad_uri">यह ducat:site/ पता नहीं है।</string>
-    <string name="sites_fetching">ला रहे हैं…</string>
     <string name="sites_not_fetched">अभी नहीं लाई गई</string>
     <string name="sites_update_waiting">अपडेट उपलब्ध — ताज़ा खुलेगी</string>
     <string name="sites_offline_ready">ऑफ़लाइन तैयार</string>
     <string name="sites_open">खोलें</string>
     <string name="sites_keep_alive">यह साइट दूसरों के लिए जीवित रखें</string>
     <string name="sites_remove">हटाएँ</string>
+    <string name="sites_fetching_waiting">लाया जा रहा है — कोई इसे परोसे, इसका इंतज़ार…</string>
 </resources>

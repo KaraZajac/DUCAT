@@ -10,11 +10,11 @@
     <string name="sites_add_link_body">Diese Adresse kam über einen Link. Hinzufügen legt sie in dein Regal; geholt wird erst, wenn du sie öffnest.</string>
     <string name="sites_uri_label">ducat:site/…-Adresse</string>
     <string name="sites_bad_uri">Das ist keine ducat:site/-Adresse.</string>
-    <string name="sites_fetching">Wird geholt…</string>
     <string name="sites_not_fetched">Noch nicht geholt</string>
     <string name="sites_update_waiting">Update verfügbar — öffnet frisch</string>
     <string name="sites_offline_ready">Offline bereit</string>
     <string name="sites_open">Öffnen</string>
     <string name="sites_keep_alive">Diese Seite für andere am Leben halten</string>
     <string name="sites_remove">Entfernen</string>
+    <string name="sites_fetching_waiting">Wird geholt – warten auf jemanden, der es bereitstellt …</string>
 </resources>

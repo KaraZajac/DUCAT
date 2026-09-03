@@ -10,11 +10,11 @@
     <string name="sites_add_link_body">Ця адреса прийшла за посиланням. Додавання кладе її на твою полицю; нічого не завантажується, доки ти її не відкриєш.</string>
     <string name="sites_uri_label">адреса ducat:site/…</string>
     <string name="sites_bad_uri">Це не адреса ducat:site/.</string>
-    <string name="sites_fetching">Завантаження…</string>
     <string name="sites_not_fetched">Ще не завантажено</string>
     <string name="sites_update_waiting">Є оновлення — відкриється свіжим</string>
     <string name="sites_offline_ready">Готовий офлайн</string>
     <string name="sites_open">Відкрити</string>
     <string name="sites_keep_alive">Тримати цей сайт живим для інших</string>
     <string name="sites_remove">Прибрати</string>
+    <string name="sites_fetching_waiting">Завантаження — чекаємо на того, хто роздає…</string>
 </resources>

@@ -10,11 +10,11 @@
     <string name="sites_add_link_body">このアドレスはリンクから届きました。追加すると本棚に保存されます。開くまで何も取得されません。</string>
     <string name="sites_uri_label">ducat:site/… アドレス</string>
     <string name="sites_bad_uri">これは ducat:site/ アドレスではありません。</string>
-    <string name="sites_fetching">取得中…</string>
     <string name="sites_not_fetched">未取得</string>
     <string name="sites_update_waiting">更新あり — 新しく開きます</string>
     <string name="sites_offline_ready">オフライン準備完了</string>
     <string name="sites_open">開く</string>
     <string name="sites_keep_alive">このサイトを他の人のために生かしておく</string>
     <string name="sites_remove">削除</string>
+    <string name="sites_fetching_waiting">取得中 — 配信してくれる相手を待っています…</string>
 </resources>

@@ -10,11 +10,11 @@
     <string name="sites_add_link_body">ที่อยู่นี้มาจากลิงก์ การเพิ่มจะเก็บไว้บนชั้นของคุณ และจะไม่ดึงข้อมูลใดจนกว่าคุณจะเปิด</string>
     <string name="sites_uri_label">ที่อยู่ ducat:site/…</string>
     <string name="sites_bad_uri">นี่ไม่ใช่ที่อยู่ ducat:site/</string>
-    <string name="sites_fetching">กำลังดึง…</string>
     <string name="sites_not_fetched">ยังไม่ได้ดึง</string>
     <string name="sites_update_waiting">มีอัปเดต — จะเปิดแบบใหม่</string>
     <string name="sites_offline_ready">พร้อมออฟไลน์</string>
     <string name="sites_open">เปิด</string>
     <string name="sites_keep_alive">ช่วยให้ไซต์นี้อยู่ต่อเพื่อคนอื่น</string>
     <string name="sites_remove">เอาออก</string>
+    <string name="sites_fetching_waiting">กำลังดึงข้อมูล — รอให้มีคนแบ่งปัน…</string>
 </resources>

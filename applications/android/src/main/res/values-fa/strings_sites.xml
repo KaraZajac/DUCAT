@@ -10,11 +10,11 @@
     <string name="sites_add_link_body">این نشانی از طریق یک پیوند رسیده است. افزودن آن را در قفسهٔ شما ذخیره می‌کند؛ تا بازش نکنید چیزی دریافت نمی‌شود.</string>
     <string name="sites_uri_label">نشانی ducat:site/…</string>
     <string name="sites_bad_uri">این نشانی ducat:site/ نیست.</string>
-    <string name="sites_fetching">در حال دریافت…</string>
     <string name="sites_not_fetched">هنوز دریافت نشده</string>
     <string name="sites_update_waiting">به‌روزرسانی هست — تازه باز می‌شود</string>
     <string name="sites_offline_ready">آمادهٔ آفلاین</string>
     <string name="sites_open">باز کردن</string>
     <string name="sites_keep_alive">این سایت را برای دیگران زنده نگه دار</string>
     <string name="sites_remove">حذف</string>
+    <string name="sites_fetching_waiting">در حال دریافت — در انتظار کسی که آن را ارائه دهد…</string>
 </resources>

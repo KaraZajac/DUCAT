@@ -10,11 +10,11 @@
     <string name="sites_add_link_body">Alamat ini datang lewat tautan. Menambahkannya menyimpannya di rak Anda; tidak ada yang diambil sampai Anda membukanya.</string>
     <string name="sites_uri_label">alamat ducat:site/…</string>
     <string name="sites_bad_uri">Itu bukan alamat ducat:site/.</string>
-    <string name="sites_fetching">Mengambil…</string>
     <string name="sites_not_fetched">Belum diambil</string>
     <string name="sites_update_waiting">Ada pembaruan — terbuka segar</string>
     <string name="sites_offline_ready">Siap luring</string>
     <string name="sites_open">Buka</string>
     <string name="sites_keep_alive">Jaga situs ini tetap hidup untuk yang lain</string>
     <string name="sites_remove">Hapus</string>
+    <string name="sites_fetching_waiting">Mengambil — menunggu seseorang menyajikannya…</string>
 </resources>

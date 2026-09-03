@@ -10,11 +10,11 @@
     <string name="sites_add_link_body">A link brought this address here. Adding saves it to your shelf; nothing is fetched until you open it.</string>
     <string name="sites_uri_label">ducat:site/… address</string>
     <string name="sites_bad_uri">That is not a ducat:site/ address.</string>
-    <string name="sites_fetching">Fetching…</string>
     <string name="sites_not_fetched">Not fetched yet</string>
     <string name="sites_update_waiting">Update available — opens fresh</string>
     <string name="sites_offline_ready">Ready offline</string>
     <string name="sites_open">Open</string>
     <string name="sites_keep_alive">Keep this site alive for others</string>
     <string name="sites_remove">Remove</string>
+    <string name="sites_fetching_waiting">Fetching — waiting for someone to serve it…</string>
 </resources>

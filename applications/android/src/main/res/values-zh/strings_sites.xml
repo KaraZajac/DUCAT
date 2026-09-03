@@ -10,11 +10,11 @@
     <string name="sites_add_link_body">这个地址来自一个链接。添加后会保存到你的书架；在你打开之前不会获取任何内容。</string>
     <string name="sites_uri_label">ducat:site/… 地址</string>
     <string name="sites_bad_uri">这不是 ducat:site/ 地址。</string>
-    <string name="sites_fetching">正在获取…</string>
     <string name="sites_not_fetched">尚未获取</string>
     <string name="sites_update_waiting">有更新——将以新版打开</string>
     <string name="sites_offline_ready">可离线阅读</string>
     <string name="sites_open">打开</string>
     <string name="sites_keep_alive">为他人保持此站点存活</string>
     <string name="sites_remove">移除</string>
+    <string name="sites_fetching_waiting">正在获取 — 等待有人提供…</string>
 </resources>

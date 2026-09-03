@@ -10,11 +10,11 @@
     <string name="sites_add_link_body">Địa chỉ này đến từ một liên kết. Thêm sẽ lưu nó vào kệ của bạn; không tải gì cho đến khi bạn mở.</string>
     <string name="sites_uri_label">địa chỉ ducat:site/…</string>
     <string name="sites_bad_uri">Đây không phải địa chỉ ducat:site/.</string>
-    <string name="sites_fetching">Đang tải…</string>
     <string name="sites_not_fetched">Chưa tải</string>
     <string name="sites_update_waiting">Có bản cập nhật — sẽ mở bản mới</string>
     <string name="sites_offline_ready">Sẵn sàng ngoại tuyến</string>
     <string name="sites_open">Mở</string>
     <string name="sites_keep_alive">Giữ trang này sống cho người khác</string>
     <string name="sites_remove">Xóa</string>
+    <string name="sites_fetching_waiting">Đang tải — chờ ai đó chia sẻ…</string>
 </resources>

@@ -1322,6 +1322,25 @@ fun SitesSection() {
         mutableStateOf(siteJobs().firstOrNull { ThreadSends.inFlight("site:$it") })
     }
     var word by remember { mutableStateOf<String?>(null) }
+    // The swarm's own count for whichever site is being fetched, polled on
+    // its own clock: ThreadSends only ticks when a job lands, and a fetch
+    // that is going nowhere never does. Off the main thread — this reaches
+    // into the node.
+    var siteProgress by remember { mutableStateOf<org.ducatproject.ducat.Swarm.Progress?>(null) }
+    val fetching = busy?.takeIf { it != SITE_ADD_JOB }
+    LaunchedEffect(fetching) {
+        val share = fetching?.let { key -> sites.firstOrNull { it.recordKey == key }?.share }
+        if (share.isNullOrBlank()) {
+            siteProgress = null
+            return@LaunchedEffect
+        }
+        while (true) {
+            siteProgress = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                runCatching { org.ducatproject.ducat.Swarm.fetchProgress(share) }.getOrNull()
+            }
+            kotlinx.coroutines.delay(1_000)
+        }
+    }
     val tick by ThreadSends.ticks.collectAsState()
     LaunchedEffect(tick, sites) {
         val keys = siteJobs()
@@ -1442,9 +1461,37 @@ fun SitesSection() {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Column(Modifier.weight(1f)) {
                                 Text(site.title, style = MaterialTheme.typography.titleMedium)
+                                // What the swarm is actually doing, not just
+                                // that something is. A site whose seeders
+                                // cannot be reached sits at zero for as long
+                                // as the fetch keeps retrying, and "Fetching…"
+                                // alone cannot be told from a slow one — the
+                                // Library has said this all along and this
+                                // screen never did.
+                                val moved = if (busy == site.recordKey) {
+                                    siteProgress
+                                } else {
+                                    null
+                                }
                                 Text(
                                     if (busy == site.recordKey) {
-                                        stringResource(R.string.sites_fetching)
+                                        if (moved != null && moved.length > 0) {
+                                            // The Library's own wording, so
+                                            // the two screens say a download
+                                            // the same way.
+                                            stringResource(
+                                                R.string.library_progress,
+                                                android.text.format.Formatter
+                                                    .formatShortFileSize(
+                                                        context,
+                                                        moved.position.coerceAtLeast(0),
+                                                    ),
+                                                android.text.format.Formatter
+                                                    .formatShortFileSize(context, moved.length),
+                                            )
+                                        } else {
+                                            stringResource(R.string.sites_fetching_waiting)
+                                        }
                                     } else if (site.fetchedDigestHex == null) {
                                         stringResource(R.string.sites_not_fetched)
                                     } else if (site.fetchedDigestHex != site.digestHex) {
