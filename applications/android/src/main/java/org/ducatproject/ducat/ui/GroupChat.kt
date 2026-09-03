@@ -135,7 +135,10 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
     // second group counter for the same sentence.
     val key = "group:$idHex"
     // Kept the way a thread's is, so Back mid-sentence costs nothing.
-    var draft by rememberSaveable { mutableStateOf(store.draftOf(key)) }
+    // Keyed on the group, like every neighbour here. Unkeyed, switching
+    // groups carried the composer text into the new room and wrote it to
+    // that room's draft on the way out.
+    var draft by rememberSaveable(idHex) { mutableStateOf(store.draftOf(key)) }
     val draftNow by rememberUpdatedState(draft)
     DisposableEffect(idHex) {
         onDispose {
@@ -146,7 +149,12 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
     var sending by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     // (sender, groupSeq) of the message being answered, if one is.
-    var replyTo by rememberSaveable { mutableStateOf<String?>(null) }
+    // Keyed for a sharper reason: a reply target is "(sender, groupSeq)",
+    // and Groups.send numbers with a *per-group* counter, so seq 1 exists
+    // in every group. Carried across a switch, the banner points at one
+    // room's message and the send quotes a real but unrelated line in the
+    // other — which every member of that group then receives.
+    var replyTo by rememberSaveable(idHex) { mutableStateOf<String?>(null) }
     var addOpen by remember { mutableStateOf(false) }
     // The split sheet survives a rotation: its bills go out one member at
     // a time and it keeps the list of who has been billed (see SplitSheet),

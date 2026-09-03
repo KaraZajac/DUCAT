@@ -273,7 +273,18 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val store = remember { ContactStore(context) }
     val scope = rememberCoroutineScope()
-    var c by remember { mutableStateOf(contact) }
+    // Keyed on the contact, because this screen is reused for another one.
+    //
+    // MainActivity composes ChatScreen at one call site with no key(), so a
+    // notification for a different thread — tapped while this one is open —
+    // only *recomposes* it with a new `contact`. Unkeyed, `c` stayed the
+    // thread that was already showing: the top bar kept the old name, the
+    // old messages stayed on screen, the tap looked like it had done
+    // nothing, and anything sent went to the wrong person. The refresh
+    // effect could not rescue it either, since it re-reads by `c`'s own hex
+    // and so re-fetched the same contact for ever. Profile.kt keys the same
+    // read correctly; this did not.
+    var c by remember(contact.personaHex) { mutableStateOf(contact) }
     // Starts empty and fills from IO below: decoding a whole thread is work
     // that scales with how long two people have known each other, and the
     // ledger ANR (2026-08-27) established what that costs on the main
@@ -293,7 +304,14 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     // screen on Back, so saveable state alone dropped the draft the moment
     // somebody checked another conversation mid-sentence. Written to the
     // store on dispose, read back on entry, cleared by send.
-    var draft by rememberSaveable {
+    // Keyed too, and this one costs more than a confusing screen. The
+    // DisposableEffect below IS keyed on the hex, so when the parameter
+    // flipped it re-registered under the new contact while `draft` still
+    // held the words typed to the old one — and its onDispose then wrote
+    // them to the new contact's draft, where they open in the composer
+    // under a live Send button. A half-written message to one person
+    // waiting to be sent to another.
+    var draft by rememberSaveable(contact.personaHex) {
         mutableStateOf(ContactStore(context).draftOf(contact.personaHex))
     }
     val draftNow by androidx.compose.runtime.rememberUpdatedState(draft)

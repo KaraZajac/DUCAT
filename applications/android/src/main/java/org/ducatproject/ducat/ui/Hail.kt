@@ -2410,8 +2410,16 @@ fun HailSheet(
             error = context.getString(R.string.hail_no_route)
         } else {
             error = null
-            org.ducatproject.ducat.Fare.estimateExact(context, r.meters, r.seconds)
-                ?.let { (_, pxmr) -> fareXmr = pxmrToField(pxmr, fiat, rate) }
+            // Only while the rider has not written their own number. This
+            // effect re-runs on every entry into composition, keys unchanged
+            // or not, so a rotation or a trip to another screen used to
+            // overwrite a typed offer with the app's estimate — the fare
+            // quietly reverting under a Hail button. The sibling above
+            // already guards on `fareXmr.isBlank()`; this one did not.
+            if (fareXmr.isBlank()) {
+                org.ducatproject.ducat.Fare.estimateExact(context, r.meters, r.seconds)
+                    ?.let { (_, pxmr) -> fareXmr = pxmrToField(pxmr, fiat, rate) }
+            }
         }
     }
 
