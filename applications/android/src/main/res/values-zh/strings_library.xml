@@ -24,8 +24,14 @@
     <plurals name="main_issues_waiting">
         <item quantity="other">%1$d 期新刊等待中</item>
     </plurals>
-    <string name="library_open">打开</string>
     <string name="library_queued">排队中</string>
-    <string name="library_no_viewer">这台手机上没有能打开该文件的应用。分享给能打开它的应用，或把它复制出手机。</string>
+    <string name="library_no_viewer">这部手机上没有能接收该文件的应用。请用其他方式把它复制到手机之外。</string>
     <string name="library_mirror">帮助把这份刊物分享给其他读者</string>
+    <string name="library_save">保存副本</string>
+    <string name="library_save_title">保存会把它带出 DUCAT</string>
+    <string name="library_save_body">DUCAT 取回的页面由 DUCAT 自己显示：脚本关闭，任何东西都不得触及网络。文件无法这样显示。打开它的是一个普通连接上的普通阅读器，而 PDF 和电子书都可以被做成一打开就去取点什么——这会告诉出版者你读过它，以及在什么时候读的。
+
+这一期是你的。这只是把它拿到别处去读所要付出的代价。</string>
+    <string name="library_save_go">保存</string>
+    <string name="library_save_keep">暂不</string>
 </resources>

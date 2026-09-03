@@ -24,8 +24,14 @@
     <plurals name="main_issues_waiting">
         <item quantity="other">%1$d số mới đang chờ</item>
     </plurals>
-    <string name="library_open">Mở</string>
     <string name="library_queued">Trong hàng đợi</string>
-    <string name="library_no_viewer">Không có ứng dụng nào trên máy mở được tệp đó. Hãy chia sẻ tới ứng dụng mở được, hoặc chép ra khỏi máy.</string>
+    <string name="library_no_viewer">Không có gì trên điện thoại này nhận được tệp đó. Hãy chép nó ra khỏi điện thoại bằng cách khác.</string>
     <string name="library_mirror">Giúp chia sẻ ấn phẩm này với những người đọc khác</string>
+    <string name="library_save">Lưu một bản</string>
+    <string name="library_save_title">Lưu lại sẽ đưa nó ra khỏi DUCAT</string>
+    <string name="library_save_body">Trang mà DUCAT tải về thì chính DUCAT hiển thị: tắt tập lệnh, không cho phép thứ gì chạm tới mạng. Một tệp thì không thể hiển thị như vậy. Thứ mở nó là một trình đọc thông thường trên một kết nối thông thường, và cả PDF lẫn sách điện tử đều có thể được dựng để lấy về thứ gì đó ngay khi được mở — điều đó cho người xuất bản biết rằng bạn đã đọc, và đọc lúc nào.
+
+Số này là của bạn. Đây chỉ là cái giá để đọc nó ở nơi khác.</string>
+    <string name="library_save_go">Lưu lại</string>
+    <string name="library_save_keep">Để sau</string>
 </resources>

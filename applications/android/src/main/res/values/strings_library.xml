@@ -28,8 +28,14 @@
         <item quantity="one">%1$d new issue waiting</item>
         <item quantity="other">%1$d new issues waiting</item>
     </plurals>
-    <string name="library_open">Open</string>
     <string name="library_queued">Queued</string>
-    <string name="library_no_viewer">Nothing on this phone can open that file. Share it to an app that can, or copy it off the phone.</string>
+    <string name="library_no_viewer">Nothing on this phone can take that file. Copy it off the phone another way.</string>
     <string name="library_mirror">Help share this publication with other readers</string>
+    <string name="library_save">Save a copy</string>
+    <string name="library_save_title">Saving takes it out of DUCAT</string>
+    <string name="library_save_body">A page DUCAT fetches is shown by DUCAT: scripts off, nothing allowed to reach the network. A file cannot be shown that way. Whatever opens it is an ordinary reader on an ordinary connection, and both PDFs and e-books can be built to fetch something the moment they are opened — which tells whoever published it that you read it, and when.
+
+The issue is yours to keep. This is only what it costs to read it somewhere else.</string>
+    <string name="library_save_go">Save it</string>
+    <string name="library_save_keep">Not now</string>
 </resources>

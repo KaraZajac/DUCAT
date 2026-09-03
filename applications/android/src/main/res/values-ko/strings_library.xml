@@ -24,8 +24,14 @@
     <plurals name="main_issues_waiting">
         <item quantity="other">새 호 %1$d개 대기 중</item>
     </plurals>
-    <string name="library_open">열기</string>
     <string name="library_queued">대기 중</string>
-    <string name="library_no_viewer">이 휴대폰에는 그 파일을 열 수 있는 앱이 없어요. 열 수 있는 앱으로 공유하거나 휴대폰 밖으로 복사하세요.</string>
+    <string name="library_no_viewer">이 휴대폰에는 그 파일을 받을 수 있는 것이 없습니다. 다른 방법으로 휴대폰 밖으로 복사하세요.</string>
     <string name="library_mirror">이 발행물을 다른 독자와 나누는 것을 돕기</string>
+    <string name="library_save">사본 저장</string>
+    <string name="library_save_title">저장하면 DUCAT 밖으로 나갑니다</string>
+    <string name="library_save_body">DUCAT이 받아 온 페이지는 DUCAT이 직접 보여 줍니다. 스크립트는 꺼져 있고 무엇도 네트워크에 닿을 수 없습니다. 파일은 그렇게 보여 줄 수 없습니다. 그 파일을 여는 것은 보통의 연결에 놓인 보통의 뷰어이며, PDF와 전자책은 모두 열리는 순간 무언가를 가져오도록 만들 수 있습니다. 그것은 발행인에게 당신이 읽었다는 사실과 그 시각을 알려 줍니다.
+
+이 호는 당신의 것입니다. 이것은 다른 곳에서 읽기 위해 치르는 대가일 뿐입니다.</string>
+    <string name="library_save_go">저장</string>
+    <string name="library_save_keep">나중에</string>
 </resources>

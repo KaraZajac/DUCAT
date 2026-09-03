@@ -25,8 +25,14 @@
         <item quantity="one">%1$d yeni sayı bekliyor</item>
         <item quantity="other">%1$d yeni sayı bekliyor</item>
     </plurals>
-    <string name="library_open">Aç</string>
     <string name="library_queued">Sırada</string>
-    <string name="library_no_viewer">Bu telefonda o dosyayı açabilecek bir şey yok. Açabilen bir uygulamaya paylaş ya da telefondan kopyala.</string>
+    <string name="library_no_viewer">Bu telefonda o dosyayı alabilecek bir şey yok. Dosyayı telefondan başka bir yolla kopyalayın.</string>
     <string name="library_mirror">Bu yayını başka okurlarla paylaşmaya yardım et</string>
+    <string name="library_save">Bir kopyasını kaydet</string>
+    <string name="library_save_title">Kaydetmek onu DUCAT\'ın dışına çıkarır</string>
+    <string name="library_save_body">DUCAT\'ın getirdiği sayfayı DUCAT\'ın kendisi gösterir: betikler kapalı, hiçbir şeyin ağa uzanmasına izin yok. Bir dosya böyle gösterilemez. Onu ne açarsa açsın, sıradan bir bağlantıdaki sıradan bir okuyucudur; hem PDF\'ler hem de e-kitaplar açıldıkları anda bir şey isteyecek biçimde hazırlanabilir — bu da yayımlayan kişiye okuduğunuzu ve ne zaman okuduğunuzu söyler.
+
+Sayı sizindir. Bu yalnızca onu başka bir yerde okumanın bedeli.</string>
+    <string name="library_save_go">Kaydet</string>
+    <string name="library_save_keep">Şimdi değil</string>
 </resources>

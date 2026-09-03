@@ -25,8 +25,14 @@
         <item quantity="one">%1$d edição nova esperando</item>
         <item quantity="other">%1$d edições novas esperando</item>
     </plurals>
-    <string name="library_open">Abrir</string>
     <string name="library_queued">Na fila</string>
-    <string name="library_no_viewer">Nada neste telefone consegue abrir esse ficheiro. Partilha-o com uma app que consiga, ou copia-o para fora do telefone.</string>
+    <string name="library_no_viewer">Nada neste telemóvel consegue receber esse ficheiro. Copie-o para fora do telemóvel de outra forma.</string>
     <string name="library_mirror">Ajude a partilhar esta publicação com outros leitores</string>
+    <string name="library_save">Guardar uma cópia</string>
+    <string name="library_save_title">Guardar tira-a do DUCAT</string>
+    <string name="library_save_body">Uma página que o DUCAT obtém é o DUCAT que a mostra: sem scripts e sem deixar nada chegar à rede. Um ficheiro não pode ser mostrado assim. O que o abrir será um leitor comum numa ligação comum, e tanto os PDF como os livros digitais podem ser feitos para ir buscar algo no instante em que são abertos — o que diz a quem o publicou que você o leu, e quando.
+
+A edição é sua. Isto é só o que custa lê-la noutro lado.</string>
+    <string name="library_save_go">Guardar</string>
+    <string name="library_save_keep">Agora não</string>
 </resources>

@@ -25,8 +25,14 @@
         <item quantity="one">%1$d شمارهٔ تازه در انتظار</item>
         <item quantity="other">%1$d شمارهٔ تازه در انتظار</item>
     </plurals>
-    <string name="library_open">باز کردن</string>
     <string name="library_queued">در صف</string>
-    <string name="library_no_viewer">هیچ برنامه‌ای روی این گوشی نمی‌تواند این فایل را باز کند. آن را با برنامه‌ای که می‌تواند به اشتراک بگذارید یا از گوشی کپی کنید.</string>
+    <string name="library_no_viewer">در این تلفن چیزی نیست که آن پرونده را بگیرد. آن را به شیوه‌ای دیگر از تلفن بیرون کپی کنید.</string>
     <string name="library_mirror">به اشتراک‌گذاری این نشریه با خوانندگان دیگر کمک کنید</string>
+    <string name="library_save">ذخیرهٔ یک نسخه</string>
+    <string name="library_save_title">ذخیره‌کردن آن را از DUCAT بیرون می‌برد</string>
+    <string name="library_save_body">صفحه‌ای که DUCAT می‌گیرد، خودِ DUCAT نشان می‌دهد: اسکریپت‌ها خاموش و هیچ‌چیز اجازهٔ رسیدن به شبکه ندارد. یک پرونده را نمی‌توان این‌گونه نشان داد. هرچه آن را باز کند، خوانندهٔ معمولی روی اتصالی معمولی است، و هم PDF و هم کتاب‌های الکترونیکی را می‌توان چنان ساخت که همان لحظهٔ باز شدن چیزی را درخواست کنند — و این به ناشر می‌گوید که شما آن را خوانده‌اید، و چه زمانی.
+
+این شماره از آنِ شماست. این تنها بهای خواندن آن در جای دیگر است.</string>
+    <string name="library_save_go">ذخیره کن</string>
+    <string name="library_save_keep">اکنون نه</string>
 </resources>

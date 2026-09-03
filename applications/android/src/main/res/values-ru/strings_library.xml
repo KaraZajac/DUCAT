@@ -27,8 +27,14 @@
         <item quantity="many">%1$d новых выпусков ждут</item>
         <item quantity="other">%1$d нового выпуска ждёт</item>
     </plurals>
-    <string name="library_open">Открыть</string>
     <string name="library_queued">В очереди</string>
-    <string name="library_no_viewer">На этом телефоне нечем открыть этот файл. Поделитесь им с приложением, которое умеет, или скопируйте с телефона.</string>
+    <string name="library_no_viewer">На этом телефоне нечему принять этот файл. Скопируйте его с телефона другим способом.</string>
     <string name="library_mirror">Помогать раздавать это издание другим читателям</string>
+    <string name="library_save">Сохранить копию</string>
+    <string name="library_save_title">Сохранение выносит файл из DUCAT</string>
+    <string name="library_save_body">Страницу, которую DUCAT загружает, показывает сам DUCAT: скрипты отключены, ничему не позволено выходить в сеть. Файл так показать нельзя. Его откроет обычная программа с обычным подключением, а и PDF, и электронные книги можно сделать так, чтобы они запрашивали что-нибудь сразу при открытии, — и это сообщает издателю, что вы это прочли, и когда.
+
+Выпуск ваш. Это лишь цена того, чтобы прочесть его в другом месте.</string>
+    <string name="library_save_go">Сохранить</string>
+    <string name="library_save_keep">Не сейчас</string>
 </resources>

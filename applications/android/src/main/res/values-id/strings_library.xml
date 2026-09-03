@@ -24,8 +24,14 @@
     <plurals name="main_issues_waiting">
         <item quantity="other">%1$d edisi baru menunggu</item>
     </plurals>
-    <string name="library_open">Buka</string>
     <string name="library_queued">Dalam antrean</string>
-    <string name="library_no_viewer">Tidak ada di ponsel ini yang bisa membuka berkas itu. Bagikan ke aplikasi yang bisa, atau salin keluar dari ponsel.</string>
+    <string name="library_no_viewer">Tidak ada di ponsel ini yang bisa menerima berkas itu. Salin ke luar ponsel dengan cara lain.</string>
     <string name="library_mirror">Bantu bagikan publikasi ini ke pembaca lain</string>
+    <string name="library_save">Simpan salinan</string>
+    <string name="library_save_title">Menyimpannya mengeluarkannya dari DUCAT</string>
+    <string name="library_save_body">Halaman yang diambil DUCAT ditampilkan oleh DUCAT sendiri: skrip mati, tidak ada yang boleh menjangkau jaringan. Sebuah berkas tidak bisa ditampilkan begitu. Apa pun yang membukanya adalah pembaca biasa dengan koneksi biasa, dan baik PDF maupun buku elektronik bisa dibuat untuk mengambil sesuatu begitu dibuka — itu memberi tahu penerbitnya bahwa Anda membacanya, dan kapan.
+
+Edisi ini milik Anda. Ini hanya harga untuk membacanya di tempat lain.</string>
+    <string name="library_save_go">Simpan</string>
+    <string name="library_save_keep">Nanti saja</string>
 </resources>

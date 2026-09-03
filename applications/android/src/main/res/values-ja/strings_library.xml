@@ -24,8 +24,14 @@
     <plurals name="main_issues_waiting">
         <item quantity="other">新しい号が%1$d件待っています</item>
     </plurals>
-    <string name="library_open">開く</string>
     <string name="library_queued">待機中</string>
-    <string name="library_no_viewer">この端末にはこのファイルを開けるものがありません。開けるアプリに共有するか、端末の外にコピーしてください。</string>
+    <string name="library_no_viewer">この端末にはそのファイルを受け取れるものがありません。別の方法で端末の外にコピーしてください。</string>
     <string name="library_mirror">この刊行物を他の読者に届けるのを手伝う</string>
+    <string name="library_save">コピーを保存</string>
+    <string name="library_save_title">保存すると DUCAT の外に出ます</string>
+    <string name="library_save_body">DUCAT が取得したページは DUCAT 自身が表示します。スクリプトは無効で、何もネットワークに到達できません。ファイルはそのようには表示できません。それを開くのは、ふつうの接続につながったふつうの閲覧アプリです。PDF も電子書籍も、開いた瞬間に何かを取りに行くように作ることができます。それは、あなたが読んだことと、その時刻を発行者に伝えます。
+
+この号はあなたのものです。これは、よそで読むために払う代償にすぎません。</string>
+    <string name="library_save_go">保存する</string>
+    <string name="library_save_keep">今はしない</string>
 </resources>

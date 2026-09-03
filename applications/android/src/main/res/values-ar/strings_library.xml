@@ -29,8 +29,14 @@
         <item quantity="many">%1$d عددًا جديدًا بانتظارك</item>
         <item quantity="other">%1$d عدد جديد بانتظارك</item>
     </plurals>
-    <string name="library_open">فتح</string>
     <string name="library_queued">في قائمة الانتظار</string>
-    <string name="library_no_viewer">لا يوجد على هذا الهاتف ما يفتح هذا الملف. شاركه مع تطبيق يستطيع فتحه، أو انسخه خارج الهاتف.</string>
+    <string name="library_no_viewer">لا يوجد على هذا الهاتف ما يستقبل هذا الملف. انسخه خارج الهاتف بطريقة أخرى.</string>
     <string name="library_mirror">ساعِد في مشاركة هذه النشرة مع قراء آخرين</string>
+    <string name="library_save">حفظ نسخة</string>
+    <string name="library_save_title">الحفظ يُخرجه من DUCAT</string>
+    <string name="library_save_body">الصفحة التي يجلبها DUCAT يعرضها DUCAT نفسه: البرمجات النصية معطَّلة، ولا يُسمح لشيء بالوصول إلى الشبكة. الملف لا يمكن عرضه هكذا. ما يفتحه هو قارئ عادي على اتصال عادي، وملفات PDF والكتب الإلكترونية يمكن أن تُصنَع لتطلب شيئًا لحظة فتحها — وهذا يخبر من نشرها أنك قرأتها، ومتى.
+
+العدد لك. هذا فقط ثمن قراءته في مكان آخر.</string>
+    <string name="library_save_go">احفظه</string>
+    <string name="library_save_keep">ليس الآن</string>
 </resources>

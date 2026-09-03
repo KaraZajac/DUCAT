@@ -25,8 +25,14 @@
         <item quantity="one">%1$d nuovo numero in attesa</item>
         <item quantity="other">%1$d nuovi numeri in attesa</item>
     </plurals>
-    <string name="library_open">Apri</string>
     <string name="library_queued">In coda</string>
-    <string name="library_no_viewer">Su questo telefono non c\'è nulla che possa aprire quel file. Condividilo con un\'app che ci riesce, o copialo fuori dal telefono.</string>
+    <string name="library_no_viewer">Su questo telefono non c\'è nulla che possa ricevere quel file. Copialo fuori dal telefono in un altro modo.</string>
     <string name="library_mirror">Aiuta a condividere questa pubblicazione con altri lettori</string>
+    <string name="library_save">Salva una copia</string>
+    <string name="library_save_title">Salvarlo lo porta fuori da DUCAT</string>
+    <string name="library_save_body">Una pagina che DUCAT scarica la mostra DUCAT stesso: script disattivati, niente che possa raggiungere la rete. Un file non può essere mostrato così. Qualunque cosa lo apra è un lettore qualsiasi su una connessione qualsiasi, e sia i PDF sia gli e-book possono essere costruiti per richiedere qualcosa nel momento in cui vengono aperti, il che dice a chi lo ha pubblicato che lei lo ha letto, e quando.
+
+Il numero è suo. Questo è solo ciò che costa leggerlo altrove.</string>
+    <string name="library_save_go">Salvalo</string>
+    <string name="library_save_keep">Non ora</string>
 </resources>

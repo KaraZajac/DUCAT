@@ -24,8 +24,14 @@
     <plurals name="main_issues_waiting">
         <item quantity="other">%1$d ฉบับใหม่รออยู่</item>
     </plurals>
-    <string name="library_open">เปิด</string>
     <string name="library_queued">อยู่ในคิว</string>
-    <string name="library_no_viewer">ไม่มีแอปในเครื่องนี้ที่เปิดไฟล์นั้นได้ แชร์ไปยังแอปที่เปิดได้ หรือคัดลอกออกจากเครื่อง</string>
+    <string name="library_no_viewer">ไม่มีอะไรในโทรศัพท์นี้ที่รับไฟล์นั้นได้ โปรดคัดลอกออกจากโทรศัพท์ด้วยวิธีอื่น</string>
     <string name="library_mirror">ช่วยแบ่งปันสิ่งพิมพ์นี้ให้ผู้อ่านคนอื่น</string>
+    <string name="library_save">บันทึกสำเนา</string>
+    <string name="library_save_title">การบันทึกจะนำไฟล์ออกจาก DUCAT</string>
+    <string name="library_save_body">หน้าที่ DUCAT ดึงมานั้น DUCAT เป็นผู้แสดงเอง โดยปิดสคริปต์และไม่ยอมให้สิ่งใดเข้าถึงเครือข่าย แต่ไฟล์แสดงแบบนั้นไม่ได้ สิ่งที่เปิดไฟล์คือโปรแกรมอ่านธรรมดาบนการเชื่อมต่อธรรมดา และทั้ง PDF และหนังสืออิเล็กทรอนิกส์ก็สร้างให้ดึงบางอย่างทันทีที่เปิดได้ ซึ่งบอกผู้จัดพิมพ์ว่าคุณอ่านแล้ว และอ่านเมื่อใด
+
+ฉบับนี้เป็นของคุณ นี่เป็นเพียงราคาของการอ่านมันที่อื่น</string>
+    <string name="library_save_go">บันทึก</string>
+    <string name="library_save_keep">ยังไม่ตอนนี้</string>
 </resources>

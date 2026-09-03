@@ -27,8 +27,14 @@
         <item quantity="many">%1$d nowych wydań czeka</item>
         <item quantity="other">%1$d nowego wydania czeka</item>
     </plurals>
-    <string name="library_open">Otwórz</string>
     <string name="library_queued">W kolejce</string>
-    <string name="library_no_viewer">Nic na tym telefonie nie otworzy tego pliku. Udostępnij go aplikacji, która potrafi, albo skopiuj poza telefon.</string>
+    <string name="library_no_viewer">Nic w tym telefonie nie przyjmie tego pliku. Skopiuj go z telefonu w inny sposób.</string>
     <string name="library_mirror">Pomóż udostępniać tę publikację innym czytelnikom</string>
+    <string name="library_save">Zapisz kopię</string>
+    <string name="library_save_title">Zapisanie wynosi go poza DUCAT</string>
+    <string name="library_save_body">Stronę, którą DUCAT pobiera, pokazuje sam DUCAT: skrypty wyłączone, nic nie może sięgnąć do sieci. Pliku nie da się tak pokazać. To, co go otworzy, będzie zwykłym czytnikiem na zwykłym łączu, a zarówno PDF-y, jak i e-booki mogą być tak zbudowane, by pobrać coś w chwili otwarcia — co mówi wydawcy, że go przeczytałeś i kiedy.
+
+Numer należy do ciebie. To tylko cena za przeczytanie go gdzie indziej.</string>
+    <string name="library_save_go">Zapisz</string>
+    <string name="library_save_keep">Nie teraz</string>
 </resources>

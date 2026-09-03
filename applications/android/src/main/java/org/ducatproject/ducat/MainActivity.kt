@@ -192,7 +192,20 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
                 window.attributes = lp
             }
         }
-        org.ducatproject.ducat.ui.libraryOpen = { ctx, publisherHex, period ->
+        org.ducatproject.ducat.ui.librarySave = { ctx, publisherHex, period ->
+            // Straight to the sheet — no ACTION_VIEW first.
+            //
+            // This used to try to *open* the issue, falling back to sharing
+            // only when nothing could. On a phone with a browser that
+            // succeeded, which meant a tap on "Open" handed a publisher's
+            // file to Chrome: scripts on, network up, and PDFs and EPUBs are
+            // both formats that can be built to fetch something the instant
+            // they are opened. §16.22's sealed room is a promise about a
+            // page DUCAT renders itself; it was never one about a file, and
+            // quietly acting as though it were is the worse of the two
+            // failures. The reader is told, then the file goes where they
+            // want it.
+            //
             // Through the library's own path builder, which is the one that
             // refuses a period id that would leave the library — this had
             // its own copy of the join and so its own way past the check.
@@ -206,39 +219,28 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
                 )
                 val mime = android.webkit.MimeTypeMap.getSingleton()
                     .getMimeTypeFromExtension(file.extension.lowercase()) ?: "*/*"
-                val view = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
-                    setDataAndType(uri, mime)
+                val send = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                    type = mime
+                    putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                    // See the note in BackupSettings.share: the sheet
+                    // builds its preview from ClipData, and the grant is
+                    // unambiguous only when it is there.
+                    clipData = android.content.ClipData.newUri(
+                        ctx.contentResolver, file.name, uri,
+                    )
                     addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
-                runCatching { ctx.startActivity(view) }.onFailure {
-                    val send = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                        type = mime
-                        putExtra(android.content.Intent.EXTRA_STREAM, uri)
-                        // See the note in BackupSettings.share: the sheet
-                        // builds its preview from ClipData, and the grant is
-                        // unambiguous only when it is there.
-                        clipData = android.content.ClipData.newUri(
-                            ctx.contentResolver, file.name, uri,
-                        )
-                        addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    }
-                    runCatching {
-                        ctx.startActivity(
-                            android.content.Intent.createChooser(send, file.name),
-                        )
-                    }.onFailure {
-                        // Neither a viewer nor anything to hand it to. The
-                        // tap did nothing at all before — on a phone with a
-                        // bare launcher that is every issue in the library,
-                        // and the reader is left tapping Open at a screen
-                        // that never changes.
-                        DucatLog.w("Library", "nothing can open ${file.name}: ${it.message}")
-                        android.widget.Toast.makeText(
-                            ctx,
-                            ctx.getString(R.string.library_no_viewer),
-                            android.widget.Toast.LENGTH_LONG,
-                        ).show()
-                    }
+                runCatching {
+                    ctx.startActivity(
+                        android.content.Intent.createChooser(send, file.name),
+                    )
+                }.onFailure {
+                    DucatLog.w("Library", "nothing can take ${file.name}: ${it.message}")
+                    android.widget.Toast.makeText(
+                        ctx,
+                        ctx.getString(R.string.library_no_viewer),
+                        android.widget.Toast.LENGTH_LONG,
+                    ).show()
                 }
             }
         }

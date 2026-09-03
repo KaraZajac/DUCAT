@@ -375,10 +375,20 @@ fun LibrarySection() {
     }
 }
 
-/** Hand a fetched issue to whatever can read it. Injected: viewers,
- *  FileProvider and the share sheet are the phone's business (see
- *  MainActivity), and the desk compiles this file without them. */
-var libraryOpen: (android.content.Context, String, String) -> Unit = { _, _, _ -> }
+/** Hand a fetched issue out of the app, to wherever the reader keeps
+ *  things. Injected: FileProvider and the share sheet are the phone's
+ *  business (see MainActivity), and the desk compiles this file without
+ *  them.
+ *
+ *  Deliberately not "open". §16.22's sealed room is a promise DUCAT can
+ *  keep about a *page* — it renders that itself, scripts off, network
+ *  blocked. A publication is a file, and a file is read by whatever the
+ *  phone hands it to: an ordinary reader on an ordinary connection.
+ *  PDFs carry JavaScript and OpenActions, EPUBs are zipped XHTML, and
+ *  both can be built to fetch something the moment they open — which
+ *  tells the publisher that this reader read it, and when. So the app
+ *  does not open one. It saves it out, having said what that costs. */
+var librarySave: (android.content.Context, String, String) -> Unit = { _, _, _ -> }
 
 @Composable
 private fun PublisherHeader(publisherHex: String, publisherName: String?, muted: Boolean) {
@@ -588,13 +598,32 @@ private fun IssueLine(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         } else if (row.bytes != null && !mine) {
-            // On this device and readable: the whole point of the fetch.
-            // There was no way to open a downloaded issue — the shelf said
-            // "205 kB" and stopped.
-            androidx.compose.material3.OutlinedButton(onClick = {
-                libraryOpen(context, row.publisherHex, row.period)
-            }) {
-                Text(stringResource(R.string.library_open))
+            // On this device: the whole point of the fetch. The shelf used
+            // to say "205 kB" and stop, with no way to get at it at all.
+            //
+            // Keyed on the issue, so an answer given about one cannot
+            // survive into another if the shelf reorders under it.
+            var confirmSave by remember(job) { mutableStateOf(false) }
+            if (confirmSave) {
+                androidx.compose.material3.AlertDialog(
+                    onDismissRequest = { confirmSave = false },
+                    title = { Text(stringResource(R.string.library_save_title)) },
+                    text = { Text(stringResource(R.string.library_save_body)) },
+                    confirmButton = {
+                        androidx.compose.material3.TextButton(onClick = {
+                            confirmSave = false
+                            librarySave(context, row.publisherHex, row.period)
+                        }) { Text(stringResource(R.string.library_save_go)) }
+                    },
+                    dismissButton = {
+                        androidx.compose.material3.TextButton(
+                            onClick = { confirmSave = false },
+                        ) { Text(stringResource(R.string.library_save_keep)) }
+                    },
+                )
+            }
+            androidx.compose.material3.OutlinedButton(onClick = { confirmSave = true }) {
+                Text(stringResource(R.string.library_save))
             }
         }
     }
