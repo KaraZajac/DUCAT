@@ -510,6 +510,57 @@ gear rental that were here have moved above: they are pre-1.0 by decision.
 
 - **Group messaging.** See below; the mechanism is already proven here.
 
+- **Pictures on a listing — the Uber/Airbnb/eBay shape.** The thing every
+  comparable marketplace has and this one does not, and the last big gap
+  between "a board that works" and a flow a stranger recognises. The
+  transport is already built: §16.15's second road carries an attachment
+  over a swarm share, which is how a photograph outgrows a record without
+  outgrowing the thread, and `Enquiries.About` already keeps `listingId`
+  for exactly this class of thing — "the address and the key handover,
+  which live on the listing and never on a board, offered once there is a
+  booking to give them to". Photographs belong in that same slot.
+
+  **The prerequisite is done (2026-09-02).** Images now leave as pixels:
+  `SafeImage.stripped` decodes and re-encodes so no EXIF survives, with
+  the orientation baked in first, and `exiftest` guards it in CI. That had
+  to land before any of this, because a phone writes GPS into a photo to
+  within a few metres and §16.18 spends its whole design putting a listing
+  on a board at about five kilometres.
+
+  **What is decided and what is not.** Sending photographs *in the thread*
+  after contact is spec-compliant today and is the piece to build first:
+  the seller attaches them to the listing once, and the phone offers them
+  when somebody enquires, instead of the seller digging through a camera
+  roll every time. Putting them *on the board* is a §16.18 change and a
+  real decision, deliberately left open — today's rule is an unqualified
+  "A client MUST NOT put an exact location, a registration plate, or a
+  photograph on a board", while the reasoning given is about photographs
+  of someone's living room.
+
+  The research behind that, so it does not have to be done twice
+  (2026-09-02): **Airbnb** shows listing photographs publicly and hides
+  only the address until booking, for §16.18's own stated reason — an
+  empty home whose address is known is a target. **Uber and Lyft** show
+  the driver's photograph, car and plate *after a driver accepts*, never
+  publicly, and expire them (photo at 48 hours, plate at 30 days) — which
+  is what this app already does with fields 210–212 on `CONTACT_ACCEPT`,
+  so rides are aligned already. Against putting them on a board: interior
+  photographs are a documented burglary vector — rings researching targets
+  through Zillow, investigators routinely finding those searches on
+  suspects' phones, listing photographs showing every room, every entry
+  point and the location of the cameras, and staying online for years. A DUCAT
+  board is worse placed than Zillow for that, not better: no operator to
+  take anything down, and mirrors keep serving. For it: in peer-to-peer
+  resale the photograph is the primary trust signal, and the research is
+  specific about why — *"the photograph carries more weight because the
+  seller is often unknown"*, which is this app's permanent condition,
+  with no reviews and no operator to fall back on.
+
+  If it is ever opened up, the shape that matches what people actually
+  expect is by kind rather than one rule: the *object* on the board for
+  goods, gear and vehicles (plate obscured), interiors and faces only
+  after contact, person photographs expiring the way Uber's do.
+
 ## The everyday-money tail — five features one Ask surfaced (built 2026-08-27)
 
 All client-side, none touched the wire; each earned its shape from a rule
