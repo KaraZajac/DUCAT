@@ -260,7 +260,18 @@ fun RentingScreen(kinds: List<Int> = Listings.KINDS) {
             }
         } else {
             LazyColumn(Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
-                items(listings) { o ->
+                // Keyed by the listing's own id, not by its position. Without
+                // a key LazyColumn identifies an item by index, so every
+                // `remember` inside a card belongs to the *slot* rather than
+                // to the listing in it — and the card below keeps the
+                // delete-confirmation dialog in one. A list that reorders or
+                // shortens under an open dialog (the poller re-posts, a sale
+                // removes one) leaves the dialog standing over a different
+                // listing, with `onDelete` already rebound to it: Confirm
+                // then deletes something the owner never chose, and a
+                // listing's signing key comes from its id, so it cannot be
+                // put back.
+                items(listings, key = { it.optString("id") }) { o ->
                     MyListingCard(
                         o = o,
                         onPost = {
@@ -449,7 +460,9 @@ private fun MyListingCard(
                 // brand-new author and the "established a while" signal a
                 // careful buyer reads resets to zero. That is unrecoverable,
                 // and this sits 8dp from "Take down", which is not.
-                var confirmDrop by remember { mutableStateOf(false) }
+                // Keyed too, so the answer cannot outlive the question even
+                // if this card is ever shown without a keyed parent.
+                var confirmDrop by remember(o.optString("id")) { mutableStateOf(false) }
                 if (confirmDrop) {
                     AlertDialog(
                         onDismissRequest = { confirmDrop = false },
