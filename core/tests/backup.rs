@@ -321,15 +321,32 @@ fn an_older_bundle_restores_with_an_empty_profile() {
 #[test]
 fn personas_and_owners_survive_the_round_trip() {
     use ducat_core::backup::BackupPersona;
+    // Built through one helper rather than two struct literals: this test
+    // is about the roster surviving, not about the face, and every field
+    // added to a dressed hat since has been a compile error here — which
+    // is how it came to be a compile error nobody had fixed.
+    fn hat(secret: u8, name: Option<&str>, color: u64, created: u64) -> BackupPersona {
+        BackupPersona {
+            secret: vec![secret; 32],
+            name: name.map(Into::into),
+            color,
+            created,
+            display_name: None,
+            avatar: None,
+            email: None,
+            phone: None,
+            signal: None,
+            pronouns: None,
+            car_model: None,
+            car_color: None,
+            plate: None,
+            share_profile: true,
+        }
+    }
     let mut b = sample();
     b.personas = vec![
-        BackupPersona { secret: vec![0x11; 32], name: None, color: 0, created: 1_700_000_000 },
-        BackupPersona {
-            secret: vec![0x22; 32],
-            name: Some("Shop".into()),
-            color: 0xFF88_4499,
-            created: 1_700_000_500,
-        },
+        hat(0x11, None, 0, 1_700_000_000),
+        hat(0x22, Some("Shop"), 0xFF88_4499, 1_700_000_500),
     ];
     b.contacts = vec![BackupContact {
         persona: vec![0xAB; 32],
