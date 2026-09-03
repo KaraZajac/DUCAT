@@ -1549,7 +1549,17 @@ fun SitesSection() {
                                 )
                             }
                             Button(
-                                enabled = busy == null,
+                                // This site's own job, not the section's.
+                                // `busy == null` disabled every Open in the
+                                // list while any one of them was out — and
+                                // Swarm.fetch does not give up for about
+                                // nine minutes, so one address nobody is
+                                // serving locked the whole section, right
+                                // down to sites sitting complete on disk
+                                // that needed no network at all. Fetches of
+                                // two different sites are independent: each
+                                // lands in its own bundle directory.
+                                enabled = busy != site.recordKey,
                                 onClick = {
                                     busy = site.recordKey
                                     ThreadSends.launch(

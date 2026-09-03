@@ -208,8 +208,8 @@ object Sites {
         val head = readHead(recordKey)
         val now = System.currentTimeMillis() / 1000
         return synchronized(lock) {
-            val rest = all(context).filterNot { it.recordKey == recordKey }
-            val prior = all(context).firstOrNull { it.recordKey == recordKey }
+            val existing = all(context)
+            val prior = existing.firstOrNull { it.recordKey == recordKey }
             val entry = Site(
                 recordKey = recordKey,
                 title = head.title,
@@ -231,7 +231,22 @@ object Sites {
                 ownerSecret = prior?.ownerSecret,
                 page = prior?.page,
             )
-            save(context, rest + entry)
+            // Replaced where it stands, appended only when it is new. This
+            // was `filterNot { it.recordKey == … } + entry`, which moves a
+            // refreshed site to the end of the table — and `all` returns
+            // stored order, so the row jumped to the bottom of the list.
+            // Open re-reads the head before it fetches, so this happened
+            // under the hand that had just tapped it: the row moved, the
+            // rows below it slid up, and a second tap landed on whichever
+            // site had taken its place.
+            save(
+                context,
+                if (prior == null) {
+                    existing + entry
+                } else {
+                    existing.map { if (it.recordKey == recordKey) entry else it }
+                },
+            )
             entry
         }
     }
