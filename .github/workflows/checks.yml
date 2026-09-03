@@ -127,6 +127,17 @@ jobs:
       - name: backup round-trip, profile scoping, read marks
         run: cd applications && ./gradlew --no-daemon :desktop:backuptest :desktop:profilescope :desktop:markstest
 
+      # Two of these guard what a stranger's bytes are allowed to name. A
+      # publisher's period id becomes a directory under the reader's
+      # library, and a site's address becomes the directory its bundle
+      # renders from — both were reachable from the network and neither had
+      # anything watching them. The third is the one thing in the tab store
+      # that deletes without being asked.
+      - name: a stranger's bytes cannot name a path
+        env:
+          DUCAT_DESK_STATE: ${{ runner.temp }}/desk-paths
+        run: cd applications && ./gradlew --no-daemon :desktop:periodidtest :desktop:sitedirtest :desktop:sweeptest
+
       # Compiling is not drawing. This renders every hosted screen with no
       # display attached and fails on a blank rectangle — it is what caught
       # two rooms that crashed on first composition.
