@@ -86,6 +86,21 @@ if [ "$1" = "check" ]; then
   else
     echo "  OFF   nothing is listening on 10.0.2.3:53"; BAD=1
   fi
+  # Carrier, reported and never fatal: before the phones are launched every
+  # tap is legitimately NO-CARRIER. It earns its line because setting this
+  # up again DELETES the taps and builds new ones, which leaves any running
+  # emulator holding a device that no longer exists — host config perfect,
+  # every check above green, and not one guest able to reach anything. The
+  # cure is to relaunch the phones, which is not what "run the setup again"
+  # sounds like.
+  for TAP in tap-ducat tap-ducat2 tap-ducat3; do
+    if ip link show "$TAP" 2>/dev/null | grep -q LOWER_UP; then
+      echo "  ok    $TAP has a guest attached"
+    else
+      echo "  --    $TAP has no guest (fine before launch; after a rebuild,"
+      echo "        relaunch the phone: scripts/emulator.sh [1|2|3])"
+    fi
+  done
   if [ $BAD = 0 ]; then
     echo "tap networking looks healthy."
   else
