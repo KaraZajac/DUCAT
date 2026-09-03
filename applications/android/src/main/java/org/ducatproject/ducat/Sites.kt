@@ -153,6 +153,19 @@ object Sites {
      * `publications/<publisherHex>/<period>`, `swarm_out/<digestHex>` — and
      * this was the one place that was not.
      */
+    /**
+     * Is the bundle actually on this phone?
+     *
+     * `fetchedDigestHex` is a claim the *table* makes, and the table
+     * outlives the files: a bundle goes when [sweepOrphans] runs, when the
+     * naming of these directories changes under an upgrade, or when the
+     * system reclaims app storage. [fetchBundle] has always asked the disk
+     * as well — everything else took the table's word, and so promised a
+     * reader a page that was not there.
+     */
+    fun cached(context: Context, recordKey: String): Boolean =
+        bundleDir(context, recordKey).let { it.isDirectory && it.walkTopDown().any { f -> f.isFile } }
+
     fun bundleDir(context: Context, recordKey: String): File =
         File(context.filesDir, "sites/${dirNameOf(recordKey)}/current")
 
@@ -454,7 +467,17 @@ object Sites {
         val digest = site.fetchedDigestHex ?: return
         val share = site.fetchedShare ?: site.share
         val dir = bundleDir(context, recordKey)
-        if (!dir.isDirectory || !dir.walkTopDown().any { it.isFile }) return
+        if (!dir.isDirectory || !dir.walkTopDown().any { it.isFile }) {
+            // Said, not swallowed. Ticking "keep this alive for others" over
+            // a site whose bundle is gone did nothing at all and reported
+            // nothing — the box stayed ticked, promising a mirror this phone
+            // could not provide until somebody happened to press Open.
+            DucatLog.i(
+                "Sites",
+                "keep-alive for ${recordKey.take(8)}… has no bundle to serve yet — open it once",
+            )
+            return
+        }
         Thread {
             runCatching {
                 // Re-checked in here, not only on the caller's thread. Every

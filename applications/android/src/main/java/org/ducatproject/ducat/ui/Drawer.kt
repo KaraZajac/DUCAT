@@ -1311,6 +1311,15 @@ fun SitesSection() {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
     val sites = remember(version) { org.ducatproject.ducat.Sites.all(context) }
+    // Which of them are really here. The row below used to read "ready
+    // offline" off the stored digest alone, so a site whose bundle had gone
+    // — swept, or orphaned by a change to how these directories are named —
+    // announced itself as readable offline, and Open was the only thing that
+    // noticed otherwise.
+    val onDisk = remember(version, sites) {
+        sites.filter { org.ducatproject.ducat.Sites.cached(context, it.recordKey) }
+            .mapTo(HashSet()) { it.recordKey }
+    }
     var adding by rememberSaveable { mutableStateOf(false) }
     // A site address is pasted or read off something; retyping it is the
     // whole cost of losing it.
@@ -1526,7 +1535,9 @@ fun SitesSection() {
                                         } else {
                                             stringResource(R.string.sites_fetching_waiting)
                                         }
-                                    } else if (site.fetchedDigestHex == null) {
+                                    } else if (site.fetchedDigestHex == null ||
+                                        site.recordKey !in onDisk
+                                    ) {
                                         stringResource(R.string.sites_not_fetched)
                                     } else if (site.fetchedDigestHex != site.digestHex) {
                                         stringResource(R.string.sites_update_waiting)
