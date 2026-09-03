@@ -39,7 +39,13 @@ fun main() {
         println("VAULTSET locked $dir")
     }
     val sealed = File(dir, "prefs").listFiles()?.count { it.name.endsWith(".enc") } ?: 0
-    val plain = File(dir, "prefs").listFiles()?.count { it.name.endsWith(".json") } ?: 0
-    println("VAULTSET sealed=$sealed plaintext-left=$plain")
-    if (plain > 0) kotlin.system.exitProcess(1)
+    // Only stores that were *meant* to be sealed count against the sweep. A
+    // desk keeps plain ones on purpose — its public identity, for one — and
+    // counting those made a clean lock report failure.
+    val left = DeskVault.plaintextLeft(dir)
+    println("VAULTSET sealed=$sealed plaintext-left=${left.size}")
+    if (left.isNotEmpty()) {
+        println("VAULTSET_FAIL still readable: ${left.joinToString(", ")}")
+        kotlin.system.exitProcess(1)
+    }
 }

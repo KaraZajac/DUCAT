@@ -2368,6 +2368,13 @@ fun HailSheet(
     val cur = remember(rateVersion) { Amounts.currency(context) }
     var fiat by rememberSaveable { mutableStateOf(Amounts.enterFiat(context)) }
     var fareXmr by rememberSaveable { mutableStateOf("") }
+    // Whether the number in that field is the rider's or the app's. The
+    // estimate below may replace its own guess as freely as it likes — a new
+    // destination must re-price — but it must never overwrite a figure
+    // somebody typed. Blankness cannot carry this: the moment the first
+    // estimate lands the field is non-blank, and gating on that froze the
+    // fare at the first destination's price for the life of the sheet.
+    var fareEdited by rememberSaveable { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }
     // Which part of posting is running — see Hailing.Step.
     var step by remember { mutableStateOf(org.ducatproject.ducat.Hailing.Step.CARD) }
@@ -2427,13 +2434,13 @@ fun HailSheet(
             error = context.getString(R.string.hail_no_route)
         } else {
             error = null
-            // Only while the rider has not written their own number. This
-            // effect re-runs on every entry into composition, keys unchanged
-            // or not, so a rotation or a trip to another screen used to
-            // overwrite a typed offer with the app's estimate — the fare
-            // quietly reverting under a Hail button. The sibling above
-            // already guards on `fareXmr.isBlank()`; this one did not.
-            if (fareXmr.isBlank()) {
+            // Only while the rider has not written their own number — the
+            // sibling above keeps an `edited` flag for exactly this, and this
+            // one now does too. A rotation or a trip to another screen
+            // re-enters composition and re-runs this effect, which used to
+            // overwrite a typed offer with the app's estimate: the fare
+            // quietly reverting under a Hail button.
+            if (!fareEdited) {
                 org.ducatproject.ducat.Fare.estimateExact(context, r.meters, r.seconds)
                     ?.let { (_, pxmr) -> fareXmr = pxmrToField(pxmr, fiat, rate) }
             }
@@ -2546,7 +2553,7 @@ fun HailSheet(
                         Spacer(Modifier.height(8.dp))
                         OutlinedTextField(
                             value = fareXmr,
-                            onValueChange = { fareXmr = it },
+                            onValueChange = { fareXmr = it; fareEdited = true },
                             label = { Text(stringResource(R.string.hail_your_offer, if (fiat) cur else "XMR")) },
                             modifier = Modifier.fillMaxWidth(), singleLine = true,
                         )

@@ -140,11 +140,15 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
     // groups carried the composer text into the new room and wrote it to
     // that room's draft on the way out.
     var draft by rememberSaveable(idHex) { mutableStateOf(store.draftOf(key)) }
-    val draftNow by rememberUpdatedState(draft)
+    // Keyed, for the reason Chat.kt's copy explains: unkeyed, this held the
+    // NEW room's draft by the time the OLD room's onDispose ran, and filed
+    // it under the old room's key.
+    val latest = remember(idHex) { mutableStateOf(draft) }.apply { value = draft }
     DisposableEffect(idHex) {
+        val mineKey = key
         onDispose {
-            val d = draftNow
-            store.saveDraft(key, if (ThreadSends.owns(key, d)) "" else d)
+            val d = latest.value
+            store.saveDraft(mineKey, if (ThreadSends.owns(mineKey, d)) "" else d)
         }
     }
     var sending by remember { mutableStateOf(false) }

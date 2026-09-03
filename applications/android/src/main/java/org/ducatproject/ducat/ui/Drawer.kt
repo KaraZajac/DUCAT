@@ -1572,11 +1572,19 @@ fun SitesSection() {
                         // restart sweep. The address stayed live in the DHT
                         // with no seeder behind it, while Pages went on
                         // saying "Served from this phone".
-                        if (!site.mine) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             // Off the main thread, both: the store is an
                             // encrypted table read back whole, and remove
                             // deletes a bundle that can be hundreds of files.
+                            //
+                            // The checkbox only — NOT the Remove button. An
+                            // earlier attempt at this guard opened before the
+                            // Row and closed after it, which took the delete
+                            // gesture with it: a page this phone published
+                            // could no longer be removed at all, and the
+                            // confirmation written for exactly that case
+                            // became unreachable code.
+                            if (!site.mine) {
                             Checkbox(
                                 checked = site.keepAlive,
                                 onCheckedChange = { keep ->
@@ -1595,6 +1603,9 @@ fun SitesSection() {
                                 style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier.weight(1f),
                             )
+                            } else {
+                                Spacer(Modifier.weight(1f))
+                            }
                             TextButton(onClick = {
                                 // Somebody else's page is a cache: dropping
                                 // it costs a re-fetch and the address still
@@ -1614,7 +1625,6 @@ fun SitesSection() {
                                     }
                                 }
                             }) { Text(stringResource(R.string.sites_remove)) }
-                        }
                         }
                     }
                 }

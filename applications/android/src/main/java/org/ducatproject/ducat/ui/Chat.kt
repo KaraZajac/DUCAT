@@ -314,14 +314,26 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     var draft by rememberSaveable(contact.personaHex) {
         mutableStateOf(ContactStore(context).draftOf(contact.personaHex))
     }
-    val draftNow by androidx.compose.runtime.rememberUpdatedState(draft)
+    // rememberUpdatedState, keyed — which is the whole of the fix. It is
+    // unkeyed by construction (`remember { mutableStateOf(v) }.apply { value
+    // = v }`), so on a switch it already held the NEW thread's draft by the
+    // time the OLD thread's onDispose ran: B's half-written words saved into
+    // A's slot, and A's lost. The same bug the keying above fixed, pointing
+    // the other way.
+    //
+    // Keyed, each contact gets its own holder object, and the disposer's
+    // lambda closed over the one that existed beside it — so it reads the
+    // thread it belongs to, with no assumption about what order effects run
+    // in or when a coroutine body gets its turn.
+    val latest = remember(contact.personaHex) { mutableStateOf(draft) }
+        .apply { value = draft }
     androidx.compose.runtime.DisposableEffect(contact.personaHex) {
         onDispose {
             // Not the words on their way out. Send does not empty the box
             // until the send lands, and a Back tapped in between saved the
             // sentence that had just gone as the draft — offered up again,
             // under a Send button, the next time the thread was opened.
-            val d = draftNow
+            val d = latest.value
             ContactStore(context).saveDraft(
                 contact.personaHex,
                 if (ThreadSends.owns(contact.personaHex, d)) "" else d,

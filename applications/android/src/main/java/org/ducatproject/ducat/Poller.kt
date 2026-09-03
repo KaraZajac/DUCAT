@@ -602,7 +602,17 @@ class Poller(private val context: Context) {
             var freed = 0L
             root.listFiles()?.forEach { pub ->
                 pub.listFiles()?.forEach { d ->
-                    if (d.isDirectory && d.name.endsWith(".part") && d.lastModified() < old) {
+                    // The newest byte anywhere inside, not the directory's
+                    // own stamp: a directory's mtime moves when an entry is
+                    // added or removed and not when a file already in it is
+                    // written to. A resumed fetch pours into files that
+                    // already exist, so a download making steady progress
+                    // read as untouched since the day it started — and this
+                    // deleted it mid-flight, losing exactly the partial work
+                    // a .part exists to keep.
+                    val touched = d.walkBottomUp().filter { it.isFile }
+                        .maxOfOrNull { it.lastModified() } ?: d.lastModified()
+                    if (d.isDirectory && d.name.endsWith(".part") && touched < old) {
                         freed += d.walkBottomUp().filter { it.isFile }.sumOf { it.length() }
                         d.deleteRecursively()
                     }

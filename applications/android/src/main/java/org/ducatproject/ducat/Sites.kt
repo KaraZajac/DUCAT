@@ -470,6 +470,16 @@ object Sites {
                 // the first task; stopping a share nobody serves is a no-op.
                 Swarm.stopShare(share)
                 Swarm.fetch(share, digest, dir.absolutePath, staySeeding = true)
+                // And again on the way out, because *this* is the call that
+                // parks the seeder. A `remove` or an unticked box landing
+                // while the fetch was out did its own stopShare before this
+                // one existed, so the site went away and the phone went on
+                // serving it — the check above the fetch cannot see that, it
+                // ran minutes earlier. Whatever the store says now wins.
+                if (all(context).none { it.recordKey == recordKey && it.keepAlive }) {
+                    Swarm.stopShare(share)
+                    DucatLog.i("Sites", "reseed finished for a site no longer kept — stopped")
+                }
             }
         }.apply { isDaemon = true; name = "site-reseed" }.start()
     }

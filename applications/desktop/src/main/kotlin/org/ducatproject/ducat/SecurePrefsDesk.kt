@@ -127,9 +127,38 @@ object DeskVault {
         }
     }
 
+    /**
+     * The stores this build knows are sealed, as a floor under the register.
+     *
+     * A desk upgrading from before the register has an empty file, so the
+     * eager pass would migrate nothing and every secret would sit in
+     * plaintext until its store happened to be opened. This is safe to be
+     * incomplete in a way the opposite list is not: a sealed name missing
+     * from here is picked up lazily on first open, whereas a *plain* name
+     * missing from an exclusion list is encrypted and deleted out from
+     * under its reader. Wrong in the recoverable direction, by design.
+     */
+    private val KNOWN_SEALED = listOf(
+        "ducat_contacts", "ducat_publications", "ducat_groups", "ducat_listings",
+        "ducat_catalogue", "ducat_sites", "ducat_recurring", "ducat_enquiries",
+        "ducat_ceremonies", "ducat_orders", "ducat_pin",
+    )
+
     private fun sealedNames(root: File): List<String> =
-        runCatching { sealedNamesFile(root).takeIf { it.isFile }?.readLines() }
-            .getOrNull().orEmpty().filter { it.isNotBlank() }
+        (
+            runCatching { sealedNamesFile(root).takeIf { it.isFile }?.readLines() }
+                .getOrNull().orEmpty() + KNOWN_SEALED
+            ).filter { it.isNotBlank() }.distinct()
+
+    /**
+     * Sealed stores whose plaintext is still on disk.
+     *
+     * The distinction matters to anything reporting on a lock: a desk keeps
+     * plain stores on purpose (ducat_desk_public among them), so counting
+     * every leftover .json calls a clean sweep a failure.
+     */
+    internal fun plaintextLeft(root: File): List<String> =
+        sealedNames(root).filter { File(root, "prefs/$it.json").isFile }
 
     /** Every *sealed* store's plaintext becomes an encrypted one, then stops
      *  existing. Eager, because a vault whose secrets are still readable on

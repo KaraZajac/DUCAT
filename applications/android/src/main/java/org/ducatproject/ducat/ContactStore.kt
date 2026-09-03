@@ -240,8 +240,17 @@ class ContactStore(context: Context) {
             // sweep. That errs towards deleting a message early, and for a
             // feature whose entire purpose is not keeping plaintext around
             // that is the right direction to err in.
-            val nowSecs = System.currentTimeMillis() / 1000
-            val kept = all.filter { !Elapsed.dueSecs(nowSecs, it.timestamp, afterSecs) }
+            // Deliberately a raw comparison, and the Elapsed attempt is
+            // worth recording. Its future rule reads any stamp more than
+            // sixty seconds ahead as due — and these stamps are the
+            // *sender's*, so a contact whose clock runs a minute fast has
+            // every message they have ever sent read as past its window and
+            // deleted on the next sweep, whatever the setting says. Losing a
+            // whole conversation to somebody else's clock is far worse than
+            // the leak it was closing (a peer stamping ahead keeps their own
+            // plaintext on this device). The real fix is a receipt-time
+            // stamp of our own, which StoredMessage does not carry yet.
+            val kept = all.filter { it.timestamp >= cutoff }
             if (kept.size == all.size) return@synchronized 0
             writeThread(personaHex, kept)
             all.size - kept.size

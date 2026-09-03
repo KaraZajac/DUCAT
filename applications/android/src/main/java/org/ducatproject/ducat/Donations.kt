@@ -39,25 +39,24 @@ object Donations {
     }
 
     /**
-     * How many receipted donations to remember.
+     * NOT bounded, and the attempt to bound it is worth recording.
      *
-     * This is the only replay guard in the loop, and it is parsed on every
-     * poll pass — so it cannot grow without end: a busy donation box would
-     * make each pass re-parse a list one entry longer than the last, for
-     * ever. Newest kept, because a second receipt is only possible while the
-     * donation is still one the reconciler looks at; a transaction thousands
-     * of donations old is not coming back round.
+     * This list is parsed on every poll pass, so capping it to the newest
+     * few thousand looked like an obvious win. It is not: `reconcile`
+     * re-walks every donor thread for ever — nothing prunes the donor's
+     * notice, nothing prunes wallet_outputs, and SecondOpinion.settles
+     * short-circuits on a sticky ok_<txid> — so membership here is the only
+     * thing standing between an old donation and a second receipt. Evicting
+     * the oldest entries makes the next pass re-receipt every one of them,
+     * and each append evicts more: a rolling duplicate thank-you to every
+     * donor of a busy box, for ever, one Mailbox.send apiece. The growth is
+     * a parse cost; the cap was a correctness bug.
      */
-    private const val RECEIPTED_KEPT = 2_000
-
     private fun markReceipted(context: Context, txid: String) {
         val prefs = securePrefs(context, "ducat_contacts")
         val arr = JSONArray(prefs.getString("donation_receipted", "[]"))
         arr.put(txid)
-        val bounded = if (arr.length() <= RECEIPTED_KEPT) arr else JSONArray().also { out ->
-            for (i in arr.length() - RECEIPTED_KEPT until arr.length()) out.put(arr.getString(i))
-        }
-        prefs.edit().putString("donation_receipted", bounded.toString()).apply()
+        prefs.edit().putString("donation_receipted", arr.toString()).apply()
     }
 
     fun reconcile(context: Context) {

@@ -89,21 +89,28 @@ class SiteViewerActivity : ComponentActivity() {
                             startActivity(
                                 android.content.Intent(
                                     android.content.Intent.ACTION_VIEW, url,
-                                ).setPackage(packageName)
-                                    // …and stay open behind them, which is
-                                    // what the comment above promises and
-                                    // what did not happen: MainActivity is
-                                    // singleTop in the same task, so this
-                                    // brought it to the front and finished
-                                    // the room. Following a link out of a
-                                    // page ended the page, and Back went to
-                                    // wherever the app had been rather than
-                                    // to what was being read. A new task
-                                    // keeps the room where it was.
-                                    .addFlags(
-                                        android.content.Intent.FLAG_ACTIVITY_NEW_TASK or
-                                            android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT,
-                                    ),
+                                ).setPackage(packageName),
+                                // The room does NOT stay open behind this,
+                                // and no flag here can make it. MainActivity
+                                // is `singleTask` in the manifest, so any
+                                // launch of it returns to its existing task
+                                // and clears whatever sits above — this
+                                // activity included. FLAG_ACTIVITY_NEW_TASK
+                                // finds that same task; NEW_DOCUMENT is
+                                // documented to have no effect unless the
+                                // target's launchMode is `standard`. A pair
+                                // of flags was added here that read as a fix
+                                // and did nothing at all.
+                                //
+                                // Keeping the page behind a followed link
+                                // means either changing MainActivity's launch
+                                // mode — which every deep link and
+                                // notification tap depends on — or giving
+                                // this activity its own taskAffinity, which
+                                // makes the reader a separate entry in
+                                // recents that Back does not return to.
+                                // Neither is a polish-pass change, so the
+                                // behaviour stands and is written down.
                             )
                         }
                         true

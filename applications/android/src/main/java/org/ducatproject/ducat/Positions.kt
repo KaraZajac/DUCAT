@@ -225,13 +225,20 @@ object Positions {
             runCatching { uniffi.ducat_mobile.nodeDhtDelete(rec.key) }
             return false
         }
-        val o = load(context, contact.personaHex)
-        o.put("send_record", rec.key)
-        o.put("send_owner_pub", hexOf(rec.ownerPublic))
-        o.put("send_owner_sec", hexOf(rec.ownerSecret))
-        o.put("send_key", hexOf(streamKey))
-        o.put("send_counter", 0L)
-        save(context, contact.personaHex, o)
+        // Under the lock, and clearing `stopped` — the flag stop() sets on
+        // its way out so a push already in flight cannot resurrect a stream
+        // the user ended. It outlives stop() only if the network work in
+        // between died, and a leftover true would then silently stop every
+        // counter write on the new stream: sharing that says it is on and
+        // never moves.
+        mutate(context, contact.personaHex) { o ->
+            o.remove("stopped")
+            o.put("send_record", rec.key)
+            o.put("send_owner_pub", hexOf(rec.ownerPublic))
+            o.put("send_owner_sec", hexOf(rec.ownerSecret))
+            o.put("send_key", hexOf(streamKey))
+            o.put("send_counter", 0L)
+        }
         DucatLog.i(TAG, "sharing position with ${contact.displayName()}")
         return true
     }
