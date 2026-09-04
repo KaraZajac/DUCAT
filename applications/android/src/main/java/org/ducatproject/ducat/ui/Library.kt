@@ -202,30 +202,42 @@ object LibraryFetch {
             // half-overwritten issue the ordinary path below takes a .part
             // dir to avoid. Nothing to verify against means nothing to do.
             if (!done.isDirectory || done.walkTopDown().none { it.isFile }) return
-            // **Only the edition we actually hold.** The share handed in is
-            // the publisher's latest announcement, and it is not necessarily
-            // what is on this disk: a re-shipped period leaves the two
-            // disagreeing. Announcing a digest we have not got is the fault
-            // Sites.reseed had — peers match on the index digest, so the
-            // mirror is rejected and dropped from the swarm — and fetching
-            // the difference here would write it into the very directory the
-            // reader reads from, which is the half-overwritten issue the
-            // .part path below exists to prevent. Neither, then: leave it to
-            // the ordinary fetch, which lands in .part and swaps whole.
-            val held = Publications.heldDigest(app, job.publisherHex, job.period)
-            if (held == null || held != share.digestHex) {
+            // **The edition we hold, not the one last announced.**
+            //
+            // A period is immutable: a shipped period id names one fixed
+            // thing, and new content is a new period. What is on this disk
+            // is therefore a complete edition somebody bought, addressed by
+            // its own digest, and serving it is the whole point of the
+            // checkbox. Peers match on the index digest, so announcing the
+            // publisher's newest instead would get this mirror rejected and
+            // dropped — the fault Sites.reseed had, from the other side.
+            //
+            // A site is the opposite and needs the opposite fix: its head
+            // moves by design, so a mirror there must follow it.
+            val held = Publications.heldEdition(app, job.publisherHex, job.period)
+            if (held == null) {
+                // Fetched before this was recorded, or landed by the shelf
+                // road, which is not a swarm share at all. Nothing to
+                // announce: the next full fetch records one.
                 DucatLog.i(
                     "Library",
-                    "'${job.period}' on disk is not the shipped edition — " +
-                        "leaving it for a full fetch rather than seeding it",
+                    "'${job.period}' has no recorded edition to serve — fetch it once",
                 )
                 return
             }
-            runCatching {
-                Swarm.fetch(
-                    share.shareKey, share.digestHex, done.absolutePath,
-                    staySeeding = true,
+            val (heldKey, heldDigest) = held
+            if (heldDigest != share.digestHex) {
+                // Should not happen: the publisher re-shipped a period id.
+                // Readers who bought this edition still hold its key and
+                // still want it, so keep serving it — and say so, because
+                // it means the immutability rule was broken upstream.
+                DucatLog.w(
+                    "Library",
+                    "'${job.period}' was re-shipped — still serving the edition on disk",
                 )
+            }
+            runCatching {
+                Swarm.fetch(heldKey, heldDigest, done.absolutePath, staySeeding = true)
             }.onFailure {
                 DucatLog.w("Library", "reseed of '${job.period}': ${it.message}")
             }
@@ -256,7 +268,9 @@ object LibraryFetch {
             // mirror that announces an edition it does not hold is rejected
             // by every peer that does, and dropped.
             if (source is Source.Swarm) {
-                Publications.markHeld(app, job.publisherHex, job.period, source.digestHex)
+                Publications.markHeld(
+                    app, job.publisherHex, job.period, source.shareKey, source.digestHex,
+                )
             }
             // The reader joins the club — if they said they would. This
             // used to be unconditional, which made downloading an issue a

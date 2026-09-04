@@ -847,32 +847,50 @@ object Publications {
     }
 
     /**
-     * The digest of the edition this device actually holds for a period.
+     * The edition of a period this device actually holds: (shareKey,
+     * digestHex), or null if nothing has landed.
      *
-     * The filed shipment is what the *publisher* last announced; this is
-     * what came down and verified. They differ whenever a period is
-     * re-shipped, and telling them apart is what keeps a mirror honest:
-     * peers match on the index digest, so announcing a shipment we have
-     * not fetched gets this reader rejected and dropped from the swarm —
-     * the same way a site did before Sites.reseed learned to re-read its
-     * head. Null when nothing has been fetched, which reads as "do not
-     * announce anything".
+     * A period is *immutable* — a shipped period id names one fixed thing,
+     * and new content is a new period. So this is not a staleness check,
+     * it is an identity: what we hold is a complete edition somebody
+     * bought, addressed by its own digest, and it stays servable for as
+     * long as we keep it. Peers match on the index digest, so a mirror
+     * must announce the edition it has rather than the one the publisher
+     * announced most recently; announcing anything else gets it rejected
+     * and dropped from the swarm.
+     *
+     * The two differ only if a publisher re-ships a period id, which the
+     * rule says they must not. If it happens, readers who bought the
+     * earlier edition still hold its key and still want it — so we go on
+     * serving what we have and say so, rather than going quiet.
      */
-    fun heldDigest(context: Context, publisherHex: String, periodId: String): String? {
+    fun heldEdition(context: Context, publisherHex: String, periodId: String): Pair<String, String>? {
         val all = prefs(context).getString("subs", null)?.let { JSONObject(it) } ?: return null
-        return all.optJSONObject(publisherHex)?.optJSONObject("ships")
-            ?.optJSONObject(periodId)?.optString("got")?.ifBlank { null }
+        val ship = all.optJSONObject(publisherHex)?.optJSONObject("ships")
+            ?.optJSONObject(periodId) ?: return null
+        val key = ship.optString("gotkey").ifBlank { null } ?: return null
+        val digest = ship.optString("got").ifBlank { null } ?: return null
+        return key to digest
     }
 
-    /** Record what verified onto this device, once a fetch has landed. */
-    fun markHeld(context: Context, publisherHex: String, periodId: String, digestHex: String) {
+    /** Record the edition that verified onto this device, once a fetch has
+     *  landed. Both halves or neither: a key without its digest cannot be
+     *  announced, and a digest without its key cannot be served. */
+    fun markHeld(
+        context: Context,
+        publisherHex: String,
+        periodId: String,
+        shareKey: String,
+        digestHex: String,
+    ) {
+        if (shareKey.isBlank() || digestHex.isBlank()) return
         val p = prefs(context)
         synchronized(lock) {
             val all = p.getString("subs", null)?.let { JSONObject(it) } ?: JSONObject()
             val mine = all.optJSONObject(publisherHex) ?: JSONObject()
             val ships = mine.optJSONObject("ships") ?: JSONObject()
             val ship = ships.optJSONObject(periodId) ?: JSONObject()
-            ship.put("got", digestHex)
+            ship.put("gotkey", shareKey).put("got", digestHex)
             ships.put(periodId, ship)
             mine.put("ships", ships)
             all.put(publisherHex, mine)
