@@ -272,6 +272,21 @@ pub mod f {
     /// object — §18.4.2's whole point.
     pub const MSG_PUB_WANT: u64 = 286;
 
+    /// §16.18: one small picture, carried inline on the board so a browser
+    /// paints a listing from the read it was already doing — no second
+    /// network operation, no peer discovery, and it still shows when the
+    /// seller's phone is off. ≤10 KiB, PNG/JPEG/WebP, the same three
+    /// formats an avatar may be. Every reader of every slot pays for this
+    /// on every sweep, which is why the cap is small and the gallery is
+    /// somewhere else.
+    pub const RN_THUMB: u64 = 287;
+    /// …and that gallery: a swarm share carrying the full-size pictures,
+    /// fetched only when somebody opens the listing. Share key and index
+    /// digest travel together or not at all, like every other pair in this
+    /// registry, because half of one fetches nothing.
+    pub const RN_GALLERY: u64 = 288;
+    pub const RN_GALLERY_DIGEST: u64 = 289;
+
     // PUB_NOTICE (§16.18.2) — a publication listed on a public board. The
     // board name carries the where (a topic, or a local cell for the town
     // paper); the notice carries only what a stranger needs to decide to

@@ -1362,6 +1362,14 @@ pub struct RentalInfo {
     pub features: Vec<String>,
     /// How many the poster has. One unless they said otherwise.
     pub quantity: u64,
+    /// §16.18's picture: one small image inline, and the swarm share that
+    /// carries the rest. The pair travels whole or not at all.
+    #[uniffi(default = None)]
+    pub thumb: Option<Vec<u8>>,
+    #[uniffi(default = None)]
+    pub gallery_share: Option<String>,
+    #[uniffi(default = None)]
+    pub gallery_digest: Option<String>,
 }
 
 fn rental_from_core(n: ducat_core::contact::RentalNotice) -> RentalInfo {
@@ -1378,6 +1386,11 @@ fn rental_from_core(n: ducat_core::contact::RentalNotice) -> RentalInfo {
         fuel: n.fuel, seats: n.seats, color: n.color, trim: n.trim,
         rooms: n.rooms, sleeps: n.sleeps, size_m2: n.size_m2,
         subtype: n.subtype, features: n.features, quantity: n.quantity,
+        thumb: n.thumb,
+        gallery_share: n.gallery_share,
+        gallery_digest: n
+            .gallery_digest
+            .map(|d| d.iter().map(|x| format!("{x:02x}")).collect::<String>()),
     }
 }
 
@@ -1418,6 +1431,18 @@ pub fn rental_encode(
         // Zero would be a listing of nothing, and the UI has no way to mean
         // it; a caller that leaves it unset means one.
         quantity: info.quantity.max(1),
+        thumb: info.thumb,
+        gallery_share: info.gallery_share,
+        gallery_digest: match &info.gallery_digest {
+            None => None,
+            Some(h) => Some(
+                crate::hex_to_bytes(h)
+                    .and_then(|b| <[u8; 32]>::try_from(b.as_slice()).ok())
+                    .ok_or_else(|| {
+                        ContactError::Refused("a gallery digest is 32 bytes of hex".into())
+                    })?,
+            ),
+        },
     };
     let ducat_core::cbor::Value::Map(m) = n.to_value() else { unreachable!() };
     let seed = ducat_core::board::listing_seed(&persona_secret, &listing_id);

@@ -232,6 +232,18 @@ impl Pronouns {
 /// does not fit is a contact who cannot be reached at all.
 pub const MAX_AVATAR_BYTES: usize = 12 * 1024;
 
+/// The most a listing's inline thumbnail may weigh (§16.18).
+///
+/// Sized against the *reader*, not the picture. A browse sweep is 18
+/// boards of 8 slots — 144 notices — and every one of them is read whole,
+/// signature and proof-of-work verified over the body, by a phone that is
+/// merely looking. At 10 KiB that sweep carries about 1.4 MB of pictures
+/// where today it carries 45 kB of words. That is the trade: a
+/// marketplace that shows what is for sale, paid for by every browser on
+/// every lap. Anything bigger belongs in the gallery, which is a swarm
+/// and is fetched by the one person who opened the listing.
+pub const MAX_LISTING_THUMB_BYTES: usize = 10 * 1024;
+
 /// How far ahead a board notice may claim to be good for.
 ///
 /// board.rs prices flooding by making each slot cost a search, and its own
@@ -2130,6 +2142,13 @@ pub struct RentalNotice {
     /// ordinary listing costs nothing on a board that is expensive to read,
     /// and every listing that means "one" has the same bytes.
     pub quantity: u64,
+    /// One small picture, inline (§16.18). PNG, JPEG or WebP, at most
+    /// [`MAX_LISTING_THUMB_BYTES`]. The seller picks which of their
+    /// photographs this is; the rest ride the gallery below.
+    pub thumb: Option<Vec<u8>>,
+    /// The full-size pictures, on a swarm share. Both halves or neither.
+    pub gallery_share: Option<String>,
+    pub gallery_digest: Option<[u8; 32]>,
 }
 
 pub const RENTAL_PLACE: u64 = 1;
@@ -2369,6 +2388,15 @@ impl RentalNotice {
         if self.quantity > 1 {
             m.insert(f::RN_QUANTITY, Value::Uint(self.quantity));
         }
+        if let Some(t) = &self.thumb {
+            m.insert(f::RN_THUMB, Value::Bytes(t.clone()));
+        }
+        if let Some(g) = &self.gallery_share {
+            m.insert(f::RN_GALLERY, Value::Text(g.clone()));
+        }
+        if let Some(d) = &self.gallery_digest {
+            m.insert(f::RN_GALLERY_DIGEST, Value::Bytes(d.to_vec()));
+        }
         Value::Map(m)
     }
 
@@ -2553,11 +2581,63 @@ impl RentalNotice {
                 out
             }
         };
+        // The picture, inline. Refused rather than trimmed: a board slot
+        // is signed over its bytes, so a reader that silently accepted an
+        // oversized one would be verifying something no other reader
+        // would. Same three formats as an avatar, and for the same
+        // reason — a browser must not be asked to guess at a decoder.
+        let thumb = r.opt_bytes(f::RN_THUMB, None)?;
+        if let Some(t) = &thumb {
+            if t.is_empty() {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "an empty thumbnail is not a picture; omit the key instead",
+                ));
+            }
+            if t.len() > MAX_LISTING_THUMB_BYTES {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    format!("a listing thumbnail may be at most {MAX_LISTING_THUMB_BYTES} bytes"),
+                ));
+            }
+            if !avatar_format_is_known(t) {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "a listing thumbnail must be PNG, JPEG or WebP",
+                ));
+            }
+        }
+        // And the gallery it stands for: together or not at all. A share
+        // key with no digest fetches bytes nothing can check, and a digest
+        // with no share key names a fetch that cannot start.
+        let gallery_share = r.opt_text(f::RN_GALLERY, MAX_SHARE_KEY_CHARS)?;
+        let gallery_digest = r.opt_bytes(f::RN_GALLERY_DIGEST, Some(32))?;
+        let gallery_digest = match (&gallery_share, gallery_digest) {
+            (Some(_), Some(d)) => Some(<[u8; 32]>::try_from(d.as_slice()).map_err(|_| {
+                Reject::with_detail(RejectCode::Malformed, "a gallery digest is 32 bytes")
+            })?),
+            (None, None) => None,
+            _ => {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "a listing gallery carries its share key and its digest together",
+                ))
+            }
+        };
+        if let Some(g) = &gallery_share {
+            if g.is_empty() {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "an empty gallery share key names nothing",
+                ));
+            }
+        }
         r.finish()?;
         Ok(RentalNotice {
             version, card, kind, title, area, cell, price_pxmr, deposit_pxmr, expiry,
             make, model, year, gearbox, fuel, seats, color, trim,
             rooms, sleeps, size_m2, subtype, features, quantity,
+            thumb, gallery_share, gallery_digest,
         })
     }
 }
@@ -2587,6 +2667,7 @@ mod rental_tests {
             subtype,
             features: vec!["good condition".into()],
             quantity: 1,
+            thumb: None, gallery_share: None, gallery_digest: None,
         }
     }
 
@@ -2675,6 +2756,7 @@ mod rental_tests {
             subtype: Some(1),
             features: vec!["child seat".into(), "roof box".into()],
             quantity: 1,
+            thumb: None, gallery_share: None, gallery_digest: None,
         }
     }
 
@@ -2697,6 +2779,7 @@ mod rental_tests {
             subtype: Some(2),
             features: vec!["wifi".into()],
             quantity: 1,
+            thumb: None, gallery_share: None, gallery_digest: None,
         }
     }
 

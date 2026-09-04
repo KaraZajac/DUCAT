@@ -4579,7 +4579,14 @@ data class RentalInfo (
     /**
      * How many the poster has. One unless they said otherwise.
      */
-    var `quantity`: kotlin.ULong
+    var `quantity`: kotlin.ULong, 
+    /**
+     * §16.18's picture: one small image inline, and the swarm share that
+     * carries the rest. The pair travels whole or not at all.
+     */
+    var `thumb`: kotlin.ByteArray? = null, 
+    var `galleryShare`: kotlin.String? = null, 
+    var `galleryDigest`: kotlin.String? = null
 ) {
     
     companion object
@@ -4616,6 +4623,9 @@ public object FfiConverterTypeRentalInfo: FfiConverterRustBuffer<RentalInfo> {
             FfiConverterOptionalULong.read(buf),
             FfiConverterSequenceString.read(buf),
             FfiConverterULong.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
         )
     }
 
@@ -4644,7 +4654,10 @@ public object FfiConverterTypeRentalInfo: FfiConverterRustBuffer<RentalInfo> {
             FfiConverterOptionalULong.allocationSize(value.`sizeM2`) +
             FfiConverterOptionalULong.allocationSize(value.`subtype`) +
             FfiConverterSequenceString.allocationSize(value.`features`) +
-            FfiConverterULong.allocationSize(value.`quantity`)
+            FfiConverterULong.allocationSize(value.`quantity`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`thumb`) +
+            FfiConverterOptionalString.allocationSize(value.`galleryShare`) +
+            FfiConverterOptionalString.allocationSize(value.`galleryDigest`)
     )
 
     override fun write(value: RentalInfo, buf: ByteBuffer) {
@@ -4673,6 +4686,9 @@ public object FfiConverterTypeRentalInfo: FfiConverterRustBuffer<RentalInfo> {
             FfiConverterOptionalULong.write(value.`subtype`, buf)
             FfiConverterSequenceString.write(value.`features`, buf)
             FfiConverterULong.write(value.`quantity`, buf)
+            FfiConverterOptionalByteArray.write(value.`thumb`, buf)
+            FfiConverterOptionalString.write(value.`galleryShare`, buf)
+            FfiConverterOptionalString.write(value.`galleryDigest`, buf)
     }
 }
 

@@ -1048,6 +1048,14 @@ RN_FEATURES = 239
 RN_TRIM = 240
 RN_SIZE_M2 = 241
 RN_QUANTITY = 248
+# §16.18's pictures: one small one inline on the board, and the swarm share
+# carrying the rest. Every reader of every slot pays for the inline one on
+# every browse sweep, which is why it is capped small and the gallery is not
+# on the board at all.
+RN_THUMB = 287
+RN_GALLERY = 288
+RN_GALLERY_DIGEST = 289
+MAX_LISTING_THUMB_BYTES = 10 * 1024
 # §16.18 + board.rs: who wrote a board notice, and what it cost them. A stand's
 # write key is the cell name hashed, so anybody can write any slot — these do
 # not make a slot somebody's property, they make authorship checkable and
@@ -1432,6 +1440,48 @@ def parse_listing(buf):
             if kind != "text" or not isinstance(val, str) or not val or len(val) > 16:
                 raise Reject("Malformed", "a feature is a short word")
             out["features"].append(val)
+
+    # The picture. Refused rather than trimmed, and the format checked
+    # rather than guessed — a slot is signed over its bytes, and a decoder
+    # handed bytes whose format it must guess is how a picture becomes an
+    # exploit.
+    thumb = _opt(b, RN_THUMB, "bytes")
+    if thumb is not None:
+        if len(thumb) == 0:
+            raise Reject("Malformed", "an empty thumbnail is not a picture")
+        if len(thumb) > MAX_LISTING_THUMB_BYTES:
+            raise Reject(
+                "Malformed",
+                f"a listing thumbnail may be at most {MAX_LISTING_THUMB_BYTES} bytes",
+            )
+        png = bytes([0x89]) + b"PNG\r\n\x1a\n"
+        known = (
+            thumb.startswith(png)
+            or thumb.startswith(bytes([0xFF, 0xD8, 0xFF]))
+            or (len(thumb) > 12 and thumb[0:4] == b"RIFF" and thumb[8:12] == b"WEBP")
+        )
+        if not known:
+            raise Reject("Malformed", "a listing thumbnail must be PNG, JPEG or WebP")
+    out["thumb"] = thumb
+
+    # And the gallery: both halves or neither, like every pair in §18.4.2.
+    share = _opt(b, RN_GALLERY, "text")
+    digest = _opt(b, RN_GALLERY_DIGEST, "bytes")
+    if (share is None) != (digest is None):
+        raise Reject(
+            "Malformed",
+            "a listing gallery carries its share key and its digest together",
+        )
+    if share is not None:
+        if not share:
+            raise Reject("Malformed", "an empty gallery share key names nothing")
+        if len(share) > 128:
+            raise Reject("Malformed", "a share key is at most 128 characters")
+        if len(digest) != 32:
+            raise Reject("Malformed", "a gallery digest is 32 bytes")
+    out["gallery_share"] = share
+    out["gallery_digest"] = digest
+
     _finish(b)
     return out
 
@@ -1801,6 +1851,12 @@ def run_listing(cases, r):
                 fields.append((RN_FEATURES, ("array", [("text", f) for f in n["features"]])))
             if n["quantity"] > 1:
                 fields.append((RN_QUANTITY, ("uint", n["quantity"])))
+            if n.get("thumb") is not None:
+                fields.append((RN_THUMB, ("bytes", n["thumb"])))
+            if n.get("gallery_share") is not None:
+                fields.append((RN_GALLERY, ("text", n["gallery_share"])))
+            if n.get("gallery_digest") is not None:
+                fields.append((RN_GALLERY_DIGEST, ("bytes", n["gallery_digest"])))
             return _reencode_map(fields)
         out = expect_reject(r, "contact", c, go)
         if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:

@@ -2485,6 +2485,7 @@ fn contact_cases() -> Vec<J> {
             subtype: Some(1),
             features: vec!["child seat".into()],
             quantity: 1,
+            thumb: None, gallery_share: None, gallery_digest: None,
         };
         let room = RentalNotice {
             kind: 1,
@@ -2505,6 +2506,47 @@ fn contact_cases() -> Vec<J> {
         lcase("listing_place",
             "A room, the same way. Bedrooms and sleeps where the car had a gearbox and a fuel.",
             &room, None);
+        // §16.18's pictures. A thumbnail rides the board so a browser paints
+        // the listing from the read it already does; the gallery is a swarm
+        // fetched only by whoever opens it. Every reader of every slot pays
+        // for the thumbnail, so its cap is pinned at both edges here.
+        let png = |n: usize| {
+            let mut v = vec![0x89u8, b'P', b'N', b'G', 0x0D, 0x0A, 0x1A, 0x0A];
+            v.resize(n, 0x5a);
+            v
+        };
+        let pictured = RentalNotice {
+            thumb: Some(png(2048)),
+            gallery_share: Some("VLD0:2m1CQVCAiPjIfW5EX7ja1i8dRAsCLZ3nSCEgKHZBHZY".into()),
+            gallery_digest: Some([0x11u8; 32]),
+            ..car.clone()
+        };
+        lcase("listing_with_pictures",
+            "One small picture inline and a swarm share for the rest (\u{a7}16.18). The thumbnail is what a browse sweep can afford to carry for every slot it reads; the gallery is what the one person who opened the listing pays for.",
+            &pictured, None);
+        lcase("listing_thumb_at_cap",
+            "Exactly 10 KiB of thumbnail, accepted. The other edge is the case below, and a cap pinned from one side only is a cap two implementations can disagree about.",
+            &RentalNotice { thumb: Some(png(10 * 1024)), ..pictured.clone() }, None);
+        lcase("listing_thumb_over_cap",
+            "One byte past it. Refused rather than trimmed: a slot is signed over its bytes, so a reader that quietly accepted an oversized picture would be verifying something no other reader would.",
+            &RentalNotice { thumb: Some(png(10 * 1024 + 1)), ..pictured.clone() },
+            Some((RejectCode::Malformed, "thumbnail at most 10240 bytes")));
+        lcase("listing_thumb_not_an_image",
+            "Bytes that are not PNG, JPEG or WebP. A decoder should never be handed something whose format it has to guess \u{2014} that is how a picture becomes an exploit.",
+            &RentalNotice { thumb: Some(vec![0x00, 0x01, 0x02, 0x03]), ..pictured.clone() },
+            Some((RejectCode::Malformed, "thumbnail must be PNG, JPEG or WebP")));
+        lcase("listing_thumb_empty",
+            "An empty thumbnail is not a picture; omitting the key is how a listing says it has none, and two spellings of nothing is the thing \u{a7}18.1 refuses.",
+            &RentalNotice { thumb: Some(Vec::new()), ..pictured.clone() },
+            Some((RejectCode::Malformed, "empty thumbnail")));
+        lcase("listing_gallery_without_its_digest",
+            "A share key with no digest fetches bytes nothing can check. Both halves or neither, like every other pair in the registry.",
+            &RentalNotice { gallery_digest: None, ..pictured.clone() },
+            Some((RejectCode::Malformed, "gallery share key and digest together")));
+        lcase("listing_gallery_digest_without_its_share",
+            "And the other half: a digest naming a fetch that cannot start.",
+            &RentalNotice { gallery_share: None, ..pictured.clone() },
+            Some((RejectCode::Malformed, "gallery share key and digest together")));
         lcase("listing_place_with_gearbox",
             "A place with a gearbox is describing two things, and a reader would have to guess which half to believe. Refused rather than reconciled (§18.1).",
             &RentalNotice { gearbox: Some(2), ..room.clone() },
