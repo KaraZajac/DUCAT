@@ -5150,7 +5150,14 @@ data class SwarmProgress (
      * reader can be shown the shape of the thing and watch it fill.
      */
     var `piecesDone`: kotlin.ULong, 
-    var `piecesTotal`: kotlin.ULong
+    var `piecesTotal`: kotlin.ULong, 
+    /**
+     * Which pieces are verified, one bit each, little-endian within a
+     * byte. Pieces land scattered — the lease manager pops them out of a
+     * HashSet of what is wanted, filtered by what each peer holds — so a
+     * count says far less than the pattern does.
+     */
+    var `pieces`: kotlin.ByteArray
 ) {
     
     companion object
@@ -5167,6 +5174,7 @@ public object FfiConverterTypeSwarmProgress: FfiConverterRustBuffer<SwarmProgres
             FfiConverterBoolean.read(buf),
             FfiConverterULong.read(buf),
             FfiConverterULong.read(buf),
+            FfiConverterByteArray.read(buf),
         )
     }
 
@@ -5175,7 +5183,8 @@ public object FfiConverterTypeSwarmProgress: FfiConverterRustBuffer<SwarmProgres
             FfiConverterULong.allocationSize(value.`length`) +
             FfiConverterBoolean.allocationSize(value.`done`) +
             FfiConverterULong.allocationSize(value.`piecesDone`) +
-            FfiConverterULong.allocationSize(value.`piecesTotal`)
+            FfiConverterULong.allocationSize(value.`piecesTotal`) +
+            FfiConverterByteArray.allocationSize(value.`pieces`)
     )
 
     override fun write(value: SwarmProgress, buf: ByteBuffer) {
@@ -5184,6 +5193,7 @@ public object FfiConverterTypeSwarmProgress: FfiConverterRustBuffer<SwarmProgres
             FfiConverterBoolean.write(value.`done`, buf)
             FfiConverterULong.write(value.`piecesDone`, buf)
             FfiConverterULong.write(value.`piecesTotal`, buf)
+            FfiConverterByteArray.write(value.`pieces`, buf)
     }
 }
 

@@ -126,6 +126,11 @@ pub struct SwarmProgress {
     /// reader can be shown the shape of the thing and watch it fill.
     pub pieces_done: u64,
     pub pieces_total: u64,
+    /// Which pieces are verified, one bit each, little-endian within a
+    /// byte. Pieces land scattered — the lease manager pops them out of a
+    /// HashSet of what is wanted, filtered by what each peer holds — so a
+    /// count says far less than the pattern does.
+    pub pieces: Vec<u8>,
 }
 
 static PROGRESS: OnceLock<Mutex<std::collections::HashMap<String, SwarmProgress>>> =
@@ -147,6 +152,7 @@ pub fn swarm_fetch_progress(share_key: String) -> SwarmProgress {
             length: 0,
             pieces_done: 0,
             pieces_total: 0,
+            pieces: Vec::new(),
             done: false,
         })
 }
@@ -354,6 +360,7 @@ async fn fetch_once(
             length: 0,
             pieces_done: 0,
             pieces_total: 0,
+            pieces: Vec::new(),
             done: false,
         },
     );
@@ -440,11 +447,20 @@ async fn fetch_once(
                 } else if fetch_position > baseline {
                     advanced = true;
                 }
+                let bitmap = share.verified_bitmap().await;
                 if let Some(p) = crate::lock(progress_map()).get_mut(&progress_key) {
                     p.position = fetch_position;
                     p.length = fetch_length;
                     p.pieces_done = verify_position;
                     p.pieces_total = verify_length;
+                    if let Some((bits, n)) = bitmap {
+                        p.pieces = bits;
+                        // The verifier knows the real count; verify_length
+                        // has been seen to lag it early on.
+                        if n > 0 {
+                            p.pieces_total = n as u64;
+                        }
+                    }
                 }
             }
             _ => {}

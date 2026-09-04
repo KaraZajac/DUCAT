@@ -39,6 +39,27 @@ impl PieceVerifier {
         let inner = self.inner.lock().await;
         inner.verified_pieces.len() == inner.n_pieces
     }
+
+    /// DUCAT modification (see ../STIGMERGE-NOTICE.md): which pieces are
+    /// verified, as a bitmap, little-endian within each byte.
+    ///
+    /// A count cannot describe a swarm transfer. Pieces are leased per peer
+    /// out of a `HashSet` of what is still wanted, so they land scattered,
+    /// and "37 of 120" hides both which parts arrived and whether anything
+    /// is moving at all. This is for showing the reader the shape of the
+    /// thing filling in. Returns (bitmap, n_pieces).
+    pub async fn verified_bitmap(&self) -> (Vec<u8>, usize) {
+        let inner = self.inner.lock().await;
+        let n = inner.n_pieces;
+        let mut bits = vec![0u8; n.div_ceil(8)];
+        for (_, state) in inner.verified_pieces.iter() {
+            let i = state.piece_index;
+            if i < n {
+                bits[i / 8] |= 1 << (i % 8);
+            }
+        }
+        (bits, n)
+    }
 }
 
 pub trait PieceStatusHandler {

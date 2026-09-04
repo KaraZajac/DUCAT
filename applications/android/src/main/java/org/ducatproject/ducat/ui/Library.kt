@@ -559,13 +559,12 @@ private fun IssueLine(
                 mine -> {
                     val p = progress
                     if (p != null && p.length > 0) {
-                        LinearProgressIndicator(
-                            progress = {
-                                (p.position.toFloat() / p.length.toFloat())
-                                    .coerceIn(0f, 1f)
-                            },
-                            Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 2.dp),
-                        )
+                        // The pieces, not a fraction: an issue arrives
+                        // scattered across the swarm, and which parts have
+                        // landed is the thing a reader can act on — a bar
+                        // creeping from the left would be describing an
+                        // order the fetcher does not use.
+                        PieceBar(p, Modifier.padding(top = 4.dp, bottom = 2.dp))
                         Text(
                             stringResource(
                                 R.string.library_progress,

@@ -26,7 +26,27 @@ object Swarm {
          *  move. */
         val piecesDone: Long = 0,
         val piecesTotal: Long = 0,
-    )
+        /** One bit per piece, little-endian within each byte: which have
+         *  verified. Empty until the fetcher has an index to count. */
+        val pieces: ByteArray = ByteArray(0),
+    ) {
+        /** Is piece [i] on this device yet? */
+        fun has(i: Int): Boolean {
+            val byte = i / 8
+            if (byte < 0 || byte >= pieces.size) return false
+            return (pieces[byte].toInt() shr (i % 8)) and 1 == 1
+        }
+
+        // ByteArray in a data class: equals/hashCode by identity would make
+        // every poll look like a change and redraw the whole bar.
+        override fun equals(other: Any?): Boolean =
+            other is Progress && position == other.position && length == other.length &&
+                done == other.done && piecesDone == other.piecesDone &&
+                piecesTotal == other.piecesTotal && pieces.contentEquals(other.pieces)
+
+        override fun hashCode(): Int =
+            ((position * 31 + length) * 31 + piecesDone).toInt() * 31 + pieces.contentHashCode()
+    }
 
     /** Index and announce; returns once every local piece is verified and
      *  the share is on the DHT. Serving continues until [stop]. */
@@ -62,6 +82,7 @@ object Swarm {
         return Progress(
             p.position, p.length.toLong(), p.done,
             p.piecesDone.toLong(), p.piecesTotal.toLong(),
+            p.pieces,
         )
     }
 }

@@ -114,6 +114,7 @@ val sharedLogic = listOf(
     "org/ducatproject/ducat/FareRates.kt",
     "org/ducatproject/ducat/ui/Drawer.kt",
     "org/ducatproject/ducat/ui/Library.kt",
+    "org/ducatproject/ducat/ui/PieceBar.kt",
     "org/ducatproject/ducat/ui/Publishing.kt",
     "org/ducatproject/ducat/ui/Market.kt",
     "org/ducatproject/ducat/ui/Press.kt",
@@ -874,6 +875,15 @@ tasks.register<JavaExec>("periodidtest") {
 tasks.register<JavaExec>("sitedirtest") {
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "org.ducatproject.desk.SiteDirTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
+// The swarm bar's arithmetic: every piece in exactly one cell, and no cell
+// full before its run is.
+// `./gradlew :desktop:piecebartest`.
+tasks.register<JavaExec>("piecebartest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.PieceBarTestKt"
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 

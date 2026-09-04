@@ -94,6 +94,10 @@ pub struct Share<C: Connection> {
     events_tx: broadcast::Sender<Event>,
     events_rx: broadcast::Receiver<Event>,
 
+    /// DUCAT modification: kept so an embedding host can ask which pieces
+    /// are verified and draw them. Cheap — PieceVerifier is an Arc handle.
+    piece_verifier: Option<piece_verifier::PieceVerifier>,
+
     pub(crate) tasks: JoinSet<Result<()>>,
 }
 
@@ -108,6 +112,7 @@ impl<C: Connection + Clone + Send + Sync + 'static> Share<C> {
             retry: Retry::default(),
             events_tx,
             events_rx,
+            piece_verifier: None,
             tasks: JoinSet::new(),
         };
         Ok(share)
@@ -115,6 +120,15 @@ impl<C: Connection + Clone + Send + Sync + 'static> Share<C> {
 
     pub fn subscribe_events(&self) -> broadcast::Receiver<Event> {
         self.events_rx.resubscribe()
+    }
+
+    /// DUCAT modification: verified pieces as a bitmap, and how many there
+    /// are. None until `start` has built the verifier.
+    pub async fn verified_bitmap(&self) -> Option<(Vec<u8>, usize)> {
+        match &self.piece_verifier {
+            Some(v) => Some(v.verified_bitmap().await),
+            None => None,
+        }
     }
 
     pub async fn start(&mut self, cancel: CancellationToken) -> Result<()> {
@@ -270,6 +284,7 @@ impl<C: Connection + Clone + Send + Sync + 'static> Share<C> {
         // Set up piece verifier
         let shared_index = Arc::new(RwLock::new(index.clone()));
         let piece_verifier = piece_verifier::PieceVerifier::new(shared_index.clone()).await;
+        self.piece_verifier = Some(piece_verifier.clone());
 
         // All peers are seeders
         let seeder =
