@@ -956,13 +956,16 @@ object Mailbox {
         /** §16.21's door: route blob + 8-byte id, both or neither. */
         callRoute: ByteArray? = null,
         callId: ByteArray? = null,
+        /** §16.20's ask: the period a kind-16 wants sold to it. A label
+         *  and no authority — naming one obliges the publisher to nothing. */
+        pubWanted: String? = null,
     ): Contact = synchronized(sendLocks.getOrPut(c.personaHex) { Any() }) {
         sendLocked(
             context, c, body, kind, amountPxmr, payto, txidHex, items, taxPxmr,
             reSeq, reOwn, attachment, oob, etaSecs, payload, round, ceremonyId,
             positionRecord, positionStreamKey, groupId, groupSeq, groupReSender,
             groupReSeq, pubPeriodId, pubPeriodKey, pubRecord, pubHeadKey,
-            pubSwarmKey, pubSwarmDigestHex, callRoute, callId,
+            pubSwarmKey, pubSwarmDigestHex, callRoute, callId, pubWanted,
         )
     }
 
@@ -1009,6 +1012,7 @@ object Mailbox {
         pubSwarmDigestHex: String?,
         callRoute: ByteArray?,
         callId: ByteArray?,
+        pubWanted: String?,
     ): Contact {
         val store = ContactStore(context)
         // Who speaks is the contact's to say, not the caller's: the thread
@@ -1074,7 +1078,7 @@ object Mailbox {
             groupId, groupSeq?.toULong(), groupReSender, groupReSeq?.toULong(),
             pubPeriodId, pubPeriodKey, pubRecord, pubHeadKey,
             pubSwarmKey, pubSwarmDigestHex?.let { hexToBytes(it) },
-            callRoute, callId,
+            callRoute, callId, pubWanted,
         )
         // Everything local lands before anything remote. The failure orders
         // are not symmetric: a published slot and head with the counter lost
@@ -1108,6 +1112,7 @@ object Mailbox {
                 pubRecord = pubRecord, pubHeadKey = pubHeadKey,
                 pubSwarmKey = pubSwarmKey, pubSwarmDigest = pubSwarmDigestHex,
                 callRoute = callRoute?.toHexString(), callId = callId?.toHexString(),
+                pubWanted = pubWanted,
                 // Not yet. The write is three lines below, and until it lands
                 // this row is a message that has not left the phone — which
                 // looked identical to one that had.
@@ -2338,6 +2343,7 @@ object Mailbox {
                 groupSeq = opened.groupSeq?.toLong() ?: 0L,
                 groupReSender = opened.groupReSender?.toHexString(),
                 groupReSeq = opened.groupReSeq?.toLong(),
+                pubWanted = opened.wantedPeriod,
                 pubPeriodId = opened.publication?.periodId,
                 pubPeriodKey = opened.publication?.periodKey,
                 pubRecord = opened.publication?.recordKey,
@@ -2461,6 +2467,17 @@ object Mailbox {
                 runCatching {
                     Publications.absorbKey(context, c.personaHex, arrived)
                 }.onFailure { DucatLog.w(TAG, "publication key: ${it.message}") }
+            }
+            // §16.20's ask, answered from the publisher's own shelf: free
+            // goes straight back as a key, priced raises one bill against
+            // this one reader. Resolving *which* publication is onWanted's
+            // job, and it declines to guess.
+            if (arrived.kind == 16) {
+                opened.wantedPeriod?.let { want ->
+                    runCatching {
+                        Publications.onWanted(context, c.personaHex, want)
+                    }.onFailure { DucatLog.w(TAG, "publication ask: ${it.message}") }
+                }
             }
             // §15.12: a live-position stream offered. **Only after an accept.**
             //

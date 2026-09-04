@@ -1134,7 +1134,14 @@ object Publications {
      * receipt from TabStore.reconcile when the chain shows the money.
      * Idempotent per (period, subscriber); returns how many bills went out.
      */
-    fun billPeriod(context: Context, pubId: String, periodId: String): Int {
+    fun billPeriod(
+        context: Context,
+        pubId: String,
+        periodId: String,
+        /** Bill exactly one reader — §16.20's ask, where a request from one
+         *  person must not paper everybody else's tab. Null bills the round. */
+        only: String? = null,
+    ): Int {
         val price = priceOf(context, pubId)
         if (price <= 0L) return 0
         val title = publications(context).firstOrNull { it.first == pubId }?.second ?: return 0
@@ -1143,6 +1150,7 @@ object Publications {
         val contacts = ContactStore(context).all().associateBy { it.personaHex }
         var sent = 0
         for (hex in subscribers(context, pubId)) {
+            if (only != null && hex != only) continue
             if (hex in already || contacts[hex] == null) continue
             val opened = store.open(hex, ORIGIN)
             val lined = store.mutate(opened.id) {
@@ -1596,6 +1604,147 @@ object Publications {
                 DucatLog.i(
                     "Publications",
                     "settled → sent '${d.periodId}' to ${d.personaHex.take(8)}…",
+                )
+            }
+        }
+    }
+
+    // --- §16.20's ask: a reader asks to be sold a period ------------------
+
+    /**
+     * Reader side. Ask a publisher to sell us one period (kind 16).
+     *
+     * Carries the period's label and nothing else — the ask names what is
+     * *wanted*, never what is given, which is why it is field 286 and not
+     * 259. What comes back is the publisher's business: a key straight away
+     * when the publication is free, a bill when it is not.
+     */
+    fun askForPeriod(context: Context, c: Contact, periodId: String): Boolean {
+        if (!isSafePeriodId(periodId)) {
+            DucatLog.w("Publications", "refused to ask for a period that is not a name")
+            return false
+        }
+        return runCatching {
+            Mailbox.send(
+                context, c,
+                context.getString(R.string.library_note_ask_issue, periodId),
+                kind = 16,
+                pubWanted = periodId,
+            )
+        }.onFailure {
+            DucatLog.w("Publications", "askForPeriod '$periodId': ${it.message}")
+        }.isSuccess
+    }
+
+    /**
+     * Has this reader already asked for this period?
+     *
+     * Read from the thread rather than a flag of our own: the sent message
+     * IS the record, so it survives a restart, a restore and a cleared
+     * cache exactly as far as the conversation does.
+     */
+    fun askedFor(context: Context, publisherHex: String, periodId: String): Boolean =
+        ContactStore(context).thread(publisherHex)
+            .any { it.outgoing && it.kind == 16 && it.pubWanted == periodId }
+
+    /**
+     * Which of our publications, if any, should answer this ask — and null
+     * when none should. Separated from the answering so the deciding half
+     * can be exercised without a network, because every wrong answer here
+     * is either the wrong thing sold or the wrong person billed.
+     *
+     * Null on four counts: the period is not a name, nothing of ours holds
+     * it, more than one of ours does, or this reader already has it.
+     */
+    fun wantedTarget(context: Context, readerHex: String, periodId: String): String? {
+        if (!isSafePeriodId(periodId)) return null
+        // Mine, holding this exact period. A period nobody has shelved
+        // cannot be sold — pay-then-ship would bill for vapour.
+        val holding = publications(context).map { it.first }
+            .filter { pub -> issues(context, pub).any { it.periodId == periodId } }
+        // A subscriber's ask resolves against what they subscribe to; a
+        // stranger's (buying a one-off) against everything holding it.
+        val mine = holding.filter { readerHex in subscribers(context, it) }
+            .ifEmpty { holding }
+        val pubId = when (mine.size) {
+            1 -> mine.first()
+            0 -> {
+                DucatLog.i(
+                    "Publications",
+                    "${readerHex.take(8)}… asked for '$periodId' — nothing of ours holds it",
+                )
+                return null
+            }
+            else -> {
+                DucatLog.w(
+                    "Publications",
+                    "${readerHex.take(8)}… asked for '$periodId' — ${mine.size} of our " +
+                        "publications hold that period; not guessing which",
+                )
+                return null
+            }
+        }
+        // Asking twice is not an error. The publisher's own ledger — never
+        // the asker's word — says what was already handed over, so a second
+        // ask is answered from it rather than billed again.
+        if (readerHex in issues(context, pubId).first { it.periodId == periodId }.sentTo) {
+            DucatLog.i(
+                "Publications",
+                "${readerHex.take(8)}… re-asked for '$periodId' — already sent",
+            )
+            return null
+        }
+        return pubId
+    }
+
+    /**
+     * Publisher side. Somebody asked to be sold a period.
+     *
+     * The ask names a period and not a publication, because that is all the
+     * reader can honestly know — they file keys by (publisher, period) and
+     * so does everyone else. So the publication is *resolved* here, from
+     * the publisher's own shelf, and only when the answer is unambiguous:
+     * guessing between two publications either sells the wrong thing or
+     * bills for it. Ambiguity is left unanswered, which the wire allows —
+     * an ask is a request and never a claim.
+     */
+    fun onWanted(context: Context, readerHex: String, periodId: String) {
+        val pubId = wantedTarget(context, readerHex, periodId) ?: return
+        val c = ContactStore(context).all().firstOrNull { it.personaHex == readerHex } ?: return
+        val issue = issues(context, pubId).first { it.periodId == periodId }
+
+        if (priceOf(context, pubId) > 0L) {
+            // Priced: an ordinary §16.13 bill, to this one reader. It lands
+            // on their activity statement saying what it bought, and the
+            // settle reconcile hands the key over when it clears.
+            //
+            // A non-subscriber who asks is enrolled first — otherwise
+            // billPeriod, which walks the subscriber list, would paper
+            // nobody and the ask would vanish without a word.
+            if (readerHex !in subscribers(context, pubId)) {
+                setSubscriber(context, pubId, readerHex, true)
+            }
+            val n = billPeriod(context, pubId, periodId, only = readerHex)
+            DucatLog.i(
+                "Publications",
+                if (n > 0) "billed ${readerHex.take(8)}… for '$pubId' $periodId"
+                else "${readerHex.take(8)}… already billed for '$pubId' $periodId",
+            )
+        } else {
+            // Free is a path, not a zero-priced sale: no bill, no tab, no
+            // wait. A rail that could only sell would make free mean broken.
+            val shelf = shelfOf(context, pubId)
+            val ok = sendPeriod(
+                context, c, pubId, periodId,
+                record = shelf?.first, headKey = shelf?.second, note = "",
+                swarmKey = issue.swarmKey.takeIf { it.isNotBlank() },
+                swarmDigestHex = issue.swarmDigestHex.takeIf { it.isNotBlank() },
+            )
+            if (ok) {
+                markSent(context, pubId, periodId, readerHex)
+                DucatLog.i(
+                    "Publications",
+                    "sent free period '$periodId' of '$pubId' to ${readerHex.take(8)}…",
                 )
             }
         }

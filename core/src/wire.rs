@@ -259,6 +259,18 @@ pub mod f {
     pub const MSG_CALL_ROUTE: u64 = 263;
     /// …and the id both halves of the call quote.
     pub const MSG_CALL_ID: u64 = 264;
+    /// §16.20: the period a reader is asking to be sold. A label, never a
+    /// key — this travels the other way up the thread and hands over
+    /// nothing, which is why it is a separate number from
+    /// [`MSG_PUB_PERIOD`]: that one names what is being *given*, and a
+    /// reader who could write it would be describing a capability they
+    /// were not granted. ≤64 bytes.
+    ///
+    /// 286 and not 265: 265–275 are `PUB_NOTICE`'s body and stamp, 276–277
+    /// and 285 are pinned probes, and 278–284 are the attachment's second
+    /// road and the site head. The registry is one namespace, not one per
+    /// object — §18.4.2's whole point.
+    pub const MSG_PUB_WANT: u64 = 286;
 
     // PUB_NOTICE (§16.18.2) — a publication listed on a public board. The
     // board name carries the where (a topic, or a local cell for the town

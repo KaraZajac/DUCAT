@@ -697,6 +697,22 @@ pub enum MessageKind {
     /// content; it carries a capability, never content, so the thread stays
     /// small while the shelf holds the weight.
     PublicationKey = 13,
+    /// "Sell me this period" (§16.20) — the ask that a `PublicationKey`
+    /// answers.
+    ///
+    /// A subscription's shelf index is sealed under the *head* key, which
+    /// arrives at first delivery, while each period's content key is sold
+    /// separately. So a reader can always see the whole catalogue and open
+    /// almost none of it, and needed a way to say which part they wanted:
+    /// without this the publisher had to guess, or bill everybody for
+    /// everything and let them sort it out afterwards.
+    ///
+    /// It carries a label and no authority, like every request in §16.13:
+    /// naming a period does not oblige the publisher to send it, does not
+    /// move money, and does not entitle the asker to anything. What comes
+    /// back is a bill, or the key when the period is free — and either way
+    /// the reader can see on their own statement what they asked for.
+    PublicationWanted = 16,
     /// "Pick up — here is the door" (§16.21). The offer carries a fresh
     /// private-route blob and a call id; media flows as app messages on
     /// that route, never through the mailbox. Ringing is a message, so
@@ -726,6 +742,7 @@ impl MessageKind {
             13 => MessageKind::PublicationKey,
             14 => MessageKind::CallOffer,
             15 => MessageKind::CallAnswer,
+            16 => MessageKind::PublicationWanted,
             _ => return None,
         })
     }
@@ -852,6 +869,9 @@ pub struct Message {
     /// §16.20: a publication period's key. Present only on a
     /// `PublicationKey`, where it is mandatory.
     pub publication: Option<PublicationKey>,
+    /// The period a `PublicationWanted` is asking for, and mandatory on it.
+    /// A label the publisher chose, echoed back; never a key.
+    pub wanted_period: Option<String>,
     /// §16.21: the door a call offer or answer opens.
     pub call: Option<CallRef>,
     /// §16.19: which group this message belongs to — 16 random bytes minted
@@ -1058,6 +1078,9 @@ impl Message {
                 m.insert(f::MSG_PUB_SWARM_DIGEST, Value::Bytes(sd.to_vec()));
             }
         }
+        if let Some(w) = &self.wanted_period {
+            m.insert(f::MSG_PUB_WANT, Value::Text(w.clone()));
+        }
         if let Some(c) = &self.call {
             m.insert(f::MSG_CALL_ROUTE, Value::Bytes(c.route.clone()));
             m.insert(f::MSG_CALL_ID, Value::Bytes(c.id.to_vec()));
@@ -1254,6 +1277,7 @@ impl Message {
                     }
                 }
             },
+            wanted_period: r.opt_text(f::MSG_PUB_WANT, crate::publish::MAX_PERIOD_ID)?,
             publication: {
                 let period_id = r.opt_text(f::MSG_PUB_PERIOD, crate::publish::MAX_PERIOD_ID)?;
                 let period_key = r.opt_bytes(f::MSG_PUB_KEY, Some(32))?;
@@ -1365,7 +1389,8 @@ impl Message {
             | (MessageKind::GroupRoster, Some(_))
             | (MessageKind::PublicationKey, Some(_))
             | (MessageKind::CallOffer, Some(_))
-            | (MessageKind::CallAnswer, Some(_)) => {
+            | (MessageKind::CallAnswer, Some(_))
+            | (MessageKind::PublicationWanted, Some(_)) => {
                 return Err(Reject::with_detail(
                     RejectCode::Malformed,
                     "this message kind must not carry an amount",
@@ -1619,6 +1644,25 @@ impl Message {
                 return Err(Reject::with_detail(
                     RejectCode::Malformed,
                     "only a publication message carries a period key",
+                ))
+            }
+            _ => {}
+        }
+        // And once more for the ask. A `PublicationWanted` naming nothing is
+        // a reader saying "sell me" and stopping; a wanted period on any
+        // other kind is a request filed where the publisher's reconcile is
+        // not looking, which reads to the reader as having asked.
+        match (out.kind, out.wanted_period.is_some()) {
+            (MessageKind::PublicationWanted, false) => {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "a publication request names the period it wants",
+                ))
+            }
+            (k, true) if k != MessageKind::PublicationWanted => {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "only a publication request names a wanted period",
                 ))
             }
             _ => {}
@@ -2877,7 +2921,7 @@ mod position_ref_tests {
             position: Some(PositionRef {
                 record_key: "VLD0:positionrecord".into(),
                 stream_key: [0x5au8; 32],
-            }), publication: None,
+            }), publication: None, wanted_period: None,
         call: None,
             group_id: None, group_seq: None,
             group_re_sender: None, group_re_seq: None,

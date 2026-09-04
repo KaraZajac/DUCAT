@@ -670,6 +670,9 @@ pub fn seal_message(
     // §16.21's door: the call route and id, together or not at all.
     call_route: Option<Vec<u8>>,
     call_id: Option<Vec<u8>>,
+    // §16.20's ask: the period a kind-16 wants sold to it. A label and no
+    // authority — naming one obliges the publisher to nothing.
+    wanted_period: Option<String>,
 ) -> Result<SealedOut, ContactError> {
     if body.is_empty() || body.chars().count() > MAX_MESSAGE_CHARS {
         return Err(ContactError::Refused(format!(
@@ -764,6 +767,8 @@ pub fn seal_message(
     };
     let msg = Message {
         version: 1, suite: 1, seq, prev, body, timestamp: now(),
+        // §16.20's ask travels as a bare label on kind 16 and nothing else.
+        wanted_period: if kind == 16 { wanted_period } else { None },
         kind: match kind {
             1 => MessageKind::PaymentRequest,
             2 => MessageKind::PaymentSent,
@@ -780,6 +785,7 @@ pub fn seal_message(
             13 => MessageKind::PublicationKey,
             14 => MessageKind::CallOffer,
             15 => MessageKind::CallAnswer,
+            16 => MessageKind::PublicationWanted,
             _ => MessageKind::Text,
         },
         amount_pxmr,
@@ -956,6 +962,9 @@ pub struct OpenedMessage {
     pub position: Option<PositionRefOut>,
     /// §16.20: a publication period's key. Present only on kind 13.
     pub publication: Option<PublicationKeyOut>,
+    /// §16.20: the period a reader asks to be sold. Present only on kind 16.
+    /// A label and nothing else — the ask hands over no capability.
+    pub wanted_period: Option<String>,
     /// §16.21: a live call's door. Present only on kinds 14–15.
     pub call_route: Option<Vec<u8>>,
     pub call_id: Option<Vec<u8>>,
@@ -1151,6 +1160,7 @@ pub fn open_message(
             swarm_key: p.swarm_key.clone(),
             swarm_digest: p.swarm_digest.map(|d| d.to_vec()),
         }),
+        wanted_period: msg.wanted_period.clone(),
         call_route: msg.call.as_ref().map(|c| c.route.clone()),
         call_id: msg.call.as_ref().map(|c| c.id.to_vec()),
     })

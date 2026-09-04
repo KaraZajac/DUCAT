@@ -1554,11 +1554,11 @@ fn contact_cases() -> Vec<J> {
         }));
     }
 
-    let m0 = Message { version: 1, suite: 1, seq: 0, prev: [0u8; 32], body: "hey".into(), timestamp: 1_700_000_000, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, publication: None,
+    let m0 = Message { version: 1, suite: 1, seq: 0, prev: [0u8; 32], body: "hey".into(), timestamp: 1_700_000_000, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, publication: None, wanted_period: None,
         call: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None };
-    let m1 = Message { version: 1, suite: 1, seq: 1, prev: m0.link(), body: "you around?".into(), timestamp: 1_700_000_060, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, publication: None,
+    let m1 = Message { version: 1, suite: 1, seq: 1, prev: m0.link(), body: "you around?".into(), timestamp: 1_700_000_060, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, publication: None, wanted_period: None,
         call: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None };
-    let m2 = Message { version: 1, suite: 1, seq: 2, prev: m1.link(), body: "here's the 20 back".into(), timestamp: 1_700_000_120, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, publication: None,
+    let m2 = Message { version: 1, suite: 1, seq: 2, prev: m1.link(), body: "here's the 20 back".into(), timestamp: 1_700_000_120, kind: MessageKind::Text, amount_pxmr: None, txid: None, payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, publication: None, wanted_period: None,
         call: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None };
 
     let mut chain = |name: &str, why: &str, msgs: &[&Message], fail_at: Option<(usize, RejectCode, &str)>| {
@@ -1604,7 +1604,7 @@ fn contact_cases() -> Vec<J> {
         version: 1, suite: 1, seq: 0, prev: [0u8; 32],
         body: "for the coffee".into(), timestamp: 1_700_000_000,
         kind: MessageKind::PaymentRequest, amount_pxmr: Some(21_000_000_000), txid: None,
-        payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, publication: None,
+        payto: None, items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None, position: None, publication: None, wanted_period: None,
         call: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
     };
     money("payment_request", "Asking a contact for an exact amount. It carries no authority — the payer still decides at §15.5's confirm screen.", &base_pay, None);
@@ -1983,7 +1983,7 @@ fn contact_cases() -> Vec<J> {
         Some((RejectCode::Malformed, "only a position message carries a stream reference")));
     money("position_kind_without_a_reference",
         "A PositionRef whose reference is absent hands over nothing.",
-        &Message { kind: MessageKind::PositionRef, position: None, publication: None,
+        &Message { kind: MessageKind::PositionRef, position: None, publication: None, wanted_period: None,
         call: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
                    body: "empty".into(), ..base_pay.clone() },
         Some((RejectCode::Malformed, "a position message carries a reference to the stream")));
@@ -2026,10 +2026,36 @@ fn contact_cases() -> Vec<J> {
         Some((RejectCode::Malformed, "only a publication message carries a period key")));
     money("publication_kind_without_a_key",
         "A publication message with nothing to hand over is an empty gesture.",
-        &Message { kind: MessageKind::PublicationKey, position: None, publication: None,
+        &Message { kind: MessageKind::PublicationKey, position: None, publication: None, wanted_period: None,
         call: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
                    body: "empty".into(), ..base_pay.clone() },
         Some((RejectCode::Malformed, "a publication message carries the period's key")));
+    // §16.20 — the ask a publication key answers (kind 16). The reader can
+    // always see the whole shelf (its index rides the head key) and open
+    // almost none of it, so this is how they say which part they want.
+    let want = Message {
+        kind: MessageKind::PublicationWanted, amount_pxmr: None,
+        body: "can I have october?".into(),
+        publication: None,
+        wanted_period: Some("2026-10".into()),
+        call: None,
+        ..base_pay.clone()
+    };
+    money("publication_wanted",
+        "A reader asking to be sold one period. A label and no authority: naming it obliges the publisher to nothing, moves no money, and entitles the asker to nothing — what comes back is a bill, or the key outright when the period is free.",
+        &want, None);
+    money("publication_wanted_without_a_period",
+        "An ask that names nothing is a reader saying \"sell me\" and stopping.",
+        &Message { wanted_period: None, ..want.clone() },
+        Some((RejectCode::Malformed, "a publication request names the period it wants")));
+    money("publication_wanted_on_a_text",
+        "The ask IS the kind. A wanted period on anything else is a request filed where the publisher's reconcile is not looking, which reads to the reader as having asked.",
+        &Message { kind: MessageKind::Text, body: "hi".into(), ..want.clone() },
+        Some((RejectCode::Malformed, "only a publication request names a wanted period")));
+    money("publication_wanted_with_an_amount",
+        "An ask carries no money. The bill it provokes does, and that is the object the payer confirms — a request that could move money would be a request malware sends for you.",
+        &Message { amount_pxmr: Some(1_000), ..want.clone() },
+        Some((RejectCode::Malformed, "this message kind must not carry an amount")));
     // Both edges of the period id: the empty spelling is a second encoding
     // of "omitted" and refused below the field layer; one past the cap is
     // refused at it; the cap itself is accepted — pinned from both sides.

@@ -2048,6 +2048,9 @@ data class StoredMessage(
     val pubPeriodKey: ByteArray? = null,
     val pubRecord: String? = null,
     val pubHeadKey: ByteArray? = null,
+    /** §16.20: the period a reader asked to be sold. On kind 16 only —
+     *  a label, never a key; the ask hands over nothing. */
+    val pubWanted: String? = null,
     /** §16.20's shipment: a heavy period's swarm share, key + digest. */
     val pubSwarmKey: String? = null,
     val pubSwarmDigest: String? = null,
@@ -2106,6 +2109,7 @@ data class StoredMessage(
             pubSwarmKey?.let { k -> put("pub_swarm", k) }
             pubSwarmDigest?.let { d -> put("pub_swarm_dig", d) }
         }
+        pubWanted?.let { put("pub_want", it) }
         callRoute?.let { r -> put("call_route", r) }
         callId?.let { i -> put("call_id", i) }
         if (deadLetter) put("dead", true)
@@ -2159,6 +2163,7 @@ data class StoredMessage(
             pubHeadKey = o.optStringOrNull("pub_head")?.let { Base64.decode(it, Base64.NO_WRAP) },
             pubSwarmKey = o.optStringOrNull("pub_swarm"),
             pubSwarmDigest = o.optStringOrNull("pub_swarm_dig"),
+            pubWanted = o.optStringOrNull("pub_want"),
             callRoute = o.optStringOrNull("call_route"),
             callId = o.optStringOrNull("call_id"),
             readByThem = if (o.has("read")) o.getBoolean("read") else null,

@@ -521,6 +521,7 @@ pub async fn claim(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
             txid: None,
             payto: None,
             position: None, publication: None,
+            wanted_period: None,
                 call: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
         };
         prev = m.link();
@@ -803,6 +804,7 @@ pub async fn say_many(count: u32, prefix: &str) -> Result<(), Box<dyn std::error
             items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false,
             eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None,
             position: None, publication: None,
+            wanted_period: None,
                 call: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
         };
         let (chosen, fs) = their_bundle.select();
@@ -955,6 +957,7 @@ async fn bill_or_say(
             amount_pxmr: None, txid: None, payto: None,
             items: Vec::new(), tax_pxmr: None, re_seq: None, re_own: false, eta_secs: None, payload: None, round: None, ceremony_id: None, attachment: None,
             position: None, publication: None,
+            wanted_period: None,
                 call: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
         },
         Some(o) => Message {
@@ -979,6 +982,7 @@ async fn bill_or_say(
             ceremony_id: o.ceremony_id,
             attachment: None,
             position: None, publication: None,
+            wanted_period: None,
                 call: None, group_id: None, group_seq: None, group_re_sender: None, group_re_seq: None,
         },
     };
@@ -1391,6 +1395,7 @@ async fn watch_log(outbox_key: &str, their_persona: &[u8]) -> Result<(), Box<dyn
                                 MessageKind::PublicationKey => "hands over a publication period key",
                                 MessageKind::CallOffer => "offers a call",
                                 MessageKind::CallAnswer => "answers a call",
+                                MessageKind::PublicationWanted => "asks to be sold a period",
                                 MessageKind::Text => unreachable!(),
                             },
                             m.amount_pxmr

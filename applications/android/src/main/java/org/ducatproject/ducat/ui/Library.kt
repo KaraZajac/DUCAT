@@ -17,11 +17,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocalLibrary
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -29,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,7 +39,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import java.io.File
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.Publications
@@ -588,6 +593,7 @@ private fun IssueLine(
         if (mine) LibraryFetch.progressOf(job) else null
     }
     val error = LibraryFetch.errorOf(job)
+    val scope = rememberCoroutineScope()
 
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
@@ -596,11 +602,13 @@ private fun IssueLine(
                 style = MaterialTheme.typography.bodyLarge,
             )
             when {
-                // Not ours yet: say what it is and what it costs, and stop.
-                // The publisher bills for a period when they choose to; the
-                // key arrives when that bill settles. Naming a price here
-                // without a way to pay it would be a button that lies, so
-                // this row informs and does not pretend to sell.
+                // Not ours yet: say what it is, what it costs, and offer to
+                // ask for it (§16.20's kind 16). The ask is the whole of
+                // what this button can honestly promise — free comes
+                // straight back as a key, priced comes back as a bill on
+                // the activity statement — so it says "Ask", not "Buy":
+                // the publisher may ignore it, and a button that swore
+                // otherwise would be lying about somebody else's choice.
                 row.locked -> {
                     Text(
                         if (row.pricePxmr > 0) {
@@ -620,6 +628,46 @@ private fun IssueLine(
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
+                    }
+                    // Asked already? The thread says so, not a flag of ours,
+                    // so this survives a restart and a restore. Held in
+                    // state as well so the row answers the tap at once and
+                    // falls back if the send never left.
+                    var asked by remember(row.publisherHex, row.period) {
+                        mutableStateOf(
+                            Publications.askedFor(context, row.publisherHex, row.period),
+                        )
+                    }
+                    if (asked) {
+                        Text(
+                            stringResource(R.string.library_unlock_asking),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    } else {
+                        TextButton(
+                            onClick = {
+                                asked = true
+                                scope.launch(Dispatchers.IO) {
+                                    val to = ContactStore(context).all()
+                                        .firstOrNull { it.personaHex == row.publisherHex }
+                                    val ok = to != null &&
+                                        Publications.askForPeriod(context, to, row.period)
+                                    // The ask never left; say so rather than
+                                    // leaving a reader waiting on a message
+                                    // that was never sent.
+                                    if (!ok) asked = false
+                                }
+                            },
+                            contentPadding = PaddingValues(horizontal = 0.dp),
+                        ) {
+                            Text(
+                                stringResource(
+                                    if (row.pricePxmr > 0) R.string.library_unlock_buy
+                                    else R.string.library_unlock_free,
+                                ),
+                            )
+                        }
                     }
                 }
                 mine -> {

@@ -15,6 +15,10 @@
     <string name="chatlist_preview_issue">新的一期：%1$s</string>
     <string name="notify_new_issue">%1$s 发来了新的一期</string>
     <string name="library_note_new_issue">新的一期已经发布。</string>
+    <string name="library_note_ask_issue">可以给我 %1$s 吗？</string>
+    <string name="library_unlock_asking">已请求…</string>
+    <string name="library_unlock_buy">请求购买</string>
+    <string name="library_unlock_free">请求获取</string>
     <string name="library_unsubscribe">退订</string>
     <string name="library_unsub_confirm">不再接收%1$s的内容?你已持有的各期仍归你。</string>
     <string name="library_unsub_keep">保留订阅</string>

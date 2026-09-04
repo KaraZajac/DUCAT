@@ -879,9 +879,9 @@ tasks.register<JavaExec>("sitedirtest") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
-// The swarm bar's arithmetic: every piece in exactly one cell, and no cell
-// full before its run is.
-// `./gradlew :desktop:piecebartest`.
+// A release address parses back to exactly what was published, and ten
+// malformed spellings are refused.
+// `./gradlew :desktop:releaseaddrtest`.
 tasks.register<JavaExec>("releaseaddrtest") {
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "org.ducatproject.desk.ReleaseAddrTestKt"
@@ -894,6 +894,18 @@ tasks.register<JavaExec>("piecebarshots") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// §16.20's ask, deciding half: which publication answers a reader who names
+// a period, and when nothing should.
+// `DUCAT_WANTED_STATE=<dir> ./gradlew :desktop:wantedtest`.
+tasks.register<JavaExec>("wantedtest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.WantedTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
+// The swarm bar's arithmetic: every piece in exactly one cell, and no cell
+// full before its run is.
+// `./gradlew :desktop:piecebartest`.
 tasks.register<JavaExec>("piecebartest") {
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "org.ducatproject.desk.PieceBarTestKt"

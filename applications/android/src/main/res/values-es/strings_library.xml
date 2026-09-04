@@ -15,6 +15,10 @@
     <string name="chatlist_preview_issue">Número nuevo: %1$s</string>
     <string name="notify_new_issue">%1$s envió un número nuevo</string>
     <string name="library_note_new_issue">Ya salió un número nuevo.</string>
+    <string name="library_note_ask_issue">¿Me pasas %1$s?</string>
+    <string name="library_unlock_asking">Solicitado…</string>
+    <string name="library_unlock_buy">Pedir comprarlo</string>
+    <string name="library_unlock_free">Pedirlo</string>
     <string name="library_unsubscribe">Cancelar suscripción</string>
     <string name="library_unsub_confirm">¿Dejar de recibir de %1$s? Los números que ya tienes siguen siendo tuyos.</string>
     <string name="library_unsub_keep">Mantener suscripción</string>

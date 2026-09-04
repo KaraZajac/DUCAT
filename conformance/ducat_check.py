@@ -1006,6 +1006,11 @@ MSG_PUB_PERIOD, MSG_PUB_KEY = 259, 260
 MSG_PUB_SWARM_KEY, MSG_PUB_SWARM_DIGEST = 261, 262
 # §16.21 — a live call's door: route blob and call id, whole or not at all.
 MSG_CALL_ROUTE, MSG_CALL_ID = 263, 264
+# §16.20 — the ask a publication key answers (kind 16): the period a reader
+# wants sold to them. Its own number, not the period id above: that one
+# names what is being *given*, and a reader who could write it would be
+# describing a capability nobody granted.
+MSG_PUB_WANT = 286
 MAX_CALL_ROUTE = 4096
 # §16.19 — small groups: the group, the sender's own counter in it, and the
 # group reference (target's sender + their counter). The pairwise seq cannot
@@ -1852,7 +1857,7 @@ def parse_message(buf):
             raise Reject("Malformed", "kind is not an integer")
         if kind == 0:
             raise Reject("Malformed", "text is encoded by omitting the kind")
-        if kind not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15):
+        if kind not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16):
             raise Reject("Malformed", "unknown message kind")
     else:
         kind = 0
@@ -1964,6 +1969,7 @@ def parse_message(buf):
                      "a position reference carries its record and its key together")
 
     # §16.20 — the period pair together or not at all; likewise the shelf.
+    out["wanted_period"] = _take_text(b, MSG_PUB_WANT, 64, "wanted period", False)
     pub_period = _take_text(b, MSG_PUB_PERIOD, 64, "period id", False)
     pub_key = b.pop(MSG_PUB_KEY, (None, None))[1]
     pub_record = _take_text(b, MSG_PUB_RECORD, MAX_RECORD_KEY_CHARS, "publication record", False)
@@ -2014,7 +2020,7 @@ def parse_message(buf):
     # A FROST round (9) is the exception: a release proposal MAY state the
     # amount the funder gets back — the consent screen shows it beside the
     # signed payload (§15.12's settlement); a statement, not authority.
-    if kind in (0, 4, 5, 8, 10, 12, 13, 14, 15) and out["amount"] is not None:
+    if kind in (0, 4, 5, 8, 10, 12, 13, 14, 15, 16) and out["amount"] is not None:
         raise Reject("Malformed", "this kind must not carry an amount")
     if kind in (1, 2, 3) and out["amount"] is None:
         raise Reject("Malformed", "a payment message must carry an amount")
@@ -2093,6 +2099,14 @@ def parse_message(buf):
         raise Reject("Malformed", "a publication message carries the period's key")
     if kind != 13 and out["publication"] is not None:
         raise Reject("Malformed", "only a publication message carries a period key")
+    # And the ask, the same way round: naming a period is a kind-16's whole
+    # content, and a wanted period on any other kind is a request filed
+    # where the publisher's reconcile is not looking — which reads to the
+    # reader as having asked.
+    if kind == 16 and out["wanted_period"] is None:
+        raise Reject("Malformed", "a publication request names the period it wants")
+    if kind != 16 and out["wanted_period"] is not None:
+        raise Reject("Malformed", "only a publication request names a wanted period")
     # §16.21's closed world: the door IS the kind.
     if kind in (14, 15) and out["call"] is None:
         raise Reject("Malformed", "a call message carries its route and id")
@@ -2413,6 +2427,8 @@ def run_message_payment(cases, r):
                     fields.append((MSG_PUB_SWARM_KEY, ("text", pub["swarm_key"])))
                 if pub["swarm_digest"] is not None:
                     fields.append((MSG_PUB_SWARM_DIGEST, ("bytes", pub["swarm_digest"])))
+            if m.get("wanted_period") is not None:
+                fields.append((MSG_PUB_WANT, ("text", m["wanted_period"])))
             if m.get("call") is not None:
                 fields.append((MSG_CALL_ROUTE, ("bytes", m["call"]["route"])))
                 fields.append((MSG_CALL_ID, ("bytes", m["call"]["id"])))

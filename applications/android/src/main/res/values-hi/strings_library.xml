@@ -15,6 +15,10 @@
     <string name="chatlist_preview_issue">नया अंक: %1$s</string>
     <string name="notify_new_issue">%1$s ने नया अंक भेजा</string>
     <string name="library_note_new_issue">नया अंक आ गया है।</string>
+    <string name="library_note_ask_issue">क्या मुझे %1$s मिल सकता है?</string>
+    <string name="library_unlock_asking">माँगा गया…</string>
+    <string name="library_unlock_buy">खरीदने के लिए कहें</string>
+    <string name="library_unlock_free">माँगें</string>
     <string name="library_unsubscribe">सदस्यता छोड़ो</string>
     <string name="library_unsub_confirm">%1$s से लेना बंद करें? जो अंक तुम्हारे पास हैं, तुम्हारे ही रहेंगे।</string>
     <string name="library_unsub_keep">सदस्यता रखो</string>

@@ -138,7 +138,8 @@ jobs:
       - name: what bytes may name, and what they may carry
         env:
           DUCAT_DESK_STATE: ${{ runner.temp }}/desk-paths
-        run: cd applications && ./gradlew --no-daemon :desktop:periodidtest :desktop:sitedirtest :desktop:sweeptest :desktop:exiftest :desktop:clocktest :desktop:piecebartest :desktop:releaseaddrtest
+          DUCAT_WANTED_STATE: ${{ runner.temp }}/desk-wanted
+        run: cd applications && ./gradlew --no-daemon :desktop:periodidtest :desktop:sitedirtest :desktop:sweeptest :desktop:exiftest :desktop:clocktest :desktop:piecebartest :desktop:releaseaddrtest :desktop:wantedtest
 
       # Compiling is not drawing. This renders every hosted screen with no
       # display attached and fails on a blank rectangle — it is what caught

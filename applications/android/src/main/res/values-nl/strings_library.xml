@@ -15,6 +15,10 @@
     <string name="chatlist_preview_issue">Nieuwe editie: %1$s</string>
     <string name="notify_new_issue">%1$s heeft een nieuwe editie gestuurd</string>
     <string name="library_note_new_issue">Er is een nieuwe editie uit.</string>
+    <string name="library_note_ask_issue">Kan ik %1$s krijgen?</string>
+    <string name="library_unlock_asking">Gevraagd…</string>
+    <string name="library_unlock_buy">Vragen om te kopen</string>
+    <string name="library_unlock_free">Erom vragen</string>
     <string name="library_unsubscribe">Opzeggen</string>
     <string name="library_unsub_confirm">Niets meer van %1$s ontvangen? Edities die je al hebt blijven van jou.</string>
     <string name="library_unsub_keep">Abonnement houden</string>

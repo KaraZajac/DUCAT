@@ -18,6 +18,15 @@
     <string name="chatlist_preview_issue">New issue: %1$s</string>
     <string name="notify_new_issue">%1$s sent a new issue</string>
     <string name="library_note_new_issue">A new issue is out.</string>
+    <!-- §16.20's ask. The wire refuses an empty body on every kind, so the
+         request rides a protocol-written line in the SENDER's language. -->
+    <string name="library_note_ask_issue">Could I get %1$s?</string>
+    <string name="library_unlock_asking">Asked…</string>
+    <!-- "Ask", never "Buy": the publisher may ignore the request, and the
+         money (when there is any) arrives as a bill the reader still has
+         to choose to pay. -->
+    <string name="library_unlock_buy">Ask to buy</string>
+    <string name="library_unlock_free">Ask for it</string>
     <string name="library_unsubscribe">Unsubscribe</string>
     <string name="library_unsub_confirm">Stop receiving from %1$s? Issues you already hold stay yours.</string>
     <string name="library_unsub_keep">Keep subscription</string>
