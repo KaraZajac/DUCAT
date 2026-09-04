@@ -41,4 +41,23 @@
     <string name="library_save_keep">ليس الآن</string>
     <string name="library_locked">لم يُفتح بعد</string>
     <string name="library_locked_priced">غير مفتوح · %1$s</string>
+    <string name="releases_title">الملفات</string>
+    <string name="releases_note">مشاركة مباشرة: بلا اشتراك ولا مفتاح ولا فاتورة. الملف لا مالك له بعد أن يخرج — يظل في المتناول ما دام أحدهم يبقيه حيًّا.</string>
+    <string name="releases_add">إضافة بالعنوان</string>
+    <string name="releases_add_go">إضافة</string>
+    <string name="releases_add_cancel">إلغاء</string>
+    <string name="releases_addr_hint">عنوان ‎ducat:file/…‎</string>
+    <string name="releases_addr_bad">هذا ليس عنوان ملف.</string>
+    <string name="releases_share_file">مشاركة ملف</string>
+    <string name="releases_here">على هذا الجهاز</string>
+    <string name="releases_not_here">ليس على هذا الجهاز</string>
+    <string name="releases_fetching">جارٍ الجلب…</string>
+    <string name="releases_save">حفظ نسخة</string>
+    <string name="releases_get">اجلبه</string>
+    <string name="releases_keep">أبقِ هذا الملف حيًّا للآخرين</string>
+    <string name="releases_remove">إزالة</string>
+    <string name="releases_remove_title">إزالة هذا الملف؟</string>
+    <string name="releases_remove_body">سيختفي من هذا الهاتف، وسيتوقف الهاتف عن تقديمه. من يبقيه حيًّا غيرك ما زال يملكه؛ وإن لم يفعل أحد، فلن يعود العنوان يعمل.</string>
+    <string name="releases_remove_keep">أبقِه</string>
+    <string name="releases_shared">تمت المشاركة: %1$s</string>
 </resources>

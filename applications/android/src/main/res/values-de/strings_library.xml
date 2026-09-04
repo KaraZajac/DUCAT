@@ -37,4 +37,23 @@ Die Ausgabe gehört dir. Das hier ist nur der Preis dafür, sie anderswo zu lese
     <string name="library_save_keep">Jetzt nicht</string>
     <string name="library_locked">Noch nicht freigeschaltet</string>
     <string name="library_locked_priced">Nicht freigeschaltet · %1$s</string>
+    <string name="releases_title">Dateien</string>
+    <string name="releases_note">Einfach geteilt: kein Abo, kein Schlüssel, niemand wird belastet. Eine Datei hat keinen Besitzer mehr, sobald sie draußen ist — sie bleibt nur erreichbar, solange jemand sie am Leben hält.</string>
+    <string name="releases_add">Per Adresse hinzufügen</string>
+    <string name="releases_add_go">Hinzufügen</string>
+    <string name="releases_add_cancel">Abbrechen</string>
+    <string name="releases_addr_hint">ducat:file/…-Adresse</string>
+    <string name="releases_addr_bad">Das ist keine Dateiadresse.</string>
+    <string name="releases_share_file">Datei teilen</string>
+    <string name="releases_here">Auf diesem Gerät</string>
+    <string name="releases_not_here">Nicht auf diesem Gerät</string>
+    <string name="releases_fetching">Wird geholt …</string>
+    <string name="releases_save">Kopie sichern</string>
+    <string name="releases_get">Holen</string>
+    <string name="releases_keep">Diese Datei für andere am Leben halten</string>
+    <string name="releases_remove">Entfernen</string>
+    <string name="releases_remove_title">Diese Datei entfernen?</string>
+    <string name="releases_remove_body">Sie verschwindet von diesem Telefon, und dieses Telefon stellt sie nicht mehr bereit. Wer sie sonst am Leben hält, hat sie weiterhin; hält niemand sie, löst die Adresse nicht mehr auf.</string>
+    <string name="releases_remove_keep">Behalten</string>
+    <string name="releases_shared">Geteilt: %1$s</string>
 </resources>

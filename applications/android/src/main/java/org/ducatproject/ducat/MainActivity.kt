@@ -203,6 +203,76 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
                 window.attributes = lp
             }
         }
+        org.ducatproject.ducat.ui.releaseShare = { ctx, uri ->
+            // A picked content: URI is a stream, not a path, so it is copied
+            // in before it can be indexed — and copied under the name the
+            // picker reports rather than the URI's own, which is an opaque
+            // provider id and would put "document/1234" on every reader's
+            // disk.
+            runCatching {
+                val name = ctx.contentResolver.query(uri, null, null, null, null)?.use { c ->
+                    val i = c.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                    if (i >= 0 && c.moveToFirst()) c.getString(i) else null
+                }?.let { java.io.File(it).name } ?: "file"
+                val tmp = java.io.File(ctx.cacheDir, "release_pick").apply {
+                    deleteRecursively(); mkdirs()
+                }
+                val staged = java.io.File(tmp, name)
+                ctx.contentResolver.openInputStream(uri)?.use { input ->
+                    staged.outputStream().use { input.copyTo(it) }
+                } ?: error("could not read that file")
+                val r = org.ducatproject.ducat.Releases.share(ctx, staged, name)
+                tmp.deleteRecursively()
+                r
+            }.onSuccess { r ->
+                android.widget.Toast.makeText(
+                    ctx,
+                    ctx.getString(R.string.releases_shared, r.title),
+                    android.widget.Toast.LENGTH_LONG,
+                ).show()
+            }.onFailure {
+                DucatLog.w("Releases", "share: ${it.message}")
+                android.widget.Toast.makeText(
+                    ctx,
+                    it.saidWhy() ?: it.javaClass.simpleName,
+                    android.widget.Toast.LENGTH_LONG,
+                ).show()
+            }
+        }
+        org.ducatproject.ducat.ui.releaseSave = { ctx, digestHex ->
+            // Out to wherever they keep things, never opened here — the same
+            // rule a publication's issue gets, for the same reason: this is
+            // a file, and whatever opens it is an ordinary reader on an
+            // ordinary connection.
+            val dir = org.ducatproject.ducat.Releases.dirFor(ctx, digestHex)
+            val file = dir.walkTopDown().filter { it.isFile }.maxByOrNull { it.length() }
+            if (file != null) {
+                val uri = androidx.core.content.FileProvider.getUriForFile(
+                    ctx, "${ctx.packageName}.backups", file,
+                )
+                val mime = android.webkit.MimeTypeMap.getSingleton()
+                    .getMimeTypeFromExtension(file.extension.lowercase()) ?: "*/*"
+                val send = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                    type = mime
+                    putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                    clipData = android.content.ClipData.newUri(
+                        ctx.contentResolver, file.name, uri,
+                    )
+                    addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                runCatching {
+                    ctx.startActivity(
+                        android.content.Intent.createChooser(send, file.name),
+                    )
+                }.onFailure {
+                    android.widget.Toast.makeText(
+                        ctx,
+                        ctx.getString(R.string.library_no_viewer),
+                        android.widget.Toast.LENGTH_LONG,
+                    ).show()
+                }
+            }
+        }
         org.ducatproject.ducat.ui.librarySave = { ctx, publisherHex, period ->
             // Straight to the sheet — no ACTION_VIEW first.
             //

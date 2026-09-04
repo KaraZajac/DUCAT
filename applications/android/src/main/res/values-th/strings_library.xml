@@ -36,4 +36,23 @@
     <string name="library_save_keep">ยังไม่ตอนนี้</string>
     <string name="library_locked">ยังไม่ได้ปลดล็อก</string>
     <string name="library_locked_priced">ยังไม่ปลดล็อก · %1$s</string>
+    <string name="releases_title">ไฟล์</string>
+    <string name="releases_note">แบ่งปันตรง ๆ ไม่มีการสมัคร ไม่มีกุญแจ ไม่มีการเรียกเก็บ ไฟล์ไม่มีเจ้าของอีกเมื่อออกไปแล้ว มันยังเข้าถึงได้เพียงตราบที่มีใครสักคนคอยหล่อเลี้ยงไว้</string>
+    <string name="releases_add">เพิ่มด้วยที่อยู่</string>
+    <string name="releases_add_go">เพิ่ม</string>
+    <string name="releases_add_cancel">ยกเลิก</string>
+    <string name="releases_addr_hint">ที่อยู่ ducat:file/…</string>
+    <string name="releases_addr_bad">นั่นไม่ใช่ที่อยู่ไฟล์</string>
+    <string name="releases_share_file">แบ่งปันไฟล์</string>
+    <string name="releases_here">อยู่บนเครื่องนี้</string>
+    <string name="releases_not_here">ไม่ได้อยู่บนเครื่องนี้</string>
+    <string name="releases_fetching">กำลังดึง…</string>
+    <string name="releases_save">บันทึกสำเนา</string>
+    <string name="releases_get">ดึงมา</string>
+    <string name="releases_keep">หล่อเลี้ยงไฟล์นี้ไว้ให้ผู้อื่น</string>
+    <string name="releases_remove">เอาออก</string>
+    <string name="releases_remove_title">เอาไฟล์นี้ออกไหม</string>
+    <string name="releases_remove_body">มันจะหายจากโทรศัพท์เครื่องนี้ และเครื่องนี้จะหยุดให้บริการ ใครที่ยังหล่อเลี้ยงไว้ก็ยังมีอยู่ ถ้าไม่มีใครเลย ที่อยู่จะใช้ไม่ได้อีก</string>
+    <string name="releases_remove_keep">เก็บไว้</string>
+    <string name="releases_shared">แบ่งปันแล้ว: %1$s</string>
 </resources>

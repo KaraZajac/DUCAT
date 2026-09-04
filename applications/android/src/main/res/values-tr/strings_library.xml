@@ -37,4 +37,23 @@ Sayı sizindir. Bu yalnızca onu başka bir yerde okumanın bedeli.</string>
     <string name="library_save_keep">Şimdi değil</string>
     <string name="library_locked">Henüz açılmadı</string>
     <string name="library_locked_priced">Açılmadı · %1$s</string>
+    <string name="releases_title">Dosyalar</string>
+    <string name="releases_note">Doğrudan paylaşıldı: abonelik yok, anahtar yok, kimseye fatura yok. Bir dosya dışarı çıktığında sahibi kalmaz — yalnızca biri onu canlı tuttuğu sürece erişilebilir kalır.</string>
+    <string name="releases_add">Adresle ekle</string>
+    <string name="releases_add_go">Ekle</string>
+    <string name="releases_add_cancel">Vazgeç</string>
+    <string name="releases_addr_hint">ducat:file/… adresi</string>
+    <string name="releases_addr_bad">Bu bir dosya adresi değil.</string>
+    <string name="releases_share_file">Bir dosya paylaş</string>
+    <string name="releases_here">Bu cihazda</string>
+    <string name="releases_not_here">Bu cihazda değil</string>
+    <string name="releases_fetching">Alınıyor…</string>
+    <string name="releases_save">Bir kopyasını kaydet</string>
+    <string name="releases_get">Al</string>
+    <string name="releases_keep">Bu dosyayı başkaları için canlı tut</string>
+    <string name="releases_remove">Kaldır</string>
+    <string name="releases_remove_title">Bu dosya kaldırılsın mı?</string>
+    <string name="releases_remove_body">Bu telefondan gider ve telefon onu sunmayı bırakır. Onu canlı tutan başkalarında durmaya devam eder; kimse tutmuyorsa adres artık çözülmez.</string>
+    <string name="releases_remove_keep">Kalsın</string>
+    <string name="releases_shared">Paylaşıldı: %1$s</string>
 </resources>

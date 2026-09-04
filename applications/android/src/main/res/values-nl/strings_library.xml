@@ -37,4 +37,23 @@ Het nummer is van jou. Dit is alleen wat het kost om het ergens anders te lezen.
     <string name="library_save_keep">Nu niet</string>
     <string name="library_locked">Nog niet vrijgegeven</string>
     <string name="library_locked_priced">Niet vrijgegeven · %1$s</string>
+    <string name="releases_title">Bestanden</string>
+    <string name="releases_note">Gewoon gedeeld: geen abonnement, geen sleutel, niemand belast. Een bestand heeft geen eigenaar meer zodra het buiten is — het blijft alleen bereikbaar zolang iemand het in leven houdt.</string>
+    <string name="releases_add">Op adres toevoegen</string>
+    <string name="releases_add_go">Toevoegen</string>
+    <string name="releases_add_cancel">Annuleren</string>
+    <string name="releases_addr_hint">ducat:file/…-adres</string>
+    <string name="releases_addr_bad">Dat is geen bestandsadres.</string>
+    <string name="releases_share_file">Een bestand delen</string>
+    <string name="releases_here">Op dit apparaat</string>
+    <string name="releases_not_here">Niet op dit apparaat</string>
+    <string name="releases_fetching">Ophalen…</string>
+    <string name="releases_save">Kopie bewaren</string>
+    <string name="releases_get">Ophalen</string>
+    <string name="releases_keep">Dit bestand voor anderen in leven houden</string>
+    <string name="releases_remove">Verwijderen</string>
+    <string name="releases_remove_title">Dit bestand verwijderen?</string>
+    <string name="releases_remove_body">Het gaat van deze telefoon af en deze telefoon levert het niet meer. Wie het in leven houdt heeft het nog; houdt niemand het, dan lost het adres niet meer op.</string>
+    <string name="releases_remove_keep">Behouden</string>
+    <string name="releases_shared">Gedeeld: %1$s</string>
 </resources>

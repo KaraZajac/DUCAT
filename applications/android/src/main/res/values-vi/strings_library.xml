@@ -36,4 +36,23 @@ Số này là của bạn. Đây chỉ là cái giá để đọc nó ở nơi k
     <string name="library_save_keep">Để sau</string>
     <string name="library_locked">Chưa mở khoá</string>
     <string name="library_locked_priced">Chưa mở khoá · %1$s</string>
+    <string name="releases_title">Tệp</string>
+    <string name="releases_note">Chia sẻ thẳng: không đăng ký, không khoá, không ai bị tính tiền. Một tệp không còn chủ khi đã ra ngoài — nó chỉ còn với tới được chừng nào có người giữ nó sống.</string>
+    <string name="releases_add">Thêm bằng địa chỉ</string>
+    <string name="releases_add_go">Thêm</string>
+    <string name="releases_add_cancel">Huỷ</string>
+    <string name="releases_addr_hint">địa chỉ ducat:file/…</string>
+    <string name="releases_addr_bad">Đó không phải địa chỉ tệp.</string>
+    <string name="releases_share_file">Chia sẻ một tệp</string>
+    <string name="releases_here">Có trên máy này</string>
+    <string name="releases_not_here">Không có trên máy này</string>
+    <string name="releases_fetching">Đang lấy…</string>
+    <string name="releases_save">Lưu một bản</string>
+    <string name="releases_get">Lấy về</string>
+    <string name="releases_keep">Giữ tệp này sống cho người khác</string>
+    <string name="releases_remove">Gỡ bỏ</string>
+    <string name="releases_remove_title">Gỡ tệp này?</string>
+    <string name="releases_remove_body">Nó rời khỏi máy này và máy này ngừng phục vụ nó. Ai còn giữ nó sống thì vẫn có; nếu không ai giữ, địa chỉ sẽ không còn mở được.</string>
+    <string name="releases_remove_keep">Giữ lại</string>
+    <string name="releases_shared">Đã chia sẻ: %1$s</string>
 </resources>

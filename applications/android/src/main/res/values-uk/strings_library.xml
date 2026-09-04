@@ -39,4 +39,23 @@
     <string name="library_save_keep">Не зараз</string>
     <string name="library_locked">Ще не відкрито</string>
     <string name="library_locked_priced">Не відкрито · %1$s</string>
+    <string name="releases_title">Файли</string>
+    <string name="releases_note">Просто викладені: без підписки, без ключа, без рахунку. Файл не має власника, щойно вийшов, — він доступний рівно доти, доки хтось тримає його живим.</string>
+    <string name="releases_add">Додати за адресою</string>
+    <string name="releases_add_go">Додати</string>
+    <string name="releases_add_cancel">Скасувати</string>
+    <string name="releases_addr_hint">адреса ducat:file/…</string>
+    <string name="releases_addr_bad">Це не адреса файлу.</string>
+    <string name="releases_share_file">Поділитися файлом</string>
+    <string name="releases_here">На цьому пристрої</string>
+    <string name="releases_not_here">Немає на цьому пристрої</string>
+    <string name="releases_fetching">Завантаження…</string>
+    <string name="releases_save">Зберегти копію</string>
+    <string name="releases_get">Отримати</string>
+    <string name="releases_keep">Тримати цей файл живим для інших</string>
+    <string name="releases_remove">Прибрати</string>
+    <string name="releases_remove_title">Прибрати цей файл?</string>
+    <string name="releases_remove_body">Він піде з цього телефона, і телефон перестане його роздавати. У тих, хто тримає його живим, він лишається; якщо таких немає, адреса перестане відкриватися.</string>
+    <string name="releases_remove_keep">Залишити</string>
+    <string name="releases_shared">Викладено: %1$s</string>
 </resources>

@@ -416,6 +416,10 @@ fun LibrarySection() {
         contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
+        // Files shared outright, above the subscriptions: a release has no
+        // publisher, no key and no bill, so it does not belong inside any
+        // publication's card.
+        item(key = "releases") { ReleasesCard(tick) }
         val grouped = shown.groupBy { it.publisherHex }
         grouped.forEach { (pub, issues) ->
             item(key = "c:$pub") {
@@ -715,3 +719,208 @@ private fun IssueLine(
         }
     }
 }
+
+
+/**
+ * Files shared outright — §"once it's out there it's out there".
+ *
+ * A release has no publisher relationship behind it: no key to buy, no
+ * bill, nobody obliged to keep it up. It lives exactly as long as somebody
+ * mirrors it, and the note says so rather than letting the row imply
+ * permanence.
+ */
+@Composable
+private fun ReleasesCard(tick: Long) {
+    val context = LocalContext.current
+    val v by org.ducatproject.ducat.ContactStore.changes.collectAsState()
+    val releases = remember(v, tick) { org.ducatproject.ducat.Releases.all(context) }
+    var adding by remember { mutableStateOf(false) }
+    var addr by remember { mutableStateOf("") }
+    var word by remember { mutableStateOf<String?>(null) }
+
+    // A tapped ducat:file/ link, filed the moment this screen is up.
+    val pending by pendingReleaseAdd.collectAsState()
+    LaunchedEffect(pending) {
+        val uri = pending ?: return@LaunchedEffect
+        pendingReleaseAdd.value = null
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            runCatching { org.ducatproject.ducat.Releases.add(context, uri) }
+        }
+    }
+
+    val picker = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.OpenDocument(),
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        releaseShare(context, uri)
+    }
+
+    androidx.compose.material3.Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
+            Text(
+                stringResource(R.string.releases_title),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Text(
+                stringResource(R.string.releases_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            word?.let {
+                Spacer(Modifier.height(6.dp))
+                Text(it, style = MaterialTheme.typography.labelMedium)
+            }
+            for (r in releases) {
+                Spacer(Modifier.height(10.dp))
+                ReleaseLine(r, tick)
+            }
+            Spacer(Modifier.height(10.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                androidx.compose.material3.OutlinedButton(onClick = { adding = true }) {
+                    Text(stringResource(R.string.releases_add))
+                }
+                androidx.compose.material3.OutlinedButton(
+                    onClick = { runCatching { picker.launch(arrayOf("*/*")) } },
+                ) {
+                    Text(stringResource(R.string.releases_share_file))
+                }
+            }
+        }
+    }
+
+    if (adding) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { adding = false; addr = "" },
+            title = { Text(stringResource(R.string.releases_add)) },
+            text = {
+                androidx.compose.material3.OutlinedTextField(
+                    value = addr,
+                    onValueChange = { addr = it },
+                    label = { Text(stringResource(R.string.releases_addr_hint)) },
+                    singleLine = false,
+                )
+            },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    val added = org.ducatproject.ducat.Releases.add(context, addr)
+                    word = if (added == null) {
+                        context.getString(R.string.releases_addr_bad)
+                    } else {
+                        null
+                    }
+                    if (added != null) { adding = false; addr = "" }
+                }) { Text(stringResource(R.string.releases_add_go)) }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(
+                    onClick = { adding = false; addr = "" },
+                ) { Text(stringResource(R.string.releases_add_cancel)) }
+            },
+        )
+    }
+}
+
+@Composable
+private fun ReleaseLine(r: org.ducatproject.ducat.Releases.Release, tick: Long) {
+    val context = LocalContext.current
+    val here = remember(tick, r.digestHex) {
+        org.ducatproject.ducat.Releases.isHere(context, r.digestHex)
+    }
+    val progress = remember(tick, r.digestHex) {
+        if (here) null else runCatching {
+            org.ducatproject.ducat.Swarm.fetchProgress(r.shareKey)
+        }.getOrNull()
+    }
+    var busy by remember(r.digestHex) { mutableStateOf(false) }
+    var confirmDrop by remember(r.digestHex) { mutableStateOf(false) }
+
+    Column(Modifier.fillMaxWidth()) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(
+                    r.title.ifBlank { r.digestHex.take(12) },
+                    style = MaterialTheme.typography.bodyLarge,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                )
+                Text(
+                    when {
+                        here && r.bytes > 0 -> Formatter.formatShortFileSize(context, r.bytes)
+                        here -> stringResource(R.string.releases_here)
+                        busy -> stringResource(R.string.releases_fetching)
+                        else -> stringResource(R.string.releases_not_here)
+                    },
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Spacer(Modifier.width(8.dp))
+            if (here) {
+                androidx.compose.material3.OutlinedButton(onClick = {
+                    releaseSave(context, r.digestHex)
+                }) { Text(stringResource(R.string.releases_save)) }
+            } else {
+                androidx.compose.material3.OutlinedButton(
+                    enabled = !busy,
+                    onClick = {
+                        busy = true
+                        ThreadSends.launch(
+                            org.ducatproject.ducat.ContactStore(context),
+                            "release:${r.digestHex}", null,
+                        ) {
+                            org.ducatproject.ducat.Releases.fetch(context, r)
+                            null
+                        }
+                    },
+                ) { Text(stringResource(R.string.releases_get)) }
+            }
+        }
+        if (busy && !here) {
+            Spacer(Modifier.height(6.dp))
+            PieceBar(progress)
+        }
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            androidx.compose.material3.Checkbox(
+                checked = r.keepAlive,
+                onCheckedChange = { on ->
+                    org.ducatproject.ducat.Releases.setKeepAlive(context, r.digestHex, on)
+                },
+            )
+            Text(
+                stringResource(R.string.releases_keep),
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.weight(1f),
+            )
+            androidx.compose.material3.TextButton(onClick = { confirmDrop = true }) {
+                Text(stringResource(R.string.releases_remove))
+            }
+        }
+    }
+
+    if (confirmDrop) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { confirmDrop = false },
+            title = { Text(stringResource(R.string.releases_remove_title)) },
+            text = { Text(stringResource(R.string.releases_remove_body)) },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    confirmDrop = false
+                    org.ducatproject.ducat.Releases.remove(context, r.digestHex)
+                }) { Text(stringResource(R.string.releases_remove)) }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(
+                    onClick = { confirmDrop = false },
+                ) { Text(stringResource(R.string.releases_remove_keep)) }
+            },
+        )
+    }
+}
+
+/** Copy a picked file in and seed it. Injected: reading a content: URI is
+ *  the phone's business, and the desk compiles this file without it. */
+var releaseShare: (android.content.Context, android.net.Uri) -> Unit = { _, _ -> }
+
+/** Hand a held release out to wherever the reader keeps things — the same
+ *  saving discipline an issue gets, and for the same reason. */
+var releaseSave: (android.content.Context, String) -> Unit = { _, _ -> }

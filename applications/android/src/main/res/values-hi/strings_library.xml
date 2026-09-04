@@ -37,4 +37,23 @@
     <string name="library_save_keep">अभी नहीं</string>
     <string name="library_locked">अभी अनलॉक नहीं</string>
     <string name="library_locked_priced">अनलॉक नहीं · %1$s</string>
+    <string name="releases_title">फ़ाइलें</string>
+    <string name="releases_note">सीधे साझा: कोई सदस्यता नहीं, कोई कुंजी नहीं, किसी से शुल्क नहीं। बाहर जाने के बाद फ़ाइल का कोई स्वामी नहीं रहता — वह तभी तक पहुँच में रहती है जब तक कोई उसे जीवित रखे।</string>
+    <string name="releases_add">पते से जोड़ें</string>
+    <string name="releases_add_go">जोड़ें</string>
+    <string name="releases_add_cancel">रद्द करें</string>
+    <string name="releases_addr_hint">ducat:file/… पता</string>
+    <string name="releases_addr_bad">यह फ़ाइल का पता नहीं है।</string>
+    <string name="releases_share_file">कोई फ़ाइल साझा करें</string>
+    <string name="releases_here">इस डिवाइस पर</string>
+    <string name="releases_not_here">इस डिवाइस पर नहीं</string>
+    <string name="releases_fetching">लाया जा रहा है…</string>
+    <string name="releases_save">एक प्रति सहेजें</string>
+    <string name="releases_get">इसे लाएँ</string>
+    <string name="releases_keep">इस फ़ाइल को दूसरों के लिए जीवित रखें</string>
+    <string name="releases_remove">हटाएँ</string>
+    <string name="releases_remove_title">यह फ़ाइल हटाएँ?</string>
+    <string name="releases_remove_body">यह इस फ़ोन से चली जाएगी और यह फ़ोन इसे देना बंद कर देगा। जो और इसे जीवित रखे हुए हैं उनके पास रहेगी; कोई नहीं रखे तो पता काम करना बंद कर देगा।</string>
+    <string name="releases_remove_keep">रहने दें</string>
+    <string name="releases_shared">साझा किया: %1$s</string>
 </resources>

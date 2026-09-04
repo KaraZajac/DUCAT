@@ -40,4 +40,23 @@ The issue is yours to keep. This is only what it costs to read it somewhere else
     <string name="library_save_keep">Not now</string>
     <string name="library_locked">Not unlocked yet</string>
     <string name="library_locked_priced">Not unlocked · %1$s</string>
+    <string name="releases_title">Files</string>
+    <string name="releases_note">Shared outright: no subscription, no key, nobody billed. A file has no owner once it is out — it stays reachable only while somebody keeps it alive.</string>
+    <string name="releases_add">Add by address</string>
+    <string name="releases_add_go">Add</string>
+    <string name="releases_add_cancel">Cancel</string>
+    <string name="releases_addr_hint">ducat:file/… address</string>
+    <string name="releases_addr_bad">That is not a file address.</string>
+    <string name="releases_share_file">Share a file</string>
+    <string name="releases_here">On this device</string>
+    <string name="releases_not_here">Not on this device</string>
+    <string name="releases_fetching">Fetching…</string>
+    <string name="releases_save">Save a copy</string>
+    <string name="releases_get">Get it</string>
+    <string name="releases_keep">Keep this file alive for others</string>
+    <string name="releases_remove">Remove</string>
+    <string name="releases_remove_title">Remove this file?</string>
+    <string name="releases_remove_body">It goes from this phone, and this phone stops serving it. Anyone else keeping it alive still has it; if nobody is, the address stops resolving.</string>
+    <string name="releases_remove_keep">Keep it</string>
+    <string name="releases_shared">Shared: %1$s</string>
 </resources>

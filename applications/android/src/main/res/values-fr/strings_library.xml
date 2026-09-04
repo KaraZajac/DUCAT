@@ -37,4 +37,23 @@ Le numéro est à vous. Ceci n\'est que le prix à payer pour le lire ailleurs.<
     <string name="library_save_keep">Pas maintenant</string>
     <string name="library_locked">Pas encore débloqué</string>
     <string name="library_locked_priced">Non débloqué · %1$s</string>
+    <string name="releases_title">Fichiers</string>
+    <string name="releases_note">Partagés tels quels : pas d\'abonnement, pas de clé, personne facturé. Un fichier n\'a plus de propriétaire une fois sorti — il reste accessible tant que quelqu\'un le maintient en vie.</string>
+    <string name="releases_add">Ajouter par adresse</string>
+    <string name="releases_add_go">Ajouter</string>
+    <string name="releases_add_cancel">Annuler</string>
+    <string name="releases_addr_hint">adresse ducat:file/…</string>
+    <string name="releases_addr_bad">Ce n\'est pas une adresse de fichier.</string>
+    <string name="releases_share_file">Partager un fichier</string>
+    <string name="releases_here">Sur cet appareil</string>
+    <string name="releases_not_here">Pas sur cet appareil</string>
+    <string name="releases_fetching">Récupération…</string>
+    <string name="releases_save">Enregistrer une copie</string>
+    <string name="releases_get">Le récupérer</string>
+    <string name="releases_keep">Garder ce fichier en vie pour les autres</string>
+    <string name="releases_remove">Retirer</string>
+    <string name="releases_remove_title">Retirer ce fichier ?</string>
+    <string name="releases_remove_body">Il quitte ce téléphone, qui cesse de le servir. Ceux qui le maintiennent en vie l\'ont toujours ; si personne ne le fait, l\'adresse ne résout plus.</string>
+    <string name="releases_remove_keep">Le garder</string>
+    <string name="releases_shared">Partagé : %1$s</string>
 </resources>

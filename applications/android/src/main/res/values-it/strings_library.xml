@@ -37,4 +37,23 @@ Il numero è suo. Questo è solo ciò che costa leggerlo altrove.</string>
     <string name="library_save_keep">Non ora</string>
     <string name="library_locked">Non ancora sbloccato</string>
     <string name="library_locked_priced">Non sbloccato · %1$s</string>
+    <string name="releases_title">File</string>
+    <string name="releases_note">Condivisi e basta: nessun abbonamento, nessuna chiave, nessun addebito. Un file non ha più un proprietario una volta uscito: resta raggiungibile solo finché qualcuno lo tiene in vita.</string>
+    <string name="releases_add">Aggiungi per indirizzo</string>
+    <string name="releases_add_go">Aggiungi</string>
+    <string name="releases_add_cancel">Annulla</string>
+    <string name="releases_addr_hint">indirizzo ducat:file/…</string>
+    <string name="releases_addr_bad">Questo non è un indirizzo di file.</string>
+    <string name="releases_share_file">Condividi un file</string>
+    <string name="releases_here">Su questo dispositivo</string>
+    <string name="releases_not_here">Non su questo dispositivo</string>
+    <string name="releases_fetching">Scaricamento…</string>
+    <string name="releases_save">Salva una copia</string>
+    <string name="releases_get">Prendilo</string>
+    <string name="releases_keep">Tieni questo file in vita per gli altri</string>
+    <string name="releases_remove">Rimuovi</string>
+    <string name="releases_remove_title">Rimuovere questo file?</string>
+    <string name="releases_remove_body">Se ne va da questo telefono, che smette di servirlo. Chi lo tiene in vita ce l\'ha ancora; se non lo fa nessuno, l\'indirizzo non risolve più.</string>
+    <string name="releases_remove_keep">Tienilo</string>
+    <string name="releases_shared">Condiviso: %1$s</string>
 </resources>

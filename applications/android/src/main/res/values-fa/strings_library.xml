@@ -37,4 +37,23 @@
     <string name="library_save_keep">اکنون نه</string>
     <string name="library_locked">هنوز باز نشده</string>
     <string name="library_locked_priced">باز نشده · %1$s</string>
+    <string name="releases_title">پرونده‌ها</string>
+    <string name="releases_note">هم‌رسانی ساده: بدون اشتراک، بدون کلید، بدون صورت‌حساب. پرونده پس از بیرون رفتن صاحبی ندارد — تنها تا زمانی در دسترس می‌ماند که کسی زنده نگهش دارد.</string>
+    <string name="releases_add">افزودن با نشانی</string>
+    <string name="releases_add_go">افزودن</string>
+    <string name="releases_add_cancel">لغو</string>
+    <string name="releases_addr_hint">نشانی ‎ducat:file/…‎</string>
+    <string name="releases_addr_bad">این نشانی پرونده نیست.</string>
+    <string name="releases_share_file">هم‌رسانی یک پرونده</string>
+    <string name="releases_here">روی این دستگاه</string>
+    <string name="releases_not_here">روی این دستگاه نیست</string>
+    <string name="releases_fetching">در حال گرفتن…</string>
+    <string name="releases_save">ذخیرهٔ یک نسخه</string>
+    <string name="releases_get">بگیرش</string>
+    <string name="releases_keep">این پرونده را برای دیگران زنده نگه دار</string>
+    <string name="releases_remove">برداشتن</string>
+    <string name="releases_remove_title">این پرونده برداشته شود؟</string>
+    <string name="releases_remove_body">از این تلفن می‌رود و این تلفن دیگر آن را ارائه نمی‌کند. هر کس دیگری که زنده نگهش داشته هنوز آن را دارد؛ اگر کسی نباشد، نشانی دیگر باز نمی‌شود.</string>
+    <string name="releases_remove_keep">بماند</string>
+    <string name="releases_shared">هم‌رسانی شد: %1$s</string>
 </resources>

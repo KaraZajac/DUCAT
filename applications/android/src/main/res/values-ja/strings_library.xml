@@ -36,4 +36,23 @@
     <string name="library_save_keep">今はしない</string>
     <string name="library_locked">まだ解錠していません</string>
     <string name="library_locked_priced">未解錠 · %1$s</string>
+    <string name="releases_title">ファイル</string>
+    <string name="releases_note">そのまま共有：購読も鍵も請求もありません。ファイルは世に出た時点で持ち主がいなくなり、誰かが生かしている間だけ届きます。</string>
+    <string name="releases_add">アドレスで追加</string>
+    <string name="releases_add_go">追加</string>
+    <string name="releases_add_cancel">キャンセル</string>
+    <string name="releases_addr_hint">ducat:file/… のアドレス</string>
+    <string name="releases_addr_bad">それはファイルのアドレスではありません。</string>
+    <string name="releases_share_file">ファイルを共有</string>
+    <string name="releases_here">この端末にあります</string>
+    <string name="releases_not_here">この端末にはありません</string>
+    <string name="releases_fetching">取得中…</string>
+    <string name="releases_save">コピーを保存</string>
+    <string name="releases_get">取得する</string>
+    <string name="releases_keep">このファイルを他の人のために生かしておく</string>
+    <string name="releases_remove">取り除く</string>
+    <string name="releases_remove_title">このファイルを取り除きますか？</string>
+    <string name="releases_remove_body">この端末から消え、この端末は配信をやめます。ほかに生かしている人がいればその人の手元には残ります。誰もいなければ、そのアドレスは開かなくなります。</string>
+    <string name="releases_remove_keep">残す</string>
+    <string name="releases_shared">共有しました：%1$s</string>
 </resources>

@@ -36,4 +36,23 @@ Edisi ini milik Anda. Ini hanya harga untuk membacanya di tempat lain.</string>
     <string name="library_save_keep">Nanti saja</string>
     <string name="library_locked">Belum dibuka</string>
     <string name="library_locked_priced">Belum dibuka · %1$s</string>
+    <string name="releases_title">Berkas</string>
+    <string name="releases_note">Dibagikan begitu saja: tanpa langganan, tanpa kunci, tanpa tagihan. Sebuah berkas tak punya pemilik begitu keluar — ia tetap terjangkau hanya selama ada yang menjaganya hidup.</string>
+    <string name="releases_add">Tambah lewat alamat</string>
+    <string name="releases_add_go">Tambah</string>
+    <string name="releases_add_cancel">Batal</string>
+    <string name="releases_addr_hint">alamat ducat:file/…</string>
+    <string name="releases_addr_bad">Itu bukan alamat berkas.</string>
+    <string name="releases_share_file">Bagikan sebuah berkas</string>
+    <string name="releases_here">Di perangkat ini</string>
+    <string name="releases_not_here">Tidak ada di perangkat ini</string>
+    <string name="releases_fetching">Mengambil…</string>
+    <string name="releases_save">Simpan salinan</string>
+    <string name="releases_get">Ambil</string>
+    <string name="releases_keep">Jaga berkas ini tetap hidup untuk orang lain</string>
+    <string name="releases_remove">Hapus</string>
+    <string name="releases_remove_title">Hapus berkas ini?</string>
+    <string name="releases_remove_body">Ia hilang dari ponsel ini, dan ponsel ini berhenti menyajikannya. Siapa pun yang menjaganya hidup masih memilikinya; jika tak ada, alamatnya berhenti bekerja.</string>
+    <string name="releases_remove_keep">Biarkan</string>
+    <string name="releases_shared">Dibagikan: %1$s</string>
 </resources>

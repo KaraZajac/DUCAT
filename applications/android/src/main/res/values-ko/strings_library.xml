@@ -36,4 +36,23 @@
     <string name="library_save_keep">나중에</string>
     <string name="library_locked">아직 잠금 해제 안 됨</string>
     <string name="library_locked_priced">잠금 해제 안 됨 · %1$s</string>
+    <string name="releases_title">파일</string>
+    <string name="releases_note">그냥 공유: 구독도 열쇠도 청구도 없습니다. 파일은 일단 나가면 주인이 없고, 누군가 살려 두는 동안에만 닿을 수 있습니다.</string>
+    <string name="releases_add">주소로 추가</string>
+    <string name="releases_add_go">추가</string>
+    <string name="releases_add_cancel">취소</string>
+    <string name="releases_addr_hint">ducat:file/… 주소</string>
+    <string name="releases_addr_bad">파일 주소가 아닙니다.</string>
+    <string name="releases_share_file">파일 공유</string>
+    <string name="releases_here">이 기기에 있음</string>
+    <string name="releases_not_here">이 기기에 없음</string>
+    <string name="releases_fetching">가져오는 중…</string>
+    <string name="releases_save">사본 저장</string>
+    <string name="releases_get">가져오기</string>
+    <string name="releases_keep">이 파일을 다른 사람을 위해 살려 두기</string>
+    <string name="releases_remove">제거</string>
+    <string name="releases_remove_title">이 파일을 제거할까요?</string>
+    <string name="releases_remove_body">이 휴대폰에서 사라지고, 이 휴대폰은 더 이상 제공하지 않습니다. 살려 두는 다른 사람이 있다면 그쪽에는 남습니다. 아무도 없으면 그 주소는 열리지 않게 됩니다.</string>
+    <string name="releases_remove_keep">그대로 두기</string>
+    <string name="releases_shared">공유함: %1$s</string>
 </resources>

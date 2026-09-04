@@ -36,4 +36,23 @@
     <string name="library_save_keep">暂不</string>
     <string name="library_locked">尚未解锁</string>
     <string name="library_locked_priced">未解锁 · %1$s</string>
+    <string name="releases_title">文件</string>
+    <string name="releases_note">直接分享：没有订阅，没有密钥，不向任何人收费。文件一旦发出就没有主人——只有还有人让它活着，它才够得着。</string>
+    <string name="releases_add">按地址添加</string>
+    <string name="releases_add_go">添加</string>
+    <string name="releases_add_cancel">取消</string>
+    <string name="releases_addr_hint">ducat:file/… 地址</string>
+    <string name="releases_addr_bad">那不是文件地址。</string>
+    <string name="releases_share_file">分享一个文件</string>
+    <string name="releases_here">在本机上</string>
+    <string name="releases_not_here">不在本机上</string>
+    <string name="releases_fetching">获取中…</string>
+    <string name="releases_save">保存副本</string>
+    <string name="releases_get">取回</string>
+    <string name="releases_keep">为他人让这个文件活着</string>
+    <string name="releases_remove">移除</string>
+    <string name="releases_remove_title">移除这个文件？</string>
+    <string name="releases_remove_body">它会从这部手机上消失，这部手机也不再提供它。仍在让它活着的人手里还有；如果没有人，这个地址就打不开了。</string>
+    <string name="releases_remove_keep">保留</string>
+    <string name="releases_shared">已分享：%1$s</string>
 </resources>

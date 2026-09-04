@@ -37,4 +37,23 @@ El número es suyo. Esto es solo lo que cuesta leerlo en otro sitio.</string>
     <string name="library_save_keep">Ahora no</string>
     <string name="library_locked">Aún no desbloqueado</string>
     <string name="library_locked_priced">Sin desbloquear · %1$s</string>
+    <string name="releases_title">Archivos</string>
+    <string name="releases_note">Compartidos sin más: sin suscripción, sin clave, sin cobro. Un archivo no tiene dueño una vez fuera: sigue accesible solo mientras alguien lo mantenga vivo.</string>
+    <string name="releases_add">Añadir por dirección</string>
+    <string name="releases_add_go">Añadir</string>
+    <string name="releases_add_cancel">Cancelar</string>
+    <string name="releases_addr_hint">dirección ducat:file/…</string>
+    <string name="releases_addr_bad">Esa no es una dirección de archivo.</string>
+    <string name="releases_share_file">Compartir un archivo</string>
+    <string name="releases_here">En este dispositivo</string>
+    <string name="releases_not_here">No está en este dispositivo</string>
+    <string name="releases_fetching">Descargando…</string>
+    <string name="releases_save">Guardar una copia</string>
+    <string name="releases_get">Obtenerlo</string>
+    <string name="releases_keep">Mantener este archivo vivo para otros</string>
+    <string name="releases_remove">Quitar</string>
+    <string name="releases_remove_title">¿Quitar este archivo?</string>
+    <string name="releases_remove_body">Se va de este teléfono y este teléfono deja de servirlo. Quien lo mantenga vivo aún lo tiene; si nadie lo hace, la dirección deja de resolver.</string>
+    <string name="releases_remove_keep">Conservarlo</string>
+    <string name="releases_shared">Compartido: %1$s</string>
 </resources>

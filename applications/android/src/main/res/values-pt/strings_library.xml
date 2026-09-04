@@ -37,4 +37,23 @@ A edição é sua. Isto é só o que custa lê-la noutro lado.</string>
     <string name="library_save_keep">Agora não</string>
     <string name="library_locked">Ainda não desbloqueado</string>
     <string name="library_locked_priced">Por desbloquear · %1$s</string>
+    <string name="releases_title">Ficheiros</string>
+    <string name="releases_note">Partilhados sem mais: sem subscrição, sem chave, ninguém cobrado. Um ficheiro deixa de ter dono depois de sair — só continua acessível enquanto alguém o mantiver vivo.</string>
+    <string name="releases_add">Adicionar por endereço</string>
+    <string name="releases_add_go">Adicionar</string>
+    <string name="releases_add_cancel">Cancelar</string>
+    <string name="releases_addr_hint">endereço ducat:file/…</string>
+    <string name="releases_addr_bad">Isso não é um endereço de ficheiro.</string>
+    <string name="releases_share_file">Partilhar um ficheiro</string>
+    <string name="releases_here">Neste dispositivo</string>
+    <string name="releases_not_here">Não está neste dispositivo</string>
+    <string name="releases_fetching">A obter…</string>
+    <string name="releases_save">Guardar uma cópia</string>
+    <string name="releases_get">Obter</string>
+    <string name="releases_keep">Manter este ficheiro vivo para outros</string>
+    <string name="releases_remove">Remover</string>
+    <string name="releases_remove_title">Remover este ficheiro?</string>
+    <string name="releases_remove_body">Sai deste telemóvel e este telemóvel deixa de o servir. Quem o mantiver vivo continua a tê-lo; se ninguém o fizer, o endereço deixa de resolver.</string>
+    <string name="releases_remove_keep">Manter</string>
+    <string name="releases_shared">Partilhado: %1$s</string>
 </resources>

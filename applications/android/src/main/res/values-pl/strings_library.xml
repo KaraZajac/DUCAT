@@ -39,4 +39,23 @@ Numer należy do ciebie. To tylko cena za przeczytanie go gdzie indziej.</string
     <string name="library_save_keep">Nie teraz</string>
     <string name="library_locked">Jeszcze nieodblokowane</string>
     <string name="library_locked_priced">Nieodblokowane · %1$s</string>
+    <string name="releases_title">Pliki</string>
+    <string name="releases_note">Udostępnione wprost: bez subskrypcji, bez klucza, bez rachunku. Plik nie ma właściciela, gdy już wyjdzie — pozostaje osiągalny tylko dopóki ktoś utrzymuje go przy życiu.</string>
+    <string name="releases_add">Dodaj po adresie</string>
+    <string name="releases_add_go">Dodaj</string>
+    <string name="releases_add_cancel">Anuluj</string>
+    <string name="releases_addr_hint">adres ducat:file/…</string>
+    <string name="releases_addr_bad">To nie jest adres pliku.</string>
+    <string name="releases_share_file">Udostępnij plik</string>
+    <string name="releases_here">Na tym urządzeniu</string>
+    <string name="releases_not_here">Nie ma go na tym urządzeniu</string>
+    <string name="releases_fetching">Pobieranie…</string>
+    <string name="releases_save">Zapisz kopię</string>
+    <string name="releases_get">Pobierz</string>
+    <string name="releases_keep">Utrzymuj ten plik przy życiu dla innych</string>
+    <string name="releases_remove">Usuń</string>
+    <string name="releases_remove_title">Usunąć ten plik?</string>
+    <string name="releases_remove_body">Zniknie z tego telefonu, a telefon przestanie go udostępniać. Kto inny utrzymuje go przy życiu, wciąż go ma; jeśli nikt, adres przestaje działać.</string>
+    <string name="releases_remove_keep">Zostaw</string>
+    <string name="releases_shared">Udostępniono: %1$s</string>
 </resources>
