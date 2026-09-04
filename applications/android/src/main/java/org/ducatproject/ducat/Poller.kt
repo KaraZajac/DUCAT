@@ -302,6 +302,10 @@ class Poller(private val context: Context) {
                 // key — a verify-only fetch that downloads nothing and
                 // stays. Readers are mirrors (§16.20).
                 runCatching { reseedLibrary(context) }
+                // And what the publishers have put out since — on every
+                // lap, gated to about hourly per publication, because a
+                // subscription made after launch has a catalogue too.
+                runCatching { refreshShelves(context) }
                 // And the outbox: files this phone sent down the big road
                 // stay served for a week — the sender is the first seeder,
                 // and a restart must not orphan a transfer the other side
@@ -503,22 +507,7 @@ class Poller(private val context: Context) {
         val newestPerPub = 2
         for (pub in Publications.subscribedPublishers(context)) {
             if (Publications.isMuted(context, pub)) continue
-            // What is on the publisher's shelf, refreshed about hourly, so
-            // the Library can say "issue 13 is out" rather than only ever
-            // showing what this reader already bought. Elapsed, not a raw
-            // subtraction: a stamp written while the clock was ahead would
-            // freeze the catalogue for good, and a reader who never learns
-            // a new issue exists cannot buy it.
-            if (Elapsed.due(
-                    System.currentTimeMillis(),
-                    Publications.shelfSeenAt(context, pub),
-                    60 * 60_000L,
-                )
-            ) {
-                runCatching { Publications.refreshShelf(context, pub) }
-                    .onFailure { DucatLog.w(TAG, "shelf of ${pub.take(8)}…: ${it.message}") }
-            }
-            // And only what the reader offered to help share. Without
+            // Only what the reader offered to help share. Without
             // this the checkbox would mean "until my next reboot" in
             // reverse — unticked, and the restart puts it back on the
             // wire anyway.
@@ -538,6 +527,45 @@ class Poller(private val context: Context) {
                     )
                 }
             }
+        }
+    }
+
+    /**
+     * What is on each publisher's shelf, refreshed about hourly, so the
+     * Library can say "issue 13 is out" rather than only ever showing what
+     * this reader already bought.
+     *
+     * On the lap, deliberately. This lived inside [reseedLibrary], which
+     * returns after its first run — so the catalogue was read at most once
+     * per launch, and only for publications already subscribed at that
+     * moment. Subscribe after the app is up, which is what every new
+     * reader does, and the shelf stayed unread until the next restart: the
+     * back catalogue was invisible, and a period nobody can see is a
+     * period nobody can ask for. The hourly gate below was always the
+     * intent; it just never got a second chance to fire.
+     *
+     * Elapsed, not a raw subtraction: a stamp written while the clock was
+     * ahead would freeze the catalogue for good, and a reader who never
+     * learns a new issue exists cannot buy it.
+     */
+    private fun refreshShelves(context: Context) {
+        if (!runCatching { uniffi.ducat_mobile.nodeStatus().publicInternetReady }
+                .getOrDefault(false)
+        ) {
+            return
+        }
+        for (pub in Publications.subscribedPublishers(context)) {
+            if (Publications.isMuted(context, pub)) continue
+            if (!Elapsed.due(
+                    System.currentTimeMillis(),
+                    Publications.shelfSeenAt(context, pub),
+                    60 * 60_000L,
+                )
+            ) {
+                continue
+            }
+            runCatching { Publications.refreshShelf(context, pub) }
+                .onFailure { DucatLog.w(TAG, "shelf of ${pub.take(8)}…: ${it.message}") }
         }
     }
 

@@ -15,6 +15,10 @@
     <string name="library_gone">no longer in your contacts</string>
     <string name="chat_issue_sent_you">Sent you an issue</string>
     <string name="chat_issue_you_sent">You sent an issue</string>
+    <!-- §16.20's ask in the thread. Not the money bubble's "You sent":
+         nothing was sent but a request, and no amount rides one. -->
+    <string name="chat_issue_you_asked">You asked for an issue</string>
+    <string name="chat_issue_asked_you">Asked you for an issue</string>
     <string name="chatlist_preview_issue">New issue: %1$s</string>
     <string name="notify_new_issue">%1$s sent a new issue</string>
     <string name="library_note_new_issue">A new issue is out.</string>

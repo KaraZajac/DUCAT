@@ -12,6 +12,8 @@
     <string name="library_gone">已不在你的联系人中</string>
     <string name="chat_issue_sent_you">给你发来一期</string>
     <string name="chat_issue_you_sent">你发出了一期</string>
+    <string name="chat_issue_you_asked">你请求了一期</string>
+    <string name="chat_issue_asked_you">向你请求了一期</string>
     <string name="chatlist_preview_issue">新的一期：%1$s</string>
     <string name="notify_new_issue">%1$s 发来了新的一期</string>
     <string name="library_note_new_issue">新的一期已经发布。</string>

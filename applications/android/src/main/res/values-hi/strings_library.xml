@@ -12,6 +12,8 @@
     <string name="library_gone">अब तुम्हारे संपर्कों में नहीं</string>
     <string name="chat_issue_sent_you">तुम्हें एक अंक भेजा</string>
     <string name="chat_issue_you_sent">तुमने एक अंक भेजा</string>
+    <string name="chat_issue_you_asked">आपने एक अंक माँगा</string>
+    <string name="chat_issue_asked_you">आपसे एक अंक माँगा</string>
     <string name="chatlist_preview_issue">नया अंक: %1$s</string>
     <string name="notify_new_issue">%1$s ने नया अंक भेजा</string>
     <string name="library_note_new_issue">नया अंक आ गया है।</string>

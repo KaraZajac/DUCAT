@@ -12,6 +12,8 @@
     <string name="library_gone">ไม่อยู่ในรายชื่อติดต่อแล้ว</string>
     <string name="chat_issue_sent_you">ส่งฉบับมาให้คุณ</string>
     <string name="chat_issue_you_sent">คุณส่งฉบับแล้ว</string>
+    <string name="chat_issue_you_asked">คุณขอฉบับหนึ่ง</string>
+    <string name="chat_issue_asked_you">ขอฉบับหนึ่งจากคุณ</string>
     <string name="chatlist_preview_issue">ฉบับใหม่: %1$s</string>
     <string name="notify_new_issue">%1$s ส่งฉบับใหม่มาให้</string>
     <string name="library_note_new_issue">ฉบับใหม่ออกแล้ว</string>

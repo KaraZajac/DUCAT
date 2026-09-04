@@ -12,6 +12,8 @@
     <string name="library_gone">больше не в твоих контактах</string>
     <string name="chat_issue_sent_you">Тебе прислали выпуск</string>
     <string name="chat_issue_you_sent">Выпуск отправлен</string>
+    <string name="chat_issue_you_asked">Вы запросили выпуск</string>
+    <string name="chat_issue_asked_you">Запросил у вас выпуск</string>
     <string name="chatlist_preview_issue">Новый выпуск: %1$s</string>
     <string name="notify_new_issue">Новый выпуск от %1$s</string>
     <string name="library_note_new_issue">Вышел новый выпуск.</string>

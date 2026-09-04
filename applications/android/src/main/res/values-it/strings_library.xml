@@ -12,6 +12,8 @@
     <string name="library_gone">non è più tra i tuoi contatti</string>
     <string name="chat_issue_sent_you">Ti ha mandato un numero</string>
     <string name="chat_issue_you_sent">Hai mandato un numero</string>
+    <string name="chat_issue_you_asked">Hai chiesto un numero</string>
+    <string name="chat_issue_asked_you">Ti ha chiesto un numero</string>
     <string name="chatlist_preview_issue">Nuovo numero: %1$s</string>
     <string name="notify_new_issue">%1$s ha mandato un nuovo numero</string>
     <string name="library_note_new_issue">È uscito un nuovo numero.</string>

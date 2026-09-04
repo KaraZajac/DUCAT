@@ -12,6 +12,8 @@
     <string name="library_gone">nie ma go już w twoich kontaktach</string>
     <string name="chat_issue_sent_you">Przysłano ci wydanie</string>
     <string name="chat_issue_you_sent">Wysłano wydanie</string>
+    <string name="chat_issue_you_asked">Poprosiłeś o numer</string>
+    <string name="chat_issue_asked_you">Poprosił cię o numer</string>
     <string name="chatlist_preview_issue">Nowe wydanie: %1$s</string>
     <string name="notify_new_issue">Nowe wydanie od %1$s</string>
     <string name="library_note_new_issue">Ukazało się nowe wydanie.</string>

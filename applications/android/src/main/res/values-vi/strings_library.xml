@@ -12,6 +12,8 @@
     <string name="library_gone">không còn trong danh bạ của bạn</string>
     <string name="chat_issue_sent_you">Đã gửi cho bạn một số báo</string>
     <string name="chat_issue_you_sent">Bạn đã gửi một số báo</string>
+    <string name="chat_issue_you_asked">Bạn đã hỏi xin một số</string>
+    <string name="chat_issue_asked_you">Đã hỏi xin bạn một số</string>
     <string name="chatlist_preview_issue">Số mới: %1$s</string>
     <string name="notify_new_issue">%1$s đã gửi một số mới</string>
     <string name="library_note_new_issue">Số mới đã ra.</string>

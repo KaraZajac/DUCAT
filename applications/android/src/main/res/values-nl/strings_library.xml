@@ -12,6 +12,8 @@
     <string name="library_gone">niet meer in je contacten</string>
     <string name="chat_issue_sent_you">Heeft je een editie gestuurd</string>
     <string name="chat_issue_you_sent">Je hebt een editie gestuurd</string>
+    <string name="chat_issue_you_asked">Je vroeg om een nummer</string>
+    <string name="chat_issue_asked_you">Vroeg jou om een nummer</string>
     <string name="chatlist_preview_issue">Nieuwe editie: %1$s</string>
     <string name="notify_new_issue">%1$s heeft een nieuwe editie gestuurd</string>
     <string name="library_note_new_issue">Er is een nieuwe editie uit.</string>

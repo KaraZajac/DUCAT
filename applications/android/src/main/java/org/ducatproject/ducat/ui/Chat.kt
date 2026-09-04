@@ -2182,6 +2182,41 @@ private fun Bubble(
                         )
                     }
                 }
+            } else if (m.kind == 16) {
+                // §16.20's ask. Its own bubble because the trailing branch
+                // below is the *money* bubble, and falling into it printed
+                // "You sent · USD 0.00 · 0.000000 XMR" over a message the
+                // wire forbids from carrying an amount at all — a request
+                // to be sold something, rendered as a zero-value payment.
+                // Same shape as the handover above: a paper trail, no
+                // amount row, no buttons. What answers it arrives as its
+                // own message.
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.MenuBook,
+                            null,
+                            Modifier.size(14.dp),
+                            tint = fg.copy(alpha = 0.8f),
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            stringResource(
+                                if (m.outgoing) R.string.chat_issue_you_asked
+                                else R.string.chat_issue_asked_you,
+                            ),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = fg.copy(alpha = 0.8f),
+                        )
+                    }
+                    m.pubWanted?.let {
+                        Text(
+                            stringResource(R.string.library_issue, it),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = fg,
+                        )
+                    }
+                }
             } else {
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically) {

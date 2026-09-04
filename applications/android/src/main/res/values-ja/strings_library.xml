@@ -12,6 +12,8 @@
     <string name="library_gone">連絡先に存在しません</string>
     <string name="chat_issue_sent_you">号が届きました</string>
     <string name="chat_issue_you_sent">号を送りました</string>
+    <string name="chat_issue_you_asked">号をリクエストしました</string>
+    <string name="chat_issue_asked_you">号をリクエストされました</string>
     <string name="chatlist_preview_issue">新しい号: %1$s</string>
     <string name="notify_new_issue">%1$sから新しい号が届きました</string>
     <string name="library_note_new_issue">新しい号が出ました。</string>

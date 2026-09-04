@@ -12,6 +12,8 @@
     <string name="library_gone">دیگر در مخاطبانت نیست</string>
     <string name="chat_issue_sent_you">شماره‌ای برایت فرستاد</string>
     <string name="chat_issue_you_sent">شماره‌ای فرستادی</string>
+    <string name="chat_issue_you_asked">شماره‌ای درخواست کردی</string>
+    <string name="chat_issue_asked_you">از تو شماره‌ای خواست</string>
     <string name="chatlist_preview_issue">شمارهٔ تازه: %1$s</string>
     <string name="notify_new_issue">%1$s شمارهٔ تازه‌ای فرستاد</string>
     <string name="library_note_new_issue">شمارهٔ تازه‌ای منتشر شد.</string>

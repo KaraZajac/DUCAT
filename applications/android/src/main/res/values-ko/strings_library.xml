@@ -12,6 +12,8 @@
     <string name="library_gone">더 이상 연락처에 없음</string>
     <string name="chat_issue_sent_you">호를 보내왔어요</string>
     <string name="chat_issue_you_sent">호를 보냈어요</string>
+    <string name="chat_issue_you_asked">호를 요청했어요</string>
+    <string name="chat_issue_asked_you">호를 요청했습니다</string>
     <string name="chatlist_preview_issue">새 호: %1$s</string>
     <string name="notify_new_issue">%1$s님이 새 호를 보냈어요</string>
     <string name="library_note_new_issue">새 호가 나왔어요.</string>

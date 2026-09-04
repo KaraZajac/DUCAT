@@ -12,6 +12,8 @@
     <string name="library_gone">artık kişilerinde değil</string>
     <string name="chat_issue_sent_you">Sana bir sayı gönderdi</string>
     <string name="chat_issue_you_sent">Bir sayı gönderdin</string>
+    <string name="chat_issue_you_asked">Bir sayı istedin</string>
+    <string name="chat_issue_asked_you">Senden bir sayı istedi</string>
     <string name="chatlist_preview_issue">Yeni sayı: %1$s</string>
     <string name="notify_new_issue">%1$s yeni bir sayı gönderdi</string>
     <string name="library_note_new_issue">Yeni sayı çıktı.</string>

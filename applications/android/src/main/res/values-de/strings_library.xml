@@ -12,6 +12,8 @@
     <string name="library_gone">nicht mehr in deinen Kontakten</string>
     <string name="chat_issue_sent_you">Hat dir eine Ausgabe geschickt</string>
     <string name="chat_issue_you_sent">Du hast eine Ausgabe geschickt</string>
+    <string name="chat_issue_you_asked">Du hast eine Ausgabe angefragt</string>
+    <string name="chat_issue_asked_you">Hat dich um eine Ausgabe gebeten</string>
     <string name="chatlist_preview_issue">Neue Ausgabe: %1$s</string>
     <string name="notify_new_issue">%1$s hat eine neue Ausgabe geschickt</string>
     <string name="library_note_new_issue">Eine neue Ausgabe ist da.</string>
