@@ -3,6 +3,7 @@
 #
 #   scripts/emulator.sh [1|2]            boot phone 1 or 2, wait for Android
 #   scripts/emulator.sh [1|2] install    + build, install, launch DUCAT
+#   VISIBLE=1 scripts/emulator.sh 1      ...with the screen on show
 #   adb -s emulator-5554 emu geo fix <lon> <lat>    mock GPS (phone 1)
 #   adb -s emulator-5556 emu geo fix <lon> <lat>    mock GPS (phone 2)
 #
@@ -62,7 +63,17 @@ else
   echo "no $TAP — SLIRP only (UI testing; DHT writes will not propagate)"
 fi
 
-$ANDROID_HOME/emulator/emulator -avd $AVD -port $PORT -no-window -no-audio \
+# VISIBLE=1 shows the phone's screen. Headless is the default because these
+# are usually driven by adb, but a crash somebody is watching happen wants a
+# window: -gpu host already needs X, so this costs nothing extra beyond the
+# display the script has always required.
+WINDOW="-no-window"
+if [ -n "${VISIBLE:-}" ]; then
+  WINDOW=""
+  echo "showing the screen on DISPLAY=$DISPLAY"
+fi
+
+$ANDROID_HOME/emulator/emulator -avd $AVD -port $PORT $WINDOW -no-audio \
   -gpu host -no-snapshot -no-boot-anim -feature -Vulkan $NETFLAGS &
 EMU=$!
 trap 'kill $EMU 2>/dev/null' EXIT

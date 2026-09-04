@@ -1902,7 +1902,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_node_route_blob() != 4436.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_node_start() != 15207.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_node_start() != 61127.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_status() != 13257.toShort()) {
@@ -8348,13 +8348,6 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
     }
     
 
-        /**
-         * Start the node, storing its state under `storage_dir`.
-         *
-         * Returns as soon as startup is under way rather than when the network is
-         * usable: readiness takes seconds to minutes and a UI that blocks on it is a UI
-         * that appears frozen. Poll [`node_status`].
-         */
     @Throws(NodeException::class) fun `nodeStart`(`storageDir`: kotlin.String, `udp`: kotlin.Boolean)
         = 
     uniffiRustCallWithError(NodeException) { _status ->

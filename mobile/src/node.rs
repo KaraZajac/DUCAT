@@ -257,8 +257,60 @@ pub enum NodeError {
 /// Returns as soon as startup is under way rather than when the network is
 /// usable: readiness takes seconds to minutes and a UI that blocks on it is a UI
 /// that appears frozen. Poll [`node_status`].
+/// Where a panic goes when there is nobody left to tell.
+///
+/// A panic on one of veilid's own threads has no `catch_unwind` over it, so
+/// the process aborts — and the ring above dies with it, unread, because the
+/// Kotlin poller only drains it every few seconds. The result on a phone is
+/// an app that vanishes mid-send and a log that simply stops, which is the
+/// worst kind of black box: the last line before the restart is whatever it
+/// was *about* to do, never why it failed.
+///
+/// So the hook writes straight into `ducat.log`, in that file's own format
+/// (`millis|E|tag|text`), before unwinding goes any further. One append, no
+/// locks of ours, nothing that can panic again.
+static PANIC_LOG: std::sync::OnceLock<std::path::PathBuf> = std::sync::OnceLock::new();
+static PANIC_HOOK: std::sync::Once = std::sync::Once::new();
+
+pub(crate) fn install_panic_hook(storage_dir: &str) {
+    // ducat.log lives beside the node's directory, not inside it.
+    if let Some(parent) = std::path::Path::new(storage_dir).parent() {
+        let _ = PANIC_LOG.set(parent.join("ducat.log"));
+    }
+    PANIC_HOOK.call_once(|| {
+        let previous = std::panic::take_hook();
+        std::panic::set_hook(Box::new(move |info| {
+            if let Some(path) = PANIC_LOG.get() {
+                let msg = info
+                    .payload()
+                    .downcast_ref::<&str>()
+                    .map(|s| (*s).to_string())
+                    .or_else(|| info.payload().downcast_ref::<String>().cloned())
+                    .unwrap_or_else(|| "panic".to_string());
+                let at = info
+                    .location()
+                    .map(|l| format!("{}:{}", l.file(), l.line()))
+                    .unwrap_or_else(|| "?".into());
+                let thread = std::thread::current().name().unwrap_or("?").to_string();
+                let millis = std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .map(|d| d.as_millis())
+                    .unwrap_or(0);
+                use std::io::Write;
+                if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open(path)
+                {
+                    let _ = writeln!(f, "{millis}|E|panic|on '{thread}' at {at}: {msg}");
+                    let _ = f.flush();
+                }
+            }
+            previous(info);
+        }));
+    });
+}
+
 #[uniffi::export]
 pub fn node_start(storage_dir: String, udp: bool) -> Result<(), NodeError> {
+    install_panic_hook(&storage_dir);
     // "Already running" and "already starting" both mean don't: starting
     // twice would fight over the store. The flag, not the slot's lock, is
     // what holds the second caller off — startup takes seconds (the keyring,
@@ -1668,5 +1720,36 @@ mod stand_tests {
             // whoever is looking at a board that mysteriously has nobody on it.
             assert!(msg.contains("standEpochName"), "the refusal names no remedy: {msg}");
         }
+    }
+}
+
+#[cfg(test)]
+mod panic_hook_tests {
+    /// The hook has one job and only gets one chance to do it: a panic on a
+    /// veilid thread aborts the process, so if the line is not on disk
+    /// before that, nobody ever learns what happened. Worth a test precisely
+    /// because it cannot be checked by using the app — the evidence it
+    /// produces only exists when something has already gone wrong.
+    #[test]
+    fn a_panic_names_itself_in_ducat_log() {
+        let dir = std::env::temp_dir().join(format!("ducat-hook-{}", std::process::id()));
+        let node_dir = dir.join("veilid");
+        std::fs::create_dir_all(&node_dir).expect("temp dir");
+        super::install_panic_hook(node_dir.to_str().unwrap());
+
+        // On a thread, because that is where the ones that matter happen.
+        let joined = std::thread::Builder::new()
+            .name("pretend-veilid".into())
+            .spawn(|| panic!("something went wrong in the node"))
+            .expect("spawn")
+            .join();
+        assert!(joined.is_err(), "the thread was supposed to panic");
+
+        let log = std::fs::read_to_string(dir.join("ducat.log")).expect("ducat.log written");
+        assert!(log.contains("|E|panic|"), "not in ducat.log's format: {log}");
+        assert!(log.contains("something went wrong in the node"), "no message: {log}");
+        assert!(log.contains("pretend-veilid"), "no thread name: {log}");
+        assert!(log.contains("node.rs:"), "no location: {log}");
+        std::fs::remove_dir_all(&dir).ok();
     }
 }
