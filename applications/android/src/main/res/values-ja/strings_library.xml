@@ -34,4 +34,6 @@
 この号はあなたのものです。これは、よそで読むために払う代償にすぎません。</string>
     <string name="library_save_go">保存する</string>
     <string name="library_save_keep">今はしない</string>
+    <string name="library_locked">まだ解錠していません</string>
+    <string name="library_locked_priced">未解錠 · %1$s</string>
 </resources>

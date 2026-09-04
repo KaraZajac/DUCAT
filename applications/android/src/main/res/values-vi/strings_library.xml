@@ -34,4 +34,6 @@
 Số này là của bạn. Đây chỉ là cái giá để đọc nó ở nơi khác.</string>
     <string name="library_save_go">Lưu lại</string>
     <string name="library_save_keep">Để sau</string>
+    <string name="library_locked">Chưa mở khoá</string>
+    <string name="library_locked_priced">Chưa mở khoá · %1$s</string>
 </resources>

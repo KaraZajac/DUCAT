@@ -35,4 +35,6 @@
 Die Ausgabe gehört dir. Das hier ist nur der Preis dafür, sie anderswo zu lesen.</string>
     <string name="library_save_go">Sichern</string>
     <string name="library_save_keep">Jetzt nicht</string>
+    <string name="library_locked">Noch nicht freigeschaltet</string>
+    <string name="library_locked_priced">Nicht freigeschaltet · %1$s</string>
 </resources>

@@ -35,4 +35,6 @@
 Sayı sizindir. Bu yalnızca onu başka bir yerde okumanın bedeli.</string>
     <string name="library_save_go">Kaydet</string>
     <string name="library_save_keep">Şimdi değil</string>
+    <string name="library_locked">Henüz açılmadı</string>
+    <string name="library_locked_priced">Açılmadı · %1$s</string>
 </resources>

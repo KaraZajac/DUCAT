@@ -35,4 +35,6 @@
 A edição é sua. Isto é só o que custa lê-la noutro lado.</string>
     <string name="library_save_go">Guardar</string>
     <string name="library_save_keep">Agora não</string>
+    <string name="library_locked">Ainda não desbloqueado</string>
+    <string name="library_locked_priced">Por desbloquear · %1$s</string>
 </resources>

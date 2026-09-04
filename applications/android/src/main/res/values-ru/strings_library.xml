@@ -37,4 +37,6 @@
 Выпуск ваш. Это лишь цена того, чтобы прочесть его в другом месте.</string>
     <string name="library_save_go">Сохранить</string>
     <string name="library_save_keep">Не сейчас</string>
+    <string name="library_locked">Ещё не открыт</string>
+    <string name="library_locked_priced">Не открыт · %1$s</string>
 </resources>

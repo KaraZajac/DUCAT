@@ -39,4 +39,6 @@
 العدد لك. هذا فقط ثمن قراءته في مكان آخر.</string>
     <string name="library_save_go">احفظه</string>
     <string name="library_save_keep">ليس الآن</string>
+    <string name="library_locked">لم يُفتح بعد</string>
+    <string name="library_locked_priced">غير مفتوح · %1$s</string>
 </resources>

@@ -35,4 +35,6 @@
 Le numéro est à vous. Ceci n\'est que le prix à payer pour le lire ailleurs.</string>
     <string name="library_save_go">L\'enregistrer</string>
     <string name="library_save_keep">Pas maintenant</string>
+    <string name="library_locked">Pas encore débloqué</string>
+    <string name="library_locked_priced">Non débloqué · %1$s</string>
 </resources>

@@ -35,4 +35,6 @@
 यह अंक आपका है। यह केवल उसे कहीं और पढ़ने की कीमत है।</string>
     <string name="library_save_go">सहेजें</string>
     <string name="library_save_keep">अभी नहीं</string>
+    <string name="library_locked">अभी अनलॉक नहीं</string>
+    <string name="library_locked_priced">अनलॉक नहीं · %1$s</string>
 </resources>

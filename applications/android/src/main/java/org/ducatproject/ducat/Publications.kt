@@ -847,6 +847,74 @@ object Publications {
     }
 
     /**
+     * Every period the publisher has shelved, whether or not this reader
+     * can open it: period id → bytes.
+     *
+     * The shelf's index is sealed under the *head* key, which arrives with
+     * the first delivery — so a subscriber can always see the whole
+     * catalogue, including issues they have not bought. The per-period
+     * content keys are what they lack, and lacking one is exactly what
+     * makes an issue an offer rather than a possession.
+     *
+     * Cached, because reading it is a DHT round trip and the list changes
+     * about as often as a magazine comes out.
+     */
+    fun shelvedPeriods(context: Context, publisherHex: String): Map<String, Long> {
+        val raw = prefs(context).getString("shelfseen", null) ?: return emptyMap()
+        val o = runCatching { JSONObject(raw).optJSONObject(publisherHex) }.getOrNull()
+            ?: return emptyMap()
+        val periods = o.optJSONObject("periods") ?: return emptyMap()
+        return periods.keys().asSequence().associateWith { periods.optLong(it, 0L) }
+    }
+
+    /** When that list was last read, epoch millis, or 0. */
+    fun shelfSeenAt(context: Context, publisherHex: String): Long =
+        runCatching {
+            prefs(context).getString("shelfseen", null)
+                ?.let { JSONObject(it) }?.optJSONObject(publisherHex)?.optLong("at", 0L)
+        }.getOrNull() ?: 0L
+
+    /**
+     * Read the publisher's shelf index and remember what is on it.
+     *
+     * Network work: call it off the main thread. Returns the number of
+     * periods seen, or -1 if the shelf could not be read — which is not an
+     * error worth shouting about, since a publisher's node is allowed to be
+     * away.
+     */
+    fun refreshShelf(context: Context, publisherHex: String): Int {
+        val sub = subscription(context, publisherHex) ?: return -1
+        val root = sub.first ?: return -1
+        val head = sub.second ?: return -1
+        val index = runCatching {
+            uniffi.ducat_mobile.nodeDhtOpen(root, null, null)
+            val raw = uniffi.ducat_mobile.nodeDhtGet(root, 0u, true) ?: return -1
+            JSONObject(
+                String(
+                    uniffi.ducat_mobile.publicationOpenChunk(head, root, 0u, raw),
+                    Charsets.UTF_8,
+                ),
+            )
+        }.getOrElse { return -1 }
+        val periods = index.optJSONObject("periods") ?: return 0
+        val seen = JSONObject()
+        for (id in periods.keys()) {
+            seen.put(id, periods.optJSONObject(id)?.optLong("bytes", 0L) ?: 0L)
+        }
+        synchronized(lock) {
+            val p = prefs(context)
+            val all = p.getString("shelfseen", null)?.let { JSONObject(it) } ?: JSONObject()
+            all.put(
+                publisherHex,
+                JSONObject().put("periods", seen).put("at", System.currentTimeMillis()),
+            )
+            p.edit().putString("shelfseen", all.toString()).apply()
+        }
+        ContactStore.bump()
+        return seen.length()
+    }
+
+    /**
      * The edition of a period this device actually holds: (shareKey,
      * digestHex), or null if nothing has landed.
      *

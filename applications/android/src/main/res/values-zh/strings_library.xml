@@ -34,4 +34,6 @@
 这一期是你的。这只是把它拿到别处去读所要付出的代价。</string>
     <string name="library_save_go">保存</string>
     <string name="library_save_keep">暂不</string>
+    <string name="library_locked">尚未解锁</string>
+    <string name="library_locked_priced">未解锁 · %1$s</string>
 </resources>

@@ -34,4 +34,6 @@
 Edisi ini milik Anda. Ini hanya harga untuk membacanya di tempat lain.</string>
     <string name="library_save_go">Simpan</string>
     <string name="library_save_keep">Nanti saja</string>
+    <string name="library_locked">Belum dibuka</string>
+    <string name="library_locked_priced">Belum dibuka · %1$s</string>
 </resources>

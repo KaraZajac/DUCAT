@@ -34,4 +34,6 @@
 이 호는 당신의 것입니다. 이것은 다른 곳에서 읽기 위해 치르는 대가일 뿐입니다.</string>
     <string name="library_save_go">저장</string>
     <string name="library_save_keep">나중에</string>
+    <string name="library_locked">아직 잠금 해제 안 됨</string>
+    <string name="library_locked_priced">잠금 해제 안 됨 · %1$s</string>
 </resources>

@@ -503,6 +503,21 @@ class Poller(private val context: Context) {
         val newestPerPub = 2
         for (pub in Publications.subscribedPublishers(context)) {
             if (Publications.isMuted(context, pub)) continue
+            // What is on the publisher's shelf, refreshed about hourly, so
+            // the Library can say "issue 13 is out" rather than only ever
+            // showing what this reader already bought. Elapsed, not a raw
+            // subtraction: a stamp written while the clock was ahead would
+            // freeze the catalogue for good, and a reader who never learns
+            // a new issue exists cannot buy it.
+            if (Elapsed.due(
+                    System.currentTimeMillis(),
+                    Publications.shelfSeenAt(context, pub),
+                    60 * 60_000L,
+                )
+            ) {
+                runCatching { Publications.refreshShelf(context, pub) }
+                    .onFailure { DucatLog.w(TAG, "shelf of ${pub.take(8)}…: ${it.message}") }
+            }
             // And only what the reader offered to help share. Without
             // this the checkbox would mean "until my next reboot" in
             // reverse — unticked, and the restart puts it back on the

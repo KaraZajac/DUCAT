@@ -305,6 +305,12 @@ private data class IssueRow(
     val period: String,
     val source: LibraryFetch.Source?,
     val bytes: Long?,
+    /** On the publisher's shelf but not opened by any key this reader
+     *  holds: an offer rather than a possession. [shelfBytes] is what the
+     *  index says it weighs, [pricePxmr] what the publisher asks. */
+    val locked: Boolean = false,
+    val shelfBytes: Long = 0,
+    val pricePxmr: Long = 0,
 )
 
 @Composable
@@ -331,18 +337,31 @@ fun LibrarySection() {
                 // is per-period. Prefer the swarm when both exist — it is
                 // the publisher saying this month went by truck.
                 val hasShelf = sub.first != null && sub.second != null
-                sub.third.keys.sortedDescending().map { period ->
+                // Everything on the shelf, not only what this reader can
+                // open. A period whose key has not been bought is still
+                // news — "issue 13 is out" is the whole of a subscription,
+                // and a library that only ever showed possessions could
+                // never say it.
+                val onShelf = Publications.shelvedPeriods(context, pub)
+                val price = Publications.priceOf(context, pub)
+                val owned = sub.third.keys
+                (owned + onShelf.keys).distinct().sortedDescending().map { period ->
                     val ship = Publications.shipment(context, pub, period)
+                    val mine = period in owned
                     IssueRow(
                         publisherHex = pub,
                         publisherName = names[pub],
                         period = period,
                         source = when {
+                            !mine -> null
                             ship != null -> LibraryFetch.Source.Swarm(ship.first, ship.second)
                             hasShelf -> LibraryFetch.Source.Shelf
                             else -> null
                         },
-                        bytes = LibraryFetch.fetchedBytes(context, pub, period),
+                        bytes = if (mine) LibraryFetch.fetchedBytes(context, pub, period) else null,
+                        locked = !mine,
+                        shelfBytes = onShelf[period] ?: 0L,
+                        pricePxmr = price,
                     )
                 }
             }.sortedWith(
@@ -570,6 +589,32 @@ private fun IssueLine(
                 style = MaterialTheme.typography.bodyLarge,
             )
             when {
+                // Not ours yet: say what it is and what it costs, and stop.
+                // The publisher bills for a period when they choose to; the
+                // key arrives when that bill settles. Naming a price here
+                // without a way to pay it would be a button that lies, so
+                // this row informs and does not pretend to sell.
+                row.locked -> {
+                    Text(
+                        if (row.pricePxmr > 0) {
+                            stringResource(
+                                R.string.library_locked_priced,
+                                org.ducatproject.ducat.Amounts.show(context, row.pricePxmr).primary,
+                            )
+                        } else {
+                            stringResource(R.string.library_locked)
+                        },
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    if (row.shelfBytes > 0) {
+                        Text(
+                            Formatter.formatShortFileSize(context, row.shelfBytes),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
                 mine -> {
                     val p = progress
                     if (p != null && p.length > 0) {

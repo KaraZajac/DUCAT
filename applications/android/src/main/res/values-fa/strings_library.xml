@@ -35,4 +35,6 @@
 این شماره از آنِ شماست. این تنها بهای خواندن آن در جای دیگر است.</string>
     <string name="library_save_go">ذخیره کن</string>
     <string name="library_save_keep">اکنون نه</string>
+    <string name="library_locked">هنوز باز نشده</string>
+    <string name="library_locked_priced">باز نشده · %1$s</string>
 </resources>

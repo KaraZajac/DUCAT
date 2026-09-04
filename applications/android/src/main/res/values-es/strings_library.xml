@@ -35,4 +35,6 @@
 El número es suyo. Esto es solo lo que cuesta leerlo en otro sitio.</string>
     <string name="library_save_go">Guardarlo</string>
     <string name="library_save_keep">Ahora no</string>
+    <string name="library_locked">Aún no desbloqueado</string>
+    <string name="library_locked_priced">Sin desbloquear · %1$s</string>
 </resources>

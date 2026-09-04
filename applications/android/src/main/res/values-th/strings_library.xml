@@ -34,4 +34,6 @@
 ฉบับนี้เป็นของคุณ นี่เป็นเพียงราคาของการอ่านมันที่อื่น</string>
     <string name="library_save_go">บันทึก</string>
     <string name="library_save_keep">ยังไม่ตอนนี้</string>
+    <string name="library_locked">ยังไม่ได้ปลดล็อก</string>
+    <string name="library_locked_priced">ยังไม่ปลดล็อก · %1$s</string>
 </resources>

@@ -35,4 +35,6 @@
 Het nummer is van jou. Dit is alleen wat het kost om het ergens anders te lezen.</string>
     <string name="library_save_go">Bewaren</string>
     <string name="library_save_keep">Nu niet</string>
+    <string name="library_locked">Nog niet vrijgegeven</string>
+    <string name="library_locked_priced">Niet vrijgegeven · %1$s</string>
 </resources>

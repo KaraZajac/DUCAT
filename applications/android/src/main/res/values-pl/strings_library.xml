@@ -37,4 +37,6 @@
 Numer należy do ciebie. To tylko cena za przeczytanie go gdzie indziej.</string>
     <string name="library_save_go">Zapisz</string>
     <string name="library_save_keep">Nie teraz</string>
+    <string name="library_locked">Jeszcze nieodblokowane</string>
+    <string name="library_locked_priced">Nieodblokowane · %1$s</string>
 </resources>

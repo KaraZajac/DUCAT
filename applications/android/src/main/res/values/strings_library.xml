@@ -38,4 +38,6 @@
 The issue is yours to keep. This is only what it costs to read it somewhere else.</string>
     <string name="library_save_go">Save it</string>
     <string name="library_save_keep">Not now</string>
+    <string name="library_locked">Not unlocked yet</string>
+    <string name="library_locked_priced">Not unlocked · %1$s</string>
 </resources>
