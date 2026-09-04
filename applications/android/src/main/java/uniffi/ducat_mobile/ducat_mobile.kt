@@ -5141,7 +5141,16 @@ public object FfiConverterTypeStandNotice: FfiConverterRustBuffer<StandNotice> {
 data class SwarmProgress (
     var `position`: kotlin.Long, 
     var `length`: kotlin.ULong, 
-    var `done`: kotlin.Boolean
+    var `done`: kotlin.Boolean, 
+    /**
+     * Pieces verified, and how many there are. Bytes alone cannot say
+     * whether a transfer is moving: a share whose peers all refuse sits
+     * at "0 B of 1.0 kB" and looks identical to one that has not started.
+     * The index knows the piece count before a single byte arrives, so a
+     * reader can be shown the shape of the thing and watch it fill.
+     */
+    var `piecesDone`: kotlin.ULong, 
+    var `piecesTotal`: kotlin.ULong
 ) {
     
     companion object
@@ -5156,19 +5165,25 @@ public object FfiConverterTypeSwarmProgress: FfiConverterRustBuffer<SwarmProgres
             FfiConverterLong.read(buf),
             FfiConverterULong.read(buf),
             FfiConverterBoolean.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterULong.read(buf),
         )
     }
 
     override fun allocationSize(value: SwarmProgress) = (
             FfiConverterLong.allocationSize(value.`position`) +
             FfiConverterULong.allocationSize(value.`length`) +
-            FfiConverterBoolean.allocationSize(value.`done`)
+            FfiConverterBoolean.allocationSize(value.`done`) +
+            FfiConverterULong.allocationSize(value.`piecesDone`) +
+            FfiConverterULong.allocationSize(value.`piecesTotal`)
     )
 
     override fun write(value: SwarmProgress, buf: ByteBuffer) {
             FfiConverterLong.write(value.`position`, buf)
             FfiConverterULong.write(value.`length`, buf)
             FfiConverterBoolean.write(value.`done`, buf)
+            FfiConverterULong.write(value.`piecesDone`, buf)
+            FfiConverterULong.write(value.`piecesTotal`, buf)
     }
 }
 

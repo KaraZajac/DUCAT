@@ -16,7 +16,17 @@ package org.ducatproject.ducat
  */
 object Swarm {
     data class Share(val shareKey: String, val indexDigestHex: String)
-    data class Progress(val position: Long, val length: Long, val done: Boolean)
+    data class Progress(
+        val position: Long,
+        val length: Long,
+        val done: Boolean,
+        /** Pieces verified, and how many the index says there are. Known
+         *  before the first byte lands, which is what lets a screen show
+         *  the shape of a transfer rather than a byte count that may never
+         *  move. */
+        val piecesDone: Long = 0,
+        val piecesTotal: Long = 0,
+    )
 
     /** Index and announce; returns once every local piece is verified and
      *  the share is on the DHT. Serving continues until [stop]. */
@@ -49,6 +59,9 @@ object Swarm {
     /** This share's fetch progress. Keyed: fetches run concurrently now. */
     fun fetchProgress(shareKey: String): Progress {
         val p = uniffi.ducat_mobile.swarmFetchProgress(shareKey)
-        return Progress(p.position, p.length.toLong(), p.done)
+        return Progress(
+            p.position, p.length.toLong(), p.done,
+            p.piecesDone.toLong(), p.piecesTotal.toLong(),
+        )
     }
 }

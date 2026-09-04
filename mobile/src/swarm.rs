@@ -119,6 +119,13 @@ pub struct SwarmProgress {
     pub position: i64,
     pub length: u64,
     pub done: bool,
+    /// Pieces verified, and how many there are. Bytes alone cannot say
+    /// whether a transfer is moving: a share whose peers all refuse sits
+    /// at "0 B of 1.0 kB" and looks identical to one that has not started.
+    /// The index knows the piece count before a single byte arrives, so a
+    /// reader can be shown the shape of the thing and watch it fill.
+    pub pieces_done: u64,
+    pub pieces_total: u64,
 }
 
 static PROGRESS: OnceLock<Mutex<std::collections::HashMap<String, SwarmProgress>>> =
@@ -138,6 +145,8 @@ pub fn swarm_fetch_progress(share_key: String) -> SwarmProgress {
         .unwrap_or(SwarmProgress {
             position: 0,
             length: 0,
+            pieces_done: 0,
+            pieces_total: 0,
             done: false,
         })
 }
@@ -343,6 +352,8 @@ async fn fetch_once(
         SwarmProgress {
             position: 0,
             length: 0,
+            pieces_done: 0,
+            pieces_total: 0,
             done: false,
         },
     );
@@ -417,7 +428,8 @@ async fn fetch_once(
             Event::FetcherStatus(stigmerge_peer::fetcher::Status::FetchProgress {
                 fetch_position,
                 fetch_length,
-                ..
+                verify_position,
+                verify_length,
             }) => {
                 total = fetch_length;
                 // Early reports are the resume point — what disk already
@@ -431,6 +443,8 @@ async fn fetch_once(
                 if let Some(p) = crate::lock(progress_map()).get_mut(&progress_key) {
                     p.position = fetch_position;
                     p.length = fetch_length;
+                    p.pieces_done = verify_position;
+                    p.pieces_total = verify_length;
                 }
             }
             _ => {}

@@ -1547,6 +1547,9 @@ fun SitesSection() {
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
+                                if (busy == site.recordKey) {
+                                    PieceBar(moved)
+                                }
                             }
                             Button(
                                 // This site's own job, not the section's.
@@ -1934,5 +1937,64 @@ private fun RecurringSetting() {
             }
         }
         Spacer(Modifier.height(24.dp))
+    }
+}
+
+
+/**
+ * A transfer drawn as the thing it actually is: one cell per piece of the
+ * share, filled as each is verified.
+ *
+ * A byte count cannot say whether a transfer is moving. "0 B of 1.0 kB" is
+ * what a share whose peers all refuse looks like, and it is also what one
+ * that started a second ago looks like — I spent an afternoon reading the
+ * first as the second. The index knows the piece count before a single byte
+ * arrives, so the shape of the thing can be on screen from the start, and
+ * filling in is the only evidence of progress that cannot be mistaken for
+ * stillness.
+ *
+ * Falls back to an indeterminate bar when the piece count is not known yet
+ * (the index has not resolved), because a row of zero cells is a lie about
+ * a transfer that may be perfectly healthy.
+ */
+@Composable
+private fun PieceBar(p: org.ducatproject.ducat.Swarm.Progress?) {
+    Spacer(Modifier.height(6.dp))
+    val total = p?.piecesTotal?.toInt() ?: 0
+    if (total <= 0) {
+        LinearProgressIndicator(
+            modifier = Modifier.fillMaxWidth().height(6.dp),
+            color = MaterialTheme.colorScheme.primary,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+        )
+        return
+    }
+    val done = (p?.piecesDone?.toInt() ?: 0).coerceIn(0, total)
+    // One cell per piece while they are countable by eye; past that the
+    // cells stop being individually meaningful and a plain bar says the
+    // same thing without a hundred hairlines.
+    if (total <= 60) {
+        Row(Modifier.fillMaxWidth().height(8.dp)) {
+            for (i in 0 until total) {
+                Box(
+                    Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .padding(end = if (i == total - 1) 0.dp else 1.dp)
+                        .background(
+                            if (i < done) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.surfaceVariant,
+                            MaterialTheme.shapes.extraSmall,
+                        ),
+                )
+            }
+        }
+    } else {
+        LinearProgressIndicator(
+            progress = { done.toFloat() / total.toFloat() },
+            modifier = Modifier.fillMaxWidth().height(8.dp),
+            color = MaterialTheme.colorScheme.primary,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+        )
     }
 }
