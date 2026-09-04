@@ -8,11 +8,15 @@
     <string name="rent_public_note">هر چه در این بخش نخست بنویسید روی تابلویی عمومی می‌رود که هر کسی در نزدیکی می‌تواند بخواند. تنها همان اندازه بنویسید که کسی برای تصمیم‌گیری لازم دارد.</string>
     <string name="rent_title">یک خط درباره‌اش</string>
     <string name="rent_ask_note">پرسیدن گفتگویی با فروشنده باز می‌کند.</string>
+    <string name="rent_photos_coming">عکس‌ها از گوشی فروشنده می‌آیند.</string>
+    <string name="rent_photos_away">عکس‌های بیشتری هست، اما گوشی فروشنده الان در دسترس نیست.</string>
     <string name="rent_photo_add">افزودن عکس</string>
-    <string name="rent_photo_change">تغییر عکس</string>
     <string name="rent_photo_remove">حذف</string>
     <string name="rent_photo_yours">عکس آگهی شما</string>
     <string name="rent_photo_note">روی تابلوی عمومی می‌رود، کوچک شده تا مرور سریع بماند.</string>
+    <string name="rent_photo_pick_cover">عکسی را که روی تابلو می‌رود بزن</string>
+    <string name="rent_photo_cover">روی تابلو</string>
+    <string name="rent_photo_gallery_note">بقیه وقتی کسی آگهی‌ات را باز کند از همین گوشی ارائه می‌شوند.</string>
     <string name="rent_photo_failed">آن تصویر قابل استفاده نبود. یکی دیگر را امتحان کنید.</string>
     <string name="rent_area">محله</string>
     <string name="rent_area_hint">با واژه‌های ساده — یک محله، نه نشانی</string>

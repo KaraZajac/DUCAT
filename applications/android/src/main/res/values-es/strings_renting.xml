@@ -8,11 +8,15 @@
     <string name="rent_public_note">Todo lo de esta primera parte se publica en un tablón público que cualquiera cerca puede leer. Limítate a lo que alguien necesita para decidir.</string>
     <string name="rent_title">Una línea sobre esto</string>
     <string name="rent_ask_note">Preguntar abre una conversación con quien vende.</string>
+    <string name="rent_photos_coming">Las fotos vienen del teléfono de quien vende.</string>
+    <string name="rent_photos_away">Hay más fotos, pero el teléfono de quien vende no está accesible ahora.</string>
     <string name="rent_photo_add">Añadir una foto</string>
-    <string name="rent_photo_change">Cambiar la foto</string>
     <string name="rent_photo_remove">Quitar</string>
     <string name="rent_photo_yours">La foto de tu anuncio</string>
     <string name="rent_photo_note">Va al tablón público, reducida para que navegar siga siendo rápido.</string>
+    <string name="rent_photo_pick_cover">Toca la que irá al tablón</string>
+    <string name="rent_photo_cover">En el tablón</string>
+    <string name="rent_photo_gallery_note">Las demás se ofrecen desde este teléfono cuando alguien abre tu anuncio.</string>
     <string name="rent_photo_failed">No se pudo usar esa imagen. Prueba con otra.</string>
     <string name="rent_area">Zona</string>
     <string name="rent_area_hint">Palabras normales: un barrio, no una dirección</string>

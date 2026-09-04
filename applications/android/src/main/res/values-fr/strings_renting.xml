@@ -8,11 +8,15 @@
     <string name="rent_public_note">Tout ce qui figure dans cette première partie va sur un tableau public que n’importe qui à proximité peut lire. Ne mettez que ce qu’il faut pour décider.</string>
     <string name="rent_title">Une ligne à son sujet</string>
     <string name="rent_ask_note">Demander ouvre une conversation avec le vendeur.</string>
+    <string name="rent_photos_coming">Les photos arrivent du téléphone du vendeur.</string>
+    <string name="rent_photos_away">D’autres photos existent, mais le téléphone du vendeur n’est pas joignable pour l’instant.</string>
     <string name="rent_photo_add">Ajouter une photo</string>
-    <string name="rent_photo_change">Changer la photo</string>
     <string name="rent_photo_remove">Retirer</string>
     <string name="rent_photo_yours">La photo de votre annonce</string>
     <string name="rent_photo_note">Elle va sur le tableau public, réduite pour que la navigation reste rapide.</string>
+    <string name="rent_photo_pick_cover">Touchez celle qui ira sur le tableau</string>
+    <string name="rent_photo_cover">Sur le tableau</string>
+    <string name="rent_photo_gallery_note">Les autres sont proposées depuis ce téléphone quand quelqu’un ouvre votre annonce.</string>
     <string name="rent_photo_failed">Cette image n’a pas pu être utilisée. Essayez-en une autre.</string>
     <string name="rent_area">Quartier</string>
     <string name="rent_area_hint">Des mots simples : un quartier, pas une adresse</string>

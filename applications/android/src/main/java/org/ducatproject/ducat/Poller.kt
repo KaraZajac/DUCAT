@@ -688,6 +688,20 @@ class Poller(private val context: Context) {
         for (r in Releases.all(context)) {
             if (r.keepAlive) Releases.reseed(context, r.digestHex)
         }
+        // And every live listing's photographs (§16.18.3). A node restart
+        // takes the seed registry with it, so without this a phone that
+        // rebooted went on advertising a gallery share on the board and
+        // served nobody: the reader is told more photographs exist and
+        // then waits for pictures that are not coming from anywhere. The
+        // share is minted from the pictures, so re-seeding the same
+        // directory yields the same key the board already names.
+        for (o in Listings.all(context)) {
+            if (!o.optBoolean("wanted", false)) continue
+            val id = o.optString("id")
+            if (id.isBlank() || o.optString("gallery").isBlank()) continue
+            runCatching { Listings.seedGallery(context, id) }
+                .onFailure { DucatLog.w(TAG, "gallery of ${id.take(8)}…: ${it.message}") }
+        }
     }
 
     private fun warmBoards(context: Context, scope: CoroutineScope) {

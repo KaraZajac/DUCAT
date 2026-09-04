@@ -8,11 +8,15 @@
     <string name="rent_public_note">Bu ilk bölümdeki her şey, yakındaki herkesin okuyabileceği açık bir panoya gider. Yalnızca birinin karar vermek için ihtiyaç duyduğu kadarını yazın.</string>
     <string name="rent_title">Tek cümleyle</string>
     <string name="rent_ask_note">Sormak, satıcıyla bir sohbet açar.</string>
+    <string name="rent_photos_coming">Fotoğraflar satıcının telefonundan geliyor.</string>
+    <string name="rent_photos_away">Başka fotoğraflar var ama satıcının telefonuna şu an ulaşılamıyor.</string>
     <string name="rent_photo_add">Fotoğraf ekle</string>
-    <string name="rent_photo_change">Fotoğrafı değiştir</string>
     <string name="rent_photo_remove">Kaldır</string>
     <string name="rent_photo_yours">İlanının fotoğrafı</string>
     <string name="rent_photo_note">Herkese açık panoya gider, gezinme hızlı kalsın diye küçültülür.</string>
+    <string name="rent_photo_pick_cover">Panoya çıkacak olanı seç</string>
+    <string name="rent_photo_cover">Panoda</string>
+    <string name="rent_photo_gallery_note">Kalanlar, biri ilanını açtığında bu telefondan sunulur.</string>
     <string name="rent_photo_failed">O görsel kullanılamadı. Başka birini dene.</string>
     <string name="rent_area">Semt</string>
     <string name="rent_area_hint">Gündelik sözcüklerle — bir semt, adres değil</string>

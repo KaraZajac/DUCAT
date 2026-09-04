@@ -8,11 +8,15 @@
     <string name="rent_public_note">この最初の部分に書いたことは、近くの誰でも読める公開の掲示板に載ります。相手が決めるのに必要なことだけにしてください。</string>
     <string name="rent_title">ひとことで言うと</string>
     <string name="rent_ask_note">質問すると出品者との会話が始まります。</string>
+    <string name="rent_photos_coming">写真は出品者の端末から届きます。</string>
+    <string name="rent_photos_away">ほかにも写真がありますが、出品者の端末に今はつながりません。</string>
     <string name="rent_photo_add">写真を追加</string>
-    <string name="rent_photo_change">写真を変える</string>
     <string name="rent_photo_remove">削除</string>
     <string name="rent_photo_yours">この出品の写真</string>
     <string name="rent_photo_note">公開ボードに載ります。閲覧を軽く保つため小さくします。</string>
+    <string name="rent_photo_pick_cover">ボードに載せる1枚をタップ</string>
+    <string name="rent_photo_cover">ボードに掲載</string>
+    <string name="rent_photo_gallery_note">残りは誰かが出品を開いたとき、この端末から提供されます。</string>
     <string name="rent_photo_failed">その画像は使えませんでした。別のものをお試しください。</string>
     <string name="rent_area">エリア</string>
     <string name="rent_area_hint">ふつうの言葉で — 地区名であって住所ではありません</string>

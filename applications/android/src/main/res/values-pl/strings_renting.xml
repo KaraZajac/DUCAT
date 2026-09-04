@@ -8,11 +8,15 @@
     <string name="rent_public_note">Wszystko z tej pierwszej części trafia na publiczną tablicę, którą może przeczytać każdy w pobliżu. Podaj tylko to, co ktoś musi wiedzieć, żeby się zdecydować.</string>
     <string name="rent_title">Jedno zdanie o tym</string>
     <string name="rent_ask_note">Zapytanie otwiera rozmowę ze sprzedającym.</string>
+    <string name="rent_photos_coming">Zdjęcia przychodzą z telefonu sprzedającego.</string>
+    <string name="rent_photos_away">Jest więcej zdjęć, ale telefon sprzedającego jest teraz nieosiągalny.</string>
     <string name="rent_photo_add">Dodaj zdjęcie</string>
-    <string name="rent_photo_change">Zmień zdjęcie</string>
     <string name="rent_photo_remove">Usuń</string>
     <string name="rent_photo_yours">Zdjęcie twojego ogłoszenia</string>
     <string name="rent_photo_note">Trafia na publiczną tablicę, pomniejszone, żeby przeglądanie było szybkie.</string>
+    <string name="rent_photo_pick_cover">Dotknij tego, które trafi na tablicę</string>
+    <string name="rent_photo_cover">Na tablicy</string>
+    <string name="rent_photo_gallery_note">Reszta jest udostępniana z tego telefonu, gdy ktoś otworzy twoje ogłoszenie.</string>
     <string name="rent_photo_failed">Nie udało się użyć tego obrazu. Spróbuj innego.</string>
     <string name="rent_area">Okolica</string>
     <string name="rent_area_hint">Zwykłe słowa — dzielnica, nie adres</string>

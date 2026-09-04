@@ -8,11 +8,15 @@
     <string name="rent_public_note">Mọi thứ ở phần đầu này sẽ lên một bảng công khai mà bất kỳ ai ở gần đều đọc được. Chỉ ghi những gì người ta cần để quyết định.</string>
     <string name="rent_title">Một dòng về nó</string>
     <string name="rent_ask_note">Hỏi sẽ mở cuộc trò chuyện với người bán.</string>
+    <string name="rent_photos_coming">Ảnh đang đến từ máy của người bán.</string>
+    <string name="rent_photos_away">Còn ảnh khác, nhưng máy của người bán hiện không kết nối được.</string>
     <string name="rent_photo_add">Thêm ảnh</string>
-    <string name="rent_photo_change">Đổi ảnh</string>
     <string name="rent_photo_remove">Bỏ</string>
     <string name="rent_photo_yours">Ảnh của tin đăng</string>
     <string name="rent_photo_note">Lên bảng công khai, được thu nhỏ để duyệt cho nhanh.</string>
+    <string name="rent_photo_pick_cover">Chạm vào ảnh sẽ lên bảng</string>
+    <string name="rent_photo_cover">Trên bảng</string>
+    <string name="rent_photo_gallery_note">Những ảnh còn lại được cung cấp từ máy này khi ai đó mở tin của bạn.</string>
     <string name="rent_photo_failed">Không dùng được ảnh đó. Thử ảnh khác.</string>
     <string name="rent_area">Khu vực</string>
     <string name="rent_area_hint">Bằng lời thường ngày — một khu phố, không phải địa chỉ</string>

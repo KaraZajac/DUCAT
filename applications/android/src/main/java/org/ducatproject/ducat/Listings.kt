@@ -289,7 +289,78 @@ object Listings {
     private val postLocks = java.util.concurrent.ConcurrentHashMap<String, Any>()
 
     fun remove(context: Context, id: String) {
+        // The pictures go with it, and the seeding stops. A listing taken
+        // down whose share kept serving would be a picture on the network
+        // for a thing nobody can buy, with nothing left pointing at it.
+        stopGallery(context, id)
+        photoDir(context, id).deleteRecursively()
         synchronized(lock) { save(context, all(context).filter { it.optString("id") != id }) }
+    }
+
+    // --- §16.18.3's gallery ------------------------------------------------
+    //
+    // Full-size pictures live here from the moment they are picked, and are
+    // seeded from here — never from a staging directory that is about to
+    // move, which leaves the seeder serving a path that no longer exists
+    // (Releases.share learned that one the hard way).
+
+    /** How many photographs one listing may carry.
+     *
+     *  Not a protocol bound — the swarm does not care — but a browser
+     *  fetching a gallery is waiting on it, and twenty pictures is a
+     *  minute of somebody's patience for a bicycle. */
+    const val MAX_PHOTOS = 8
+
+    /** Where one listing's full-size pictures live on this phone. */
+    fun photoDir(context: Context, listingId: String): java.io.File =
+        java.io.File(java.io.File(context.filesDir, "listing_photos"), safeId(listingId))
+
+    /** An id that cannot walk out of its own directory. */
+    private fun safeId(id: String): String =
+        id.filter { it.isLetterOrDigit() || it == '-' || it == '_' }.take(64)
+            .ifBlank { "unnamed" }
+
+    fun photos(context: Context, listingId: String): List<java.io.File> =
+        photoDir(context, listingId).listFiles()?.filter { it.isFile }?.sortedBy { it.name }
+            ?: emptyList()
+
+    /**
+     * Put this listing's pictures on the swarm, and keep serving them.
+     *
+     * Returns share key and index digest, or null when there is nothing to
+     * seed. Idempotent by design: seeding an unchanged directory returns the
+     * same share, so a refresh does not mint a second one.
+     */
+    fun seedGallery(context: Context, listingId: String): Pair<String, String>? {
+        val dir = photoDir(context, listingId)
+        if (!dir.isDirectory || dir.listFiles().orEmpty().none { it.isFile }) return null
+        return runCatching {
+            val share = Swarm.seed(dir.absolutePath)
+            // Narrated here rather than at the call site, because there are
+            // two: posting mints it, and the lap re-parks it after a node
+            // restart. A silent re-park is indistinguishable from one that
+            // never happened, which is the whole failure being guarded.
+            //
+            // In full, not truncated: this pair is public — it rides the
+            // board where anybody can read it — and a half-printed share
+            // key is no use to whoever is reading the log to find out why
+            // a gallery will not arrive.
+            DucatLog.i(
+                "Listings",
+                "gallery of ${listingId.take(8)}… serving at ${share.shareKey} " +
+                    "digest ${share.indexDigestHex}",
+            )
+            share.shareKey to share.indexDigestHex
+        }.onFailure {
+            DucatLog.w("Listings", "gallery of ${listingId.take(8)}…: ${it.message}")
+        }.getOrNull()
+    }
+
+    /** Stop serving this listing's pictures. */
+    fun stopGallery(context: Context, listingId: String) {
+        val share = get(context, listingId)?.optString("gallery")?.takeIf { it.isNotBlank() }
+            ?: return
+        runCatching { Swarm.stopShare(share) }
     }
 
     /**
@@ -434,6 +505,13 @@ object Listings {
             // board's budget when it was stored — core refuses an oversized
             // one, and the poster is the only person who could fix it.
             thumb = thumbOf(o),
+            // The gallery does not: the notice carries only where to find
+            // it. Both halves or neither, so a half-written pair never
+            // reaches core.
+            galleryShare = o.optString("gallery").takeIf { it.isNotBlank() }
+                ?.takeIf { o.optString("gallery_dig").isNotBlank() },
+            galleryDigest = o.optString("gallery_dig").takeIf { it.isNotBlank() }
+                ?.takeIf { o.optString("gallery").isNotBlank() },
         )
     }
 
@@ -516,6 +594,23 @@ object Listings {
             get(context, id)?.let { it.put("wanted", true); it.put("triedAt", now); put(context, it) }
         }
         val o = reprice(context, get(context, id) ?: return false)
+        // The pictures go on the network before the notice that names them.
+        // The other order publishes an address for a share nobody is
+        // serving yet, and a reader who arrives in that window is told the
+        // listing has photographs and then cannot fetch them.
+        if (o.optString("gallery").isBlank()) {
+            seedGallery(context, id)?.let { (share, digest) ->
+                synchronized(lock) {
+                    get(context, id)?.let {
+                        it.put("gallery", share)
+                        it.put("gallery_dig", digest)
+                        put(context, it)
+                    }
+                }
+                o.put("gallery", share)
+                o.put("gallery_dig", digest)
+            }
+        }
         val cell = o.optString("cell")
         if (cell.isBlank()) throw IllegalStateException("this listing has no area yet")
         val personas = PersonaStore(context)

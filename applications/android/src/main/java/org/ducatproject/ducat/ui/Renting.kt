@@ -4,7 +4,9 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -17,6 +19,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Backpack
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.Remove
@@ -551,24 +554,68 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
     var details by rememberSaveable { mutableStateOf("") }
     var fix by remember { mutableStateOf<Pair<Long, Long>?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
-    // §16.18.3's picture. Held as bytes already shrunk to the board's
-    // budget, so what the form shows is exactly what will be published —
-    // a preview of the original would flatter a picture nobody else sees.
-    var thumb by remember { mutableStateOf<ByteArray?>(null) }
+    // §16.18.3's pictures. The listing's id is settled here rather than at
+    // post time, because the photographs need somewhere to live the moment
+    // they are picked and that somewhere is named after the listing.
+    var draftId by rememberSaveable {
+        mutableStateOf<String?>(java.util.UUID.randomUUID().toString())
+    }
+    val galleryId = draftId!!
+    // Re-read from disk rather than held in state: bytes do not survive a
+    // rotation and files do, so the picked photographs outlive the screen.
+    var photoTick by remember { mutableStateOf(0) }
+    val photos = remember(photoTick, galleryId) { Listings.photos(context, galleryId) }
+    // Which of them is the one that rides the board. Saved by name, so a
+    // rotation does not silently promote a different picture.
+    var thumbName by rememberSaveable { mutableStateOf<String?>(null) }
     var thumbError by remember { mutableStateOf<String?>(null) }
-    val pickPhoto = rememberLauncherForActivityResult(
-        androidx.activity.result.contract.ActivityResultContracts.GetContent(),
-    ) { uri: android.net.Uri? ->
-        if (uri == null) return@rememberLauncherForActivityResult
+    // The board's copy, shrunk. What the form previews is these bytes and
+    // not the original — a preview of the source would flatter a picture
+    // nobody else ever sees.
+    val thumb = remember(thumbName, photoTick) {
+        val f = photos.firstOrNull { it.name == thumbName } ?: photos.firstOrNull()
+        f?.let { SafeImage.thumbnail({ it.inputStream() }) }
+    }
+    val pickPhotos = rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.GetMultipleContents(),
+    ) { uris: List<android.net.Uri> ->
+        if (uris.isEmpty()) return@rememberLauncherForActivityResult
         thumbError = null
-        val made = runCatching {
-            SafeImage.thumbnail({ context.contentResolver.openInputStream(uri) })
-        }.getOrNull()
-        if (made == null) {
-            thumbError = context.getString(R.string.rent_photo_failed)
-        } else {
-            thumb = made
+        val dir = Listings.photoDir(context, galleryId).apply { mkdirs() }
+        var added = 0
+        for (uri in uris.take(Listings.MAX_PHOTOS)) {
+            // Re-encoded on the way in, never passed through: a photograph
+            // carries where it was taken, and this one is headed for a
+            // public board and a swarm anybody can fetch from.
+            val mime = context.contentResolver.getType(uri)
+            val clean = runCatching {
+                SafeImage.stripped({ context.contentResolver.openInputStream(uri) }, mime)
+            }.getOrNull()
+            if (clean == null) continue
+            val ext = if (mime?.lowercase() == "image/png") "png" else "jpg"
+            // The directory's own count, which has already grown by every
+            // file written above — adding `added` to it counted each one
+            // twice and numbered three pictures 00, 02, 04.
+            val n = dir.listFiles()?.size ?: 0
+            runCatching {
+                java.io.File(dir, "%02d.%s".format(n, ext)).writeBytes(clean)
+                added++
+            }
         }
+        if (added == 0) thumbError = context.getString(R.string.rent_photo_failed)
+        photoTick++
+        if (thumbName == null) {
+            thumbName = Listings.photos(context, galleryId).firstOrNull()?.name
+        }
+    }
+
+    // Leaving without posting takes the photographs with it. They live
+    // under the listing's id, and an id that never became a listing would
+    // otherwise keep somebody's pictures on this phone for ever with
+    // nothing pointing at them.
+    val leave: () -> Unit = {
+        Listings.photoDir(context, galleryId).deleteRecursively()
+        onDone()
     }
 
     // Back closes the form — but not over the top of a half-written listing.
@@ -597,7 +644,6 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
     // One listing per form, however many times Post is pressed: a retry after
     // a failed board write must re-post the same draft, not save a second copy
     // that the poller then puts up beside the first.
-    var draftId by rememberSaveable { mutableStateOf<String?>(null) }
     // The post in flight, if any, so the screen that comes back after a
     // rotation collects what the one that left started. The post itself
     // runs in ListingPosts and finishes either way; what died with the
@@ -635,14 +681,14 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
         title, area, price, make, model, year, color, seats, trim,
         rooms, sleeps, sizeM2, tags, details,
     ).any { it.isNotBlank() }
-    BackHandler { if (started) confirmDiscard = true else onDone() }
+    BackHandler { if (started) confirmDiscard = true else leave() }
     if (confirmDiscard) {
         AlertDialog(
             onDismissRequest = { confirmDiscard = false },
             title = { Text(stringResource(R.string.rent_discard_title)) },
             text = { Text(stringResource(R.string.rent_discard_body)) },
             confirmButton = {
-                TextButton(onClick = { confirmDiscard = false; onDone() }) {
+                TextButton(onClick = { confirmDiscard = false; leave() }) {
                     Text(
                         stringResource(R.string.rent_discard_confirm),
                         color = MaterialTheme.colorScheme.error,
@@ -720,48 +766,128 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
         // The picture, first — it is the part a browser sees before any of
         // the words, and asking for it last is how listings go up without
         // one. Optional: a listing with no photograph is still a listing.
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                Modifier.size(72.dp).clip(MaterialTheme.shapes.small)
-                    .background(MaterialTheme.colorScheme.secondaryContainer)
-                    .clickable { pickPhoto.launch("image/*") },
-                contentAlignment = Alignment.Center,
-            ) {
-                val bmp = remember(thumb) {
-                    thumb?.let { SafeImage.fromBytes(it, SafeImage.AVATAR_PIXELS) }
-                }
-                if (bmp != null) {
-                    Image(
-                        bmp.asImageBitmap(),
-                        stringResource(R.string.rent_photo_yours),
-                        Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop,
-                    )
-                } else {
+        if (photos.isEmpty()) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    Modifier.size(72.dp).clip(MaterialTheme.shapes.small)
+                        .background(MaterialTheme.colorScheme.secondaryContainer)
+                        .clickable { pickPhotos.launch("image/*") },
+                    contentAlignment = Alignment.Center,
+                ) {
                     Icon(
                         Icons.Filled.AddAPhoto,
                         null,
                         tint = MaterialTheme.colorScheme.onSecondaryContainer,
                     )
                 }
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        stringResource(R.string.rent_photo_add),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Text(
+                        thumbError ?: stringResource(R.string.rent_photo_note),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (thumbError != null) MaterialTheme.colorScheme.error
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
-            Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) {
+        } else {
+            // The picked photographs, with the one that rides the board
+            // marked. Only one can: the notice carries a single small
+            // picture and the rest go by swarm, so "which one" is a choice
+            // somebody has to make and is better made here, looking at
+            // them, than guessed by taking the first.
+            Text(
+                stringResource(R.string.rent_photo_pick_cover),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Spacer(Modifier.height(6.dp))
+            Row(
+                Modifier.fillMaxWidth()
+                    .horizontalScroll(androidx.compose.foundation.rememberScrollState()),
+            ) {
+                for (f in photos) {
+                    val cover = f.name == (thumbName ?: photos.first().name)
+                    Box(
+                        Modifier.size(84.dp).padding(end = 8.dp),
+                    ) {
+                        val bmp = remember(f.path, photoTick) {
+                            SafeImage.fromFile(f.path, SafeImage.AVATAR_PIXELS)
+                        }
+                        Box(
+                            Modifier.fillMaxSize().clip(MaterialTheme.shapes.small)
+                                .background(MaterialTheme.colorScheme.secondaryContainer)
+                                .border(
+                                    if (cover) 3.dp else 0.dp,
+                                    MaterialTheme.colorScheme.primary,
+                                    MaterialTheme.shapes.small,
+                                )
+                                .clickable { thumbName = f.name },
+                        ) {
+                            if (bmp != null) {
+                                Image(
+                                    bmp.asImageBitmap(),
+                                    stringResource(R.string.rent_photo_yours),
+                                    Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop,
+                                )
+                            }
+                        }
+                        if (cover) {
+                            // A mark, not a caption. "On the board" is four
+                            // words in English and more in several other
+                            // languages, and at 84dp it wrapped and spilled
+                            // out of the picture it was labelling. The words
+                            // stay as the description a screen reader says.
+                            Box(
+                                Modifier.align(Alignment.BottomEnd)
+                                    .padding(end = 8.dp)
+                                    .clip(androidx.compose.foundation.shape.CircleShape)
+                                    .background(MaterialTheme.colorScheme.primary),
+                            ) {
+                                Icon(
+                                    Icons.Filled.Check,
+                                    stringResource(R.string.rent_photo_cover),
+                                    Modifier.size(18.dp).padding(2.dp),
+                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                )
+                            }
+                        }
+                    }
+                }
+                if (photos.size < Listings.MAX_PHOTOS) {
+                    Box(
+                        Modifier.size(84.dp).clip(MaterialTheme.shapes.small)
+                            .background(MaterialTheme.colorScheme.secondaryContainer)
+                            .clickable { pickPhotos.launch("image/*") },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            Icons.Filled.AddAPhoto,
+                            null,
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.height(4.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    stringResource(
-                        if (thumb == null) R.string.rent_photo_add else R.string.rent_photo_change,
-                    ),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                Text(
-                    thumbError ?: stringResource(R.string.rent_photo_note),
+                    thumbError ?: stringResource(R.string.rent_photo_gallery_note),
                     style = MaterialTheme.typography.labelSmall,
                     color = if (thumbError != null) MaterialTheme.colorScheme.error
                     else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
                 )
-            }
-            if (thumb != null) {
-                TextButton(onClick = { thumb = null; thumbError = null }) {
+                TextButton(onClick = {
+                    Listings.photoDir(context, galleryId).deleteRecursively()
+                    thumbName = null
+                    thumbError = null
+                    photoTick++
+                }) {
                     Text(stringResource(R.string.rent_photo_remove))
                 }
             }
@@ -1079,7 +1205,7 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
                 ) else Text(stringResource(R.string.rent_post_it))
             }
             Spacer(Modifier.width(8.dp))
-            TextButton(onClick = onDone) { Text(stringResource(R.string.rent_cancel)) }
+            TextButton(onClick = leave) { Text(stringResource(R.string.rent_cancel)) }
         }
         if (posting) {
             // A board write is a DHT publish and an empty cell takes its

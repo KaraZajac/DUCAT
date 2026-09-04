@@ -8,11 +8,15 @@
     <string name="rent_public_note">Alles in dit eerste deel komt op een openbaar bord dat iedereen in de buurt kan lezen. Houd het bij wat iemand nodig heeft om te beslissen.</string>
     <string name="rent_title">Eén regel erover</string>
     <string name="rent_ask_note">Vragen opent een gesprek met de verkoper.</string>
+    <string name="rent_photos_coming">De foto’s komen van de telefoon van de verkoper.</string>
+    <string name="rent_photos_away">Er zijn meer foto’s, maar de telefoon van de verkoper is nu niet bereikbaar.</string>
     <string name="rent_photo_add">Foto toevoegen</string>
-    <string name="rent_photo_change">Foto wijzigen</string>
     <string name="rent_photo_remove">Verwijderen</string>
     <string name="rent_photo_yours">De foto van je advertentie</string>
     <string name="rent_photo_note">Komt op het openbare bord, verkleind zodat bladeren snel blijft.</string>
+    <string name="rent_photo_pick_cover">Tik de foto aan die op het bord komt</string>
+    <string name="rent_photo_cover">Op het bord</string>
+    <string name="rent_photo_gallery_note">De rest wordt vanaf deze telefoon aangeboden als iemand je advertentie opent.</string>
     <string name="rent_photo_failed">Die afbeelding kon niet worden gebruikt. Probeer een andere.</string>
     <string name="rent_area">Buurt</string>
     <string name="rent_area_hint">Gewone woorden — een buurt, geen adres</string>

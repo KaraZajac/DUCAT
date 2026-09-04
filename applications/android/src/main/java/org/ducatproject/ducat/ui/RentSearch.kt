@@ -1,8 +1,13 @@
 package org.ducatproject.ducat.ui
 
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import org.ducatproject.ducat.Galleries
 import org.ducatproject.ducat.SafeImage
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -1004,18 +1009,87 @@ private fun ListingSheet(
                 .verticalScroll(androidx.compose.foundation.rememberScrollState())
                 .padding(start = 20.dp, end = 20.dp, bottom = 28.dp),
         ) {
-            val shot = remember(info.thumb) {
+            // §16.18.3: the thumbnail is already here; the gallery is not.
+            // Fetching starts because somebody opened this listing — which
+            // is the one moment the spec allows it, and never while
+            // browsing.
+            var tick by remember { mutableStateOf(0) }
+            val gallery = remember(info.galleryShare, tick) {
+                Galleries.state(context, info.galleryShare, info.galleryDigest)
+            }
+            LaunchedEffect(info.galleryShare, info.galleryDigest) {
+                val share = info.galleryShare
+                val dig = info.galleryDigest
+                if (share != null && dig != null && gallery.dir == null) {
+                    Galleries.start(context, share, dig)
+                }
+            }
+            // While anything is moving, re-read on a heartbeat so the bar
+            // fills. Stops when the fetch does; a sheet nobody is watching
+            // must not keep a timer alive.
+            LaunchedEffect(gallery.fetching) {
+                while (gallery.fetching) {
+                    kotlinx.coroutines.delay(700)
+                    tick++
+                }
+            }
+            val shots = remember(gallery.dir, tick) {
+                info.galleryDigest?.let { d ->
+                    Galleries.photos(context, d).mapNotNull {
+                        SafeImage.fromFile(it.path, SafeImage.MESSAGE_PIXELS)
+                    }
+                }.orEmpty()
+            }
+            val cover = remember(info.thumb) {
                 info.thumb?.let { SafeImage.fromBytes(it, SafeImage.MESSAGE_PIXELS) }
             }
-            if (shot != null) {
+            if (shots.isNotEmpty()) {
+                // The gallery arrived: the photographs themselves, full
+                // width, in the order the seller put them in.
+                Row(
+                    Modifier.fillMaxWidth()
+                        .horizontalScroll(androidx.compose.foundation.rememberScrollState()),
+                ) {
+                    for (b in shots) {
+                        Image(
+                            b.asImageBitmap(),
+                            null,
+                            Modifier.height(240.dp).padding(end = 8.dp)
+                                .clip(MaterialTheme.shapes.medium),
+                            contentScale = ContentScale.Fit,
+                        )
+                    }
+                }
+                Spacer(Modifier.height(12.dp))
+            } else if (cover != null) {
                 Image(
-                    shot.asImageBitmap(),
+                    cover.asImageBitmap(),
                     null,
                     Modifier.fillMaxWidth().height(240.dp)
                         .clip(MaterialTheme.shapes.medium),
                     contentScale = ContentScale.Crop,
                 )
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(8.dp))
+            }
+            if (info.galleryShare != null && shots.isEmpty()) {
+                if (gallery.fetching) {
+                    PieceBar(gallery.progress, Modifier.padding(bottom = 4.dp))
+                    Text(
+                        stringResource(R.string.rent_photos_coming),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                } else if (gallery.failed != null) {
+                    // A seller who is away has a gallery that does not
+                    // arrive, and that is the ordinary case rather than a
+                    // fault — said plainly so nobody reads it as one.
+                    Text(
+                        stringResource(R.string.rent_photos_away),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Spacer(Modifier.height(8.dp))
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(listingIcon(info.kind.toInt()), null, Modifier.size(20.dp))

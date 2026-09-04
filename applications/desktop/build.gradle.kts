@@ -77,6 +77,7 @@ val sharedLogic = listOf(
     "org/ducatproject/ducat/Catalogue.kt",
     "org/ducatproject/ducat/ui/Items.kt",
     "org/ducatproject/ducat/Hailing.kt",
+    "org/ducatproject/ducat/Galleries.kt",
     "org/ducatproject/ducat/Listings.kt",
     // §16.18.1: the chain's clock as a board sees it. Shared because both
     // boards' posters and readers are shared, and a desk that stamped

@@ -13,11 +13,19 @@
     <!-- Said above the ask button, because pressing it is not free: it
          opens a conversation and spends the code the seller posted. -->
     <string name="rent_ask_note">Asking opens a conversation with the seller.</string>
+    <!-- The gallery comes from the seller's own device, so it can simply
+         not arrive. That is ordinary, not a fault, and is worded as such. -->
+    <string name="rent_photos_coming">Photos are coming from the seller\u2019s phone.</string>
+    <string name="rent_photos_away">More photos exist, but the seller\u2019s phone is not reachable right now.</string>
     <string name="rent_photo_add">Add a photo</string>
-    <string name="rent_photo_change">Change the photo</string>
     <string name="rent_photo_remove">Remove</string>
     <string name="rent_photo_yours">Your listing\u2019s photo</string>
     <string name="rent_photo_note">Goes on the public board, shrunk small so browsing stays quick.</string>
+    <string name="rent_photo_pick_cover">Tap the one to show on the board</string>
+    <string name="rent_photo_cover">On the board</string>
+    <!-- Says the two things about a gallery nobody can work out: it needs
+         this phone to be reachable, and asking for it is visible to you. -->
+    <string name="rent_photo_gallery_note">The rest are offered from this phone when someone opens your listing.</string>
     <string name="rent_photo_failed">That picture could not be used. Try another.</string>
     <string name="rent_area">Area</string>
     <string name="rent_area_hint">Human words — a neighbourhood, not an address</string>

@@ -8,11 +8,15 @@
     <string name="rent_public_note">كل ما في هذا الجزء الأول يوضع على لوحة عامة يمكن لأي شخص قريب قراءتها. اكتفِ بما يحتاجه أحدهم ليقرر.</string>
     <string name="rent_title">سطر واحد عنه</string>
     <string name="rent_ask_note">السؤال يفتح محادثة مع البائع.</string>
+    <string name="rent_photos_coming">الصور قادمة من هاتف البائع.</string>
+    <string name="rent_photos_away">توجد صور أخرى، لكن هاتف البائع غير متاح الآن.</string>
     <string name="rent_photo_add">أضف صورة</string>
-    <string name="rent_photo_change">غيّر الصورة</string>
     <string name="rent_photo_remove">إزالة</string>
     <string name="rent_photo_yours">صورة إعلانك</string>
     <string name="rent_photo_note">تظهر على اللوحة العامة، مصغّرة لتبقى التصفح سريعًا.</string>
+    <string name="rent_photo_pick_cover">اضغط على الصورة التي ستظهر على اللوحة</string>
+    <string name="rent_photo_cover">على اللوحة</string>
+    <string name="rent_photo_gallery_note">تُقدَّم البقية من هذا الهاتف عندما يفتح أحد إعلانك.</string>
     <string name="rent_photo_failed">تعذّر استخدام تلك الصورة. جرّب غيرها.</string>
     <string name="rent_area">المنطقة</string>
     <string name="rent_area_hint">بكلمات عادية — حي، وليس عنوانًا</string>

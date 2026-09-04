@@ -22,6 +22,13 @@ object ActivityResultContracts {
         override fun run(input: String): Uri? = pickFile(input)
     }
 
+    /** "Give me several." The desk's dialog picks one at a time, so this
+     *  returns a list of nought or one — enough for shared code to compile
+     *  and behave, and honest about what this shim can actually do. */
+    class GetMultipleContents : ActivityResultContract<String, List<Uri>>() {
+        override fun run(input: String): List<Uri> = listOfNotNull(pickFile(input))
+    }
+
     class OpenDocument : ActivityResultContract<Array<String>, Uri?>() {
         override fun run(input: Array<String>): Uri? = pickFile(input.firstOrNull() ?: "*/*")
     }

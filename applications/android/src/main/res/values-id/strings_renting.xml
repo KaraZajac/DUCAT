@@ -8,11 +8,15 @@
     <string name="rent_public_note">Semua di bagian pertama ini masuk ke papan publik yang bisa dibaca siapa pun di dekat sini. Tulis secukupnya, sebatas yang orang butuhkan untuk memutuskan.</string>
     <string name="rent_title">Satu baris tentangnya</string>
     <string name="rent_ask_note">Bertanya membuka percakapan dengan penjual.</string>
+    <string name="rent_photos_coming">Foto sedang datang dari ponsel penjual.</string>
+    <string name="rent_photos_away">Ada foto lain, tetapi ponsel penjual sedang tidak terjangkau.</string>
     <string name="rent_photo_add">Tambah foto</string>
-    <string name="rent_photo_change">Ganti foto</string>
     <string name="rent_photo_remove">Hapus</string>
     <string name="rent_photo_yours">Foto iklanmu</string>
     <string name="rent_photo_note">Masuk ke papan publik, diperkecil agar menjelajah tetap cepat.</string>
+    <string name="rent_photo_pick_cover">Ketuk yang akan tampil di papan</string>
+    <string name="rent_photo_cover">Di papan</string>
+    <string name="rent_photo_gallery_note">Sisanya ditawarkan dari ponsel ini saat ada yang membuka iklanmu.</string>
     <string name="rent_photo_failed">Gambar itu tidak bisa dipakai. Coba yang lain.</string>
     <string name="rent_area">Area</string>
     <string name="rent_area_hint">Dengan kata biasa — nama daerah, bukan alamat</string>

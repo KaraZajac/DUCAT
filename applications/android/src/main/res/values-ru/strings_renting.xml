@@ -8,11 +8,15 @@
     <string name="rent_public_note">Всё из этой первой части попадает на публичную доску, которую может прочитать любой рядом. Оставьте только то, что нужно человеку для решения.</string>
     <string name="rent_title">Одна строка об этом</string>
     <string name="rent_ask_note">Вопрос откроет разговор с продавцом.</string>
+    <string name="rent_photos_coming">Фотографии идут с телефона продавца.</string>
+    <string name="rent_photos_away">Есть ещё фотографии, но телефон продавца сейчас недоступен.</string>
     <string name="rent_photo_add">Добавить фото</string>
-    <string name="rent_photo_change">Заменить фото</string>
     <string name="rent_photo_remove">Убрать</string>
     <string name="rent_photo_yours">Фото вашего объявления</string>
     <string name="rent_photo_note">Попадёт на публичную доску, уменьшено, чтобы просмотр оставался быстрым.</string>
+    <string name="rent_photo_pick_cover">Нажмите ту, что пойдёт на доску</string>
+    <string name="rent_photo_cover">На доске</string>
+    <string name="rent_photo_gallery_note">Остальные предлагаются с этого телефона, когда кто-то открывает объявление.</string>
     <string name="rent_photo_failed">Это изображение не подошло. Попробуйте другое.</string>
     <string name="rent_area">Район</string>
     <string name="rent_area_hint">Обычными словами — район, а не адрес</string>
