@@ -7,6 +7,12 @@
     <string name="rent_form_vehicle">Kendaraan untuk disewakan</string>
     <string name="rent_public_note">Semua di bagian pertama ini masuk ke papan publik yang bisa dibaca siapa pun di dekat sini. Tulis secukupnya, sebatas yang orang butuhkan untuk memutuskan.</string>
     <string name="rent_title">Satu baris tentangnya</string>
+    <string name="rent_photo_add">Tambah foto</string>
+    <string name="rent_photo_change">Ganti foto</string>
+    <string name="rent_photo_remove">Hapus</string>
+    <string name="rent_photo_yours">Foto iklanmu</string>
+    <string name="rent_photo_note">Masuk ke papan publik, diperkecil agar menjelajah tetap cepat.</string>
+    <string name="rent_photo_failed">Gambar itu tidak bisa dipakai. Coba yang lain.</string>
     <string name="rent_area">Area</string>
     <string name="rent_area_hint">Dengan kata biasa — nama daerah, bukan alamat</string>
     <string name="rent_per_day">Harga per hari (%1$s)</string>

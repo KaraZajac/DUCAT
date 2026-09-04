@@ -7,6 +7,12 @@
     <string name="rent_form_vehicle">Een voertuig om te verhuren</string>
     <string name="rent_public_note">Alles in dit eerste deel komt op een openbaar bord dat iedereen in de buurt kan lezen. Houd het bij wat iemand nodig heeft om te beslissen.</string>
     <string name="rent_title">Eén regel erover</string>
+    <string name="rent_photo_add">Foto toevoegen</string>
+    <string name="rent_photo_change">Foto wijzigen</string>
+    <string name="rent_photo_remove">Verwijderen</string>
+    <string name="rent_photo_yours">De foto van je advertentie</string>
+    <string name="rent_photo_note">Komt op het openbare bord, verkleind zodat bladeren snel blijft.</string>
+    <string name="rent_photo_failed">Die afbeelding kon niet worden gebruikt. Probeer een andere.</string>
     <string name="rent_area">Buurt</string>
     <string name="rent_area_hint">Gewone woorden — een buurt, geen adres</string>
     <string name="rent_per_day">Prijs per dag (%1$s)</string>

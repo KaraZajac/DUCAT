@@ -1,5 +1,9 @@
 package org.ducatproject.ducat.ui
 
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import org.ducatproject.ducat.SafeImage
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -897,6 +901,22 @@ private fun ListingCard(info: RentalInfo, busy: Boolean, onAsk: () -> Unit) {
     val vehicle = kind == Listings.KIND_VEHICLE
     val place = kind == Listings.KIND_PLACE
     Card(Modifier.fillMaxWidth().clickable(enabled = !busy) { onAsk() }) {
+        Column {
+            // §16.18.3's thumbnail, straight off the board — it arrived with
+            // the notice, so drawing it costs nothing more than the read
+            // that is already done. A listing without one is not missing
+            // anything: it simply starts at its title.
+            val shot = remember(info.thumb) {
+                info.thumb?.let { SafeImage.fromBytes(it, SafeImage.MESSAGE_PIXELS) }
+            }
+            if (shot != null) {
+                Image(
+                    shot.asImageBitmap(),
+                    null,
+                    Modifier.fillMaxWidth().height(160.dp),
+                    contentScale = ContentScale.Crop,
+                )
+            }
         Column(Modifier.padding(14.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 // The kind's own icon. A house stood in for "not a vehicle",
@@ -1032,6 +1052,7 @@ private fun ListingCard(info: RentalInfo, busy: Boolean, onAsk: () -> Unit) {
             Button(enabled = !busy, onClick = onAsk) {
                 Text(stringResource(R.string.rent_ask_about_it))
             }
+        }
         }
     }
 }

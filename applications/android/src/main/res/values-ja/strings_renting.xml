@@ -7,6 +7,12 @@
     <string name="rent_form_vehicle">貸し出す車</string>
     <string name="rent_public_note">この最初の部分に書いたことは、近くの誰でも読める公開の掲示板に載ります。相手が決めるのに必要なことだけにしてください。</string>
     <string name="rent_title">ひとことで言うと</string>
+    <string name="rent_photo_add">写真を追加</string>
+    <string name="rent_photo_change">写真を変える</string>
+    <string name="rent_photo_remove">削除</string>
+    <string name="rent_photo_yours">この出品の写真</string>
+    <string name="rent_photo_note">公開ボードに載ります。閲覧を軽く保つため小さくします。</string>
+    <string name="rent_photo_failed">その画像は使えませんでした。別のものをお試しください。</string>
     <string name="rent_area">エリア</string>
     <string name="rent_area_hint">ふつうの言葉で — 地区名であって住所ではありません</string>
     <string name="rent_per_day">1日あたりの価格（%1$s）</string>

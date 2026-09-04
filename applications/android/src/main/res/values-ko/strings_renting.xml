@@ -7,6 +7,12 @@
     <string name="rent_form_vehicle">빌려줄 차량</string>
     <string name="rent_public_note">이 첫 부분에 쓴 내용은 근처 누구나 읽을 수 있는 공개 게시판에 올라갑니다. 상대가 결정하는 데 필요한 만큼만 적으세요.</string>
     <string name="rent_title">한 줄 소개</string>
+    <string name="rent_photo_add">사진 추가</string>
+    <string name="rent_photo_change">사진 바꾸기</string>
+    <string name="rent_photo_remove">삭제</string>
+    <string name="rent_photo_yours">이 게시물의 사진</string>
+    <string name="rent_photo_note">공개 게시판에 올라가며, 탐색이 빠르도록 작게 줄입니다.</string>
+    <string name="rent_photo_failed">그 이미지는 쓸 수 없었어요. 다른 걸 시도해 보세요.</string>
     <string name="rent_area">지역</string>
     <string name="rent_area_hint">평범한 말로 — 주소가 아니라 동네</string>
     <string name="rent_per_day">1일 요금 (%1$s)</string>

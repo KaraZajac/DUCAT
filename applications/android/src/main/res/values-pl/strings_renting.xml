@@ -7,6 +7,12 @@
     <string name="rent_form_vehicle">Pojazd do wynajęcia</string>
     <string name="rent_public_note">Wszystko z tej pierwszej części trafia na publiczną tablicę, którą może przeczytać każdy w pobliżu. Podaj tylko to, co ktoś musi wiedzieć, żeby się zdecydować.</string>
     <string name="rent_title">Jedno zdanie o tym</string>
+    <string name="rent_photo_add">Dodaj zdjęcie</string>
+    <string name="rent_photo_change">Zmień zdjęcie</string>
+    <string name="rent_photo_remove">Usuń</string>
+    <string name="rent_photo_yours">Zdjęcie twojego ogłoszenia</string>
+    <string name="rent_photo_note">Trafia na publiczną tablicę, pomniejszone, żeby przeglądanie było szybkie.</string>
+    <string name="rent_photo_failed">Nie udało się użyć tego obrazu. Spróbuj innego.</string>
     <string name="rent_area">Okolica</string>
     <string name="rent_area_hint">Zwykłe słowa — dzielnica, nie adres</string>
     <string name="rent_per_day">Cena za dzień (%1$s)</string>

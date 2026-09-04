@@ -7,6 +7,12 @@
     <string name="rent_form_vehicle">Ein Fahrzeug zum Vermieten</string>
     <string name="rent_public_note">Alles in diesem ersten Teil kommt auf ein öffentliches Brett, das jeder in der Nähe lesen kann. Beschränke dich auf das, was jemand zum Entscheiden braucht.</string>
     <string name="rent_title">Eine Zeile dazu</string>
+    <string name="rent_photo_add">Foto hinzufügen</string>
+    <string name="rent_photo_change">Foto ändern</string>
+    <string name="rent_photo_remove">Entfernen</string>
+    <string name="rent_photo_yours">Das Foto deiner Anzeige</string>
+    <string name="rent_photo_note">Kommt auf das öffentliche Board, klein gerechnet, damit das Stöbern schnell bleibt.</string>
+    <string name="rent_photo_failed">Dieses Bild ließ sich nicht verwenden. Versuch ein anderes.</string>
     <string name="rent_area">Gegend</string>
     <string name="rent_area_hint">Normale Worte — ein Viertel, keine Adresse</string>
     <string name="rent_per_day">Preis pro Tag (%1$s)</string>

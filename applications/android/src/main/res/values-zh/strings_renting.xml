@@ -7,6 +7,12 @@
     <string name="rent_form_vehicle">一辆出租的车</string>
     <string name="rent_public_note">第一部分的内容都会贴到附近所有人都能看到的公共板上。只写别人做决定需要知道的信息。</string>
     <string name="rent_title">一句话介绍</string>
+    <string name="rent_photo_add">添加照片</string>
+    <string name="rent_photo_change">更换照片</string>
+    <string name="rent_photo_remove">移除</string>
+    <string name="rent_photo_yours">这条信息的照片</string>
+    <string name="rent_photo_note">会放到公开板上，已缩小以保持浏览流畅。</string>
+    <string name="rent_photo_failed">那张图片无法使用，换一张试试。</string>
     <string name="rent_area">区域</string>
     <string name="rent_area_hint">用平常的说法——一个街区，不是地址</string>
     <string name="rent_per_day">每日价格（%1$s）</string>

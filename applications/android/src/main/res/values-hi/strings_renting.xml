@@ -7,6 +7,12 @@
     <string name="rent_form_vehicle">किराये पर देने का वाहन</string>
     <string name="rent_public_note">इस पहले हिस्से की हर बात एक सार्वजनिक बोर्ड पर जाती है जिसे आस-पास कोई भी पढ़ सकता है। उतना ही लिखें जितना किसी को तय करने के लिए चाहिए।</string>
     <string name="rent_title">एक पंक्ति में</string>
+    <string name="rent_photo_add">फ़ोटो जोड़ें</string>
+    <string name="rent_photo_change">फ़ोटो बदलें</string>
+    <string name="rent_photo_remove">हटाएँ</string>
+    <string name="rent_photo_yours">आपकी लिस्टिंग की फ़ोटो</string>
+    <string name="rent_photo_note">सार्वजनिक बोर्ड पर जाती है, छोटी की गई ताकि ब्राउज़िंग तेज़ रहे।</string>
+    <string name="rent_photo_failed">वह तस्वीर इस्तेमाल नहीं हो सकी। कोई और आज़माएँ।</string>
     <string name="rent_area">इलाका</string>
     <string name="rent_area_hint">आम शब्दों में — मोहल्ला, पता नहीं</string>
     <string name="rent_per_day">प्रति दिन कीमत (%1$s)</string>

@@ -1,6 +1,10 @@
 package org.ducatproject.ducat.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -10,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Backpack
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DirectionsCar
@@ -30,6 +35,10 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import org.ducatproject.ducat.SafeImage
 import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.DucatLog
@@ -542,6 +551,25 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
     var details by rememberSaveable { mutableStateOf("") }
     var fix by remember { mutableStateOf<Pair<Long, Long>?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
+    // §16.18.3's picture. Held as bytes already shrunk to the board's
+    // budget, so what the form shows is exactly what will be published —
+    // a preview of the original would flatter a picture nobody else sees.
+    var thumb by remember { mutableStateOf<ByteArray?>(null) }
+    var thumbError by remember { mutableStateOf<String?>(null) }
+    val pickPhoto = rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.GetContent(),
+    ) { uri: android.net.Uri? ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        thumbError = null
+        val made = runCatching {
+            SafeImage.thumbnail({ context.contentResolver.openInputStream(uri) })
+        }.getOrNull()
+        if (made == null) {
+            thumbError = context.getString(R.string.rent_photo_failed)
+        } else {
+            thumb = made
+        }
+    }
 
     // Back closes the form — but not over the top of a half-written listing.
     //
@@ -688,6 +716,56 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        Spacer(Modifier.height(12.dp))
+        // The picture, first — it is the part a browser sees before any of
+        // the words, and asking for it last is how listings go up without
+        // one. Optional: a listing with no photograph is still a listing.
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                Modifier.size(72.dp).clip(MaterialTheme.shapes.small)
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
+                    .clickable { pickPhoto.launch("image/*") },
+                contentAlignment = Alignment.Center,
+            ) {
+                val bmp = remember(thumb) {
+                    thumb?.let { SafeImage.fromBytes(it, SafeImage.AVATAR_PIXELS) }
+                }
+                if (bmp != null) {
+                    Image(
+                        bmp.asImageBitmap(),
+                        stringResource(R.string.rent_photo_yours),
+                        Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                    )
+                } else {
+                    Icon(
+                        Icons.Filled.AddAPhoto,
+                        null,
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                    )
+                }
+            }
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(
+                    stringResource(
+                        if (thumb == null) R.string.rent_photo_add else R.string.rent_photo_change,
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Text(
+                    thumbError ?: stringResource(R.string.rent_photo_note),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (thumbError != null) MaterialTheme.colorScheme.error
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            if (thumb != null) {
+                TextButton(onClick = { thumb = null; thumbError = null }) {
+                    Text(stringResource(R.string.rent_photo_remove))
+                }
+            }
+        }
         Spacer(Modifier.height(12.dp))
         OutlinedTextField(
             value = title, onValueChange = { title = it.take(60) },
@@ -980,6 +1058,7 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
                         priceTyped = price.takeIf { fiat },
                         priceCurrency = cur.takeIf { fiat },
                         quantity = howMany.toLongOrNull() ?: 1L,
+                        thumb = thumb,
                     )
                     draftId?.let { draft.put("id", it) } ?: run { draftId = draft.optString("id") }
                     error = null

@@ -27,7 +27,11 @@ class Bitmap internal constructor(
         }
     }
 
-    enum class CompressFormat { JPEG, PNG, WEBP }
+    // WEBP_LOSSY is API 30's name for the same encoder; the shim carries it
+    // so shared code can name it. ImageIO has no WebP writer, so both WebP
+    // spellings fail here and the caller's JPEG fallback takes over — which
+    // is exactly what that fallback is for.
+    enum class CompressFormat { JPEG, PNG, WEBP, WEBP_LOSSY }
 
     /**
      * Re-encode. The phone steps quality down until the bytes fit a record;

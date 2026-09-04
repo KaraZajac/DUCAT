@@ -113,6 +113,14 @@ object Listings {
         r.subtype?.let { put("subtype", it.toLong()) }
         put("features", org.json.JSONArray(r.features))
         put("quantity", r.quantity.toLong())
+        // The picture too: this cache is what the browse screen draws from
+        // between sweeps, and a row that forgot its thumbnail would go grey
+        // every time the list was rebuilt from disk.
+        r.thumb?.let {
+            put("thumb", android.util.Base64.encodeToString(it, android.util.Base64.NO_WRAP))
+        }
+        r.galleryShare?.let { put("gallery", it) }
+        r.galleryDigest?.let { put("gallery_dig", it) }
     }
 
     private fun rowFromJson(o: JSONObject): uniffi.ducat_mobile.RentalInfo? = runCatching {
@@ -142,6 +150,9 @@ object Listings {
                 (0 until a.length()).map { a.getString(it) }
             } ?: emptyList(),
             quantity = o.optLong("quantity", 1).toULong(),
+            thumb = thumbOf(o),
+            galleryShare = o.optString("gallery").takeIf { it.isNotBlank() },
+            galleryDigest = o.optString("gallery_dig").takeIf { it.isNotBlank() },
         )
     }.getOrNull()
 
@@ -301,6 +312,11 @@ object Listings {
         priceCurrency: String? = null,
         /** How many of it there are. One unless the owner said otherwise. */
         quantity: Long = 1,
+        /** §16.18.3's inline picture, already shrunk to fit the board by
+         *  [SafeImage.thumbnail]. Stored base64 beside the words, because a
+         *  listing that loses its picture on a rotation is one nobody
+         *  re-photographs. */
+        thumb: ByteArray? = null,
     ): JSONObject {
         val cell = runCatching {
             uniffi.ducat_mobile.geohashEncode(latE7, lonE7, CELL_PRECISION)
@@ -323,6 +339,9 @@ object Listings {
             // Stored even when it is one, so the owner's counter has something
             // to count down from without a migration the first time they sell.
             put("quantity", quantity.coerceIn(1L, MAX_QUANTITY))
+            thumb?.let {
+                put("thumb", android.util.Base64.encodeToString(it, android.util.Base64.NO_WRAP))
+            }
             put("created", System.currentTimeMillis() / 1000)
             // The doorway decision: this listing — its cards, its notice
             // signatures, every enquiry it opens — belongs to the persona
@@ -411,7 +430,26 @@ object Listings {
             // own screen counts down as they sell, and this is read at every
             // refresh so the board follows. A skill cannot carry one at all.
             quantity = (if (kind == KIND_SKILL) 1L else quantityOf(o)).toULong(),
+            // The picture rides the notice (§16.18.3). Already within the
+            // board's budget when it was stored — core refuses an oversized
+            // one, and the poster is the only person who could fix it.
+            thumb = thumbOf(o),
         )
+    }
+
+    /** A stored listing's inline picture, or null. Refused rather than
+     *  published if it will not fit: a notice one byte over the cap is
+     *  refused by every reader, and this is the last place that can say so. */
+    fun thumbOf(o: JSONObject): ByteArray? {
+        val raw = o.optString("thumb").takeIf { it.isNotBlank() } ?: return null
+        val bytes = runCatching {
+            android.util.Base64.decode(raw, android.util.Base64.NO_WRAP)
+        }.getOrNull() ?: return null
+        if (bytes.isEmpty() || bytes.size > SafeImage.THUMB_BYTES) {
+            DucatLog.w("Listings", "dropping a ${bytes.size}-byte thumbnail: over the board's cap")
+            return null
+        }
+        return bytes
     }
 
     /**

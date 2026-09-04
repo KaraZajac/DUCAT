@@ -7,6 +7,12 @@
     <string name="rent_form_vehicle">Un véhicule à louer</string>
     <string name="rent_public_note">Tout ce qui figure dans cette première partie va sur un tableau public que n’importe qui à proximité peut lire. Ne mettez que ce qu’il faut pour décider.</string>
     <string name="rent_title">Une ligne à son sujet</string>
+    <string name="rent_photo_add">Ajouter une photo</string>
+    <string name="rent_photo_change">Changer la photo</string>
+    <string name="rent_photo_remove">Retirer</string>
+    <string name="rent_photo_yours">La photo de votre annonce</string>
+    <string name="rent_photo_note">Elle va sur le tableau public, réduite pour que la navigation reste rapide.</string>
+    <string name="rent_photo_failed">Cette image n’a pas pu être utilisée. Essayez-en une autre.</string>
     <string name="rent_area">Quartier</string>
     <string name="rent_area_hint">Des mots simples : un quartier, pas une adresse</string>
     <string name="rent_per_day">Prix par jour (%1$s)</string>

@@ -7,6 +7,15 @@
     <string name="rent_form_vehicle">A vehicle to rent out</string>
     <string name="rent_public_note">Everything in this first part goes on a public board that anyone nearby can read. Keep it to what someone needs in order to decide.</string>
     <string name="rent_title">One line about it</string>
+    <!-- §16.18.3's inline picture. The note says the two things a poster
+         cannot work out for themselves: it rides the public board, and it
+         is shrunk to fit one. -->
+    <string name="rent_photo_add">Add a photo</string>
+    <string name="rent_photo_change">Change the photo</string>
+    <string name="rent_photo_remove">Remove</string>
+    <string name="rent_photo_yours">Your listing\u2019s photo</string>
+    <string name="rent_photo_note">Goes on the public board, shrunk small so browsing stays quick.</string>
+    <string name="rent_photo_failed">That picture could not be used. Try another.</string>
     <string name="rent_area">Area</string>
     <string name="rent_area_hint">Human words — a neighbourhood, not an address</string>
     <string name="rent_per_day">Price per day (%1$s)</string>

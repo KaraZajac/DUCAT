@@ -36,6 +36,73 @@ object SafeImage {
     /** Room for a picture the user is about to send, before it is scaled. */
     const val COMPOSE_PIXELS = 16 shl 20
 
+    /** §16.18.3's inline thumbnail: what the wire will accept. */
+    const val THUMB_BYTES = 10 * 1024
+
+    /**
+     * A listing's inline thumbnail, EXIF gone and small enough for a board.
+     *
+     * The budget is the protocol's and it is *hard* — a notice one byte over
+     * is refused on arrival, and the poster is the only person who can fix
+     * it — so this shrinks until it fits rather than hoping. Largest first:
+     * each edge is tried at falling quality, and the first size that fits is
+     * the one that keeps the most detail. Returns null when even the
+     * smallest attempt is too big, which the caller must show rather than
+     * publish a listing whose picture nobody can read.
+     *
+     * WebP because the budget is 10 KiB and a JPEG of the same size at these
+     * dimensions is visibly worse. [Bitmap.CompressFormat.WEBP_LOSSY] wants
+     * API 30; below that the deprecated WEBP constant is the same encoder,
+     * lossy at any quality under 100. Both write the RIFF/WEBP header
+     * §16.18's format check looks for.
+     *
+     * Orientation is baked in by [upright] before anything is measured, for
+     * the reason spelled out there — and on a public board it matters twice
+     * over, since the tag being dropped is also the only thing carrying
+     * where the picture was taken.
+     */
+    fun thumbnail(
+        open: () -> java.io.InputStream?,
+        budget: Int = THUMB_BYTES,
+    ): ByteArray? = runCatching {
+        val src = upright(open, COMPOSE_PIXELS) ?: return null
+        for (edge in intArrayOf(640, 512, 400, 320, 240)) {
+            val w: Int
+            val h: Int
+            if (src.width >= src.height) {
+                w = minOf(edge, src.width)
+                h = (w.toLong() * src.height / src.width).toInt().coerceAtLeast(1)
+            } else {
+                h = minOf(edge, src.height)
+                w = (h.toLong() * src.width / src.height).toInt().coerceAtLeast(1)
+            }
+            val scaled = Bitmap.createScaledBitmap(src, w, h, true)
+            // WebP first, JPEG as the floor. 30 is Android R, where the
+            // lossy constant arrives; below it the deprecated WEBP is the
+            // same encoder. The fallback is not decoration — the desk shim
+            // has no WebP writer at all, and a thumbnail that silently
+            // failed there would be a listing posted without its picture.
+            @Suppress("DEPRECATION")
+            val formats = listOfNotNull(
+                if (android.os.Build.VERSION.SDK_INT >= 30) {
+                    Bitmap.CompressFormat.WEBP_LOSSY
+                } else {
+                    Bitmap.CompressFormat.WEBP
+                },
+                Bitmap.CompressFormat.JPEG,
+            )
+            for (fmt in formats) {
+                for (q in intArrayOf(80, 70, 60, 50, 40, 30)) {
+                    val out = java.io.ByteArrayOutputStream()
+                    if (!runCatching { scaled.compress(fmt, q, out) }.getOrDefault(false)) break
+                    val bytes = out.toByteArray()
+                    if (bytes.size in 1..budget) return bytes
+                }
+            }
+        }
+        null
+    }.getOrNull()
+
     fun fromBytes(bytes: ByteArray, maxPixels: Int): Bitmap? = runCatching {
         val probe = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeByteArray(bytes, 0, bytes.size, probe)

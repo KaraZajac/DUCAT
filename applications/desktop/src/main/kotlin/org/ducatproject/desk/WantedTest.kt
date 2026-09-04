@@ -17,13 +17,28 @@ import org.ducatproject.ducat.Publications
  *   DUCAT_WANTED_STATE=<dir> ./gradlew :desktop:wantedtest
  */
 fun main() {
+    // A fresh directory per run, under the one the caller named. This is a
+    // test over a store, and a store keeps what the last run put in it: a
+    // second run against the same directory found two Gazettes holding the
+    // same period and wantedTarget refused to guess between them — correct
+    // behaviour, reported as a failure, which is the worst kind of red.
+    // sitepublishtest solves it the same way.
     val state = System.getenv("DUCAT_WANTED_STATE") ?: error("WANTED_FAIL set DUCAT_WANTED_STATE")
-    val context = DeskContext(File(state).apply { mkdirs() })
+    val root = File(state).apply { mkdirs() }
+    val context = DeskContext(kotlin.io.path.createTempDirectory(root.toPath(), "run").toFile())
 
     val reader = "aa".repeat(32)
     val stranger = "cc".repeat(32)
 
-    val gazette = Publications.create(context, "The Gazette")
+    // Reused by name rather than created blind: a second run against the
+    // same state dir would otherwise stack a fresh Gazette on the old one,
+    // and wantedTarget would correctly refuse to guess between them — a
+    // green test failing on its own leftovers, which reads as a regression.
+    fun publication(name: String): String =
+        Publications.publications(context).firstOrNull { it.second == name }?.first
+            ?: Publications.create(context, name)
+
+    val gazette = publication("The Gazette")
     Publications.setSubscriber(context, gazette, reader, true)
     Publications.recordIssue(
         context, gazette, "2026-09", "/tmp/sep.bin", "VLD0:sep", "11".repeat(32),
@@ -62,7 +77,7 @@ fun main() {
 
     // Two of ours hold the same label. Guessing sells the wrong thing or
     // bills for it, so the ask goes unanswered — which the wire allows.
-    val herald = Publications.create(context, "The Herald")
+    val herald = publication("The Herald")
     Publications.recordIssue(
         context, herald, "2026-09", "/tmp/sep2.bin", "VLD0:sep2", "22".repeat(32),
     )

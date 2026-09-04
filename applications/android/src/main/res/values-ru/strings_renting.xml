@@ -7,6 +7,12 @@
     <string name="rent_form_vehicle">Машина в аренду</string>
     <string name="rent_public_note">Всё из этой первой части попадает на публичную доску, которую может прочитать любой рядом. Оставьте только то, что нужно человеку для решения.</string>
     <string name="rent_title">Одна строка об этом</string>
+    <string name="rent_photo_add">Добавить фото</string>
+    <string name="rent_photo_change">Заменить фото</string>
+    <string name="rent_photo_remove">Убрать</string>
+    <string name="rent_photo_yours">Фото вашего объявления</string>
+    <string name="rent_photo_note">Попадёт на публичную доску, уменьшено, чтобы просмотр оставался быстрым.</string>
+    <string name="rent_photo_failed">Это изображение не подошло. Попробуйте другое.</string>
     <string name="rent_area">Район</string>
     <string name="rent_area_hint">Обычными словами — район, а не адрес</string>
     <string name="rent_per_day">Цена за день (%1$s)</string>
