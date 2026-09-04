@@ -153,6 +153,16 @@ Recorded per the MPL's Exhibit A expectations and plain courtesy:
    next `add` (test `done_handlers_are_skipped_and_swept`). **Upstream
    candidate for both crates.**
 
+   700. **`join_all` after `abort` panicked a runtime worker.** Three
+   places called `JoinSet::join_all` to collect tasks they had just
+   aborted, and `join_all` ends with `Err(err) => panic!("{err}")` — it
+   panics on precisely the cancellation those `abort()` calls create.
+   Every fetcher shutdown with work in flight took a tokio worker with
+   it: seen as `task 5044 was cancelled` on a fetch whose origin had
+   gone offline. Replaced by `fetcher::join_drain`, which ignores a
+   cancellation it asked for and still reports a task error or a real
+   panic (`fetcher.rs` ×2, `share.rs::join`). **Upstream candidate.**
+
 Proven live 2026-08-30, two DUCAT nodes on real Veilid: 25 MiB in 97.5 s
 and 100 MiB in 279.9 s (~3 Mbit/s through private routes), payload
 BLAKE3 identical on both ends, clean exits

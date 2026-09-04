@@ -56,11 +56,23 @@ fun main() {
                     try { Thread.sleep(2_000) } catch (_: InterruptedException) { break }
                 }
             }.apply { isDaemon = true; start() }
+            // DUCAT_SWARM_KEEP makes this a mirror rather than a reader:
+            // staySeeding leaves the share serving, and the process stays
+            // up, which is the only way to test the promise that matters —
+            // that a bundle outlives its origin. Without it the fetcher
+            // exits and takes its pieces with it.
+            val keep = System.getenv("DUCAT_SWARM_KEEP") != null
             val t0 = System.currentTimeMillis()
-            val bytes = Swarm.fetch(key, digest, out)
+            val bytes = Swarm.fetch(key, digest, out, staySeeding = keep)
             val secs = (System.currentTimeMillis() - t0) / 1000.0
             ticker.interrupt()
             println("SWARMTEST_OK $bytes $secs")
+            System.out.flush()
+            if (keep) {
+                println("SWARMTEST_MIRRORING serving until killed")
+                System.out.flush()
+                while (true) Thread.sleep(5_000)
+            }
         }
         else -> error("SWARMTEST_FAIL unknown role $role")
     }

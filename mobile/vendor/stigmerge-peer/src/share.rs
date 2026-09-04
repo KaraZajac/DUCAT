@@ -343,12 +343,8 @@ impl<C: Connection + Clone + Send + Sync + 'static> Share<C> {
         Ok(())
     }
 
-    pub async fn join(self) -> Result<()> {
-        self.tasks
-            .join_all()
-            .await
-            .into_iter()
-            .collect::<Result<(), _>>()
+    pub async fn join(mut self) -> Result<()> {
+        crate::fetcher::join_drain(&mut self.tasks).await
     }
 
     async fn send_indexer_progress(

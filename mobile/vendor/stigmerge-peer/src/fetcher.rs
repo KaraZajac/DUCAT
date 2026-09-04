@@ -14,6 +14,40 @@ use tracing::{debug, info, instrument, trace, warn};
 use veilid_core::RecordKey;
 use veilnet::Connection;
 
+/// Drain a `JoinSet` whose tasks may have been aborted.
+///
+/// **DUCAT modification.** `JoinSet::join_all` ends with
+/// `Err(err) => panic!("{err}")`, so it panics on any task that was
+/// cancelled — and every caller below reaches it immediately after
+/// calling `abort()` on those same tasks. The result was a runtime worker
+/// panicking with "task N was cancelled" on the ordinary shutdown path:
+/// seen on a fetch that ran out of peers, where the fetcher tore itself
+/// down and took a tokio worker with it.
+///
+/// A task we cancelled on purpose is not a failure. A task that *panicked*
+/// still is, and so is a task that returned an error — the first of those
+/// is what comes back.
+pub(crate) async fn join_drain(tasks: &mut JoinSet<Result<()>>) -> Result<()> {
+    let mut first_err = None;
+    while let Some(res) = tasks.join_next().await {
+        match res {
+            Ok(Ok(())) => {}
+            Ok(Err(e)) => {
+                if first_err.is_none() {
+                    first_err = Some(e);
+                }
+            }
+            // We aborted these ourselves; that is the shutdown working.
+            Err(e) if e.is_cancelled() => {}
+            Err(e) => return Err(e.into()),
+        }
+    }
+    match first_err {
+        Some(e) => Err(e),
+        None => Ok(()),
+    }
+}
+
 use crate::block_fetcher::BlockFetcher;
 use crate::content_addressable::ContentAddressable;
 use crate::error::{CancelError, Unrecoverable};
@@ -329,11 +363,7 @@ impl<C: Connection + Clone + Send + Sync + 'static> Fetcher<C> {
                     for handle in share_tasks.values() {
                         handle.abort();
                     }
-                    tasks
-                        .join_all()
-                        .await
-                        .into_iter()
-                        .collect::<Result<()>>()?;
+                    join_drain(&mut tasks).await?;
                     if self.piece_verifier.is_complete().await && self.piece_lease_manager.is_empty().await {
                         return Ok(State::Done);
                     }
@@ -685,11 +715,6 @@ impl<C: Connection + Clone + Send + Sync + 'static> FetchPool<C> {
             });
         }
 
-        tasks
-            .join_all()
-            .await
-            .into_iter()
-            .find(|res| res.is_err())
-            .unwrap_or(Ok(()))
+        join_drain(&mut tasks).await
     }
 }
