@@ -524,6 +524,48 @@ object Sites {
                 if (all(context).none { it.recordKey == recordKey && it.keepAlive }) {
                     return@runCatching
                 }
+                // **The head first, because seeding the wrong edition is
+                // worse than seeding nothing.**
+                //
+                // Peers do not compare content, they compare the index
+                // digest (peer_gossip::add_known_peer), and a mirror still
+                // announcing the edition it synced last month is rejected by
+                // everyone holding the current one — and DUCAT's own
+                // modification then calls remove_share, so the mirror drops
+                // out of the swarm for good. It cannot be advertised into the
+                // publisher's peer map, so no later reader can ever discover
+                // it, while this phone goes on saying "Ready offline" with
+                // the box ticked. Measured 2026-09-03: a mirror rejecting the
+                // publisher dozens of times an hour over byte-identical
+                // files, and zero rejections once it re-synced.
+                //
+                // Re-reading costs one DHT read per kept site per process,
+                // on this thread, and it is the difference between a promise
+                // and a decoration.
+                val head = runCatching { add(context, recordKey) }.getOrNull()
+                if (head == null) {
+                    // No answer: serve what we hold rather than nothing. A
+                    // reader offline with a current copy is the ordinary
+                    // case, and refusing to seed would punish it for the
+                    // network being away.
+                    DucatLog.i(
+                        "Sites",
+                        "keep-alive for ${recordKey.take(8)}… could not re-read the head — " +
+                            "serving the copy on disk",
+                    )
+                } else if (head.digestHex != digest) {
+                    // The page moved on. Fetch it: fetchBundle re-seeds when
+                    // it lands, under the index everyone else is using, so
+                    // that call finishes this one's work.
+                    DucatLog.i(
+                        "Sites",
+                        "keep-alive for ${recordKey.take(8)}… is a stale edition — refetching",
+                    )
+                    runCatching { fetchBundle(context, head) }.onFailure {
+                        DucatLog.w("Sites", "refetch for keep-alive: ${it.message}")
+                    }
+                    return@runCatching
+                }
                 // Stop-then-stay: parking the same share twice would strand
                 // the first task; stopping a share nobody serves is a no-op.
                 Swarm.stopShare(share)
