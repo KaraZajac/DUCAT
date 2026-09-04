@@ -104,6 +104,9 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
 
         /** A ducat:site/ link asking for the Sites shelf. */
         val openSites = kotlinx.coroutines.flow.MutableStateFlow(false)
+
+        /** A ducat:file/ link asking for the Library. */
+        val openLibrary = kotlinx.coroutines.flow.MutableStateFlow(false)
     }
 
     private fun readIntent(i: android.content.Intent?) {
@@ -120,6 +123,14 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
             if (uri != null && uri.startsWith("ducat:site/")) {
                 org.ducatproject.ducat.ui.pendingSiteAdd.value = uri
                 openSites.value = true
+            } else if (uri != null && org.ducatproject.ducat.Releases.parse(uri) != null) {
+                // A release address: share key and digest together, so it
+                // is filed the moment it is tapped and fetched when the
+                // reader asks. Parsed rather than prefix-matched, because
+                // a malformed one must reach the claim road below and be
+                // refused there, not be filed as a release nothing serves.
+                org.ducatproject.ducat.ui.pendingReleaseAdd.value = uri
+                openLibrary.value = true
             } else {
                 claimLink.value = uri
             }

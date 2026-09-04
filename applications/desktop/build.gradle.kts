@@ -99,6 +99,7 @@ val sharedLogic = listOf(
     "org/ducatproject/ducat/Publications.kt",
     "org/ducatproject/ducat/Swarm.kt",
     "org/ducatproject/ducat/Sites.kt",
+    "org/ducatproject/ducat/Releases.kt",
     "org/ducatproject/ducat/PageTemplate.kt",
     "org/ducatproject/ducat/ui/GroupChat.kt",
     "org/ducatproject/ducat/ui/SettledMark.kt",
@@ -881,6 +882,12 @@ tasks.register<JavaExec>("sitedirtest") {
 // The swarm bar's arithmetic: every piece in exactly one cell, and no cell
 // full before its run is.
 // `./gradlew :desktop:piecebartest`.
+tasks.register<JavaExec>("releaseaddrtest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.ReleaseAddrTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 tasks.register<JavaExec>("piecebarshots") {
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "org.ducatproject.desk.PieceBarShotsKt"

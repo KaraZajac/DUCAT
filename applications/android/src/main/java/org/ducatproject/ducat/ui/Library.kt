@@ -63,6 +63,9 @@ import org.ducatproject.ducat.saidWhy
  * Two at a time now that swarm progress is keyed per share: a queue feeds
  * a small pool, and everything past the pool waits its turn visibly.
  */
+/** A tapped `ducat:file/` address, waiting for the Library to open. */
+val pendingReleaseAdd = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
+
 object LibraryFetch {
     data class Job(val publisherHex: String, val period: String)
 

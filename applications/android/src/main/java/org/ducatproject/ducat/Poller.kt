@@ -605,6 +605,8 @@ class Poller(private val context: Context) {
         // reseed above it does not wait for a node.
         runCatching { Sites.sweepOrphans(context) }
             .onFailure { DucatLog.w(TAG, "site sweep: ${it.message}") }
+        runCatching { Releases.sweepOrphans(context) }
+            .onFailure { DucatLog.w(TAG, "release sweep: ${it.message}") }
         // And the library's abandoned part-downloads. A `.part` is kept after
         // a failure on purpose — the swarm engine checks pieces on disk, so a
         // retry resumes rather than starting over — but nothing ever collected
@@ -651,6 +653,12 @@ class Poller(private val context: Context) {
         sitesReseeded = true
         for (site in Sites.all(context)) {
             if (site.keepAlive) Sites.reseed(context, site.recordKey)
+        }
+        // And the releases. Nothing to re-read for these: the address names
+        // one fixed thing, so a mirror announces the pair it holds and can
+        // never be serving the wrong edition of anything.
+        for (r in Releases.all(context)) {
+            if (r.keepAlive) Releases.reseed(context, r.digestHex)
         }
     }
 
