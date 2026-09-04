@@ -7,6 +7,7 @@
     <string name="rent_form_vehicle">किराये पर देने का वाहन</string>
     <string name="rent_public_note">इस पहले हिस्से की हर बात एक सार्वजनिक बोर्ड पर जाती है जिसे आस-पास कोई भी पढ़ सकता है। उतना ही लिखें जितना किसी को तय करने के लिए चाहिए।</string>
     <string name="rent_title">एक पंक्ति में</string>
+    <string name="rent_ask_note">पूछने पर विक्रेता से बातचीत शुरू होती है।</string>
     <string name="rent_photo_add">फ़ोटो जोड़ें</string>
     <string name="rent_photo_change">फ़ोटो बदलें</string>
     <string name="rent_photo_remove">हटाएँ</string>

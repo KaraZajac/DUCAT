@@ -7,6 +7,7 @@
     <string name="rent_form_vehicle">Un vehículo para alquilar</string>
     <string name="rent_public_note">Todo lo de esta primera parte se publica en un tablón público que cualquiera cerca puede leer. Limítate a lo que alguien necesita para decidir.</string>
     <string name="rent_title">Una línea sobre esto</string>
+    <string name="rent_ask_note">Preguntar abre una conversación con quien vende.</string>
     <string name="rent_photo_add">Añadir una foto</string>
     <string name="rent_photo_change">Cambiar la foto</string>
     <string name="rent_photo_remove">Quitar</string>

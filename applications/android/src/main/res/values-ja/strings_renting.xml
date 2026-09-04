@@ -7,6 +7,7 @@
     <string name="rent_form_vehicle">貸し出す車</string>
     <string name="rent_public_note">この最初の部分に書いたことは、近くの誰でも読める公開の掲示板に載ります。相手が決めるのに必要なことだけにしてください。</string>
     <string name="rent_title">ひとことで言うと</string>
+    <string name="rent_ask_note">質問すると出品者との会話が始まります。</string>
     <string name="rent_photo_add">写真を追加</string>
     <string name="rent_photo_change">写真を変える</string>
     <string name="rent_photo_remove">削除</string>

@@ -7,6 +7,7 @@
     <string name="rent_form_vehicle">Một chiếc xe để cho thuê</string>
     <string name="rent_public_note">Mọi thứ ở phần đầu này sẽ lên một bảng công khai mà bất kỳ ai ở gần đều đọc được. Chỉ ghi những gì người ta cần để quyết định.</string>
     <string name="rent_title">Một dòng về nó</string>
+    <string name="rent_ask_note">Hỏi sẽ mở cuộc trò chuyện với người bán.</string>
     <string name="rent_photo_add">Thêm ảnh</string>
     <string name="rent_photo_change">Đổi ảnh</string>
     <string name="rent_photo_remove">Bỏ</string>

@@ -10,6 +10,9 @@
     <!-- §16.18.3's inline picture. The note says the two things a poster
          cannot work out for themselves: it rides the public board, and it
          is shrunk to fit one. -->
+    <!-- Said above the ask button, because pressing it is not free: it
+         opens a conversation and spends the code the seller posted. -->
+    <string name="rent_ask_note">Asking opens a conversation with the seller.</string>
     <string name="rent_photo_add">Add a photo</string>
     <string name="rent_photo_change">Change the photo</string>
     <string name="rent_photo_remove">Remove</string>

@@ -7,6 +7,7 @@
     <string name="rent_form_vehicle">빌려줄 차량</string>
     <string name="rent_public_note">이 첫 부분에 쓴 내용은 근처 누구나 읽을 수 있는 공개 게시판에 올라갑니다. 상대가 결정하는 데 필요한 만큼만 적으세요.</string>
     <string name="rent_title">한 줄 소개</string>
+    <string name="rent_ask_note">문의하면 판매자와 대화가 시작됩니다.</string>
     <string name="rent_photo_add">사진 추가</string>
     <string name="rent_photo_change">사진 바꾸기</string>
     <string name="rent_photo_remove">삭제</string>

@@ -1,5 +1,6 @@
 package org.ducatproject.ducat.ui
 
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import org.ducatproject.ducat.SafeImage
@@ -127,6 +128,11 @@ private fun RentSearchScreen(
     // See NameGate: the name travels on the handshake, so a blank one arrives
     // as "Unnamed contact" and neither end is told.
     var intro by remember { mutableStateOf<(() -> Unit)?>(null) }
+    // The listing somebody is looking at. Local: opening one costs nothing
+    // and tells nobody, which is the whole reason it is a separate gesture
+    // from asking.
+    var opened by remember { mutableStateOf<RentalInfo?>(null) }
+
     NameGate(
         open = intro != null,
         onDismiss = { intro = null },
@@ -142,6 +148,54 @@ private fun RentSearchScreen(
     // and every Ask button with it. Saveable, so the screen a rotation
     // rebuilds is the one that reads the outcome and opens the thread.
     var asking by rememberSaveable { mutableStateOf<String?>(null) }
+    // Asking, once, so the card and the sheet cannot drift apart. It was
+    // written inline in the card's onAsk; the sheet needs the same thing,
+    // and two copies of "claim their card and say what this is about" is
+    // two places for that to stop matching.
+    val askAbout: (RentalInfo) -> Unit = { info ->
+                          val go: () -> Unit = {
+                            busy = true; error = null
+                            asking = info.card
+                            // Asked from this phone already: the
+                            // card's reply is ours and the thread it
+                            // opened is still here. The claim goes to
+                            // it, and says nothing again — the
+                            // question is already in it.
+                            claimOffScreen(context, info.card, onFresh = { c ->
+                                // This side knows the subject without
+                                // being told: they tapped it.
+                                org.ducatproject.ducat.Enquiries.remember(
+                                    context, c.personaHex,
+                                    org.ducatproject.ducat.Enquiries.About(
+                                        title = info.title,
+                                        pricePxmr = info.pricePxmr.toLong(),
+                                        depositPxmr = info.depositPxmr.toLong(),
+                                        kind = info.kind.toInt(),
+                                    ),
+                                )
+                                // Say what this is about.
+                                //
+                                // The claim alone opened an empty
+                                // thread with a stranger: the owner
+                                // got somebody arriving with nothing
+                                // said, and the asker got a blank
+                                // screen and had to remember which of
+                                // the cars they had tapped. "Ask about
+                                // it" is a question; this is the
+                                // question.
+                                runCatching {
+                                    Mailbox.send(
+                                        context, c,
+                                        context.getString(
+                                            R.string.rent_asking_about,
+                                            isolate(info.title),
+                                        ),
+                                    )
+                                }
+                            })
+                          }
+                          if (nameGateNeeded(context)) intro = go else go()
+    }
     val claimTick by ThreadSends.ticks.collectAsState()
     LaunchedEffect(claimTick, asking) {
         val k = asking?.let(::claimKey) ?: return@LaunchedEffect
@@ -564,50 +618,8 @@ private fun RentSearchScreen(
                             ListingCard(
                                 info = info,
                                 busy = busy,
-                                onAsk = {
-                                  val go: () -> Unit = {
-                                    busy = true; error = null
-                                    asking = info.card
-                                    // Asked from this phone already: the
-                                    // card's reply is ours and the thread it
-                                    // opened is still here. The claim goes to
-                                    // it, and says nothing again — the
-                                    // question is already in it.
-                                    claimOffScreen(context, info.card, onFresh = { c ->
-                                        // This side knows the subject without
-                                        // being told: they tapped it.
-                                        org.ducatproject.ducat.Enquiries.remember(
-                                            context, c.personaHex,
-                                            org.ducatproject.ducat.Enquiries.About(
-                                                title = info.title,
-                                                pricePxmr = info.pricePxmr.toLong(),
-                                                depositPxmr = info.depositPxmr.toLong(),
-                                                kind = info.kind.toInt(),
-                                            ),
-                                        )
-                                        // Say what this is about.
-                                        //
-                                        // The claim alone opened an empty
-                                        // thread with a stranger: the owner
-                                        // got somebody arriving with nothing
-                                        // said, and the asker got a blank
-                                        // screen and had to remember which of
-                                        // the cars they had tapped. "Ask about
-                                        // it" is a question; this is the
-                                        // question.
-                                        runCatching {
-                                            Mailbox.send(
-                                                context, c,
-                                                context.getString(
-                                                    R.string.rent_asking_about,
-                                                    isolate(info.title),
-                                                ),
-                                            )
-                                        }
-                                    })
-                                  }
-                                  if (nameGateNeeded(context)) intro = go else go()
-                                },
+                                onOpen = { opened = info },
+                                onAsk = { askAbout(info) },
                             )
                             Spacer(Modifier.height(10.dp))
                         }
@@ -616,6 +628,17 @@ private fun RentSearchScreen(
                 }
             }
         }
+    // Opened, not asked. The sheet closes on its own the moment the ask
+    // starts, so the busy state and the errors stay on the one screen that
+    // was already showing them.
+    opened?.let { info ->
+        ListingSheet(
+            info = info,
+            busy = busy,
+            onDismiss = { opened = null },
+            onAsk = { opened = null; askAbout(info) },
+        )
+    }
     }
 
 /**
@@ -888,19 +911,199 @@ internal fun ListingCardsPreview() {
                     rooms = null, sleeps = null, sizeM2 = null,
                     subtype = subtype, features = features, quantity = 1uL,
                 ),
-                busy = false, onAsk = {},
+                busy = false, onAsk = {}, onOpen = {},
             )
         }
     }
 }
 
+/**
+ * The one line of specifics under a listing's title, in reading order.
+ *
+ * Lifted out of [ListingCard] so the sheet says exactly the same thing:
+ * two renderings of one listing that disagreed would be the board's own
+ * bytes described two ways.
+ */
 @Composable
-private fun ListingCard(info: RentalInfo, busy: Boolean, onAsk: () -> Unit) {
+private fun listingSpecs(info: RentalInfo): List<String> {
+    val kind = info.kind.toInt()
+    val vehicle = kind == Listings.KIND_VEHICLE
+    val place = kind == Listings.KIND_PLACE
+    return buildList {
+        if (vehicle) {
+            info.year?.let { add(it.toString()) }
+            info.make?.let { add(isolate(it)) }
+            info.model?.let { add(isolate(it)) }
+            info.gearbox?.let {
+                add(stringResource(
+                    if (it.toInt() == 1) R.string.rent_manual else R.string.rent_automatic,
+                ))
+            }
+            info.fuel?.let {
+                add(stringResource(when (it.toInt()) {
+                    2 -> R.string.rent_diesel
+                    3 -> R.string.rent_electric
+                    4 -> R.string.rent_hybrid
+                    else -> R.string.rent_petrol
+                }))
+            }
+            info.trim?.let { add(isolate(it)) }
+            info.seats?.let {
+                add(pluralStringResource(R.plurals.rent_seats_n, it.toInt(), it.toInt()))
+            }
+        } else if (place) {
+            info.rooms?.let {
+                add(pluralStringResource(R.plurals.rent_rooms_n, it.toInt(), it.toInt()))
+            }
+            info.sleeps?.let { add(stringResource(R.string.rent_sleeps_n, it.toInt())) }
+            info.sizeM2?.let { add(stringResource(R.string.rent_size_m2, it.toInt())) }
+            info.subtype?.let {
+                add(stringResource(
+                    if (it.toInt() == 2) R.string.rent_private_room
+                    else R.string.rent_whole_place,
+                ))
+            }
+        } else {
+            // This branch used to be "a place", so every one of the
+            // three new nouns rendered its category through a
+            // whole-place / private-room lookup: a bicycle in the
+            // Sport category read "Whole place".
+            info.subtype?.let { add(stringResource(categoryLabel(kind, it.toInt()))) }
+        }
+        addAll(info.features.map { isolate(it) })
+        // Only when there is more than one. Somebody deciding whether
+        // to ask wants to know they are not competing for the last
+        // one — and for the listing that *is* one thing, which is
+        // nearly all of them, saying so would be noise.
+        if (info.quantity > 1uL) {
+            add(stringResource(R.string.rent_n_available, info.quantity.toLong()))
+        }
+    }
+}
+
+/**
+ * One listing, opened.
+ *
+ * Local and free: nothing here touches the network, because everything it
+ * shows arrived with the board read. The one button that costs anything is
+ * the one that says so.
+ */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+private fun ListingSheet(
+    info: RentalInfo,
+    busy: Boolean,
+    onAsk: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val context = LocalContext.current
+    androidx.compose.material3.ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .verticalScroll(androidx.compose.foundation.rememberScrollState())
+                .padding(start = 20.dp, end = 20.dp, bottom = 28.dp),
+        ) {
+            val shot = remember(info.thumb) {
+                info.thumb?.let { SafeImage.fromBytes(it, SafeImage.MESSAGE_PIXELS) }
+            }
+            if (shot != null) {
+                Image(
+                    shot.asImageBitmap(),
+                    null,
+                    Modifier.fillMaxWidth().height(240.dp)
+                        .clip(MaterialTheme.shapes.medium),
+                    contentScale = ContentScale.Crop,
+                )
+                Spacer(Modifier.height(12.dp))
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(listingIcon(info.kind.toInt()), null, Modifier.size(20.dp))
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    isolate(info.title),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            Spacer(Modifier.height(6.dp))
+            Text(
+                run {
+                    val shown = Amounts.show(context, info.pricePxmr.toLong()).primary
+                    if (info.kind.toInt() == Listings.KIND_SALE) shown
+                    else stringResource(priceLabelShort(info.kind.toInt()), shown)
+                },
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            if (info.depositPxmr > 0uL) {
+                Text(
+                    stringResource(
+                        R.string.rent_stake_short,
+                        Amounts.show(context, info.depositPxmr.toLong()).primary,
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            val specs = listingSpecs(info)
+            if (specs.isNotEmpty()) {
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    specs.joinToString(" \u00b7 "),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            if (info.area.isNotBlank()) {
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    isolate(info.area),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Spacer(Modifier.height(16.dp))
+            // Says what pressing it does, because it is not free: it opens a
+            // conversation with somebody and spends the code they posted.
+            Text(
+                stringResource(R.string.rent_ask_note),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(6.dp))
+            Button(
+                enabled = !busy,
+                onClick = onAsk,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(stringResource(R.string.rent_ask_about_it))
+            }
+        }
+    }
+}
+
+@Composable
+private fun ListingCard(
+    info: RentalInfo,
+    busy: Boolean,
+    onAsk: () -> Unit,
+    onOpen: () -> Unit,
+) {
     val context = LocalContext.current
     val kind = info.kind.toInt()
     val vehicle = kind == Listings.KIND_VEHICLE
     val place = kind == Listings.KIND_PLACE
-    Card(Modifier.fillMaxWidth().clickable(enabled = !busy) { onAsk() }) {
+    // Tapping the card *looks*; only the button asks.
+    //
+    // The whole card used to call onAsk, which claims the seller's
+    // claim-once card and sends them a message. That was defensible while a
+    // listing was words — you tapped it because you had decided. It stopped
+    // being defensible the moment listings grew photographs, because a
+    // picture is a thing people tap to see better, and the cost of being
+    // wrong is a stranger's card burnt and a conversation they did not
+    // start. Looking is now local, free and reversible; asking is still one
+    // deliberate press.
+    Card(Modifier.fillMaxWidth().clickable(enabled = !busy) { onOpen() }) {
         Column {
             // §16.18.3's thumbnail, straight off the board — it arrived with
             // the notice, so drawing it costs nothing more than the read
@@ -983,56 +1186,7 @@ private fun ListingCard(info: RentalInfo, busy: Boolean, onAsk: () -> Unit) {
             // says: the make, model, trim and tags come off a public board,
             // and a right-to-left one beside a localised "automatic" would
             // otherwise reorder the whole line.
-            val specs = buildList {
-                if (vehicle) {
-                    info.year?.let { add(it.toString()) }
-                    info.make?.let { add(isolate(it)) }
-                    info.model?.let { add(isolate(it)) }
-                    info.gearbox?.let {
-                        add(stringResource(
-                            if (it.toInt() == 1) R.string.rent_manual else R.string.rent_automatic,
-                        ))
-                    }
-                    info.fuel?.let {
-                        add(stringResource(when (it.toInt()) {
-                            2 -> R.string.rent_diesel
-                            3 -> R.string.rent_electric
-                            4 -> R.string.rent_hybrid
-                            else -> R.string.rent_petrol
-                        }))
-                    }
-                    info.trim?.let { add(isolate(it)) }
-                    info.seats?.let {
-                        add(pluralStringResource(R.plurals.rent_seats_n, it.toInt(), it.toInt()))
-                    }
-                } else if (place) {
-                    info.rooms?.let {
-                        add(pluralStringResource(R.plurals.rent_rooms_n, it.toInt(), it.toInt()))
-                    }
-                    info.sleeps?.let { add(stringResource(R.string.rent_sleeps_n, it.toInt())) }
-                    info.sizeM2?.let { add(stringResource(R.string.rent_size_m2, it.toInt())) }
-                    info.subtype?.let {
-                        add(stringResource(
-                            if (it.toInt() == 2) R.string.rent_private_room
-                            else R.string.rent_whole_place,
-                        ))
-                    }
-                } else {
-                    // This branch used to be "a place", so every one of the
-                    // three new nouns rendered its category through a
-                    // whole-place / private-room lookup: a bicycle in the
-                    // Sport category read "Whole place".
-                    info.subtype?.let { add(stringResource(categoryLabel(kind, it.toInt()))) }
-                }
-                addAll(info.features.map { isolate(it) })
-                // Only when there is more than one. Somebody deciding whether
-                // to ask wants to know they are not competing for the last
-                // one — and for the listing that *is* one thing, which is
-                // nearly all of them, saying so would be noise.
-                if (info.quantity > 1uL) {
-                    add(stringResource(R.string.rent_n_available, info.quantity.toLong()))
-                }
-            }
+            val specs = listingSpecs(info)
             if (specs.isNotEmpty()) {
                 Spacer(Modifier.height(4.dp))
                 Text(

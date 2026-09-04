@@ -7,6 +7,7 @@
     <string name="rent_form_vehicle">一辆出租的车</string>
     <string name="rent_public_note">第一部分的内容都会贴到附近所有人都能看到的公共板上。只写别人做决定需要知道的信息。</string>
     <string name="rent_title">一句话介绍</string>
+    <string name="rent_ask_note">询问会与卖家开启一段对话。</string>
     <string name="rent_photo_add">添加照片</string>
     <string name="rent_photo_change">更换照片</string>
     <string name="rent_photo_remove">移除</string>

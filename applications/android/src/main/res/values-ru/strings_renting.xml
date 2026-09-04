@@ -7,6 +7,7 @@
     <string name="rent_form_vehicle">Машина в аренду</string>
     <string name="rent_public_note">Всё из этой первой части попадает на публичную доску, которую может прочитать любой рядом. Оставьте только то, что нужно человеку для решения.</string>
     <string name="rent_title">Одна строка об этом</string>
+    <string name="rent_ask_note">Вопрос откроет разговор с продавцом.</string>
     <string name="rent_photo_add">Добавить фото</string>
     <string name="rent_photo_change">Заменить фото</string>
     <string name="rent_photo_remove">Убрать</string>

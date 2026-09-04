@@ -7,6 +7,7 @@
     <string name="rent_form_vehicle">Pojazd do wynajęcia</string>
     <string name="rent_public_note">Wszystko z tej pierwszej części trafia na publiczną tablicę, którą może przeczytać każdy w pobliżu. Podaj tylko to, co ktoś musi wiedzieć, żeby się zdecydować.</string>
     <string name="rent_title">Jedno zdanie o tym</string>
+    <string name="rent_ask_note">Zapytanie otwiera rozmowę ze sprzedającym.</string>
     <string name="rent_photo_add">Dodaj zdjęcie</string>
     <string name="rent_photo_change">Zmień zdjęcie</string>
     <string name="rent_photo_remove">Usuń</string>

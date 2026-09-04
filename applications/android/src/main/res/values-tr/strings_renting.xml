@@ -7,6 +7,7 @@
     <string name="rent_form_vehicle">Kiraya verilecek bir araç</string>
     <string name="rent_public_note">Bu ilk bölümdeki her şey, yakındaki herkesin okuyabileceği açık bir panoya gider. Yalnızca birinin karar vermek için ihtiyaç duyduğu kadarını yazın.</string>
     <string name="rent_title">Tek cümleyle</string>
+    <string name="rent_ask_note">Sormak, satıcıyla bir sohbet açar.</string>
     <string name="rent_photo_add">Fotoğraf ekle</string>
     <string name="rent_photo_change">Fotoğrafı değiştir</string>
     <string name="rent_photo_remove">Kaldır</string>

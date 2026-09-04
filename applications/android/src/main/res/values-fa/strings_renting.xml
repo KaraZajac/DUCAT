@@ -7,6 +7,7 @@
     <string name="rent_form_vehicle">خودرویی برای اجاره دادن</string>
     <string name="rent_public_note">هر چه در این بخش نخست بنویسید روی تابلویی عمومی می‌رود که هر کسی در نزدیکی می‌تواند بخواند. تنها همان اندازه بنویسید که کسی برای تصمیم‌گیری لازم دارد.</string>
     <string name="rent_title">یک خط درباره‌اش</string>
+    <string name="rent_ask_note">پرسیدن گفتگویی با فروشنده باز می‌کند.</string>
     <string name="rent_photo_add">افزودن عکس</string>
     <string name="rent_photo_change">تغییر عکس</string>
     <string name="rent_photo_remove">حذف</string>

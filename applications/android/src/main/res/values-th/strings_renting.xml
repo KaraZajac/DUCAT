@@ -7,6 +7,7 @@
     <string name="rent_form_vehicle">รถสำหรับให้เช่า</string>
     <string name="rent_public_note">ทุกอย่างในส่วนแรกนี้จะขึ้นบนกระดานสาธารณะที่ใครก็ตามที่อยู่ใกล้อ่านได้ เขียนเท่าที่คนอื่นต้องใช้ตัดสินใจ</string>
     <string name="rent_title">อธิบายสั้น ๆ หนึ่งบรรทัด</string>
+    <string name="rent_ask_note">การถามจะเปิดบทสนทนากับผู้ขาย</string>
     <string name="rent_photo_add">เพิ่มรูป</string>
     <string name="rent_photo_change">เปลี่ยนรูป</string>
     <string name="rent_photo_remove">เอาออก</string>
