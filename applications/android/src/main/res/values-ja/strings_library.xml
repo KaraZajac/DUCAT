@@ -16,6 +16,7 @@
     <string name="notify_new_issue">%1$sから新しい号が届きました</string>
     <string name="library_note_new_issue">新しい号が出ました。</string>
     <string name="library_note_ask_issue">%1$s をもらえますか？</string>
+    <string name="library_note_asked_issue">%1$s をどうぞ。</string>
     <string name="library_unlock_asking">リクエスト済み…</string>
     <string name="library_unlock_buy">購入を依頼</string>
     <string name="library_unlock_free">リクエストする</string>

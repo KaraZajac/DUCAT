@@ -16,6 +16,7 @@
     <string name="notify_new_issue">%1$s شمارهٔ تازه‌ای فرستاد</string>
     <string name="library_note_new_issue">شمارهٔ تازه‌ای منتشر شد.</string>
     <string name="library_note_ask_issue">می‌توانم %1$s را بگیرم؟</string>
+    <string name="library_note_asked_issue">بفرمایید %1$s.</string>
     <string name="library_unlock_asking">درخواست شد…</string>
     <string name="library_unlock_buy">درخواست خرید</string>
     <string name="library_unlock_free">درخواستش کن</string>

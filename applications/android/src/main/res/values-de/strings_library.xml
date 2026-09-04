@@ -16,6 +16,7 @@
     <string name="notify_new_issue">%1$s hat eine neue Ausgabe geschickt</string>
     <string name="library_note_new_issue">Eine neue Ausgabe ist da.</string>
     <string name="library_note_ask_issue">Kann ich %1$s bekommen?</string>
+    <string name="library_note_asked_issue">Hier ist %1$s.</string>
     <string name="library_unlock_asking">Angefragt…</string>
     <string name="library_unlock_buy">Kauf anfragen</string>
     <string name="library_unlock_free">Anfragen</string>

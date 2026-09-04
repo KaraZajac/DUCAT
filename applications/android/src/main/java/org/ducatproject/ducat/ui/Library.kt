@@ -31,7 +31,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,9 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import java.io.File
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.Publications
@@ -593,7 +590,6 @@ private fun IssueLine(
         if (mine) LibraryFetch.progressOf(job) else null
     }
     val error = LibraryFetch.errorOf(job)
-    val scope = rememberCoroutineScope()
 
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
@@ -648,16 +644,25 @@ private fun IssueLine(
                         TextButton(
                             onClick = {
                                 asked = true
-                                scope.launch(Dispatchers.IO) {
-                                    val to = ContactStore(context).all()
+                                // A plain daemon thread on the application
+                                // context, the way LibraryFetch does it —
+                                // NOT rememberCoroutineScope, which dies
+                                // with this row. Scrolling far enough to
+                                // recycle the row would otherwise cancel
+                                // the send while the button already read
+                                // "Asked", which is the one outcome a
+                                // reader cannot see or recover from.
+                                val app = context.applicationContext
+                                Thread {
+                                    val to = ContactStore(app).all()
                                         .firstOrNull { it.personaHex == row.publisherHex }
                                     val ok = to != null &&
-                                        Publications.askForPeriod(context, to, row.period)
+                                        Publications.askForPeriod(app, to, row.period)
                                     // The ask never left; say so rather than
                                     // leaving a reader waiting on a message
                                     // that was never sent.
                                     if (!ok) asked = false
-                                }
+                                }.apply { isDaemon = true; name = "library-ask" }.start()
                             },
                             contentPadding = PaddingValues(horizontal = 0.dp),
                         ) {

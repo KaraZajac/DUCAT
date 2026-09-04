@@ -16,6 +16,7 @@
     <string name="notify_new_issue">%1$s mengirim edisi baru</string>
     <string name="library_note_new_issue">Edisi baru sudah terbit.</string>
     <string name="library_note_ask_issue">Boleh saya minta %1$s?</string>
+    <string name="library_note_asked_issue">Ini %1$s.</string>
     <string name="library_unlock_asking">Sudah diminta…</string>
     <string name="library_unlock_buy">Minta untuk membeli</string>
     <string name="library_unlock_free">Minta</string>

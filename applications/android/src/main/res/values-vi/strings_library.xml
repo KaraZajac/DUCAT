@@ -16,6 +16,7 @@
     <string name="notify_new_issue">%1$s đã gửi một số mới</string>
     <string name="library_note_new_issue">Số mới đã ra.</string>
     <string name="library_note_ask_issue">Cho tôi xin %1$s được không?</string>
+    <string name="library_note_asked_issue">%1$s đây.</string>
     <string name="library_unlock_asking">Đã hỏi…</string>
     <string name="library_unlock_buy">Hỏi mua</string>
     <string name="library_unlock_free">Hỏi xin</string>

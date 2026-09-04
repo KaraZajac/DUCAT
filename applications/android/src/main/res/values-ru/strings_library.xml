@@ -16,6 +16,7 @@
     <string name="notify_new_issue">Новый выпуск от %1$s</string>
     <string name="library_note_new_issue">Вышел новый выпуск.</string>
     <string name="library_note_ask_issue">Можно мне %1$s?</string>
+    <string name="library_note_asked_issue">Вот %1$s.</string>
     <string name="library_unlock_asking">Запрошено…</string>
     <string name="library_unlock_buy">Запросить покупку</string>
     <string name="library_unlock_free">Запросить</string>

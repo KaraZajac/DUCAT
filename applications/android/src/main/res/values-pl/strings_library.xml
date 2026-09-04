@@ -16,6 +16,7 @@
     <string name="notify_new_issue">Nowe wydanie od %1$s</string>
     <string name="library_note_new_issue">Ukazało się nowe wydanie.</string>
     <string name="library_note_ask_issue">Czy mogę dostać %1$s?</string>
+    <string name="library_note_asked_issue">Oto %1$s.</string>
     <string name="library_unlock_asking">Poproszono…</string>
     <string name="library_unlock_buy">Poproś o zakup</string>
     <string name="library_unlock_free">Poproś o to</string>

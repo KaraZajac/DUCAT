@@ -16,6 +16,7 @@
     <string name="notify_new_issue">%1$s ส่งฉบับใหม่มาให้</string>
     <string name="library_note_new_issue">ฉบับใหม่ออกแล้ว</string>
     <string name="library_note_ask_issue">ขอ %1$s ได้ไหม</string>
+    <string name="library_note_asked_issue">นี่ %1$s</string>
     <string name="library_unlock_asking">ขอแล้ว…</string>
     <string name="library_unlock_buy">ขอซื้อ</string>
     <string name="library_unlock_free">ขอรับ</string>

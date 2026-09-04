@@ -16,6 +16,7 @@
     <string name="notify_new_issue">%1$s yeni bir sayı gönderdi</string>
     <string name="library_note_new_issue">Yeni sayı çıktı.</string>
     <string name="library_note_ask_issue">%1$s alabilir miyim?</string>
+    <string name="library_note_asked_issue">İşte %1$s.</string>
     <string name="library_unlock_asking">İstendi…</string>
     <string name="library_unlock_buy">Satın almak için iste</string>
     <string name="library_unlock_free">İste</string>

@@ -16,6 +16,7 @@
     <string name="notify_new_issue">%1$s님이 새 호를 보냈어요</string>
     <string name="library_note_new_issue">새 호가 나왔어요.</string>
     <string name="library_note_ask_issue">%1$s 받을 수 있을까요?</string>
+    <string name="library_note_asked_issue">%1$s 여기 있어요.</string>
     <string name="library_unlock_asking">요청함…</string>
     <string name="library_unlock_buy">구매 요청</string>
     <string name="library_unlock_free">요청하기</string>

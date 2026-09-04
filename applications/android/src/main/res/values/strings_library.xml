@@ -21,6 +21,9 @@
     <!-- §16.20's ask. The wire refuses an empty body on every kind, so the
          request rides a protocol-written line in the SENDER's language. -->
     <string name="library_note_ask_issue">Could I get %1$s?</string>
+    <!-- The answer to that ask. Not "a new issue is out": what comes back is
+         usually a back issue the reader named, and calling it new is wrong. -->
+    <string name="library_note_asked_issue">Here\u2019s %1$s.</string>
     <string name="library_unlock_asking">Asked…</string>
     <!-- "Ask", never "Buy": the publisher may ignore the request, and the
          money (when there is any) arrives as a bill the reader still has

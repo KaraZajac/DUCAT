@@ -894,6 +894,15 @@ tasks.register<JavaExec>("piecebarshots") {
     jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
 }
 
+// §16.20's ask on the wire: two desks, a back catalogue, and a free period
+// unlocked by asking for it. No money — that path is pubsettletest's.
+// `DUCAT_WANT_ROLE=publish|read DUCAT_WANT_STATE=<dir> ./gradlew :desktop:wantedwiretest`.
+tasks.register<JavaExec>("wantedwiretest") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.WantedWireTestKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 // §16.20's ask, deciding half: which publication answers a reader who names
 // a period, and when nothing should.
 // `DUCAT_WANTED_STATE=<dir> ./gradlew :desktop:wantedtest`.

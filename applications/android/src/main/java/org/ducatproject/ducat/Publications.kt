@@ -1736,7 +1736,11 @@ object Publications {
             val shelf = shelfOf(context, pubId)
             val ok = sendPeriod(
                 context, c, pubId, periodId,
-                record = shelf?.first, headKey = shelf?.second, note = "",
+                record = shelf?.first, headKey = shelf?.second,
+                // Answers the ask in its own words. sendPeriod's blank-note
+                // fallback says "a new issue is out", which is wrong here:
+                // what an ask usually names is a back issue.
+                note = context.getString(R.string.library_note_asked_issue, periodId),
                 swarmKey = issue.swarmKey.takeIf { it.isNotBlank() },
                 swarmDigestHex = issue.swarmDigestHex.takeIf { it.isNotBlank() },
             )
