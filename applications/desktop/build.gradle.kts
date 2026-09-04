@@ -881,6 +881,12 @@ tasks.register<JavaExec>("sitedirtest") {
 // The swarm bar's arithmetic: every piece in exactly one cell, and no cell
 // full before its run is.
 // `./gradlew :desktop:piecebartest`.
+tasks.register<JavaExec>("piecebarshots") {
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass = "org.ducatproject.desk.PieceBarShotsKt"
+    jvmArgs("-Djna.library.path=${rootProject.projectDir}/../target/release")
+}
+
 tasks.register<JavaExec>("piecebartest") {
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "org.ducatproject.desk.PieceBarTestKt"
