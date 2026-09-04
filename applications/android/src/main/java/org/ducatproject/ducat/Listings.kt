@@ -356,6 +356,51 @@ object Listings {
         }.getOrNull()
     }
 
+    /**
+     * Re-park a gallery this phone has already published, after a restart.
+     *
+     * **Not [seedGallery].** A node restart drops the seed registry, and
+     * minting the announcement again from scratch wants a private route
+     * allocated there and then — which on a phone answers `TryAgain:
+     * allocated route failed to test` and, being one shot, never comes
+     * back. Sites and releases solved this long before galleries existed:
+     * stop the old share, then *fetch* the share key already on the board
+     * with `staySeeding`, which verifies the files in place, downloads
+     * nothing, and leaves the same key serving. That path retries; the
+     * mint does not.
+     *
+     * Its own thread, like Sites.reseed, because the caller is the poll
+     * lap and this waits on the network.
+     */
+    fun reseedGallery(context: Context, listingId: String) {
+        val o = get(context, listingId) ?: return
+        val share = o.optString("gallery").takeIf { it.isNotBlank() } ?: return
+        val digest = o.optString("gallery_dig").takeIf { it.isNotBlank() } ?: return
+        val dir = photoDir(context, listingId)
+        if (!dir.isDirectory || dir.listFiles().orEmpty().none { it.isFile }) {
+            // Said, not swallowed: a listing whose pictures are gone cannot
+            // serve the gallery its notice still advertises, and the owner
+            // is the only one who can put that right.
+            DucatLog.i(
+                "Listings",
+                "gallery of ${listingId.take(8)}… has no pictures left to serve",
+            )
+            return
+        }
+        Thread {
+            runCatching {
+                // Re-checked in here: the lap read the store before this
+                // thread started, and a take-down can land in between.
+                if (get(context, listingId)?.optString("gallery") != share) return@runCatching
+                Swarm.stopShare(share)
+                Swarm.fetch(share, digest, dir.absolutePath, staySeeding = true)
+                DucatLog.i("Listings", "gallery of ${listingId.take(8)}… serving again")
+            }.onFailure {
+                DucatLog.w("Listings", "gallery of ${listingId.take(8)}…: ${it.message}")
+            }
+        }.apply { isDaemon = true; name = "gallery-reseed" }.start()
+    }
+
     /** Stop serving this listing's pictures. */
     fun stopGallery(context: Context, listingId: String) {
         val share = get(context, listingId)?.optString("gallery")?.takeIf { it.isNotBlank() }

@@ -699,7 +699,7 @@ class Poller(private val context: Context) {
             if (!o.optBoolean("wanted", false)) continue
             val id = o.optString("id")
             if (id.isBlank() || o.optString("gallery").isBlank()) continue
-            runCatching { Listings.seedGallery(context, id) }
+            runCatching { Listings.reseedGallery(context, id) }
                 .onFailure { DucatLog.w(TAG, "gallery of ${id.take(8)}…: ${it.message}") }
         }
     }
