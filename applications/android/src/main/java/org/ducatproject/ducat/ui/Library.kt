@@ -202,6 +202,25 @@ object LibraryFetch {
             // half-overwritten issue the ordinary path below takes a .part
             // dir to avoid. Nothing to verify against means nothing to do.
             if (!done.isDirectory || done.walkTopDown().none { it.isFile }) return
+            // **Only the edition we actually hold.** The share handed in is
+            // the publisher's latest announcement, and it is not necessarily
+            // what is on this disk: a re-shipped period leaves the two
+            // disagreeing. Announcing a digest we have not got is the fault
+            // Sites.reseed had — peers match on the index digest, so the
+            // mirror is rejected and dropped from the swarm — and fetching
+            // the difference here would write it into the very directory the
+            // reader reads from, which is the half-overwritten issue the
+            // .part path below exists to prevent. Neither, then: leave it to
+            // the ordinary fetch, which lands in .part and swaps whole.
+            val held = Publications.heldDigest(app, job.publisherHex, job.period)
+            if (held == null || held != share.digestHex) {
+                DucatLog.i(
+                    "Library",
+                    "'${job.period}' on disk is not the shipped edition — " +
+                        "leaving it for a full fetch rather than seeding it",
+                )
+                return
+            }
             runCatching {
                 Swarm.fetch(
                     share.shareKey, share.digestHex, done.absolutePath,
@@ -232,6 +251,13 @@ object LibraryFetch {
             }
             done.deleteRecursively()
             check(part.renameTo(done)) { "could not move the download into place" }
+            // What is now on the disk, recorded, so a later re-seed can tell
+            // whether it still matches what the publisher is announcing. A
+            // mirror that announces an edition it does not hold is rejected
+            // by every peer that does, and dropped.
+            if (source is Source.Swarm) {
+                Publications.markHeld(app, job.publisherHex, job.period, source.digestHex)
+            }
             // The reader joins the club — if they said they would. This
             // used to be unconditional, which made downloading an issue a
             // standing commitment to serve it: bandwidth the reader never

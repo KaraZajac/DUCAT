@@ -846,6 +846,40 @@ object Publications {
         }.isSuccess
     }
 
+    /**
+     * The digest of the edition this device actually holds for a period.
+     *
+     * The filed shipment is what the *publisher* last announced; this is
+     * what came down and verified. They differ whenever a period is
+     * re-shipped, and telling them apart is what keeps a mirror honest:
+     * peers match on the index digest, so announcing a shipment we have
+     * not fetched gets this reader rejected and dropped from the swarm —
+     * the same way a site did before Sites.reseed learned to re-read its
+     * head. Null when nothing has been fetched, which reads as "do not
+     * announce anything".
+     */
+    fun heldDigest(context: Context, publisherHex: String, periodId: String): String? {
+        val all = prefs(context).getString("subs", null)?.let { JSONObject(it) } ?: return null
+        return all.optJSONObject(publisherHex)?.optJSONObject("ships")
+            ?.optJSONObject(periodId)?.optString("got")?.ifBlank { null }
+    }
+
+    /** Record what verified onto this device, once a fetch has landed. */
+    fun markHeld(context: Context, publisherHex: String, periodId: String, digestHex: String) {
+        val p = prefs(context)
+        synchronized(lock) {
+            val all = p.getString("subs", null)?.let { JSONObject(it) } ?: JSONObject()
+            val mine = all.optJSONObject(publisherHex) ?: JSONObject()
+            val ships = mine.optJSONObject("ships") ?: JSONObject()
+            val ship = ships.optJSONObject(periodId) ?: JSONObject()
+            ship.put("got", digestHex)
+            ships.put(periodId, ship)
+            mine.put("ships", ships)
+            all.put(publisherHex, mine)
+            p.edit().putString("subs", all.toString()).apply()
+        }
+    }
+
     /** A period's filed shipment, if one arrived: (shareKey, digestHex). */
     fun shipment(context: Context, publisherHex: String, periodId: String): Pair<String, String>? {
         val all = prefs(context).getString("subs", null)?.let { JSONObject(it) } ?: return null
