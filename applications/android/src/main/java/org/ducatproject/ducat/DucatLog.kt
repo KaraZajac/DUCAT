@@ -154,14 +154,36 @@ object DucatLog {
                 "$reason — status ${intOf("getStatus")}, ${desc ?: "no description"} " +
                     "(pss ${longOf("getPss") / 1024} MB, rss ${longOf("getRss") / 1024} MB)",
             )
-            // The tombstone, when there is one: signal, fault address and the
-            // frames it died in — the whole question, in the box all along.
+            // The tombstone, when there is one.
+            //
+            // It is a protobuf, not text: reading it as lines produced pages
+            // of mojibake and cut the faulting frames off entirely, leaving
+            // only a parked thread that cannot have crashed. So keep the
+            // bytes whole, on disk, where they can be decoded properly —
+            // and pull out the library names in passing, because "which .so
+            // faulted" is the one question worth answering without tools.
             runCatching {
                 val stream = info.javaClass.getMethod("getTraceInputStream").invoke(info)
-                    as? java.io.InputStream
-                stream?.bufferedReader()?.useLines { lines: Sequence<String> ->
-                    lines.take(40).forEach { l -> add(Level.Error, "Tombstone", l) }
-                }
+                    as? java.io.InputStream ?: return
+                val raw = stream.use { it.readBytes() }
+                // Somewhere the person holding the phone can actually reach:
+                // files/ is app-private and needs adb, and the whole point
+                // is that adb is what we do not have. The external files
+                // directory shows up in any file manager and can be sent
+                // straight back over KDE Connect.
+                val dir = context.getExternalFilesDir(null) ?: context.filesDir
+                val out = java.io.File(dir, "tombstone.pb")
+                out.writeBytes(raw)
+                add(Level.Error, "Tombstone", "${raw.size} bytes kept at ${out.absolutePath}")
+                // Printable runs naming a shared object, in order, deduped.
+                // The faulting frame's library is in here even when the
+                // frame numbers are not.
+                val seen = LinkedHashSet<String>()
+                Regex("[\\x20-\\x7e]{6,}").findAll(String(raw, Charsets.ISO_8859_1))
+                    .map { it.value }
+                    .filter { it.contains(".so") || it.contains("ducat") }
+                    .forEach { seen.add(it.trim()) }
+                seen.take(12).forEach { add(Level.Error, "Tombstone", it) }
             }
         }
     }

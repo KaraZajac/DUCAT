@@ -28,6 +28,11 @@ abstract class Context {
     // one context for the whole run; itself is the honest answer.
     open val applicationContext: Context get() = this
     open val cacheDir: File get() = File(filesDir.parentFile, "cache").apply { mkdirs() }
+
+    /** A phone's shareable per-app directory. The desk has no "external"
+     *  storage and no file manager to find it with, so its own directory is
+     *  the honest answer — anything written there is equally reachable. */
+    open fun getExternalFilesDir(type: String?): File? = filesDir
     abstract fun getSharedPreferences(name: String, mode: Int): SharedPreferences
     open val packageName: String get() = "org.ducatproject.desk"
     open val packageManager: android.content.pm.PackageManager
