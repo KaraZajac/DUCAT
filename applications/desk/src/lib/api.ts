@@ -55,6 +55,14 @@ export interface SiteRow {
   dir: string;
 }
 
+export type FeedMedia = { path: string; full: string | null; mime: string; bytes: number; w: number; h: number; alt: string };
+export type FeedFile = { name: string; addr: string; mime: string; bytes: number };
+export type FeedPost = { id: string; at: number; edited: number | null; text: string; media: FeedMedia[]; files: FeedFile[]; re: { persona: string; id: string } | null };
+export type FeedSpan = { text: string; bold: boolean; italic: boolean; link: string | null };
+export type FeedBlock = { kind: "Paragraph"; spans: FeedSpan[] } | { kind: "Image"; path: string; alt: string };
+export type TimelineRow = { persona: string; name: string; mine: boolean; post: FeedPost; blocks: FeedBlock[] };
+export type HomeView = { persona_hex: string; record_key: string; title: string; has_head: boolean; digest_hex: string; updated: number; hearted: boolean; mine: boolean; posts: number };
+
 export type MyProfile = { email: string | null; phone: string | null; signal: string | null; share: boolean };
 
 export interface PersonaRow {
@@ -73,6 +81,7 @@ export interface Code {
 }
 
 export interface ContactRow {
+  hearted: boolean;
   persona_hex: string;
   name: string;
   named: boolean;
@@ -483,7 +492,16 @@ export const api = {
     invoke<SiteRow>("publish_site", { dir, title, recordKey: recordKey ?? null }),
   addSite: (uri: string) => invoke<SiteRow>("add_site", { uri }),
   fetchSite: (recordKey: string) => invoke<string>("fetch_site", { recordKey }),
-  openSiteRoom: (recordKey: string) => invoke<void>("open_site_room", { recordKey }),
+  openSiteRoom: (recordKey: string, path?: string) => invoke<void>("open_site_room", { recordKey, path: path ?? null }),
+  // §16.23: homes, hearts, the feed
+  timeline: (limit = 200) => invoke<TimelineRow[]>("timeline", { limit }),
+  homeView: (personaHex?: string) => invoke<HomeView>("home_view", { personaHex: personaHex ?? null }),
+  setHeart: (personaHex: string, on: boolean) => invoke<void>("set_heart", { personaHex, on }),
+  refreshFeeds: () => invoke<number>("refresh_feeds"),
+  postFeed: (text: string, media: string[], files: string[]) => invoke<FeedPost>("post_feed", { text, media, files }),
+  deletePost: (id: string) => invoke<void>("delete_post", { id }),
+  homeFileDataUrl: (personaHex: string, rel: string) => invoke<string | null>("home_file_data_url", { personaHex, rel }),
+  homeKeyOf: (personaHex: string) => invoke<string>("home_key_of", { personaHex }),
   setSiteKeep: (recordKey: string, keep: boolean) => invoke<void>("set_site_keep", { recordKey, keep }),
   removeSite: (recordKey: string) => invoke<void>("remove_site", { recordKey }),
   lintSite: (dir: string) => invoke<string | null>("lint_site", { dir }),
@@ -642,6 +660,10 @@ export const api = {
   pickFile: async (): Promise<string | null> => {
     const r = await open({ multiple: false, directory: false });
     return typeof r === "string" ? r : null;
+  },
+  pickFiles: async (): Promise<string[]> => {
+    const r = await open({ multiple: true, directory: false });
+    return Array.isArray(r) ? (r as string[]) : typeof r === "string" ? [r] : [];
   },
   pickFolder: async (): Promise<string | null> => {
     const r = await open({ multiple: false, directory: true });

@@ -193,7 +193,7 @@ impl App {
 
     /// Replace in place, append only when new — a row that moves under
     /// the hand about to tap it is the fault this store used to have.
-    fn upsert_site(&self, s: Site) -> Result<(), Error> {
+    pub(crate) fn upsert_site(&self, s: Site) -> Result<(), Error> {
         self.sites_store().edit::<Vec<Site>, _>("sites", |cur| {
             if cur.iter().any(|x| x.record_key == s.record_key) {
                 cur.into_iter().map(|x| if x.record_key == s.record_key { s.clone() } else { x }).collect()

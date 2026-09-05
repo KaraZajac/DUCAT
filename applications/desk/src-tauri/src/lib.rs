@@ -374,7 +374,7 @@ fn room_label(record_key: &str) -> String {
 /// then a window that can read that bundle and nothing else. A room
 /// already open for the site is brought forward instead.
 #[tauri::command]
-async fn open_site_room(handle: tauri::AppHandle, record_key: String) -> Result<(), String> {
+async fn open_site_room(handle: tauri::AppHandle, record_key: String, path: Option<String>) -> Result<(), String> {
     let a = app()?;
     let key = record_key.clone();
     let (dir, title) = tauri::async_runtime::spawn_blocking(move || {
@@ -400,7 +400,11 @@ async fn open_site_room(handle: tauri::AppHandle, record_key: String) -> Result<
     }
     let label = room_label(&record_key);
     set_room(label.clone(), dir);
+    // A page inside the bundle, or the front page; nothing a page could
+    // name resolves outside the room either way.
+    let page = path.filter(|p| ducat_mobile::feed::bundle_path_ok(p)).map(|p| p.trim_start_matches('/').to_string()).unwrap_or_else(|| "index.html".into());
     if let Some(w) = handle.get_webview_window(&label) {
+        let _ = w.eval(&format!("location.replace('/{}')", page.replace('\'', "%27")));
         let _ = w.set_focus();
         return Ok(());
     }
@@ -413,7 +417,7 @@ async fn open_site_room(handle: tauri::AppHandle, record_key: String) -> Result<
     let forward = tauri::menu::MenuItemBuilder::with_id("room-forward", "Forward").accelerator("Alt+Right").build(&handle).map_err(|e| e.to_string())?;
     let first = tauri::menu::MenuItemBuilder::with_id("room-home", "First page").accelerator("Alt+Home").build(&handle).map_err(|e| e.to_string())?;
     let menu = tauri::menu::MenuBuilder::new(&handle).items(&[&back, &forward, &first]).build().map_err(|e| e.to_string())?;
-    WebviewWindowBuilder::new(&handle, &label, WebviewUrl::CustomProtocol("ducat-site://localhost/index.html".parse().unwrap()))
+    WebviewWindowBuilder::new(&handle, &label, WebviewUrl::CustomProtocol(format!("ducat-site://localhost/{page}").parse().map_err(|e| format!("{e}"))?))
         .title(&title)
         .inner_size(1000.0, 760.0)
         .min_inner_size(480.0, 360.0)
@@ -445,6 +449,86 @@ async fn open_site_room(handle: tauri::AppHandle, record_key: String) -> Result<
         .map_err(|e| e.to_string())?;
     ducat_app::log::info("Desk", format!("sealed room opened for '{}'", title));
     Ok(())
+}
+
+// ----- §16.23: homes, hearts, the feed -----------------------------------------
+
+#[derive(Serialize)]
+struct TimelineRow {
+    persona: String,
+    name: String,
+    mine: bool,
+    post: ducat_mobile::feed::FeedPost,
+    blocks: Vec<ducat_mobile::feed::FeedBlock>,
+}
+
+#[tauri::command]
+fn timeline(limit: u32) -> Result<Vec<TimelineRow>, String> {
+    let a = app()?;
+    let me = a.worn().unwrap_or_default();
+    Ok(a.timeline(limit)
+        .into_iter()
+        .map(|e| TimelineRow { mine: e.persona == me, blocks: ducat_mobile::feed::feed_blocks(e.post.text.clone()), persona: e.persona, name: e.name, post: e.post })
+        .collect())
+}
+
+#[tauri::command]
+fn home_view(persona_hex: Option<String>) -> Result<ducat_app::home::HomeView, String> {
+    let a = app()?;
+    let hex = match persona_hex {
+        Some(h) => h,
+        None => a.worn().map_err(said)?,
+    };
+    a.home_view(&hex).map_err(said)
+}
+
+#[tauri::command]
+async fn set_heart(persona_hex: String, on: bool) -> Result<(), String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.set_heart(&persona_hex, on).map_err(said)).await.map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+async fn refresh_feeds() -> Result<u32, String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || Ok(a.refresh_feeds() as u32)).await.map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+async fn post_feed(text: String, media: Vec<String>, files: Vec<String>) -> Result<ducat_mobile::feed::FeedPost, String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || {
+        let media: Vec<std::path::PathBuf> = media.into_iter().map(std::path::PathBuf::from).collect();
+        let files: Vec<std::path::PathBuf> = files.into_iter().map(std::path::PathBuf::from).collect();
+        a.post_to_feed(&text, &media, &files).map_err(said)
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+async fn delete_post(id: String) -> Result<(), String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.delete_post(&id).map_err(said)).await.map_err(|e| e.to_string())?
+}
+
+/// A thumbnail from a home's bundle, as a data URL the page may show.
+#[tauri::command]
+fn home_file_data_url(persona_hex: String, rel: String) -> Result<Option<String>, String> {
+    use base64::Engine as _;
+    let a = app()?;
+    let Some(p) = a.home_file(&persona_hex, &rel) else { return Ok(None) };
+    let bytes = std::fs::read(&p).map_err(|e| e.to_string())?;
+    if bytes.len() > 2 * 1024 * 1024 {
+        return Ok(None);
+    }
+    Ok(Some(format!("data:{};base64,{}", room_mime(&p), base64::engine::general_purpose::STANDARD.encode(bytes))))
+}
+
+/// The room key for a persona's home, so a post opens as its page.
+#[tauri::command]
+fn home_key_of(persona_hex: String) -> Result<String, String> {
+    app()?.home_key_of(&persona_hex).map_err(said)
 }
 
 fn said(e: Error) -> String {
@@ -604,6 +688,7 @@ struct ContactRow {
     last_outgoing: bool,
     chat_visible: bool,
     has_keys: bool,
+    hearted: bool,
     owner: String,
     their_address: Option<String>,
     pending_address: Option<String>,
@@ -632,6 +717,7 @@ fn contact_row(a: &App, c: Contact) -> ContactRow {
         last_at: last.map_or(0, |r| r.timestamp),
         last_outgoing: last.map_or(false, |r| r.outgoing),
         has_keys: c.their_bundle.is_some(),
+        hearted: c.hearted,
         persona_hex: c.persona_hex,
         petname: c.petname,
         asserted_name: c.asserted_name,
@@ -2463,6 +2549,14 @@ pub fn run() {
             add_site,
             fetch_site,
             open_site_room,
+            timeline,
+            home_view,
+            set_heart,
+            refresh_feeds,
+            post_feed,
+            delete_post,
+            home_file_data_url,
+            home_key_of,
             set_site_keep,
             remove_site,
             lint_site,

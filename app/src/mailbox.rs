@@ -414,6 +414,7 @@ impl App {
             .or_else(|| prior.as_ref().and_then(|p| p.petname.clone()));
         let built = Contact {
             persona_hex: theirs_hex.clone(),
+            hearted: prior.as_ref().map_or(false, |p| p.hearted),
             petname,
             asserted_name: theirs.asserted_name.clone(),
             in_seq: if same_log { prior.as_ref().map_or(0, |p| p.in_seq) } else { 0 },
@@ -597,6 +598,7 @@ impl App {
         let purpose_changed = !issued.purpose.is_empty() && prior.as_ref().and_then(|p| p.my_card_purpose.as_deref()) != Some(issued.purpose.as_str());
         let built = Contact {
             persona_hex: persona_hex.clone(),
+            hearted: prior.as_ref().map_or(false, |p| p.hearted),
             petname: prior.as_ref().and_then(|p| p.petname.clone()),
             asserted_name: theirs.asserted_name.clone(),
             my_outbox: issued.outbox_key.clone(),

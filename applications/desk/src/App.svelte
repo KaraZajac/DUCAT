@@ -3,6 +3,7 @@
   import { api, type Status } from "./lib/api";
   import Chat from "./lib/Chat.svelte";
   import Me from "./lib/Me.svelte";
+  import Feed from "./lib/Feed.svelte";
   import Wallet from "./lib/Wallet.svelte";
   import Till from "./lib/Till.svelte";
   import Kiosk from "./lib/Kiosk.svelte";
@@ -22,7 +23,7 @@
   import { listen } from "@tauri-apps/api/event";
   import { pending } from "./lib/state.svelte";
 
-  type Page = "chat" | "wallet" | "till" | "kiosk" | "activity" | "library" | "market" | "files" | "sites" | "me" | "status";
+  type Page = "chat" | "feed" | "wallet" | "till" | "kiosk" | "activity" | "library" | "market" | "files" | "sites" | "me" | "status";
   let page = $state<Page>("chat");
   let unread = $state(0);
 
@@ -66,6 +67,7 @@
     void i18n.lang;
     return [
       { id: "chat", label: t("tab_chat") },
+      { id: "feed", label: t("desk_feed") },
       { id: "wallet", label: t("monero_wallet_title") },
       { id: "till", label: t("desk_nav_till") },
       { id: "kiosk", label: t("kiosk_mode_title") },
@@ -142,6 +144,8 @@
       <Wallet />
     {:else if page === "till"}
       <Till />
+    {:else if page === "feed"}
+      <Feed />
     {:else if page === "kiosk"}
       <Kiosk />
     {:else if page === "activity"}

@@ -23,6 +23,7 @@ pub mod catalogue;
 pub mod contacts;
 pub mod donations;
 pub mod groups;
+pub mod home;
 pub mod identity;
 pub mod lap;
 pub mod ledger;

@@ -517,3 +517,20 @@ input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
    and "12:24 PM" stays a clock. */
 .empty, .note, .page-lede, .thread-name, .thread-last, .thread-when, .bubble-body, .bubble-meta, .quote,
 .row .title, .row .meta, .ledger-row .lw, .ledger-row .lm, .addr, .card-link code, .stat-v { unicode-bidi: plaintext; }
+
+/* ----- the feed --------------------------------------------------------------- */
+.feed-grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(220px, 1fr); gap: 16px; align-items: start; }
+.card.post { padding: 14px 16px; }
+.post-head { display: flex; align-items: center; gap: 10px; }
+.post-who { flex: 1; min-width: 0; }
+.post-tools { display: flex; gap: 4px; }
+.post-body { margin-top: 8px; }
+.post-body p { margin: 0 0 8px; white-space: pre-wrap; unicode-bidi: plaintext; }
+.post-body p:last-child { margin-bottom: 0; }
+.post-media { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.post-img { max-width: 100%; max-height: 320px; border-radius: var(--radius-s); display: block; }
+.linkish.img { padding: 0; border: 0; background: none; }
+.post-files { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.post-files .chip, .chips .chip { display: inline-flex; align-items: center; gap: 6px; }
+textarea.compose { width: 100%; resize: vertical; margin-bottom: 10px; }
+@media (max-width: 1000px) { .feed-grid { grid-template-columns: minmax(0, 1fr); } }

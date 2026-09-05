@@ -129,6 +129,9 @@ pub struct Contact {
     pub petname: Option<String>,
     #[serde(rename = "asserted", default)]
     pub asserted_name: Option<String>,
+    /// §16.23: this persona's home is kept and its posts sit in the timeline.
+    #[serde(default)]
+    pub hearted: bool,
     #[serde(rename = "my_outbox", default)]
     pub my_outbox: String,
     #[serde(rename = "my_outbox_pub", with = "bytes_b64", default)]
@@ -1378,6 +1381,7 @@ mod tests {
     fn contact(hex: &str) -> Contact {
         Contact {
             persona_hex: hex.into(),
+            hearted: false,
             petname: None,
             asserted_name: Some("Pat".into()),
             my_outbox: "VLD0:mine".into(),

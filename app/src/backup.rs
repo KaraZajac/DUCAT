@@ -308,6 +308,7 @@ impl App {
                 owner: c.owner.clone().or_else(|| existing.as_ref().map(|e| e.owner.clone())).unwrap_or_default(),
                 ..existing.clone().unwrap_or_else(|| Contact {
                     persona_hex: persona_hex.clone(),
+                    hearted: false,
                     petname: None,
                     asserted_name: None,
                     my_outbox: String::new(),
@@ -381,6 +382,7 @@ mod tests {
         let shop = a.create_persona("Shop", 7).unwrap().unwrap();
         a.put_contact(Contact {
             persona_hex: "cd".repeat(32),
+            hearted: false,
             petname: Some("Pat".into()),
             asserted_name: None,
             my_outbox: "VLD0:mine".into(),

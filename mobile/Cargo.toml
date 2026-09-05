@@ -26,6 +26,7 @@ stigmerge_peer = { path = "vendor/stigmerge-peer" }
 stigmerge_fileindex = { path = "vendor/stigmerge-fileindex" }
 veilnet = { path = "vendor/veilnet" }
 serde_json = "1"
+serde = { version = "1", features = ["derive"] }
 curve25519-dalek = { version = "4", features = ["precomputed-tables"] }
 uniffi = { version = "0.28", features = ["cli"] }
 ureq = { version = "2", default-features = false, features = ["tls"] }

@@ -55,6 +55,16 @@
     }
   });
 
+  // §16.23: keep this persona's home and read its posts in the feed.
+  async function toggleHeart() {
+    if (!current) return;
+    err = null;
+    try {
+      await api.setHeart(current.persona_hex, !current.hearted);
+      await refresh();
+    } catch (e) { err = String(e); }
+  }
+
   async function refresh() {
     try {
       rows = await api.contacts();
@@ -707,6 +717,7 @@
           <button class="btn small" class:active={payingOut} disabled={!current.their_address} title={current.their_address ? t("desk_send_them_money") : t("pay_no_address_hint", current.name)} onclick={() => { payingOut = !payingOut; requesting = false; }}>{t("desk_pay")}</button>
           <button class="btn small" class:active={requesting} onclick={() => { requesting = !requesting; payingOut = false; }}>{t("pay_request")}</button>
           <button class="btn small" onclick={() => { renaming = true; newName = current?.petname ?? ""; }}>{t("profiles_rename")}</button>
+          <button class="btn small" class:active={current.hearted} title={current.hearted ? t("desk_unheart") : t("desk_heart")} disabled={!current.has_keys} onclick={toggleHeart}>{@html current.hearted ? icons.heartFull : icons.heart}</button>
           <button class="btn small" class:active={showSettings} title={t("chat_conversation_settings")} onclick={() => (showSettings = !showSettings)}>{@html icons.more} {t("desk_more")}</button>
         </div>
       </div>

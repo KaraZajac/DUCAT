@@ -85,5 +85,6 @@ impl App {
         self.expire_all();
         self.expire_orders();
         self.sweep_abandoned_tabs(&[]);
+        self.feeds_lap();
     }
 }

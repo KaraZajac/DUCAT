@@ -25,5 +25,8 @@ export const icons: Record<string, string> = {
   mic: wrap('<rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/><path d="M12 18v3M9 21h6"/>'),
   more: wrap('<circle cx="6" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="18" cy="12" r="1.4" fill="currentColor" stroke="none"/>'),
   send: wrap('<path d="M4 12L20 4l-4 16-4-7z"/><path d="M12 13l8-9"/>'),
+  feed: wrap('<path d="M4 4.5a15.5 15.5 0 0 1 15.5 15.5"/><path d="M4 10.5a9.5 9.5 0 0 1 9.5 9.5"/><circle cx="5.5" cy="18.5" r="1.6" fill="currentColor" stroke="none"/>'),
+  heart: wrap('<path d="M12 20.5s-7.5-4.6-7.5-10A4.2 4.2 0 0 1 12 8a4.2 4.2 0 0 1 7.5 2.5c0 5.4-7.5 10-7.5 10z"/>'),
+  heartFull: wrap('<path d="M12 20.5s-7.5-4.6-7.5-10A4.2 4.2 0 0 1 12 8a4.2 4.2 0 0 1 7.5 2.5c0 5.4-7.5 10-7.5 10z" fill="currentColor"/>'),
   status: wrap('<path d="M3.5 12h3.5l3-7 4 14 3-7h3.5"/>'),
 };

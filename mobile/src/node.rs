@@ -1095,6 +1095,53 @@ pub fn node_dht_create(subkey_count: u32) -> Result<DhtRecord, NodeError> {
     })
 }
 
+/// The record key a given owner key and one-subkey schema would name —
+/// computed, not created, so a reader who knows a persona's key can find
+/// its home (§16.23) without owning anything.
+#[uniffi::export]
+pub fn node_dht_record_key_for(owner_public: Vec<u8>, subkey_count: u32) -> Result<String, NodeError> {
+    let (api, rt) = handles()?;
+    rt.block_on(async {
+        let schema = DHTSchema::dflt(subkey_count as u16).map_err(|e| NodeError::Failed(format!("schema: {e}")))?;
+        let key = api
+            .get_dht_record_key(schema, PublicKey::new(CRYPTO_KIND_VLD0, BarePublicKey::new(&owner_public)), None)
+            .await
+            .map_err(|e| NodeError::Failed(format!("record key: {e}")))?;
+        Ok(key.to_string())
+    })
+}
+
+/// Create — or, if this node already holds it, open — the record a given
+/// keypair owns. The key is deterministic (see `node_dht_record_key_for`),
+/// so creating twice names the same record, and a restored device finds
+/// its own home again from its persona key alone.
+#[uniffi::export]
+pub fn node_dht_create_owned(subkey_count: u32, owner_public: Vec<u8>, owner_secret: Vec<u8>) -> Result<DhtRecord, NodeError> {
+    let (api, rt) = handles()?;
+    rt.block_on(async {
+        let rc = api
+            .routing_context()
+            .map_err(|e| NodeError::Failed(format!("routing context: {e}")))?;
+        let schema = DHTSchema::dflt(subkey_count as u16).map_err(|e| NodeError::Failed(format!("schema: {e}")))?;
+        let kp = KeyPair::new(
+            CRYPTO_KIND_VLD0,
+            BareKeyPair::new(BarePublicKey::new(&owner_public), BareSecretKey::new(&owner_secret)),
+        );
+        let key = api
+            .get_dht_record_key(schema.clone(), PublicKey::new(CRYPTO_KIND_VLD0, BarePublicKey::new(&owner_public)), None)
+            .await
+            .map_err(|e| NodeError::Failed(format!("record key: {e}")))?;
+        let opened = rc.open_dht_record(key.clone(), Some(kp.clone())).await.is_ok();
+        if !opened {
+            let _ = rc
+                .create_dht_record(CRYPTO_KIND_VLD0, schema, Some(kp))
+                .await
+                .map_err(|e| NodeError::Failed(format!("create: {e}")))?;
+        }
+        Ok(DhtRecord { key: key.to_string(), owner_public, owner_secret, subkey_count })
+    })
+}
+
 /// Create a record we own and **one other party may also write**.
 ///
 /// This is the contact-request inbox: subkey 0 is ours, subkey 1 is theirs. The

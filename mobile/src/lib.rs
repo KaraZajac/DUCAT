@@ -18,6 +18,7 @@ pub mod contacts;
 pub mod monero;
 pub mod node;
 pub mod swarm;
+pub mod feed;
 
 uniffi::setup_scaffolding!();
 

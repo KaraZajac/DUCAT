@@ -2718,6 +2718,77 @@ choice rather than a default, because hosting somebody's storefront is a
 small gift a person should knowingly give. A site whose publisher is
 gone lives exactly as long as someone chooses to keep it.
 
+## 16.23 Homes and feeds: a persona's own site, and the timeline of the people you keep
+
+A **home** is a site (§16.22) at an address every holder of a persona's
+key can compute and only that persona can write. Its record uses the
+site schema (one subkey, `SITE_HEAD`) and the **persona key itself as
+the record owner**, so the record key is the network's hash of the
+persona's public key and that schema — no field carries it, no card
+changes, and a contact who knows you can find your home from the key
+they already hold. The persona key signs the record as its owner; the
+network's signed data never begins with a §18.3 domain tag, so those
+signatures cannot be mistaken for a DUCAT message. A persona MAY have no
+home; a reader who finds no head treats the persona as having nothing to
+say yet, not as an error.
+
+**One bundle, two readers.** The home's bundle is a site — `index.html`
+and whatever it references, rendered in the sealed room — and it MAY
+also carry a **feed**: `feed.json` at the bundle root, the machine-read
+list of the persona's posts. A post is also a page: a publisher SHOULD
+write `posts/<id>.html` for each post and `feed.html` listing them, all
+under the same clearnet rule, so a room shows a post the way it shows any
+page and a viewer that knows nothing of feeds still reads them.
+
+**`feed.json`, closed set, version 1.** One object:
+`v` (=1), `persona` (the author's key, hex), `name` (≤80 chars),
+`updated` (epoch seconds), `posts` (newest first, ≤200), `older` (the
+path of the next page of posts, or absent). A post: `id` (8–32 lowercase
+hex, unique within the feed), `at` (epoch seconds), `edited` (epoch
+seconds, or absent), `text` (≤4000 chars, the subset below), `media`
+(≤8: `path`, `full`, `mime`, `bytes`, `w`, `h`, `alt`), `files` (≤8:
+`name`, `addr`, `mime`, `bytes`), `re` (`persona`, `id` — the post this
+one answers or reposts, or absent). `path` names a file inside the
+bundle — no scheme, no `..`; `full` and `addr` are `ducat:file/`
+addresses (§16.20's shares) and nothing else. Strict reader: an unknown
+key, a wrong type, a limit exceeded, or any other target is a refusal of
+the whole document, so a feed that reaches the clearnet is unreadable
+rather than half-read. Thumbnails travel in the bundle; the full-size
+picture, a video, or any other file travels as its own immutable share,
+so hearting a persona mirrors the small thing by default and a new post
+never re-ships every file ever posted.
+
+**The text subset.** Paragraphs separated by a blank line; `**bold**`,
+`*italic*`; `[text](target)` and `![alt](path)` where a target is a
+path inside the bundle or a `ducat:` URI. Nothing else is markup; a
+reader renders everything else as the characters they are. A target of
+any other shape makes the document unreadable, by the same rule as
+above.
+
+**Hearts.** To heart a persona is to keep its home: the reader saves the
+home's address, sets the site's keep-alive (§16.22's mirror choice,
+made once for the person rather than per page), and reads the head on
+the same schedule as its other reads. A moved digest means a new edition:
+fetch it, read its `feed.json`, and the **timeline** is every hearted
+persona's posts merged newest first, the reader's own among them. There
+is no global timeline and no follower count anywhere: who hearts whom is
+known only to the one who hearts.
+
+**Editions, edits, deletions.** Every post is a new edition of the home
+bundle and a rewrite of the head in place. An edit keeps the post's `id`
+and stamps `edited`; a deletion leaves the post out of the next edition.
+Readers of a home chase its head, as site readers do; a mirror that
+keeps an old edition alive keeps a page the author has since taken down,
+which is §16.22's survivability rule and is the author's to weigh before
+posting. A like or a reply is a message (§16.14) to the author naming the
+persona and post id, private like any message; comments an author wants
+seen are published into the next edition of that post by the author.
+
+**Privacy, plainly.** Because the address derives from the key, a home is
+readable by everyone who ever took the persona's card. A future revision
+MAY encrypt the head with a key handed to hearted contacts over the
+mailbox; the document shapes above do not change for it.
+
 ## 17.1 The core insight: bond once, ride hundreds of times
 
 The objection to Monero multisig (8.2) was that it's multi-round and brittle — hostile to a 3-second curbside exchange. A **consumer bond is not per-transaction**. The user loads a float once; the awkward multisig setup happens once, in a calm, retryable onboarding flow where failure means "tap retry," not "I'm standing in the rain." That single bonded float then backs hundreds of rides.
