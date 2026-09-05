@@ -9,6 +9,9 @@ name: release
 on:
   push:
     tags: ["v*"]
+  # Run by hand to prove every platform still packages, without cutting a
+  # release: the bundles land on the run as artifacts instead.
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -55,7 +58,15 @@ jobs:
       - name: the APKs
         run: cd applications && ./gradlew --no-daemon :android:assembleDebug
 
+      - name: keep the APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: apks
+          path: applications/android/build/outputs/apk/debug/app-*-debug.apk
+          retention-days: 14
+
       - name: upload to the tag's release
+        if: github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -151,7 +162,15 @@ jobs:
           for f in "$b"/dmg/*.dmg; do cp "$f" "dist/ducat-desk-${{ matrix.slug }}.dmg"; done
           ls -la dist
 
+      - name: keep the bundles
+        uses: actions/upload-artifact@v4
+        with:
+          name: desk-${{ matrix.slug }}
+          path: dist/*
+          retention-days: 14
+
       - name: upload to the tag's release
+        if: github.event_name == 'push'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
