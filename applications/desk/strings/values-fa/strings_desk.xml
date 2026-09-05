@@ -314,4 +314,5 @@
     <string name="desk_confirm_abandon_order">این سفارش رهاشده علامت بخورد؟ کد آن دیگر پاییده نمی‌شود.</string>
     <string name="desk_find_conversation">یافتن گفتگو</string>
     <string name="desk_version_line">میز v%1$s · %2$s</string>
+    <string name="desk_show_folder">نمایش پوشه</string>
 </resources>

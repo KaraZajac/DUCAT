@@ -483,6 +483,7 @@ export const api = {
     invoke<SiteRow>("publish_site", { dir, title, recordKey: recordKey ?? null }),
   addSite: (uri: string) => invoke<SiteRow>("add_site", { uri }),
   fetchSite: (recordKey: string) => invoke<string>("fetch_site", { recordKey }),
+  openSiteRoom: (recordKey: string) => invoke<void>("open_site_room", { recordKey }),
   setSiteKeep: (recordKey: string, keep: boolean) => invoke<void>("set_site_keep", { recordKey, keep }),
   removeSite: (recordKey: string) => invoke<void>("remove_site", { recordKey }),
   lintSite: (dir: string) => invoke<string | null>("lint_site", { dir }),

@@ -385,6 +385,7 @@
  "desk_shelf_word": "on the shelf",
  "desk_show": "Show",
  "desk_show_donation_code": "Show a donation code",
+ "desk_show_folder": "Show folder",
  "desk_show_my_code": "Show my code",
  "desk_show_notes": "Show notes",
  "desk_site_check_note": "The bundle is checked for anything that reaches the clearnet before it is seeded, because one external fetch hands a reader's address to a third party.",

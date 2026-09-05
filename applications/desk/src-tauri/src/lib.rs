@@ -10,7 +10,7 @@ use ducat_app::contacts::{Contact, StoredMessage};
 use ducat_app::mailbox::{Claim, Outgoing};
 use ducat_app::{App, CardProblem, Error};
 use serde::Serialize;
-use tauri::Manager;
+use tauri::{Emitter, Manager, WebviewUrl, WebviewWindowBuilder};
 
 static APP: OnceLock<App> = OnceLock::new();
 
@@ -247,6 +247,171 @@ fn lint_site(dir: String) -> Option<String> {
 
 /// A refusal in the reader's terms. Card problems are typed on the app
 /// side so this is the one place they become sentences.
+// ----- §16.22's sealed room, on the desk ---------------------------------------
+//
+// A site opens in its own window, and every request that window makes is
+// answered from the fetched bundle and nothing else: no network of any
+// kind from rendered content, scripts off, `ducat:` links the only door
+// out. The bundle a window may read is looked up by the window's label,
+// so no URL a page could write names a path, and the phone's rules
+// (SiteViewerActivity) hold here to the letter.
+
+static ROOMS: std::sync::Mutex<Option<std::collections::HashMap<String, std::path::PathBuf>>> = std::sync::Mutex::new(None);
+
+fn room_dir(label: &str) -> Option<std::path::PathBuf> {
+    ROOMS.lock().ok()?.as_ref()?.get(label).cloned()
+}
+
+fn set_room(label: String, dir: std::path::PathBuf) {
+    let mut g = ROOMS.lock().unwrap_or_else(|e| e.into_inner());
+    g.get_or_insert_with(Default::default).insert(label, dir);
+}
+
+/// What the room may do, said in the header of every response: nothing
+/// that reaches past the bundle. Scripts are refused outright — the
+/// phone turns JavaScript off; a policy the renderer enforces is the
+/// same wall here.
+const ROOM_CSP: &str = "default-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; media-src 'self'; script-src 'none'; connect-src 'none'; frame-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'";
+
+fn room_mime(path: &std::path::Path) -> &'static str {
+    match path.extension().and_then(|e| e.to_str()).map(|e| e.to_ascii_lowercase()).as_deref() {
+        Some("html") | Some("htm") => "text/html; charset=utf-8",
+        Some("css") => "text/css; charset=utf-8",
+        Some("js") | Some("mjs") => "text/javascript",
+        Some("json") => "application/json",
+        Some("txt") | Some("md") => "text/plain; charset=utf-8",
+        Some("png") => "image/png",
+        Some("jpg") | Some("jpeg") => "image/jpeg",
+        Some("gif") => "image/gif",
+        Some("svg") => "image/svg+xml",
+        Some("webp") => "image/webp",
+        Some("avif") => "image/avif",
+        Some("ico") => "image/x-icon",
+        Some("woff") => "font/woff",
+        Some("woff2") => "font/woff2",
+        Some("ttf") => "font/ttf",
+        Some("otf") => "font/otf",
+        Some("mp3") => "audio/mpeg",
+        Some("ogg") | Some("oga") => "audio/ogg",
+        Some("wav") => "audio/wav",
+        Some("mp4") | Some("m4v") => "video/mp4",
+        Some("webm") => "video/webm",
+        Some("pdf") => "application/pdf",
+        _ => "application/octet-stream",
+    }
+}
+
+fn percent_decode(s: &str) -> String {
+    let b = s.as_bytes();
+    let mut out = Vec::with_capacity(b.len());
+    let mut i = 0;
+    while i < b.len() {
+        if b[i] == b'%' && i + 2 < b.len() {
+            if let Ok(v) = u8::from_str_radix(&s[i + 1..i + 3], 16) {
+                out.push(v);
+                i += 3;
+                continue;
+            }
+        }
+        out.push(b[i]);
+        i += 1;
+    }
+    String::from_utf8_lossy(&out).into_owned()
+}
+
+fn room_response(label: &str, uri_path: &str) -> tauri::http::Response<Vec<u8>> {
+    let closed = |status: u16| {
+        tauri::http::Response::builder()
+            .status(status)
+            .header("Content-Type", "text/plain")
+            .header("Content-Security-Policy", ROOM_CSP)
+            .body(Vec::new())
+            .unwrap()
+    };
+    let Some(root) = room_dir(label) else { return closed(403) };
+    let rel = percent_decode(uri_path.trim_start_matches('/'));
+    if rel.contains('\0') {
+        return closed(404);
+    }
+    let mut candidate = root.join(if rel.is_empty() { "index.html" } else { rel.as_str() });
+    if candidate.is_dir() {
+        candidate = candidate.join("index.html");
+    }
+    // The one wall that matters twice: inside the bundle, and only the
+    // bundle. Canonical paths compare by component, so a neighbour whose
+    // name merely begins with the bundle's cannot pass as inside it.
+    let Ok(canon) = candidate.canonicalize() else { return closed(404) };
+    if !canon.starts_with(&root) || !canon.is_file() {
+        return closed(404);
+    }
+    let Ok(bytes) = std::fs::read(&canon) else { return closed(404) };
+    tauri::http::Response::builder()
+        .status(200)
+        .header("Content-Type", room_mime(&canon))
+        .header("Content-Security-Policy", ROOM_CSP)
+        .header("X-Content-Type-Options", "nosniff")
+        .header("Referrer-Policy", "no-referrer")
+        .header("Cache-Control", "no-store")
+        .body(bytes)
+        .unwrap()
+}
+
+fn room_label(record_key: &str) -> String {
+    use std::hash::{Hash, Hasher};
+    let mut h = std::collections::hash_map::DefaultHasher::new();
+    record_key.hash(&mut h);
+    format!("site-{:016x}", h.finish())
+}
+
+/// Open a site in its room: fetch the current edition if the head moved,
+/// then a window that can read that bundle and nothing else. A room
+/// already open for the site is brought forward instead.
+#[tauri::command]
+async fn open_site_room(handle: tauri::AppHandle, record_key: String) -> Result<(), String> {
+    let a = app()?;
+    let key = record_key.clone();
+    let (dir, title) = tauri::async_runtime::spawn_blocking(move || {
+        a.add_site(&key).map_err(s)?;
+        let dir = a.fetch_site_bundle(&key).map_err(s)?;
+        let title = a.sites().into_iter().find(|x| x.record_key == key).map(|x| x.title).unwrap_or_default();
+        Ok::<_, String>((dir, title))
+    })
+    .await
+    .map_err(|e| e.to_string())??;
+    let dir = dir.canonicalize().map_err(|e| e.to_string())?;
+    if !dir.join("index.html").is_file() {
+        return Err("a site needs an index.html at its root".into());
+    }
+    let label = room_label(&record_key);
+    set_room(label.clone(), dir);
+    if let Some(w) = handle.get_webview_window(&label) {
+        let _ = w.set_focus();
+        return Ok(());
+    }
+    let main = handle.clone();
+    let title = if title.trim().is_empty() { "Site".to_string() } else { title };
+    WebviewWindowBuilder::new(&handle, &label, WebviewUrl::CustomProtocol("ducat-site://localhost/index.html".parse().unwrap()))
+        .title(&title)
+        .inner_size(1000.0, 760.0)
+        .min_inner_size(480.0, 360.0)
+        .on_navigation(move |url| match url.scheme() {
+            "ducat-site" => true,
+            // Windows serves custom schemes as http://<scheme>.localhost.
+            "http" | "https" => url.host_str().map_or(false, |h| h == "ducat-site.localhost"),
+            // The page's only working exit: the address goes to the desk's
+            // own flows, and the room stays where it is.
+            "ducat" => {
+                let _ = main.emit_to("main", "ducat-link", url.to_string());
+                false
+            }
+            _ => false,
+        })
+        .build()
+        .map_err(|e| e.to_string())?;
+    ducat_app::log::info("Desk", format!("sealed room opened for '{}'", title));
+    Ok(())
+}
+
 fn said(e: Error) -> String {
     match e {
         Error::Card(CardProblem::AlreadyUsed) => "That card has already been answered — ask them for a fresh one.".into(),
@@ -2240,6 +2405,11 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())
+        // Every request from a room window, answered by the room and nothing else.
+        .register_uri_scheme_protocol("ducat-site", |ctx, request| {
+            let label = ctx.webview_label().to_string();
+            room_response(&label, request.uri().path())
+        })
         .setup(|app| {
             start_drive(app.handle().clone());
             Ok(())
@@ -2257,6 +2427,7 @@ pub fn run() {
             publish_site,
             add_site,
             fetch_site,
+            open_site_room,
             set_site_keep,
             remove_site,
             lint_site,

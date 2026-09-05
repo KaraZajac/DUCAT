@@ -314,4 +314,5 @@
     <string name="desk_confirm_abandon_order">Marcar este pedido como abandonado? O seu código deixa de ser vigiado.</string>
     <string name="desk_find_conversation">Encontrar uma conversa</string>
     <string name="desk_version_line">desk v%1$s · %2$s</string>
+    <string name="desk_show_folder">Mostrar pasta</string>
 </resources>

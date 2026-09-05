@@ -73,6 +73,21 @@ printed hands out what you just saved; anyone who answered it earlier keeps
 what they were given then. Anything that cannot be undone asks first, and the
 chat list and the ledger each have a search box.
 
+### The sealed room
+
+A site opens in its own window, and that window is answered from the fetched
+bundle and nothing else — the same room the phone builds. Every request goes
+to a `ducat-site` protocol handler that reads the one directory registered
+for that window's label; the response carries a policy of `default-src
+'none'` with images, styles, fonts, and media from the bundle only and
+`script-src 'none'`, so a page cannot run code, fetch, frame, or submit. The
+window's navigation guard allows the bundle's own addresses, refuses
+everything else, and turns a `ducat:` link into an event for the main
+window: a site address is added and shown, a card lands in the chat's add
+panel, and the room stays where it is. The room has no IPC: capabilities are
+granted to the main window alone. "Show folder" still reveals the bundle in
+the file manager for anyone who wants the files.
+
 ## Languages
 
 The desk speaks the phone's nineteen languages. Every sentence a page

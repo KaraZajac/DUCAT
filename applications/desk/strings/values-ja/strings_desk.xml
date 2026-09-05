@@ -310,4 +310,5 @@
     <string name="desk_confirm_abandon_order">この注文を放棄済みにしますか？コードの監視は止まります。</string>
     <string name="desk_find_conversation">会話を探す</string>
     <string name="desk_version_line">デスク v%1$s · %2$s</string>
+    <string name="desk_show_folder">フォルダーを表示</string>
 </resources>

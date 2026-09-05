@@ -318,4 +318,5 @@
     <string name="desk_confirm_abandon_order">Mark this order as walked away? Its code stops being watched.</string>
     <string name="desk_find_conversation">Find a conversation</string>
     <string name="desk_version_line">desk v%1$s · %2$s</string>
+    <string name="desk_show_folder">Show folder</string>
 </resources>

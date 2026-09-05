@@ -93,14 +93,23 @@
     err = null;
     busy = r.record_key;
     try {
-      const p = await api.fetchSite(r.record_key);
+      await api.fetchSite(r.record_key);
       await refresh();
-      await api.reveal(p);
+      await api.openSiteRoom(r.record_key);
     } catch (e) {
       err = String(e);
     } finally {
       busy = null;
       delete progress[r.share];
+    }
+  }
+
+  async function showFolder(r: SiteRow) {
+    err = null;
+    try {
+      await api.reveal(await api.fetchSite(r.record_key));
+    } catch (e) {
+      err = String(e);
     }
   }
 
@@ -176,6 +185,7 @@
       <div class="actions">
         <button class="btn small" onclick={() => copy(r.uri)}>{t("desk_copy_address")}</button>
         <button class="btn small primary" disabled={busy !== null} onclick={() => open(r)}>{busy === r.record_key ? t("releases_fetching") : t("sites_open")}</button>
+        <button class="btn small" disabled={busy !== null} onclick={() => showFolder(r)}>{t("desk_show_folder")}</button>
         {#if r.mine}<button class="btn small" onclick={() => startUpdate(r)}>{t("desk_update")}</button>{/if}
         <label class="toggle"><input type="checkbox" checked={r.keep_alive} onchange={(e) => keep(r, (e.target as HTMLInputElement).checked)} /> {t("desk_keep_alive")}</label>
         <button class="btn small danger" onclick={() => remove(r)}>{t("sites_remove")}</button>

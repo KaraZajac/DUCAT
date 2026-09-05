@@ -9,6 +9,9 @@ export const gen = $state({ value: 0 });
 // would open a file picker also take a typed path while it is on.
 export const drive = $state({ on: false });
 
+// A ducat: address handed over from a room window, waiting for its page.
+export const pending = $state({ card: null as string | null });
+
 let timer: ReturnType<typeof setInterval> | null = null;
 
 // Notices the app queued — a message, money, a call — shown the way the

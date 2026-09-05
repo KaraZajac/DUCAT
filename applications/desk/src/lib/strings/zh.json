@@ -376,6 +376,7 @@
  "desk_shelf_word": "在书架上",
  "desk_show": "显示",
  "desk_show_donation_code": "显示捐赠码",
+ "desk_show_folder": "显示文件夹",
  "desk_show_my_code": "显示我的码",
  "desk_show_notes": "显示输出",
  "desk_site_check_note": "分发前会检查包内是否有访问明网的内容，因为一次外部请求就会把读者的地址交给第三方。",

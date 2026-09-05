@@ -5,7 +5,7 @@
   import { onMount, tick } from "svelte";
   import { t, tp } from "./i18n.svelte";
   import { api, confirmDanger, copy, fmtTime, fmtXmr, type ContactRow, type GroupMessage, type GroupRow, type MessageRow, type StandingRow } from "./api";
-  import { gen, drive } from "./state.svelte";
+  import { gen, drive, pending } from "./state.svelte";
 
   let rows = $state<ContactRow[]>([]);
   let open = $state<string | null>(null);
@@ -46,6 +46,15 @@
     const q = finding.trim().toLowerCase();
     return q ? groups.filter((g) => `${g.name} ${g.last_body ?? ""}`.toLowerCase().includes(q)) : groups;
   });
+  // A card handed over from a site's room opens the add panel with it.
+  $effect(() => {
+    if (pending.card) {
+      adding = true;
+      cardUri = pending.card;
+      pending.card = null;
+    }
+  });
+
   async function refresh() {
     try {
       rows = await api.contacts();

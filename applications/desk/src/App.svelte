@@ -19,6 +19,8 @@
   import cat from "./assets/ducat-cat.png";
   import { icons } from "./lib/icons";
   import { getCurrentWindow } from "@tauri-apps/api/window";
+  import { listen } from "@tauri-apps/api/event";
+  import { pending } from "./lib/state.svelte";
 
   type Page = "chat" | "wallet" | "till" | "kiosk" | "activity" | "library" | "market" | "files" | "sites" | "me" | "status";
   let page = $state<Page>("chat");
@@ -75,6 +77,22 @@
       { id: "me", label: t("desk_nav_me") },
       { id: "status", label: t("section_status") },
     ];
+  });
+
+  // A ducat: link followed inside a site's room lands here: a site is
+  // added and shown, a card goes to the chat's add panel.
+  onMount(() => {
+    const off = listen<string>("ducat-link", async (e) => {
+      const uri = e.payload;
+      if (uri.startsWith("ducat:site/")) {
+        try { await api.addSite(uri); } catch {}
+        page = "sites";
+      } else if (uri.startsWith("ducat:card/")) {
+        pending.card = uri;
+        page = "chat";
+      }
+    });
+    return () => { off.then((f) => f()); };
   });
 
   onMount(() => {

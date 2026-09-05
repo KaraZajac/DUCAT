@@ -144,6 +144,12 @@ fn first_external(text: &str) -> Option<String> {
     let starts: [&str; 4] = ["src", "href", "url(", "@import"];
     let mut i = 0;
     while i < bytes.len() {
+        // Byte by byte, but a slice must start on a character: the middle
+        // of a "·" or an accented letter is not a place to look from.
+        if !lower.is_char_boundary(i) {
+            i += 1;
+            continue;
+        }
         let mut matched = None;
         for s in starts {
             if lower[i..].starts_with(s) {
@@ -165,7 +171,11 @@ fn first_external(text: &str) -> Option<String> {
         let val = &lower[j..];
         if val.starts_with("//") || val.starts_with("http://") || val.starts_with("https://") {
             let end = text[i..].find(|c: char| c == '>' || c == ')' || c == '\n').map(|e| i + e).unwrap_or(text.len());
-            return Some(text[i..end.min(i + 120)].trim().to_string());
+            let mut cut = end.min(i + 120);
+            while cut > i && !text.is_char_boundary(cut) {
+                cut -= 1;
+            }
+            return Some(text[i..cut].trim().to_string());
         }
         i += 1;
     }
@@ -586,4 +596,16 @@ mod tests {
         assert_eq!(app.sites()[0].title, "Renamed");
         std::fs::remove_dir_all(dir).ok();
     }
+    #[test]
+    fn scan_survives_multibyte_text() {
+        // A middle dot before the link, and one right where the message
+        // is cut: neither may land a slice inside a character.
+        let page = format!("<p>{} <a href=\"https://x.example/\">go</a>", "·".repeat(60));
+        let hit = first_external(&page).expect("the link is external");
+        assert!(hit.starts_with("href="), "{hit}");
+        assert!(first_external("<p>naïve · text</p><a href=\"about.html\">a</a>").is_none());
+        let long = format!("<a href=\"https://x.example/{}·\">", "a".repeat(110));
+        let _ = first_external(&long);
+    }
+
 }

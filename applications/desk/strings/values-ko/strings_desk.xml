@@ -310,4 +310,5 @@
     <string name="desk_confirm_abandon_order">이 주문을 떠난 것으로 표시할까요? 코드 감시가 중단됩니다.</string>
     <string name="desk_find_conversation">대화 찾기</string>
     <string name="desk_version_line">데스크 v%1$s · %2$s</string>
+    <string name="desk_show_folder">폴더 표시</string>
 </resources>

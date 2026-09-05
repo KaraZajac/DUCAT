@@ -330,4 +330,5 @@
     <string name="desk_confirm_abandon_order">وضع علامة على هذا الطلب كمهجور؟ سيتوقف مراقبة رمزه.</string>
     <string name="desk_find_conversation">ابحث عن محادثة</string>
     <string name="desk_version_line">المكتب v%1$s · %2$s</string>
+    <string name="desk_show_folder">إظهار المجلد</string>
 </resources>

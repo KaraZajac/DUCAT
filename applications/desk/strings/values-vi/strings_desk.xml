@@ -310,4 +310,5 @@
     <string name="desk_confirm_abandon_order">Đánh dấu đơn này là đã bỏ đi? Mã của nó không còn được theo dõi.</string>
     <string name="desk_find_conversation">Tìm cuộc trò chuyện</string>
     <string name="desk_version_line">bàn v%1$s · %2$s</string>
+    <string name="desk_show_folder">Hiện thư mục</string>
 </resources>
