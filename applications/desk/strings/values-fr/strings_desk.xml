@@ -308,4 +308,9 @@
     <string name="desk_send_the_memo">Envoyer le mémo</string>
     <string name="desk_pick_conversation">Choisissez une conversation, ou ajoutez quelqu’un avec sa carte.</string>
     <string name="desk_reach_title">Comment vous joindre</string>
+    <string name="desk_confirm_remove_site">Retirer ce site de ce bureau ? Il cesse de le servir ; les lecteurs qui le gardent en vie l\'ont toujours.</string>
+    <string name="desk_confirm_delete_listing">Supprimer cette annonce ? Elle quitte le tableau et ne peut pas être récupérée.</string>
+    <string name="desk_confirm_remove_item">Retirer cet article du catalogue ?</string>
+    <string name="desk_confirm_abandon_order">Marquer cette commande comme abandonnée ? Son code n\'est plus surveillé.</string>
+    <string name="desk_find_conversation">Trouver une conversation</string>
 </resources>

@@ -51,9 +51,16 @@
     refresh();
   });
 
+  let query = $state("");
   const shown = $derived.by(() => {
     const [from, to] = bounds(range);
-    return events.filter((e) => e.pending || (e.timestamp >= from && e.timestamp < to) || (e.timestamp === 0 && range === "all"));
+    const q = query.trim().toLowerCase();
+    return events.filter((e) => {
+      const inRange = e.pending || (e.timestamp >= from && e.timestamp < to) || (e.timestamp === 0 && range === "all");
+      if (!inRange) return false;
+      if (!q) return true;
+      return Object.values(e).filter((v) => typeof v === "string").join(" ").toLowerCase().includes(q);
+    });
   });
 
   async function exportAs(json: boolean) {
@@ -129,7 +136,7 @@
 <div class="card">
   <div class="page-head" style="margin-bottom: 8px">
     <h3 style="margin: 0">{t("desk_ledger")}</h3>
-    <div class="actions"><button class="btn small" onclick={() => exportAs(false)}>{t("activity_export")}</button><button class="btn small" onclick={() => exportAs(true)}>{t("desk_export_json")}</button></div>
+    <div class="actions"><input class="input find narrow" type="search" placeholder={t("activity_search_hint")} bind:value={query} /><button class="btn small" onclick={() => exportAs(false)}>{t("activity_export")}</button><button class="btn small" onclick={() => exportAs(true)}>{t("desk_export_json")}</button></div>
   </div>
   {#if msg}<p class="note ok-text">{msg}</p>{/if}
   {#if err}<p class="err">{err}</p>{/if}

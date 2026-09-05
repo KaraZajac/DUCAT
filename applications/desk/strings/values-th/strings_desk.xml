@@ -304,4 +304,9 @@
     <string name="desk_send_the_memo">ส่งบันทึกเสียง</string>
     <string name="desk_pick_conversation">เลือกบทสนทนา หรือเพิ่มใครสักคนด้วยการ์ดของเขา</string>
     <string name="desk_reach_title">ช่องทางติดต่อคุณ</string>
+    <string name="desk_confirm_remove_site">นำไซต์นี้ออกจากเดสก์นี้? จะหยุดให้บริการ ผู้อ่านที่เก็บไว้ยังคงมีอยู่</string>
+    <string name="desk_confirm_delete_listing">ลบประกาศนี้? จะถูกนำออกจากบอร์ดและกู้คืนไม่ได้</string>
+    <string name="desk_confirm_remove_item">นำรายการนี้ออกจากแค็ตตาล็อก?</string>
+    <string name="desk_confirm_abandon_order">ทำเครื่องหมายว่าออร์เดอร์นี้ถูกทิ้ง? จะหยุดเฝ้าดูรหัสของมัน</string>
+    <string name="desk_find_conversation">ค้นหาการสนทนา</string>
 </resources>

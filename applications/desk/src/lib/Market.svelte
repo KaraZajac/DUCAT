@@ -5,7 +5,7 @@
   // takes the place as a geohash cell.
   import { onMount } from "svelte";
   import { t, i18n } from "./i18n.svelte";
-  import { api, copy, fmtXmr, fmtTime, type FoundRow, type ListingDraft, type ListingRow } from "./api";
+  import { api, copy, fmtXmr, fmtTime, type FoundRow, type ListingDraft, type ListingRow, confirmDanger } from "./api";
   import { gen, drive } from "./state.svelte";
 
   let mode = $state<"browse" | "mine">("browse");
@@ -282,7 +282,7 @@
             {:else}
               <button class="btn" disabled={busy === "post"} onclick={() => act("post", () => api.postListing(editingId!))}>{busy === "post" ? t("desk_posting") : t("rent_post_it")}</button>
             {/if}
-            <button class="btn danger" onclick={() => act("rm", async () => { await api.removeListing(editingId!); editing = null; editingId = null; })}>{t("rent_delete")}</button>
+            <button class="btn danger" onclick={async () => { if (!(await confirmDanger(t("desk_confirm_delete_listing")))) return; act("rm", async () => { await api.removeListing(editingId!); editing = null; editingId = null; }); }}>{t("rent_delete")}</button>
           {/if}
         </div>
         {#if editingId}

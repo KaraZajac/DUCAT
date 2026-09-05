@@ -308,4 +308,9 @@
     <string name="desk_send_the_memo">Enviar la nota de voz</string>
     <string name="desk_pick_conversation">Elige una conversación, o añade a alguien con su tarjeta.</string>
     <string name="desk_reach_title">Formas de contactarte</string>
+    <string name="desk_confirm_remove_site">¿Quitar este sitio de este escritorio? Deja de servirlo; los lectores que lo mantienen vivo lo conservan.</string>
+    <string name="desk_confirm_delete_listing">¿Eliminar este anuncio? Sale del tablón y no se puede recuperar.</string>
+    <string name="desk_confirm_remove_item">¿Quitar este artículo del catálogo?</string>
+    <string name="desk_confirm_abandon_order">¿Marcar este pedido como abandonado? Su código deja de vigilarse.</string>
+    <string name="desk_find_conversation">Buscar una conversación</string>
 </resources>

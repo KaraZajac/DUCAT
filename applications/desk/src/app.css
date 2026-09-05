@@ -506,3 +506,8 @@ details > summary::before {
 }
 details[open] > summary::before { transform: rotate(90deg); }
 details > summary:hover { color: var(--text); }
+
+/* Finding: a search box that sits with the list it narrows. */
+.input.find { width: 100%; margin: 6px 0 10px; }
+.input.find.narrow { width: 220px; margin: 0; }
+input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }

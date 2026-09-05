@@ -316,4 +316,9 @@
     <string name="desk_send_the_memo">Wyślij notatkę</string>
     <string name="desk_pick_conversation">Wybierz rozmowę albo dodaj kogoś jego kartą.</string>
     <string name="desk_reach_title">Jak się z tobą skontaktować</string>
+    <string name="desk_confirm_remove_site">Usunąć tę stronę z tego biurka? Przestanie ją udostępniać; czytelnicy, którzy ją utrzymują, nadal ją mają.</string>
+    <string name="desk_confirm_delete_listing">Usunąć to ogłoszenie? Znika z tablicy i nie da się go odzyskać.</string>
+    <string name="desk_confirm_remove_item">Usunąć tę pozycję z katalogu?</string>
+    <string name="desk_confirm_abandon_order">Oznaczyć to zamówienie jako porzucone? Jego kod przestaje być obserwowany.</string>
+    <string name="desk_find_conversation">Znajdź rozmowę</string>
 </resources>

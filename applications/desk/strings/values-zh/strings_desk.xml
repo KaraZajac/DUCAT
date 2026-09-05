@@ -304,4 +304,9 @@
     <string name="desk_send_the_memo">发送语音</string>
     <string name="desk_pick_conversation">选择一个会话，或用名片添加某人。</string>
     <string name="desk_reach_title">联系你的方式</string>
+    <string name="desk_confirm_remove_site">从此桌面移除该站点？它将停止提供；仍在保活的读者依然拥有它。</string>
+    <string name="desk_confirm_delete_listing">删除此条目？它将从公告板下架且无法恢复。</string>
+    <string name="desk_confirm_remove_item">从目录中移除该商品？</string>
+    <string name="desk_confirm_abandon_order">将此订单标记为已离开？其付款码将不再被监视。</string>
+    <string name="desk_find_conversation">查找会话</string>
 </resources>

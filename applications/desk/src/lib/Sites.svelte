@@ -2,7 +2,7 @@
   // Sites: one mutable head at a stable address, a bundle on the swarm.
   import { onMount } from "svelte";
   import { t, tp } from "./i18n.svelte";
-  import { api, copy, fmtWhen, type Progress, type SiteRow } from "./api";
+  import { api, confirmDanger, copy, fmtWhen, type Progress, type SiteRow } from "./api";
   import PieceBar from "./PieceBar.svelte";
 
   let rows = $state<SiteRow[]>([]);
@@ -110,6 +110,7 @@
   }
 
   async function remove(r: SiteRow) {
+    if (!(await confirmDanger(t("desk_confirm_remove_site")))) return;
     await api.removeSite(r.record_key);
     await refresh();
   }

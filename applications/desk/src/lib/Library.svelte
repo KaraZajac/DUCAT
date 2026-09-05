@@ -4,7 +4,7 @@
   // shipment is big and on the swarm.
   import { onMount } from "svelte";
   import { t, tp } from "./i18n.svelte";
-  import { api, copy, fmtBytes, fmtXmr, fmtTime, type Code, type ContactRow, type PublicationRow, type SubscriptionRow } from "./api";
+  import { api, confirmDanger, copy, fmtBytes, fmtXmr, fmtTime, type Code, type ContactRow, type PublicationRow, type SubscriptionRow } from "./api";
   import { gen, drive } from "./state.svelte";
 
   let mode = $state<"reading" | "press">("reading");
@@ -234,7 +234,7 @@
         <label class="toggle"><input type="checkbox" bind:checked={preferSwarm} /> {t("desk_prefer_swarm")}</label>
         <div class="actions">
           <button class="btn primary" disabled={!file || !period.trim() || busy === "publish"} onclick={publish}>{busy === "publish" ? t("pub_publishing") : t("pub_publish")}</button>
-          <button class="btn small danger" onclick={() => act("del", async () => { await api.deletePublication(current!.id); selected = null; })}>{t("pub_delete_btn")}</button>
+          <button class="btn small danger" onclick={async () => { if (!(await confirmDanger(t("pub_delete_body"), t("pub_delete_title")))) return; act("del", async () => { await api.deletePublication(current!.id); selected = null; }); }}>{t("pub_delete_btn")}</button>
         </div>
         {#if lastResult}<p class="note ok-text">{lastResult}</p>{/if}
         {#if err}<p class="err">{err}</p>{/if}

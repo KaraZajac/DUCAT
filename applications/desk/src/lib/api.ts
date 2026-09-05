@@ -2,7 +2,7 @@
 // nowhere else, so a renamed command breaks one file.
 
 import { invoke } from "@tauri-apps/api/core";
-import { open, save } from "@tauri-apps/plugin-dialog";
+import { ask, open, save } from "@tauri-apps/plugin-dialog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
 export interface Status {
@@ -684,4 +684,17 @@ export function fmtTime(secs: number): string {
   const today = new Date();
   const sameDay = d.toDateString() === today.toDateString();
   return sameDay ? d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : d.toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+
+/** A yes/no before something that cannot be undone. Under the drive
+ *  harness there is nobody to answer a dialog, so it says yes. */
+export async function confirmDanger(message: string, title = "DUCAT"): Promise<boolean> {
+  try {
+    if ((window as any).__DUCAT_DRIVE) return true;
+  } catch {}
+  try {
+    return await ask(message, { title, kind: "warning", okLabel: "OK", cancelLabel: "Cancel" });
+  } catch {
+    return window.confirm(message);
+  }
 }

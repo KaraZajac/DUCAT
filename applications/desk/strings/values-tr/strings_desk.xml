@@ -308,4 +308,9 @@
     <string name="desk_send_the_memo">Notu gönder</string>
     <string name="desk_pick_conversation">Bir konuşma seç ya da kartıyla birini ekle.</string>
     <string name="desk_reach_title">Sana ulaşma yolları</string>
+    <string name="desk_confirm_remove_site">Bu site bu masadan kaldırılsın mı? Sunmayı bırakır; onu canlı tutan okurlar hâlâ ona sahip olur.</string>
+    <string name="desk_confirm_delete_listing">Bu ilan silinsin mi? Panodan kalkar ve geri getirilemez.</string>
+    <string name="desk_confirm_remove_item">Bu ürün katalogdan kaldırılsın mı?</string>
+    <string name="desk_confirm_abandon_order">Bu sipariş terk edildi olarak işaretlensin mi? Kodu artık izlenmez.</string>
+    <string name="desk_find_conversation">Bir sohbet bul</string>
 </resources>

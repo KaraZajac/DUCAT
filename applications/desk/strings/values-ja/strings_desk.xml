@@ -304,4 +304,9 @@
     <string name="desk_send_the_memo">メモを送る</string>
     <string name="desk_pick_conversation">会話を選ぶか、カードで誰かを追加してください。</string>
     <string name="desk_reach_title">連絡方法</string>
+    <string name="desk_confirm_remove_site">このサイトをこのデスクから外しますか？配信は止まりますが、保持している読者は引き続き持っています。</string>
+    <string name="desk_confirm_delete_listing">この出品を削除しますか？掲示板から消え、元に戻せません。</string>
+    <string name="desk_confirm_remove_item">この品目をカタログから外しますか？</string>
+    <string name="desk_confirm_abandon_order">この注文を放棄済みにしますか？コードの監視は止まります。</string>
+    <string name="desk_find_conversation">会話を探す</string>
 </resources>

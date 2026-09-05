@@ -308,4 +308,9 @@
     <string name="desk_send_the_memo">De memo sturen</string>
     <string name="desk_pick_conversation">Kies een gesprek, of voeg iemand toe met zijn kaart.</string>
     <string name="desk_reach_title">Hoe je te bereiken bent</string>
+    <string name="desk_confirm_remove_site">Deze site van dit bureau verwijderen? Het stopt met serveren; lezers die hem in leven houden, hebben hem nog.</string>
+    <string name="desk_confirm_delete_listing">Deze advertentie verwijderen? Hij verdwijnt van het bord en kan niet worden hersteld.</string>
+    <string name="desk_confirm_remove_item">Dit artikel uit de catalogus verwijderen?</string>
+    <string name="desk_confirm_abandon_order">Deze bestelling als weggelopen markeren? De code wordt niet langer bewaakt.</string>
+    <string name="desk_find_conversation">Een gesprek zoeken</string>
 </resources>

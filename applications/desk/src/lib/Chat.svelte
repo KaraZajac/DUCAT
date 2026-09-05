@@ -4,7 +4,7 @@
   // the room for both at once, which is the one place it beats the phone.
   import { onMount, tick } from "svelte";
   import { t, tp } from "./i18n.svelte";
-  import { api, copy, fmtTime, fmtXmr, type ContactRow, type GroupMessage, type GroupRow, type MessageRow, type StandingRow } from "./api";
+  import { api, confirmDanger, copy, fmtTime, fmtXmr, type ContactRow, type GroupMessage, type GroupRow, type MessageRow, type StandingRow } from "./api";
   import { gen, drive } from "./state.svelte";
 
   let rows = $state<ContactRow[]>([]);
@@ -35,6 +35,17 @@
   // The empty state waits for the first answer; a blank list is not
   // the same as an empty one.
   let loaded = $state(false);
+  // Finding a conversation by name or last words; the lists stay whole
+  // when the box is empty.
+  let finding = $state("");
+  const foundRows = $derived.by(() => {
+    const q = finding.trim().toLowerCase();
+    return q ? rows.filter((r) => `${r.name} ${r.asserted_name ?? ""} ${r.last_body ?? ""}`.toLowerCase().includes(q)) : rows;
+  });
+  const foundGroups = $derived.by(() => {
+    const q = finding.trim().toLowerCase();
+    return q ? groups.filter((g) => `${g.name} ${g.last_body ?? ""}`.toLowerCase().includes(q)) : groups;
+  });
   async function refresh() {
     try {
       rows = await api.contacts();
@@ -207,6 +218,7 @@
 
   async function remove() {
     if (!open) return;
+    if (!(await confirmDanger(t("drawer_forget_body"), t("drawer_forget_title", current?.name ?? "")))) return;
     await api.removeContact(open);
     open = null;
     thread = [];
@@ -275,6 +287,7 @@
 
   async function clearThread() {
     if (!open) return;
+    if (!(await confirmDanger(t("chat_clear_confirm_text"), t("chat_clear_confirm_title")))) return;
     await api.deleteThread(open);
     thread = await api.thread(open);
   }
@@ -540,6 +553,9 @@
     {#if loaded && rows.length === 0 && !adding}
       <p class="empty">{t("desk_nobody_yet")}</p>
     {/if}
+    {#if rows.length + groups.length >= 6}
+      <input class="input find" type="search" placeholder={t("desk_find_conversation")} bind:value={finding} />
+    {/if}
     {#if groups.length || rows.length >= 2}
       <div class="list-head"><span>{t("desk_groups")}</span><button class="linkish" onclick={() => (makingGroup = !makingGroup)}>{makingGroup ? t("chat_close").toLowerCase() : t("desk_new").toLowerCase()}</button></div>
     {/if}
@@ -555,7 +571,7 @@
         <p class="note">{t("desk_group_note")}</p>
       </div>
     {/if}
-    {#each groups as g (g.id_hex)}
+    {#each foundGroups as g (g.id_hex)}
       <button class="thread-row" class:active={g.id_hex === openGroup} onclick={() => selectGroup(g.id_hex)}>
         <div class="avatar group">#</div>
         <div class="thread-text">
@@ -566,7 +582,7 @@
       </button>
     {/each}
     {#if groups.length}<div class="list-head"><span>{t("desk_people")}</span></div>{/if}
-    {#each rows.filter((r) => r.chat_visible) as r (r.persona_hex)}
+    {#each foundRows.filter((r) => r.chat_visible) as r (r.persona_hex)}
       <button class="thread-row" class:active={r.persona_hex === open} onclick={() => select(r.persona_hex)}>
         <div class="avatar" class:unnamed={!r.named}>{r.name.slice(0, 1).toUpperCase()}</div>
         <div class="thread-text">

@@ -316,4 +316,9 @@
     <string name="desk_send_the_memo">Отправить заметку</string>
     <string name="desk_pick_conversation">Выберите разговор или добавьте кого-то по карточке.</string>
     <string name="desk_reach_title">Как с вами связаться</string>
+    <string name="desk_confirm_remove_site">Убрать этот сайт с этого стола? Он перестанет его раздавать; читатели, поддерживающие его, сохранят копию.</string>
+    <string name="desk_confirm_delete_listing">Удалить это объявление? Оно исчезнет с доски, и его нельзя будет восстановить.</string>
+    <string name="desk_confirm_remove_item">Убрать этот товар из каталога?</string>
+    <string name="desk_confirm_abandon_order">Отметить этот заказ как брошенный? Его код перестанет отслеживаться.</string>
+    <string name="desk_find_conversation">Найти разговор</string>
 </resources>

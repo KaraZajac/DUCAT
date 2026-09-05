@@ -2,7 +2,7 @@
   // Releases: a file put out once, at an address that cannot change.
   import { onMount } from "svelte";
   import { t, tp } from "./i18n.svelte";
-  import { api, copy, fmtBytes, fmtWhen, type Progress, type ReleaseRow } from "./api";
+  import { api, confirmDanger, copy, fmtBytes, fmtWhen, type Progress, type ReleaseRow } from "./api";
   import PieceBar from "./PieceBar.svelte";
 
   let rows = $state<ReleaseRow[]>([]);
@@ -83,6 +83,7 @@
   }
 
   async function remove(r: ReleaseRow) {
+    if (!(await confirmDanger(t("releases_remove_body"), t("releases_remove_title")))) return;
     await api.removeRelease(r.digest_hex);
     await refresh();
   }

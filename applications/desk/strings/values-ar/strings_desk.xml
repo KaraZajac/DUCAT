@@ -324,4 +324,9 @@
     <string name="desk_send_the_memo">إرسال المذكرة</string>
     <string name="desk_pick_conversation">اختر محادثة، أو أضف شخصًا ببطاقته.</string>
     <string name="desk_reach_title">طرق التواصل معك</string>
+    <string name="desk_confirm_remove_site">إزالة هذا الموقع من هذا المكتب؟ سيتوقف عن تقديمه؛ القراء الذين يبقونه حيًا يحتفظون به.</string>
+    <string name="desk_confirm_delete_listing">حذف هذا الإعلان؟ سيُزال من اللوحة ولا يمكن استعادته.</string>
+    <string name="desk_confirm_remove_item">إزالة هذا العنصر من الفهرس؟</string>
+    <string name="desk_confirm_abandon_order">وضع علامة على هذا الطلب كمهجور؟ سيتوقف مراقبة رمزه.</string>
+    <string name="desk_find_conversation">ابحث عن محادثة</string>
 </resources>

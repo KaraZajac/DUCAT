@@ -308,4 +308,9 @@
     <string name="desk_send_the_memo">فرستادن یادداشت</string>
     <string name="desk_pick_conversation">گفتگویی را انتخاب کنید، یا کسی را با کارتش بیفزایید.</string>
     <string name="desk_reach_title">راه‌های تماس با شما</string>
+    <string name="desk_confirm_remove_site">این سایت از این میز حذف شود؟ دیگر آن را ارائه نمی‌کند؛ خوانندگانی که آن را زنده نگه می‌دارند همچنان آن را دارند.</string>
+    <string name="desk_confirm_delete_listing">این آگهی حذف شود؟ از تابلو برداشته می‌شود و قابل بازیابی نیست.</string>
+    <string name="desk_confirm_remove_item">این مورد از فهرست حذف شود؟</string>
+    <string name="desk_confirm_abandon_order">این سفارش رهاشده علامت بخورد؟ کد آن دیگر پاییده نمی‌شود.</string>
+    <string name="desk_find_conversation">یافتن گفتگو</string>
 </resources>

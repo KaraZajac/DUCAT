@@ -6,7 +6,7 @@
   // order into a bill with a receipt.
   import { onMount } from "svelte";
   import { t, tp } from "./i18n.svelte";
-  import { api, copy, fmtXmr, fmtTime, type ItemRow, type OrderRow } from "./api";
+  import { api, copy, fmtXmr, fmtTime, type ItemRow, type OrderRow, confirmDanger } from "./api";
   import { gen } from "./state.svelte";
 
   let items = $state<ItemRow[]>([]);
@@ -147,7 +147,7 @@
           <button class="btn primary" disabled={busy === "ready"} onclick={() => act("ready", () => api.sayReady(current!.id))}>{t("kiosk_say_ready")}</button>
         {/if}
         {#if current.state === "Awaiting"}
-          <button class="btn danger" onclick={() => act("abandon", () => api.abandonOrder(current!.id))}>{t("desk_abandon")}</button>
+          <button class="btn danger" onclick={async () => { if (!(await confirmDanger(t("desk_confirm_abandon_order")))) return; act("abandon", () => api.abandonOrder(current!.id)); }}>{t("desk_abandon")}</button>
         {/if}
       </div>
     {:else}

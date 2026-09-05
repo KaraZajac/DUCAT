@@ -308,4 +308,9 @@
     <string name="desk_send_the_memo">मेमो भेजें</string>
     <string name="desk_pick_conversation">बातचीत चुनें, या किसी को उसके कार्ड से जोड़ें।</string>
     <string name="desk_reach_title">आपसे संपर्क के तरीके</string>
+    <string name="desk_confirm_remove_site">इस साइट को इस डेस्क से हटाएँ? यह इसे परोसना बंद कर देगा; जो पाठक इसे ज़िंदा रखते हैं, उनके पास यह रहेगी।</string>
+    <string name="desk_confirm_delete_listing">यह सूची हटाएँ? यह बोर्ड से हट जाएगी और वापस नहीं लाई जा सकती।</string>
+    <string name="desk_confirm_remove_item">इस वस्तु को सूची से हटाएँ?</string>
+    <string name="desk_confirm_abandon_order">इस ऑर्डर को छोड़ा हुआ चिह्नित करें? इसका कोड देखा जाना बंद हो जाएगा।</string>
+    <string name="desk_find_conversation">बातचीत खोजें</string>
 </resources>

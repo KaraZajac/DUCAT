@@ -4,7 +4,7 @@
   // catalogue both draw from. The phone's POS and Bar Tab, side by side.
   import { onMount } from "svelte";
   import { t, tp } from "./i18n.svelte";
-  import { api, copy, fmtXmr, fmtTime, type Code, type ContactRow, type ItemRow, type TabRow } from "./api";
+  import { api, copy, fmtXmr, fmtTime, type Code, type ContactRow, type ItemRow, type TabRow, confirmDanger } from "./api";
   import { gen } from "./state.svelte";
 
   type Mode = "sale" | "tabs" | "catalogue";
@@ -344,7 +344,7 @@
           </div>
           <div class="actions">
             <button class="btn primary" disabled={openTab.lines.length === 0} onclick={settleOpen}>{t("desk_settle_send_bill")}</button>
-            <button class="btn danger" onclick={() => act(async () => { await api.deleteTab(openTab!.id); openTab = null; })}>{t("bartab_discard_confirm")}</button>
+            <button class="btn danger" onclick={async () => { if (!(await confirmDanger(t("bartab_discard_body"), t("bartab_discard_title")))) return; act(async () => { await api.deleteTab(openTab!.id); openTab = null; }); }}>{t("bartab_discard_confirm")}</button>
           </div>
         {:else if openTab.state === "settled"}
           <p class="note">{openTab.seen_tx ? t("desk_payment_in_mempool") : t("desk_bill_with_them")}</p>
@@ -374,7 +374,7 @@
         </div>
         <div class="actions">
           <button class="btn small" onclick={() => act(() => api.putItem(i.id, i.name, i.price, !i.sold_out))}>{i.sold_out ? t("items_back_on") : t("items_sold_out")}</button>
-          <button class="btn small danger" onclick={() => act(() => api.removeItem(i.id))}>{t("items_remove")}</button>
+          <button class="btn small danger" onclick={async () => { if (!(await confirmDanger(t("desk_confirm_remove_item")))) return; act(() => api.removeItem(i.id)); }}>{t("items_remove")}</button>
         </div>
       </div>
     {/each}

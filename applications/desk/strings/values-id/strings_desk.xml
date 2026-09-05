@@ -304,4 +304,9 @@
     <string name="desk_send_the_memo">Kirim memo</string>
     <string name="desk_pick_conversation">Pilih percakapan, atau tambahkan seseorang dengan kartunya.</string>
     <string name="desk_reach_title">Cara menghubungi Anda</string>
+    <string name="desk_confirm_remove_site">Hapus situs ini dari desk ini? Desk berhenti melayaninya; pembaca yang menjaganya tetap memilikinya.</string>
+    <string name="desk_confirm_delete_listing">Hapus iklan ini? Iklan hilang dari papan dan tidak dapat dipulihkan.</string>
+    <string name="desk_confirm_remove_item">Hapus item ini dari katalog?</string>
+    <string name="desk_confirm_abandon_order">Tandai pesanan ini sebagai ditinggalkan? Kodenya berhenti dipantau.</string>
+    <string name="desk_find_conversation">Cari percakapan</string>
 </resources>
