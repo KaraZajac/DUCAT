@@ -28,6 +28,13 @@ export AR_armv7_linux_androideabi=$NDK/llvm-ar
 export CC_x86_64_linux_android=$NDK/x86_64-linux-android26-clang
 export CXX_x86_64_linux_android=$NDK/x86_64-linux-android26-clang++
 export AR_x86_64_linux_android=$NDK/llvm-ar
+# The linker too, as cargo sees it: an environment variable wins over any
+# .cargo/config.toml, so the path written there for one machine cannot
+# reach into another's home directory (it did — CI's build looked for the
+# NDK under /home/kara).
+export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=$CC_aarch64_linux_android
+export CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_LINKER=$CC_armv7_linux_androideabi
+export CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER=$CC_x86_64_linux_android
 # All three, always. x86_64 is emulator-only, but the emulator is where this
 # gets tested, and building a subset is worse than it sounds: the bindings
 # below are regenerated every run, so any ABI left out keeps an older .so and

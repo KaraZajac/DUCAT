@@ -91,8 +91,15 @@
   }
 
   function doorWord(o: string): string {
-    const k: Record<string, string> = { pos: "activity_door_pos", bar: "activity_door_bar", pub: "activity_door_pub", donate: "activity_door_donate", kiosk: "desk_door_kiosk", taxi: "activity_door_taxi" };
-    return k[o] ? t(k[o]) : o;
+    switch (o) {
+      case "pos": return t("activity_door_pos");
+      case "bar": return t("activity_door_bar");
+      case "pub": return t("activity_door_pub");
+      case "donate": return t("activity_door_donate");
+      case "kiosk": return t("desk_door_kiosk");
+      case "taxi": return t("activity_door_taxi");
+      default: return o;
+    }
   }
 </script>
 

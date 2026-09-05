@@ -24,6 +24,10 @@ import sys
 import xml.etree.ElementTree as ET
 
 RES = os.path.join(os.path.dirname(os.path.abspath(__file__)), "android/src/main/res")
+# The desk keeps the sentences only it says in the same layout under
+# applications/desk/strings; `--res <dir>` points this at them.
+if "--res" in sys.argv:
+    RES = os.path.abspath(sys.argv[sys.argv.index("--res") + 1])
 
 # The script each language writes in. Languages sharing a script are grouped,
 # because "Ukrainian contains Cyrillic" is not a finding.
@@ -246,10 +250,22 @@ def main() -> int:
     # XML, and there is no `getIdentifier` anywhere in the tree.
     app = os.path.dirname(os.path.abspath(__file__))
     used = set()
+    if "--res" in sys.argv:
+        # The desk's pages reach their strings through t("key") and
+        # tp("key"), never by a built name; scan them instead of Kotlin.
+        desk_src = os.path.join(os.path.dirname(RES), "src")
+        for dirpath, _, filenames in os.walk(desk_src):
+            for fn in filenames:
+                if not (fn.endswith(".svelte") or fn.endswith(".ts")) or fn == "i18n.svelte.ts":
+                    continue
+                with open(os.path.join(dirpath, fn), encoding="utf-8") as fh:
+                    used |= set(re.findall(r"\bt[pn]?\(\s*[\"']([a-z0-9_]+)[\"']", fh.read()))
     for root in (
         os.path.join(app, "android/src/main/java"),
         os.path.join(app, "desktop/src/main/kotlin"),
     ):
+        if "--res" in sys.argv:
+            break
         for dirpath, _, filenames in os.walk(root):
             for fn in filenames:
                 if not fn.endswith(".kt"):

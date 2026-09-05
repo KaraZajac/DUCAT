@@ -1,17 +1,20 @@
 <script lang="ts">
 
-  const ATTACH: Record<string, string> = {
-    Detached: "desk_node_detached",
-    Detaching: "desk_node_detaching",
-    Attaching: "desk_node_attaching",
-    AttachedWeak: "desk_node_attached_weak",
-    AttachedGood: "desk_node_attached",
-    AttachedStrong: "desk_node_attached_strong",
-    AttachedFull: "desk_node_attached_full",
-    FullyAttached: "desk_node_attached_full",
-    OverAttached: "desk_node_over_attached",
-  };
-  const attachWord = (s: string) => (ATTACH[s] ? t(ATTACH[s]) : s);
+  // Literal keys, one per state, so the string checker can see each is used.
+  function attachWord(s: string): string {
+    switch (s) {
+      case "Detached": return t("desk_node_detached");
+      case "Detaching": return t("desk_node_detaching");
+      case "Attaching": return t("desk_node_attaching");
+      case "AttachedWeak": return t("desk_node_attached_weak");
+      case "AttachedGood": return t("desk_node_attached");
+      case "AttachedStrong": return t("desk_node_attached_strong");
+      case "AttachedFull":
+      case "FullyAttached": return t("desk_node_attached_full");
+      case "OverAttached": return t("desk_node_over_attached");
+      default: return s;
+    }
+  }
   import { onMount } from "svelte";
   import { t, tp, i18n } from "./i18n.svelte";
   import { api, type Status } from "./api";

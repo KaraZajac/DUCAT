@@ -10,9 +10,8 @@ try {
 } catch {}
 
 // The language too: the dictionaries are small, and a page must never
-// flash English before its own words.
-await applyLanguage();
-
-const app = mount(App, { target: document.getElementById("app")! });
-
-export default app;
+// flash English before its own words. A promise rather than a top-level
+// await, which the production build's browser targets do not allow.
+applyLanguage().then(() => {
+  mount(App, { target: document.getElementById("app")! });
+});

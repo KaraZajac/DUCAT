@@ -222,6 +222,9 @@ jobs:
       - name: the desk's strings agree with the phone's
         run: python3 applications/desk/scripts/strings_from_android.py --check
 
+      - name: the desk's own translations agree
+        run: python3 applications/check_strings.py --res applications/desk/strings
+
       - name: the pages type-check
         run: cd applications/desk && pnpm check
 
