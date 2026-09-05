@@ -19,6 +19,9 @@
   // The list comes first; the publisher's form opens on request.
   let showPublish = $state(false);
 
+  // The empty state waits for the first answer; a blank list is not
+  // the same as an empty one.
+  let loaded = $state(false);
   async function refresh() {
     try {
       rows = await api.sites();
@@ -28,7 +31,7 @@
   }
 
   onMount(() => {
-    refresh();
+    refresh().then(() => (loaded = true));
     const t = setInterval(async () => {
       for (const r of rows) {
         if (busy === r.record_key) progress[r.share] = await api.fetchProgress(r.share);
@@ -157,7 +160,7 @@
 </div>
 
 <div class="card">
-  {#if rows.length === 0}
+  {#if loaded && rows.length === 0}
     <p class="empty">{t("sites_empty_title")}</p>
   {/if}
   {#each rows as r (r.record_key)}

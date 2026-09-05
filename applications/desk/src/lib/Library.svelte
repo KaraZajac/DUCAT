@@ -27,6 +27,9 @@
 
   const current = $derived(pubs.find((p) => p.id === selected) ?? null);
 
+  // The empty state waits for the first answer; a blank list is not
+  // the same as an empty one.
+  let loaded = $state(false);
   async function refresh() {
     try {
       pubs = await api.publications();
@@ -38,7 +41,7 @@
     }
   }
 
-  onMount(refresh);
+  onMount(async () => { await refresh(); loaded = true; });
   $effect(() => {
     void gen.value;
     refresh();
@@ -117,7 +120,7 @@
 </div>
 
 {#if mode === "reading"}
-  {#if subs.length === 0}
+  {#if loaded && subs.length === 0}
     <div class="card"><p class="empty">{t("desk_shelf_empty")}</p></div>
   {/if}
   {#each subs as s (s.publisher_hex)}

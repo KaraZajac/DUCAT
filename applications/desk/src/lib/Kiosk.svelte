@@ -22,6 +22,9 @@
   const current = $derived(orders.find((o) => o.id === open) ?? null);
   const total = $derived(lines.reduce((s, l) => s + l.a, 0));
 
+  // The empty state waits for the first answer; a blank list is not
+  // the same as an empty one.
+  let loaded = $state(false);
   async function refresh() {
     try {
       items = await api.catalogue();
@@ -31,7 +34,7 @@
     }
   }
 
-  onMount(refresh);
+  onMount(async () => { await refresh(); loaded = true; });
   $effect(() => {
     void gen.value;
     refresh();
@@ -113,7 +116,7 @@
         </div>
       </button>
     {/each}
-    {#if orders.length === 0}<p class="empty">{t("kiosk_no_orders")}</p>{/if}
+    {#if loaded && orders.length === 0}<p class="empty">{t("kiosk_no_orders")}</p>{/if}
   </div>
 
   <div class="card sale-status">

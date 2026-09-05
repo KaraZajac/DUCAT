@@ -32,6 +32,9 @@
   let tab = $state<"send" | "receive" | "history">("receive");
   let showNotes = $state(false);
 
+  // The empty state waits for the first answer; a blank list is not
+  // the same as an empty one.
+  let loaded = $state(false);
   async function refresh() {
     try {
       view = await api.walletStatus();
@@ -44,7 +47,7 @@
   }
 
   onMount(() => {
-    refresh();
+    refresh().then(() => (loaded = true));
     // A watched wallet takes its scan steps faster than the lane's twenty
     // seconds; nothing is lost if both run.
     const t = setInterval(() => api.walletStep().catch(() => {}), 6000);
@@ -212,7 +215,7 @@
   {:else}
     <div class="card">
       <h3>{t("txdetail_payment_sent")}</h3>
-      {#if sends.length === 0}<p class="empty">{t("desk_nothing_sent")}</p>{/if}
+      {#if loaded && sends.length === 0}<p class="empty">{t("desk_nothing_sent")}</p>{/if}
       {#each sends as s (s.txid_hex + s.timestamp)}
         <div class="row">
           <div class="lead">
@@ -226,7 +229,7 @@
     <div class="card">
       <h3>{t("txdetail_payment_received")} <button class="btn small" onclick={() => (showNotes = !showNotes)}>{showNotes ? t("desk_hide_notes") : t("desk_show_notes")}</button></h3>
       {#if showNotes}
-        {#if notes.length === 0}<p class="empty">{t("desk_no_notes")}</p>{/if}
+        {#if loaded && notes.length === 0}<p class="empty">{t("desk_no_notes")}</p>{/if}
         {#each notes as n (n.tx_hash_hex + n.minor + n.height)}
           <div class="row">
             <div class="lead">

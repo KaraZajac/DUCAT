@@ -29,6 +29,9 @@
     }
   }
 
+  // The empty state waits for the first answer; a blank list is not
+  // the same as an empty one.
+  let loaded = $state(false);
   async function refresh() {
     try {
       const [from, to] = bounds(range);
@@ -41,7 +44,7 @@
     }
   }
 
-  onMount(refresh);
+  onMount(async () => { await refresh(); loaded = true; });
   $effect(() => {
     void gen.value;
     void range;
@@ -130,7 +133,7 @@
   </div>
   {#if msg}<p class="note ok-text">{msg}</p>{/if}
   {#if err}<p class="err">{err}</p>{/if}
-  {#if shown.length === 0}<p class="empty">{t("activity_period_none")}</p>{/if}
+  {#if loaded && shown.length === 0}<p class="empty">{t("activity_period_none")}</p>{/if}
   <div class="ledger">
     {#each shown as e (e.txid + ":" + e.height + ":" + e.timestamp + ":" + e.direction)}
       <button class="ledger-row" class:out={e.direction === "Sent"} onclick={() => (open = open === e.txid + e.timestamp ? null : e.txid + e.timestamp)}>

@@ -37,6 +37,9 @@
   let newName = $state("");
   let newPrice = $state("");
 
+  // The empty state waits for the first answer; a blank list is not
+  // the same as an empty one.
+  let loaded = $state(false);
   async function refresh() {
     try {
       items = await api.catalogue();
@@ -49,7 +52,7 @@
     }
   }
 
-  onMount(refresh);
+  onMount(async () => { await refresh(); loaded = true; });
 
   $effect(() => {
     void gen.value;
@@ -279,7 +282,7 @@
       </div>
       <div class="card">
         <h3>{t("items_tab")}</h3>
-        {#if items.length === 0}<p class="empty">{t("desk_no_items_yet")}</p>{/if}
+        {#if loaded && items.length === 0}<p class="empty">{t("desk_no_items_yet")}</p>{/if}
         <div class="chips">
           {#each items.filter((i) => !i.sold_out) as i (i.id)}
             <button class="chip" onclick={() => addFromCatalogue(i)} title={i.pxmr ? fmtXmr(i.pxmr) : t("items_no_rate")}>{i.name} · {i.price} {i.currency}</button>
@@ -301,7 +304,7 @@
         {#each contacts as c (c.persona_hex)}
           <button class="thread-row" onclick={() => startTab(c)}><div class="avatar">{c.name.slice(0, 1).toUpperCase()}</div><div class="thread-text"><div class="thread-name">{c.name}</div></div></button>
         {/each}
-        {#if contacts.length === 0}<p class="empty">{t("desk_no_contacts")}</p>{/if}
+        {#if loaded && contacts.length === 0}<p class="empty">{t("desk_no_contacts")}</p>{/if}
       {/if}
       {#each tabs.filter((x) => x.state === "open" || x.state === "settled" || x.receipt_owed) as tb (tb.id)}
         <button class="thread-row" class:active={openTab?.id === tb.id} onclick={() => (openTab = tb)}>

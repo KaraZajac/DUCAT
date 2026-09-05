@@ -32,6 +32,9 @@
 
   const current = $derived(rows.find((r) => r.persona_hex === open) ?? null);
 
+  // The empty state waits for the first answer; a blank list is not
+  // the same as an empty one.
+  let loaded = $state(false);
   async function refresh() {
     try {
       rows = await api.contacts();
@@ -145,7 +148,7 @@
     scrollToEnd();
   }
 
-  onMount(refresh);
+  onMount(async () => { await refresh(); loaded = true; });
 
   $effect(() => {
     void gen.value;
@@ -534,7 +537,7 @@
         <p class="note">{t("desk_card_answered_once")}</p>
       </div>
     {/if}
-    {#if rows.length === 0 && !adding}
+    {#if loaded && rows.length === 0 && !adding}
       <p class="empty">{t("desk_nobody_yet")}</p>
     {/if}
     {#if groups.length || rows.length >= 2}

@@ -12,6 +12,9 @@
   let over = $state(false);
   let progress = $state<Record<string, Progress>>({});
 
+  // The empty state waits for the first answer; a blank list is not
+  // the same as an empty one.
+  let loaded = $state(false);
   async function refresh() {
     try {
       rows = await api.releases();
@@ -21,7 +24,7 @@
   }
 
   onMount(() => {
-    refresh();
+    refresh().then(() => (loaded = true));
     const t = setInterval(async () => {
       // Only the fetches in flight are polled; a list at rest asks nothing.
       for (const r of rows) {
@@ -119,7 +122,7 @@
 </div>
 
 <div class="card">
-  {#if rows.length === 0}
+  {#if loaded && rows.length === 0}
     <p class="empty">{t("desk_nothing_here")}</p>
   {/if}
   {#each rows as r (r.digest_hex)}
