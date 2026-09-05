@@ -66,6 +66,13 @@ calls with a test tone, which is how the call path is exercised headless.
 Notices — a message, money, a call — go to the desktop's notification
 tray when the window is not focused.
 
+The Me page also keeps the ways to reach you away from DUCAT — email, phone,
+Signal — with the switch that decides whether they ride a profile card at all.
+Saving them rewrites your standing code's record in place, so a code already
+printed hands out what you just saved; anyone who answered it earlier keeps
+what they were given then. Anything that cannot be undone asks first, and the
+chat list and the ledger each have a search box.
+
 ## Languages
 
 The desk speaks the phone's nineteen languages. Every sentence a page
