@@ -9,6 +9,7 @@
     "core:default",
     "dialog:default",
     "opener:default",
-    "notification:default"
+    "notification:default",
+    "core:window:allow-set-title"
   ]
 }

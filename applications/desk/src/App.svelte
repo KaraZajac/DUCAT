@@ -18,10 +18,44 @@
   import { i18n, t } from "./lib/i18n.svelte";
   import cat from "./assets/ducat-cat.png";
   import { icons } from "./lib/icons";
+  import { getCurrentWindow } from "@tauri-apps/api/window";
 
   type Page = "chat" | "wallet" | "till" | "kiosk" | "activity" | "library" | "market" | "files" | "sites" | "me" | "status";
   let page = $state<Page>("chat");
   let unread = $state(0);
+
+  // The window's title carries what is waiting, so a minimized desk
+  // still says so in the task bar.
+  $effect(() => {
+    const title = unread > 0 ? `(${unread}) DUCAT` : "DUCAT";
+    document.title = title;
+    getCurrentWindow().setTitle(title).catch(() => {});
+  });
+
+  // Keyboard: Ctrl+1…9,0 walks the sidebar in order; Ctrl+K goes to the
+  // find box on the page that has one (Chat, otherwise).
+  function onKey(e: KeyboardEvent) {
+    if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
+    if (e.key >= "0" && e.key <= "9") {
+      const i = e.key === "0" ? 9 : Number(e.key) - 1;
+      const n = nav[i];
+      if (n) { e.preventDefault(); page = n.id; }
+    } else if (e.key === "k" || e.key === "K") {
+      e.preventDefault();
+      const box = document.querySelector<HTMLInputElement>("input.find");
+      if (box) { box.focus(); return; }
+      // The chat's box appears once its list has loaded; look for it a
+      // few times rather than once.
+      page = "chat";
+      let tries = 0;
+      const look = () => {
+        const b = document.querySelector<HTMLInputElement>("input.find");
+        if (b) b.focus();
+        else if (tries++ < 20) setTimeout(look, 100);
+      };
+      setTimeout(look, 100);
+    }
+  }
   let status = $state<Status | null>(null);
 
   // Labels re-read when the language changes; the keys are the phone's
@@ -58,6 +92,8 @@
     api.unreadThreads().then((n) => (unread = n)).catch(() => {});
   });
 </script>
+
+<svelte:window onkeydown={onKey} />
 
 <div class="shell">
   <aside class="sidebar">

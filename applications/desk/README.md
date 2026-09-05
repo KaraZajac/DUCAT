@@ -91,6 +91,16 @@ Not on the desk (yet): rides in any seat — hail, taxi, drive, and the
 bonded escrow behind them — need a phone's position. Cards from those
 threads still land here and read as they should. 
 
+## Keyboard
+
+Ctrl+1 … Ctrl+9 and Ctrl+0 walk the sidebar in order (Cmd on a Mac).
+Ctrl+K goes to the find box — the chat list's once it holds six or more
+conversations, the ledger's on Activity. Enter sends a message, Shift+Enter
+breaks a line, Escape drops a reply you were composing. Anything that cannot
+be undone — forgetting a contact, clearing a chat, deleting a publication or a
+listing, removing a file or a site, discarding a tab — asks first, in the
+phone's own words.
+
 ## Driving the window
 
 A debug build watches `DUCAT_DESK_DRIVE=<dir>` for `*.js` files and
