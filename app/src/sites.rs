@@ -268,7 +268,13 @@ impl App {
         std::fs::create_dir_all(&fresh)?;
         // Never staySeeding here: a seed parked now would be rooted at
         // `next/`, and the rename below pulls the floor out from under it.
-        swarm::swarm_fetch(site.share.clone(), site.digest_hex.clone(), fresh.to_string_lossy().into_owned(), false)?;
+        log::info(TAG, format!("fetching '{}' ({}…)", site.title, &site.digest_hex[..12]));
+        let t0 = std::time::Instant::now();
+        if let Err(e) = swarm::swarm_fetch(site.share.clone(), site.digest_hex.clone(), fresh.to_string_lossy().into_owned(), false) {
+            log::warn(TAG, format!("'{}' did not arrive after {:.0}s: {e}", site.title, t0.elapsed().as_secs_f64()));
+            return Err(e.into());
+        }
+        log::info(TAG, format!("'{}' arrived in {:.0}s", site.title, t0.elapsed().as_secs_f64()));
         swarm::swarm_stop_share(site.fetched_share.clone().unwrap_or_else(|| site.share.clone()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::rename(&fresh, &dir)?;

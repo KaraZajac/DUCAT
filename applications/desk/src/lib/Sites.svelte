@@ -15,6 +15,8 @@
   let title = $state("");
   let lint = $state<string | null>(null);
   let updating = $state<string | null>(null);
+  // The list comes first; the publisher's form opens on request.
+  let showPublish = $state(false);
 
   async function refresh() {
     try {
@@ -52,6 +54,7 @@
       title = "";
       lint = null;
       updating = null;
+      showPublish = false;
       await refresh();
     } catch (e) {
       err = String(e);
@@ -61,6 +64,7 @@
   }
 
   function startUpdate(r: SiteRow) {
+    showPublish = true;
     updating = r.record_key;
     title = r.title;
     dir = null;
@@ -107,13 +111,19 @@
   }
 </script>
 
-<h1 class="page-title">Sites</h1>
+<div class="page-head">
+  <h1 class="page-title">Sites</h1>
+  <button class="btn primary" onclick={() => { showPublish = !showPublish; if (!showPublish) { updating = null; dir = null; lint = null; title = ""; } }}>
+    {showPublish ? "Close" : "Publish a site…"}
+  </button>
+</div>
 <p class="page-lede">
   Pages that travel like publications: a folder with an <code>index.html</code>, put on the network
   at an address you keep for the life of the site. Update it and readers see the new edition at the
   same address.
 </p>
 
+{#if showPublish || updating}
 <div class="card">
   <h3>{updating ? "Update a site" : "Publish a site"}</h3>
   <div class="field">
@@ -134,10 +144,11 @@
     <button class="btn primary" disabled={!dir || !!lint || busy === "publish"} onclick={publish}>
       {busy === "publish" ? "Seeding…" : updating ? "Publish the update" : "Publish"}
     </button>
-    {#if updating}<button class="btn" onclick={() => { updating = null; title = ""; dir = null; lint = null; }}>Cancel</button>{/if}
+    {#if updating}<button class="btn" onclick={() => { updating = null; showPublish = false; title = ""; dir = null; lint = null; }}>Cancel</button>{/if}
   </div>
   <p class="note">The bundle is checked for anything that reaches the clearnet before it is seeded, because one external fetch hands a reader's address to a third party.</p>
 </div>
+{/if}
 
 <div class="card">
   <div class="field">
@@ -154,16 +165,12 @@
   {/if}
   {#each rows as r (r.record_key)}
     <div class="row">
-      <div>
+      <div class="lead">
         <div class="title">{r.title || "(untitled)"} {#if r.mine}<span class="meta">· yours</span>{/if}</div>
-        <div class="addr">{r.uri}</div>
         <div class="meta">
           {r.cached ? (r.current ? "Ready offline" : "An older edition is on this desk") : "Not fetched"}
           {r.updated ? ` · updated ${fmtWhen(r.updated)}` : ""}
         </div>
-        {#if busy === r.record_key}
-          <PieceBar progress={progress[r.share] ?? null} />
-        {/if}
       </div>
       <div class="actions">
         <button class="btn small" onclick={() => copy(r.uri)}>Copy address</button>
@@ -172,6 +179,10 @@
         <label class="toggle"><input type="checkbox" checked={r.keep_alive} onchange={(e) => keep(r, (e.target as HTMLInputElement).checked)} /> keep alive</label>
         <button class="btn small danger" onclick={() => remove(r)}>Remove</button>
       </div>
+      <div class="addr">{r.uri}</div>
+      {#if busy === r.record_key}
+        <div class="wide"><PieceBar progress={progress[r.share] ?? null} /></div>
+      {/if}
     </div>
   {/each}
 </div>

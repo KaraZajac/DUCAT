@@ -12,11 +12,21 @@
 //! more: where the stores live, where bundles are cached, where the node
 //! keeps its keys. Two desks on one machine are two directories.
 
+pub mod catalogue;
+pub mod contacts;
+pub mod identity;
+pub mod lap;
 pub mod log;
+pub mod mailbox;
+pub mod opinion;
 pub mod paths;
+pub mod pay;
+pub mod publications;
 pub mod releases;
 pub mod sites;
 pub mod store;
+pub mod tabs;
+pub mod wallet;
 
 use std::path::{Path, PathBuf};
 
@@ -39,7 +49,22 @@ impl App {
     /// The default location for this user, honouring the same environment
     /// the Compose desk did so `DUCAT_DESK_STATE` still names an identity.
     pub fn open_default() -> std::io::Result<App> {
-        App::open(paths::data_dir())
+        let root = paths::data_dir();
+        // The previous desk kept its state one directory over. A fresh
+        // start here with that directory present adopts it — copied, so
+        // the old desk keeps working — and the identity, contacts and
+        // wallet carry across instead of being minted twice.
+        if !root.join("prefs").exists() {
+            if let Some(old) = paths::previous_desk_dir().filter(|d| d.join("prefs").exists()) {
+                if let Err(e) = copy_tree(&old, &root) {
+                    log::warn("App", format!("could not adopt {}: {e}", old.display()));
+                } else {
+                    log::init(&root);
+                    log::info("App", format!("adopted the previous desk's state from {}", old.display()));
+                }
+            }
+        }
+        App::open(root)
     }
 
     pub fn root(&self) -> &Path {
@@ -101,6 +126,25 @@ pub enum Error {
     Io(#[from] std::io::Error),
     #[error("store: {0}")]
     Store(#[from] serde_json::Error),
+    /// A card that cannot be claimed, typed so a screen can say why in
+    /// the reader's language instead of repeating an English sentence.
+    #[error("card: {0:?}")]
+    Card(CardProblem),
+}
+
+/// Why a card was not claimed. Each is a different screen: a spent card
+/// wants a fresh one, an own card is the listing being yours, a card whose
+/// details are not up yet wants a second scan in a minute.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize)]
+pub enum CardProblem {
+    /// Its one reply slot is already written (§7.5's claim-once).
+    AlreadyUsed,
+    /// The card is this desk's own.
+    Own,
+    /// The record exists but subkey 0 has not arrived yet.
+    NotPublished,
+    /// Past its expiry.
+    Expired,
 }
 
 impl From<ducat_mobile::node::NodeError> for Error {

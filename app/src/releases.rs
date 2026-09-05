@@ -230,16 +230,30 @@ impl App {
         let part = dir.with_extension("part");
         let _ = std::fs::remove_dir_all(&part);
         std::fs::create_dir_all(&part)?;
-        swarm::swarm_fetch(
+        log::info(TAG, format!("fetching '{}' ({}…)", r.title, &r.digest_hex[..12]));
+        let t0 = std::time::Instant::now();
+        if let Err(e) = swarm::swarm_fetch(
             r.share_key.clone(),
             r.digest_hex.clone(),
             part.to_string_lossy().into_owned(),
             false,
-        )?;
+        ) {
+            log::warn(TAG, format!("'{}' did not arrive after {:.0}s: {e}", r.title, t0.elapsed().as_secs_f64()));
+            return Err(e.into());
+        }
+        log::info(TAG, format!("'{}' arrived in {:.0}s", r.title, t0.elapsed().as_secs_f64()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::rename(&part, &dir)?;
         let mut filled = r.clone();
         filled.bytes = dir_bytes(&dir);
+        // A release added by address arrives nameless; the file it turns
+        // out to be is the best name there is, and it is the one the
+        // phone shows.
+        if filled.title.trim().is_empty() {
+            if let Some(name) = single_file_name(&dir) {
+                filled.title = name;
+            }
+        }
         self.put_release(filled)?;
         if self.releases().iter().any(|x| x.digest_hex == digest_hex && x.keep_alive) {
             self.reseed_release(digest_hex);
@@ -383,5 +397,21 @@ mod tests {
         app.remove_release(&a.digest_hex).unwrap();
         assert_eq!(app.releases().len(), 1);
         std::fs::remove_dir_all(dir).ok();
+    }
+}
+
+/// The one file in a directory, by name — or nothing when there are none
+/// or several, because then no single name is *the* name.
+fn single_file_name(dir: &std::path::Path) -> Option<String> {
+    let mut names: Vec<String> = std::fs::read_dir(dir)
+        .ok()?
+        .flatten()
+        .filter(|e| e.file_type().map(|t| t.is_file()).unwrap_or(false))
+        .map(|e| e.file_name().to_string_lossy().into_owned())
+        .collect();
+    if names.len() == 1 {
+        names.pop()
+    } else {
+        None
     }
 }

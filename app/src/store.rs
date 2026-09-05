@@ -51,7 +51,7 @@ impl Store {
     /// One key, decoded, or None when absent or unreadable.
     pub fn get<T: DeserializeOwned>(&self, key: &str) -> Option<T> {
         let _g = self.lock.lock().ok()?;
-        self.read_all().remove(key).and_then(|v| serde_json::from_value(v).ok())
+        self.read_all().remove(key).and_then(value_as)
     }
 
     pub fn get_string(&self, key: &str) -> Option<String> {
@@ -75,6 +75,31 @@ impl Store {
 
     /// Read-modify-write one key under the lock. `f` sees the current
     /// value (or the default) and returns the new one.
+    /// Read-modify-write the whole table under one lock and one write, for
+    /// the changes that must land together — a thread row and the counter
+    /// it advanced, a card and the contact it produced. Returns what the
+    /// closure returned.
+    pub fn update<R, F>(&self, f: F) -> std::io::Result<R>
+    where
+        F: FnOnce(&mut Map<String, Value>) -> R,
+    {
+        let _g = self.lock.lock().unwrap_or_else(|e| e.into_inner());
+        let mut m = self.read_all();
+        let r = f(&mut m);
+        self.write_all(&m)?;
+        Ok(r)
+    }
+
+    /// Read several keys under one lock, so a pair read together is a
+    /// pair written together.
+    pub fn view<R, F>(&self, f: F) -> R
+    where
+        F: FnOnce(&Map<String, Value>) -> R,
+    {
+        let _g = self.lock.lock().unwrap_or_else(|e| e.into_inner());
+        f(&self.read_all())
+    }
+
     pub fn edit<T, F>(&self, key: &str, f: F) -> std::io::Result<T>
     where
         T: Serialize + DeserializeOwned + Default + Clone,
@@ -82,15 +107,26 @@ impl Store {
     {
         let _g = self.lock.lock().unwrap_or_else(|e| e.into_inner());
         let mut m = self.read_all();
-        let cur: T = m
-            .get(key)
-            .cloned()
-            .and_then(|v| serde_json::from_value(v).ok())
-            .unwrap_or_default();
+        let cur: T = m.get(key).cloned().and_then(value_as).unwrap_or_default();
         let next = f(cur);
         m.insert(key.to_string(), serde_json::to_value(&next)?);
         self.write_all(&m)?;
         Ok(next)
+    }
+}
+
+/// A value as `T` — and when the table holds a JSON *string* where a
+/// structure is wanted, the string parsed as JSON. That is how the
+/// previous desk (SharedPreferences over JSON) kept every list and
+/// object, so a state directory it left behind reads here as it was;
+/// the next write keeps the structure natively.
+pub(crate) fn value_as<T: DeserializeOwned>(v: Value) -> Option<T> {
+    match serde_json::from_value::<T>(v.clone()) {
+        Ok(t) => Some(t),
+        Err(_) => match v {
+            Value::String(s) => serde_json::from_str::<T>(&s).ok(),
+            _ => None,
+        },
     }
 }
 
@@ -113,6 +149,10 @@ mod tests {
         assert_eq!(s.get_string("name").as_deref(), Some("desk"));
         s.remove("xs").unwrap();
         assert!(s.get::<Vec<u32>>("xs").is_none());
+        // What the previous desk wrote: a list kept as a JSON string.
+        s.put("legacy", &"[4,5]").unwrap();
+        assert_eq!(s.get::<Vec<u32>>("legacy"), Some(vec![4, 5]));
+        assert_eq!(s.get_string("legacy").as_deref(), Some("[4,5]"));
         std::fs::remove_dir_all(dir).ok();
     }
 }

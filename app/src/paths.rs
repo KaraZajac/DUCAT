@@ -19,6 +19,13 @@ pub fn data_dir() -> PathBuf {
     platform_data_home().join("ducat")
 }
 
+/// Where the desk before this one kept its state, if that directory
+/// exists at all.
+pub fn previous_desk_dir() -> Option<PathBuf> {
+    let d = platform_data_home().join("ducat-desk");
+    d.is_dir().then_some(d)
+}
+
 fn platform_data_home() -> PathBuf {
     #[cfg(target_os = "windows")]
     {

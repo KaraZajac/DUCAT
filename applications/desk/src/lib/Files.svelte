@@ -126,13 +126,9 @@
   {/if}
   {#each rows as r (r.digest_hex)}
     <div class="row">
-      <div>
+      <div class="lead">
         <div class="title">{r.title || "(untitled)"} <span class="meta">· {fmtBytes(r.bytes)}{r.mine ? " · shared from this desk" : ""}</span></div>
-        <div class="addr">{r.uri}</div>
         <div class="meta">{r.here ? "On this desk" : "Not fetched"}{r.added_at ? ` · ${fmtWhen(r.added_at)}` : ""}</div>
-        {#if busy === r.digest_hex}
-          <PieceBar progress={progress[r.share_key] ?? null} />
-        {/if}
       </div>
       <div class="actions">
         <button class="btn small" onclick={() => copy(r.uri)}>Copy address</button>
@@ -144,6 +140,10 @@
         <label class="toggle"><input type="checkbox" checked={r.keep_alive} onchange={(e) => keep(r, (e.target as HTMLInputElement).checked)} /> keep alive</label>
         <button class="btn small danger" onclick={() => remove(r)}>Remove</button>
       </div>
+      <div class="addr">{r.uri}</div>
+      {#if busy === r.digest_hex}
+        <div class="wide"><PieceBar progress={progress[r.share_key] ?? null} /></div>
+      {/if}
     </div>
   {/each}
   <p class="note">"Keep alive" serves this file to anyone who asks for its address, for as long as this desk is running.</p>
