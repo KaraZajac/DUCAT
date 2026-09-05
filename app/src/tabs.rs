@@ -476,7 +476,22 @@ impl App {
     /// Withdraw a bill that has not been paid.
     pub fn cancel_tab(&self, tab: &RunningTab) -> Result<Option<RunningTab>, Error> {
         let amount = format_xmr(tab.settled_total);
-        let r = self.close_tab(tab, "cancelled", true, |c| self.send(c, Outgoing::text(&format!("That bill for {amount} XMR is cancelled — nothing to pay."))))?;
+        // The phone withdraws the bill itself — a retraction pointing at
+        // it — so the customer's screen says "withdrawn" and stops offering
+        // to pay; a plain sentence would leave the bill standing.
+        let bill_seq = if tab.bill_seq >= 0 { Some(tab.bill_seq as u64) } else { None };
+        let r = self.close_tab(tab, "cancelled", true, |c| {
+            self.send(
+                c,
+                Outgoing {
+                    body: format!("That bill for {amount} XMR is cancelled — nothing to pay."),
+                    kind: if bill_seq.is_some() { 5 } else { 0 },
+                    re_seq: bill_seq,
+                    re_own: true,
+                    ..Default::default()
+                },
+            )
+        })?;
         if r.is_some() {
             log::info(TAG, format!("{} tab cancelled ({} XMR)", tab.origin, format_xmr(tab.settled_total)));
         }

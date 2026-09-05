@@ -133,7 +133,9 @@
     err = null;
     sending = true;
     try {
-      await api.sendText(open, body);
+      if (replyTo) await api.sendReply(open, body, replyTo.seq, replyTo.own);
+      else await api.sendText(open, body);
+      replyTo = null;
       draft = "";
       api.saveDraft(open, "").catch(() => {});
       thread = await api.thread(open);
@@ -304,6 +306,115 @@
       }
     }
   });
+
+  // Voice memos and other audio: a data URL the page can play, once here.
+  let audios = $state<Record<string, string>>({});
+  $effect(() => {
+    for (const m of thread) {
+      if (m.att_hash && m.att_here && m.att_mime?.startsWith("audio/") && !audios[m.att_hash]) {
+        const h = m.att_hash;
+        api.attachmentDataUrl(h, m.att_mime ?? null).then((u) => { if (u) audios = { ...audios, [h]: u }; }).catch(() => {});
+      }
+    }
+  });
+
+  // Replying: the reference travels, the quote is read from our own copy.
+  let replyTo = $state<{ seq: number; own: boolean; line: string } | null>(null);
+  function startReply(m: MessageRow) {
+    replyTo = { seq: m.seq, own: m.outgoing, line: quoteOf(m) };
+  }
+  function quoteOf(m: MessageRow): string {
+    if (m.unsent) return "This message was withdrawn.";
+    if (m.kind === 1) return "a request for money";
+    if (m.kind === 2) return "a payment";
+    if (m.kind === 3) return "a receipt";
+    if (m.att_hash && !m.body.trim()) return "an attachment";
+    if (m.body.trim()) return m.body;
+    return "a message";
+  }
+
+  // A bill of theirs, declined; a bill of ours, taken back.
+  let answering = $state<string | null>(null);
+  async function decline(m: MessageRow) {
+    if (!open) return;
+    err = null;
+    answering = keyOf(m);
+    try { await api.declineBill(open, m.seq, m.timestamp); thread = await api.thread(open); } catch (e) { err = String(e); } finally { answering = null; }
+  }
+  async function cancelMine(m: MessageRow) {
+    if (!open) return;
+    err = null;
+    answering = keyOf(m);
+    try { await api.cancelBill(open, m.seq, m.timestamp); thread = await api.thread(open); } catch (e) { err = String(e); } finally { answering = null; }
+  }
+
+  // Sharing: a one-claim card for me, or somebody's profile.
+  let sharing = $state(false);
+  let people = $state<ContactRow[]>([]);
+  let shareWho = $state("");
+  async function openShare() {
+    sharing = !sharing;
+    if (sharing) { try { people = (await api.contacts()).filter((c) => c.persona_hex !== open); } catch {} }
+  }
+  async function shareCard() {
+    if (!open) return;
+    err = null;
+    try { await api.shareIntroCard(open); sharing = false; thread = await api.thread(open); scrollToEnd(); } catch (e) { err = String(e); }
+  }
+  async function shareProfile() {
+    if (!open || !shareWho) return;
+    err = null;
+    try { await api.shareContact(open, shareWho); sharing = false; thread = await api.thread(open); scrollToEnd(); } catch (e) { err = String(e); }
+  }
+  const CARD_LINK = /ducat:card\/\S+/;
+  function cardIn(body: string): string | null {
+    const m = body.match(CARD_LINK);
+    return m ? m[0] : null;
+  }
+  let answeringCard = $state(false);
+  async function answerCard(uri: string) {
+    err = null;
+    answeringCard = true;
+    try {
+      const r = await api.claimCard(uri, null);
+      contacts = await api.contacts();
+      open = r.contact.persona_hex;
+    } catch (e) { err = String(e); } finally { answeringCard = false; }
+  }
+
+  // Voice memos: click to start, click to send; the counter ticks here.
+  let recording = $state(false);
+  let recMs = $state(0);
+  let recTimer: ReturnType<typeof setInterval> | null = null;
+  async function startMemo() {
+    if (!open) return;
+    err = null;
+    try {
+      await api.memoStart();
+      recording = true;
+      recMs = 0;
+      recTimer = setInterval(async () => { const ms = await api.memoElapsedMs().catch(() => null); if (ms != null) recMs = ms; }, 500);
+    } catch (e) { err = String(e); }
+  }
+  function endTicking() {
+    if (recTimer) clearInterval(recTimer);
+    recTimer = null;
+    recording = false;
+  }
+  async function sendMemo() {
+    if (!open) return;
+    endTicking();
+    sending = true;
+    try { await api.memoStopSend(open); thread = await api.thread(open); scrollToEnd(); } catch (e) { err = String(e); } finally { sending = false; }
+  }
+  async function cancelMemo() {
+    endTicking();
+    await api.memoCancel().catch(() => {});
+  }
+  function clock(ms: number): string {
+    const s = Math.floor(ms / 1000);
+    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+  }
 
   async function attach(path?: string) {
     if (!open) return;
@@ -521,7 +632,19 @@
           <button class="btn small" onclick={clearThread}>Clear the thread here</button>
           <button class="btn small" onclick={hideThread}>Hide</button>
           <button class="btn small danger" onclick={remove}>Forget them</button>
+          <button class="btn small" class:active={sharing} onclick={openShare}>Share…</button>
           <span class="meta">Clearing and hiding touch only this desk; forgetting drops the contact.</span>
+        </div>
+      {/if}
+      {#if sharing}
+        <div class="request-bar">
+          <button class="btn small" title="A one-claim link they can pass to someone who should reach you" onclick={shareCard}>A card for me</button>
+          <select class="input" bind:value={shareWho}>
+            <option value="">Someone's profile…</option>
+            {#each people as c (c.persona_hex)}<option value={c.persona_hex}>{c.name}</option>{/each}
+          </select>
+          <button class="btn small" disabled={!shareWho} onclick={shareProfile}>Share the profile</button>
+          <span class="meta">A profile is their name and what they chose to publish — not their connection code.</span>
         </div>
       {/if}
       {#if payingOut}
@@ -549,6 +672,8 @@
             {#if hovered === keyOf(m) && !m.dead_letter}
               <div class="bubble-tools" class:out={m.outgoing}>
                 <button class="linkish" title="React" onclick={() => (picking = picking === keyOf(m) ? null : keyOf(m))}>☺</button>
+                {#if !m.unsent}<button class="linkish" title="Reply" onclick={() => startReply(m)}>↩</button>{/if}
+                {#if m.kind === 0 && m.body && !m.unsent}<button class="linkish" title="Copy the text" onclick={() => copy(m.body)}>⧉</button>{/if}
                 {#if m.outgoing && m.kind === 0 && m.delivered && !m.unsent}<button class="linkish" title="Take it back for both of you" onclick={() => unsend(m)}>↶</button>{/if}
                 <button class="linkish" title="Delete here only" onclick={() => deleteHere(m)}>✕</button>
               </div>
@@ -561,6 +686,9 @@
               {#if m.withdrawn}<div class="bubble-kind">{m.outgoing ? "Withdrawn" : "They withdrew this bill"}</div>{/if}
               {#if m.refused}<div class="bubble-kind">{m.outgoing ? "They declined this bill" : "Declined"}</div>{/if}
               {#if kindLabel(m)}<div class="bubble-kind">{kindLabel(m)}</div>{/if}
+              {#if m.kind === 0 && m.re_seq !== null}
+                <div class="quote" class:gone={m.quote === null}>{m.quote ?? "a message that is no longer here"}</div>
+              {/if}
               {#if m.items.length}
                 <div class="bill">
                   {#each m.items as [d, a]}<div class="bill-line"><span>{d}</span><span>{fmtXmr(a)}</span></div>{/each}
@@ -570,6 +698,8 @@
               {#if m.att_hash}
                 {#if m.att_here && m.att_mime?.startsWith("image/") && pictures[m.att_hash]}
                   <img class="bubble-pic" src={pictures[m.att_hash]} alt="" />
+                {:else if m.att_here && m.att_mime?.startsWith("audio/") && audios[m.att_hash]}
+                  <div class="bubble-audio"><span class="meta">🎤 Voice memo</span><audio controls preload="metadata" src={audios[m.att_hash]}></audio></div>
                 {:else if m.att_here}
                   <div class="bubble-att">📎 {m.att_name ?? m.att_mime} · <button class="linkish" onclick={() => showFile(m)}>Show</button></div>
                 {:else if m.att_on_swarm}
@@ -578,14 +708,23 @@
                   <div class="bubble-att">📎 {m.att_name ?? m.att_mime ?? "attachment"} · arriving…</div>
                 {/if}
               {/if}
-              {#if unpaid(m)}
+              {#if unpaid(m) && !m.withdrawn && !m.refused}
                 <div class="actions" style="margin: 6px 0 4px">
                   <button class="btn small primary" disabled={paying !== null} onclick={() => pay(m)}>{paying === m.seq ? "Paying…" : `Pay ${fmtXmr(m.amount_pxmr)}`}</button>
+                  <button class="btn small" disabled={answering !== null} title="Not this time" onclick={() => decline(m)}>{answering === keyOf(m) ? "…" : "Decline"}</button>
                 </div>
-              {:else if !m.outgoing && m.kind === 1}
+              {:else if !m.outgoing && m.kind === 1 && !m.withdrawn && !m.refused}
                 <div class="meta">paid</div>
               {/if}
-              {#if m.body && !(m.att_hash && (m.body === "📷" || m.body.startsWith("📎 ")))}<div class="bubble-body">{m.body}</div>{/if}
+              {#if m.outgoing && m.kind === 1 && m.delivered && !m.withdrawn && !m.refused && !m.bill_answered}
+                <div class="actions" style="margin: 6px 0 4px">
+                  <button class="btn small" disabled={answering !== null} title="Take this bill back — nothing to pay" onclick={() => cancelMine(m)}>{answering === keyOf(m) ? "…" : "Cancel this bill"}</button>
+                </div>
+              {/if}
+              {#if m.body && !(m.att_hash && (m.body === "📷" || m.body === "🎤" || m.body.startsWith("📎 ")))}<div class="bubble-body">{m.body}</div>{/if}
+              {#if !m.outgoing && m.kind === 0 && cardIn(m.body)}
+                <div class="actions" style="margin: 6px 0 2px"><button class="btn small primary" disabled={answeringCard} onclick={() => answerCard(cardIn(m.body)!)}>{answeringCard ? "Answering…" : "Answer this card"}</button></div>
+              {/if}
               <div class="bubble-meta">
                 {fmtTime(m.timestamp)}
                 {#if m.outgoing}{m.delivered ? (m.read_by_them ? " · read" : " · sent") : " · sending…"}{/if}
@@ -601,12 +740,24 @@
           <p class="empty">Nothing here yet. Say hello.</p>
         {/if}
       </div>
-      <div class="composer">
-        <textarea class="input" rows="2" placeholder="Write a message" bind:value={draft} disabled={!current.has_keys} oninput={draftChanged}
-          onkeydown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}></textarea>
-        <button class="btn" title="Attach a picture or a file" disabled={attaching || !current.has_keys} onclick={() => attach()}>{attaching ? "…" : "📎"}</button>
-        <button class="btn primary" disabled={!draft.trim() || sending || !current.has_keys} onclick={send}>{sending ? "Sending…" : "Send"}</button>
-      </div>
+      {#if replyTo}
+        <div class="reply-banner"><span class="meta">Replying to</span><span class="reply-line">{replyTo.line}</span><button class="linkish" title="Not replying to that" onclick={() => (replyTo = null)}>✕</button></div>
+      {/if}
+      {#if recording}
+        <div class="composer recording">
+          <span class="rec-dot"></span><span>Recording · {clock(recMs)}</span>
+          <button class="btn" onclick={cancelMemo}>Discard</button>
+          <button class="btn primary" disabled={sending} onclick={sendMemo}>{sending ? "Sending…" : "Send the memo"}</button>
+        </div>
+      {:else}
+        <div class="composer">
+          <textarea class="input" rows="2" placeholder={replyTo ? "Your reply" : "Write a message"} bind:value={draft} disabled={!current.has_keys} oninput={draftChanged}
+            onkeydown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}></textarea>
+          <button class="btn" title="Attach a picture or a file" disabled={attaching || !current.has_keys} onclick={() => attach()}>{attaching ? "…" : "📎"}</button>
+          <button class="btn" title="Record a voice memo" disabled={sending || !current.has_keys} onclick={startMemo}>🎤</button>
+          <button class="btn primary" disabled={!draft.trim() || sending || !current.has_keys} onclick={send}>{sending ? "Sending…" : "Send"}</button>
+        </div>
+      {/if}
       {#if drive.on}<div class="request-bar"><input id="attpath" class="input" placeholder="/path/to/attach" onchange={(e) => attach((e.target as HTMLInputElement).value)} /></div>{/if}
       {#if err}<p class="err">{err}</p>{/if}
     {:else}

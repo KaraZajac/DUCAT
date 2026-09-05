@@ -280,3 +280,94 @@ mod tests {
         a.stop();
     }
 }
+
+/// A voice memo being taken: the capture tool's raw PCM gathered until
+/// `stop`, then wrapped as a WAV — the phone records AAC in an MP4, the
+/// desk has no encoder, and both play either.
+pub struct MemoRecorder {
+    child: Child,
+    buf: Arc<Mutex<Vec<u8>>>,
+    started: std::time::Instant,
+}
+
+impl MemoRecorder {
+    pub fn start() -> Result<MemoRecorder, String> {
+        let tool = available().ok_or_else(|| "no sound tools on this machine".to_string())?;
+        let mut child = tool.record().spawn().map_err(|e| format!("no microphone: {e}"))?;
+        let mut out = child.stdout.take().ok_or_else(|| "no microphone pipe".to_string())?;
+        let buf = Arc::new(Mutex::new(Vec::new()));
+        let sink = buf.clone();
+        std::thread::Builder::new()
+            .name("memo".into())
+            .spawn(move || {
+                let mut chunk = vec![0u8; 4096];
+                loop {
+                    match out.read(&mut chunk) {
+                        Ok(0) | Err(_) => break,
+                        Ok(n) => sink.lock().unwrap().extend_from_slice(&chunk[..n]),
+                    }
+                }
+            })
+            .map_err(|e| e.to_string())?;
+        Ok(MemoRecorder { child, buf, started: std::time::Instant::now() })
+    }
+
+    pub fn elapsed(&self) -> Duration {
+        self.started.elapsed()
+    }
+
+    /// Ends the take: the WAV bytes and how long it ran.
+    pub fn stop(mut self) -> (Vec<u8>, Duration) {
+        let took = self.started.elapsed();
+        let _ = self.child.kill();
+        let _ = self.child.wait();
+        // The reader thread ends on EOF once the child is gone.
+        std::thread::sleep(Duration::from_millis(30));
+        let pcm = std::mem::take(&mut *self.buf.lock().unwrap());
+        (wav_of(&pcm, 16_000, 1), took)
+    }
+
+    /// Drops the take.
+    pub fn cancel(mut self) {
+        let _ = self.child.kill();
+        let _ = self.child.wait();
+    }
+}
+
+/// A canonical 44-byte header around 16-bit little-endian PCM.
+pub fn wav_of(pcm: &[u8], rate: u32, channels: u16) -> Vec<u8> {
+    let mut out = Vec::with_capacity(pcm.len() + 44);
+    let block = channels * 2;
+    out.extend_from_slice(b"RIFF");
+    out.extend_from_slice(&(36 + pcm.len() as u32).to_le_bytes());
+    out.extend_from_slice(b"WAVEfmt ");
+    out.extend_from_slice(&16u32.to_le_bytes());
+    out.extend_from_slice(&1u16.to_le_bytes());
+    out.extend_from_slice(&channels.to_le_bytes());
+    out.extend_from_slice(&rate.to_le_bytes());
+    out.extend_from_slice(&(rate * block as u32).to_le_bytes());
+    out.extend_from_slice(&block.to_le_bytes());
+    out.extend_from_slice(&16u16.to_le_bytes());
+    out.extend_from_slice(b"data");
+    out.extend_from_slice(&(pcm.len() as u32).to_le_bytes());
+    out.extend_from_slice(pcm);
+    out
+}
+
+#[cfg(test)]
+mod wav_tests {
+    use super::*;
+
+    #[test]
+    fn a_wav_header_describes_its_pcm() {
+        let pcm = vec![0u8; 640];
+        let w = wav_of(&pcm, 16_000, 1);
+        assert_eq!(w.len(), 684);
+        assert_eq!(&w[0..4], b"RIFF");
+        assert_eq!(u32::from_le_bytes(w[4..8].try_into().unwrap()), 36 + 640);
+        assert_eq!(&w[8..12], b"WAVE");
+        assert_eq!(u32::from_le_bytes(w[24..28].try_into().unwrap()), 16_000);
+        assert_eq!(u32::from_le_bytes(w[28..32].try_into().unwrap()), 32_000);
+        assert_eq!(u32::from_le_bytes(w[40..44].try_into().unwrap()), 640);
+    }
+}

@@ -121,6 +121,8 @@ export interface MessageRow {
   unsent: boolean;
   withdrawn: boolean;
   refused: boolean;
+  quote: string | null;
+  bill_answered: boolean;
 }
 
 export interface Balances {
@@ -573,6 +575,16 @@ export const api = {
   stopStandingBill: (id: string) => invoke<void>("stop_standing_bill", { id }),
   donateCode: () => invoke<Code>("donate_code"),
 
+  sendReply: (personaHex: string, body: string, reSeq: number, reOwn: boolean) => invoke<void>("send_reply", { personaHex, body, reSeq, reOwn }),
+  declineBill: (personaHex: string, seq: number, timestamp: number) => invoke<void>("decline_bill", { personaHex, seq, timestamp }),
+  cancelBill: (personaHex: string, seq: number, timestamp: number) => invoke<void>("cancel_bill", { personaHex, seq, timestamp }),
+  shareIntroCard: (personaHex: string) => invoke<void>("share_intro_card", { personaHex }),
+  shareContact: (personaHex: string, otherHex: string) => invoke<void>("share_contact", { personaHex, otherHex }),
+  memoStart: () => invoke<void>("memo_start"),
+  memoElapsedMs: () => invoke<number | null>("memo_elapsed_ms"),
+  memoCancel: () => invoke<void>("memo_cancel"),
+  memoStopSend: (personaHex: string) => invoke<number>("memo_stop_send", { personaHex }),
+  attachmentDataUrl: (ctHashHex: string, mime: string | null) => invoke<string | null>("attachment_data_url", { ctHashHex, mime }),
   sendAttachment: (personaHex: string, path: string, caption: string | null) => invoke<void>("send_attachment", { personaHex, path, caption }),
   attachmentPath: (ctHashHex: string) => invoke<string | null>("attachment_path", { ctHashHex }),
   fetchSwarmAttachment: (personaHex: string, seq: number, outgoing: boolean) => invoke<string>("fetch_swarm_attachment", { personaHex, seq, outgoing }),

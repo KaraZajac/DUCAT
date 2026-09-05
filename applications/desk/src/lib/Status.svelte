@@ -2,10 +2,12 @@
 
   const ATTACH: Record<string, string> = {
     Detached: "Detached",
+    Detaching: "Detaching",
     Attaching: "Attaching",
     AttachedWeak: "Attached, weakly",
     AttachedGood: "Attached",
     AttachedStrong: "Attached, strongly",
+    AttachedFull: "Fully attached",
     FullyAttached: "Fully attached",
     OverAttached: "Over-attached",
   };

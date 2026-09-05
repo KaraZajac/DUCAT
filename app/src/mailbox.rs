@@ -717,6 +717,74 @@ impl App {
         Ok(())
     }
 
+    /// A reply: plain text that points at a message — one of ours when
+    /// `re_own`. The quote never travels; each side reads it from its copy.
+    pub fn send_reply(&self, persona_hex: &str, body: &str, re_seq: u64, re_own: bool) -> Result<Contact, Error> {
+        let c = self.contact(persona_hex).ok_or_else(|| Error::Refused("no such contact".into()))?;
+        self.send(&c, Outgoing { body: body.into(), kind: 0, re_seq: Some(re_seq), re_own, ..Default::default() })
+    }
+
+    /// Declining a bill they sent: a retraction pointing at their message,
+    /// in the phone's words, so their screen says "declined".
+    pub fn decline_bill(&self, persona_hex: &str, seq: u64, timestamp: u64) -> Result<(), Error> {
+        let c = self.contact(persona_hex).ok_or_else(|| Error::Refused("no such contact".into()))?;
+        let thread = self.thread(persona_hex);
+        let bill = thread
+            .iter()
+            .find(|m| !m.outgoing && m.kind == 1 && m.seq == seq && m.timestamp == timestamp)
+            .ok_or_else(|| Error::Refused("no such bill of theirs".into()))?;
+        let body = format!("Declining that bill for {} — not this time.", self.show_amount(bill.amount_pxmr).primary);
+        self.send(&c, Outgoing { body, kind: 5, re_seq: Some(seq), re_own: false, ..Default::default() })?;
+        Ok(())
+    }
+
+    /// Taking back a bill of ours nobody has answered. A tab standing
+    /// behind it is cancelled with it, as the phone does.
+    pub fn cancel_bill(&self, persona_hex: &str, seq: u64, timestamp: u64) -> Result<(), Error> {
+        let c = self.contact(persona_hex).ok_or_else(|| Error::Refused("no such contact".into()))?;
+        let thread = self.thread(persona_hex);
+        let bill = thread
+            .iter()
+            .find(|m| m.outgoing && m.kind == 1 && m.seq == seq && m.timestamp == timestamp)
+            .ok_or_else(|| Error::Refused("no such bill of ours".into()))?;
+        if !bill.delivered {
+            return Err(Error::Refused("that bill has not gone out yet".into()));
+        }
+        let marks = crate::contacts::retractions(&thread);
+        if marks.withdrawn.contains(&(seq, timestamp)) || marks.refused.contains(&(seq, timestamp)) || crate::contacts::bill_answered(&thread, bill) {
+            return Err(Error::Refused("that bill is already answered".into()));
+        }
+        // A tab standing behind the bill cancels itself with the same
+        // retraction; otherwise the bill is withdrawn on its own.
+        if let Some(t) = self.tabs().into_iter().find(|t| t.persona_hex == persona_hex && t.bill_seq == seq as i64 && t.state == "settled") {
+            self.cancel_tab(&t)?;
+            return Ok(());
+        }
+        let body = format!("That bill for {} is cancelled — nothing to pay.", self.show_amount(bill.amount_pxmr).primary);
+        self.send(&c, Outgoing { body, kind: 5, re_seq: Some(seq), re_own: true, ..Default::default() })?;
+        Ok(())
+    }
+
+    /// "A card for me": a one-claim, one-week intro card in the thread, for
+    /// them to pass to whoever should reach us.
+    pub fn share_intro_card(&self, persona_hex: &str) -> Result<(), Error> {
+        let c = self.contact(persona_hex).ok_or_else(|| Error::Refused("no such contact".into()))?;
+        let name = self.my_name(None)?;
+        let card = self.issue_card(name.as_deref(), 60 * 60 * 24 * 7, "intro", None)?;
+        let body = format!("🎟 A card for me — pass it to whoever should reach me. One claim, one week:\n{}", card.uri);
+        self.send(&c, Outgoing::text(&body))?;
+        Ok(())
+    }
+
+    /// Someone's profile into a thread: their name and what they chose to
+    /// publish, never their connection code.
+    pub fn share_contact(&self, persona_hex: &str, other_hex: &str) -> Result<(), Error> {
+        let c = self.contact(persona_hex).ok_or_else(|| Error::Refused("no such contact".into()))?;
+        let other = self.contact(other_hex).ok_or_else(|| Error::Refused("no such contact to share".into()))?;
+        self.send(&c, Outgoing::text(&crate::contacts::contact_card_text(&other)))?;
+        Ok(())
+    }
+
     fn send_locked(&self, c0: &Contact, out: Outgoing) -> Result<Contact, Error> {
         // Who speaks is the contact's to say, not the caller's.
         let mine_hex = self.owner_hex_of(c0);

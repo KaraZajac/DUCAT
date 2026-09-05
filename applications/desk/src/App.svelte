@@ -16,7 +16,7 @@
 
   import { gen, startTicker } from "./lib/state.svelte";
 
-  type Page = "chat" | "wallet" | "till" | "activity" | "library" | "market" | "files" | "sites" | "me" | "status";
+  type Page = "chat" | "wallet" | "till" | "kiosk" | "activity" | "library" | "market" | "files" | "sites" | "me" | "status";
   let page = $state<Page>("chat");
   let unread = $state(0);
   let status = $state<Status | null>(null);

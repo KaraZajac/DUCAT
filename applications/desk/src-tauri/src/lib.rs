@@ -453,6 +453,10 @@ struct MessageRow {
     unsent: bool,
     withdrawn: bool,
     refused: bool,
+    /// What a reply answers, in our words; None with re_seq set means it is gone.
+    quote: Option<String>,
+    /// A bill of ours somebody has answered (paid, or receipted by us).
+    bill_answered: bool,
 }
 
 fn message_row(m: StoredMessage) -> MessageRow {
@@ -489,6 +493,8 @@ fn message_row(m: StoredMessage) -> MessageRow {
         unsent: false,
         withdrawn: false,
         refused: false,
+        quote: None,
+        bill_answered: false,
     }
 }
 
@@ -511,9 +517,84 @@ fn thread(persona_hex: String) -> Result<Vec<MessageRow>, String> {
             row.unsent = marks.unsent.contains(&key);
             row.withdrawn = marks.withdrawn.contains(&key);
             row.refused = marks.refused.contains(&key);
+            if m.kind == 0 && m.re_seq.is_some() {
+                row.quote = ducat_app::contacts::reply_line(&all, m, &marks);
+            }
+            if m.outgoing && m.kind == 1 {
+                row.bill_answered = ducat_app::contacts::bill_answered(&all, m);
+            }
             row
         })
         .collect())
+}
+
+#[tauri::command]
+async fn send_reply(persona_hex: String, body: String, re_seq: u64, re_own: bool) -> Result<(), String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.send_reply(&persona_hex, &body, re_seq, re_own).map(|_| ()).map_err(said)).await.map_err(s)?
+}
+
+#[tauri::command]
+async fn decline_bill(persona_hex: String, seq: u64, timestamp: u64) -> Result<(), String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.decline_bill(&persona_hex, seq, timestamp).map_err(said)).await.map_err(s)?
+}
+
+#[tauri::command]
+async fn cancel_bill(persona_hex: String, seq: u64, timestamp: u64) -> Result<(), String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.cancel_bill(&persona_hex, seq, timestamp).map_err(said)).await.map_err(s)?
+}
+
+#[tauri::command]
+async fn share_intro_card(persona_hex: String) -> Result<(), String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.share_intro_card(&persona_hex).map_err(said)).await.map_err(s)?
+}
+
+#[tauri::command]
+async fn share_contact(persona_hex: String, other_hex: String) -> Result<(), String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.share_contact(&persona_hex, &other_hex).map_err(said)).await.map_err(s)?
+}
+
+#[tauri::command]
+fn memo_start() -> Result<(), String> {
+    app()?.memo_start().map_err(said)
+}
+
+#[tauri::command]
+fn memo_elapsed_ms() -> Result<Option<u64>, String> {
+    Ok(app()?.memo_elapsed().map(|d| d.as_millis() as u64))
+}
+
+#[tauri::command]
+fn memo_cancel() -> Result<(), String> {
+    app()?.memo_cancel();
+    Ok(())
+}
+
+#[tauri::command]
+async fn memo_stop_send(persona_hex: String) -> Result<u64, String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.memo_stop_and_send(&persona_hex).map(|d| d.as_millis() as u64).map_err(said)).await.map_err(s)?
+}
+
+/// An attachment that is here, as a data URL the page can play or show.
+#[tauri::command]
+fn attachment_data_url(ct_hash_hex: String, mime: Option<String>) -> Result<Option<String>, String> {
+    let a = app()?;
+    let path = a.attachment_file(&ct_hash_hex);
+    if !path.exists() {
+        return Ok(None);
+    }
+    let bytes = std::fs::read(&path).map_err(s)?;
+    if bytes.len() > 24 * 1024 * 1024 {
+        return Err("too big to hand to the page".into());
+    }
+    let mime = mime.unwrap_or_else(|| "application/octet-stream".into());
+    use base64::Engine as _;
+    Ok(Some(format!("data:{};base64,{}", mime, base64::engine::general_purpose::STANDARD.encode(&bytes))))
 }
 
 #[tauri::command]
@@ -2170,6 +2251,16 @@ pub fn run() {
             hang_up,
             dismiss_call,
             react,
+            send_reply,
+            decline_bill,
+            cancel_bill,
+            share_intro_card,
+            share_contact,
+            memo_start,
+            memo_elapsed_ms,
+            memo_cancel,
+            memo_stop_send,
+            attachment_data_url,
             retract_message,
             delete_message,
             delete_thread,

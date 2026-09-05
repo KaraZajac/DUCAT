@@ -36,9 +36,11 @@ fn main() {
             let handle = app.profile_code(None).expect("MB_FAIL issue");
             println!("MB_CARD {}", handle.uri);
             let t0 = Instant::now();
-            let mut seen: std::collections::HashMap<String, usize> = std::collections::HashMap::new();
+            // What is already in the threads is history, not a prompt.
+            let mut seen: std::collections::HashMap<String, usize> =
+                app.contacts().into_iter().map(|c| (c.persona_hex.clone(), app.thread(&c.persona_hex).len())).collect();
             let mut answered = 0;
-            while t0.elapsed() < Duration::from_secs(600) {
+            while t0.elapsed() < Duration::from_secs(1500) {
                 let claimed = app.collect_claims(None);
                 if claimed > 0 {
                     println!("MB_CLAIM_SEEN {claimed}");
@@ -48,9 +50,36 @@ fn main() {
                     let thread = app.thread(&c.persona_hex);
                     let before = seen.get(&c.persona_hex).copied().unwrap_or(0);
                     for row in thread.iter().skip(before).filter(|r| !r.outgoing) {
-                        println!("MB_GOT {} seq {} '{}' fs={}", c.display_name(), row.seq, row.body, row.forward_secret);
-                        let reply = format!("echo: {}", row.body);
-                        match app.send(&c, Outgoing::text(&reply)) {
+                        println!(
+                            "MB_GOT {} seq {} kind {} '{}' fs={} re={:?}/{} att={}",
+                            c.display_name(),
+                            row.seq,
+                            row.kind,
+                            row.body.replace('\n', "\\n"),
+                            row.forward_secret,
+                            row.re_seq,
+                            row.re_own,
+                            row.att_mime.as_deref().unwrap_or("-")
+                        );
+                        if row.kind != 0 {
+                            continue;
+                        }
+                        // "bill me": a small bill back, so the other side can
+                        // pay or decline one of ours.
+                        let out = if row.body.trim().eq_ignore_ascii_case("bill me") {
+                            let payto = app.ensure_wallet().ok().and_then(|_| app.wallet_address());
+                            Outgoing {
+                                body: "A small bill".into(),
+                                kind: 1,
+                                amount_pxmr: Some(100_000_000),
+                                payto,
+                                items: vec![ducat_app::contacts::BillItem { description: "A thing".into(), amount_pxmr: 100_000_000 }],
+                                ..Default::default()
+                            }
+                        } else {
+                            Outgoing::text(&format!("echo: {}", row.body))
+                        };
+                        match app.send(&c, out) {
                             Ok(_) => {
                                 println!("MB_SENT reply to {}", c.display_name());
                                 answered += 1;
@@ -60,7 +89,7 @@ fn main() {
                     }
                     seen.insert(c.persona_hex.clone(), thread.len());
                 }
-                if answered >= 2 {
+                if answered >= 40 {
                     println!("MB_OK host answered {answered}");
                     return;
                 }
@@ -145,7 +174,9 @@ fn main() {
                     }
                     let thread = app.thread(&c.persona_hex);
                     for b in thread.iter().filter(|m| !m.outgoing && m.kind == 1) {
-                        let answered = thread.iter().any(|m| (m.outgoing && m.kind == 2 && m.re_seq == Some(b.seq)) || (!m.outgoing && m.kind == 3 && m.re_seq == Some(b.seq)));
+                        // Seq restarts with every fresh card, so one thread can hold two
+                        // bills numbered 0; an answer must also be newer than the bill.
+                        let answered = thread.iter().any(|m| m.timestamp >= b.timestamp && ((m.outgoing && m.kind == 2 && m.re_seq == Some(b.seq)) || (!m.outgoing && m.kind == 3 && m.re_seq == Some(b.seq))));
                         if !answered && best.as_ref().map_or(true, |(_, x)| b.timestamp > x.timestamp) {
                             best = Some((c.clone(), b.clone()));
                         }
@@ -197,7 +228,7 @@ fn main() {
             let t1 = Instant::now();
             loop {
                 app.poll();
-                if let Some(r) = app.thread(&c.persona_hex).into_iter().find(|m| !m.outgoing && m.kind == 3 && m.re_seq == Some(bill.seq)) {
+                if let Some(r) = app.thread(&c.persona_hex).into_iter().find(|m| !m.outgoing && m.kind == 3 && m.re_seq == Some(bill.seq) && m.timestamp >= bill.timestamp) {
                     println!("MB_RECEIPT {} XMR txid={} re_seq={:?}", ducat_app::wallet::format_xmr(r.amount_pxmr), r.txid_hex.as_deref().unwrap_or("-"), r.re_seq);
                     println!("MB_OK receipt in {:.0}s", t1.elapsed().as_secs_f64());
                     // A publication's bill is answered with its key: wait a

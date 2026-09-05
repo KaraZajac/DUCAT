@@ -1286,6 +1286,57 @@ pub fn retractions(thread: &[StoredMessage]) -> Retractions {
 }
 
 /// The message a reaction (§16.14) points at, if the thread holds it.
+/// What a reply is answering, in the reader's own words — the phone's
+/// `replyLine`: the quoted text is never on the wire, only (seq, re_own),
+/// so each side describes the referent from its own copy. None when the
+/// referent is gone, which the screen says in its own sentence.
+pub fn reply_line(thread: &[StoredMessage], m: &StoredMessage, marks: &Retractions) -> Option<String> {
+    let t = referent(thread, m)?;
+    Some(if marks.unsent.contains(&(t.seq, t.timestamp)) {
+        "This message was withdrawn.".to_string()
+    } else if t.kind == 1 {
+        "a request for money".to_string()
+    } else if t.kind == 2 {
+        "a payment".to_string()
+    } else if t.kind == 3 {
+        "a receipt".to_string()
+    } else if t.att_hash.is_some() && t.body.trim().is_empty() {
+        "an attachment".to_string()
+    } else if !t.body.trim().is_empty() {
+        t.body.clone()
+    } else {
+        "a message".to_string()
+    })
+}
+
+/// Whether a bill of ours has been answered: their payment notice or our
+/// receipt pointing at it, and newer than it — seq restarts with every
+/// fresh card, so the older bill numbered the same must not count.
+pub fn bill_answered(thread: &[StoredMessage], bill: &StoredMessage) -> bool {
+    thread.iter().any(|m| {
+        m.timestamp >= bill.timestamp
+            && m.re_seq == Some(bill.seq)
+            && ((!m.outgoing && m.kind == 2) || (m.outgoing && m.kind == 3))
+    })
+}
+
+/// The phone's "someone's profile" share: emoji labels because the
+/// reader's language is unknown, and the persona hex — never a ticket.
+pub fn contact_card_text(c: &Contact) -> String {
+    let mut s = format!("👤 {}\n", c.display_name());
+    if let Some(e) = c.email.as_deref().filter(|e| !e.trim().is_empty()) {
+        s.push_str(&format!("✉ {}\n", e.trim()));
+    }
+    if let Some(p) = c.phone.as_deref().filter(|p| !p.trim().is_empty()) {
+        s.push_str(&format!("☎ {}\n", p.trim()));
+    }
+    if let Some(x) = c.signal.as_deref().filter(|x| !x.trim().is_empty()) {
+        s.push_str(&format!("Signal: {}\n", x.trim()));
+    }
+    s.push_str(&format!("🔑 {}", c.persona_hex));
+    s
+}
+
 pub fn referent<'a>(thread: &'a [StoredMessage], r: &StoredMessage) -> Option<&'a StoredMessage> {
     const CLOCK_SKEW_SECS: u64 = 900;
     let seq = r.re_seq?;
