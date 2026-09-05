@@ -537,6 +537,7 @@
  "pay_amount": "المبلغ",
  "pay_max": "الأقصى",
  "pay_no_address_hint": "%1$s لم يشارك عنوانًا، فيمكنك أن تطلب لكن لا أن ترسل بعد. بدّل إلى «طلب» — فهو يعيد عنوانًا معه.",
+ "pay_not_monero_address": "هذا لا يبدو عنوان Monero.",
  "pay_repeat_monthly": "شهريًا",
  "pay_repeat_once": "مرة واحدة",
  "pay_repeat_weekly": "أسبوعيًا",

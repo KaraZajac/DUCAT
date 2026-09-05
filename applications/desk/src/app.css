@@ -511,3 +511,9 @@ details > summary:hover { color: var(--text); }
 .input.find { width: 100%; margin: 6px 0 10px; }
 .input.find.narrow { width: 220px; margin: 0; }
 input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
+
+/* Right-to-left pages: a sentence, a name, or a clock keeps its own
+   direction, so English text in an Arabic desk reads in English order
+   and "12:24 PM" stays a clock. */
+.empty, .note, .page-lede, .thread-name, .thread-last, .thread-when, .bubble-body, .bubble-meta, .quote,
+.row .title, .row .meta, .ledger-row .lw, .ledger-row .lm, .addr, .card-link code, .stat-v { unicode-bidi: plaintext; }

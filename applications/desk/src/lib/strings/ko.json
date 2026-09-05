@@ -492,6 +492,7 @@
  "pay_amount": "금액",
  "pay_max": "최대",
  "pay_no_address_hint": "%1$s님이 주소를 공유하지 않아서, 요청은 돼도 아직 보낼 수는 없어요. 요청으로 바꿔 보세요 — 요청이 주소를 담아 와요.",
+ "pay_not_monero_address": "Monero 주소로 보이지 않아요.",
  "pay_repeat_monthly": "매월",
  "pay_repeat_once": "한 번",
  "pay_repeat_weekly": "매주",

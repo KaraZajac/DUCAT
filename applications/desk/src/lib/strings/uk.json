@@ -519,6 +519,7 @@
  "pay_amount": "Сума",
  "pay_max": "Макс",
  "pay_no_address_hint": "%1$s не поділилися адресою, тож попросити можна, а надіслати ще ні. Перемкнись на «Попросити» — запит принесе адресу назад.",
+ "pay_not_monero_address": "Це не схоже на адресу Monero.",
  "pay_repeat_monthly": "Щомісяця",
  "pay_repeat_once": "Один раз",
  "pay_repeat_weekly": "Щотижня",

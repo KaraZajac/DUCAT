@@ -501,6 +501,7 @@
  "pay_amount": "مبلغ",
  "pay_max": "حداکثر",
  "pay_no_address_hint": "%1$s نشانی‌ای به اشتراک نگذاشته، پس فعلاً می‌توانی بخواهی اما نمی‌توانی بفرستی. برو روی «درخواست» — نشانی را با خودش برمی‌گرداند.",
+ "pay_not_monero_address": "این شبیه نشانی Monero نیست.",
  "pay_repeat_monthly": "ماهانه",
  "pay_repeat_once": "یک بار",
  "pay_repeat_weekly": "هفتگی",

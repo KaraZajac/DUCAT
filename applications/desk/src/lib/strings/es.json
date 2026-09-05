@@ -501,6 +501,7 @@
  "pay_amount": "Monto",
  "pay_max": "Máx",
  "pay_no_address_hint": "%1$s no ha compartido una dirección, así que puedes pedir pero todavía no enviar. Cambia a Solicitar — la solicitud lleva una de vuelta.",
+ "pay_not_monero_address": "Eso no parece una dirección de Monero.",
  "pay_repeat_monthly": "Mensual",
  "pay_repeat_once": "Una vez",
  "pay_repeat_weekly": "Semanal",

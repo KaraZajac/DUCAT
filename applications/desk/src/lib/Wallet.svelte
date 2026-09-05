@@ -82,6 +82,17 @@
     requote();
   }
 
+  // The shape of a Monero address, before the wallet is asked: base58,
+  // 95 characters (106 with a payment id), and the network's own first
+  // digit — 4 or 8 on mainnet, 5 or 7 on stagenet.
+  const addressProblem = $derived.by(() => {
+    const a = to.trim();
+    if (!a) return null;
+    const shape = /^[1-9A-HJ-NP-Za-km-z]{95}$|^[1-9A-HJ-NP-Za-km-z]{106}$/.test(a);
+    const first = view?.stagenet ? "57" : "48";
+    return shape && first.includes(a[0]) ? null : t("pay_not_monero_address");
+  });
+
   async function send() {
     err = null;
     sentTx = null;
@@ -181,6 +192,7 @@
         <label for="to">{t("txdetail_to")}</label>
         <input id="to" class="input" bind:value={to} placeholder={t("desk_monero_address_hint")} />
       </div>
+      {#if addressProblem}<p class="err">{addressProblem}</p>{/if}
       <div class="field">
         <label for="amt">{t("pay_amount")}</label>
         <input id="amt" class="input" bind:value={amount} oninput={requote} placeholder="0.00 XMR" />
@@ -207,7 +219,7 @@
         <p class="note">{t("desk_working_fee")}</p>
       {/if}
       <div class="actions">
-        <button class="btn primary" disabled={!to.trim() || !amount.trim() || sending || (quote !== null && !quote.affordable)} onclick={send}>{sending ? t("desk_sending") : amount.trim() ? t("desk_send_x_xmr", amount.trim()) : t("desk_send_now")}</button>
+        <button class="btn primary" disabled={!to.trim() || !!addressProblem || !amount.trim() || sending || (quote !== null && !quote.affordable)} onclick={send}>{sending ? t("desk_sending") : amount.trim() ? t("desk_send_x_xmr", amount.trim()) : t("desk_send_now")}</button>
       </div>
       {#if sentTx}<p class="note ok-text">{t("desk_sent_tx", sentTx.slice(0, 16) + "…")}</p>{/if}
       {#if err}<p class="err">{err}</p>{/if}

@@ -501,6 +501,7 @@
  "pay_amount": "Bedrag",
  "pay_max": "Max",
  "pay_no_address_hint": "%1$s heeft geen adres gedeeld, dus je kunt wel vragen maar nog niet sturen. Schakel over naar Vragen — dat verzoek brengt er een mee terug.",
+ "pay_not_monero_address": "Dat ziet er niet uit als een Monero-adres.",
  "pay_repeat_monthly": "Maandelijks",
  "pay_repeat_once": "Eenmalig",
  "pay_repeat_weekly": "Wekelijks",

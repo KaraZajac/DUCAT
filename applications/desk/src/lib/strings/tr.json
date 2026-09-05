@@ -501,6 +501,7 @@
  "pay_amount": "Tutar",
  "pay_max": "Maks",
  "pay_no_address_hint": "%1$s adres paylaşmadı; bu yüzden isteyebilirsin ama henüz gönderemezsin. İste'ye geç — istek bir adres taşıyıp getirir.",
+ "pay_not_monero_address": "Bu bir Monero adresine benzemiyor.",
  "pay_repeat_monthly": "Aylık",
  "pay_repeat_once": "Bir kez",
  "pay_repeat_weekly": "Haftalık",

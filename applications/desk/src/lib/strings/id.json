@@ -492,6 +492,7 @@
  "pay_amount": "Jumlah",
  "pay_max": "Maks",
  "pay_no_address_hint": "%1$s belum membagikan alamat, jadi kamu bisa meminta tapi belum bisa mengirim. Beralihlah ke Minta — permintaan membawa alamat kembali.",
+ "pay_not_monero_address": "Itu tidak tampak seperti alamat Monero.",
  "pay_repeat_monthly": "Bulanan",
  "pay_repeat_once": "Sekali",
  "pay_repeat_weekly": "Mingguan",

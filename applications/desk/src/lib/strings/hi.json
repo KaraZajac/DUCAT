@@ -501,6 +501,7 @@
  "pay_amount": "रकम",
  "pay_max": "मैक्स",
  "pay_no_address_hint": "%1$s ने पता शेयर नहीं किया है, इसलिए आप माँग तो सकते हैं पर अभी भेज नहीं सकते। ‘माँगें’ पर जाएँ — वह पता साथ लौटा लाता है।",
+ "pay_not_monero_address": "यह Monero पते जैसा नहीं दिखता।",
  "pay_repeat_monthly": "मासिक",
  "pay_repeat_once": "एक बार",
  "pay_repeat_weekly": "साप्ताहिक",

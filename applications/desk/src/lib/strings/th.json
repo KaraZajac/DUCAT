@@ -492,6 +492,7 @@
  "pay_amount": "จำนวนเงิน",
  "pay_max": "สูงสุด",
  "pay_no_address_hint": "%1$s ยังไม่ได้แชร์ที่อยู่ คุณจึงขอได้แต่ยังส่งไม่ได้ สลับไปที่ ขอ — คำขอจะพกที่อยู่กลับมาให้เอง",
+ "pay_not_monero_address": "นั่นดูไม่เหมือนที่อยู่ Monero",
  "pay_repeat_monthly": "รายเดือน",
  "pay_repeat_once": "ครั้งเดียว",
  "pay_repeat_weekly": "รายสัปดาห์",

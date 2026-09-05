@@ -519,6 +519,7 @@
  "pay_amount": "Kwota",
  "pay_max": "Maks.",
  "pay_no_address_hint": "%1$s nie udostępnił(a) adresu, więc możesz poprosić, ale jeszcze nie wysłać. Przełącz na Poproś — prośba przynosi adres z powrotem.",
+ "pay_not_monero_address": "To nie wygląda na adres Monero.",
  "pay_repeat_monthly": "Co miesiąc",
  "pay_repeat_once": "Raz",
  "pay_repeat_weekly": "Co tydzień",

@@ -492,6 +492,7 @@
  "pay_amount": "Số tiền",
  "pay_max": "Tối đa",
  "pay_no_address_hint": "%1$s chưa chia sẻ địa chỉ, nên bạn hỏi được nhưng chưa gửi được. Chuyển sang Yêu cầu — nó mang về một địa chỉ.",
+ "pay_not_monero_address": "Cái đó trông không giống một địa chỉ Monero.",
  "pay_repeat_monthly": "Hàng tháng",
  "pay_repeat_once": "Một lần",
  "pay_repeat_weekly": "Hàng tuần",

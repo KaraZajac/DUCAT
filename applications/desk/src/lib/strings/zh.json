@@ -492,6 +492,7 @@
  "pay_amount": "金额",
  "pay_max": "最大",
  "pay_no_address_hint": "%1$s 没有分享地址，所以你可以先问，暂时还发不了。切换到「请求」— 它会把地址捎回来。",
+ "pay_not_monero_address": "这看起来不像 Monero 地址。",
  "pay_repeat_monthly": "每月",
  "pay_repeat_once": "仅一次",
  "pay_repeat_weekly": "每周",

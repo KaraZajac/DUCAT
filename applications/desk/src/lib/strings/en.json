@@ -501,6 +501,7 @@
  "pay_amount": "Amount",
  "pay_max": "Max",
  "pay_no_address_hint": "%1$s has not shared an address, so you can ask but not send yet. Switch to Request — it carries one back.",
+ "pay_not_monero_address": "That does not look like a Monero address.",
  "pay_repeat_monthly": "Monthly",
  "pay_repeat_once": "Once",
  "pay_repeat_weekly": "Weekly",

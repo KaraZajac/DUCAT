@@ -501,6 +501,7 @@
  "pay_amount": "Importo",
  "pay_max": "Max",
  "pay_no_address_hint": "%1$s non ha condiviso un indirizzo, quindi puoi chiedere ma non ancora inviare. Passa a Richiedi — riporta indietro un indirizzo.",
+ "pay_not_monero_address": "Questo non sembra un indirizzo Monero.",
  "pay_repeat_monthly": "Mensile",
  "pay_repeat_once": "Una volta",
  "pay_repeat_weekly": "Settimanale",

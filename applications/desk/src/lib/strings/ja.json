@@ -492,6 +492,7 @@
  "pay_amount": "金額",
  "pay_max": "最大",
  "pay_no_address_hint": "%1$sはアドレスを共有していないため、請求はできますが、まだ送金はできません。「請求」に切り替えてください — 請求はアドレスを持ち帰ります。",
+ "pay_not_monero_address": "Moneroアドレスには見えません。",
  "pay_repeat_monthly": "毎月",
  "pay_repeat_once": "1回のみ",
  "pay_repeat_weekly": "毎週",
