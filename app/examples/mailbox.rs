@@ -118,7 +118,15 @@ fn main() {
                     return;
                 }
             };
-            println!("MB_CLAIMED {} ({}) in {:.1}s", c.display_name(), c.asserted_name.clone().unwrap_or_default(), t0.elapsed().as_secs_f64());
+            println!(
+                "MB_CLAIMED {} ({}) in {:.1}s email={:?} phone={:?} signal={:?}",
+                c.display_name(),
+                c.asserted_name.clone().unwrap_or_default(),
+                t0.elapsed().as_secs_f64(),
+                c.email,
+                c.phone,
+                c.signal
+            );
             let c = app.send(&c, Outgoing::text("hello from the guest")).expect("MB_FAIL send 1");
             println!("MB_SENT seq {}", c.out_seq - 1);
             let c = app.send(&c, Outgoing::text("and a second line")).expect("MB_FAIL send 2");
@@ -167,7 +175,7 @@ fn main() {
                 None => None,
             };
             if let Some(c) = &known {
-                println!("MB_CLAIMED {}", c.display_name());
+                println!("MB_CLAIMED {} email={:?} phone={:?} signal={:?}", c.display_name(), c.email, c.phone, c.signal);
             }
             // The newest bill nobody has paid: no payment notice of ours
             // names it and no receipt of theirs does.
@@ -276,7 +284,7 @@ fn main() {
                     return;
                 }
             };
-            println!("MB_CLAIMED {}", c.display_name());
+            println!("MB_CLAIMED {} email={:?} phone={:?} signal={:?}", c.display_name(), c.email, c.phone, c.signal);
             let t0 = Instant::now();
             let period = loop {
                 app.poll();
@@ -312,7 +320,10 @@ fn main() {
             app.set_my_name(None, &name).expect("MB_FAIL name");
             for uri in args.iter().skip(2) {
                 match app.claim_card(uri, None, false, None) {
-                    Ok(c) => println!("MB_CLAIMED {}", c.contact().display_name()),
+                    Ok(c) => {
+                        let cc = c.contact();
+                        println!("MB_CLAIMED {} email={:?} phone={:?} signal={:?}", cc.display_name(), cc.email, cc.phone, cc.signal)
+                    }
                     Err(e) => println!("MB_FAIL claim: {e}"),
                 }
             }
@@ -355,7 +366,10 @@ fn main() {
             app.set_my_name(None, "Callee Desk").expect("MB_FAIL name");
             if let Some(uri) = args.get(1) {
                 match app.claim_card(uri, Some("the caller"), false, None) {
-                    Ok(c) => println!("MB_CLAIMED {}", c.contact().display_name()),
+                    Ok(c) => {
+                        let cc = c.contact();
+                        println!("MB_CLAIMED {} email={:?} phone={:?} signal={:?}", cc.display_name(), cc.email, cc.phone, cc.signal)
+                    }
                     Err(e) => println!("MB_FAIL claim: {e}"),
                 }
             }
@@ -414,7 +428,7 @@ fn main() {
                     return;
                 }
             };
-            println!("MB_CLAIMED {}", c.display_name());
+            println!("MB_CLAIMED {} email={:?} phone={:?} signal={:?}", c.display_name(), c.email, c.phone, c.signal);
             // Their reply to our claim must be collected before we speak.
             for _ in 0..30 {
                 app.poll();

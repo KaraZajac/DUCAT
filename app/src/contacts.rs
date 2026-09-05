@@ -378,6 +378,13 @@ pub struct IssuedCard {
     pub outbox_owner_public: Vec<u8>,
     #[serde(rename = "osec", with = "bytes_b64", default)]
     pub outbox_owner_secret: Vec<u8>,
+    /// The inbox record's own keypair, kept so its first subkey can be
+    /// rewritten later (a profile edit); empty on cards cut before this
+    /// was kept, which then rely on the node still holding the record.
+    #[serde(rename = "ipub", with = "bytes_b64", default)]
+    pub inbox_owner_public: Vec<u8>,
+    #[serde(rename = "isec", with = "bytes_b64", default)]
+    pub inbox_owner_secret: Vec<u8>,
     #[serde(default)]
     pub uri: String,
     #[serde(default = "default_purpose")]

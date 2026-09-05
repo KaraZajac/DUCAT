@@ -289,6 +289,8 @@ impl App {
             outbox_key: outbox.key,
             outbox_owner_public: outbox.owner_public,
             outbox_owner_secret: outbox.owner_secret,
+            inbox_owner_public: inbox.owner_public,
+            inbox_owner_secret: inbox.owner_secret,
             uri: card.uri.clone(),
             purpose: purpose.to_string(),
             owner: owner_hex,
@@ -665,6 +667,75 @@ impl App {
             Ok(_) => log::info(TAG, "a fresh profile code is ready"),
             Err(e) => log::warn(TAG, format!("could not pre-issue: {e}")),
         }
+    }
+
+    /// §16.9 puts the profile in the standing code's *record*, written when
+    /// the code is cut — so a profile edited afterwards would not reach
+    /// anyone answering that code until it was taken and the next one cut.
+    /// Rewrite every outstanding profile card of this persona in place:
+    /// the code itself, and anything printed with it, stays valid; whoever
+    /// answers it from now on reads the profile as it is now. A fresh
+    /// prekey bundle rides along, as it would on a new issue. Returns how
+    /// many records were rewritten.
+    pub fn refresh_profile_cards(&self, owner_hex: &str) -> usize {
+        let cards: Vec<IssuedCard> = self
+            .issued_cards()
+            .into_iter()
+            .filter(|c| c.purpose == "profile" && c.answered_by.is_none() && c.owner == owner_hex)
+            .collect();
+        let mut n = 0;
+        for c in cards {
+            match self.rewrite_card_record(&c) {
+                Ok(()) => n += 1,
+                Err(e) => log::warn(TAG, format!("could not refresh the profile code {}: {e}", short(&c.inbox_key))),
+            }
+        }
+        if n > 0 {
+            log::info(TAG, format!("profile code(s) rewritten with the profile as it is now: {n}"));
+        }
+        n
+    }
+
+    fn rewrite_card_record(&self, c: &IssuedCard) -> Result<(), Error> {
+        let persona = match self.persona_secret(&c.owner)? {
+            Some(p) => p,
+            None => self.primary_secret()?,
+        };
+        let display_name = self.my_name(Some(&c.owner))?;
+        let prekeys = generate_prekeys(
+            ONE_TIME_KEYS,
+            ONE_TIME_VALID_SECS,
+            self.next_prekey_start(ONE_TIME_KEYS)?,
+            self.signed_prekey_secret(),
+        );
+        self.save_prekeys(
+            &prekeys.bundle,
+            &prekeys.signed_secret,
+            &zip_secrets(&prekeys.one_time_ids, &prekeys.one_time_secrets),
+            false,
+        )?;
+        // A record is writable in this process only once it is open with
+        // its owner keys; a card cut before those were kept leans on the
+        // node still holding the record it created.
+        if c.inbox_owner_secret.is_empty() {
+            node_dht_open(c.inbox_key.clone(), None, None)?;
+        } else {
+            node_dht_open(c.inbox_key.clone(), Some(c.inbox_owner_public.clone()), Some(c.inbox_owner_secret.clone()))?;
+        }
+        node_dht_set(
+            c.inbox_key.clone(),
+            0,
+            build_contact_details(
+                persona,
+                c.outbox_key.clone(),
+                prekeys.bundle,
+                display_name,
+                None,
+                self.profile_wire(&c.owner, Some(&c.purpose), false),
+                Some(c.purpose.clone()),
+            )?,
+        )?;
+        Ok(())
     }
 
     /// The standing profile code for the worn persona, cut if there is

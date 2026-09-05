@@ -303,7 +303,15 @@ fn create_persona(name: String, color: i64) -> Result<Option<PersonaRow>, String
 
 #[tauri::command]
 fn set_my_name(name: String, persona_hex: Option<String>) -> Result<(), String> {
-    app()?.set_my_name(persona_hex.as_deref(), &name).map_err(said)
+    let a = app()?;
+    a.set_my_name(persona_hex.as_deref(), &name).map_err(said)?;
+    // The name rides the standing code's record too.
+    let owner = match persona_hex {
+        Some(h) => h,
+        None => a.worn().map_err(said)?,
+    };
+    a.refresh_profile_cards(&owner);
+    Ok(())
 }
 
 /// §16.9: the ways to reach the worn persona away from DUCAT. They ride
@@ -335,7 +343,11 @@ fn set_my_profile(email: Option<String>, phone: Option<String>, signal: Option<S
     a.set_profile_field(&worn, "email", email.as_deref()).map_err(said)?;
     a.set_profile_field(&worn, "phone", phone.as_deref()).map_err(said)?;
     a.set_profile_field(&worn, "signal", signal.as_deref()).map_err(said)?;
-    a.set_share_profile(&worn, share).map_err(said)
+    a.set_share_profile(&worn, share).map_err(said)?;
+    // The standing code's record carries the profile: rewrite it, so the
+    // code already on a business card hands out what was just saved.
+    a.refresh_profile_cards(&worn);
+    Ok(())
 }
 
 #[derive(Serialize)]
