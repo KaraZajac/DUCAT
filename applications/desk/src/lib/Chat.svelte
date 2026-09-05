@@ -105,11 +105,16 @@
   }
 
   async function select(hex: string) {
+    if (open && open !== hex) api.saveDraft(open, draft).catch(() => {});
     openGroup = null;
     open = hex;
     renaming = false;
     requesting = false;
+    showSettings = false;
+    picking = null;
     standing = await api.standingBills();
+    draft = await api.draft(hex);
+    disappear = await api.disappearAfter(hex);
     thread = await api.thread(hex);
     await api.markSeen(hex);
     scrollToEnd();
@@ -130,6 +135,7 @@
     try {
       await api.sendText(open, body);
       draft = "";
+      api.saveDraft(open, "").catch(() => {});
       thread = await api.thread(open);
       scrollToEnd();
       // Their reply should not be fifteen seconds late.
@@ -192,6 +198,76 @@
       thread = await api.thread(open);
       scrollToEnd();
     } catch (e) { err = String(e); }
+  }
+
+  // The smaller rites: a reaction, taking a message back, deleting a
+  // row here, messages that disappear, the draft kept per thread.
+  const QUICK = ["👍", "❤️", "😂", "😮", "😢", "🔥"];
+  let hovered = $state<string | null>(null);
+  let picking = $state<string | null>(null);
+  let disappear = $state(0);
+  let showSettings = $state(false);
+  let draftTimer: ReturnType<typeof setTimeout> | null = null;
+
+  function keyOf(m: MessageRow): string {
+    return `${m.outgoing ? "o" : "i"}:${m.seq}:${m.timestamp}`;
+  }
+
+  async function reactTo(m: MessageRow, emoji: string) {
+    if (!open) return;
+    err = null;
+    picking = null;
+    try {
+      // The same emoji again takes it back.
+      const already = m.react_mine === emoji;
+      await api.react(open, m.seq, m.outgoing, already ? "" : emoji);
+      thread = await api.thread(open);
+    } catch (e) { err = String(e); }
+  }
+
+  async function unsend(m: MessageRow) {
+    if (!open) return;
+    err = null;
+    try {
+      await api.retractMessage(open, m.seq);
+      thread = await api.thread(open);
+    } catch (e) { err = String(e); }
+  }
+
+  async function deleteHere(m: MessageRow) {
+    if (!open) return;
+    err = null;
+    try {
+      await api.deleteMessage(open, m.seq, m.outgoing, m.timestamp);
+      thread = await api.thread(open);
+    } catch (e) { err = String(e); }
+  }
+
+  async function clearThread() {
+    if (!open) return;
+    await api.deleteThread(open);
+    thread = await api.thread(open);
+  }
+
+  async function hideThread() {
+    if (!open) return;
+    await api.setChatVisible(open, false);
+    open = null;
+    thread = [];
+    await refresh();
+  }
+
+  async function setDisappear(secs: number) {
+    if (!open) return;
+    disappear = secs;
+    await api.setDisappearAfter(open, secs);
+  }
+
+  function draftChanged() {
+    if (!open) return;
+    const hex = open;
+    if (draftTimer) clearTimeout(draftTimer);
+    draftTimer = setTimeout(() => api.saveDraft(hex, draft).catch(() => {}), 400);
   }
 
   let requesting = $state(false);
@@ -430,9 +506,24 @@
           <button class="btn small" disabled={!current.their_address} title={current.their_address ? "Send them money" : "They have not given a payment address"} onclick={() => { payingOut = !payingOut; requesting = false; }}>{payingOut ? "Close" : "Pay"}</button>
           <button class="btn small" onclick={() => { requesting = !requesting; payingOut = false; }}>{requesting ? "Close" : "Request"}</button>
           <button class="btn small" onclick={() => { renaming = true; newName = current?.petname ?? ""; }}>Rename</button>
-          <button class="btn small danger" onclick={remove}>Forget</button>
+          <button class="btn small" title="Thread settings" onclick={() => (showSettings = !showSettings)}>⋯</button>
         </div>
       </div>
+      {#if showSettings}
+        <div class="request-bar">
+          <span class="meta">Messages disappear after</span>
+          <select class="input narrow" value={disappear} onchange={(e) => setDisappear(Number((e.target as HTMLSelectElement).value))}>
+            <option value={0}>never</option>
+            <option value={3600}>an hour</option>
+            <option value={86400}>a day</option>
+            <option value={604800}>a week</option>
+          </select>
+          <button class="btn small" onclick={clearThread}>Clear the thread here</button>
+          <button class="btn small" onclick={hideThread}>Hide</button>
+          <button class="btn small danger" onclick={remove}>Forget them</button>
+          <span class="meta">Clearing and hiding touch only this desk; forgetting drops the contact.</span>
+        </div>
+      {/if}
       {#if payingOut}
         <div class="request-bar">
           <input class="input narrow" placeholder="XMR" bind:value={payAmount} />
@@ -454,8 +545,21 @@
       {/if}
       <div class="bubbles" bind:this={list}>
         {#each thread as m (m.outgoing + ":" + m.seq + ":" + m.timestamp)}
-          <div class="bubble-row" class:out={m.outgoing}>
-            <div class="bubble" class:out={m.outgoing} class:dead={m.dead_letter} class:money={m.kind >= 1 && m.kind <= 3}>
+          <div class="bubble-row" role="listitem" class:out={m.outgoing} onmouseenter={() => (hovered = keyOf(m))} onmouseleave={() => { if (picking !== keyOf(m)) hovered = null; }}>
+            {#if hovered === keyOf(m) && !m.dead_letter}
+              <div class="bubble-tools" class:out={m.outgoing}>
+                <button class="linkish" title="React" onclick={() => (picking = picking === keyOf(m) ? null : keyOf(m))}>☺</button>
+                {#if m.outgoing && m.kind === 0 && m.delivered && !m.unsent}<button class="linkish" title="Take it back for both of you" onclick={() => unsend(m)}>↶</button>{/if}
+                <button class="linkish" title="Delete here only" onclick={() => deleteHere(m)}>✕</button>
+              </div>
+            {/if}
+            <div class="bubble" class:out={m.outgoing} class:dead={m.dead_letter} class:money={m.kind >= 1 && m.kind <= 3} class:unsent={m.unsent}>
+              {#if picking === keyOf(m)}
+                <div class="picker">{#each QUICK as q}<button class="linkish" class:on={m.react_mine === q} onclick={() => reactTo(m, q)}>{q}</button>{/each}</div>
+              {/if}
+              {#if m.unsent}<div class="bubble-kind">{m.outgoing ? "You took this back" : "They took this back"}</div>{/if}
+              {#if m.withdrawn}<div class="bubble-kind">{m.outgoing ? "Withdrawn" : "They withdrew this bill"}</div>{/if}
+              {#if m.refused}<div class="bubble-kind">{m.outgoing ? "They declined this bill" : "Declined"}</div>{/if}
               {#if kindLabel(m)}<div class="bubble-kind">{kindLabel(m)}</div>{/if}
               {#if m.items.length}
                 <div class="bill">
@@ -487,6 +591,9 @@
                 {#if m.outgoing}{m.delivered ? (m.read_by_them ? " · read" : " · sent") : " · sending…"}{/if}
                 {#if !m.forward_secret && !m.dead_letter} · no forward secrecy{/if}
               </div>
+              {#if m.react_mine || m.react_theirs}
+                <div class="reactions">{#if m.react_theirs}<span title={current?.name}>{m.react_theirs}</span>{/if}{#if m.react_mine}<span class="mine" title="you">{m.react_mine}</span>{/if}</div>
+              {/if}
             </div>
           </div>
         {/each}
@@ -495,7 +602,7 @@
         {/if}
       </div>
       <div class="composer">
-        <textarea class="input" rows="2" placeholder="Write a message" bind:value={draft} disabled={!current.has_keys}
+        <textarea class="input" rows="2" placeholder="Write a message" bind:value={draft} disabled={!current.has_keys} oninput={draftChanged}
           onkeydown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}></textarea>
         <button class="btn" title="Attach a picture or a file" disabled={attaching || !current.has_keys} onclick={() => attach()}>{attaching ? "…" : "📎"}</button>
         <button class="btn primary" disabled={!draft.trim() || sending || !current.has_keys} onclick={send}>{sending ? "Sending…" : "Send"}</button>

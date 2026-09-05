@@ -544,6 +544,7 @@ impl App {
         crate::contacts::bump();
         let who = self.contact(contact_hex).map(|c| c.display_name()).unwrap_or_default();
         log::info(TAG, format!("ringing: {who} is calling"));
+        crate::notify::post("Incoming call", format!("{who} is calling"), Some(contact_hex.to_string()));
         let left = (RING_WINDOW_SECS + CALL_SKEW_SECS).saturating_sub(now.saturating_sub(offer.timestamp)).clamp(1, RING_WINDOW_SECS);
         self.expire_ring(calls().state(), left);
         true

@@ -28,6 +28,7 @@ pub mod ledger;
 pub mod listings;
 pub mod log;
 pub mod mailbox;
+pub mod notify;
 pub mod opinion;
 pub mod paths;
 pub mod pay;

@@ -567,6 +567,7 @@ export const api = {
   declineCall: () => invoke<void>("decline_call"),
   hangUp: () => invoke<void>("hang_up"),
   dismissCall: () => invoke<void>("dismiss_call"),
+  takeNotices: () => invoke<{ title: string; body: string; open_thread: string | null; at_ms: number }[]>("take_notices"),
 
   react: (personaHex: string, seq: number, reOwn: boolean, emoji: string) => invoke<void>("react", { personaHex, seq, reOwn, emoji }),
   retractMessage: (personaHex: string, seq: number) => invoke<void>("retract_message", { personaHex, seq }),

@@ -260,6 +260,8 @@ impl App {
             }
         })?;
         log::info(TAG, format!("filed period '{period}' from {}…", &publisher_hex[..8.min(publisher_hex.len())]));
+        let who = self.contact(publisher_hex).map(|c| c.display_name()).unwrap_or_else(|| "A publisher".into());
+        crate::notify::post("New issue", format!("{who} sent the key to '{period}'"), None);
         Ok(())
     }
 

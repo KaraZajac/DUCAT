@@ -107,7 +107,9 @@ fn main() {
         Some("customer") => {
             // Claim a till's sale code, wait for the bill, pay it, wait
             // for the receipt.
-            let uri = args.get(1).expect("MB_FAIL customer <card uri>");
+            // customer [card]: with a card, claim it first; without, the
+            // bill is expected from somebody already known.
+            let uri = args.get(1).filter(|u| u.starts_with("ducat:card/"));
             app.set_my_name(None, "Customer Desk").expect("MB_FAIL name");
             let node = app.last_good_node().or_else(|| app.pick_node()).expect("MB_FAIL no monero node");
             app.ensure_wallet().expect("MB_FAIL wallet");
@@ -120,19 +122,42 @@ fn main() {
             app.refresh_spent(&node);
             let b = app.balances();
             println!("MB_BAL spendable {} XMR", ducat_app::wallet::format_xmr(b.spendable_pxmr));
-            let c = match app.claim_card(uri, Some("the till"), false, None) {
-                Ok(c) => c.contact(),
-                Err(e) => {
-                    println!("MB_FAIL claim: {e}");
-                    return;
-                }
+            let known = match uri {
+                Some(uri) => match app.claim_card(uri, Some("the till"), false, None) {
+                    Ok(c) => Some(c.contact()),
+                    Err(e) => {
+                        println!("MB_FAIL claim: {e}");
+                        return;
+                    }
+                },
+                None => None,
             };
-            println!("MB_CLAIMED {}", c.display_name());
+            if let Some(c) = &known {
+                println!("MB_CLAIMED {}", c.display_name());
+            }
+            // The newest bill nobody has paid: no payment notice of ours
+            // names it and no receipt of theirs does.
+            let unpaid = |app: &App| -> Option<(ducat_app::contacts::Contact, ducat_app::contacts::StoredMessage)> {
+                let mut best: Option<(ducat_app::contacts::Contact, ducat_app::contacts::StoredMessage)> = None;
+                for c in app.contacts() {
+                    if known.as_ref().map_or(false, |k| k.persona_hex != c.persona_hex) {
+                        continue;
+                    }
+                    let thread = app.thread(&c.persona_hex);
+                    for b in thread.iter().filter(|m| !m.outgoing && m.kind == 1) {
+                        let answered = thread.iter().any(|m| (m.outgoing && m.kind == 2 && m.re_seq == Some(b.seq)) || (!m.outgoing && m.kind == 3 && m.re_seq == Some(b.seq)));
+                        if !answered && best.as_ref().map_or(true, |(_, x)| b.timestamp > x.timestamp) {
+                            best = Some((c.clone(), b.clone()));
+                        }
+                    }
+                }
+                best
+            };
             let t0 = Instant::now();
-            let bill = loop {
+            let (c, bill) = loop {
                 app.poll();
-                if let Some(b) = app.thread(&c.persona_hex).into_iter().find(|m| !m.outgoing && m.kind == 1) {
-                    break b;
+                if let Some(found) = unpaid(&app) {
+                    break found;
                 }
                 if t0.elapsed() > Duration::from_secs(300) {
                     println!("MB_FAIL no bill arrived");
@@ -172,9 +197,28 @@ fn main() {
             let t1 = Instant::now();
             loop {
                 app.poll();
-                if let Some(r) = app.thread(&c.persona_hex).into_iter().find(|m| !m.outgoing && m.kind == 3) {
+                if let Some(r) = app.thread(&c.persona_hex).into_iter().find(|m| !m.outgoing && m.kind == 3 && m.re_seq == Some(bill.seq)) {
                     println!("MB_RECEIPT {} XMR txid={} re_seq={:?}", ducat_app::wallet::format_xmr(r.amount_pxmr), r.txid_hex.as_deref().unwrap_or("-"), r.re_seq);
                     println!("MB_OK receipt in {:.0}s", t1.elapsed().as_secs_f64());
+                    // A publication's bill is answered with its key: wait a
+                    // little for one and fetch the issue.
+                    if bill.items.iter().any(|i| i.description.contains(" — ")) {
+                        let t2 = Instant::now();
+                        while t2.elapsed() < Duration::from_secs(240) {
+                            app.poll();
+                            if let Some(sub) = app.subscription(&c.persona_hex) {
+                                if let Some(period) = sub.periods.keys().last().cloned() {
+                                    match app.fetch_issue(&c.persona_hex, &period) {
+                                        Ok(dir) => println!("MB_ISSUE '{period}' at {}", dir.display()),
+                                        Err(e) => println!("MB_FAIL issue: {e}"),
+                                    }
+                                    return;
+                                }
+                            }
+                            std::thread::sleep(Duration::from_secs(5));
+                        }
+                        println!("MB_FAIL paid but no key came");
+                    }
                     return;
                 }
                 if t1.elapsed() > Duration::from_secs(1800) {

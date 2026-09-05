@@ -514,6 +514,7 @@ impl App {
             let tx = hit.tx_hash_hex.clone();
             let _ = self.mutate_tab(&tab.id, |t| RunningTab { seen_tx: Some(tx.clone()), ..t });
             log::info(TAG, format!("pool sighting for {} tab: {}… — {} XMR seen, settling now", tab.origin, &hit.tx_hash_hex[..16.min(hit.tx_hash_hex.len())], format_xmr(hit.amount_pxmr)));
+            crate::notify::post("Payment seen", format!("{} XMR — settling now", format_xmr(hit.amount_pxmr)), Some(tab.persona_hex.clone()));
         }
     }
 
@@ -581,6 +582,11 @@ impl App {
                     contact.display_name(),
                     if tip > 0 { format!(" (tip {})", format_xmr(tip)) } else { String::new() }
                 ),
+            );
+            crate::notify::post(
+                format!("{} paid", contact.display_name()),
+                if tip > 0 { format!("{} XMR (tip {}) — receipt sent", format_xmr(hit.amount_pxmr), format_xmr(tip)) } else { format!("{} XMR — receipt sent", format_xmr(hit.amount_pxmr)) },
+                Some(tab.persona_hex.clone()),
             );
             let bill_seq = bill.map(|b| b.seq);
             let txid = Some(hit.tx_hash_hex.clone()).filter(|t| !t.is_empty());

@@ -34,7 +34,7 @@ the same identity:
 
 | Page | What is there |
 | --- | --- |
-| Chat | Threads and groups; bills paid in place; pictures and files attached, small ones by record, big ones by swarm; a request or a standing bill from the header |
+| Chat | Threads and groups; bills paid in place; pictures and files attached, small ones by record, big ones by swarm; a request, a standing bill, or a voice call from the header; reactions, taking a message back, disappearing messages, drafts |
 | Wallet | Balance and sync, receive (address and code), send with a quote, history, the node |
 | Till | A sale to whoever scans the code, running tabs, the catalogue priced in your currency; receipts go out when the chain agrees |
 | Activity | The ledger — every note in and send out with what it was for — and its CSV/JSON export |
@@ -52,10 +52,17 @@ window while it was built:
     DUCAT_DESK_STATE=<dir> cargo run -p ducat-app --example publish -- share <file> | site <folder> <title> | get <address>
     DUCAT_DESK_STATE=<dir> cargo run -p ducat-app --example wallet -- address | sync | send <addr> <xmr>
 
+Voice calls run through the machine's microphone and speaker when the
+desk is built with `--features sound` (cpal; `alsa-lib-devel` on Fedora,
+`libasound2-dev` on Debian); without it, calls say they need sound
+devices. A debug desk started with `DUCAT_DESK_TONE_AUDIO=1` calls with
+a test tone instead, which is how the call path is exercised headless.
+Notices — a message, money, a call — go to the desktop's notification
+tray when the window is not focused.
+
 Not on the desk (yet): rides in any seat — hail, taxi, drive, and the
-bonded escrow behind them — need a phone's position; voice calls need
-a phone's audio path; the kiosk's self-service screen is a phone at a
-counter. Cards from those threads still land here and read as they
+bonded escrow behind them — need a phone's position; the kiosk's
+self-service screen is a phone at a counter. Cards from those threads still land here and read as they
 should. The screens are English only for now; the phone's nineteen
 languages are a dictionary away.
 

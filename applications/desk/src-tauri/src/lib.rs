@@ -1842,6 +1842,14 @@ fn wire_audio() {
     }
 }
 
+
+/// Notices queued by the app since the last take: a message, money, a
+/// call. The window shows them as the platform does.
+#[tauri::command]
+fn take_notices() -> Vec<ducat_app::notify::Notice> {
+    ducat_app::notify::take()
+}
+
 // ----- the log ---------------------------------------------------------------
 
 #[tauri::command]
@@ -1952,6 +1960,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_notification::init())
         .setup(|app| {
             start_drive(app.handle().clone());
             Ok(())
@@ -2078,6 +2087,7 @@ pub fn run() {
             draft,
             save_draft,
             set_chat_visible,
+            take_notices,
         ])
         .run(tauri::generate_context!())
         .expect("error while running the desk");

@@ -527,6 +527,7 @@ impl App {
                         log::info(TAG, format!("change back: {} XMR", format_xmr(o.amount_pxmr)));
                     } else {
                         log::info(TAG, format!("received {} XMR at block {}", format_xmr(o.amount_pxmr), o.height));
+                        crate::notify::post("Money arrived", format!("{} XMR at block {}", format_xmr(o.amount_pxmr), o.height), None);
                     }
                 }
                 if r.blocks_failed > 0 {

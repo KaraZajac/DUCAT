@@ -371,3 +371,14 @@ h4 { margin: 16px 0 6px; font-size: 14px; color: var(--muted); text-transform: u
 .callbar.ringing { animation: ring-pulse 1s ease-in-out infinite; }
 @keyframes ring-pulse { 0%, 100% { box-shadow: 0 0 0 0 transparent; } 50% { box-shadow: 0 0 0 6px var(--primary-soft); } }
 .callbar-who { display: flex; align-items: center; gap: 10px; }
+
+/* ----- bubble tools, reactions ----- */
+.bubble-row { position: relative; align-items: flex-end; gap: 6px; }
+.bubble-tools { display: flex; gap: 6px; opacity: 0.85; order: 2; }
+.bubble-tools.out { order: -1; }
+.bubble-tools .linkish { font-size: 16px; }
+.bubble.unsent .bubble-body { text-decoration: line-through; color: var(--muted); }
+.picker { display: flex; gap: 8px; margin-bottom: 6px; font-size: 18px; }
+.picker .linkish.on { outline: 2px solid var(--primary); border-radius: 6px; }
+.reactions { display: flex; gap: 6px; margin-top: 4px; font-size: 14px; }
+.reactions .mine { opacity: 0.75; }

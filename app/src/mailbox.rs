@@ -645,6 +645,9 @@ impl App {
             self.on_sale_claimed(&issued.inbox_key, &persona_hex);
         }
         log::info(TAG, format!("card ({}) answered by {}", issued.purpose, theirs.asserted_name.clone().unwrap_or_else(|| "an unnamed contact".into())));
+        if issued.purpose == "profile" {
+            crate::notify::post("New contact", format!("{} answered your code", theirs.asserted_name.clone().unwrap_or_else(|| "Somebody".into())), Some(persona_hex.clone()));
+        }
         // Only the standing profile code replaces itself — a sale's
         // handshake was for that sale.
         if issued.purpose == "profile" {
@@ -1306,6 +1309,15 @@ impl App {
             let link = opened.link.clone();
             self.append_and_advance(&c.persona_hex, arrived.clone(), seq + 1, Some(link.clone()))?;
             self.record_slot_seen(&slot_key, raw_hash, seq);
+            if arrived.surfaces() && arrived.kind != 14 && arrived.kind != 15 {
+                let line = match arrived.kind {
+                    1 => format!("Bill · {} XMR", crate::wallet::format_xmr(arrived.amount_pxmr)),
+                    2 => format!("Payment · {} XMR", crate::wallet::format_xmr(arrived.amount_pxmr)),
+                    3 => "Receipt".to_string(),
+                    _ => arrived.body.chars().take(120).collect(),
+                };
+                crate::notify::post(who.clone(), line, Some(c.persona_hex.clone()));
+            }
             self.on_arrival(c, &opened, &arrived);
             if let Some(p) = opened.payto.as_deref() {
                 self.set_their_address(&c.persona_hex, p)?;
