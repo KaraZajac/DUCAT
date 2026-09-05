@@ -52,6 +52,7 @@ window while it was built:
     DUCAT_DESK_STATE=<dir> cargo run -p ducat-app --example mailbox -- host | guest <card> | customer <card> | reader <code> | party <name> [card...]
     DUCAT_DESK_STATE=<dir> cargo run -p ducat-app --example publish -- share <file> | site <folder> <title> | get <address>
     DUCAT_DESK_STATE=<dir> cargo run -p ducat-app --example wallet -- address | sync | send <addr> <xmr>
+    DUCAT_DESK_STATE=<dir> cargo run -p ducat-app --example backup -- export <file> <passphrase> | import <file> <passphrase>
 
 Voice calls use the machine's microphone and speaker. Built plainly, the
 desk carries them through the sound server's own tools — `pw-record` and

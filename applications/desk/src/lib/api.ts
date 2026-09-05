@@ -382,7 +382,7 @@ export interface LedgerEvent {
   counterparty: string | null;
   address: string | null;
   donation: boolean;
-  source: "Notice" | "OurRecord" | "Unknown";
+  source: "Notice" | "OurRecord" | "Order" | "Unknown";
   note: string | null;
   pending: boolean;
   locked: boolean;

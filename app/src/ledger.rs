@@ -25,6 +25,8 @@ pub enum Direction {
 pub enum Source {
     Notice,
     OurRecord,
+    /// A kiosk order paid by a plain wallet: the amount and address named it.
+    Order,
     Unknown,
 }
 
@@ -429,7 +431,23 @@ impl App {
         let sends_by_tx: HashMap<String, SentPayment> = sends.iter().map(|s| (s.txid_hex.to_lowercase(), s.clone())).collect();
         let name_of = |h: Option<&str>| -> Option<String> { h.and_then(|h| everyone.iter().find(|c| c.persona_hex == h).map(|c| c.display_name())) };
         let chain_of = |t: &str| self.chain_tx(t);
-        let built = assemble(&self.entries(), self.tip(), &chain_of, &sends, &name_of, &announced);
+        let mut built = assemble(&self.entries(), self.tip(), &chain_of, &sends, &name_of, &announced);
+        // A kiosk order paid by any wallet has no notice to name it; the
+        // order does — its noisy total matched the note.
+        let orders: HashMap<String, u32> = self
+            .orders()
+            .into_iter()
+            .filter_map(|o| o.seen_tx.as_deref().map(|t| (t.to_lowercase(), o.number)))
+            .collect();
+        for e in built.iter_mut() {
+            if e.counterparty.is_none() && e.direction == Direction::Received {
+                if let Some(n) = orders.get(&e.txid.to_lowercase()) {
+                    e.counterparty = Some(format!("Kiosk order #{n}"));
+                    e.note = Some("paid at the counter".into());
+                    e.source = Source::Order;
+                }
+            }
+        }
         built
             .into_iter()
             .map(|mut e| {

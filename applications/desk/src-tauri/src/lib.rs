@@ -1354,7 +1354,8 @@ struct GroupRowOut {
 
 fn group_row(a: &App, g: ducat_app::groups::Group) -> GroupRowOut {
     let rows = a.group_thread(&g.id_hex);
-    let last = rows.last();
+    // Reactions and withdrawals decorate; the preview is the last words.
+    let last = rows.iter().rev().find(|r| r.message.kind != 4 && r.message.kind != 5);
     GroupRowOut {
         members: g.members.iter().filter_map(|h| a.contact(h)).map(|c| contact_row(a, c)).collect(),
         missing: a.group_missing(&g.id_hex),

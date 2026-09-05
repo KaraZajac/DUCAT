@@ -67,6 +67,20 @@
   function signed(n: number): string {
     return (n < 0 ? "−" : "+") + fmtXmr(Math.abs(n));
   }
+
+  /// The row's second line: whatever applies, separated once.
+  function metaOf(e: LedgerEvent): string {
+    const parts: string[] = [];
+    if (e.note) parts.push(e.note);
+    if (e.items.length) parts.push(e.items.map((i) => i.d).join(", "));
+    if (e.receipted) parts.push("receipt" + (e.receipt_by ? ` from ${e.receipt_by}` : ""));
+    if (e.locked) parts.push(`unlocks in ${e.unlocks_in_blocks} ${e.unlocks_in_blocks === 1 ? "block" : "blocks"}`);
+    if (e.pending) parts.push("not on the chain yet");
+    if (e.provisional) parts.push("change on its way");
+    if (e.unexplained) parts.push("not one of ours?");
+    if (e.fee_pxmr) parts.push(`fee ${fmtXmr(e.fee_pxmr)}`);
+    return parts.join(" · ");
+  }
 </script>
 
 <div class="page-head">
@@ -103,14 +117,14 @@
         <div class="lw">{e.timestamp ? fmtTime(e.timestamp) : e.pending ? "pending" : "—"}</div>
         <div class="lc">
           <div class="title">{e.direction === "Sent" ? "To" : "From"} {e.counterparty ?? (e.direction === "Sent" ? (e.address ? e.address.slice(0, 12) + "…" : "somewhere") : "someone")}{e.donation ? " · donation" : ""}</div>
-          <div class="meta">{e.note ?? ""}{e.items.length ? (e.note ? " · " : "") + e.items.map((i) => i.d).join(", ") : ""}{e.receipted ? " · receipt" + (e.receipt_by ? ` from ${e.receipt_by}` : "") : ""}{e.locked ? ` · unlocks in ${e.unlocks_in_blocks} ${e.unlocks_in_blocks === 1 ? "block" : "blocks"}` : ""}{e.pending ? " · not on the chain yet" : ""}{e.provisional ? " · change on its way" : ""}{e.unexplained ? " · not one of ours?" : ""}{e.fee_pxmr ? ` · fee ${fmtXmr(e.fee_pxmr)}` : ""}</div>
+          <div class="meta">{metaOf(e)}</div>
         </div>
         <div class="la"><div class="title">{signed(e.net_pxmr)}</div><div class="meta">then {fmtXmr(Math.max(0, e.balance_after_pxmr))}</div></div>
       </button>
       {#if open === e.txid + e.timestamp}
         <div class="ledger-detail">
           {#if e.txid}<div class="addr">{e.txid}</div>{/if}
-          <div class="meta">block {e.height || "—"} · {e.source === "Notice" ? "named by their payment notice" : e.source === "OurRecord" ? "from this desk's record of the send" : "no note says who"}{e.tax_pxmr ? ` · tax ${fmtXmr(e.tax_pxmr)}` : ""}</div>
+          <div class="meta">block {e.height || "—"} · {e.source === "Notice" ? "named by their payment notice" : e.source === "OurRecord" ? "from this desk's record of the send" : e.source === "Order" ? "matched to a kiosk order by amount and address" : "no note says who"}{e.tax_pxmr ? ` · tax ${fmtXmr(e.tax_pxmr)}` : ""}</div>
           {#if e.items.length}<div class="bill">{#each e.items as i}<div class="bill-line"><span>{i.d}</span><span>{fmtXmr(i.a)}</span></div>{/each}</div>{/if}
         </div>
       {/if}
