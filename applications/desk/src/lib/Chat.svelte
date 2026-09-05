@@ -752,7 +752,7 @@
       {:else}
         <div class="composer">
           <textarea class="input" rows="2" placeholder={replyTo ? "Your reply" : "Write a message"} bind:value={draft} disabled={!current.has_keys} oninput={draftChanged}
-            onkeydown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}></textarea>
+            onkeydown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } else if (e.key === "Escape" && replyTo) { replyTo = null; } }}></textarea>
           <div class="composer-tools">
             <button class="btn" title="Attach a picture or a file" disabled={attaching || !current.has_keys} onclick={() => attach()}>{attaching ? "…" : "📎"}</button>
             <button class="btn" title="Record a voice memo" disabled={sending || !current.has_keys} onclick={startMemo}>🎤</button>

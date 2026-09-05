@@ -81,6 +81,11 @@ window can click it; a walk of every screen after every change is how
 the desk is tested. Under the drive, pages that would open a file
 picker also take a typed path. Release builds compile none of this.
 
+Under the drive, screens that would open a file dialog show a typed-path
+input instead: `#fpath` (Library issue), `#ppath` (Market photo),
+`#attpath` (Chat attachment), `#bpath` and `#ipath` (Me: backup export
+and import). A drive script fills the input and dispatches `change`.
+
 ## Where things are
 
 - `../../app/` — `ducat-app`: identity, contacts and the mailbox, wallet, tabs, publications, groups, listings and boards, the ledger, backup, releases, sites — the logic, tested with `cargo test -p ducat-app`
