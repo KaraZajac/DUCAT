@@ -247,6 +247,18 @@ fn log_tail(lines: usize) -> Result<Vec<String>, String> {
 
 pub fn run() {
     let a = App::open_default().expect("could not open the data directory");
+    // The same first line the phone writes, so a log read cold says what
+    // it was looking at before it says anything else.
+    ducat_app::log::info(
+        "App",
+        format!(
+            "started — desk v{}, {} {}, state {}",
+            env!("CARGO_PKG_VERSION"),
+            std::env::consts::OS,
+            std::env::consts::ARCH,
+            a.root().display()
+        ),
+    );
     // Start the node before the window: the first thing the screen asks is
     // "are we attached", and the answer should already be on its way.
     if let Err(e) = a.start_node() {
