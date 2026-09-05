@@ -712,6 +712,8 @@ struct WalletView {
     blocker: ducat_app::wallet::SyncBlocker,
     node: Option<String>,
     own_node: Option<String>,
+    /// Where a rescan starts by default: the wallet's birth height.
+    restore_height: u64,
     stagenet: bool,
     fiat_spendable: Option<ducat_app::wallet::FiatView>,
     currency: String,
@@ -731,6 +733,7 @@ fn wallet_status() -> Result<WalletView, String> {
         blocker: a.blocker(),
         node: a.last_good_node(),
         own_node: a.monero_own_url(),
+        restore_height: a.restore_height(),
         stagenet: a.wallet_stagenet(),
         currency: a.rate_currency(),
     })

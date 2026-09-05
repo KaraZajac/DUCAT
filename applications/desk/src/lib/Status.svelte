@@ -69,5 +69,6 @@
 
 <div class="card">
   <h3>Log</h3>
-  <div class="log">{#each log as line}<div class={cls(line)}>{pretty(line)}</div>{/each}</div>
+  <div class="meta" style="margin-bottom: 6px">Newest first.</div>
+  <div class="log">{#each [...log].reverse() as line}<div class={cls(line)}>{pretty(line)}</div>{/each}</div>
 </div>

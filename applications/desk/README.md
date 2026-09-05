@@ -35,7 +35,7 @@ the same identity:
 | Page | What is there |
 | --- | --- |
 | Chat | Threads and groups; bills paid, declined, or taken back in place; replies that quote; pictures, files, and voice memos attached, small ones by record, big ones by swarm; a request, a standing bill, or a voice call from the header; a card for you or somebody's profile shared into the thread; reactions, taking a message back, disappearing messages, drafts — and in groups, reactions, quoted replies, and withdrawals named by (author, counter) |
-| Wallet | Balance and sync, receive (address and code), send with a quote, history, the node |
+| Wallet | Balance and sync, receive (address and code), send with a quote, history, the node, a rescan from any block |
 | Till | A sale to whoever scans the code, running tabs, the catalogue priced in your currency; receipts go out when the chain agrees |
 | Kiosk | Orders at a counter: a number, a `monero:` code any wallet can pay (the total carries six digits of noise so the payment is recognised), and a DUCAT card that turns the order into a bill with a receipt; ready and abandon |
 | Activity | The ledger — every note in and send out with what it was for — and its CSV/JSON export |

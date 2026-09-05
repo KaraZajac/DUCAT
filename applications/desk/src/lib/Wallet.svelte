@@ -19,6 +19,15 @@
   let sentTx = $state<string | null>(null);
   let ownNode = $state("");
   let editingNode = $state(false);
+  let rescanFrom = $state("");
+  let rescanning = $state(false);
+  async function rescan() {
+    err = null;
+    const h = Number(rescanFrom.trim() || (view?.restore_height ?? 0));
+    if (!Number.isFinite(h) || h < 0) { err = "A block height is a whole number."; return; }
+    rescanning = true;
+    try { await api.walletRescan(h); await refresh(); } catch (e) { err = String(e); } finally { rescanning = false; }
+  }
   let tab = $state<"send" | "receive" | "history">("receive");
   let showNotes = $state(false);
 
@@ -245,6 +254,12 @@
         <button class="linkish" onclick={() => (editingNode = true)}>Change</button>
         {#if view.own_node}<button class="linkish" onclick={() => { ownNode = ""; saveNode(); }}>Forget mine</button>{/if}
       </p>
+      <div class="field">
+        <span class="meta">Rescan from block</span>
+        <input class="input narrow" bind:value={rescanFrom} placeholder={String(view.restore_height)} />
+        <button class="btn small" disabled={rescanning} onclick={rescan}>{rescanning ? "Rescanning…" : "Rescan"}</button>
+        <span class="meta">Reads the chain again from there; the notes and the balance come back as the scan reaches them.</span>
+      </div>
     {/if}
   </div>
 {:else}

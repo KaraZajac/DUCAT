@@ -153,6 +153,7 @@ export interface WalletView {
   blocker: "None" | "NoWallet" | "NoNode" | "Failing";
   node: string | null;
   own_node: string | null;
+  restore_height: number;
   stagenet: boolean;
   fiat_spendable: FiatView | null;
   currency: string;
