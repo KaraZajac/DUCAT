@@ -8,6 +8,7 @@
   import Library from "./lib/Library.svelte";
   import Market from "./lib/Market.svelte";
   import Activity from "./lib/Activity.svelte";
+  import CallBar from "./lib/CallBar.svelte";
   import Files from "./lib/Files.svelte";
   import Sites from "./lib/Sites.svelte";
   import StatusView from "./lib/Status.svelte";
@@ -68,6 +69,7 @@
     </div>
   </aside>
   <main class="main">
+    <CallBar />
     {#if page === "chat"}
       <Chat />
     {:else if page === "wallet"}

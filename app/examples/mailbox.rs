@@ -260,6 +260,130 @@ fn main() {
                 std::thread::sleep(Duration::from_secs(5));
             }
         }
-        _ => panic!("MB_FAIL usage: host | guest <card uri> [name] | customer <card uri> | reader <press code> | party <name> [card...]"),
+        Some("callee") => {
+            // Claim a card, then wait to be rung; answer with a test tone,
+            // talk until the far side hangs up, report the frames.
+            app.set_my_name(None, "Callee Desk").expect("MB_FAIL name");
+            if let Some(uri) = args.get(1) {
+                match app.claim_card(uri, Some("the caller"), false, None) {
+                    Ok(c) => println!("MB_CLAIMED {}", c.contact().display_name()),
+                    Err(e) => println!("MB_FAIL claim: {e}"),
+                }
+            }
+            let h = app.profile_code(None).expect("MB_FAIL issue");
+            println!("MB_CARD {}", h.uri);
+            let tone = ducat_app::calls::ToneAudio::new(660.0);
+            let played = tone.played.clone();
+            let rang = tone.rang.clone();
+            ducat_app::calls::calls().set_audio(Box::new(tone));
+            let t0 = Instant::now();
+            let mut answered = false;
+            while t0.elapsed() < Duration::from_secs(900) {
+                app.lap_once();
+                match ducat_app::calls::calls().state() {
+                    ducat_app::calls::CallState::Incoming { .. } if !answered => {
+                        println!("MB_RING rang={}", rang.load(std::sync::atomic::Ordering::SeqCst));
+                        match app.answer_call() {
+                            Ok(()) => {
+                                answered = true;
+                                println!("MB_ANSWERED");
+                            }
+                            Err(e) => println!("MB_FAIL answer: {e}"),
+                        }
+                    }
+                    ducat_app::calls::CallState::Active { .. } => {
+                        std::thread::sleep(Duration::from_millis(500));
+                        continue;
+                    }
+                    ducat_app::calls::CallState::Idle | ducat_app::calls::CallState::NoAnswer { .. } if answered => {
+                        let cs = ducat_app::calls::calls();
+                        println!(
+                            "MB_CALLEND rx={} tx={} played={}",
+                            cs.rx_frames.load(std::sync::atomic::Ordering::SeqCst),
+                            cs.tx_frames.load(std::sync::atomic::Ordering::SeqCst),
+                            played.load(std::sync::atomic::Ordering::SeqCst)
+                        );
+                        println!("MB_OK call over");
+                        return;
+                    }
+                    _ => {}
+                }
+                std::thread::sleep(Duration::from_secs(2));
+            }
+            println!("MB_FAIL nobody rang");
+        }
+        Some("caller") => {
+            // Claim a card and ring it; talk for a while once answered,
+            // then hang up.
+            let uri = args.get(1).expect("MB_FAIL caller <card uri>");
+            let talk_secs: u64 = args.get(2).and_then(|s| s.parse().ok()).unwrap_or(10);
+            app.set_my_name(None, "Caller Desk").expect("MB_FAIL name");
+            let c = match app.claim_card(uri, Some("the callee"), false, None) {
+                Ok(c) => c.contact(),
+                Err(e) => {
+                    println!("MB_FAIL claim: {e}");
+                    return;
+                }
+            };
+            println!("MB_CLAIMED {}", c.display_name());
+            // Their reply to our claim must be collected before we speak.
+            for _ in 0..30 {
+                app.poll();
+                if app.contact(&c.persona_hex).map_or(false, |k| k.their_bundle.is_some()) {
+                    break;
+                }
+                std::thread::sleep(Duration::from_secs(2));
+            }
+            let tone = ducat_app::calls::ToneAudio::new(440.0);
+            let played = tone.played.clone();
+            ducat_app::calls::calls().set_audio(Box::new(tone));
+            if let Err(e) = app.place_call(&c.persona_hex) {
+                println!("MB_FAIL place: {e}");
+                return;
+            }
+            println!("MB_RINGING");
+            let t0 = Instant::now();
+            let mut active_at: Option<Instant> = None;
+            loop {
+                match ducat_app::calls::calls().state() {
+                    ducat_app::calls::CallState::Active { .. } => {
+                        if active_at.is_none() {
+                            active_at = Some(Instant::now());
+                            println!("MB_ACTIVE after {:.1}s", t0.elapsed().as_secs_f64());
+                        }
+                        if active_at.map_or(false, |a| a.elapsed() >= Duration::from_secs(talk_secs)) {
+                            app.hang_up();
+                            std::thread::sleep(Duration::from_secs(1));
+                            let cs = ducat_app::calls::calls();
+                            println!(
+                                "MB_CALLEND rx={} tx={} played={}",
+                                cs.rx_frames.load(std::sync::atomic::Ordering::SeqCst),
+                                cs.tx_frames.load(std::sync::atomic::Ordering::SeqCst),
+                                played.load(std::sync::atomic::Ordering::SeqCst)
+                            );
+                            println!("MB_OK hung up");
+                            return;
+                        }
+                    }
+                    ducat_app::calls::CallState::NoAnswer { why, .. } => {
+                        println!("MB_FAIL no answer: {why:?}");
+                        return;
+                    }
+                    ducat_app::calls::CallState::Idle if active_at.is_some() => {
+                        let cs = ducat_app::calls::calls();
+                        println!("MB_CALLEND rx={} tx={} (they hung up)", cs.rx_frames.load(std::sync::atomic::Ordering::SeqCst), cs.tx_frames.load(std::sync::atomic::Ordering::SeqCst));
+                        println!("MB_OK they hung up");
+                        return;
+                    }
+                    _ => {}
+                }
+                if t0.elapsed() > Duration::from_secs(300) {
+                    println!("MB_FAIL call never connected");
+                    return;
+                }
+                std::thread::sleep(Duration::from_millis(500));
+            }
+        }
+        _ => panic!("MB_FAIL usage: host | guest <card uri> [name] | customer <card uri> | reader <press code> | party <name> [card...] | callee <card> | caller <card> [secs]"),
     }
 }

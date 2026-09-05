@@ -364,3 +364,10 @@ h4 { margin: 16px 0 6px; font-size: 14px; color: var(--muted); text-transform: u
 .ledger-detail { padding: 4px 4px 12px 126px; }
 .request-bar { display: flex; gap: 8px; align-items: center; padding: 8px 24px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
 .bubble-pic { max-width: 100%; max-height: 320px; border-radius: 10px; display: block; margin-bottom: 4px; }
+
+/* ----- the call bar ----- */
+.callbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 14px; margin: -12px 0 16px; border-radius: var(--radius); background: var(--primary-soft); border: 1px solid var(--primary); }
+.callbar.active { background: var(--surface); border-color: var(--ok); }
+.callbar.ringing { animation: ring-pulse 1s ease-in-out infinite; }
+@keyframes ring-pulse { 0%, 100% { box-shadow: 0 0 0 0 transparent; } 50% { box-shadow: 0 0 0 6px var(--primary-soft); } }
+.callbar-who { display: flex; align-items: center; gap: 10px; }

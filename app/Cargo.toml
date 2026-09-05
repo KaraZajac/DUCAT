@@ -37,3 +37,8 @@ base64 = "0.22"
 # Thumbnails for the board: decode what a person picks, encode a JPEG under the cap.
 image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp"] }
 thiserror = "1"
+# The sound devices for a call; optional because it links the platform's audio library.
+cpal = { version = "0.15", optional = true }
+
+[features]
+sound = ["dep:cpal"]

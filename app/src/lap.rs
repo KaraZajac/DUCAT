@@ -76,11 +76,13 @@ impl App {
         if got > 0 {
             log::info(TAG, format!("{got} message(s) arrived"));
         }
+        self.calls_noticed();
         self.verify_last_writes();
         self.retry_group_outbox();
         self.listings_lap();
         self.run_due_bills();
         self.fetch_one_attachment();
+        self.expire_all();
         self.sweep_abandoned_tabs(&[]);
     }
 }

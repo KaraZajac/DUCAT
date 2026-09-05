@@ -858,6 +858,92 @@ impl App {
         self.contacts_store().get(&format!("slotfix_{persona_hex}")).unwrap_or(0)
     }
 
+    // ----- housekeeping a person asks for ---------------------------------------------
+
+    /// Take one row out of a thread, here only — the network keeps its copy.
+    pub fn delete_message(&self, persona_hex: &str, seq: u64, outgoing: bool, timestamp: Option<u64>) -> Result<(), Error> {
+        self.contacts_store().update(|m| {
+            let mut thread = read_thread(m, persona_hex);
+            thread.retain(|r| !(r.seq == seq && r.outgoing == outgoing && timestamp.map_or(true, |t| r.timestamp == t)));
+            write_thread(m, persona_hex, &thread);
+        })?;
+        bump();
+        Ok(())
+    }
+
+    /// Clear a conversation, keeping the group copies that live in it.
+    pub fn delete_thread(&self, persona_hex: &str) -> Result<(), Error> {
+        self.contacts_store().update(|m| {
+            let kept: Vec<StoredMessage> = read_thread(m, persona_hex).into_iter().filter(|r| r.group_id.is_some()).collect();
+            if kept.is_empty() {
+                m.remove(&format!("thread_{persona_hex}"));
+            } else {
+                write_thread(m, persona_hex, &kept);
+            }
+        })?;
+        bump();
+        Ok(())
+    }
+
+    /// Seconds after which this thread's rows are dropped; zero keeps them.
+    pub fn disappear_after(&self, persona_hex: &str) -> u64 {
+        self.contacts_store().get(&format!("disappear_{persona_hex}")).unwrap_or(0)
+    }
+
+    pub fn set_disappear_after(&self, persona_hex: &str, secs: u64) -> Result<(), Error> {
+        self.contacts_store().put(&format!("disappear_{persona_hex}"), &secs)?;
+        bump();
+        Ok(())
+    }
+
+    /// Drop rows older than `after_secs`; how many went.
+    pub fn expire_old(&self, persona_hex: &str, after_secs: u64) -> usize {
+        if after_secs == 0 {
+            return 0;
+        }
+        let cutoff = App::now().saturating_sub(after_secs);
+        let gone = self
+            .contacts_store()
+            .update(|m| {
+                let all = read_thread(m, persona_hex);
+                let kept: Vec<StoredMessage> = all.iter().filter(|r| r.timestamp >= cutoff).cloned().collect();
+                let gone = all.len() - kept.len();
+                if gone > 0 {
+                    write_thread(m, persona_hex, &kept);
+                }
+                gone
+            })
+            .unwrap_or(0);
+        if gone > 0 {
+            bump();
+        }
+        gone
+    }
+
+    pub fn expire_all(&self) -> usize {
+        self.contacts().into_iter().map(|c| self.expire_old(&c.persona_hex, self.disappear_after(&c.persona_hex))).sum()
+    }
+
+    /// The half-typed message, per thread.
+    pub fn draft_of(&self, persona_hex: &str) -> String {
+        self.contacts_store().get_string(&format!("draft_{persona_hex}")).unwrap_or_default()
+    }
+
+    pub fn save_draft(&self, persona_hex: &str, text: &str) -> Result<(), Error> {
+        let key = format!("draft_{persona_hex}");
+        if text.trim().is_empty() {
+            self.contacts_store().remove(&key)?;
+        } else {
+            self.contacts_store().put(&key, &text.chars().take(4000).collect::<String>())?;
+        }
+        Ok(())
+    }
+
+    /// Show or hide a conversation without touching the contact.
+    pub fn set_chat_visible(&self, persona_hex: &str, visible: bool) -> Result<(), Error> {
+        self.edit_contact(persona_hex, |c| c.chat_visible = visible)
+    }
+
     // ----- seen marks ------------------------------------------------------------
 
     /// How far into their log the reader has looked, in the numbering of
@@ -1144,6 +1230,59 @@ pub fn fold_card_address(prior: Option<&Contact>, incoming: Option<&str>) -> (Op
             Some(a) => (p.their_address.clone(), Some(a)),
         },
     }
+}
+
+/// Reactions (§16.14) on each row, keyed by (seq, timestamp): the latest
+/// from each side — ours, theirs.
+pub fn reactions_on(thread: &[StoredMessage]) -> std::collections::HashMap<(u64, u64), (Option<String>, Option<String>)> {
+    let mut sorted: Vec<&StoredMessage> = thread.iter().filter(|m| m.kind == 4).collect();
+    sorted.sort_by_key(|m| m.timestamp);
+    let mut out: std::collections::HashMap<(u64, u64), (Option<String>, Option<String>)> = std::collections::HashMap::new();
+    for r in sorted {
+        let Some(t) = referent(thread, r) else { continue };
+        let e = out.entry((t.seq, t.timestamp)).or_insert((None, None));
+        let body = Some(r.body.clone()).filter(|b| !b.trim().is_empty());
+        if r.outgoing {
+            e.0 = body;
+        } else {
+            e.1 = body;
+        }
+    }
+    out
+}
+
+/// What kind-5 rows did to the thread: bills withdrawn by their sender,
+/// bills refused by their reader, plain messages unsent by their sender —
+/// and the retraction rows that should stay quiet because their target
+/// carries the mark.
+#[derive(Debug, Default, Clone)]
+pub struct Retractions {
+    pub withdrawn: std::collections::HashSet<(u64, u64)>,
+    pub refused: std::collections::HashSet<(u64, u64)>,
+    pub unsent: std::collections::HashSet<(u64, u64)>,
+    pub quiet: std::collections::HashSet<(u64, u64)>,
+}
+
+pub fn retractions(thread: &[StoredMessage]) -> Retractions {
+    let mut out = Retractions::default();
+    for r in thread.iter().filter(|m| m.kind == 5) {
+        let Some(t) = referent(thread, r) else { continue };
+        match t.kind {
+            1 => {
+                if r.re_own {
+                    out.withdrawn.insert((t.seq, t.timestamp));
+                } else {
+                    out.refused.insert((t.seq, t.timestamp));
+                }
+            }
+            0 if r.re_own => {
+                out.unsent.insert((t.seq, t.timestamp));
+                out.quiet.insert((r.seq, r.timestamp));
+            }
+            _ => {}
+        }
+    }
+    out
 }
 
 /// The message a reaction (§16.14) points at, if the thread holds it.

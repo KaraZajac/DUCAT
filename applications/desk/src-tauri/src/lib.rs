@@ -445,6 +445,13 @@ struct MessageRow {
     group_id: Option<String>,
     pub_wanted: Option<String>,
     pub_period_id: Option<String>,
+    /// Reactions on this row: ours, theirs.
+    react_mine: Option<String>,
+    react_theirs: Option<String>,
+    /// A plain message of ours we took back, or a bill withdrawn/refused.
+    unsent: bool,
+    withdrawn: bool,
+    refused: bool,
 }
 
 fn message_row(m: StoredMessage) -> MessageRow {
@@ -476,13 +483,83 @@ fn message_row(m: StoredMessage) -> MessageRow {
         group_id: m.group_id,
         pub_wanted: m.pub_wanted,
         pub_period_id: m.pub_period_id,
+        react_mine: None,
+        react_theirs: None,
+        unsent: false,
+        withdrawn: false,
+        refused: false,
     }
 }
 
 #[tauri::command]
 fn thread(persona_hex: String) -> Result<Vec<MessageRow>, String> {
     let a = app()?;
-    Ok(a.thread(&persona_hex).into_iter().filter(|m| m.surfaces()).map(message_row).collect())
+    let all = a.thread(&persona_hex);
+    let reactions = ducat_app::contacts::reactions_on(&all);
+    let marks = ducat_app::contacts::retractions(&all);
+    Ok(all
+        .iter()
+        .filter(|m| m.surfaces() && m.kind != 4 && !marks.quiet.contains(&(m.seq, m.timestamp)))
+        .map(|m| {
+            let key = (m.seq, m.timestamp);
+            let mut row = message_row(m.clone());
+            if let Some((mine, theirs)) = reactions.get(&key) {
+                row.react_mine = mine.clone();
+                row.react_theirs = theirs.clone();
+            }
+            row.unsent = marks.unsent.contains(&key);
+            row.withdrawn = marks.withdrawn.contains(&key);
+            row.refused = marks.refused.contains(&key);
+            row
+        })
+        .collect())
+}
+
+#[tauri::command]
+async fn react(persona_hex: String, seq: u64, re_own: bool, emoji: String) -> Result<(), String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.react(&persona_hex, seq, re_own, &emoji).map_err(said)).await.map_err(s)?
+}
+
+#[tauri::command]
+async fn retract_message(persona_hex: String, seq: u64) -> Result<(), String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.retract(&persona_hex, seq).map_err(said)).await.map_err(s)?
+}
+
+#[tauri::command]
+fn delete_message(persona_hex: String, seq: u64, outgoing: bool, timestamp: u64) -> Result<(), String> {
+    app()?.delete_message(&persona_hex, seq, outgoing, Some(timestamp)).map_err(said)
+}
+
+#[tauri::command]
+fn delete_thread(persona_hex: String) -> Result<(), String> {
+    app()?.delete_thread(&persona_hex).map_err(said)
+}
+
+#[tauri::command]
+fn disappear_after(persona_hex: String) -> Result<u64, String> {
+    Ok(app()?.disappear_after(&persona_hex))
+}
+
+#[tauri::command]
+fn set_disappear_after(persona_hex: String, secs: u64) -> Result<(), String> {
+    app()?.set_disappear_after(&persona_hex, secs).map_err(said)
+}
+
+#[tauri::command]
+fn draft(persona_hex: String) -> Result<String, String> {
+    Ok(app()?.draft_of(&persona_hex))
+}
+
+#[tauri::command]
+fn save_draft(persona_hex: String, text: String) -> Result<(), String> {
+    app()?.save_draft(&persona_hex, &text).map_err(said)
+}
+
+#[tauri::command]
+fn set_chat_visible(persona_hex: String, visible: bool) -> Result<(), String> {
+    app()?.set_chat_visible(&persona_hex, visible).map_err(said)
 }
 
 #[tauri::command]
@@ -1692,6 +1769,79 @@ fn sales_in_progress() -> Result<Vec<(String, TabRow)>, String> {
     Ok(a.sales_in_progress().into_iter().map(|(i, t)| (i, tab_row(a, t))).collect())
 }
 
+
+// ----- calls -------------------------------------------------------------------
+
+#[derive(Serialize)]
+struct CallView {
+    state: ducat_app::calls::CallState,
+    contact_name: Option<String>,
+    rx_frames: u64,
+    tx_frames: u64,
+    has_audio: bool,
+}
+
+#[tauri::command]
+fn call_state() -> Result<CallView, String> {
+    let a = app()?;
+    let cs = ducat_app::calls::calls();
+    let state = cs.state();
+    Ok(CallView {
+        contact_name: state.contact_hex().and_then(|h| a.contact(h)).map(|c| c.display_name()),
+        state,
+        rx_frames: cs.rx_frames.load(std::sync::atomic::Ordering::Relaxed),
+        tx_frames: cs.tx_frames.load(std::sync::atomic::Ordering::Relaxed),
+        has_audio: cs.has_audio(),
+    })
+}
+
+#[tauri::command]
+async fn place_call(persona_hex: String) -> Result<(), String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.place_call(&persona_hex).map_err(said)).await.map_err(s)?
+}
+
+#[tauri::command]
+async fn answer_call() -> Result<(), String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.answer_call().map_err(said)).await.map_err(s)?
+}
+
+#[tauri::command]
+async fn decline_call() -> Result<(), String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.decline_call().map_err(said)).await.map_err(s)?
+}
+
+#[tauri::command]
+async fn hang_up() -> Result<(), String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.hang_up()).await.map_err(s)
+}
+
+#[tauri::command]
+fn dismiss_call() -> Result<(), String> {
+    app()?.dismiss_call();
+    Ok(())
+}
+
+/// The sound devices a call uses: the machine's when the desk was built
+/// with sound, a test tone when asked for one (debug runs), none
+/// otherwise — and then calls say so.
+fn wire_audio() {
+    #[cfg(debug_assertions)]
+    if std::env::var_os("DUCAT_DESK_TONE_AUDIO").is_some() {
+        ducat_app::calls::calls().set_audio(Box::new(ducat_app::calls::ToneAudio::new(440.0)));
+        ducat_app::log::info("Desk", "calls will use a test tone, not the microphone");
+        return;
+    }
+    #[cfg(feature = "sound")]
+    {
+        ducat_app::calls::calls().set_audio(Box::new(ducat_app::audio::DeviceAudio::new()));
+        ducat_app::log::info("Desk", "calls use the machine's sound devices");
+    }
+}
+
 // ----- the log ---------------------------------------------------------------
 
 #[tauri::command]
@@ -1797,6 +1947,7 @@ pub fn run() {
     // a desk that stopped serving what it promised on every reboot is not
     // a mirror.
     a.start_lap();
+    wire_audio();
 
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
@@ -1912,6 +2063,21 @@ pub fn run() {
             fetch_swarm_attachment,
             present_sale,
             sales_in_progress,
+            call_state,
+            place_call,
+            answer_call,
+            decline_call,
+            hang_up,
+            dismiss_call,
+            react,
+            retract_message,
+            delete_message,
+            delete_thread,
+            disappear_after,
+            set_disappear_after,
+            draft,
+            save_draft,
+            set_chat_visible,
         ])
         .run(tauri::generate_context!())
         .expect("error while running the desk");

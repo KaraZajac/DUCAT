@@ -13,8 +13,11 @@
 //! keeps its keys. Two desks on one machine are two directories.
 
 pub mod attachments;
+#[cfg(feature = "sound")]
+pub mod audio;
 pub mod backup;
 pub mod boards;
+pub mod calls;
 pub mod catalogue;
 pub mod contacts;
 pub mod donations;

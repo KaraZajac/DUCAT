@@ -116,6 +116,11 @@ export interface MessageRow {
   group_id: string | null;
   pub_wanted: string | null;
   pub_period_id: string | null;
+  react_mine: string | null;
+  react_theirs: string | null;
+  unsent: boolean;
+  withdrawn: boolean;
+  refused: boolean;
 }
 
 export interface Balances {
@@ -414,6 +419,22 @@ export interface StandingRow {
   next_at: number;
 }
 
+export type CallState =
+  | { kind: "Idle" }
+  | { kind: "Outgoing"; contact_hex: string }
+  | { kind: "NoAnswer"; contact_hex: string; why: "RangOut" | "Unreached" | "NeverConnected" }
+  | { kind: "Incoming"; contact_hex: string; offer_seq: number; call_id: string }
+  | { kind: "Answering"; contact_hex: string; offer_seq: number; call_id: string; door: string }
+  | { kind: "Active"; contact_hex: string; since_ms: number };
+
+export interface CallView {
+  state: CallState;
+  contact_name: string | null;
+  rx_frames: number;
+  tx_frames: number;
+  has_audio: boolean;
+}
+
 export const api = {
   status: () => invoke<Status>("status"),
   fetchProgress: (shareKey: string) => invoke<Progress>("fetch_progress", { shareKey }),
@@ -539,6 +560,23 @@ export const api = {
 
   presentSale: (lines: [string, number][], taxPxmr: number | null) => invoke<{ code: Code; tab: TabRow }>("present_sale", { lines, taxPxmr }),
   salesInProgress: () => invoke<[string, TabRow][]>("sales_in_progress"),
+
+  callState: () => invoke<CallView>("call_state"),
+  placeCall: (personaHex: string) => invoke<void>("place_call", { personaHex }),
+  answerCall: () => invoke<void>("answer_call"),
+  declineCall: () => invoke<void>("decline_call"),
+  hangUp: () => invoke<void>("hang_up"),
+  dismissCall: () => invoke<void>("dismiss_call"),
+
+  react: (personaHex: string, seq: number, reOwn: boolean, emoji: string) => invoke<void>("react", { personaHex, seq, reOwn, emoji }),
+  retractMessage: (personaHex: string, seq: number) => invoke<void>("retract_message", { personaHex, seq }),
+  deleteMessage: (personaHex: string, seq: number, outgoing: boolean, timestamp: number) => invoke<void>("delete_message", { personaHex, seq, outgoing, timestamp }),
+  deleteThread: (personaHex: string) => invoke<void>("delete_thread", { personaHex }),
+  disappearAfter: (personaHex: string) => invoke<number>("disappear_after", { personaHex }),
+  setDisappearAfter: (personaHex: string, secs: number) => invoke<void>("set_disappear_after", { personaHex, secs }),
+  draft: (personaHex: string) => invoke<string>("draft", { personaHex }),
+  saveDraft: (personaHex: string, text: string) => invoke<void>("save_draft", { personaHex, text }),
+  setChatVisible: (personaHex: string, visible: boolean) => invoke<void>("set_chat_visible", { personaHex, visible }),
   pickSavePath: async (name: string): Promise<string | null> => {
     const r = await save({ defaultPath: name });
     return typeof r === "string" ? r : null;

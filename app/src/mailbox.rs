@@ -694,6 +694,26 @@ impl App {
         self.send(&c, Outgoing::text(body))
     }
 
+    /// React to a row (§16.14): an emoji, or nothing to take one back.
+    pub fn react(&self, persona_hex: &str, seq: u64, re_own: bool, emoji: &str) -> Result<(), Error> {
+        let c = self.contact(persona_hex).ok_or_else(|| Error::Refused("no such contact".into()))?;
+        self.send(&c, Outgoing { body: emoji.trim().chars().take(8).collect(), kind: 4, re_seq: Some(seq), re_own, ..Default::default() })?;
+        Ok(())
+    }
+
+    /// Take back a plain message of ours (kind 5 naming our own row). The
+    /// row stays here marked unsent; their client hides theirs.
+    pub fn retract(&self, persona_hex: &str, seq: u64) -> Result<(), Error> {
+        let c = self.contact(persona_hex).ok_or_else(|| Error::Refused("no such contact".into()))?;
+        let thread = self.thread(persona_hex);
+        let target = thread.iter().find(|m| m.outgoing && m.seq == seq).ok_or_else(|| Error::Refused("no such message of ours".into()))?;
+        if target.kind != 0 || !target.delivered {
+            return Err(Error::Refused("only a delivered plain message can be taken back".into()));
+        }
+        self.send(&c, Outgoing { body: "Took a message back".into(), kind: 5, re_seq: Some(seq), re_own: true, ..Default::default() })?;
+        Ok(())
+    }
+
     fn send_locked(&self, c0: &Contact, out: Outgoing) -> Result<Contact, Error> {
         // Who speaks is the contact's to say, not the caller's.
         let mine_hex = self.owner_hex_of(c0);

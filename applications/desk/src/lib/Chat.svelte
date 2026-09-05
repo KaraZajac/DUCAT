@@ -300,6 +300,8 @@
       case 6: return "Ride offer";
       case 7: return "Ride accepted";
       case 13: return "A publication key";
+      case 14: return "Call";
+      case 15: return "Call answered";
       case 16: return `Asked for an issue${m.pub_wanted ? ` · ${m.pub_wanted}` : ""}`;
       default: return null;
     }
@@ -424,6 +426,7 @@
           {/if}
         </div>
         <div class="actions nowrap">
+          <button class="btn small" title="Voice call" disabled={!current.has_keys} onclick={async () => { err = null; try { await api.placeCall(current!.persona_hex); } catch (e) { err = String(e); } }}>📞</button>
           <button class="btn small" disabled={!current.their_address} title={current.their_address ? "Send them money" : "They have not given a payment address"} onclick={() => { payingOut = !payingOut; requesting = false; }}>{payingOut ? "Close" : "Pay"}</button>
           <button class="btn small" onclick={() => { requesting = !requesting; payingOut = false; }}>{requesting ? "Close" : "Request"}</button>
           <button class="btn small" onclick={() => { renaming = true; newName = current?.petname ?? ""; }}>Rename</button>
