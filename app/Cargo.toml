@@ -14,10 +14,14 @@ license = "MPL-2.0"
 # moves here, where a Tauri desk links it directly and the phone reaches it
 # through uniffi. One implementation, two doors.
 #
-# Milestone 1 is the publishing half: releases (a file at an address that
-# cannot change) and sites (one mutable head at a stable key). Both are
-# thin over the swarm and the DHT, both are what a desk is for, and neither
-# touches the mailbox — which is the hard part and comes second.
+# What is here: identity and the persona roster, contacts and the mailbox
+# (cards, send, poll, the dead-letter rules), the wallet (scan, send, the
+# intent ledger), tabs and the till, the catalogue, publications (press and
+# reading room), groups, listings and the boards, the ledger and its
+# exports, backup bundles, attachments, standing bills, donations, releases
+# and sites — with the lap that turns it all while a window is open. Each
+# module names the phone file it was ported from; the JSON it keeps uses
+# the phone's keys, so one log line reads the same on both.
 
 [lib]
 name = "ducat_app"

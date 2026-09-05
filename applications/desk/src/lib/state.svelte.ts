@@ -4,12 +4,16 @@
 import { api } from "./api";
 
 export const gen = $state({ value: 0 });
+// Set by a debug build's drive thread once it is watching; screens that
+// would open a file picker also take a typed path while it is on.
+export const drive = $state({ on: false });
 
 let timer: ReturnType<typeof setInterval> | null = null;
 
 export function startTicker() {
   if (timer) return;
   const tick = async () => {
+    if ((window as any).__DUCAT_DRIVE && !drive.on) drive.on = true;
     try {
       const g = await api.generation();
       if (g !== gen.value) gen.value = g;

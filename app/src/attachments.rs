@@ -180,7 +180,7 @@ impl App {
             let (Some(share), Some(digest)) = (v.get("share").and_then(|s| s.as_str()), v.get("digest").and_then(|s| s.as_str())) else { continue };
             swarm::swarm_stop_share(share.to_string());
             if let Err(e) = swarm::swarm_fetch(share.to_string(), digest.to_string(), dir.to_string_lossy().into_owned(), true) {
-                log::warn(TAG, format!("re-park {}: {e}", &e.to_string()[..0]));
+                log::warn(TAG, format!("re-park {}: {e}", dir.file_name().map(|f| f.to_string_lossy().into_owned()).unwrap_or_default()));
             }
         }
     }

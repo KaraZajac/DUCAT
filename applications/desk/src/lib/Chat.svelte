@@ -3,7 +3,7 @@
   // the room for both at once, which is the one place it beats the phone.
   import { onMount, tick } from "svelte";
   import { api, copy, fmtTime, fmtXmr, type ContactRow, type GroupMessage, type GroupRow, type MessageRow, type StandingRow } from "./api";
-  import { gen } from "./state.svelte";
+  import { gen, drive } from "./state.svelte";
 
   let rows = $state<ContactRow[]>([]);
   let open = $state<string | null>(null);
@@ -175,6 +175,23 @@
     open = null;
     thread = [];
     await refresh();
+  }
+
+  let payingOut = $state(false);
+  let payAmount = $state("");
+  let payNote = $state("");
+
+  async function payUnprompted() {
+    if (!open) return;
+    err = null;
+    const n = Number(payAmount);
+    if (!Number.isFinite(n) || n <= 0) { err = "An amount in XMR."; return; }
+    try {
+      await api.payBill(open, null, Math.floor(n * 1e12), payNote.trim() || null, 1);
+      payingOut = false; payAmount = ""; payNote = "";
+      thread = await api.thread(open);
+      scrollToEnd();
+    } catch (e) { err = String(e); }
   }
 
   let requesting = $state(false);
@@ -407,11 +424,20 @@
           {/if}
         </div>
         <div class="actions nowrap">
-          <button class="btn small" onclick={() => (requesting = !requesting)}>{requesting ? "Close" : "Request"}</button>
+          <button class="btn small" disabled={!current.their_address} title={current.their_address ? "Send them money" : "They have not given a payment address"} onclick={() => { payingOut = !payingOut; requesting = false; }}>{payingOut ? "Close" : "Pay"}</button>
+          <button class="btn small" onclick={() => { requesting = !requesting; payingOut = false; }}>{requesting ? "Close" : "Request"}</button>
           <button class="btn small" onclick={() => { renaming = true; newName = current?.petname ?? ""; }}>Rename</button>
           <button class="btn small danger" onclick={remove}>Forget</button>
         </div>
       </div>
+      {#if payingOut}
+        <div class="request-bar">
+          <input class="input narrow" placeholder="XMR" bind:value={payAmount} />
+          <input class="input" placeholder="A note for your records (optional)" bind:value={payNote} onkeydown={(e) => e.key === "Enter" && payUnprompted()} />
+          <button class="btn primary" onclick={payUnprompted} disabled={!payAmount.trim()}>Send the money</button>
+          <span class="meta">{current.card_purpose === "donate" ? "Their code is a donation jar: this goes as a gift." : "Unprompted; they get a payment notice."}</span>
+        </div>
+      {/if}
       {#if requesting}
         <div class="request-bar">
           <input class="input narrow" placeholder="XMR" bind:value={reqAmount} />
@@ -471,7 +497,7 @@
         <button class="btn" title="Attach a picture or a file" disabled={attaching || !current.has_keys} onclick={() => attach()}>{attaching ? "…" : "📎"}</button>
         <button class="btn primary" disabled={!draft.trim() || sending || !current.has_keys} onclick={send}>{sending ? "Sending…" : "Send"}</button>
       </div>
-      {#if (window as any).__DUCAT_DRIVE}<div class="request-bar"><input id="attpath" class="input" placeholder="/path/to/attach" onchange={(e) => attach((e.target as HTMLInputElement).value)} /></div>{/if}
+      {#if drive.on}<div class="request-bar"><input id="attpath" class="input" placeholder="/path/to/attach" onchange={(e) => attach((e.target as HTMLInputElement).value)} /></div>{/if}
       {#if err}<p class="err">{err}</p>{/if}
     {:else}
       <div class="pane-empty">

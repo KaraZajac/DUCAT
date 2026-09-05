@@ -4,7 +4,7 @@
   // takes the place as a geohash cell.
   import { onMount } from "svelte";
   import { api, copy, fmtXmr, fmtTime, type FoundRow, type ListingDraft, type ListingRow } from "./api";
-  import { gen } from "./state.svelte";
+  import { gen, drive } from "./state.svelte";
 
   let mode = $state<"browse" | "mine">("browse");
   let err = $state<string | null>(null);
@@ -273,7 +273,7 @@
           <button class="btn primary" disabled={busy === "save"} onclick={saveDraft}>{busy === "save" ? "Saving…" : "Save"}</button>
           {#if editingId}
             <button class="btn" onclick={addPhoto}>Add a picture…</button>
-            {#if (window as any).__DUCAT_DRIVE}<input id="ppath" class="input narrow" placeholder="/path/to/picture" onchange={(e) => act("photo", () => api.addListingPhoto(editingId!, (e.target as HTMLInputElement).value))} />{/if}
+            {#if drive.on}<input id="ppath" class="input narrow" placeholder="/path/to/picture" onchange={(e) => act("photo", () => api.addListingPhoto(editingId!, (e.target as HTMLInputElement).value))} />{/if}
             {#if mine.find((l) => l.id === editingId)?.posted}
               <button class="btn" disabled={busy === "post"} onclick={() => act("post", () => api.postListing(editingId!))}>Refresh on the board</button>
               <button class="btn danger" onclick={() => act("unpost", () => api.unpostListing(editingId!))}>Take down</button>

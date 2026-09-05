@@ -298,11 +298,16 @@ conformance/        four checkers: schema, second implementation, spec audit,
                     declared dependencies
 harness/            end-to-end over real Veilid routes and real settlement
 sim/                offline simulator and market scenarios
+app/                ducat-app: the application logic in Rust — identity,
+                    contacts and the mailbox, wallet, till, library, groups,
+                    boards, ledger, backup — ported from the phone, tested,
+                    shared by every client that is not a JVM
 applications/       every client: android/ (Kotlin/Compose over a UniFFI
-                    bridge) and desktop/, which compiles the same protocol
-                    sources verbatim into DUCAT Desk for Linux/Windows/macOS
-                    — it has played bar counter, driver, and standing escrow
-                    arbiter. iOS gets a folder when it earns one.
+                    bridge); desk/, the desktop client — a Tauri window over
+                    ducat-app for Linux/Windows/macOS; and desktop/, the
+                    earlier Compose desk, which compiled the phone's sources
+                    against a shim and still runs the field-day tasks.
+                    iOS gets a folder when it earns one.
 mobile/             the Rust bridge: wallet, scanner, mailbox, node
 research/           one-off measurements: Veilid throughput, Monero multisig,
                     FROSTLASS, wallet-layer probes. Evidence, not product.

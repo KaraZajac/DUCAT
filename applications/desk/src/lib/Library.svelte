@@ -4,7 +4,7 @@
   // shipment is big and on the swarm.
   import { onMount } from "svelte";
   import { api, copy, fmtBytes, fmtXmr, fmtTime, type Code, type ContactRow, type PublicationRow, type SubscriptionRow } from "./api";
-  import { gen } from "./state.svelte";
+  import { gen, drive } from "./state.svelte";
 
   let mode = $state<"reading" | "press">("reading");
   let pubs = $state<PublicationRow[]>([]);
@@ -220,7 +220,7 @@
           <input id="period" class="input narrow" placeholder="2026-09" bind:value={period} />
           <button class="btn" onclick={pickFile}>{file ? file.split(/[\\/]/).pop() : "Choose the file…"}</button>
         </div>
-        {#if (window as any).__DUCAT_DRIVE}
+        {#if drive.on}
           <div class="field"><label for="fpath">Path</label><input id="fpath" class="input" placeholder="/path/to/issue" onchange={(e) => (file = (e.target as HTMLInputElement).value)} /></div>
         {/if}
         <div class="field">
