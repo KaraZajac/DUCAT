@@ -1214,7 +1214,7 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_rental_encode(`info`: RustBuffer.ByValue,`personaSecret`: RustBuffer.ByValue,`listingId`: RustBuffer.ByValue,`board`: RustBuffer.ByValue,`subkey`: Int,`beaconHeight`: Long,`beaconHashHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_seal_message(`bundleBytes`: RustBuffer.ByValue,`seq`: Long,`prevLink`: RustBuffer.ByValue,`body`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,`kind`: Byte,`amountPxmr`: RustBuffer.ByValue,`txid`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,`items`: RustBuffer.ByValue,`taxPxmr`: RustBuffer.ByValue,`reSeq`: RustBuffer.ByValue,`reOwn`: Byte,`attachment`: RustBuffer.ByValue,`etaSecs`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`round`: RustBuffer.ByValue,`ceremonyId`: RustBuffer.ByValue,`position`: RustBuffer.ByValue,`group`: RustBuffer.ByValue,`publication`: RustBuffer.ByValue,`call`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_seal_message(`input`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_sealed_prekey_id(`sealedBytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
@@ -1983,7 +1983,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_rental_encode() != 60190.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_seal_message() != 29846.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_seal_message() != 61152.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_sealed_prekey_id() != 10001.toShort()) {
@@ -5124,6 +5124,158 @@ public object FfiConverterTypeScannedCard: FfiConverterRustBuffer<ScannedCard> {
             FfiConverterOptionalString.write(value.`assertedName`, buf)
             FfiConverterULong.write(value.`expiry`, buf)
             FfiConverterBoolean.write(value.`expired`, buf)
+    }
+}
+
+
+
+/**
+ * Everything one sealed message needs, in a single record.
+ *
+ * **One argument, deliberately.** `seal_message` used to take its fields
+ * as separate parameters — thirty-three of them at the peak, twenty-two
+ * after a first attempt at this — and on arm64 that crashed the process
+ * outright while sending. The tombstone put the fault 288 bytes into the
+ * scaffolding, at `ldr q0, [x12]` where `x12` had been loaded from a
+ * stack-passed argument slot and held the value 1.
+ *
+ * One is a `RustBuffer`'s *capacity* — what uniffi allocates for an
+ * `Option::None` — read as if it were the address of the struct. So JNA
+ * and Rust disagree about how a 24-byte struct is passed by value once
+ * the arguments spill past the registers: one side writes the struct,
+ * the other expects a pointer to it. Every optional field on a message
+ * is one of those structs, which is why an ordinary text message — all
+ * of them absent — was the reliable way to hit it.
+ *
+ * A single record is lowered to a single buffer, which travels in a
+ * register and never reaches the disputed ground.
+ */
+data class SealIn (
+    var `bundleBytes`: kotlin.ByteArray, 
+    var `seq`: kotlin.ULong, 
+    var `prevLink`: kotlin.ByteArray, 
+    var `body`: kotlin.String, 
+    var `threadAad`: kotlin.ByteArray, 
+    /**
+     * 0 text, 1 request, 2 notice (§16.13). A request carries no
+     * authority — the payer still decides at §15.5's confirm screen.
+     */
+    var `kind`: kotlin.UByte, 
+    var `amountPxmr`: kotlin.ULong?, 
+    var `txid`: kotlin.ByteArray?, 
+    /**
+     * Only a request may name one (§16.13). Where to pay travels with the
+     * ask so the payer needs nothing from a record that may be stale.
+     */
+    var `payto`: kotlin.String?, 
+    /**
+     * What the money is for. Empty means not itemised; the items plus tax
+     * MUST add up to `amount_pxmr`, and core refuses the message if not.
+     */
+    var `items`: List<BillLine>, 
+    var `taxPxmr`: kotlin.ULong?, 
+    /**
+     * §16.14: the message a reaction is about, in the recipient's log
+     * unless `re_own`.
+     */
+    var `reSeq`: kotlin.ULong?, 
+    var `reOwn`: kotlin.Boolean, 
+    /**
+     * §16.15: a sealed blob parked in its own record, or on the swarm.
+     */
+    var `attachment`: AttachmentRef?, 
+    var `etaSecs`: kotlin.ULong?, 
+    var `payload`: kotlin.ByteArray?, 
+    var `round`: kotlin.ULong?, 
+    var `ceremonyId`: kotlin.ByteArray?, 
+    var `position`: PositionSend?, 
+    var `group`: GroupSend?, 
+    var `publication`: PublicationSend?, 
+    var `call`: CallSend?
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeSealIn: FfiConverterRustBuffer<SealIn> {
+    override fun read(buf: ByteBuffer): SealIn {
+        return SealIn(
+            FfiConverterByteArray.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterByteArray.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterByteArray.read(buf),
+            FfiConverterUByte.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterSequenceTypeBillLine.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterOptionalTypeAttachmentRef.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
+            FfiConverterOptionalTypePositionSend.read(buf),
+            FfiConverterOptionalTypeGroupSend.read(buf),
+            FfiConverterOptionalTypePublicationSend.read(buf),
+            FfiConverterOptionalTypeCallSend.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: SealIn) = (
+            FfiConverterByteArray.allocationSize(value.`bundleBytes`) +
+            FfiConverterULong.allocationSize(value.`seq`) +
+            FfiConverterByteArray.allocationSize(value.`prevLink`) +
+            FfiConverterString.allocationSize(value.`body`) +
+            FfiConverterByteArray.allocationSize(value.`threadAad`) +
+            FfiConverterUByte.allocationSize(value.`kind`) +
+            FfiConverterOptionalULong.allocationSize(value.`amountPxmr`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`txid`) +
+            FfiConverterOptionalString.allocationSize(value.`payto`) +
+            FfiConverterSequenceTypeBillLine.allocationSize(value.`items`) +
+            FfiConverterOptionalULong.allocationSize(value.`taxPxmr`) +
+            FfiConverterOptionalULong.allocationSize(value.`reSeq`) +
+            FfiConverterBoolean.allocationSize(value.`reOwn`) +
+            FfiConverterOptionalTypeAttachmentRef.allocationSize(value.`attachment`) +
+            FfiConverterOptionalULong.allocationSize(value.`etaSecs`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`payload`) +
+            FfiConverterOptionalULong.allocationSize(value.`round`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`ceremonyId`) +
+            FfiConverterOptionalTypePositionSend.allocationSize(value.`position`) +
+            FfiConverterOptionalTypeGroupSend.allocationSize(value.`group`) +
+            FfiConverterOptionalTypePublicationSend.allocationSize(value.`publication`) +
+            FfiConverterOptionalTypeCallSend.allocationSize(value.`call`)
+    )
+
+    override fun write(value: SealIn, buf: ByteBuffer) {
+            FfiConverterByteArray.write(value.`bundleBytes`, buf)
+            FfiConverterULong.write(value.`seq`, buf)
+            FfiConverterByteArray.write(value.`prevLink`, buf)
+            FfiConverterString.write(value.`body`, buf)
+            FfiConverterByteArray.write(value.`threadAad`, buf)
+            FfiConverterUByte.write(value.`kind`, buf)
+            FfiConverterOptionalULong.write(value.`amountPxmr`, buf)
+            FfiConverterOptionalByteArray.write(value.`txid`, buf)
+            FfiConverterOptionalString.write(value.`payto`, buf)
+            FfiConverterSequenceTypeBillLine.write(value.`items`, buf)
+            FfiConverterOptionalULong.write(value.`taxPxmr`, buf)
+            FfiConverterOptionalULong.write(value.`reSeq`, buf)
+            FfiConverterBoolean.write(value.`reOwn`, buf)
+            FfiConverterOptionalTypeAttachmentRef.write(value.`attachment`, buf)
+            FfiConverterOptionalULong.write(value.`etaSecs`, buf)
+            FfiConverterOptionalByteArray.write(value.`payload`, buf)
+            FfiConverterOptionalULong.write(value.`round`, buf)
+            FfiConverterOptionalByteArray.write(value.`ceremonyId`, buf)
+            FfiConverterOptionalTypePositionSend.write(value.`position`, buf)
+            FfiConverterOptionalTypeGroupSend.write(value.`group`, buf)
+            FfiConverterOptionalTypePublicationSend.write(value.`publication`, buf)
+            FfiConverterOptionalTypeCallSend.write(value.`call`, buf)
     }
 }
 
@@ -9067,11 +9219,11 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
         /**
          * Seal one message in a thread.
          */
-    @Throws(ContactException::class) fun `sealMessage`(`bundleBytes`: kotlin.ByteArray, `seq`: kotlin.ULong, `prevLink`: kotlin.ByteArray, `body`: kotlin.String, `threadAad`: kotlin.ByteArray, `kind`: kotlin.UByte, `amountPxmr`: kotlin.ULong?, `txid`: kotlin.ByteArray?, `payto`: kotlin.String?, `items`: List<BillLine>, `taxPxmr`: kotlin.ULong?, `reSeq`: kotlin.ULong?, `reOwn`: kotlin.Boolean, `attachment`: AttachmentRef?, `etaSecs`: kotlin.ULong?, `payload`: kotlin.ByteArray?, `round`: kotlin.ULong?, `ceremonyId`: kotlin.ByteArray?, `position`: PositionSend?, `group`: GroupSend?, `publication`: PublicationSend?, `call`: CallSend?): SealedOut {
+    @Throws(ContactException::class) fun `sealMessage`(`input`: SealIn): SealedOut {
             return FfiConverterTypeSealedOut.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_seal_message(
-        FfiConverterByteArray.lower(`bundleBytes`),FfiConverterULong.lower(`seq`),FfiConverterByteArray.lower(`prevLink`),FfiConverterString.lower(`body`),FfiConverterByteArray.lower(`threadAad`),FfiConverterUByte.lower(`kind`),FfiConverterOptionalULong.lower(`amountPxmr`),FfiConverterOptionalByteArray.lower(`txid`),FfiConverterOptionalString.lower(`payto`),FfiConverterSequenceTypeBillLine.lower(`items`),FfiConverterOptionalULong.lower(`taxPxmr`),FfiConverterOptionalULong.lower(`reSeq`),FfiConverterBoolean.lower(`reOwn`),FfiConverterOptionalTypeAttachmentRef.lower(`attachment`),FfiConverterOptionalULong.lower(`etaSecs`),FfiConverterOptionalByteArray.lower(`payload`),FfiConverterOptionalULong.lower(`round`),FfiConverterOptionalByteArray.lower(`ceremonyId`),FfiConverterOptionalTypePositionSend.lower(`position`),FfiConverterOptionalTypeGroupSend.lower(`group`),FfiConverterOptionalTypePublicationSend.lower(`publication`),FfiConverterOptionalTypeCallSend.lower(`call`),_status)
+        FfiConverterTypeSealIn.lower(`input`),_status)
 }
     )
     }

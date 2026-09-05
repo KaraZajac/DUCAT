@@ -1065,41 +1065,53 @@ object Mailbox {
         }
         DucatLog.i(TAG, "sending ${kindName(kind)} seq ${c.outSeq} to ${c.displayName()}")
         val sealed = sealMessage(
-            bundle, c.outSeq.toULong(), c.outPrevLink ?: ByteArray(32), body,
-            threadAad(minePersonaHex, c.personaHex),
-            kind.toUByte(), amountPxmr?.toULong(),
-            txidHex?.let { hexToBytes(it) }, payto,
-            items.map { uniffi.ducat_mobile.BillLine(it.description, it.amountPxmr.toULong()) },
-            taxPxmr?.toULong(),
-            reSeq?.toULong(), reOwn, attachment,
-            etaSecs?.toULong(),
-            payload, round?.toULong(), ceremonyId,
-            // Bundled, not spread: thirty-three arguments across this
-            // boundary crashed arm64 outright (see PositionSend's note).
-            // Null where a family is absent, so nothing is allocated for
-            // the ordinary text message that carries none of them.
-            if (positionRecord != null || positionStreamKey != null) {
-                uniffi.ducat_mobile.PositionSend(positionRecord, positionStreamKey)
-            } else null,
-            if (groupId != null || groupSeq != null ||
-                groupReSender != null || groupReSeq != null
-            ) {
-                uniffi.ducat_mobile.GroupSend(
-                    groupId, groupSeq?.toULong(), groupReSender, groupReSeq?.toULong(),
-                )
-            } else null,
-            if (pubPeriodId != null || pubPeriodKey != null || pubRecord != null ||
-                pubHeadKey != null || pubSwarmKey != null ||
-                pubSwarmDigestHex != null || pubWanted != null
-            ) {
-                uniffi.ducat_mobile.PublicationSend(
-                    pubPeriodId, pubPeriodKey, pubRecord, pubHeadKey,
-                    pubSwarmKey, pubSwarmDigestHex?.let { hexToBytes(it) }, pubWanted,
-                )
-            } else null,
-            if (callRoute != null || callId != null) {
-                uniffi.ducat_mobile.CallSend(callRoute, callId)
-            } else null,
+            // One record, not twenty-two arguments. Passing this many
+            // structs by value crashed arm64 outright once they spilled
+            // past the registers — see SealIn's note in mobile/src.
+            uniffi.ducat_mobile.SealIn(
+                bundleBytes = bundle,
+                seq = c.outSeq.toULong(),
+                prevLink = c.outPrevLink ?: ByteArray(32),
+                body = body,
+                threadAad = threadAad(minePersonaHex, c.personaHex),
+                kind = kind.toUByte(),
+                amountPxmr = amountPxmr?.toULong(),
+                txid = txidHex?.let { hexToBytes(it) },
+                payto = payto,
+                items = items.map {
+                    uniffi.ducat_mobile.BillLine(it.description, it.amountPxmr.toULong())
+                },
+                taxPxmr = taxPxmr?.toULong(),
+                reSeq = reSeq?.toULong(),
+                reOwn = reOwn,
+                attachment = attachment,
+                etaSecs = etaSecs?.toULong(),
+                payload = payload,
+                round = round?.toULong(),
+                ceremonyId = ceremonyId,
+                position = if (positionRecord != null || positionStreamKey != null) {
+                    uniffi.ducat_mobile.PositionSend(positionRecord, positionStreamKey)
+                } else null,
+                group = if (groupId != null || groupSeq != null ||
+                    groupReSender != null || groupReSeq != null
+                ) {
+                    uniffi.ducat_mobile.GroupSend(
+                        groupId, groupSeq?.toULong(), groupReSender, groupReSeq?.toULong(),
+                    )
+                } else null,
+                publication = if (pubPeriodId != null || pubPeriodKey != null ||
+                    pubRecord != null || pubHeadKey != null || pubSwarmKey != null ||
+                    pubSwarmDigestHex != null || pubWanted != null
+                ) {
+                    uniffi.ducat_mobile.PublicationSend(
+                        pubPeriodId, pubPeriodKey, pubRecord, pubHeadKey,
+                        pubSwarmKey, pubSwarmDigestHex?.let { hexToBytes(it) }, pubWanted,
+                    )
+                } else null,
+                call = if (callRoute != null || callId != null) {
+                    uniffi.ducat_mobile.CallSend(callRoute, callId)
+                } else null,
+            ),
         )
         // Breadcrumbs, because a send that takes the process with it leaves
         // nothing else behind. DucatLog writes through to disk on every

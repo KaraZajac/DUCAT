@@ -8,41 +8,41 @@
 //! optional fields, any of which it could be confused with.
 
 use ducat_mobile::contacts::{
-    generate_prekeys, open_message, seal_message, thread_aad, PublicationSend,
+    generate_prekeys, open_message, seal_message, thread_aad, PublicationSend, SealIn,
 };
 
-/// The arguments, with everything the ask does not use left empty. Named
-/// rather than inlined so a reordering shows up as a compile error here
-/// instead of a wrong field on the wire.
-#[allow(clippy::too_many_arguments)]
+/// One `SealIn`, with everything the ask does not use left empty. Named
+/// fields rather than positions, which is the whole point of the record:
+/// a field in the wrong place is now a compile error rather than a wrong
+/// value on the wire.
 fn seal_ask(
     bundle: Vec<u8>,
     aad: Vec<u8>,
     kind: u8,
     wanted: Option<String>,
 ) -> Result<ducat_mobile::contacts::SealedOut, ducat_mobile::contacts::ContactError> {
-    seal_message(
-        bundle,
-        0,           // seq
-        vec![0; 32], // prev_link: the thread's genesis
-        "Could I get issue-12?".to_string(),
-        aad,
+    seal_message(SealIn {
+        bundle_bytes: bundle,
+        seq: 0,
+        prev_link: vec![0; 32], // the thread's genesis
+        body: "Could I get issue-12?".to_string(),
+        thread_aad: aad,
         kind,
-        None,       // amount_pxmr
-        None,       // txid
-        None,       // payto
-        Vec::new(), // items
-        None,       // tax_pxmr
-        None,       // re_seq
-        false,      // re_own
-        None,       // attachment
-        None,       // eta_secs
-        None,       // payload
-        None,       // round
-        None,       // ceremony_id
-        None,       // position
-        None,       // group
-        wanted.map(|w| PublicationSend {
+        amount_pxmr: None,
+        txid: None,
+        payto: None,
+        items: Vec::new(),
+        tax_pxmr: None,
+        re_seq: None,
+        re_own: false,
+        attachment: None,
+        eta_secs: None,
+        payload: None,
+        round: None,
+        ceremony_id: None,
+        position: None,
+        group: None,
+        publication: wanted.map(|w| PublicationSend {
             period_id: None,
             period_key: None,
             record_key: None,
@@ -51,8 +51,8 @@ fn seal_ask(
             swarm_digest: None,
             wanted_period: Some(w),
         }),
-        None, // call
-    )
+        call: None,
+    })
 }
 
 #[test]

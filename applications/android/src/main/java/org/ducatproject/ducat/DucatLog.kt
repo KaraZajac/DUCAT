@@ -166,15 +166,18 @@ object DucatLog {
                 val stream = info.javaClass.getMethod("getTraceInputStream").invoke(info)
                     as? java.io.InputStream ?: return
                 val raw = stream.use { it.readBytes() }
-                // Somewhere the person holding the phone can actually reach:
-                // files/ is app-private and needs adb, and the whole point
-                // is that adb is what we do not have. The external files
-                // directory shows up in any file manager and can be sent
-                // straight back over KDE Connect.
-                val dir = context.getExternalFilesDir(null) ?: context.filesDir
-                val out = java.io.File(dir, "tombstone.pb")
-                out.writeBytes(raw)
-                add(Level.Error, "Tombstone", "${raw.size} bytes kept at ${out.absolutePath}")
+                // Into Downloads, because the point is that somebody can
+                // find it. files/ needs adb; Android/data/<pkg>/files is
+                // "external" in name only — scoped storage hides it from
+                // every file manager on Android 11 and up, which is where
+                // the first attempt at this put it and why it could not be
+                // fetched. MediaStore's Downloads collection needs no
+                // permission and shows up in Files like any download.
+                val name = "ducat-tombstone.pb"
+                val saved = saveToDownloads(context, name, raw)
+                val where = saved ?: java.io.File(context.filesDir, name)
+                    .apply { writeBytes(raw) }.absolutePath
+                add(Level.Error, "Tombstone", "${raw.size} bytes saved to $where")
                 // Printable runs naming a shared object, in order, deduped.
                 // The faulting frame's library is in here even when the
                 // frame numbers are not.
@@ -187,6 +190,49 @@ object DucatLog {
             }
         }
     }
+
+    /**
+     * Put a file in Downloads, where a person can find and send it.
+     *
+     * Reflection for the same reason as the exit reasons above: the desk
+     * compiles this file against a shim with no MediaStore, and the API-29
+     * guard means it never runs there. Returns the display path, or null if
+     * this phone will not take it.
+     */
+    private fun saveToDownloads(
+        context: android.content.Context,
+        name: String,
+        bytes: ByteArray,
+    ): String? = runCatching {
+        if (android.os.Build.VERSION.SDK_INT < 29) return null
+        val media = Class.forName("android.provider.MediaStore\$Downloads")
+        val uri = media.getField("EXTERNAL_CONTENT_URI").get(null) as android.net.Uri
+        // ContentValues and ContentResolver are not in the desk's shim
+        // either, so they are reached the same way.
+        val cvClass = Class.forName("android.content.ContentValues")
+        val values = cvClass.getDeclaredConstructor().newInstance()
+        val putString = cvClass.getMethod("put", String::class.java, String::class.java)
+        putString.invoke(values, "_display_name", name)
+        putString.invoke(values, "mime_type", "application/octet-stream")
+        val resolver = context.javaClass.getMethod("getContentResolver").invoke(context)
+            ?: return null
+        val rClass = resolver.javaClass
+        // Replace last time's, rather than stacking (1), (2), (3) copies.
+        runCatching {
+            rClass.getMethod(
+                "delete", android.net.Uri::class.java, String::class.java,
+                Array<String>::class.java,
+            ).invoke(resolver, uri, "_display_name = ?", arrayOf(name))
+        }
+        val item = rClass
+            .getMethod("insert", android.net.Uri::class.java, cvClass)
+            .invoke(resolver, uri, values) as? android.net.Uri ?: return null
+        val stream = rClass
+            .getMethod("openOutputStream", android.net.Uri::class.java)
+            .invoke(resolver, item) as? java.io.OutputStream ?: return null
+        stream.use { it.write(bytes) }
+        "Downloads/$name"
+    }.getOrNull()
 
     private val lineFormat = Regex("^(\\d+)\\|(I|W|E)\\|([^|]*)\\|(.*)$")
 

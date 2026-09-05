@@ -663,46 +663,87 @@ pub struct BillLine {
     pub amount_pxmr: u64,
 }
 
+/// Everything one sealed message needs, in a single record.
+///
+/// **One argument, deliberately.** `seal_message` used to take its fields
+/// as separate parameters — thirty-three of them at the peak, twenty-two
+/// after a first attempt at this — and on arm64 that crashed the process
+/// outright while sending. The tombstone put the fault 288 bytes into the
+/// scaffolding, at `ldr q0, [x12]` where `x12` had been loaded from a
+/// stack-passed argument slot and held the value 1.
+///
+/// One is a `RustBuffer`'s *capacity* — what uniffi allocates for an
+/// `Option::None` — read as if it were the address of the struct. So JNA
+/// and Rust disagree about how a 24-byte struct is passed by value once
+/// the arguments spill past the registers: one side writes the struct,
+/// the other expects a pointer to it. Every optional field on a message
+/// is one of those structs, which is why an ordinary text message — all
+/// of them absent — was the reliable way to hit it.
+///
+/// A single record is lowered to a single buffer, which travels in a
+/// register and never reaches the disputed ground.
+#[derive(uniffi::Record, Clone)]
+pub struct SealIn {
+    pub bundle_bytes: Vec<u8>,
+    pub seq: u64,
+    pub prev_link: Vec<u8>,
+    pub body: String,
+    pub thread_aad: Vec<u8>,
+    /// 0 text, 1 request, 2 notice (§16.13). A request carries no
+    /// authority — the payer still decides at §15.5's confirm screen.
+    pub kind: u8,
+    pub amount_pxmr: Option<u64>,
+    pub txid: Option<Vec<u8>>,
+    /// Only a request may name one (§16.13). Where to pay travels with the
+    /// ask so the payer needs nothing from a record that may be stale.
+    pub payto: Option<String>,
+    /// What the money is for. Empty means not itemised; the items plus tax
+    /// MUST add up to `amount_pxmr`, and core refuses the message if not.
+    pub items: Vec<BillLine>,
+    pub tax_pxmr: Option<u64>,
+    /// §16.14: the message a reaction is about, in the recipient's log
+    /// unless `re_own`.
+    pub re_seq: Option<u64>,
+    pub re_own: bool,
+    /// §16.15: a sealed blob parked in its own record, or on the swarm.
+    pub attachment: Option<AttachmentRef>,
+    pub eta_secs: Option<u64>,
+    pub payload: Option<Vec<u8>>,
+    pub round: Option<u64>,
+    pub ceremony_id: Option<Vec<u8>>,
+    pub position: Option<PositionSend>,
+    pub group: Option<GroupSend>,
+    pub publication: Option<PublicationSend>,
+    pub call: Option<CallSend>,
+}
+
 /// Seal one message in a thread.
 #[uniffi::export]
-pub fn seal_message(
-    bundle_bytes: Vec<u8>,
-    seq: u64,
-    prev_link: Vec<u8>,
-    body: String,
-    thread_aad: Vec<u8>,
-    // 0 text, 1 request, 2 notice (§16.13). A request carries no authority —
-    // the payer still decides at §15.5's confirm screen.
-    kind: u8,
-    amount_pxmr: Option<u64>,
-    txid: Option<Vec<u8>>,
-    // Only a request may name one (§16.13). Where to pay travels with the ask
-    // so the payer needs nothing from a record that may be stale.
-    payto: Option<String>,
-    // What the money is for. Empty means not itemised; the items plus tax MUST
-    // add up to `amount_pxmr`, and core refuses the message if they do not.
-    items: Vec<BillLine>,
-    tax_pxmr: Option<u64>,
-    // §16.14: the message a reaction is about, in the recipient's log unless
-    // `re_own`.
-    re_seq: Option<u64>,
-    re_own: bool,
-    // §16.15: a sealed blob parked in its own record.
-    attachment: Option<AttachmentRef>,
-    // §15.12: a ride offer's courtesy figure; refused on any other kind.
-    eta_secs: Option<u64>,
-    // §17.9 ceremony: opaque threshold bytes, round tag, per-escrow context.
-    payload: Option<Vec<u8>>,
-    round: Option<u64>,
-    ceremony_id: Option<Vec<u8>>,
-    // §15.12: a live-position stream reference on a kind-11 message. Both or
-    // neither — core refuses a half-reference, and a reference on any other
-    // kind.
-    position: Option<PositionSend>,
-    group: Option<GroupSend>,
-    publication: Option<PublicationSend>,
-    call: Option<CallSend>,
-) -> Result<SealedOut, ContactError> {
+pub fn seal_message(input: SealIn) -> Result<SealedOut, ContactError> {
+    let SealIn {
+        bundle_bytes,
+        seq,
+        prev_link,
+        body,
+        thread_aad,
+        kind,
+        amount_pxmr,
+        txid,
+        payto,
+        items,
+        tax_pxmr,
+        re_seq,
+        re_own,
+        attachment,
+        eta_secs,
+        payload,
+        round,
+        ceremony_id,
+        position,
+        group,
+        publication,
+        call,
+    } = input;
     // Unpacked once, so everything below reads as it always did.
     let position_record = position.as_ref().and_then(|p| p.record_key.clone());
     let position_stream_key = position.as_ref().and_then(|p| p.stream_key.clone());
