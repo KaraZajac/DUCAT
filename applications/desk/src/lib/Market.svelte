@@ -274,7 +274,7 @@
           <button class="btn primary" disabled={busy === "save"} onclick={saveDraft}>{busy === "save" ? t("desk_saving") : t("myprofile_save")}</button>
           {#if editingId}
             <button class="btn" onclick={addPhoto}>{t("rent_photo_add")}…</button>
-            {#if drive.on}<input id="ppath" class="input narrow" placeholder="/path/to/picture" onchange={(e) => act("photo", () => api.addListingPhoto(editingId!, (e.target as HTMLInputElement).value))} />{/if}
+            {#if drive.on}<input id="ppath" class="input narrow" hidden placeholder="/path/to/picture" onchange={(e) => act("photo", () => api.addListingPhoto(editingId!, (e.target as HTMLInputElement).value))} />{/if}
             {#if mine.find((l) => l.id === editingId)?.posted}
               <button class="btn" disabled={busy === "post"} onclick={() => act("post", () => api.postListing(editingId!))}>{t("desk_refresh_board")}</button>
               <button class="btn danger" onclick={() => act("unpost", () => api.unpostListing(editingId!))}>{t("rent_take_down")}</button>

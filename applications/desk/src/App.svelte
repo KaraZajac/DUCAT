@@ -16,6 +16,7 @@
 
   import { gen, startTicker } from "./lib/state.svelte";
   import { i18n, t } from "./lib/i18n.svelte";
+  import cat from "./assets/ducat-cat.png";
 
   type Page = "chat" | "wallet" | "till" | "kiosk" | "activity" | "library" | "market" | "files" | "sites" | "me" | "status";
   let page = $state<Page>("chat");
@@ -59,7 +60,7 @@
 
 <div class="shell">
   <aside class="sidebar">
-    <div class="brand">DUCAT</div>
+    <div class="brand"><img src={cat} alt="" /><span>DUCAT</span></div>
     {#each nav as n}
       <button class="nav-item" class:active={page === n.id} onclick={() => (page = n.id)}>
         <span class="glyph">{n.glyph}</span>{n.label}

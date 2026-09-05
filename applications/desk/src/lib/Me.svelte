@@ -188,8 +188,8 @@
     <button class="btn" disabled={passphrase.length < 8 || backupBusy} onclick={() => exportBackup()}>{t("backup_export")}…</button>
     <button class="btn" disabled={passphrase.length < 8 || backupBusy} onclick={() => importBackup()}>{t("backup_import")}…</button>
         {#if drive.on}
-          <input id="bpath" class="input" placeholder="/path/to/export.ducat" onchange={(e) => exportBackup((e.target as HTMLInputElement).value)} />
-          <input id="ipath" class="input" placeholder="/path/to/import.ducat" onchange={(e) => importBackup((e.target as HTMLInputElement).value)} />
+          <input id="bpath" class="input" hidden placeholder="/path/to/export.ducat" onchange={(e) => exportBackup((e.target as HTMLInputElement).value)} />
+          <input id="ipath" class="input" hidden placeholder="/path/to/import.ducat" onchange={(e) => importBackup((e.target as HTMLInputElement).value)} />
         {/if}
   </div>
   {#if backupMsg}<p class="note ok-text">{backupMsg}</p>{/if}

@@ -1,55 +1,64 @@
-/* DUCAT desk — one palette, two themes, no framework.
-   The phone's Material palette is the reference: violet primary, quiet
-   surfaces, generous radius. Dark follows the OS. */
+/* DUCAT desk — Catppuccin, the phone's own palette: Latte in the light,
+   Mocha in the dark, mauve for the accent. The roles follow the phone's
+   Theme.kt — page on base, cards and the sidebar on mantle, fields and
+   chips a tone further in — so the two clients are one look. Corners are
+   rounded rectangles, never pills: 8px on controls, 12px on cards. */
 
 :root {
-  --bg: #f7f5fb;
-  --surface: #ffffff;
-  --surface-2: #efebf6;
-  --text: #1c1b22;
-  --muted: #5f5b6b;
-  --line: #e2ddec;
-  --primary: #7c3aed;
-  --primary-ink: #ffffff;
-  --primary-soft: #ede4fb;
-  --danger: #b3261e;
-  --ok: #1b7f4b;
+  --bg: #eff1f5;            /* base */
+  --surface: #e6e9ef;       /* mantle: cards, sidebar */
+  --surface-2: #dce0e8;     /* crust: chips, fields at rest */
+  --surface-3: #ccd0da;     /* surface0: hover, tracks */
+  --text: #4c4f69;
+  --muted: #6c6f85;         /* subtext0 */
+  --line: #bcc0cc;          /* surface1 */
+  --primary: #8839ef;       /* mauve */
+  --primary-ink: #eff1f5;
+  --primary-soft: #d9d0ef;  /* mauve over mantle, a tint */
+  --danger: #d20f39;        /* red */
+  --ok: #40a02b;            /* green */
+  --warn: #df8e1d;          /* yellow */
   --radius: 12px;
   --radius-s: 8px;
-  --shadow: 0 1px 2px rgba(20, 10, 40, 0.06), 0 4px 16px rgba(20, 10, 40, 0.05);
+  --radius-xs: 6px;
+  --shadow: 0 1px 2px rgba(76, 79, 105, 0.06), 0 3px 10px rgba(76, 79, 105, 0.05);
   color-scheme: light dark;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #141320;
-    --surface: #1c1b2a;
-    --surface-2: #26243a;
-    --text: #ece8f5;
-    --muted: #a49fb5;
-    --line: #322f47;
-    --primary: #b892ff;
-    --primary-ink: #1a0b33;
-    --primary-soft: #2e2547;
-    --danger: #ff8a80;
-    --ok: #6fd39a;
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 20px rgba(0, 0, 0, 0.35);
+    --bg: #1e1e2e;            /* base */
+    --surface: #181825;       /* mantle */
+    --surface-2: #313244;     /* surface0 */
+    --surface-3: #45475a;     /* surface1 */
+    --text: #cdd6f4;
+    --muted: #a6adc8;         /* subtext0 */
+    --line: #45475a;          /* surface1 */
+    --primary: #cba6f7;       /* mauve */
+    --primary-ink: #11111b;   /* crust */
+    --primary-soft: #38324b;
+    --danger: #f38ba8;
+    --ok: #a6e3a1;
+    --warn: #f9e2af;
+    --shadow: none;
   }
 }
 /* An explicit choice on the Me page wins over the system in both directions. */
 :root[data-theme="dark"] {
-    --bg: #141320;
-    --surface: #1c1b2a;
-    --surface-2: #26243a;
-    --text: #ece8f5;
-    --muted: #a49fb5;
-    --line: #322f47;
-    --primary: #b892ff;
-    --primary-ink: #1a0b33;
-    --primary-soft: #2e2547;
-    --danger: #ff8a80;
-    --ok: #6fd39a;
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 20px rgba(0, 0, 0, 0.35);
+    --bg: #1e1e2e;
+    --surface: #181825;
+    --surface-2: #313244;
+    --surface-3: #45475a;
+    --text: #cdd6f4;
+    --muted: #a6adc8;
+    --line: #45475a;
+    --primary: #cba6f7;
+    --primary-ink: #11111b;
+    --primary-soft: #38324b;
+    --danger: #f38ba8;
+    --ok: #a6e3a1;
+    --warn: #f9e2af;
+    --shadow: none;
 }
 
 * { box-sizing: border-box; }
@@ -86,12 +95,16 @@ body {
 }
 
 .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-weight: 700;
-  font-size: 18px;
-  letter-spacing: 0.12em;
-  padding: 6px 12px 16px;
+  font-size: 17px;
+  letter-spacing: 0.1em;
+  padding: 4px 10px 14px;
   color: var(--primary);
 }
+.brand img { width: 30px; height: 30px; border-radius: 8px; }
 
 .nav-item {
   display: flex;
@@ -192,13 +205,13 @@ body {
 .btn {
   font: inherit;
   padding: 8px 14px;
-  border-radius: 999px;
+  border-radius: var(--radius-s);
   border: 1px solid var(--line);
   background: var(--surface);
   color: var(--text);
   cursor: pointer;
 }
-.btn:hover { background: var(--surface-2); }
+.btn:hover { background: var(--surface-3); }
 .btn:disabled { opacity: 0.5; cursor: default; }
 .btn.primary { background: var(--primary); color: var(--primary-ink); border-color: transparent; font-weight: 600; }
 .btn.primary:hover { filter: brightness(1.06); }
@@ -210,7 +223,7 @@ body {
   padding: 9px 12px;
   border-radius: var(--radius-s);
   border: 1px solid var(--line);
-  background: var(--surface);
+  background: var(--bg);
   color: var(--text);
   width: 100%;
   user-select: text;
@@ -278,7 +291,7 @@ body {
 .thread-row { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: none; border: 0; color: inherit; padding: 10px 8px; border-radius: 10px; cursor: pointer; font: inherit; }
 .thread-row:hover { background: var(--surface-2); }
 .thread-row.active { background: var(--primary-soft); }
-.avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: #fff; display: grid; place-items: center; font-weight: 700; flex: none; }
+.avatar { width: 36px; height: 36px; border-radius: 10px; background: var(--primary); color: var(--primary-ink); display: grid; place-items: center; font-weight: 700; flex: none; }
 .avatar.unnamed { background: var(--muted); }
 .thread-text { min-width: 0; flex: 1; }
 .thread-top { display: flex; justify-content: space-between; gap: 8px; }
@@ -307,7 +320,7 @@ body {
 .bill-line { display: flex; justify-content: space-between; gap: 16px; }
 .composer { display: flex; gap: 10px; padding: 14px 24px; border-top: 1px solid var(--line); align-items: flex-end; }
 .composer textarea { flex: 1; resize: none; font: inherit; }
-.badge { margin-left: auto; background: var(--primary); color: #fff; border-radius: 999px; font-size: 11px; padding: 1px 7px; font-weight: 700; }
+.badge { margin-left: auto; background: var(--primary); color: var(--primary-ink); border-radius: var(--radius-xs); font-size: 11px; padding: 1px 7px; font-weight: 700; }
 .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }
 .code-wrap { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
 .qr { background: #fff; padding: 8px; border-radius: 10px; width: 256px; height: 256px; flex: none; }
@@ -320,13 +333,13 @@ body {
 /* ----- wallet ----- */
 .balance-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
 .balance-big { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; }
-.pill { display: inline-block; padding: 4px 10px; border-radius: 999px; background: var(--surface-2); font-size: 12.5px; }
+.pill { display: inline-block; padding: 4px 10px; border-radius: var(--radius-xs); background: var(--surface-2); font-size: 12.5px; }
 .pill.ok { color: var(--ok); }
 .pill.warn { color: var(--danger); }
-.bar { height: 6px; background: var(--surface-2); border-radius: 999px; margin-top: 12px; overflow: hidden; }
+.bar { height: 6px; background: var(--surface-3); border-radius: 3px; margin-top: 12px; overflow: hidden; }
 .bar-fill { height: 100%; background: var(--primary); transition: width 0.4s; }
 .tabs { display: flex; gap: 6px; margin: 4px 0 14px; }
-.tab { background: none; border: 1px solid var(--line); color: var(--muted); padding: 6px 14px; border-radius: 999px; cursor: pointer; font: inherit; }
+.tab { background: none; border: 1px solid var(--line); color: var(--muted); padding: 6px 14px; border-radius: var(--radius-s); cursor: pointer; font: inherit; }
 .tab.active { background: var(--primary-soft); color: var(--text); border-color: transparent; }
 
 /* ----- till ----- */
@@ -334,7 +347,7 @@ body {
 .input.narrow { max-width: 130px; }
 .total-row { display: flex; justify-content: space-between; padding: 10px 0; border-top: 1px solid var(--line); margin-top: 8px; font-size: 15px; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
-.chip { background: var(--surface-2); border: 1px solid var(--line); color: var(--text); padding: 6px 12px; border-radius: 999px; cursor: pointer; font: inherit; font-size: 13px; }
+.chip { background: var(--surface-2); border: 1px solid var(--line); color: var(--text); padding: 6px 12px; border-radius: var(--radius-s); cursor: pointer; font: inherit; font-size: 13px; }
 .chip:hover { border-color: var(--primary); }
 .row-line { padding: 4px 0; }
 .sale-status { text-align: center; }
@@ -410,7 +423,7 @@ h4 { margin: 16px 0 6px; font-size: 14px; color: var(--muted); text-transform: u
 .code-pair .qr :global(svg) { width: 156px; height: 156px; }
 
 /* Native checkboxes vanish on a white card in the light theme; draw our own. */
-input[type="checkbox"] { appearance: none; -webkit-appearance: none; width: 16px; height: 16px; margin: 0 2px 0 0; border: 1.5px solid var(--muted); border-radius: 4px; background: var(--surface); display: inline-grid; place-content: center; vertical-align: -3px; cursor: pointer; flex: none; }
+input[type="checkbox"] { appearance: none; -webkit-appearance: none; width: 16px; height: 16px; margin: 0 2px 0 0; border: 1.5px solid var(--muted); border-radius: 4px; background: var(--bg); display: inline-grid; place-content: center; vertical-align: -3px; cursor: pointer; flex: none; }
 input[type="checkbox"]::before { content: ""; width: 9px; height: 9px; border-radius: 2px; background: var(--primary); transform: scale(0); transition: transform 80ms; }
 input[type="checkbox"]:checked { border-color: var(--primary); }
 input[type="checkbox"]:checked::before { transform: scale(1); }
@@ -434,8 +447,8 @@ input[type="checkbox"]:disabled { opacity: 0.5; cursor: default; }
 
 /* Selects draw themselves: the platform's popup button ignores the page's
    theme and comes out dark on a light card. */
-select.input { appearance: none; -webkit-appearance: none; background-color: var(--surface); color: var(--text); padding-right: 30px; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' fill='none' stroke='%23888' stroke-width='1.8' stroke-linecap='round'/></svg>"); background-repeat: no-repeat; background-position: right 10px center; cursor: pointer; }
-select.input option { background: var(--surface); color: var(--text); }
+select.input { appearance: none; -webkit-appearance: none; background-color: var(--bg); color: var(--text); padding-right: 30px; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' fill='none' stroke='%23888' stroke-width='1.8' stroke-linecap='round'/></svg>"); background-repeat: no-repeat; background-position: right 10px center; cursor: pointer; }
+select.input option { background: var(--bg); color: var(--text); }
 
 /* The composer: the box takes the room, the buttons take a row below when
    there is not enough. */

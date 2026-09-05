@@ -222,7 +222,7 @@
           <button class="btn" onclick={pickFile}>{file ? file.split(/[\\/]/).pop() : t("pub_choose_file")}</button>
         </div>
         {#if drive.on}
-          <div class="field"><label for="fpath">{t("desk_path")}</label><input id="fpath" class="input" placeholder="/path/to/issue" onchange={(e) => (file = (e.target as HTMLInputElement).value)} /></div>
+          <div class="field" hidden><label for="fpath">{t("desk_path")}</label><input id="fpath" class="input" hidden placeholder="/path/to/issue" onchange={(e) => (file = (e.target as HTMLInputElement).value)} /></div>
         {/if}
         <div class="field">
           <label for="note">{t("txdetail_note")}</label>

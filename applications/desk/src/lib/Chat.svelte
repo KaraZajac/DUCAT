@@ -798,7 +798,7 @@
           </div>
         </div>
       {/if}
-      {#if drive.on}<div class="request-bar"><input id="attpath" class="input" placeholder="/path/to/attach" onchange={(e) => attach((e.target as HTMLInputElement).value)} /></div>{/if}
+      {#if drive.on}<div class="request-bar" hidden><input id="attpath" class="input" hidden placeholder="/path/to/attach" onchange={(e) => attach((e.target as HTMLInputElement).value)} /></div>{/if}
       {#if err}<p class="err">{err}</p>{/if}
     {:else}
       <div class="pane-empty">
