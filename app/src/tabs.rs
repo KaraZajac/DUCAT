@@ -627,6 +627,67 @@ impl App {
         }
     }
 
+    // ----- a sale at the till ----------------------------------------------------------
+
+    /// Present a sale: the tab exists before anyone scans, bound to the
+    /// card it shows, so the claim — collected by the lap, whichever screen
+    /// is up — bills whoever answered. Returns the card and the tab.
+    pub fn present_sale(&self, lines: Vec<BillItem>, tax: Option<u64>) -> Result<(crate::mailbox::IssuedHandle, RunningTab), Error> {
+        if lines.is_empty() {
+            return Err(Error::Refused("nothing on the bill".into()));
+        }
+        let name = self.my_name(None)?;
+        let card = self.issue_card(name.as_deref(), 60 * 60 * 2, "sale", None)?;
+        let tab = self.open_tab(&format!("pending:{}", card.inbox_key), ORIGIN_POS)?;
+        let id = tab.id.clone();
+        let tab = self
+            .mutate_tab(&id, move |mut t| {
+                t.lines = lines;
+                t.tax = tax.filter(|v| *v > 0);
+                t
+            })?
+            .ok_or_else(|| Error::Refused("the tab vanished".into()))?;
+        self.store(crate::contacts::CONTACTS).update(|m| {
+            let mut map: std::collections::BTreeMap<String, String> = m.get("sale_cards").cloned().and_then(crate::store::value_as).unwrap_or_default();
+            map.insert(card.inbox_key.clone(), id.clone());
+            m.insert("sale_cards".into(), serde_json::to_value(&map).unwrap_or_default());
+        })?;
+        log::info(TAG, format!("sale presented: {} line(s), {} XMR", tab.lines.len(), format_xmr(tab.total_pxmr())));
+        Ok((card, tab))
+    }
+
+    /// The tab a sale card is bound to, if any.
+    pub fn sale_tab_for(&self, inbox_key: &str) -> Option<RunningTab> {
+        let map: std::collections::BTreeMap<String, String> = self.store(crate::contacts::CONTACTS).get("sale_cards").unwrap_or_default();
+        map.get(inbox_key).and_then(|id| self.tab(id))
+    }
+
+    /// A sale card was answered: the tab takes the customer and the bill
+    /// goes out. Called from the claim sweep.
+    pub fn on_sale_claimed(&self, inbox_key: &str, persona_hex: &str) {
+        let Some(tab) = self.sale_tab_for(inbox_key) else { return };
+        if tab.state != "open" {
+            return;
+        }
+        let who = persona_hex.to_string();
+        let Ok(Some(filled)) = self.mutate_tab(&tab.id, move |mut t| {
+            t.persona_hex = who;
+            t
+        }) else {
+            return;
+        };
+        match self.settle_tab(&filled) {
+            Ok(_) => log::info(TAG, format!("sale billed to {}: {} XMR", self.contact(persona_hex).map(|c| c.display_name()).unwrap_or_default(), format_xmr(filled.total_pxmr()))),
+            Err(e) => log::warn(TAG, format!("sale bill: {e}")),
+        }
+    }
+
+    /// Sales presented and not yet answered, for a screen that reloaded.
+    pub fn sales_in_progress(&self) -> Vec<(String, RunningTab)> {
+        let map: std::collections::BTreeMap<String, String> = self.store(crate::contacts::CONTACTS).get("sale_cards").unwrap_or_default();
+        map.into_iter().filter_map(|(inbox, id)| self.tab(&id).map(|t| (inbox, t))).collect()
+    }
+
     /// The tabs' turn on the wallet lane: sightings in the pool, matches
     /// on the chain, receipts still owed.
     pub fn tabs_lap(&self, node: &str) {

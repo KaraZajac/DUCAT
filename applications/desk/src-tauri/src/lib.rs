@@ -432,6 +432,9 @@ struct MessageRow {
     att_name: Option<String>,
     att_mime: Option<String>,
     att_len: u64,
+    att_hash: Option<String>,
+    att_on_swarm: bool,
+    att_here: bool,
     items: Vec<(String, u64)>,
     tax_pxmr: Option<u64>,
     payto: Option<String>,
@@ -445,7 +448,11 @@ struct MessageRow {
 }
 
 fn message_row(m: StoredMessage) -> MessageRow {
+    let att_here = m.att_hash.as_deref().map_or(false, |h| APP.get().map_or(false, |a| a.attachment_file(h).exists()));
     MessageRow {
+        att_hash: m.att_hash.clone(),
+        att_on_swarm: m.att_swarm.is_some(),
+        att_here,
         outgoing: m.outgoing,
         seq: m.seq,
         body: m.body,
@@ -725,7 +732,7 @@ struct TabRow {
 
 fn tab_row(a: &App, t: ducat_app::tabs::RunningTab) -> TabRow {
     TabRow {
-        name: a.contact(&t.persona_hex).map(|c| c.display_name()).unwrap_or_else(|| "(gone)".into()),
+        name: if t.persona_hex.starts_with("pending:") { "Waiting for a scan".into() } else { a.contact(&t.persona_hex).map(|c| c.display_name()).unwrap_or_else(|| "(gone)".into()) },
         total_pxmr: t.total_pxmr(),
         tip_pxmr: t.tip_pxmr(),
         receipt_owed: t.word_seq == ducat_app::tabs::WORD_UNSENT,
@@ -1537,6 +1544,154 @@ fn enquiry_about(persona_hex: String) -> Result<Option<ducat_app::listings::Enqu
     Ok(app()?.enquiry(&persona_hex))
 }
 
+
+// ----- activity: the ledger --------------------------------------------------------
+
+#[derive(Serialize)]
+struct LedgerOut {
+    events: Vec<ducat_app::ledger::Event>,
+    summary: ducat_app::ledger::Summary,
+    business: ducat_app::ledger::BusinessSummary,
+}
+
+#[tauri::command]
+fn ledger(from_ts: u64, to_ts: u64) -> Result<LedgerOut, String> {
+    let a = app()?;
+    let events = a.ledger();
+    Ok(LedgerOut {
+        summary: ducat_app::ledger::summarize(&events, from_ts, to_ts),
+        business: ducat_app::ledger::summarize_business(&a.tabs(), from_ts, to_ts),
+        events,
+    })
+}
+
+#[tauri::command]
+async fn export_ledger(path: String, json: bool) -> Result<u64, String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.export_ledger_to(std::path::Path::new(&path), json).map_err(said)).await.map_err(s)?
+}
+
+
+// ----- requests, standing bills, donations ------------------------------------
+
+#[tauri::command]
+async fn request_payment(persona_hex: String, amount_pxmr: u64, note: String) -> Result<(), String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.request_payment(&persona_hex, amount_pxmr, &note).map_err(said)).await.map_err(s)?
+}
+
+#[derive(Serialize)]
+struct StandingRow {
+    id: String,
+    persona_hex: String,
+    name: String,
+    amount_pxmr: u64,
+    note: String,
+    monthly: bool,
+    next_at: u64,
+}
+
+#[tauri::command]
+fn standing_bills() -> Result<Vec<StandingRow>, String> {
+    let a = app()?;
+    Ok(a.standing_bills()
+        .into_iter()
+        .map(|b| StandingRow {
+            name: a.contact(&b.persona_hex).map(|c| c.display_name()).unwrap_or_else(|| "(gone)".into()),
+            id: b.id,
+            persona_hex: b.persona_hex,
+            amount_pxmr: b.amount_pxmr,
+            note: b.note,
+            monthly: b.monthly,
+            next_at: b.next_at,
+        })
+        .collect())
+}
+
+#[tauri::command]
+fn add_standing_bill(persona_hex: String, amount_pxmr: u64, note: String, monthly: bool) -> Result<(), String> {
+    if amount_pxmr == 0 {
+        return Err("a standing bill needs an amount".into());
+    }
+    app()?.add_standing_bill(&persona_hex, amount_pxmr, &note, monthly).map(|_| ()).map_err(said)
+}
+
+#[tauri::command]
+fn stop_standing_bill(id: String) -> Result<(), String> {
+    app()?.stop_standing_bill(&id).map_err(said)
+}
+
+/// A code whose thread takes unprompted payments as donations (§16.13).
+#[tauri::command]
+async fn donate_code() -> Result<Code, String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || {
+        let owner = a.worn().map_err(said)?;
+        if let Some(c) = a.current_card(&owner, "donate") {
+            return Ok(Code { svg: qr_svg(&c.uri), uri: c.uri, inbox_key: c.inbox_key });
+        }
+        let name = a.my_name(Some(&owner)).map_err(said)?;
+        let h = a.issue_card(name.as_deref(), 60 * 60 * 24 * 30, "donate", Some(&owner)).map_err(said)?;
+        Ok(Code { svg: qr_svg(&h.uri), uri: h.uri, inbox_key: h.inbox_key })
+    })
+    .await
+    .map_err(s)?
+}
+
+
+// ----- attachments ---------------------------------------------------------------
+
+#[tauri::command]
+async fn send_attachment(persona_hex: String, path: String, caption: Option<String>) -> Result<(), String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.send_attachment(&persona_hex, std::path::Path::new(&path), caption.as_deref()).map_err(said))
+        .await
+        .map_err(s)?
+}
+
+/// Where an attachment's plaintext is, if it has arrived.
+#[tauri::command]
+fn attachment_path(ct_hash_hex: String) -> Result<Option<String>, String> {
+    let a = app()?;
+    let p = a.attachment_file(&ct_hash_hex);
+    Ok(p.exists().then(|| p.to_string_lossy().into_owned()))
+}
+
+#[tauri::command]
+async fn fetch_swarm_attachment(persona_hex: String, seq: u64, outgoing: bool) -> Result<String, String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.fetch_swarm_attachment(&persona_hex, seq, outgoing).map(|p| p.to_string_lossy().into_owned()).map_err(said))
+        .await
+        .map_err(s)?
+}
+
+
+#[derive(Serialize)]
+struct Presented {
+    code: Code,
+    tab: TabRow,
+}
+
+/// A sale: the tab first, bound to the card it shows; the lap bills
+/// whoever answers, whatever the screen is doing by then.
+#[tauri::command]
+async fn present_sale(lines: Vec<(String, u64)>, tax_pxmr: Option<u64>) -> Result<Presented, String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || {
+        let items: Vec<ducat_app::contacts::BillItem> = lines.into_iter().map(|(d, a)| ducat_app::contacts::BillItem { description: d, amount_pxmr: a }).collect();
+        let (h, tab) = a.present_sale(items, tax_pxmr).map_err(said)?;
+        Ok(Presented { code: Code { svg: qr_svg(&h.uri), uri: h.uri, inbox_key: h.inbox_key }, tab: tab_row(a, tab) })
+    })
+    .await
+    .map_err(s)?
+}
+
+#[tauri::command]
+fn sales_in_progress() -> Result<Vec<(String, TabRow)>, String> {
+    let a = app()?;
+    Ok(a.sales_in_progress().into_iter().map(|(i, t)| (i, tab_row(a, t))).collect())
+}
+
 // ----- the log ---------------------------------------------------------------
 
 #[tauri::command]
@@ -1745,6 +1900,18 @@ pub fn run() {
             fetch_gallery,
             picture_data_url,
             enquiry_about,
+            ledger,
+            export_ledger,
+            request_payment,
+            standing_bills,
+            add_standing_bill,
+            stop_standing_bill,
+            donate_code,
+            send_attachment,
+            attachment_path,
+            fetch_swarm_attachment,
+            present_sale,
+            sales_in_progress,
         ])
         .run(tauri::generate_context!())
         .expect("error while running the desk");

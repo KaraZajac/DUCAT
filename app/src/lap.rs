@@ -51,6 +51,8 @@ impl App {
                             app.reseed_issues();
                             app.reseed_library();
                             app.reseed_galleries();
+                            app.reseed_attachments();
+                            app.sweep_attachments();
                             app.refresh_shelves();
                             app.sweep_site_orphans();
                             app.sweep_release_orphans();
@@ -77,6 +79,8 @@ impl App {
         self.verify_last_writes();
         self.retry_group_outbox();
         self.listings_lap();
+        self.run_due_bills();
+        self.fetch_one_attachment();
         self.sweep_abandoned_tabs(&[]);
     }
 }

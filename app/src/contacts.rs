@@ -454,6 +454,61 @@ fn write_thread(m: &mut Map<String, Value>, persona_hex: &str, thread: &[StoredM
     set(m, &format!("thread_{persona_hex}"), &thread);
 }
 
+/// A receipt (§16.13's kind 3) as filed for the ledger, beside the thread
+/// row it came from. Field names follow the phone's JSON.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ReceiptRecord {
+    #[serde(default)]
+    pub txid: Option<String>,
+    #[serde(rename = "amt")]
+    pub amount_pxmr: u64,
+    #[serde(default)]
+    pub items: Vec<BillItem>,
+    #[serde(default)]
+    pub tax: Option<u64>,
+    #[serde(rename = "hex")]
+    pub contact_hex: String,
+    #[serde(rename = "who", default)]
+    pub counterparty: String,
+    /// True when this desk issued it (we were the payee).
+    #[serde(default)]
+    pub mine: bool,
+    #[serde(rename = "ts", default)]
+    pub timestamp: u64,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub oob: bool,
+    #[serde(default)]
+    pub seq: u64,
+}
+
+/// File a kind-3 row as a receipt, once: the same transaction or the same
+/// message replaces rather than duplicates.
+fn save_receipt(m: &mut Map<String, Value>, persona_hex: &str, row: &StoredMessage) {
+    if row.kind != 3 {
+        return;
+    }
+    let name = read_contacts(m).iter().find(|c| c.persona_hex == persona_hex).map(|c| c.display_name()).unwrap_or_else(|| format!("{}…", &persona_hex[..8.min(persona_hex.len())]));
+    let mut list: Vec<ReceiptRecord> = take(m, "receipts_v1").unwrap_or_default();
+    list.retain(|r| {
+        let same_tx = row.txid_hex.as_deref().map_or(false, |t| r.txid.as_deref().map_or(false, |x| x.eq_ignore_ascii_case(t)));
+        let same_msg = r.contact_hex == persona_hex && r.seq == row.seq && r.mine == row.outgoing && (r.timestamp == 0 || r.timestamp == row.timestamp);
+        !(same_tx || same_msg)
+    });
+    list.push(ReceiptRecord {
+        txid: row.txid_hex.clone(),
+        amount_pxmr: row.amount_pxmr,
+        items: row.items.clone(),
+        tax: row.tax_pxmr,
+        contact_hex: persona_hex.to_string(),
+        counterparty: name,
+        mine: row.outgoing,
+        timestamp: row.timestamp,
+        oob: row.oob,
+        seq: row.seq,
+    });
+    set(m, "receipts_v1", &list);
+}
+
 fn replace_contact(list: &mut Vec<Contact>, c: Contact) {
     list.retain(|k| k.persona_hex != c.persona_hex);
     list.push(c);
@@ -611,6 +666,11 @@ impl App {
         Ok(())
     }
 
+    /// Every receipt filed, either direction.
+    pub fn receipts(&self) -> Vec<ReceiptRecord> {
+        self.contacts_store().get("receipts_v1").unwrap_or_default()
+    }
+
     // ----- flags ---------------------------------------------------------------
 
     fn flag(&self, key: &str) -> bool {
@@ -662,6 +722,7 @@ impl App {
         self.contacts_store().update(|m| {
             let mut thread = read_thread(m, persona_hex);
             let surfaces = row.surfaces();
+            save_receipt(m, persona_hex, &row);
             thread.push(row);
             write_thread(m, persona_hex, &thread);
             let mut list = read_contacts(m);
@@ -696,6 +757,7 @@ impl App {
             let mut thread = read_thread(m, persona_hex);
             let surfaces = row.surfaces();
             let seq = row.seq;
+            save_receipt(m, persona_hex, &row);
             thread.push(row);
             write_thread(m, persona_hex, &thread);
             m.insert(

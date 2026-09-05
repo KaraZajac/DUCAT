@@ -12,13 +12,16 @@
 //! more: where the stores live, where bundles are cached, where the node
 //! keeps its keys. Two desks on one machine are two directories.
 
+pub mod attachments;
 pub mod backup;
 pub mod boards;
 pub mod catalogue;
 pub mod contacts;
+pub mod donations;
 pub mod groups;
 pub mod identity;
 pub mod lap;
+pub mod ledger;
 pub mod listings;
 pub mod log;
 pub mod mailbox;
@@ -26,6 +29,7 @@ pub mod opinion;
 pub mod paths;
 pub mod pay;
 pub mod publications;
+pub mod recurring;
 pub mod releases;
 pub mod sites;
 pub mod store;

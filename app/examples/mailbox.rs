@@ -141,12 +141,33 @@ fn main() {
                 std::thread::sleep(Duration::from_secs(5));
             };
             println!("MB_BILL seq {} {} XMR payto={} items={}", bill.seq, ducat_app::wallet::format_xmr(bill.amount_pxmr), bill.payto.as_deref().map(|p| &p[..12]).unwrap_or("-"), bill.items.len());
-            match app.pay_bill(&c.persona_hex, Some(bill.seq), bill.amount_pxmr, None, 1) {
-                Ok(tx) => println!("MB_PAID {tx}"),
-                Err(e) => {
-                    println!("MB_FAIL pay: {e}");
-                    return;
+            // The notes may still be locked: a fresh top-up unlocks ten
+            // blocks after it lands. Keep the wallet moving and try again.
+            let mut paid = false;
+            for attempt in 0..60 {
+                match app.pay_bill(&c.persona_hex, Some(bill.seq), bill.amount_pxmr, None, 1) {
+                    Ok(tx) => {
+                        println!("MB_PAID {tx}");
+                        paid = true;
+                        break;
+                    }
+                    Err(e) if e.to_string().contains("not enough unlocked") => {
+                        if attempt % 4 == 0 {
+                            println!("MB_WAIT {e}");
+                        }
+                        app.scan_step(&node);
+                        app.refresh_spent(&node);
+                        std::thread::sleep(Duration::from_secs(30));
+                    }
+                    Err(e) => {
+                        println!("MB_FAIL pay: {e}");
+                        return;
+                    }
                 }
+            }
+            if !paid {
+                println!("MB_FAIL pay: still locked after half an hour");
+                return;
             }
             let t1 = Instant::now();
             loop {

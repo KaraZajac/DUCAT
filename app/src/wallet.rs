@@ -844,6 +844,8 @@ impl App {
             self.refresh_spent(&node);
         }
         self.tabs_lap(&node);
+        self.reconcile_donations();
+        self.enrich_ledger(&node, 6);
         self.publications_lap();
         self.rates_refresh();
     }

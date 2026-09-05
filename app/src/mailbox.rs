@@ -641,6 +641,9 @@ impl App {
             }
         }
         self.mark_card_answered(&issued.inbox_key, &persona_hex)?;
+        if issued.purpose == "sale" {
+            self.on_sale_claimed(&issued.inbox_key, &persona_hex);
+        }
         log::info(TAG, format!("card ({}) answered by {}", issued.purpose, theirs.asserted_name.clone().unwrap_or_else(|| "an unnamed contact".into())));
         // Only the standing profile code replaces itself — a sale's
         // handshake was for that sale.

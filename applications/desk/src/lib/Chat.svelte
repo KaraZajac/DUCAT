@@ -2,7 +2,7 @@
   // Chat: every thread on the left, the open one on the right. A desk has
   // the room for both at once, which is the one place it beats the phone.
   import { onMount, tick } from "svelte";
-  import { api, copy, fmtTime, fmtXmr, type ContactRow, type GroupMessage, type GroupRow, type MessageRow } from "./api";
+  import { api, copy, fmtTime, fmtXmr, type ContactRow, type GroupMessage, type GroupRow, type MessageRow, type StandingRow } from "./api";
   import { gen } from "./state.svelte";
 
   let rows = $state<ContactRow[]>([]);
@@ -108,6 +108,8 @@
     openGroup = null;
     open = hex;
     renaming = false;
+    requesting = false;
+    standing = await api.standingBills();
     thread = await api.thread(hex);
     await api.markSeen(hex);
     scrollToEnd();
@@ -173,6 +175,79 @@
     open = null;
     thread = [];
     await refresh();
+  }
+
+  let requesting = $state(false);
+  let reqAmount = $state("");
+  let reqNote = $state("");
+  let reqRepeat = $state<"once" | "weekly" | "monthly">("once");
+  let standing = $state<StandingRow[]>([]);
+
+  async function sendRequest() {
+    if (!open) return;
+    err = null;
+    const n = Number(reqAmount);
+    if (!Number.isFinite(n) || n <= 0) { err = "An amount in XMR."; return; }
+    const pxmr = Math.floor(n * 1e12);
+    try {
+      if (reqRepeat === "once") await api.requestPayment(open, pxmr, reqNote);
+      else await api.addStandingBill(open, pxmr, reqNote, reqRepeat === "monthly");
+      requesting = false; reqAmount = ""; reqNote = ""; reqRepeat = "once";
+      await refresh();
+      standing = await api.standingBills();
+    } catch (e) { err = String(e); }
+  }
+
+  // Attachments: pictures inline once here, files as a line with Show.
+  let pictures = $state<Record<string, string>>({});
+  let fetching = $state<string | null>(null);
+  let attaching = $state(false);
+
+  $effect(() => {
+    for (const m of thread) {
+      if (m.att_hash && m.att_here && m.att_mime?.startsWith("image/") && !pictures[m.att_hash]) {
+        const h = m.att_hash;
+        api.attachmentPath(h).then((p) => p && api.pictureDataUrl(p)).then((u) => { if (u) pictures = { ...pictures, [h]: u }; }).catch(() => {});
+      }
+    }
+  });
+
+  async function attach(path?: string) {
+    if (!open) return;
+    const p = path ?? (await api.pickFile());
+    if (!p) return;
+    err = null;
+    attaching = true;
+    try {
+      await api.sendAttachment(open, p, draft.trim() || null);
+      draft = "";
+      thread = await api.thread(open);
+      scrollToEnd();
+    } catch (e) {
+      err = String(e);
+    } finally {
+      attaching = false;
+    }
+  }
+
+  async function fetchBig(m: MessageRow) {
+    if (!open) return;
+    err = null;
+    fetching = m.att_hash;
+    try {
+      await api.fetchSwarmAttachment(open, m.seq, m.outgoing);
+      thread = await api.thread(open);
+    } catch (e) {
+      err = String(e);
+    } finally {
+      fetching = null;
+    }
+  }
+
+  async function showFile(m: MessageRow) {
+    if (!m.att_hash) return;
+    const p = await api.attachmentPath(m.att_hash);
+    if (p) await api.reveal(p);
   }
 
   let paying = $state<number | null>(null);
@@ -332,10 +407,22 @@
           {/if}
         </div>
         <div class="actions nowrap">
+          <button class="btn small" onclick={() => (requesting = !requesting)}>{requesting ? "Close" : "Request"}</button>
           <button class="btn small" onclick={() => { renaming = true; newName = current?.petname ?? ""; }}>Rename</button>
           <button class="btn small danger" onclick={remove}>Forget</button>
         </div>
       </div>
+      {#if requesting}
+        <div class="request-bar">
+          <input class="input narrow" placeholder="XMR" bind:value={reqAmount} />
+          <input class="input" placeholder="What for" bind:value={reqNote} onkeydown={(e) => e.key === "Enter" && sendRequest()} />
+          <select class="input narrow" bind:value={reqRepeat}><option value="once">once</option><option value="weekly">every week</option><option value="monthly">every month</option></select>
+          <button class="btn primary" onclick={sendRequest} disabled={!reqAmount.trim()}>Send the bill</button>
+        </div>
+        {#each standing.filter((b) => b.persona_hex === open) as b (b.id)}
+          <div class="request-bar meta">Standing: {fmtXmr(b.amount_pxmr)} {b.monthly ? "monthly" : "weekly"}{b.note ? ` · ${b.note}` : ""} · next {fmtTime(Math.floor(b.next_at / 1000))} <button class="linkish" onclick={async () => { await api.stopStandingBill(b.id); standing = await api.standingBills(); }}>stop</button></div>
+        {/each}
+      {/if}
       <div class="bubbles" bind:this={list}>
         {#each thread as m (m.outgoing + ":" + m.seq + ":" + m.timestamp)}
           <div class="bubble-row" class:out={m.outgoing}>
@@ -347,7 +434,17 @@
                   {#if m.tax_pxmr}<div class="bill-line"><span>Tax</span><span>{fmtXmr(m.tax_pxmr)}</span></div>{/if}
                 </div>
               {/if}
-              {#if m.att_name}<div class="bubble-att">📎 {m.att_name}</div>{/if}
+              {#if m.att_hash}
+                {#if m.att_here && m.att_mime?.startsWith("image/") && pictures[m.att_hash]}
+                  <img class="bubble-pic" src={pictures[m.att_hash]} alt="" />
+                {:else if m.att_here}
+                  <div class="bubble-att">📎 {m.att_name ?? m.att_mime} · <button class="linkish" onclick={() => showFile(m)}>Show</button></div>
+                {:else if m.att_on_swarm}
+                  <div class="bubble-att">📎 {m.att_name ?? m.att_mime} · {(m.att_len / 1024 / 1024).toFixed(1)} MB · <button class="linkish" disabled={fetching === m.att_hash} onclick={() => fetchBig(m)}>{fetching === m.att_hash ? "fetching…" : "Fetch"}</button></div>
+                {:else}
+                  <div class="bubble-att">📎 {m.att_name ?? m.att_mime ?? "attachment"} · arriving…</div>
+                {/if}
+              {/if}
               {#if unpaid(m)}
                 <div class="actions" style="margin: 6px 0 4px">
                   <button class="btn small primary" disabled={paying !== null} onclick={() => pay(m)}>{paying === m.seq ? "Paying…" : `Pay ${fmtXmr(m.amount_pxmr)}`}</button>
@@ -355,7 +452,7 @@
               {:else if !m.outgoing && m.kind === 1}
                 <div class="meta">paid</div>
               {/if}
-              {#if m.body}<div class="bubble-body">{m.body}</div>{/if}
+              {#if m.body && !(m.att_hash && (m.body === "📷" || m.body.startsWith("📎 ")))}<div class="bubble-body">{m.body}</div>{/if}
               <div class="bubble-meta">
                 {fmtTime(m.timestamp)}
                 {#if m.outgoing}{m.delivered ? (m.read_by_them ? " · read" : " · sent") : " · sending…"}{/if}
@@ -371,8 +468,10 @@
       <div class="composer">
         <textarea class="input" rows="2" placeholder="Write a message" bind:value={draft} disabled={!current.has_keys}
           onkeydown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}></textarea>
+        <button class="btn" title="Attach a picture or a file" disabled={attaching || !current.has_keys} onclick={() => attach()}>{attaching ? "…" : "📎"}</button>
         <button class="btn primary" disabled={!draft.trim() || sending || !current.has_keys} onclick={send}>{sending ? "Sending…" : "Send"}</button>
       </div>
+      {#if (window as any).__DUCAT_DRIVE}<div class="request-bar"><input id="attpath" class="input" placeholder="/path/to/attach" onchange={(e) => attach((e.target as HTMLInputElement).value)} /></div>{/if}
       {#if err}<p class="err">{err}</p>{/if}
     {:else}
       <div class="pane-empty">

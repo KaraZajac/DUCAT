@@ -22,7 +22,6 @@
   let card = $state<Code | null>(null);
   let presenting = $state(false);
   let saleTab = $state<TabRow | null>(null);
-  let claimTimer: ReturnType<typeof setInterval> | null = null;
 
   const saleTotal = $derived(saleLines.reduce((s, l) => s + l.a, 0));
 
@@ -48,10 +47,7 @@
     }
   }
 
-  onMount(() => {
-    refresh();
-    return () => { if (claimTimer) clearInterval(claimTimer); };
-  });
+  onMount(refresh);
 
   $effect(() => {
     void gen.value;
@@ -84,27 +80,12 @@
     err = null;
     presenting = true;
     try {
-      card = await api.saleCard();
-      const inbox = card.inbox_key;
-      const lines = saleLines;
       const tax = taxText.trim() ? await pxmrOf(taxText, "") : null;
-      claimTimer = setInterval(async () => {
-        try {
-          const who = await api.cardClaimant(inbox);
-          if (!who) return;
-          if (claimTimer) clearInterval(claimTimer);
-          claimTimer = null;
-          let t = await api.openTab(who.persona_hex, "pos");
-          for (const l of lines) t = await api.tabAddLine(t.id, l.d, l.a);
-          if (tax) t = await api.tabSetTax(t.id, tax);
-          saleTab = await api.settleTab(t.id);
-          card = null;
-          saleLines = [];
-          taxText = "";
-        } catch (e) {
-          err = String(e);
-        }
-      }, 3000);
+      const r = await api.presentSale(saleLines.map((l) => [l.d, l.a] as [string, number]), tax);
+      card = r.code;
+      saleTab = r.tab;
+      saleLines = [];
+      taxText = "";
     } catch (e) {
       err = String(e);
     } finally {
@@ -113,9 +94,10 @@
   }
 
   function stopPresenting() {
-    if (claimTimer) clearInterval(claimTimer);
-    claimTimer = null;
+    // The tab stays bound to its card until it is answered or swept; the
+    // screen just stops watching.
     card = null;
+    saleTab = null;
   }
 
   async function saleDone() {
@@ -228,7 +210,7 @@
 </div>
 
 {#if mode === "sale"}
-  {#if saleTab}
+  {#if saleTab && saleTab.state !== "open"}
     <div class="card sale-status">
       <h3>{saleTab.name}</h3>
       <div class="balance-big">{saleTab.shown.primary}</div>
@@ -250,15 +232,15 @@
       </div>
       {#if err}<p class="err">{err}</p>{/if}
     </div>
-  {:else if card}
+  {:else if card && saleTab}
     <div class="card">
-      <h3>Scan to pay {fmtXmr(saleTotal)}</h3>
+      <h3>Scan to pay {fmtXmr(saleTab.total_pxmr)}</h3>
       <div class="code-wrap">
         <div class="qr">{@html card.svg}</div>
         <div class="code-side">
           <p class="note">The customer scans this with their phone. As soon as they do, the bill goes to them and this screen follows the payment.</p>
           <div class="bill">
-            {#each saleLines as l}<div class="bill-line"><span>{l.d}</span><span>{fmtXmr(l.a)}</span></div>{/each}
+            {#each saleTab.lines as [d, a]}<div class="bill-line"><span>{d}</span><span>{fmtXmr(a)}</span></div>{/each}
           </div>
           <div class="addr">{card.uri}</div>
           <div class="actions">

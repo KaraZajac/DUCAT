@@ -7,13 +7,14 @@
   import Till from "./lib/Till.svelte";
   import Library from "./lib/Library.svelte";
   import Market from "./lib/Market.svelte";
+  import Activity from "./lib/Activity.svelte";
   import Files from "./lib/Files.svelte";
   import Sites from "./lib/Sites.svelte";
   import StatusView from "./lib/Status.svelte";
 
   import { gen, startTicker } from "./lib/state.svelte";
 
-  type Page = "chat" | "wallet" | "till" | "library" | "market" | "files" | "sites" | "me" | "status";
+  type Page = "chat" | "wallet" | "till" | "activity" | "library" | "market" | "files" | "sites" | "me" | "status";
   let page = $state<Page>("chat");
   let unread = $state(0);
   let status = $state<Status | null>(null);
@@ -22,6 +23,7 @@
     { id: "chat", label: "Chat", glyph: "✉" },
     { id: "wallet", label: "Wallet", glyph: "◈" },
     { id: "till", label: "Till", glyph: "▣" },
+    { id: "activity", label: "Activity", glyph: "≣" },
     { id: "library", label: "Library", glyph: "▥" },
     { id: "market", label: "Market", glyph: "◫" },
     { id: "files", label: "Files", glyph: "▤" },
@@ -72,6 +74,8 @@
       <Wallet />
     {:else if page === "till"}
       <Till />
+    {:else if page === "activity"}
+      <Activity />
     {:else if page === "library"}
       <Library />
     {:else if page === "market"}

@@ -103,6 +103,9 @@ export interface MessageRow {
   att_name: string | null;
   att_mime: string | null;
   att_len: number;
+  att_hash: string | null;
+  att_on_swarm: boolean;
+  att_here: boolean;
   items: [string, number][];
   tax_pxmr: number | null;
   payto: string | null;
@@ -354,6 +357,63 @@ export interface Enquiry {
   listing: string;
 }
 
+export interface LedgerEvent {
+  txid: string;
+  height: number;
+  timestamp: number;
+  direction: "Received" | "Sent";
+  amount_pxmr: number;
+  fee_pxmr: number;
+  net_pxmr: number;
+  balance_after_pxmr: number;
+  counterparty: string | null;
+  address: string | null;
+  donation: boolean;
+  source: "Notice" | "OurRecord" | "Unknown";
+  note: string | null;
+  pending: boolean;
+  locked: boolean;
+  unlocks_in_blocks: number;
+  unexplained: boolean;
+  provisional: boolean;
+  items: { d: string; a: number }[];
+  tax_pxmr: number | null;
+  receipted: boolean;
+  contact_hex: string | null;
+  receipt_by: string | null;
+  receipt_at: number;
+}
+
+export interface LedgerSummary {
+  in_pxmr: number;
+  out_pxmr: number;
+  net_pxmr: number;
+  fees_pxmr: number;
+  in_count: number;
+  out_count: number;
+  tax_collected_pxmr: number;
+  donations_pxmr: number;
+}
+
+export interface BusinessSummary {
+  by_origin: [string, { count: number; take_pxmr: number; tip_pxmr: number }][];
+  tax_collected_pxmr: number;
+  outstanding_count: number;
+  outstanding_pxmr: number;
+  sales_count: number;
+  sales_pxmr: number;
+}
+
+export interface StandingRow {
+  id: string;
+  persona_hex: string;
+  name: string;
+  amount_pxmr: number;
+  note: string;
+  monthly: boolean;
+  next_at: number;
+}
+
 export const api = {
   status: () => invoke<Status>("status"),
   fetchProgress: (shareKey: string) => invoke<Progress>("fetch_progress", { shareKey }),
@@ -463,6 +523,22 @@ export const api = {
   fetchGallery: (share: string, digestHex: string) => invoke<string[]>("fetch_gallery", { share, digestHex }),
   pictureDataUrl: (path: string) => invoke<string>("picture_data_url", { path }),
   enquiryAbout: (personaHex: string) => invoke<Enquiry | null>("enquiry_about", { personaHex }),
+
+  ledger: (fromTs: number, toTs: number) => invoke<{ events: LedgerEvent[]; summary: LedgerSummary; business: BusinessSummary }>("ledger", { fromTs, toTs }),
+  exportLedger: (path: string, json: boolean) => invoke<number>("export_ledger", { path, json }),
+
+  requestPayment: (personaHex: string, amountPxmr: number, note: string) => invoke<void>("request_payment", { personaHex, amountPxmr, note }),
+  standingBills: () => invoke<StandingRow[]>("standing_bills"),
+  addStandingBill: (personaHex: string, amountPxmr: number, note: string, monthly: boolean) => invoke<void>("add_standing_bill", { personaHex, amountPxmr, note, monthly }),
+  stopStandingBill: (id: string) => invoke<void>("stop_standing_bill", { id }),
+  donateCode: () => invoke<Code>("donate_code"),
+
+  sendAttachment: (personaHex: string, path: string, caption: string | null) => invoke<void>("send_attachment", { personaHex, path, caption }),
+  attachmentPath: (ctHashHex: string) => invoke<string | null>("attachment_path", { ctHashHex }),
+  fetchSwarmAttachment: (personaHex: string, seq: number, outgoing: boolean) => invoke<string>("fetch_swarm_attachment", { personaHex, seq, outgoing }),
+
+  presentSale: (lines: [string, number][], taxPxmr: number | null) => invoke<{ code: Code; tab: TabRow }>("present_sale", { lines, taxPxmr }),
+  salesInProgress: () => invoke<[string, TabRow][]>("sales_in_progress"),
   pickSavePath: async (name: string): Promise<string | null> => {
     const r = await save({ defaultPath: name });
     return typeof r === "string" ? r : null;

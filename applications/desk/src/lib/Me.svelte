@@ -18,6 +18,7 @@
   let backupMsg = $state<string | null>(null);
   let backupBusy = $state(false);
   let exportedAt = $state(0);
+  let donate = $state<Code | null>(null);
 
   async function exportBackup() {
     err = null; backupMsg = null;
@@ -133,6 +134,19 @@
   {:else}
     <button class="btn primary" onclick={showCode} disabled={cutting}>{cutting ? "Cutting…" : "Show my code"}</button>
     <p class="note">Cutting a code writes a record to the network; the first one takes a few seconds.</p>
+  {/if}
+</div>
+
+<div class="card">
+  <h3>Donations</h3>
+  <p class="note">A code for a jar, a busking pitch, a page: whoever answers it can send money without being asked, and each gift is receipted as a donation.</p>
+  {#if donate}
+    <div class="code-wrap">
+      <div class="qr">{@html donate.svg}</div>
+      <div class="code-side"><div class="addr">{donate.uri}</div><div class="actions"><button class="btn small" onclick={() => copy(donate?.uri ?? "")}>Copy code</button></div></div>
+    </div>
+  {:else}
+    <button class="btn" onclick={async () => { try { donate = await api.donateCode(); } catch (e) { err = String(e); } }}>Show a donation code</button>
   {/if}
 </div>
 

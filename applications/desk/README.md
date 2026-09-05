@@ -27,12 +27,59 @@ The Rust half also builds on its own, without the web toolchain:
 compile, and a box without webkit — CI, a phone build machine — must still
 be able to `cargo test --workspace` on everything else.
 
+## What it does
+
+Everything the phone does that a desk can, in the same protocol, from
+the same identity:
+
+| Page | What is there |
+| --- | --- |
+| Chat | Threads and groups; bills paid in place; pictures and files attached, small ones by record, big ones by swarm; a request or a standing bill from the header |
+| Wallet | Balance and sync, receive (address and code), send with a quote, history, the node |
+| Till | A sale to whoever scans the code, running tabs, the catalogue priced in your currency; receipts go out when the chain agrees |
+| Activity | The ledger — every note in and send out with what it was for — and its CSV/JSON export |
+| Library | The press (publications, issues on the shelf or the swarm, subscribers, subscribe-by-scan) and the reading room |
+| Market | Browse a cell and its ring; list a thing with pictures, post it to this week's board |
+| Files, Sites | A file at an address that cannot change; a site at an address that can |
+| Me | Your name, your code, personas, a donation code, backup and restore |
+
+The logic is `ducat-app`, tested with `cargo test -p ducat-app`; the
+window is a thin set of commands over it. Several live-network
+exercises ship as examples of that crate and were run against this
+window while it was built:
+
+    DUCAT_DESK_STATE=<dir> cargo run -p ducat-app --example mailbox -- host | guest <card> | customer <card> | reader <code> | party <name> [card...]
+    DUCAT_DESK_STATE=<dir> cargo run -p ducat-app --example publish -- share <file> | site <folder> <title> | get <address>
+    DUCAT_DESK_STATE=<dir> cargo run -p ducat-app --example wallet -- address | sync | send <addr> <xmr>
+
+Not on the desk (yet): rides in any seat — hail, taxi, drive, and the
+bonded escrow behind them — need a phone's position; voice calls need
+a phone's audio path; the kiosk's self-service screen is a phone at a
+counter. Cards from those threads still land here and read as they
+should. The screens are English only for now; the phone's nineteen
+languages are a dictionary away.
+
+## Driving the window
+
+A debug build watches `DUCAT_DESK_DRIVE=<dir>` for `*.js` files and
+evaluates each inside the page, in name order, deleting it; the page
+can write back with `window.__TAURI__.core.invoke('drive_report',
+{text})`, which lands in `<dir>/report.txt`. It exists because a
+Wayland session ignores X11 pointer warps, so nothing outside the
+window can click it; a walk of every screen after every change is how
+the desk is tested. Under the drive, pages that would open a file
+picker also take a typed path. Release builds compile none of this.
+
 ## Where things are
 
-- `../../app/` — `ducat-app`: stores, releases, sites; the logic, tested with `cargo test -p ducat-app`
+- `../../app/` — `ducat-app`: identity, contacts and the mailbox, wallet, tabs, publications, groups, listings and boards, the ledger, backup, releases, sites — the logic, tested with `cargo test -p ducat-app`
 - `src-tauri/src/lib.rs` — the commands, one thin call each into `ducat-app`
 - `src/lib/*.svelte` — the screens; `src/lib/api.ts` types every command once
 
 State lives under `$XDG_DATA_HOME/ducat` (Linux), `~/Library/Application Support/ducat`
 (macOS) or `%APPDATA%\ducat` (Windows). `DUCAT_DESK_STATE=<dir>` names an
 identity explicitly; two desks on one machine are two directories.
+On a fresh start with no state, the previous desk's directory
+(`…/ducat-desk`) is adopted — copied, so nothing there is touched —
+and its identity, contacts and wallet carry across; its string-kept
+tables read here as structures.
