@@ -122,7 +122,8 @@ body {
 }
 .nav-item:hover { background: var(--surface-2); }
 .nav-item.active { background: var(--primary-soft); color: var(--primary); font-weight: 600; }
-.nav-item .glyph { width: 20px; text-align: center; opacity: 0.9; }
+.nav-item .glyph { width: 20px; display: inline-flex; align-items: center; justify-content: center; opacity: 0.85; flex: none; }
+.glyph svg { display: block; }
 
 .sidebar .spacer { flex: 1; }
 
@@ -377,9 +378,9 @@ h4 { margin: 16px 0 6px; font-size: 14px; color: var(--muted); text-transform: u
 .shot .linkish { color: #fff; }
 
 /* ----- activity ----- */
-.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 16px; }
-.stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; }
-.stat-v { font-size: 20px; font-weight: 700; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; min-width: 0; }
+.stat-v { font-size: 19px; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
 .ledger { display: grid; }
 .ledger-row { display: grid; grid-template-columns: 76px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 4px; border-top: 1px solid var(--line); background: none; border-left: 0; border-right: 0; border-bottom: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .ledger-row:first-child { border-top: 0; }
@@ -456,3 +457,13 @@ select.input option { background: var(--bg); color: var(--text); }
 .composer textarea { flex: 1 1 220px; min-width: 160px; }
 .composer-tools { display: flex; gap: 8px; align-items: flex-end; margin-left: auto; }
 .composer .btn { padding: 8px 12px; }
+
+/* Inline icons sit on the text line; in a bare button they are the button. */
+.btn svg, .linkish svg, .meta svg, .bubble-att svg { width: 16px; height: 16px; vertical-align: -3px; }
+.bubble-tools .linkish { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; padding: 0; border-radius: var(--radius-xs); color: var(--muted); }
+.bubble-tools .linkish:hover { background: var(--surface-2); color: var(--text); }
+.composer-tools .btn, .composer .btn.icon { display: inline-flex; align-items: center; justify-content: center; }
+.composer .btn svg { vertical-align: middle; }
+.card-link { display: flex; align-items: center; gap: 6px; margin-top: 6px; min-width: 0; }
+.card-link code { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; background: var(--surface-2); padding: 5px 8px; border-radius: var(--radius-xs); }
+.bubble.out .card-link code { background: rgba(0, 0, 0, 0.08); }

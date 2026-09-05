@@ -366,8 +366,15 @@ struct ContactRow {
 
 fn contact_row(a: &App, c: Contact) -> ContactRow {
     let thread = a.thread(&c.persona_hex);
-    // The preview is the last thing said, not the last thing done to it.
-    let last = thread.iter().rev().find(|r| r.surfaces() && !matches!(r.kind, 4 | 5 | 14 | 15));
+    // The preview is the last thing said, not the last thing done to it —
+    // and a withdrawn message was unsaid.
+    let marks = ducat_app::contacts::retractions(&thread);
+    let last = thread.iter().rev().find(|r| {
+        r.surfaces()
+            && !matches!(r.kind, 4 | 5 | 14 | 15)
+            && !marks.unsent.contains(&(r.seq, r.timestamp))
+            && !marks.quiet.contains(&(r.seq, r.timestamp))
+    });
     ContactRow {
         name: c.display_name(),
         named: c.named(),
@@ -1357,8 +1364,14 @@ struct GroupRowOut {
 
 fn group_row(a: &App, g: ducat_app::groups::Group) -> GroupRowOut {
     let rows = a.group_thread(&g.id_hex);
-    // Reactions and withdrawals decorate; the preview is the last words.
-    let last = rows.iter().rev().find(|r| r.message.kind != 4 && r.message.kind != 5);
+    // Reactions and withdrawals decorate; the preview is the last words
+    // still standing.
+    let marks = ducat_app::groups::group_marks(&rows);
+    let last = rows.iter().rev().find(|r| {
+        r.message.kind != 4
+            && r.message.kind != 5
+            && !marks.unsent.contains(&(r.sender_hex.clone(), r.message.group_seq))
+    });
     GroupRowOut {
         members: g.members.iter().filter_map(|h| a.contact(h)).map(|c| contact_row(a, c)).collect(),
         missing: a.group_missing(&g.id_hex),

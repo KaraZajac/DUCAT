@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { icons } from "./icons";
   // Chat: every thread on the left, the open one on the right. A desk has
   // the room for both at once, which is the one place it beats the phone.
   import { onMount, tick } from "svelte";
@@ -61,7 +62,12 @@
 
   async function scrollToEnd() {
     await tick();
-    if (list) list.scrollTop = list.scrollHeight;
+    // Once now, and again after layout settles — a long card or a late
+    // image can grow the list after the first pass.
+    const go = () => { if (list) list.scrollTop = list.scrollHeight; };
+    go();
+    requestAnimationFrame(go);
+    setTimeout(go, 250);
   }
 
   async function selectGroup(id: string) {
@@ -600,10 +606,10 @@
           <div class="bubble-row" role="listitem" class:out={g.mine} onmouseenter={() => (groupHover = gkey(g))} onmouseleave={() => { if (groupPicking !== gkey(g)) groupHover = null; }}>
             {#if groupHover === gkey(g)}
               <div class="bubble-tools" class:out={g.mine}>
-                <button class="linkish" title={t("desk_react")} onclick={() => (groupPicking = groupPicking === gkey(g) ? null : gkey(g))}>☺</button>
-                {#if !g.unsent}<button class="linkish" title={t("chat_reply")} onclick={() => (groupReplyTo = { sender_hex: g.sender_hex, gseq: g.gseq, line: g.message.body.trim() || t("chat_reply_to_message") })}>↩</button>{/if}
-                {#if g.mine && !g.unsent}<button class="linkish" title={t("chat_unsend")} onclick={() => unsendInGroup(g)}>↶</button>{/if}
-                {#if g.message.body && !g.unsent}<button class="linkish" title={t("chat_copy")} onclick={() => copy(g.message.body)}>⧉</button>{/if}
+                <button class="linkish" title={t("desk_react")} onclick={() => (groupPicking = groupPicking === gkey(g) ? null : gkey(g))}>{@html icons.react}</button>
+                {#if !g.unsent}<button class="linkish" title={t("chat_reply")} onclick={() => (groupReplyTo = { sender_hex: g.sender_hex, gseq: g.gseq, line: g.message.body.trim() || t("chat_reply_to_message") })}>{@html icons.reply}</button>{/if}
+                {#if g.mine && !g.unsent}<button class="linkish" title={t("chat_unsend")} onclick={() => unsendInGroup(g)}>{@html icons.unsend}</button>{/if}
+                {#if g.message.body && !g.unsent}<button class="linkish" title={t("chat_copy")} onclick={() => copy(g.message.body)}>{@html icons.copy}</button>{/if}
               </div>
             {/if}
             <div class="bubble" class:out={g.mine} class:unsent={g.unsent}>
@@ -612,7 +618,7 @@
               {/if}
               {#if !g.mine}<div class="bubble-kind">{g.sender_name}</div>{/if}
               {#if g.unsent}<div class="bubble-kind">{g.mine ? t("chat_you_withdrew") : t("chat_they_withdrew", g.sender_name)}</div>{/if}
-              {#if g.re_seq !== null}<div class="quote" class:gone={g.quote === null}>{g.quote ?? t("chat_reply_to_gone")}</div>{/if}
+              {#if g.re_seq !== null && !g.unsent}<div class="quote" class:gone={g.quote === null}>{g.quote ?? t("chat_reply_to_gone")}</div>{/if}
               <div class="bubble-body">{g.unsent ? "" : g.message.body}</div>
               <div class="bubble-meta">{fmtTime(g.message.timestamp)}</div>
               {#if g.reactions.length}
@@ -624,7 +630,7 @@
         {#if groupThread.length === 0}<p class="empty">{t("desk_nothing_here")}</p>{/if}
       </div>
       {#if groupReplyTo}
-        <div class="reply-banner"><span class="meta">{t("desk_replying_to")}</span><span class="reply-line">{groupReplyTo.line}</span><button class="linkish" title={t("chat_reply_cancel")} onclick={() => (groupReplyTo = null)}>✕</button></div>
+        <div class="reply-banner"><span class="meta">{t("desk_replying_to")}</span><span class="reply-line">{groupReplyTo.line}</span><button class="linkish" title={t("chat_reply_cancel")} onclick={() => (groupReplyTo = null)}>{@html icons.close}</button></div>
       {/if}
       <div class="composer">
         <textarea class="input" rows="2" placeholder={groupReplyTo ? t("desk_your_reply") : t("desk_write_to_group")} bind:value={draft} disabled={currentGroup.missing.length > 0}
@@ -651,11 +657,11 @@
           {/if}
         </div>
         <div class="actions pane-actions">
-          <button class="btn small" title={t("call_button")} disabled={!current.has_keys} onclick={async () => { err = null; try { await api.placeCall(current!.persona_hex); } catch (e) { err = String(e); } }}>📞 {t("call_button")}</button>
+          <button class="btn small" title={t("call_button")} disabled={!current.has_keys} onclick={async () => { err = null; try { await api.placeCall(current!.persona_hex); } catch (e) { err = String(e); } }}>{@html icons.call} {t("call_button")}</button>
           <button class="btn small" class:active={payingOut} disabled={!current.their_address} title={current.their_address ? t("desk_send_them_money") : t("pay_no_address_hint", current.name)} onclick={() => { payingOut = !payingOut; requesting = false; }}>{t("desk_pay")}</button>
           <button class="btn small" class:active={requesting} onclick={() => { requesting = !requesting; payingOut = false; }}>{t("pay_request")}</button>
           <button class="btn small" onclick={() => { renaming = true; newName = current?.petname ?? ""; }}>{t("profiles_rename")}</button>
-          <button class="btn small" class:active={showSettings} title={t("chat_conversation_settings")} onclick={() => (showSettings = !showSettings)}>⋯ {t("desk_more")}</button>
+          <button class="btn small" class:active={showSettings} title={t("chat_conversation_settings")} onclick={() => (showSettings = !showSettings)}>{@html icons.more} {t("desk_more")}</button>
         </div>
       </div>
       {#if showSettings}
@@ -709,11 +715,11 @@
           <div class="bubble-row" role="listitem" class:out={m.outgoing} onmouseenter={() => (hovered = keyOf(m))} onmouseleave={() => { if (picking !== keyOf(m)) hovered = null; }}>
             {#if hovered === keyOf(m) && !m.dead_letter}
               <div class="bubble-tools" class:out={m.outgoing}>
-                <button class="linkish" title={t("desk_react")} onclick={() => (picking = picking === keyOf(m) ? null : keyOf(m))}>☺</button>
-                {#if !m.unsent}<button class="linkish" title={t("chat_reply")} onclick={() => startReply(m)}>↩</button>{/if}
-                {#if m.kind === 0 && m.body && !m.unsent}<button class="linkish" title={t("chat_copy")} onclick={() => copy(m.body)}>⧉</button>{/if}
-                {#if m.outgoing && m.kind === 0 && m.delivered && !m.unsent}<button class="linkish" title={t("chat_unsend")} onclick={() => unsend(m)}>↶</button>{/if}
-                <button class="linkish" title={t("chat_delete")} onclick={() => deleteHere(m)}>✕</button>
+                <button class="linkish" title={t("desk_react")} onclick={() => (picking = picking === keyOf(m) ? null : keyOf(m))}>{@html icons.react}</button>
+                {#if !m.unsent}<button class="linkish" title={t("chat_reply")} onclick={() => startReply(m)}>{@html icons.reply}</button>{/if}
+                {#if m.kind === 0 && m.body && !m.unsent}<button class="linkish" title={t("chat_copy")} onclick={() => copy(m.body)}>{@html icons.copy}</button>{/if}
+                {#if m.outgoing && m.kind === 0 && m.delivered && !m.unsent}<button class="linkish" title={t("chat_unsend")} onclick={() => unsend(m)}>{@html icons.unsend}</button>{/if}
+                <button class="linkish" title={t("chat_delete")} onclick={() => deleteHere(m)}>{@html icons.close}</button>
               </div>
             {/if}
             <div class="bubble" class:out={m.outgoing} class:dead={m.dead_letter} class:money={m.kind >= 1 && m.kind <= 3} class:unsent={m.unsent}>
@@ -724,7 +730,7 @@
               {#if m.withdrawn}<div class="bubble-kind">{m.outgoing ? t("chat_you_withdrew_bill") : t("chat_they_withdrew_bill", current?.name ?? "")}</div>{/if}
               {#if m.refused}<div class="bubble-kind">{m.outgoing ? t("chat_they_declined", current?.name ?? "") : t("chat_you_declined")}</div>{/if}
               {#if kindLabel(m)}<div class="bubble-kind">{kindLabel(m)}</div>{/if}
-              {#if m.kind === 0 && m.re_seq !== null}
+              {#if m.kind === 0 && m.re_seq !== null && !m.unsent}
                 <div class="quote" class:gone={m.quote === null}>{m.quote ?? t("chat_reply_to_gone")}</div>
               {/if}
               {#if m.items.length}
@@ -737,13 +743,13 @@
                 {#if m.att_here && m.att_mime?.startsWith("image/") && pictures[m.att_hash]}
                   <img class="bubble-pic" src={pictures[m.att_hash]} alt="" />
                 {:else if m.att_here && m.att_mime?.startsWith("audio/") && audios[m.att_hash]}
-                  <div class="bubble-audio"><span class="meta">🎤 {t("chat_voice_memo")}</span><audio controls preload="metadata" src={audios[m.att_hash]}></audio></div>
+                  <div class="bubble-audio"><span class="meta">{@html icons.mic} {t("chat_voice_memo")}</span><audio controls preload="metadata" src={audios[m.att_hash]}></audio></div>
                 {:else if m.att_here}
-                  <div class="bubble-att">📎 {m.att_name ?? m.att_mime} · <button class="linkish" onclick={() => showFile(m)}>{t("desk_show")}</button></div>
+                  <div class="bubble-att">{@html icons.attach} {m.att_name ?? m.att_mime} · <button class="linkish" onclick={() => showFile(m)}>{t("desk_show")}</button></div>
                 {:else if m.att_on_swarm}
-                  <div class="bubble-att">📎 {m.att_name ?? m.att_mime} · {(m.att_len / 1024 / 1024).toFixed(1)} MB · <button class="linkish" disabled={fetching === m.att_hash} onclick={() => fetchBig(m)}>{fetching === m.att_hash ? t("releases_fetching").toLowerCase() : t("chat_download_file")}</button></div>
+                  <div class="bubble-att">{@html icons.attach} {m.att_name ?? m.att_mime} · {(m.att_len / 1024 / 1024).toFixed(1)} MB · <button class="linkish" disabled={fetching === m.att_hash} onclick={() => fetchBig(m)}>{fetching === m.att_hash ? t("releases_fetching").toLowerCase() : t("chat_download_file")}</button></div>
                 {:else}
-                  <div class="bubble-att">📎 {m.att_name ?? m.att_mime ?? t("chat_file_fallback")} · {t("desk_arriving_word")}</div>
+                  <div class="bubble-att">{@html icons.attach} {m.att_name ?? m.att_mime ?? t("chat_file_fallback")} · {t("desk_arriving_word")}</div>
                 {/if}
               {/if}
               {#if unpaid(m) && !m.withdrawn && !m.refused}
@@ -759,7 +765,10 @@
                   <button class="btn small" disabled={answering !== null} title={t("desk_take_bill_back")} onclick={() => cancelMine(m)}>{answering === keyOf(m) ? "…" : t("chat_cancel_request")}</button>
                 </div>
               {/if}
-              {#if m.body && !(m.att_hash && (m.body === "📷" || m.body === "🎤" || m.body.startsWith("📎 ")))}<div class="bubble-body">{m.body}</div>{/if}
+              {#if cardIn(m.body)}
+                <div class="bubble-body">{m.body.replace(CARD_LINK, "").trim()}</div>
+                <div class="card-link"><code>{cardIn(m.body)}</code><button class="linkish" title={t("chat_copy")} onclick={() => copy(cardIn(m.body)!)}>{@html icons.copy}</button></div>
+              {:else if m.body && !(m.att_hash && (m.body === "📷" || m.body === "🎤" || m.body.startsWith("📎 ")))}<div class="bubble-body">{m.body}</div>{/if}
               {#if !m.outgoing && m.kind === 0 && cardIn(m.body)}
                 <div class="actions" style="margin: 6px 0 2px"><button class="btn small primary" disabled={answeringCard} onclick={() => answerCard(cardIn(m.body)!)}>{answeringCard ? t("desk_answering") : t("desk_answer_this_card")}</button></div>
               {/if}
@@ -779,7 +788,7 @@
         {/if}
       </div>
       {#if replyTo}
-        <div class="reply-banner"><span class="meta">{t("desk_replying_to")}</span><span class="reply-line">{replyTo.line}</span><button class="linkish" title={t("chat_reply_cancel")} onclick={() => (replyTo = null)}>✕</button></div>
+        <div class="reply-banner"><span class="meta">{t("desk_replying_to")}</span><span class="reply-line">{replyTo.line}</span><button class="linkish" title={t("chat_reply_cancel")} onclick={() => (replyTo = null)}>{@html icons.close}</button></div>
       {/if}
       {#if recording}
         <div class="composer recording">
@@ -792,8 +801,8 @@
           <textarea class="input" rows="2" placeholder={replyTo ? t("desk_your_reply") : t("chat_message_placeholder")} bind:value={draft} disabled={!current.has_keys} oninput={draftChanged}
             onkeydown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } else if (e.key === "Escape" && replyTo) { replyTo = null; } }}></textarea>
           <div class="composer-tools">
-            <button class="btn" title={t("chat_attach")} disabled={attaching || !current.has_keys} onclick={() => attach()}>{attaching ? "…" : "📎"}</button>
-            <button class="btn" title={t("chat_voice_memo")} disabled={sending || !current.has_keys} onclick={startMemo}>🎤</button>
+            <button class="btn" title={t("chat_attach")} disabled={attaching || !current.has_keys} onclick={() => attach()}>{#if attaching}…{:else}{@html icons.attach}{/if}</button>
+            <button class="btn" title={t("chat_voice_memo")} disabled={sending || !current.has_keys} onclick={startMemo}>{@html icons.mic}</button>
             <button class="btn primary" disabled={!draft.trim() || sending || !current.has_keys} onclick={send}>{sending ? t("desk_sending") : t("chat_send")}</button>
           </div>
         </div>

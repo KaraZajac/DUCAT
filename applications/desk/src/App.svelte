@@ -17,6 +17,7 @@
   import { gen, startTicker } from "./lib/state.svelte";
   import { i18n, t } from "./lib/i18n.svelte";
   import cat from "./assets/ducat-cat.png";
+  import { icons } from "./lib/icons";
 
   type Page = "chat" | "wallet" | "till" | "kiosk" | "activity" | "library" | "market" | "files" | "sites" | "me" | "status";
   let page = $state<Page>("chat");
@@ -25,20 +26,20 @@
 
   // Labels re-read when the language changes; the keys are the phone's
   // where it has the word, the desk's own where it does not.
-  const nav = $derived.by((): { id: Page; label: string; glyph: string }[] => {
+  const nav = $derived.by((): { id: Page; label: string }[] => {
     void i18n.lang;
     return [
-      { id: "chat", label: t("tab_chat"), glyph: "✉" },
-      { id: "wallet", label: t("monero_wallet_title"), glyph: "◈" },
-      { id: "till", label: t("desk_nav_till"), glyph: "▣" },
-      { id: "kiosk", label: t("kiosk_mode_title"), glyph: "▨" },
-      { id: "activity", label: t("tab_activity"), glyph: "≣" },
-      { id: "library", label: t("section_library"), glyph: "▥" },
-      { id: "market", label: t("desk_nav_market"), glyph: "◫" },
-      { id: "files", label: t("releases_title"), glyph: "▤" },
-      { id: "sites", label: t("section_sites"), glyph: "▦" },
-      { id: "me", label: t("desk_nav_me"), glyph: "◐" },
-      { id: "status", label: t("section_status"), glyph: "◉" },
+      { id: "chat", label: t("tab_chat") },
+      { id: "wallet", label: t("monero_wallet_title") },
+      { id: "till", label: t("desk_nav_till") },
+      { id: "kiosk", label: t("kiosk_mode_title") },
+      { id: "activity", label: t("tab_activity") },
+      { id: "library", label: t("section_library") },
+      { id: "market", label: t("desk_nav_market") },
+      { id: "files", label: t("releases_title") },
+      { id: "sites", label: t("section_sites") },
+      { id: "me", label: t("desk_nav_me") },
+      { id: "status", label: t("section_status") },
     ];
   });
 
@@ -63,7 +64,7 @@
     <div class="brand"><img src={cat} alt="" /><span>DUCAT</span></div>
     {#each nav as n}
       <button class="nav-item" class:active={page === n.id} onclick={() => (page = n.id)}>
-        <span class="glyph">{n.glyph}</span>{n.label}
+        <span class="glyph">{@html icons[n.id]}</span>{n.label}
         {#if n.id === "chat" && unread > 0}<span class="badge">{unread}</span>{/if}
       </button>
     {/each}

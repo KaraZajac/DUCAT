@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { icons } from "./icons";
   // The kiosk: orders at a counter. Each has a number, a code any Monero
   // wallet can pay — the total carries six digits of noise so the payment
   // is recognised — and, if the customer has DUCAT, a card that turns the
@@ -90,7 +91,7 @@
       {/each}
     </div>
     {#each lines as l, i}
-      <div class="bill-line row-line"><span>{l.d}</span><span>{fmtXmr(l.a)} <button class="linkish" onclick={() => (lines = lines.filter((_, j) => j !== i))}>✕</button></span></div>
+      <div class="bill-line row-line"><span>{l.d}</span><span>{fmtXmr(l.a)} <button class="linkish" onclick={() => (lines = lines.filter((_, j) => j !== i))}>{@html icons.close}</button></span></div>
     {/each}
     <div class="field">
       <input class="input" placeholder={t("desk_line")} bind:value={lineName} />
