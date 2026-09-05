@@ -2,7 +2,7 @@
   // Me: the name on your cards, the code somebody scans to reach you, and
   // the hats you wear.
   import { onMount } from "svelte";
-  import { api, copy, type Code, type PersonaRow } from "./api";
+  import { api, copy, fmtWhen, type Code, type PersonaRow } from "./api";
   import { gen } from "./state.svelte";
 
   let personas = $state<PersonaRow[]>([]);
@@ -14,10 +14,40 @@
   let newPersona = $state("");
 
   const worn = $derived(personas.find((p) => p.worn) ?? null);
+  let passphrase = $state("");
+  let backupMsg = $state<string | null>(null);
+  let backupBusy = $state(false);
+  let exportedAt = $state(0);
+
+  async function exportBackup() {
+    err = null; backupMsg = null;
+    const path = await api.pickSavePath("ducat-backup.ducat");
+    if (!path) return;
+    backupBusy = true;
+    try {
+      const n = await api.exportBackup(path, passphrase);
+      backupMsg = `Written: ${n} bytes to ${path}`;
+      await refresh();
+    } catch (e) { err = String(e); } finally { backupBusy = false; }
+  }
+
+  async function importBackup() {
+    err = null; backupMsg = null;
+    const path = await api.pickFile();
+    if (!path) return;
+    backupBusy = true;
+    try {
+      const r = await api.importBackup(path, passphrase);
+      backupMsg = `Restored ${r.contacts} contact(s) and ${r.personas} persona(s); the wallet rescans from block ${r.restore_height}.`;
+      code = null; name = "";
+      await refresh();
+    } catch (e) { err = String(e); } finally { backupBusy = false; }
+  }
 
   async function refresh() {
     try {
       personas = await api.personas();
+      exportedAt = (await api.backupInfo()).exported_at;
       const w = personas.find((p) => p.worn);
       savedName = w?.my_name ?? null;
       if (!name) name = savedName ?? "";
@@ -104,6 +134,18 @@
     <button class="btn primary" onclick={showCode} disabled={cutting}>{cutting ? "Cutting…" : "Show my code"}</button>
     <p class="note">Cutting a code writes a record to the network; the first one takes a few seconds.</p>
   {/if}
+</div>
+
+<div class="card">
+  <h3>Backup</h3>
+  <p class="note">One sealed file carries your identity, wallet key, contacts and their threads, prekeys, tabs, publications and groups — the same bundle the phone makes, so either restores the other. {#if exportedAt}Last exported {fmtWhen(exportedAt)}.{:else}Never exported.{/if}</p>
+  <div class="field">
+    <label for="pass">Passphrase</label>
+    <input id="pass" class="input" type="password" bind:value={passphrase} placeholder="Eight characters or more" />
+    <button class="btn" disabled={passphrase.length < 8 || backupBusy} onclick={exportBackup}>Export…</button>
+    <button class="btn" disabled={passphrase.length < 8 || backupBusy} onclick={importBackup}>Import…</button>
+  </div>
+  {#if backupMsg}<p class="note ok-text">{backupMsg}</p>{/if}
 </div>
 
 <div class="card">

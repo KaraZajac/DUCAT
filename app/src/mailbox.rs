@@ -1312,7 +1312,7 @@ impl App {
             }
             8 | 9 | 10 => log::warn(TAG, format!("a ceremony round from {} — ceremonies are not on the desk yet", c.display_name())),
             11 => log::info(TAG, format!("{} offered a live position — not shown on the desk yet", c.display_name())),
-            12 => log::warn(TAG, format!("a group roster from {} — groups are not on the desk yet", c.display_name())),
+            12 => self.absorb_roster(&c.persona_hex, opened.group_id.as_deref(), opened.payload.as_deref()),
             13 => {
                 if let Err(e) = self.absorb_key(&c.persona_hex, arrived) {
                     log::warn(TAG, format!("publication key: {e}"));

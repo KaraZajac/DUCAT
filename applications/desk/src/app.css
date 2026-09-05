@@ -328,3 +328,23 @@ select.input { appearance: auto; }
 .sale-status .actions { justify-content: center; }
 .muted-card { opacity: 0.7; }
 h4 { margin: 16px 0 6px; font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.library-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 16px; align-items: start; }
+.list-head { display: flex; justify-content: space-between; align-items: center; padding: 10px 8px 4px; color: var(--muted); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; }
+.avatar.group { background: var(--surface-2); color: var(--primary); }
+.chip.on { background: var(--primary-soft); border-color: var(--primary); }
+
+/* ----- market ----- */
+.found-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.found { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 0; overflow: hidden; text-align: left; cursor: pointer; color: inherit; font: inherit; display: flex; flex-direction: column; }
+.found:hover { border-color: var(--primary); }
+.found-text { padding: 10px 12px; }
+.thumb { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; background: var(--surface-2); }
+.thumb.none { display: grid; place-items: center; color: var(--muted); font-size: 13px; }
+.thumb.big { width: 280px; border-radius: var(--radius-s); flex: none; }
+.thumb.small { width: 44px; height: 44px; aspect-ratio: 1; border-radius: 8px; flex: none; }
+.found-detail { display: flex; gap: 18px; align-items: flex-start; flex-wrap: wrap; }
+.gallery { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+.gallery img { max-width: 220px; max-height: 180px; border-radius: 8px; }
+.shot { position: relative; }
+.shot .actions { position: absolute; bottom: 4px; left: 6px; gap: 10px; background: rgba(0,0,0,0.45); border-radius: 6px; padding: 2px 6px; }
+.shot .linkish { color: #fff; }

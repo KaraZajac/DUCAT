@@ -2,7 +2,7 @@
 // nowhere else, so a renamed command breaks one file.
 
 import { invoke } from "@tauri-apps/api/core";
-import { open } from "@tauri-apps/plugin-dialog";
+import { open, save } from "@tauri-apps/plugin-dialog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
 export interface Status {
@@ -264,6 +264,96 @@ export interface SubscriptionRow {
   periods: ShelfRow[];
 }
 
+export interface GroupRow {
+  id_hex: string;
+  name: string;
+  members: ContactRow[];
+  missing: string[];
+  mine: string;
+  unread: boolean;
+  last_body: string | null;
+  last_at: number;
+}
+
+export interface GroupMessage {
+  sender_hex: string;
+  sender_name: string;
+  mine: boolean;
+  message: MessageRow;
+}
+
+export interface Restored {
+  contacts: number;
+  personas: number;
+  restore_height: number;
+  display_name: string | null;
+}
+
+export interface ListingRow {
+  id: string;
+  kind: number;
+  kind_name: string;
+  title: string;
+  area: string;
+  cell: string;
+  price_pxmr: number;
+  deposit_pxmr: number;
+  specs: Record<string, unknown>;
+  private_details: string;
+  quantity: number;
+  thumb_data_url: string | null;
+  photos: string[];
+  posted: boolean;
+  board: string | null;
+  posted_at: number;
+  wanted: boolean;
+  price_typed: string | null;
+  price_currency: string | null;
+  shown: Shown;
+}
+
+export interface ListingDraft {
+  id: string | null;
+  kind: number;
+  title: string;
+  area: string;
+  cell: string;
+  price_text: string;
+  price_is_fiat: boolean;
+  specs: Record<string, unknown>;
+  private_details: string;
+  quantity: number;
+}
+
+export interface FoundRow {
+  card: string;
+  poster: string;
+  kind: number;
+  kind_name: string;
+  title: string;
+  area: string;
+  cell: string | null;
+  price_pxmr: number;
+  deposit_pxmr: number;
+  expiry: number;
+  specs: Record<string, unknown>;
+  features: string[];
+  quantity: number;
+  thumb_data_url: string | null;
+  gallery: string | null;
+  gallery_dig: string | null;
+  mine: boolean;
+  shown: Shown;
+}
+
+export interface Enquiry {
+  title: string;
+  price: number;
+  deposit: number;
+  kind: number;
+  listing: string;
+}
+
 export const api = {
   status: () => invoke<Status>("status"),
   fetchProgress: (shareKey: string) => invoke<Progress>("fetch_progress", { shareKey }),
@@ -348,6 +438,35 @@ export const api = {
   askForPeriod: (publisherHex: string, period: string) => invoke<void>("ask_for_period", { publisherHex, period }),
   setMirroring: (publisherHex: string, on: boolean) => invoke<void>("set_mirroring", { publisherHex, on }),
   setMuted: (publisherHex: string, muted: boolean) => invoke<void>("set_muted", { publisherHex, muted }),
+
+  groups: () => invoke<GroupRow[]>("groups"),
+  createGroup: (name: string, members: string[]) => invoke<GroupRow>("create_group", { name, members }),
+  addToGroup: (idHex: string, personaHex: string) => invoke<void>("add_to_group", { idHex, personaHex }),
+  groupThread: (idHex: string) => invoke<GroupMessage[]>("group_thread", { idHex }),
+  sendGroup: (idHex: string, body: string) => invoke<boolean>("send_group", { idHex, body }),
+  markGroupSeen: (idHex: string) => invoke<void>("mark_group_seen", { idHex }),
+
+  backupInfo: () => invoke<{ exported_at: number; has_wallet: boolean }>("backup_info"),
+  exportBackup: (path: string, passphrase: string) => invoke<number>("export_backup", { path, passphrase }),
+  importBackup: (path: string, passphrase: string) => invoke<Restored>("import_backup", { path, passphrase }),
+
+  listings: () => invoke<ListingRow[]>("listings"),
+  saveListing: (draft: ListingDraft) => invoke<ListingRow>("save_listing", { draft }),
+  removeListing: (id: string) => invoke<void>("remove_listing", { id }),
+  postListing: (id: string) => invoke<boolean>("post_listing", { id }),
+  unpostListing: (id: string) => invoke<void>("unpost_listing", { id }),
+  addListingPhoto: (id: string, path: string) => invoke<number>("add_listing_photo", { id, path }),
+  removeListingPhoto: (id: string, index: number) => invoke<void>("remove_listing_photo", { id, index }),
+  setListingCover: (id: string, index: number) => invoke<boolean>("set_listing_cover", { id, index }),
+  browseCached: (cell: string, kind: number | null) => invoke<FoundRow[]>("browse_cached", { cell, kind }),
+  browse: (cell: string, kind: number | null) => invoke<FoundRow[]>("browse", { cell, kind }),
+  fetchGallery: (share: string, digestHex: string) => invoke<string[]>("fetch_gallery", { share, digestHex }),
+  pictureDataUrl: (path: string) => invoke<string>("picture_data_url", { path }),
+  enquiryAbout: (personaHex: string) => invoke<Enquiry | null>("enquiry_about", { personaHex }),
+  pickSavePath: async (name: string): Promise<string | null> => {
+    const r = await save({ defaultPath: name });
+    return typeof r === "string" ? r : null;
+  },
 
   pickFile: async (): Promise<string | null> => {
     const r = await open({ multiple: false, directory: false });

@@ -1171,6 +1171,372 @@ fn set_muted(publisher_hex: String, muted: bool) -> Result<(), String> {
     app()?.set_muted(&publisher_hex, muted).map_err(said)
 }
 
+
+// ----- groups ----------------------------------------------------------------------
+
+#[derive(Serialize)]
+struct GroupRowOut {
+    id_hex: String,
+    name: String,
+    members: Vec<ContactRow>,
+    missing: Vec<String>,
+    mine: String,
+    unread: bool,
+    last_body: Option<String>,
+    last_at: u64,
+}
+
+fn group_row(a: &App, g: ducat_app::groups::Group) -> GroupRowOut {
+    let rows = a.group_thread(&g.id_hex);
+    let last = rows.last();
+    GroupRowOut {
+        members: g.members.iter().filter_map(|h| a.contact(h)).map(|c| contact_row(a, c)).collect(),
+        missing: a.group_missing(&g.id_hex),
+        mine: a.mine_in(&g.members),
+        unread: App::group_unread(&a.group_seen(&g.id_hex), &a.look_at(&rows)),
+        last_body: last.map(|r| r.message.body.clone()),
+        last_at: last.map_or(0, |r| r.message.timestamp),
+        id_hex: g.id_hex,
+        name: g.name,
+    }
+}
+
+#[tauri::command]
+fn groups() -> Result<Vec<GroupRowOut>, String> {
+    let a = app()?;
+    let mut rows: Vec<GroupRowOut> = a.groups().into_iter().map(|g| group_row(a, g)).collect();
+    rows.sort_by(|x, y| y.last_at.cmp(&x.last_at));
+    Ok(rows)
+}
+
+#[tauri::command]
+async fn create_group(name: String, members: Vec<String>) -> Result<GroupRowOut, String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.create_group(&name, &members).map(|g| group_row(a, g)).map_err(said))
+        .await
+        .map_err(s)?
+}
+
+#[tauri::command]
+async fn add_to_group(id_hex: String, persona_hex: String) -> Result<(), String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.add_to_group(&id_hex, &persona_hex).map_err(said)).await.map_err(s)?
+}
+
+#[derive(Serialize)]
+struct GroupMessage {
+    sender_hex: String,
+    sender_name: String,
+    mine: bool,
+    message: MessageRow,
+}
+
+#[tauri::command]
+fn group_thread(id_hex: String) -> Result<Vec<GroupMessage>, String> {
+    let a = app()?;
+    let ours = a.persona_hexes();
+    Ok(a.group_thread(&id_hex)
+        .into_iter()
+        .map(|r| GroupMessage {
+            mine: ours.contains(&r.sender_hex),
+            sender_name: if ours.contains(&r.sender_hex) { "You".into() } else { a.contact(&r.sender_hex).map(|c| c.display_name()).unwrap_or_else(|| format!("{}…", &r.sender_hex[..8.min(r.sender_hex.len())])) },
+            sender_hex: r.sender_hex,
+            message: message_row(r.message),
+        })
+        .collect())
+}
+
+#[tauri::command]
+async fn send_group(id_hex: String, body: String) -> Result<bool, String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.send_group(&id_hex, &body, 0, None, None).map_err(said)).await.map_err(s)?
+}
+
+#[tauri::command]
+fn mark_group_seen(id_hex: String) -> Result<(), String> {
+    let a = app()?;
+    let rows = a.group_thread(&id_hex);
+    let look = a.look_at(&rows);
+    a.mark_group_seen(&id_hex, &look).map_err(said)
+}
+
+
+// ----- backup ------------------------------------------------------------------
+
+#[derive(Serialize)]
+struct BackupInfo {
+    exported_at: u64,
+    has_wallet: bool,
+}
+
+#[tauri::command]
+fn backup_info() -> Result<BackupInfo, String> {
+    let a = app()?;
+    Ok(BackupInfo { exported_at: a.backup_exported_at(), has_wallet: a.spend_key_hex().is_some() })
+}
+
+#[tauri::command]
+async fn export_backup(path: String, passphrase: String) -> Result<u64, String> {
+    let a = app()?;
+    if passphrase.chars().count() < 8 {
+        return Err("a passphrase is eight characters at least".into());
+    }
+    tauri::async_runtime::spawn_blocking(move || a.export_backup_to(std::path::Path::new(&path), &passphrase).map_err(said))
+        .await
+        .map_err(s)?
+}
+
+#[tauri::command]
+async fn import_backup(path: String, passphrase: String) -> Result<ducat_app::backup::Restored, String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.import_backup_from(std::path::Path::new(&path), &passphrase).map_err(said))
+        .await
+        .map_err(s)?
+}
+
+
+// ----- the board: listings and browsing -------------------------------------------
+
+#[derive(Serialize)]
+struct ListingRow {
+    id: String,
+    kind: u32,
+    kind_name: String,
+    title: String,
+    area: String,
+    cell: String,
+    price_pxmr: u64,
+    deposit_pxmr: u64,
+    specs: serde_json::Map<String, serde_json::Value>,
+    private_details: String,
+    quantity: u64,
+    thumb_data_url: Option<String>,
+    photos: Vec<String>,
+    posted: bool,
+    board: Option<String>,
+    posted_at: u64,
+    wanted: bool,
+    price_typed: Option<String>,
+    price_currency: Option<String>,
+    shown: ducat_app::wallet::Shown,
+}
+
+fn data_url(b64: &str, mime: &str) -> String {
+    format!("data:{mime};base64,{b64}")
+}
+
+fn listing_row(a: &App, l: ducat_app::listings::Listing) -> ListingRow {
+    ListingRow {
+        kind_name: ducat_app::listings::kind_name(l.kind).into(),
+        thumb_data_url: l.thumb.as_deref().filter(|t| !t.is_empty()).map(|t| data_url(t, "image/jpeg")),
+        photos: a.photos(&l.id).into_iter().map(|p| p.to_string_lossy().into_owned()).collect(),
+        posted: l.posted(),
+        shown: a.show_amount(l.price_pxmr),
+        id: l.id,
+        kind: l.kind,
+        title: l.title,
+        area: l.area,
+        cell: l.cell,
+        price_pxmr: l.price_pxmr,
+        deposit_pxmr: l.deposit_pxmr,
+        specs: l.specs,
+        private_details: l.private_details,
+        quantity: l.quantity,
+        board: l.board,
+        posted_at: l.posted_at,
+        wanted: l.wanted,
+        price_typed: l.price_typed,
+        price_currency: l.price_currency,
+    }
+}
+
+#[tauri::command]
+fn listings() -> Result<Vec<ListingRow>, String> {
+    let a = app()?;
+    let mut rows: Vec<ListingRow> = a.listings().into_iter().map(|l| listing_row(a, l)).collect();
+    rows.sort_by(|x, y| y.posted_at.cmp(&x.posted_at));
+    Ok(rows)
+}
+
+#[derive(serde::Deserialize)]
+struct ListingDraft {
+    id: Option<String>,
+    kind: u32,
+    title: String,
+    area: String,
+    cell: String,
+    price_text: String,
+    price_is_fiat: bool,
+    specs: serde_json::Map<String, serde_json::Value>,
+    private_details: String,
+    quantity: u64,
+}
+
+#[tauri::command]
+fn save_listing(draft: ListingDraft) -> Result<ListingRow, String> {
+    let a = app()?;
+    if draft.title.trim().is_empty() {
+        return Err("a listing needs a title".into());
+    }
+    let cell = draft.cell.trim().to_lowercase();
+    if cell.len() < 4 || !cell.chars().all(|c| "0123456789bcdefghjkmnpqrstuvwxyz".contains(c)) {
+        return Err("the area is a geohash cell, e.g. dqche".into());
+    }
+    let (price_pxmr, typed, currency) = if draft.price_is_fiat {
+        let (rate, _) = a.rate_cached_pair().ok_or("no exchange rate yet — price in XMR, or wait for the wallet")?;
+        (a.fiat_to_pxmr(&draft.price_text, rate).ok_or("that is not a price")?, Some(draft.price_text.trim().to_string()), Some(a.rate_currency()))
+    } else {
+        (ducat_app::wallet::parse_xmr(&draft.price_text).ok_or("that is not an amount of XMR")?, None, None)
+    };
+    let mut l = a
+        .draft_listing(draft.kind, &draft.title, &draft.area, price_pxmr, &cell, draft.specs, &draft.private_details, typed.as_deref(), currency.as_deref(), draft.quantity, None)
+        .map_err(said)?;
+    if let Some(id) = draft.id.filter(|i| !i.is_empty()) {
+        if let Some(old) = a.listing(&id) {
+            l.id = id;
+            l.thumb = old.thumb;
+            l.created = old.created;
+            l.gallery = old.gallery;
+            l.gallery_dig = old.gallery_dig;
+        }
+    }
+    a.put_draft(l.clone()).map_err(said)?;
+    Ok(listing_row(a, a.listing(&l.id).unwrap_or(l)))
+}
+
+#[tauri::command]
+fn remove_listing(id: String) -> Result<(), String> {
+    app()?.remove_listing(&id).map_err(said)
+}
+
+#[tauri::command]
+async fn post_listing(id: String) -> Result<bool, String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.post_listing(&id).map_err(said)).await.map_err(s)?
+}
+
+#[tauri::command]
+async fn unpost_listing(id: String) -> Result<(), String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.unpost_listing(&id).map_err(said)).await.map_err(s)?
+}
+
+#[tauri::command]
+fn add_listing_photo(id: String, path: String) -> Result<usize, String> {
+    let a = app()?;
+    let n = a.add_photo(&id, std::path::Path::new(&path)).map_err(said)?;
+    // The first picture is the board's picture until another is chosen.
+    if n == 1 {
+        a.set_thumb_from_photo(&id, 0).map_err(said)?;
+    }
+    Ok(n)
+}
+
+#[tauri::command]
+fn remove_listing_photo(id: String, index: usize) -> Result<(), String> {
+    app()?.remove_photo(&id, index).map_err(said)
+}
+
+#[tauri::command]
+fn set_listing_cover(id: String, index: usize) -> Result<bool, String> {
+    app()?.set_thumb_from_photo(&id, index).map_err(said)
+}
+
+#[derive(Serialize)]
+struct FoundRow {
+    card: String,
+    poster: String,
+    kind: u64,
+    kind_name: String,
+    title: String,
+    area: String,
+    cell: Option<String>,
+    price_pxmr: u64,
+    deposit_pxmr: u64,
+    expiry: u64,
+    specs: serde_json::Map<String, serde_json::Value>,
+    features: Vec<String>,
+    quantity: u64,
+    thumb_data_url: Option<String>,
+    gallery: Option<String>,
+    gallery_dig: Option<String>,
+    mine: bool,
+    shown: ducat_app::wallet::Shown,
+}
+
+fn found_row(a: &App, f: ducat_app::listings::Found) -> FoundRow {
+    let ours = a.persona_hexes();
+    FoundRow {
+        kind_name: ducat_app::listings::kind_name(f.kind as u32).into(),
+        thumb_data_url: f.thumb.as_deref().map(|t| data_url(t, "image/jpeg")),
+        mine: ours.contains(&f.poster),
+        shown: a.show_amount(f.price),
+        card: f.card,
+        poster: f.poster,
+        kind: f.kind,
+        title: f.title,
+        area: f.area,
+        cell: f.cell,
+        price_pxmr: f.price,
+        deposit_pxmr: f.deposit,
+        expiry: f.expiry,
+        specs: f.specs,
+        features: f.features,
+        quantity: f.quantity,
+        gallery: f.gallery,
+        gallery_dig: f.gallery_dig,
+    }
+}
+
+#[tauri::command]
+fn browse_cached(cell: String, kind: Option<u32>) -> Result<Vec<FoundRow>, String> {
+    let a = app()?;
+    Ok(a.browse_cached(&cell.trim().to_lowercase(), kind).into_iter().map(|f| found_row(a, f)).collect())
+}
+
+#[tauri::command]
+async fn browse(cell: String, kind: Option<u32>) -> Result<Vec<FoundRow>, String> {
+    let a = app()?;
+    let cell = cell.trim().to_lowercase();
+    if cell.len() < 4 {
+        return Err("the area is a geohash cell, e.g. dqche".into());
+    }
+    tauri::async_runtime::spawn_blocking(move || a.browse(&cell, kind).into_iter().map(|f| found_row(a, f)).collect()).await.map_err(s)
+}
+
+#[tauri::command]
+async fn fetch_gallery(share: String, digest_hex: String) -> Result<Vec<String>, String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || {
+        let dir = a.fetch_gallery(&share, &digest_hex).map_err(said)?;
+        let mut files: Vec<String> = std::fs::read_dir(&dir).map(|rd| rd.flatten().map(|e| e.path()).filter(|p| p.is_file()).map(|p| p.to_string_lossy().into_owned()).collect()).unwrap_or_default();
+        files.sort();
+        Ok(files)
+    })
+    .await
+    .map_err(s)?
+}
+
+/// A picture off disk as a data URL, for the webview which cannot read
+/// files itself.
+#[tauri::command]
+fn picture_data_url(path: String) -> Result<String, String> {
+    let bytes = std::fs::read(&path).map_err(s)?;
+    let mime = match std::path::Path::new(&path).extension().and_then(|e| e.to_str()).map(|e| e.to_lowercase()).as_deref() {
+        Some("png") => "image/png",
+        Some("webp") => "image/webp",
+        Some("gif") => "image/gif",
+        _ => "image/jpeg",
+    };
+    use base64::Engine;
+    Ok(data_url(&base64::engine::general_purpose::STANDARD.encode(&bytes), mime))
+}
+
+#[tauri::command]
+fn enquiry_about(persona_hex: String) -> Result<Option<ducat_app::listings::Enquiry>, String> {
+    Ok(app()?.enquiry(&persona_hex))
+}
+
 // ----- the log ---------------------------------------------------------------
 
 #[tauri::command]
@@ -1357,6 +1723,28 @@ pub fn run() {
             ask_for_period,
             set_mirroring,
             set_muted,
+            groups,
+            create_group,
+            add_to_group,
+            group_thread,
+            send_group,
+            mark_group_seen,
+            backup_info,
+            export_backup,
+            import_backup,
+            listings,
+            save_listing,
+            remove_listing,
+            post_listing,
+            unpost_listing,
+            add_listing_photo,
+            remove_listing_photo,
+            set_listing_cover,
+            browse_cached,
+            browse,
+            fetch_gallery,
+            picture_data_url,
+            enquiry_about,
         ])
         .run(tauri::generate_context!())
         .expect("error while running the desk");

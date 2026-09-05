@@ -12,10 +12,14 @@
 //! more: where the stores live, where bundles are cached, where the node
 //! keeps its keys. Two desks on one machine are two directories.
 
+pub mod backup;
+pub mod boards;
 pub mod catalogue;
 pub mod contacts;
+pub mod groups;
 pub mod identity;
 pub mod lap;
+pub mod listings;
 pub mod log;
 pub mod mailbox;
 pub mod opinion;
@@ -26,6 +30,7 @@ pub mod releases;
 pub mod sites;
 pub mod store;
 pub mod tabs;
+pub mod thumbs;
 pub mod wallet;
 
 use std::path::{Path, PathBuf};
@@ -101,7 +106,7 @@ impl App {
     }
 
     /// Unix seconds now.
-    pub(crate) fn now() -> u64 {
+    pub fn now() -> u64 {
         std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .map(|d| d.as_secs())

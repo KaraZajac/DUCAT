@@ -152,7 +152,7 @@
   {#if err}<p class="err">{err}</p>{/if}
 
 {:else}
-  <div class="till-grid">
+  <div class="library-grid">
     <div class="card">
       <h3>Your publications</h3>
       {#each pubs as p (p.id)}

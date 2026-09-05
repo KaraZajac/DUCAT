@@ -50,6 +50,7 @@ impl App {
                             app.reseed_all_releases();
                             app.reseed_issues();
                             app.reseed_library();
+                            app.reseed_galleries();
                             app.refresh_shelves();
                             app.sweep_site_orphans();
                             app.sweep_release_orphans();
@@ -74,6 +75,8 @@ impl App {
             log::info(TAG, format!("{got} message(s) arrived"));
         }
         self.verify_last_writes();
+        self.retry_group_outbox();
+        self.listings_lap();
         self.sweep_abandoned_tabs(&[]);
     }
 }

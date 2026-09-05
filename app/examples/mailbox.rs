@@ -203,6 +203,42 @@ fn main() {
                 Err(e) => println!("MB_FAIL fetch: {e}"),
             }
         }
-        _ => panic!("MB_FAIL usage: host | guest <card uri> [name] | customer <card uri> | reader <press code>"),
+        Some("party") => {
+            // One member of a group: claim every card given, cut a card of
+            // its own, then keep the lap turning and print what the group
+            // says. Args: party <name> [card...]
+            let name = args.get(1).cloned().unwrap_or_else(|| "Party".into());
+            app.set_my_name(None, &name).expect("MB_FAIL name");
+            for uri in args.iter().skip(2) {
+                match app.claim_card(uri, None, false, None) {
+                    Ok(c) => println!("MB_CLAIMED {}", c.contact().display_name()),
+                    Err(e) => println!("MB_FAIL claim: {e}"),
+                }
+            }
+            let h = app.profile_code(None).expect("MB_FAIL issue");
+            println!("MB_CARD {}", h.uri);
+            let mut seen: std::collections::HashSet<(String, String, u64)> = std::collections::HashSet::new();
+            let t0 = Instant::now();
+            while t0.elapsed() < Duration::from_secs(900) {
+                app.lap_once();
+                for g in app.groups() {
+                    for r in app.group_thread(&g.id_hex) {
+                        let key = (g.id_hex.clone(), r.sender_hex.clone(), r.message.group_seq);
+                        if seen.insert(key) {
+                            let who = app.contact(&r.sender_hex).map(|c| c.display_name()).unwrap_or_else(|| "me".into());
+                            println!("MB_GROUP '{}' {}: {}", g.name, who, r.message.body);
+                            if !app.persona_hexes().contains(&r.sender_hex) && r.message.body.starts_with("ping") {
+                                match app.send_group(&g.id_hex, &format!("pong from {name}"), 0, None, None) {
+                                    Ok(all) => println!("MB_PONG all={all}"),
+                                    Err(e) => println!("MB_FAIL pong: {e}"),
+                                }
+                            }
+                        }
+                    }
+                }
+                std::thread::sleep(Duration::from_secs(5));
+            }
+        }
+        _ => panic!("MB_FAIL usage: host | guest <card uri> [name] | customer <card uri> | reader <press code> | party <name> [card...]"),
     }
 }
