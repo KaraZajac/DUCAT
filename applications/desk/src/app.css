@@ -1,0 +1,249 @@
+/* DUCAT desk — one palette, two themes, no framework.
+   The phone's Material palette is the reference: violet primary, quiet
+   surfaces, generous radius. Dark follows the OS. */
+
+:root {
+  --bg: #f7f5fb;
+  --surface: #ffffff;
+  --surface-2: #efebf6;
+  --text: #1c1b22;
+  --muted: #5f5b6b;
+  --line: #e2ddec;
+  --primary: #7c3aed;
+  --primary-ink: #ffffff;
+  --primary-soft: #ede4fb;
+  --danger: #b3261e;
+  --ok: #1b7f4b;
+  --radius: 12px;
+  --radius-s: 8px;
+  --shadow: 0 1px 2px rgba(20, 10, 40, 0.06), 0 4px 16px rgba(20, 10, 40, 0.05);
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141320;
+    --surface: #1c1b2a;
+    --surface-2: #26243a;
+    --text: #ece8f5;
+    --muted: #a49fb5;
+    --line: #322f47;
+    --primary: #b892ff;
+    --primary-ink: #1a0b33;
+    --primary-soft: #2e2547;
+    --danger: #ff8a80;
+    --ok: #6fd39a;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 20px rgba(0, 0, 0, 0.35);
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body, #app {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* ----- shell ------------------------------------------------------------ */
+
+.shell {
+  display: grid;
+  grid-template-columns: 232px 1fr;
+  height: 100%;
+}
+
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  padding: 18px 12px;
+  gap: 4px;
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.12em;
+  padding: 6px 12px 16px;
+  color: var(--primary);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-s);
+  color: var(--text);
+  cursor: pointer;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  width: 100%;
+}
+.nav-item:hover { background: var(--surface-2); }
+.nav-item.active { background: var(--primary-soft); color: var(--primary); font-weight: 600; }
+.nav-item .glyph { width: 20px; text-align: center; opacity: 0.9; }
+
+.sidebar .spacer { flex: 1; }
+
+.node-pill {
+  margin: 8px 4px 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-s);
+  background: var(--surface-2);
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
+.dot.ok { background: var(--ok); }
+.dot.warn { background: #d99a1c; }
+
+.main {
+  overflow: auto;
+  padding: 28px 36px 48px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+.page-lede {
+  color: var(--muted);
+  margin: 0 0 22px;
+  max-width: 62ch;
+}
+
+/* ----- cards + rows --------------------------------------------------------- */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px 20px;
+  margin-bottom: 16px;
+}
+
+.card h3 { margin: 0 0 10px; font-size: 15px; }
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px 16px;
+  align-items: center;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+.row:first-of-type { border-top: 0; }
+.row .title { font-weight: 600; }
+.row .meta { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+.row .actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+
+.empty {
+  color: var(--muted);
+  padding: 18px 0 6px;
+}
+
+.note {
+  color: var(--muted);
+  font-size: 12.5px;
+  margin-top: 8px;
+}
+
+/* ----- controls --------------------------------------------------------------- */
+
+.btn {
+  font: inherit;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+.btn:hover { background: var(--surface-2); }
+.btn:disabled { opacity: 0.5; cursor: default; }
+.btn.primary { background: var(--primary); color: var(--primary-ink); border-color: transparent; font-weight: 600; }
+.btn.primary:hover { filter: brightness(1.06); }
+.btn.danger { color: var(--danger); }
+.btn.small { padding: 5px 10px; font-size: 12.5px; }
+
+.input {
+  font: inherit;
+  padding: 9px 12px;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  width: 100%;
+  user-select: text;
+}
+.input:focus { outline: 2px solid var(--primary-soft); border-color: var(--primary); }
+
+.field { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+.field label { width: 96px; color: var(--muted); font-size: 12.5px; flex: none; }
+
+.toggle { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); cursor: pointer; }
+.toggle input { accent-color: var(--primary); }
+
+.addr {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--muted);
+  word-break: break-all;
+  user-select: text;
+}
+
+.err { color: var(--danger); margin: 8px 0; font-size: 13px; }
+.ok-text { color: var(--ok); }
+
+.drop {
+  border: 2px dashed var(--line);
+  border-radius: var(--radius);
+  padding: 26px;
+  text-align: center;
+  color: var(--muted);
+  transition: border-color 120ms, background 120ms;
+}
+.drop.over { border-color: var(--primary); background: var(--primary-soft); color: var(--primary); }
+
+/* ----- piece bar ----------------------------------------------------------- */
+
+.pieces {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 2px;
+  height: 8px;
+  margin: 8px 0 4px;
+}
+.pieces span { background: var(--surface-2); border-radius: 2px; }
+.pieces span.on { background: var(--primary); }
+
+.log {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  user-select: text;
+  color: var(--muted);
+  max-height: 60vh;
+  overflow: auto;
+}
+.log .e { color: var(--danger); }
+.log .w { color: #d99a1c; }

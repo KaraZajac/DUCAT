@@ -9,6 +9,7 @@
 resolver = "2"
 members = [
     "core", "sim", "harness", "mobile",
+    "app",
     # Vendored, credited, and modified — see mobile/vendor/STIGMERGE-NOTICE.md.
     "mobile/vendor/stigmerge-fileindex",
     "mobile/vendor/stigmerge-peer",

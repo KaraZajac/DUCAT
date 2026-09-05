@@ -1295,6 +1295,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "ducat-app"
+version = "0.1.0"
+dependencies = [
+ "base64",
+ "ducat-mobile",
+ "hex",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "thiserror 1.0.69",
+]
+
+[[package]]
 name = "ducat-core"
 version = "0.1.0"
 dependencies = [

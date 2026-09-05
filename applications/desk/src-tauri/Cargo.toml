@@ -1,0 +1,33 @@
+[package]
+name = "ducat-desk"
+version = "0.1.0"
+edition = "2021"
+description = "DUCAT on a bigger screen"
+license = "MPL-2.0"
+
+# The desk is a window over ducat-app. Every command here is a thin call
+# into that crate; nothing about DUCAT is decided in this package, which is
+# what lets the phone and the desk stay one implementation.
+
+# Its own workspace, deliberately. Tauri needs webkit2gtk and friends to
+# compile, and a machine without them — CI, a phone build box — must still
+# be able to `cargo test --workspace` on everything else. Built with
+# `pnpm tauri dev` / `pnpm tauri build` from applications/desk, or
+# `cargo build --manifest-path applications/desk/src-tauri/Cargo.toml`.
+[workspace]
+
+[lib]
+name = "ducat_desk_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+ducat-app = { path = "../../../app" }
+ducat-mobile = { path = "../../../mobile" }
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
