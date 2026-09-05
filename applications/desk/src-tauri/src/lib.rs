@@ -366,7 +366,8 @@ struct ContactRow {
 
 fn contact_row(a: &App, c: Contact) -> ContactRow {
     let thread = a.thread(&c.persona_hex);
-    let last = thread.iter().rev().find(|r| r.surfaces());
+    // The preview is the last thing said, not the last thing done to it.
+    let last = thread.iter().rev().find(|r| r.surfaces() && !matches!(r.kind, 4 | 5 | 14 | 15));
     ContactRow {
         name: c.display_name(),
         named: c.named(),
@@ -1839,6 +1840,15 @@ fn wire_audio() {
     {
         ducat_app::calls::calls().set_audio(Box::new(ducat_app::audio::DeviceAudio::new()));
         ducat_app::log::info("Desk", "calls use the machine's sound devices");
+        return;
+    }
+    #[allow(unreachable_code)]
+    match ducat_app::audio_proc::ProcessAudio::detect() {
+        Some(a) => {
+            ducat_app::log::info("Desk", &format!("calls use {} through its command-line tools", a.tool().name()));
+            ducat_app::calls::calls().set_audio(Box::new(a));
+        }
+        None => ducat_app::log::warn("Desk", "no sound tools found; calls will connect without audio"),
     }
 }
 
@@ -1848,6 +1858,87 @@ fn wire_audio() {
 #[tauri::command]
 fn take_notices() -> Vec<ducat_app::notify::Notice> {
     ducat_app::notify::take()
+}
+
+
+// ----- the kiosk: orders --------------------------------------------------------
+
+#[derive(Serialize)]
+struct OrderRow {
+    id: String,
+    number: u32,
+    lines: Vec<(String, u64)>,
+    total_pxmr: u64,
+    tax_pxmr: Option<u64>,
+    address: String,
+    pay_uri: String,
+    pay_svg: String,
+    state: ducat_app::orders::OrderState,
+    placed_at: u64,
+    ready_at: u64,
+    customer: Option<String>,
+    card: Option<String>,
+    card_svg: Option<String>,
+    shown: ducat_app::wallet::Shown,
+}
+
+fn order_row(a: &App, o: ducat_app::orders::Order) -> OrderRow {
+    OrderRow {
+        state: a.order_state(&o),
+        customer: o.persona_hex.as_deref().and_then(|h| a.contact(h)).map(|c| c.display_name()),
+        pay_uri: o.pay_uri(),
+        pay_svg: if o.address.is_empty() { String::new() } else { qr_svg(&o.pay_uri()) },
+        card_svg: o.card.as_deref().map(qr_svg),
+        shown: a.show_amount(o.total_pxmr),
+        lines: o.lines.iter().map(|l| (l.description.clone(), l.amount_pxmr)).collect(),
+        id: o.id,
+        number: o.number,
+        total_pxmr: o.total_pxmr,
+        tax_pxmr: o.tax,
+        address: o.address,
+        placed_at: o.placed_at,
+        ready_at: o.ready_at,
+        card: o.card,
+    }
+}
+
+#[tauri::command]
+fn orders() -> Result<Vec<OrderRow>, String> {
+    let a = app()?;
+    Ok(a.orders().into_iter().map(|o| order_row(a, o)).collect())
+}
+
+#[tauri::command]
+async fn place_order(lines: Vec<(String, u64)>, tax_pxmr: Option<u64>, with_card: bool) -> Result<OrderRow, String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || {
+        let items: Vec<ducat_app::contacts::BillItem> = lines.into_iter().map(|(d, a)| ducat_app::contacts::BillItem { description: d, amount_pxmr: a }).collect();
+        let mut o = a.place_order(items, tax_pxmr).map_err(said)?;
+        if with_card {
+            o = a.order_card(&o.id).map_err(said)?;
+        }
+        Ok(order_row(a, o))
+    })
+    .await
+    .map_err(s)?
+}
+
+#[tauri::command]
+async fn order_card(id: String) -> Result<OrderRow, String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.order_card(&id).map(|o| order_row(a, o)).map_err(said)).await.map_err(s)?
+}
+
+#[tauri::command]
+async fn abandon_order(id: String) -> Result<(), String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.abandon_order(&id).map_err(said)).await.map_err(s)?
+}
+
+#[tauri::command]
+async fn say_ready(id: String) -> Result<(), String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.say_ready(&id).map_err(said)).await.map_err(s)?
 }
 
 // ----- the log ---------------------------------------------------------------
@@ -2088,6 +2179,11 @@ pub fn run() {
             save_draft,
             set_chat_visible,
             take_notices,
+            orders,
+            place_order,
+            order_card,
+            abandon_order,
+            say_ready,
         ])
         .run(tauri::generate_context!())
         .expect("error while running the desk");

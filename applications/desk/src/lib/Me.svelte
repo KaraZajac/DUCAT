@@ -19,6 +19,14 @@
   let backupBusy = $state(false);
   let exportedAt = $state(0);
   let donate = $state<Code | null>(null);
+  let theme = $state<string>((() => { try { return localStorage.getItem("ducat.theme") ?? "system"; } catch { return "system"; } })());
+
+  function setTheme(v: string) {
+    theme = v;
+    try { localStorage.setItem("ducat.theme", v); } catch {}
+    if (v === "light" || v === "dark") document.documentElement.dataset.theme = v;
+    else delete document.documentElement.dataset.theme;
+  }
 
   async function exportBackup() {
     err = null; backupMsg = null;
@@ -135,6 +143,18 @@
     <button class="btn primary" onclick={showCode} disabled={cutting}>{cutting ? "Cutting…" : "Show my code"}</button>
     <p class="note">Cutting a code writes a record to the network; the first one takes a few seconds.</p>
   {/if}
+</div>
+
+<div class="card">
+  <h3>Appearance</h3>
+  <div class="field">
+    <label for="theme">Theme</label>
+    <select id="theme" class="input narrow" value={theme} onchange={(e) => setTheme((e.target as HTMLSelectElement).value)}>
+      <option value="system">Follow the system</option>
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
+    </select>
+  </div>
 </div>
 
 <div class="card">

@@ -484,8 +484,8 @@
       </div>
       {#if err}<p class="err">{err}</p>{/if}
     {:else if current}
-      <div class="pane-head">
-        <div>
+      <div class="pane-head stacked">
+        <div class="pane-lead">
           {#if renaming}
             <input class="input" bind:value={newName} placeholder={current.asserted_name ?? "A name for them"} onkeydown={(e) => e.key === "Enter" && rename()} />
             <button class="btn small" onclick={rename}>Save</button>
@@ -501,12 +501,12 @@
             </div>
           {/if}
         </div>
-        <div class="actions nowrap">
-          <button class="btn small" title="Voice call" disabled={!current.has_keys} onclick={async () => { err = null; try { await api.placeCall(current!.persona_hex); } catch (e) { err = String(e); } }}>📞</button>
-          <button class="btn small" disabled={!current.their_address} title={current.their_address ? "Send them money" : "They have not given a payment address"} onclick={() => { payingOut = !payingOut; requesting = false; }}>{payingOut ? "Close" : "Pay"}</button>
-          <button class="btn small" onclick={() => { requesting = !requesting; payingOut = false; }}>{requesting ? "Close" : "Request"}</button>
+        <div class="actions pane-actions">
+          <button class="btn small" title="Voice call" disabled={!current.has_keys} onclick={async () => { err = null; try { await api.placeCall(current!.persona_hex); } catch (e) { err = String(e); } }}>📞 Call</button>
+          <button class="btn small" class:active={payingOut} disabled={!current.their_address} title={current.their_address ? "Send them money" : "They have not given a payment address"} onclick={() => { payingOut = !payingOut; requesting = false; }}>Pay</button>
+          <button class="btn small" class:active={requesting} onclick={() => { requesting = !requesting; payingOut = false; }}>Request</button>
           <button class="btn small" onclick={() => { renaming = true; newName = current?.petname ?? ""; }}>Rename</button>
-          <button class="btn small" title="Thread settings" onclick={() => (showSettings = !showSettings)}>⋯</button>
+          <button class="btn small" class:active={showSettings} title="Thread settings" onclick={() => (showSettings = !showSettings)}>⋯ More</button>
         </div>
       </div>
       {#if showSettings}

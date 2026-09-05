@@ -671,6 +671,9 @@ impl App {
     /// A sale card was answered: the tab takes the customer and the bill
     /// goes out. Called from the claim sweep.
     pub fn on_sale_claimed(&self, inbox_key: &str, persona_hex: &str) {
+        if self.on_order_card_claimed(inbox_key, persona_hex) {
+            return;
+        }
         let Some(tab) = self.sale_tab_for(inbox_key) else { return };
         if tab.state != "open" {
             return;

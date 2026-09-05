@@ -435,6 +435,25 @@ export interface CallView {
   has_audio: boolean;
 }
 
+
+export type OrderRow = {
+  id: string;
+  number: number;
+  lines: [string, number][];
+  total_pxmr: number;
+  tax_pxmr: number | null;
+  address: string;
+  pay_uri: string;
+  pay_svg: string;
+  card: string | null;
+  card_svg: string | null;
+  state: "Awaiting" | "Seen" | "Confirmed" | "Abandoned";
+  placed_at: number;
+  ready_at: number;
+  customer: string | null;
+  shown: Shown;
+};
+
 export const api = {
   status: () => invoke<Status>("status"),
   fetchProgress: (shareKey: string) => invoke<Progress>("fetch_progress", { shareKey }),
@@ -568,6 +587,14 @@ export const api = {
   hangUp: () => invoke<void>("hang_up"),
   dismissCall: () => invoke<void>("dismiss_call"),
   takeNotices: () => invoke<{ title: string; body: string; open_thread: string | null; at_ms: number }[]>("take_notices"),
+
+  // the kiosk
+  orders: () => invoke<OrderRow[]>("orders"),
+  placeOrder: (lines: [string, number][], taxPxmr: number | null, withCard: boolean) =>
+    invoke<OrderRow>("place_order", { lines, taxPxmr, withCard }),
+  orderCard: (id: string) => invoke<OrderRow>("order_card", { id }),
+  abandonOrder: (id: string) => invoke<void>("abandon_order", { id }),
+  sayReady: (id: string) => invoke<void>("say_ready", { id }),
 
   react: (personaHex: string, seq: number, reOwn: boolean, emoji: string) => invoke<void>("react", { personaHex, seq, reOwn, emoji }),
   retractMessage: (personaHex: string, seq: number) => invoke<void>("retract_message", { personaHex, seq }),

@@ -107,7 +107,7 @@
 </script>
 
 <h1 class="page-title">Wallet</h1>
-<p class="page-lede">Monero, kept here. Nobody else holds these keys{#if view?.stagenet} — stagenet coin for now, so the amounts are practice{/if}.</p>
+<p class="page-lede">Monero, kept here. Nobody else holds these keys{#if view?.stagenet}{" — "}stagenet coin for now, so the amounts are practice{/if}.</p>
 
 {#if view}
   <div class="card">
@@ -115,7 +115,7 @@
       <div>
         <div class="balance-big">{fmtXmr(view.balances.spendable_pxmr)}</div>
         <div class="meta">
-          spendable{#if view.fiat_spendable} · {view.fiat_spendable.text}{view.fiat_spendable.notional ? " (notional)" : ""}{view.fiat_spendable.stale ? " · stale rate" : ""}{/if}
+          spendable{#if view.fiat_spendable}{" · "}{view.fiat_spendable.text}{view.fiat_spendable.notional ? " (notional)" : ""}{view.fiat_spendable.stale ? " · stale rate" : ""}{/if}
           {#if view.balances.locked_pxmr > 0} · {fmtXmr(view.balances.locked_pxmr)} arriving{#if view.balances.blocks_to_unlock > 0}, {view.balances.blocks_to_unlock} block{view.balances.blocks_to_unlock === 1 ? "" : "s"} to go{/if}{/if}
         </div>
       </div>
@@ -194,7 +194,7 @@
         <p class="note">Working out the fee…</p>
       {/if}
       <div class="actions">
-        <button class="btn primary" disabled={!to.trim() || !amount.trim() || sending || (quote !== null && !quote.affordable)} onclick={send}>{sending ? "Sending…" : "Send"}</button>
+        <button class="btn primary" disabled={!to.trim() || !amount.trim() || sending || (quote !== null && !quote.affordable)} onclick={send}>{sending ? "Sending…" : amount.trim() ? `Send ${amount.trim()} XMR` : "Send now"}</button>
       </div>
       {#if sentTx}<p class="note ok-text">Sent. Transaction {sentTx.slice(0, 16)}…</p>{/if}
       {#if err}<p class="err">{err}</p>{/if}

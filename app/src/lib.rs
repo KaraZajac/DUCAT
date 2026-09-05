@@ -15,6 +15,7 @@
 pub mod attachments;
 #[cfg(feature = "sound")]
 pub mod audio;
+pub mod audio_proc;
 pub mod backup;
 pub mod boards;
 pub mod calls;
@@ -30,6 +31,7 @@ pub mod log;
 pub mod mailbox;
 pub mod notify;
 pub mod opinion;
+pub mod orders;
 pub mod paths;
 pub mod pay;
 pub mod publications;

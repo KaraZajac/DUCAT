@@ -1411,6 +1411,32 @@ mod tests {
     }
 
     #[test]
+    fn reactions_and_retractions_find_their_targets() {
+        let text = |out: bool, seq: u64, ts: u64, body: &str| StoredMessage { outgoing: out, seq, body: body.into(), timestamp: ts, ..Default::default() };
+        let thread = vec![
+            text(true, 0, 100, "hi"),
+            text(false, 0, 101, "hello"),
+            // Their reaction to our "hi" (re_own=false from their side means our row).
+            StoredMessage { outgoing: false, seq: 1, kind: 4, body: "👍".into(), timestamp: 102, re_seq: Some(0), re_own: false, ..Default::default() },
+            // Our reaction to their "hello".
+            StoredMessage { outgoing: true, seq: 1, kind: 4, body: "❤️".into(), timestamp: 103, re_seq: Some(0), re_own: false, ..Default::default() },
+            // We take "hi" back.
+            StoredMessage { outgoing: true, seq: 2, kind: 5, body: "took it back".into(), timestamp: 104, re_seq: Some(0), re_own: true, ..Default::default() },
+            // A bill of ours, refused by them.
+            StoredMessage { outgoing: true, seq: 3, kind: 1, amount_pxmr: 5, body: "bill".into(), timestamp: 105, ..Default::default() },
+            StoredMessage { outgoing: false, seq: 2, kind: 5, body: "no".into(), timestamp: 106, re_seq: Some(3), re_own: false, ..Default::default() },
+        ];
+        let r = reactions_on(&thread);
+        assert_eq!(r.get(&(0, 100)).cloned(), Some((None, Some("👍".into()))));
+        assert_eq!(r.get(&(0, 101)).cloned(), Some((Some("❤️".into()), None)));
+        let m = retractions(&thread);
+        assert!(m.unsent.contains(&(0, 100)));
+        assert!(m.quiet.contains(&(2, 104)));
+        assert!(m.refused.contains(&(3, 105)));
+        assert!(m.withdrawn.is_empty());
+    }
+
+    #[test]
     fn a_card_may_not_move_a_working_address() {
         let mut prior = contact("aa");
         assert_eq!(fold_card_address(None, Some("4new")), (Some("4new".into()), None));

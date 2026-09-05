@@ -1,4 +1,15 @@
 <script lang="ts">
+
+  const ATTACH: Record<string, string> = {
+    Detached: "Detached",
+    Attaching: "Attaching",
+    AttachedWeak: "Attached, weakly",
+    AttachedGood: "Attached",
+    AttachedStrong: "Attached, strongly",
+    FullyAttached: "Fully attached",
+    OverAttached: "Over-attached",
+  };
+  const attachWord = (s: string) => ATTACH[s] ?? s;
   import { onMount } from "svelte";
   import { api, type Status } from "./api";
 
@@ -44,7 +55,7 @@
           <span class="dot" class:ok={status.ready} class:warn={status.attached && !status.ready}></span>
           {status.ready ? "Attached" : status.attached ? "Attaching" : status.running ? "Starting" : "Stopped"}
         </div>
-        <div class="meta">{status.state} · {status.peers} peers, {status.reliable_peers} reliable</div>
+        <div class="meta">{attachWord(status.state)} · {status.peers} peers, {status.reliable_peers} reliable</div>
       </div>
       <div class="actions"><span class="meta">{status.data_dir}</span></div>
     </div>

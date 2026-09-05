@@ -83,6 +83,7 @@ impl App {
         self.run_due_bills();
         self.fetch_one_attachment();
         self.expire_all();
+        self.expire_orders();
         self.sweep_abandoned_tabs(&[]);
     }
 }

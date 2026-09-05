@@ -5,6 +5,7 @@
   import Me from "./lib/Me.svelte";
   import Wallet from "./lib/Wallet.svelte";
   import Till from "./lib/Till.svelte";
+  import Kiosk from "./lib/Kiosk.svelte";
   import Library from "./lib/Library.svelte";
   import Market from "./lib/Market.svelte";
   import Activity from "./lib/Activity.svelte";
@@ -24,6 +25,7 @@
     { id: "chat", label: "Chat", glyph: "✉" },
     { id: "wallet", label: "Wallet", glyph: "◈" },
     { id: "till", label: "Till", glyph: "▣" },
+    { id: "kiosk", label: "Kiosk", glyph: "▨" },
     { id: "activity", label: "Activity", glyph: "≣" },
     { id: "library", label: "Library", glyph: "▥" },
     { id: "market", label: "Market", glyph: "◫" },
@@ -76,6 +78,8 @@
       <Wallet />
     {:else if page === "till"}
       <Till />
+    {:else if page === "kiosk"}
+      <Kiosk />
     {:else if page === "activity"}
       <Activity />
     {:else if page === "library"}

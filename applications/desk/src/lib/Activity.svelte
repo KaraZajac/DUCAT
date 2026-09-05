@@ -103,9 +103,9 @@
         <div class="lw">{e.timestamp ? fmtTime(e.timestamp) : e.pending ? "pending" : "—"}</div>
         <div class="lc">
           <div class="title">{e.direction === "Sent" ? "To" : "From"} {e.counterparty ?? (e.direction === "Sent" ? (e.address ? e.address.slice(0, 12) + "…" : "somewhere") : "someone")}{e.donation ? " · donation" : ""}</div>
-          <div class="meta">{e.note ?? ""}{e.items.length ? (e.note ? " · " : "") + e.items.map((i) => i.d).join(", ") : ""}{e.receipted ? " · receipt" + (e.receipt_by ? ` from ${e.receipt_by}` : "") : ""}{e.locked ? ` · unlocks in ${e.unlocks_in_blocks} blocks` : ""}{e.pending ? " · not on the chain yet" : ""}{e.provisional ? " · change on its way" : ""}{e.unexplained ? " · not one of ours?" : ""}</div>
+          <div class="meta">{e.note ?? ""}{e.items.length ? (e.note ? " · " : "") + e.items.map((i) => i.d).join(", ") : ""}{e.receipted ? " · receipt" + (e.receipt_by ? ` from ${e.receipt_by}` : "") : ""}{e.locked ? ` · unlocks in ${e.unlocks_in_blocks} ${e.unlocks_in_blocks === 1 ? "block" : "blocks"}` : ""}{e.pending ? " · not on the chain yet" : ""}{e.provisional ? " · change on its way" : ""}{e.unexplained ? " · not one of ours?" : ""}{e.fee_pxmr ? ` · fee ${fmtXmr(e.fee_pxmr)}` : ""}</div>
         </div>
-        <div class="la"><div class="title">{signed(e.net_pxmr)}</div><div class="meta">{e.fee_pxmr ? `fee ${fmtXmr(e.fee_pxmr)} · ` : ""}bal {fmtXmr(Math.max(0, e.balance_after_pxmr))}</div></div>
+        <div class="la"><div class="title">{signed(e.net_pxmr)}</div><div class="meta">then {fmtXmr(Math.max(0, e.balance_after_pxmr))}</div></div>
       </button>
       {#if open === e.txid + e.timestamp}
         <div class="ledger-detail">
