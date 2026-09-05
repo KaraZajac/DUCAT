@@ -63,19 +63,21 @@
   <aside class="sidebar">
     <div class="brand"><img src={cat} alt="" /><span>DUCAT</span></div>
     {#each nav as n}
-      <button class="nav-item" class:active={page === n.id} onclick={() => (page = n.id)}>
-        <span class="glyph">{@html icons[n.id]}</span>{n.label}
+      <button class="nav-item" class:active={page === n.id} title={n.label} onclick={() => (page = n.id)}>
+        <span class="glyph">{@html icons[n.id]}</span><span class="label">{n.label}</span>
         {#if n.id === "chat" && unread > 0}<span class="badge">{unread}</span>{/if}
       </button>
     {/each}
     <div class="spacer"></div>
     <div class="node-pill">
       <span class="dot" class:ok={status?.ready} class:warn={status?.attached && !status?.ready}></span>
-      {#if status}
-        {status.ready ? `${t("net_line_attached")} · ${status.peers} ${t("net_line_peers")}` : status.attached ? t("desk_attaching") : t("net_starting")}
-      {:else}
-        {t("net_starting")}
-      {/if}
+      <span class="word">
+        {#if status}
+          {status.ready ? `${t("net_line_attached")} · ${status.peers} ${t("net_line_peers")}` : status.attached ? t("desk_attaching") : t("net_starting")}
+        {:else}
+          {t("net_starting")}
+        {/if}
+      </span>
     </div>
   </aside>
   <main class="main">

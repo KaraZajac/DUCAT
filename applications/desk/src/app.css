@@ -467,3 +467,16 @@ select.input option { background: var(--bg); color: var(--text); }
 .card-link { display: flex; align-items: center; gap: 6px; margin-top: 6px; min-width: 0; }
 .card-link code { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; background: var(--surface-2); padding: 5px 8px; border-radius: var(--radius-xs); }
 .bubble.out .card-link code { background: rgba(0, 0, 0, 0.08); }
+
+/* A narrow window keeps the sidebar as a rail of icons. */
+@media (max-width: 880px) {
+  .shell { grid-template-columns: 64px 1fr; }
+  .sidebar { padding-left: 8px; padding-right: 8px; }
+  .brand span { display: none; }
+  .brand { justify-content: center; }
+  .nav-item { justify-content: center; padding-left: 0; padding-right: 0; position: relative; }
+  .nav-item .label { display: none; }
+  .nav-item .badge { position: absolute; top: 4px; right: 4px; }
+  .node-pill { justify-content: center; padding: 10px 0; }
+  .node-pill .word { display: none; }
+}

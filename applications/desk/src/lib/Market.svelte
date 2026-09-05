@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { icons } from "./icons";
   // The market: what is offered around a place, and what you offer. A
   // notice on a board is a day long and a card wide; a desk with no GPS
   // takes the place as a geohash cell.
@@ -291,7 +292,7 @@
               {#each l.photos as p, i}
                 <div class="shot">
                   <img src={photoUrls[p] ?? ""} alt="" />
-                  <div class="actions"><button class="linkish" onclick={() => act("cover", () => api.setListingCover(l.id, i))}>{t("desk_cover")}</button><button class="linkish" onclick={() => act("rmp", () => api.removeListingPhoto(l.id, i))}>✕</button></div>
+                  <div class="actions"><button class="linkish" onclick={() => act("cover", () => api.setListingCover(l.id, i))}>{t("desk_cover")}</button><button class="linkish" onclick={() => act("rmp", () => api.removeListingPhoto(l.id, i))}>{@html icons.close}</button></div>
                 </div>
               {/each}
             </div>

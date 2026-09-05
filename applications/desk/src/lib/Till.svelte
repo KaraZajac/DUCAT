@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { icons } from "./icons";
   // The till: a sale to whoever is in front of you, tabs that run, and the
   // catalogue both draw from. The phone's POS and Bar Tab, side by side.
   import { onMount } from "svelte";
@@ -258,7 +259,7 @@
         <h3>{t("pos_this_sale")}</h3>
         {#if saleLines.length === 0}<p class="empty">{t("desk_sale_empty")}</p>{/if}
         {#each saleLines as l, i}
-          <div class="bill-line row-line"><span>{l.d}</span><span>{fmtXmr(l.a)} <button class="linkish" onclick={() => (saleLines = saleLines.filter((_, j) => j !== i))}>✕</button></span></div>
+          <div class="bill-line row-line"><span>{l.d}</span><span>{fmtXmr(l.a)} <button class="linkish" onclick={() => (saleLines = saleLines.filter((_, j) => j !== i))}>{@html icons.close}</button></span></div>
         {/each}
         <div class="field">
           <input class="input" placeholder={t("desk_line")} bind:value={lineName} />
@@ -323,7 +324,7 @@
         <h3>{openTab.name} <span class="meta">· {stateWord(openTab)}</span></h3>
         <div class="bill">
           {#each openTab.lines as [d, a], i}
-            <div class="bill-line row-line"><span>{d}</span><span>{fmtXmr(a)} {#if openTab.state === "open"}<button class="linkish" onclick={() => act(() => api.tabRemoveLine(openTab!.id, i))}>✕</button>{/if}</span></div>
+            <div class="bill-line row-line"><span>{d}</span><span>{fmtXmr(a)} {#if openTab.state === "open"}<button class="linkish" onclick={() => act(() => api.tabRemoveLine(openTab!.id, i))}>{@html icons.close}</button>{/if}</span></div>
           {/each}
           {#if openTab.tax_pxmr}<div class="bill-line"><span>{t("pos_tax")}</span><span>{fmtXmr(openTab.tax_pxmr)}</span></div>{/if}
           {#if openTab.tip_pxmr > 0}<div class="bill-line"><span>{t("kiosk_tip")}</span><span>{fmtXmr(openTab.tip_pxmr)}</span></div>{/if}
