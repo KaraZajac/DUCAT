@@ -3,7 +3,7 @@
   // the hats you wear.
   import { onMount } from "svelte";
   import { api, copy, fmtWhen, type Code, type PersonaRow } from "./api";
-  import { gen } from "./state.svelte";
+  import { gen, drive } from "./state.svelte";
 
   let personas = $state<PersonaRow[]>([]);
   let name = $state("");
@@ -28,9 +28,9 @@
     else delete document.documentElement.dataset.theme;
   }
 
-  async function exportBackup() {
+  async function exportBackup(typed?: string) {
     err = null; backupMsg = null;
-    const path = await api.pickSavePath("ducat-backup.ducat");
+    const path = typed ?? (await api.pickSavePath("ducat-backup.ducat"));
     if (!path) return;
     backupBusy = true;
     try {
@@ -40,9 +40,9 @@
     } catch (e) { err = String(e); } finally { backupBusy = false; }
   }
 
-  async function importBackup() {
+  async function importBackup(typed?: string) {
     err = null; backupMsg = null;
-    const path = await api.pickFile();
+    const path = typed ?? (await api.pickFile());
     if (!path) return;
     backupBusy = true;
     try {
@@ -176,8 +176,12 @@
   <div class="field">
     <label for="pass">Passphrase</label>
     <input id="pass" class="input" type="password" bind:value={passphrase} placeholder="Eight characters or more" />
-    <button class="btn" disabled={passphrase.length < 8 || backupBusy} onclick={exportBackup}>Export…</button>
-    <button class="btn" disabled={passphrase.length < 8 || backupBusy} onclick={importBackup}>Import…</button>
+    <button class="btn" disabled={passphrase.length < 8 || backupBusy} onclick={() => exportBackup()}>Export…</button>
+    <button class="btn" disabled={passphrase.length < 8 || backupBusy} onclick={() => importBackup()}>Import…</button>
+        {#if drive.on}
+          <input id="bpath" class="input" placeholder="/path/to/export.ducat" onchange={(e) => exportBackup((e.target as HTMLInputElement).value)} />
+          <input id="ipath" class="input" placeholder="/path/to/import.ducat" onchange={(e) => importBackup((e.target as HTMLInputElement).value)} />
+        {/if}
   </div>
   {#if backupMsg}<p class="note ok-text">{backupMsg}</p>{/if}
 </div>

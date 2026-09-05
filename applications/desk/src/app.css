@@ -440,5 +440,6 @@ select.input option { background: var(--surface); color: var(--text); }
 /* The composer: the box takes the room, the buttons take a row below when
    there is not enough. */
 .composer { flex-wrap: wrap; }
-.composer textarea { flex: 1 1 200px; min-width: 160px; }
+.composer textarea { flex: 1 1 220px; min-width: 160px; }
+.composer-tools { display: flex; gap: 8px; align-items: flex-end; margin-left: auto; }
 .composer .btn { padding: 8px 12px; }

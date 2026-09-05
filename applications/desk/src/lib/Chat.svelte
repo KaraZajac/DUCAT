@@ -753,9 +753,11 @@
         <div class="composer">
           <textarea class="input" rows="2" placeholder={replyTo ? "Your reply" : "Write a message"} bind:value={draft} disabled={!current.has_keys} oninput={draftChanged}
             onkeydown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}></textarea>
-          <button class="btn" title="Attach a picture or a file" disabled={attaching || !current.has_keys} onclick={() => attach()}>{attaching ? "…" : "📎"}</button>
-          <button class="btn" title="Record a voice memo" disabled={sending || !current.has_keys} onclick={startMemo}>🎤</button>
-          <button class="btn primary" disabled={!draft.trim() || sending || !current.has_keys} onclick={send}>{sending ? "Sending…" : "Send"}</button>
+          <div class="composer-tools">
+            <button class="btn" title="Attach a picture or a file" disabled={attaching || !current.has_keys} onclick={() => attach()}>{attaching ? "…" : "📎"}</button>
+            <button class="btn" title="Record a voice memo" disabled={sending || !current.has_keys} onclick={startMemo}>🎤</button>
+            <button class="btn primary" disabled={!draft.trim() || sending || !current.has_keys} onclick={send}>{sending ? "Sending…" : "Send"}</button>
+          </div>
         </div>
       {/if}
       {#if drive.on}<div class="request-bar"><input id="attpath" class="input" placeholder="/path/to/attach" onchange={(e) => attach((e.target as HTMLInputElement).value)} /></div>{/if}

@@ -66,7 +66,12 @@ fn main() {
                         }
                         // "bill me": a small bill back, so the other side can
                         // pay or decline one of ours.
-                        let out = if row.body.trim().eq_ignore_ascii_case("bill me") {
+                        let out = if row.body.trim().eq_ignore_ascii_case("card me") {
+                            // "card me": an intro card of ours, the way the
+                            // phone shares "a card for me".
+                            let card = app.issue_card(Some("Host Desk"), 60 * 60 * 24 * 7, "intro", None).expect("MB_FAIL intro card");
+                            Outgoing::text(&format!("🎟 A card for me — pass it to whoever should reach me. One claim, one week:\n{}", card.uri))
+                        } else if row.body.trim().eq_ignore_ascii_case("bill me") {
                             let payto = app.ensure_wallet().ok().and_then(|_| app.wallet_address());
                             Outgoing {
                                 body: "A small bill".into(),
