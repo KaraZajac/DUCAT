@@ -89,6 +89,81 @@ object DucatLog {
             Level.Info, "App",
             "started — v$pkg, ${android.os.Build.MODEL}, Android ${android.os.Build.VERSION.RELEASE}",
         )
+        reportLastExit(context)
+    }
+
+    /**
+     * Why the previous process died, asked of the system that killed it.
+     *
+     * A phone that vanishes mid-send leaves us guessing between a native
+     * crash, an ANR, and the low-memory killer — three completely different
+     * bugs that look identical from inside our own log, which simply stops.
+     * Android has kept the answer since API 30 and nobody was asking it.
+     *
+     * `getHistoricalProcessExitReasons` gives the reason, the exit status,
+     * the importance the process had when it went, and for a native crash
+     * the tombstone itself — signal, fault address and the offending frames.
+     * That last one is the difference between reasoning about a crash and
+     * reading it.
+     *
+     * Only deaths that are not ordinary: a user swipe or a normal exit says
+     * nothing worth a line.
+     */
+    private fun reportLastExit(context: android.content.Context) {
+        if (android.os.Build.VERSION.SDK_INT < 30) return
+        // Reflection, not the typed API, for one reason: this file is
+        // compiled by the desk too, against a four-class Android shim that
+        // has no ActivityManager and never will — stubbing the whole exit
+        // API so a phone-only diagnostic can name a type is a poor trade.
+        // The guard above means none of this runs there anyway.
+        runCatching {
+            val am = context.getSystemService("activity") ?: return
+            @Suppress("UNCHECKED_CAST")
+            val past = am.javaClass
+                .getMethod(
+                    "getHistoricalProcessExitReasons",
+                    String::class.java, Int::class.javaPrimitiveType, Int::class.javaPrimitiveType,
+                )
+                .invoke(am, context.packageName, 0, 3) as? List<Any> ?: return
+            val info = past.firstOrNull() ?: return
+            fun intOf(name: String) = info.javaClass.getMethod(name).invoke(info) as? Int ?: -1
+            fun longOf(name: String) = info.javaClass.getMethod(name).invoke(info) as? Long ?: 0L
+            // ApplicationExitInfo's own numbering. Written out rather than
+            // guessed: the first draft of this had them shuffled and
+            // reported a force-stop as "too much of something", which is
+            // the sort of confident wrong answer a diagnostic must not give.
+            val reason = when (intOf("getReason")) {
+                1 -> return  // EXIT_SELF
+                10 -> return // USER_REQUESTED — a swipe is not news
+                11 -> return // USER_STOPPED
+                16 -> return // PACKAGE_UPDATED — every install would say this
+                2 -> "signalled"
+                3 -> "low memory"
+                4 -> "java crash"
+                5 -> "native crash"
+                6 -> "ANR"
+                7 -> "initialisation failure"
+                9 -> "excessive resource use"
+                12 -> "a process it depended on died"
+                14 -> "frozen"
+                else -> "reason ${intOf("getReason")}"
+            }
+            val desc = info.javaClass.getMethod("getDescription").invoke(info) as? String
+            add(
+                Level.Error, "LastExit",
+                "$reason — status ${intOf("getStatus")}, ${desc ?: "no description"} " +
+                    "(pss ${longOf("getPss") / 1024} MB, rss ${longOf("getRss") / 1024} MB)",
+            )
+            // The tombstone, when there is one: signal, fault address and the
+            // frames it died in — the whole question, in the box all along.
+            runCatching {
+                val stream = info.javaClass.getMethod("getTraceInputStream").invoke(info)
+                    as? java.io.InputStream
+                stream?.bufferedReader()?.useLines { lines: Sequence<String> ->
+                    lines.take(40).forEach { l -> add(Level.Error, "Tombstone", l) }
+                }
+            }
+        }
     }
 
     private val lineFormat = Regex("^(\\d+)\\|(I|W|E)\\|([^|]*)\\|(.*)$")
