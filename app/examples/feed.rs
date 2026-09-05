@@ -40,7 +40,21 @@ fn main() {
                 }
             };
             println!("FEED_HEAD '{}' digest={} updated={} in {:.1}s", site.title, &site.digest_hex[..12.min(site.digest_hex.len())], site.updated, t0.elapsed().as_secs_f64());
+            // Progress while the bundle comes down, so a stall says where.
+            let share = site.share.clone();
+            let ticker = std::thread::spawn(move || {
+                let t = Instant::now();
+                loop {
+                    std::thread::sleep(Duration::from_secs(15));
+                    let p = ducat_mobile::swarm::swarm_fetch_progress(share.clone());
+                    println!("FEED_PROGRESS {:.0}s pieces {}/{} position {} of {} done={}", t.elapsed().as_secs_f64(), p.pieces_done, p.pieces_total, p.position, p.length, p.done);
+                    if t.elapsed() > Duration::from_secs(900) {
+                        break;
+                    }
+                }
+            });
             let dir = app.fetch_site_bundle(&key).expect("FEED_FAIL fetch");
+            drop(ticker);
             let text = std::fs::read_to_string(dir.join("feed.json")).expect("FEED_FAIL no feed.json in the bundle");
             let doc = ducat_mobile::feed::feed_parse(text).expect("FEED_FAIL feed unreadable");
             for p in &doc.posts {

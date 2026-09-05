@@ -393,6 +393,10 @@ impl App {
                 if prior.as_ref().map(|p| p.mine()).unwrap_or(false) { "update" } else { "new" }
             ),
         );
+        // A one-shot seed is not a parked share: until the hourly re-park a
+        // fresh publication answered nobody. Park it now, the way every
+        // kept site is parked, so a reader who saw the head can fetch.
+        self.reseed_site(&key);
         Ok(entry)
     }
 
@@ -407,6 +411,13 @@ impl App {
         }
         let Some(digest) = site.fetched_digest_hex.clone() else { return };
         let share = site.fetched_share.clone().unwrap_or_else(|| site.share.clone());
+        // A share this process already serves — one it just published, or
+        // parked earlier — stays as it is: stopping a live seed to re-park
+        // it costs a round of DHT reads and, on a slow day, the seed.
+        if swarm::swarm_seeding(share.clone()) {
+            log::info(TAG, format!("'{}' already serving", site.title));
+            return;
+        }
         let dir = self.site_bundle_dir(record_key);
         if !has_any_file(&dir) {
             log::info(TAG, format!("keep-alive for {}… has no bundle to serve yet — open it once", &record_key[..record_key.len().min(8)]));

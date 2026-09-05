@@ -217,6 +217,13 @@ pub fn swarm_stop() {
     }
 }
 
+/// Whether this process is serving a share right now — a seed that is
+/// already up is not something to tear down and rebuild.
+#[uniffi::export]
+pub fn swarm_seeding(share_key: String) -> bool {
+    crate::lock(seeding_slot()).contains_key(&share_key)
+}
+
 /// Stop seeding one share, leaving the rest serving.
 #[uniffi::export]
 pub fn swarm_stop_share(share_key: String) {
