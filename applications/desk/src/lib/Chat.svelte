@@ -377,7 +377,7 @@
     answeringCard = true;
     try {
       const r = await api.claimCard(uri, null);
-      contacts = await api.contacts();
+      rows = await api.contacts();
       open = r.contact.persona_hex;
     } catch (e) { err = String(e); } finally { answeringCard = false; }
   }
