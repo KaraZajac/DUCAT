@@ -421,6 +421,24 @@
     const m = body.match(CARD_LINK);
     return m ? m[0] : null;
   }
+
+  // A site address in a message opens in the sealed room, added to the
+  // Sites page on the way.
+  const SITE_LINK = /ducat:site\/\S+/;
+  function siteIn(body: string): string | null {
+    const m = body.match(SITE_LINK);
+    return m ? m[0] : null;
+  }
+  let openingSite = $state(false);
+  async function openSite(uri: string) {
+    err = null;
+    openingSite = true;
+    try {
+      const row = await api.addSite(uri);
+      await api.fetchSite(row.record_key);
+      await api.openSiteRoom(row.record_key);
+    } catch (e) { err = String(e); } finally { openingSite = false; }
+  }
   let answeringCard = $state(false);
   async function answerCard(uri: string) {
     err = null;
@@ -797,6 +815,9 @@
                 <div class="bubble-body">{m.body.replace(CARD_LINK, "").trim()}</div>
                 <div class="card-link"><code>{cardIn(m.body)}</code><button class="linkish" title={t("chat_copy")} onclick={() => copy(cardIn(m.body)!)}>{@html icons.copy}</button></div>
               {:else if m.body && !(m.att_hash && (m.body === "📷" || m.body === "🎤" || m.body.startsWith("📎 ")))}<div class="bubble-body">{m.body}</div>{/if}
+              {#if m.kind === 0 && siteIn(m.body)}
+                <div class="actions" style="margin: 6px 0 2px"><button class="btn small" disabled={openingSite} onclick={() => openSite(siteIn(m.body)!)}>{openingSite ? t("releases_fetching") : t("sites_open")}</button></div>
+              {/if}
               {#if !m.outgoing && m.kind === 0 && cardIn(m.body)}
                 <div class="actions" style="margin: 6px 0 2px"><button class="btn small primary" disabled={answeringCard} onclick={() => answerCard(cardIn(m.body)!)}>{answeringCard ? t("desk_answering") : t("desk_answer_this_card")}</button></div>
               {/if}

@@ -86,7 +86,11 @@ everything else, and turns a `ducat:` link into an event for the main
 window: a site address is added and shown, a card lands in the chat's add
 panel, and the room stays where it is. The room has no IPC: capabilities are
 granted to the main window alone. "Show folder" still reveals the bundle in
-the file manager for anyone who wants the files.
+the file manager for anyone who wants the files. The room's menu offers Back,
+Forward, and First page (Alt+Left, Alt+Right, Alt+Home), run by the desk since
+the page cannot run anything. A site that was fetched before opens from the
+edition on hand when the node is offline. A `ducat:site/` address in a chat
+message shows an Open button that adds the site and opens its room.
 
 ## Languages
 

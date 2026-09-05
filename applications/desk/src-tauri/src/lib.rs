@@ -219,8 +219,15 @@ async fn add_site(uri: String) -> Result<SiteRow, String> {
 async fn fetch_site(record_key: String) -> Result<String, String> {
     let a = app()?;
     tauri::async_runtime::spawn_blocking(move || {
-        // Re-read the head first, so "open" always means the current edition.
-        a.add_site(&record_key).map_err(s)?;
+        // Re-read the head first, so "open" always means the current
+        // edition; offline, the edition on hand is what there is.
+        let on_hand = a.site_bundle_dir(&record_key).join("index.html").is_file();
+        if let Err(e) = a.add_site(&record_key) {
+            if !on_hand {
+                return Err(s(e));
+            }
+            ducat_app::log::info("Sites", format!("head unreadable ({e}); keeping the edition on hand"));
+        }
         a.fetch_site_bundle(&record_key).map(|p| p.to_string_lossy().into_owned()).map_err(s)
     })
     .await
@@ -371,7 +378,16 @@ async fn open_site_room(handle: tauri::AppHandle, record_key: String) -> Result<
     let a = app()?;
     let key = record_key.clone();
     let (dir, title) = tauri::async_runtime::spawn_blocking(move || {
-        a.add_site(&key).map_err(s)?;
+        // Re-read the head so "open" means the current edition — but a
+        // desk that is offline, or not yet attached, still has the edition
+        // it fetched last time, and that one opens.
+        let on_hand = a.site_bundle_dir(&key).join("index.html").is_file();
+        if let Err(e) = a.add_site(&key) {
+            if !on_hand {
+                return Err(s(e));
+            }
+            ducat_app::log::info("Sites", format!("head unreadable ({e}); showing the edition on hand"));
+        }
         let dir = a.fetch_site_bundle(&key).map_err(s)?;
         let title = a.sites().into_iter().find(|x| x.record_key == key).map(|x| x.title).unwrap_or_default();
         Ok::<_, String>((dir, title))
@@ -390,10 +406,29 @@ async fn open_site_room(handle: tauri::AppHandle, record_key: String) -> Result<
     }
     let main = handle.clone();
     let title = if title.trim().is_empty() { "Site".to_string() } else { title };
+    // A site with more than one page has a way back through it; the
+    // window offers one too — Back and Forward, run by the desk, not by
+    // the page, which cannot run anything.
+    let back = tauri::menu::MenuItemBuilder::with_id("room-back", "Back").accelerator("Alt+Left").build(&handle).map_err(|e| e.to_string())?;
+    let forward = tauri::menu::MenuItemBuilder::with_id("room-forward", "Forward").accelerator("Alt+Right").build(&handle).map_err(|e| e.to_string())?;
+    let first = tauri::menu::MenuItemBuilder::with_id("room-home", "First page").accelerator("Alt+Home").build(&handle).map_err(|e| e.to_string())?;
+    let menu = tauri::menu::MenuBuilder::new(&handle).items(&[&back, &forward, &first]).build().map_err(|e| e.to_string())?;
     WebviewWindowBuilder::new(&handle, &label, WebviewUrl::CustomProtocol("ducat-site://localhost/index.html".parse().unwrap()))
         .title(&title)
         .inner_size(1000.0, 760.0)
         .min_inner_size(480.0, 360.0)
+        .menu(menu)
+        .on_menu_event(|window, event| {
+            let js = match event.id().as_ref() {
+                "room-back" => "history.back()",
+                "room-forward" => "history.forward()",
+                "room-home" => "location.replace('/index.html')",
+                _ => return,
+            };
+            if let Some(w) = window.app_handle().get_webview_window(window.label()) {
+                let _ = w.eval(js);
+            }
+        })
         .on_navigation(move |url| match url.scheme() {
             "ducat-site" => true,
             // Windows serves custom schemes as http://<scheme>.localhost.
