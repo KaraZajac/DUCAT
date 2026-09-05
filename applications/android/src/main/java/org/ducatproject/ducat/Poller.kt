@@ -316,6 +316,8 @@ class Poller(private val context: Context) {
                 // kept bundles and puts them back on the wire. Without this
                 // the checkbox only means "until my next reboot".
                 runCatching { reseedSites(context) }
+                // §16.23: the homes of the people kept, read now and then.
+                runCatching { Home.feedsTick(context) }
                 // And the staged issues nothing will publish (see
                 // Publications.sweepStaging): once per process is plenty.
                 runCatching { sweepStaging(context) }

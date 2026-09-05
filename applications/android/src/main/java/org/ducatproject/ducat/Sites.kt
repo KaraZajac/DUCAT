@@ -113,6 +113,11 @@ object Sites {
     // store's round trip directly: publish() needs a node and the property
     // worth pinning — that a site's owner keypair survives being written
     // and read back — does not.
+    /** One entry replaced or added, the rest as they were. */
+    internal fun upsert(context: Context, site: Site) = synchronized(lock) {
+        save(context, all(context).filter { it.recordKey != site.recordKey } + site)
+    }
+
     internal fun save(context: Context, sites: List<Site>) {
         val arr = JSONArray()
         for (s in sites) {

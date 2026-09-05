@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_feed">Лента</string>
+    <string name="feed_post">Опубликовать</string>
+    <string name="feed_post_hint">Что нового? Слова, картинка, файл.</string>
+    <string name="feed_post_note">Картинки идут как миниатюра плюс полноразмерная раздача; файлы — как раздачи. Все, кто вас хранит, увидят это при следующем взгляде.</string>
+    <string name="feed_add_photos">Добавить фото</string>
+    <string name="feed_add_files">Добавить файлы</string>
+    <string name="feed_posting">Размещение…</string>
+    <string name="feed_posted">Опубликовано.</string>
+    <string name="feed_empty">Здесь пока пусто. Поставьте сердце контакту, чтобы хранить его дом, или опубликуйте что-нибудь сами.</string>
+    <string name="feed_open_post">Открыть</string>
+    <string name="feed_refresh">Проверить новые записи</string>
+    <string name="feed_nothing_new">Ничего нового.</string>
+    <string name="feed_delete_post">Удалить запись</string>
+    <string name="feed_delete_post_body">Удалить запись? Она уйдёт из ленты со следующим изданием; у тех, кто зеркалил старое, она останется.</string>
+    <string name="feed_saved_to_files">%1$s на странице Файлы.</string>
+    <string name="feed_no_home_yet">Пока ничего. Первая запись выведет ваш дом в сеть.</string>
+    <string name="feed_edited">изменено</string>
+    <string name="feed_heart">Хранить их дом</string>
+    <string name="feed_heart_note">Их записи в вашей ленте, и этот телефон зеркалит их дом.</string>
+    <string name="feed_delete_post_title">Удалить эту запись?</string>
+    <string name="feed_name_you">%1$s · вы</string>
+    <plurals name="feed_new_editions">
+        <item quantity="one">%d дом с новыми записями.</item>
+        <item quantity="other">%d домов с новыми записями.</item>
+    </plurals>
+    <plurals name="feed_home_posts">
+        <item quantity="one">%d запись, в сети.</item>
+        <item quantity="other">%d записей, в сети.</item>
+    </plurals>
+    <plurals name="feed_n_pictures">
+        <item quantity="one">%d картинка</item>
+        <item quantity="other">%d картинок</item>
+    </plurals>
+    <plurals name="feed_n_files">
+        <item quantity="one">%d файл</item>
+        <item quantity="other">%d файлов</item>
+    </plurals>
+    <string name="feed_failed">Не получилось. Попробуйте ещё раз через минуту.</string>
+</resources>

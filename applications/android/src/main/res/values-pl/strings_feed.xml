@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_feed">Kanał</string>
+    <string name="feed_post">Opublikuj</string>
+    <string name="feed_post_hint">Co słychać? Słowa, obraz, plik.</string>
+    <string name="feed_post_note">Obrazy podróżują jako miniatura plus udostępnienie w pełnym rozmiarze; pliki jako udostępnienia. Kto cię zachowuje, zobaczy to przy następnym spojrzeniu.</string>
+    <string name="feed_add_photos">Dodaj zdjęcia</string>
+    <string name="feed_add_files">Dodaj pliki</string>
+    <string name="feed_posting">Wywieszanie…</string>
+    <string name="feed_posted">Opublikowano.</string>
+    <string name="feed_empty">Jeszcze nic tu nie ma. Daj kontaktowi serce, by zachować jego dom, albo opublikuj coś sam.</string>
+    <string name="feed_open_post">Otwórz</string>
+    <string name="feed_refresh">Sprawdź nowe wpisy</string>
+    <string name="feed_nothing_new">Nic nowego.</string>
+    <string name="feed_delete_post">Usuń wpis</string>
+    <string name="feed_delete_post_body">Usunąć ten wpis? Zniknie z kanału przy następnym wydaniu; kto skopiował stare, nadal je ma.</string>
+    <string name="feed_saved_to_files">%1$s jest na stronie Pliki.</string>
+    <string name="feed_no_home_yet">Jeszcze nic nie opublikowano. Pierwszy wpis umieszcza twój dom w sieci.</string>
+    <string name="feed_edited">edytowano</string>
+    <string name="feed_heart">Zachowaj ich dom</string>
+    <string name="feed_heart_note">Ich wpisy są w twoim kanale, a ten telefon odzwierciedla ich dom.</string>
+    <string name="feed_delete_post_title">Usunąć ten wpis?</string>
+    <string name="feed_name_you">%1$s · ty</string>
+    <plurals name="feed_new_editions">
+        <item quantity="one">%d dom ma nowe wpisy.</item>
+        <item quantity="other">%d domów ma nowe wpisy.</item>
+    </plurals>
+    <plurals name="feed_home_posts">
+        <item quantity="one">%d wpis, w sieci.</item>
+        <item quantity="other">%d wpisów, w sieci.</item>
+    </plurals>
+    <plurals name="feed_n_pictures">
+        <item quantity="one">%d zdjęcie</item>
+        <item quantity="other">%d zdjęć</item>
+    </plurals>
+    <plurals name="feed_n_files">
+        <item quantity="one">%d plik</item>
+        <item quantity="other">%d plików</item>
+    </plurals>
+    <string name="feed_failed">To się nie udało. Spróbuj ponownie za chwilę.</string>
+</resources>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_feed">الخلاصة</string>
+    <string name="feed_post">نشر</string>
+    <string name="feed_post_hint">ماذا يحدث؟ كلمات، صورة، ملف.</string>
+    <string name="feed_post_note">تنتقل الصور كصور مصغرة مع مشاركة بالحجم الكامل؛ والملفات كمشاركات. كل من يحتفظ بك يرى هذا في نظرته التالية.</string>
+    <string name="feed_add_photos">إضافة صور</string>
+    <string name="feed_add_files">إضافة ملفات</string>
+    <string name="feed_posting">جارٍ النشر…</string>
+    <string name="feed_posted">تم النشر.</string>
+    <string name="feed_empty">لا شيء هنا بعد. أعطِ قلبًا لجهة اتصال للاحتفاظ بمنزلها، أو انشر شيئًا بنفسك.</string>
+    <string name="feed_open_post">فتح</string>
+    <string name="feed_refresh">البحث عن منشورات جديدة</string>
+    <string name="feed_nothing_new">لا جديد.</string>
+    <string name="feed_delete_post">حذف المنشور</string>
+    <string name="feed_delete_post_body">حذف هذا المنشور؟ سيغادر خلاصتك في الإصدار التالي؛ ومن نسخ الإصدار القديم ما زال لديه.</string>
+    <string name="feed_saved_to_files">%1$s في صفحة الملفات.</string>
+    <string name="feed_no_home_yet">لم يُنشر شيء بعد. منشورك الأول يضع منزلك على الشبكة.</string>
+    <string name="feed_edited">معدّل</string>
+    <string name="feed_heart">الاحتفاظ بمنزلهم</string>
+    <string name="feed_heart_note">منشوراتهم في خلاصتك، وهذا الهاتف يعكس منزلهم.</string>
+    <string name="feed_delete_post_title">حذف هذا المنشور؟</string>
+    <string name="feed_name_you">%1$s · أنت</string>
+    <plurals name="feed_new_editions">
+        <item quantity="one">%d منزل به منشورات جديدة.</item>
+        <item quantity="other">%d منزل بها منشورات جديدة.</item>
+    </plurals>
+    <plurals name="feed_home_posts">
+        <item quantity="one">%d منشور، على الشبكة.</item>
+        <item quantity="other">%d منشورات، على الشبكة.</item>
+    </plurals>
+    <plurals name="feed_n_pictures">
+        <item quantity="one">صورة واحدة</item>
+        <item quantity="other">%d صور</item>
+    </plurals>
+    <plurals name="feed_n_files">
+        <item quantity="one">ملف واحد</item>
+        <item quantity="other">%d ملفات</item>
+    </plurals>
+    <string name="feed_failed">لم ينجح ذلك. حاول مرة أخرى بعد قليل.</string>
+</resources>

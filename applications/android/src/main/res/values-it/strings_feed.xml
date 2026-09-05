@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_feed">Feed</string>
+    <string name="feed_post">Pubblica</string>
+    <string name="feed_post_hint">Che succede? Parole, un\'immagine, un file.</string>
+    <string name="feed_post_note">Le immagini viaggiano come miniatura più una condivisione a grandezza naturale; i file come condivisioni. Chi ti tiene lo vedrà alla prossima occhiata.</string>
+    <string name="feed_add_photos">Aggiungi foto</string>
+    <string name="feed_add_files">Aggiungi file</string>
+    <string name="feed_posting">Pubblicazione…</string>
+    <string name="feed_posted">Pubblicato.</string>
+    <string name="feed_empty">Ancora niente qui. Metti un cuore a un contatto per tenere la sua casa, o pubblica qualcosa tu.</string>
+    <string name="feed_open_post">Apri</string>
+    <string name="feed_refresh">Cerca nuovi post</string>
+    <string name="feed_nothing_new">Niente di nuovo.</string>
+    <string name="feed_delete_post">Elimina post</string>
+    <string name="feed_delete_post_body">Eliminare questo post? Lascia il tuo feed con la prossima edizione; chi ha copiato quella vecchia ce l\'ha ancora.</string>
+    <string name="feed_saved_to_files">%1$s è nella pagina File.</string>
+    <string name="feed_no_home_yet">Ancora nulla. Il tuo primo post mette la tua casa in rete.</string>
+    <string name="feed_edited">modificato</string>
+    <string name="feed_heart">Tieni la loro casa</string>
+    <string name="feed_heart_note">I loro post sono nel tuo feed, e questo telefono rispecchia la loro casa.</string>
+    <string name="feed_delete_post_title">Eliminare questo post?</string>
+    <string name="feed_name_you">%1$s · tu</string>
+    <plurals name="feed_new_editions">
+        <item quantity="one">%d casa ha nuovi post.</item>
+        <item quantity="other">%d case hanno nuovi post.</item>
+    </plurals>
+    <plurals name="feed_home_posts">
+        <item quantity="one">%d post, in rete.</item>
+        <item quantity="other">%d post, in rete.</item>
+    </plurals>
+    <plurals name="feed_n_pictures">
+        <item quantity="one">%d immagine</item>
+        <item quantity="other">%d immagini</item>
+    </plurals>
+    <plurals name="feed_n_files">
+        <item quantity="one">%d file</item>
+        <item quantity="other">%d file</item>
+    </plurals>
+    <string name="feed_failed">Non è andata. Riprova tra un momento.</string>
+</resources>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_feed">Beranda</string>
+    <string name="feed_post">Kirim</string>
+    <string name="feed_post_hint">Ada apa? Kata-kata, gambar, berkas.</string>
+    <string name="feed_post_note">Gambar dikirim sebagai thumbnail plus berbagi ukuran penuh; berkas sebagai berbagi. Semua yang menyimpanmu melihatnya saat melihat berikutnya.</string>
+    <string name="feed_add_photos">Tambah foto</string>
+    <string name="feed_add_files">Tambah berkas</string>
+    <string name="feed_posting">Memasang…</string>
+    <string name="feed_posted">Terkirim.</string>
+    <string name="feed_empty">Belum ada apa-apa. Beri hati pada kontak untuk menyimpan rumahnya, atau kirim sesuatu sendiri.</string>
+    <string name="feed_open_post">Buka</string>
+    <string name="feed_refresh">Cari kiriman baru</string>
+    <string name="feed_nothing_new">Tidak ada yang baru.</string>
+    <string name="feed_delete_post">Hapus kiriman</string>
+    <string name="feed_delete_post_body">Hapus kiriman ini? Hilang dari beranda pada edisi berikutnya; yang mencerminkan edisi lama masih punya.</string>
+    <string name="feed_saved_to_files">%1$s ada di halaman Berkas.</string>
+    <string name="feed_no_home_yet">Belum ada kiriman. Kiriman pertamamu menaruh rumahmu di jaringan.</string>
+    <string name="feed_edited">disunting</string>
+    <string name="feed_heart">Simpan rumahnya</string>
+    <string name="feed_heart_note">Kiriman mereka ada di berandamu, dan ponsel ini mencerminkan rumah mereka.</string>
+    <string name="feed_delete_post_title">Hapus kiriman ini?</string>
+    <string name="feed_name_you">%1$s · kamu</string>
+    <plurals name="feed_new_editions">
+        <item quantity="one">%d rumah punya kiriman baru.</item>
+        <item quantity="other">%d rumah punya kiriman baru.</item>
+    </plurals>
+    <plurals name="feed_home_posts">
+        <item quantity="one">%d kiriman, di jaringan.</item>
+        <item quantity="other">%d kiriman, di jaringan.</item>
+    </plurals>
+    <plurals name="feed_n_pictures">
+        <item quantity="one">%d gambar</item>
+        <item quantity="other">%d gambar</item>
+    </plurals>
+    <plurals name="feed_n_files">
+        <item quantity="one">%d berkas</item>
+        <item quantity="other">%d berkas</item>
+    </plurals>
+    <string name="feed_failed">Tidak berhasil. Coba lagi sebentar lagi.</string>
+</resources>

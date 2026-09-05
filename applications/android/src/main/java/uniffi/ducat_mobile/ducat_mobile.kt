@@ -975,6 +975,26 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1043,6 +1063,20 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_escrow_balance(`keys`: RustBuffer.ByValue,`nodeUrl`: RustBuffer.ByValue,`fromHeight`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): Long
     fun uniffi_ducat_mobile_fn_func_export_backup(`input`: RustBuffer.ByValue,`passphrase`: RustBuffer.ByValue,`personaSecret`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_feed_blocks(`text`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_feed_encode(`doc`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_feed_index_html(`doc`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_feed_merge(`feeds`: RustBuffer.ByValue,`limit`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_feed_new_id(uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_feed_parse(`json`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_feed_post_html(`name`: RustBuffer.ByValue,`post`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_frost_complete(`ceremonyId`: RustBuffer.ByValue,`i`: Short,`cosigner`: Short,`payload`: RustBuffer.ByValue,`nodeUrl`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1138,6 +1172,8 @@ internal interface UniffiLib : Library {
     ): Unit
     fun uniffi_ducat_mobile_fn_func_node_dht_create(`subkeyCount`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_node_dht_create_owned(`subkeyCount`: Int,`ownerPublic`: RustBuffer.ByValue,`ownerSecret`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_dht_create_shared(`writerPublic`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_dht_delete(`key`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -1148,6 +1184,8 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_dht_open(`key`: RustBuffer.ByValue,`writerPublic`: RustBuffer.ByValue,`writerSecret`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
+    fun uniffi_ducat_mobile_fn_func_node_dht_record_key_for(`ownerPublic`: RustBuffer.ByValue,`subkeyCount`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_dht_set(`key`: RustBuffer.ByValue,`subkey`: Int,`data`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Unit
     fun uniffi_ducat_mobile_fn_func_node_dht_watch(`key`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -1244,6 +1282,8 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_swarm_seed(`path`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_swarm_seeding(`shareKey`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Byte
     fun uniffi_ducat_mobile_fn_func_swarm_stop(uniffi_out_err: UniffiRustCallStatus, 
     ): Unit
     fun uniffi_ducat_mobile_fn_func_swarm_stop_share(`shareKey`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -1420,6 +1460,20 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_export_backup(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_feed_blocks(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_feed_encode(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_feed_index_html(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_feed_merge(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_feed_new_id(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_feed_parse(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_feed_post_html(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_frost_complete(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_frost_cosign(
@@ -1514,6 +1568,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_dht_create(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_dht_create_owned(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_node_dht_create_shared(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_dht_delete(
@@ -1523,6 +1579,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_checksum_func_node_dht_get_versioned(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_dht_open(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_dht_record_key_for(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_dht_set(
     ): Short
@@ -1619,6 +1677,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_checksum_func_swarm_fetch_progress(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_swarm_seed(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_swarm_seeding(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_swarm_stop(
     ): Short
@@ -1726,6 +1786,27 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_export_backup() != 50604.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_feed_blocks() != 24691.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_feed_encode() != 34913.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_feed_index_html() != 30061.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_feed_merge() != 16112.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_feed_new_id() != 54033.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_feed_parse() != 16856.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_feed_post_html() != 38604.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_frost_complete() != 49699.toShort()) {
@@ -1869,6 +1950,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_node_dht_create() != 59934.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_dht_create_owned() != 3546.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ducat_mobile_checksum_func_node_dht_create_shared() != 28332.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -1882,6 +1966,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_dht_open() != 42085.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_dht_record_key_for() != 52574.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_dht_set() != 6238.toShort()) {
@@ -2026,6 +2113,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_swarm_seed() != 29515.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_swarm_seeding() != 61432.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_swarm_stop() != 49903.toShort()) {
@@ -2922,6 +3012,323 @@ public object FfiConverterTypeFeeEstimate: FfiConverterRustBuffer<FeeEstimate> {
             FfiConverterULong.write(value.`estimatedBytes`, buf)
             FfiConverterUInt.write(value.`minutesToConfirm`, buf)
             FfiConverterSequenceULong.write(value.`tierFeesPxmr`, buf)
+    }
+}
+
+
+
+data class FeedDoc (
+    var `v`: kotlin.ULong, 
+    var `persona`: kotlin.String, 
+    var `name`: kotlin.String, 
+    var `updated`: kotlin.ULong, 
+    var `posts`: List<FeedPost>, 
+    var `older`: kotlin.String?
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeFeedDoc: FfiConverterRustBuffer<FeedDoc> {
+    override fun read(buf: ByteBuffer): FeedDoc {
+        return FeedDoc(
+            FfiConverterULong.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterSequenceTypeFeedPost.read(buf),
+            FfiConverterOptionalString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: FeedDoc) = (
+            FfiConverterULong.allocationSize(value.`v`) +
+            FfiConverterString.allocationSize(value.`persona`) +
+            FfiConverterString.allocationSize(value.`name`) +
+            FfiConverterULong.allocationSize(value.`updated`) +
+            FfiConverterSequenceTypeFeedPost.allocationSize(value.`posts`) +
+            FfiConverterOptionalString.allocationSize(value.`older`)
+    )
+
+    override fun write(value: FeedDoc, buf: ByteBuffer) {
+            FfiConverterULong.write(value.`v`, buf)
+            FfiConverterString.write(value.`persona`, buf)
+            FfiConverterString.write(value.`name`, buf)
+            FfiConverterULong.write(value.`updated`, buf)
+            FfiConverterSequenceTypeFeedPost.write(value.`posts`, buf)
+            FfiConverterOptionalString.write(value.`older`, buf)
+    }
+}
+
+
+
+/**
+ * One post as it sits in a timeline: whose it is, and the post.
+ */
+data class FeedEntry (
+    var `persona`: kotlin.String, 
+    var `name`: kotlin.String, 
+    var `post`: FeedPost
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeFeedEntry: FfiConverterRustBuffer<FeedEntry> {
+    override fun read(buf: ByteBuffer): FeedEntry {
+        return FeedEntry(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterTypeFeedPost.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: FeedEntry) = (
+            FfiConverterString.allocationSize(value.`persona`) +
+            FfiConverterString.allocationSize(value.`name`) +
+            FfiConverterTypeFeedPost.allocationSize(value.`post`)
+    )
+
+    override fun write(value: FeedEntry, buf: ByteBuffer) {
+            FfiConverterString.write(value.`persona`, buf)
+            FfiConverterString.write(value.`name`, buf)
+            FfiConverterTypeFeedPost.write(value.`post`, buf)
+    }
+}
+
+
+
+data class FeedFile (
+    var `name`: kotlin.String, 
+    /**
+     * `ducat:file/…`, an immutable share.
+     */
+    var `addr`: kotlin.String, 
+    var `mime`: kotlin.String, 
+    var `bytes`: kotlin.ULong
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeFeedFile: FfiConverterRustBuffer<FeedFile> {
+    override fun read(buf: ByteBuffer): FeedFile {
+        return FeedFile(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: FeedFile) = (
+            FfiConverterString.allocationSize(value.`name`) +
+            FfiConverterString.allocationSize(value.`addr`) +
+            FfiConverterString.allocationSize(value.`mime`) +
+            FfiConverterULong.allocationSize(value.`bytes`)
+    )
+
+    override fun write(value: FeedFile, buf: ByteBuffer) {
+            FfiConverterString.write(value.`name`, buf)
+            FfiConverterString.write(value.`addr`, buf)
+            FfiConverterString.write(value.`mime`, buf)
+            FfiConverterULong.write(value.`bytes`, buf)
+    }
+}
+
+
+
+data class FeedMedia (
+    /**
+     * A file inside the bundle — the thumbnail, or the picture itself
+     * when it is small.
+     */
+    var `path`: kotlin.String, 
+    /**
+     * The full-size share, `ducat:file/…`, when the bundle holds only a
+     * thumbnail.
+     */
+    var `full`: kotlin.String?, 
+    var `mime`: kotlin.String, 
+    var `bytes`: kotlin.ULong, 
+    var `w`: kotlin.UInt, 
+    var `h`: kotlin.UInt, 
+    var `alt`: kotlin.String
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeFeedMedia: FfiConverterRustBuffer<FeedMedia> {
+    override fun read(buf: ByteBuffer): FeedMedia {
+        return FeedMedia(
+            FfiConverterString.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: FeedMedia) = (
+            FfiConverterString.allocationSize(value.`path`) +
+            FfiConverterOptionalString.allocationSize(value.`full`) +
+            FfiConverterString.allocationSize(value.`mime`) +
+            FfiConverterULong.allocationSize(value.`bytes`) +
+            FfiConverterUInt.allocationSize(value.`w`) +
+            FfiConverterUInt.allocationSize(value.`h`) +
+            FfiConverterString.allocationSize(value.`alt`)
+    )
+
+    override fun write(value: FeedMedia, buf: ByteBuffer) {
+            FfiConverterString.write(value.`path`, buf)
+            FfiConverterOptionalString.write(value.`full`, buf)
+            FfiConverterString.write(value.`mime`, buf)
+            FfiConverterULong.write(value.`bytes`, buf)
+            FfiConverterUInt.write(value.`w`, buf)
+            FfiConverterUInt.write(value.`h`, buf)
+            FfiConverterString.write(value.`alt`, buf)
+    }
+}
+
+
+
+data class FeedPost (
+    var `id`: kotlin.String, 
+    var `at`: kotlin.ULong, 
+    var `edited`: kotlin.ULong?, 
+    var `text`: kotlin.String, 
+    var `media`: List<FeedMedia>, 
+    var `files`: List<FeedFile>, 
+    var `re`: FeedRef?
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeFeedPost: FfiConverterRustBuffer<FeedPost> {
+    override fun read(buf: ByteBuffer): FeedPost {
+        return FeedPost(
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterOptionalULong.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterSequenceTypeFeedMedia.read(buf),
+            FfiConverterSequenceTypeFeedFile.read(buf),
+            FfiConverterOptionalTypeFeedRef.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: FeedPost) = (
+            FfiConverterString.allocationSize(value.`id`) +
+            FfiConverterULong.allocationSize(value.`at`) +
+            FfiConverterOptionalULong.allocationSize(value.`edited`) +
+            FfiConverterString.allocationSize(value.`text`) +
+            FfiConverterSequenceTypeFeedMedia.allocationSize(value.`media`) +
+            FfiConverterSequenceTypeFeedFile.allocationSize(value.`files`) +
+            FfiConverterOptionalTypeFeedRef.allocationSize(value.`re`)
+    )
+
+    override fun write(value: FeedPost, buf: ByteBuffer) {
+            FfiConverterString.write(value.`id`, buf)
+            FfiConverterULong.write(value.`at`, buf)
+            FfiConverterOptionalULong.write(value.`edited`, buf)
+            FfiConverterString.write(value.`text`, buf)
+            FfiConverterSequenceTypeFeedMedia.write(value.`media`, buf)
+            FfiConverterSequenceTypeFeedFile.write(value.`files`, buf)
+            FfiConverterOptionalTypeFeedRef.write(value.`re`, buf)
+    }
+}
+
+
+
+data class FeedRef (
+    var `persona`: kotlin.String, 
+    var `id`: kotlin.String
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeFeedRef: FfiConverterRustBuffer<FeedRef> {
+    override fun read(buf: ByteBuffer): FeedRef {
+        return FeedRef(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: FeedRef) = (
+            FfiConverterString.allocationSize(value.`persona`) +
+            FfiConverterString.allocationSize(value.`id`)
+    )
+
+    override fun write(value: FeedRef, buf: ByteBuffer) {
+            FfiConverterString.write(value.`persona`, buf)
+            FfiConverterString.write(value.`id`, buf)
+    }
+}
+
+
+
+data class FeedSpan (
+    var `text`: kotlin.String, 
+    var `bold`: kotlin.Boolean, 
+    var `italic`: kotlin.Boolean, 
+    /**
+     * A bundle path or a `ducat:` URI; nothing else survives the check.
+     */
+    var `link`: kotlin.String?
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeFeedSpan: FfiConverterRustBuffer<FeedSpan> {
+    override fun read(buf: ByteBuffer): FeedSpan {
+        return FeedSpan(
+            FfiConverterString.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterOptionalString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: FeedSpan) = (
+            FfiConverterString.allocationSize(value.`text`) +
+            FfiConverterBoolean.allocationSize(value.`bold`) +
+            FfiConverterBoolean.allocationSize(value.`italic`) +
+            FfiConverterOptionalString.allocationSize(value.`link`)
+    )
+
+    override fun write(value: FeedSpan, buf: ByteBuffer) {
+            FfiConverterString.write(value.`text`, buf)
+            FfiConverterBoolean.write(value.`bold`, buf)
+            FfiConverterBoolean.write(value.`italic`, buf)
+            FfiConverterOptionalString.write(value.`link`, buf)
     }
 }
 
@@ -6063,6 +6470,139 @@ public object FfiConverterTypeContactError : FfiConverterRustBuffer<ContactExcep
 
 
 
+sealed class FeedBlock {
+    
+    data class Paragraph(
+        val `spans`: List<FeedSpan>) : FeedBlock() {
+        companion object
+    }
+    
+    data class Image(
+        val `path`: kotlin.String, 
+        val `alt`: kotlin.String) : FeedBlock() {
+        companion object
+    }
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeFeedBlock : FfiConverterRustBuffer<FeedBlock>{
+    override fun read(buf: ByteBuffer): FeedBlock {
+        return when(buf.getInt()) {
+            1 -> FeedBlock.Paragraph(
+                FfiConverterSequenceTypeFeedSpan.read(buf),
+                )
+            2 -> FeedBlock.Image(
+                FfiConverterString.read(buf),
+                FfiConverterString.read(buf),
+                )
+            else -> throw RuntimeException("invalid enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: FeedBlock) = when(value) {
+        is FeedBlock.Paragraph -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterSequenceTypeFeedSpan.allocationSize(value.`spans`)
+            )
+        }
+        is FeedBlock.Image -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterString.allocationSize(value.`path`)
+                + FfiConverterString.allocationSize(value.`alt`)
+            )
+        }
+    }
+
+    override fun write(value: FeedBlock, buf: ByteBuffer) {
+        when(value) {
+            is FeedBlock.Paragraph -> {
+                buf.putInt(1)
+                FfiConverterSequenceTypeFeedSpan.write(value.`spans`, buf)
+                Unit
+            }
+            is FeedBlock.Image -> {
+                buf.putInt(2)
+                FfiConverterString.write(value.`path`, buf)
+                FfiConverterString.write(value.`alt`, buf)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+}
+
+
+
+
+
+
+
+sealed class FeedException: kotlin.Exception() {
+    
+    class Refused(
+        
+        val v1: kotlin.String
+        ) : FeedException() {
+        override val message
+            get() = "v1=${ v1 }"
+    }
+    
+
+    companion object ErrorHandler : UniffiRustCallStatusErrorHandler<FeedException> {
+        override fun lift(error_buf: RustBuffer.ByValue): FeedException = FfiConverterTypeFeedError.lift(error_buf)
+    }
+
+    
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeFeedError : FfiConverterRustBuffer<FeedException> {
+    override fun read(buf: ByteBuffer): FeedException {
+        
+
+        return when(buf.getInt()) {
+            1 -> FeedException.Refused(
+                FfiConverterString.read(buf),
+                )
+            else -> throw RuntimeException("invalid error enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: FeedException): ULong {
+        return when(value) {
+            is FeedException.Refused -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+                + FfiConverterString.allocationSize(value.v1)
+            )
+        }
+    }
+
+    override fun write(value: FeedException, buf: ByteBuffer) {
+        when(value) {
+            is FeedException.Refused -> {
+                buf.putInt(1)
+                FfiConverterString.write(value.v1, buf)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+
+}
+
+
+
 
 
 sealed class MoneroException: kotlin.Exception() {
@@ -6730,6 +7270,38 @@ public object FfiConverterOptionalTypeDhtRead: FfiConverterRustBuffer<DhtRead?> 
 /**
  * @suppress
  */
+public object FfiConverterOptionalTypeFeedRef: FfiConverterRustBuffer<FeedRef?> {
+    override fun read(buf: ByteBuffer): FeedRef? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeFeedRef.read(buf)
+    }
+
+    override fun allocationSize(value: FeedRef?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeFeedRef.allocationSize(value)
+        }
+    }
+
+    override fun write(value: FeedRef?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeFeedRef.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterOptionalTypeGroupSend: FfiConverterRustBuffer<GroupSend?> {
     override fun read(buf: ByteBuffer): GroupSend? {
         if (buf.get().toInt() == 0) {
@@ -7174,6 +7746,174 @@ public object FfiConverterSequenceTypeEscrowShareEntry: FfiConverterRustBuffer<L
 /**
  * @suppress
  */
+public object FfiConverterSequenceTypeFeedDoc: FfiConverterRustBuffer<List<FeedDoc>> {
+    override fun read(buf: ByteBuffer): List<FeedDoc> {
+        val len = buf.getInt()
+        return List<FeedDoc>(len) {
+            FfiConverterTypeFeedDoc.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<FeedDoc>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeFeedDoc.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<FeedDoc>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeFeedDoc.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypeFeedEntry: FfiConverterRustBuffer<List<FeedEntry>> {
+    override fun read(buf: ByteBuffer): List<FeedEntry> {
+        val len = buf.getInt()
+        return List<FeedEntry>(len) {
+            FfiConverterTypeFeedEntry.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<FeedEntry>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeFeedEntry.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<FeedEntry>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeFeedEntry.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypeFeedFile: FfiConverterRustBuffer<List<FeedFile>> {
+    override fun read(buf: ByteBuffer): List<FeedFile> {
+        val len = buf.getInt()
+        return List<FeedFile>(len) {
+            FfiConverterTypeFeedFile.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<FeedFile>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeFeedFile.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<FeedFile>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeFeedFile.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypeFeedMedia: FfiConverterRustBuffer<List<FeedMedia>> {
+    override fun read(buf: ByteBuffer): List<FeedMedia> {
+        val len = buf.getInt()
+        return List<FeedMedia>(len) {
+            FfiConverterTypeFeedMedia.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<FeedMedia>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeFeedMedia.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<FeedMedia>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeFeedMedia.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypeFeedPost: FfiConverterRustBuffer<List<FeedPost>> {
+    override fun read(buf: ByteBuffer): List<FeedPost> {
+        val len = buf.getInt()
+        return List<FeedPost>(len) {
+            FfiConverterTypeFeedPost.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<FeedPost>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeFeedPost.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<FeedPost>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeFeedPost.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypeFeedSpan: FfiConverterRustBuffer<List<FeedSpan>> {
+    override fun read(buf: ByteBuffer): List<FeedSpan> {
+        val len = buf.getInt()
+        return List<FeedSpan>(len) {
+            FfiConverterTypeFeedSpan.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<FeedSpan>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeFeedSpan.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<FeedSpan>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeFeedSpan.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterSequenceTypeFromParty: FfiConverterRustBuffer<List<FromParty>> {
     override fun read(buf: ByteBuffer): List<FromParty> {
         val len = buf.getInt()
@@ -7444,6 +8184,34 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
         buf.putInt(value.size)
         value.iterator().forEach {
             FfiConverterTypeTxDestination.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypeFeedBlock: FfiConverterRustBuffer<List<FeedBlock>> {
+    override fun read(buf: ByteBuffer): List<FeedBlock> {
+        val len = buf.getInt()
+        return List<FeedBlock>(len) {
+            FfiConverterTypeFeedBlock.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<FeedBlock>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeFeedBlock.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<FeedBlock>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeFeedBlock.write(it, buf)
         }
     }
 }
@@ -7862,6 +8630,96 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
     uniffiRustCallWithError(BackupException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_export_backup(
         FfiConverterTypeBackupInput.lower(`input`),FfiConverterString.lower(`passphrase`),FfiConverterByteArray.lower(`personaSecret`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Paragraphs, bold, italic, links and images — and nothing else is
+         * markup. A renderer draws every other character as itself.
+         */ fun `feedBlocks`(`text`: kotlin.String): List<FeedBlock> {
+            return FfiConverterSequenceTypeFeedBlock.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_feed_blocks(
+        FfiConverterString.lower(`text`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Write a feed the way it is read: posts newest first, nothing extra.
+         */
+    @Throws(FeedException::class) fun `feedEncode`(`doc`: FeedDoc): kotlin.String {
+            return FfiConverterString.lift(
+    uniffiRustCallWithError(FeedException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_feed_encode(
+        FfiConverterTypeFeedDoc.lower(`doc`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * The feed as a page: `feed.html`, every post's first lines and a link
+         * to its page.
+         */ fun `feedIndexHtml`(`doc`: FeedDoc): kotlin.String {
+            return FfiConverterString.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_feed_index_html(
+        FfiConverterTypeFeedDoc.lower(`doc`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * The timeline: every feed's posts together, newest first; ties break
+         * by author key then post id so two readers agree on the order.
+         */ fun `feedMerge`(`feeds`: List<FeedDoc>, `limit`: kotlin.UInt): List<FeedEntry> {
+            return FfiConverterSequenceTypeFeedEntry.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_feed_merge(
+        FfiConverterSequenceTypeFeedDoc.lower(`feeds`),FfiConverterUInt.lower(`limit`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * A fresh post id: 16 hex characters that no clock made.
+         */ fun `feedNewId`(): kotlin.String {
+            return FfiConverterString.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_feed_new_id(
+        _status)
+}
+    )
+    }
+    
+
+        /**
+         * Read a feed as a strict reader: the whole document or nothing.
+         */
+    @Throws(FeedException::class) fun `feedParse`(`json`: kotlin.String): FeedDoc {
+            return FfiConverterTypeFeedDoc.lift(
+    uniffiRustCallWithError(FeedException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_feed_parse(
+        FfiConverterString.lower(`json`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * One post as a page of the home: `posts/<id>.html`, referring to the
+         * bundle's files by root-relative paths.
+         */ fun `feedPostHtml`(`name`: kotlin.String, `post`: FeedPost): kotlin.String {
+            return FfiConverterString.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_feed_post_html(
+        FfiConverterString.lower(`name`),FfiConverterTypeFeedPost.lower(`post`),_status)
 }
     )
     }
@@ -8613,6 +9471,22 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
     
 
         /**
+         * Create — or, if this node already holds it, open — the record a given
+         * keypair owns. The key is deterministic (see `node_dht_record_key_for`),
+         * so creating twice names the same record, and a restored device finds
+         * its own home again from its persona key alone.
+         */
+    @Throws(NodeException::class) fun `nodeDhtCreateOwned`(`subkeyCount`: kotlin.UInt, `ownerPublic`: kotlin.ByteArray, `ownerSecret`: kotlin.ByteArray): DhtRecord {
+            return FfiConverterTypeDhtRecord.lift(
+    uniffiRustCallWithError(NodeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_dht_create_owned(
+        FfiConverterUInt.lower(`subkeyCount`),FfiConverterByteArray.lower(`ownerPublic`),FfiConverterByteArray.lower(`ownerSecret`),_status)
+}
+    )
+    }
+    
+
+        /**
          * Create a record we own and **one other party may also write**.
          *
          * This is the contact-request inbox: subkey 0 is ours, subkey 1 is theirs. The
@@ -8688,6 +9562,21 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
     uniffiRustCallWithError(NodeException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_dht_open(
         FfiConverterString.lower(`key`),FfiConverterOptionalByteArray.lower(`writerPublic`),FfiConverterOptionalByteArray.lower(`writerSecret`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * The record key a given owner key and one-subkey schema would name —
+         * computed, not created, so a reader who knows a persona's key can find
+         * its home (§16.23) without owning anything.
+         */
+    @Throws(NodeException::class) fun `nodeDhtRecordKeyFor`(`ownerPublic`: kotlin.ByteArray, `subkeyCount`: kotlin.UInt): kotlin.String {
+            return FfiConverterString.lift(
+    uniffiRustCallWithError(NodeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_dht_record_key_for(
+        FfiConverterByteArray.lower(`ownerPublic`),FfiConverterUInt.lower(`subkeyCount`),_status)
 }
     )
     }
@@ -9437,6 +10326,19 @@ public object FfiConverterSequenceTypeTxDestination: FfiConverterRustBuffer<List
     uniffiRustCallWithError(SwarmException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_swarm_seed(
         FfiConverterString.lower(`path`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Whether this process is serving a share right now — a seed that is
+         * already up is not something to tear down and rebuild.
+         */ fun `swarmSeeding`(`shareKey`: kotlin.String): kotlin.Boolean {
+            return FfiConverterBoolean.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_swarm_seeding(
+        FfiConverterString.lower(`shareKey`),_status)
 }
     )
     }

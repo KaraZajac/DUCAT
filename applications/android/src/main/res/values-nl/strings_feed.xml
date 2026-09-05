@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_feed">Feed</string>
+    <string name="feed_post">Plaatsen</string>
+    <string name="feed_post_hint">Wat is er? Woorden, een foto, een bestand.</string>
+    <string name="feed_post_note">Foto\'s reizen als miniatuur plus een gedeeld origineel; bestanden als gedeelde items. Wie je bewaart ziet dit bij de volgende blik.</string>
+    <string name="feed_add_photos">Foto\'s toevoegen</string>
+    <string name="feed_add_files">Bestanden toevoegen</string>
+    <string name="feed_posting">Plaatsen…</string>
+    <string name="feed_posted">Geplaatst.</string>
+    <string name="feed_empty">Nog niets hier. Geef een contact een hart om zijn thuis te bewaren, of plaats zelf iets.</string>
+    <string name="feed_open_post">Openen</string>
+    <string name="feed_refresh">Naar nieuwe berichten kijken</string>
+    <string name="feed_nothing_new">Niets nieuws.</string>
+    <string name="feed_delete_post">Bericht verwijderen</string>
+    <string name="feed_delete_post_body">Dit bericht verwijderen? Het verlaat je feed bij de volgende editie; wie de oude spiegelde heeft hem nog.</string>
+    <string name="feed_saved_to_files">%1$s staat op de pagina Bestanden.</string>
+    <string name="feed_no_home_yet">Nog niets geplaatst. Je eerste bericht zet je thuis op het netwerk.</string>
+    <string name="feed_edited">bewerkt</string>
+    <string name="feed_heart">Hun thuis bewaren</string>
+    <string name="feed_heart_note">Hun berichten staan in je feed, en deze telefoon spiegelt hun thuis.</string>
+    <string name="feed_delete_post_title">Dit bericht verwijderen?</string>
+    <string name="feed_name_you">%1$s · jij</string>
+    <plurals name="feed_new_editions">
+        <item quantity="one">%d thuis heeft nieuwe berichten.</item>
+        <item quantity="other">%d thuis hebben nieuwe berichten.</item>
+    </plurals>
+    <plurals name="feed_home_posts">
+        <item quantity="one">%d bericht, op het netwerk.</item>
+        <item quantity="other">%d berichten, op het netwerk.</item>
+    </plurals>
+    <plurals name="feed_n_pictures">
+        <item quantity="one">%d foto</item>
+        <item quantity="other">%d foto\'s</item>
+    </plurals>
+    <plurals name="feed_n_files">
+        <item quantity="one">%d bestand</item>
+        <item quantity="other">%d bestanden</item>
+    </plurals>
+    <string name="feed_failed">Dat is niet gelukt. Probeer het zo nog eens.</string>
+</resources>

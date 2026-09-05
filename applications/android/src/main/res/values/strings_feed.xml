@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_feed">Feed</string>
+    <string name="feed_post">Post</string>
+    <string name="feed_post_hint">What is happening? Words, a picture, a file.</string>
+    <string name="feed_post_note">Pictures travel as thumbnails plus a full-size share; files as shares. Everyone who keeps you sees this at their next look.</string>
+    <string name="feed_add_photos">Add photos</string>
+    <string name="feed_add_files">Add files</string>
+    <string name="feed_posting">Posting…</string>
+    <string name="feed_posted">Posted.</string>
+    <string name="feed_empty">Nothing here yet. Heart a contact to keep their home, or post something yourself.</string>
+    <string name="feed_open_post">Open</string>
+    <string name="feed_refresh">Look for new posts</string>
+    <string name="feed_nothing_new">Nothing new.</string>
+    <string name="feed_delete_post">Delete post</string>
+    <string name="feed_delete_post_body">Delete this post? It leaves your feed at the next edition; anyone who mirrored the old edition still has it.</string>
+    <string name="feed_saved_to_files">%1$s is on the Files page.</string>
+    <string name="feed_no_home_yet">Nothing posted yet. Your first post puts your home on the network.</string>
+    <string name="feed_edited">edited</string>
+    <string name="feed_heart">Keep their home</string>
+    <string name="feed_heart_note">Their posts sit in your feed, and this phone mirrors their home.</string>
+    <string name="feed_delete_post_title">Delete this post?</string>
+    <string name="feed_name_you">%1$s · you</string>
+    <plurals name="feed_new_editions">
+        <item quantity="one">%d home has new posts.</item>
+        <item quantity="other">%d homes have new posts.</item>
+    </plurals>
+    <plurals name="feed_home_posts">
+        <item quantity="one">%d post, on the network.</item>
+        <item quantity="other">%d posts, on the network.</item>
+    </plurals>
+    <plurals name="feed_n_pictures">
+        <item quantity="one">%d picture</item>
+        <item quantity="other">%d pictures</item>
+    </plurals>
+    <plurals name="feed_n_files">
+        <item quantity="one">%d file</item>
+        <item quantity="other">%d files</item>
+    </plurals>
+    <string name="feed_failed">That did not go through. Try again in a moment.</string>
+</resources>

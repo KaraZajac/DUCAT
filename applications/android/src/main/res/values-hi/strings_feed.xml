@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_feed">फ़ीड</string>
+    <string name="feed_post">पोस्ट</string>
+    <string name="feed_post_hint">क्या हो रहा है? शब्द, एक तस्वीर, एक फ़ाइल।</string>
+    <string name="feed_post_note">तस्वीरें थंबनेल और पूरे आकार की साझा प्रति के रूप में जाती हैं; फ़ाइलें साझा प्रति के रूप में। जो आपको रखते हैं, वे अगली बार देखने पर इसे देखेंगे।</string>
+    <string name="feed_add_photos">फ़ोटो जोड़ें</string>
+    <string name="feed_add_files">फ़ाइलें जोड़ें</string>
+    <string name="feed_posting">लगाया जा रहा है…</string>
+    <string name="feed_posted">पोस्ट हो गया।</string>
+    <string name="feed_empty">अभी यहाँ कुछ नहीं है। किसी संपर्क को दिल दें ताकि उनका घर रखें, या खुद कुछ पोस्ट करें।</string>
+    <string name="feed_open_post">खोलें</string>
+    <string name="feed_refresh">नई पोस्ट देखें</string>
+    <string name="feed_nothing_new">कुछ नया नहीं।</string>
+    <string name="feed_delete_post">पोस्ट हटाएँ</string>
+    <string name="feed_delete_post_body">यह पोस्ट हटाएँ? यह अगले संस्करण में आपके फ़ीड से हट जाएगी; जिसने पुराना संस्करण रखा है, उसके पास रहेगी।</string>
+    <string name="feed_saved_to_files">%1$s फ़ाइलें पृष्ठ पर है।</string>
+    <string name="feed_no_home_yet">अभी कुछ पोस्ट नहीं हुआ। आपकी पहली पोस्ट आपका घर नेटवर्क पर रखती है।</string>
+    <string name="feed_edited">संपादित</string>
+    <string name="feed_heart">उनका घर रखें</string>
+    <string name="feed_heart_note">उनकी पोस्ट आपके फ़ीड में रहती हैं, और यह फ़ोन उनका घर मिरर करता है।</string>
+    <string name="feed_delete_post_title">यह पोस्ट हटाएँ?</string>
+    <string name="feed_name_you">%1$s · आप</string>
+    <plurals name="feed_new_editions">
+        <item quantity="one">%d घर में नई पोस्ट हैं।</item>
+        <item quantity="other">%d घरों में नई पोस्ट हैं।</item>
+    </plurals>
+    <plurals name="feed_home_posts">
+        <item quantity="one">%d पोस्ट, नेटवर्क पर।</item>
+        <item quantity="other">%d पोस्ट, नेटवर्क पर।</item>
+    </plurals>
+    <plurals name="feed_n_pictures">
+        <item quantity="one">%d तस्वीर</item>
+        <item quantity="other">%d तस्वीरें</item>
+    </plurals>
+    <plurals name="feed_n_files">
+        <item quantity="one">%d फ़ाइल</item>
+        <item quantity="other">%d फ़ाइलें</item>
+    </plurals>
+    <string name="feed_failed">यह नहीं हो सका। थोड़ी देर में फिर कोशिश करें।</string>
+</resources>

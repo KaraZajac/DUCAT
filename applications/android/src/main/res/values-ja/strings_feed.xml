@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_feed">フィード</string>
+    <string name="feed_post">投稿</string>
+    <string name="feed_post_hint">いまどうしてる？言葉、写真、ファイル。</string>
+    <string name="feed_post_note">写真はサムネイルと原寸の共有として、ファイルは共有として届きます。あなたを保持している人は次に見るときにこれを見ます。</string>
+    <string name="feed_add_photos">写真を追加</string>
+    <string name="feed_add_files">ファイルを追加</string>
+    <string name="feed_posting">掲示中…</string>
+    <string name="feed_posted">投稿しました。</string>
+    <string name="feed_empty">まだ何もありません。連絡先にハートを付けてその人のホームを保持するか、自分で投稿しましょう。</string>
+    <string name="feed_open_post">開く</string>
+    <string name="feed_refresh">新しい投稿を探す</string>
+    <string name="feed_nothing_new">新しいものはありません。</string>
+    <string name="feed_delete_post">投稿を削除</string>
+    <string name="feed_delete_post_body">この投稿を削除しますか？次の版でフィードから消えますが、旧版を保持している人はまだ持っています。</string>
+    <string name="feed_saved_to_files">%1$s はファイルページにあります。</string>
+    <string name="feed_no_home_yet">まだ投稿はありません。最初の投稿であなたのホームがネットワークに載ります。</string>
+    <string name="feed_edited">編集済み</string>
+    <string name="feed_heart">この人のホームを保持</string>
+    <string name="feed_heart_note">この人の投稿があなたのフィードに並び、この電話がそのホームをミラーします。</string>
+    <string name="feed_delete_post_title">この投稿を削除しますか？</string>
+    <string name="feed_name_you">%1$s · あなた</string>
+    <plurals name="feed_new_editions">
+        <item quantity="one">%d 件のホームに新しい投稿があります。</item>
+        <item quantity="other">%d 件のホームに新しい投稿があります。</item>
+    </plurals>
+    <plurals name="feed_home_posts">
+        <item quantity="one">%d 件の投稿、ネットワーク上。</item>
+        <item quantity="other">%d 件の投稿、ネットワーク上。</item>
+    </plurals>
+    <plurals name="feed_n_pictures">
+        <item quantity="one">%d 枚の写真</item>
+        <item quantity="other">%d 枚の写真</item>
+    </plurals>
+    <plurals name="feed_n_files">
+        <item quantity="one">%d 個のファイル</item>
+        <item quantity="other">%d 個のファイル</item>
+    </plurals>
+    <string name="feed_failed">うまくいきませんでした。しばらくしてからもう一度お試しください。</string>
+</resources>

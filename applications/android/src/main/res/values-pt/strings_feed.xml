@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_feed">Feed</string>
+    <string name="feed_post">Publicar</string>
+    <string name="feed_post_hint">O que se passa? Palavras, uma imagem, um ficheiro.</string>
+    <string name="feed_post_note">As imagens viajam como miniatura mais uma partilha em tamanho real; os ficheiros como partilhas. Quem te guarda vê isto na próxima vez que olhar.</string>
+    <string name="feed_add_photos">Adicionar fotos</string>
+    <string name="feed_add_files">Adicionar ficheiros</string>
+    <string name="feed_posting">A afixar…</string>
+    <string name="feed_posted">Publicado.</string>
+    <string name="feed_empty">Ainda nada aqui. Dá um coração a um contacto para guardar a sua casa, ou publica algo tu.</string>
+    <string name="feed_open_post">Abrir</string>
+    <string name="feed_refresh">Procurar publicações novas</string>
+    <string name="feed_nothing_new">Nada de novo.</string>
+    <string name="feed_delete_post">Apagar publicação</string>
+    <string name="feed_delete_post_body">Apagar esta publicação? Sai do teu feed na próxima edição; quem espelhou a antiga ainda a tem.</string>
+    <string name="feed_saved_to_files">%1$s está na página Ficheiros.</string>
+    <string name="feed_no_home_yet">Ainda nada publicado. A tua primeira publicação põe a tua casa na rede.</string>
+    <string name="feed_edited">editado</string>
+    <string name="feed_heart">Guardar a sua casa</string>
+    <string name="feed_heart_note">As suas publicações ficam no teu feed, e este telemóvel espelha a sua casa.</string>
+    <string name="feed_delete_post_title">Apagar esta publicação?</string>
+    <string name="feed_name_you">%1$s · tu</string>
+    <plurals name="feed_new_editions">
+        <item quantity="one">%d casa tem publicações novas.</item>
+        <item quantity="other">%d casas têm publicações novas.</item>
+    </plurals>
+    <plurals name="feed_home_posts">
+        <item quantity="one">%d publicação, na rede.</item>
+        <item quantity="other">%d publicações, na rede.</item>
+    </plurals>
+    <plurals name="feed_n_pictures">
+        <item quantity="one">%d imagem</item>
+        <item quantity="other">%d imagens</item>
+    </plurals>
+    <plurals name="feed_n_files">
+        <item quantity="one">%d ficheiro</item>
+        <item quantity="other">%d ficheiros</item>
+    </plurals>
+    <string name="feed_failed">Não correu bem. Tenta de novo daqui a pouco.</string>
+</resources>

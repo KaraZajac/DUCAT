@@ -54,6 +54,7 @@ enum class Section(val labelRes: Int) {
     Status(R.string.section_status),
     Profile(R.string.section_profile),
     Contacts(R.string.section_contacts),
+    Feed(R.string.section_feed),
     Library(R.string.section_library),
     Sites(R.string.section_sites),
     Selling(R.string.section_selling),
@@ -115,6 +116,7 @@ private fun iconFor(s: Section) = when (s) {
     Section.Status -> Icons.Filled.Lan
     Section.Profile -> Icons.Filled.Person
     Section.Contacts -> Icons.Filled.People
+    Section.Feed -> Icons.Filled.DynamicFeed
     Section.Library -> Icons.Filled.LocalLibrary
     Section.Sites -> Icons.Filled.Public
     Section.Selling -> Icons.Filled.Storefront
@@ -151,6 +153,7 @@ fun SectionScreen(
         Section.Profile -> ProfileSection()
 
         Section.Contacts -> ContactsAdminSection(onOpenChat)
+        Section.Feed -> FeedSection()
 
         Section.Library -> LibrarySection()
 

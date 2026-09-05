@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_feed">Akış</string>
+    <string name="feed_post">Paylaş</string>
+    <string name="feed_post_hint">Neler oluyor? Sözler, bir resim, bir dosya.</string>
+    <string name="feed_post_note">Resimler küçük resim artı tam boyutlu paylaşım olarak, dosyalar paylaşım olarak gider. Seni tutan herkes bir sonraki bakışta görür.</string>
+    <string name="feed_add_photos">Fotoğraf ekle</string>
+    <string name="feed_add_files">Dosya ekle</string>
+    <string name="feed_posting">Asılıyor…</string>
+    <string name="feed_posted">Paylaşıldı.</string>
+    <string name="feed_empty">Henüz burada bir şey yok. Bir kişinin evini tutmak için kalp ver ya da kendin bir şey paylaş.</string>
+    <string name="feed_open_post">Aç</string>
+    <string name="feed_refresh">Yeni gönderilere bak</string>
+    <string name="feed_nothing_new">Yeni bir şey yok.</string>
+    <string name="feed_delete_post">Gönderiyi sil</string>
+    <string name="feed_delete_post_body">Bu gönderi silinsin mi? Sonraki sürümde akışından çıkar; eski sürümü tutanlar hâlâ görür.</string>
+    <string name="feed_saved_to_files">%1$s Dosyalar sayfasında.</string>
+    <string name="feed_no_home_yet">Henüz bir şey paylaşılmadı. İlk gönderin evini ağa koyar.</string>
+    <string name="feed_edited">düzenlendi</string>
+    <string name="feed_heart">Evini tut</string>
+    <string name="feed_heart_note">Gönderileri akışında durur ve bu telefon evlerini yansıtır.</string>
+    <string name="feed_delete_post_title">Bu gönderi silinsin mi?</string>
+    <string name="feed_name_you">%1$s · sen</string>
+    <plurals name="feed_new_editions">
+        <item quantity="one">%d evde yeni gönderi var.</item>
+        <item quantity="other">%d evde yeni gönderi var.</item>
+    </plurals>
+    <plurals name="feed_home_posts">
+        <item quantity="one">%d gönderi, ağda.</item>
+        <item quantity="other">%d gönderi, ağda.</item>
+    </plurals>
+    <plurals name="feed_n_pictures">
+        <item quantity="one">%d resim</item>
+        <item quantity="other">%d resim</item>
+    </plurals>
+    <plurals name="feed_n_files">
+        <item quantity="one">%d dosya</item>
+        <item quantity="other">%d dosya</item>
+    </plurals>
+    <string name="feed_failed">Olmadı. Birazdan tekrar dene.</string>
+</resources>

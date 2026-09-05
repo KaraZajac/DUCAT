@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_feed">动态</string>
+    <string name="feed_post">发布</string>
+    <string name="feed_post_hint">在想什么？文字、图片、文件。</string>
+    <string name="feed_post_note">图片以缩略图加原图分享传送，文件以分享传送。所有关注你的人下次查看时会看到。</string>
+    <string name="feed_add_photos">添加照片</string>
+    <string name="feed_add_files">添加文件</string>
+    <string name="feed_posting">正在张贴…</string>
+    <string name="feed_posted">已发布。</string>
+    <string name="feed_empty">这里还没有内容。给联系人点心以保留其主页，或自己发布一些内容。</string>
+    <string name="feed_open_post">打开</string>
+    <string name="feed_refresh">查看新动态</string>
+    <string name="feed_nothing_new">没有新内容。</string>
+    <string name="feed_delete_post">删除动态</string>
+    <string name="feed_delete_post_body">删除此动态？它将在下一版从你的动态中消失；镜像了旧版的人仍然拥有它。</string>
+    <string name="feed_saved_to_files">%1$s 已在文件页面。</string>
+    <string name="feed_no_home_yet">还没有动态。你的第一条动态会把你的主页放到网络上。</string>
+    <string name="feed_edited">已编辑</string>
+    <string name="feed_heart">保留其主页</string>
+    <string name="feed_heart_note">他们的动态会出现在你的动态中，这部手机会镜像其主页。</string>
+    <string name="feed_delete_post_title">删除此动态？</string>
+    <string name="feed_name_you">%1$s · 你</string>
+    <plurals name="feed_new_editions">
+        <item quantity="one">%d 个主页有新动态。</item>
+        <item quantity="other">%d 个主页有新动态。</item>
+    </plurals>
+    <plurals name="feed_home_posts">
+        <item quantity="one">%d 条动态，已在网络上。</item>
+        <item quantity="other">%d 条动态，已在网络上。</item>
+    </plurals>
+    <plurals name="feed_n_pictures">
+        <item quantity="one">%d 张图片</item>
+        <item quantity="other">%d 张图片</item>
+    </plurals>
+    <plurals name="feed_n_files">
+        <item quantity="one">%d 个文件</item>
+        <item quantity="other">%d 个文件</item>
+    </plurals>
+    <string name="feed_failed">没有成功。请稍后再试。</string>
+</resources>

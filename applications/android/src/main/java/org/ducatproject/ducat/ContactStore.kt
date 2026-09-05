@@ -1786,6 +1786,8 @@ data class Contact(
     val personaHex: String,
     val petname: String?,
     val assertedName: String?,
+    /** §16.23: this persona's home is kept and its posts sit in the feed. */
+    val hearted: Boolean = false,
     /** Our append-only log for this contact (§16.12). Only we write it. */
     val myOutbox: String,
     /**
@@ -1915,6 +1917,7 @@ data class Contact(
         put("persona", personaHex)
         put("petname", petname ?: JSONObject.NULL)
         put("asserted", assertedName ?: JSONObject.NULL)
+        put("hearted", hearted)
         put("my_outbox", myOutbox)
         put("my_outbox_pub", b64(myOutboxOwnerPublic))
         put("my_outbox_sec", b64(myOutboxOwnerSecret))
@@ -1948,6 +1951,7 @@ data class Contact(
             personaHex = o.getString("persona"),
             petname = o.optStringOrNull("petname"),
             assertedName = o.optStringOrNull("asserted"),
+            hearted = o.optBoolean("hearted", false),
             avatar = o.optStringOrNull("avatar")?.let { Base64.decode(it, Base64.NO_WRAP) },
             email = o.optStringOrNull("email"),
             phone = o.optStringOrNull("phone"),

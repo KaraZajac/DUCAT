@@ -1,6 +1,9 @@
 package org.ducatproject.ducat.ui
 
 import androidx.activity.compose.BackHandler
+import org.ducatproject.ducat.DucatLog
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -200,6 +203,30 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
             val arbiters = remember { org.ducatproject.ducat.ArbiterStore(context) }
             var isArbiter by remember(c.personaHex) {
                 mutableStateOf(arbiters.hex() == c.personaHex)
+            }
+            // §16.23: keep this persona's home; its posts sit in the feed.
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(R.string.feed_heart), style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        stringResource(R.string.feed_heart_note),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                val heartScope = rememberCoroutineScope()
+                Switch(
+                    checked = c.hearted,
+                    onCheckedChange = { on ->
+                        heartScope.launch(Dispatchers.IO) {
+                            runCatching { org.ducatproject.ducat.Home.setHeart(context, c.personaHex, on) }
+                                .onFailure { DucatLog.w("Profile", "heart: ${it.message}") }
+                        }
+                    },
+                )
             }
             Row(
                 Modifier.fillMaxWidth(),

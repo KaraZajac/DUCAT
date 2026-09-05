@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_feed">Feed</string>
+    <string name="feed_post">Posten</string>
+    <string name="feed_post_hint">Was gibt es? Worte, ein Bild, eine Datei.</string>
+    <string name="feed_post_note">Bilder reisen als Vorschau plus Freigabe in voller Größe; Dateien als Freigaben. Wer dich behält, sieht das beim nächsten Blick.</string>
+    <string name="feed_add_photos">Bilder hinzufügen</string>
+    <string name="feed_add_files">Dateien hinzufügen</string>
+    <string name="feed_posting">Wird angeschlagen…</string>
+    <string name="feed_posted">Gepostet.</string>
+    <string name="feed_empty">Noch nichts hier. Gib einem Kontakt ein Herz, um sein Zuhause zu behalten, oder poste selbst etwas.</string>
+    <string name="feed_open_post">Öffnen</string>
+    <string name="feed_refresh">Nach neuen Beiträgen sehen</string>
+    <string name="feed_nothing_new">Nichts Neues.</string>
+    <string name="feed_delete_post">Beitrag löschen</string>
+    <string name="feed_delete_post_body">Diesen Beitrag löschen? Er verschwindet mit der nächsten Ausgabe; wer die alte gespiegelt hat, behält sie.</string>
+    <string name="feed_saved_to_files">%1$s liegt auf der Seite Dateien.</string>
+    <string name="feed_no_home_yet">Noch nichts gepostet. Dein erster Beitrag bringt dein Zuhause ins Netz.</string>
+    <string name="feed_edited">bearbeitet</string>
+    <string name="feed_heart">Ihr Zuhause behalten</string>
+    <string name="feed_heart_note">Ihre Beiträge liegen in deinem Feed, und dieses Telefon spiegelt ihr Zuhause.</string>
+    <string name="feed_delete_post_title">Diesen Beitrag löschen?</string>
+    <string name="feed_name_you">%1$s · du</string>
+    <plurals name="feed_new_editions">
+        <item quantity="one">%d Zuhause hat neue Beiträge.</item>
+        <item quantity="other">%d Zuhause haben neue Beiträge.</item>
+    </plurals>
+    <plurals name="feed_home_posts">
+        <item quantity="one">%d Beitrag, im Netz.</item>
+        <item quantity="other">%d Beiträge, im Netz.</item>
+    </plurals>
+    <plurals name="feed_n_pictures">
+        <item quantity="one">%d Bild</item>
+        <item quantity="other">%d Bilder</item>
+    </plurals>
+    <plurals name="feed_n_files">
+        <item quantity="one">%d Datei</item>
+        <item quantity="other">%d Dateien</item>
+    </plurals>
+    <string name="feed_failed">Das hat nicht geklappt. Versuch es gleich noch einmal.</string>
+</resources>

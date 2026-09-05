@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_feed">Dòng tin</string>
+    <string name="feed_post">Đăng</string>
+    <string name="feed_post_hint">Có gì mới? Lời, một bức ảnh, một tệp.</string>
+    <string name="feed_post_note">Ảnh đi dưới dạng ảnh thu nhỏ kèm bản chia sẻ kích thước đầy đủ; tệp dưới dạng chia sẻ. Ai giữ bạn sẽ thấy ở lần xem tới.</string>
+    <string name="feed_add_photos">Thêm ảnh</string>
+    <string name="feed_add_files">Thêm tệp</string>
+    <string name="feed_posting">Đang đăng…</string>
+    <string name="feed_posted">Đã đăng.</string>
+    <string name="feed_empty">Chưa có gì ở đây. Thả tim một liên hệ để giữ nhà của họ, hoặc tự đăng gì đó.</string>
+    <string name="feed_open_post">Mở</string>
+    <string name="feed_refresh">Tìm bài mới</string>
+    <string name="feed_nothing_new">Không có gì mới.</string>
+    <string name="feed_delete_post">Xóa bài</string>
+    <string name="feed_delete_post_body">Xóa bài này? Nó rời dòng tin ở lần xuất bản tới; ai đã lưu bản cũ vẫn còn giữ.</string>
+    <string name="feed_saved_to_files">%1$s đã ở trang Tệp.</string>
+    <string name="feed_no_home_yet">Chưa đăng gì. Bài đầu tiên đưa nhà của bạn lên mạng.</string>
+    <string name="feed_edited">đã sửa</string>
+    <string name="feed_heart">Giữ nhà của họ</string>
+    <string name="feed_heart_note">Bài của họ nằm trong dòng tin của bạn, và điện thoại này sao chép nhà của họ.</string>
+    <string name="feed_delete_post_title">Xóa bài này?</string>
+    <string name="feed_name_you">%1$s · bạn</string>
+    <plurals name="feed_new_editions">
+        <item quantity="one">%d nhà có bài mới.</item>
+        <item quantity="other">%d nhà có bài mới.</item>
+    </plurals>
+    <plurals name="feed_home_posts">
+        <item quantity="one">%d bài, trên mạng.</item>
+        <item quantity="other">%d bài, trên mạng.</item>
+    </plurals>
+    <plurals name="feed_n_pictures">
+        <item quantity="one">%d ảnh</item>
+        <item quantity="other">%d ảnh</item>
+    </plurals>
+    <plurals name="feed_n_files">
+        <item quantity="one">%d tệp</item>
+        <item quantity="other">%d tệp</item>
+    </plurals>
+    <string name="feed_failed">Không thành công. Thử lại sau giây lát.</string>
+</resources>

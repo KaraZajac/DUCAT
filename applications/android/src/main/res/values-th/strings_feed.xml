@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_feed">ฟีด</string>
+    <string name="feed_post">โพสต์</string>
+    <string name="feed_post_hint">เกิดอะไรขึ้น? ข้อความ รูปภาพ ไฟล์</string>
+    <string name="feed_post_note">รูปภาพส่งเป็นภาพย่อพร้อมแชร์ขนาดเต็ม ไฟล์ส่งเป็นแชร์ ทุกคนที่เก็บคุณไว้จะเห็นในการดูครั้งถัดไป</string>
+    <string name="feed_add_photos">เพิ่มรูปภาพ</string>
+    <string name="feed_add_files">เพิ่มไฟล์</string>
+    <string name="feed_posting">กำลังติดประกาศ…</string>
+    <string name="feed_posted">โพสต์แล้ว</string>
+    <string name="feed_empty">ยังไม่มีอะไรที่นี่ ให้หัวใจผู้ติดต่อเพื่อเก็บบ้านของเขา หรือโพสต์อะไรสักอย่างเอง</string>
+    <string name="feed_open_post">เปิด</string>
+    <string name="feed_refresh">ค้นหาโพสต์ใหม่</string>
+    <string name="feed_nothing_new">ไม่มีอะไรใหม่</string>
+    <string name="feed_delete_post">ลบโพสต์</string>
+    <string name="feed_delete_post_body">ลบโพสต์นี้? มันจะออกจากฟีดในฉบับถัดไป ใครที่มิเรอร์ฉบับเก่ายังคงมีอยู่</string>
+    <string name="feed_saved_to_files">%1$s อยู่ในหน้าไฟล์</string>
+    <string name="feed_no_home_yet">ยังไม่ได้โพสต์ โพสต์แรกของคุณจะนำบ้านของคุณขึ้นเครือข่าย</string>
+    <string name="feed_edited">แก้ไขแล้ว</string>
+    <string name="feed_heart">เก็บบ้านของเขา</string>
+    <string name="feed_heart_note">โพสต์ของเขาอยู่ในฟีดของคุณ และโทรศัพท์นี้มิเรอร์บ้านของเขา</string>
+    <string name="feed_delete_post_title">ลบโพสต์นี้?</string>
+    <string name="feed_name_you">%1$s · คุณ</string>
+    <plurals name="feed_new_editions">
+        <item quantity="one">%d บ้านมีโพสต์ใหม่</item>
+        <item quantity="other">%d บ้านมีโพสต์ใหม่</item>
+    </plurals>
+    <plurals name="feed_home_posts">
+        <item quantity="one">%d โพสต์ อยู่บนเครือข่าย</item>
+        <item quantity="other">%d โพสต์ อยู่บนเครือข่าย</item>
+    </plurals>
+    <plurals name="feed_n_pictures">
+        <item quantity="one">%d รูป</item>
+        <item quantity="other">%d รูป</item>
+    </plurals>
+    <plurals name="feed_n_files">
+        <item quantity="one">%d ไฟล์</item>
+        <item quantity="other">%d ไฟล์</item>
+    </plurals>
+    <string name="feed_failed">ไม่สำเร็จ ลองอีกครั้งในอีกสักครู่</string>
+</resources>

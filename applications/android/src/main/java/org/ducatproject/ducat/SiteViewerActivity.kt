@@ -126,7 +126,12 @@ class SiteViewerActivity : ComponentActivity() {
         onBackPressedDispatcher.addCallback(this) {
             if (web.canGoBack()) web.goBack() else finish()
         }
-        web.loadUrl("https://site.local/index.html")
+        // A page inside the bundle, or the front page; nothing a caller
+        // could name resolves outside the room either way.
+        val page = intent.getStringExtra("page")
+            ?.takeIf { p -> p.isNotBlank() && !p.contains("..") && !p.contains(':') && !p.startsWith("//") }
+            ?.trimStart('/') ?: "index.html"
+        web.loadUrl("https://site.local/$page")
     }
 
     private fun mimeFor(path: String): String = when (path.substringAfterLast('.').lowercase()) {

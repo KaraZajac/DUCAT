@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_feed">خوراک</string>
+    <string name="feed_post">ارسال</string>
+    <string name="feed_post_hint">چه خبر؟ کلمات، یک تصویر، یک فایل.</string>
+    <string name="feed_post_note">تصاویر به صورت بندانگشتی به‌همراه اشتراک اندازه کامل می‌روند؛ فایل‌ها به صورت اشتراک. هر کس شما را نگه می‌دارد در نگاه بعدی این را می‌بیند.</string>
+    <string name="feed_add_photos">افزودن عکس</string>
+    <string name="feed_add_files">افزودن فایل</string>
+    <string name="feed_posting">در حال نصب…</string>
+    <string name="feed_posted">ارسال شد.</string>
+    <string name="feed_empty">هنوز چیزی اینجا نیست. به مخاطبی قلب بدهید تا خانه‌اش را نگه دارید، یا خودتان چیزی ارسال کنید.</string>
+    <string name="feed_open_post">باز کردن</string>
+    <string name="feed_refresh">جستجوی پست‌های جدید</string>
+    <string name="feed_nothing_new">چیز تازه‌ای نیست.</string>
+    <string name="feed_delete_post">حذف پست</string>
+    <string name="feed_delete_post_body">این پست حذف شود؟ در نسخه بعدی از خوراک شما می‌رود؛ هر کس نسخه قدیمی را آینه کرده هنوز آن را دارد.</string>
+    <string name="feed_saved_to_files">%1$s در صفحه فایل‌ها است.</string>
+    <string name="feed_no_home_yet">هنوز چیزی ارسال نشده. اولین پست شما خانه‌تان را روی شبکه می‌گذارد.</string>
+    <string name="feed_edited">ویرایش‌شده</string>
+    <string name="feed_heart">نگه داشتن خانه‌شان</string>
+    <string name="feed_heart_note">پست‌هایشان در خوراک شما می‌نشیند و این گوشی خانه‌شان را آینه می‌کند.</string>
+    <string name="feed_delete_post_title">این پست حذف شود؟</string>
+    <string name="feed_name_you">%1$s · شما</string>
+    <plurals name="feed_new_editions">
+        <item quantity="one">%d خانه پست جدید دارد.</item>
+        <item quantity="other">%d خانه پست جدید دارند.</item>
+    </plurals>
+    <plurals name="feed_home_posts">
+        <item quantity="one">%d پست، در شبکه.</item>
+        <item quantity="other">%d پست، در شبکه.</item>
+    </plurals>
+    <plurals name="feed_n_pictures">
+        <item quantity="one">%d تصویر</item>
+        <item quantity="other">%d تصویر</item>
+    </plurals>
+    <plurals name="feed_n_files">
+        <item quantity="one">%d فایل</item>
+        <item quantity="other">%d فایل</item>
+    </plurals>
+    <string name="feed_failed">انجام نشد. کمی بعد دوباره امتحان کنید.</string>
+</resources>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_feed">Fil</string>
+    <string name="feed_post">Publier</string>
+    <string name="feed_post_hint">Quoi de neuf ? Des mots, une image, un fichier.</string>
+    <string name="feed_post_note">Les images voyagent en vignette plus un partage en taille réelle ; les fichiers en partages. Ceux qui vous gardent le verront à leur prochain coup d\'œil.</string>
+    <string name="feed_add_photos">Ajouter des photos</string>
+    <string name="feed_add_files">Ajouter des fichiers</string>
+    <string name="feed_posting">Affichage…</string>
+    <string name="feed_posted">Publié.</string>
+    <string name="feed_empty">Rien ici pour l\'instant. Donnez un cœur à un contact pour garder son chez-soi, ou publiez quelque chose.</string>
+    <string name="feed_open_post">Ouvrir</string>
+    <string name="feed_refresh">Chercher de nouvelles publications</string>
+    <string name="feed_nothing_new">Rien de nouveau.</string>
+    <string name="feed_delete_post">Supprimer la publication</string>
+    <string name="feed_delete_post_body">Supprimer cette publication ? Elle quittera votre fil à la prochaine édition ; ceux qui ont gardé l\'ancienne l\'ont encore.</string>
+    <string name="feed_saved_to_files">%1$s est sur la page Fichiers.</string>
+    <string name="feed_no_home_yet">Rien de publié encore. Votre première publication met votre chez-soi sur le réseau.</string>
+    <string name="feed_edited">modifié</string>
+    <string name="feed_heart">Garder leur chez-soi</string>
+    <string name="feed_heart_note">Leurs publications sont dans votre fil, et ce téléphone reflète leur chez-soi.</string>
+    <string name="feed_delete_post_title">Supprimer cette publication ?</string>
+    <string name="feed_name_you">%1$s · vous</string>
+    <plurals name="feed_new_editions">
+        <item quantity="one">%d chez-soi a de nouvelles publications.</item>
+        <item quantity="other">%d chez-soi ont de nouvelles publications.</item>
+    </plurals>
+    <plurals name="feed_home_posts">
+        <item quantity="one">%d publication, sur le réseau.</item>
+        <item quantity="other">%d publications, sur le réseau.</item>
+    </plurals>
+    <plurals name="feed_n_pictures">
+        <item quantity="one">%d image</item>
+        <item quantity="other">%d images</item>
+    </plurals>
+    <plurals name="feed_n_files">
+        <item quantity="one">%d fichier</item>
+        <item quantity="other">%d fichiers</item>
+    </plurals>
+    <string name="feed_failed">Cela n\'a pas abouti. Réessayez dans un instant.</string>
+</resources>

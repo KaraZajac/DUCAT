@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="section_feed">피드</string>
+    <string name="feed_post">게시</string>
+    <string name="feed_post_hint">무슨 일이 있나요? 글, 사진, 파일.</string>
+    <string name="feed_post_note">사진은 썸네일과 원본 공유로, 파일은 공유로 전달됩니다. 당신을 간직한 모두가 다음에 볼 때 이것을 봅니다.</string>
+    <string name="feed_add_photos">사진 추가</string>
+    <string name="feed_add_files">파일 추가</string>
+    <string name="feed_posting">게시 중…</string>
+    <string name="feed_posted">게시했습니다.</string>
+    <string name="feed_empty">아직 아무것도 없습니다. 연락처에 하트를 눌러 그들의 홈을 간직하거나, 직접 무언가를 게시하세요.</string>
+    <string name="feed_open_post">열기</string>
+    <string name="feed_refresh">새 게시물 찾기</string>
+    <string name="feed_nothing_new">새로운 것이 없습니다.</string>
+    <string name="feed_delete_post">게시물 삭제</string>
+    <string name="feed_delete_post_body">이 게시물을 삭제할까요? 다음 판에서 피드에서 사라지며, 이전 판을 미러한 사람은 여전히 갖고 있습니다.</string>
+    <string name="feed_saved_to_files">%1$s이(가) 파일 페이지에 있습니다.</string>
+    <string name="feed_no_home_yet">아직 게시물이 없습니다. 첫 게시물이 당신의 홈을 네트워크에 올립니다.</string>
+    <string name="feed_edited">수정됨</string>
+    <string name="feed_heart">이 사람의 홈 간직하기</string>
+    <string name="feed_heart_note">그들의 게시물이 내 피드에 오르고, 이 전화가 그들의 홈을 미러합니다.</string>
+    <string name="feed_delete_post_title">이 게시물을 삭제할까요?</string>
+    <string name="feed_name_you">%1$s · 나</string>
+    <plurals name="feed_new_editions">
+        <item quantity="one">%d개의 홈에 새 게시물이 있습니다.</item>
+        <item quantity="other">%d개의 홈에 새 게시물이 있습니다.</item>
+    </plurals>
+    <plurals name="feed_home_posts">
+        <item quantity="one">게시물 %d개, 네트워크에 있음.</item>
+        <item quantity="other">게시물 %d개, 네트워크에 있음.</item>
+    </plurals>
+    <plurals name="feed_n_pictures">
+        <item quantity="one">사진 %d장</item>
+        <item quantity="other">사진 %d장</item>
+    </plurals>
+    <plurals name="feed_n_files">
+        <item quantity="one">파일 %d개</item>
+        <item quantity="other">파일 %d개</item>
+    </plurals>
+    <string name="feed_failed">진행되지 않았습니다. 잠시 후 다시 시도하세요.</string>
+</resources>
