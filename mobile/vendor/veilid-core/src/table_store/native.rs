@@ -1,0 +1,114 @@
+use super::*;
+pub use keyvaluedb_sqlite::*;
+use std::path::PathBuf;
+
+#[derive(Clone)]
+#[must_use]
+pub(in crate::table_store) struct TableStoreDriver {
+    registry: VeilidComponentRegistry,
+}
+
+impl_veilid_component_accessors!(TableStoreDriver);
+
+impl TableStoreDriver {
+    pub fn new(registry: VeilidComponentRegistry) -> Self {
+        Self { registry }
+    }
+
+    fn get_dbpath(&self, table: &str) -> VeilidAPIResult<PathBuf> {
+        let config = self.config();
+        let tablestoredir = config.table_store.directory.clone();
+        std::fs::create_dir_all(&tablestoredir).map_err(VeilidAPIError::from)?;
+
+        let namespace = config.namespace.clone();
+        let dbpath: PathBuf = if namespace.is_empty() {
+            [tablestoredir, String::from(table)].iter().collect()
+        } else {
+            [tablestoredir, format!("{}_{}", namespace, table)]
+                .iter()
+                .collect()
+        };
+        Ok(dbpath)
+    }
+
+    #[expect(clippy::unused_async)]
+    pub async fn open(
+        &self,
+        table_name: &str,
+        column_count: u32,
+        concurrency: usize,
+    ) -> VeilidAPIResult<Database> {
+        let dbpath = self.get_dbpath(table_name)?;
+
+        // Ensure permissions are correct
+        ensure_file_private_owner(&dbpath).map_err(VeilidAPIError::internal)?;
+
+        let cfg = DatabaseConfig::new()
+            .with_columns(column_count)
+            .with_num_conns(concurrency)
+            .with_vacuum_mode(VacuumMode::None);
+        let db = Database::open(&dbpath, cfg).map_err(VeilidAPIError::from)?;
+
+        // Ensure permissions are correct
+        ensure_file_private_owner(&dbpath).map_err(VeilidAPIError::internal)?;
+
+        veilid_log!(self trace
+            "opened table store '{}' at path '{:?}' with {} columns",
+            table_name,
+            dbpath,
+            column_count
+        );
+        Ok(db)
+    }
+
+    #[expect(clippy::unused_async)]
+    pub async fn delete(&self, table_name: &str) -> VeilidAPIResult<bool> {
+        let dbpath = self.get_dbpath(table_name)?;
+        if !dbpath.exists() {
+            veilid_log!(self debug "TableStore::delete '{}' at path '{:?}' not deleted", table_name, dbpath);
+            return Ok(false);
+        }
+
+        veilid_log!(self trace "TableStore::delete '{}' at path '{:?}' deleted", table_name, dbpath);
+        std::fs::remove_file(dbpath).map_err(VeilidAPIError::from)?;
+
+        Ok(true)
+    }
+
+    /// Delete every table file for the currently configured namespace.
+    #[expect(clippy::unused_async)]
+    pub async fn delete_all_in_namespace(&self) -> VeilidAPIResult<usize> {
+        let config = self.config();
+        let tablestoredir = config.table_store.directory.clone();
+        let namespace = config.namespace.clone();
+        let dir = std::path::PathBuf::from(&tablestoredir);
+        if !dir.exists() {
+            return Ok(0);
+        }
+
+        let prefix = if namespace.is_empty() {
+            String::new()
+        } else {
+            format!("{}_", namespace)
+        };
+
+        let mut deleted = 0usize;
+        for entry in std::fs::read_dir(&dir).map_err(VeilidAPIError::from)? {
+            let Ok(entry) = entry else { continue };
+            let path = entry.path();
+            let Some(fname) = path.file_name().and_then(|n| n.to_str()) else {
+                continue;
+            };
+            if !prefix.is_empty() && !fname.starts_with(&prefix) {
+                continue;
+            }
+            if let Err(e) = std::fs::remove_file(&path) {
+                veilid_log!(self warn "delete_all_in_namespace: failed to remove '{}': {}", fname, e);
+                continue;
+            }
+            deleted += 1;
+            veilid_log!(self debug "delete_all_in_namespace: removed '{}'", fname);
+        }
+        Ok(deleted)
+    }
+}

@@ -8169,8 +8169,6 @@ checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
 [[package]]
 name = "veilid-core"
 version = "0.5.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2adad47ca2c40d00da22f698661551c1d07fc3966c3dbd40c4213608cfc4b286"
 dependencies = [
  "arc-swap",
  "argon2 0.6.0",

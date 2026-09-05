@@ -25,13 +25,14 @@ Use `armeabi-v7a` only for phones older than about 2016; `x86_64` is for emulato
 
 | | |
 |---|---|
-| Linux | [`.deb`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-linux-x64.deb) · [`.rpm`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-linux-x64.rpm) · [portable](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-linux-x64.tar.gz) |
-| Windows | [`.msi`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-windows-x64.msi) · [portable](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-windows-x64.zip) |
-| macOS (Apple Silicon) | [`.dmg`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-macos-arm64.dmg) · [portable](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-macos-arm64.tar.gz) |
-| macOS (Intel) | [`.dmg`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-macos-x64.dmg) · [portable](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-macos-x64.tar.gz) |
+| Linux | [`.deb`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-linux-x64.deb) · [`.rpm`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-linux-x64.rpm) · [AppImage](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-linux-x64.AppImage) |
+| Windows | [`.msi`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-windows-x64.msi) · [setup `.exe`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-windows-x64-setup.exe) |
+| macOS (Apple Silicon) | [`.dmg`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-macos-arm64.dmg) |
+| macOS (Intel) | [`.dmg`](https://github.com/KaraZajac/DUCAT/releases/latest/download/ducat-macos-x64.dmg) |
 
-Each carries its own Rust library and JVM — nothing to install first. They are
-unsigned, so both desktop OSes will warn on first open.
+A native window over the same Rust the phone runs — nothing to install
+first. They are unsigned: Windows will warn on first open, and on a Mac,
+right-click the app and choose Open the first time.
 
 **Debug-signed, stagenet only.** Not for real money.
 
@@ -308,7 +309,9 @@ applications/       every client: android/ (Kotlin/Compose over a UniFFI
                     earlier Compose desk, which compiled the phone's sources
                     against a shim and still runs the field-day tasks.
                     iOS gets a folder when it earns one.
-mobile/             the Rust bridge: wallet, scanner, mailbox, node
+mobile/             the Rust bridge: wallet, scanner, mailbox, node; vendor/
+                    holds the crates carried with a change of ours (see each
+                    NOTICE), veilid-core among them
 research/           one-off measurements: Veilid throughput, Monero multisig,
                     FROSTLASS, wallet-layer probes. Evidence, not product.
 ```

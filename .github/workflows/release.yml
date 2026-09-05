@@ -154,12 +154,12 @@ jobs:
           b="$base/release/bundle"
           mkdir -p dist
           shopt -s nullglob
-          for f in "$b"/deb/*.deb; do cp "$f" "dist/ducat-desk-${{ matrix.slug }}.deb"; done
-          for f in "$b"/rpm/*.rpm; do cp "$f" "dist/ducat-desk-${{ matrix.slug }}.rpm"; done
-          for f in "$b"/appimage/*.AppImage; do cp "$f" "dist/ducat-desk-${{ matrix.slug }}.AppImage"; done
-          for f in "$b"/msi/*.msi; do cp "$f" "dist/ducat-desk-${{ matrix.slug }}.msi"; done
-          for f in "$b"/nsis/*.exe; do cp "$f" "dist/ducat-desk-${{ matrix.slug }}-setup.exe"; done
-          for f in "$b"/dmg/*.dmg; do cp "$f" "dist/ducat-desk-${{ matrix.slug }}.dmg"; done
+          for f in "$b"/deb/*.deb; do cp "$f" "dist/ducat-${{ matrix.slug }}.deb"; done
+          for f in "$b"/rpm/*.rpm; do cp "$f" "dist/ducat-${{ matrix.slug }}.rpm"; done
+          for f in "$b"/appimage/*.AppImage; do cp "$f" "dist/ducat-${{ matrix.slug }}.AppImage"; done
+          for f in "$b"/msi/*.msi; do cp "$f" "dist/ducat-${{ matrix.slug }}.msi"; done
+          for f in "$b"/nsis/*.exe; do cp "$f" "dist/ducat-${{ matrix.slug }}-setup.exe"; done
+          for f in "$b"/dmg/*.dmg; do cp "$f" "dist/ducat-${{ matrix.slug }}.dmg"; done
           ls -la dist
 
       - name: keep the bundles

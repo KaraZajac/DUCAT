@@ -14,6 +14,8 @@ members = [
     "mobile/vendor/stigmerge-fileindex",
     "mobile/vendor/stigmerge-peer",
     "mobile/vendor/veilnet",
+    # veilid-core with one bounded-history fix; see its DUCAT-NOTICE.md.
+    "mobile/vendor/veilid-core",
 ]
 exclude = ["research"]
 
@@ -25,3 +27,6 @@ lto = true            # veilid pulls a large dependency tree; cross-crate inlini
 codegen-units = 1     # slower to build, smaller to ship
 opt-level = "z"       # size over speed: nothing here is compute-bound except
                       # Argon2, which is deliberately slow anyway
+
+[patch.crates-io]
+veilid-core = { path = "mobile/vendor/veilid-core" }

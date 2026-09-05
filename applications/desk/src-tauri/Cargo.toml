@@ -40,3 +40,8 @@ qrcode = { version = "0.14", default-features = false, features = ["svg"] }
 # Real calls: the machine's microphone and speaker. Needs the platform's
 # audio development library to build (alsa-lib-devel on Fedora).
 sound = ["ducat-app/sound"]
+
+# The same veilid-core the phone builds against, with its one fix; this
+# workspace is separate from the root one, so it says so itself.
+[patch.crates-io]
+veilid-core = { path = "../../../mobile/vendor/veilid-core" }
