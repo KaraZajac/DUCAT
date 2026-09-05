@@ -420,6 +420,7 @@
  "desk_update": "अपडेट करें",
  "desk_update_site": "साइट अपडेट करें",
  "desk_updated_at": "अपडेट %1$s",
+ "desk_version_line": "डेस्क v%1$s · %2$s",
  "desk_waiting_node": "नोड की प्रतीक्षा…",
  "desk_wallet_lede": "मोनेरो, यहाँ रखा हुआ। ये कुंजियाँ और किसी के पास नहीं।",
  "desk_wallet_lede_stagenet": "मोनेरो, यहाँ रखा हुआ। ये कुंजियाँ और किसी के पास नहीं — फ़िलहाल stagenet सिक्के, इसलिए राशियाँ अभ्यास हैं।",

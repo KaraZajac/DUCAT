@@ -411,6 +411,7 @@
  "desk_update": "Perbarui",
  "desk_update_site": "Perbarui situs",
  "desk_updated_at": "diperbarui %1$s",
+ "desk_version_line": "desk v%1$s · %2$s",
  "desk_waiting_node": "Menunggu node…",
  "desk_wallet_lede": "Monero, disimpan di sini. Tidak ada orang lain yang memegang kunci ini.",
  "desk_wallet_lede_stagenet": "Monero, disimpan di sini. Tidak ada orang lain yang memegang kunci ini — koin stagenet untuk saat ini, jadi jumlahnya latihan.",

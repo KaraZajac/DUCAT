@@ -420,6 +420,7 @@
  "desk_update": "Mettre à jour",
  "desk_update_site": "Mettre à jour un site",
  "desk_updated_at": "mis à jour %1$s",
+ "desk_version_line": "bureau v%1$s · %2$s",
  "desk_waiting_node": "En attente du nœud…",
  "desk_wallet_lede": "Du Monero, gardé ici. Personne d’autre ne détient ces clés.",
  "desk_wallet_lede_stagenet": "Du Monero, gardé ici. Personne d’autre ne détient ces clés — des pièces stagenet pour l’instant, les montants sont donc d’exercice.",

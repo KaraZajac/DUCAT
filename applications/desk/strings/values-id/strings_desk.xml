@@ -309,4 +309,5 @@
     <string name="desk_confirm_remove_item">Hapus item ini dari katalog?</string>
     <string name="desk_confirm_abandon_order">Tandai pesanan ini sebagai ditinggalkan? Kodenya berhenti dipantau.</string>
     <string name="desk_find_conversation">Cari percakapan</string>
+    <string name="desk_version_line">desk v%1$s · %2$s</string>
 </resources>

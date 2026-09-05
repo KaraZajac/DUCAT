@@ -64,6 +64,7 @@
         <div class="meta">{attachWord(status.state)} · {t("net_line_peers")}: {t("net_peers_value", status.peers, status.reliable_peers)}</div>
       </div>
       <div class="actions"><span class="meta">{status.data_dir}</span></div>
+      <div class="meta">{t("desk_version_line", status.version, status.platform)}</div>
     </div>
     {#if status.error}<p class="err">{status.error}</p>{/if}
   {:else}

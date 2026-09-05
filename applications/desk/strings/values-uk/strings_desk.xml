@@ -321,4 +321,5 @@
     <string name="desk_confirm_remove_item">Прибрати цей товар із каталогу?</string>
     <string name="desk_confirm_abandon_order">Позначити це замовлення як покинуте? Його код перестане відстежуватися.</string>
     <string name="desk_find_conversation">Знайти розмову</string>
+    <string name="desk_version_line">стіл v%1$s · %2$s</string>
 </resources>

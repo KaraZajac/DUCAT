@@ -411,6 +411,7 @@
  "desk_update": "갱신",
  "desk_update_site": "사이트 갱신",
  "desk_updated_at": "갱신 %1$s",
+ "desk_version_line": "데스크 v%1$s · %2$s",
  "desk_waiting_node": "노드를 기다리는 중…",
  "desk_wallet_lede": "여기에 보관된 Monero. 이 키는 다른 누구도 갖고 있지 않습니다.",
  "desk_wallet_lede_stagenet": "여기에 보관된 Monero. 이 키는 다른 누구도 갖고 있지 않습니다. 지금은 stagenet 코인이라 금액은 연습용입니다.",

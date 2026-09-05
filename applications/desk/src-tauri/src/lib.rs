@@ -24,6 +24,9 @@ fn s<E: std::fmt::Display>(e: E) -> String {
 
 #[derive(Serialize)]
 struct Status {
+    /// The desk's own version and platform, for the Status page.
+    version: String,
+    platform: String,
     running: bool,
     attached: bool,
     ready: bool,
@@ -39,6 +42,8 @@ fn status() -> Result<Status, String> {
     let a = app()?;
     let n = a.node_status();
     Ok(Status {
+        version: env!("CARGO_PKG_VERSION").to_string(),
+        platform: format!("{} {}", std::env::consts::OS, std::env::consts::ARCH),
         running: n.running,
         attached: n.attached,
         ready: n.public_internet_ready,

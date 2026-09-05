@@ -411,6 +411,7 @@
  "desk_update": "อัปเดต",
  "desk_update_site": "อัปเดตไซต์",
  "desk_updated_at": "อัปเดต %1$s",
+ "desk_version_line": "เดสก์ v%1$s · %2$s",
  "desk_waiting_node": "กำลังรอโหนด…",
  "desk_wallet_lede": "Monero เก็บไว้ที่นี่ ไม่มีใครอื่นถือกุญแจเหล่านี้",
  "desk_wallet_lede_stagenet": "Monero เก็บไว้ที่นี่ ไม่มีใครอื่นถือกุญแจเหล่านี้ — ตอนนี้เป็นเหรียญ stagenet จำนวนเงินจึงเป็นการฝึก",

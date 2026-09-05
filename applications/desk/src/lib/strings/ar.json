@@ -456,6 +456,7 @@
  "desk_update": "تحديث",
  "desk_update_site": "تحديث موقع",
  "desk_updated_at": "حُدّث %1$s",
+ "desk_version_line": "المكتب v%1$s · %2$s",
  "desk_waiting_node": "في انتظار العقدة…",
  "desk_wallet_lede": "مونيرو، محفوظ هنا. لا أحد غيرك يملك هذه المفاتيح.",
  "desk_wallet_lede_stagenet": "مونيرو، محفوظ هنا. لا أحد غيرك يملك هذه المفاتيح — عملات stagenet حاليًا، فالمبالغ للتدريب.",

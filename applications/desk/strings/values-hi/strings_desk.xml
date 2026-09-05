@@ -313,4 +313,5 @@
     <string name="desk_confirm_remove_item">इस वस्तु को सूची से हटाएँ?</string>
     <string name="desk_confirm_abandon_order">इस ऑर्डर को छोड़ा हुआ चिह्नित करें? इसका कोड देखा जाना बंद हो जाएगा।</string>
     <string name="desk_find_conversation">बातचीत खोजें</string>
+    <string name="desk_version_line">डेस्क v%1$s · %2$s</string>
 </resources>

@@ -438,6 +438,7 @@
  "desk_update": "Zaktualizuj",
  "desk_update_site": "Zaktualizuj stronę",
  "desk_updated_at": "zaktualizowano %1$s",
+ "desk_version_line": "biurko v%1$s · %2$s",
  "desk_waiting_node": "Czekanie na węzeł…",
  "desk_wallet_lede": "Monero, trzymane tutaj. Nikt inny nie ma tych kluczy.",
  "desk_wallet_lede_stagenet": "Monero, trzymane tutaj. Nikt inny nie ma tych kluczy — na razie monety stagenet, więc kwoty są ćwiczebne.",

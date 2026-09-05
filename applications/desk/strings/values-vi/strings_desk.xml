@@ -309,4 +309,5 @@
     <string name="desk_confirm_remove_item">Gỡ mặt hàng này khỏi danh mục?</string>
     <string name="desk_confirm_abandon_order">Đánh dấu đơn này là đã bỏ đi? Mã của nó không còn được theo dõi.</string>
     <string name="desk_find_conversation">Tìm cuộc trò chuyện</string>
+    <string name="desk_version_line">bàn v%1$s · %2$s</string>
 </resources>

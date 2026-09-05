@@ -321,4 +321,5 @@
     <string name="desk_confirm_remove_item">Usunąć tę pozycję z katalogu?</string>
     <string name="desk_confirm_abandon_order">Oznaczyć to zamówienie jako porzucone? Jego kod przestaje być obserwowany.</string>
     <string name="desk_find_conversation">Znajdź rozmowę</string>
+    <string name="desk_version_line">biurko v%1$s · %2$s</string>
 </resources>

@@ -309,4 +309,5 @@
     <string name="desk_confirm_remove_item">从目录中移除该商品？</string>
     <string name="desk_confirm_abandon_order">将此订单标记为已离开？其付款码将不再被监视。</string>
     <string name="desk_find_conversation">查找会话</string>
+    <string name="desk_version_line">桌面 v%1$s · %2$s</string>
 </resources>

@@ -317,4 +317,5 @@
     <string name="desk_confirm_remove_item">Remove this item from the catalogue?</string>
     <string name="desk_confirm_abandon_order">Mark this order as walked away? Its code stops being watched.</string>
     <string name="desk_find_conversation">Find a conversation</string>
+    <string name="desk_version_line">desk v%1$s · %2$s</string>
 </resources>

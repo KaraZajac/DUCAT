@@ -6,6 +6,8 @@ import { ask, open, save } from "@tauri-apps/plugin-dialog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
 export interface Status {
+  version: string;
+  platform: string;
   running: boolean;
   attached: boolean;
   ready: boolean;

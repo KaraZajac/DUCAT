@@ -420,6 +420,7 @@
  "desk_update": "Aggiorna",
  "desk_update_site": "Aggiorna un sito",
  "desk_updated_at": "aggiornato %1$s",
+ "desk_version_line": "desk v%1$s · %2$s",
  "desk_waiting_node": "In attesa del nodo…",
  "desk_wallet_lede": "Monero, custodito qui. Nessun altro possiede queste chiavi.",
  "desk_wallet_lede_stagenet": "Monero, custodito qui. Nessun altro possiede queste chiavi — per ora monete stagenet, quindi gli importi sono di prova.",

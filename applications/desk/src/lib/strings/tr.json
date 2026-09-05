@@ -420,6 +420,7 @@
  "desk_update": "Güncelle",
  "desk_update_site": "Bir siteyi güncelle",
  "desk_updated_at": "güncellendi %1$s",
+ "desk_version_line": "masa v%1$s · %2$s",
  "desk_waiting_node": "Düğüm bekleniyor…",
  "desk_wallet_lede": "Monero, burada saklanır. Bu anahtarlar başka kimsede yok.",
  "desk_wallet_lede_stagenet": "Monero, burada saklanır. Bu anahtarlar başka kimsede yok — şimdilik stagenet parası, yani tutarlar alıştırma.",

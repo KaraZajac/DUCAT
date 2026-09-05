@@ -411,6 +411,7 @@
  "desk_update": "更新",
  "desk_update_site": "更新站点",
  "desk_updated_at": "更新于 %1$s",
+ "desk_version_line": "桌面 v%1$s · %2$s",
  "desk_waiting_node": "正在等待节点…",
  "desk_wallet_lede": "门罗币，存放在这里。没有其他人持有这些密钥。",
  "desk_wallet_lede_stagenet": "门罗币，存放在这里。没有其他人持有这些密钥——目前是 stagenet 测试币，金额只是练习。",

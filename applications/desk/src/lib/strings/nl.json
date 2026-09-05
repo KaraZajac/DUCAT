@@ -420,6 +420,7 @@
  "desk_update": "Bijwerken",
  "desk_update_site": "Een site bijwerken",
  "desk_updated_at": "bijgewerkt %1$s",
+ "desk_version_line": "bureau v%1$s · %2$s",
  "desk_waiting_node": "Wachten op de node…",
  "desk_wallet_lede": "Monero, hier bewaard. Niemand anders heeft deze sleutels.",
  "desk_wallet_lede_stagenet": "Monero, hier bewaard. Niemand anders heeft deze sleutels — voorlopig stagenet-munten, dus de bedragen zijn oefening.",

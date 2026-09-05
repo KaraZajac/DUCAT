@@ -420,6 +420,7 @@
  "desk_update": "Update",
  "desk_update_site": "Update a site",
  "desk_updated_at": "updated %1$s",
+ "desk_version_line": "desk v%1$s · %2$s",
  "desk_waiting_node": "Waiting for the node…",
  "desk_wallet_lede": "Monero, kept here. Nobody else holds these keys.",
  "desk_wallet_lede_stagenet": "Monero, kept here. Nobody else holds these keys — stagenet coin for now, so the amounts are practice.",

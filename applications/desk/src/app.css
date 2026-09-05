@@ -509,7 +509,7 @@ details > summary:hover { color: var(--text); }
 
 /* Finding: a search box that sits with the list it narrows. */
 .input.find { width: 100%; margin: 6px 0 10px; }
-.input.find.narrow { width: 220px; margin: 0; }
+.input.find.narrow { width: 260px; margin: 0; }
 input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
 
 /* Right-to-left pages: a sentence, a name, or a clock keeps its own

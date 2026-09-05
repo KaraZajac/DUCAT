@@ -438,6 +438,7 @@
  "desk_update": "Оновити",
  "desk_update_site": "Оновити сайт",
  "desk_updated_at": "оновлено %1$s",
+ "desk_version_line": "стіл v%1$s · %2$s",
  "desk_waiting_node": "Очікування вузла…",
  "desk_wallet_lede": "Monero, зберігається тут. Більше ні в кого немає цих ключів.",
  "desk_wallet_lede_stagenet": "Monero, зберігається тут. Більше ні в кого немає цих ключів — поки монети stagenet, тож суми навчальні.",

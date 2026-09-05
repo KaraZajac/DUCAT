@@ -313,4 +313,5 @@
     <string name="desk_confirm_remove_item">Retirer cet article du catalogue ?</string>
     <string name="desk_confirm_abandon_order">Marquer cette commande comme abandonnée ? Son code n\'est plus surveillé.</string>
     <string name="desk_find_conversation">Trouver une conversation</string>
+    <string name="desk_version_line">bureau v%1$s · %2$s</string>
 </resources>

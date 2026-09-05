@@ -420,6 +420,7 @@
  "desk_update": "Actualizar",
  "desk_update_site": "Actualizar un sitio",
  "desk_updated_at": "actualizado %1$s",
+ "desk_version_line": "escritorio v%1$s · %2$s",
  "desk_waiting_node": "Esperando al nodo…",
  "desk_wallet_lede": "Monero, guardado aquí. Nadie más tiene estas claves.",
  "desk_wallet_lede_stagenet": "Monero, guardado aquí. Nadie más tiene estas claves; por ahora moneda de stagenet, así que las cantidades son de práctica.",

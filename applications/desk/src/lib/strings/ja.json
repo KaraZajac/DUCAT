@@ -411,6 +411,7 @@
  "desk_update": "更新",
  "desk_update_site": "サイトを更新",
  "desk_updated_at": "更新 %1$s",
+ "desk_version_line": "デスク v%1$s · %2$s",
  "desk_waiting_node": "ノードを待っています…",
  "desk_wallet_lede": "Monero をここに保管。この鍵を持つのはあなただけです。",
  "desk_wallet_lede_stagenet": "Monero をここに保管。この鍵を持つのはあなただけです。今は stagenet のコインなので、金額は練習です。",

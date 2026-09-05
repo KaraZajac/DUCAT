@@ -411,6 +411,7 @@
  "desk_update": "Cập nhật",
  "desk_update_site": "Cập nhật trang",
  "desk_updated_at": "cập nhật %1$s",
+ "desk_version_line": "bàn v%1$s · %2$s",
  "desk_waiting_node": "Đang chờ nút…",
  "desk_wallet_lede": "Monero, giữ tại đây. Không ai khác giữ những khóa này.",
  "desk_wallet_lede_stagenet": "Monero, giữ tại đây. Không ai khác giữ những khóa này — hiện là coin stagenet, nên số tiền chỉ để tập.",
