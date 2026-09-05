@@ -182,8 +182,11 @@ fn fix_android_emulator() {
         let android_home = env::var("ANDROID_HOME")
             .or(env::var("ANDROID_SDK_ROOT"))
             .expect("ANDROID_HOME or ANDROID_SDK_ROOT not set");
+        // DUCAT: any installed NDK, not one pinned version — the file has
+        // the same name in every recent NDK, and a build box with only the
+        // NDK the project pins (27.2) used to fail here.
         let lib_path = glob(&format!(
-            "{android_home}/ndk/28.2.13676358/**/lib{missing_library}.a"
+            "{android_home}/ndk/*/**/lib{missing_library}.a"
         ))
         .expect("failed to glob")
         .next()
