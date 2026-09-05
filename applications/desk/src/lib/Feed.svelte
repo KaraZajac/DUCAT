@@ -29,7 +29,7 @@
       people = await api.contacts();
       home = await api.homeView();
       for (const r of rows) {
-        for (const m of r.post.media) {
+        for (const m of r.post.media ?? []) {
           const key = r.persona + "/" + m.path;
           if (thumbs[key] === undefined) {
             api.homeFileDataUrl(r.persona, m.path).then((u) => { if (u) thumbs[key] = u; }).catch(() => {});
@@ -168,18 +168,18 @@
               {#if thumbs[r.persona + "/" + b.path]}<img class="post-img" src={thumbs[r.persona + "/" + b.path]} alt={b.alt} />{/if}
             {/if}
           {/each}
-          {#if r.post.media.length}
+          {#if (r.post.media ?? []).length}
             <div class="post-media">
-              {#each r.post.media as m}
+              {#each r.post.media ?? [] as m}
                 {#if thumbs[r.persona + "/" + m.path]}
                   <button class="linkish img" title={t("desk_open_post")} onclick={() => openPost(r)}><img class="post-img" src={thumbs[r.persona + "/" + m.path]} alt={m.alt} /></button>
                 {/if}
               {/each}
             </div>
           {/if}
-          {#if r.post.files.length}
+          {#if (r.post.files ?? []).length}
             <div class="post-files">
-              {#each r.post.files as f}
+              {#each r.post.files ?? [] as f}
                 <span class="chip">{@html icons.files} {f.name} · {fmtBytes(f.bytes)} <button class="linkish" onclick={() => saveFile(f.addr, f.name)}>{t("desk_save_file")}</button></span>
               {/each}
             </div>

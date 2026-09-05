@@ -57,7 +57,9 @@ export interface SiteRow {
 
 export type FeedMedia = { path: string; full: string | null; mime: string; bytes: number; w: number; h: number; alt: string };
 export type FeedFile = { name: string; addr: string; mime: string; bytes: number };
-export type FeedPost = { id: string; at: number; edited: number | null; text: string; media: FeedMedia[]; files: FeedFile[]; re: { persona: string; id: string } | null };
+// Empty lists and absent fields are left out of the document, so a post
+// read back may lack them; readers treat a missing list as empty.
+export type FeedPost = { id: string; at: number; edited?: number | null; text: string; media?: FeedMedia[]; files?: FeedFile[]; re?: { persona: string; id: string } | null };
 export type FeedSpan = { text: string; bold: boolean; italic: boolean; link: string | null };
 export type FeedBlock = { kind: "Paragraph"; spans: FeedSpan[] } | { kind: "Image"; path: string; alt: string };
 export type TimelineRow = { persona: string; name: string; mine: boolean; post: FeedPost; blocks: FeedBlock[] };
