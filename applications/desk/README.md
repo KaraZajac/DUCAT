@@ -92,6 +92,18 @@ the page cannot run anything. A site that was fetched before opens from the
 edition on hand when the node is offline. A `ducat:site/` address in a chat
 message shows an Open button that adds the site and opens its room.
 
+### Feed
+
+Every persona has a home: a site at the address its own key names, so a
+contact who holds your card can find it and only you can write it. The home's
+bundle carries your pages if you keep any, `feed.json`, its thumbnails, and a
+page per post for the sealed room. Heart a contact in chat or on the Feed page
+and their home is kept and read on the lap; the Feed page merges everyone kept,
+newest first, with your own posts among them. Post takes words in the small
+markdown subset, photos as thumbnails plus a full-size share, and files as
+shares. The rules are §16.23 of the protocol document, implemented once in the
+shared crate for both clients.
+
 ## Languages
 
 The desk speaks the phone's nineteen languages. Every sentence a page
