@@ -307,4 +307,5 @@
     <string name="desk_recording">Grabando</string>
     <string name="desk_send_the_memo">Enviar la nota de voz</string>
     <string name="desk_pick_conversation">Elige una conversación, o añade a alguien con su tarjeta.</string>
+    <string name="desk_reach_title">Formas de contactarte</string>
 </resources>

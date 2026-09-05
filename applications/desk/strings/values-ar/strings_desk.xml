@@ -323,4 +323,5 @@
     <string name="desk_recording">جارٍ التسجيل</string>
     <string name="desk_send_the_memo">إرسال المذكرة</string>
     <string name="desk_pick_conversation">اختر محادثة، أو أضف شخصًا ببطاقته.</string>
+    <string name="desk_reach_title">طرق التواصل معك</string>
 </resources>

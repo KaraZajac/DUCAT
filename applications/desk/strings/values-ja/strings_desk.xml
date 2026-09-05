@@ -303,4 +303,5 @@
     <string name="desk_recording">録音中</string>
     <string name="desk_send_the_memo">メモを送る</string>
     <string name="desk_pick_conversation">会話を選ぶか、カードで誰かを追加してください。</string>
+    <string name="desk_reach_title">連絡方法</string>
 </resources>

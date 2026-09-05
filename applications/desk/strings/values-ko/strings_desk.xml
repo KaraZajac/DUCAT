@@ -303,4 +303,5 @@
     <string name="desk_recording">녹음 중</string>
     <string name="desk_send_the_memo">메모 보내기</string>
     <string name="desk_pick_conversation">대화를 고르거나 카드로 누군가를 추가하세요.</string>
+    <string name="desk_reach_title">연락 방법</string>
 </resources>

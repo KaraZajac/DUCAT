@@ -306,6 +306,38 @@ fn set_my_name(name: String, persona_hex: Option<String>) -> Result<(), String> 
     app()?.set_my_name(persona_hex.as_deref(), &name).map_err(said)
 }
 
+/// §16.9: the ways to reach the worn persona away from DUCAT. They ride
+/// only a "profile" handshake, and only while `share` is on.
+#[derive(Serialize)]
+struct MyProfile {
+    email: Option<String>,
+    phone: Option<String>,
+    signal: Option<String>,
+    share: bool,
+}
+
+#[tauri::command]
+fn my_profile() -> Result<MyProfile, String> {
+    let a = app()?;
+    let worn = a.worn().map_err(said)?;
+    Ok(MyProfile {
+        email: a.profile_field(&worn, "email"),
+        phone: a.profile_field(&worn, "phone"),
+        signal: a.profile_field(&worn, "signal"),
+        share: a.share_profile(&worn),
+    })
+}
+
+#[tauri::command]
+fn set_my_profile(email: Option<String>, phone: Option<String>, signal: Option<String>, share: bool) -> Result<(), String> {
+    let a = app()?;
+    let worn = a.worn().map_err(said)?;
+    a.set_profile_field(&worn, "email", email.as_deref()).map_err(said)?;
+    a.set_profile_field(&worn, "phone", phone.as_deref()).map_err(said)?;
+    a.set_profile_field(&worn, "signal", signal.as_deref()).map_err(said)?;
+    a.set_share_profile(&worn, share).map_err(said)
+}
+
 #[derive(Serialize)]
 struct Code {
     uri: String,
@@ -2217,6 +2249,8 @@ pub fn run() {
             wear,
             create_persona,
             set_my_name,
+            my_profile,
+            set_my_profile,
             profile_code,
             contacts,
             claim_card,

@@ -311,4 +311,5 @@
     <string name="desk_recording">Recording</string>
     <string name="desk_send_the_memo">Send the memo</string>
     <string name="desk_pick_conversation">Pick a conversation, or add somebody with their card.</string>
+    <string name="desk_reach_title">Ways to reach you</string>
 </resources>

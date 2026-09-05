@@ -307,4 +307,5 @@
     <string name="desk_recording">रिकॉर्डिंग</string>
     <string name="desk_send_the_memo">मेमो भेजें</string>
     <string name="desk_pick_conversation">बातचीत चुनें, या किसी को उसके कार्ड से जोड़ें।</string>
+    <string name="desk_reach_title">आपसे संपर्क के तरीके</string>
 </resources>

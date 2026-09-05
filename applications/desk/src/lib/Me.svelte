@@ -3,7 +3,7 @@
   // the hats you wear.
   import { onMount } from "svelte";
   import { t, i18n, LANGS, applyLanguage } from "./i18n.svelte";
-  import { api, copy, fmtWhen, type Code, type PersonaRow } from "./api";
+  import { api, copy, fmtWhen, type Code, type PersonaRow, type MyProfile } from "./api";
   import { gen, drive } from "./state.svelte";
 
   let personas = $state<PersonaRow[]>([]);
@@ -15,6 +15,58 @@
   let newPersona = $state("");
 
   const worn = $derived(personas.find((p) => p.worn) ?? null);
+
+  // Ways to reach you (§16.9): kept per persona, sent only on a profile
+  // handshake and only while the switch is on. The shapes are the
+  // phone's, so a value saved here reads the same there.
+  let pEmail = $state(""), pPhone = $state(""), pSignal = $state(""), pShare = $state(false);
+  let savedProfile = $state<MyProfile | null>(null);
+  let profileMsg = $state<string | null>(null);
+  let profileErr = $state<string | null>(null);
+  const profileDirty = $derived(
+    !!savedProfile &&
+      (pEmail.trim() !== (savedProfile.email ?? "") ||
+        pPhone.trim() !== (savedProfile.phone ?? "") ||
+        pSignal.trim() !== (savedProfile.signal ?? "") ||
+        pShare !== savedProfile.share),
+  );
+  function checkEmail(v: string): string | null {
+    if (!v) return null;
+    if (v.length > 254) return t("myprofile_email_too_long");
+    const ok = /^[A-Za-z0-9._%+\-']+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/;
+    if (!ok.test(v) || v.includes("..")) return t("myprofile_email_shape");
+    return null;
+  }
+  function checkPhone(v: string): string | null {
+    if (!v) return null;
+    if (!/^[0-9]+$/.test(v)) return t("myprofile_phone_digits");
+    if (v.length > 15) return t("myprofile_phone_too_long");
+    return null;
+  }
+  function checkSignal(v: string): string | null {
+    if (!v) return null;
+    if (v.length > 48) return t("myprofile_signal_too_long");
+    if (!/^[A-Za-z_][A-Za-z0-9_]{2,}\.[0-9]{2,}$/.test(v)) return t("myprofile_signal_shape");
+    return null;
+  }
+  async function loadProfile() {
+    try {
+      const p = await api.myProfile();
+      savedProfile = p;
+      pEmail = p.email ?? ""; pPhone = p.phone ?? ""; pSignal = p.signal ?? ""; pShare = p.share;
+    } catch (e) { profileErr = String(e); }
+  }
+  async function saveProfile() {
+    profileErr = null; profileMsg = null;
+    const email = pEmail.trim(), phone = pPhone.trim(), signal = pSignal.trim();
+    const bad = checkEmail(email) ?? checkPhone(phone) ?? checkSignal(signal);
+    if (bad) { profileErr = bad; return; }
+    try {
+      await api.setMyProfile({ email: email || null, phone: phone || null, signal: signal || null, share: pShare });
+      profileMsg = t("myprofile_saved");
+      await loadProfile();
+    } catch (e) { profileErr = String(e); }
+  }
   let passphrase = $state("");
   let backupMsg = $state<string | null>(null);
   let backupBusy = $state(false);
@@ -66,7 +118,7 @@
     }
   }
 
-  onMount(refresh);
+  onMount(() => { refresh(); loadProfile(); });
   $effect(() => {
     void gen.value;
     refresh();
@@ -124,6 +176,30 @@
     <button class="btn" onclick={saveName} disabled={name.trim() === (savedName ?? "")}>{t("myprofile_save")}</button>
   </div>
   <p class="note">{t("desk_name_note")}</p>
+</div>
+
+<div class="card">
+  <h3>{t("desk_reach_title")}</h3>
+  <p class="note">{t("myprofile_reach_note")}</p>
+  <div class="field">
+    <label for="pemail">{t("myprofile_email")}</label>
+    <input id="pemail" class="input" type="email" bind:value={pEmail} placeholder="name@example.org" onkeydown={(e) => e.key === "Enter" && saveProfile()} />
+  </div>
+  <div class="field">
+    <label for="pphone">{t("myprofile_phone")}</label>
+    <input id="pphone" class="input" inputmode="numeric" bind:value={pPhone} placeholder={t("myprofile_phone_hint")} onkeydown={(e) => e.key === "Enter" && saveProfile()} />
+  </div>
+  <div class="field">
+    <label for="psignal">{t("myprofile_signal")}</label>
+    <input id="psignal" class="input" bind:value={pSignal} placeholder={t("myprofile_signal_hint")} onkeydown={(e) => e.key === "Enter" && saveProfile()} />
+  </div>
+  <label class="toggle"><input type="checkbox" bind:checked={pShare} /> {t("myprofile_share_switch")}</label>
+  <p class="note">{pShare ? t("myprofile_share_on_note") : t("myprofile_share_off_note")}</p>
+  <div class="actions">
+    <button class="btn" onclick={saveProfile} disabled={!profileDirty}>{t("myprofile_save")}</button>
+    {#if profileMsg}<span class="meta">{profileMsg}</span>{/if}
+  </div>
+  {#if profileErr}<p class="err">{profileErr}</p>{/if}
 </div>
 
 <div class="card">

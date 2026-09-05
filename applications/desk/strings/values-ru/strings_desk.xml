@@ -315,4 +315,5 @@
     <string name="desk_recording">Запись</string>
     <string name="desk_send_the_memo">Отправить заметку</string>
     <string name="desk_pick_conversation">Выберите разговор или добавьте кого-то по карточке.</string>
+    <string name="desk_reach_title">Как с вами связаться</string>
 </resources>

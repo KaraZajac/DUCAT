@@ -53,6 +53,8 @@ export interface SiteRow {
   dir: string;
 }
 
+export type MyProfile = { email: string | null; phone: string | null; signal: string | null; share: boolean };
+
 export interface PersonaRow {
   hex: string;
   name: string;
@@ -489,6 +491,8 @@ export const api = {
   wear: (hex: string) => invoke<void>("wear", { hex }),
   createPersona: (name: string, color: number) => invoke<PersonaRow | null>("create_persona", { name, color }),
   setMyName: (name: string, personaHex?: string) => invoke<void>("set_my_name", { name, personaHex: personaHex ?? null }),
+  myProfile: () => invoke<MyProfile>("my_profile"),
+  setMyProfile: (p: MyProfile) => invoke<void>("set_my_profile", { email: p.email, phone: p.phone, signal: p.signal, share: p.share }),
   profileCode: () => invoke<Code>("profile_code"),
 
   contacts: () => invoke<ContactRow[]>("contacts"),

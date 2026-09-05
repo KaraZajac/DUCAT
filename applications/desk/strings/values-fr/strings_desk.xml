@@ -307,4 +307,5 @@
     <string name="desk_recording">Enregistrement</string>
     <string name="desk_send_the_memo">Envoyer le mémo</string>
     <string name="desk_pick_conversation">Choisissez une conversation, ou ajoutez quelqu’un avec sa carte.</string>
+    <string name="desk_reach_title">Comment vous joindre</string>
 </resources>

@@ -303,4 +303,5 @@
     <string name="desk_recording">正在录音</string>
     <string name="desk_send_the_memo">发送语音</string>
     <string name="desk_pick_conversation">选择一个会话，或用名片添加某人。</string>
+    <string name="desk_reach_title">联系你的方式</string>
 </resources>
