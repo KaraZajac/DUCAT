@@ -3,6 +3,7 @@
   // is ringing, connecting, or up. Polled twice a second — a state, not
   // an event, so nothing can be missed.
   import { onMount } from "svelte";
+  import { t, tp, i18n } from "./i18n.svelte";
   import { api, type CallView } from "./api";
 
   let view = $state<CallView | null>(null);
@@ -34,25 +35,25 @@
     <div class="callbar-who">
       <span class="avatar">{(view.contact_name ?? "?").slice(0, 1).toUpperCase()}</span>
       <div>
-        <div class="title">{view.contact_name ?? "Somebody"}</div>
+        <div class="title">{view.contact_name ?? t("desk_somebody")}</div>
         <div class="meta">
-          {#if st.kind === "Outgoing"}Calling…
-          {:else if st.kind === "Incoming"}Incoming call
-          {:else if st.kind === "Answering"}Connecting…
-          {:else if st.kind === "Active"}{view.rx_frames === 0 ? "Connecting…" : clock(st.since_ms)} · {view.rx_frames} in / {view.tx_frames} out
-          {:else if st.kind === "NoAnswer"}{st.why === "Unreached" ? "Could not reach them" : st.why === "NeverConnected" ? "Answered, but no sound came through" : "No answer"}
+          {#if st.kind === "Outgoing"}{t("call_calling")}
+          {:else if st.kind === "Incoming"}{t("call_incoming")}
+          {:else if st.kind === "Answering"}{t("call_connecting")}
+          {:else if st.kind === "Active"}{view.rx_frames === 0 ? t("call_connecting") : clock(st.since_ms)} · {t("call_frames", view.rx_frames, view.tx_frames)}
+          {:else if st.kind === "NoAnswer"}{st.why === "Unreached" ? t("call_unreached") : st.why === "NeverConnected" ? t("call_never_connected") : t("call_no_answer")}
           {/if}
         </div>
       </div>
     </div>
     <div class="actions nowrap">
       {#if st.kind === "Incoming"}
-        <button class="btn primary" onclick={() => act(api.answerCall)}>Answer</button>
-        <button class="btn danger" onclick={() => act(api.declineCall)}>Decline</button>
+        <button class="btn primary" onclick={() => act(api.answerCall)}>{t("call_answer_btn")}</button>
+        <button class="btn danger" onclick={() => act(api.declineCall)}>{t("ceremony_decline")}</button>
       {:else if st.kind === "NoAnswer"}
-        <button class="btn" onclick={() => act(api.dismissCall)}>OK</button>
+        <button class="btn" onclick={() => act(api.dismissCall)}>{t("main_card_link_ok")}</button>
       {:else}
-        <button class="btn danger" onclick={() => act(api.hangUp)}>{st.kind === "Outgoing" ? "Cancel" : "Hang up"}</button>
+        <button class="btn danger" onclick={() => act(api.hangUp)}>{st.kind === "Outgoing" ? t("common_cancel") : t("call_end_btn")}</button>
       {/if}
     </div>
     {#if err}<span class="err">{err}</span>{/if}

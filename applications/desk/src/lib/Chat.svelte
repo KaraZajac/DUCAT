@@ -2,6 +2,7 @@
   // Chat: every thread on the left, the open one on the right. A desk has
   // the room for both at once, which is the one place it beats the phone.
   import { onMount, tick } from "svelte";
+  import { t, tp } from "./i18n.svelte";
   import { api, copy, fmtTime, fmtXmr, type ContactRow, type GroupMessage, type GroupRow, type MessageRow, type StandingRow } from "./api";
   import { gen, drive } from "./state.svelte";
 
@@ -110,7 +111,7 @@
     sending = true;
     try {
       const all = await api.sendGroup(openGroup, body, groupReplyTo?.sender_hex ?? null, groupReplyTo?.gseq ?? null);
-      if (!all) err = "Some copies did not go out yet — they are queued and retried.";
+      if (!all) err = t("desk_group_copies_queued");
       groupReplyTo = null;
       draft = "";
       groupThread = await api.groupThread(openGroup);
@@ -211,7 +212,7 @@
     if (!open) return;
     err = null;
     const n = Number(payAmount);
-    if (!Number.isFinite(n) || n <= 0) { err = "An amount in XMR."; return; }
+    if (!Number.isFinite(n) || n <= 0) { err = t("desk_amount_in_xmr"); return; }
     try {
       await api.payBill(open, null, Math.floor(n * 1e12), payNote.trim() || null, 1);
       payingOut = false; payAmount = ""; payNote = "";
@@ -300,7 +301,7 @@
     if (!open) return;
     err = null;
     const n = Number(reqAmount);
-    if (!Number.isFinite(n) || n <= 0) { err = "An amount in XMR."; return; }
+    if (!Number.isFinite(n) || n <= 0) { err = t("desk_amount_in_xmr"); return; }
     const pxmr = Math.floor(n * 1e12);
     try {
       if (reqRepeat === "once") await api.requestPayment(open, pxmr, reqNote);
@@ -342,13 +343,13 @@
     replyTo = { seq: m.seq, own: m.outgoing, line: quoteOf(m) };
   }
   function quoteOf(m: MessageRow): string {
-    if (m.unsent) return "This message was withdrawn.";
-    if (m.kind === 1) return "a request for money";
-    if (m.kind === 2) return "a payment";
-    if (m.kind === 3) return "a receipt";
-    if (m.att_hash && !m.body.trim()) return "an attachment";
+    if (m.unsent) return t("chat_unsent");
+    if (m.kind === 1) return t("chat_reply_to_bill");
+    if (m.kind === 2) return t("chat_reply_to_payment");
+    if (m.kind === 3) return t("chat_reply_to_receipt");
+    if (m.att_hash && !m.body.trim()) return t("chat_reply_to_attachment");
     if (m.body.trim()) return m.body;
-    return "a message";
+    return t("chat_reply_to_message");
   }
 
   // A bill of theirs, declined; a bill of ours, taken back.
@@ -497,17 +498,17 @@
 
   function kindLabel(m: MessageRow): string | null {
     switch (m.kind) {
-      case 1: return `Bill · ${fmtXmr(m.amount_pxmr)}`;
-      case 2: return `Payment · ${fmtXmr(m.amount_pxmr)}`;
-      case 3: return m.oob ? "Receipt · settled outside DUCAT" : `Receipt · ${fmtXmr(m.amount_pxmr)}`;
-      case 4: return "Reaction";
-      case 5: return "Retraction";
-      case 6: return "Ride offer";
-      case 7: return "Ride accepted";
-      case 13: return "A publication key";
-      case 14: return "Call";
-      case 15: return "Call answered";
-      case 16: return `Asked for an issue${m.pub_wanted ? ` · ${m.pub_wanted}` : ""}`;
+      case 1: return `${m.outgoing ? t("chat_you_asked_for") : t("chat_asked_you_for")} · ${fmtXmr(m.amount_pxmr)}`;
+      case 2: return `${m.outgoing ? t("chat_you_sent") : t("chat_sent_you")} · ${fmtXmr(m.amount_pxmr)}`;
+      case 3: return m.oob ? `${t("chat_receipt")} · ${t("bartab_state_paid_oob")}` : `${m.outgoing ? t("chat_receipt_you_issued") : t("chat_receipt")} · ${fmtXmr(m.amount_pxmr)}`;
+      case 4: return t("desk_kind_reaction");
+      case 5: return t("desk_kind_retraction");
+      case 6: return t("desk_kind_ride_offer");
+      case 7: return t("desk_kind_ride_accepted");
+      case 13: return t("desk_kind_publication_key");
+      case 14: return t("call_button");
+      case 15: return t("chatlist_preview_call_answered");
+      case 16: return `${t("desk_kind_asked_issue")}${m.pub_wanted ? ` · ${m.pub_wanted}` : ""}`;
       default: return null;
     }
   }
@@ -516,33 +517,33 @@
 <div class="chat">
   <div class="threads">
     <div class="threads-head">
-      <h2>Chat</h2>
-      <button class="btn small" onclick={() => (adding = !adding)}>{adding ? "Close" : "Add"}</button>
+      <h2>{t("tab_chat")}</h2>
+      <button class="btn small" onclick={() => (adding = !adding)}>{adding ? t("chat_close") : t("main_card_link_add")}</button>
     </div>
     {#if adding}
       <div class="add-card">
-        <input class="input" placeholder="Paste a ducat:card/… code" bind:value={cardUri} />
-        <input class="input" placeholder="What you call them (optional)" bind:value={petname} />
-        <button class="btn primary" disabled={!cardUri.trim() || claiming} onclick={claim}>{claiming ? "Answering…" : "Answer the card"}</button>
-        <p class="note">A card is answered once. Yours is on the Me page.</p>
+        <input class="input" placeholder={t("desk_paste_card_hint")} bind:value={cardUri} />
+        <input class="input" placeholder={t("desk_petname_hint")} bind:value={petname} />
+        <button class="btn primary" disabled={!cardUri.trim() || claiming} onclick={claim}>{claiming ? t("desk_answering") : t("desk_answer_the_card")}</button>
+        <p class="note">{t("desk_card_answered_once")}</p>
       </div>
     {/if}
     {#if rows.length === 0 && !adding}
-      <p class="empty">Nobody yet. Answer somebody's card, or show them yours on the Me page.</p>
+      <p class="empty">{t("desk_nobody_yet")}</p>
     {/if}
     {#if groups.length || rows.length >= 2}
-      <div class="list-head"><span>Groups</span><button class="linkish" onclick={() => (makingGroup = !makingGroup)}>{makingGroup ? "close" : "new"}</button></div>
+      <div class="list-head"><span>{t("desk_groups")}</span><button class="linkish" onclick={() => (makingGroup = !makingGroup)}>{makingGroup ? t("chat_close").toLowerCase() : t("desk_new").toLowerCase()}</button></div>
     {/if}
     {#if makingGroup}
       <div class="add-card">
-        <input class="input" placeholder="A name for the group" bind:value={groupName} />
+        <input class="input" placeholder={t("desk_group_name_hint")} bind:value={groupName} />
         <div class="chips">
           {#each rows as r (r.persona_hex)}
             <button class="chip" class:on={groupPick.has(r.persona_hex)} onclick={() => { const n = new Set(groupPick); n.has(r.persona_hex) ? n.delete(r.persona_hex) : n.add(r.persona_hex); groupPick = n; }}>{r.name}</button>
           {/each}
         </div>
-        <button class="btn primary" disabled={!groupName.trim() || groupPick.size === 0} onclick={createGroup}>Create</button>
-        <p class="note">Everyone in it must already know everyone else; the roster goes out to each member.</p>
+        <button class="btn primary" disabled={!groupName.trim() || groupPick.size === 0} onclick={createGroup}>{t("desk_create")}</button>
+        <p class="note">{t("desk_group_note")}</p>
       </div>
     {/if}
     {#each groups as g (g.id_hex)}
@@ -550,12 +551,12 @@
         <div class="avatar group">#</div>
         <div class="thread-text">
           <div class="thread-top"><span class="thread-name" class:unread={g.unread}>{g.name}</span><span class="thread-when">{fmtTime(g.last_at)}</span></div>
-          <div class="thread-last" class:unread={g.unread}>{#if g.last_body}{g.last_body}{:else}<i>{g.members.length + 1} in the group</i>{/if}</div>
+          <div class="thread-last" class:unread={g.unread}>{#if g.last_body}{g.last_body}{:else}<i>{t("desk_n_in_group", g.members.length + 1)}</i>{/if}</div>
         </div>
         {#if g.unread}<span class="dot-unread"></span>{/if}
       </button>
     {/each}
-    {#if groups.length}<div class="list-head"><span>People</span></div>{/if}
+    {#if groups.length}<div class="list-head"><span>{t("desk_people")}</span></div>{/if}
     {#each rows.filter((r) => r.chat_visible) as r (r.persona_hex)}
       <button class="thread-row" class:active={r.persona_hex === open} onclick={() => select(r.persona_hex)}>
         <div class="avatar" class:unnamed={!r.named}>{r.name.slice(0, 1).toUpperCase()}</div>
@@ -565,7 +566,7 @@
             <span class="thread-when">{fmtTime(r.last_at)}</span>
           </div>
           <div class="thread-last" class:unread={r.unread}>
-            {#if r.last_body}{r.last_outgoing ? "You: " : ""}{r.last_body}{:else}<i>No messages yet</i>{/if}
+            {#if r.last_body}{r.last_outgoing ? t("chatlist_preview_you", r.last_body) : r.last_body}{:else}<i>{t("chatlist_no_messages_yet")}</i>{/if}
           </div>
         </div>
         {#if r.unread}<span class="dot-unread"></span>{/if}
@@ -579,12 +580,12 @@
         <div>
           <div class="pane-name">{currentGroup.name}</div>
           <div class="meta">
-            {currentGroup.members.map((m) => m.name).join(", ")} and you
-            {#if currentGroup.missing.length} · {currentGroup.missing.length} member{currentGroup.missing.length === 1 ? "" : "s"} you do not know yet — nothing can be sent until you do{/if}
+            {t("desk_members_and_you", currentGroup.members.map((m) => m.name).join(", "))}
+            {#if currentGroup.missing.length} · {tp("desk_members_unknown", currentGroup.missing.length)}{/if}
           </div>
         </div>
         <div class="actions nowrap">
-          <button class="btn small" onclick={() => (addingMember = !addingMember)}>{addingMember ? "Close" : "Add"}</button>
+          <button class="btn small" onclick={() => (addingMember = !addingMember)}>{addingMember ? t("chat_close") : t("group_add")}</button>
         </div>
       </div>
       {#if addingMember}
@@ -599,10 +600,10 @@
           <div class="bubble-row" role="listitem" class:out={g.mine} onmouseenter={() => (groupHover = gkey(g))} onmouseleave={() => { if (groupPicking !== gkey(g)) groupHover = null; }}>
             {#if groupHover === gkey(g)}
               <div class="bubble-tools" class:out={g.mine}>
-                <button class="linkish" title="React" onclick={() => (groupPicking = groupPicking === gkey(g) ? null : gkey(g))}>☺</button>
-                {#if !g.unsent}<button class="linkish" title="Reply" onclick={() => (groupReplyTo = { sender_hex: g.sender_hex, gseq: g.gseq, line: g.message.body.trim() || "a message" })}>↩</button>{/if}
-                {#if g.mine && !g.unsent}<button class="linkish" title="Take it back for everyone" onclick={() => unsendInGroup(g)}>↶</button>{/if}
-                {#if g.message.body && !g.unsent}<button class="linkish" title="Copy the text" onclick={() => copy(g.message.body)}>⧉</button>{/if}
+                <button class="linkish" title={t("desk_react")} onclick={() => (groupPicking = groupPicking === gkey(g) ? null : gkey(g))}>☺</button>
+                {#if !g.unsent}<button class="linkish" title={t("chat_reply")} onclick={() => (groupReplyTo = { sender_hex: g.sender_hex, gseq: g.gseq, line: g.message.body.trim() || t("chat_reply_to_message") })}>↩</button>{/if}
+                {#if g.mine && !g.unsent}<button class="linkish" title={t("chat_unsend")} onclick={() => unsendInGroup(g)}>↶</button>{/if}
+                {#if g.message.body && !g.unsent}<button class="linkish" title={t("chat_copy")} onclick={() => copy(g.message.body)}>⧉</button>{/if}
               </div>
             {/if}
             <div class="bubble" class:out={g.mine} class:unsent={g.unsent}>
@@ -610,8 +611,8 @@
                 <div class="picker">{#each QUICK as q}<button class="linkish" class:on={g.reactions.some(([who, e]) => who === "You" && e === q)} onclick={() => reactInGroup(g, q)}>{q}</button>{/each}</div>
               {/if}
               {#if !g.mine}<div class="bubble-kind">{g.sender_name}</div>{/if}
-              {#if g.unsent}<div class="bubble-kind">{g.mine ? "You took this back" : "Taken back"}</div>{/if}
-              {#if g.re_seq !== null}<div class="quote" class:gone={g.quote === null}>{g.quote ?? "a message that is no longer here"}</div>{/if}
+              {#if g.unsent}<div class="bubble-kind">{g.mine ? t("chat_you_withdrew") : t("chat_they_withdrew", g.sender_name)}</div>{/if}
+              {#if g.re_seq !== null}<div class="quote" class:gone={g.quote === null}>{g.quote ?? t("chat_reply_to_gone")}</div>{/if}
               <div class="bubble-body">{g.unsent ? "" : g.message.body}</div>
               <div class="bubble-meta">{fmtTime(g.message.timestamp)}</div>
               {#if g.reactions.length}
@@ -620,87 +621,87 @@
             </div>
           </div>
         {/each}
-        {#if groupThread.length === 0}<p class="empty">Nothing here yet.</p>{/if}
+        {#if groupThread.length === 0}<p class="empty">{t("desk_nothing_here")}</p>{/if}
       </div>
       {#if groupReplyTo}
-        <div class="reply-banner"><span class="meta">Replying to</span><span class="reply-line">{groupReplyTo.line}</span><button class="linkish" title="Not replying to that" onclick={() => (groupReplyTo = null)}>✕</button></div>
+        <div class="reply-banner"><span class="meta">{t("desk_replying_to")}</span><span class="reply-line">{groupReplyTo.line}</span><button class="linkish" title={t("chat_reply_cancel")} onclick={() => (groupReplyTo = null)}>✕</button></div>
       {/if}
       <div class="composer">
-        <textarea class="input" rows="2" placeholder={groupReplyTo ? "Your reply" : "Write to the group"} bind:value={draft} disabled={currentGroup.missing.length > 0}
+        <textarea class="input" rows="2" placeholder={groupReplyTo ? t("desk_your_reply") : t("desk_write_to_group")} bind:value={draft} disabled={currentGroup.missing.length > 0}
           onkeydown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendToGroup(); } else if (e.key === "Escape" && groupReplyTo) { groupReplyTo = null; } }}></textarea>
-        <button class="btn primary" disabled={!draft.trim() || sending || currentGroup.missing.length > 0} onclick={sendToGroup}>{sending ? "Sending…" : "Send"}</button>
+        <button class="btn primary" disabled={!draft.trim() || sending || currentGroup.missing.length > 0} onclick={sendToGroup}>{sending ? t("desk_sending") : t("chat_send")}</button>
       </div>
       {#if err}<p class="err">{err}</p>{/if}
     {:else if current}
       <div class="pane-head stacked">
         <div class="pane-lead">
           {#if renaming}
-            <input class="input" bind:value={newName} placeholder={current.asserted_name ?? "A name for them"} onkeydown={(e) => e.key === "Enter" && rename()} />
-            <button class="btn small" onclick={rename}>Save</button>
-            <button class="btn small" onclick={() => (renaming = false)}>Cancel</button>
+            <input class="input" bind:value={newName} placeholder={current.asserted_name ?? t("desk_name_for_them")} onkeydown={(e) => e.key === "Enter" && rename()} />
+            <button class="btn small" onclick={rename}>{t("myprofile_save")}</button>
+            <button class="btn small" onclick={() => (renaming = false)}>{t("chat_cancel")}</button>
           {:else}
             <div class="pane-name">{current.name}</div>
             <div class="meta">
-              {#if current.petname && current.asserted_name && current.petname !== current.asserted_name}calls themself {current.asserted_name} · {/if}
-              {#if !current.has_keys}their keys have not arrived yet · {/if}
-              {#if current.pending_address}a new payment address is being held for you · {/if}
+              {#if current.petname && current.asserted_name && current.petname !== current.asserted_name}{t("desk_calls_themself", current.asserted_name)} · {/if}
+              {#if !current.has_keys}{t("desk_keys_not_arrived")} · {/if}
+              {#if current.pending_address}{t("desk_address_held")} · {/if}
               {#if current.email}{current.email} · {/if}{#if current.phone}{current.phone} · {/if}{#if current.signal}Signal {current.signal} · {/if}
-              <button class="linkish mono" title="Copy their key" onclick={() => copy(current?.persona_hex ?? "")}>{current.persona_hex.slice(0, 12)}…</button>
+              <button class="linkish mono" title={t("desk_copy_their_key")} onclick={() => copy(current?.persona_hex ?? "")}>{current.persona_hex.slice(0, 12)}…</button>
             </div>
           {/if}
         </div>
         <div class="actions pane-actions">
-          <button class="btn small" title="Voice call" disabled={!current.has_keys} onclick={async () => { err = null; try { await api.placeCall(current!.persona_hex); } catch (e) { err = String(e); } }}>📞 Call</button>
-          <button class="btn small" class:active={payingOut} disabled={!current.their_address} title={current.their_address ? "Send them money" : "They have not given a payment address"} onclick={() => { payingOut = !payingOut; requesting = false; }}>Pay</button>
-          <button class="btn small" class:active={requesting} onclick={() => { requesting = !requesting; payingOut = false; }}>Request</button>
-          <button class="btn small" onclick={() => { renaming = true; newName = current?.petname ?? ""; }}>Rename</button>
-          <button class="btn small" class:active={showSettings} title="Thread settings" onclick={() => (showSettings = !showSettings)}>⋯ More</button>
+          <button class="btn small" title={t("call_button")} disabled={!current.has_keys} onclick={async () => { err = null; try { await api.placeCall(current!.persona_hex); } catch (e) { err = String(e); } }}>📞 {t("call_button")}</button>
+          <button class="btn small" class:active={payingOut} disabled={!current.their_address} title={current.their_address ? t("desk_send_them_money") : t("pay_no_address_hint", current.name)} onclick={() => { payingOut = !payingOut; requesting = false; }}>{t("desk_pay")}</button>
+          <button class="btn small" class:active={requesting} onclick={() => { requesting = !requesting; payingOut = false; }}>{t("pay_request")}</button>
+          <button class="btn small" onclick={() => { renaming = true; newName = current?.petname ?? ""; }}>{t("profiles_rename")}</button>
+          <button class="btn small" class:active={showSettings} title={t("chat_conversation_settings")} onclick={() => (showSettings = !showSettings)}>⋯ {t("desk_more")}</button>
         </div>
       </div>
       {#if showSettings}
         <div class="request-bar">
-          <span class="meta">Messages disappear after</span>
+          <span class="meta">{t("chat_delete_after")}</span>
           <select class="input narrow" value={disappear} onchange={(e) => setDisappear(Number((e.target as HTMLSelectElement).value))}>
-            <option value={0}>never</option>
-            <option value={3600}>an hour</option>
-            <option value={86400}>a day</option>
-            <option value={604800}>a week</option>
+            <option value={0}>{t("desk_never")}</option>
+            <option value={3600}>{t("desk_an_hour")}</option>
+            <option value={86400}>{t("desk_a_day")}</option>
+            <option value={604800}>{t("desk_a_week")}</option>
           </select>
-          <button class="btn small" onclick={clearThread}>Clear the thread here</button>
-          <button class="btn small" onclick={hideThread}>Hide</button>
-          <button class="btn small danger" onclick={remove}>Forget them</button>
-          <button class="btn small" class:active={sharing} onclick={openShare}>Share…</button>
-          <span class="meta">Clearing and hiding touch only this desk; forgetting drops the contact.</span>
+          <button class="btn small" onclick={clearThread}>{t("chat_clear_this_chat")}</button>
+          <button class="btn small" onclick={hideThread}>{t("accounts_hide")}</button>
+          <button class="btn small danger" onclick={remove}>{t("drawer_forget_confirm")}</button>
+          <button class="btn small" class:active={sharing} onclick={openShare}>{t("chat_share")}…</button>
+          <span class="meta">{t("desk_clear_hide_note")}</span>
         </div>
       {/if}
       {#if sharing}
         <div class="request-bar">
-          <button class="btn small" title="A one-claim link they can pass to someone who should reach you" onclick={shareCard}>A card for me</button>
+          <button class="btn small" title={t("chat_card_for_me_desc")} onclick={shareCard}>{t("chat_card_for_me")}</button>
           <select class="input" bind:value={shareWho}>
-            <option value="">Someone's profile…</option>
+            <option value="">{t("desk_someones_profile")}</option>
             {#each people as c (c.persona_hex)}<option value={c.persona_hex}>{c.name}</option>{/each}
           </select>
-          <button class="btn small" disabled={!shareWho} onclick={shareProfile}>Share the profile</button>
-          <span class="meta">A profile is their name and what they chose to publish — not their connection code.</span>
+          <button class="btn small" disabled={!shareWho} onclick={shareProfile}>{t("desk_share_the_profile")}</button>
+          <span class="meta">{t("chat_someones_profile")}</span>
         </div>
       {/if}
       {#if payingOut}
         <div class="request-bar">
           <input class="input narrow" placeholder="XMR" bind:value={payAmount} />
-          <input class="input" placeholder="A note for your records (optional)" bind:value={payNote} onkeydown={(e) => e.key === "Enter" && payUnprompted()} />
-          <button class="btn primary" onclick={payUnprompted} disabled={!payAmount.trim()}>Send the money</button>
-          <span class="meta">{current.card_purpose === "donate" ? "Their code is a donation jar: this goes as a gift." : "Unprompted; they get a payment notice."}</span>
+          <input class="input" placeholder={t("desk_note_hint")} bind:value={payNote} onkeydown={(e) => e.key === "Enter" && payUnprompted()} />
+          <button class="btn primary" onclick={payUnprompted} disabled={!payAmount.trim()}>{t("desk_send_the_money")}</button>
+          <span class="meta">{current.card_purpose === "donate" ? t("desk_donation_jar_note") : t("desk_unprompted_note")}</span>
         </div>
       {/if}
       {#if requesting}
         <div class="request-bar">
           <input class="input narrow" placeholder="XMR" bind:value={reqAmount} />
-          <input class="input" placeholder="What for" bind:value={reqNote} onkeydown={(e) => e.key === "Enter" && sendRequest()} />
-          <select class="input narrow" bind:value={reqRepeat}><option value="once">once</option><option value="weekly">every week</option><option value="monthly">every month</option></select>
-          <button class="btn primary" onclick={sendRequest} disabled={!reqAmount.trim()}>Send the bill</button>
+          <input class="input" placeholder={t("desk_what_for")} bind:value={reqNote} onkeydown={(e) => e.key === "Enter" && sendRequest()} />
+          <select class="input narrow" bind:value={reqRepeat}><option value="once">{t("pay_repeat_once")}</option><option value="weekly">{t("pay_repeat_weekly")}</option><option value="monthly">{t("pay_repeat_monthly")}</option></select>
+          <button class="btn primary" onclick={sendRequest} disabled={!reqAmount.trim()}>{t("desk_send_the_bill")}</button>
         </div>
         {#each standing.filter((b) => b.persona_hex === open) as b (b.id)}
-          <div class="request-bar meta">Standing: {fmtXmr(b.amount_pxmr)} {b.monthly ? "monthly" : "weekly"}{b.note ? ` · ${b.note}` : ""} · next {fmtTime(Math.floor(b.next_at / 1000))} <button class="linkish" onclick={async () => { await api.stopStandingBill(b.id); standing = await api.standingBills(); }}>stop</button></div>
+          <div class="request-bar meta">{t("desk_standing")}: {fmtXmr(b.amount_pxmr)} {b.monthly ? t("pay_repeat_monthly") : t("pay_repeat_weekly")}{b.note ? ` · ${b.note}` : ""} · {t("desk_next_at", fmtTime(Math.floor(b.next_at / 1000)))} <button class="linkish" onclick={async () => { await api.stopStandingBill(b.id); standing = await api.standingBills(); }}>stop</button></div>
         {/each}
       {/if}
       <div class="bubbles" bind:this={list}>
@@ -708,92 +709,92 @@
           <div class="bubble-row" role="listitem" class:out={m.outgoing} onmouseenter={() => (hovered = keyOf(m))} onmouseleave={() => { if (picking !== keyOf(m)) hovered = null; }}>
             {#if hovered === keyOf(m) && !m.dead_letter}
               <div class="bubble-tools" class:out={m.outgoing}>
-                <button class="linkish" title="React" onclick={() => (picking = picking === keyOf(m) ? null : keyOf(m))}>☺</button>
-                {#if !m.unsent}<button class="linkish" title="Reply" onclick={() => startReply(m)}>↩</button>{/if}
-                {#if m.kind === 0 && m.body && !m.unsent}<button class="linkish" title="Copy the text" onclick={() => copy(m.body)}>⧉</button>{/if}
-                {#if m.outgoing && m.kind === 0 && m.delivered && !m.unsent}<button class="linkish" title="Take it back for both of you" onclick={() => unsend(m)}>↶</button>{/if}
-                <button class="linkish" title="Delete here only" onclick={() => deleteHere(m)}>✕</button>
+                <button class="linkish" title={t("desk_react")} onclick={() => (picking = picking === keyOf(m) ? null : keyOf(m))}>☺</button>
+                {#if !m.unsent}<button class="linkish" title={t("chat_reply")} onclick={() => startReply(m)}>↩</button>{/if}
+                {#if m.kind === 0 && m.body && !m.unsent}<button class="linkish" title={t("chat_copy")} onclick={() => copy(m.body)}>⧉</button>{/if}
+                {#if m.outgoing && m.kind === 0 && m.delivered && !m.unsent}<button class="linkish" title={t("chat_unsend")} onclick={() => unsend(m)}>↶</button>{/if}
+                <button class="linkish" title={t("chat_delete")} onclick={() => deleteHere(m)}>✕</button>
               </div>
             {/if}
             <div class="bubble" class:out={m.outgoing} class:dead={m.dead_letter} class:money={m.kind >= 1 && m.kind <= 3} class:unsent={m.unsent}>
               {#if picking === keyOf(m)}
                 <div class="picker">{#each QUICK as q}<button class="linkish" class:on={m.react_mine === q} onclick={() => reactTo(m, q)}>{q}</button>{/each}</div>
               {/if}
-              {#if m.unsent}<div class="bubble-kind">{m.outgoing ? "You took this back" : "They took this back"}</div>{/if}
-              {#if m.withdrawn}<div class="bubble-kind">{m.outgoing ? "Withdrawn" : "They withdrew this bill"}</div>{/if}
-              {#if m.refused}<div class="bubble-kind">{m.outgoing ? "They declined this bill" : "Declined"}</div>{/if}
+              {#if m.unsent}<div class="bubble-kind">{m.outgoing ? t("chat_you_withdrew") : t("chat_they_withdrew", current?.name ?? "")}</div>{/if}
+              {#if m.withdrawn}<div class="bubble-kind">{m.outgoing ? t("chat_you_withdrew_bill") : t("chat_they_withdrew_bill", current?.name ?? "")}</div>{/if}
+              {#if m.refused}<div class="bubble-kind">{m.outgoing ? t("chat_they_declined", current?.name ?? "") : t("chat_you_declined")}</div>{/if}
               {#if kindLabel(m)}<div class="bubble-kind">{kindLabel(m)}</div>{/if}
               {#if m.kind === 0 && m.re_seq !== null}
-                <div class="quote" class:gone={m.quote === null}>{m.quote ?? "a message that is no longer here"}</div>
+                <div class="quote" class:gone={m.quote === null}>{m.quote ?? t("chat_reply_to_gone")}</div>
               {/if}
               {#if m.items.length}
                 <div class="bill">
                   {#each m.items as [d, a]}<div class="bill-line"><span>{d}</span><span>{fmtXmr(a)}</span></div>{/each}
-                  {#if m.tax_pxmr}<div class="bill-line"><span>Tax</span><span>{fmtXmr(m.tax_pxmr)}</span></div>{/if}
+                  {#if m.tax_pxmr}<div class="bill-line"><span>{t("pos_tax")}</span><span>{fmtXmr(m.tax_pxmr)}</span></div>{/if}
                 </div>
               {/if}
               {#if m.att_hash}
                 {#if m.att_here && m.att_mime?.startsWith("image/") && pictures[m.att_hash]}
                   <img class="bubble-pic" src={pictures[m.att_hash]} alt="" />
                 {:else if m.att_here && m.att_mime?.startsWith("audio/") && audios[m.att_hash]}
-                  <div class="bubble-audio"><span class="meta">🎤 Voice memo</span><audio controls preload="metadata" src={audios[m.att_hash]}></audio></div>
+                  <div class="bubble-audio"><span class="meta">🎤 {t("chat_voice_memo")}</span><audio controls preload="metadata" src={audios[m.att_hash]}></audio></div>
                 {:else if m.att_here}
-                  <div class="bubble-att">📎 {m.att_name ?? m.att_mime} · <button class="linkish" onclick={() => showFile(m)}>Show</button></div>
+                  <div class="bubble-att">📎 {m.att_name ?? m.att_mime} · <button class="linkish" onclick={() => showFile(m)}>{t("desk_show")}</button></div>
                 {:else if m.att_on_swarm}
-                  <div class="bubble-att">📎 {m.att_name ?? m.att_mime} · {(m.att_len / 1024 / 1024).toFixed(1)} MB · <button class="linkish" disabled={fetching === m.att_hash} onclick={() => fetchBig(m)}>{fetching === m.att_hash ? "fetching…" : "Fetch"}</button></div>
+                  <div class="bubble-att">📎 {m.att_name ?? m.att_mime} · {(m.att_len / 1024 / 1024).toFixed(1)} MB · <button class="linkish" disabled={fetching === m.att_hash} onclick={() => fetchBig(m)}>{fetching === m.att_hash ? t("releases_fetching").toLowerCase() : t("chat_download_file")}</button></div>
                 {:else}
-                  <div class="bubble-att">📎 {m.att_name ?? m.att_mime ?? "attachment"} · arriving…</div>
+                  <div class="bubble-att">📎 {m.att_name ?? m.att_mime ?? t("chat_file_fallback")} · {t("desk_arriving_word")}</div>
                 {/if}
               {/if}
               {#if unpaid(m) && !m.withdrawn && !m.refused}
                 <div class="actions" style="margin: 6px 0 4px">
-                  <button class="btn small primary" disabled={paying !== null} onclick={() => pay(m)}>{paying === m.seq ? "Paying…" : `Pay ${fmtXmr(m.amount_pxmr)}`}</button>
-                  <button class="btn small" disabled={answering !== null} title="Not this time" onclick={() => decline(m)}>{answering === keyOf(m) ? "…" : "Decline"}</button>
+                  <button class="btn small primary" disabled={paying !== null} onclick={() => pay(m)}>{paying === m.seq ? t("desk_paying") : t("desk_pay_x", fmtXmr(m.amount_pxmr))}</button>
+                  <button class="btn small" disabled={answering !== null} title={t("desk_not_this_time")} onclick={() => decline(m)}>{answering === keyOf(m) ? "…" : t("ceremony_decline")}</button>
                 </div>
               {:else if !m.outgoing && m.kind === 1 && !m.withdrawn && !m.refused}
-                <div class="meta">paid</div>
+                <div class="meta">{t("chat_paid")}</div>
               {/if}
               {#if m.outgoing && m.kind === 1 && m.delivered && !m.withdrawn && !m.refused && !m.bill_answered}
                 <div class="actions" style="margin: 6px 0 4px">
-                  <button class="btn small" disabled={answering !== null} title="Take this bill back — nothing to pay" onclick={() => cancelMine(m)}>{answering === keyOf(m) ? "…" : "Cancel this bill"}</button>
+                  <button class="btn small" disabled={answering !== null} title={t("desk_take_bill_back")} onclick={() => cancelMine(m)}>{answering === keyOf(m) ? "…" : t("chat_cancel_request")}</button>
                 </div>
               {/if}
               {#if m.body && !(m.att_hash && (m.body === "📷" || m.body === "🎤" || m.body.startsWith("📎 ")))}<div class="bubble-body">{m.body}</div>{/if}
               {#if !m.outgoing && m.kind === 0 && cardIn(m.body)}
-                <div class="actions" style="margin: 6px 0 2px"><button class="btn small primary" disabled={answeringCard} onclick={() => answerCard(cardIn(m.body)!)}>{answeringCard ? "Answering…" : "Answer this card"}</button></div>
+                <div class="actions" style="margin: 6px 0 2px"><button class="btn small primary" disabled={answeringCard} onclick={() => answerCard(cardIn(m.body)!)}>{answeringCard ? t("desk_answering") : t("desk_answer_this_card")}</button></div>
               {/if}
               <div class="bubble-meta">
                 {fmtTime(m.timestamp)}
-                {#if m.outgoing}{m.delivered ? (m.read_by_them ? " · read" : " · sent") : " · sending…"}{/if}
-                {#if !m.forward_secret && !m.dead_letter} · no forward secrecy{/if}
+                {#if m.outgoing}{m.delivered ? (m.read_by_them ? ` · ${t("desk_read")}` : ` · ${t("desk_sent_word")}`) : ` · ${t("chat_not_sent_yet")}`}{/if}
+                {#if !m.forward_secret && !m.dead_letter} · {t("chat_no_forward_secrecy").toLowerCase()}{/if}
               </div>
               {#if m.react_mine || m.react_theirs}
-                <div class="reactions">{#if m.react_theirs}<span title={current?.name}>{m.react_theirs}</span>{/if}{#if m.react_mine}<span class="mine" title="you">{m.react_mine}</span>{/if}</div>
+                <div class="reactions">{#if m.react_theirs}<span title={current?.name}>{m.react_theirs}</span>{/if}{#if m.react_mine}<span class="mine" title={t("desk_you")}>{m.react_mine}</span>{/if}</div>
               {/if}
             </div>
           </div>
         {/each}
         {#if thread.length === 0}
-          <p class="empty">Nothing here yet. Say hello.</p>
+          <p class="empty">{t("desk_say_hello")}</p>
         {/if}
       </div>
       {#if replyTo}
-        <div class="reply-banner"><span class="meta">Replying to</span><span class="reply-line">{replyTo.line}</span><button class="linkish" title="Not replying to that" onclick={() => (replyTo = null)}>✕</button></div>
+        <div class="reply-banner"><span class="meta">{t("desk_replying_to")}</span><span class="reply-line">{replyTo.line}</span><button class="linkish" title={t("chat_reply_cancel")} onclick={() => (replyTo = null)}>✕</button></div>
       {/if}
       {#if recording}
         <div class="composer recording">
-          <span class="rec-dot"></span><span>Recording · {clock(recMs)}</span>
-          <button class="btn" onclick={cancelMemo}>Discard</button>
-          <button class="btn primary" disabled={sending} onclick={sendMemo}>{sending ? "Sending…" : "Send the memo"}</button>
+          <span class="rec-dot"></span><span>{t("desk_recording")} · {clock(recMs)}</span>
+          <button class="btn" onclick={cancelMemo}>{t("bartab_discard_confirm")}</button>
+          <button class="btn primary" disabled={sending} onclick={sendMemo}>{sending ? t("desk_sending") : t("desk_send_the_memo")}</button>
         </div>
       {:else}
         <div class="composer">
-          <textarea class="input" rows="2" placeholder={replyTo ? "Your reply" : "Write a message"} bind:value={draft} disabled={!current.has_keys} oninput={draftChanged}
+          <textarea class="input" rows="2" placeholder={replyTo ? t("desk_your_reply") : t("chat_message_placeholder")} bind:value={draft} disabled={!current.has_keys} oninput={draftChanged}
             onkeydown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } else if (e.key === "Escape" && replyTo) { replyTo = null; } }}></textarea>
           <div class="composer-tools">
-            <button class="btn" title="Attach a picture or a file" disabled={attaching || !current.has_keys} onclick={() => attach()}>{attaching ? "…" : "📎"}</button>
-            <button class="btn" title="Record a voice memo" disabled={sending || !current.has_keys} onclick={startMemo}>🎤</button>
-            <button class="btn primary" disabled={!draft.trim() || sending || !current.has_keys} onclick={send}>{sending ? "Sending…" : "Send"}</button>
+            <button class="btn" title={t("chat_attach")} disabled={attaching || !current.has_keys} onclick={() => attach()}>{attaching ? "…" : "📎"}</button>
+            <button class="btn" title={t("chat_voice_memo")} disabled={sending || !current.has_keys} onclick={startMemo}>🎤</button>
+            <button class="btn primary" disabled={!draft.trim() || sending || !current.has_keys} onclick={send}>{sending ? t("desk_sending") : t("chat_send")}</button>
           </div>
         </div>
       {/if}
@@ -801,7 +802,7 @@
       {#if err}<p class="err">{err}</p>{/if}
     {:else}
       <div class="pane-empty">
-        <p class="empty">Pick a conversation, or add somebody with their card.</p>
+        <p class="empty">{t("desk_pick_conversation")}</p>
         {#if err}<p class="err">{err}</p>{/if}
       </div>
     {/if}

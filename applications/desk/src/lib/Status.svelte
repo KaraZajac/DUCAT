@@ -1,18 +1,19 @@
 <script lang="ts">
 
   const ATTACH: Record<string, string> = {
-    Detached: "Detached",
-    Detaching: "Detaching",
-    Attaching: "Attaching",
-    AttachedWeak: "Attached, weakly",
-    AttachedGood: "Attached",
-    AttachedStrong: "Attached, strongly",
-    AttachedFull: "Fully attached",
-    FullyAttached: "Fully attached",
-    OverAttached: "Over-attached",
+    Detached: "desk_node_detached",
+    Detaching: "desk_node_detaching",
+    Attaching: "desk_node_attaching",
+    AttachedWeak: "desk_node_attached_weak",
+    AttachedGood: "desk_node_attached",
+    AttachedStrong: "desk_node_attached_strong",
+    AttachedFull: "desk_node_attached_full",
+    FullyAttached: "desk_node_attached_full",
+    OverAttached: "desk_node_over_attached",
   };
-  const attachWord = (s: string) => ATTACH[s] ?? s;
+  const attachWord = (s: string) => (ATTACH[s] ? t(ATTACH[s]) : s);
   import { onMount } from "svelte";
+  import { t, tp, i18n } from "./i18n.svelte";
   import { api, type Status } from "./api";
 
   let status = $state<Status | null>(null);
@@ -46,8 +47,8 @@
   }
 </script>
 
-<h1 class="page-title">Status</h1>
-<p class="page-lede">This desk's node on the network, and what it has been doing.</p>
+<h1 class="page-title">{t("section_status")}</h1>
+<p class="page-lede">{t("desk_status_lede")}</p>
 
 <div class="card">
   {#if status}
@@ -55,20 +56,20 @@
       <div>
         <div class="title">
           <span class="dot" class:ok={status.ready} class:warn={status.attached && !status.ready}></span>
-          {status.ready ? "Attached" : status.attached ? "Attaching" : status.running ? "Starting" : "Stopped"}
+          {status.ready ? t("net_line_attached") : status.attached ? t("desk_node_attaching") : status.running ? t("net_starting") : t("net_stopped")}
         </div>
-        <div class="meta">{attachWord(status.state)} · {status.peers} peers, {status.reliable_peers} reliable</div>
+        <div class="meta">{attachWord(status.state)} · {t("net_line_peers")}: {t("net_peers_value", status.peers, status.reliable_peers)}</div>
       </div>
       <div class="actions"><span class="meta">{status.data_dir}</span></div>
     </div>
     {#if status.error}<p class="err">{status.error}</p>{/if}
   {:else}
-    <p class="empty">Waiting for the node…</p>
+    <p class="empty">{t("desk_waiting_node")}</p>
   {/if}
 </div>
 
 <div class="card">
-  <h3>Log</h3>
-  <div class="meta" style="margin-bottom: 6px">Newest first.</div>
+  <h3>{t("desk_log")}</h3>
+  <div class="meta" style="margin-bottom: 6px">{t("desk_newest_first")}</div>
   <div class="log">{#each [...log].reverse() as line}<div class={cls(line)}>{pretty(line)}</div>{/each}</div>
 </div>

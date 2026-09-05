@@ -2,6 +2,7 @@
   // Wallet: what is here, what is on its way, where money comes in, and
   // one form to send it. Stagenet until a mainnet build exists.
   import { onMount } from "svelte";
+  import { t, tp } from "./i18n.svelte";
   import { api, copy, fmtXmr, fmtTime, type NoteRow, type Quote, type SentRow, type WalletView } from "./api";
   import { gen } from "./state.svelte";
 
@@ -24,7 +25,7 @@
   async function rescan() {
     err = null;
     const h = Number(rescanFrom.trim() || (view?.restore_height ?? 0));
-    if (!Number.isFinite(h) || h < 0) { err = "A block height is a whole number."; return; }
+    if (!Number.isFinite(h) || h < 0) { err = t("desk_height_whole"); return; }
     rescanning = true;
     try { await api.walletRescan(h); await refresh(); } catch (e) { err = String(e); } finally { rescanning = false; }
   }
@@ -109,14 +110,14 @@
 
   function eta(secs: number | null): string {
     if (secs == null) return "";
-    if (secs < 90) return "about a minute";
-    if (secs < 3600) return `about ${Math.round(secs / 60)} minutes`;
-    return `about ${(secs / 3600).toFixed(1)} hours`;
+    if (secs < 90) return tp("balance_unlock_minutes", 1);
+    if (secs < 3600) return tp("balance_unlock_minutes", Math.round(secs / 60));
+    return tp("balance_unlock_hours", Math.round(secs / 3600));
   }
 </script>
 
-<h1 class="page-title">Wallet</h1>
-<p class="page-lede">Monero, kept here. Nobody else holds these keys{#if view?.stagenet}{" — "}stagenet coin for now, so the amounts are practice{/if}.</p>
+<h1 class="page-title">{t("monero_wallet_title")}</h1>
+<p class="page-lede">{view?.stagenet ? t("desk_wallet_lede_stagenet") : t("desk_wallet_lede")}</p>
 
 {#if view}
   <div class="card">
@@ -124,21 +125,21 @@
       <div>
         <div class="balance-big">{fmtXmr(view.balances.spendable_pxmr)}</div>
         <div class="meta">
-          spendable{#if view.fiat_spendable}{" · "}{view.fiat_spendable.text}{view.fiat_spendable.notional ? " (notional)" : ""}{view.fiat_spendable.stale ? " · stale rate" : ""}{/if}
-          {#if view.balances.locked_pxmr > 0} · {fmtXmr(view.balances.locked_pxmr)} arriving{#if view.balances.blocks_to_unlock > 0}, {view.balances.blocks_to_unlock} block{view.balances.blocks_to_unlock === 1 ? "" : "s"} to go{/if}{/if}
+          {t("desk_spendable")}{#if view.fiat_spendable}{" · "}{view.fiat_spendable.text}{view.fiat_spendable.notional ? ` (${t("desk_notional")})` : ""}{view.fiat_spendable.stale ? ` · ${t("desk_stale_rate")}` : ""}{/if}
+          {#if view.balances.locked_pxmr > 0} · {t("desk_arriving", fmtXmr(view.balances.locked_pxmr))}{#if view.balances.blocks_to_unlock > 0}, {tp("monero_blocks_to_go", view.balances.blocks_to_unlock)}{/if}{/if}
         </div>
       </div>
       <div class="sync">
         {#if view.blocker === "NoWallet"}
-          <span class="pill warn">Minting a wallet…</span>
+          <span class="pill warn">{t("desk_minting")}</span>
         {:else if view.blocker === "NoNode"}
-          <span class="pill warn">Looking for a node…</span>
+          <span class="pill warn">{t("monero_finding_node")}</span>
         {:else if view.blocker === "Failing"}
-          <span class="pill warn" title={view.balances.error ?? ""}>Node trouble</span>
+          <span class="pill warn" title={view.balances.error ?? ""}>{t("desk_node_trouble")}</span>
         {:else if view.balances.syncing}
-          <span class="pill">Catching up · {Math.round(view.balances.progress * 100)}% · {view.balances.blocks_left} blocks{eta(view.balances.seconds_left) ? " · " + eta(view.balances.seconds_left) : ""}</span>
+          <span class="pill">{t("desk_catching_up")} · {Math.round(view.balances.progress * 100)}% · {tp("monero_blocks_to_go", view.balances.blocks_left)}{eta(view.balances.seconds_left) ? " · " + eta(view.balances.seconds_left) : ""}</span>
         {:else}
-          <span class="pill ok">Up to date · block {view.balances.tip}</span>
+          <span class="pill ok">{t("desk_up_to_date")} · {t("txdetail_block_n", view.balances.tip)}</span>
         {/if}
       </div>
     </div>
@@ -149,88 +150,88 @@
   </div>
 
   <div class="tabs">
-    <button class="tab" class:active={tab === "receive"} onclick={() => (tab = "receive")}>Receive</button>
-    <button class="tab" class:active={tab === "send"} onclick={() => (tab = "send")}>Send</button>
-    <button class="tab" class:active={tab === "history"} onclick={() => (tab = "history")}>History</button>
+    <button class="tab" class:active={tab === "receive"} onclick={() => (tab = "receive")}>{t("desk_receive")}</button>
+    <button class="tab" class:active={tab === "send"} onclick={() => (tab = "send")}>{t("pay_send")}</button>
+    <button class="tab" class:active={tab === "history"} onclick={() => (tab = "history")}>{t("desk_history")}</button>
   </div>
 
   {#if tab === "receive"}
     <div class="card">
-      <h3>Your address</h3>
+      <h3>{t("desk_your_address")}</h3>
       {#if view.address}
         <div class="code-wrap">
           <div class="qr">{@html view.address_svg}</div>
           <div class="code-side">
-            <p class="note">Anyone can pay this. A contact who pays you through DUCAT gets their own subaddress automatically, so their payments stand out.</p>
+            <p class="note">{t("desk_address_note")}</p>
             <div class="addr">{view.address}</div>
-            <div class="actions"><button class="btn small" onclick={() => copy(view?.address ?? "")}>Copy address</button></div>
+            <div class="actions"><button class="btn small" onclick={() => copy(view?.address ?? "")}>{t("desk_copy_address")}</button></div>
           </div>
         </div>
       {:else}
-        <p class="empty">The wallet is minted the first time a node answers.</p>
+        <p class="empty">{t("desk_wallet_minted_note")}</p>
       {/if}
     </div>
   {:else if tab === "send"}
     <div class="card">
-      <h3>Send</h3>
+      <h3>{t("pay_send")}</h3>
       <div class="field">
-        <label for="to">To</label>
-        <input id="to" class="input" bind:value={to} placeholder="A Monero address" />
+        <label for="to">{t("txdetail_to")}</label>
+        <input id="to" class="input" bind:value={to} placeholder={t("desk_monero_address_hint")} />
       </div>
       <div class="field">
-        <label for="amt">Amount</label>
+        <label for="amt">{t("pay_amount")}</label>
         <input id="amt" class="input" bind:value={amount} oninput={requote} placeholder="0.00 XMR" />
-        <button class="btn small" onclick={sendMax}>Max</button>
+        <button class="btn small" onclick={sendMax}>{t("pay_max")}</button>
       </div>
       <div class="field">
-        <label for="note">Note</label>
-        <input id="note" class="input" bind:value={note} placeholder="For your own records (optional)" />
+        <label for="note">{t("txdetail_note")}</label>
+        <input id="note" class="input" bind:value={note} placeholder={t("desk_note_hint")} />
       </div>
       <div class="field">
-        <label for="prio">Speed</label>
+        <label for="prio">{t("pay_speed")}</label>
         <select id="prio" class="input" bind:value={priority} onchange={requote}>
-          <option value={0}>Slow · ~20 min</option>
-          <option value={1}>Normal · ~6 min</option>
-          <option value={2}>Fast · ~4 min</option>
-          <option value={3}>Fastest · ~2 min</option>
+          <option value={0}>{t("pay_speed_slow")} · ~20 min</option>
+          <option value={1}>{t("pay_speed_normal")} · ~6 min</option>
+          <option value={2}>{t("pay_speed_fast")} · ~4 min</option>
+          <option value={3}>{t("pay_speed_fastest")} · ~2 min</option>
         </select>
       </div>
       {#if quote}
         <p class="note">
-          {#if quote.fee_known}Fee {fmtXmr(quote.fee_pxmr)} over {quote.notes} note{quote.notes === 1 ? "" : "s"} · total {fmtXmr(quote.total_pxmr)} · {quote.affordable ? `${fmtXmr(quote.remaining_pxmr)} left after` : "more than is unlocked"}{:else}The fee is not known yet — no node has answered.{/if}
+          {#if quote.fee_known}{t("txdetail_fee")} {fmtXmr(quote.fee_pxmr)} · {tp("balance_notes", quote.notes)} · {t("pay_total").toLowerCase()} {fmtXmr(quote.total_pxmr)} · {quote.affordable ? t("desk_left_after", fmtXmr(quote.remaining_pxmr)) : t("desk_more_than_unlocked")}{:else}The fee is not known yet — no node has answered.{/if}
         </p>
       {:else if quoting}
-        <p class="note">Working out the fee…</p>
+        <p class="note">{t("desk_working_fee")}</p>
       {/if}
       <div class="actions">
-        <button class="btn primary" disabled={!to.trim() || !amount.trim() || sending || (quote !== null && !quote.affordable)} onclick={send}>{sending ? "Sending…" : amount.trim() ? `Send ${amount.trim()} XMR` : "Send now"}</button>
+        <button class="btn primary" disabled={!to.trim() || !amount.trim() || sending || (quote !== null && !quote.affordable)} onclick={send}>{sending ? t("desk_sending") : amount.trim() ? t("desk_send_x_xmr", amount.trim()) : t("desk_send_now")}</button>
       </div>
-      {#if sentTx}<p class="note ok-text">Sent. Transaction {sentTx.slice(0, 16)}…</p>{/if}
+      {#if sentTx}<p class="note ok-text">{t("desk_sent_tx", sentTx.slice(0, 16) + "…")}</p>{/if}
       {#if err}<p class="err">{err}</p>{/if}
     </div>
   {:else}
     <div class="card">
-      <h3>Sent</h3>
-      {#if sends.length === 0}<p class="empty">Nothing sent yet.</p>{/if}
+      <h3>{t("txdetail_payment_sent")}</h3>
+      {#if sends.length === 0}<p class="empty">{t("desk_nothing_sent")}</p>{/if}
       {#each sends as s (s.txid_hex + s.timestamp)}
         <div class="row">
           <div class="lead">
-            <div class="title">{fmtXmr(s.amount_pxmr)} <span class="meta">· fee {fmtXmr(s.fee_pxmr)}{s.recovered ? " · recovered from the chain" : ""}{s.donation ? " · donation" : ""}</span></div>
-            <div class="meta">{fmtTime(s.timestamp)} · to {s.contact_name ?? s.to_address.slice(0, 16) + "…"}{s.note ? ` · ${s.note}` : ""}</div>
+            <div class="title">{fmtXmr(s.amount_pxmr)} <span class="meta">· {t("desk_fee_x", fmtXmr(s.fee_pxmr))}{s.recovered ? ` · ${t("desk_recovered")}` : ""}{s.donation ? ` · ${t("activity_donation_chip").toLowerCase()}` : ""}</span></div>
+            <div class="meta">{fmtTime(s.timestamp)} · {t("pay_sending_to", s.contact_name ?? s.to_address.slice(0, 16) + "…")}{s.note ? ` · ${s.note}` : ""}</div>
           </div>
           {#if s.txid_hex}<div class="addr">{s.txid_hex}</div>{/if}
         </div>
       {/each}
     </div>
     <div class="card">
-      <h3>Received <button class="btn small" onclick={() => (showNotes = !showNotes)}>{showNotes ? "Hide" : "Show"} notes</button></h3>
+      <h3>{t("txdetail_payment_received")} <button class="btn small" onclick={() => (showNotes = !showNotes)}>{showNotes ? t("desk_hide_notes") : t("desk_show_notes")}</button></h3>
       {#if showNotes}
-        {#if notes.length === 0}<p class="empty">No notes yet.</p>{/if}
+        {#if notes.length === 0}<p class="empty">{t("desk_no_notes")}</p>{/if}
         {#each notes as n (n.tx_hash_hex + n.minor + n.height)}
           <div class="row">
             <div class="lead">
-              <div class="title">{fmtXmr(n.amount_pxmr)} <span class="meta">· {n.spent ? "spent" : n.unlocked ? "spendable" : "locked"}{n.from ? ` · from ${n.from}` : n.minor ? ` · subaddress ${n.minor}` : ""}</span></div>
-              <div class="meta">block {n.height}{n.timestamp ? ` · ${fmtTime(n.timestamp)}` : ""}</div>
+              <div class="title">{fmtXmr(n.amount_pxmr)} <span class="meta">· {n.spent ? t("txdetail_spent") : n.unlocked ? t("desk_spendable") : t("desk_locked")}{n.from ? ` · ${t("activity_from", n.from).toLowerCase()}` : n.minor ? ` · ${t("desk_subaddress_n", n.minor)}` : ""}</span></div>
+              <div class="meta">{t("txdetail_block_n", n.height)}{n.timestamp ? ` · ${fmtTime(n.timestamp)}` : ""}</div>
             </div>
             <div class="addr">{n.tx_hash_hex}</div>
           </div>
@@ -240,28 +241,28 @@
   {/if}
 
   <div class="card">
-    <h3>Node</h3>
+    <h3>{t("monero_title")}</h3>
     {#if editingNode}
       <div class="field">
-        <label for="node">Your node</label>
+        <label for="node">{t("monero_your_node")}</label>
         <input id="node" class="input" bind:value={ownNode} placeholder="http://host:38089" onkeydown={(e) => e.key === "Enter" && saveNode()} />
-        <button class="btn" onclick={saveNode}>Use it</button>
-        <button class="btn" onclick={() => { editingNode = false; ownNode = view?.own_node ?? ""; }}>Cancel</button>
+        <button class="btn" onclick={saveNode}>{t("monero_use_it")}</button>
+        <button class="btn" onclick={() => { editingNode = false; ownNode = view?.own_node ?? ""; }}>{t("monero_cancel")}</button>
       </div>
     {:else}
       <p class="note">
-        {#if view.node}Asking <span class="mono">{view.node}</span>{view.own_node ? " (your node)" : " (a public node — it sees your address, not your keys)"}{:else}No node yet.{/if}
-        <button class="linkish" onclick={() => (editingNode = true)}>Change</button>
-        {#if view.own_node}<button class="linkish" onclick={() => { ownNode = ""; saveNode(); }}>Forget mine</button>{/if}
+        {#if view.node}{t("desk_asking_node")} <span class="mono">{view.node}</span>{view.own_node ? ` (${t("monero_your_node").toLowerCase()})` : ` (${t("desk_public_node_note")})`}{:else}{t("monero_no_node")}.{/if}
+        <button class="linkish" onclick={() => (editingNode = true)}>{t("monero_change_your_node")}</button>
+        {#if view.own_node}<button class="linkish" onclick={() => { ownNode = ""; saveNode(); }}>{t("monero_back_to_public")}</button>{/if}
       </p>
       <div class="field">
-        <span class="meta">Rescan from block</span>
+        <span class="meta">{t("desk_rescan_from")}</span>
         <input class="input narrow" bind:value={rescanFrom} placeholder={String(view.restore_height)} />
-        <button class="btn small" disabled={rescanning} onclick={rescan}>{rescanning ? "Rescanning…" : "Rescan"}</button>
-        <span class="meta">Reads the chain again from there; the notes and the balance come back as the scan reaches them.</span>
+        <button class="btn small" disabled={rescanning} onclick={rescan}>{rescanning ? t("desk_rescanning") : t("desk_rescan")}</button>
+        <span class="meta">{t("desk_rescan_note")}</span>
       </div>
     {/if}
   </div>
 {:else}
-  <p class="empty">Opening the wallet…</p>
+  <p class="empty">{t("desk_opening_wallet")}</p>
 {/if}

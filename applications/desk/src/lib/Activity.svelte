@@ -3,6 +3,7 @@
   // it was for, and a running balance. Exported as CSV or JSON for the
   // books, which is a thing a desk is for.
   import { onMount } from "svelte";
+  import { t, tp, i18n } from "./i18n.svelte";
   import { api, fmtXmr, fmtTime, type BusinessSummary, type LedgerEvent, type LedgerSummary } from "./api";
   import { gen } from "./state.svelte";
 
@@ -58,7 +59,7 @@
     if (!path) return;
     try {
       const n = await api.exportLedger(path, json);
-      msg = `Written: ${n} bytes to ${path}`;
+      msg = t("desk_written_to", n, path);
     } catch (e) {
       err = String(e);
     }
@@ -73,58 +74,70 @@
     const parts: string[] = [];
     if (e.note) parts.push(e.note);
     if (e.items.length) parts.push(e.items.map((i) => i.d).join(", "));
-    if (e.receipted) parts.push("receipt" + (e.receipt_by ? ` from ${e.receipt_by}` : ""));
-    if (e.locked) parts.push(`unlocks in ${e.unlocks_in_blocks} ${e.unlocks_in_blocks === 1 ? "block" : "blocks"}`);
-    if (e.pending) parts.push("not on the chain yet");
-    if (e.provisional) parts.push("change on its way");
-    if (e.unexplained) parts.push("not one of ours?");
-    if (e.fee_pxmr) parts.push(`fee ${fmtXmr(e.fee_pxmr)}`);
+    if (e.receipted) parts.push(e.receipt_by ? t("desk_receipt_from", e.receipt_by) : t("desk_receipt"));
+    if (e.locked) parts.push(tp("activity_unlocks_blocks", e.unlocks_in_blocks));
+    if (e.pending) parts.push(t("txdetail_status_broadcast"));
+    if (e.provisional) parts.push(t("desk_change_on_way"));
+    if (e.unexplained) parts.push(t("desk_not_ours"));
+    if (e.fee_pxmr) parts.push(t("desk_fee_x", fmtXmr(e.fee_pxmr)));
     return parts.join(" · ");
+  }
+
+  /// The first line: who, in the reader's words, or the honest blank.
+  function whoLine(e: LedgerEvent): string {
+    if (e.counterparty) return e.direction === "Sent" ? t("activity_to", e.counterparty) : t("activity_from", e.counterparty);
+    if (e.direction === "Sent") return e.address ? t("activity_to", e.address.slice(0, 12) + "…") : t("activity_sent_unrecorded");
+    return t("activity_received_unknown");
+  }
+
+  function doorWord(o: string): string {
+    const k: Record<string, string> = { pos: "activity_door_pos", bar: "activity_door_bar", pub: "activity_door_pub", donate: "activity_door_donate", kiosk: "desk_door_kiosk", taxi: "activity_door_taxi" };
+    return k[o] ? t(k[o]) : o;
   }
 </script>
 
 <div class="page-head">
-  <h1 class="page-title">Activity</h1>
+  <h1 class="page-title">{t("tab_activity")}</h1>
   <div class="tabs" style="margin: 0">
-    <button class="tab" class:active={range === "today"} onclick={() => (range = "today")}>Today</button>
-    <button class="tab" class:active={range === "week"} onclick={() => (range = "week")}>7 days</button>
-    <button class="tab" class:active={range === "month"} onclick={() => (range = "month")}>30 days</button>
-    <button class="tab" class:active={range === "all"} onclick={() => (range = "all")}>All</button>
+    <button class="tab" class:active={range === "today"} onclick={() => (range = "today")}>{t("activity_period_today")}</button>
+    <button class="tab" class:active={range === "week"} onclick={() => (range = "week")}>{t("activity_period_7d")}</button>
+    <button class="tab" class:active={range === "month"} onclick={() => (range = "month")}>{t("desk_period_30d")}</button>
+    <button class="tab" class:active={range === "all"} onclick={() => (range = "all")}>{t("activity_period_all")}</button>
   </div>
 </div>
 
 {#if summary}
   <div class="stats">
-    <div class="stat"><div class="stat-v">{fmtXmr(summary.in_pxmr)}</div><div class="meta">in · {summary.in_count}</div></div>
-    <div class="stat"><div class="stat-v">{fmtXmr(summary.out_pxmr)}</div><div class="meta">out · {summary.out_count} · fees {fmtXmr(summary.fees_pxmr)}</div></div>
-    <div class="stat"><div class="stat-v">{signed(summary.net_pxmr)}</div><div class="meta">net</div></div>
-    {#if business && business.sales_count}<div class="stat"><div class="stat-v">{fmtXmr(business.sales_pxmr)}</div><div class="meta">{business.sales_count} sale{business.sales_count === 1 ? "" : "s"} at the till{business.by_origin.map(([o, d]) => ` · ${o} ${d.count}`).join("")}{business.tax_collected_pxmr ? ` · tax ${fmtXmr(business.tax_collected_pxmr)}` : ""}</div></div>{/if}
-    {#if summary.donations_pxmr}<div class="stat"><div class="stat-v">{fmtXmr(summary.donations_pxmr)}</div><div class="meta">given</div></div>{/if}
+    <div class="stat"><div class="stat-v">{fmtXmr(summary.in_pxmr)}</div><div class="meta">{t("activity_sum_in")} · {summary.in_count}</div></div>
+    <div class="stat"><div class="stat-v">{fmtXmr(summary.out_pxmr)}</div><div class="meta">{t("activity_sum_out")} · {summary.out_count} · {t("activity_sum_fees")} {fmtXmr(summary.fees_pxmr)}</div></div>
+    <div class="stat"><div class="stat-v">{signed(summary.net_pxmr)}</div><div class="meta">{t("activity_sum_net")}</div></div>
+    {#if business && business.sales_count}<div class="stat"><div class="stat-v">{fmtXmr(business.sales_pxmr)}</div><div class="meta">{tp("desk_sales_at_till", business.sales_count)}{business.by_origin.map(([o, d]) => ` · ${doorWord(o)} ${d.count}`).join("")}{business.tax_collected_pxmr ? ` · ${t("activity_tax_collected").toLowerCase()} ${fmtXmr(business.tax_collected_pxmr)}` : ""}</div></div>{/if}
+    {#if summary.donations_pxmr}<div class="stat"><div class="stat-v">{fmtXmr(summary.donations_pxmr)}</div><div class="meta">{t("desk_given")}</div></div>{/if}
   </div>
 {/if}
 
 <div class="card">
   <div class="page-head" style="margin-bottom: 8px">
-    <h3 style="margin: 0">Ledger</h3>
-    <div class="actions"><button class="btn small" onclick={() => exportAs(false)}>Export CSV</button><button class="btn small" onclick={() => exportAs(true)}>Export JSON</button></div>
+    <h3 style="margin: 0">{t("desk_ledger")}</h3>
+    <div class="actions"><button class="btn small" onclick={() => exportAs(false)}>{t("activity_export")}</button><button class="btn small" onclick={() => exportAs(true)}>{t("desk_export_json")}</button></div>
   </div>
   {#if msg}<p class="note ok-text">{msg}</p>{/if}
   {#if err}<p class="err">{err}</p>{/if}
-  {#if shown.length === 0}<p class="empty">Nothing in this period.</p>{/if}
+  {#if shown.length === 0}<p class="empty">{t("activity_period_none")}</p>{/if}
   <div class="ledger">
     {#each shown as e (e.txid + ":" + e.height + ":" + e.timestamp + ":" + e.direction)}
       <button class="ledger-row" class:out={e.direction === "Sent"} onclick={() => (open = open === e.txid + e.timestamp ? null : e.txid + e.timestamp)}>
-        <div class="lw">{e.timestamp ? fmtTime(e.timestamp) : e.pending ? "pending" : "—"}</div>
+        <div class="lw">{e.timestamp ? fmtTime(e.timestamp) : e.pending ? t("desk_pending") : "—"}</div>
         <div class="lc">
-          <div class="title">{e.direction === "Sent" ? "To" : "From"} {e.counterparty ?? (e.direction === "Sent" ? (e.address ? e.address.slice(0, 12) + "…" : "somewhere") : "someone")}{e.donation ? " · donation" : ""}</div>
+          <div class="title">{whoLine(e)}{e.donation ? " · " + t("activity_donation_chip").toLowerCase() : ""}</div>
           <div class="meta">{metaOf(e)}</div>
         </div>
-        <div class="la"><div class="title">{signed(e.net_pxmr)}</div><div class="meta">then {fmtXmr(Math.max(0, e.balance_after_pxmr))}</div></div>
+        <div class="la"><div class="title">{signed(e.net_pxmr)}</div><div class="meta">{t("desk_then_balance", fmtXmr(Math.max(0, e.balance_after_pxmr)))}</div></div>
       </button>
       {#if open === e.txid + e.timestamp}
         <div class="ledger-detail">
           {#if e.txid}<div class="addr">{e.txid}</div>{/if}
-          <div class="meta">block {e.height || "—"} · {e.source === "Notice" ? "named by their payment notice" : e.source === "OurRecord" ? "from this desk's record of the send" : e.source === "Order" ? "matched to a kiosk order by amount and address" : "no note says who"}{e.tax_pxmr ? ` · tax ${fmtXmr(e.tax_pxmr)}` : ""}</div>
+          <div class="meta">{t("txdetail_block").toLowerCase()} {e.height || "—"} · {e.source === "Notice" ? t("desk_source_notice") : e.source === "OurRecord" ? t("desk_source_record") : e.source === "Order" ? t("desk_source_order") : t("desk_source_unknown")}{e.tax_pxmr ? ` · ${t("txdetail_tax").toLowerCase()} ${fmtXmr(e.tax_pxmr)}` : ""}</div>
           {#if e.items.length}<div class="bill">{#each e.items as i}<div class="bill-line"><span>{i.d}</span><span>{fmtXmr(i.a)}</span></div>{/each}</div>{/if}
         </div>
       {/if}

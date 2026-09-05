@@ -2,6 +2,7 @@
   // The till: a sale to whoever is in front of you, tabs that run, and the
   // catalogue both draw from. The phone's POS and Bar Tab, side by side.
   import { onMount } from "svelte";
+  import { t, tp } from "./i18n.svelte";
   import { api, copy, fmtXmr, fmtTime, type Code, type ContactRow, type ItemRow, type TabRow } from "./api";
   import { gen } from "./state.svelte";
 
@@ -66,7 +67,7 @@
   async function addSaleLine() {
     err = null;
     const a = await pxmrOf(linePrice, lineXmr);
-    if (!lineName.trim() || !a) { err = "A line needs a name and a price (fiat needs a rate; XMR always works)."; return; }
+    if (!lineName.trim() || !a) { err = t("desk_line_needs_price_or_xmr"); return; }
     saleLines = [...saleLines, { d: lineName.trim(), a }];
     lineName = ""; linePrice = ""; lineXmr = "";
   }
@@ -142,7 +143,7 @@
     if (!openTab) return;
     err = null;
     const a = await pxmrOf(tabLinePrice, "");
-    if (!tabLineName.trim() || !a) { err = "A line needs a name and a price."; return; }
+    if (!tabLineName.trim() || !a) { err = t("desk_line_needs_price"); return; }
     try {
       openTab = await api.tabAddLine(openTab.id, tabLineName.trim(), a);
       tabLineName = ""; tabLinePrice = "";
@@ -177,14 +178,14 @@
     }
   }
 
-  function stateWord(t: TabRow): string {
-    switch (t.state) {
-      case "open": return "running";
-      case "settled": return t.seen_tx ? "payment seen — settling" : "billed, waiting";
-      case "paid": return t.receipt_owed ? "paid · receipt owed" : "paid";
-      case "paid_oob": return t.receipt_owed ? "settled outside · receipt owed" : "settled outside";
-      case "cancelled": return "cancelled";
-      default: return t.state;
+  function stateWord(tab: TabRow): string {
+    switch (tab.state) {
+      case "open": return t("bartab_section_running").toLowerCase();
+      case "settled": return tab.seen_tx ? t("bartab_state_payment_seen") : t("bartab_state_billed_unpaid");
+      case "paid": return tab.receipt_owed ? t("desk_paid_receipt_owed") : t("bartab_state_paid");
+      case "paid_oob": return tab.receipt_owed ? t("desk_paid_oob_receipt_owed") : t("bartab_state_paid_oob");
+      case "cancelled": return t("bartab_state_cancelled");
+      default: return tab.state;
     }
   }
 
@@ -201,11 +202,11 @@
 </script>
 
 <div class="page-head">
-  <h1 class="page-title">Till</h1>
+  <h1 class="page-title">{t("desk_nav_till")}</h1>
   <div class="tabs" style="margin: 0">
-    <button class="tab" class:active={mode === "sale"} onclick={() => (mode = "sale")}>Sale</button>
-    <button class="tab" class:active={mode === "tabs"} onclick={() => (mode = "tabs")}>Tabs</button>
-    <button class="tab" class:active={mode === "catalogue"} onclick={() => (mode = "catalogue")}>Catalogue</button>
+    <button class="tab" class:active={mode === "sale"} onclick={() => (mode = "sale")}>{t("pos_sale")}</button>
+    <button class="tab" class:active={mode === "tabs"} onclick={() => (mode = "tabs")}>{t("bartab_open_tabs")}</button>
+    <button class="tab" class:active={mode === "catalogue"} onclick={() => (mode = "catalogue")}>{t("items_tab")}</button>
   </div>
 </div>
 
@@ -218,34 +219,34 @@
       <p class="pill" class:ok={saleTab.state === "paid" || saleTab.state === "paid_oob"}>{stateWord(saleTab)}</p>
       <div class="bill">
         {#each saleTab.lines as [d, a]}<div class="bill-line"><span>{d}</span><span>{fmtXmr(a)}</span></div>{/each}
-        {#if saleTab.tax_pxmr}<div class="bill-line"><span>Tax</span><span>{fmtXmr(saleTab.tax_pxmr)}</span></div>{/if}
-        {#if saleTab.tip_pxmr > 0}<div class="bill-line"><span>Tip</span><span>{fmtXmr(saleTab.tip_pxmr)}</span></div>{/if}
+        {#if saleTab.tax_pxmr}<div class="bill-line"><span>{t("pos_tax")}</span><span>{fmtXmr(saleTab.tax_pxmr)}</span></div>{/if}
+        {#if saleTab.tip_pxmr > 0}<div class="bill-line"><span>{t("kiosk_tip")}</span><span>{fmtXmr(saleTab.tip_pxmr)}</span></div>{/if}
       </div>
       <div class="actions">
         {#if saleTab.state === "settled"}
-          <button class="btn" onclick={salePaidOutside}>Paid another way</button>
-          <button class="btn danger" onclick={saleCancel}>Cancel the bill</button>
+          <button class="btn" onclick={salePaidOutside}>{t("bartab_paid_outside_button")}</button>
+          <button class="btn danger" onclick={saleCancel}>{t("bartab_cancel_bill")}</button>
         {:else}
-          {#if saleTab.receipt_owed}<button class="btn" onclick={() => act(() => api.tabSendReceipt(saleTab!.id))}>Send the receipt</button>{/if}
-          <button class="btn primary" onclick={saleDone}>Next customer</button>
+          {#if saleTab.receipt_owed}<button class="btn" onclick={() => act(() => api.tabSendReceipt(saleTab!.id))}>{t("bartab_send_receipt")}</button>{/if}
+          <button class="btn primary" onclick={saleDone}>{t("kiosk_next_customer")}</button>
         {/if}
       </div>
       {#if err}<p class="err">{err}</p>{/if}
     </div>
   {:else if card && saleTab}
     <div class="card">
-      <h3>Scan to pay {fmtXmr(saleTab.total_pxmr)}</h3>
+      <h3>{t("desk_scan_to_pay", fmtXmr(saleTab.total_pxmr))}</h3>
       <div class="code-wrap">
         <div class="qr">{@html card.svg}</div>
         <div class="code-side">
-          <p class="note">The customer scans this with their phone. As soon as they do, the bill goes to them and this screen follows the payment.</p>
+          <p class="note">{t("desk_sale_scan_note")}</p>
           <div class="bill">
             {#each saleTab.lines as [d, a]}<div class="bill-line"><span>{d}</span><span>{fmtXmr(a)}</span></div>{/each}
           </div>
           <div class="addr">{card.uri}</div>
           <div class="actions">
-            <button class="btn small" onclick={() => copy(card?.uri ?? "")}>Copy code</button>
-            <button class="btn small" onclick={stopPresenting}>Back</button>
+            <button class="btn small" onclick={() => copy(card?.uri ?? "")}>{t("desk_copy_code")}</button>
+            <button class="btn small" onclick={stopPresenting}>{t("pos_back")}</button>
           </div>
         </div>
       </div>
@@ -254,33 +255,33 @@
   {:else}
     <div class="till-grid">
       <div class="card">
-        <h3>This sale</h3>
-        {#if saleLines.length === 0}<p class="empty">Add lines from the catalogue, or type one.</p>{/if}
+        <h3>{t("pos_this_sale")}</h3>
+        {#if saleLines.length === 0}<p class="empty">{t("desk_sale_empty")}</p>{/if}
         {#each saleLines as l, i}
           <div class="bill-line row-line"><span>{l.d}</span><span>{fmtXmr(l.a)} <button class="linkish" onclick={() => (saleLines = saleLines.filter((_, j) => j !== i))}>✕</button></span></div>
         {/each}
         <div class="field">
-          <input class="input" placeholder="Line" bind:value={lineName} />
-          <input class="input narrow" placeholder="Price" bind:value={linePrice} title="In your currency" />
-          <input class="input narrow" placeholder="or XMR" bind:value={lineXmr} />
-          <button class="btn" onclick={addSaleLine}>Add</button>
+          <input class="input" placeholder={t("desk_line")} bind:value={lineName} />
+          <input class="input narrow" placeholder={t("desk_price")} bind:value={linePrice} title={t("desk_in_your_currency")} />
+          <input class="input narrow" placeholder={t("desk_or_xmr")} bind:value={lineXmr} />
+          <button class="btn" onclick={addSaleLine}>{t("pos_add_line")}</button>
         </div>
         <div class="field">
-          <label for="tax">Tax</label>
+          <label for="tax">{t("pos_tax")}</label>
           <input id="tax" class="input narrow" placeholder="0.00" bind:value={taxText} />
         </div>
-        <div class="total-row"><span>Total</span><strong>{fmtXmr(saleTotal)}</strong></div>
+        <div class="total-row"><span>{t("pay_total")}</span><strong>{fmtXmr(saleTotal)}</strong></div>
         <div class="actions">
-          <button class="btn primary" disabled={saleLines.length === 0 || presenting} onclick={present}>{presenting ? "Cutting a code…" : "Present"}</button>
+          <button class="btn primary" disabled={saleLines.length === 0 || presenting} onclick={present}>{presenting ? t("pos_getting_code_ready") : t("desk_present")}</button>
         </div>
         {#if err}<p class="err">{err}</p>{/if}
       </div>
       <div class="card">
-        <h3>Catalogue</h3>
-        {#if items.length === 0}<p class="empty">No items yet — add some under Catalogue.</p>{/if}
+        <h3>{t("items_tab")}</h3>
+        {#if items.length === 0}<p class="empty">{t("desk_no_items_yet")}</p>{/if}
         <div class="chips">
           {#each items.filter((i) => !i.sold_out) as i (i.id)}
-            <button class="chip" onclick={() => addFromCatalogue(i)} title={i.pxmr ? fmtXmr(i.pxmr) : "not priceable yet"}>{i.name} · {i.price} {i.currency}</button>
+            <button class="chip" onclick={() => addFromCatalogue(i)} title={i.pxmr ? fmtXmr(i.pxmr) : t("items_no_rate")}>{i.name} · {i.price} {i.currency}</button>
           {/each}
         </div>
       </div>
@@ -291,28 +292,28 @@
   <div class="till-grid">
     <div class="card">
       <div class="page-head" style="margin-bottom: 8px">
-        <h3 style="margin: 0">Running tabs</h3>
-        <button class="btn small" onclick={() => (pickingContact = !pickingContact)}>{pickingContact ? "Close" : "Open a tab"}</button>
+        <h3 style="margin: 0">{t("bartab_open_tabs")}</h3>
+        <button class="btn small" onclick={() => (pickingContact = !pickingContact)}>{pickingContact ? t("chat_close") : t("bartab_start_tab")}</button>
       </div>
       {#if pickingContact}
-        <p class="note">Whose tab? Somebody you already know — a stranger scans a sale code instead.</p>
+        <p class="note">{t("desk_whose_tab")}</p>
         {#each contacts as c (c.persona_hex)}
           <button class="thread-row" onclick={() => startTab(c)}><div class="avatar">{c.name.slice(0, 1).toUpperCase()}</div><div class="thread-text"><div class="thread-name">{c.name}</div></div></button>
         {/each}
-        {#if contacts.length === 0}<p class="empty">No contacts yet.</p>{/if}
+        {#if contacts.length === 0}<p class="empty">{t("desk_no_contacts")}</p>{/if}
       {/if}
-      {#each tabs.filter((t) => t.state === "open" || t.state === "settled" || t.receipt_owed) as t (t.id)}
-        <button class="thread-row" class:active={openTab?.id === t.id} onclick={() => (openTab = t)}>
+      {#each tabs.filter((x) => x.state === "open" || x.state === "settled" || x.receipt_owed) as tb (tb.id)}
+        <button class="thread-row" class:active={openTab?.id === tb.id} onclick={() => (openTab = tb)}>
           <div class="thread-text">
-            <div class="thread-top"><span class="thread-name">{t.name}{t.origin !== "bar" ? ` · ${t.origin}` : ""}</span><span class="thread-when">{t.shown.primary}</span></div>
-            <div class="thread-last">{stateWord(t)} · opened {fmtTime(Math.floor(t.opened_at / 1000))}</div>
+            <div class="thread-top"><span class="thread-name">{tb.name}{tb.origin !== "bar" ? ` · ${tb.origin}` : ""}</span><span class="thread-when">{tb.shown.primary}</span></div>
+            <div class="thread-last">{stateWord(tb)} · {t("desk_opened_at", fmtTime(Math.floor(tb.opened_at / 1000)))}</div>
           </div>
         </button>
       {/each}
-      {#if tabs.filter((t) => t.state !== "open" && t.state !== "settled" && !t.receipt_owed).length}
-        <details><summary class="meta">Closed tabs</summary>
-          {#each tabs.filter((t) => t.state !== "open" && t.state !== "settled" && !t.receipt_owed) as t (t.id)}
-            <div class="row"><div class="lead"><div class="title">{t.name} <span class="meta">· {t.shown.primary} · {stateWord(t)}</span></div><div class="meta">{fmtTime(Math.floor(t.opened_at / 1000))}</div></div><div class="actions"><button class="btn small" onclick={() => act(() => api.deleteTab(t.id))}>Clear</button></div></div>
+      {#if tabs.filter((x) => x.state !== "open" && x.state !== "settled" && !x.receipt_owed).length}
+        <details><summary class="meta">{t("bartab_section_settled")}</summary>
+          {#each tabs.filter((x) => x.state !== "open" && x.state !== "settled" && !x.receipt_owed) as tb (tb.id)}
+            <div class="row"><div class="lead"><div class="title">{tb.name} <span class="meta">· {tb.shown.primary} · {stateWord(tb)}</span></div><div class="meta">{fmtTime(Math.floor(tb.opened_at / 1000))}</div></div><div class="actions"><button class="btn small" onclick={() => act(() => api.deleteTab(tb.id))}>Clear</button></div></div>
           {/each}
         </details>
       {/if}
@@ -324,35 +325,35 @@
           {#each openTab.lines as [d, a], i}
             <div class="bill-line row-line"><span>{d}</span><span>{fmtXmr(a)} {#if openTab.state === "open"}<button class="linkish" onclick={() => act(() => api.tabRemoveLine(openTab!.id, i))}>✕</button>{/if}</span></div>
           {/each}
-          {#if openTab.tax_pxmr}<div class="bill-line"><span>Tax</span><span>{fmtXmr(openTab.tax_pxmr)}</span></div>{/if}
-          {#if openTab.tip_pxmr > 0}<div class="bill-line"><span>Tip</span><span>{fmtXmr(openTab.tip_pxmr)}</span></div>{/if}
+          {#if openTab.tax_pxmr}<div class="bill-line"><span>{t("pos_tax")}</span><span>{fmtXmr(openTab.tax_pxmr)}</span></div>{/if}
+          {#if openTab.tip_pxmr > 0}<div class="bill-line"><span>{t("kiosk_tip")}</span><span>{fmtXmr(openTab.tip_pxmr)}</span></div>{/if}
         </div>
-        <div class="total-row"><span>Total</span><strong>{openTab.shown.primary}{openTab.shown.secondary ? ` · ${openTab.shown.secondary}` : ""}</strong></div>
+        <div class="total-row"><span>{t("pay_total")}</span><strong>{openTab.shown.primary}{openTab.shown.secondary ? ` · ${openTab.shown.secondary}` : ""}</strong></div>
         {#if openTab.state === "open"}
           <div class="chips">
             {#each items.filter((i) => !i.sold_out && i.pxmr) as i (i.id)}<button class="chip" onclick={() => addTabItem(i)}>{i.name}</button>{/each}
           </div>
           <div class="field">
-            <input class="input" placeholder="Line" bind:value={tabLineName} />
-            <input class="input narrow" placeholder="Price" bind:value={tabLinePrice} />
-            <button class="btn" onclick={addTabLine}>Add</button>
+            <input class="input" placeholder={t("desk_line")} bind:value={tabLineName} />
+            <input class="input narrow" placeholder={t("desk_price")} bind:value={tabLinePrice} />
+            <button class="btn" onclick={addTabLine}>{t("pos_add_line")}</button>
           </div>
           <div class="actions">
-            <button class="btn primary" disabled={openTab.lines.length === 0} onclick={settleOpen}>Settle up — send the bill</button>
-            <button class="btn danger" onclick={() => act(async () => { await api.deleteTab(openTab!.id); openTab = null; })}>Discard</button>
+            <button class="btn primary" disabled={openTab.lines.length === 0} onclick={settleOpen}>{t("desk_settle_send_bill")}</button>
+            <button class="btn danger" onclick={() => act(async () => { await api.deleteTab(openTab!.id); openTab = null; })}>{t("bartab_discard_confirm")}</button>
           </div>
         {:else if openTab.state === "settled"}
-          <p class="note">{openTab.seen_tx ? "Their payment is in the mempool — the receipt goes out when it lands." : "The bill is with them. This follows the payment; nothing to do."}</p>
+          <p class="note">{openTab.seen_tx ? t("desk_payment_in_mempool") : t("desk_bill_with_them")}</p>
           <div class="actions">
-            <button class="btn" onclick={() => act(() => api.tabPaidOutside(openTab!.id))}>Paid another way</button>
-            <button class="btn danger" onclick={() => act(() => api.cancelTab(openTab!.id))}>Cancel the bill</button>
+            <button class="btn" onclick={() => act(() => api.tabPaidOutside(openTab!.id))}>{t("bartab_paid_outside_button")}</button>
+            <button class="btn danger" onclick={() => act(() => api.cancelTab(openTab!.id))}>{t("bartab_cancel_bill")}</button>
           </div>
         {:else}
-          {#if openTab.receipt_owed}<div class="actions"><button class="btn" onclick={() => act(() => api.tabSendReceipt(openTab!.id))}>Send the receipt</button></div>{/if}
+          {#if openTab.receipt_owed}<div class="actions"><button class="btn" onclick={() => act(() => api.tabSendReceipt(openTab!.id))}>{t("bartab_send_receipt")}</button></div>{/if}
         {/if}
         {#if err}<p class="err">{err}</p>{/if}
       {:else}
-        <p class="empty">Pick a tab, or open one.</p>
+        <p class="empty">{t("desk_pick_a_tab")}</p>
         {#if err}<p class="err">{err}</p>{/if}
       {/if}
     </div>
@@ -360,23 +361,23 @@
 
 {:else}
   <div class="card">
-    <h3>Catalogue</h3>
-    <p class="note">Prices in your currency; each sale converts at the rate of the moment.</p>
+    <h3>{t("items_title")}</h3>
+    <p class="note">{t("desk_catalogue_note")}</p>
     {#each items as i (i.id)}
       <div class="row">
         <div class="lead">
-          <div class="title">{i.name} <span class="meta">· {i.price} {i.currency}{i.pxmr ? ` · ${fmtXmr(i.pxmr)} now` : i.snag === "NoRate" ? " · no rate yet" : ""}</span></div>
+          <div class="title">{i.name} <span class="meta">· {i.price} {i.currency}{i.pxmr ? ` · ${fmtXmr(i.pxmr)} ${t("desk_now")}` : i.snag === "NoRate" ? ` · ${t("items_no_rate")}` : ""}</span></div>
         </div>
         <div class="actions">
-          <button class="btn small" onclick={() => act(() => api.putItem(i.id, i.name, i.price, !i.sold_out))}>{i.sold_out ? "Back in stock" : "Sold out"}</button>
-          <button class="btn small danger" onclick={() => act(() => api.removeItem(i.id))}>Remove</button>
+          <button class="btn small" onclick={() => act(() => api.putItem(i.id, i.name, i.price, !i.sold_out))}>{i.sold_out ? t("items_back_on") : t("items_sold_out")}</button>
+          <button class="btn small danger" onclick={() => act(() => api.removeItem(i.id))}>{t("items_remove")}</button>
         </div>
       </div>
     {/each}
     <div class="field">
-      <input class="input" placeholder="Name" bind:value={newName} />
-      <input class="input narrow" placeholder="Price" bind:value={newPrice} onkeydown={(e) => e.key === "Enter" && addItem()} />
-      <button class="btn" onclick={addItem} disabled={!newName.trim() || !newPrice.trim()}>Add</button>
+      <input class="input" placeholder={t("items_name")} bind:value={newName} />
+      <input class="input narrow" placeholder={t("desk_price")} bind:value={newPrice} onkeydown={(e) => e.key === "Enter" && addItem()} />
+      <button class="btn" onclick={addItem} disabled={!newName.trim() || !newPrice.trim()}>{t("items_add")}</button>
     </div>
     {#if err}<p class="err">{err}</p>{/if}
   </div>

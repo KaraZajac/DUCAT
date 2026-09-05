@@ -101,8 +101,30 @@ jobs:
       - name: the translations agree
         run: python3 applications/check_strings.py
 
+      # The phone's Rust is built here, not fetched: jniLibs/ is ignored by
+      # git, so a checkout has no native library at all, and Gradle's
+      # freshness check waves an empty directory through — the APK this
+      # job used to produce launched and crashed on the first bridge call.
+      # One ABI keeps the job honest without tripling it; the release
+      # workflow builds all three.
+      - name: the phone's native library, arm64
+        env:
+          ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
+          DUCAT_ABIS: "aarch64-linux-android:arm64-v8a"
+        run: |
+          rustup target add aarch64-linux-android
+          echo y | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --install "ndk;27.2.12479018" >/dev/null
+          bash mobile/build-android.sh
+
       - name: the phone compiles
         run: cd applications && ./gradlew --no-daemon :android:assembleDebug
+
+      - name: keep the APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-arm64-v8a-debug.apk
+          path: applications/android/build/outputs/apk/debug/app-arm64-v8a-debug.apk
+          retention-days: 14
 
       - name: the phone's unit tests
         run: cd applications && ./gradlew --no-daemon :android:testDebugUnitTest
@@ -159,3 +181,49 @@ jobs:
           path: ${{ runner.temp }}/desk-render/renders
           if-no-files-found: ignore
           retention-days: 7
+
+  desk:
+    name: desk — the Tauri client compiles, its pages type-check, its strings agree
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            applications/desk/src-tauri/target
+          key: desk-${{ runner.os }}-${{ hashFiles('applications/desk/src-tauri/Cargo.lock', '**/Cargo.lock') }}
+          restore-keys: desk-${{ runner.os }}-
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: applications/desk/pnpm-lock.yaml
+
+      # What a webview needs to link against, and the sound library the
+      # calls feature compiles for on Linux.
+      - name: the window's system libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libasound2-dev
+
+      - name: the desk's dependencies
+        run: cd applications/desk && pnpm install --frozen-lockfile
+
+      # The dictionaries are generated from the phone's resources and
+      # committed; a phone-side string edit must be carried over, not lost.
+      - name: the desk's strings agree with the phone's
+        run: python3 applications/desk/scripts/strings_from_android.py --check
+
+      - name: the pages type-check
+        run: cd applications/desk && pnpm check
+
+      - name: the desk compiles, with sound
+        run: cd applications/desk/src-tauri && cargo build --features sound

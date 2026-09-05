@@ -15,25 +15,31 @@
   import StatusView from "./lib/Status.svelte";
 
   import { gen, startTicker } from "./lib/state.svelte";
+  import { i18n, t } from "./lib/i18n.svelte";
 
   type Page = "chat" | "wallet" | "till" | "kiosk" | "activity" | "library" | "market" | "files" | "sites" | "me" | "status";
   let page = $state<Page>("chat");
   let unread = $state(0);
   let status = $state<Status | null>(null);
 
-  const nav: { id: Page; label: string; glyph: string }[] = [
-    { id: "chat", label: "Chat", glyph: "✉" },
-    { id: "wallet", label: "Wallet", glyph: "◈" },
-    { id: "till", label: "Till", glyph: "▣" },
-    { id: "kiosk", label: "Kiosk", glyph: "▨" },
-    { id: "activity", label: "Activity", glyph: "≣" },
-    { id: "library", label: "Library", glyph: "▥" },
-    { id: "market", label: "Market", glyph: "◫" },
-    { id: "files", label: "Files", glyph: "▤" },
-    { id: "sites", label: "Sites", glyph: "▦" },
-    { id: "me", label: "Me", glyph: "◐" },
-    { id: "status", label: "Status", glyph: "◉" },
-  ];
+  // Labels re-read when the language changes; the keys are the phone's
+  // where it has the word, the desk's own where it does not.
+  const nav = $derived.by((): { id: Page; label: string; glyph: string }[] => {
+    void i18n.lang;
+    return [
+      { id: "chat", label: t("tab_chat"), glyph: "✉" },
+      { id: "wallet", label: t("monero_wallet_title"), glyph: "◈" },
+      { id: "till", label: t("desk_nav_till"), glyph: "▣" },
+      { id: "kiosk", label: t("kiosk_mode_title"), glyph: "▨" },
+      { id: "activity", label: t("tab_activity"), glyph: "≣" },
+      { id: "library", label: t("section_library"), glyph: "▥" },
+      { id: "market", label: t("desk_nav_market"), glyph: "◫" },
+      { id: "files", label: t("releases_title"), glyph: "▤" },
+      { id: "sites", label: t("section_sites"), glyph: "▦" },
+      { id: "me", label: t("desk_nav_me"), glyph: "◐" },
+      { id: "status", label: t("section_status"), glyph: "◉" },
+    ];
+  });
 
   onMount(() => {
     const tick = async () => {
@@ -64,9 +70,9 @@
     <div class="node-pill">
       <span class="dot" class:ok={status?.ready} class:warn={status?.attached && !status?.ready}></span>
       {#if status}
-        {status.ready ? `Attached · ${status.peers} peers` : status.attached ? "Attaching…" : "Starting…"}
+        {status.ready ? `${t("net_line_attached")} · ${status.peers} ${t("net_line_peers")}` : status.attached ? t("desk_attaching") : t("net_starting")}
       {:else}
-        Starting…
+        {t("net_starting")}
       {/if}
     </div>
   </aside>

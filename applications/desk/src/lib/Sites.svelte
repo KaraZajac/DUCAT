@@ -1,6 +1,7 @@
 <script lang="ts">
   // Sites: one mutable head at a stable address, a bundle on the swarm.
   import { onMount } from "svelte";
+  import { t, tp } from "./i18n.svelte";
   import { api, copy, fmtWhen, type Progress, type SiteRow } from "./api";
   import PieceBar from "./PieceBar.svelte";
 
@@ -112,72 +113,68 @@
 </script>
 
 <div class="page-head">
-  <h1 class="page-title">Sites</h1>
+  <h1 class="page-title">{t("section_sites")}</h1>
   <button class="btn primary" onclick={() => { showPublish = !showPublish; if (!showPublish) { updating = null; dir = null; lint = null; title = ""; } }}>
-    {showPublish ? "Close" : "Publish a site…"}
+    {showPublish ? t("chat_close") : t("desk_publish_site")}
   </button>
 </div>
-<p class="page-lede">
-  Pages that travel like publications: a folder with an <code>index.html</code>, put on the network
-  at an address you keep for the life of the site. Update it and readers see the new edition at the
-  same address.
-</p>
+<p class="page-lede">{t("desk_sites_lede")}</p>
 
 {#if showPublish || updating}
 <div class="card">
-  <h3>{updating ? "Update a site" : "Publish a site"}</h3>
+  <h3>{updating ? t("desk_update_site") : t("desk_publish_site_title")}</h3>
   <div class="field">
-    <label for="folder">Folder</label>
-    <input id="folder" class="input" readonly value={dir ?? ""} placeholder="A folder with index.html at its root" />
-    <button class="btn" onclick={chooseFolder}>Choose…</button>
+    <label for="folder">{t("desk_folder")}</label>
+    <input id="folder" class="input" readonly value={dir ?? ""} placeholder={t("desk_folder_hint")} />
+    <button class="btn" onclick={chooseFolder}>{t("desk_choose")}</button>
   </div>
   <div class="field">
-    <label for="title">Title</label>
-    <input id="title" class="input" bind:value={title} placeholder="What readers will see" />
+    <label for="title">{t("desk_title")}</label>
+    <input id="title" class="input" bind:value={title} placeholder={t("desk_title_hint")} />
   </div>
   {#if lint}
-    <p class="err">That page reaches the network — {lint}. A site is served from its bundle and nothing else; fix the reference and choose the folder again.</p>
+    <p class="err">{t("desk_site_reaches_network", lint)}</p>
   {:else if dir}
-    <p class="note ok-text">Sealed: every reference stays inside the bundle.</p>
+    <p class="note ok-text">{t("desk_site_sealed")}</p>
   {/if}
   <div class="actions" style="justify-content: flex-start; gap: 8px">
     <button class="btn primary" disabled={!dir || !!lint || busy === "publish"} onclick={publish}>
-      {busy === "publish" ? "Seeding…" : updating ? "Publish the update" : "Publish"}
+      {busy === "publish" ? t("desk_seeding") : updating ? t("desk_publish_update") : t("desk_publish")}
     </button>
-    {#if updating}<button class="btn" onclick={() => { updating = null; showPublish = false; title = ""; dir = null; lint = null; }}>Cancel</button>{/if}
+    {#if updating}<button class="btn" onclick={() => { updating = null; showPublish = false; title = ""; dir = null; lint = null; }}>{t("common_cancel")}</button>{/if}
   </div>
-  <p class="note">The bundle is checked for anything that reaches the clearnet before it is seeded, because one external fetch hands a reader's address to a third party.</p>
+  <p class="note">{t("desk_site_check_note")}</p>
 </div>
 {/if}
 
 <div class="card">
   <div class="field">
-    <label for="saddr">Add by address</label>
-    <input id="saddr" class="input" placeholder="ducat:site/…" bind:value={addr} onkeydown={(e) => e.key === "Enter" && add()} />
-    <button class="btn" onclick={add} disabled={!addr.trim() || busy === "add"}>{busy === "add" ? "Reading…" : "Add"}</button>
+    <label for="saddr">{t("releases_add")}</label>
+    <input id="saddr" class="input" placeholder={t("sites_uri_label")} bind:value={addr} onkeydown={(e) => e.key === "Enter" && add()} />
+    <button class="btn" onclick={add} disabled={!addr.trim() || busy === "add"}>{busy === "add" ? t("desk_reading") : t("sites_add_confirm")}</button>
   </div>
   {#if err}<p class="err">{err}</p>{/if}
 </div>
 
 <div class="card">
   {#if rows.length === 0}
-    <p class="empty">No sites yet.</p>
+    <p class="empty">{t("sites_empty_title")}</p>
   {/if}
   {#each rows as r (r.record_key)}
     <div class="row">
       <div class="lead">
-        <div class="title">{r.title || "(untitled)"} {#if r.mine}<span class="meta">· yours</span>{/if}</div>
+        <div class="title">{r.title || t("desk_untitled")} {#if r.mine}<span class="meta">· {t("desk_yours")}</span>{/if}</div>
         <div class="meta">
-          {r.cached ? (r.current ? "Ready offline" : "An older edition is on this desk") : "Not fetched"}
-          {r.updated ? ` · updated ${fmtWhen(r.updated)}` : ""}
+          {r.cached ? (r.current ? t("sites_offline_ready") : t("desk_older_edition")) : t("sites_not_fetched")}
+          {r.updated ? ` · ${t("desk_updated_at", fmtWhen(r.updated))}` : ""}
         </div>
       </div>
       <div class="actions">
-        <button class="btn small" onclick={() => copy(r.uri)}>Copy address</button>
-        <button class="btn small primary" disabled={busy !== null} onclick={() => open(r)}>{busy === r.record_key ? "Fetching…" : "Open"}</button>
-        {#if r.mine}<button class="btn small" onclick={() => startUpdate(r)}>Update</button>{/if}
-        <label class="toggle"><input type="checkbox" checked={r.keep_alive} onchange={(e) => keep(r, (e.target as HTMLInputElement).checked)} /> keep alive</label>
-        <button class="btn small danger" onclick={() => remove(r)}>Remove</button>
+        <button class="btn small" onclick={() => copy(r.uri)}>{t("desk_copy_address")}</button>
+        <button class="btn small primary" disabled={busy !== null} onclick={() => open(r)}>{busy === r.record_key ? t("releases_fetching") : t("sites_open")}</button>
+        {#if r.mine}<button class="btn small" onclick={() => startUpdate(r)}>{t("desk_update")}</button>{/if}
+        <label class="toggle"><input type="checkbox" checked={r.keep_alive} onchange={(e) => keep(r, (e.target as HTMLInputElement).checked)} /> {t("desk_keep_alive")}</label>
+        <button class="btn small danger" onclick={() => remove(r)}>{t("sites_remove")}</button>
       </div>
       <div class="addr">{r.uri}</div>
       {#if busy === r.record_key}

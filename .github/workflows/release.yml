@@ -1,0 +1,161 @@
+# A tag push (release.sh) starts this. Nothing is built on the tagging
+# machine any more: the phone's APKs come from the runner that has the NDK,
+# and the desk is packaged where each OS can only package itself — .deb,
+# .rpm and AppImage on Linux, .msi and a setup .exe on Windows, .dmg on a
+# Mac. Every job uploads to the release the tag names, which release.sh
+# creates with the notes moments after pushing the tag.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    name: phone — every ABI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: cargo-${{ runner.os }}-
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('applications/**/*.gradle.kts', 'applications/gradle/**') }}
+          restore-keys: gradle-${{ runner.os }}-
+
+      # Every ABI, because "which phone is this for" should not be a
+      # question the person installing has to answer wrong once to learn.
+      - name: the phone's native library, every ABI
+        env:
+          ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
+        run: |
+          rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
+          echo y | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --install "ndk;27.2.12479018" >/dev/null
+          bash mobile/build-android.sh
+
+      - name: the APKs
+        run: cd applications && ./gradlew --no-daemon :android:assembleDebug
+
+      - name: upload to the tag's release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          out=applications/android/build/outputs/apk/debug
+          ls -la "$out"
+          bash .github/upload-to-release.sh "${GITHUB_REF_NAME}" \
+            "$out/app-arm64-v8a-debug.apk#DUCAT ${GITHUB_REF_NAME} (arm64-v8a)" \
+            "$out/app-armeabi-v7a-debug.apk#DUCAT ${GITHUB_REF_NAME} (armeabi-v7a)" \
+            "$out/app-x86_64-debug.apk#DUCAT ${GITHUB_REF_NAME} (x86_64)"
+
+  desk:
+    name: desk — ${{ matrix.slug }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # 22.04 rather than latest: a binary links against the glibc and
+          # webkit it was built on, and an older base runs on more desks.
+          - os: ubuntu-22.04
+            slug: linux-x64
+          - os: windows-latest
+            slug: windows-x64
+          - os: macos-latest
+            slug: macos-arm64
+          # Intel Macs, built on an Apple Silicon runner with an x86_64
+          # Rust target; the window's own code is architecture-blind.
+          - os: macos-latest
+            slug: macos-x64
+            target: x86_64-apple-darwin
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            applications/desk/src-tauri/target
+          key: desk-${{ matrix.slug }}-${{ hashFiles('applications/desk/src-tauri/Cargo.lock', '**/Cargo.lock') }}
+          restore-keys: desk-${{ matrix.slug }}-
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: applications/desk/pnpm-lock.yaml
+
+      - name: the Rust target
+        if: matrix.target != ''
+        run: rustup target add ${{ matrix.target }}
+
+      - name: Linux system libraries
+        if: matrix.slug == 'linux-x64'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libasound2-dev
+
+      - name: the desk's dependencies
+        run: cd applications/desk && pnpm install --frozen-lockfile
+
+      # `sound` everywhere: cpal needs only the platform's own audio stack
+      # on Windows and macOS, and libasound2-dev is installed above on
+      # Linux. A desk built this way talks through the machine's devices.
+      - name: package the desk
+        shell: bash
+        run: |
+          cd applications/desk
+          if [ -n "${{ matrix.target }}" ]; then
+            pnpm tauri build --target "${{ matrix.target }}" --features sound
+          else
+            pnpm tauri build --features sound
+          fi
+
+      - name: collect under stable names
+        shell: bash
+        run: |
+          set -x
+          base=applications/desk/src-tauri/target
+          if [ -n "${{ matrix.target }}" ]; then base="$base/${{ matrix.target }}"; fi
+          b="$base/release/bundle"
+          mkdir -p dist
+          shopt -s nullglob
+          for f in "$b"/deb/*.deb; do cp "$f" "dist/ducat-desk-${{ matrix.slug }}.deb"; done
+          for f in "$b"/rpm/*.rpm; do cp "$f" "dist/ducat-desk-${{ matrix.slug }}.rpm"; done
+          for f in "$b"/appimage/*.AppImage; do cp "$f" "dist/ducat-desk-${{ matrix.slug }}.AppImage"; done
+          for f in "$b"/msi/*.msi; do cp "$f" "dist/ducat-desk-${{ matrix.slug }}.msi"; done
+          for f in "$b"/nsis/*.exe; do cp "$f" "dist/ducat-desk-${{ matrix.slug }}-setup.exe"; done
+          for f in "$b"/dmg/*.dmg; do cp "$f" "dist/ducat-desk-${{ matrix.slug }}.dmg"; done
+          ls -la dist
+
+      - name: upload to the tag's release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          args=()
+          for f in dist/*; do args+=("$f"); done
+          bash .github/upload-to-release.sh "${GITHUB_REF_NAME}" "${args[@]}"

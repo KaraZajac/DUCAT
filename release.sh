@@ -24,38 +24,13 @@ DRAFT=$(grep -m1 -oP '^\*\*Draft \K[^ ]+' ducat-protocol.md)
 # because it is the thing you can actually look up.
 BUILD=$(git rev-list --count HEAD)
 TAG="${1:-v${DRAFT}.${BUILD}-$(git rev-parse --short HEAD)}"
-OUT=applications/android/build/outputs/apk/debug
 
-echo "building ${TAG}…"
-bash mobile/build-android.sh >/dev/null
-(cd applications && ./gradlew :android:assembleDebug -q >/dev/null)
-
-# Every ABI, because "which phone is this for" should not be a question the
-# person installing has to answer wrong once to learn.
-APKS=()
-for a in arm64-v8a armeabi-v7a x86_64; do
-  f="$OUT/app-$a-debug.apk"
-  [ -f "$f" ] && APKS+=("$f#DUCAT ${TAG} ($a)")
-done
-[ ${#APKS[@]} -gt 0 ] || { echo "no APKs built"; exit 1; }
-
-# The desk rides along: this machine can make the Linux portable build
-# immediately, so the release is never desk-less while CI (.github/
-# workflows/desk.yml, started by the tag push below) spends its twenty
-# minutes producing the .deb/.rpm/.msi/.dmg on each OS that can.
-echo "building the desk…"
-(cd applications && ./gradlew :desktop:createDistributable -q >/dev/null)
-# One name across everything the release carries: the desk is DUCAT on a
-# bigger screen, not a second product. jpackage names the built directory
-# after nativeDistributions.packageName, so this follows that rather than
-# guessing — a rename there used to leave this tarring a path that no longer
-# existed, and the release went out desk-less.
-APPDIR=applications/desktop/build/compose/binaries/main/app
-NAME=$(cd "$APPDIR" && ls -1 | head -1)
-[ -n "$NAME" ] || { echo "no desk app directory"; exit 1; }
-DESK=applications/desktop/build/compose/binaries/ducat-linux-x64.tar.gz
-tar czf "$DESK" -C "$APPDIR" "$NAME"
-APKS+=("$DESK#DUCAT ${TAG} (Linux x64, portable)")
+# Nothing is built here any more. The tag push starts .github/workflows/
+# release.yml, which builds the phone's native library with the NDK for
+# every ABI and the desk on each OS that can package itself, and uploads
+# all of it to the release this script creates. Building on the tagging
+# machine used to mean an APK from whatever jniLibs/ happened to hold.
+echo "tagging ${TAG}…"
 
 NOTES=$(mktemp)
 {
@@ -65,9 +40,11 @@ NOTES=$(mktemp)
   echo
   echo "Install \`arm64-v8a\` unless you know your phone is older."
   echo
-  echo "**The desktop build** attaches below: the Linux"
-  echo "portable build immediately, and the .deb/.rpm/.msi/.dmg for each"
-  echo "OS as CI finishes building them (~30 min after the tag)."
+  echo "**Everything attaches below as CI finishes building it** (~30 min"
+  echo "after the tag): the APK for each ABI, and the desk for Linux"
+  echo "(.deb, .rpm, AppImage), Windows (.msi, setup .exe) and macOS"
+  echo "(.dmg, Apple Silicon and Intel). The desk is unsigned: on a Mac,"
+  echo "right-click the app and choose Open the first time."
   echo
   echo "### Since the last release"
   echo
@@ -92,7 +69,7 @@ git tag -f "$TAG" >/dev/null
 git push -f origin "$TAG" >/dev/null 2>&1
 # --latest pinned explicitly rather than left to inference, so the badge and
 # the stable download URL always mean the build made most recently.
-gh release create "$TAG" "${APKS[@]}" --title "DUCAT $TAG" --notes-file "$NOTES" --latest
+gh release create "$TAG" --title "DUCAT $TAG" --notes-file "$NOTES" --latest
 rm -f "$NOTES"
 
 # The stable link is the one worth handing over. A release page keeps its

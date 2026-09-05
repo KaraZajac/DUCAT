@@ -1,6 +1,7 @@
 <script lang="ts">
   // Releases: a file put out once, at an address that cannot change.
   import { onMount } from "svelte";
+  import { t, tp } from "./i18n.svelte";
   import { api, copy, fmtBytes, fmtWhen, type Progress, type ReleaseRow } from "./api";
   import PieceBar from "./PieceBar.svelte";
 
@@ -92,11 +93,8 @@
   }
 </script>
 
-<h1 class="page-title">Files</h1>
-<p class="page-lede">
-  Share a file once and hand over its address. Nobody can change what the address points at —
-  not even you — and it stays reachable only while somebody keeps it alive.
-</p>
+<h1 class="page-title">{t("releases_title")}</h1>
+<p class="page-lede">{t("desk_files_lede")}</p>
 
 <div class="card">
   <div
@@ -110,35 +108,35 @@
     onclick={pick}
     onkeydown={(e) => e.key === "Enter" && pick()}
   >
-    {busy === "share" ? "Seeding…" : "Drop a file here, or click to choose one"}
+    {busy === "share" ? t("desk_seeding") : t("desk_drop_file")}
   </div>
   <div class="field" style="margin-top: 14px">
-    <label for="addr">Get one</label>
-    <input id="addr" class="input" placeholder="ducat:file/… address" bind:value={addr} onkeydown={(e) => e.key === "Enter" && add()} />
-    <button class="btn" onclick={add} disabled={!addr.trim()}>Add</button>
+    <label for="addr">{t("releases_add")}</label>
+    <input id="addr" class="input" placeholder={t("releases_addr_hint")} bind:value={addr} onkeydown={(e) => e.key === "Enter" && add()} />
+    <button class="btn" onclick={add} disabled={!addr.trim()}>{t("releases_add_go")}</button>
   </div>
   {#if err}<p class="err">{err}</p>{/if}
 </div>
 
 <div class="card">
   {#if rows.length === 0}
-    <p class="empty">Nothing here yet.</p>
+    <p class="empty">{t("desk_nothing_here")}</p>
   {/if}
   {#each rows as r (r.digest_hex)}
     <div class="row">
       <div class="lead">
-        <div class="title">{r.title || "(untitled)"} <span class="meta">· {fmtBytes(r.bytes)}{r.mine ? " · shared from this desk" : ""}</span></div>
-        <div class="meta">{r.here ? "On this desk" : "Not fetched"}{r.added_at ? ` · ${fmtWhen(r.added_at)}` : ""}</div>
+        <div class="title">{r.title || t("desk_untitled")} <span class="meta">· {fmtBytes(r.bytes)}{r.mine ? ` · ${t("desk_shared_from_here")}` : ""}</span></div>
+        <div class="meta">{r.here ? t("releases_here") : t("sites_not_fetched")}{r.added_at ? ` · ${fmtWhen(r.added_at)}` : ""}</div>
       </div>
       <div class="actions">
-        <button class="btn small" onclick={() => copy(r.uri)}>Copy address</button>
+        <button class="btn small" onclick={() => copy(r.uri)}>{t("desk_copy_address")}</button>
         {#if r.here}
-          <button class="btn small" onclick={() => api.reveal(r.dir)}>Show</button>
+          <button class="btn small" onclick={() => api.reveal(r.dir)}>{t("desk_show")}</button>
         {:else}
-          <button class="btn small primary" disabled={busy !== null} onclick={() => get(r)}>{busy === r.digest_hex ? "Fetching…" : "Get"}</button>
+          <button class="btn small primary" disabled={busy !== null} onclick={() => get(r)}>{busy === r.digest_hex ? t("releases_fetching") : t("releases_get")}</button>
         {/if}
-        <label class="toggle"><input type="checkbox" checked={r.keep_alive} onchange={(e) => keep(r, (e.target as HTMLInputElement).checked)} /> keep alive</label>
-        <button class="btn small danger" onclick={() => remove(r)}>Remove</button>
+        <label class="toggle"><input type="checkbox" checked={r.keep_alive} onchange={(e) => keep(r, (e.target as HTMLInputElement).checked)} /> {t("desk_keep_alive")}</label>
+        <button class="btn small danger" onclick={() => remove(r)}>{t("releases_remove")}</button>
       </div>
       <div class="addr">{r.uri}</div>
       {#if busy === r.digest_hex}
@@ -146,5 +144,5 @@
       {/if}
     </div>
   {/each}
-  <p class="note">"Keep alive" serves this file to anyone who asks for its address, for as long as this desk is running.</p>
+  <p class="note">{t("desk_keep_alive_note")}</p>
 </div>
