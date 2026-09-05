@@ -1080,6 +1080,12 @@ object Mailbox {
             pubSwarmKey, pubSwarmDigestHex?.let { hexToBytes(it) },
             callRoute, callId, pubWanted,
         )
+        // Breadcrumbs, because a send that takes the process with it leaves
+        // nothing else behind. DucatLog writes through to disk on every
+        // line, so whichever of these is the LAST one in the file names the
+        // step that died — and a native abort under the JVM produces no
+        // stack trace at all, which is exactly the case being chased here.
+        DucatLog.i(TAG, "sealed seq ${c.outSeq} (${sealed.bytes.size} B)")
         // Everything local lands before anything remote. The failure orders
         // are not symmetric: a published slot and head with the counter lost
         // to a process death reuses this seq with different content next time
@@ -1135,7 +1141,9 @@ object Mailbox {
             runCatching { prunePrekey(bundle, sealed.prekeyId) }
                 .onSuccess { store.setTheirBundle(c.personaHex, it) }
         }
+        DucatLog.i(TAG, "filed seq ${c.outSeq}, writing the slot")
         ring = writeSlotClamped(store, c, c.outSeq.toULong(), sealed.bytes, ring)
+        DucatLog.i(TAG, "slot written, publishing the head")
         // Republish our keys with every head write. Cheap — the head is read on
         // every poll anyway — and it is the only route back from an exhausted
         // supply, since the handshake inbox is a one-time artifact.
