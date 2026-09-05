@@ -1394,6 +1394,15 @@ struct GroupMessage {
     sender_hex: String,
     sender_name: String,
     mine: bool,
+    /// The message's counter in its author's numbering — what a reply or
+    /// a reaction names, together with the author.
+    gseq: u64,
+    re_sender_hex: Option<String>,
+    re_seq: Option<u64>,
+    quote: Option<String>,
+    /// (who, emoji), one per member who reacted.
+    reactions: Vec<(String, String)>,
+    unsent: bool,
     message: MessageRow,
 }
 
@@ -1401,21 +1410,53 @@ struct GroupMessage {
 fn group_thread(id_hex: String) -> Result<Vec<GroupMessage>, String> {
     let a = app()?;
     let ours = a.persona_hexes();
-    Ok(a.group_thread(&id_hex)
-        .into_iter()
+    let rows = a.group_thread(&id_hex);
+    let marks = ducat_app::groups::group_marks(&rows);
+    let name_of = |hex: &str| -> String {
+        if ours.contains(&hex.to_string()) {
+            "You".into()
+        } else {
+            a.contact(hex).map(|c| c.display_name()).unwrap_or_else(|| format!("{}…", &hex[..8.min(hex.len())]))
+        }
+    };
+    Ok(rows
+        .iter()
+        .filter(|r| r.message.kind != 4 && r.message.kind != 5)
         .map(|r| GroupMessage {
             mine: ours.contains(&r.sender_hex),
-            sender_name: if ours.contains(&r.sender_hex) { "You".into() } else { a.contact(&r.sender_hex).map(|c| c.display_name()).unwrap_or_else(|| format!("{}…", &r.sender_hex[..8.min(r.sender_hex.len())])) },
-            sender_hex: r.sender_hex,
-            message: message_row(r.message),
+            sender_name: name_of(&r.sender_hex),
+            gseq: r.message.group_seq,
+            re_sender_hex: r.message.group_re_sender.clone(),
+            re_seq: r.message.group_re_seq,
+            quote: ducat_app::groups::group_reply_line(&rows, &r.message, &marks),
+            reactions: marks
+                .reactions
+                .get(&(r.sender_hex.clone(), r.message.group_seq))
+                .map(|v| v.iter().map(|(who, e)| (name_of(who), e.clone())).collect())
+                .unwrap_or_default(),
+            unsent: marks.unsent.contains(&(r.sender_hex.clone(), r.message.group_seq)),
+            sender_hex: r.sender_hex.clone(),
+            message: message_row(r.message.clone()),
         })
         .collect())
 }
 
 #[tauri::command]
-async fn send_group(id_hex: String, body: String) -> Result<bool, String> {
+async fn send_group(id_hex: String, body: String, re_sender_hex: Option<String>, re_seq: Option<u64>) -> Result<bool, String> {
     let a = app()?;
-    tauri::async_runtime::spawn_blocking(move || a.send_group(&id_hex, &body, 0, None, None).map_err(said)).await.map_err(s)?
+    tauri::async_runtime::spawn_blocking(move || a.send_group(&id_hex, &body, 0, re_sender_hex.as_deref(), re_seq).map_err(said)).await.map_err(s)?
+}
+
+#[tauri::command]
+async fn react_in_group(id_hex: String, sender_hex: String, seq: u64, emoji: String) -> Result<bool, String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.react_in_group(&id_hex, &sender_hex, seq, &emoji).map_err(said)).await.map_err(s)?
+}
+
+#[tauri::command]
+async fn unsend_in_group(id_hex: String, seq: u64) -> Result<bool, String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.unsend_in_group(&id_hex, seq).map_err(said)).await.map_err(s)?
 }
 
 #[tauri::command]
@@ -2215,6 +2256,8 @@ pub fn run() {
             add_to_group,
             group_thread,
             send_group,
+            react_in_group,
+            unsend_in_group,
             mark_group_seen,
             backup_info,
             export_backup,

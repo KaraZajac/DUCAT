@@ -327,7 +327,16 @@ fn main() {
                         let key = (g.id_hex.clone(), r.sender_hex.clone(), r.message.group_seq);
                         if seen.insert(key) {
                             let who = app.contact(&r.sender_hex).map(|c| c.display_name()).unwrap_or_else(|| "me".into());
-                            println!("MB_GROUP '{}' {}: {}", g.name, who, r.message.body);
+                            println!(
+                                "MB_GROUP '{}' {}: kind {} gseq {} re={:?}/{:?} '{}'",
+                                g.name,
+                                who,
+                                r.message.kind,
+                                r.message.group_seq,
+                                r.message.group_re_sender.as_deref().map(|h| &h[..8.min(h.len())]),
+                                r.message.group_re_seq,
+                                r.message.body
+                            );
                             if !app.persona_hexes().contains(&r.sender_hex) && r.message.body.starts_with("ping") {
                                 match app.send_group(&g.id_hex, &format!("pong from {name}"), 0, None, None) {
                                     Ok(all) => println!("MB_PONG all={all}"),

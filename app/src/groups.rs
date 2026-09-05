@@ -339,6 +339,21 @@ impl App {
 
     /// The group as one conversation: every member's copies merged, each
     /// (sender, counter) once, in time order.
+    /// An emoji on a member's message: kind 4 naming (sender, counter).
+    pub fn react_in_group(&self, id_hex: &str, target_sender_hex: &str, target_seq: u64, emoji: &str) -> Result<bool, Error> {
+        let e: String = emoji.trim().chars().take(8).collect();
+        self.send_group(id_hex, &e, 4, Some(target_sender_hex), Some(target_seq))
+    }
+
+    /// Taking back words of ours in a group: a kind 5 naming our own
+    /// (sender, counter). Only the author's withdrawal is honoured anywhere,
+    /// so this is the one place the button exists.
+    pub fn unsend_in_group(&self, id_hex: &str, seq: u64) -> Result<bool, Error> {
+        let g = self.group(id_hex).ok_or_else(|| Error::Refused("no such group".into()))?;
+        let mine = self.mine_in(&g.members);
+        self.send_group(id_hex, "This message was withdrawn.", 5, Some(&mine), Some(seq))
+    }
+
     pub fn group_thread(&self, id_hex: &str) -> Vec<GroupRow> {
         let Some(g) = self.group(id_hex) else { return Vec::new() };
         let mine = self.mine_in(&g.members);
@@ -445,4 +460,58 @@ mod tests {
         app.absorb_roster("zz", Some(&hex_to_bytes(&g.id_hex).unwrap()), Some(&payload));
         assert_eq!(app.group(&g.id_hex).unwrap().members.len(), 3);
     }
+}
+
+/// What decorates a group's words: the latest emoji each member gave a
+/// message, and the withdrawals honoured — only from the message's own
+/// author, since anyone can send a kind 5 naming anything, and honouring a
+/// stranger's would let any member blank any other's words.
+#[derive(Default, Debug)]
+pub struct GroupMarks {
+    /// (author, counter) → (reactor, emoji), one per reactor.
+    pub reactions: HashMap<(String, u64), Vec<(String, String)>>,
+    pub unsent: HashSet<(String, u64)>,
+}
+
+pub fn group_marks(rows: &[GroupRow]) -> GroupMarks {
+    let mut out = GroupMarks::default();
+    let mut latest: HashMap<((String, u64), String), (u64, String)> = HashMap::new();
+    for r in rows {
+        let m = &r.message;
+        let (Some(rs), Some(rq)) = (m.group_re_sender.clone(), m.group_re_seq) else { continue };
+        match m.kind {
+            4 => {
+                let e = latest.entry(((rs, rq), r.sender_hex.clone())).or_insert((0, String::new()));
+                if m.timestamp >= e.0 {
+                    *e = (m.timestamp, m.body.clone());
+                }
+            }
+            5 if rs == r.sender_hex => {
+                out.unsent.insert((rs, rq));
+            }
+            _ => {}
+        }
+    }
+    let mut keys: Vec<_> = latest.into_iter().collect();
+    keys.sort_by_key(|(_, (t, _))| *t);
+    for ((target, reactor), (_, emoji)) in keys {
+        if !emoji.is_empty() {
+            out.reactions.entry(target).or_default().push((reactor, emoji));
+        }
+    }
+    out
+}
+
+/// The quote a group reply shows — the reader's own copy of the target,
+/// found by (author, counter), never bytes from the wire.
+pub fn group_reply_line(rows: &[GroupRow], m: &StoredMessage, marks: &GroupMarks) -> Option<String> {
+    let rs = m.group_re_sender.as_ref()?;
+    let rq = m.group_re_seq?;
+    let t = rows.iter().find(|r| &r.sender_hex == rs && r.message.group_seq == rq);
+    Some(match t {
+        None => "a message that is no longer here".to_string(),
+        Some(_) if marks.unsent.contains(&(rs.clone(), rq)) => "This message was withdrawn.".to_string(),
+        Some(t) if !t.message.body.trim().is_empty() => t.message.body.clone(),
+        Some(_) => "a message".to_string(),
+    })
 }

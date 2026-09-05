@@ -86,14 +86,32 @@
     }
   }
 
+  // A reply in a group names (author, counter); the quote is read locally.
+  let groupReplyTo = $state<{ sender_hex: string; gseq: number; line: string } | null>(null);
+  let groupHover = $state<string | null>(null);
+  let groupPicking = $state<string | null>(null);
+  const gkey = (g: GroupMessage) => g.sender_hex + ":" + g.gseq;
+  async function reactInGroup(g: GroupMessage, emoji: string) {
+    if (!openGroup) return;
+    err = null;
+    groupPicking = null;
+    try { await api.reactInGroup(openGroup, g.sender_hex, g.gseq, emoji); groupThread = await api.groupThread(openGroup); } catch (e) { err = String(e); }
+  }
+  async function unsendInGroup(g: GroupMessage) {
+    if (!openGroup) return;
+    err = null;
+    try { await api.unsendInGroup(openGroup, g.gseq); groupThread = await api.groupThread(openGroup); } catch (e) { err = String(e); }
+  }
+
   async function sendToGroup() {
     const body = draft.trim();
     if (!body || !openGroup) return;
     err = null;
     sending = true;
     try {
-      const all = await api.sendGroup(openGroup, body);
+      const all = await api.sendGroup(openGroup, body, groupReplyTo?.sender_hex ?? null, groupReplyTo?.gseq ?? null);
       if (!all) err = "Some copies did not go out yet — they are queued and retried.";
+      groupReplyTo = null;
       draft = "";
       groupThread = await api.groupThread(openGroup);
       scrollToEnd();
@@ -578,19 +596,38 @@
       {/if}
       <div class="bubbles" bind:this={list}>
         {#each groupThread as g (g.sender_hex + ":" + g.message.group_id + ":" + g.message.seq + ":" + g.message.timestamp)}
-          <div class="bubble-row" class:out={g.mine}>
-            <div class="bubble" class:out={g.mine}>
+          <div class="bubble-row" role="listitem" class:out={g.mine} onmouseenter={() => (groupHover = gkey(g))} onmouseleave={() => { if (groupPicking !== gkey(g)) groupHover = null; }}>
+            {#if groupHover === gkey(g)}
+              <div class="bubble-tools" class:out={g.mine}>
+                <button class="linkish" title="React" onclick={() => (groupPicking = groupPicking === gkey(g) ? null : gkey(g))}>☺</button>
+                {#if !g.unsent}<button class="linkish" title="Reply" onclick={() => (groupReplyTo = { sender_hex: g.sender_hex, gseq: g.gseq, line: g.message.body.trim() || "a message" })}>↩</button>{/if}
+                {#if g.mine && !g.unsent}<button class="linkish" title="Take it back for everyone" onclick={() => unsendInGroup(g)}>↶</button>{/if}
+                {#if g.message.body && !g.unsent}<button class="linkish" title="Copy the text" onclick={() => copy(g.message.body)}>⧉</button>{/if}
+              </div>
+            {/if}
+            <div class="bubble" class:out={g.mine} class:unsent={g.unsent}>
+              {#if groupPicking === gkey(g)}
+                <div class="picker">{#each QUICK as q}<button class="linkish" class:on={g.reactions.some(([who, e]) => who === "You" && e === q)} onclick={() => reactInGroup(g, q)}>{q}</button>{/each}</div>
+              {/if}
               {#if !g.mine}<div class="bubble-kind">{g.sender_name}</div>{/if}
-              <div class="bubble-body">{g.message.body}</div>
+              {#if g.unsent}<div class="bubble-kind">{g.mine ? "You took this back" : "Taken back"}</div>{/if}
+              {#if g.re_seq !== null}<div class="quote" class:gone={g.quote === null}>{g.quote ?? "a message that is no longer here"}</div>{/if}
+              <div class="bubble-body">{g.unsent ? "" : g.message.body}</div>
               <div class="bubble-meta">{fmtTime(g.message.timestamp)}</div>
+              {#if g.reactions.length}
+                <div class="reactions">{#each g.reactions as [who, e]}<span class:mine={who === "You"} title={who}>{e}</span>{/each}</div>
+              {/if}
             </div>
           </div>
         {/each}
         {#if groupThread.length === 0}<p class="empty">Nothing here yet.</p>{/if}
       </div>
+      {#if groupReplyTo}
+        <div class="reply-banner"><span class="meta">Replying to</span><span class="reply-line">{groupReplyTo.line}</span><button class="linkish" title="Not replying to that" onclick={() => (groupReplyTo = null)}>✕</button></div>
+      {/if}
       <div class="composer">
-        <textarea class="input" rows="2" placeholder="Write to the group" bind:value={draft} disabled={currentGroup.missing.length > 0}
-          onkeydown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendToGroup(); } }}></textarea>
+        <textarea class="input" rows="2" placeholder={groupReplyTo ? "Your reply" : "Write to the group"} bind:value={draft} disabled={currentGroup.missing.length > 0}
+          onkeydown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendToGroup(); } else if (e.key === "Escape" && groupReplyTo) { groupReplyTo = null; } }}></textarea>
         <button class="btn primary" disabled={!draft.trim() || sending || currentGroup.missing.length > 0} onclick={sendToGroup}>{sending ? "Sending…" : "Send"}</button>
       </div>
       {#if err}<p class="err">{err}</p>{/if}

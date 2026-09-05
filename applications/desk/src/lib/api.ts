@@ -289,6 +289,12 @@ export interface GroupMessage {
   sender_hex: string;
   sender_name: string;
   mine: boolean;
+  gseq: number;
+  re_sender_hex: string | null;
+  re_seq: number | null;
+  quote: string | null;
+  reactions: [string, string][];
+  unsent: boolean;
   message: MessageRow;
 }
 
@@ -545,7 +551,10 @@ export const api = {
   createGroup: (name: string, members: string[]) => invoke<GroupRow>("create_group", { name, members }),
   addToGroup: (idHex: string, personaHex: string) => invoke<void>("add_to_group", { idHex, personaHex }),
   groupThread: (idHex: string) => invoke<GroupMessage[]>("group_thread", { idHex }),
-  sendGroup: (idHex: string, body: string) => invoke<boolean>("send_group", { idHex, body }),
+  sendGroup: (idHex: string, body: string, reSenderHex: string | null = null, reSeq: number | null = null) =>
+    invoke<boolean>("send_group", { idHex, body, reSenderHex, reSeq }),
+  reactInGroup: (idHex: string, senderHex: string, seq: number, emoji: string) => invoke<boolean>("react_in_group", { idHex, senderHex, seq, emoji }),
+  unsendInGroup: (idHex: string, seq: number) => invoke<boolean>("unsend_in_group", { idHex, seq }),
   markGroupSeen: (idHex: string) => invoke<void>("mark_group_seen", { idHex }),
 
   backupInfo: () => invoke<{ exported_at: number; has_wallet: boolean }>("backup_info"),
