@@ -1755,7 +1755,7 @@ fun DriveScreen() {
                     SegmentedButton(
                         selected = range == v,
                         onClick = { range = v; rangePrefs.edit().putInt("drive_range", v).apply() },
-                        shape = SegmentedButtonDefaults.itemShape(i, 3),
+                        shape = ducatSegmentShape(i, 3),
                         icon = {},
                     ) { Text(label) }
                 }

@@ -109,12 +109,12 @@ fun PosScreen() {
             SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
                 SegmentedButton(
                     selected = !quick, onClick = { quick = false },
-                    shape = SegmentedButtonDefaults.itemShape(0, 2),
+                    shape = ducatSegmentShape(0, 2),
                     icon = {},
                 ) { Text(stringResource(R.string.pos_items)) }
                 SegmentedButton(
                     selected = quick, onClick = { quick = true },
-                    shape = SegmentedButtonDefaults.itemShape(1, 2),
+                    shape = ducatSegmentShape(1, 2),
                     icon = {},
                 ) { Text(stringResource(R.string.pos_quick_amount)) }
             }

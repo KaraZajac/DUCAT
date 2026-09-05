@@ -227,7 +227,7 @@ fun QrHub(
                             // card can be tried again — and the old verdict
                             // should not be waiting above it.
                             onClick = { scanning = true; scanError = null },
-                            shape = SegmentedButtonDefaults.itemShape(0, 2),
+                            shape = ducatSegmentShape(0, 2),
                             // No checkmark — the fill already says which is active,
                             // and the icon shoves the label sideways when it appears.
                             icon = {},
@@ -236,7 +236,7 @@ fun QrHub(
                         SegmentedButton(
                             selected = !scanning,
                             onClick = { scanning = false },
-                            shape = SegmentedButtonDefaults.itemShape(1, 2),
+                            shape = ducatSegmentShape(1, 2),
                             // No checkmark — the fill already says which is active,
                             // and the icon shoves the label sideways when it appears.
                             icon = {},

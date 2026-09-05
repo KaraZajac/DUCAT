@@ -25,11 +25,13 @@ import androidx.compose.ui.unit.dp
  * the surface, the softer its corner.
  */
 val DucatShapes = Shapes(
-    extraSmall = RoundedCornerShape(8.dp),
-    small = RoundedCornerShape(12.dp),
-    medium = RoundedCornerShape(16.dp),
-    large = RoundedCornerShape(20.dp),
-    extraLarge = RoundedCornerShape(28.dp),
+    // Rectangles with rounded edges, never pills: a list row two lines tall
+    // keeps straight sides at 14dp; at 20dp its ends were half-circles.
+    extraSmall = RoundedCornerShape(6.dp),
+    small = RoundedCornerShape(8.dp),
+    medium = RoundedCornerShape(12.dp),
+    large = RoundedCornerShape(14.dp),
+    extraLarge = RoundedCornerShape(20.dp),
 )
 
 /** What the user chose, if anything. */

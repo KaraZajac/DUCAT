@@ -950,7 +950,7 @@ private fun AmountStep(
                 SegmentedButton(
                     selected = !asking,
                     onClick = { asking = false },
-                    shape = SegmentedButtonDefaults.itemShape(0, 2),
+                    shape = ducatSegmentShape(0, 2),
                     // No checkmark — the fill already says which is active,
                     // and the icon shoves the label sideways when it appears.
                     icon = {},
@@ -959,7 +959,7 @@ private fun AmountStep(
                 SegmentedButton(
                     selected = asking,
                     onClick = { asking = true },
-                    shape = SegmentedButtonDefaults.itemShape(1, 2),
+                    shape = ducatSegmentShape(1, 2),
                     // No checkmark — the fill already says which is active,
                     // and the icon shoves the label sideways when it appears.
                     icon = {},
