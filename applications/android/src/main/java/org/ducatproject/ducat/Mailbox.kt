@@ -1074,11 +1074,32 @@ object Mailbox {
             reSeq?.toULong(), reOwn, attachment,
             etaSecs?.toULong(),
             payload, round?.toULong(), ceremonyId,
-            positionRecord, positionStreamKey,
-            groupId, groupSeq?.toULong(), groupReSender, groupReSeq?.toULong(),
-            pubPeriodId, pubPeriodKey, pubRecord, pubHeadKey,
-            pubSwarmKey, pubSwarmDigestHex?.let { hexToBytes(it) },
-            callRoute, callId, pubWanted,
+            // Bundled, not spread: thirty-three arguments across this
+            // boundary crashed arm64 outright (see PositionSend's note).
+            // Null where a family is absent, so nothing is allocated for
+            // the ordinary text message that carries none of them.
+            if (positionRecord != null || positionStreamKey != null) {
+                uniffi.ducat_mobile.PositionSend(positionRecord, positionStreamKey)
+            } else null,
+            if (groupId != null || groupSeq != null ||
+                groupReSender != null || groupReSeq != null
+            ) {
+                uniffi.ducat_mobile.GroupSend(
+                    groupId, groupSeq?.toULong(), groupReSender, groupReSeq?.toULong(),
+                )
+            } else null,
+            if (pubPeriodId != null || pubPeriodKey != null || pubRecord != null ||
+                pubHeadKey != null || pubSwarmKey != null ||
+                pubSwarmDigestHex != null || pubWanted != null
+            ) {
+                uniffi.ducat_mobile.PublicationSend(
+                    pubPeriodId, pubPeriodKey, pubRecord, pubHeadKey,
+                    pubSwarmKey, pubSwarmDigestHex?.let { hexToBytes(it) }, pubWanted,
+                )
+            } else null,
+            if (callRoute != null || callId != null) {
+                uniffi.ducat_mobile.CallSend(callRoute, callId)
+            } else null,
         )
         // Breadcrumbs, because a send that takes the process with it leaves
         // nothing else behind. DucatLog writes through to disk on every

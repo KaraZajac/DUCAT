@@ -455,6 +455,56 @@ pub struct SealedOut {
     pub next_link: Vec<u8>,
 }
 
+/// The extras a send may carry, bundled rather than spread.
+///
+/// **Why these are records and not fifteen more arguments.** `seal_message`
+/// had grown to thirty-three parameters, thirty of them `RustBuffer`
+/// structs passed by value, and on arm64 that call crashed the process
+/// outright — no Rust panic, no Kotlin exception, the app simply gone
+/// between "sending message seq 0" and the next line of its own log. The
+/// same call on x86_64 is fine, which is what a marshalling limit looks
+/// like from the outside. Grouping the optional families cuts the call to
+/// twenty-two arguments and the by-value structs with it.
+///
+/// It is also the shape the arguments always had: nothing here is
+/// independent of its neighbours — core refuses every half of every pair.
+#[derive(uniffi::Record, Clone)]
+pub struct PositionSend {
+    pub record_key: Option<String>,
+    pub stream_key: Option<Vec<u8>>,
+}
+
+/// §16.19: which group this rides in, the sender's own counter there, and
+/// the group reference for replies — the pairwise re_seq cannot name a
+/// fanned-out message, so groups target by (sender, counter).
+#[derive(uniffi::Record, Clone)]
+pub struct GroupSend {
+    pub id: Option<Vec<u8>>,
+    pub seq: Option<u64>,
+    pub re_sender: Option<Vec<u8>>,
+    pub re_seq: Option<u64>,
+}
+
+/// §16.20: the period key a kind-13 hands over, the shelf it belongs to,
+/// a heavy period's shipment, and the label a kind-16 asks to be sold.
+#[derive(uniffi::Record, Clone)]
+pub struct PublicationSend {
+    pub period_id: Option<String>,
+    pub period_key: Option<Vec<u8>>,
+    pub record_key: Option<String>,
+    pub head_key: Option<Vec<u8>>,
+    pub swarm_key: Option<String>,
+    pub swarm_digest: Option<Vec<u8>>,
+    pub wanted_period: Option<String>,
+}
+
+/// §16.21's door: the call route and id, together or not at all.
+#[derive(uniffi::Record, Clone)]
+pub struct CallSend {
+    pub route: Option<Vec<u8>>,
+    pub id: Option<Vec<u8>>,
+}
+
 /// An attachment reference, across the bridge (§16.15).
 #[derive(uniffi::Record, Clone)]
 pub struct AttachmentRef {
@@ -648,32 +698,27 @@ pub fn seal_message(
     // §15.12: a live-position stream reference on a kind-11 message. Both or
     // neither — core refuses a half-reference, and a reference on any other
     // kind.
-    position_record: Option<String>,
-    position_stream_key: Option<Vec<u8>>,
-    // §16.19: which group this rides in, the sender's own counter there, and
-    // the group reference for replies/reactions — the pairwise re_seq cannot
-    // name a fanned-out message, so groups target by (sender, counter).
-    group_id: Option<Vec<u8>>,
-    group_seq: Option<u64>,
-    group_re_sender: Option<Vec<u8>>,
-    group_re_seq: Option<u64>,
-    // §16.20: a publication period's key on a kind-13 message. The period
-    // pair together or not at all; the shelf pair likewise; core refuses
-    // every other arrangement.
-    pub_period_id: Option<String>,
-    pub_period_key: Option<Vec<u8>>,
-    pub_record: Option<String>,
-    pub_head_key: Option<Vec<u8>>,
-    // §16.20's shipment: the swarm pair, together or not at all.
-    pub_swarm_key: Option<String>,
-    pub_swarm_digest: Option<Vec<u8>>,
-    // §16.21's door: the call route and id, together or not at all.
-    call_route: Option<Vec<u8>>,
-    call_id: Option<Vec<u8>>,
-    // §16.20's ask: the period a kind-16 wants sold to it. A label and no
-    // authority — naming one obliges the publisher to nothing.
-    wanted_period: Option<String>,
+    position: Option<PositionSend>,
+    group: Option<GroupSend>,
+    publication: Option<PublicationSend>,
+    call: Option<CallSend>,
 ) -> Result<SealedOut, ContactError> {
+    // Unpacked once, so everything below reads as it always did.
+    let position_record = position.as_ref().and_then(|p| p.record_key.clone());
+    let position_stream_key = position.as_ref().and_then(|p| p.stream_key.clone());
+    let group_id = group.as_ref().and_then(|g| g.id.clone());
+    let group_seq = group.as_ref().and_then(|g| g.seq);
+    let group_re_sender = group.as_ref().and_then(|g| g.re_sender.clone());
+    let group_re_seq = group.as_ref().and_then(|g| g.re_seq);
+    let pub_period_id = publication.as_ref().and_then(|p| p.period_id.clone());
+    let pub_period_key = publication.as_ref().and_then(|p| p.period_key.clone());
+    let pub_record = publication.as_ref().and_then(|p| p.record_key.clone());
+    let pub_head_key = publication.as_ref().and_then(|p| p.head_key.clone());
+    let pub_swarm_key = publication.as_ref().and_then(|p| p.swarm_key.clone());
+    let pub_swarm_digest = publication.as_ref().and_then(|p| p.swarm_digest.clone());
+    let wanted_period = publication.as_ref().and_then(|p| p.wanted_period.clone());
+    let call_route = call.as_ref().and_then(|c| c.route.clone());
+    let call_id = call.as_ref().and_then(|c| c.id.clone());
     if body.is_empty() || body.chars().count() > MAX_MESSAGE_CHARS {
         return Err(ContactError::Refused(format!(
             "a message must be 1 to {MAX_MESSAGE_CHARS} characters"

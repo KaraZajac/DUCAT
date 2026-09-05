@@ -2,14 +2,16 @@
 //! on the other still names the period it wanted.
 //!
 //! Core's own tests and the vectors pin the *encoding*; what they cannot see
-//! is this crate's 33-argument `seal_message`, where a field slotted one
-//! position out compiles perfectly and silently sends the wrong thing — or
-//! nothing. `wanted_period` was added last, after `call_id`, which is the
-//! easiest place in the list to get wrong.
+//! is this crate's `seal_message`, where a field slotted into the wrong
+//! place compiles perfectly and silently sends the wrong thing — or
+//! nothing. `wanted_period` rides inside `PublicationSend` with six other
+//! optional fields, any of which it could be confused with.
 
-use ducat_mobile::contacts::{generate_prekeys, open_message, seal_message, thread_aad};
+use ducat_mobile::contacts::{
+    generate_prekeys, open_message, seal_message, thread_aad, PublicationSend,
+};
 
-/// The 33 arguments, with everything the ask does not use left empty. Named
+/// The arguments, with everything the ask does not use left empty. Named
 /// rather than inlined so a reordering shows up as a compile error here
 /// instead of a wrong field on the wire.
 #[allow(clippy::too_many_arguments)]
@@ -38,21 +40,18 @@ fn seal_ask(
         None,       // payload
         None,       // round
         None,       // ceremony_id
-        None,       // position_record
-        None,       // position_stream_key
-        None,       // group_id
-        None,       // group_seq
-        None,       // group_re_sender
-        None,       // group_re_seq
-        None,       // pub_period_id
-        None,       // pub_period_key
-        None,       // pub_record
-        None,       // pub_head_key
-        None,       // pub_swarm_key
-        None,       // pub_swarm_digest
-        None,       // call_route
-        None,       // call_id
-        wanted,
+        None,       // position
+        None,       // group
+        wanted.map(|w| PublicationSend {
+            period_id: None,
+            period_key: None,
+            record_key: None,
+            head_key: None,
+            swarm_key: None,
+            swarm_digest: None,
+            wanted_period: Some(w),
+        }),
+        None, // call
     )
 }
 
