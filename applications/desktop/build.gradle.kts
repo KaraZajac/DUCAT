@@ -31,6 +31,7 @@ val sharedLogic = listOf(
     "org/ducatproject/ducat/Modes.kt",
     "org/ducatproject/ducat/Units.kt",
     "org/ducatproject/ducat/ui/Theme.kt",
+    "org/ducatproject/ducat/ui/Buttons.kt",
     "org/ducatproject/ducat/ui/Type.kt",
     "org/ducatproject/ducat/ui/Catppuccin.kt",
     "org/ducatproject/ducat/ui/Activity.kt",

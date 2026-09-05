@@ -1349,11 +1349,16 @@ class ContactStore(context: Context) {
         validSecs: Long = 0,
         /** The persona that cut it — whoever answers is theirs (doorway rule). */
         owner: String = "",
+        /** The inbox record's own keypair, kept so its first subkey can be
+         *  rewritten later (a profile edit). Same field names as the desk. */
+        inboxOwnerPublic: ByteArray = ByteArray(0),
+        inboxOwnerSecret: ByteArray = ByteArray(0),
     ) = synchronized(lock) {
         val arr = prefs.getString("issued_cards", null)?.let { JSONArray(it) } ?: JSONArray()
         arr.put(JSONObject().apply {
             put("inbox", inboxKey); put("wpub", b64(writerPublic)); put("wsec", b64(writerSecret))
             put("outbox", outboxKey); put("opub", b64(outboxOwnerPublic)); put("osec", b64(outboxOwnerSecret))
+            if (inboxOwnerSecret.isNotEmpty()) { put("ipub", b64(inboxOwnerPublic)); put("isec", b64(inboxOwnerSecret)) }
             put("uri", uri); put("purpose", purpose); put("owner", owner)
             put("made", System.currentTimeMillis()); put("ttl", validSecs)
             put("answered_by", JSONObject.NULL)
@@ -1373,6 +1378,8 @@ class ContactStore(context: Context) {
                 outboxKey = o.getString("outbox"),
                 outboxOwnerPublic = unb64(o.getString("opub")),
                 outboxOwnerSecret = unb64(o.getString("osec")),
+                inboxOwnerPublic = o.optString("ipub", "").let { if (it.isEmpty()) ByteArray(0) else unb64(it) },
+                inboxOwnerSecret = o.optString("isec", "").let { if (it.isEmpty()) ByteArray(0) else unb64(it) },
                 uri = o.optString("uri", ""),
                 purpose = o.optString("purpose", "profile"),
                 owner = o.optString("owner", ""),
@@ -2262,6 +2269,9 @@ data class IssuedCardState(
     val outboxKey: String,
     val outboxOwnerPublic: ByteArray,
     val outboxOwnerSecret: ByteArray,
+    /** The inbox record's own keypair; empty on cards cut before it was kept. */
+    val inboxOwnerPublic: ByteArray = ByteArray(0),
+    val inboxOwnerSecret: ByteArray = ByteArray(0),
     val uri: String = "",
     /** "profile" (the standing code) or "sale" (a till/tab/ride handshake). */
     val purpose: String = "profile",

@@ -228,6 +228,62 @@ object Mailbox {
      * pointing at a record that does not exist yet is a card that fails after
      * someone has already accepted it.
      */
+    /**
+     * §16.9 puts the profile in the standing code's *record*, written when
+     * the code is cut — so a profile edited afterwards would reach nobody
+     * answering that code until it was taken and the next one cut. Rewrite
+     * every outstanding profile card of this persona in place: the code,
+     * and anything printed with it, stays valid; whoever answers it from
+     * now on reads the profile as it is now. A fresh prekey bundle rides
+     * along, as it would on a new issue. Cards cut before the record's own
+     * keys were kept cannot be reopened for writing and are left alone.
+     * Returns how many records were rewritten. Network work: call it off
+     * the main thread.
+     */
+    fun refreshProfileCards(context: Context, ownerHex: String): Int {
+        val store = ContactStore(context)
+        val personas = PersonaStore(context)
+        val primary = personas.personaHex()
+        val cards = store.issuedCards().filter {
+            it.purpose == "profile" && it.answeredBy == null &&
+                (it.owner == ownerHex || (it.owner.isBlank() && ownerHex == primary))
+        }
+        var n = 0
+        for (c in cards) {
+            if (c.inboxOwnerSecret.isEmpty()) {
+                DucatLog.i(TAG, "profile code ${c.inboxKey.take(24)}… predates kept record keys; left as cut")
+                continue
+            }
+            runCatching {
+                val persona = personas.secretFor(ownerHex) ?: personas.secret()
+                val prekeys = generatePrekeys(
+                    ONE_TIME_KEYS, 60uL * 60uL * 24uL * 30uL,
+                    store.nextPrekeyStart(ONE_TIME_KEYS.toInt()).toUInt(),
+                    store.signedPrekeySecret(),
+                )
+                store.savePrekeys(
+                    prekeys.bundle,
+                    prekeys.signedSecret,
+                    prekeys.oneTimeIds.mapIndexed { i, id -> id.toInt() to prekeys.oneTimeSecrets[i] }.toMap(),
+                )
+                nodeDhtOpen(c.inboxKey, c.inboxOwnerPublic, c.inboxOwnerSecret)
+                nodeDhtSet(
+                    c.inboxKey, 0u,
+                    buildContactDetails(
+                        persona, c.outboxKey, prekeys.bundle,
+                        NameStore(context, ownerHex.ifBlank { null }).get(),
+                        if (store.publishAddress()) WalletStore(context).addressFor("card_${c.inboxKey}") else null,
+                        MyProfile(context, ownerHex).toWire(purpose = c.purpose),
+                        c.purpose,
+                    ),
+                )
+            }.onSuccess { n += 1 }
+                .onFailure { DucatLog.w(TAG, "could not refresh the profile code ${c.inboxKey.take(24)}…: ${it.message}") }
+        }
+        if (n > 0) DucatLog.i(TAG, "profile code(s) rewritten with the profile as it is now: $n")
+        return n
+    }
+
     fun issueCard(
         context: Context,
         displayName: String?,
@@ -294,6 +350,8 @@ object Mailbox {
             outbox.key, outbox.ownerPublic, outbox.ownerSecret,
             card.uri, purpose, validSecs.toLong(),
             owner = ownerHex,
+            inboxOwnerPublic = inbox.ownerPublic,
+            inboxOwnerSecret = inbox.ownerSecret,
         )
         DucatLog.i(TAG, "issued card: inbox=${inbox.key.take(24)}… outbox=${outbox.key.take(24)}…")
         // The inbox key rides along because it is the card's identity: a flow

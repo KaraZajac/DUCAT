@@ -28,6 +28,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.ducatproject.ducat.DucatLog
+import org.ducatproject.ducat.Mailbox
+import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.SafeImage
 import org.ducatproject.ducat.MyProfile
 import org.ducatproject.ducat.R
@@ -243,6 +245,14 @@ fun MyProfileEditor(personaHex: String? = null) {
                 p.setName(name); p.setEmail(email); p.setPhone(phone); p.setSignal(signal)
                 p.setCarModel(carModel); p.setCarColor(carColor); p.setPlate(plate)
                 saved = true
+                // The standing code's record carries the profile: rewrite it,
+                // so the code already on a business card hands out what was
+                // just saved. Network work, off the main thread.
+                val owner = personaHex ?: PersonaStore(context).worn()
+                Thread {
+                    runCatching { Mailbox.refreshProfileCards(context, owner) }
+                        .onFailure { DucatLog.w("MyProfileEditor", "profile code refresh: ${it.message}") }
+                }.start()
             },
             enabled = problems.isEmpty(),
             modifier = Modifier.fillMaxWidth(),
