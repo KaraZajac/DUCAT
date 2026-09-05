@@ -109,9 +109,13 @@ jobs:
       # workflow builds all three.
       - name: the phone's native library, arm64
         env:
-          ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
           DUCAT_ABIS: "aarch64-linux-android:arm64-v8a"
         run: |
+          # The runner's own ANDROID_SDK_ROOT lives in the shell, not in the
+          # workflow's env context; and pin the NDK rather than take whichever
+          # the image preinstalled.
+          export ANDROID_HOME="$ANDROID_SDK_ROOT"
+          export ANDROID_NDK="$ANDROID_SDK_ROOT/ndk/27.2.12479018"
           rustup target add aarch64-linux-android
           echo y | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --install "ndk;27.2.12479018" >/dev/null
           bash mobile/build-android.sh

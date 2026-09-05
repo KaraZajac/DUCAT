@@ -48,9 +48,9 @@ jobs:
       # Every ABI, because "which phone is this for" should not be a
       # question the person installing has to answer wrong once to learn.
       - name: the phone's native library, every ABI
-        env:
-          ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
         run: |
+          export ANDROID_HOME="$ANDROID_SDK_ROOT"
+          export ANDROID_NDK="$ANDROID_SDK_ROOT/ndk/27.2.12479018"
           rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
           echo y | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --install "ndk;27.2.12479018" >/dev/null
           bash mobile/build-android.sh
