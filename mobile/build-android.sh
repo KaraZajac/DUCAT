@@ -44,6 +44,8 @@ ABIS=${DUCAT_ABIS:-"aarch64-linux-android:arm64-v8a armv7-linux-androideabi:arme
 for t in $ABIS; do
   target=${t%%:*}; abi=${t##*:}
   cargo build -p ducat-mobile --target "$target" --release
+  # jniLibs/ is ignored by git, so a fresh checkout has no such directory.
+  mkdir -p "applications/android/src/main/jniLibs/$abi"
   cp "target/$target/release/libducat_mobile.so" "applications/android/src/main/jniLibs/$abi/"
 done
 rm -rf /tmp/uniffi-out
