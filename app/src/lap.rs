@@ -3,6 +3,7 @@
 //! answers to our cards, everyone's log, slot insurance, and once an hour
 //! the things that only drift.
 
+use ducat_mobile::node::{node_changed_keys, node_wait_change};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, Instant};
 
@@ -59,7 +60,15 @@ impl App {
                             last_hourly = Some(Instant::now());
                         }
                     }
-                    std::thread::sleep(POLL_EVERY);
+                    // Sleep until the network rings or the lap is due. A
+                    // watched log that changed wakes the lap for that
+                    // contact alone; everyone else keeps their turn.
+                    if node_wait_change(POLL_EVERY.as_millis() as u32) {
+                        let rang = app.mark_changed(&node_changed_keys());
+                        if rang > 0 {
+                            log::info(TAG, format!("{rang} log(s) rang"));
+                        }
+                    }
                 }
             })
             .ok();

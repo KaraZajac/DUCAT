@@ -427,22 +427,20 @@ class Poller(private val context: Context) {
                 // message is late (push v2, PUSH.md).
                 runCatching {
                     val store = ContactStore(context)
-                    var up = 0
-                    var down = 0
-                    store.all().forEach {
-                        runCatching { uniffi.ducat_mobile.nodeDhtWatch(it.theirOutbox) }
-                            .onSuccess { ok -> if (ok) up++ else down++ }
-                            .onFailure { down++ }
-                    }
+                    // Contacts through the plan: a watch is renewed inside
+                    // veilid's ten minutes, not re-armed every ten seconds
+                    // for every contact — that was one network op per
+                    // contact per sweep for nothing.
+                    var (up, down) = Mailbox.armWatches(context)
                     store.issuedCards().filter { it.answeredBy == null }.forEach {
                         runCatching { uniffi.ducat_mobile.nodeDhtWatch(it.inboxKey) }
                             .onSuccess { ok -> if (ok) up++ else down++ }
                             .onFailure { down++ }
                     }
-                    if (up != watchesUp || down != watchesDown) {
+                    if (down > 0 && (up != watchesUp || down != watchesDown)) {
                         watchesUp = up
                         watchesDown = down
-                        DucatLog.i(TAG, "watches: $up armed, $down not")
+                        DucatLog.i(TAG, "watches: $up renewed, $down refused this pass")
                     }
                 }.onFailure { DucatLog.w(TAG, "watch: ${it.message}") }
 

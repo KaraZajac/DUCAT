@@ -16,6 +16,7 @@
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
+use std::time::Instant;
 
 use ducat_mobile::contacts::{
     build_contact_details, build_log_head, create_contact_card, generate_prekeys, generate_writer_keys,
@@ -25,7 +26,7 @@ use ducat_mobile::contacts::{
 };
 use ducat_mobile::node::{
     node_dht_create, node_dht_create_shared, node_dht_get, node_dht_get_versioned, node_dht_open, node_dht_set,
-    DhtRecord,
+    DhtRecord, node_dht_watch,
 };
 
 use crate::contacts::{bump, fold_card_address, hex, hex_to_bytes, now_ms, BillItem, Contact, IssuedCard, StoredMessage};
@@ -110,6 +111,59 @@ impl Outgoing {
 
 static SEND_LOCKS: Mutex<Option<HashMap<String, Arc<Mutex<()>>>>> = Mutex::new(None);
 static POLL_LOCKS: Mutex<Option<HashMap<String, Arc<Mutex<()>>>>> = Mutex::new(None);
+
+// ----- the polling plan -------------------------------------------------------
+/// Logs read per lap, and how many side by side.
+const POLL_BUDGET: usize = 24;
+const POLL_WIDTH: usize = 8;
+/// A quiet log is read at least this often, watch or no watch.
+const POLL_MAX_SECS: u64 = 300;
+/// veilid lets a watch run ten minutes; renew well inside that.
+const WATCH_RENEW_SECS: u64 = 8 * 60;
+
+#[derive(Clone, Copy)]
+struct PollSlot {
+    due: Instant,
+    backoff_secs: u64,
+    watched: Option<Instant>,
+}
+
+impl PollSlot {
+    fn fresh() -> PollSlot {
+        PollSlot { due: Instant::now(), backoff_secs: 0, watched: None }
+    }
+}
+
+static PLAN: Mutex<Option<HashMap<String, PollSlot>>> = Mutex::new(None);
+
+fn with_plan<T>(f: impl FnOnce(&mut HashMap<String, PollSlot>) -> T) -> T {
+    let mut g = PLAN.lock().unwrap_or_else(|e| e.into_inner());
+    f(g.get_or_insert_with(HashMap::new))
+}
+
+/// When this log is next due; None for a contact the plan has not met,
+/// who is due at once.
+fn plan_due(hex: &str) -> Option<Instant> {
+    with_plan(|p| p.get(hex).map(|s| s.due))
+}
+
+fn plan_watched(hex: &str) -> Option<Instant> {
+    with_plan(|p| p.get(hex).and_then(|s| s.watched))
+}
+
+fn plan_set_watched(hex: &str, at: Option<Instant>) {
+    with_plan(|p| p.entry(hex.to_string()).or_insert_with(PollSlot::fresh).watched = at);
+}
+
+/// After a read: a log that spoke is read every lap; a quiet one waits
+/// twice as long as last time, up to POLL_MAX_SECS.
+fn plan_settle(hex: &str, spoke: bool) {
+    with_plan(|p| {
+        let s = p.entry(hex.to_string()).or_insert_with(PollSlot::fresh);
+        s.backoff_secs = if spoke { 0 } else { (s.backoff_secs * 2).clamp(15, POLL_MAX_SECS) };
+        s.due = Instant::now() + std::time::Duration::from_secs(s.backoff_secs);
+    });
+}
 static CLAIMING: AtomicBool = AtomicBool::new(false);
 static LAST_POLL_OFFLINE: AtomicBool = AtomicBool::new(false);
 static CLAIM_CURSOR: Mutex<usize> = Mutex::new(0);
@@ -760,6 +814,7 @@ impl App {
     /// contact as it is afterwards — the counters moved, and a caller that
     /// sends twice from one snapshot writes two messages into one slot.
     pub fn send(&self, c: &Contact, out: Outgoing) -> Result<Contact, Error> {
+        self.touch_contact(&c.persona_hex);
         let lock = lock_for(&SEND_LOCKS, &c.persona_hex);
         let _g = lock.lock().unwrap_or_else(|e| e.into_inner());
         self.send_locked(c, out)
@@ -1224,8 +1279,18 @@ impl App {
 
     // ----- receiving --------------------------------------------------------------
 
-    /// Read every contact's log forward. Returns how many messages
-    /// arrived; offline stops the pass with one line.
+    /// Read the logs that are due. Returns how many messages arrived;
+    /// offline leaves every turn where it was and says so once.
+    ///
+    /// Every contact used to be read every lap, in order, two forced DHT
+    /// reads each: fine for seven, a two-minute lap for fifty. A lap now
+    /// reads at most POLL_BUDGET logs, POLL_WIDTH side by side, most
+    /// overdue first. A log that had nothing new backs off — doubling to
+    /// POLL_MAX_SECS — and one that spoke is read every lap again; the
+    /// watch armed on each record rings the lap early for the contact
+    /// that changed (see `mark_changed`), so a quiet contact's message
+    /// still lands within seconds. The backoff is what a lap costs when
+    /// watches fail, not the delivery time.
     pub fn poll(&self) -> usize {
         // Before reading anyone: a restored desk is advertising keys it
         // does not hold.
@@ -1234,32 +1299,146 @@ impl App {
         }
         // Each poll is also the clock for the forward-secrecy delete.
         let _ = self.sweep_burned_prekeys();
+        let now = Instant::now();
+        let mut due: Vec<(Contact, Instant)> = self
+            .contacts()
+            .into_iter()
+            .filter_map(|c| {
+                let at = plan_due(&c.persona_hex).unwrap_or(now);
+                (at <= now).then_some((c, at))
+            })
+            .collect();
+        due.sort_by_key(|(_, at)| *at);
+        let waiting = due.len().saturating_sub(POLL_BUDGET);
+        due.truncate(POLL_BUDGET);
+        let read = due.len();
         let mut got = 0;
         let mut offline = false;
-        for c in self.contacts() {
-            let r: Result<usize, Error> = (|| {
-                // Ours first: a slot an interrupted send left behind is
-                // older than anything this pass will read.
-                self.late_slot(&c)?;
-                self.poll_one(&c)
-            })();
-            match r {
-                Ok(n) => got += n,
-                Err(e) if is_offline(&e) => {
-                    log::info(TAG, "offline — messages wait for the network");
-                    offline = true;
-                    break;
+        for chunk in due.chunks(POLL_WIDTH) {
+            let results: Vec<(String, String, Result<usize, Error>)> = std::thread::scope(|s| {
+                let handles: Vec<_> = chunk
+                    .iter()
+                    .map(|(c, _)| {
+                        let app = self.clone();
+                        let c = c.clone();
+                        s.spawn(move || {
+                            // Ours first: a slot an interrupted send left
+                            // behind is older than anything this pass will
+                            // read.
+                            let r = (|| {
+                                app.late_slot(&c)?;
+                                app.poll_one(&c)
+                            })();
+                            (c.persona_hex.clone(), c.display_name(), r)
+                        })
+                    })
+                    .collect();
+                handles.into_iter().filter_map(|h| h.join().ok()).collect()
+            });
+            for (hex, name, r) in results {
+                match r {
+                    Ok(n) => {
+                        got += n;
+                        plan_settle(&hex, n > 0);
+                    }
+                    Err(e) if is_offline(&e) => offline = true,
+                    Err(e) => {
+                        log::warn(TAG, format!("poll {name}: {e}"));
+                        plan_settle(&hex, false);
+                    }
                 }
-                Err(e) => log::warn(TAG, format!("poll {}: {e}", c.display_name())),
+            }
+            if offline {
+                log::info(TAG, "offline — messages wait for the network");
+                break;
             }
         }
         LAST_POLL_OFFLINE.store(offline, Ordering::Relaxed);
+        if !offline {
+            self.arm_watches();
+        }
+        // The lap's cost, when it is worth a line: a slow pass, or more
+        // logs due than a pass reads.
+        let ms = now.elapsed().as_millis();
+        if ms > 5_000 || waiting > 0 {
+            log::info(TAG, format!("read {read} log(s) in {ms} ms, {waiting} waiting"));
+        }
         got
+    }
+
+    /// The user is looking at this thread, or just spoke in it: read its
+    /// log every lap again until it goes quiet.
+    pub fn touch_contact(&self, persona_hex: &str) {
+        with_plan(|p| {
+            let s = p.entry(persona_hex.to_string()).or_insert_with(PollSlot::fresh);
+            s.due = Instant::now();
+            s.backoff_secs = 0;
+        });
+    }
+
+    /// Records the network rang for (`node_changed_keys`): their contacts
+    /// are due now, ahead of everyone's turn. Returns how many matched.
+    pub fn mark_changed(&self, keys: &[String]) -> usize {
+        if keys.is_empty() {
+            return 0;
+        }
+        let mut n = 0;
+        for c in self.contacts() {
+            if keys.iter().any(|k| k == &c.their_outbox) {
+                self.touch_contact(&c.persona_hex);
+                n += 1;
+            }
+        }
+        n
+    }
+
+    /// A watch on every log whose watch is missing or ageing, oldest
+    /// first, POLL_BUDGET per lap. veilid refuses a watch on a record this
+    /// process has not opened — a contact not yet read since start — and
+    /// that one is simply tried again after its first read.
+    fn arm_watches(&self) -> (usize, usize) {
+        let now = Instant::now();
+        let mut stale: Vec<(Contact, Option<Instant>)> = self
+            .contacts()
+            .into_iter()
+            .filter_map(|c| {
+                let at = plan_watched(&c.persona_hex);
+                at.map_or(true, |t| now.duration_since(t).as_secs() >= WATCH_RENEW_SECS)
+                    .then_some((c, at))
+            })
+            .collect();
+        stale.sort_by_key(|(_, at)| *at);
+        stale.truncate(POLL_BUDGET);
+        let (mut up, mut down) = (0, 0);
+        for chunk in stale.chunks(POLL_WIDTH) {
+            let armed: Vec<(String, bool)> = std::thread::scope(|s| {
+                let handles: Vec<_> = chunk
+                    .iter()
+                    .map(|(c, _)| {
+                        let key = c.their_outbox.clone();
+                        let hex = c.persona_hex.clone();
+                        s.spawn(move || (hex, node_dht_watch(key).unwrap_or(false)))
+                    })
+                    .collect();
+                handles.into_iter().filter_map(|h| h.join().ok()).collect()
+            });
+            for (hex, ok) in armed {
+                if ok {
+                    up += 1;
+                    plan_set_watched(&hex, Some(now));
+                } else {
+                    down += 1;
+                }
+            }
+        }
+        (up, down)
     }
 
     pub fn poll_contact(&self, persona_hex: &str) -> usize {
         let Some(c) = self.contact(persona_hex) else { return 0 };
-        self.poll_one(&c).unwrap_or(0)
+        let n = self.poll_one(&c).unwrap_or(0);
+        plan_settle(persona_hex, n > 0);
+        n
     }
 
     fn poll_one(&self, c: &Contact) -> Result<usize, Error> {

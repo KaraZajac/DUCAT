@@ -856,6 +856,8 @@ fn message_row(m: StoredMessage) -> MessageRow {
 #[tauri::command]
 fn thread(persona_hex: String) -> Result<Vec<MessageRow>, String> {
     let a = app()?;
+    // Looking at it: its log is read every lap while this page is open.
+    a.touch_contact(&persona_hex);
     let all = a.thread(&persona_hex);
     let reactions = ducat_app::contacts::reactions_on(&all);
     let marks = ducat_app::contacts::retractions(&all);

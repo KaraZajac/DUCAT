@@ -14,8 +14,9 @@
 //! with its own design — an OS keyring on three platforms — and is called
 //! out here so nobody mistakes the current state for a decision.
 
+use std::collections::HashMap;
 use std::path::PathBuf;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex, OnceLock};
 
 use serde::de::DeserializeOwned;
 use serde::Serialize;
@@ -23,12 +24,28 @@ use serde_json::{Map, Value};
 
 pub struct Store {
     path: PathBuf,
-    lock: Mutex<()>,
+    lock: Arc<Mutex<()>>,
+}
+
+/// One lock per table path for the whole process. `App::store` hands out
+/// a fresh `Store` on every call, so a lock inside the value only ever
+/// guarded one caller against itself; two threads editing the same table
+/// through two values raced through read → modify → rename, and the
+/// second rename quietly dropped the first edit. The lock lives here now
+/// and every value for a path shares it.
+fn lock_for(path: &PathBuf) -> Arc<Mutex<()>> {
+    static LOCKS: OnceLock<Mutex<HashMap<PathBuf, Arc<Mutex<()>>>>> = OnceLock::new();
+    let mut m = LOCKS
+        .get_or_init(|| Mutex::new(HashMap::new()))
+        .lock()
+        .unwrap_or_else(|e| e.into_inner());
+    m.entry(path.clone()).or_insert_with(|| Arc::new(Mutex::new(()))).clone()
 }
 
 impl Store {
     pub(crate) fn new(path: PathBuf) -> Store {
-        Store { path, lock: Mutex::new(()) }
+        let lock = lock_for(&path);
+        Store { path, lock }
     }
 
     fn read_all(&self) -> Map<String, Value> {

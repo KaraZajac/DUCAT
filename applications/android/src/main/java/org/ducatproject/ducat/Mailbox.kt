@@ -1671,6 +1671,8 @@ object Mailbox {
      * turned receipts on.
      */
     fun markRead(context: Context, c: Contact) {
+        // Looking at it: its log is read every sweep while the thread is open.
+        touch(c.personaHex)
         val store = ContactStore(context)
         if (!store.readReceipts()) return
         // The same snapshot rule [send] states at length: this writes the
@@ -1916,9 +1918,79 @@ object Mailbox {
     fun pollContact(context: Context, c: Contact): Int {
         val store = ContactStore(context)
         val fresh = store.all().firstOrNull { it.personaHex == c.personaHex } ?: return 0
-        return runCatching {
+        val n = runCatching {
             pollOne(context, store, fresh, PersonaStore(context).ownerHexOf(fresh))
         }.getOrDefault(0)
+        settle(c.personaHex, n > 0)
+        return n
+    }
+
+    // ----- the polling plan ---------------------------------------------
+    // Every contact used to be read every sweep, in order, two forced DHT
+    // reads each: fine for a handful, minutes of sweep for fifty, and a
+    // phone that never rested. A sweep now reads the logs that are *due*,
+    // and a log that had nothing new backs off — doubling to POLL_MAX_MS —
+    // while one that spoke is read every sweep again. The watches
+    // (armWatches, renewed inside veilid's ten minutes) ring the lane for
+    // the contact that changed, so a quiet contact's message still lands
+    // within seconds; the backoff is what a sweep costs when watches
+    // fail, not the delivery time.
+    private const val POLL_BUDGET = 24
+    private const val POLL_WIDTH = 4
+    private const val POLL_MAX_MS = 5 * 60_000L
+    private const val WATCH_RENEW_MS = 8 * 60_000L
+
+    private class PollSlot(var dueAt: Long = 0L, var backoffMs: Long = 0L, var watchedAt: Long = 0L)
+
+    private val plan = HashMap<String, PollSlot>()
+    private val pollPool: java.util.concurrent.ExecutorService by lazy {
+        java.util.concurrent.Executors.newFixedThreadPool(POLL_WIDTH) { r ->
+            Thread(r, "mailbox-poll").apply { isDaemon = true }
+        }
+    }
+
+    private fun slot(hex: String): PollSlot = synchronized(plan) { plan.getOrPut(hex) { PollSlot() } }
+
+    /** The user is looking at this thread, or just spoke in it: read its log every sweep again. */
+    fun touch(personaHex: String) {
+        synchronized(plan) {
+            plan.getOrPut(personaHex) { PollSlot() }.apply { dueAt = 0L; backoffMs = 0L }
+        }
+    }
+
+    /** After a read: a log that spoke is read every sweep; a quiet one waits twice as long, up to POLL_MAX_MS. */
+    private fun settle(hex: String, spoke: Boolean) {
+        synchronized(plan) {
+            val s = plan.getOrPut(hex) { PollSlot() }
+            s.backoffMs = if (spoke) 0L else (s.backoffMs * 2).coerceIn(10_000L, POLL_MAX_MS)
+            s.dueAt = System.currentTimeMillis() + s.backoffMs
+        }
+    }
+
+    /**
+     * A watch on every log whose watch is missing or ageing, oldest first,
+     * POLL_BUDGET per pass. veilid refuses a watch on a record this process
+     * has not opened — a contact not yet read since start — and that one is
+     * simply tried again after its first read. Returns (armed, refused).
+     */
+    fun armWatches(context: Context): Pair<Int, Int> {
+        val now = System.currentTimeMillis()
+        val stale = ContactStore(context).all()
+            .filter { now - slot(it.personaHex).watchedAt >= WATCH_RENEW_MS }
+            .sortedBy { slot(it.personaHex).watchedAt }
+            .take(POLL_BUDGET)
+        var up = 0
+        var down = 0
+        for (c in stale) {
+            val ok = runCatching { nodeDhtWatch(c.theirOutbox) }.getOrDefault(false)
+            if (ok) {
+                up++
+                synchronized(plan) { slot(c.personaHex).watchedAt = now }
+            } else {
+                down++
+            }
+        }
+        return up to down
     }
 
     fun poll(context: Context): Int {
@@ -1934,27 +2006,54 @@ object Mailbox {
         // not ours or the notice has expired out of everyone's sweeps.
         runCatching { org.ducatproject.ducat.ui.sweepHailTombstones(context) }
         val personas = PersonaStore(context)
+        // The logs that are due, most overdue first, POLL_BUDGET of them,
+        // POLL_WIDTH side by side. See the plan below.
+        val now = System.currentTimeMillis()
+        val dueAll = store.all()
+            .filter { slot(it.personaHex).dueAt <= now }
+            .sortedBy { slot(it.personaHex).dueAt }
+        val due = dueAll.take(POLL_BUDGET)
+        val waiting = dueAll.size - due.size
         var got = 0
         var offline = false
-        for (c in store.all()) {
-            got += try {
-                // Ours first: a slot an interrupted send left behind is
-                // older than anything this pass will read, and the other
-                // side may be waiting on it.
-                lateSlot(context, c)
-                pollOne(context, store, c, personas.ownerHexOf(c))
-            } catch (e: Exception) {
-                if (isOffline(e)) {
-                    // Offline fails every contact identically; one line says it.
-                    DucatLog.i(TAG, "offline — messages wait for the network")
-                    offline = true
-                    break
+        for (chunk in due.chunked(POLL_WIDTH)) {
+            val tasks = chunk.map { c ->
+                java.util.concurrent.Callable<Pair<Contact, Result<Int>>> {
+                    c to runCatching {
+                        // Ours first: a slot an interrupted send left behind
+                        // is older than anything this pass will read, and
+                        // the other side may be waiting on it.
+                        lateSlot(context, c)
+                        pollOne(context, store, c, personas.ownerHexOf(c))
+                    }
                 }
-                DucatLog.w(TAG, "poll ${c.displayName()}: ${e.message}")
-                0
+            }
+            for (f in pollPool.invokeAll(tasks)) {
+                val (c, r) = f.get()
+                r.onSuccess { n ->
+                    got += n
+                    settle(c.personaHex, n > 0)
+                }.onFailure { e ->
+                    if (e is Exception && isOffline(e)) {
+                        offline = true
+                    } else {
+                        DucatLog.w(TAG, "poll ${c.displayName()}: ${e.message}")
+                        settle(c.personaHex, false)
+                    }
+                }
+            }
+            if (offline) {
+                // Offline fails every contact identically; one line says it,
+                // and nobody loses their turn.
+                DucatLog.i(TAG, "offline — messages wait for the network")
+                break
             }
         }
         lastPollOffline = offline
+        // The sweep's cost, when it is worth a line: a slow pass, or more
+        // logs due than a pass reads.
+        val ms = System.currentTimeMillis() - now
+        if (ms > 5_000 || waiting > 0) DucatLog.i(TAG, "read ${due.size} log(s) in $ms ms, $waiting waiting")
         return got
     }
 
