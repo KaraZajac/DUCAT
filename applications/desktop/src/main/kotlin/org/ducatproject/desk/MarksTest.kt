@@ -43,7 +43,7 @@ fun main() {
     Groups.absorbRoster(
         ctx, sam, gid,
         uniffi.ducat_mobile.groupRosterEncode(
-            "ladder crew", listOf(me, sam, jordan).map { hexToBytes(it)!! },
+            "ladder crew", listOf(me, sam, jordan).map { hexToBytes(it)!! }, null,
         ),
     )
     check(Groups.get(ctx, gidHex)?.members?.toSet() == setOf(me, sam, jordan)) {

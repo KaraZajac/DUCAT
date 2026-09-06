@@ -169,7 +169,7 @@ fun main() {
         org.ducatproject.ducat.Groups.absorbRoster(
             context, members[0], gid,
             uniffi.ducat_mobile.groupRosterEncode(
-                "ladder crew", (members + me).map { org.ducatproject.ducat.hexToBytes(it)!! },
+                "ladder crew", (members + me).map { org.ducatproject.ducat.hexToBytes(it)!! }, null,
             ),
         )
         val gidHex = org.ducatproject.ducat.Groups.all(context).first().idHex
