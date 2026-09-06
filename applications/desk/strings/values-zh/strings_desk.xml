@@ -331,7 +331,6 @@
     <string name="desk_confirm_delete_post">删除此动态？它将在下一版从你的动态中消失；镜像了旧版的人仍然拥有它。</string>
     <string name="desk_save_file">保存到文件</string>
     <string name="desk_saved_to_files">%1$s 已在文件页面。</string>
-    <string name="desk_home_posts">%1$d 条动态，已在网络上。</string>
     <string name="desk_no_home_yet_you">还没有动态。你的第一条动态会把你的主页放到网络上。</string>
     <string name="desk_keep_someone">还没有人。给联系人点心会在这里保留其主页。</string>
     <string name="desk_others">其他</string>

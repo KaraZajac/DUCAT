@@ -331,7 +331,6 @@
     <string name="desk_confirm_delete_post">Xóa bài này? Nó rời dòng tin ở lần xuất bản tới; ai đã lưu bản cũ vẫn còn giữ.</string>
     <string name="desk_save_file">Lưu vào Tệp</string>
     <string name="desk_saved_to_files">%1$s đã ở trang Tệp.</string>
-    <string name="desk_home_posts">%1$d bài, trên mạng.</string>
     <string name="desk_no_home_yet_you">Chưa đăng gì. Bài đầu tiên đưa nhà của bạn lên mạng.</string>
     <string name="desk_keep_someone">Chưa có ai. Thả tim một liên hệ sẽ giữ nhà của họ ở đây.</string>
     <string name="desk_others">Người khác</string>

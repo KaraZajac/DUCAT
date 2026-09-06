@@ -335,7 +335,6 @@
     <string name="desk_confirm_delete_post">این پست حذف شود؟ در نسخه بعدی از خوراک شما می‌رود؛ هر کس نسخه قدیمی را آینه کرده هنوز آن را دارد.</string>
     <string name="desk_save_file">ذخیره در فایل‌ها</string>
     <string name="desk_saved_to_files">%1$s در صفحه فایل‌ها است.</string>
-    <string name="desk_home_posts">%1$d پست، در شبکه.</string>
     <string name="desk_no_home_yet_you">هنوز چیزی ارسال نشده. اولین پست شما خانه‌تان را روی شبکه می‌گذارد.</string>
     <string name="desk_keep_someone">هنوز کسی نیست. قلب روی یک مخاطب خانه‌اش را اینجا نگه می‌دارد.</string>
     <string name="desk_others">دیگران</string>

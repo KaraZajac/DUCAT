@@ -48,6 +48,10 @@
    "one": "%1$d prenumerator",
    "other": "%1$d prenumeratora"
   },
+  "feed_home_posts": {
+   "one": "%d wpis, w sieci.",
+   "other": "%d wpisów, w sieci."
+  },
   "monero_blocks_to_go": {
    "few": "pozostały %1$d bloki",
    "many": "pozostało %1$d bloków",
@@ -251,7 +255,6 @@
  "desk_height_whole": "Wysokość bloku to liczba całkowita.",
  "desk_hide_notes": "Ukryj nominały",
  "desk_history": "Historia",
- "desk_home_posts": "%1$d wpis(ów), w sieci.",
  "desk_in_xmr": "w XMR",
  "desk_in_your_currency": "W Twojej walucie",
  "desk_keep_alive": "utrzymuj przy życiu",

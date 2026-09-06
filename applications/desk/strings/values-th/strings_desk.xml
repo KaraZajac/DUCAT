@@ -331,7 +331,6 @@
     <string name="desk_confirm_delete_post">ลบโพสต์นี้? มันจะออกจากฟีดในฉบับถัดไป ใครที่มิเรอร์ฉบับเก่ายังคงมีอยู่</string>
     <string name="desk_save_file">บันทึกไปยังไฟล์</string>
     <string name="desk_saved_to_files">%1$s อยู่ในหน้าไฟล์</string>
-    <string name="desk_home_posts">%1$d โพสต์ อยู่บนเครือข่าย</string>
     <string name="desk_no_home_yet_you">ยังไม่ได้โพสต์ โพสต์แรกของคุณจะนำบ้านของคุณขึ้นเครือข่าย</string>
     <string name="desk_keep_someone">ยังไม่มีใคร หัวใจบนผู้ติดต่อจะเก็บบ้านของเขาไว้ที่นี่</string>
     <string name="desk_others">คนอื่นๆ</string>

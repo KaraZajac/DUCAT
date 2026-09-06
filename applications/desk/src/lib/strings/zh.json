@@ -24,6 +24,10 @@
   "desk_subscribers_n": {
    "other": "%1$d 位订阅者"
   },
+  "feed_home_posts": {
+   "one": "%d 条动态，已在网络上。",
+   "other": "%d 条动态，已在网络上。"
+  },
   "monero_blocks_to_go": {
    "other": "还剩 %1$d 个区块"
   }
@@ -224,7 +228,6 @@
  "desk_height_whole": "区块高度是整数。",
  "desk_hide_notes": "隐藏输出",
  "desk_history": "历史",
- "desk_home_posts": "%1$d 条动态，已在网络上。",
  "desk_in_xmr": "以 XMR 计",
  "desk_in_your_currency": "以你的货币计",
  "desk_keep_alive": "保持在线",

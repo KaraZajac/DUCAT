@@ -24,6 +24,10 @@
   "desk_subscribers_n": {
    "other": "%1$d pelanggan"
   },
+  "feed_home_posts": {
+   "one": "%d kiriman, di jaringan.",
+   "other": "%d kiriman, di jaringan."
+  },
   "monero_blocks_to_go": {
    "other": "%1$d blok lagi"
   }
@@ -224,7 +228,6 @@
  "desk_height_whole": "Tinggi blok adalah bilangan bulat.",
  "desk_hide_notes": "Sembunyikan keluaran",
  "desk_history": "Riwayat",
- "desk_home_posts": "%1$d kiriman, di jaringan.",
  "desk_in_xmr": "dalam XMR",
  "desk_in_your_currency": "Dalam mata uang Anda",
  "desk_keep_alive": "jaga tetap hidup",

@@ -335,7 +335,6 @@
     <string name="desk_confirm_delete_post">Apagar esta publicação? Sai do teu feed na próxima edição; quem espelhou a antiga ainda a tem.</string>
     <string name="desk_save_file">Guardar em Ficheiros</string>
     <string name="desk_saved_to_files">%1$s está na página Ficheiros.</string>
-    <string name="desk_home_posts">%1$d publicação(ões), na rede.</string>
     <string name="desk_no_home_yet_you">Ainda nada publicado. A tua primeira publicação põe a tua casa na rede.</string>
     <string name="desk_keep_someone">Ainda ninguém. Um coração num contacto guarda aqui a sua casa.</string>
     <string name="desk_others">Outros</string>

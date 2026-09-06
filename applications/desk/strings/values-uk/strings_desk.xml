@@ -343,7 +343,6 @@
     <string name="desk_confirm_delete_post">Видалити допис? Він зникне зі стрічки з наступним виданням; у тих, хто дзеркалив старе, він залишиться.</string>
     <string name="desk_save_file">Зберегти у Файли</string>
     <string name="desk_saved_to_files">%1$s на сторінці Файли.</string>
-    <string name="desk_home_posts">%1$d допис(ів), у мережі.</string>
     <string name="desk_no_home_yet_you">Поки нічого. Перший допис виведе ваш дім у мережу.</string>
     <string name="desk_keep_someone">Поки нікого. Серце на контакті зберігає тут його дім.</string>
     <string name="desk_others">Інші</string>

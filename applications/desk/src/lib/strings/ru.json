@@ -48,6 +48,10 @@
    "one": "%1$d подписчик",
    "other": "%1$d подписчика"
   },
+  "feed_home_posts": {
+   "one": "%d запись, в сети.",
+   "other": "%d записей, в сети."
+  },
   "monero_blocks_to_go": {
    "few": "осталось %1$d блока",
    "many": "осталось %1$d блоков",
@@ -251,7 +255,6 @@
  "desk_height_whole": "Высота блока — целое число.",
  "desk_hide_notes": "Скрыть выходы",
  "desk_history": "История",
- "desk_home_posts": "%1$d запис(ей), в сети.",
  "desk_in_xmr": "в XMR",
  "desk_in_your_currency": "В вашей валюте",
  "desk_keep_alive": "поддерживать",

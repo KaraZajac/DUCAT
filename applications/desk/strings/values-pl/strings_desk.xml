@@ -343,7 +343,6 @@
     <string name="desk_confirm_delete_post">Usunąć ten wpis? Zniknie z kanału przy następnym wydaniu; kto skopiował stare, nadal je ma.</string>
     <string name="desk_save_file">Zapisz w Plikach</string>
     <string name="desk_saved_to_files">%1$s jest na stronie Pliki.</string>
-    <string name="desk_home_posts">%1$d wpis(ów), w sieci.</string>
     <string name="desk_no_home_yet_you">Jeszcze nic nie opublikowano. Pierwszy wpis umieszcza twój dom w sieci.</string>
     <string name="desk_keep_someone">Jeszcze nikogo. Serce przy kontakcie zachowuje tu jego dom.</string>
     <string name="desk_others">Inni</string>

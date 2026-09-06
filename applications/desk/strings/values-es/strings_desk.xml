@@ -335,7 +335,6 @@
     <string name="desk_confirm_delete_post">¿Eliminar esta publicación? Saldrá de tu feed en la próxima edición; quien copió la anterior aún la tiene.</string>
     <string name="desk_save_file">Guardar en Archivos</string>
     <string name="desk_saved_to_files">%1$s está en la página Archivos.</string>
-    <string name="desk_home_posts">%1$d publicación(es), en la red.</string>
     <string name="desk_no_home_yet_you">Nada publicado aún. Tu primera publicación pone tu hogar en la red.</string>
     <string name="desk_keep_someone">Nadie aún. Un corazón en un contacto guarda su hogar aquí.</string>
     <string name="desk_others">Otros</string>

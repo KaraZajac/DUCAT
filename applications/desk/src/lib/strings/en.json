@@ -32,6 +32,10 @@
    "one": "%1$d subscriber",
    "other": "%1$d subscribers"
   },
+  "feed_home_posts": {
+   "one": "%d post, on the network.",
+   "other": "%d posts, on the network."
+  },
   "monero_blocks_to_go": {
    "one": "%1$d block to go",
    "other": "%1$d blocks to go"
@@ -233,7 +237,6 @@
  "desk_height_whole": "A block height is a whole number.",
  "desk_hide_notes": "Hide notes",
  "desk_history": "History",
- "desk_home_posts": "%1$d post(s), on the network.",
  "desk_in_xmr": "in XMR",
  "desk_in_your_currency": "In your currency",
  "desk_keep_alive": "keep alive",

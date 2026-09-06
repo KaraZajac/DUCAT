@@ -339,7 +339,6 @@
     <string name="desk_confirm_delete_post">Delete this post? It leaves your feed at the next edition; anyone who mirrored the old edition still has it.</string>
     <string name="desk_save_file">Save to Files</string>
     <string name="desk_saved_to_files">%1$s is on the Files page.</string>
-    <string name="desk_home_posts">%1$d post(s), on the network.</string>
     <string name="desk_no_home_yet_you">Nothing posted yet. Your first post puts your home on the network.</string>
     <string name="desk_keep_someone">Nobody yet. A heart on a contact keeps their home here.</string>
     <string name="desk_others">Others</string>

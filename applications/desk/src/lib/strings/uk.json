@@ -48,6 +48,10 @@
    "one": "%1$d підписник",
    "other": "%1$d підписника"
   },
+  "feed_home_posts": {
+   "one": "%d допис, у мережі.",
+   "other": "%d дописів, у мережі."
+  },
   "monero_blocks_to_go": {
    "few": "лишилося %1$d блоки",
    "many": "лишилося %1$d блоків",
@@ -251,7 +255,6 @@
  "desk_height_whole": "Висота блоку — ціле число.",
  "desk_hide_notes": "Сховати виходи",
  "desk_history": "Історія",
- "desk_home_posts": "%1$d допис(ів), у мережі.",
  "desk_in_xmr": "у XMR",
  "desk_in_your_currency": "У вашій валюті",
  "desk_keep_alive": "підтримувати",

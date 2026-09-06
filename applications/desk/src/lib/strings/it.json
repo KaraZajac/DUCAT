@@ -32,6 +32,10 @@
    "one": "%1$d abbonato",
    "other": "%1$d abbonati"
   },
+  "feed_home_posts": {
+   "one": "%d post, in rete.",
+   "other": "%d post, in rete."
+  },
   "monero_blocks_to_go": {
    "one": "%1$d blocco rimanente",
    "other": "%1$d blocchi rimanenti"
@@ -233,7 +237,6 @@
  "desk_height_whole": "L’altezza di un blocco è un numero intero.",
  "desk_hide_notes": "Nascondi le note",
  "desk_history": "Cronologia",
- "desk_home_posts": "%1$d post, in rete.",
  "desk_in_xmr": "in XMR",
  "desk_in_your_currency": "Nella tua valuta",
  "desk_keep_alive": "tieni in vita",

@@ -32,6 +32,10 @@
    "one": "%1$d ग्राहक",
    "other": "%1$d ग्राहक"
   },
+  "feed_home_posts": {
+   "one": "%d पोस्ट, नेटवर्क पर।",
+   "other": "%d पोस्ट, नेटवर्क पर।"
+  },
   "monero_blocks_to_go": {
    "one": "%1$d ब्लॉक बाकी",
    "other": "%1$d ब्लॉक बाकी"
@@ -233,7 +237,6 @@
  "desk_height_whole": "ब्लॉक की ऊँचाई एक पूर्णांक होती है।",
  "desk_hide_notes": "नोट छिपाएँ",
  "desk_history": "इतिहास",
- "desk_home_posts": "%1$d पोस्ट, नेटवर्क पर।",
  "desk_in_xmr": "XMR में",
  "desk_in_your_currency": "आपकी मुद्रा में",
  "desk_keep_alive": "ज़िंदा रखें",

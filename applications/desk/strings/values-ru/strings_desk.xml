@@ -343,7 +343,6 @@
     <string name="desk_confirm_delete_post">Удалить запись? Она уйдёт из ленты со следующим изданием; у тех, кто зеркалил старое, она останется.</string>
     <string name="desk_save_file">Сохранить в Файлы</string>
     <string name="desk_saved_to_files">%1$s на странице Файлы.</string>
-    <string name="desk_home_posts">%1$d запис(ей), в сети.</string>
     <string name="desk_no_home_yet_you">Пока ничего. Первая запись выведет ваш дом в сеть.</string>
     <string name="desk_keep_someone">Пока никого. Сердце на контакте хранит его дом здесь.</string>
     <string name="desk_others">Остальные</string>

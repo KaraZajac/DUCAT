@@ -32,6 +32,10 @@
    "one": "%1$d مشترک",
    "other": "%1$d مشترک"
   },
+  "feed_home_posts": {
+   "one": "%d پست، در شبکه.",
+   "other": "%d پست، در شبکه."
+  },
   "monero_blocks_to_go": {
    "one": "%1$d بلاک مانده",
    "other": "%1$d بلاک مانده"
@@ -233,7 +237,6 @@
  "desk_height_whole": "ارتفاع بلوک یک عدد صحیح است.",
  "desk_hide_notes": "پنهان کردن خروجی‌ها",
  "desk_history": "تاریخچه",
- "desk_home_posts": "%1$d پست، در شبکه.",
  "desk_in_xmr": "به XMR",
  "desk_in_your_currency": "به ارز شما",
  "desk_keep_alive": "زنده نگه دار",

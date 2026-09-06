@@ -164,7 +164,10 @@ and import). A drive script fills the input and dispatches `change`.
 State lives under `$XDG_DATA_HOME/ducat` (Linux), `~/Library/Application Support/ducat`
 (macOS) or `%APPDATA%\ducat` (Windows). `DUCAT_DESK_STATE=<dir>` names an
 identity explicitly; two desks on one machine are two directories.
-On a fresh start with no state, the previous desk's directory
-(`…/ducat-desk`) is adopted — copied, so nothing there is touched —
-and its identity, contacts and wallet carry across; its string-kept
-tables read here as structures.
+On a fresh start with no state in the default directory, the previous
+desk's directory (`…/ducat-desk`) is adopted — copied, so nothing there
+is touched — and its identity, contacts and wallet carry across; its
+string-kept tables read here as structures. A directory named with
+`DUCAT_DESK_STATE` is never adopted into: it starts as a fresh identity
+with its own node, so two states on one machine are two nodes, not one
+node twice.

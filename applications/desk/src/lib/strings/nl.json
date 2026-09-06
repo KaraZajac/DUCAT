@@ -32,6 +32,10 @@
    "one": "%1$d abonnee",
    "other": "%1$d abonnees"
   },
+  "feed_home_posts": {
+   "one": "%d bericht, op het netwerk.",
+   "other": "%d berichten, op het netwerk."
+  },
   "monero_blocks_to_go": {
    "one": "nog %1$d blok",
    "other": "nog %1$d blokken"
@@ -233,7 +237,6 @@
  "desk_height_whole": "Een blokhoogte is een geheel getal.",
  "desk_hide_notes": "Noten verbergen",
  "desk_history": "Geschiedenis",
- "desk_home_posts": "%1$d bericht(en), op het netwerk.",
  "desk_in_xmr": "in XMR",
  "desk_in_your_currency": "In je valuta",
  "desk_keep_alive": "in leven houden",

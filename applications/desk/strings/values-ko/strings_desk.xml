@@ -331,7 +331,6 @@
     <string name="desk_confirm_delete_post">이 게시물을 삭제할까요? 다음 판에서 피드에서 사라지며, 이전 판을 미러한 사람은 여전히 갖고 있습니다.</string>
     <string name="desk_save_file">파일에 저장</string>
     <string name="desk_saved_to_files">%1$s이(가) 파일 페이지에 있습니다.</string>
-    <string name="desk_home_posts">게시물 %1$d개, 네트워크에 있음.</string>
     <string name="desk_no_home_yet_you">아직 게시물이 없습니다. 첫 게시물이 당신의 홈을 네트워크에 올립니다.</string>
     <string name="desk_keep_someone">아직 아무도 없습니다. 연락처의 하트가 그들의 홈을 여기에 간직합니다.</string>
     <string name="desk_others">다른 사람들</string>

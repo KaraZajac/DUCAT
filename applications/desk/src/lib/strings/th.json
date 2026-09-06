@@ -24,6 +24,10 @@
   "desk_subscribers_n": {
    "other": "สมาชิก %1$d ราย"
   },
+  "feed_home_posts": {
+   "one": "%d โพสต์ อยู่บนเครือข่าย",
+   "other": "%d โพสต์ อยู่บนเครือข่าย"
+  },
   "monero_blocks_to_go": {
    "other": "เหลืออีก %1$d บล็อก"
   }
@@ -224,7 +228,6 @@
  "desk_height_whole": "ความสูงของบล็อกต้องเป็นจำนวนเต็ม",
  "desk_hide_notes": "ซ่อนเอาต์พุต",
  "desk_history": "ประวัติ",
- "desk_home_posts": "%1$d โพสต์ อยู่บนเครือข่าย",
  "desk_in_xmr": "เป็น XMR",
  "desk_in_your_currency": "ในสกุลเงินของคุณ",
  "desk_keep_alive": "คงไว้",

@@ -335,7 +335,6 @@
     <string name="desk_confirm_delete_post">Eliminare questo post? Lascia il tuo feed con la prossima edizione; chi ha copiato quella vecchia ce l\'ha ancora.</string>
     <string name="desk_save_file">Salva in File</string>
     <string name="desk_saved_to_files">%1$s è nella pagina File.</string>
-    <string name="desk_home_posts">%1$d post, in rete.</string>
     <string name="desk_no_home_yet_you">Ancora nulla. Il tuo primo post mette la tua casa in rete.</string>
     <string name="desk_keep_someone">Ancora nessuno. Un cuore su un contatto tiene qui la sua casa.</string>
     <string name="desk_others">Altri</string>

@@ -64,6 +64,10 @@
    "two": "مشتركان",
    "zero": "لا مشتركين"
   },
+  "feed_home_posts": {
+   "one": "%d منشور، على الشبكة.",
+   "other": "%d منشورات، على الشبكة."
+  },
   "monero_blocks_to_go": {
    "few": "%1$d كتل متبقية",
    "many": "%1$d كتلة متبقية",
@@ -269,7 +273,6 @@
  "desk_height_whole": "ارتفاع الكتلة عدد صحيح.",
  "desk_hide_notes": "إخفاء المخرجات",
  "desk_history": "السجل",
- "desk_home_posts": "%1$d منشور، على الشبكة.",
  "desk_in_xmr": "بـ XMR",
  "desk_in_your_currency": "بعملتك",
  "desk_keep_alive": "إبقاء حيًا",

@@ -24,6 +24,10 @@
   "desk_subscribers_n": {
    "other": "購読者 %1$d 人"
   },
+  "feed_home_posts": {
+   "one": "%d 件の投稿、ネットワーク上。",
+   "other": "%d 件の投稿、ネットワーク上。"
+  },
   "monero_blocks_to_go": {
    "other": "残り%1$dブロック"
   }
@@ -224,7 +228,6 @@
  "desk_height_whole": "ブロック高は整数です。",
  "desk_hide_notes": "出力を隠す",
  "desk_history": "履歴",
- "desk_home_posts": "%1$d 件の投稿、ネットワーク上。",
  "desk_in_xmr": "XMR で",
  "desk_in_your_currency": "あなたの通貨で",
  "desk_keep_alive": "保持する",

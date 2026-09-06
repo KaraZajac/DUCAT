@@ -32,6 +32,10 @@
    "one": "%1$d abone",
    "other": "%1$d abone"
   },
+  "feed_home_posts": {
+   "one": "%d gönderi, ağda.",
+   "other": "%d gönderi, ağda."
+  },
   "monero_blocks_to_go": {
    "one": "%1$d blok kaldı",
    "other": "%1$d blok kaldı"
@@ -233,7 +237,6 @@
  "desk_height_whole": "Blok yüksekliği tam sayıdır.",
  "desk_hide_notes": "Çıktıları gizle",
  "desk_history": "Geçmiş",
- "desk_home_posts": "%1$d gönderi, ağda.",
  "desk_in_xmr": "XMR olarak",
  "desk_in_your_currency": "Kendi para biriminde",
  "desk_keep_alive": "canlı tut",

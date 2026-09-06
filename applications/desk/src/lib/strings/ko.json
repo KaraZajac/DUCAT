@@ -24,6 +24,10 @@
   "desk_subscribers_n": {
    "other": "구독자 %1$d명"
   },
+  "feed_home_posts": {
+   "one": "게시물 %d개, 네트워크에 있음.",
+   "other": "게시물 %d개, 네트워크에 있음."
+  },
   "monero_blocks_to_go": {
    "other": "%1$d블록 남음"
   }
@@ -224,7 +228,6 @@
  "desk_height_whole": "블록 높이는 정수입니다.",
  "desk_hide_notes": "출력 숨기기",
  "desk_history": "내역",
- "desk_home_posts": "게시물 %1$d개, 네트워크에 있음.",
  "desk_in_xmr": "XMR로",
  "desk_in_your_currency": "내 통화로",
  "desk_keep_alive": "살려 두기",

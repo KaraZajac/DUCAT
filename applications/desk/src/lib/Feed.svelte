@@ -2,8 +2,8 @@
   // The feed (§16.23): the posts of everyone you keep, newest first, with
   // your own among them — and the Post button that adds to yours.
   import { onMount } from "svelte";
-  import { t } from "./i18n.svelte";
-  import { api, confirmDanger, fmtTime, type ContactRow, type FeedBlock, type HomeView, type TimelineRow } from "./api";
+  import { t, tp } from "./i18n.svelte";
+  import { api, confirmDanger, fmtTime, type ContactRow, type FeedBlock, type HomeView, type TimelineRow, fmtBytes } from "./api";
   import { gen, drive } from "./state.svelte";
   import { icons } from "./icons";
 
@@ -100,9 +100,6 @@
     return p.split(/[\\/]/).pop() ?? p;
   }
 
-  function fmtBytes(n: number): string {
-    return n >= 1024 * 1024 ? (n / 1024 / 1024).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " kB";
-  }
 
   onMount(async () => { await refresh(); loaded = true; });
   $effect(() => { void gen.value; refresh(); });
@@ -152,7 +149,7 @@
         <div class="post-head">
           <div class="avatar">{(r.name || "?").slice(0, 1).toUpperCase()}</div>
           <div class="post-who">
-            <div class="title">{r.name || t("desk_unnamed")}{#if r.mine} <span class="meta">· {t("desk_you")}</span>{/if}</div>
+            <div class="title">{r.name || t("desk_unnamed")}{#if r.mine}<span class="meta">{" · "}{t("desk_you")}</span>{/if}</div>
             <div class="meta">{fmtTime(r.post.at)}{#if r.post.edited} · {t("desk_edited")}{/if}</div>
           </div>
           <div class="post-tools">
@@ -192,7 +189,7 @@
     <div class="card">
       <h3>{t("desk_your_home")}</h3>
       {#if home}
-        <p class="note">{home.has_head ? t("desk_home_posts", home.posts) : t("desk_no_home_yet_you")}</p>
+        <p class="note">{home.has_head ? tp("feed_home_posts", home.posts) : t("desk_no_home_yet_you")}</p>
         {#if home.has_head}<div class="actions"><button class="btn small" onclick={() => api.openSiteRoom(home!.record_key)}>{t("sites_open")}</button></div>{/if}
       {/if}
     </div>

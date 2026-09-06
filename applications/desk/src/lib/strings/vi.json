@@ -24,6 +24,10 @@
   "desk_subscribers_n": {
    "other": "%1$d người đăng ký"
   },
+  "feed_home_posts": {
+   "one": "%d bài, trên mạng.",
+   "other": "%d bài, trên mạng."
+  },
   "monero_blocks_to_go": {
    "other": "còn %1$d khối"
   }
@@ -224,7 +228,6 @@
  "desk_height_whole": "Chiều cao khối là một số nguyên.",
  "desk_hide_notes": "Ẩn đầu ra",
  "desk_history": "Lịch sử",
- "desk_home_posts": "%1$d bài, trên mạng.",
  "desk_in_xmr": "bằng XMR",
  "desk_in_your_currency": "Bằng tiền của bạn",
  "desk_keep_alive": "giữ sống",
