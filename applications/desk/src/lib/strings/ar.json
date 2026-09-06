@@ -68,6 +68,10 @@
    "one": "%d منشور، على الشبكة.",
    "other": "%d منشورات، على الشبكة."
   },
+  "feed_new_editions": {
+   "one": "%d منزل به منشورات جديدة.",
+   "other": "%d منزل بها منشورات جديدة."
+  },
   "monero_blocks_to_go": {
    "few": "%1$d كتل متبقية",
    "many": "%1$d كتلة متبقية",
@@ -253,7 +257,6 @@
  "desk_fee_x": "رسوم %1$s",
  "desk_feed": "الخلاصة",
  "desk_feed_empty": "لا شيء هنا بعد. أعطِ قلبًا لجهة اتصال للاحتفاظ بمنزلها، أو انشر شيئًا بنفسك.",
- "desk_feed_new_editions": "%1$d منزل به منشورات جديدة.",
  "desk_feed_nothing_new": "لا جديد.",
  "desk_feed_refresh": "البحث عن منشورات جديدة",
  "desk_fetching_pictures": "جارٍ جلب الصور…",
@@ -560,6 +563,7 @@
  "myprofile_signal_shape": "اسم مستخدم Signal يبدو مثل name.12 — اسم، ثم نقطة، ثم أرقام.",
  "myprofile_signal_too_long": "هذا أطول مما يمكن أن يكون عليه اسم مستخدم Signal.",
  "net_line_attached": "الالتحاق",
+ "net_line_node_id": "معرّف العقدة",
  "net_line_peers": "النظراء",
  "net_peers_value": "%1$d نشط، %2$d موثوق",
  "net_starting": "جارٍ البدء…",

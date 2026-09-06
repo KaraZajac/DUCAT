@@ -11,6 +11,7 @@
     <string name="net_line_route_capable">rota kurabilir</string>
     <string name="net_yes">evet</string>
     <string name="net_not_yet_routes">henüz değil — bu olmadan rota yok</string>
+    <string name="net_line_node_id">Düğüm kimliği</string>
     <string name="net_line_peers">eşler</string>
     <string name="net_peers_value">%1$d canlı, %2$d güvenilir</string>
     <string name="net_waiting">%1$d sn bekleniyor — bir düğümün rota kurabilmesi için önce kendisine nasıl ulaşılabildiğini çözmesi gerekir</string>

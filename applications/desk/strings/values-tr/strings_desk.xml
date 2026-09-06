@@ -329,7 +329,6 @@
     <string name="desk_open_post">Aç</string>
     <string name="desk_your_home">Evin</string>
     <string name="desk_feed_refresh">Yeni gönderilere bak</string>
-    <string name="desk_feed_new_editions">%1$d evde yeni gönderi var.</string>
     <string name="desk_feed_nothing_new">Yeni bir şey yok.</string>
     <string name="desk_delete_post">Gönderiyi sil</string>
     <string name="desk_confirm_delete_post">Bu gönderi silinsin mi? Sonraki sürümde akışından çıkar; eski sürümü tutanlar hâlâ görür.</string>

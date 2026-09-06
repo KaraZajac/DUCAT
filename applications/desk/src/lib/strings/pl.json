@@ -52,6 +52,10 @@
    "one": "%d wpis, w sieci.",
    "other": "%d wpisów, w sieci."
   },
+  "feed_new_editions": {
+   "one": "%d dom ma nowe wpisy.",
+   "other": "%d domów ma nowe wpisy."
+  },
   "monero_blocks_to_go": {
    "few": "pozostały %1$d bloki",
    "many": "pozostało %1$d bloków",
@@ -235,7 +239,6 @@
  "desk_fee_x": "opłata %1$s",
  "desk_feed": "Kanał",
  "desk_feed_empty": "Jeszcze nic tu nie ma. Daj kontaktowi serce, by zachować jego dom, albo opublikuj coś sam.",
- "desk_feed_new_editions": "%1$d dom(y) ma nowe wpisy.",
  "desk_feed_nothing_new": "Nic nowego.",
  "desk_feed_refresh": "Sprawdź nowe wpisy",
  "desk_fetching_pictures": "Pobieranie zdjęć…",
@@ -542,6 +545,7 @@
  "myprofile_signal_shape": "Nazwa użytkownika Signal wygląda jak nazwa.12 — nazwa, kropka, potem cyfry.",
  "myprofile_signal_too_long": "To dłuższe, niż może być nazwa użytkownika Signal.",
  "net_line_attached": "podłączony",
+ "net_line_node_id": "ID węzła",
  "net_line_peers": "peery",
  "net_peers_value": "%1$d aktywnych, %2$d niezawodnych",
  "net_starting": "Uruchamianie…",

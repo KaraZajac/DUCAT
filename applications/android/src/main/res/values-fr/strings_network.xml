@@ -11,6 +11,7 @@
     <string name="net_line_route_capable">apte aux routes</string>
     <string name="net_yes">oui</string>
     <string name="net_not_yet_routes">pas encore — aucune route avant ça</string>
+    <string name="net_line_node_id">ID du nœud</string>
     <string name="net_line_peers">pairs</string>
     <string name="net_peers_value">%1$d actifs, %2$d fiables</string>
     <string name="net_waiting">attente %1$ds — un nœud doit comprendre comment il est joignable avant de pouvoir construire une route</string>

@@ -28,6 +28,10 @@
    "one": "%d 条动态，已在网络上。",
    "other": "%d 条动态，已在网络上。"
   },
+  "feed_new_editions": {
+   "one": "%d 个主页有新动态。",
+   "other": "%d 个主页有新动态。"
+  },
   "monero_blocks_to_go": {
    "other": "还剩 %1$d 个区块"
   }
@@ -208,7 +212,6 @@
  "desk_fee_x": "手续费 %1$s",
  "desk_feed": "动态",
  "desk_feed_empty": "这里还没有内容。给联系人点心以保留其主页，或自己发布一些内容。",
- "desk_feed_new_editions": "%1$d 个主页有新动态。",
  "desk_feed_nothing_new": "没有新内容。",
  "desk_feed_refresh": "查看新动态",
  "desk_fetching_pictures": "正在获取图片…",
@@ -515,6 +518,7 @@
  "myprofile_signal_shape": "Signal 用户名形如 name.12——名字、一个点，然后是数字。",
  "myprofile_signal_too_long": "这超过了 Signal 用户名的最大长度。",
  "net_line_attached": "已接入",
+ "net_line_node_id": "节点 ID",
  "net_line_peers": "对等节点",
  "net_peers_value": "%1$d 个在线，%2$d 个可靠",
  "net_starting": "启动中…",

@@ -337,7 +337,6 @@
     <string name="desk_open_post">Открыть</string>
     <string name="desk_your_home">Ваш дом</string>
     <string name="desk_feed_refresh">Проверить новые записи</string>
-    <string name="desk_feed_new_editions">Новые записи: %1$d дом(ов).</string>
     <string name="desk_feed_nothing_new">Ничего нового.</string>
     <string name="desk_delete_post">Удалить запись</string>
     <string name="desk_confirm_delete_post">Удалить запись? Она уйдёт из ленты со следующим изданием; у тех, кто зеркалил старое, она останется.</string>

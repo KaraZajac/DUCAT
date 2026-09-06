@@ -36,6 +36,10 @@
    "one": "%d publicação, na rede.",
    "other": "%d publicações, na rede."
   },
+  "feed_new_editions": {
+   "one": "%d casa tem publicações novas.",
+   "other": "%d casas têm publicações novas."
+  },
   "monero_blocks_to_go": {
    "one": "falta %1$d bloco",
    "other": "faltam %1$d blocos"
@@ -217,7 +221,6 @@
  "desk_fee_x": "taxa %1$s",
  "desk_feed": "Feed",
  "desk_feed_empty": "Ainda nada aqui. Dá um coração a um contacto para guardar a sua casa, ou publica algo tu.",
- "desk_feed_new_editions": "%1$d casa(s) têm publicações novas.",
  "desk_feed_nothing_new": "Nada de novo.",
  "desk_feed_refresh": "Procurar publicações novas",
  "desk_fetching_pictures": "A obter fotos…",
@@ -524,6 +527,7 @@
  "myprofile_signal_shape": "Um nome de usuário do Signal se parece com nome.12 — um nome, um ponto e depois dígitos.",
  "myprofile_signal_too_long": "Isso é mais longo do que um nome de usuário do Signal pode ser.",
  "net_line_attached": "conectado",
+ "net_line_node_id": "ID do nó",
  "net_line_peers": "pares",
  "net_peers_value": "%1$d ativos, %2$d confiáveis",
  "net_starting": "Iniciando…",

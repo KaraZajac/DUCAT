@@ -11,6 +11,7 @@
     <string name="net_line_route_capable">경로 생성 가능</string>
     <string name="net_yes">예</string>
     <string name="net_not_yet_routes">아직 — 이게 되기 전엔 경로가 없어요</string>
+    <string name="net_line_node_id">노드 ID</string>
     <string name="net_line_peers">피어</string>
     <string name="net_peers_value">활성 %1$d, 신뢰 %2$d</string>
     <string name="net_waiting">%1$d초 대기 중 — 노드는 자기가 어떻게 도달 가능한지 알아내야 경로를 만들 수 있어요</string>

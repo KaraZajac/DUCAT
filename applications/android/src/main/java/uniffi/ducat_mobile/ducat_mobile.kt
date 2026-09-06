@@ -997,6 +997,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1194,6 +1196,8 @@ internal interface UniffiLib : Library {
     ): Unit
     fun uniffi_ducat_mobile_fn_func_node_dht_watch(`key`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Byte
+    fun uniffi_ducat_mobile_fn_func_node_id(uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_logs(uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_poll_call(uniffi_out_err: UniffiRustCallStatus, 
@@ -1592,6 +1596,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_dht_watch(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_id(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_node_logs(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_poll_call(
@@ -1984,6 +1990,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_dht_watch() != 21226.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_id() != 48640.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_logs() != 19323.toShort()) {
@@ -9658,6 +9667,21 @@ public object FfiConverterSequenceTypeFeedBlock: FfiConverterRustBuffer<List<Fee
     uniffiRustCallWithError(NodeException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_dht_watch(
         FfiConverterString.lower(`key`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * This node's id on the network, the `VLD0:…` string veilid's own tools
+         * print — the first thing to compare when two installs seem to fight
+         * over one identity, and the one thing support needs from a status
+         * screen. Cached once known; it does not change while the node runs.
+         */ fun `nodeId`(): kotlin.String? {
+            return FfiConverterOptionalString.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_id(
+        _status)
 }
     )
     }

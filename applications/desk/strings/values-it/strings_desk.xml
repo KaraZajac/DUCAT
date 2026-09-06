@@ -329,7 +329,6 @@
     <string name="desk_open_post">Apri</string>
     <string name="desk_your_home">La tua casa</string>
     <string name="desk_feed_refresh">Cerca nuovi post</string>
-    <string name="desk_feed_new_editions">%1$d case hanno nuovi post.</string>
     <string name="desk_feed_nothing_new">Niente di nuovo.</string>
     <string name="desk_delete_post">Elimina post</string>
     <string name="desk_confirm_delete_post">Eliminare questo post? Lascia il tuo feed con la prossima edizione; chi ha copiato quella vecchia ce l\'ha ancora.</string>

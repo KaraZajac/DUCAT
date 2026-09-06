@@ -36,6 +36,10 @@
    "one": "%d پست، در شبکه.",
    "other": "%d پست، در شبکه."
   },
+  "feed_new_editions": {
+   "one": "%d خانه پست جدید دارد.",
+   "other": "%d خانه پست جدید دارند."
+  },
   "monero_blocks_to_go": {
    "one": "%1$d بلاک مانده",
    "other": "%1$d بلاک مانده"
@@ -217,7 +221,6 @@
  "desk_fee_x": "کارمزد %1$s",
  "desk_feed": "خوراک",
  "desk_feed_empty": "هنوز چیزی اینجا نیست. به مخاطبی قلب بدهید تا خانه‌اش را نگه دارید، یا خودتان چیزی ارسال کنید.",
- "desk_feed_new_editions": "%1$d خانه پست جدید دارند.",
  "desk_feed_nothing_new": "چیز تازه‌ای نیست.",
  "desk_feed_refresh": "جستجوی پست‌های جدید",
  "desk_fetching_pictures": "در حال واکشی عکس‌ها…",
@@ -524,6 +527,7 @@
  "myprofile_signal_shape": "نام کاربری Signal شبیه name.12 است — یک نام، یک نقطه، سپس رقم‌ها.",
  "myprofile_signal_too_long": "این از حداکثر طول یک نام کاربری Signal بلندتر است.",
  "net_line_attached": "متصل",
+ "net_line_node_id": "شناسه گره",
  "net_line_peers": "همتاها",
  "net_peers_value": "%1$d زنده، %2$d قابل‌اتکا",
  "net_starting": "در حال شروع…",

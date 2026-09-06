@@ -325,7 +325,6 @@
     <string name="desk_open_post">開く</string>
     <string name="desk_your_home">あなたのホーム</string>
     <string name="desk_feed_refresh">新しい投稿を探す</string>
-    <string name="desk_feed_new_editions">%1$d 件のホームに新しい投稿があります。</string>
     <string name="desk_feed_nothing_new">新しいものはありません。</string>
     <string name="desk_delete_post">投稿を削除</string>
     <string name="desk_confirm_delete_post">この投稿を削除しますか？次の版でフィードから消えますが、旧版を保持している人はまだ持っています。</string>

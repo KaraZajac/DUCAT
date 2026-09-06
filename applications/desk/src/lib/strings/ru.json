@@ -52,6 +52,10 @@
    "one": "%d запись, в сети.",
    "other": "%d записей, в сети."
   },
+  "feed_new_editions": {
+   "one": "%d дом с новыми записями.",
+   "other": "%d домов с новыми записями."
+  },
   "monero_blocks_to_go": {
    "few": "осталось %1$d блока",
    "many": "осталось %1$d блоков",
@@ -235,7 +239,6 @@
  "desk_fee_x": "комиссия %1$s",
  "desk_feed": "Лента",
  "desk_feed_empty": "Здесь пока пусто. Поставьте сердце контакту, чтобы хранить его дом, или опубликуйте что-нибудь сами.",
- "desk_feed_new_editions": "Новые записи: %1$d дом(ов).",
  "desk_feed_nothing_new": "Ничего нового.",
  "desk_feed_refresh": "Проверить новые записи",
  "desk_fetching_pictures": "Загрузка фото…",
@@ -542,6 +545,7 @@
  "myprofile_signal_shape": "Имя пользователя Signal выглядит как name.12 — имя, точка, затем цифры.",
  "myprofile_signal_too_long": "Это длиннее, чем может быть имя пользователя Signal.",
  "net_line_attached": "прикреплён",
+ "net_line_node_id": "ID узла",
  "net_line_peers": "пиры",
  "net_peers_value": "%1$d активных, %2$d надёжных",
  "net_starting": "Запускаем…",

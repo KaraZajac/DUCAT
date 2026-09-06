@@ -11,6 +11,7 @@
     <string name="net_line_route_capable">قادرة على المسارات</string>
     <string name="net_yes">نعم</string>
     <string name="net_not_yet_routes">ليس بعد — لا مسارات قبل هذا</string>
+    <string name="net_line_node_id">معرّف العقدة</string>
     <string name="net_line_peers">النظراء</string>
     <string name="net_peers_value">%1$d نشط، %2$d موثوق</string>
     <string name="net_waiting">انتظار %1$d ث — على العقدة أن تعرف كيف يمكن الوصول إليها قبل أن تستطيع بناء مسار</string>

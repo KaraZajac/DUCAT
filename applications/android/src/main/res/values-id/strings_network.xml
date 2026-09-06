@@ -11,6 +11,7 @@
     <string name="net_line_route_capable">siap rute</string>
     <string name="net_yes">ya</string>
     <string name="net_not_yet_routes">belum — tidak ada rute sebelum ini</string>
+    <string name="net_line_node_id">ID node</string>
     <string name="net_line_peers">peer</string>
     <string name="net_peers_value">%1$d aktif, %2$d andal</string>
     <string name="net_waiting">menunggu %1$d dtk — node harus mencari tahu cara ia dijangkau sebelum bisa membangun rute</string>

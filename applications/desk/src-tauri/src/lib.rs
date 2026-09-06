@@ -35,6 +35,8 @@ struct Status {
     state: String,
     error: Option<String>,
     data_dir: String,
+    /// `VLD0:…` — what to compare when two installs seem to share one identity.
+    node_id: Option<String>,
 }
 
 #[tauri::command]
@@ -52,6 +54,7 @@ fn status() -> Result<Status, String> {
         state: n.state,
         error: n.error,
         data_dir: a.root().to_string_lossy().into_owned(),
+        node_id: ducat_mobile::node::node_id(),
     })
 }
 

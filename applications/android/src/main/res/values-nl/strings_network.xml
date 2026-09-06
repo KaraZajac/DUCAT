@@ -11,6 +11,7 @@
     <string name="net_line_route_capable">route-geschikt</string>
     <string name="net_yes">ja</string>
     <string name="net_not_yet_routes">nog niet — geen routes tot dit er is</string>
+    <string name="net_line_node_id">Node-ID</string>
     <string name="net_line_peers">peers</string>
     <string name="net_peers_value">%1$d live, %2$d betrouwbaar</string>
     <string name="net_waiting">wacht %1$ds — een node moet eerst uitzoeken hoe hij bereikbaar is voordat hij een route kan bouwen</string>

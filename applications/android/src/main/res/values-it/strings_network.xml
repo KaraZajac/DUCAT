@@ -11,6 +11,7 @@
     <string name="net_line_route_capable">in grado di creare rotte</string>
     <string name="net_yes">sì</string>
     <string name="net_not_yet_routes">non ancora — niente rotte finché manca questo</string>
+    <string name="net_line_node_id">ID del nodo</string>
     <string name="net_line_peers">peer</string>
     <string name="net_peers_value">%1$d attivi, %2$d affidabili</string>
     <string name="net_waiting">attesa di %1$ds — un nodo deve capire come è raggiungibile prima di poter costruire una rotta</string>

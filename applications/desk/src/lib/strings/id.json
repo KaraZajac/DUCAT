@@ -28,6 +28,10 @@
    "one": "%d kiriman, di jaringan.",
    "other": "%d kiriman, di jaringan."
   },
+  "feed_new_editions": {
+   "one": "%d rumah punya kiriman baru.",
+   "other": "%d rumah punya kiriman baru."
+  },
   "monero_blocks_to_go": {
    "other": "%1$d blok lagi"
   }
@@ -208,7 +212,6 @@
  "desk_fee_x": "biaya %1$s",
  "desk_feed": "Beranda",
  "desk_feed_empty": "Belum ada apa-apa. Beri hati pada kontak untuk menyimpan rumahnya, atau kirim sesuatu sendiri.",
- "desk_feed_new_editions": "%1$d rumah punya kiriman baru.",
  "desk_feed_nothing_new": "Tidak ada yang baru.",
  "desk_feed_refresh": "Cari kiriman baru",
  "desk_fetching_pictures": "Mengambil foto…",
@@ -515,6 +518,7 @@
  "myprofile_signal_shape": "Nama pengguna Signal terlihat seperti nama.12 — nama, titik, lalu angka.",
  "myprofile_signal_too_long": "Itu lebih panjang dari yang mungkin untuk nama pengguna Signal.",
  "net_line_attached": "terhubung",
+ "net_line_node_id": "ID node",
  "net_line_peers": "peer",
  "net_peers_value": "%1$d aktif, %2$d andal",
  "net_starting": "Memulai…",

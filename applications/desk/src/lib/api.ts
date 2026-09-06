@@ -16,6 +16,7 @@ export interface Status {
   state: string;
   error: string | null;
   data_dir: string;
+  node_id?: string | null;
 }
 
 export interface Progress {

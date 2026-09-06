@@ -28,6 +28,10 @@
    "one": "%d bài, trên mạng.",
    "other": "%d bài, trên mạng."
   },
+  "feed_new_editions": {
+   "one": "%d nhà có bài mới.",
+   "other": "%d nhà có bài mới."
+  },
   "monero_blocks_to_go": {
    "other": "còn %1$d khối"
   }
@@ -208,7 +212,6 @@
  "desk_fee_x": "phí %1$s",
  "desk_feed": "Dòng tin",
  "desk_feed_empty": "Chưa có gì ở đây. Thả tim một liên hệ để giữ nhà của họ, hoặc tự đăng gì đó.",
- "desk_feed_new_editions": "%1$d nhà có bài mới.",
  "desk_feed_nothing_new": "Không có gì mới.",
  "desk_feed_refresh": "Tìm bài mới",
  "desk_fetching_pictures": "Đang tải ảnh…",
@@ -515,6 +518,7 @@
  "myprofile_signal_shape": "Tên người dùng Signal có dạng ten.12 — một cái tên, một dấu chấm, rồi các chữ số.",
  "myprofile_signal_too_long": "Chuỗi này dài hơn mức một tên người dùng Signal có thể có.",
  "net_line_attached": "đã gắn kết",
+ "net_line_node_id": "ID nút",
  "net_line_peers": "peer",
  "net_peers_value": "%1$d trực tuyến, %2$d đáng tin",
  "net_starting": "Đang khởi động…",

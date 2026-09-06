@@ -325,7 +325,6 @@
     <string name="desk_open_post">Mở</string>
     <string name="desk_your_home">Nhà của bạn</string>
     <string name="desk_feed_refresh">Tìm bài mới</string>
-    <string name="desk_feed_new_editions">%1$d nhà có bài mới.</string>
     <string name="desk_feed_nothing_new">Không có gì mới.</string>
     <string name="desk_delete_post">Xóa bài</string>
     <string name="desk_confirm_delete_post">Xóa bài này? Nó rời dòng tin ở lần xuất bản tới; ai đã lưu bản cũ vẫn còn giữ.</string>

@@ -329,7 +329,6 @@
     <string name="desk_open_post">باز کردن</string>
     <string name="desk_your_home">خانه شما</string>
     <string name="desk_feed_refresh">جستجوی پست‌های جدید</string>
-    <string name="desk_feed_new_editions">%1$d خانه پست جدید دارند.</string>
     <string name="desk_feed_nothing_new">چیز تازه‌ای نیست.</string>
     <string name="desk_delete_post">حذف پست</string>
     <string name="desk_confirm_delete_post">این پست حذف شود؟ در نسخه بعدی از خوراک شما می‌رود؛ هر کس نسخه قدیمی را آینه کرده هنوز آن را دارد.</string>

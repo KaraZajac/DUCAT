@@ -28,6 +28,10 @@
    "one": "%d 件の投稿、ネットワーク上。",
    "other": "%d 件の投稿、ネットワーク上。"
   },
+  "feed_new_editions": {
+   "one": "%d 件のホームに新しい投稿があります。",
+   "other": "%d 件のホームに新しい投稿があります。"
+  },
   "monero_blocks_to_go": {
    "other": "残り%1$dブロック"
   }
@@ -208,7 +212,6 @@
  "desk_fee_x": "手数料 %1$s",
  "desk_feed": "フィード",
  "desk_feed_empty": "まだ何もありません。連絡先にハートを付けてその人のホームを保持するか、自分で投稿しましょう。",
- "desk_feed_new_editions": "%1$d 件のホームに新しい投稿があります。",
  "desk_feed_nothing_new": "新しいものはありません。",
  "desk_feed_refresh": "新しい投稿を探す",
  "desk_fetching_pictures": "写真を取得中…",
@@ -515,6 +518,7 @@
  "myprofile_signal_shape": "Signalのユーザー名は name.12 の形です — 名前、ドット、そして数字。",
  "myprofile_signal_too_long": "Signalのユーザー名として長すぎます。",
  "net_line_attached": "接続",
+ "net_line_node_id": "ノードID",
  "net_line_peers": "ピア",
  "net_peers_value": "稼働%1$d、信頼%2$d",
  "net_starting": "起動中…",

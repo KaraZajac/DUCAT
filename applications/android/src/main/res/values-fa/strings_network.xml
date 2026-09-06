@@ -11,6 +11,7 @@
     <string name="net_line_route_capable">قادر به مسیرسازی</string>
     <string name="net_yes">بله</string>
     <string name="net_not_yet_routes">هنوز نه — تا این نشود مسیری نیست</string>
+    <string name="net_line_node_id">شناسه گره</string>
     <string name="net_line_peers">همتاها</string>
     <string name="net_peers_value">%1$d زنده، %2$d قابل‌اتکا</string>
     <string name="net_waiting">%1$d ثانیه در انتظار — نود باید اول بفهمد چطور در دسترس است تا بتواند مسیری بسازد</string>

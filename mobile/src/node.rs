@@ -206,6 +206,28 @@ pub fn node_debug(command: String) -> Result<String, NodeError> {
     rt.block_on(async move { api.debug(command).await.map_err(|e| NodeError::Failed(e.to_string())) })
 }
 
+/// This node's id on the network, the `VLD0:…` string veilid's own tools
+/// print — the first thing to compare when two installs seem to fight
+/// over one identity, and the one thing support needs from a status
+/// screen. Cached once known; it does not change while the node runs.
+#[uniffi::export]
+pub fn node_id() -> Option<String> {
+    static ID: std::sync::OnceLock<String> = std::sync::OnceLock::new();
+    if let Some(id) = ID.get() {
+        return Some(id.clone());
+    }
+    let (api, rt) = swarm_handles()?;
+    let out = rt.block_on(async move { api.debug("nodeinfo".into()).await.ok() })?;
+    let line = out.lines().find(|l| l.starts_with("Node Ids:"))?;
+    let inner = line.split_once('[')?.1.split(']').next()?;
+    let id = inner.split(',').next()?.trim().to_string();
+    if id.is_empty() {
+        return None;
+    }
+    let _ = ID.set(id.clone());
+    Some(id)
+}
+
 /// A line of our own into the same ring — the swarm's fetch loop lives and
 /// dies entirely between two FFI calls, and on a phone that death is
 /// invisible without this.

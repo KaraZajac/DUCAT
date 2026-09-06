@@ -28,6 +28,10 @@
    "one": "%d โพสต์ อยู่บนเครือข่าย",
    "other": "%d โพสต์ อยู่บนเครือข่าย"
   },
+  "feed_new_editions": {
+   "one": "%d บ้านมีโพสต์ใหม่",
+   "other": "%d บ้านมีโพสต์ใหม่"
+  },
   "monero_blocks_to_go": {
    "other": "เหลืออีก %1$d บล็อก"
   }
@@ -208,7 +212,6 @@
  "desk_fee_x": "ค่าธรรมเนียม %1$s",
  "desk_feed": "ฟีด",
  "desk_feed_empty": "ยังไม่มีอะไรที่นี่ ให้หัวใจผู้ติดต่อเพื่อเก็บบ้านของเขา หรือโพสต์อะไรสักอย่างเอง",
- "desk_feed_new_editions": "%1$d บ้านมีโพสต์ใหม่",
  "desk_feed_nothing_new": "ไม่มีอะไรใหม่",
  "desk_feed_refresh": "ค้นหาโพสต์ใหม่",
  "desk_fetching_pictures": "กำลังดึงรูป…",
@@ -515,6 +518,7 @@
  "myprofile_signal_shape": "ชื่อผู้ใช้ Signal มีรูปแบบ name.12 — ชื่อ จุด แล้วตามด้วยตัวเลข",
  "myprofile_signal_too_long": "ยาวเกินกว่าชื่อผู้ใช้ Signal จะเป็นได้",
  "net_line_attached": "เชื่อมเข้าเครือข่าย",
+ "net_line_node_id": "รหัสโหนด",
  "net_line_peers": "เพียร์",
  "net_peers_value": "ออนไลน์ %1$d, เชื่อถือได้ %2$d",
  "net_starting": "กำลังเริ่ม…",

@@ -333,7 +333,6 @@
     <string name="desk_open_post">Open</string>
     <string name="desk_your_home">Your home</string>
     <string name="desk_feed_refresh">Look for new posts</string>
-    <string name="desk_feed_new_editions">%1$d home(s) have new posts.</string>
     <string name="desk_feed_nothing_new">Nothing new.</string>
     <string name="desk_delete_post">Delete post</string>
     <string name="desk_confirm_delete_post">Delete this post? It leaves your feed at the next edition; anyone who mirrored the old edition still has it.</string>

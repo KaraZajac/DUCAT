@@ -47,7 +47,7 @@
     try {
       const n = await api.refreshFeeds();
       await refresh();
-      msg = n > 0 ? t("desk_feed_new_editions", n) : t("desk_feed_nothing_new");
+      msg = n > 0 ? tp("feed_new_editions", n) : t("desk_feed_nothing_new");
     } catch (e) { err = String(e); } finally { looking = false; }
   }
 

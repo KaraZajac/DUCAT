@@ -329,7 +329,6 @@
     <string name="desk_open_post">Ouvrir</string>
     <string name="desk_your_home">Votre chez-soi</string>
     <string name="desk_feed_refresh">Chercher de nouvelles publications</string>
-    <string name="desk_feed_new_editions">%1$d chez-soi ont de nouvelles publications.</string>
     <string name="desk_feed_nothing_new">Rien de nouveau.</string>
     <string name="desk_delete_post">Supprimer la publication</string>
     <string name="desk_confirm_delete_post">Supprimer cette publication ? Elle quittera votre fil à la prochaine édition ; ceux qui ont gardé l\'ancienne l\'ont encore.</string>

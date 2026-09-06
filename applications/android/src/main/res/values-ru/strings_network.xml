@@ -11,6 +11,7 @@
     <string name="net_line_route_capable">готов к маршрутам</string>
     <string name="net_yes">да</string>
     <string name="net_not_yet_routes">ещё нет — без этого маршрутов не будет</string>
+    <string name="net_line_node_id">ID узла</string>
     <string name="net_line_peers">пиры</string>
     <string name="net_peers_value">%1$d активных, %2$d надёжных</string>
     <string name="net_waiting">ждём %1$d с — узлу нужно понять, как он достижим, прежде чем строить маршрут</string>

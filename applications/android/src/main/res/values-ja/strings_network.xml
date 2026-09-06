@@ -11,6 +11,7 @@
     <string name="net_line_route_capable">経路構築可能</string>
     <string name="net_yes">はい</string>
     <string name="net_not_yet_routes">まだです — これが済むまで経路は作れません</string>
+    <string name="net_line_node_id">ノードID</string>
     <string name="net_line_peers">ピア</string>
     <string name="net_peers_value">稼働%1$d、信頼%2$d</string>
     <string name="net_waiting">待機中 %1$d秒 — 経路を作る前に、ノードは自分がどう到達可能かを把握する必要があります</string>

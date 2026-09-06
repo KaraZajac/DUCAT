@@ -36,6 +36,10 @@
    "one": "%d पोस्ट, नेटवर्क पर।",
    "other": "%d पोस्ट, नेटवर्क पर।"
   },
+  "feed_new_editions": {
+   "one": "%d घर में नई पोस्ट हैं।",
+   "other": "%d घरों में नई पोस्ट हैं।"
+  },
   "monero_blocks_to_go": {
    "one": "%1$d ब्लॉक बाकी",
    "other": "%1$d ब्लॉक बाकी"
@@ -217,7 +221,6 @@
  "desk_fee_x": "शुल्क %1$s",
  "desk_feed": "फ़ीड",
  "desk_feed_empty": "अभी यहाँ कुछ नहीं है। किसी संपर्क को दिल दें ताकि उनका घर रखें, या खुद कुछ पोस्ट करें।",
- "desk_feed_new_editions": "%1$d घर में नई पोस्ट हैं।",
  "desk_feed_nothing_new": "कुछ नया नहीं।",
  "desk_feed_refresh": "नई पोस्ट देखें",
  "desk_fetching_pictures": "तस्वीरें लाई जा रही हैं…",
@@ -524,6 +527,7 @@
  "myprofile_signal_shape": "Signal उपयोगकर्ता नाम name.12 जैसा दिखता है — एक नाम, एक बिंदु, फिर अंक।",
  "myprofile_signal_too_long": "यह Signal उपयोगकर्ता नाम की अधिकतम लंबाई से ज़्यादा है।",
  "net_line_attached": "जुड़ा",
+ "net_line_node_id": "नोड आईडी",
  "net_line_peers": "पीयर",
  "net_peers_value": "%1$d सक्रिय, %2$d भरोसेमंद",
  "net_starting": "शुरू हो रहा है…",

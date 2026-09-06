@@ -345,7 +345,6 @@
     <string name="desk_open_post">فتح</string>
     <string name="desk_your_home">منزلك</string>
     <string name="desk_feed_refresh">البحث عن منشورات جديدة</string>
-    <string name="desk_feed_new_editions">%1$d منزل به منشورات جديدة.</string>
     <string name="desk_feed_nothing_new">لا جديد.</string>
     <string name="desk_delete_post">حذف المنشور</string>
     <string name="desk_confirm_delete_post">حذف هذا المنشور؟ سيغادر خلاصتك في الإصدار التالي؛ ومن نسخ الإصدار القديم ما زال لديه.</string>

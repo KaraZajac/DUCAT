@@ -325,7 +325,6 @@
     <string name="desk_open_post">打开</string>
     <string name="desk_your_home">你的主页</string>
     <string name="desk_feed_refresh">查看新动态</string>
-    <string name="desk_feed_new_editions">%1$d 个主页有新动态。</string>
     <string name="desk_feed_nothing_new">没有新内容。</string>
     <string name="desk_delete_post">删除动态</string>
     <string name="desk_confirm_delete_post">删除此动态？它将在下一版从你的动态中消失；镜像了旧版的人仍然拥有它。</string>

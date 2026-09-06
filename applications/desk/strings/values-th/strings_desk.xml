@@ -325,7 +325,6 @@
     <string name="desk_open_post">เปิด</string>
     <string name="desk_your_home">บ้านของคุณ</string>
     <string name="desk_feed_refresh">ค้นหาโพสต์ใหม่</string>
-    <string name="desk_feed_new_editions">%1$d บ้านมีโพสต์ใหม่</string>
     <string name="desk_feed_nothing_new">ไม่มีอะไรใหม่</string>
     <string name="desk_delete_post">ลบโพสต์</string>
     <string name="desk_confirm_delete_post">ลบโพสต์นี้? มันจะออกจากฟีดในฉบับถัดไป ใครที่มิเรอร์ฉบับเก่ายังคงมีอยู่</string>

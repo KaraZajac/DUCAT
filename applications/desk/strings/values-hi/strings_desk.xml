@@ -329,7 +329,6 @@
     <string name="desk_open_post">खोलें</string>
     <string name="desk_your_home">आपका घर</string>
     <string name="desk_feed_refresh">नई पोस्ट देखें</string>
-    <string name="desk_feed_new_editions">%1$d घर में नई पोस्ट हैं।</string>
     <string name="desk_feed_nothing_new">कुछ नया नहीं।</string>
     <string name="desk_delete_post">पोस्ट हटाएँ</string>
     <string name="desk_confirm_delete_post">यह पोस्ट हटाएँ? यह अगले संस्करण में आपके फ़ीड से हट जाएगी; जिसने पुराना संस्करण रखा है, उसके पास रहेगी।</string>

@@ -329,7 +329,6 @@
     <string name="desk_open_post">Öffnen</string>
     <string name="desk_your_home">Dein Zuhause</string>
     <string name="desk_feed_refresh">Nach neuen Beiträgen sehen</string>
-    <string name="desk_feed_new_editions">%1$d Zuhause haben neue Beiträge.</string>
     <string name="desk_feed_nothing_new">Nichts Neues.</string>
     <string name="desk_delete_post">Beitrag löschen</string>
     <string name="desk_confirm_delete_post">Diesen Beitrag löschen? Er verschwindet mit der nächsten Ausgabe; wer die alte gespiegelt hat, behält sie.</string>

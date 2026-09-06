@@ -28,6 +28,10 @@
    "one": "게시물 %d개, 네트워크에 있음.",
    "other": "게시물 %d개, 네트워크에 있음."
   },
+  "feed_new_editions": {
+   "one": "%d개의 홈에 새 게시물이 있습니다.",
+   "other": "%d개의 홈에 새 게시물이 있습니다."
+  },
   "monero_blocks_to_go": {
    "other": "%1$d블록 남음"
   }
@@ -208,7 +212,6 @@
  "desk_fee_x": "수수료 %1$s",
  "desk_feed": "피드",
  "desk_feed_empty": "아직 아무것도 없습니다. 연락처에 하트를 눌러 그들의 홈을 간직하거나, 직접 무언가를 게시하세요.",
- "desk_feed_new_editions": "%1$d개의 홈에 새 게시물이 있습니다.",
  "desk_feed_nothing_new": "새로운 것이 없습니다.",
  "desk_feed_refresh": "새 게시물 찾기",
  "desk_fetching_pictures": "사진 가져오는 중…",
@@ -515,6 +518,7 @@
  "myprofile_signal_shape": "Signal 사용자 이름은 name.12 모양이에요 — 이름, 점, 그다음 숫자.",
  "myprofile_signal_too_long": "Signal 사용자 이름으로는 너무 길어요.",
  "net_line_attached": "접속",
+ "net_line_node_id": "노드 ID",
  "net_line_peers": "피어",
  "net_peers_value": "활성 %1$d, 신뢰 %2$d",
  "net_starting": "시작하는 중…",

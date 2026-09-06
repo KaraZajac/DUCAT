@@ -36,6 +36,7 @@ import uniffi.ducat_mobile.nodeTestRoute
 fun NetworkPanel(storageDir: String) {
     val context = androidx.compose.ui.platform.LocalContext.current
     var status by remember { mutableStateOf(NodeStatus(false, false, false, 0u, 0u, "stopped", null)) }
+    var nodeId by remember { mutableStateOf<String?>(null) }
     var starting by remember { mutableStateOf(false) }
     var routeResult by remember { mutableStateOf<String?>(null) }
     var elapsed by remember { mutableStateOf(0) }
@@ -44,6 +45,7 @@ fun NetworkPanel(storageDir: String) {
     // what is already happening rather than by offering to start something.
     LaunchedEffect(Unit) {
         status = withContext(Dispatchers.IO) { nodeStatus() }
+        if (nodeId == null) nodeId = withContext(Dispatchers.IO) { runCatching { uniffi.ducat_mobile.nodeId() }.getOrNull() }
     }
 
     // Poll while running. Readiness takes seconds to minutes, and a screen that
@@ -52,6 +54,7 @@ fun NetworkPanel(storageDir: String) {
         while (status.running) {
             delay(2000)
             status = withContext(Dispatchers.IO) { nodeStatus() }
+        if (nodeId == null) nodeId = withContext(Dispatchers.IO) { runCatching { uniffi.ducat_mobile.nodeId() }.getOrNull() }
             elapsed += 2
         }
     }
@@ -94,6 +97,9 @@ fun NetworkPanel(storageDir: String) {
                     status.peers.toLong(), status.reliablePeers.toLong()),
                 status.peers > 0u,
             )
+            // The id veilid's own tools print: the first thing to compare
+            // when two installs seem to be fighting over one identity.
+            nodeId?.let { Line(stringResource(R.string.net_line_node_id), it, true) }
             if (status.running && !status.publicInternetReady) {
                 Text(
                     stringResource(R.string.net_waiting, elapsed),
@@ -161,6 +167,7 @@ fun NetworkPanel(storageDir: String) {
                 ?.let { it.saidWhy() ?: it.javaClass.simpleName }
         }
         status = withContext(Dispatchers.IO) { nodeStatus() }
+        if (nodeId == null) nodeId = withContext(Dispatchers.IO) { runCatching { uniffi.ducat_mobile.nodeId() }.getOrNull() }
         if (result != null) status = status.copy(error = startupNote(context, result))
         starting = false
     }

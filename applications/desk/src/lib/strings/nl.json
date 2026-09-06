@@ -36,6 +36,10 @@
    "one": "%d bericht, op het netwerk.",
    "other": "%d berichten, op het netwerk."
   },
+  "feed_new_editions": {
+   "one": "%d thuis heeft nieuwe berichten.",
+   "other": "%d thuis hebben nieuwe berichten."
+  },
   "monero_blocks_to_go": {
    "one": "nog %1$d blok",
    "other": "nog %1$d blokken"
@@ -217,7 +221,6 @@
  "desk_fee_x": "kosten %1$s",
  "desk_feed": "Feed",
  "desk_feed_empty": "Nog niets hier. Geef een contact een hart om zijn thuis te bewaren, of plaats zelf iets.",
- "desk_feed_new_editions": "%1$d thuis hebben nieuwe berichten.",
  "desk_feed_nothing_new": "Niets nieuws.",
  "desk_feed_refresh": "Naar nieuwe berichten kijken",
  "desk_fetching_pictures": "Foto’s ophalen…",
@@ -524,6 +527,7 @@
  "myprofile_signal_shape": "Een Signal-gebruikersnaam ziet eruit als naam.12 — een naam, een punt, dan cijfers.",
  "myprofile_signal_too_long": "Dat is langer dan een Signal-gebruikersnaam kan zijn.",
  "net_line_attached": "gekoppeld",
+ "net_line_node_id": "Node-ID",
  "net_line_peers": "peers",
  "net_peers_value": "%1$d live, %2$d betrouwbaar",
  "net_starting": "Starten…",

@@ -337,7 +337,6 @@
     <string name="desk_open_post">Відкрити</string>
     <string name="desk_your_home">Ваш дім</string>
     <string name="desk_feed_refresh">Перевірити нові дописи</string>
-    <string name="desk_feed_new_editions">Нові дописи: %1$d дім(ів).</string>
     <string name="desk_feed_nothing_new">Нічого нового.</string>
     <string name="desk_delete_post">Видалити допис</string>
     <string name="desk_confirm_delete_post">Видалити допис? Він зникне зі стрічки з наступним виданням; у тих, хто дзеркалив старе, він залишиться.</string>

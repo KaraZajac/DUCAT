@@ -52,6 +52,10 @@
    "one": "%d допис, у мережі.",
    "other": "%d дописів, у мережі."
   },
+  "feed_new_editions": {
+   "one": "%d дім з новими дописами.",
+   "other": "%d домів з новими дописами."
+  },
   "monero_blocks_to_go": {
    "few": "лишилося %1$d блоки",
    "many": "лишилося %1$d блоків",
@@ -235,7 +239,6 @@
  "desk_fee_x": "комісія %1$s",
  "desk_feed": "Стрічка",
  "desk_feed_empty": "Тут поки порожньо. Поставте серце контакту, щоб зберігати його дім, або опублікуйте щось самі.",
- "desk_feed_new_editions": "Нові дописи: %1$d дім(ів).",
  "desk_feed_nothing_new": "Нічого нового.",
  "desk_feed_refresh": "Перевірити нові дописи",
  "desk_fetching_pictures": "Завантаження фото…",
@@ -542,6 +545,7 @@
  "myprofile_signal_shape": "Ім'я користувача Signal має вигляд name.12 — ім'я, крапка, потім цифри.",
  "myprofile_signal_too_long": "Це довше, ніж може бути ім'я користувача Signal.",
  "net_line_attached": "приєднано",
+ "net_line_node_id": "ID вузла",
  "net_line_peers": "піри",
  "net_peers_value": "%1$d живих, %2$d надійних",
  "net_starting": "Запуск…",

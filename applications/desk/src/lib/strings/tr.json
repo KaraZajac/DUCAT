@@ -36,6 +36,10 @@
    "one": "%d gönderi, ağda.",
    "other": "%d gönderi, ağda."
   },
+  "feed_new_editions": {
+   "one": "%d evde yeni gönderi var.",
+   "other": "%d evde yeni gönderi var."
+  },
   "monero_blocks_to_go": {
    "one": "%1$d blok kaldı",
    "other": "%1$d blok kaldı"
@@ -217,7 +221,6 @@
  "desk_fee_x": "ücret %1$s",
  "desk_feed": "Akış",
  "desk_feed_empty": "Henüz burada bir şey yok. Bir kişinin evini tutmak için kalp ver ya da kendin bir şey paylaş.",
- "desk_feed_new_editions": "%1$d evde yeni gönderi var.",
  "desk_feed_nothing_new": "Yeni bir şey yok.",
  "desk_feed_refresh": "Yeni gönderilere bak",
  "desk_fetching_pictures": "Fotoğraflar alınıyor…",
@@ -524,6 +527,7 @@
  "myprofile_signal_shape": "Bir Signal kullanıcı adı ad.12 gibi görünür — bir ad, bir nokta, sonra rakamlar.",
  "myprofile_signal_too_long": "Bu, bir Signal kullanıcı adının olabileceğinden daha uzun.",
  "net_line_attached": "bağlı",
+ "net_line_node_id": "Düğüm kimliği",
  "net_line_peers": "eşler",
  "net_peers_value": "%1$d canlı, %2$d güvenilir",
  "net_starting": "Başlatılıyor…",

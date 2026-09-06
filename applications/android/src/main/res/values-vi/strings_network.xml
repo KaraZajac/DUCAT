@@ -11,6 +11,7 @@
     <string name="net_line_route_capable">tạo được tuyến</string>
     <string name="net_yes">rồi</string>
     <string name="net_not_yet_routes">chưa — chưa có tuyến nào cho tới khi xong phần này</string>
+    <string name="net_line_node_id">ID nút</string>
     <string name="net_line_peers">peer</string>
     <string name="net_peers_value">%1$d trực tuyến, %2$d đáng tin</string>
     <string name="net_waiting">chờ %1$d giây — node phải tự tìm ra cách nó được liên lạc tới trước khi dựng được tuyến</string>

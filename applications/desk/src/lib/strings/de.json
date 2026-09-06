@@ -36,6 +36,10 @@
    "one": "%d Beitrag, im Netz.",
    "other": "%d Beiträge, im Netz."
   },
+  "feed_new_editions": {
+   "one": "%d Zuhause hat neue Beiträge.",
+   "other": "%d Zuhause haben neue Beiträge."
+  },
   "monero_blocks_to_go": {
    "one": "noch %1$d Block",
    "other": "noch %1$d Blöcke"
@@ -217,7 +221,6 @@
  "desk_fee_x": "Gebühr %1$s",
  "desk_feed": "Feed",
  "desk_feed_empty": "Noch nichts hier. Gib einem Kontakt ein Herz, um sein Zuhause zu behalten, oder poste selbst etwas.",
- "desk_feed_new_editions": "%1$d Zuhause haben neue Beiträge.",
  "desk_feed_nothing_new": "Nichts Neues.",
  "desk_feed_refresh": "Nach neuen Beiträgen sehen",
  "desk_fetching_pictures": "Bilder werden geholt…",
@@ -524,6 +527,7 @@
  "myprofile_signal_shape": "Ein Signal-Benutzername sieht aus wie name.12 — ein Name, ein Punkt, dann Ziffern.",
  "myprofile_signal_too_long": "Das ist länger, als ein Signal-Benutzername sein kann.",
  "net_line_attached": "verbunden",
+ "net_line_node_id": "Knoten-ID",
  "net_line_peers": "Peers",
  "net_peers_value": "%1$d aktiv, %2$d zuverlässig",
  "net_starting": "Startet…",

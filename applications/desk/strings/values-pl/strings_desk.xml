@@ -337,7 +337,6 @@
     <string name="desk_open_post">Otwórz</string>
     <string name="desk_your_home">Twój dom</string>
     <string name="desk_feed_refresh">Sprawdź nowe wpisy</string>
-    <string name="desk_feed_new_editions">%1$d dom(y) ma nowe wpisy.</string>
     <string name="desk_feed_nothing_new">Nic nowego.</string>
     <string name="desk_delete_post">Usuń wpis</string>
     <string name="desk_confirm_delete_post">Usunąć ten wpis? Zniknie z kanału przy następnym wydaniu; kto skopiował stare, nadal je ma.</string>

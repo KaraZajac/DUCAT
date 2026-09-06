@@ -329,7 +329,6 @@
     <string name="desk_open_post">Abrir</string>
     <string name="desk_your_home">A tua casa</string>
     <string name="desk_feed_refresh">Procurar publicações novas</string>
-    <string name="desk_feed_new_editions">%1$d casa(s) têm publicações novas.</string>
     <string name="desk_feed_nothing_new">Nada de novo.</string>
     <string name="desk_delete_post">Apagar publicação</string>
     <string name="desk_confirm_delete_post">Apagar esta publicação? Sai do teu feed na próxima edição; quem espelhou a antiga ainda a tem.</string>

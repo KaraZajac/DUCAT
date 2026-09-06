@@ -11,6 +11,7 @@
     <string name="net_line_route_capable">可建路由</string>
     <string name="net_yes">是</string>
     <string name="net_not_yet_routes">还不行 — 在此之前没有路由</string>
+    <string name="net_line_node_id">节点 ID</string>
     <string name="net_line_peers">对等节点</string>
     <string name="net_peers_value">%1$d 个在线，%2$d 个可靠</string>
     <string name="net_waiting">已等待 %1$d 秒 — 节点得先弄清自己如何可达，才能建路由</string>

@@ -325,7 +325,6 @@
     <string name="desk_open_post">열기</string>
     <string name="desk_your_home">내 홈</string>
     <string name="desk_feed_refresh">새 게시물 찾기</string>
-    <string name="desk_feed_new_editions">%1$d개의 홈에 새 게시물이 있습니다.</string>
     <string name="desk_feed_nothing_new">새로운 것이 없습니다.</string>
     <string name="desk_delete_post">게시물 삭제</string>
     <string name="desk_confirm_delete_post">이 게시물을 삭제할까요? 다음 판에서 피드에서 사라지며, 이전 판을 미러한 사람은 여전히 갖고 있습니다.</string>
