@@ -388,6 +388,26 @@ h4 { margin: 16px 0 6px; font-size: 14px; color: var(--muted); text-transform: u
 .shot { position: relative; }
 .shot .actions { position: absolute; bottom: 4px; left: 6px; gap: 10px; background: rgba(0,0,0,0.45); border-radius: 6px; padding: 2px 6px; }
 .shot .linkish { color: #fff; }
+/* The bundle behind a listing (§16.18.3): the pictures as a grid, the
+   words as a post, the details as a table, the files as chips. */
+.found-detail .grow { flex: 1; min-width: 240px; }
+.pics { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 12px; }
+.pic { padding: 0; border: 1px solid var(--line); border-radius: var(--radius-s); background: var(--surface-2); overflow: hidden; cursor: zoom-in; aspect-ratio: 4 / 3; }
+.pic:hover { border-color: var(--primary); }
+.pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.listing-words { margin-top: 12px; max-width: 72ch; }
+.details { border-collapse: collapse; font-size: 13.5px; margin: 0 8px 4px; }
+.details th { text-align: start; color: var(--muted); font-weight: 500; padding: 4px 16px 4px 0; vertical-align: top; white-space: nowrap; }
+.details td { padding: 4px 0; unicode-bidi: plaintext; }
+.details tr + tr th, .details tr + tr td { border-top: 1px solid var(--line); }
+.lightbox { position: fixed; inset: 0; z-index: 50; border: 0; padding: 24px; background: rgba(17, 17, 27, 0.9); display: grid; place-items: center; align-content: center; gap: 10px; cursor: zoom-out; color: #cdd6f4; font: inherit; }
+.lightbox img { max-width: 100%; max-height: calc(100vh - 90px); border-radius: var(--radius-s); }
+.lightbox .meta { color: #a6adc8; }
+.field.top { align-items: flex-start; }
+.field.top label { padding-top: 8px; }
+.field .grow { flex: 1; min-width: 0; }
+.field .grow textarea.compose { margin-bottom: 4px; }
+.counter { text-align: end; font-size: 12px; margin-bottom: 6px; }
 
 /* ----- faces, cars, covers: pictures where a letter stood ----- */
 .avatar.pic { object-fit: cover; padding: 0; }

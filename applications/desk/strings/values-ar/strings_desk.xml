@@ -368,4 +368,13 @@
     <string name="desk_car_picture">صورة السيارة</string>
     <string name="desk_car_picture_note">تُرسل مع الطراز واللون واللوحة فقط عندما تقبل نداء ركوب، ليميّز الراكب سيارتك عند الرصيف.</string>
     <string name="desk_car">السيارة</string>
+    <string name="desk_description">الوصف</string>
+    <string name="desk_description_hint">ما هو، وحالته، وما يأتي معه.</string>
+    <string name="desk_chars_used">%1$d من %2$d حرفًا</string>
+    <string name="desk_attach_file">إرفاق ملف</string>
+    <string name="desk_attachments">المرفقات</string>
+    <string name="desk_files_note">ما يصل إلى 8 ملفات بحجم 20 ميغابايت لكل منها تنتقل مع الصور، ولا تُجلب إلا عندما يفتح أحدهم الإعلان.</string>
+    <string name="desk_details">التفاصيل</string>
+    <string name="desk_save_as">حفظ باسم…</string>
+    <string name="desk_seller_away">البائع غير متاح الآن، لذا تعذّر جلب الصور والملفات.</string>
 </resources>

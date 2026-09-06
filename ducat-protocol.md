@@ -2476,6 +2476,42 @@ the index digest — about 160 bytes. Both halves or neither: a share key
 with no digest fetches bytes nothing can check, and a digest with no
 share key names a fetch that cannot start.
 
+**The bundle behind the notice (`listing.json`).** The share the notice
+names is a bundle, and a bundle MAY carry more than pictures: a
+`listing.json` at its root, a closed set in the manner of §16.23's
+`feed.json`, refused whole on any key it does not name:
+
+```
+{ "v": 1, "id": "<the listing id, 8–64 lowercase hex or the poster's own id>",
+  "title": "...", "description": "...", "updated": <seconds>,
+  "pictures": [ { "path": "pictures/00.jpg", "mime": "image/jpeg",
+                  "bytes": 36108, "w": 1400, "h": 1000, "caption": "" } ],
+  "files":    [ { "path": "files/manual.pdf", "name": "manual.pdf",
+                  "mime": "application/pdf", "bytes": 120400 } ],
+  "specs":    { "make": "Trek", "year": "2019" } }
+```
+
+`description` is at most 8 000 characters in §16.23's text subset —
+paragraphs, `**bold**`, `*italic*`, `[text](target)` and `![alt](path)`,
+where a target is a path inside the bundle or a `ducat:` address and
+nothing else, so a listing cannot walk a reader out of the room.
+`pictures` is at most 24 entries and `files` at most 8, every `path` a
+bundle path (§16.23's rule: relative, no `..`, no leading slash);
+`mime` is an image type for a picture and any registered type for a
+file; `specs` is at most 32 string pairs the client shows as a table,
+in addition to — never instead of — the notice's own fields. `updated`
+is the seconds the bundle was written. A bundle with no `listing.json`
+is the picture-only gallery this section began with, and a reader
+shows it as such; a `listing.json` that does not open is refused whole
+and the pictures shown alone, because a bad document must not hide
+good pictures.
+
+The reader fetches the bundle when the listing is opened, shows the
+description, the pictures and the files, and keeps the notice's action
+— asking the seller — where it was. What the person taps is what the
+seller wrote; nothing in the bundle changes the price, the area or the
+card, which stay on the signed notice.
+
 **A client MUST NOT fetch galleries while browsing.** The gallery is for
 the listing somebody opened, one share at a time. Peer discovery through a
 swarm is measured in tens of seconds before the first piece moves, and a

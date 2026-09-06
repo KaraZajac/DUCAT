@@ -352,4 +352,13 @@
     <string name="desk_car_picture">عکس خودرو</string>
     <string name="desk_car_picture_note">فقط وقتی درخواستی را می‌پذیرید همراه مدل، رنگ و پلاک فرستاده می‌شود تا مسافر خودروی شما را کنار خیابان تشخیص دهد.</string>
     <string name="desk_car">خودرو</string>
+    <string name="desk_description">توضیحات</string>
+    <string name="desk_description_hint">چیست، در چه وضعیتی است، چه چیزی همراهش می‌آید.</string>
+    <string name="desk_chars_used">%1$d از %2$d نویسه</string>
+    <string name="desk_attach_file">پیوست کردن فایل</string>
+    <string name="desk_attachments">پیوست‌ها</string>
+    <string name="desk_files_note">تا ۸ فایل، هر یک تا ۲۰ مگابایت، همراه عکس‌ها منتقل می‌شوند و فقط وقتی کسی آگهی را باز کند دریافت می‌شوند.</string>
+    <string name="desk_details">جزئیات</string>
+    <string name="desk_save_as">ذخیره با نام…</string>
+    <string name="desk_seller_away">فروشنده در حال حاضر در دسترس نیست، بنابراین عکس‌ها و فایل‌ها دریافت نشدند.</string>
 </resources>

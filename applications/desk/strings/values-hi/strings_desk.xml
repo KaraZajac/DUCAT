@@ -352,4 +352,13 @@
     <string name="desk_car_picture">गाड़ी की तस्वीर</string>
     <string name="desk_car_picture_note">मॉडल, रंग और नंबर प्लेट के साथ सिर्फ़ तब भेजी जाती है जब आप कोई सवारी लेते हैं, ताकि सवार सड़क किनारे आपकी गाड़ी पहचान सके।</string>
     <string name="desk_car">गाड़ी</string>
+    <string name="desk_description">विवरण</string>
+    <string name="desk_description_hint">यह क्या है, इसकी हालत कैसी है, इसके साथ क्या मिलता है।</string>
+    <string name="desk_chars_used">%2$d में से %1$d अक्षर</string>
+    <string name="desk_attach_file">फ़ाइल जोड़ें</string>
+    <string name="desk_attachments">संलग्नक</string>
+    <string name="desk_files_note">20 MB तक की अधिकतम 8 फ़ाइलें तस्वीरों के साथ जाती हैं और तभी लाई जाती हैं जब कोई विज्ञापन खोले।</string>
+    <string name="desk_details">ब्योरा</string>
+    <string name="desk_save_as">इस नाम से सहेजें…</string>
+    <string name="desk_seller_away">विक्रेता अभी पहुँच में नहीं है, इसलिए तस्वीरें और फ़ाइलें नहीं लाई जा सकीं।</string>
 </resources>

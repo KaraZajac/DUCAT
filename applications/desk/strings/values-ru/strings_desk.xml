@@ -360,4 +360,13 @@
     <string name="desk_car_picture">Фото машины</string>
     <string name="desk_car_picture_note">Отправляется вместе с моделью, цветом и номером только когда вы принимаете вызов, чтобы пассажир узнал вашу машину у обочины.</string>
     <string name="desk_car">Машина</string>
+    <string name="desk_description">Описание</string>
+    <string name="desk_description_hint">Что это, в каком состоянии, что входит в комплект.</string>
+    <string name="desk_chars_used">%1$d из %2$d символов</string>
+    <string name="desk_attach_file">Прикрепить файл</string>
+    <string name="desk_attachments">Вложения</string>
+    <string name="desk_files_note">До 8 файлов по 20 МБ каждый передаются вместе с фотографиями и загружаются только тогда, когда кто-то открывает объявление.</string>
+    <string name="desk_details">Подробности</string>
+    <string name="desk_save_as">Сохранить как…</string>
+    <string name="desk_seller_away">Продавец сейчас недоступен, поэтому фотографии и файлы получить не удалось.</string>
 </resources>

@@ -5,7 +5,7 @@
   // takes the place as a geohash cell.
   import { onMount } from "svelte";
   import { t, i18n, LANGS } from "./i18n.svelte";
-  import { api, copy, fmtXmr, fmtTime, type FoundRow, type ListingDraft, type ListingRow, type MarketRow, MARKET_CATEGORIES, confirmDanger } from "./api";
+  import { api, copy, fmtXmr, fmtTime, fmtBytes, type FoundRow, type ListingAttachment, type ListingBundle, type ListingDraft, type ListingRow, type MarketRow, LISTING_DESCRIPTION_MAX, MARKET_CATEGORIES, confirmDanger } from "./api";
   import { gen, drive } from "./state.svelte";
 
   let mode = $state<"browse" | "mine">("browse");
@@ -15,8 +15,15 @@
   let found = $state<FoundRow[]>([]);
   let searching = $state(false);
   let openFound = $state<FoundRow | null>(null);
-  let gallery = $state<string[]>([]);
-  let galleryBusy = $state(false);
+  // The bundle behind the open notice (§16.18.3): fetched for the listing
+  // somebody opened, one at a time, never while browsing.
+  let bundle = $state<ListingBundle | null>(null);
+  let bundleBusy = $state(false);
+  let bundleErr = $state<string | null>(null);
+  let bundleProgress = $state<{ done: number; total: number } | null>(null);
+  let bundleSeq = 0;
+  let lightbox = $state<number | null>(null);
+  let saved = $state<string | null>(null);
   let asking = $state(false);
 
   // Where to look: the boards around a place, or the six shelves the
@@ -155,23 +162,98 @@
     }
   }
 
-  async function openListing(f: FoundRow) {
+  function openListing(f: FoundRow) {
     openFound = f;
-    gallery = [];
+    bundle = null; bundleErr = null; bundleProgress = null; saved = null; lightbox = null;
+    if (f.gallery && f.gallery_dig) loadBundle(f);
   }
 
-  async function loadGallery() {
-    if (!openFound?.gallery || !openFound.gallery_dig) return;
-    galleryBusy = true;
+  function closeListing() {
+    // A fetch still in flight lands nowhere.
+    bundleSeq++;
+    openFound = null; bundle = null; bundleBusy = false; bundleProgress = null; lightbox = null;
+  }
+
+  // Progress is polled while the swarm moves; a fetch that fails is the
+  // seller being away, which the thumbnail on the board never is.
+  async function loadBundle(f: FoundRow) {
+    if (!f.gallery || !f.gallery_dig) return;
+    const my = ++bundleSeq;
+    const share = f.gallery;
+    bundleBusy = true; bundleErr = null; bundleProgress = null;
+    const tick = setInterval(async () => {
+      try {
+        const p = await api.fetchProgress(share);
+        if (my === bundleSeq && p.pieces_total > 0) bundleProgress = { done: p.pieces_done, total: p.pieces_total };
+      } catch {}
+    }, 800);
     try {
-      const files = await api.fetchGallery(openFound.gallery, openFound.gallery_dig);
-      gallery = await Promise.all(files.map((p) => api.pictureDataUrl(p)));
+      const b = await api.listingBundle(f.gallery, f.gallery_dig);
+      if (my === bundleSeq) bundle = b;
     } catch (e) {
-      err = String(e);
+      if (my === bundleSeq) bundleErr = String(e);
     } finally {
-      galleryBusy = false;
+      clearInterval(tick);
+      if (my === bundleSeq) { bundleBusy = false; bundleProgress = null; }
     }
   }
+
+  function pictureAt(path: string): string | null {
+    return bundle?.pictures.find((p) => p.path === path)?.data_url ?? null;
+  }
+
+  // A link in the description goes to the desk's own flows or to a
+  // picture in the bundle; nothing else was allowed past the check.
+  function followLink(target: string) {
+    if (target.startsWith("ducat:")) { window.dispatchEvent(new CustomEvent("ducat-link", { detail: target })); return; }
+    const i = bundle?.pictures.findIndex((p) => p.path === target) ?? -1;
+    if (i >= 0) lightbox = i;
+  }
+
+  function stepLightbox(by: number) {
+    if (lightbox === null || !bundle?.pictures.length) return;
+    lightbox = (lightbox + by + bundle.pictures.length) % bundle.pictures.length;
+  }
+
+  async function saveBundleFile(f: ListingAttachment) {
+    err = null; saved = null;
+    const dest = await api.pickSavePath(f.name);
+    if (!dest) return;
+    try {
+      const n = await api.saveListingFile(f.path, dest);
+      saved = t("desk_written_to", n, dest);
+    } catch (e) {
+      err = String(e);
+    }
+  }
+
+  function specLabel(k: string): string {
+    switch (k) {
+      case "make": return t("rent_make");
+      case "model": return t("rent_model");
+      case "year": return t("rent_year");
+      case "color": return t("rent_color");
+      case "seats": return t("rent_seats");
+      case "trim": return t("rent_trim");
+      case "rooms": return t("rent_rooms");
+      case "sleeps": return t("rent_sleeps");
+      case "size_m2": return t("rent_size");
+      default: return k;
+    }
+  }
+
+  // The notice's own fields first; the bundle's table adds to them and
+  // never replaces them (§16.18.3).
+  const details = $derived.by((): [string, string][] => {
+    void i18n.lang;
+    const f = openFound;
+    if (!f) return [];
+    const rows: [string, string][] = [];
+    for (const [k, v] of Object.entries(f.specs)) if (v !== null && v !== "" && k !== "features" && k !== "subtype") rows.push([specLabel(k), String(v)]);
+    if (f.features?.length) rows.push([t("desk_features"), f.features.join(", ")]);
+    for (const [k, v] of Object.entries(bundle?.doc?.specs ?? {})) rows.push([k, v]);
+    return rows;
+  });
 
   async function ask() {
     if (!openFound) return;
@@ -192,7 +274,7 @@
 
   function newDraft(k: number) {
     editingId = null;
-    editing = { id: null, kind: k, title: "", area: "", cell: cell || "", price_text: "", price_is_fiat: true, specs: {}, private_details: "", quantity: 1 };
+    editing = { id: null, kind: k, title: "", area: "", cell: cell || "", price_text: "", price_is_fiat: true, specs: {}, private_details: "", description: "", quantity: 1 };
   }
 
   function editListing(l: ListingRow) {
@@ -200,7 +282,7 @@
     editing = {
       id: l.id, kind: l.kind, title: l.title, area: l.area, cell: l.cell,
       price_text: l.price_typed ?? (l.price_pxmr / 1e12).toString(), price_is_fiat: !!l.price_typed,
-      specs: { ...l.specs }, private_details: l.private_details, quantity: l.quantity,
+      specs: { ...l.specs }, private_details: l.private_details, description: l.description, quantity: l.quantity,
     };
   }
 
@@ -240,11 +322,11 @@
     await act("photo", () => api.addListingPhoto(editingId!, p));
   }
 
-  function specText(f: { specs: Record<string, unknown>; features: string[] }): string {
-    const parts: string[] = [];
-    for (const [k, v] of Object.entries(f.specs)) if (v !== null && v !== "" && k !== "features" && k !== "subtype") parts.push(`${k}: ${v}`);
-    if (f.features?.length) parts.push(f.features.join(", "));
-    return parts.join(" · ");
+  async function addFile() {
+    if (!editingId) { err = t("desk_save_first"); return; }
+    const p = await api.pickFile();
+    if (!p) return;
+    await act("file", () => api.addListingFile(editingId!, p));
   }
 </script>
 
@@ -277,23 +359,57 @@
   </div>
   {#if openFound}
     <div class="card">
-      <div class="page-head" style="margin-bottom: 8px"><h3 style="margin: 0">{openFound.title}</h3><button class="btn small" onclick={() => (openFound = null)}>{t("main_back")}</button></div>
+      <div class="page-head" style="margin-bottom: 8px"><h3 style="margin: 0">{openFound.title}</h3><button class="btn small" onclick={closeListing}>{t("main_back")}</button></div>
       <div class="found-detail">
-        {#if openFound.thumb_data_url}<img class="thumb big" src={openFound.thumb_data_url} alt="" />{/if}
-        <div>
+        {#if openFound.thumb_data_url && !bundle?.pictures.length}<img class="thumb big" src={openFound.thumb_data_url} alt="" />{/if}
+        <div class="grow">
           <div class="balance-big" style="font-size: 22px">{openFound.shown.primary}</div>
           <div class="meta">{openFound.kind_name} · {openFound.area}{openFound.cell ? ` · ${openFound.cell}` : ""} · {t("desk_until", fmtTime(openFound.expiry))}{openFound.quantity > 1 ? ` · ${t("rent_n_available", openFound.quantity)}` : ""}</div>
           {#if openFound.deposit_pxmr}<div class="meta">{t("desk_deposit_x", fmtXmr(openFound.deposit_pxmr))}</div>{/if}
-          <p>{specText(openFound)}</p>
           <div class="actions">
             {#if !openFound.mine}<button class="btn primary" disabled={asking} onclick={ask}>{asking ? t("desk_asking") : t("rent_ask_about_it")}</button>{:else}<span class="meta">{t("desk_this_is_yours")}</span>{/if}
-            {#if openFound.gallery && !gallery.length}<button class="btn" disabled={galleryBusy} onclick={loadGallery}>{galleryBusy ? t("desk_fetching_pictures") : t("desk_see_pictures")}</button>{/if}
+            {#if openFound.gallery && !bundle && !bundleBusy}<button class="btn" onclick={() => loadBundle(openFound!)}>{bundleErr ? t("rent_search_retry") : t("desk_see_pictures")}</button>{/if}
           </div>
+          {#if bundleBusy}<p class="meta">{t("desk_fetching_pictures")}{bundleProgress ? ` ${bundleProgress.done} / ${bundleProgress.total}` : ""}</p>{/if}
+          {#if bundleErr}<p class="note">{t("desk_seller_away")}</p><p class="err">{bundleErr}</p>{/if}
           <p class="note">{t("desk_ask_note")}</p>
         </div>
       </div>
-      {#if gallery.length}<div class="gallery">{#each gallery as g}<img src={g} alt="" />{/each}</div>{/if}
+      {#if bundle?.pictures.length}
+        <div class="pics">
+          {#each bundle.pictures as p, i (p.path)}<button class="pic" title={p.caption} onclick={() => (lightbox = i)}><img src={p.data_url} alt={p.caption} /></button>{/each}
+        </div>
+      {/if}
+      {#if bundle?.blocks.length}
+        <div class="post-body listing-words">
+          {#each bundle.blocks as b}
+            {#if b.kind === "Paragraph"}
+              <p>{#each b.spans as s}{#if s.link}<a href={s.link} onclick={(e) => { e.preventDefault(); followLink(s.link!); }}>{s.text}</a>{:else if s.bold && s.italic}<strong><em>{s.text}</em></strong>{:else if s.bold}<strong>{s.text}</strong>{:else if s.italic}<em>{s.text}</em>{:else}{s.text}{/if}{/each}</p>
+            {:else if b.kind === "Image"}
+              {@const src = pictureAt(b.path)}
+              {#if src}<img class="post-img" {src} alt={b.alt} />{/if}
+            {/if}
+          {/each}
+        </div>
+      {/if}
+      {#if details.length}
+        <div class="list-head"><span>{t("desk_details")}</span></div>
+        <table class="details"><tbody>{#each details as [k, v]}<tr><th>{k}</th><td>{v}</td></tr>{/each}</tbody></table>
+      {/if}
+      {#if bundle?.files.length}
+        <div class="list-head"><span>{t("desk_attachments")}</span></div>
+        <div class="post-files">
+          {#each bundle.files as f (f.path)}<span class="chip">{@html icons.files} {f.name} · {fmtBytes(f.bytes)} <button class="linkish" onclick={() => saveBundleFile(f)}>{t("desk_save_as")}</button></span>{/each}
+        </div>
+        {#if saved}<p class="note ok-text">{saved}</p>{/if}
+      {/if}
     </div>
+    {#if lightbox !== null && bundle?.pictures[lightbox]}
+      <button class="lightbox" title={t("chat_close")} onclick={() => (lightbox = null)} onkeydown={(e) => { if (e.key === "ArrowRight") { e.preventDefault(); stepLightbox(1); } else if (e.key === "ArrowLeft") { e.preventDefault(); stepLightbox(-1); } }}>
+        <img src={bundle.pictures[lightbox].data_url} alt={bundle.pictures[lightbox].caption} />
+        {#if bundle.pictures.length > 1}<span class="meta">{lightbox + 1} / {bundle.pictures.length}</span>{/if}
+      </button>
+    {/if}
   {:else}
     <div class="found-grid">
       {#each found as f (f.card)}
@@ -389,12 +505,21 @@
           </div>
         {/if}
         <div class="field"><label for="ft">{t("desk_features")}</label><input id="ft" class="input" placeholder={t("rent_tags_hint")} value={((editing.specs.features as string[] | undefined) ?? []).join(", ")} oninput={(e) => (editing!.specs.features = (e.target as HTMLInputElement).value.split(",").map((s) => s.trim()).filter(Boolean))} /></div>
+        <div class="field top">
+          <label for="ds">{t("desk_description")}</label>
+          <div class="grow">
+            <textarea id="ds" class="input compose" rows="5" maxlength={LISTING_DESCRIPTION_MAX} placeholder={t("desk_description_hint")} bind:value={editing.description}></textarea>
+            <div class="meta counter">{t("desk_chars_used", editing.description.length, LISTING_DESCRIPTION_MAX)}</div>
+          </div>
+        </div>
         <div class="field"><label for="pv">{t("desk_private")}</label><input id="pv" class="input" placeholder={t("rent_private_label")} bind:value={editing.private_details} /></div>
         <div class="actions">
           <button class="btn primary" disabled={busy === "save"} onclick={saveDraft}>{busy === "save" ? t("desk_saving") : t("myprofile_save")}</button>
           {#if editingId}
             <button class="btn" onclick={addPhoto}>{t("rent_photo_add")}…</button>
+            <button class="btn" disabled={busy === "file"} onclick={addFile}>{t("desk_attach_file")}…</button>
             {#if drive.on}<input id="ppath" class="input narrow" hidden placeholder="/path/to/picture" onchange={(e) => act("photo", () => api.addListingPhoto(editingId!, (e.target as HTMLInputElement).value))} />{/if}
+            {#if drive.on}<input id="fpath" class="input narrow" hidden placeholder="/path/to/file" onchange={(e) => act("file", () => api.addListingFile(editingId!, (e.target as HTMLInputElement).value))} />{/if}
             {#if mine.find((l) => l.id === editingId)?.posted}
               <button class="btn" disabled={busy === "post"} onclick={() => act("post", () => api.postListing(editingId!))}>{t("desk_refresh_board")}</button>
               <button class="btn danger" onclick={() => act("unpost", () => api.unpostListing(editingId!))}>{t("rent_take_down")}</button>
@@ -417,6 +542,13 @@
             </div>
             <p class="note">{t("desk_cover_note")}</p>
           {/if}
+          {#if l && l.files.length}
+            <div class="list-head"><span>{t("desk_attachments")}</span></div>
+            <div class="post-files">
+              {#each l.files as f, i (f.path)}<span class="chip">{@html icons.files} {f.name} · {fmtBytes(f.bytes)} <button class="linkish" title={t("rent_photo_remove")} onclick={() => act("rmf", () => api.removeListingFile(l.id, i))}>{@html icons.close}</button></span>{/each}
+            </div>
+          {/if}
+          <p class="note">{t("desk_files_note")}</p>
         {/if}
         {#if err}<p class="err">{err}</p>{/if}
       {:else}

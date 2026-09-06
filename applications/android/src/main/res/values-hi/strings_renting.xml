@@ -149,4 +149,18 @@
     <string name="rent_delete_keep">रहने दें</string>
     <string name="rent_photo_take">फ़ोटो खींचें</string>
     <string name="rent_photo_no_camera">इस फ़ोन में कैमरा ऐप नहीं है।</string>
+    <string name="rent_description">इसके बारे में और</string>
+    <string name="rent_description_hint">बोर्ड पर नहीं जाता — जब कोई आपकी लिस्टिंग खोलता है तो इसी फ़ोन से दिया जाता है। %1$d अक्षर बचे हैं।</string>
+    <string name="rent_file_attach">फ़ाइल जोड़ें</string>
+    <string name="rent_files_note">एक मैनुअल, एक नक्शा, एक स्पेक शीट — 20 MB तक की अधिकतम 8 फ़ाइलें, तस्वीरों के साथ इसी फ़ोन से दी जाती हैं।</string>
+    <string name="rent_file_too_big">वह फ़ाइल 20 MB से बड़ी है। कोई छोटी फ़ाइल आज़माएँ।</string>
+    <string name="rent_file_failed">वह फ़ाइल पढ़ी नहीं जा सकी। कोई और आज़माएँ।</string>
+    <string name="rent_file_remove">यह फ़ाइल हटाएँ</string>
+    <string name="rent_files_heading">विक्रेता की फ़ाइलें</string>
+    <string name="rent_file_save">फ़ाइलें में सहेजें</string>
+    <string name="rent_file_save_failed">वह फ़ाइल अभी सहेजी नहीं जा सकी।</string>
+    <string name="rent_spec_gearbox">गियरबॉक्स</string>
+    <string name="rent_spec_fuel">ईंधन</string>
+    <string name="rent_photo_open">बड़ा करके देखें</string>
+    <string name="rent_photo_close">बंद करें</string>
 </resources>

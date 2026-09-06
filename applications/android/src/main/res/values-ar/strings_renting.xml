@@ -149,4 +149,18 @@
     <string name="rent_delete_keep">احتفظ به</string>
     <string name="rent_photo_take">التقط صورة</string>
     <string name="rent_photo_no_camera">لا يوجد تطبيق كاميرا على هذا الهاتف.</string>
+    <string name="rent_description">المزيد عنه</string>
+    <string name="rent_description_hint">لا يظهر على اللوحة — يُقدَّم من هذا الهاتف عندما يفتح أحد إعلانك. بقي %1$d حرفًا.</string>
+    <string name="rent_file_attach">إرفاق ملف</string>
+    <string name="rent_files_note">دليل، مخطط، ورقة مواصفات — حتى 8 ملفات بحجم 20 ميغابايت لكل منها، تُقدَّم من هذا الهاتف مع الصور.</string>
+    <string name="rent_file_too_big">هذا الملف أكبر من 20 ميغابايت. جرّب ملفًا أصغر.</string>
+    <string name="rent_file_failed">تعذّرت قراءة هذا الملف. جرّب ملفًا آخر.</string>
+    <string name="rent_file_remove">إزالة هذا الملف</string>
+    <string name="rent_files_heading">ملفات من البائع</string>
+    <string name="rent_file_save">حفظ في الملفات</string>
+    <string name="rent_file_save_failed">تعذّر حفظ هذا الملف الآن.</string>
+    <string name="rent_spec_gearbox">ناقل الحركة</string>
+    <string name="rent_spec_fuel">الوقود</string>
+    <string name="rent_photo_open">عرض بحجم أكبر</string>
+    <string name="rent_photo_close">إغلاق</string>
 </resources>

@@ -380,6 +380,8 @@ export interface ListingRow {
   quantity: number;
   thumb_data_url: string | null;
   photos: string[];
+  description: string;
+  files: ListingAttachment[];
   posted: boolean;
   board: string | null;
   posted_at: number;
@@ -399,8 +401,25 @@ export interface ListingDraft {
   price_is_fiat: boolean;
   specs: Record<string, unknown>;
   private_details: string;
+  description: string;
   quantity: number;
 }
+
+// §16.18.3's bundle: the document behind a notice, and what landed with it.
+export const LISTING_DESCRIPTION_MAX = 8000;
+export type ListingAttachment = { name: string; bytes: number; mime: string; path: string };
+export type ListingPicture = { path: string; data_url: string; w: number; h: number; caption: string };
+export type ListingDoc = {
+  v: number;
+  id: string;
+  title: string;
+  description: string;
+  updated: number;
+  pictures?: { path: string; mime: string; bytes: number; w: number; h: number; caption: string }[];
+  files?: { path: string; name: string; mime: string; bytes: number }[];
+  specs?: Record<string, string>;
+};
+export type ListingBundle = { doc: ListingDoc | null; pictures: ListingPicture[]; files: ListingAttachment[]; blocks: FeedBlock[] };
 
 export interface FoundRow {
   card: string;
@@ -648,9 +667,13 @@ export const api = {
   addListingPhoto: (id: string, path: string) => invoke<number>("add_listing_photo", { id, path }),
   removeListingPhoto: (id: string, index: number) => invoke<void>("remove_listing_photo", { id, index }),
   setListingCover: (id: string, index: number) => invoke<boolean>("set_listing_cover", { id, index }),
+  addListingFile: (id: string, path: string) => invoke<number>("add_listing_file", { id, path }),
+  removeListingFile: (id: string, index: number) => invoke<void>("remove_listing_file", { id, index }),
   browseCached: (cell: string, kind: number | null) => invoke<FoundRow[]>("browse_cached", { cell, kind }),
   browse: (cell: string, kind: number | null) => invoke<FoundRow[]>("browse", { cell, kind }),
   fetchGallery: (share: string, digestHex: string) => invoke<string[]>("fetch_gallery", { share, digestHex }),
+  listingBundle: (share: string, digestHex: string) => invoke<ListingBundle>("listing_bundle", { share, digestHex }),
+  saveListingFile: (path: string, dest: string) => invoke<number>("save_listing_file", { path, dest }),
   pictureDataUrl: (path: string) => invoke<string>("picture_data_url", { path }),
   enquiryAbout: (personaHex: string) => invoke<Enquiry | null>("enquiry_about", { personaHex }),
 

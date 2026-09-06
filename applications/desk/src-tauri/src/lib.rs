@@ -2079,6 +2079,8 @@ struct ListingRow {
     quantity: u64,
     thumb_data_url: Option<String>,
     photos: Vec<String>,
+    description: String,
+    files: Vec<FileRow>,
     posted: bool,
     board: Option<String>,
     posted_at: u64,
@@ -2086,6 +2088,15 @@ struct ListingRow {
     price_typed: Option<String>,
     price_currency: Option<String>,
     shown: ducat_app::wallet::Shown,
+}
+
+/// A file behind a listing: one of mine as kept, or one from a fetched bundle.
+#[derive(Serialize)]
+struct FileRow {
+    name: String,
+    bytes: u64,
+    mime: String,
+    path: String,
 }
 
 fn data_url(b64: &str, mime: &str) -> String {
@@ -2124,6 +2135,7 @@ fn listing_row(a: &App, l: ducat_app::listings::Listing) -> ListingRow {
         kind_name: ducat_app::listings::kind_name(l.kind).into(),
         thumb_data_url: l.thumb.as_deref().filter(|t| !t.is_empty()).map(|t| data_url(t, "image/jpeg")),
         photos: a.photos(&l.id).into_iter().map(|p| p.to_string_lossy().into_owned()).collect(),
+        files: a.attachments(&l.id).into_iter().map(|f| FileRow { name: f.name, bytes: f.bytes, mime: f.mime, path: f.path.to_string_lossy().into_owned() }).collect(),
         posted: l.posted(),
         shown: a.show_amount(l.price_pxmr),
         id: l.id,
@@ -2135,6 +2147,7 @@ fn listing_row(a: &App, l: ducat_app::listings::Listing) -> ListingRow {
         deposit_pxmr: l.deposit_pxmr,
         specs: l.specs,
         private_details: l.private_details,
+        description: l.description,
         quantity: l.quantity,
         board: l.board,
         posted_at: l.posted_at,
@@ -2163,6 +2176,8 @@ struct ListingDraft {
     price_is_fiat: bool,
     specs: serde_json::Map<String, serde_json::Value>,
     private_details: String,
+    #[serde(default)]
+    description: String,
     quantity: u64,
 }
 
@@ -2183,7 +2198,7 @@ fn save_listing(draft: ListingDraft) -> Result<ListingRow, String> {
         (ducat_app::wallet::parse_xmr(&draft.price_text).ok_or("that is not an amount of XMR")?, None, None)
     };
     let mut l = a
-        .draft_listing(draft.kind, &draft.title, &draft.area, price_pxmr, &cell, draft.specs, &draft.private_details, typed.as_deref(), currency.as_deref(), draft.quantity, None)
+        .draft_listing(draft.kind, &draft.title, &draft.area, &draft.description, price_pxmr, &cell, draft.specs, &draft.private_details, typed.as_deref(), currency.as_deref(), draft.quantity, None)
         .map_err(said)?;
     if let Some(id) = draft.id.filter(|i| !i.is_empty()) {
         if let Some(old) = a.listing(&id) {
@@ -2234,6 +2249,16 @@ fn remove_listing_photo(id: String, index: usize) -> Result<(), String> {
 #[tauri::command]
 fn set_listing_cover(id: String, index: usize) -> Result<bool, String> {
     app()?.set_thumb_from_photo(&id, index).map_err(said)
+}
+
+#[tauri::command]
+fn add_listing_file(id: String, path: String) -> Result<usize, String> {
+    app()?.add_file(&id, std::path::Path::new(&path)).map_err(said)
+}
+
+#[tauri::command]
+fn remove_listing_file(id: String, index: usize) -> Result<(), String> {
+    app()?.remove_file(&id, index).map_err(said)
 }
 
 #[derive(Serialize)]
@@ -2309,6 +2334,49 @@ async fn fetch_gallery(share: String, digest_hex: String) -> Result<Vec<String>,
     })
     .await
     .map_err(s)?
+}
+
+#[derive(Serialize)]
+struct BundlePictureOut {
+    path: String,
+    data_url: String,
+    w: u32,
+    h: u32,
+    caption: String,
+}
+
+#[derive(Serialize)]
+struct ListingBundleOut {
+    doc: Option<ducat_mobile::listing_doc::ListingDoc>,
+    pictures: Vec<BundlePictureOut>,
+    files: Vec<FileRow>,
+    blocks: Vec<ducat_mobile::feed::FeedBlock>,
+}
+
+/// The bundle behind a notice (§16.18.3), fetched if it is not here yet:
+/// the document when it opened, the pictures as data URLs, the files,
+/// and the description as blocks.
+#[tauri::command]
+async fn listing_bundle(share: String, digest_hex: String) -> Result<ListingBundleOut, String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || {
+        let v = a.listing_bundle(&share, &digest_hex).map_err(said)?;
+        let pictures = v
+            .pictures
+            .into_iter()
+            .filter_map(|p| std::fs::read(&p.file).ok().map(|b| BundlePictureOut { path: p.path, data_url: picture_url(&b), w: p.w, h: p.h, caption: p.caption }))
+            .collect();
+        let files = v.files.into_iter().map(|f| FileRow { name: f.name, bytes: f.bytes, mime: f.mime, path: f.file.to_string_lossy().into_owned() }).collect();
+        Ok(ListingBundleOut { doc: v.doc, pictures, files, blocks: v.blocks })
+    })
+    .await
+    .map_err(s)?
+}
+
+/// A bundle's file copied to where the person chose; the bytes written.
+#[tauri::command]
+fn save_listing_file(path: String, dest: String) -> Result<u64, String> {
+    app()?.export_bundle_file(std::path::Path::new(&path), std::path::Path::new(&dest)).map_err(said)
 }
 
 /// A picture off disk as a data URL, for the webview which cannot read
@@ -2883,9 +2951,13 @@ pub fn run() {
             add_listing_photo,
             remove_listing_photo,
             set_listing_cover,
+            add_listing_file,
+            remove_listing_file,
             browse_cached,
             browse,
             fetch_gallery,
+            listing_bundle,
+            save_listing_file,
             picture_data_url,
             enquiry_about,
             market_browse_world_cached,

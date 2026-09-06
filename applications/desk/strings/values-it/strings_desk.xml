@@ -352,4 +352,13 @@
     <string name="desk_car_picture">Foto dell\'auto</string>
     <string name="desk_car_picture_note">Inviata con modello, colore e targa solo quando accetti una chiamata, così il passeggero riconosce la tua auto sul marciapiede.</string>
     <string name="desk_car">Auto</string>
+    <string name="desk_description">Descrizione</string>
+    <string name="desk_description_hint">Che cos\'è, in che condizioni è, cosa è incluso.</string>
+    <string name="desk_chars_used">%1$d di %2$d caratteri</string>
+    <string name="desk_attach_file">Allega un file</string>
+    <string name="desk_attachments">Allegati</string>
+    <string name="desk_files_note">Fino a 8 file da 20 MB ciascuno viaggiano con le foto e vengono scaricati solo quando qualcuno apre l\'annuncio.</string>
+    <string name="desk_details">Dettagli</string>
+    <string name="desk_save_as">Salva con nome…</string>
+    <string name="desk_seller_away">Il venditore non è raggiungibile al momento, quindi foto e file non sono stati scaricati.</string>
 </resources>

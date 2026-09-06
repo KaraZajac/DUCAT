@@ -149,4 +149,18 @@
     <string name="rent_delete_keep">Залишити</string>
     <string name="rent_photo_take">Зробити фото</string>
     <string name="rent_photo_no_camera">На цьому телефоні немає застосунку камери.</string>
+    <string name="rent_description">Докладніше</string>
+    <string name="rent_description_hint">На дошку не потрапляє — пропонується з цього телефона, коли хтось відкриває оголошення. Лишилося %1$d символів.</string>
+    <string name="rent_file_attach">Долучити файл</string>
+    <string name="rent_files_note">Інструкція, план, специфікація — до 8 файлів по 20 МБ, пропонуються з цього телефона разом із фотографіями.</string>
+    <string name="rent_file_too_big">Цей файл більший за 20 МБ. Спробуйте менший.</string>
+    <string name="rent_file_failed">Не вдалося прочитати цей файл. Спробуйте інший.</string>
+    <string name="rent_file_remove">Прибрати цей файл</string>
+    <string name="rent_files_heading">Файли від продавця</string>
+    <string name="rent_file_save">Зберегти у Файли</string>
+    <string name="rent_file_save_failed">Не вдалося зараз зберегти цей файл.</string>
+    <string name="rent_spec_gearbox">Коробка передач</string>
+    <string name="rent_spec_fuel">Пальне</string>
+    <string name="rent_photo_open">Переглянути більшим</string>
+    <string name="rent_photo_close">Закрити</string>
 </resources>

@@ -149,4 +149,18 @@
     <string name="rent_delete_keep">Zostaw</string>
     <string name="rent_photo_take">Zrób zdjęcie</string>
     <string name="rent_photo_no_camera">Brak aplikacji aparatu na tym telefonie.</string>
+    <string name="rent_description">Więcej o tym</string>
+    <string name="rent_description_hint">Nie trafia na tablicę – jest udostępniane z tego telefonu, gdy ktoś otworzy twoje ogłoszenie. Zostało %1$d znaków.</string>
+    <string name="rent_file_attach">Dołącz plik</string>
+    <string name="rent_files_note">Instrukcja, plan, karta specyfikacji – do 8 plików po 20 MB każdy, udostępnianych z tego telefonu razem ze zdjęciami.</string>
+    <string name="rent_file_too_big">Ten plik ma ponad 20 MB. Spróbuj mniejszego.</string>
+    <string name="rent_file_failed">Nie udało się odczytać tego pliku. Spróbuj innego.</string>
+    <string name="rent_file_remove">Usuń ten plik</string>
+    <string name="rent_files_heading">Pliki od sprzedającego</string>
+    <string name="rent_file_save">Zapisz w Plikach</string>
+    <string name="rent_file_save_failed">Nie udało się teraz zapisać tego pliku.</string>
+    <string name="rent_spec_gearbox">Skrzynia biegów</string>
+    <string name="rent_spec_fuel">Paliwo</string>
+    <string name="rent_photo_open">Zobacz w powiększeniu</string>
+    <string name="rent_photo_close">Zamknij</string>
 </resources>

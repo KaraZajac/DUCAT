@@ -48,7 +48,7 @@ pub struct HomeView {
     pub posts: u32,
 }
 
-fn mime_of(path: &Path) -> &'static str {
+pub(crate) fn mime_of(path: &Path) -> &'static str {
     match path.extension().and_then(|e| e.to_str()).map(|e| e.to_ascii_lowercase()).as_deref() {
         Some("jpg") | Some("jpeg") => "image/jpeg",
         Some("png") => "image/png",
@@ -72,7 +72,7 @@ fn mime_of(path: &Path) -> &'static str {
     }
 }
 
-fn file_name_of(p: &Path) -> String {
+pub(crate) fn file_name_of(p: &Path) -> String {
     p.file_name().and_then(|n| n.to_str()).filter(|n| !n.trim().is_empty()).unwrap_or("file").to_string()
 }
 

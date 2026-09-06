@@ -258,8 +258,15 @@ object Listings {
         )
     }
 
-    /** What [post] and [unpost] own on a record: where it is, and the cards it cut. */
-    private val TENANCY = listOf("owner", "board", "subkey", "postedAt", "card", "cards", "wanted", "triedAt")
+    /** What [post] and [unpost] own on a record: where it is, the cards it
+     *  cut, and the gallery pair it minted with the fingerprint of what it
+     *  was minted from — a re-posted draft that dropped those would rebuild
+     *  an unchanged bundle and, the document's clock having moved, mint a
+     *  second share for the same pictures. */
+    private val TENANCY = listOf(
+        "owner", "board", "subkey", "postedAt", "card", "cards", "wanted", "triedAt",
+        "gallery", "gallery_dig", "bundle_fp",
+    )
 
     /**
      * Save a draft over whatever record already carries its id, keeping the
@@ -294,15 +301,23 @@ object Listings {
         // for a thing nobody can buy, with nothing left pointing at it.
         stopGallery(context, id)
         photoDir(context, id).deleteRecursively()
+        fileDir(context, id).deleteRecursively()
+        bundleDir(context, id).deleteRecursively()
         synchronized(lock) { save(context, all(context).filter { it.optString("id") != id }) }
     }
 
     // --- §16.18.3's gallery ------------------------------------------------
     //
-    // Full-size pictures live here from the moment they are picked, and are
-    // seeded from here — never from a staging directory that is about to
-    // move, which leaves the seeder serving a path that no longer exists
-    // (Releases.share learned that one the hard way).
+    // Full-size pictures live under [photoDir] from the moment they are
+    // picked, attached files under [fileDir], and what the swarm serves is
+    // neither: it is the *bundle* [buildBundle] lays out from them at post
+    // time — `pictures/NN.<ext>`, `files/<name>` and a `listing.json` that
+    // names them all, with the description and the specs the notice has no
+    // slot for. Seeded from where it will stay, never from a staging
+    // directory about to move (Releases.share learned that one the hard
+    // way), and rebuilt only when what goes into it has changed, because
+    // the share key on the board is minted from the bytes and a rebuild for
+    // nothing would mint a second one.
 
     /** How many photographs one listing may carry.
      *
@@ -325,16 +340,271 @@ object Listings {
             ?: emptyList()
 
     /**
-     * Put this listing's pictures on the swarm, and keep serving them.
+     * How many files one listing may attach, and how big each may be.
      *
-     * Returns share key and index digest, or null when there is nothing to
-     * seed. Idempotent by design: seeding an unchanged directory returns the
-     * same share, so a refresh does not mint a second one.
+     * The eight is §16.18.3's own ceiling on `files`; the twenty mebibytes
+     * is this client's, for [MAX_PHOTOS]'s reason: a reader who opened the
+     * listing is waiting on the whole bundle, and a manual is a few
+     * megabytes where a video is a few hundred.
      */
-    fun seedGallery(context: Context, listingId: String): Pair<String, String>? {
-        val dir = photoDir(context, listingId)
-        if (!dir.isDirectory || dir.listFiles().orEmpty().none { it.isFile }) return null
+    const val MAX_FILES = 8
+    const val MAX_FILE_BYTES = 20L * 1024 * 1024
+
+    /** §16.18.3's cap on the description, in characters. */
+    const val MAX_DESCRIPTION = 8000
+
+    /** Where one listing's attached files live on this phone. */
+    fun fileDir(context: Context, listingId: String): java.io.File =
+        java.io.File(java.io.File(context.filesDir, "listing_files"), safeId(listingId))
+
+    fun files(context: Context, listingId: String): List<java.io.File> =
+        fileDir(context, listingId).listFiles()?.filter { it.isFile }?.sortedBy { it.name }
+            ?: emptyList()
+
+    /** A file past [MAX_FILE_BYTES]: its own type, so the form can say
+     *  which limit was hit rather than that something was. */
+    class TooBig : IllegalArgumentException("that file is over $MAX_FILE_BYTES bytes")
+
+    /**
+     * Copy a picked file in, under the name the picker reports.
+     *
+     * The name is what the bundle carries and what a reader's disk gets,
+     * so it is the picker's rather than the URI's — a provider id such as
+     * "document/1234" is nobody's manual. Bounded on the way in, byte by
+     * byte, because a content: stream does not always know its own length
+     * and the cap has to hold whether it does or not.
+     */
+    fun addFile(context: Context, listingId: String, uri: android.net.Uri): java.io.File {
+        check(files(context, listingId).size < MAX_FILES) { "a listing attaches at most $MAX_FILES files" }
+        val dir = fileDir(context, listingId).apply { mkdirs() }
+        val out = java.io.File(dir, uniqueName(dir, safeName(Releases.nameOf(context, uri))))
+        val input = context.contentResolver.openInputStream(uri)
+            ?: throw IllegalStateException("could not read what was picked")
+        try {
+            input.use { i ->
+                out.outputStream().use { o ->
+                    val buf = ByteArray(64 * 1024)
+                    var copied = 0L
+                    while (true) {
+                        val n = i.read(buf)
+                        if (n < 0) break
+                        copied += n
+                        if (copied > MAX_FILE_BYTES) throw TooBig()
+                        o.write(buf, 0, n)
+                    }
+                }
+            }
+        } catch (e: Throwable) {
+            out.delete()
+            throw e
+        }
+        return out
+    }
+
+    fun removeFile(context: Context, listingId: String, name: String) {
+        java.io.File(fileDir(context, listingId), safeName(name)).delete()
+    }
+
+    /**
+     * A name that stays one path segment and inside the document's bounds:
+     * no separators, no colon (a bundle path with one reads as a scheme),
+     * no control characters, and short enough that "files/" in front and
+     * " (2)" behind still fit §16.23's path cap.
+     */
+    private fun safeName(raw: String): String {
+        val flat = raw.map { c ->
+            if (c == '/' || c == '\\' || c == ':' || c.isISOControl()) '_' else c
+        }.joinToString("").trim().trimStart('.')
+        return flat.take(150).ifBlank { "file" }
+    }
+
+    /** "manual.pdf", then "manual (2).pdf": two picks of one name are two
+     *  files, not one written over the other. */
+    private fun uniqueName(dir: java.io.File, name: String): String {
+        if (!java.io.File(dir, name).exists()) return name
+        val dot = name.lastIndexOf('.').takeIf { it > 0 } ?: name.length
+        val stem = name.substring(0, dot)
+        val ext = name.substring(dot)
+        var n = 2
+        while (java.io.File(dir, "$stem ($n)$ext").exists()) n++
+        return "$stem ($n)$ext"
+    }
+
+    /** The seeded root: what a reader's fetch lands as, laid out by [buildBundle]. */
+    fun bundleDir(context: Context, listingId: String): java.io.File =
+        java.io.File(java.io.File(context.filesDir, "listing_bundles"), safeId(listingId))
+
+    /** The document's name at the root of the share (§16.18.3). */
+    private const val BUNDLE_DOC = "listing.json"
+
+    /**
+     * What the bundle would be built from, folded to one string, so [post]
+     * and [reseedGallery] can ask "has it changed?" without laying it out.
+     *
+     * Names, sizes and the words — not `updated`. The document's clock is
+     * set when the bundle is written, and if it counted, every refresh
+     * would find the bundle changed and mint a fresh share for the same
+     * pictures. Null when there is nothing to serve at all.
+     */
+    fun bundleFingerprint(context: Context, o: JSONObject): String? {
+        val id = o.optString("id")
+        val photos = photos(context, id)
+        val files = files(context, id)
+        val description = o.optString("description")
+        if (photos.isEmpty() && files.isEmpty() && description.isBlank()) return null
+        val text = buildString {
+            append(o.optString("title")).append('\u0000')
+            append(description).append('\u0000')
+            append(docSpecs(o).toString()).append('\u0000')
+            for (f in photos + files) append(f.name).append(':').append(f.length()).append('\u0000')
+        }
+        return java.security.MessageDigest.getInstance("SHA-256").digest(text.toByteArray()).toHexString()
+    }
+
+    /**
+     * The spec strings the notice does not already carry, for the
+     * document's table — "in addition to, never instead of" (§16.18.3).
+     * The phone's form writes exactly the notice's fields, so this is
+     * usually empty here; a record written by another client, or a form
+     * that grows a field the wire has no slot for, is what it is for.
+     */
+    private fun docSpecs(o: JSONObject): java.util.SortedMap<String, String> {
+        val out = java.util.TreeMap<String, String>()
+        val specs = o.optJSONObject("specs") ?: return out
+        val kind = o.optInt("kind")
+        val onNotice = hashSetOf("subtype", "features")
+        if (kind == KIND_VEHICLE) {
+            onNotice += listOf("make", "model", "year", "gearbox", "fuel", "seats", "color", "trim")
+        }
+        if (kind == KIND_PLACE) onNotice += listOf("rooms", "sleeps", "size_m2")
+        for (k in specs.keys()) {
+            if (k in onNotice || out.size >= 32) continue
+            val v = specs.opt(k)
+            val s = when (v) {
+                is String -> v
+                is Number, is Boolean -> v.toString()
+                else -> null
+            } ?: continue
+            if (k.isBlank() || k.length > 120 || s.isBlank() || s.length > 120) continue
+            out[k] = withoutDisplayHazards(s)
+        }
+        return out
+    }
+
+    /**
+     * Lay the bundle out — beside the old one, then in its place.
+     *
+     * Pictures numbered in the order the form kept them, so the first is
+     * the first a reader sees, each measured from its header (bounds only;
+     * nothing is decoded) because the document promises real dimensions
+     * and a reader may size a strip from them before it looks at a byte
+     * of the picture. Files under the names they were picked by. Then the
+     * document, encoded by the same code that will check it on the far
+     * side, so a bundle this phone writes is one every reader opens.
+     *
+     * A document that will not encode is dropped, not the bundle: the
+     * pictures still go up alone, which is the choice §16.18.3 asks a
+     * reader to make about a document that will not open. Returns null
+     * when there is nothing to serve at all.
+     */
+    private fun buildBundle(context: Context, o: JSONObject): java.io.File? {
+        val id = o.optString("id")
+        val photos = photos(context, id)
+        val files = files(context, id).take(MAX_FILES)
+        val description = o.optString("description").take(MAX_DESCRIPTION)
+        if (photos.isEmpty() && files.isEmpty() && description.isBlank()) return null
+        val dir = bundleDir(context, id)
+        val fresh = java.io.File(dir.parentFile, "${dir.name}.next")
+        fresh.deleteRecursively()
+        java.io.File(fresh, "pictures").mkdirs()
+        java.io.File(fresh, "files").mkdirs()
+        val pictures = ArrayList<uniffi.ducat_mobile.ListingPicture>()
+        for (f in photos) {
+            if (pictures.size >= 24) break
+            // Its type from its own bytes, the way §16.18.3 has the thumbnail
+            // checked; what is not one of the three is not a picture.
+            val mime = imageMime(f) ?: continue
+            val bounds = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            android.graphics.BitmapFactory.decodeFile(f.path, bounds)
+            val ext = when (mime) { "image/png" -> "png"; "image/webp" -> "webp"; else -> "jpg" }
+            val rel = "pictures/${pictures.size.toString().padStart(2, '0')}.$ext"
+            f.copyTo(java.io.File(fresh, rel), overwrite = true)
+            pictures += uniffi.ducat_mobile.ListingPicture(
+                path = rel, mime = mime, bytes = f.length().toULong(),
+                w = bounds.outWidth.coerceAtLeast(0).toUInt(),
+                h = bounds.outHeight.coerceAtLeast(0).toUInt(),
+                caption = "",
+            )
+        }
+        val attached = files.map { f ->
+            f.copyTo(java.io.File(fresh, "files/${f.name}"), overwrite = true)
+            uniffi.ducat_mobile.ListingFile(
+                path = "files/${f.name}", name = f.name,
+                mime = Releases.mimeOf(f.name), bytes = f.length().toULong(),
+            )
+        }
+        val doc = uniffi.ducat_mobile.ListingDoc(
+            v = 1uL,
+            id = id,
+            title = o.optString("title").trim().take(120),
+            description = description,
+            updated = (System.currentTimeMillis() / 1000).toULong(),
+            pictures = pictures,
+            files = attached,
+            specs = docSpecs(o),
+        )
+        runCatching { uniffi.ducat_mobile.listingDocEncode(doc) }
+            .onSuccess { java.io.File(fresh, BUNDLE_DOC).writeText(it) }
+            .onFailure {
+                DucatLog.w(TAG, "listing ${id.take(8)}…: document refused, the pictures go up alone: ${it.message}")
+            }
+        if (fresh.walkTopDown().none { it.isFile }) {
+            fresh.deleteRecursively()
+            return null
+        }
+        dir.deleteRecursively()
+        check(fresh.renameTo(dir)) { "could not move the bundle into place" }
+        return dir
+    }
+
+    /**
+     * A picture's type from its first bytes — what the file *is*, not what
+     * its name says or what a decoder guessed. The same three formats the
+     * board accepts for the thumbnail, plus GIF; null for anything else.
+     */
+    private fun imageMime(f: java.io.File): String? {
+        val head = ByteArray(12)
+        val n = runCatching { f.inputStream().use { it.read(head) } }.getOrDefault(-1)
+        if (n < 12) return null
+        fun at(i: Int) = head[i].toInt() and 0xff
+        fun says(from: Int, text: String) = text.indices.all { at(from + it) == text[it].code }
+        return when {
+            at(0) == 0xFF && at(1) == 0xD8 && at(2) == 0xFF -> "image/jpeg"
+            at(0) == 0x89 && says(1, "PNG") -> "image/png"
+            says(0, "RIFF") && says(8, "WEBP") -> "image/webp"
+            says(0, "GIF8") -> "image/gif"
+            else -> null
+        }
+    }
+
+    /** What [seedGallery] minted: the pair the notice carries, and the
+     *  fingerprint of what it was minted from. */
+    data class Seeded(val share: String, val digest: String, val fingerprint: String)
+
+    /**
+     * Lay the bundle out, put it on the swarm, and keep serving it.
+     *
+     * Returns what the notice needs, or null when there is nothing to
+     * seed or the network would not take it. The caller decides when: an
+     * unchanged bundle is left as it is, because the document's clock
+     * moves with every write and a rewrite would mint a second share for
+     * the same pictures.
+     */
+    fun seedGallery(context: Context, listingId: String): Seeded? {
+        val o = get(context, listingId) ?: return null
+        val fingerprint = bundleFingerprint(context, o) ?: return null
         return runCatching {
+            val dir = buildBundle(context, o) ?: return null
             val share = Swarm.seed(dir.absolutePath)
             // Narrated here rather than at the call site, because there are
             // two: posting mints it, and the lap re-parks it after a node
@@ -350,7 +620,7 @@ object Listings {
                 "gallery of ${listingId.take(8)}… serving at ${share.shareKey} " +
                     "digest ${share.indexDigestHex}",
             )
-            share.shareKey to share.indexDigestHex
+            Seeded(share.shareKey, share.indexDigestHex, fingerprint)
         }.onFailure {
             DucatLog.w("Listings", "gallery of ${listingId.take(8)}…: ${it.message}")
         }.getOrNull()
@@ -369,6 +639,14 @@ object Listings {
      * nothing, and leaves the same key serving. That path retries; the
      * mint does not.
      *
+     * Unless what the board names is no longer what this phone would
+     * serve — the words or the files moved since the pair was minted, or
+     * the pair is older than bundles are and was minted from the pictures
+     * alone. Verifying in place would then verify files that are not
+     * there, so that case goes through [post], which lays the bundle out,
+     * mints the pair and puts it on the notice: the one order that leaves
+     * nothing advertised that nobody serves.
+     *
      * Its own thread, like Sites.reseed, because the caller is the poll
      * lap and this waits on the network.
      */
@@ -376,27 +654,42 @@ object Listings {
         val o = get(context, listingId) ?: return
         val share = o.optString("gallery").takeIf { it.isNotBlank() } ?: return
         val digest = o.optString("gallery_dig").takeIf { it.isNotBlank() } ?: return
-        val dir = photoDir(context, listingId)
-        if (!dir.isDirectory || dir.listFiles().orEmpty().none { it.isFile }) {
+        val fingerprint = bundleFingerprint(context, o)
+        if (fingerprint == null) {
             // Said, not swallowed: a listing whose pictures are gone cannot
             // serve the gallery its notice still advertises, and the owner
             // is the only one who can put that right.
             DucatLog.i(
                 "Listings",
-                "gallery of ${listingId.take(8)}… has no pictures left to serve",
+                "gallery of ${listingId.take(8)}… has nothing left to serve",
             )
             return
         }
         Thread {
-            runCatching {
-                // Re-checked in here: the lap read the store before this
-                // thread started, and a take-down can land in between.
-                if (get(context, listingId)?.optString("gallery") != share) return@runCatching
-                Swarm.stopShare(share)
-                Swarm.fetch(share, digest, dir.absolutePath, staySeeding = true)
-                DucatLog.i("Listings", "gallery of ${listingId.take(8)}… serving again")
-            }.onFailure {
-                DucatLog.w("Listings", "gallery of ${listingId.take(8)}…: ${it.message}")
+            // Under the listing's post lock: the lap and a refresh can want
+            // the same listing in the same breath, and two of them laying
+            // the bundle out at once is two seeders rooted at one path.
+            synchronized(postLocks.getOrPut(listingId) { Any() }) {
+                runCatching {
+                    // Re-checked in here: the lap read the store before this
+                    // thread started, and a take-down can land in between.
+                    val cur = get(context, listingId) ?: return@runCatching
+                    if (cur.optString("gallery") != share) return@runCatching
+                    val dir = bundleDir(context, listingId)
+                    if (cur.optString("bundle_fp") != fingerprint || !dir.isDirectory) {
+                        DucatLog.i(
+                            "Listings",
+                            "gallery of ${listingId.take(8)}… changed since it was minted; re-posting",
+                        )
+                        post(context, listingId)
+                        return@runCatching
+                    }
+                    Swarm.stopShare(share)
+                    Swarm.fetch(share, digest, dir.absolutePath, staySeeding = true)
+                    DucatLog.i("Listings", "gallery of ${listingId.take(8)}… serving again")
+                }.onFailure {
+                    DucatLog.w("Listings", "gallery of ${listingId.take(8)}…: ${it.message}")
+                }
             }
         }.apply { isDaemon = true; name = "gallery-reseed" }.start()
     }
@@ -433,6 +726,12 @@ object Listings {
          *  listing that loses its picture on a rotation is one nobody
          *  re-photographs. */
         thumb: ByteArray? = null,
+        /** §16.18.3's description: the seller's words at length, for the
+         *  bundle rather than the board. Kept as typed — the feed's text
+         *  subset is paragraphs and a little emphasis, and the reader's own
+         *  core parses it — save for the display hazards no listing may
+         *  carry, stripped line by line so the paragraphs survive. */
+        description: String = "",
     ): JSONObject {
         val cell = runCatching {
             uniffi.ducat_mobile.geohashEncode(latE7, lonE7, CELL_PRECISION)
@@ -445,6 +744,10 @@ object Listings {
             // every reader's core will refuse it if it carries an override.
             put("title", withoutDisplayHazards(title))
             put("area", withoutDisplayHazards(area))
+            put(
+                "description",
+                description.lines().joinToString("\n") { withoutDisplayHazards(it) }.take(MAX_DESCRIPTION),
+            )
             put("cell", cell ?: "")
             put("pricePxmr", pricePxmr)
             // Suggested from the same table the escrow will use, so what the
@@ -639,21 +942,47 @@ object Listings {
             get(context, id)?.let { it.put("wanted", true); it.put("triedAt", now); put(context, it) }
         }
         val o = reprice(context, get(context, id) ?: return false)
-        // The pictures go on the network before the notice that names them.
+        // The bundle goes on the network before the notice that names it.
         // The other order publishes an address for a share nobody is
         // serving yet, and a reader who arrives in that window is told the
         // listing has photographs and then cannot fetch them.
-        if (o.optString("gallery").isBlank()) {
-            seedGallery(context, id)?.let { (share, digest) ->
-                synchronized(lock) {
-                    get(context, id)?.let {
-                        it.put("gallery", share)
-                        it.put("gallery_dig", digest)
-                        put(context, it)
+        //
+        // And only when it changed. The share is minted from the bytes and
+        // the document's clock is among them, so re-laying an unchanged
+        // bundle would put a second pair on the board for the same pictures
+        // at the price of a route allocation; a changed one — the words
+        // edited, a file added, or a pair older than bundles are — needs a
+        // fresh pair on the notice, or the board goes on naming what this
+        // phone no longer serves.
+        val fingerprint = bundleFingerprint(context, o)
+        val had = o.optString("gallery")
+        if (fingerprint != null && (had.isBlank() || o.optString("bundle_fp") != fingerprint)) {
+            if (had.isNotBlank()) runCatching { Swarm.stopShare(had) }
+            val seeded = seedGallery(context, id)
+            synchronized(lock) {
+                get(context, id)?.let {
+                    if (seeded != null) {
+                        it.put("gallery", seeded.share)
+                        it.put("gallery_dig", seeded.digest)
+                        it.put("bundle_fp", seeded.fingerprint)
+                    } else {
+                        // Nothing serves the old pair now, and a notice that
+                        // named it would send every reader to wait for
+                        // pictures that are not coming. No gallery, then,
+                        // until a refresh mints one.
+                        it.remove("gallery")
+                        it.remove("gallery_dig")
+                        it.remove("bundle_fp")
                     }
+                    put(context, it)
                 }
-                o.put("gallery", share)
-                o.put("gallery_dig", digest)
+            }
+            if (seeded != null) {
+                o.put("gallery", seeded.share)
+                o.put("gallery_dig", seeded.digest)
+            } else {
+                o.remove("gallery")
+                o.remove("gallery_dig")
             }
         }
         val cell = o.optString("cell")

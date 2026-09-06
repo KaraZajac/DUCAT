@@ -147,4 +147,18 @@
     <string name="rent_delete_keep">残す</string>
     <string name="rent_photo_take">写真を撮る</string>
     <string name="rent_photo_no_camera">このスマホにカメラアプリがありません。</string>
+    <string name="rent_description">もっと詳しく</string>
+    <string name="rent_description_hint">ボードには載りません。誰かが出品を開いたとき、この端末から提供されます。残り %1$d 文字。</string>
+    <string name="rent_file_attach">ファイルを添付</string>
+    <string name="rent_files_note">説明書、間取り図、仕様書など、20 MB までのファイルを 8 つまで。写真と一緒にこの端末から提供されます。</string>
+    <string name="rent_file_too_big">そのファイルは 20 MB を超えています。もっと小さいものを試してください。</string>
+    <string name="rent_file_failed">そのファイルを読み込めませんでした。別のものを試してください。</string>
+    <string name="rent_file_remove">このファイルを外す</string>
+    <string name="rent_files_heading">出品者からのファイル</string>
+    <string name="rent_file_save">ファイルに保存</string>
+    <string name="rent_file_save_failed">そのファイルは今は保存できませんでした。</string>
+    <string name="rent_spec_gearbox">変速機</string>
+    <string name="rent_spec_fuel">燃料</string>
+    <string name="rent_photo_open">大きく見る</string>
+    <string name="rent_photo_close">閉じる</string>
 </resources>

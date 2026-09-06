@@ -49,11 +49,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -64,7 +59,6 @@ import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.R
 import org.ducatproject.ducat.Releases
 import org.ducatproject.ducat.SiteViewerActivity
-import uniffi.ducat_mobile.FeedBlock
 import uniffi.ducat_mobile.FeedEntry
 
 /**
@@ -229,24 +223,7 @@ private fun FeedCard(e: FeedEntry, mine: Boolean, onOpen: () -> Unit, onDelete: 
                 if (mine) IconButton(onClick = onDelete) { Icon(Icons.Filled.Delete, stringResource(R.string.feed_delete_post)) }
             }
             val blocks = remember(e.post.text) { runCatching { uniffi.ducat_mobile.feedBlocks(e.post.text) }.getOrDefault(emptyList()) }
-            for (b in blocks) {
-                when (b) {
-                    is FeedBlock.Paragraph -> Text(
-                        buildAnnotatedString {
-                            for (s in b.spans) {
-                                val style = SpanStyle(
-                                    fontWeight = if (s.bold) FontWeight.Bold else null,
-                                    fontStyle = if (s.italic) FontStyle.Italic else null,
-                                    color = if (s.link != null) MaterialTheme.colorScheme.primary else androidx.compose.ui.graphics.Color.Unspecified,
-                                )
-                                withStyle(style) { append(s.text) }
-                            }
-                        },
-                        modifier = Modifier.padding(top = 6.dp),
-                    )
-                    is FeedBlock.Image -> HomeImage(e.persona, b.path, onOpen)
-                }
-            }
+            FeedBlocks(blocks) { path -> HomeImage(e.persona, path, onOpen) }
             for (m in e.post.media) HomeImage(e.persona, m.path, onOpen)
             if (e.post.files.isNotEmpty()) {
                 Row(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {

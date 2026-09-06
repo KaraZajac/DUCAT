@@ -701,13 +701,15 @@ class Poller(private val context: Context) {
         for (r in Releases.all(context)) {
             if (r.keepAlive) Releases.reseed(context, r.digestHex)
         }
-        // And every live listing's photographs (§16.18.3). A node restart
-        // takes the seed registry with it, so without this a phone that
-        // rebooted went on advertising a gallery share on the board and
-        // served nobody: the reader is told more photographs exist and
-        // then waits for pictures that are not coming from anywhere. The
-        // share is minted from the pictures, so re-seeding the same
-        // directory yields the same key the board already names.
+        // And every live listing's bundle (§16.18.3): the photographs, the
+        // description, the files. A node restart takes the seed registry
+        // with it, so without this a phone that rebooted went on
+        // advertising a gallery share on the board and served nobody: the
+        // reader is told more photographs exist and then waits for pictures
+        // that are not coming from anywhere. The share is minted from the
+        // bundle's bytes, so re-parking the same directory serves the key
+        // the board already names — and a bundle that changed underneath
+        // it is re-posted instead (see Listings.reseedGallery).
         for (o in Listings.all(context)) {
             if (!o.optBoolean("wanted", false)) continue
             val id = o.optString("id")

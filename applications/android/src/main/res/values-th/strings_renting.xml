@@ -147,4 +147,18 @@
     <string name="rent_delete_keep">เก็บไว้</string>
     <string name="rent_photo_take">ถ่ายรูป</string>
     <string name="rent_photo_no_camera">ไม่มีแอปกล้องในโทรศัพท์เครื่องนี้</string>
+    <string name="rent_description">รายละเอียดเพิ่มเติม</string>
+    <string name="rent_description_hint">ไม่ขึ้นบนบอร์ด — ส่งจากเครื่องนี้เมื่อมีคนเปิดประกาศของคุณ เหลืออีก %1$d ตัวอักษร</string>
+    <string name="rent_file_attach">แนบไฟล์</string>
+    <string name="rent_files_note">คู่มือ แปลน ใบสเปก — ได้สูงสุด 8 ไฟล์ ไฟล์ละไม่เกิน 20 MB ส่งจากเครื่องนี้พร้อมกับรูป</string>
+    <string name="rent_file_too_big">ไฟล์นั้นใหญ่กว่า 20 MB ลองไฟล์ที่เล็กกว่านี้</string>
+    <string name="rent_file_failed">อ่านไฟล์นั้นไม่ได้ ลองไฟล์อื่น</string>
+    <string name="rent_file_remove">เอาไฟล์นี้ออก</string>
+    <string name="rent_files_heading">ไฟล์จากผู้ขาย</string>
+    <string name="rent_file_save">บันทึกลงไฟล์</string>
+    <string name="rent_file_save_failed">บันทึกไฟล์นั้นไม่ได้ในตอนนี้</string>
+    <string name="rent_spec_gearbox">เกียร์</string>
+    <string name="rent_spec_fuel">เชื้อเพลิง</string>
+    <string name="rent_photo_open">ดูภาพขยาย</string>
+    <string name="rent_photo_close">ปิด</string>
 </resources>

@@ -348,4 +348,13 @@
     <string name="desk_car_picture">차 사진</string>
     <string name="desk_car_picture_note">호출을 받을 때만 모델, 색상, 번호판과 함께 보내져 승객이 길가에서 당신의 차를 알아볼 수 있습니다.</string>
     <string name="desk_car">차</string>
+    <string name="desk_description">설명</string>
+    <string name="desk_description_hint">무엇인지, 상태는 어떤지, 무엇이 함께 오는지.</string>
+    <string name="desk_chars_used">%1$d / %2$d자</string>
+    <string name="desk_attach_file">파일 첨부</string>
+    <string name="desk_attachments">첨부 파일</string>
+    <string name="desk_files_note">각 20MB까지의 파일 최대 8개가 사진과 함께 전달되며, 누군가 게시물을 열 때만 가져옵니다.</string>
+    <string name="desk_details">상세 정보</string>
+    <string name="desk_save_as">다른 이름으로 저장…</string>
+    <string name="desk_seller_away">판매자에게 지금은 연결할 수 없어 사진과 파일을 가져오지 못했습니다.</string>
 </resources>

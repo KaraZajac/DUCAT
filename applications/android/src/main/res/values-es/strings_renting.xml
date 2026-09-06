@@ -149,4 +149,18 @@
     <string name="rent_delete_keep">Conservarlo</string>
     <string name="rent_photo_take">Tomar una foto</string>
     <string name="rent_photo_no_camera">No hay ninguna app de cámara en este teléfono.</string>
+    <string name="rent_description">Más sobre ello</string>
+    <string name="rent_description_hint">No va al tablón: se ofrece desde este teléfono cuando alguien abre tu anuncio. Quedan %1$d caracteres.</string>
+    <string name="rent_file_attach">Adjuntar un archivo</string>
+    <string name="rent_files_note">Un manual, un plano, una ficha técnica: hasta 8 archivos de 20 MB cada uno, ofrecidos desde este teléfono junto con las fotos.</string>
+    <string name="rent_file_too_big">Ese archivo supera los 20 MB. Prueba con uno más pequeño.</string>
+    <string name="rent_file_failed">Ese archivo no se pudo leer. Prueba con otro.</string>
+    <string name="rent_file_remove">Quitar este archivo</string>
+    <string name="rent_files_heading">Archivos de quien vende</string>
+    <string name="rent_file_save">Guardar en Archivos</string>
+    <string name="rent_file_save_failed">Ese archivo no se pudo guardar ahora mismo.</string>
+    <string name="rent_spec_gearbox">Cambio</string>
+    <string name="rent_spec_fuel">Combustible</string>
+    <string name="rent_photo_open">Verlo más grande</string>
+    <string name="rent_photo_close">Cerrar</string>
 </resources>

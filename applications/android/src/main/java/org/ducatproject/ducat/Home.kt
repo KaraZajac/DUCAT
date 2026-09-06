@@ -84,20 +84,11 @@ object Home {
         feedFile(context, doc.persona).writeText(uniffi.ducat_mobile.feedEncode(doc))
     }
 
-    private fun mimeOf(name: String): String = when (name.substringAfterLast('.', "").lowercase()) {
-        "jpg", "jpeg" -> "image/jpeg"; "png" -> "image/png"; "gif" -> "image/gif"; "webp" -> "image/webp"
-        "mp4", "m4v" -> "video/mp4"; "webm" -> "video/webm"; "mov" -> "video/quicktime"
-        "mp3" -> "audio/mpeg"; "ogg", "oga" -> "audio/ogg"; "wav" -> "audio/wav"
-        "pdf" -> "application/pdf"; "txt", "md" -> "text/plain"; "zip" -> "application/zip"
-        else -> "application/octet-stream"
-    }
+    /** Both answered by Releases, which the listing bundle (§16.18.3)
+     *  shares with the desk; the feed asks the same two questions. */
+    private fun mimeOf(name: String): String = Releases.mimeOf(name)
 
-    private fun nameOf(context: Context, uri: Uri): String {
-        context.contentResolver.query(uri, arrayOf(android.provider.OpenableColumns.DISPLAY_NAME), null, null, null)?.use { c ->
-            if (c.moveToFirst()) c.getString(0)?.takeIf { it.isNotBlank() }?.let { return it }
-        }
-        return uri.lastPathSegment?.substringAfterLast('/')?.takeIf { it.isNotBlank() } ?: "file"
-    }
+    private fun nameOf(context: Context, uri: Uri): String = Releases.nameOf(context, uri)
 
     /** A picked thing copied under its own name, so the share carries that name. */
     private fun copyIn(context: Context, uri: Uri, staging: File): File {

@@ -17,8 +17,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.House
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -1027,19 +1031,8 @@ private fun listingSpecs(info: RentalInfo): List<String> {
             info.year?.let { add(it.toString()) }
             info.make?.let { add(isolate(it)) }
             info.model?.let { add(isolate(it)) }
-            info.gearbox?.let {
-                add(stringResource(
-                    if (it.toInt() == 1) R.string.rent_manual else R.string.rent_automatic,
-                ))
-            }
-            info.fuel?.let {
-                add(stringResource(when (it.toInt()) {
-                    2 -> R.string.rent_diesel
-                    3 -> R.string.rent_electric
-                    4 -> R.string.rent_hybrid
-                    else -> R.string.rent_petrol
-                }))
-            }
+            info.gearbox?.let { add(stringResource(gearboxLabel(it))) }
+            info.fuel?.let { add(stringResource(fuelLabel(it))) }
             info.trim?.let { add(isolate(it)) }
             info.seats?.let {
                 add(pluralStringResource(R.plurals.rent_seats_n, it.toInt(), it.toInt()))
@@ -1074,12 +1067,178 @@ private fun listingSpecs(info: RentalInfo): List<String> {
     }
 }
 
+/** The words a gearbox and a fuel wear, shared by the card's line and the
+ *  sheet's table so the two cannot disagree about a diesel. */
+private fun gearboxLabel(n: ULong): Int =
+    if (n.toInt() == 1) R.string.rent_manual else R.string.rent_automatic
+
+private fun fuelLabel(n: ULong): Int = when (n.toInt()) {
+    2 -> R.string.rent_diesel
+    3 -> R.string.rent_electric
+    4 -> R.string.rent_hybrid
+    else -> R.string.rent_petrol
+}
+
+/**
+ * The notice's fields as a table's rows — label and value — for the
+ * opened listing, where there is room to say which number is which. The
+ * card's one-liner ([listingSpecs]) is the same facts without the labels.
+ */
+@Composable
+private fun listingSpecRows(info: RentalInfo): List<Pair<String, String>> {
+    val kind = info.kind.toInt()
+    val vehicle = kind == Listings.KIND_VEHICLE
+    val place = kind == Listings.KIND_PLACE
+    return buildList {
+        if (vehicle) {
+            info.year?.let { add(stringResource(R.string.rent_year) to it.toString()) }
+            info.make?.let { add(stringResource(R.string.rent_make) to isolate(it)) }
+            info.model?.let { add(stringResource(R.string.rent_model) to isolate(it)) }
+            info.gearbox?.let {
+                add(stringResource(R.string.rent_spec_gearbox) to stringResource(gearboxLabel(it)))
+            }
+            info.fuel?.let {
+                add(stringResource(R.string.rent_spec_fuel) to stringResource(fuelLabel(it)))
+            }
+            info.color?.let { add(stringResource(R.string.rent_color) to isolate(it)) }
+            info.trim?.let { add(stringResource(R.string.rent_trim) to isolate(it)) }
+            info.seats?.let { add(stringResource(R.string.rent_seats) to it.toString()) }
+        } else if (place) {
+            info.rooms?.let { add(stringResource(R.string.rent_rooms) to it.toString()) }
+            info.sleeps?.let { add(stringResource(R.string.rent_sleeps) to it.toString()) }
+            info.sizeM2?.let { add(stringResource(R.string.rent_size) to it.toString()) }
+            info.subtype?.let {
+                add(
+                    stringResource(R.string.rent_category) to stringResource(
+                        if (it.toInt() == 2) R.string.rent_private_room else R.string.rent_whole_place,
+                    ),
+                )
+            }
+        } else {
+            info.subtype?.let {
+                add(stringResource(R.string.rent_category) to stringResource(categoryLabel(kind, it.toInt())))
+            }
+        }
+        if (info.features.isNotEmpty()) {
+            add(stringResource(R.string.rent_tags) to info.features.joinToString(", ") { isolate(it) })
+        }
+        if (info.quantity > 1uL) {
+            add(stringResource(R.string.rent_how_many) to info.quantity.toString())
+        }
+    }
+}
+
+/**
+ * Two columns, the label muted. What the notice carries comes first and
+ * what the bundle's document adds comes after, in that order because the
+ * notice is signed and the document is not (§16.18.3): a row from the
+ * document is the seller's word, and the price, the area and the card are
+ * never in it.
+ */
+@Composable
+private fun SpecTable(rows: List<Pair<String, String>>) {
+    Column(Modifier.fillMaxWidth()) {
+        for ((label, value) in rows) {
+            Row(Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
+                Text(
+                    label,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(2f),
+                )
+                Text(value, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(3f))
+            }
+        }
+    }
+}
+
+/** A picture the description points at, found inside the bundle and
+ *  nowhere else — the job HomeImage does for a post. */
+@Composable
+private fun BundleImage(digest: String?, path: String) {
+    val context = LocalContext.current
+    val bmp = remember(digest, path) {
+        digest?.let { d ->
+            Galleries.file(context, d, path)?.let { SafeImage.fromFile(it.path, SafeImage.MESSAGE_PIXELS) }
+        }
+    }
+    if (bmp != null) {
+        Image(
+            bmp.asImageBitmap(),
+            null,
+            Modifier.padding(top = 8.dp).fillMaxWidth().clip(MaterialTheme.shapes.small),
+            contentScale = ContentScale.FillWidth,
+        )
+    }
+}
+
+/**
+ * One picture, the whole screen, over the sheet rather than instead of it
+ * — so what the reader was in the middle of is still there when they come
+ * back. A tap on the picture closes it; the arrows step along the strip.
+ */
+@Composable
+private fun PictureViewer(
+    shots: List<Pair<android.graphics.Bitmap, String>>,
+    start: Int,
+    onClose: () -> Unit,
+) {
+    var at by remember { mutableStateOf(start.coerceIn(0, shots.lastIndex)) }
+    val white = androidx.compose.ui.graphics.Color.White
+    androidx.compose.ui.window.Dialog(
+        onDismissRequest = onClose,
+        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        val (bmp, caption) = shots[at]
+        Box(
+            Modifier.fillMaxSize()
+                .background(androidx.compose.ui.graphics.Color.Black)
+                .clickable(
+                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                    indication = null,
+                ) { onClose() },
+        ) {
+            Image(
+                bmp.asImageBitmap(),
+                caption.ifBlank { null },
+                Modifier.fillMaxSize(),
+                contentScale = ContentScale.Fit,
+            )
+            IconButton(onClick = onClose, Modifier.align(Alignment.TopStart).padding(8.dp)) {
+                Icon(Icons.Filled.Close, stringResource(R.string.rent_photo_close), tint = white)
+            }
+            Column(
+                Modifier.align(Alignment.BottomCenter).padding(bottom = 24.dp, start = 16.dp, end = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                if (caption.isNotBlank()) {
+                    Text(isolate(caption), color = white, style = MaterialTheme.typography.bodyMedium)
+                }
+                if (shots.size > 1) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(onClick = { at = (at + shots.size - 1) % shots.size }) {
+                            Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, null, tint = white)
+                        }
+                        Text("${at + 1} / ${shots.size}", color = white, style = MaterialTheme.typography.labelMedium)
+                        IconButton(onClick = { at = (at + 1) % shots.size }) {
+                            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = white)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 /**
  * One listing, opened.
  *
- * Local and free: nothing here touches the network, because everything it
- * shows arrived with the board read. The one button that costs anything is
- * the one that says so.
+ * Local and free, except for the one thing that is neither and says so:
+ * the gallery. Everything else arrived with the board read. What the
+ * bundle adds when it lands — the seller's description, the files, the
+ * specs the notice has no slot for — is shown under what the notice
+ * signed and never in place of it: the price, the area and the card stay
+ * what the board said (§16.18.3).
  */
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
@@ -1090,6 +1249,7 @@ private fun ListingSheet(
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     androidx.compose.material3.ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(
             Modifier
@@ -1121,29 +1281,39 @@ private fun ListingSheet(
                     tick++
                 }
             }
-            val shots = remember(gallery.dir, tick) {
-                info.galleryDigest?.let { d ->
-                    Galleries.photos(context, d).mapNotNull {
-                        SafeImage.fromFile(it.path, SafeImage.MESSAGE_PIXELS)
-                    }
-                }.orEmpty()
+            // What landed, read once it has: the document when there is one
+            // that opens, the pictures, the files.
+            val bundle = remember(gallery.dir, tick) {
+                if (gallery.dir == null) null
+                else info.galleryDigest?.let { Galleries.bundle(context, it) }
+            }
+            val shots = remember(bundle) {
+                bundle?.pictures.orEmpty().mapNotNull { p ->
+                    SafeImage.fromFile(p.file.path, SafeImage.MESSAGE_PIXELS)?.let { it to p.caption }
+                }
             }
             val cover = remember(info.thumb) {
                 info.thumb?.let { SafeImage.fromBytes(it, SafeImage.MESSAGE_PIXELS) }
             }
+            var viewing by remember { mutableStateOf<Int?>(null) }
+            viewing?.let { i ->
+                if (i in shots.indices) PictureViewer(shots, i, onClose = { viewing = null })
+            }
             if (shots.isNotEmpty()) {
                 // The gallery arrived: the photographs themselves, full
-                // width, in the order the seller put them in.
+                // width, in the order the seller put them in. A tap opens
+                // one the size of the screen.
                 Row(
                     Modifier.fillMaxWidth()
                         .horizontalScroll(androidx.compose.foundation.rememberScrollState()),
                 ) {
-                    for (b in shots) {
+                    shots.forEachIndexed { i, (b, caption) ->
                         Image(
                             b.asImageBitmap(),
-                            null,
+                            caption.ifBlank { stringResource(R.string.rent_photo_open) },
                             Modifier.height(240.dp).padding(end = 8.dp)
-                                .clip(MaterialTheme.shapes.medium),
+                                .clip(MaterialTheme.shapes.medium)
+                                .clickable { viewing = i },
                             contentScale = ContentScale.Fit,
                         )
                     }
@@ -1207,14 +1377,25 @@ private fun ListingSheet(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            val specs = listingSpecs(info)
-            if (specs.isNotEmpty()) {
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    specs.joinToString(" \u00b7 "),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+            // The seller's own words, when the bundle carries them: drawn
+            // exactly as a post is — §16.23's subset, the same parser — with
+            // its pictures found inside the bundle and nowhere else.
+            val description = bundle?.doc?.description?.takeIf { it.isNotBlank() }
+            if (description != null) {
+                val blocks = remember(description) {
+                    runCatching { uniffi.ducat_mobile.listingDocBlocks(description) }
+                        .getOrDefault(emptyList())
+                }
+                Spacer(Modifier.height(4.dp))
+                FeedBlocks(blocks) { path -> BundleImage(info.galleryDigest, path) }
+            }
+            // The table: the notice's fields first, the document's after —
+            // in addition to, never instead of.
+            val rows = listingSpecRows(info) +
+                bundle?.doc?.specs.orEmpty().toSortedMap().map { (k, v) -> isolate(k) to isolate(v) }
+            if (rows.isNotEmpty()) {
+                Spacer(Modifier.height(8.dp))
+                SpecTable(rows)
             }
             if (info.area.isNotBlank()) {
                 Spacer(Modifier.height(2.dp))
@@ -1223,6 +1404,55 @@ private fun ListingSheet(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+            }
+            // The files, with a way to keep one. Kept the way the feed keeps
+            // a post's file — it lands on the Files page — but held rather
+            // than offered: saving a seller's manual is not a promise to
+            // serve it, and that page's own checkbox is where such a
+            // promise is made.
+            val files = bundle?.files.orEmpty()
+            if (files.isNotEmpty()) {
+                var word by remember { mutableStateOf<String?>(null) }
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    stringResource(R.string.rent_files_heading),
+                    style = MaterialTheme.typography.titleSmall,
+                )
+                for (f in files) {
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            Text(
+                                isolate(f.name),
+                                style = MaterialTheme.typography.bodyMedium,
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                            )
+                            Text(
+                                android.text.format.Formatter.formatShortFileSize(context, f.file.length()),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        TextButton(onClick = {
+                            scope.launch {
+                                val r = withContext(Dispatchers.IO) {
+                                    runCatching {
+                                        org.ducatproject.ducat.Releases.share(context, f.file, f.name, keepAlive = false)
+                                    }
+                                }
+                                word = if (r.isSuccess) {
+                                    context.getString(R.string.feed_saved_to_files, f.name)
+                                } else {
+                                    DucatLog.w("RentSearch", "save ${f.name}: ${r.exceptionOrNull()?.message}")
+                                    context.getString(R.string.rent_file_save_failed)
+                                }
+                            }
+                        }) { Text(stringResource(R.string.rent_file_save)) }
+                    }
+                }
+                word?.let {
+                    Text(it, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                }
             }
             Spacer(Modifier.height(16.dp))
             // Says what pressing it does, because it is not free: it opens a

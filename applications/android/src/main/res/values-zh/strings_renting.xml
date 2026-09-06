@@ -147,4 +147,18 @@
     <string name="rent_delete_keep">保留</string>
     <string name="rent_photo_take">拍照</string>
     <string name="rent_photo_no_camera">这部手机上没有相机应用。</string>
+    <string name="rent_description">更多介绍</string>
+    <string name="rent_description_hint">不放到板上——有人打开你的信息时由这台手机提供。还可输入 %1$d 个字。</string>
+    <string name="rent_file_attach">附加文件</string>
+    <string name="rent_files_note">说明书、平面图、参数表——最多 8 个文件，每个 20 MB，与照片一起由这台手机提供。</string>
+    <string name="rent_file_too_big">那个文件超过 20 MB。换个小一点的试试。</string>
+    <string name="rent_file_failed">无法读取那个文件。换一个试试。</string>
+    <string name="rent_file_remove">移除这个文件</string>
+    <string name="rent_files_heading">卖家提供的文件</string>
+    <string name="rent_file_save">保存到文件</string>
+    <string name="rent_file_save_failed">那个文件现在无法保存。</string>
+    <string name="rent_spec_gearbox">变速箱</string>
+    <string name="rent_spec_fuel">燃料</string>
+    <string name="rent_photo_open">放大查看</string>
+    <string name="rent_photo_close">关闭</string>
 </resources>

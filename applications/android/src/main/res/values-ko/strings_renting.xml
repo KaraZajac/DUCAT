@@ -147,4 +147,18 @@
     <string name="rent_delete_keep">보관</string>
     <string name="rent_photo_take">사진 찍기</string>
     <string name="rent_photo_no_camera">이 휴대폰에 카메라 앱이 없습니다.</string>
+    <string name="rent_description">더 자세히</string>
+    <string name="rent_description_hint">게시판에는 올라가지 않아요. 누군가 게시물을 열 때 이 기기에서 제공됩니다. %1$d자 남음.</string>
+    <string name="rent_file_attach">파일 첨부</string>
+    <string name="rent_files_note">설명서, 평면도, 사양서 등 20 MB 이하 파일을 8개까지. 사진과 함께 이 기기에서 제공됩니다.</string>
+    <string name="rent_file_too_big">그 파일은 20 MB를 넘습니다. 더 작은 파일을 써 보세요.</string>
+    <string name="rent_file_failed">그 파일을 읽을 수 없었어요. 다른 파일을 써 보세요.</string>
+    <string name="rent_file_remove">이 파일 빼기</string>
+    <string name="rent_files_heading">판매자의 파일</string>
+    <string name="rent_file_save">파일에 저장</string>
+    <string name="rent_file_save_failed">그 파일을 지금은 저장할 수 없었어요.</string>
+    <string name="rent_spec_gearbox">변속기</string>
+    <string name="rent_spec_fuel">연료</string>
+    <string name="rent_photo_open">크게 보기</string>
+    <string name="rent_photo_close">닫기</string>
 </resources>

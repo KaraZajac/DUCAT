@@ -147,4 +147,18 @@
     <string name="rent_delete_keep">Kalsın</string>
     <string name="rent_photo_take">Fotoğraf çek</string>
     <string name="rent_photo_no_camera">Bu telefonda kamera uygulaması yok.</string>
+    <string name="rent_description">Daha fazla bilgi</string>
+    <string name="rent_description_hint">Panoya gitmez; biri ilanını açtığında bu telefondan sunulur. %1$d karakter kaldı.</string>
+    <string name="rent_file_attach">Dosya iliştir</string>
+    <string name="rent_files_note">Bir kılavuz, bir kat planı, bir teknik föy — her biri 20 MB olan en fazla 8 dosya, fotoğraflarla birlikte bu telefondan sunulur.</string>
+    <string name="rent_file_too_big">Bu dosya 20 MB’tan büyük. Daha küçüğünü dene.</string>
+    <string name="rent_file_failed">Bu dosya okunamadı. Başka bir dosya dene.</string>
+    <string name="rent_file_remove">Bu dosyayı kaldır</string>
+    <string name="rent_files_heading">Satıcının dosyaları</string>
+    <string name="rent_file_save">Dosyalar’a kaydet</string>
+    <string name="rent_file_save_failed">Bu dosya şu anda kaydedilemedi.</string>
+    <string name="rent_spec_gearbox">Vites kutusu</string>
+    <string name="rent_spec_fuel">Yakıt</string>
+    <string name="rent_photo_open">Büyük gör</string>
+    <string name="rent_photo_close">Kapat</string>
 </resources>

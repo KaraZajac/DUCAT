@@ -147,4 +147,18 @@
     <string name="rent_delete_keep">Giữ lại</string>
     <string name="rent_photo_take">Chụp ảnh</string>
     <string name="rent_photo_no_camera">Điện thoại này không có ứng dụng máy ảnh.</string>
+    <string name="rent_description">Thêm về món này</string>
+    <string name="rent_description_hint">Không lên bảng — được cung cấp từ máy này khi ai đó mở tin của bạn. Còn %1$d ký tự.</string>
+    <string name="rent_file_attach">Đính kèm tệp</string>
+    <string name="rent_files_note">Sách hướng dẫn, sơ đồ mặt bằng, bảng thông số — tối đa 8 tệp, mỗi tệp 20 MB, được cung cấp từ máy này cùng với ảnh.</string>
+    <string name="rent_file_too_big">Tệp đó lớn hơn 20 MB. Hãy thử tệp nhỏ hơn.</string>
+    <string name="rent_file_failed">Không đọc được tệp đó. Hãy thử tệp khác.</string>
+    <string name="rent_file_remove">Bỏ tệp này</string>
+    <string name="rent_files_heading">Tệp từ người bán</string>
+    <string name="rent_file_save">Lưu vào Tệp</string>
+    <string name="rent_file_save_failed">Hiện chưa lưu được tệp đó.</string>
+    <string name="rent_spec_gearbox">Hộp số</string>
+    <string name="rent_spec_fuel">Nhiên liệu</string>
+    <string name="rent_photo_open">Xem lớn hơn</string>
+    <string name="rent_photo_close">Đóng</string>
 </resources>

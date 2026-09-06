@@ -158,4 +158,21 @@
     <string name="rent_delete_keep">Keep it</string>
     <string name="rent_photo_take">Take a photo</string>
     <string name="rent_photo_no_camera">No camera app on this phone.</string>
+    <!-- §16.18.3's bundle: what rides the swarm beside the pictures rather
+         than the board. The description hint says both where the words go
+         and how much room is left; the file note says the two limits. -->
+    <string name="rent_description">More about it</string>
+    <string name="rent_description_hint">Not on the board — offered from this phone when someone opens your listing. %1$d characters left.</string>
+    <string name="rent_file_attach">Attach a file</string>
+    <string name="rent_files_note">A manual, a floor plan, a spec sheet — up to 8 files of 20 MB each, offered from this phone with the photos.</string>
+    <string name="rent_file_too_big">That file is over 20 MB. Try a smaller one.</string>
+    <string name="rent_file_failed">That file could not be read. Try another.</string>
+    <string name="rent_file_remove">Remove this file</string>
+    <string name="rent_files_heading">Files from the seller</string>
+    <string name="rent_file_save">Save to Files</string>
+    <string name="rent_file_save_failed">That file could not be saved just now.</string>
+    <string name="rent_spec_gearbox">Gearbox</string>
+    <string name="rent_spec_fuel">Fuel</string>
+    <string name="rent_photo_open">See it larger</string>
+    <string name="rent_photo_close">Close</string>
 </resources>

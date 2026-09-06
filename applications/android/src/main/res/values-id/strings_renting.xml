@@ -147,4 +147,18 @@
     <string name="rent_delete_keep">Simpan</string>
     <string name="rent_photo_take">Ambil foto</string>
     <string name="rent_photo_no_camera">Tidak ada aplikasi kamera di ponsel ini.</string>
+    <string name="rent_description">Lebih lanjut tentangnya</string>
+    <string name="rent_description_hint">Tidak masuk ke papan — ditawarkan dari ponsel ini saat ada yang membuka iklanmu. Sisa %1$d karakter.</string>
+    <string name="rent_file_attach">Lampirkan berkas</string>
+    <string name="rent_files_note">Buku panduan, denah, lembar spesifikasi — hingga 8 berkas masing-masing 20 MB, ditawarkan dari ponsel ini bersama foto.</string>
+    <string name="rent_file_too_big">Berkas itu lebih dari 20 MB. Coba yang lebih kecil.</string>
+    <string name="rent_file_failed">Berkas itu tidak bisa dibaca. Coba yang lain.</string>
+    <string name="rent_file_remove">Hapus berkas ini</string>
+    <string name="rent_files_heading">Berkas dari penjual</string>
+    <string name="rent_file_save">Simpan ke Berkas</string>
+    <string name="rent_file_save_failed">Berkas itu tidak bisa disimpan saat ini.</string>
+    <string name="rent_spec_gearbox">Transmisi</string>
+    <string name="rent_spec_fuel">Bahan bakar</string>
+    <string name="rent_photo_open">Lihat lebih besar</string>
+    <string name="rent_photo_close">Tutup</string>
 </resources>

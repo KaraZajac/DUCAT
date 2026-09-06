@@ -348,4 +348,13 @@
     <string name="desk_car_picture">車の写真</string>
     <string name="desk_car_picture_note">配車の呼び出しを受けたときだけ、車種・色・ナンバーと一緒に送られ、乗客が路肩であなたの車を見分けられます。</string>
     <string name="desk_car">車</string>
+    <string name="desk_description">説明</string>
+    <string name="desk_description_hint">何なのか、状態はどうか、何が付属するか。</string>
+    <string name="desk_chars_used">%1$d / %2$d 文字</string>
+    <string name="desk_attach_file">ファイルを添付</string>
+    <string name="desk_attachments">添付ファイル</string>
+    <string name="desk_files_note">最大8個、各20MBまでのファイルが写真と一緒に運ばれ、誰かが出品を開いたときにだけ取得されます。</string>
+    <string name="desk_details">詳細</string>
+    <string name="desk_save_as">名前を付けて保存…</string>
+    <string name="desk_seller_away">出品者に今は接続できないため、写真とファイルを取得できませんでした。</string>
 </resources>

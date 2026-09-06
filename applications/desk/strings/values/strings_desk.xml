@@ -356,4 +356,13 @@
     <string name="desk_car_picture">Picture of the car</string>
     <string name="desk_car_picture_note">Sent with the model, colour and plate only when you take a hail, so a rider can pick your car out at the curb.</string>
     <string name="desk_car">Car</string>
+    <string name="desk_description">Description</string>
+    <string name="desk_description_hint">What it is, its condition, what comes with it.</string>
+    <string name="desk_chars_used">%1$d of %2$d characters</string>
+    <string name="desk_attach_file">Attach a file</string>
+    <string name="desk_attachments">Attachments</string>
+    <string name="desk_files_note">Up to 8 files of 20 MB each travel with the pictures and are fetched only when somebody opens the listing.</string>
+    <string name="desk_details">Details</string>
+    <string name="desk_save_as">Save as…</string>
+    <string name="desk_seller_away">The seller is not reachable right now, so the pictures and files could not be fetched.</string>
 </resources>

@@ -348,4 +348,13 @@
     <string name="desk_car_picture">车的照片</string>
     <string name="desk_car_picture_note">只有在你接单时才会连同车型、颜色和车牌一起发送，好让乘客在路边认出你的车。</string>
     <string name="desk_car">车</string>
+    <string name="desk_description">描述</string>
+    <string name="desk_description_hint">这是什么、成色如何、附带什么。</string>
+    <string name="desk_chars_used">%1$d / %2$d 字</string>
+    <string name="desk_attach_file">附加文件</string>
+    <string name="desk_attachments">附件</string>
+    <string name="desk_files_note">最多 8 个、每个不超过 20 MB 的文件随图片一起传送，只有在有人打开该信息时才会获取。</string>
+    <string name="desk_details">详情</string>
+    <string name="desk_save_as">另存为…</string>
+    <string name="desk_seller_away">目前联系不上卖家，因此无法获取图片和文件。</string>
 </resources>

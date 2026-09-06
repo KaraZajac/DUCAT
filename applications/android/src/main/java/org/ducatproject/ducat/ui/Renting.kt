@@ -17,6 +17,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddAPhoto
+import androidx.compose.material.icons.filled.AttachFile
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Backpack
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Check
@@ -39,6 +41,8 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -528,6 +532,7 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
     // phone turns sideways is one nobody fills in twice. The till already
     // does this for a basket; the form it inspired did not inherit it.
     var title by rememberSaveable { mutableStateOf("") }
+    var description by rememberSaveable { mutableStateOf("") }
     var area by rememberSaveable { mutableStateOf("") }
     var price by rememberSaveable { mutableStateOf("") }
     // Vehicle
@@ -566,6 +571,12 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
     // rotation and files do, so the picked photographs outlive the screen.
     var photoTick by remember { mutableStateOf(0) }
     val photos = remember(photoTick, galleryId) { Listings.photos(context, galleryId) }
+    // The attached files the same way: on disk under the listing's id from
+    // the moment they are picked, re-read after every change.
+    var fileTick by remember { mutableStateOf(0) }
+    val attached = remember(fileTick, galleryId) { Listings.files(context, galleryId) }
+    var fileError by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
     // Which of them is the one that rides the board. Saved by name, so a
     // rotation does not silently promote a different picture.
     var thumbName by rememberSaveable { mutableStateOf<String?>(null) }
@@ -664,12 +675,38 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
         }
     }
 
-    // Leaving without posting takes the photographs with it. They live
-    // under the listing's id, and an id that never became a listing would
-    // otherwise keep somebody's pictures on this phone for ever with
-    // nothing pointing at them.
+    // A file beside the pictures — a manual, a floor plan — copied in under
+    // the listing's id the way the photographs are, so it outlives the
+    // screen and goes into the bundle at post time (§16.18.3). OpenDocument
+    // rather than GetContent, and no persistable grant: the copy is made
+    // now, on IO, because twenty megabytes off a slow provider is a second
+    // the screen should not spend frozen.
+    val pickFile = rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.OpenDocument(),
+    ) { uri: android.net.Uri? ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        fileError = null
+        scope.launch {
+            val r = withContext(Dispatchers.IO) {
+                runCatching { Listings.addFile(context, galleryId, uri) }
+            }
+            r.onFailure {
+                DucatLog.w("Renting", "attach: ${it.message}")
+                fileError = context.getString(
+                    if (it is Listings.TooBig) R.string.rent_file_too_big else R.string.rent_file_failed,
+                )
+            }
+            fileTick++
+        }
+    }
+
+    // Leaving without posting takes the photographs and the files with it.
+    // They live under the listing's id, and an id that never became a
+    // listing would otherwise keep somebody's pictures on this phone for
+    // ever with nothing pointing at them.
     val leave: () -> Unit = {
         Listings.photoDir(context, galleryId).deleteRecursively()
+        Listings.fileDir(context, galleryId).deleteRecursively()
         onDone()
     }
 
@@ -733,9 +770,9 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
         if (error == null) onDone()
     }
     val started = listOf(
-        title, area, price, make, model, year, color, seats, trim,
+        title, description, area, price, make, model, year, color, seats, trim,
         rooms, sleeps, sizeM2, tags, details,
-    ).any { it.isNotBlank() }
+    ).any { it.isNotBlank() } || attached.isNotEmpty()
     BackHandler { if (started) confirmDiscard = true else leave() }
     if (confirmDiscard) {
         AlertDialog(
@@ -848,6 +885,10 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
                         tint = MaterialTheme.colorScheme.onSecondaryContainer,
                     )
                 }
+                if (attached.size < Listings.MAX_FILES) {
+                    Spacer(Modifier.width(8.dp))
+                    AttachTile(72.dp) { runCatching { pickFile.launch(arrayOf("*/*")) } }
+                }
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
@@ -953,6 +994,10 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
                         )
                     }
                 }
+                if (attached.size < Listings.MAX_FILES) {
+                    Spacer(Modifier.width(8.dp))
+                    AttachTile(84.dp) { runCatching { pickFile.launch(arrayOf("*/*")) } }
+                }
             }
             Spacer(Modifier.height(4.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -973,11 +1018,70 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
                 }
             }
         }
+        // What is attached, each with a way off the list. The note under
+        // them says the two limits, or what went wrong with the last pick.
+        if (attached.isNotEmpty() || fileError != null) {
+            Spacer(Modifier.height(8.dp))
+            for (f in attached) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Filled.AttachFile, null, Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            f.name,
+                            style = MaterialTheme.typography.bodyMedium,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                        )
+                        Text(
+                            android.text.format.Formatter.formatShortFileSize(context, f.length()),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    IconButton(onClick = {
+                        Listings.removeFile(context, galleryId, f.name)
+                        fileError = null
+                        fileTick++
+                    }) {
+                        Icon(Icons.Filled.Close, stringResource(R.string.rent_file_remove))
+                    }
+                }
+            }
+            Text(
+                fileError ?: stringResource(R.string.rent_files_note),
+                style = MaterialTheme.typography.labelSmall,
+                color = if (fileError != null) MaterialTheme.colorScheme.error
+                else MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         Spacer(Modifier.height(12.dp))
         OutlinedTextField(
             value = title, onValueChange = { title = it.take(60) },
             label = { Text(stringResource(R.string.rent_title)) },
             singleLine = true, modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(8.dp))
+        // The seller's words at length, for whoever opens the listing: not
+        // on the board, so not bounded by it — the bundle carries them
+        // (§16.18.3) — and the hint says both that and how much room is
+        // left.
+        OutlinedTextField(
+            value = description,
+            onValueChange = { description = it.take(Listings.MAX_DESCRIPTION) },
+            label = { Text(stringResource(R.string.rent_description)) },
+            supportingText = {
+                Text(
+                    stringResource(
+                        R.string.rent_description_hint,
+                        Listings.MAX_DESCRIPTION - description.length,
+                    ),
+                )
+            },
+            minLines = 3, modifier = Modifier.fillMaxWidth(),
         )
         Spacer(Modifier.height(8.dp))
         OutlinedTextField(
@@ -1266,6 +1370,7 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
                         priceCurrency = cur.takeIf { fiat },
                         quantity = howMany.toLongOrNull() ?: 1L,
                         thumb = thumb,
+                        description = description,
                     )
                     draftId?.let { draft.put("id", it) } ?: run { draftId = draft.optString("id") }
                     error = null
@@ -1327,6 +1432,23 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
             }
         }
         Spacer(Modifier.height(24.dp))
+    }
+}
+
+/** The paperclip beside the camera: a file for the bundle, not the board. */
+@Composable
+private fun AttachTile(size: androidx.compose.ui.unit.Dp, onClick: () -> Unit) {
+    Box(
+        Modifier.size(size).clip(MaterialTheme.shapes.small)
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            Icons.Filled.AttachFile,
+            stringResource(R.string.rent_file_attach),
+            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+        )
     }
 }
 

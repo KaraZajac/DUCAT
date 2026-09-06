@@ -348,4 +348,13 @@
     <string name="desk_car_picture">Ảnh chiếc xe</string>
     <string name="desk_car_picture_note">Chỉ được gửi cùng mẫu xe, màu và biển số khi bạn nhận một cuốc, để hành khách nhận ra xe của bạn bên lề đường.</string>
     <string name="desk_car">Xe</string>
+    <string name="desk_description">Mô tả</string>
+    <string name="desk_description_hint">Món đồ là gì, tình trạng ra sao, đi kèm những gì.</string>
+    <string name="desk_chars_used">%1$d trên %2$d ký tự</string>
+    <string name="desk_attach_file">Đính kèm tệp</string>
+    <string name="desk_attachments">Tệp đính kèm</string>
+    <string name="desk_files_note">Tối đa 8 tệp, mỗi tệp 20 MB, đi cùng ảnh và chỉ được tải về khi có người mở tin.</string>
+    <string name="desk_details">Chi tiết</string>
+    <string name="desk_save_as">Lưu thành…</string>
+    <string name="desk_seller_away">Người bán hiện không liên lạc được, nên chưa tải được ảnh và tệp.</string>
 </resources>

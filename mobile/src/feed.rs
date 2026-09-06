@@ -142,7 +142,7 @@ fn share_addr_ok(a: &str) -> bool {
     a.starts_with(FILE_PREFIX) && a.len() > FILE_PREFIX.len() && !a.contains(char::is_whitespace)
 }
 
-fn mime_ok(m: &str) -> bool {
+pub(crate) fn mime_ok(m: &str) -> bool {
     let mut parts = m.splitn(2, '/');
     match (parts.next(), parts.next()) {
         (Some(a), Some(b)) => {
@@ -312,7 +312,7 @@ pub fn feed_blocks(text: String) -> Vec<FeedBlock> {
     text_blocks(&text)
 }
 
-fn text_blocks(text: &str) -> Vec<FeedBlock> {
+pub(crate) fn text_blocks(text: &str) -> Vec<FeedBlock> {
     let mut out = Vec::new();
     for para in text.replace("\r\n", "\n").split("\n\n") {
         let para = para.trim_matches('\n');

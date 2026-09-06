@@ -149,4 +149,18 @@
     <string name="rent_delete_keep">Behouden</string>
     <string name="rent_photo_take">Foto maken</string>
     <string name="rent_photo_no_camera">Geen camera-app op deze telefoon.</string>
+    <string name="rent_description">Meer erover</string>
+    <string name="rent_description_hint">Niet op het bord – wordt vanaf deze telefoon aangeboden als iemand je advertentie opent. Nog %1$d tekens.</string>
+    <string name="rent_file_attach">Bestand toevoegen</string>
+    <string name="rent_files_note">Een handleiding, een plattegrond, een specificatieblad – tot 8 bestanden van elk 20 MB, samen met de foto’s vanaf deze telefoon aangeboden.</string>
+    <string name="rent_file_too_big">Dat bestand is groter dan 20 MB. Probeer een kleiner bestand.</string>
+    <string name="rent_file_failed">Dat bestand kon niet worden gelezen. Probeer een ander.</string>
+    <string name="rent_file_remove">Dit bestand verwijderen</string>
+    <string name="rent_files_heading">Bestanden van de verkoper</string>
+    <string name="rent_file_save">Opslaan in Bestanden</string>
+    <string name="rent_file_save_failed">Dat bestand kon nu niet worden opgeslagen.</string>
+    <string name="rent_spec_gearbox">Versnellingsbak</string>
+    <string name="rent_spec_fuel">Brandstof</string>
+    <string name="rent_photo_open">Groter bekijken</string>
+    <string name="rent_photo_close">Sluiten</string>
 </resources>

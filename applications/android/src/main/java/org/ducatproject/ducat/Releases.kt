@@ -50,6 +50,30 @@ object Releases {
     )
 
     /**
+     * A type by extension, for what a share carries. Here rather than in
+     * Home because the listing bundle (§16.18.3) names its files the same
+     * way and Listings crosses to the desk, where Home does not.
+     */
+    fun mimeOf(name: String): String = when (name.substringAfterLast('.', "").lowercase()) {
+        "jpg", "jpeg" -> "image/jpeg"; "png" -> "image/png"; "gif" -> "image/gif"; "webp" -> "image/webp"
+        "mp4", "m4v" -> "video/mp4"; "webm" -> "video/webm"; "mov" -> "video/quicktime"
+        "mp3" -> "audio/mpeg"; "ogg", "oga" -> "audio/ogg"; "wav" -> "audio/wav"
+        "pdf" -> "application/pdf"; "txt", "md" -> "text/plain"; "zip" -> "application/zip"
+        else -> "application/octet-stream"
+    }
+
+    /** The name the picker reports for a content: URI — the URI's own is
+     *  an opaque provider id, and "document/1234" is nobody's manual. */
+    fun nameOf(context: Context, uri: android.net.Uri): String {
+        context.contentResolver.query(
+            uri, arrayOf(android.provider.OpenableColumns.DISPLAY_NAME), null, null, null,
+        )?.use { c ->
+            if (c.moveToFirst()) c.getString(0)?.takeIf { it.isNotBlank() }?.let { return it }
+        }
+        return uri.lastPathSegment?.substringAfterLast('/')?.takeIf { it.isNotBlank() } ?: "file"
+    }
+
+    /**
      * `ducat:file/<share-key>:<digest-hex>` — the whole of the address.
      *
      * The digest rides in it deliberately. A reader who has the address can
@@ -143,7 +167,16 @@ object Releases {
      * name the far end can write to disk. Returns the release, whose
      * address is the only thing that needs handing over.
      */
-    fun share(context: Context, source: java.io.File, title: String): Release {
+    fun share(
+        context: Context,
+        source: java.io.File,
+        title: String,
+        /** Serve it from here on. False files it without offering it: a
+         *  reader saving a seller's manual out of a listing (§16.18.3) has
+         *  chosen to keep it, not to mirror it, and the row's checkbox on
+         *  the Files page is where that choice is changed. */
+        keepAlive: Boolean = true,
+    ): Release {
         val staging = java.io.File(context.filesDir, "release_staging").apply {
             deleteRecursively(); mkdirs()
         }
@@ -164,11 +197,11 @@ object Releases {
             title = title.ifBlank { name },
             addedAt = System.currentTimeMillis() / 1000,
             bytes = dir.walkTopDown().filter { it.isFile }.sumOf { it.length() },
-            keepAlive = true,
+            keepAlive = keepAlive,
             mine = true,
         )
         put(context, r)
-        reseed(context, r.digestHex)
+        if (keepAlive) reseed(context, r.digestHex)
         DucatLog.i("Releases", "shared '${r.title}' at ${uriOf(r.shareKey, r.digestHex)}")
         return r
     }

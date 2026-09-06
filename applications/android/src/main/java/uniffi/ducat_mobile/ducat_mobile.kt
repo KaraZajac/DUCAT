@@ -1019,6 +1019,12 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1149,6 +1155,12 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_haversinem(`lat1E7`: Long,`lon1E7`: Long,`lat2E7`: Long,`lon2E7`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): Long
     fun uniffi_ducat_mobile_fn_func_import_backup(`blob`: RustBuffer.ByValue,`passphrase`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_listing_doc_blocks(`description`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_listing_doc_encode(`doc`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_listing_doc_parse(`json`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_log_still_readable(`seq`: Long,`nextSeq`: Long,`subkeyCount`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): Byte
@@ -1570,6 +1582,12 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_import_backup(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_listing_doc_blocks(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_listing_doc_encode(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_listing_doc_parse(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_log_still_readable(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_log_subkey(
@@ -1951,6 +1969,15 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_import_backup() != 12814.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_listing_doc_blocks() != 3909.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_listing_doc_encode() != 14200.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_listing_doc_parse() != 12041.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_log_still_readable() != 48161.toShort()) {
@@ -4182,6 +4209,154 @@ public object FfiConverterTypeIssuedCard: FfiConverterRustBuffer<IssuedCard> {
             FfiConverterByteArray.write(value.`bytes`, buf)
             FfiConverterString.write(value.`uri`, buf)
             FfiConverterULong.write(value.`expiry`, buf)
+    }
+}
+
+
+
+data class ListingDoc (
+    var `v`: kotlin.ULong, 
+    var `id`: kotlin.String, 
+    var `title`: kotlin.String, 
+    var `description`: kotlin.String, 
+    var `updated`: kotlin.ULong, 
+    var `pictures`: List<ListingPicture>, 
+    var `files`: List<ListingFile>, 
+    /**
+     * A map for the bridge's sake; written sorted, so two writes of the
+     * same document are the same bytes.
+     */
+    var `specs`: Map<kotlin.String, kotlin.String>
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeListingDoc: FfiConverterRustBuffer<ListingDoc> {
+    override fun read(buf: ByteBuffer): ListingDoc {
+        return ListingDoc(
+            FfiConverterULong.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterSequenceTypeListingPicture.read(buf),
+            FfiConverterSequenceTypeListingFile.read(buf),
+            FfiConverterMapStringString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ListingDoc) = (
+            FfiConverterULong.allocationSize(value.`v`) +
+            FfiConverterString.allocationSize(value.`id`) +
+            FfiConverterString.allocationSize(value.`title`) +
+            FfiConverterString.allocationSize(value.`description`) +
+            FfiConverterULong.allocationSize(value.`updated`) +
+            FfiConverterSequenceTypeListingPicture.allocationSize(value.`pictures`) +
+            FfiConverterSequenceTypeListingFile.allocationSize(value.`files`) +
+            FfiConverterMapStringString.allocationSize(value.`specs`)
+    )
+
+    override fun write(value: ListingDoc, buf: ByteBuffer) {
+            FfiConverterULong.write(value.`v`, buf)
+            FfiConverterString.write(value.`id`, buf)
+            FfiConverterString.write(value.`title`, buf)
+            FfiConverterString.write(value.`description`, buf)
+            FfiConverterULong.write(value.`updated`, buf)
+            FfiConverterSequenceTypeListingPicture.write(value.`pictures`, buf)
+            FfiConverterSequenceTypeListingFile.write(value.`files`, buf)
+            FfiConverterMapStringString.write(value.`specs`, buf)
+    }
+}
+
+
+
+data class ListingFile (
+    var `path`: kotlin.String, 
+    var `name`: kotlin.String, 
+    var `mime`: kotlin.String, 
+    var `bytes`: kotlin.ULong
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeListingFile: FfiConverterRustBuffer<ListingFile> {
+    override fun read(buf: ByteBuffer): ListingFile {
+        return ListingFile(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ListingFile) = (
+            FfiConverterString.allocationSize(value.`path`) +
+            FfiConverterString.allocationSize(value.`name`) +
+            FfiConverterString.allocationSize(value.`mime`) +
+            FfiConverterULong.allocationSize(value.`bytes`)
+    )
+
+    override fun write(value: ListingFile, buf: ByteBuffer) {
+            FfiConverterString.write(value.`path`, buf)
+            FfiConverterString.write(value.`name`, buf)
+            FfiConverterString.write(value.`mime`, buf)
+            FfiConverterULong.write(value.`bytes`, buf)
+    }
+}
+
+
+
+data class ListingPicture (
+    var `path`: kotlin.String, 
+    var `mime`: kotlin.String, 
+    var `bytes`: kotlin.ULong, 
+    var `w`: kotlin.UInt, 
+    var `h`: kotlin.UInt, 
+    var `caption`: kotlin.String
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeListingPicture: FfiConverterRustBuffer<ListingPicture> {
+    override fun read(buf: ByteBuffer): ListingPicture {
+        return ListingPicture(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ListingPicture) = (
+            FfiConverterString.allocationSize(value.`path`) +
+            FfiConverterString.allocationSize(value.`mime`) +
+            FfiConverterULong.allocationSize(value.`bytes`) +
+            FfiConverterUInt.allocationSize(value.`w`) +
+            FfiConverterUInt.allocationSize(value.`h`) +
+            FfiConverterString.allocationSize(value.`caption`)
+    )
+
+    override fun write(value: ListingPicture, buf: ByteBuffer) {
+            FfiConverterString.write(value.`path`, buf)
+            FfiConverterString.write(value.`mime`, buf)
+            FfiConverterULong.write(value.`bytes`, buf)
+            FfiConverterUInt.write(value.`w`, buf)
+            FfiConverterUInt.write(value.`h`, buf)
+            FfiConverterString.write(value.`caption`, buf)
     }
 }
 
@@ -7010,6 +7185,65 @@ public object FfiConverterTypeFeedError : FfiConverterRustBuffer<FeedException> 
 
 
 
+sealed class ListingDocException: kotlin.Exception() {
+    
+    class Refused(
+        
+        val v1: kotlin.String
+        ) : ListingDocException() {
+        override val message
+            get() = "v1=${ v1 }"
+    }
+    
+
+    companion object ErrorHandler : UniffiRustCallStatusErrorHandler<ListingDocException> {
+        override fun lift(error_buf: RustBuffer.ByValue): ListingDocException = FfiConverterTypeListingDocError.lift(error_buf)
+    }
+
+    
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeListingDocError : FfiConverterRustBuffer<ListingDocException> {
+    override fun read(buf: ByteBuffer): ListingDocException {
+        
+
+        return when(buf.getInt()) {
+            1 -> ListingDocException.Refused(
+                FfiConverterString.read(buf),
+                )
+            else -> throw RuntimeException("invalid error enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: ListingDocException): ULong {
+        return when(value) {
+            is ListingDocException.Refused -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+                + FfiConverterString.allocationSize(value.v1)
+            )
+        }
+    }
+
+    override fun write(value: ListingDocException, buf: ByteBuffer) {
+        when(value) {
+            is ListingDocException.Refused -> {
+                buf.putInt(1)
+                FfiConverterString.write(value.v1, buf)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+
+}
+
+
+
+
+
 sealed class MoneroException: kotlin.Exception() {
     
     class Failed(
@@ -8407,6 +8641,62 @@ public object FfiConverterSequenceTypeGroupEntryOut: FfiConverterRustBuffer<List
 /**
  * @suppress
  */
+public object FfiConverterSequenceTypeListingFile: FfiConverterRustBuffer<List<ListingFile>> {
+    override fun read(buf: ByteBuffer): List<ListingFile> {
+        val len = buf.getInt()
+        return List<ListingFile>(len) {
+            FfiConverterTypeListingFile.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<ListingFile>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeListingFile.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<ListingFile>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeListingFile.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypeListingPicture: FfiConverterRustBuffer<List<ListingPicture>> {
+    override fun read(buf: ByteBuffer): List<ListingPicture> {
+        val len = buf.getInt()
+        return List<ListingPicture>(len) {
+            FfiConverterTypeListingPicture.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<ListingPicture>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeListingPicture.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<ListingPicture>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeListingPicture.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterSequenceTypeNodeCandidate: FfiConverterRustBuffer<List<NodeCandidate>> {
     override fun read(buf: ByteBuffer): List<NodeCandidate> {
         val len = buf.getInt()
@@ -8677,6 +8967,45 @@ public object FfiConverterSequenceTypeFeedBlock: FfiConverterRustBuffer<List<Fee
         buf.putInt(value.size)
         value.iterator().forEach {
             FfiConverterTypeFeedBlock.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterMapStringString: FfiConverterRustBuffer<Map<kotlin.String, kotlin.String>> {
+    override fun read(buf: ByteBuffer): Map<kotlin.String, kotlin.String> {
+        val len = buf.getInt()
+        return buildMap<kotlin.String, kotlin.String>(len) {
+            repeat(len) {
+                val k = FfiConverterString.read(buf)
+                val v = FfiConverterString.read(buf)
+                this[k] = v
+            }
+        }
+    }
+
+    override fun allocationSize(value: Map<kotlin.String, kotlin.String>): ULong {
+        val spaceForMapSize = 4UL
+        val spaceForChildren = value.map { (k, v) ->
+            FfiConverterString.allocationSize(k) +
+            FfiConverterString.allocationSize(v)
+        }.sum()
+        return spaceForMapSize + spaceForChildren
+    }
+
+    override fun write(value: Map<kotlin.String, kotlin.String>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        // The parens on `(k, v)` here ensure we're calling the right method,
+        // which is important for compatibility with older android devices.
+        // Ref https://blog.danlew.net/2017/03/16/kotlin-puzzler-whose-line-is-it-anyways/
+        value.forEach { (k, v) ->
+            FfiConverterString.write(k, buf)
+            FfiConverterString.write(v, buf)
         }
     }
 }
@@ -9512,6 +9841,39 @@ public object FfiConverterSequenceTypeFeedBlock: FfiConverterRustBuffer<List<Fee
     uniffiRustCallWithError(BackupException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_import_backup(
         FfiConverterByteArray.lower(`blob`),FfiConverterString.lower(`passphrase`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * The description as blocks for a screen: §16.23's text subset, the
+         * same parser the feed uses, so a listing reads like a post.
+         */ fun `listingDocBlocks`(`description`: kotlin.String): List<FeedBlock> {
+            return FfiConverterSequenceTypeFeedBlock.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_listing_doc_blocks(
+        FfiConverterString.lower(`description`),_status)
+}
+    )
+    }
+    
+
+    @Throws(ListingDocException::class) fun `listingDocEncode`(`doc`: ListingDoc): kotlin.String {
+            return FfiConverterString.lift(
+    uniffiRustCallWithError(ListingDocException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_listing_doc_encode(
+        FfiConverterTypeListingDoc.lower(`doc`),_status)
+}
+    )
+    }
+    
+
+    @Throws(ListingDocException::class) fun `listingDocParse`(`json`: kotlin.String): ListingDoc {
+            return FfiConverterTypeListingDoc.lift(
+    uniffiRustCallWithError(ListingDocException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_listing_doc_parse(
+        FfiConverterString.lower(`json`),_status)
 }
     )
     }

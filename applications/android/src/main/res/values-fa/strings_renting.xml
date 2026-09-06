@@ -147,4 +147,18 @@
     <string name="rent_delete_keep">نگه دار</string>
     <string name="rent_photo_take">گرفتن عکس</string>
     <string name="rent_photo_no_camera">برنامهٔ دوربینی روی این گوشی نیست.</string>
+    <string name="rent_description">بیشتر درباره‌اش</string>
+    <string name="rent_description_hint">روی تابلو نمی‌رود — وقتی کسی آگهی‌ات را باز کند از همین گوشی ارائه می‌شود. %1$d نویسه مانده.</string>
+    <string name="rent_file_attach">پیوست فایل</string>
+    <string name="rent_files_note">یک دفترچه راهنما، یک نقشه، یک برگه مشخصات — تا 8 فایل هر کدام 20 مگابایت، همراه عکس‌ها از همین گوشی ارائه می‌شوند.</string>
+    <string name="rent_file_too_big">این فایل بزرگ‌تر از 20 مگابایت است. فایل کوچک‌تری را امتحان کن.</string>
+    <string name="rent_file_failed">این فایل خوانده نشد. فایل دیگری را امتحان کن.</string>
+    <string name="rent_file_remove">حذف این فایل</string>
+    <string name="rent_files_heading">فایل‌های فروشنده</string>
+    <string name="rent_file_save">ذخیره در فایل‌ها</string>
+    <string name="rent_file_save_failed">این فایل فعلاً ذخیره نشد.</string>
+    <string name="rent_spec_gearbox">گیربکس</string>
+    <string name="rent_spec_fuel">سوخت</string>
+    <string name="rent_photo_open">بزرگ‌تر ببین</string>
+    <string name="rent_photo_close">بستن</string>
 </resources>
