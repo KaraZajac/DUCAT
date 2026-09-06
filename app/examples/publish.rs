@@ -27,9 +27,28 @@ fn ready(app: &App) {
     panic!("PUB_FAIL node never became ready");
 }
 
+fn veilid_view() {
+    for cmd in ["nodeinfo", "route list"] {
+        match ducat_mobile::node::node_debug(cmd.into()) {
+            Ok(out) => {
+                for line in out.lines() {
+                    println!("PUB_DEBUG {cmd}: {line}");
+                }
+            }
+            Err(e) => println!("PUB_DEBUG {cmd} failed: {e}"),
+        }
+    }
+}
+
 fn serve_forever() -> ! {
+    veilid_view();
+    // The swarm's own notes while serving, so a seeder that lost its
+    // route says so.
     loop {
-        std::thread::sleep(Duration::from_secs(5));
+        std::thread::sleep(Duration::from_secs(2));
+        for line in ducat_mobile::node::node_logs() {
+            println!("PUB_NOTE {line}");
+        }
     }
 }
 
@@ -55,18 +74,18 @@ fn main() {
                 .expect("PUB_FAIL publish");
             println!("PUB_ADDR {}", sites::uri_of(&s.record_key));
             println!("PUB_OK published '{}' share={} digest={}", s.title, s.share, s.digest_hex);
+            veilid_view();
             serve_forever()
         }
         Some("get") => {
             let uri = args.get(1).expect("PUB_FAIL get <address>");
             let t0 = Instant::now();
+            veilid_view();
             // The swarm's own notes, so a stall says where it stalled.
             std::thread::spawn(|| loop {
-                std::thread::sleep(Duration::from_secs(10));
+                std::thread::sleep(Duration::from_secs(2));
                 for line in ducat_mobile::node::node_logs() {
-                    if line.starts_with("swarm") {
-                        println!("PUB_NOTE {line}");
-                    }
+                    println!("PUB_NOTE {line}");
                 }
             });
             if releases::parse(uri).is_some() {

@@ -995,6 +995,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1167,6 +1169,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_node_call_send_report(uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_changed_keys(uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_node_debug(`command`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_dht_close(`key`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Unit
@@ -1564,6 +1568,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_changed_keys(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_debug(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_node_dht_close(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_dht_create(
@@ -1942,6 +1948,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_changed_keys() != 44940.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_debug() != 62795.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_dht_close() != 4986.toShort()) {
@@ -9438,6 +9447,21 @@ public object FfiConverterSequenceTypeFeedBlock: FfiConverterRustBuffer<List<Fee
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_changed_keys(
         _status)
+}
+    )
+    }
+    
+
+        /**
+         * veilid's own view of this node — `nodeinfo`, `route list`, `relay`,
+         * `peerinfo`, the commands its CLI takes — for a network screen or a
+         * swarm autopsy. The node has to be running.
+         */
+    @Throws(NodeException::class) fun `nodeDebug`(`command`: kotlin.String): kotlin.String {
+            return FfiConverterString.lift(
+    uniffiRustCallWithError(NodeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_debug(
+        FfiConverterString.lower(`command`),_status)
 }
     )
     }

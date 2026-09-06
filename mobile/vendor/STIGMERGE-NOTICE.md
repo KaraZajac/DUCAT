@@ -181,3 +181,14 @@ over what a phone already spends to be a phone.
 
 The CLI (`stigmerge` itself), the Docker/Nix packaging, and the examples
 are not vendored — only the two library crates and their tests.
+
+### The fetch pool hung on small pieces (`fetcher.rs`, `FetchPool::fetch_lease`)
+
+Each leased piece is split into blocks on a bounded channel and fetched by
+five workers; a worker returned when it found the channel empty after a
+block, and the pool returned once all five had. The sender stayed alive
+until then. A piece with fewer than five blocks — every file under 160 KiB
+— never gave some workers a block, so they waited on the open channel and
+the pool waited on them: one piece per bootstrap, for ever, until a
+watchdog restarted the fetch. The sender is now dropped once the queue is
+filled and a worker treats the closed channel as its finish line.

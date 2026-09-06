@@ -197,6 +197,15 @@ pub fn node_logs() -> Vec<String> {
     crate::lock(logs()).drain(..).collect()
 }
 
+/// veilid's own view of this node — `nodeinfo`, `route list`, `relay`,
+/// `peerinfo`, the commands its CLI takes — for a network screen or a
+/// swarm autopsy. The node has to be running.
+#[uniffi::export]
+pub fn node_debug(command: String) -> Result<String, NodeError> {
+    let (api, rt) = swarm_handles().ok_or(NodeError::NotRunning)?;
+    rt.block_on(async move { api.debug(command).await.map_err(|e| NodeError::Failed(e.to_string())) })
+}
+
 /// A line of our own into the same ring — the swarm's fetch loop lives and
 /// dies entirely between two FFI calls, and on a phone that death is
 /// invisible without this.

@@ -162,6 +162,24 @@ pub fn swarm_fetch_progress(share_key: String) -> SwarmProgress {
 /// background until [`swarm_stop`].
 #[uniffi::export]
 pub fn swarm_seed(path: String) -> Result<SwarmShare, SwarmError> {
+    // A node that only just attached refuses route allocation for a while
+    // ("allocated route failed to test"); the fetch side already waits it
+    // out, and a publish that fails hard in that window was the seed side
+    // not doing the same.
+    let mut waited = 0u64;
+    loop {
+        match seed_once(path.clone()) {
+            Err(SwarmError::Failed(e)) if e.contains("TryAgain") && waited < 90 => {
+                crate::node::note(format!("swarm: seed route not ready, retrying — {e}"));
+                std::thread::sleep(std::time::Duration::from_secs(5));
+                waited += 5;
+            }
+            other => return other,
+        }
+    }
+}
+
+fn seed_once(path: String) -> Result<SwarmShare, SwarmError> {
     let conn = ensure_conn()?;
     let (_, rt) = crate::node::swarm_handles()
         .ok_or_else(|| SwarmError::Failed("the node is not running".into()))?;

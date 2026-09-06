@@ -678,6 +678,15 @@ impl<C: Connection + Clone + Send + Sync + 'static> FetchPool<C> {
                 block_index,
             })?;
         }
+        // DUCAT modification (see ../STIGMERGE-NOTICE.md): the queue is
+        // complete, so close it. Upstream kept the sender alive until this
+        // function returned, and returned only once every worker had — but
+        // a worker that never received a block waited on the open queue
+        // for ever. A piece of fewer than five blocks, which is every small
+        // file, therefore left four workers hung, the pool never asked for
+        // its next lease, and a bundle of little files moved one piece per
+        // bootstrap.
+        drop(blocks_tx);
 
         // Five concurrent block fetchers
         let mut tasks = JoinSet::new();
@@ -696,7 +705,9 @@ impl<C: Connection + Clone + Send + Sync + 'static> FetchPool<C> {
                             return Err(CancelError.into());
                         }
                         res = blocks_rx.recv_async() => {
-                            let block_fetch = res?;
+                            // Drained and closed: this worker's share of
+                            // the piece is done.
+                            let Ok(block_fetch) = res else { return Ok(()) };
                             match block_fetcher.fetch_block(remote_share.clone(), &block_fetch, true).await {
                                 Ok((piece_state, _)) => {
                                     piece_verifier.update_piece(piece_state).await?;

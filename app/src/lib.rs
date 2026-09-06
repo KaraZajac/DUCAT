@@ -71,7 +71,14 @@ impl App {
         // start here with that directory present adopts it — copied, so
         // the old desk keeps working — and the identity, contacts and
         // wallet carry across instead of being minted twice.
-        if !root.join("prefs").exists() {
+        //
+        // Only the default root, though. `DUCAT_DESK_STATE` names an
+        // identity on purpose, and adopting there handed every test node
+        // the desk's veilid keypair: three nodes with one node id, whose
+        // private routes then failed their own tests and whose piece
+        // requests reached whichever clone the network answered for.
+        let named = std::env::var_os("DUCAT_DESK_STATE").is_some_and(|v| !v.is_empty());
+        if !named && !root.join("prefs").exists() {
             if let Some(old) = paths::previous_desk_dir().filter(|d| d.join("prefs").exists()) {
                 if let Err(e) = copy_tree(&old, &root) {
                     log::warn("App", format!("could not adopt {}: {e}", old.display()));
