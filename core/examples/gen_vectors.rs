@@ -848,6 +848,7 @@ fn backup_cases() -> Vec<J> {
                 car_model: None,
                 car_color: None,
                 plate: None,
+                car_photo: None,
                 share_profile: true,
             },
             ducat_core::backup::BackupPersona {
@@ -864,6 +865,7 @@ fn backup_cases() -> Vec<J> {
                 car_model: Some("Vauxhall Astra".into()),
                 car_color: Some("green".into()),
                 plate: Some("AB12 CDE".into()),
+                car_photo: None,
                 share_profile: false,
             },
         ],
@@ -872,7 +874,7 @@ fn backup_cases() -> Vec<J> {
     let dressed_blob = export(&dressed, pass, salt, nonce).expect("export");
     cases.push(json!({
         "name": "personas_carry_their_profiles",
-        "why": "post-1.0 compartments: every persona's own profile rides its roster entry                 (keys 4..13 in the per-persona map), the primary's copy still also riding                 the legacy top-level fields. share_profile is written only when off —                 absence decodes as on, the stored default.",
+        "why": "post-1.0 compartments: every persona's own profile rides its roster entry                 (keys 4..13 in the per-persona map; the car's picture, key 14, has its own case), the primary's copy still also riding                 the legacy top-level fields. share_profile is written only when off —                 absence decodes as on, the stored default.",
         "passphrase_utf8": String::from_utf8_lossy(pass),
         "salt_hex": hex(&salt),
         "nonce_hex": hex(&nonce),
@@ -903,6 +905,73 @@ fn backup_cases() -> Vec<J> {
                      "display_name": "Corner Shop", "avatar_hex": hex(&[0x89, 0x50, 0x4E, 0x47]),
                      "phone": "15551234567", "car_model": "Vauxhall Astra",
                      "car_color": "green", "plate": "AB12 CDE", "share_profile": false}
+                ]
+            }
+        }
+    }));
+
+    // The car's picture (per-persona key 14): the roster entry's edge since
+    // the picture joined the driving profile (§16.9, field 301). Pinned on
+    // its own, with no avatar aboard, so an implementation that files it
+    // under the face's key — or the face under this one — is caught rather
+    // than merely shifted. Carried, not re-validated: like the avatar at
+    // key 5, the bytes were checked when they were set and are checked
+    // again when published, and a bundle that will not open over a picture
+    // is a wallet held hostage to a magic number.
+    let driving = Backup {
+        personas: vec![ducat_core::backup::BackupPersona {
+            secret: vec![0x11; 32],
+            name: Some("Cab".into()),
+            color: 0,
+            created: 1_799_000_000,
+            display_name: Some("Sam".into()),
+            avatar: None,
+            email: None,
+            phone: None,
+            signal: None,
+            pronouns: None,
+            car_model: Some("Toyota Prius".into()),
+            car_color: Some("silver".into()),
+            plate: Some("CD34 EFG".into()),
+            car_photo: Some(vec![0xFF, 0xD8, 0xFF, 0xE0]),
+            share_profile: true,
+        }],
+        ..base.clone()
+    };
+    let driving_blob = export(&driving, pass, salt, nonce).expect("export");
+    cases.push(json!({
+        "name": "persona_car_picture_rides_the_roster",
+        "why": "the car's picture (per-persona key 14) travels beside the model, colour and \
+                plate as the avatar travels beside the name — the same bytes field 301 \
+                carries on a driving profile, carried rather than re-validated, and pinned \
+                with no avatar aboard so a reader that files it under key 5 is caught.",
+        "passphrase_utf8": String::from_utf8_lossy(pass),
+        "salt_hex": hex(&salt),
+        "nonce_hex": hex(&nonce),
+        "kdf": {"algorithm": "argon2id", "version": 19, "memory_kib": 65536, "iterations": 3, "lanes": 1, "output_len": 32},
+        "blob_hex": hex(&driving_blob),
+        "expect": {
+            "ok": true,
+            "decoded": {
+                "persona_suite": 1,
+                "persona_secret_hex": hex(&base.persona_secret),
+                "monero_seed": seed,
+                "monero_restore_height": 2_183_500u64,
+                "rendezvous_hex": base.rendezvous.iter().map(|r| hex(r)).collect::<Vec<_>>(),
+                "attestation_records_hex": base.attestation_records.iter().map(|r| hex(r)).collect::<Vec<_>>(),
+                "mandates_hex": base.mandates.iter().map(|r| hex(r)).collect::<Vec<_>>(),
+                "verification": {
+                    "device_unlock_at": base.verification.device_unlock_at,
+                    "app_secret_at": base.verification.app_secret_at,
+                    "app_secret_validity_s": base.verification.app_secret_validity_s,
+                    "cumulative_at": base.verification.cumulative_at,
+                    "cumulative_window_s": base.verification.cumulative_window_s
+                },
+                "created": 1_800_000_000u64,
+                "personas": [
+                    {"secret_hex": hex(&[0x11; 32]), "name": "Cab", "display_name": "Sam",
+                     "car_model": "Toyota Prius", "car_color": "silver", "plate": "CD34 EFG",
+                     "car_photo_hex": "ffd8ffe0", "share_profile": true}
                 ]
             }
         }

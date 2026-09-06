@@ -487,6 +487,9 @@ pub struct PersonaBackup {
     pub car_model: Option<String>,
     pub car_color: Option<String>,
     pub plate: Option<String>,
+    /// The car's picture (§16.9, field 301): rides beside the plate as the
+    /// avatar rides beside the name.
+    pub car_photo: Option<Vec<u8>>,
     pub share_profile: bool,
 }
 
@@ -691,6 +694,7 @@ pub fn export_backup(
                 car_model: p.car_model.clone(),
                 car_color: p.car_color.clone(),
                 plate: p.plate.clone(),
+                car_photo: p.car_photo.clone(),
                 share_profile: p.share_profile,
             })
             .collect(),
@@ -995,6 +999,7 @@ pub fn import_backup(blob: Vec<u8>, passphrase: String) -> Result<RestoredBackup
                 car_model: p.car_model.clone(),
                 car_color: p.car_color.clone(),
                 plate: p.plate.clone(),
+                car_photo: p.car_photo.clone(),
                 share_profile: p.share_profile,
             })
             .collect(),

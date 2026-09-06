@@ -2671,6 +2671,7 @@ class PersonaStore(context: Context) {
                     carModel = mp.carModel(),
                     carColor = mp.carColor(),
                     plate = mp.plate(),
+                    carPhoto = mp.carPhoto(),
                     shareProfile = mp.shareProfile(),
                 )
             }
@@ -2701,7 +2702,7 @@ class PersonaStore(context: Context) {
             val dressed = e.displayName != null || e.avatar != null ||
                 e.email != null || e.phone != null || e.signal != null ||
                 e.pronouns != null || e.carModel != null ||
-                e.carColor != null || e.plate != null || !e.shareProfile
+                e.carColor != null || e.plate != null || e.carPhoto != null || !e.shareProfile
             if (!dressed) continue
             val hex = uniffi.ducat_mobile.personaPublicHex(e.secret)
             MyProfile(context, hex).let { p ->
@@ -2714,6 +2715,7 @@ class PersonaStore(context: Context) {
                 p.setCarModel(e.carModel)
                 p.setCarColor(e.carColor)
                 p.setPlate(e.plate)
+                p.setCarPhoto(e.carPhoto)
                 p.setShareProfile(e.shareProfile)
             }
             NameStore(context, hex).let { n ->

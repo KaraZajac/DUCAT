@@ -130,6 +130,12 @@ mod k {
     // Present (as 0) only when sharing is off: absence decodes as on, the
     // field's own default, so old bundles keep their meaning.
     pub const P_SHARE: u64 = 13;
+    // The car's picture: the same bytes field 301 carries on a driving
+    // profile (§16.9), riding the roster entry beside the model, colour and
+    // plate exactly as the avatar rides beside the name — and, like the
+    // avatar, carried rather than re-validated here (see `Backup::avatar`):
+    // it was checked when it was set and is checked again when published.
+    pub const P_CAR_PHOTO: u64 = 14;
     pub const ESCROW_KEY_FILE: u64 = 1;
     pub const ESCROW_RESTORE_HEIGHT: u64 = 2;
 }
@@ -399,6 +405,10 @@ pub struct BackupPersona {
     pub car_model: Option<String>,
     pub car_color: Option<String>,
     pub plate: Option<String>,
+    /// The car's picture (§16.9, field 301 on the wire): rides beside the
+    /// plate as the avatar rides beside the name, and is carried the same
+    /// way — not re-validated on the way in (see [`Backup::avatar`]).
+    pub car_photo: Option<Vec<u8>>,
     /// Whether the optional fields go out with a new contact. True is the
     /// stored default; only a deliberate off is written to the wire.
     pub share_profile: bool,
@@ -444,6 +454,9 @@ impl BackupPersona {
         if let Some(v) = &self.plate {
             m.insert(k::P_PLATE, Value::Text(v.clone()));
         }
+        if let Some(v) = &self.car_photo {
+            m.insert(k::P_CAR_PHOTO, Value::Bytes(v.clone()));
+        }
         if !self.share_profile {
             m.insert(k::P_SHARE, Value::Uint(0));
         }
@@ -474,6 +487,7 @@ impl BackupPersona {
             car_model: text(k::P_CAR_MODEL),
             car_color: text(k::P_CAR_COLOR),
             plate: text(k::P_PLATE),
+            car_photo: m.get(&k::P_CAR_PHOTO).and_then(|v| v.as_bytes()).map(|b| b.to_vec()),
             share_profile: m
                 .get(&k::P_SHARE)
                 .and_then(|v| v.as_uint())

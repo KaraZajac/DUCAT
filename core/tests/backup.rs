@@ -317,6 +317,40 @@ fn an_older_bundle_restores_with_an_empty_profile() {
     assert!(!back.publish_payto, "publishing must never default to on");
 }
 
+/// The car's picture rides the roster entry like the avatar does — and, like
+/// the avatar, is carried rather than re-validated: a restore is not the place
+/// a wallet learns its owner's car picture was a byte too long.
+#[test]
+fn a_car_picture_rides_the_roster_entry() {
+    const JPEG: &[u8] = &[0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, b'J', b'F', b'I', b'F'];
+    let mut b = sample();
+    b.personas = vec![BackupPersona {
+        secret: b.persona_secret.clone(),
+        name: Some("Cab".into()),
+        color: 0,
+        created: 1_799_000_000,
+        display_name: None,
+        avatar: None,
+        email: None,
+        phone: None,
+        signal: None,
+        pronouns: None,
+        car_model: Some("Toyota Prius".into()),
+        car_color: Some("silver".into()),
+        plate: Some("CD34 EFG".into()),
+        car_photo: Some(JPEG.to_vec()),
+        share_profile: true,
+    }];
+    let blob = export(&b, b"a real passphrase", [7u8; 16], [9u8; 24]).expect("export");
+    let back = import(&blob, b"a real passphrase").expect("import");
+    assert_eq!(back.personas[0].car_photo.as_deref(), Some(JPEG));
+    assert!(back.personas[0].avatar.is_none(), "the car is not the face");
+    // Undressed, the key is absent rather than empty.
+    b.personas[0].car_photo = None;
+    let blob = export(&b, b"a real passphrase", [7u8; 16], [9u8; 24]).expect("export");
+    assert!(import(&blob, b"a real passphrase").expect("import").personas[0].car_photo.is_none());
+}
+
 /// The compartments survive: the roster, and which persona owns whom.
 #[test]
 fn personas_and_owners_survive_the_round_trip() {
@@ -340,6 +374,7 @@ fn personas_and_owners_survive_the_round_trip() {
             car_model: None,
             car_color: None,
             plate: None,
+            car_photo: None,
             share_profile: true,
         }
     }

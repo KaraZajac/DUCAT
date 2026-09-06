@@ -774,7 +774,7 @@ def run_backup(cases, r):
                 bad = f"{label}: we read {got[key][1]!r}, vector says {want!r}"
                 break
         # Post-1.0: each persona's own profile rides its roster entry
-        # (per-persona keys 4..13). Asserted field by field when the vector
+        # (per-persona keys 4..14). Asserted field by field when the vector
         # says so — this is the enumeration's edge, and the blind-spot rule
         # says pin it on both sides.
         if bad is None and "personas" in d:
@@ -792,6 +792,12 @@ def run_backup(cases, r):
                         break
                     if want_p.get("avatar_hex") is not None and                             e.get(5, (None, b""))[1].hex() != want_p["avatar_hex"]:
                         bad = f"personas[{i}].avatar differs"
+                        break
+                    # The car's picture (key 14): the entry's edge, pinned
+                    # like the face and never confused with it.
+                    if want_p.get("car_photo_hex") is not None and \
+                            e.get(14, (None, b""))[1].hex() != want_p["car_photo_hex"]:
+                        bad = f"personas[{i}].car_photo differs"
                         break
                     # share_profile: written only when off; absence means on.
                     share = e.get(13, (None, 1))[1] != 0

@@ -131,6 +131,7 @@ impl App {
                 car_model: f("car_model"),
                 car_color: f("car_color"),
                 plate: f("plate"),
+                car_photo: f("car_photo").and_then(|s| unb64(&s)),
                 share_profile: self.share_profile(&p.hex),
             });
         }
@@ -227,6 +228,9 @@ impl App {
                 }
                 if let Some(a) = &p.avatar {
                     self.set_profile_field(&hex, "avatar", Some(&crate::contacts::b64(a)))?;
+                }
+                if let Some(c) = &p.car_photo {
+                    self.set_profile_field(&hex, "car_photo", Some(&crate::contacts::b64(c)))?;
                 }
                 if let Some(pr) = p.pronouns {
                     self.set_profile_field(&hex, "pronouns", Some(&pr.to_string()))?;
@@ -380,6 +384,8 @@ mod tests {
         let me = a.primary_hex().unwrap();
         a.set_profile_field(&me, "email", Some("k@example.org")).unwrap();
         a.set_share_profile(&me, true).unwrap();
+        // The car's picture rides the roster entry like the avatar: bytes in, bytes out.
+        a.set_profile_field(&me, "car_photo", Some(&crate::contacts::b64(&[0xFF, 0xD8, 0xFF, 0xE0]))).unwrap();
         let shop = a.create_persona("Shop", 7).unwrap().unwrap();
         a.put_contact(Contact {
             persona_hex: "cd".repeat(32),
@@ -433,6 +439,7 @@ mod tests {
         assert_eq!(b.personas().unwrap()[1].hex, shop.hex);
         assert_eq!(b.my_name(Some(&me)).unwrap().as_deref(), Some("Kara"));
         assert_eq!(b.profile_field(&me, "email").as_deref(), Some("k@example.org"));
+        assert_eq!(b.profile_picture(&me, "car_photo"), Some(vec![0xFF, 0xD8, 0xFF, 0xE0]));
         assert_eq!(b.spend_key_hex().as_deref(), Some(w.spend_key_hex.as_str()));
         assert_eq!(b.wallet_address().as_deref(), Some(w.address.as_str()));
         assert_eq!(b.restore_height(), 2_200_000);

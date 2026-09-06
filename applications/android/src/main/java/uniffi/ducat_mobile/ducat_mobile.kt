@@ -4826,6 +4826,11 @@ data class PersonaBackup (
     var `carModel`: kotlin.String?, 
     var `carColor`: kotlin.String?, 
     var `plate`: kotlin.String?, 
+    /**
+     * The car's picture (§16.9, field 301): rides beside the plate as the
+     * avatar rides beside the name.
+     */
+    var `carPhoto`: kotlin.ByteArray?, 
     var `shareProfile`: kotlin.Boolean
 ) {
     
@@ -4851,6 +4856,7 @@ public object FfiConverterTypePersonaBackup: FfiConverterRustBuffer<PersonaBacku
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
             FfiConverterBoolean.read(buf),
         )
     }
@@ -4869,6 +4875,7 @@ public object FfiConverterTypePersonaBackup: FfiConverterRustBuffer<PersonaBacku
             FfiConverterOptionalString.allocationSize(value.`carModel`) +
             FfiConverterOptionalString.allocationSize(value.`carColor`) +
             FfiConverterOptionalString.allocationSize(value.`plate`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`carPhoto`) +
             FfiConverterBoolean.allocationSize(value.`shareProfile`)
     )
 
@@ -4886,6 +4893,7 @@ public object FfiConverterTypePersonaBackup: FfiConverterRustBuffer<PersonaBacku
             FfiConverterOptionalString.write(value.`carModel`, buf)
             FfiConverterOptionalString.write(value.`carColor`, buf)
             FfiConverterOptionalString.write(value.`plate`, buf)
+            FfiConverterOptionalByteArray.write(value.`carPhoto`, buf)
             FfiConverterBoolean.write(value.`shareProfile`, buf)
     }
 }
