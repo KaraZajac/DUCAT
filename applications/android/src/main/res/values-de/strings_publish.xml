@@ -48,7 +48,6 @@
     <string name="market_delist_btn">Herunternehmen</string>
     <string name="market_listed_as">Gelistet unter %1$s</string>
     <string name="market_list_failed">Konnte nicht einstellen — läuft der Knoten?</string>
-    <string name="market_all_langs">alle Sprachen</string>
     <string name="market_what_all">Alles</string>
     <string name="market_what_digital">Digitales</string>
     <string name="market_looking">Das Regal „%1$s“ wird durchgesehen…</string>
@@ -80,4 +79,15 @@
     <string name="press_open_room">Presseraum öffnen</string>
     <string name="market_refreshing">Prüfe auf Änderungen…</string>
     <string name="pub_period_not_a_name">Ein Zeitraum ist ein Name, kein Ordner – keine Schrägstriche, und nicht nur Punkte.</string>
+    <string name="market_any_lang">Alle Sprachen</string>
+    <string name="market_add_lang">+ Sprache</string>
+    <string name="market_pick_lang">Welche Sprache?</string>
+    <string name="market_looking_lang">Das Regal „%1$s“ auf %2$s wird durchgesehen…</string>
+    <string name="market_looking_all">Alle Regale werden durchgesehen…</string>
+    <string name="market_looking_all_lang">Alle Regale auf %1$s werden durchgesehen…</string>
+    <string name="market_cover_desc">Titelbild</string>
+    <string name="pub_cover_label">Titelbild</string>
+    <string name="pub_cover_note">Steht im Regal neben dem Titel. Wird passend zur Anzeige verkleinert, damit das Stöbern schnell bleibt.</string>
+    <string name="pub_cover_remove">Entfernen</string>
+    <string name="pub_cover_failed">Dieses Bild ließ sich nicht verwenden. Versuch ein anderes.</string>
 </resources>

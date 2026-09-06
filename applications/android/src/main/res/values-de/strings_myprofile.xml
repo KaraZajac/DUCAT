@@ -32,4 +32,7 @@
     <string name="myprofile_phone_too_long">Eine Telefonnummer hat höchstens 15 Ziffern.</string>
     <string name="myprofile_signal_too_long">Das ist länger, als ein Signal-Benutzername sein kann.</string>
     <string name="myprofile_signal_shape">Ein Signal-Benutzername sieht aus wie name.12 — ein Name, ein Punkt, dann Ziffern.</string>
+    <string name="myprofile_car_photo">Bild vom Auto</string>
+    <string name="myprofile_car_photo_add">Bild vom Auto hinzufügen</string>
+    <string name="myprofile_car_photo_note">Stark verkleinert. Fahrgäste sehen es neben dem Kennzeichen, wenn du ihren Ruf annimmst — nach einem Bild sucht man einen Bordstein voller Fremder ab.</string>
 </resources>

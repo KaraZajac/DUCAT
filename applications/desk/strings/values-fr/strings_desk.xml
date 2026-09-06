@@ -338,4 +338,18 @@
     <string name="desk_keep_someone">Personne encore. Un cœur sur un contact garde son chez-soi ici.</string>
     <string name="desk_others">Autres</string>
     <string name="desk_edited">modifié</string>
+    <string name="desk_any_language">Toutes les langues</string>
+    <string name="desk_other_language">Une autre langue…</string>
+    <string name="desk_subscribing">Abonnement…</string>
+    <string name="desk_subscribed_note">Abonné. La facture ou le premier numéro arrive dans le Chat ; ce que vous détenez est dans la Bibliothèque.</string>
+    <string name="desk_choose_cover">Choisir une couverture…</string>
+    <string name="desk_remove_cover">Retirer la couverture</string>
+    <string name="desk_market_cover_note">La couverture voyage avec l\'annonce, sous dix kilo-octets, pour qu\'un lecteur la voie sur l\'étagère avant de rien télécharger.</string>
+    <string name="desk_market_lang_note">Une langue restreint l\'étagère. L\'annonce va aussi sur le tableau de toute la catégorie, pour que les lecteurs de toute langue la trouvent.</string>
+    <string name="desk_market_world_note">Six tableaux partagés par tout le réseau, renouvelés chaque semaine. Une annonce est estampillée d\'un peu de travail et dure un jour ; le bureau la renouvelle tant qu\'il est ouvert.</string>
+    <string name="desk_no_market_slot">Toutes les places de ce tableau sont prises cette semaine. Le choix est conservé et le bureau continue d\'essayer.</string>
+    <string name="desk_market_waiting">Listé ; en attente d\'une place libre sur le tableau.</string>
+    <string name="desk_car_picture">Photo de la voiture</string>
+    <string name="desk_car_picture_note">Envoyée avec le modèle, la couleur et la plaque seulement quand vous prenez un appel, pour qu\'un passager repère votre voiture au bord du trottoir.</string>
+    <string name="desk_car">Voiture</string>
 </resources>

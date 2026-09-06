@@ -32,4 +32,7 @@
     <string name="myprofile_phone_too_long">電話番号は最大15桁です。</string>
     <string name="myprofile_signal_too_long">Signalのユーザー名として長すぎます。</string>
     <string name="myprofile_signal_shape">Signalのユーザー名は name.12 の形です — 名前、ドット、そして数字。</string>
+    <string name="myprofile_car_photo">車の写真</string>
+    <string name="myprofile_car_photo_add">車の写真を追加</string>
+    <string name="myprofile_car_photo_note">大きく縮小されます。乗客は呼び出しに応じたときにナンバーの横でこれを見ます — 見知らぬ人だらけの路肩は、写真で見分けるものです。</string>
 </resources>

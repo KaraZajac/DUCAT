@@ -338,4 +338,18 @@
     <string name="desk_keep_someone">Henüz kimse yok. Bir kişiye kalp vermek evini burada tutar.</string>
     <string name="desk_others">Diğerleri</string>
     <string name="desk_edited">düzenlendi</string>
+    <string name="desk_any_language">Herhangi bir dil</string>
+    <string name="desk_other_language">Başka bir dil…</string>
+    <string name="desk_subscribing">Abone olunuyor…</string>
+    <string name="desk_subscribed_note">Abone olundu. Fatura veya ilk sayı Sohbet\'e gelir; elinizdekiler Kitaplık\'ta.</string>
+    <string name="desk_choose_cover">Kapak seç…</string>
+    <string name="desk_remove_cover">Kapağı kaldır</string>
+    <string name="desk_market_cover_note">Kapak, on kilobaytın altında, duyuruyla birlikte gider; okur bir şey indirmeden önce onu rafta görür.</string>
+    <string name="desk_market_lang_note">Dil rafı daraltır. Duyuru tüm kategorinin panosuna da gider, böylece her dilden okur onu bulur.</string>
+    <string name="desk_market_world_note">Tüm ağın paylaştığı, her hafta yenilenen altı pano. Bir duyuru biraz emekle damgalanır ve bir gün kalır; masa açık olduğu sürece onu yeniler.</string>
+    <string name="desk_no_market_slot">Bu hafta o panodaki her yer dolu. Seçim saklanır ve masa denemeye devam eder.</string>
+    <string name="desk_market_waiting">Listelendi; panoda boş bir yer bekleniyor.</string>
+    <string name="desk_car_picture">Arabanın fotoğrafı</string>
+    <string name="desk_car_picture_note">Yalnızca bir çağrı aldığınızda model, renk ve plakayla birlikte gönderilir; böylece yolcu arabanızı kaldırımda seçebilir.</string>
+    <string name="desk_car">Araba</string>
 </resources>

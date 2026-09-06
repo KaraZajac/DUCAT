@@ -32,4 +32,7 @@
     <string name="myprofile_phone_too_long">Een telefoonnummer telt hoogstens 15 cijfers.</string>
     <string name="myprofile_signal_too_long">Dat is langer dan een Signal-gebruikersnaam kan zijn.</string>
     <string name="myprofile_signal_shape">Een Signal-gebruikersnaam ziet eruit als naam.12 — een naam, een punt, dan cijfers.</string>
+    <string name="myprofile_car_photo">Foto van de auto</string>
+    <string name="myprofile_car_photo_add">Foto van de auto toevoegen</string>
+    <string name="myprofile_car_photo_note">Sterk verkleind. Passagiers zien hem naast het kenteken als je hun oproep aanneemt — een stoep vol vreemden zoek je af met een foto.</string>
 </resources>

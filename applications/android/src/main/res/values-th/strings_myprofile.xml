@@ -32,4 +32,7 @@
     <string name="myprofile_phone_too_long">หมายเลขโทรศัพท์มีได้ไม่เกิน 15 หลัก</string>
     <string name="myprofile_signal_too_long">ยาวเกินกว่าชื่อผู้ใช้ Signal จะเป็นได้</string>
     <string name="myprofile_signal_shape">ชื่อผู้ใช้ Signal มีรูปแบบ name.12 — ชื่อ จุด แล้วตามด้วยตัวเลข</string>
+    <string name="myprofile_car_photo">รูปรถ</string>
+    <string name="myprofile_car_photo_add">เพิ่มรูปรถ</string>
+    <string name="myprofile_car_photo_note">ถูกย่อให้เล็กมาก ผู้โดยสารจะเห็นข้างป้ายทะเบียนเมื่อคุณรับการเรียก — ริมทางที่เต็มไปด้วยคนแปลกหน้านั้นมองหากันด้วยรูป</string>
 </resources>

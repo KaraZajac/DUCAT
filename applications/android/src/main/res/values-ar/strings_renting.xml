@@ -147,4 +147,6 @@
     <string name="rent_delete_title">حذف هذا الإعلان؟</string>
     <string name="rent_delete_body">الإنزال يحفظه مع تاريخه. الحذف نهائي — والإعلان المُعاد كتابته يُحتسب بائعًا جديدًا، فمهما طال عمر هذا الإعلان لن يبقى منه شيء.</string>
     <string name="rent_delete_keep">احتفظ به</string>
+    <string name="rent_photo_take">التقط صورة</string>
+    <string name="rent_photo_no_camera">لا يوجد تطبيق كاميرا على هذا الهاتف.</string>
 </resources>

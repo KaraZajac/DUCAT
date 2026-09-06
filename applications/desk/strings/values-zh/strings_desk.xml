@@ -334,4 +334,18 @@
     <string name="desk_keep_someone">还没有人。给联系人点心会在这里保留其主页。</string>
     <string name="desk_others">其他</string>
     <string name="desk_edited">已编辑</string>
+    <string name="desk_any_language">任何语言</string>
+    <string name="desk_other_language">其他语言…</string>
+    <string name="desk_subscribing">正在订阅…</string>
+    <string name="desk_subscribed_note">已订阅。账单或第一期会到聊天里；你持有的在图书馆里。</string>
+    <string name="desk_choose_cover">选择封面…</string>
+    <string name="desk_remove_cover">移除封面</string>
+    <string name="desk_market_cover_note">封面随通告一起传送，不到十千字节，读者在下载任何内容之前就能在书架上看到它。</string>
+    <string name="desk_market_lang_note">语言会缩小书架的范围。通告也会登在整个类别的板上，任何语言的读者都能找到。</string>
+    <string name="desk_market_world_note">全网共用的六块板，每周更新。通告以少量工作盖章，有效一天；桌面在开着时会持续续期。</string>
+    <string name="desk_no_market_slot">本周那块板上的位置已全部占满。选择已保留，桌面会继续尝试。</string>
+    <string name="desk_market_waiting">已登记；等待板上的空位。</string>
+    <string name="desk_car_picture">车的照片</string>
+    <string name="desk_car_picture_note">只有在你接单时才会连同车型、颜色和车牌一起发送，好让乘客在路边认出你的车。</string>
+    <string name="desk_car">车</string>
 </resources>

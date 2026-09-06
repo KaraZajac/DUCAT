@@ -32,4 +32,7 @@
     <string name="myprofile_phone_too_long">A phone number is at most 15 digits.</string>
     <string name="myprofile_signal_too_long">That is longer than a Signal username can be.</string>
     <string name="myprofile_signal_shape">A Signal username looks like name.12 — a name, a dot, then digits.</string>
+    <string name="myprofile_car_photo">Picture of the car</string>
+    <string name="myprofile_car_photo_add">Add a picture of the car</string>
+    <string name="myprofile_car_photo_note">Shrunk small. Riders see it beside the plate when you take their hail — a picture is what a curb full of strangers is scanned by.</string>
 </resources>

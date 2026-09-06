@@ -1185,7 +1185,7 @@ Ship Phase 1–2 as a working federation at a single seed market before touching
 - **O18.** **Cancellation fees erode the permissionless lane.** §7.3 makes no-show fees enforceable only against collateral. The pressure this creates — providers preferring bonded counterparties precisely because cancellation *costs* them something — pushes the network toward the collateralized lane and quietly hollows out the slow permissionless one A4 depends on (§17.6). Whether the unbonded lane survives contact with real no-show rates is an empirical question no amount of spec work answers.
 - **O19.** **iOS cannot present over NFC, permanently.** Apple's HCE entitlement is conditioned on EEA establishment, organization enrollment, and financial-regulatory standing (§15.3.2) — structurally incompatible with A4, and not a hurdle an open protocol clears. The best-UX medium is therefore available to roughly half the supply side, and QR carries the rest. This is outside DUCAT's control and will not improve through protocol design; it is stated so no one plans around a tap that cannot exist.
 - **O20. (closed in 0.48, §18.7.)** Transport identifiers assigned. The NFC AID is `F0 44 55 43 41 54` (`0xF0` ‖ `"DUCAT"`), and the "pending real RID registration" caveat was mistaken — ISO/IEC 7816-5 reserves the `0xF…` range for **proprietary identifiers requiring no registration at all**, which is what Android HCE documents for exactly this case. There was nothing to wait for. BLE takes one random 128-bit service UUID and three characteristics sharing a base; the Bluetooth SIG registers only 16-bit UUIDs, and the 128-bit space exists so anyone can allocate without asking. **Residue, and it is a real one:** no registry means no uniqueness guarantee, so nothing prevents another vendor choosing the same AID bytes — mitigated by using the full name rather than the four-character contraction, since AIDs may run to 16 bytes and the 5-byte minimum was never a maximum. The L2CAP PSM stays deliberately unassigned: LE CoC PSMs are allocated dynamically by the local stack, so a spec pinning one would pin a value it does not control; it is published in a characteristic and read.
-- **O21. Conformance suite exists, schema published, second implementation runs it (§18.9.1, §18.11).** 393 vectors, every case carrying a `kind` that is the sole discriminator, validated against a **hand-written** `schema.json` — hand-written because a schema emitted by the generator would agree with the generator's mistakes, and it earned that by catching two defects on its first run. A second implementation written from Part V agreed on 101 cases and disagreed on 3, **all three defects in this document**, of which the important one was negative integers being *unspecified* — the reference accepted them, the second implementation refused them, and both were conformant, a divergence no vector set could detect because there was no correct answer to test against. 104/104 after correction. Most of the second implementation's effort went into the harness rather than the protocol; that friction is now removed (§18.11). **Still not closed, and what remains cannot be engineered away: an implementer who has never read `core/`.** Everything accidental has been cleared out of their way — a normative case schema, one event encoding instead of five, `why` required on every case, and two commands that validate any change. The gap is authorship.
+- **O21. Conformance suite exists, schema published, second implementation runs it (§18.9.1, §18.11).** 405 vectors, every case carrying a `kind` that is the sole discriminator, validated against a **hand-written** `schema.json` — hand-written because a schema emitted by the generator would agree with the generator's mistakes, and it earned that by catching two defects on its first run. A second implementation written from Part V agreed on 101 cases and disagreed on 3, **all three defects in this document**, of which the important one was negative integers being *unspecified* — the reference accepted them, the second implementation refused them, and both were conformant, a divergence no vector set could detect because there was no correct answer to test against. 104/104 after correction. Most of the second implementation's effort went into the harness rather than the protocol; that friction is now removed (§18.11). **Still not closed, and what remains cannot be engineered away: an implementer who has never read `core/`.** Everything accidental has been cleared out of their way — a normative case schema, one event encoding instead of five, `why` required on every case, and two commands that validate any change. The gap is authorship.
 - **O22. (closed in 0.44, §4.3.3.)** An escrow participant who loses their device. Resolved once the question was asked correctly: a share cannot be *reconstructed* — measured, `prepare_multisig` draws 88 characters of fresh randomness beyond what the wallet keys determine — but it does not need to be, because it is already a 2,286-byte file that a virgin `wallet-rpc` will open directly. The recovery ask therefore moved from **the counterparty's signature**, which no protocol can compel from an adversary, to **the other participants re-sharing multisig info**, which endorses no outcome and is a step every participant performs routinely. **Residue:** a stale bundle still cannot recover an escrow opened after it, so this now depends on a client prompting for re-export at ceremony completion — a UX obligation rather than a protocol impossibility. And an end-to-end spend from a restored share is still undemonstrated (§4.3.3's last limit).
 ---
 *End of Part I. The remaining parts specify the three mechanisms Part I leans on hardest: the tap that opens every transaction, the identity that optionally survives one, and the settlement that makes it fast enough to matter.*
@@ -1966,6 +1966,9 @@ Everything here is a **claim**, and a client MUST present it as one. DUCAT binds
 
 **The handshake says what it is for, and the profile is scoped to it.** `CONTACT_ACCEPT` carries an optional `purpose` (field 217, text, ≤ 16 chars): `profile` for a standing contact code, `sale`, `hail`, `intro`, … for a transaction. The issuer stamps it; the claimant reads it and scopes its own reply to match. The rule extends §15.12's plate discipline to the whole record: **email, phone and signal are reach-me identifiers — ways to locate a person off DUCAT, exactly the plate's class — and they SHOULD travel only on a `profile` handshake**, never on a till's, a tab's or a hail's. A bar tab does not need the till owner's Signal handle, and the till does not need the customer's, yet before this rule both crossed on every sale, in both directions. The car fields keep their own gate (a driving claim, §15.12); name, avatar and pronouns ride wherever the person's share switch allows — recognising who is at the counter locates nobody off the app; and the payout address keeps its separate opt-in (field 182). An absent `purpose` — an older peer, or a card that did not say — MUST be read as *not* a contact exchange: the private default, nothing optional beyond a name. The field is presentation-scoping only: it carries no authority, changes no protocol behaviour, and a claimant that ignores it merely overshares its own data, never the issuer's.
 
+**The car's picture (field 301, `DET_CAR_PHOTO`).** A driver's profile MAY carry one picture of the car under the avatar's rules above: at most 10 KiB, PNG, JPEG or WebP by magic number, refused empty. It travels only when the profile is in the driving purpose, with the model, colour and plate, and a rider's client MUST show it beside them — a picture is what a curb full of strangers is scanned by.
+
+
 All of it travels in the encrypted backup (§4.3). A persona restored with the right money and no face is not the same person to anyone who knew them, and nothing else in a wallet would report that it had been lost.
 
 ## 16.10 Messages
@@ -2424,6 +2427,21 @@ are settled here rather than argued on boards: fonts are `software`;
 courses are `other`. Adding a category is an appendix row in a later
 draft; removing one strands every board that used it, which is why the
 set starts small and `other` is the pressure valve.
+
+**The language boards narrow; the bare board is everyone.** A notice
+posted with a language MUST also be posted to the bare `topic:<category>`
+board — two stamps, paid honestly, like the local cross-post — so a
+reader of the bare board sees every publication in the category and a
+reader of `topic:<category>.<lang>` sees the ones in that language. A
+client that offers "any language" reads the bare board; one that offers
+"everything" reads the six category boards at once and merges, which is
+the ring-read of §16.18 with categories for cells.
+
+**The cover (field 300, `PN_THUMB`).** A notice MAY carry one inline
+picture under the same rules as a listing's thumbnail (§16.18.3): at
+most 10 KiB, PNG, JPEG or WebP by magic number, refused empty. It is the
+cover a reader sees on the shelf before deciding to fetch anything; the
+issue itself carries no picture the notice does not.
 
 ### 16.18.3 The pictures: one on the board, the rest on the swarm
 
@@ -3430,7 +3448,9 @@ Part V numbers four objects (`TapPresent`, `FullOffer`, `ACCEPT`, `RECEIPT`) and
 | 288–289 | a listing's picture gallery: swarm share and index digest (§16.18) | **Assigned** |
 | 290–298 | group board page (§16.24) | **Assigned** |
 | 299 | never to be assigned — the group page's strict-reader probe, pinned by a vector | **Reserved** |
-| 300+ | Unallocated | — |
+| 300 | a publication notice's cover, the inline thumbnail (§16.18.2) | **Assigned** |
+| 301 | the car's picture on a driver's profile (§16.9, §15.12) | **Assigned** |
+| 302+ | Unallocated | — |
 
 The `96+ Unallocated` row above was stale from 0.14 onward: 96–103 had been in use since `TERMS` and `MANDATE` shipped, and a second implementer allocating from 96 would have collided head-on. Registries decay silently unless something checks them, which is the argument for the type-code rule below.
 

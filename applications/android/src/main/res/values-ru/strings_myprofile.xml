@@ -32,4 +32,7 @@
     <string name="myprofile_phone_too_long">В телефонном номере не больше 15 цифр.</string>
     <string name="myprofile_signal_too_long">Это длиннее, чем может быть имя пользователя Signal.</string>
     <string name="myprofile_signal_shape">Имя пользователя Signal выглядит как name.12 — имя, точка, затем цифры.</string>
+    <string name="myprofile_car_photo">Фото машины</string>
+    <string name="myprofile_car_photo_add">Добавить фото машины</string>
+    <string name="myprofile_car_photo_note">Сильно сжимается. Пассажиры видят его рядом с номером, когда вы принимаете их вызов — по картинке и ищут машину среди чужих у обочины.</string>
 </resources>

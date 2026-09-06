@@ -32,4 +32,7 @@
     <string name="myprofile_phone_too_long">شماره تلفن حداکثر ۱۵ رقم است.</string>
     <string name="myprofile_signal_too_long">این از حداکثر طول یک نام کاربری Signal بلندتر است.</string>
     <string name="myprofile_signal_shape">نام کاربری Signal شبیه name.12 است — یک نام، یک نقطه، سپس رقم‌ها.</string>
+    <string name="myprofile_car_photo">عکس ماشین</string>
+    <string name="myprofile_car_photo_add">افزودن عکس ماشین</string>
+    <string name="myprofile_car_photo_note">خیلی کوچک می‌شود. مسافران هنگام پذیرفتن درخواستشان آن را کنار پلاک می‌بینند — یک عکس همان چیزی است که با آن پیاده‌روی پر از غریبه را می‌گردند.</string>
 </resources>

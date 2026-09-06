@@ -147,4 +147,6 @@
     <string name="rent_delete_title">Dieses Inserat löschen?</string>
     <string name="rent_delete_body">Herunternehmen legt es weg und behält seine Geschichte. Löschen ist endgültig – ein neu getipptes Inserat gilt als neue Verkäuferin, wie lange dieses auch bestanden hat.</string>
     <string name="rent_delete_keep">Behalten</string>
+    <string name="rent_photo_take">Foto aufnehmen</string>
+    <string name="rent_photo_no_camera">Keine Kamera-App auf diesem Telefon.</string>
 </resources>

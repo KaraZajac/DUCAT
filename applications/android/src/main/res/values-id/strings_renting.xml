@@ -145,4 +145,6 @@
     <string name="rent_delete_title">Hapus iklan ini?</string>
     <string name="rent_delete_body">Menurunkannya menyimpannya beserta riwayatnya. Menghapus bersifat permanen — dan iklan yang diketik ulang dihitung sebagai penjual baru, seberapa pun lamanya yang ini bertahan.</string>
     <string name="rent_delete_keep">Simpan</string>
+    <string name="rent_photo_take">Ambil foto</string>
+    <string name="rent_photo_no_camera">Tidak ada aplikasi kamera di ponsel ini.</string>
 </resources>

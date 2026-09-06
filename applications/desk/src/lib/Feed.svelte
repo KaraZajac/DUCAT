@@ -147,7 +147,7 @@
     {#each rows as r (r.persona + ":" + r.post.id)}
       <div class="card post">
         <div class="post-head">
-          <div class="avatar">{(r.name || "?").slice(0, 1).toUpperCase()}</div>
+          {#if r.avatar_data_url}<img class="avatar pic" src={r.avatar_data_url} alt="" />{:else}<div class="avatar">{(r.name || "?").slice(0, 1).toUpperCase()}</div>{/if}
           <div class="post-who">
             <div class="title">{r.name || t("desk_unnamed")}{#if r.mine}<span class="meta">{" · "}{t("desk_you")}</span>{/if}</div>
             <div class="meta">{fmtTime(r.post.at)}{#if r.post.edited} · {t("desk_edited")}{/if}</div>

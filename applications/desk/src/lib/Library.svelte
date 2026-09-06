@@ -2,9 +2,9 @@
   // The library: what you publish, and what you read. A period's key
   // opens exactly one edition; a shelf is small and on the DHT, a
   // shipment is big and on the swarm.
-  import { onMount } from "svelte";
-  import { t, tp } from "./i18n.svelte";
-  import { api, confirmDanger, copy, fmtBytes, fmtXmr, fmtTime, type Code, type ContactRow, type PublicationRow, type SubscriptionRow } from "./api";
+  import { onMount, untrack } from "svelte";
+  import { t, tp, LANGS } from "./i18n.svelte";
+  import { api, confirmDanger, copy, fmtBytes, fmtXmr, fmtTime, type Code, type ContactRow, type PublicationRow, type SubscriptionRow, MARKET_CATEGORIES } from "./api";
   import { gen, drive } from "./state.svelte";
 
   let mode = $state<"reading" | "press">("reading");
@@ -26,6 +26,56 @@
   let addingSub = $state(false);
 
   const current = $derived(pubs.find((p) => p.id === selected) ?? null);
+
+  // The market (§16.18.2): the form reopens as the publication left it.
+  let mktCat = $state("news");
+  let mktLang = $state("");
+  let mktBlurb = $state("");
+  let mktMsg = $state<string | null>(null);
+  let mktFormFor: string | null = null;
+  $effect(() => {
+    const p = current;
+    untrack(() => {
+      if (p && mktFormFor !== p.id) {
+        mktFormFor = p.id;
+        mktCat = p.market_category ?? "news";
+        mktLang = p.market_lang ?? "";
+        mktBlurb = p.market_blurb ?? "";
+        mktMsg = null;
+      }
+    });
+  });
+
+  function catLabel(slug: string | null): string {
+    switch (slug) {
+      case "news": return t("market_cat_news");
+      case "serials": return t("market_cat_serials");
+      case "sound": return t("market_cat_sound");
+      case "software": return t("market_cat_software");
+      case "art": return t("market_cat_art");
+      case "other": return t("market_cat_other");
+      default: return t("market_what_all");
+    }
+  }
+  const langName = (code: string) => LANGS.find((l) => l.code === code)?.name ?? code;
+
+  // One listing per click: a card mint and a ladder of stand posts,
+  // seconds of DHT, and the choice is kept whether or not a slot is free.
+  async function listWorld() {
+    if (!current) return;
+    mktMsg = null;
+    await act("market", async () => {
+      const took = await api.marketPostPublication(current!.id, mktCat, mktLang || null, mktBlurb.trim() || null);
+      if (!took) mktMsg = t("desk_no_market_slot");
+    });
+  }
+
+  async function pickCover(typed?: string) {
+    if (!current) return;
+    const p = typed ?? (await api.pickFile());
+    if (!p) return;
+    await act("cover", () => api.setPublicationCover(current!.id, p));
+  }
 
   // The empty state waits for the first answer; a blank list is not
   // the same as an empty one.
@@ -209,6 +259,40 @@
             </div>
           </div>
         {/if}
+
+        <h4>{t("market_list_header")}</h4>
+        <div class="chips">
+          {#each MARKET_CATEGORIES as c (c)}<button class="chip" class:on={mktCat === c} onclick={() => (mktCat = c)}>{catLabel(c)}</button>{/each}
+        </div>
+        <div class="field">
+          <label for="mlang">{t("desk_language")}</label>
+          <select id="mlang" class="input" bind:value={mktLang}>
+            <option value="">{t("desk_any_language")}</option>
+            {#each LANGS as l (l.code)}<option value={l.code}>{l.name}</option>{/each}
+          </select>
+        </div>
+        <p class="note">{t("desk_market_lang_note")}</p>
+        <div class="field">
+          <label for="blurb">{t("market_blurb_label")}</label>
+          <input id="blurb" class="input" maxlength="280" bind:value={mktBlurb} />
+        </div>
+        <div class="cover-row">
+          {#if current.cover_data_url}<img class="cover" src={current.cover_data_url} alt="" />{/if}
+          <div class="actions">
+            <button class="btn small" disabled={busy === "cover"} onclick={() => pickCover()}>{t("desk_choose_cover")}</button>
+            {#if current.cover_data_url}<button class="btn small" disabled={busy === "cover"} onclick={() => act("cover", () => api.removePublicationCover(current!.id))}>{t("desk_remove_cover")}</button>{/if}
+            {#if drive.on}<input id="cpath" class="input narrow" hidden placeholder="/path/to/cover" onchange={(e) => pickCover((e.target as HTMLInputElement).value)} />{/if}
+          </div>
+        </div>
+        <p class="note">{t("desk_market_cover_note")}</p>
+        <div class="actions">
+          <button class="btn" disabled={busy === "market"} onclick={listWorld}>{busy === "market" ? t("desk_posting") : current.on_market ? t("desk_refresh_board") : t("market_list_btn")}</button>
+          {#if current.on_market}<button class="btn small danger" disabled={busy === "delist"} onclick={() => act("delist", () => api.marketUnpostPublication(current!.id))}>{t("market_delist_btn")}</button>{/if}
+        </div>
+        {#if current.on_market}
+          <p class="meta">{t("market_listed_as", catLabel(current.market_category))}{current.market_lang ? ` · ${langName(current.market_lang)}` : ""} · {current.market_board ? t("desk_on_board_since", fmtTime(current.market_since)) : t("desk_market_waiting")}</p>
+        {/if}
+        {#if mktMsg}<p class="note">{mktMsg}</p>{/if}
 
         <h4>{t("pub_issues_title")}</h4>
         {#each current.issues as i (i.period)}

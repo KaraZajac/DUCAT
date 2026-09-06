@@ -302,7 +302,7 @@
       {#if pickingContact}
         <p class="note">{t("desk_whose_tab")}</p>
         {#each contacts as c (c.persona_hex)}
-          <button class="thread-row" onclick={() => startTab(c)}><div class="avatar">{c.name.slice(0, 1).toUpperCase()}</div><div class="thread-text"><div class="thread-name">{c.name}</div></div></button>
+          <button class="thread-row" onclick={() => startTab(c)}>{#if c.avatar_data_url}<img class="avatar pic" src={c.avatar_data_url} alt="" />{:else}<div class="avatar">{c.name.slice(0, 1).toUpperCase()}</div>{/if}<div class="thread-text"><div class="thread-name">{c.name}</div></div></button>
         {/each}
         {#if loaded && contacts.length === 0}<p class="empty">{t("desk_no_contacts")}</p>{/if}
       {/if}

@@ -544,6 +544,7 @@ object Mailbox {
             carModel = theirs.profile.carModel,
             carColor = theirs.profile.carColor,
             plate = theirs.profile.plate,
+            carPhoto = theirs.profile.carPhoto,
             // What this card said it was for — kept, because a thread born
             // from a `donate` card is the thread whose unprompted payments
             // are donations. An unpurposed card keeps whatever the last
@@ -837,6 +838,7 @@ object Mailbox {
                     carModel = theirs.profile.carModel,
                     carColor = theirs.profile.carColor,
                     plate = theirs.profile.plate,
+                    carPhoto = theirs.profile.carPhoto,
                     // Two directions, two fields. What THEIR card said
                     // survives from the prior record — this claim is of
                     // OUR card and says nothing about theirs. What our

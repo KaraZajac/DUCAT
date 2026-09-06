@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.House
 import androidx.compose.material3.*
@@ -576,36 +577,90 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
         val f = photos.firstOrNull { it.name == thumbName } ?: photos.firstOrNull()
         f?.let { SafeImage.thumbnail({ it.inputStream() }) }
     }
+    // One way in for every picture, picked or shot. Re-encoded on the way
+    // in, never passed through: a photograph carries where it was taken,
+    // and this one is headed for a public board and a swarm anybody can
+    // fetch from. True when it was kept.
+    val absorb: (() -> java.io.InputStream?, String?) -> Boolean = { open, mime ->
+        val dir = Listings.photoDir(context, galleryId).apply { mkdirs() }
+        val clean = runCatching { SafeImage.stripped(open, mime) }.getOrNull()
+        if (clean == null) {
+            false
+        } else {
+            val ext = if (mime?.lowercase() == "image/png") "png" else "jpg"
+            // The directory's own count, which has already grown by every
+            // file written before this one — adding a running count to it
+            // counted each one twice and numbered three pictures 00, 02, 04.
+            val n = dir.listFiles()?.size ?: 0
+            runCatching { java.io.File(dir, "%02d.%s".format(n, ext)).writeBytes(clean) }.isSuccess
+        }
+    }
+    // After any of them landed: the strip re-reads the disk, and the first
+    // picture is the board's until somebody taps another.
+    val landed = { added: Int ->
+        if (added == 0) thumbError = context.getString(R.string.rent_photo_failed)
+        photoTick++
+        if (thumbName == null) {
+            thumbName = Listings.photos(context, galleryId).firstOrNull()?.name
+        }
+    }
     val pickPhotos = rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.GetMultipleContents(),
     ) { uris: List<android.net.Uri> ->
         if (uris.isEmpty()) return@rememberLauncherForActivityResult
         thumbError = null
-        val dir = Listings.photoDir(context, galleryId).apply { mkdirs() }
         var added = 0
         for (uri in uris.take(Listings.MAX_PHOTOS)) {
-            // Re-encoded on the way in, never passed through: a photograph
-            // carries where it was taken, and this one is headed for a
-            // public board and a swarm anybody can fetch from.
             val mime = context.contentResolver.getType(uri)
-            val clean = runCatching {
-                SafeImage.stripped({ context.contentResolver.openInputStream(uri) }, mime)
-            }.getOrNull()
-            if (clean == null) continue
-            val ext = if (mime?.lowercase() == "image/png") "png" else "jpg"
-            // The directory's own count, which has already grown by every
-            // file written above — adding `added` to it counted each one
-            // twice and numbered three pictures 00, 02, 04.
-            val n = dir.listFiles()?.size ?: 0
-            runCatching {
-                java.io.File(dir, "%02d.%s".format(n, ext)).writeBytes(clean)
-                added++
-            }
+            if (absorb({ context.contentResolver.openInputStream(uri) }, mime)) added++
         }
-        if (added == 0) thumbError = context.getString(R.string.rent_photo_failed)
-        photoTick++
-        if (thumbName == null) {
-            thumbName = Listings.photos(context, galleryId).firstOrNull()?.name
+        landed(added)
+    }
+    // The camera, into the same path: the shot is staged in cache under the
+    // FileProvider the manifest already declares for the chat's camera, read
+    // back like any picked file, and deleted. Saveable as a string, because
+    // the camera app routinely kills this process while it has the screen —
+    // a plain remember came back null and the shot it named was dropped.
+    var cameraShot by rememberSaveable { mutableStateOf<String?>(null) }
+    val takePhoto = rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.TakePicture(),
+    ) { ok ->
+        val shot = cameraShot?.let { java.io.File(it) }
+        cameraShot = null
+        if (ok && shot != null) {
+            thumbError = null
+            val kept = absorb({ shot.inputStream() }, "image/jpeg")
+            shot.delete()
+            landed(if (kept) 1 else 0)
+        }
+    }
+    val launchCamera = {
+        val dir = java.io.File(context.cacheDir, "camera").apply { mkdirs() }
+        val shot = java.io.File(dir, "listing.jpg")
+        val uri = androidx.core.content.FileProvider.getUriForFile(
+            context, context.packageName + ".backups", shot,
+        )
+        cameraShot = shot.path
+        // No camera app at all — a bare phone, or an emulator — and
+        // launch() throws instead of returning ok=false.
+        runCatching { takePhoto.launch(uri) }.onFailure {
+            DucatLog.w("Renting", "camera: ${it.message}")
+            cameraShot = null
+            thumbError = context.getString(R.string.rent_photo_no_camera)
+        }
+    }
+    // Declaring CAMERA in the manifest (the QR scanner needs it) means even
+    // the delegate-to-camera-app intent requires the grant.
+    val camPerm = rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
+    ) { granted -> if (granted) launchCamera() }
+    val shoot = {
+        if (context.checkSelfPermission(android.Manifest.permission.CAMERA) ==
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) {
+            launchCamera()
+        } else {
+            camPerm.launch(android.Manifest.permission.CAMERA)
         }
     }
 
@@ -780,6 +835,19 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
                         tint = MaterialTheme.colorScheme.onSecondaryContainer,
                     )
                 }
+                Spacer(Modifier.width(8.dp))
+                Box(
+                    Modifier.size(72.dp).clip(MaterialTheme.shapes.small)
+                        .background(MaterialTheme.colorScheme.secondaryContainer)
+                        .clickable { shoot() },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        Icons.Filled.PhotoCamera,
+                        stringResource(R.string.rent_photo_take),
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                    )
+                }
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
@@ -868,6 +936,19 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
                         Icon(
                             Icons.Filled.AddAPhoto,
                             null,
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                        )
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    Box(
+                        Modifier.size(84.dp).clip(MaterialTheme.shapes.small)
+                            .background(MaterialTheme.colorScheme.secondaryContainer)
+                            .clickable { shoot() },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            Icons.Filled.PhotoCamera,
+                            stringResource(R.string.rent_photo_take),
                             tint = MaterialTheme.colorScheme.onSecondaryContainer,
                         )
                     }

@@ -56,4 +56,6 @@
     <string name="profile_sign_pending_all">Просят вернуть депозит. Ваша подпись выпускает средства.</string>
     <string name="profile_sign_release">Подписать выпуск</string>
     <string name="profile_copied">Скопировано</string>
+    <string name="profile_their_car">Их машина</string>
+    <string name="profile_car_photo">Фото их машины</string>
 </resources>

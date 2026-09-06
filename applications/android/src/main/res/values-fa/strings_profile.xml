@@ -56,4 +56,6 @@
     <string name="profile_sign_pending_all">بازگشت سپرده را خواسته‌اند. امضای شما آن را آزاد می‌کند.</string>
     <string name="profile_sign_release">امضای آزادسازی</string>
     <string name="profile_copied">کپی شد</string>
+    <string name="profile_their_car">ماشین‌شان</string>
+    <string name="profile_car_photo">عکس ماشین‌شان</string>
 </resources>

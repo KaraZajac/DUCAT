@@ -387,6 +387,19 @@ h4 { margin: 16px 0 6px; font-size: 14px; color: var(--muted); text-transform: u
 .shot .actions { position: absolute; bottom: 4px; left: 6px; gap: 10px; background: rgba(0,0,0,0.45); border-radius: 6px; padding: 2px 6px; }
 .shot .linkish { color: #fff; }
 
+/* ----- faces, cars, covers: pictures where a letter stood ----- */
+.avatar.pic { object-fit: cover; padding: 0; }
+.avatar.big { width: 72px; height: 72px; border-radius: var(--radius); font-size: 26px; }
+.pic-row { display: flex; gap: 14px; align-items: flex-start; margin: 6px 0 10px; }
+.car-pic { width: 96px; height: 64px; object-fit: cover; border-radius: var(--radius-s); background: var(--surface-2); flex: none; }
+.car-line { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+.shelf { display: grid; gap: 10px; }
+.shelf-row { display: flex; gap: 14px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; }
+.shelf-text { flex: 1; min-width: 0; }
+.cover { width: 72px; height: 72px; object-fit: cover; border-radius: var(--radius-s); background: var(--surface-2); flex: none; }
+.cover.none { display: grid; place-items: center; color: var(--muted); font-size: 12px; text-align: center; padding: 4px; }
+.cover-row { display: flex; gap: 12px; align-items: center; margin: 8px 0 4px; }
+
 /* ----- activity ----- */
 .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 16px; }
 .stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; min-width: 0; }

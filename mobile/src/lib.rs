@@ -975,6 +975,7 @@ pub fn import_backup(blob: Vec<u8>, passphrase: String) -> Result<RestoredBackup
             car_model: None,
             car_color: None,
             plate: None,
+            car_photo: None,
         },
         contacts: b.contacts.iter().map(contact_from_core).collect(),
         personas: b

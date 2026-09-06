@@ -1326,6 +1326,7 @@ fn contact_cases() -> Vec<J> {
         car_color: None,
         plate: None,
         purpose: None,
+        car_photo: None,
     };
     let mut detail = |name: &str, why: &str, d: &ContactDetails, bad: Option<(RejectCode, &str)>| {
         let hex_body = hex(&d.to_value().encode());
@@ -1402,6 +1403,27 @@ fn contact_cases() -> Vec<J> {
         &ContactDetails { payto: Some(String::new()), ..det.clone() },
         Some((RejectCode::Malformed, "empty text field")));
 
+    // §16.9's purpose (field 217): what the handshake is for, so the party
+    // answering can scope what it reveals. Presentation-scoping only, but it
+    // is a field of the record, and a strict reader that does not know it
+    // refuses every CONTACT_ACCEPT that says what it is for. No vector
+    // carried one, so a second implementation did exactly that and passed
+    // every gate. Pinned now at both edges and from both sides.
+    detail("details_purpose_profile",
+        "A standing contact code answered in full (§16.9): the issuer stamped `profile`, so the reach-me identifiers may ride. The field carries no authority — a claimant that ignores it overshares only its own data — but a reader that does not know it refuses the whole record.",
+        &ContactDetails { purpose: Some("profile".into()), ..profiled.clone() }, None);
+    detail("details_purpose_at_bound",
+        "Sixteen characters, the accept-side edge. A bound checked from one side only is a bound the next implementation gets to pick.",
+        &ContactDetails { purpose: Some("p".repeat(MAX_PURPOSE_CHARS)), ..det.clone() }, None);
+    detail("details_purpose_too_long",
+        "Seventeen. The purpose is a label — `profile`, `sale`, `hail`, `intro` — and a label long enough to hold a sentence is a message on a record that is supposed to carry none.",
+        &ContactDetails { purpose: Some("p".repeat(MAX_PURPOSE_CHARS + 1)), ..det.clone() },
+        Some((RejectCode::Malformed, "text over bound")));
+    detail("details_purpose_empty",
+        "Absent is the private default — §16.9 reads it as *not* a contact exchange. An empty string would be a second spelling of that, and §18.1 admits one encoding per meaning.",
+        &ContactDetails { purpose: Some(String::new()), ..det.clone() },
+        Some((RejectCode::Malformed, "empty text field")));
+
     detail("details_with_car",
         "A driver's identity at the curb (§15.12): model, colour, plate — claims like the rest of the profile, and the rider's check is the bumper.",
         &ContactDetails {
@@ -1418,6 +1440,38 @@ fn contact_cases() -> Vec<J> {
         "Twenty-four characters names any car; more is advertising space.",
         &ContactDetails { car_model: Some("x".repeat(25)), ..det.clone() },
         Some((RejectCode::Malformed, "text too long")));
+
+    // §16.9's picture of the car (field 301): the driving profile's fourth
+    // claim, under the listing thumbnail's rules rather than the avatar's.
+    // It is drawn on a rider's screen next to the model, colour and plate,
+    // and a curb full of strangers is scanned by pictures, not by text. The
+    // cap is pinned at both edges here, like the rental thumbnail's.
+    let png = |n: usize| {
+        let mut v = vec![0x89u8, b'P', b'N', b'G', 0x0D, 0x0A, 0x1A, 0x0A];
+        v.resize(n, 0x5a);
+        v
+    };
+    let driving = ContactDetails {
+        car_model: Some("Toyota Corolla".into()),
+        car_color: Some("blue".into()),
+        plate: Some("KAR-4242".into()),
+        ..det.clone()
+    };
+    detail("details_car_photo_valid",
+        "The car with its picture (§16.9, field 301): exactly 10 KiB of PNG beside the model, colour and plate, accepted. This is the accept-side edge — the other is two cases down, and a cap pinned from one side only is a cap two implementations can disagree about.",
+        &ContactDetails { car_photo: Some(png(MAX_LISTING_THUMB_BYTES)), ..driving.clone() }, None);
+    detail("details_car_photo_empty",
+        "Present-but-empty is a second spelling of 'no picture', and omitting the key is the first.",
+        &ContactDetails { car_photo: Some(Vec::new()), ..driving.clone() },
+        Some((RejectCode::Malformed, "empty car picture; omit the key")));
+    detail("details_car_photo_too_large",
+        "One byte past 10 KiB. The car's picture takes the listing thumbnail's cap, not the avatar's 12 KiB: it rides a record that may already carry an avatar, and a profile that does not fit is a contact nobody can reach.",
+        &ContactDetails { car_photo: Some(png(MAX_LISTING_THUMB_BYTES + 1)), ..driving.clone() },
+        Some((RejectCode::Malformed, "car picture over bound")));
+    detail("details_car_photo_not_an_image",
+        "Bytes that are not PNG, JPEG or WebP. A decoder on a rider's phone should never be handed something whose format it has to guess — that is how a picture becomes an exploit.",
+        &ContactDetails { car_photo: Some(vec![0x00, 0x01, 0x02, 0x03]), ..driving.clone() },
+        Some((RejectCode::Malformed, "car picture must be PNG, JPEG or WebP")));
 
     detail("details_outbox_empty",
         "An empty outbox key would leave the other side with a contact it can never write to, reported as success.",
@@ -2371,6 +2425,31 @@ fn contact_cases() -> Vec<J> {
         }
     }
 
+    // §16.18.1 + §18.5: the code a sealed notice is refused with, read off
+    // `board::open` rather than written down — and the difference is the
+    // point. The document puts the board, the slot and the beacon *inside
+    // the signature*, so a notice lifted onto another slot or restamped
+    // against another block is a signature that does not verify, which
+    // §18.5 names BAD_SIG; MALFORMED is "(non-canonical encoding)". The
+    // second implementation refuses those cases as BadSig. `board::open`
+    // still maps a failed verify to Malformed, so a MALFORMED written here
+    // would have hidden a reference defect behind a passing gate. Reading it
+    // off the reference records what the reference does today and leaves
+    // conformance/ducat_check.py to hold it to the document; once
+    // core/src/board.rs says BadSig, one regeneration turns these into
+    // BADSIG with no edit here.
+    fn sealed_reject(
+        v: &ducat_core::cbor::Value,
+        f: ducat_core::board::NoticeFields,
+        board: &str,
+        subkey: u32,
+    ) -> String {
+        match ducat_core::board::open(v.clone(), f, board, subkey) {
+            Err(e) => format!("{:?}", e.code).to_uppercase(),
+            Ok(_) => unreachable!("a seal offered from another slot, or against another block, opened"),
+        }
+    }
+
     // §16.17: the hail notice, the one object that lives on a public board.
     {
         let mut ncase = |name: &str, why: &str, n: &HailNotice, bad: Option<(RejectCode, &str)>| {
@@ -2752,7 +2831,9 @@ fn contact_cases() -> Vec<J> {
                 "why": "The same bytes offered as slot 4. The slot is inside the signature, so a valid notice cannot be lifted onto another one — without which an attacker holding the public write key could paper a whole cell with somebody else's signed listing.",
                 "sealed_hex": sealed_hex,
                 "board": board, "subkey": subkey + 1,
-                "expect": { "ok": false, "reject": "MALFORMED", "hint": "signed for another slot" } }));
+                "expect": { "ok": false,
+                            "reject": sealed_reject(&sealed, ducat_core::board::RENTAL, board, subkey + 1),
+                            "hint": "this notice was not signed for this slot" } }));
 
             // §16.18.1: the beacon is inside the signature, so neither half of
             // it can be restated after the work is done. Both halves, because
@@ -2766,22 +2847,28 @@ fn contact_cases() -> Vec<J> {
                 ducat_core::wire::f::RN_BEACON_HASH,
                 ducat_core::cbor::Value::Bytes(vec![0x11u8; 32]),
             );
+            let swapped = ducat_core::cbor::Value::Map(swapped);
             v.push(json!({ "name": "listing_sealed_beacon_hash_swapped",
                 "why": "A different block hash against the same work. Without a beacon in the preimage every stamp in the protocol's future is mineable this afternoon — cell, slot, body and signature are all the poster's own and the board epoch is a floor division — so the block is what makes the work perishable, and it has to be as unforgeable as the rest of the notice.",
-                "sealed_hex": hex(&ducat_core::cbor::Value::Map(swapped).encode()),
+                "sealed_hex": hex(&swapped.encode()),
                 "board": board, "subkey": subkey,
-                "expect": { "ok": false, "reject": "MALFORMED", "hint": "signed for another slot" } }));
+                "expect": { "ok": false,
+                            "reject": sealed_reject(&swapped, ducat_core::board::RENTAL, board, subkey),
+                            "hint": "the beacon is inside the signature; another block is another preimage" } }));
 
             let mut moved = base.clone();
             moved.insert(
                 ducat_core::wire::f::RN_BEACON_HEIGHT,
                 ducat_core::cbor::Value::Uint(9_999_999),
             );
+            let moved = ducat_core::cbor::Value::Map(moved);
             v.push(json!({ "name": "listing_sealed_beacon_height_moved",
                 "why": "The same block hash re-labelled with a newer height. A reader tests the height first because it is free, and looks the hash up only for heights that survive — so a height that could be moved would let one mined notice claim any tip, and the cheap test would be worth nothing.",
-                "sealed_hex": hex(&ducat_core::cbor::Value::Map(moved).encode()),
+                "sealed_hex": hex(&moved.encode()),
                 "board": board, "subkey": subkey,
-                "expect": { "ok": false, "reject": "MALFORMED", "hint": "signed for another slot" } }));
+                "expect": { "ok": false,
+                            "reject": sealed_reject(&moved, ducat_core::board::RENTAL, board, subkey),
+                            "hint": "the beacon is inside the signature; a moved height is another preimage" } }));
 
             let mut short = base.clone();
             short.insert(
@@ -3010,6 +3097,7 @@ fn contact_cases() -> Vec<J> {
             blurb: None,
             price_pxmr: None,
             expiry: 1_800_000_000,
+            thumb: None,
         };
         let priced = PubNotice {
             blurb: Some("Twelve pages of the river's week, every Friday.".into()),
@@ -3043,6 +3131,32 @@ fn contact_cases() -> Vec<J> {
             &PubNotice { blurb: Some("y".repeat(281)), ..free.clone() },
             Some((RejectCode::Malformed, "text too long")));
 
+        // §16.18.2's cover (field 300): one inline picture under the listing
+        // thumbnail's rules (§16.18.3), because a board slot is read by
+        // everyone on every sweep and written by one person. Pinned at both
+        // edges, like the rental's, so the cap is not a number two
+        // implementations can disagree about.
+        let png = |n: usize| {
+            let mut v = vec![0x89u8, b'P', b'N', b'G', 0x0D, 0x0A, 0x1A, 0x0A];
+            v.resize(n, 0x5a);
+            v
+        };
+        pcase("publication_cover_valid",
+            "A cover on the shelf: exactly 10 KiB of PNG on the priced monthly, accepted — the accept-side edge, and the notice with every optional field present at once. It is what a reader sees before deciding to fetch anything, and it arrives with the read the browser was already doing.",
+            &PubNotice { thumb: Some(png(MAX_LISTING_THUMB_BYTES)), ..priced.clone() }, None);
+        pcase("publication_cover_empty",
+            "An empty cover is not a picture; omitting the key is how a notice says it has none, and two spellings of nothing is the thing §18.1 refuses.",
+            &PubNotice { thumb: Some(Vec::new()), ..free.clone() },
+            Some((RejectCode::Malformed, "empty cover; omit the key")));
+        pcase("publication_cover_too_big",
+            "One byte past 10 KiB. Refused rather than trimmed: the notice is signed over its bytes, so a reader that quietly accepted an oversized cover would be verifying something no other reader would.",
+            &PubNotice { thumb: Some(png(MAX_LISTING_THUMB_BYTES + 1)), ..free.clone() },
+            Some((RejectCode::Malformed, "cover at most 10240 bytes")));
+        pcase("publication_cover_not_a_picture",
+            "Bytes that are not PNG, JPEG or WebP. A decoder should never be handed something whose format it has to guess — that is how a picture becomes an exploit.",
+            &PubNotice { thumb: Some(vec![0x00, 0x01, 0x02, 0x03]), ..free.clone() },
+            Some((RejectCode::Malformed, "cover must be PNG, JPEG or WebP")));
+
         // The edges a struct cannot spell: a missing card, and a field from
         // the future. By hand, which is what a careless implementation does.
         {
@@ -3057,7 +3171,7 @@ fn contact_cases() -> Vec<J> {
             let ducat_core::cbor::Value::Map(mut m) = free.to_value() else { unreachable!() };
             m.insert(276, ducat_core::cbor::Value::Uint(1));
             v.push(json!({ "name": "publication_unknown_field",
-                "why": "276 — one past the newest (275, PN_BEACON_HASH), the closed set's edge, which must move with it. The strict reader is what stops a notice smuggling anything past the stamp.",
+                "why": "276 — one past 275 (PN_BEACON_HASH), the strict-reader probe §18.4.2 reserves for this family so the edge never moves: the cover (300) was assigned past it, not onto it. The strict reader is what stops a notice smuggling anything past the stamp.",
                 "pub_listing_hex": hex(&ducat_core::cbor::Value::Map(m).encode()),
                 "expect": { "ok": false, "reject": "UNKNOWNFIELD", "hint": "unrecognised field 276" } }));
         }
@@ -3089,11 +3203,14 @@ fn contact_cases() -> Vec<J> {
                 "expect": { "ok": true, "poster_hex": hex(&poster),
                             "beacon_height": beacon.height,
                             "beacon_hash": hex(&beacon.hash) } }));
+            let elsewhere = "topic:news.es@3021-0";
             v.push(json!({ "name": "publication_sealed_wrong_board",
                 "why": "The same bytes offered from topic:news.es. The board name is inside the signature: a listing posted to one topic cannot be republished onto another by anyone but its author paying the stamp again.",
                 "sealed_hex": sealed_hex,
-                "board": "topic:news.es@3021-0", "subkey": subkey,
-                "expect": { "ok": false, "reject": "MALFORMED", "hint": "this notice was not signed for this slot" } }));
+                "board": elsewhere, "subkey": subkey,
+                "expect": { "ok": false,
+                            "reject": sealed_reject(&sealed, ducat_core::board::PUB, elsewhere, subkey),
+                            "hint": "this notice was not signed for this slot" } }));
         }
     }
 

@@ -147,4 +147,6 @@
     <string name="rent_delete_title">Видалити це оголошення?</string>
     <string name="rent_delete_body">Зняття відкладає його разом з історією. Видалення незворотне — а переписане оголошення рахується новим продавцем, скільки б це не провисіло.</string>
     <string name="rent_delete_keep">Залишити</string>
+    <string name="rent_photo_take">Зробити фото</string>
+    <string name="rent_photo_no_camera">На цьому телефоні немає застосунку камери.</string>
 </resources>

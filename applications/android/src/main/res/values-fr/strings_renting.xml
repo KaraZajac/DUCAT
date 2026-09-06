@@ -147,4 +147,6 @@
     <string name="rent_delete_title">Supprimer cette annonce ?</string>
     <string name="rent_delete_body">La retirer la met de côté avec son historique. La supprimer est définitif — et une annonce retapée compte comme un nouveau vendeur, quelle qu’ait été l’ancienneté de celle-ci.</string>
     <string name="rent_delete_keep">La conserver</string>
+    <string name="rent_photo_take">Prendre une photo</string>
+    <string name="rent_photo_no_camera">Aucune appli appareil photo sur ce téléphone.</string>
 </resources>

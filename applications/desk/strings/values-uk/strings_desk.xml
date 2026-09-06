@@ -346,4 +346,18 @@
     <string name="desk_keep_someone">Поки нікого. Серце на контакті зберігає тут його дім.</string>
     <string name="desk_others">Інші</string>
     <string name="desk_edited">змінено</string>
+    <string name="desk_any_language">Будь-яка мова</string>
+    <string name="desk_other_language">Інша мова…</string>
+    <string name="desk_subscribing">Підписка…</string>
+    <string name="desk_subscribed_note">Підписку оформлено. Рахунок або перший випуск надійде в Чат; те, що у вас є, лежить у Бібліотеці.</string>
+    <string name="desk_choose_cover">Вибрати обкладинку…</string>
+    <string name="desk_remove_cover">Прибрати обкладинку</string>
+    <string name="desk_market_cover_note">Обкладинка їде разом з оголошенням, менше десяти кілобайтів, і читач бачить її на полиці, ще нічого не завантаживши.</string>
+    <string name="desk_market_lang_note">Мова звужує полицю. Оголошення потрапляє й на дошку всієї категорії, тож його знайдуть читачі будь-якою мовою.</string>
+    <string name="desk_market_world_note">Шість дощок на всю мережу, що оновлюються щотижня. Оголошення скріплюється невеликою роботою і тримається день; стіл поновлює його, поки відкритий.</string>
+    <string name="desk_no_market_slot">На цій дошці цього тижня зайняті всі місця. Вибір збережено, і стіл продовжить спроби.</string>
+    <string name="desk_market_waiting">У списку; чекає на вільне місце на дошці.</string>
+    <string name="desk_car_picture">Фото автомобіля</string>
+    <string name="desk_car_picture_note">Надсилається разом із моделлю, кольором і номером лише коли ви приймаєте виклик, щоб пасажир упізнав вашу машину біля узбіччя.</string>
+    <string name="desk_car">Автомобіль</string>
 </resources>

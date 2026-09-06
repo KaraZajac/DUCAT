@@ -1846,6 +1846,8 @@ data class Contact(
     val carModel: String? = null,
     val carColor: String? = null,
     val plate: String? = null,
+    /** Their car's picture (§16.9, field 301), sent only while driving. */
+    val carPhoto: ByteArray? = null,
     /** How far into our log they say they have read (§16.16). Their claim. */
     val theirReadUpTo: Long? = null,
     /**
@@ -1934,6 +1936,7 @@ data class Contact(
         put("car_model", carModel ?: JSONObject.NULL)
         put("car_color", carColor ?: JSONObject.NULL)
         put("plate", plate ?: JSONObject.NULL)
+        put("car_photo", carPhoto?.let { Base64.encodeToString(it, Base64.NO_WRAP) } ?: JSONObject.NULL)
         put("their_read", theirReadUpTo ?: JSONObject.NULL)
         put("card_purpose", cardPurpose ?: JSONObject.NULL)
         put("my_card_purpose", myCardPurpose ?: JSONObject.NULL)
@@ -1961,6 +1964,7 @@ data class Contact(
             carModel = o.optStringOrNull("car_model"),
             carColor = o.optStringOrNull("car_color"),
             plate = o.optStringOrNull("plate"),
+            carPhoto = o.optStringOrNull("car_photo")?.let { Base64.decode(it, Base64.NO_WRAP) },
             theirReadUpTo = if (o.isNull("their_read")) null else o.optLong("their_read"),
             cardPurpose = o.optStringOrNull("card_purpose"),
             myCardPurpose = o.optStringOrNull("my_card_purpose"),

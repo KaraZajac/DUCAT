@@ -342,4 +342,18 @@
     <string name="desk_keep_someone">Nobody yet. A heart on a contact keeps their home here.</string>
     <string name="desk_others">Others</string>
     <string name="desk_edited">edited</string>
+    <string name="desk_any_language">Any language</string>
+    <string name="desk_other_language">Another language…</string>
+    <string name="desk_subscribing">Subscribing…</string>
+    <string name="desk_subscribed_note">Subscribed. The bill or the first issue arrives in Chat; what you hold is in the Library.</string>
+    <string name="desk_choose_cover">Choose a cover…</string>
+    <string name="desk_remove_cover">Remove the cover</string>
+    <string name="desk_market_cover_note">The cover rides the notice, under ten kilobytes, so a reader sees it on the shelf before fetching anything.</string>
+    <string name="desk_market_lang_note">A language narrows the shelf. The notice also goes on the whole category\'s board, so readers of any language find it.</string>
+    <string name="desk_market_world_note">Six boards the whole network shares, renewed weekly. A notice is stamped with a little work and lasts a day; the desk renews it while it is open.</string>
+    <string name="desk_no_market_slot">Every slot on that board is taken this week. The choice is kept and the desk keeps trying.</string>
+    <string name="desk_market_waiting">Listed; waiting for a free slot on the board.</string>
+    <string name="desk_car_picture">Picture of the car</string>
+    <string name="desk_car_picture_note">Sent with the model, colour and plate only when you take a hail, so a rider can pick your car out at the curb.</string>
+    <string name="desk_car">Car</string>
 </resources>

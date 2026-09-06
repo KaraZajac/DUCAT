@@ -56,4 +56,6 @@
     <string name="profile_sign_pending_all">Piden la devolución del depósito. Tu firma es lo que lo libera.</string>
     <string name="profile_sign_release">Firmar la liberación</string>
     <string name="profile_copied">Copiado</string>
+    <string name="profile_their_car">Su auto</string>
+    <string name="profile_car_photo">Foto de su auto</string>
 </resources>

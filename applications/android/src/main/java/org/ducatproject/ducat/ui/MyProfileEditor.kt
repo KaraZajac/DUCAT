@@ -67,6 +67,8 @@ fun MyProfileEditor(personaHex: String? = null) {
     var share by rememberSaveable(personaHex) { mutableStateOf(p.shareProfile()) }
     var saved by remember(personaHex) { mutableStateOf(false) }
     var avatarError by remember { mutableStateOf<String?>(null) }
+    var carPhoto by remember(personaHex) { mutableStateOf(p.carPhoto()) }
+    var carPhotoError by remember { mutableStateOf<String?>(null) }
 
     // The wire carries the code (§16.9, core's Pronouns enum); the labels are
     // presentation and follow the app language. Same order as the codes.
@@ -83,6 +85,22 @@ fun MyProfileEditor(personaHex: String? = null) {
                 avatarError = context.getString(R.string.myprofile_avatar_read_error)
                 DucatLog.w("Profile", "avatar: ${it.message}")
             }
+    }
+
+    // The car's picture (§16.9, field 301) goes through the board's own
+    // thumbnail path: the cap is the same 10 KiB, and it is a car, not a
+    // face — kept whole and landscape, never cropped to a circle.
+    val pickCar = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        carPhotoError = null
+        val shrunk = SafeImage.thumbnail({ context.contentResolver.openInputStream(uri) })
+        if (shrunk == null) {
+            carPhotoError = context.getString(R.string.myprofile_avatar_read_error)
+        } else {
+            carPhoto = shrunk; p.setCarPhoto(shrunk); saved = false
+        }
     }
 
     Column(Modifier.fillMaxSize().padding(20.dp)) {
@@ -215,6 +233,42 @@ fun MyProfileEditor(personaHex: String? = null) {
         }
         Field(stringResource(R.string.myprofile_plate), plate, null, hint = stringResource(R.string.myprofile_plate_hint)) {
             plate = it.take(12).uppercase(); saved = false
+        }
+        Spacer(Modifier.height(6.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                Modifier.size(width = 96.dp, height = 64.dp).clip(MaterialTheme.shapes.small)
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
+                    .clickable { pickCar.launch("image/*") },
+                contentAlignment = Alignment.Center,
+            ) {
+                val bmp = remember(carPhoto?.size, carPhoto?.contentHashCode()) {
+                    carPhoto?.let { SafeImage.fromBytes(it, SafeImage.AVATAR_PIXELS) }
+                }
+                if (bmp != null) {
+                    Image(
+                        bmp.asImageBitmap(), stringResource(R.string.myprofile_car_photo),
+                        Modifier.fillMaxSize(), contentScale = ContentScale.Crop,
+                    )
+                } else {
+                    Icon(Icons.Filled.AddAPhoto, stringResource(R.string.myprofile_car_photo_add))
+                }
+            }
+            Spacer(Modifier.width(16.dp))
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.myprofile_car_photo), style = MaterialTheme.typography.titleSmall)
+                Text(
+                    carPhotoError ?: stringResource(R.string.myprofile_car_photo_note),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (carPhotoError != null) MaterialTheme.colorScheme.error
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                if (carPhoto != null) {
+                    TextButton(onClick = { carPhoto = null; p.setCarPhoto(null) }) {
+                        Text(stringResource(R.string.myprofile_remove))
+                    }
+                }
+            }
         }
 
         Spacer(Modifier.height(16.dp))

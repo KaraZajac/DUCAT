@@ -247,6 +247,10 @@ object Publications {
     fun marketBoard(category: String, lang: String?): String =
         "topic:$category" + (lang?.takeIf { it.isNotBlank() }?.let { ".$it" } ?: "")
 
+    /** The shelf that is every category at once: not a board name — the
+     *  six read side by side and merged (§16.18.2's "everything"). */
+    const val MARKET_EVERYTHING = "*"
+
     data class MarketRow(
         val title: String,
         val blurb: String?,
@@ -256,6 +260,8 @@ object Publications {
         val board: String,
         val subkey: Int,
         val expiry: Long,
+        /** The cover (§16.18.2), already checked against the board's cap. */
+        val thumb: ByteArray? = null,
     )
 
     /**
@@ -297,6 +303,9 @@ object Publications {
             blurb = blurb?.takeIf { it.isNotBlank() }?.take(280),
             pricePxmr = price,
             expiry = (now + MARKET_TTL_SECS).toULong(),
+            // The cover rides the notice (§16.18.2's PN_THUMB): what a
+            // reader sees on the shelf before fetching anything.
+            thumb = coverOf(context, pubId),
             poster = "",
             beaconHeight = 0uL,
             beaconHash = "",
@@ -310,85 +319,73 @@ object Publications {
                 info, secret, "market:$pubId", board, slot,
                 beacon.height.toULong(), beacon.hashHex,
             )
-        val base = marketBoard(category, lang)
-        var placed: Pair<String, UInt>? = null
         val prior = readPub(context, pubId)
-        val existing = prior?.optString("mkt_board")?.takeIf {
-            it.isNotBlank() && !standStale(it)
+        fun priorSlot(boardKey: String, slotKey: String): Pair<String, UInt>? {
+            val b = prior?.optString(boardKey)?.takeIf { it.isNotBlank() } ?: return null
+            val s = prior.optInt(slotKey, -1).takeIf { it >= 0 } ?: return null
+            return b to s.toUInt()
         }
-        val existingSlot = prior?.optInt("mkt_subkey", -1)?.takeIf { it >= 0 }?.toUInt()
-        if (existing != null && existingSlot != null) {
-            if (runCatching {
-                    uniffi.ducat_mobile.standPost(existing, existingSlot, seal(existing, existingSlot))
-                }.isSuccess
-            ) {
-                placed = existing to existingSlot
-            }
-        }
-        if (placed == null) {
-            ladder@ for (shard in 0u until uniffi.ducat_mobile.maxStandShards()) {
-                val board = uniffi.ducat_mobile.standShardName(standNow(base), shard)
-                val taken = runCatching { uniffi.ducat_mobile.standRead(board) }
-                    .getOrDefault(emptyList())
-                    .mapNotNull { n ->
-                        runCatching {
-                            uniffi.ducat_mobile.pubListingDecode(
-                                n.data, board, n.subkey, Beacons.tip(context).toULong(),
-                            )
-                        }.getOrNull()?.takeIf { it.expiry.toLong() > now }?.let { n.subkey }
-                    }.toSet()
-                for (free in 0u..7u) {
-                    if (free in taken) continue
-                    if (runCatching { uniffi.ducat_mobile.standPost(board, free, seal(board, free)) }
-                            .isSuccess
-                    ) {
-                        placed = board to free
-                        break@ladder
-                    }
-                }
-            }
-        }
-        val (board, slot) = placed ?: run {
-            DucatLog.w("Publications", "every shard of $base is full")
+        // The language board narrows; the bare board is everyone (§16.18.2).
+        // A notice with a language goes up twice — two stamps, paid
+        // honestly, like the local cross-post — so a reader of "any
+        // language" sees it too. Each copy lands or fails on its own: a
+        // full board in one language does not take the other copy down.
+        val langBoard = lang?.takeIf { it.isNotBlank() }?.let { marketBoard(category, it) }
+        val bareBoard = marketBoard(category, null)
+        val primary = placeNotice(
+            context, langBoard ?: bareBoard, priorSlot("mkt_board", "mkt_subkey"), now, ::seal,
+        )
+        val bare = if (langBoard == null) null else placeNotice(
+            context, bareBoard, priorSlot("mkt_bare_board", "mkt_bare_subkey"), now, ::seal,
+        )
+        if (primary == null && bare == null) {
+            DucatLog.w("Publications", "every shard of ${langBoard ?: bareBoard} is full")
             return false
         }
+        if (primary == null) {
+            DucatLog.w("Publications", "every shard of $langBoard is full — up on $bareBoard only")
+        }
+        if (langBoard != null && bare == null) {
+            DucatLog.w("Publications", "every shard of $bareBoard is full — up on $langBoard only")
+        }
         editPub(context, pubId) { pub ->
-            pub.put("mkt_board", board)
-            pub.put("mkt_subkey", slot.toInt())
+            // A copy that landed remembers its slot; one that did not
+            // forgets the old one, so the tend knows to try again rather
+            // than re-post into a board that is not this listing's.
+            if (primary != null) {
+                pub.put("mkt_board", primary.first)
+                pub.put("mkt_subkey", primary.second.toInt())
+            } else {
+                pub.remove("mkt_board")
+                pub.remove("mkt_subkey")
+            }
+            if (bare != null) {
+                pub.put("mkt_bare_board", bare.first)
+                pub.put("mkt_bare_subkey", bare.second.toInt())
+            } else {
+                pub.remove("mkt_bare_board")
+                pub.remove("mkt_bare_subkey")
+            }
             pub.put("mkt_cat", category)
             pub.put("mkt_lang", lang ?: "")
             pub.put("mkt_blurb", blurb ?: "")
             pub.put("mkt_at", now)
             pub.put("mkt_cell", localCell ?: "")
         }
-        DucatLog.i("Publications", "listed '$name' on $board slot $slot")
-        // The local shelf, second: its own ladder under local:<cell>, same
-        // notice, second stamp. Best-effort — a full neighbourhood board
-        // does not unlist the worldwide copy.
+        DucatLog.i(
+            "Publications",
+            "listed '$name' on " + listOfNotNull(primary, bare)
+                .joinToString(" and ") { "${it.first} slot ${it.second}" },
+        )
+        // The local shelf, last: its own ladder under local:<cell>, same
+        // notice, another stamp. Best-effort — a full neighbourhood board
+        // does not unlist the worldwide copies.
         if (localCell != null) {
-            var localPlaced: Pair<String, UInt>? = null
-            lcl@ for (shard in 0u until uniffi.ducat_mobile.maxStandShards()) {
-                val b = uniffi.ducat_mobile.standShardName(standNow("local:$localCell"), shard)
-                val taken = runCatching { uniffi.ducat_mobile.standRead(b) }
-                    .getOrDefault(emptyList())
-                    .mapNotNull { n ->
-                        runCatching {
-                            uniffi.ducat_mobile.pubListingDecode(
-                                n.data, b, n.subkey, Beacons.tip(context).toULong(),
-                            )
-                        }.getOrNull()?.takeIf { it.expiry.toLong() > now }?.let { n.subkey }
-                    }.toSet()
-                for (free in 0u..7u) {
-                    if (free in taken) continue
-                    if (runCatching { uniffi.ducat_mobile.standPost(b, free, seal(b, free)) }
-                            .isSuccess
-                    ) {
-                        localPlaced = b to free
-                        break@lcl
-                    }
-                }
-            }
-            localPlaced?.let { (b, sl) ->
+            val local = placeNotice(
+                context, "local:$localCell",
+                priorSlot("mkt_local_board", "mkt_local_subkey"), now, ::seal,
+            )
+            local?.let { (b, sl) ->
                 editPub(context, pubId) { pub ->
                     pub.put("mkt_local_board", b)
                     pub.put("mkt_local_subkey", sl.toInt())
@@ -397,6 +394,51 @@ object Publications {
             }
         }
         return true
+    }
+
+    /**
+     * One notice onto one board: the remembered slot first — a re-post
+     * over the same bytes is one write — then the ladder, every shard,
+     * lowest free slot, until it lands. The remembered slot counts only
+     * when it is this board's, in the generation now being read: a
+     * listing moved to another category, or one whose week rolled over,
+     * used to be re-posted into whatever slot it had before. Null when
+     * every shard is full.
+     */
+    private fun placeNotice(
+        context: Context,
+        base: String,
+        prior: Pair<String, UInt>?,
+        now: Long,
+        seal: (String, UInt) -> ByteArray,
+    ): Pair<String, UInt>? {
+        if (prior != null && prior.first.substringBefore('@') == base && !standStale(prior.first)) {
+            val (b, s) = prior
+            if (runCatching { uniffi.ducat_mobile.standPost(b, s, seal(b, s)) }.isSuccess) {
+                return prior
+            }
+        }
+        for (shard in 0u until uniffi.ducat_mobile.maxStandShards()) {
+            val board = uniffi.ducat_mobile.standShardName(standNow(base), shard)
+            val taken = runCatching { uniffi.ducat_mobile.standRead(board) }
+                .getOrDefault(emptyList())
+                .mapNotNull { n ->
+                    runCatching {
+                        uniffi.ducat_mobile.pubListingDecode(
+                            n.data, board, n.subkey, Beacons.tip(context).toULong(),
+                        )
+                    }.getOrNull()?.takeIf { it.expiry.toLong() > now }?.let { n.subkey }
+                }.toSet()
+            for (free in 0u..7u) {
+                if (free in taken) continue
+                if (runCatching { uniffi.ducat_mobile.standPost(board, free, seal(board, free)) }
+                        .isSuccess
+                ) {
+                    return board to free
+                }
+            }
+        }
+        return null
     }
 
     /** Keep market tenancies alive: re-post past half the TTL or a
@@ -408,13 +450,20 @@ object Publications {
             val cat = pub.optString("mkt_cat").ifBlank { null } ?: continue
             val board = pub.optString("mkt_board")
             val at = pub.optLong("mkt_at", 0)
+            val lang = pub.optString("mkt_lang").ifBlank { null }
+            // A copy that is up re-posts when its week rolls over; one that
+            // never landed — its board was full, or the listing predates
+            // the bare copy a language listing must also keep (§16.18.2) —
+            // is tried again on a slower clock, since every try mints a card.
+            fun wants(b: String): Boolean =
+                if (b.isBlank()) Elapsed.dueSecs(now, at, MARKET_RETRY_SECS) else standStale(b)
             val due = Elapsed.dueSecs(now, at, MARKET_TTL_SECS / 2) ||
-                (board.isNotBlank() && standStale(board))
+                wants(board) ||
+                (lang != null && wants(pub.optString("mkt_bare_board")))
             if (due) {
                 runCatching {
                     listOnMarket(
-                        context, pubId, cat,
-                        pub.optString("mkt_lang").ifBlank { null },
+                        context, pubId, cat, lang,
                         pub.optString("mkt_blurb").ifBlank { null },
                         pub.optString("mkt_cell").ifBlank { null },
                     )
@@ -465,6 +514,7 @@ object Publications {
         r.pricePxmr?.let { put("price", it) }
         put("card", r.cardUri); put("poster", r.posterHex)
         put("board", r.board); put("subkey", r.subkey); put("expiry", r.expiry)
+        r.thumb?.let { put("thumb", b64(it)) }
     }
 
     private fun shelfRowFrom(o: JSONObject): MarketRow? = runCatching {
@@ -477,6 +527,7 @@ object Publications {
             board = o.getString("board"),
             subkey = o.getInt("subkey"),
             expiry = o.getLong("expiry"),
+            thumb = coverBytes(o.optString("thumb")),
         )
     }.getOrNull()
 
@@ -538,31 +589,27 @@ object Publications {
             ?.second?.filter { it.expiry > now }
     }
 
-    /** Browse one category worldwide: every readable notice, one row per
-     *  poster key (a publisher re-posts; readers want the newest). */
-    fun browseMarket(
+    /**
+     * Every readable notice on one base's ladder, one row per poster key
+     * (a publisher re-posts; readers want the newest). Stops at the first
+     * empty shard: writers fill the lowest free slot, so that is the top
+     * of the ladder — and an empty cell costs a reader a flat twenty-one
+     * seconds of DHT timeouts, so stopping is not an optimisation, it is
+     * the difference between a shelf and a spinner.
+     */
+    private fun readShelf(
         context: Context,
-        category: String,
-        lang: String?,
-        onProgress: (Int) -> Unit = { _ -> },
+        base: String,
+        now: Long,
+        tip: ULong,
+        onShard: (Int) -> Unit = {},
     ): List<MarketRow> {
-        val attachedAtStart = runCatching {
-            uniffi.ducat_mobile.nodeStatus().publicInternetReady
-        }.getOrDefault(false)
-        val now = System.currentTimeMillis() / 1000
-        val tip = Beacons.tip(context).toULong()
-        val base = marketBoard(category, lang)
         val rows = LinkedHashMap<String, MarketRow>()
         for (shard in 0u until uniffi.ducat_mobile.maxStandShards()) {
             val board = uniffi.ducat_mobile.standShardName(standNow(base), shard)
             val notices = runCatching { uniffi.ducat_mobile.standRead(board) }
                 .getOrDefault(emptyList())
-            // Writers fill the lowest free slot, so the first empty shard is
-            // the top of the ladder — and an empty cell costs a reader a
-            // flat twenty-one seconds of DHT timeouts, so stopping is not
-            // an optimisation, it is the difference between a shelf and a
-            // spinner.
-            onProgress(shard.toInt() + 1)
+            onShard(shard.toInt() + 1)
             if (notices.isEmpty()) break
             for (n in notices) {
                 val d = runCatching {
@@ -578,17 +625,77 @@ object Publications {
                     board = board,
                     subkey = n.subkey.toInt(),
                     expiry = d.expiry.toLong(),
+                    thumb = d.thumb,
                 )
                 val prior = rows[d.poster]
                 if (prior == null || prior.expiry < row.expiry) rows[d.poster] = row
             }
         }
+        return rows.values.toList()
+    }
+
+    /** Browse one category worldwide — or, for [MARKET_EVERYTHING], all six. */
+    fun browseMarket(
+        context: Context,
+        category: String,
+        lang: String?,
+        onProgress: (Int) -> Unit = { _ -> },
+    ): List<MarketRow> {
+        if (category == MARKET_EVERYTHING) return browseMarketAll(context, lang)
+        val attachedAtStart = runCatching {
+            uniffi.ducat_mobile.nodeStatus().publicInternetReady
+        }.getOrDefault(false)
+        val now = System.currentTimeMillis() / 1000
+        val tip = Beacons.tip(context).toULong()
+        val rows = readShelf(context, marketBoard(category, lang), now, tip, onProgress)
         // Remember what a device that could ask was told. An unattached
         // read "succeeds" empty in a blink, and writing that emptiness over
         // yesterday's rows is how a cache poisons itself.
-        return rows.values.toList().also {
+        return rows.also {
             if (it.isNotEmpty() || attachedAtStart) {
                 rememberShelf(context, "w|$category|${lang ?: "*"}", it)
+            }
+        }
+    }
+
+    /**
+     * Everything: the six category boards read side by side and merged —
+     * §16.18's ring-read with categories for cells. In parallel for the
+     * reason the local shelf is: an empty shelf costs a flat twenty-one
+     * seconds, and six of them one after another is a spinner two minutes
+     * long. One row per poster across the six, newest first.
+     */
+    fun browseMarketAll(
+        context: Context,
+        lang: String?,
+        onProgress: (Int, Int) -> Unit = { _, _ -> },
+    ): List<MarketRow> {
+        val attachedAtStart = runCatching {
+            uniffi.ducat_mobile.nodeStatus().publicInternetReady
+        }.getOrDefault(false)
+        val now = System.currentTimeMillis() / 1000
+        val tip = Beacons.tip(context).toULong()
+        val done = java.util.concurrent.atomic.AtomicInteger()
+        val pool = java.util.concurrent.Executors.newFixedThreadPool(MARKET_CATEGORIES.size)
+        val shelves = try {
+            MARKET_CATEGORIES.map { cat ->
+                pool.submit(java.util.concurrent.Callable {
+                    readShelf(context, marketBoard(cat, lang), now, tip).also {
+                        onProgress(done.incrementAndGet(), MARKET_CATEGORIES.size)
+                    }
+                })
+            }.map { it.get() }
+        } finally {
+            pool.shutdown()
+        }
+        val merged = LinkedHashMap<String, MarketRow>()
+        for (r in shelves.flatten()) {
+            val prior = merged[r.posterHex]
+            if (prior == null || prior.expiry < r.expiry) merged[r.posterHex] = r
+        }
+        return merged.values.sortedByDescending { it.expiry }.also {
+            if (it.isNotEmpty() || attachedAtStart) {
+                rememberShelf(context, "w|$MARKET_EVERYTHING|${lang ?: "*"}", it)
             }
         }
     }
@@ -641,7 +748,7 @@ object Publications {
                                     rows[d.poster] = MarketRow(
                                         d.title, d.blurb, d.pricePxmr?.toLong(),
                                         d.card, d.poster, board, n.subkey.toInt(),
-                                        d.expiry.toLong(),
+                                        d.expiry.toLong(), d.thumb,
                                     )
                                 }
                             }
@@ -721,6 +828,73 @@ object Publications {
     }
 
     private const val MARKET_TTL_SECS = 24 * 60 * 60L
+
+    /** How soon a copy that found every shard full is tried again. */
+    private const val MARKET_RETRY_SECS = 15 * 60L
+
+    /** The publisher's cover for a publication, or null. Kept with the
+     *  publication, already at the board's cap, so every re-post carries
+     *  the same picture. */
+    fun coverOf(context: Context, pubId: String): ByteArray? =
+        coverBytes(readPub(context, pubId)?.optString("thumb"))
+
+    fun setCover(context: Context, pubId: String, thumb: ByteArray?): Boolean =
+        editPub(context, pubId) { pub ->
+            if (thumb == null) pub.remove("thumb") else pub.put("thumb", b64(thumb))
+        }
+
+    /** Stored cover bytes, or null: refused over the cap — a notice one
+     *  byte over is refused by every reader, and this is the last place
+     *  that can say so — and when they are not base64 at all. */
+    private fun coverBytes(raw: String?): ByteArray? {
+        val s = raw?.takeIf { it.isNotBlank() } ?: return null
+        val bytes = runCatching { unb64(s) }.getOrNull() ?: return null
+        return bytes.takeIf { it.isNotEmpty() && it.size <= SafeImage.THUMB_BYTES }
+    }
+
+    // The covers readers subscribed by, poster → bytes, oldest first. The
+    // notice carries the cover (§16.18.2) and nothing after it does — what
+    // follows a subscription is a key and a period — so the Library's only
+    // copy is what the shelf showed when Subscribe was tapped. Public board
+    // content, plain prefs; bounded, because every tap adds one and
+    // nothing else takes them away.
+    private val covers = LinkedHashMap<String, ByteArray>()
+    private var coversLoaded = false
+    private const val COVERS_KEPT = 32
+
+    private fun coversLocked(context: Context): LinkedHashMap<String, ByteArray> {
+        if (!coversLoaded) {
+            coversLoaded = true
+            runCatching {
+                val raw = context.getSharedPreferences(SHELF_CACHE_PREFS, 0)
+                    .getString("covers", null)
+                if (raw != null) {
+                    val all = JSONObject(raw)
+                    for (key in all.keys()) coverBytes(all.optString(key))?.let { covers[key] = it }
+                }
+            }.onFailure { DucatLog.w("Publications", "covers load: ${it.message}") }
+        }
+        return covers
+    }
+
+    fun rememberCover(context: Context, posterHex: String, thumb: ByteArray?) {
+        if (thumb == null) return
+        val snapshot = synchronized(covers) {
+            val all = coversLocked(context)
+            all.remove(posterHex)
+            all[posterHex] = thumb
+            while (all.size > COVERS_KEPT) all.remove(all.keys.first())
+            JSONObject().apply { for ((k, v) in all) put(k, b64(v)) }.toString()
+        }
+        runCatching {
+            context.getSharedPreferences(SHELF_CACHE_PREFS, 0)
+                .edit().putString("covers", snapshot).apply()
+        }.onFailure { DucatLog.w("Publications", "covers save: ${it.message}") }
+    }
+
+    /** The cover a subscription was taken from, if the shelf showed one. */
+    fun coverFor(context: Context, posterHex: String): ByteArray? =
+        synchronized(covers) { coversLocked(context)[posterHex] }
 
     // --- the publisher's shelf --------------------------------------------
 

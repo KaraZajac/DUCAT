@@ -56,4 +56,6 @@
     <string name="profile_sign_pending_all">يطلبون استرداد الوديعة. توقيعك هو ما يحررها.</string>
     <string name="profile_sign_release">توقيع الإفراج</string>
     <string name="profile_copied">تم النسخ</string>
+    <string name="profile_their_car">سيارتهم</string>
+    <string name="profile_car_photo">صورة سيارتهم</string>
 </resources>

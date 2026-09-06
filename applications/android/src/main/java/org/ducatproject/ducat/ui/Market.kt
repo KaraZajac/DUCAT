@@ -1,17 +1,24 @@
 package org.ducatproject.ducat.ui
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -23,14 +30,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.Amounts
+import org.ducatproject.ducat.Languages
 import org.ducatproject.ducat.Publications
 import org.ducatproject.ducat.R
+import org.ducatproject.ducat.SafeImage
 
 /**
  * How a Subscribe tap hands its card off. The phone routes it into the
@@ -55,6 +67,45 @@ internal fun marketCategoryLabel(slug: String): String = stringResource(
     },
 )
 
+/** A board language's name, in that language — the picker's own rule
+ *  (Languages.SUPPORTED). A device language the app does not ship is
+ *  still named by the platform rather than shown as a tag. */
+internal fun marketLanguageName(tag: String): String =
+    Languages.endonymFor(tag)
+        ?: java.util.Locale.forLanguageTag(tag).let { it.getDisplayLanguage(it) }.ifBlank { tag }
+
+/**
+ * A publication's cover (§16.18.2), or a book where there is none. The
+ * bytes came off a board somebody else wrote, so the decode is the guarded
+ * one, and a picture that will not parse is drawn as no picture rather
+ * than as no shelf.
+ */
+@Composable
+internal fun PubCover(thumb: ByteArray?, size: Int = 56) {
+    // Keyed by content, not by the array: every read hands back a fresh
+    // one, and an array is only ever equal to itself.
+    val bmp = remember(thumb?.size, thumb?.contentHashCode()) {
+        thumb?.let { SafeImage.fromBytes(it, SafeImage.AVATAR_PIXELS) }
+    }
+    Box(
+        Modifier.size(size.dp).clip(MaterialTheme.shapes.small)
+            .background(MaterialTheme.colorScheme.secondaryContainer),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (bmp != null) {
+            Image(
+                bmp.asImageBitmap(), stringResource(R.string.market_cover_desc),
+                Modifier.fillMaxSize(), contentScale = ContentScale.Crop,
+            )
+        } else {
+            Icon(
+                Icons.AutoMirrored.Filled.MenuBook, null,
+                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+            )
+        }
+    }
+}
+
 /** One publication row, wherever its board was. */
 @Composable
 private fun MarketRowCard(r: Publications.MarketRow) {
@@ -64,26 +115,36 @@ private fun MarketRowCard(r: Publications.MarketRow) {
         color = MaterialTheme.colorScheme.surfaceVariant,
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
     ) {
-        Column(Modifier.padding(12.dp)) {
-            Text(r.title, style = MaterialTheme.typography.titleSmall)
-            r.blurb?.let {
-                Text(
-                    it, style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            Spacer(Modifier.height(6.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    r.pricePxmr?.let {
-                        stringResource(R.string.market_per_period, Amounts.show(context, it).primary)
-                    } ?: stringResource(R.string.market_free),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.ducat.settled,
-                )
-                Spacer(Modifier.weight(1f))
-                Button(onClick = { marketSubscribe(r.cardUri) }) {
-                    Text(stringResource(R.string.market_subscribe))
+        Row(Modifier.padding(12.dp)) {
+            PubCover(r.thumb)
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(r.title, style = MaterialTheme.typography.titleSmall)
+                r.blurb?.let {
+                    Text(
+                        it, style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Spacer(Modifier.height(6.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        r.pricePxmr?.let {
+                            stringResource(R.string.market_per_period, Amounts.show(context, it).primary)
+                        } ?: stringResource(R.string.market_free),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.ducat.settled,
+                    )
+                    Spacer(Modifier.weight(1f))
+                    Button(onClick = {
+                        // The cover goes with the tap: the Library will
+                        // show it, and the shelf is the only place it
+                        // was ever seen.
+                        Publications.rememberCover(context, r.posterHex, r.thumb)
+                        marketSubscribe(r.cardUri)
+                    }) {
+                        Text(stringResource(R.string.market_subscribe))
+                    }
                 }
             }
         }
@@ -235,12 +296,15 @@ private suspend fun awaitAttached(maxMs: Long): Boolean {
     return false
 }
 
-/** The worldwide shelf for one category (§16.18.2). */
+/**
+ * The worldwide shelf (§16.18.2): one category, or every category at once
+ * ([Publications.MARKET_EVERYTHING]), on the bare board ([lang] null —
+ * everyone) or one language's.
+ */
 @Composable
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
-fun WorldwideShelf(cat: String, myLangOnly: Boolean) {
+fun WorldwideShelf(cat: String, lang: String?) {
     val context = LocalContext.current
-    val lang = java.util.Locale.getDefault().language.takeIf { it.isNotBlank() }
     var rows by remember { mutableStateOf<List<Publications.MarketRow>>(emptyList()) }
     var looked by remember { mutableStateOf(false) }
     var refreshing by remember { mutableStateOf(false) }
@@ -253,7 +317,7 @@ fun WorldwideShelf(cat: String, myLangOnly: Boolean) {
     // threshold on release and only puts it away when `isRefreshing` goes
     // true and then false, so a pull that never said so sat there for good.
     var pulled by remember { mutableStateOf(false) }
-    LaunchedEffect(cat, myLangOnly, attempt) {
+    LaunchedEffect(cat, lang, attempt) {
         noNetwork = false
         if (pulled) {
             pulled = false
@@ -262,15 +326,14 @@ fun WorldwideShelf(cat: String, myLangOnly: Boolean) {
             looked = false
             refreshing = false
         }
-        val wanted = if (myLangOnly) lang else null
         // What this shelf said last time paints now; the live read replaces
         // it. The remembered choice is also what the background warmer keeps
         // fresh between visits.
         val warm = withContext(Dispatchers.IO) {
             context.getSharedPreferences("ducat_market_cache", 0).edit()
                 .putString("last_cat", cat)
-                .putString("last_lang", wanted ?: "").apply()
-            runCatching { Publications.cachedMarket(context, cat, wanted) }.getOrNull()
+                .putString("last_lang", lang ?: "").apply()
+            runCatching { Publications.cachedMarket(context, cat, lang) }.getOrNull()
         }
         if (!warm.isNullOrEmpty()) {
             rows = warm
@@ -282,7 +345,7 @@ fun WorldwideShelf(cat: String, myLangOnly: Boolean) {
             // stay, the same way an unattached read leaves them alone.
             val fresh = withContext(Dispatchers.IO) {
                 runCatching {
-                    Publications.browseMarket(context, cat, wanted)
+                    Publications.browseMarket(context, cat, lang)
                 }.getOrNull()
             }
             if (fresh != null) rows = fresh
@@ -292,10 +355,25 @@ fun WorldwideShelf(cat: String, myLangOnly: Boolean) {
         refreshing = false
         looked = true
     }
+    // Named the way the chips are: the shelf, or every shelf, and the
+    // language when one narrows it.
+    val everything = cat == Publications.MARKET_EVERYTHING
+    val looking = if (lang == null) {
+        if (everything) stringResource(R.string.market_looking_all)
+        else stringResource(R.string.market_looking, marketCategoryLabel(cat))
+    } else {
+        if (everything) {
+            stringResource(R.string.market_looking_all_lang, marketLanguageName(lang))
+        } else {
+            stringResource(
+                R.string.market_looking_lang, marketCategoryLabel(cat), marketLanguageName(lang),
+            )
+        }
+    }
     ShelfPull(refreshing = refreshing, onRefresh = { pulled = true; attempt++ }) {
         ShelfBody(
             rows, looked,
-            stringResource(R.string.market_looking, marketCategoryLabel(cat)),
+            looking,
             refreshing = refreshing,
             onRefresh = { attempt++ },
             noNetwork = noNetwork,

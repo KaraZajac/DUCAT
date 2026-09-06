@@ -63,10 +63,21 @@ export type FeedFile = { name: string; addr: string; mime: string; bytes: number
 export type FeedPost = { id: string; at: number; edited?: number | null; text: string; media?: FeedMedia[]; files?: FeedFile[]; re?: { persona: string; id: string } | null };
 export type FeedSpan = { text: string; bold: boolean; italic: boolean; link: string | null };
 export type FeedBlock = { kind: "Paragraph"; spans: FeedSpan[] } | { kind: "Image"; path: string; alt: string };
-export type TimelineRow = { persona: string; name: string; mine: boolean; post: FeedPost; blocks: FeedBlock[] };
+export type TimelineRow = { persona: string; name: string; mine: boolean; avatar_data_url: string | null; post: FeedPost; blocks: FeedBlock[] };
 export type HomeView = { persona_hex: string; record_key: string; title: string; has_head: boolean; digest_hex: string; updated: number; hearted: boolean; mine: boolean; posts: number };
 
-export type MyProfile = { email: string | null; phone: string | null; signal: string | null; share: boolean };
+export type MyProfile = {
+  email: string | null;
+  phone: string | null;
+  signal: string | null;
+  share: boolean;
+  // The face, and the car a rider looks for (§15.12): sent only while driving.
+  avatar_data_url: string | null;
+  car_model: string | null;
+  car_color: string | null;
+  plate: string | null;
+  car_photo_data_url: string | null;
+};
 
 export interface PersonaRow {
   hex: string;
@@ -103,6 +114,11 @@ export interface ContactRow {
   email: string | null;
   phone: string | null;
   signal: string | null;
+  avatar_data_url: string | null;
+  car_model: string | null;
+  car_color: string | null;
+  plate: string | null;
+  car_photo_data_url: string | null;
 }
 
 export interface MessageRow {
@@ -267,6 +283,34 @@ export interface PublicationRow {
   has_shelf: boolean;
   press_code: string | null;
   created: number;
+  // The market (§16.18.2): listed or not, where, and the remembered choice.
+  on_market: boolean;
+  market_category: string | null;
+  market_lang: string | null;
+  market_blurb: string | null;
+  market_board: string | null;
+  market_bare_board: string | null;
+  market_since: number;
+  cover_data_url: string | null;
+}
+
+// The pinned set (§16.18.2); every implementation shards the same way.
+export const MARKET_CATEGORIES = ["news", "serials", "sound", "software", "art", "other"] as const;
+
+// A publication on a worldwide shelf; `shown` is absent when it is free.
+export interface MarketRow {
+  category: string;
+  board: string;
+  subkey: number;
+  title: string;
+  blurb: string | null;
+  price_pxmr: number | null;
+  card: string;
+  poster: string;
+  expiry: number;
+  cover_data_url: string | null;
+  mine: boolean;
+  shown: Shown | null;
 }
 
 export interface ShelfRow {
@@ -455,6 +499,7 @@ export type CallState =
 export interface CallView {
   state: CallState;
   contact_name: string | null;
+  contact_avatar_data_url: string | null;
   rx_frames: number;
   tx_frames: number;
   has_audio: boolean;
@@ -476,6 +521,7 @@ export type OrderRow = {
   placed_at: number;
   ready_at: number;
   customer: string | null;
+  customer_avatar_data_url: string | null;
   shown: Shown;
 };
 
@@ -516,7 +562,11 @@ export const api = {
   createPersona: (name: string, color: number) => invoke<PersonaRow | null>("create_persona", { name, color }),
   setMyName: (name: string, personaHex?: string) => invoke<void>("set_my_name", { name, personaHex: personaHex ?? null }),
   myProfile: () => invoke<MyProfile>("my_profile"),
-  setMyProfile: (p: MyProfile) => invoke<void>("set_my_profile", { email: p.email, phone: p.phone, signal: p.signal, share: p.share }),
+  setMyProfile: (p: MyProfile) =>
+    invoke<void>("set_my_profile", { email: p.email, phone: p.phone, signal: p.signal, share: p.share, carModel: p.car_model, carColor: p.car_color, plate: p.plate }),
+  // A path to a picture, or null to take it down.
+  setMyAvatar: (path: string | null) => invoke<void>("set_my_avatar", { path }),
+  setMyCarPhoto: (path: string | null) => invoke<void>("set_my_car_photo", { path }),
   profileCode: () => invoke<Code>("profile_code"),
 
   contacts: () => invoke<ContactRow[]>("contacts"),
@@ -603,6 +653,15 @@ export const api = {
   fetchGallery: (share: string, digestHex: string) => invoke<string[]>("fetch_gallery", { share, digestHex }),
   pictureDataUrl: (path: string) => invoke<string>("picture_data_url", { path }),
   enquiryAbout: (personaHex: string) => invoke<Enquiry | null>("enquiry_about", { personaHex }),
+
+  // the worldwide market (§16.18.2): null category is every category at once, null lang the bare board
+  marketBrowseWorldCached: (category: string | null, lang: string | null) => invoke<MarketRow[]>("market_browse_world_cached", { category, lang }),
+  marketBrowseWorld: (category: string | null, lang: string | null) => invoke<MarketRow[]>("market_browse_world", { category, lang }),
+  marketPostPublication: (id: string, category: string, lang: string | null, blurb: string | null) =>
+    invoke<boolean>("market_post_publication", { id, category, lang, blurb }),
+  marketUnpostPublication: (id: string) => invoke<void>("market_unpost_publication", { id }),
+  setPublicationCover: (id: string, path: string) => invoke<void>("set_publication_cover", { id, path }),
+  removePublicationCover: (id: string) => invoke<void>("remove_publication_cover", { id }),
 
   ledger: (fromTs: number, toTs: number) => invoke<{ events: LedgerEvent[]; summary: LedgerSummary; business: BusinessSummary }>("ledger", { fromTs, toTs }),
   exportLedger: (path: string, json: boolean) => invoke<number>("export_ledger", { path, json }),

@@ -147,4 +147,6 @@
     <string name="rent_delete_title">Usunąć to ogłoszenie?</string>
     <string name="rent_delete_body">Zdjęcie odkłada je wraz z historią. Usunięcie jest trwałe — a przepisane ogłoszenie liczy się jako nowy sprzedawca, niezależnie od tego, jak długo stało to.</string>
     <string name="rent_delete_keep">Zostaw</string>
+    <string name="rent_photo_take">Zrób zdjęcie</string>
+    <string name="rent_photo_no_camera">Brak aplikacji aparatu na tym telefonie.</string>
 </resources>

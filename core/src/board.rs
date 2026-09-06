@@ -409,8 +409,11 @@ pub fn open(
     // the board four mebibytes and three milliseconds to say no. A defence
     // whose *failure* path is the expensive one is a denial of service with
     // extra steps.
+    // A signature that does not verify is BAD_SIG (§18.5), not a shape
+    // fault: the bytes are well formed, they were just not signed for
+    // this slot on this board.
     pk.verify_raw(ObjectType::BoardNotice, &signed, &sig64)
-        .map_err(|_| bad("this notice was not signed for this slot"))?;
+        .map_err(|_| Reject::with_detail(RejectCode::BadSig, "this notice was not signed for this slot"))?;
 
     if !meets(&pow_salt(&signed, &sig64), nonce, POW_BITS) {
         return Err(bad("this notice did not pay for its slot"));

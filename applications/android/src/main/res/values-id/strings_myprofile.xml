@@ -32,4 +32,7 @@
     <string name="myprofile_phone_too_long">Nomor telepon paling banyak 15 digit.</string>
     <string name="myprofile_signal_too_long">Itu lebih panjang dari yang mungkin untuk nama pengguna Signal.</string>
     <string name="myprofile_signal_shape">Nama pengguna Signal terlihat seperti nama.12 — nama, titik, lalu angka.</string>
+    <string name="myprofile_car_photo">Foto mobil</string>
+    <string name="myprofile_car_photo_add">Tambah foto mobil</string>
+    <string name="myprofile_car_photo_note">Diperkecil banyak. Penumpang melihatnya di samping pelat saat kamu mengambil panggilan mereka — gambarlah yang dipakai memindai trotoar penuh orang asing.</string>
 </resources>

@@ -24,6 +24,10 @@ const TAG: &str = "Identity";
 
 /// Compartments that fit on one hand.
 pub const MAX_PERSONAS: usize = 4;
+/// The avatar's cap on the wire (§16.9): it fits in the record beside the keys.
+pub const AVATAR_BYTES: usize = 12 * 1024;
+/// The car's picture (field 301) is bounded like a board thumbnail.
+pub const CAR_PHOTO_BYTES: usize = 10 * 1024;
 
 #[derive(Clone, Debug, Serialize)]
 pub struct Persona {
@@ -229,6 +233,41 @@ impl App {
         Ok(())
     }
 
+    /// A picture field, decoded from the base64 it is kept as.
+    pub fn profile_picture(&self, persona_hex: &str, field: &str) -> Option<Vec<u8>> {
+        self.profile_field(persona_hex, field).and_then(|s| unb64(&s)).filter(|b| !b.is_empty())
+    }
+
+    fn set_profile_picture(&self, persona_hex: &str, field: &str, shrunk: Option<Vec<u8>>) -> Result<(), Error> {
+        let key = self.profile_key(persona_hex, field);
+        match shrunk {
+            Some(bytes) => self.store(CONTACTS).put(&key, &b64(&bytes))?,
+            None => self.store(CONTACTS).remove(&key)?,
+        }
+        bump();
+        Ok(())
+    }
+
+    /// The face on the record: any picture, shrunk to a small JPEG under
+    /// the wire's cap; None takes it down.
+    pub fn set_avatar(&self, persona_hex: &str, picture: Option<&[u8]>) -> Result<(), Error> {
+        let shrunk = match picture {
+            Some(p) => Some(crate::thumbs::face(p, AVATAR_BYTES).ok_or_else(|| Error::Refused("that picture could not be read, or could not be shrunk to a face".into()))?),
+            None => None,
+        };
+        self.set_profile_picture(persona_hex, "avatar", shrunk)
+    }
+
+    /// The car's picture (§16.9): sent with the plate while driving, so a
+    /// rider can pick the car out at the curb; None takes it down.
+    pub fn set_car_photo(&self, persona_hex: &str, picture: Option<&[u8]>) -> Result<(), Error> {
+        let shrunk = match picture {
+            Some(p) => Some(crate::thumbs::thumbnail(p, CAR_PHOTO_BYTES).ok_or_else(|| Error::Refused("that picture could not be read, or could not be shrunk enough".into()))?),
+            None => None,
+        };
+        self.set_profile_picture(persona_hex, "car_photo", shrunk)
+    }
+
     /// §16.9: the profile is a choice. Off, the wire carries nothing.
     pub fn share_profile(&self, persona_hex: &str) -> bool {
         self.store(CONTACTS).get::<bool>(&self.profile_key(persona_hex, "share")).unwrap_or(false)
@@ -253,6 +292,7 @@ impl App {
             car_model: None,
             car_color: None,
             plate: None,
+            car_photo: None,
         };
         if !self.share_profile(persona_hex) {
             return none;
@@ -268,6 +308,7 @@ impl App {
             car_model: if driving { f("car_model") } else { None },
             car_color: if driving { f("car_color") } else { None },
             plate: if driving { f("plate") } else { None },
+            car_photo: if driving { f("car_photo").and_then(|s| unb64(&s)) } else { None },
         }
     }
 }
@@ -328,5 +369,35 @@ mod tests {
         assert!(app.profile_wire(&me, Some("sale"), false).email.is_none());
         assert!(app.profile_wire(&me, Some("profile"), false).plate.is_none());
         assert_eq!(app.profile_wire(&me, None, true).plate.as_deref(), Some("ABC 123"));
+    }
+
+    #[test]
+    fn the_pictures_are_shrunk_scoped_and_removable() {
+        let app = temp_app("the_pictures_are_shrunk_scoped_and_removable");
+        let me = app.primary_hex().unwrap();
+        app.set_share_profile(&me, true).unwrap();
+        let mut img = image::RgbImage::new(1200, 800);
+        for (x, y, px) in img.enumerate_pixels_mut() {
+            *px = image::Rgb([(x % 256) as u8, (y % 256) as u8, ((x * y) % 256) as u8]);
+        }
+        let mut png = Vec::new();
+        image::DynamicImage::ImageRgb8(img).write_to(&mut std::io::Cursor::new(&mut png), image::ImageFormat::Png).unwrap();
+        assert!(app.set_avatar(&me, Some(b"not a picture")).is_err());
+        app.set_avatar(&me, Some(&png)).unwrap();
+        app.set_car_photo(&me, Some(&png)).unwrap();
+        let face = app.profile_picture(&me, "avatar").expect("a face");
+        assert!(face.len() <= AVATAR_BYTES);
+        let car = app.profile_picture(&me, "car_photo").expect("a car");
+        assert!(car.len() <= CAR_PHOTO_BYTES);
+        // The face rides any handshake the share switch allows; the car
+        // only a driving one.
+        let w = app.profile_wire(&me, Some("sale"), false);
+        assert_eq!(w.avatar.as_deref(), Some(face.as_slice()));
+        assert!(w.car_photo.is_none());
+        assert_eq!(app.profile_wire(&me, None, true).car_photo.as_deref(), Some(car.as_slice()));
+        app.set_avatar(&me, None).unwrap();
+        app.set_car_photo(&me, None).unwrap();
+        assert!(app.profile_picture(&me, "avatar").is_none());
+        assert!(app.profile_wire(&me, None, true).car_photo.is_none());
     }
 }

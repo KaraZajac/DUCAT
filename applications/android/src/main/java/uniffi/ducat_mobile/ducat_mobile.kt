@@ -5179,7 +5179,12 @@ data class Profile (
      */
     var `carModel`: kotlin.String?, 
     var `carColor`: kotlin.String?, 
-    var `plate`: kotlin.String?
+    var `plate`: kotlin.String?, 
+    /**
+     * The car's picture (§16.9): one small PNG/JPEG/WebP, at most 10 KiB,
+     * sent only while driving like the model, colour and plate.
+     */
+    var `carPhoto`: kotlin.ByteArray?
 ) {
     
     companion object
@@ -5199,6 +5204,7 @@ public object FfiConverterTypeProfile: FfiConverterRustBuffer<Profile> {
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
         )
     }
 
@@ -5210,7 +5216,8 @@ public object FfiConverterTypeProfile: FfiConverterRustBuffer<Profile> {
             FfiConverterOptionalUInt.allocationSize(value.`pronouns`) +
             FfiConverterOptionalString.allocationSize(value.`carModel`) +
             FfiConverterOptionalString.allocationSize(value.`carColor`) +
-            FfiConverterOptionalString.allocationSize(value.`plate`)
+            FfiConverterOptionalString.allocationSize(value.`plate`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`carPhoto`)
     )
 
     override fun write(value: Profile, buf: ByteBuffer) {
@@ -5222,6 +5229,7 @@ public object FfiConverterTypeProfile: FfiConverterRustBuffer<Profile> {
             FfiConverterOptionalString.write(value.`carModel`, buf)
             FfiConverterOptionalString.write(value.`carColor`, buf)
             FfiConverterOptionalString.write(value.`plate`, buf)
+            FfiConverterOptionalByteArray.write(value.`carPhoto`, buf)
     }
 }
 
@@ -5239,6 +5247,10 @@ data class PubListingInfo (
      */
     var `pricePxmr`: kotlin.ULong?, 
     var `expiry`: kotlin.ULong, 
+    /**
+     * The cover: one inline picture, at most 10 KiB, PNG/JPEG/WebP.
+     */
+    var `thumb`: kotlin.ByteArray?, 
     /**
      * Filled by decode: hex of the listing's own verifying key.
      */
@@ -5261,6 +5273,7 @@ public object FfiConverterTypePubListingInfo: FfiConverterRustBuffer<PubListingI
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalULong.read(buf),
             FfiConverterULong.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
             FfiConverterString.read(buf),
             FfiConverterULong.read(buf),
             FfiConverterString.read(buf),
@@ -5273,6 +5286,7 @@ public object FfiConverterTypePubListingInfo: FfiConverterRustBuffer<PubListingI
             FfiConverterOptionalString.allocationSize(value.`blurb`) +
             FfiConverterOptionalULong.allocationSize(value.`pricePxmr`) +
             FfiConverterULong.allocationSize(value.`expiry`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`thumb`) +
             FfiConverterString.allocationSize(value.`poster`) +
             FfiConverterULong.allocationSize(value.`beaconHeight`) +
             FfiConverterString.allocationSize(value.`beaconHash`)
@@ -5284,6 +5298,7 @@ public object FfiConverterTypePubListingInfo: FfiConverterRustBuffer<PubListingI
             FfiConverterOptionalString.write(value.`blurb`, buf)
             FfiConverterOptionalULong.write(value.`pricePxmr`, buf)
             FfiConverterULong.write(value.`expiry`, buf)
+            FfiConverterOptionalByteArray.write(value.`thumb`, buf)
             FfiConverterString.write(value.`poster`, buf)
             FfiConverterULong.write(value.`beaconHeight`, buf)
             FfiConverterString.write(value.`beaconHash`, buf)

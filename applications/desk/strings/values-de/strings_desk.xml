@@ -338,4 +338,18 @@
     <string name="desk_keep_someone">Noch niemand. Ein Herz an einem Kontakt behält sein Zuhause hier.</string>
     <string name="desk_others">Andere</string>
     <string name="desk_edited">bearbeitet</string>
+    <string name="desk_any_language">Jede Sprache</string>
+    <string name="desk_other_language">Andere Sprache…</string>
+    <string name="desk_subscribing">Wird abonniert…</string>
+    <string name="desk_subscribed_note">Abonniert. Die Rechnung oder die erste Ausgabe kommt im Chat an; was du hast, steht in der Bibliothek.</string>
+    <string name="desk_choose_cover">Titelbild wählen…</string>
+    <string name="desk_remove_cover">Titelbild entfernen</string>
+    <string name="desk_market_cover_note">Das Titelbild reist mit der Anzeige, unter zehn Kilobyte, sodass ein Leser es im Regal sieht, bevor er etwas lädt.</string>
+    <string name="desk_market_lang_note">Eine Sprache grenzt das Regal ein. Die Anzeige kommt auch auf das Brett der ganzen Kategorie, damit Leser jeder Sprache sie finden.</string>
+    <string name="desk_market_world_note">Sechs Bretter, die das ganze Netz teilt, wöchentlich erneuert. Eine Anzeige wird mit etwas Arbeit gestempelt und hält einen Tag; der Desk erneuert sie, solange er offen ist.</string>
+    <string name="desk_no_market_slot">Jeder Platz auf diesem Brett ist diese Woche belegt. Die Wahl bleibt gespeichert, und der Desk versucht es weiter.</string>
+    <string name="desk_market_waiting">Gelistet; wartet auf einen freien Platz auf dem Brett.</string>
+    <string name="desk_car_picture">Bild des Autos</string>
+    <string name="desk_car_picture_note">Wird nur mit Modell, Farbe und Kennzeichen gesendet, wenn du einen Ruf annimmst, damit ein Fahrgast dein Auto am Bordstein erkennt.</string>
+    <string name="desk_car">Auto</string>
 </resources>

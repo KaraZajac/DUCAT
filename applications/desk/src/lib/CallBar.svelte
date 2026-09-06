@@ -33,7 +33,7 @@
   {@const st = view.state}
   <div class="callbar" class:active={st.kind === "Active"} class:ringing={st.kind === "Incoming"}>
     <div class="callbar-who">
-      <span class="avatar">{(view.contact_name ?? "?").slice(0, 1).toUpperCase()}</span>
+      {#if view.contact_avatar_data_url}<img class="avatar pic" src={view.contact_avatar_data_url} alt="" />{:else}<span class="avatar">{(view.contact_name ?? "?").slice(0, 1).toUpperCase()}</span>{/if}
       <div>
         <div class="title">{view.contact_name ?? t("desk_somebody")}</div>
         <div class="meta">

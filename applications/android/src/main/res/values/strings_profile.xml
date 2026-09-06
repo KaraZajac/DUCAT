@@ -56,4 +56,6 @@
     <string name="profile_sign_pending_all">They asked for the deposit back. Your signature is what releases it.</string>
     <string name="profile_sign_release">Sign the release</string>
     <string name="profile_copied">Copied</string>
+    <string name="profile_their_car">Their car</string>
+    <string name="profile_car_photo">Picture of their car</string>
 </resources>

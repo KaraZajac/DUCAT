@@ -145,4 +145,6 @@
     <string name="rent_delete_title">Bu ilan silinsin mi?</string>
     <string name="rent_delete_body">Kaldırmak onu geçmişiyle birlikte saklar. Silmek kalıcıdır — ve yeniden yazılan ilan yeni bir satıcı sayılır, bu ne kadar süredir durursa dursun.</string>
     <string name="rent_delete_keep">Kalsın</string>
+    <string name="rent_photo_take">Fotoğraf çek</string>
+    <string name="rent_photo_no_camera">Bu telefonda kamera uygulaması yok.</string>
 </resources>

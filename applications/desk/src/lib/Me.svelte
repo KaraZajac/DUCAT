@@ -20,14 +20,20 @@
   // handshake and only while the switch is on. The shapes are the
   // phone's, so a value saved here reads the same there.
   let pEmail = $state(""), pPhone = $state(""), pSignal = $state(""), pShare = $state(false);
+  // The car (§15.12): sent only when answering a hail as its driver.
+  let pCarModel = $state(""), pCarColor = $state(""), pPlate = $state("");
   let savedProfile = $state<MyProfile | null>(null);
   let profileMsg = $state<string | null>(null);
   let profileErr = $state<string | null>(null);
+  let picBusy = $state<string | null>(null);
   const profileDirty = $derived(
     !!savedProfile &&
       (pEmail.trim() !== (savedProfile.email ?? "") ||
         pPhone.trim() !== (savedProfile.phone ?? "") ||
         pSignal.trim() !== (savedProfile.signal ?? "") ||
+        pCarModel.trim() !== (savedProfile.car_model ?? "") ||
+        pCarColor.trim() !== (savedProfile.car_color ?? "") ||
+        pPlate.trim() !== (savedProfile.plate ?? "") ||
         pShare !== savedProfile.share),
   );
   function checkEmail(v: string): string | null {
@@ -54,6 +60,7 @@
       const p = await api.myProfile();
       savedProfile = p;
       pEmail = p.email ?? ""; pPhone = p.phone ?? ""; pSignal = p.signal ?? ""; pShare = p.share;
+      pCarModel = p.car_model ?? ""; pCarColor = p.car_color ?? ""; pPlate = p.plate ?? "";
     } catch (e) { profileErr = String(e); }
   }
   async function saveProfile() {
@@ -62,10 +69,33 @@
     const bad = checkEmail(email) ?? checkPhone(phone) ?? checkSignal(signal);
     if (bad) { profileErr = bad; return; }
     try {
-      await api.setMyProfile({ email: email || null, phone: phone || null, signal: signal || null, share: pShare });
+      await api.setMyProfile({
+        email: email || null, phone: phone || null, signal: signal || null, share: pShare,
+        car_model: pCarModel.trim() || null, car_color: pCarColor.trim() || null, plate: pPlate.trim() || null,
+        avatar_data_url: null, car_photo_data_url: null,
+      });
       profileMsg = t("myprofile_saved");
       await loadProfile();
     } catch (e) { profileErr = String(e); }
+  }
+  // The pictures are their own saves: each is shrunk on the way in and
+  // the standing code is rewritten, so nothing waits on the form.
+  async function setPicture(which: "avatar" | "car", path: string | null) {
+    profileErr = null; profileMsg = null;
+    picBusy = which;
+    try {
+      if (which === "avatar") await api.setMyAvatar(path);
+      else await api.setMyCarPhoto(path);
+      await loadProfile();
+    } catch (e) {
+      profileErr = path ? `${t("myprofile_avatar_read_error")} ${e}` : String(e);
+    } finally {
+      picBusy = null;
+    }
+  }
+  async function pickPicture(which: "avatar" | "car", typed?: string) {
+    const p = typed ?? (await api.pickFile());
+    if (p) await setPicture(which, p);
   }
   let passphrase = $state("");
   let backupMsg = $state<string | null>(null);
@@ -179,6 +209,21 @@
 </div>
 
 <div class="card">
+  <h3>{t("myprofile_your_picture")}</h3>
+  <div class="pic-row">
+    {#if savedProfile?.avatar_data_url}<img class="avatar big pic" src={savedProfile.avatar_data_url} alt="" />{:else}<div class="avatar big">{(name || "?").slice(0, 1).toUpperCase()}</div>{/if}
+    <div>
+      <p class="note" style="margin: 0 0 8px">{t("myprofile_picture_note")}</p>
+      <div class="actions">
+        <button class="btn small" disabled={picBusy === "avatar"} onclick={() => pickPicture("avatar")}>{t("myprofile_add_picture")}…</button>
+        {#if savedProfile?.avatar_data_url}<button class="btn small" disabled={picBusy === "avatar"} onclick={() => setPicture("avatar", null)}>{t("myprofile_remove")}</button>{/if}
+        {#if drive.on}<input id="avpath" class="input narrow" hidden placeholder="/path/to/picture" onchange={(e) => pickPicture("avatar", (e.target as HTMLInputElement).value)} />{/if}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
   <h3>{t("desk_reach_title")}</h3>
   <p class="note">{t("myprofile_reach_note")}</p>
   <div class="field">
@@ -200,6 +245,38 @@
     {#if profileMsg}<span class="meta">{profileMsg}</span>{/if}
   </div>
   {#if profileErr}<p class="err">{profileErr}</p>{/if}
+</div>
+
+<div class="card">
+  <h3>{t("desk_car")}</h3>
+  <p class="note">{t("myprofile_driving_note")}</p>
+  <div class="field">
+    <label for="pcar">{t("myprofile_car_model")}</label>
+    <input id="pcar" class="input" bind:value={pCarModel} placeholder={t("myprofile_car_model_hint")} onkeydown={(e) => e.key === "Enter" && saveProfile()} />
+  </div>
+  <div class="field">
+    <label for="pcolour">{t("myprofile_car_colour")}</label>
+    <input id="pcolour" class="input" bind:value={pCarColor} placeholder={t("myprofile_car_colour_hint")} onkeydown={(e) => e.key === "Enter" && saveProfile()} />
+  </div>
+  <div class="field">
+    <label for="pplate">{t("myprofile_plate")}</label>
+    <input id="pplate" class="input" bind:value={pPlate} placeholder={t("myprofile_plate_hint")} onkeydown={(e) => e.key === "Enter" && saveProfile()} />
+  </div>
+  <div class="pic-row">
+    {#if savedProfile?.car_photo_data_url}<img class="car-pic" src={savedProfile.car_photo_data_url} alt="" />{/if}
+    <div>
+      <div class="title">{t("desk_car_picture")}</div>
+      <p class="note" style="margin: 2px 0 8px">{t("desk_car_picture_note")}</p>
+      <div class="actions">
+        <button class="btn small" disabled={picBusy === "car"} onclick={() => pickPicture("car")}>{t("myprofile_add_picture")}…</button>
+        {#if savedProfile?.car_photo_data_url}<button class="btn small" disabled={picBusy === "car"} onclick={() => setPicture("car", null)}>{t("myprofile_remove")}</button>{/if}
+        {#if drive.on}<input id="carpath" class="input narrow" hidden placeholder="/path/to/car.jpg" onchange={(e) => pickPicture("car", (e.target as HTMLInputElement).value)} />{/if}
+      </div>
+    </div>
+  </div>
+  <div class="actions">
+    <button class="btn" onclick={saveProfile} disabled={!profileDirty}>{t("myprofile_save")}</button>
+  </div>
 </div>
 
 <div class="card">

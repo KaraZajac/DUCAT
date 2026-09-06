@@ -56,4 +56,6 @@
     <string name="profile_sign_pending_all">ขอคืนเงินมัดจำ ลายเซ็นของคุณคือสิ่งที่ปลดล็อก</string>
     <string name="profile_sign_release">เซ็นปล่อยเงิน</string>
     <string name="profile_copied">คัดลอกแล้ว</string>
+    <string name="profile_their_car">รถของพวกเขา</string>
+    <string name="profile_car_photo">รูปรถของพวกเขา</string>
 </resources>

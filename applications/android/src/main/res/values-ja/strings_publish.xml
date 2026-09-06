@@ -48,7 +48,6 @@
     <string name="market_delist_btn">取り下げる</string>
     <string name="market_listed_as">%1$s に掲載中</string>
     <string name="market_list_failed">出品できませんでした — ノードは起動していますか?</string>
-    <string name="market_all_langs">すべての言語</string>
     <string name="market_what_all">すべて</string>
     <string name="market_what_digital">デジタル</string>
     <string name="market_looking">%1$s の棚を見ています…</string>
@@ -80,4 +79,15 @@
     <string name="press_open_room">プレスルームを開く</string>
     <string name="market_refreshing">変更を確認中…</string>
     <string name="pub_period_not_a_name">期間はフォルダー名ではなく名前です。スラッシュは使えず、点だけにもできません。</string>
+    <string name="market_any_lang">すべての言語</string>
+    <string name="market_add_lang">+ 言語</string>
+    <string name="market_pick_lang">どの言語？</string>
+    <string name="market_looking_lang">%1$s の棚（%2$s）を見ています…</string>
+    <string name="market_looking_all">すべての棚を見ています…</string>
+    <string name="market_looking_all_lang">すべての棚（%1$s）を見ています…</string>
+    <string name="market_cover_desc">表紙</string>
+    <string name="pub_cover_label">表紙の画像</string>
+    <string name="pub_cover_note">棚でタイトルの横に表示されます。掲示に収まるよう縮小されるので、閲覧は軽いままです。</string>
+    <string name="pub_cover_remove">削除</string>
+    <string name="pub_cover_failed">その画像は使えませんでした。別のものをお試しください。</string>
 </resources>

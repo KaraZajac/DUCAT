@@ -32,12 +32,12 @@
     <string name="pub_sub_code_hint">Отсканируй, чтобы подписаться. Предъявление вносит в список — бесплатное издание сразу отдаёт свежий выпуск, платное присылает счёт.</string>
     <string name="market_near_me">Рядом</string>
     <string name="market_worldwide">Весь мир</string>
-    <string name="market_cat_news">новости</string>
-    <string name="market_cat_serials">сериалы</string>
-    <string name="market_cat_sound">звук</string>
-    <string name="market_cat_software">программы</string>
-    <string name="market_cat_art">искусство</string>
-    <string name="market_cat_other">другое</string>
+    <string name="market_cat_news">Новости</string>
+    <string name="market_cat_serials">Сериалы</string>
+    <string name="market_cat_sound">Звук</string>
+    <string name="market_cat_software">Программы</string>
+    <string name="market_cat_art">Искусство</string>
+    <string name="market_cat_other">Другое</string>
     <string name="market_empty">На этой полке пока пусто — доски меняются каждую неделю.</string>
     <string name="market_free">Бесплатно</string>
     <string name="market_per_period">%1$s за выпуск</string>
@@ -48,7 +48,6 @@
     <string name="market_delist_btn">Снять</string>
     <string name="market_listed_as">В разделе %1$s</string>
     <string name="market_list_failed">Не удалось выставить — узел работает?</string>
-    <string name="market_all_langs">все языки</string>
     <string name="market_what_all">Всё</string>
     <string name="market_what_digital">Цифровое</string>
     <string name="market_looking">Смотрим полку «%1$s»…</string>
@@ -80,4 +79,15 @@
     <string name="press_open_room">Открыть пресс-зал</string>
     <string name="market_refreshing">Проверка изменений…</string>
     <string name="pub_period_not_a_name">Период — это имя, а не папка: без косых черт и не только точки.</string>
+    <string name="market_any_lang">Любой язык</string>
+    <string name="market_add_lang">+ язык</string>
+    <string name="market_pick_lang">Какой язык?</string>
+    <string name="market_looking_lang">Смотрим полку «%1$s» на языке %2$s…</string>
+    <string name="market_looking_all">Смотрим все полки…</string>
+    <string name="market_looking_all_lang">Смотрим все полки на языке %1$s…</string>
+    <string name="market_cover_desc">Обложка</string>
+    <string name="pub_cover_label">Обложка</string>
+    <string name="pub_cover_note">Показывается на полке рядом с названием. Сжимается под размер объявления, чтобы просмотр оставался быстрым.</string>
+    <string name="pub_cover_remove">Убрать</string>
+    <string name="pub_cover_failed">Это изображение не подошло. Попробуйте другое.</string>
 </resources>

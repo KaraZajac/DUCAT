@@ -621,7 +621,7 @@
     {#if groups.length}<div class="list-head"><span>{t("desk_people")}</span></div>{/if}
     {#each foundRows.filter((r) => r.chat_visible) as r (r.persona_hex)}
       <button class="thread-row" class:active={r.persona_hex === open} onclick={() => select(r.persona_hex)}>
-        <div class="avatar" class:unnamed={!r.named}>{r.name.slice(0, 1).toUpperCase()}</div>
+        {#if r.avatar_data_url}<img class="avatar pic" src={r.avatar_data_url} alt="" />{:else}<div class="avatar" class:unnamed={!r.named}>{r.name.slice(0, 1).toUpperCase()}</div>{/if}
         <div class="thread-text">
           <div class="thread-top">
             <span class="thread-name" class:unread={r.unread}>{r.name}</span>
@@ -710,6 +710,12 @@
               {#if current.email}{current.email} · {/if}{#if current.phone}{current.phone} · {/if}{#if current.signal}Signal {current.signal} · {/if}
               <button class="linkish mono" title={t("desk_copy_their_key")} onclick={() => copy(current?.persona_hex ?? "")}>{current.persona_hex.slice(0, 12)}…</button>
             </div>
+            {#if current.car_model || current.car_color || current.plate || current.car_photo_data_url}
+              <div class="car-line">
+                {#if current.car_photo_data_url}<img class="car-pic" src={current.car_photo_data_url} alt="" />{/if}
+                <span class="meta">{t("desk_car")}: {[current.car_model, current.car_color, current.plate].filter(Boolean).join(" · ")}</span>
+              </div>
+            {/if}
           {/if}
         </div>
         <div class="actions pane-actions">

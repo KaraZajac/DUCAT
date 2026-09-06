@@ -32,12 +32,12 @@
     <string name="pub_sub_code_hint">Pindai untuk berlangganan. Klaim memasukkanmu ke daftar — terbitan gratis langsung memberi edisi terbaru, yang berbayar mengirim tagihan.</string>
     <string name="market_near_me">Sekitar saya</string>
     <string name="market_worldwide">Seluruh dunia</string>
-    <string name="market_cat_news">berita</string>
-    <string name="market_cat_serials">serial</string>
-    <string name="market_cat_sound">suara</string>
-    <string name="market_cat_software">perangkat lunak</string>
-    <string name="market_cat_art">seni</string>
-    <string name="market_cat_other">lainnya</string>
+    <string name="market_cat_news">Berita</string>
+    <string name="market_cat_serials">Serial</string>
+    <string name="market_cat_sound">Suara</string>
+    <string name="market_cat_software">Perangkat lunak</string>
+    <string name="market_cat_art">Seni</string>
+    <string name="market_cat_other">Lainnya</string>
     <string name="market_empty">Rak ini masih kosong — papan berganti tiap minggu.</string>
     <string name="market_free">Gratis</string>
     <string name="market_per_period">%1$s per edisi</string>
@@ -48,7 +48,6 @@
     <string name="market_delist_btn">Turunkan</string>
     <string name="market_listed_as">Terdaftar di %1$s</string>
     <string name="market_list_failed">Gagal memasang — apakah node berjalan?</string>
-    <string name="market_all_langs">semua bahasa</string>
     <string name="market_what_all">Semua</string>
     <string name="market_what_digital">Digital</string>
     <string name="market_looking">Melihat rak %1$s…</string>
@@ -80,4 +79,15 @@
     <string name="press_open_room">Buka ruang pers</string>
     <string name="market_refreshing">Memeriksa perubahan…</string>
     <string name="pub_period_not_a_name">Periode adalah nama, bukan folder — tanpa garis miring, dan bukan hanya titik.</string>
+    <string name="market_any_lang">Bahasa apa pun</string>
+    <string name="market_add_lang">+ bahasa</string>
+    <string name="market_pick_lang">Bahasa apa?</string>
+    <string name="market_looking_lang">Melihat rak %1$s dalam bahasa %2$s…</string>
+    <string name="market_looking_all">Melihat semua rak…</string>
+    <string name="market_looking_all_lang">Melihat semua rak dalam bahasa %1$s…</string>
+    <string name="market_cover_desc">Sampul</string>
+    <string name="pub_cover_label">Gambar sampul</string>
+    <string name="pub_cover_note">Tampil di rak di samping judul. Diperkecil agar muat di pemberitahuan, supaya menjelajah tetap cepat.</string>
+    <string name="pub_cover_remove">Hapus</string>
+    <string name="pub_cover_failed">Gambar itu tidak bisa dipakai. Coba yang lain.</string>
 </resources>

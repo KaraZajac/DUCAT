@@ -32,12 +32,12 @@
     <string name="pub_sub_code_hint">Scan to subscribe. A claim joins the roster — a free publication hands over the latest issue on the spot; a priced one sends the bill.</string>
     <string name="market_near_me">Near me</string>
     <string name="market_worldwide">Worldwide</string>
-    <string name="market_cat_news">news</string>
-    <string name="market_cat_serials">serials</string>
-    <string name="market_cat_sound">sound</string>
-    <string name="market_cat_software">software</string>
-    <string name="market_cat_art">art</string>
-    <string name="market_cat_other">other</string>
+    <string name="market_cat_news">News</string>
+    <string name="market_cat_serials">Serials</string>
+    <string name="market_cat_sound">Sound</string>
+    <string name="market_cat_software">Software</string>
+    <string name="market_cat_art">Art</string>
+    <string name="market_cat_other">Other</string>
     <string name="market_empty">Nothing on this shelf yet — the boards rotate weekly, so early weeks are quiet.</string>
     <string name="market_free">Free</string>
     <string name="market_per_period">%1$s a period</string>
@@ -48,7 +48,6 @@
     <string name="market_delist_btn">Take it down</string>
     <string name="market_listed_as">Listed under %1$s</string>
     <string name="market_list_failed">Could not list it — is the node up?</string>
-    <string name="market_all_langs">every language</string>
     <string name="market_what_all">Everything</string>
     <string name="market_what_digital">Digital</string>
     <string name="market_looking">Looking at the %1$s shelf…</string>
@@ -80,4 +79,15 @@
     <string name="press_open_room">Open the Press room</string>
     <string name="market_refreshing">Checking for changes…</string>
     <string name="pub_period_not_a_name">A period is a name, not a folder — no slashes, and not just dots.</string>
+    <string name="market_any_lang">Any language</string>
+    <string name="market_add_lang">+ language</string>
+    <string name="market_pick_lang">Which language?</string>
+    <string name="market_looking_lang">Looking at the %1$s shelf in %2$s…</string>
+    <string name="market_looking_all">Looking at every shelf…</string>
+    <string name="market_looking_all_lang">Looking at every shelf in %1$s…</string>
+    <string name="market_cover_desc">Cover</string>
+    <string name="pub_cover_label">Cover picture</string>
+    <string name="pub_cover_note">Shown on the shelf beside the title. Shrunk to fit the notice, so browsing stays quick.</string>
+    <string name="pub_cover_remove">Remove</string>
+    <string name="pub_cover_failed">That picture could not be used. Try another.</string>
 </resources>

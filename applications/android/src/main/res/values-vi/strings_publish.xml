@@ -32,12 +32,12 @@
     <string name="pub_sub_code_hint">Quét để đăng ký. Nhận thẻ là vào danh sách — ấn phẩm miễn phí trao ngay số mới nhất, bản trả phí gửi hóa đơn.</string>
     <string name="market_near_me">Gần tôi</string>
     <string name="market_worldwide">Toàn cầu</string>
-    <string name="market_cat_news">tin tức</string>
-    <string name="market_cat_serials">truyện dài kỳ</string>
-    <string name="market_cat_sound">âm thanh</string>
-    <string name="market_cat_software">phần mềm</string>
-    <string name="market_cat_art">nghệ thuật</string>
-    <string name="market_cat_other">khác</string>
+    <string name="market_cat_news">Tin tức</string>
+    <string name="market_cat_serials">Truyện dài kỳ</string>
+    <string name="market_cat_sound">Âm thanh</string>
+    <string name="market_cat_software">Phần mềm</string>
+    <string name="market_cat_art">Nghệ thuật</string>
+    <string name="market_cat_other">Khác</string>
     <string name="market_empty">Kệ này còn trống — bảng xoay vòng mỗi tuần.</string>
     <string name="market_free">Miễn phí</string>
     <string name="market_per_period">%1$s mỗi kỳ</string>
@@ -48,7 +48,6 @@
     <string name="market_delist_btn">Gỡ xuống</string>
     <string name="market_listed_as">Đã đăng ở %1$s</string>
     <string name="market_list_failed">Không đăng được — node có chạy không?</string>
-    <string name="market_all_langs">mọi ngôn ngữ</string>
     <string name="market_what_all">Tất cả</string>
     <string name="market_what_digital">Kỹ thuật số</string>
     <string name="market_looking">Đang xem kệ %1$s…</string>
@@ -80,4 +79,15 @@
     <string name="press_open_room">Mở phòng báo chí</string>
     <string name="market_refreshing">Đang kiểm tra thay đổi…</string>
     <string name="pub_period_not_a_name">Kỳ là một tên, không phải thư mục — không dùng dấu gạch chéo, và không chỉ là dấu chấm.</string>
+    <string name="market_any_lang">Mọi ngôn ngữ</string>
+    <string name="market_add_lang">+ ngôn ngữ</string>
+    <string name="market_pick_lang">Ngôn ngữ nào?</string>
+    <string name="market_looking_lang">Đang xem kệ %1$s bằng %2$s…</string>
+    <string name="market_looking_all">Đang xem mọi kệ…</string>
+    <string name="market_looking_all_lang">Đang xem mọi kệ bằng %1$s…</string>
+    <string name="market_cover_desc">Bìa</string>
+    <string name="pub_cover_label">Ảnh bìa</string>
+    <string name="pub_cover_note">Hiện trên kệ cạnh tiêu đề. Được thu nhỏ để vừa thông báo, nên việc dạo xem vẫn nhanh.</string>
+    <string name="pub_cover_remove">Gỡ</string>
+    <string name="pub_cover_failed">Không dùng được ảnh đó. Thử ảnh khác.</string>
 </resources>

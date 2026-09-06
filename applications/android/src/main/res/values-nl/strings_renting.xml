@@ -147,4 +147,6 @@
     <string name="rent_delete_title">Deze advertentie verwijderen?</string>
     <string name="rent_delete_body">Offline halen bewaart hem met zijn geschiedenis. Verwijderen is definitief — en een opnieuw getypte advertentie telt als een nieuwe verkoper, hoe lang deze er ook stond.</string>
     <string name="rent_delete_keep">Behouden</string>
+    <string name="rent_photo_take">Foto maken</string>
+    <string name="rent_photo_no_camera">Geen camera-app op deze telefoon.</string>
 </resources>

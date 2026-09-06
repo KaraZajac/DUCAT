@@ -32,4 +32,7 @@
     <string name="myprofile_phone_too_long">फ़ोन नंबर अधिकतम 15 अंकों का होता है।</string>
     <string name="myprofile_signal_too_long">यह Signal उपयोगकर्ता नाम की अधिकतम लंबाई से ज़्यादा है।</string>
     <string name="myprofile_signal_shape">Signal उपयोगकर्ता नाम name.12 जैसा दिखता है — एक नाम, एक बिंदु, फिर अंक।</string>
+    <string name="myprofile_car_photo">गाड़ी की तस्वीर</string>
+    <string name="myprofile_car_photo_add">गाड़ी की तस्वीर जोड़ें</string>
+    <string name="myprofile_car_photo_note">बहुत छोटी कर दी जाती है। जब आप सवारी की पुकार लेते हैं तो वे इसे नंबर प्लेट के बगल में देखते हैं — अजनबियों से भरी सड़क तस्वीर से ही छानी जाती है।</string>
 </resources>

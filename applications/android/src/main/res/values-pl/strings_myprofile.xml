@@ -32,4 +32,7 @@
     <string name="myprofile_phone_too_long">Numer telefonu ma najwyżej 15 cyfr.</string>
     <string name="myprofile_signal_too_long">To dłuższe, niż może być nazwa użytkownika Signal.</string>
     <string name="myprofile_signal_shape">Nazwa użytkownika Signal wygląda jak nazwa.12 — nazwa, kropka, potem cyfry.</string>
+    <string name="myprofile_car_photo">Zdjęcie auta</string>
+    <string name="myprofile_car_photo_add">Dodaj zdjęcie auta</string>
+    <string name="myprofile_car_photo_note">Mocno zmniejszone. Pasażerowie widzą je obok tablicy, gdy przyjmiesz ich wezwanie — po zdjęciu przeszukuje się krawężnik pełen obcych.</string>
 </resources>

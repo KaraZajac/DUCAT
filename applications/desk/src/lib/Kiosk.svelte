@@ -109,9 +109,9 @@
     <h4>{t("kiosk_orders")}</h4>
     {#each orders as o (o.id)}
       <button class="thread-row" class:active={open === o.id} onclick={() => (open = o.id)}>
-        <div class="avatar" class:group={o.state !== "Confirmed"}>#{o.number}</div>
+        {#if o.customer_avatar_data_url}<img class="avatar pic" src={o.customer_avatar_data_url} alt="" />{:else}<div class="avatar" class:group={o.state !== "Confirmed"}>#{o.number}</div>{/if}
         <div class="thread-text">
-          <div class="thread-top"><span class="thread-name">{o.shown.primary}</span><span class="thread-when">{fmtTime(o.placed_at)}</span></div>
+          <div class="thread-top"><span class="thread-name">{o.customer_avatar_data_url ? `#${o.number} · ` : ""}{o.shown.primary}</span><span class="thread-when">{fmtTime(o.placed_at)}</span></div>
           <div class="thread-last">{stateWord(o)} · {o.lines.map(([d]) => d).join(", ")}</div>
         </div>
       </button>

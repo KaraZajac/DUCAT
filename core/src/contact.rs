@@ -168,6 +168,9 @@ pub struct ContactDetails {
     pub car_model: Option<String>,
     pub car_color: Option<String>,
     pub plate: Option<String>,
+    /// The car itself, one small picture under the avatar's rules — a
+    /// curb full of strangers is scanned by a picture before a plate.
+    pub car_photo: Option<Vec<u8>>,
     /// What this handshake is *for* — "profile" for a standing contact code,
     /// "sale"/"hail"/"tab"/… for a transaction (§16.9).
     ///
@@ -395,6 +398,9 @@ impl ContactDetails {
         if let Some(v) = &self.plate {
             m.insert(f::DET_PLATE, Value::Text(v.clone()));
         }
+        if let Some(p) = &self.car_photo {
+            m.insert(f::DET_CAR_PHOTO, Value::Bytes(p.clone()));
+        }
         if let Some(v) = &self.purpose {
             m.insert(f::DET_PURPOSE, Value::Text(v.clone()));
         }
@@ -432,6 +438,7 @@ impl ContactDetails {
             car_model: r.opt_text(f::DET_CAR_MODEL, MAX_CAR_MODEL_CHARS)?,
             car_color: r.opt_text(f::DET_CAR_COLOR, MAX_CAR_COLOR_CHARS)?,
             plate: r.opt_text(f::DET_PLATE, MAX_PLATE_CHARS)?,
+            car_photo: r.opt_bytes(f::DET_CAR_PHOTO, None)?,
             purpose: r.opt_text(f::DET_PURPOSE, MAX_PURPOSE_CHARS)?,
         };
         r.finish()?;
@@ -470,6 +477,26 @@ impl ContactDetails {
                 return Err(Reject::with_detail(
                     RejectCode::Malformed,
                     "an avatar must be PNG, JPEG or WebP",
+                ));
+            }
+        }
+        if let Some(p) = &out.car_photo {
+            if p.is_empty() {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "an empty car picture is not a picture; omit the key instead",
+                ));
+            }
+            if p.len() > MAX_LISTING_THUMB_BYTES {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    format!("a car picture may be at most {MAX_LISTING_THUMB_BYTES} bytes"),
+                ));
+            }
+            if !avatar_format_is_known(p) {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "a car picture is PNG, JPEG or WebP",
                 ));
             }
         }
@@ -2211,6 +2238,8 @@ pub struct PubNotice {
     /// Piconero a period. `None` is free — the only spelling of free.
     pub price_pxmr: Option<u64>,
     pub expiry: u64,
+    /// The cover: one inline picture under the listing-thumbnail rules.
+    pub thumb: Option<Vec<u8>>,
 }
 
 const MAX_PUB_TITLE_CHARS: usize = 60;
@@ -2229,6 +2258,9 @@ impl PubNotice {
             m.insert(f::PN_PRICE, Value::Uint(p));
         }
         m.insert(f::PN_EXPIRY, Value::Uint(self.expiry));
+        if let Some(th) = &self.thumb {
+            m.insert(f::PN_THUMB, Value::Bytes(th.clone()));
+        }
         Value::Map(m)
     }
 
@@ -2264,8 +2296,20 @@ impl PubNotice {
             ));
         }
         let expiry = r.uint(f::PN_EXPIRY)?;
+        let thumb = r.opt_bytes(f::PN_THUMB, None)?;
+        if let Some(th) = &thumb {
+            if th.is_empty() {
+                return Err(Reject::with_detail(RejectCode::Malformed, "an empty cover is not a picture; omit the key instead"));
+            }
+            if th.len() > MAX_LISTING_THUMB_BYTES {
+                return Err(Reject::with_detail(RejectCode::Malformed, format!("a cover may be at most {MAX_LISTING_THUMB_BYTES} bytes")));
+            }
+            if !avatar_format_is_known(th) {
+                return Err(Reject::with_detail(RejectCode::Malformed, "a cover is PNG, JPEG or WebP"));
+            }
+        }
         r.finish()?;
-        Ok(Self { version, card, title, blurb, price_pxmr, expiry })
+        Ok(Self { version, card, title, blurb, price_pxmr, expiry, thumb })
     }
 }
 

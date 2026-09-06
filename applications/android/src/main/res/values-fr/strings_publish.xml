@@ -32,12 +32,12 @@
     <string name="pub_sub_code_hint">Scanner pour s\u2019abonner. La réclamation inscrit sur la liste — une publication gratuite remet aussitôt le dernier numéro, une payante envoie la facture.</string>
     <string name="market_near_me">Près de moi</string>
     <string name="market_worldwide">Mondial</string>
-    <string name="market_cat_news">actualités</string>
-    <string name="market_cat_serials">feuilletons</string>
-    <string name="market_cat_sound">son</string>
-    <string name="market_cat_software">logiciels</string>
-    <string name="market_cat_art">art</string>
-    <string name="market_cat_other">autres</string>
+    <string name="market_cat_news">Actualités</string>
+    <string name="market_cat_serials">Feuilletons</string>
+    <string name="market_cat_sound">Son</string>
+    <string name="market_cat_software">Logiciels</string>
+    <string name="market_cat_art">Art</string>
+    <string name="market_cat_other">Autres</string>
     <string name="market_empty">Rien sur cette étagère pour l\'instant — les tableaux tournent chaque semaine.</string>
     <string name="market_free">Gratuit</string>
     <string name="market_per_period">%1$s par numéro</string>
@@ -48,7 +48,6 @@
     <string name="market_delist_btn">Retirer</string>
     <string name="market_listed_as">Classé sous %1$s</string>
     <string name="market_list_failed">Impossible de publier — le nœud tourne-t-il ?</string>
-    <string name="market_all_langs">toutes les langues</string>
     <string name="market_what_all">Tout</string>
     <string name="market_what_digital">Numérique</string>
     <string name="market_looking">On regarde l\'étagère %1$s…</string>
@@ -80,4 +79,15 @@
     <string name="press_open_room">Ouvrir la salle de presse</string>
     <string name="market_refreshing">Vérification des changements…</string>
     <string name="pub_period_not_a_name">Une période est un nom, pas un dossier — pas de barres obliques, et pas seulement des points.</string>
+    <string name="market_any_lang">Toutes les langues</string>
+    <string name="market_add_lang">+ langue</string>
+    <string name="market_pick_lang">Quelle langue ?</string>
+    <string name="market_looking_lang">On regarde l\'étagère %1$s en %2$s…</string>
+    <string name="market_looking_all">On regarde toutes les étagères…</string>
+    <string name="market_looking_all_lang">On regarde toutes les étagères en %1$s…</string>
+    <string name="market_cover_desc">Couverture</string>
+    <string name="pub_cover_label">Image de couverture</string>
+    <string name="pub_cover_note">Affichée sur l\'étagère à côté du titre. Réduite pour tenir dans l\'annonce, pour que le parcours reste rapide.</string>
+    <string name="pub_cover_remove">Retirer</string>
+    <string name="pub_cover_failed">Cette image n’a pas pu être utilisée. Essayez-en une autre.</string>
 </resources>

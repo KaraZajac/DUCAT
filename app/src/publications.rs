@@ -4,25 +4,45 @@
 //! `Publications.kt` — both sides: the press and the library.
 //!
 //! Periods are immutable: a period's key opens exactly the bytes shelved
-//! under it, and a mirror never chases a head. The market board (listing a
-//! publication where strangers browse) lives with the boards.
+//! under it, and a mirror never chases a head.
+//!
+//! The market (§16.18.2) is the other half: a publication's notice on a
+//! worldwide topic board, `topic:<category>[.<lang>]`, where strangers
+//! browse. A language post is two stamps — the language board and the
+//! bare category board — each its own tenancy, so one board being full
+//! does not take the notice off the other. The lap re-posts on the same
+//! clock as a listing.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashSet};
 use std::path::{Path, PathBuf};
+use std::sync::Mutex;
 
-use ducat_mobile::contacts::{publication_master_create, publication_open_chunk, publication_period_key, publication_seal_chunk};
-use ducat_mobile::node::{node_dht_create, node_dht_get, node_dht_open, node_dht_set};
+use ducat_mobile::contacts::{pub_listing_decode, pub_listing_encode, publication_master_create, publication_open_chunk, publication_period_key, publication_seal_chunk, PubListingInfo};
+use ducat_mobile::node::{node_dht_create, node_dht_get, node_dht_open, node_dht_set, stand_post, stand_read};
 use ducat_mobile::swarm;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Map, Value};
 
-use crate::contacts::{b64, bump, hex, unb64, BillItem, Contact, StoredMessage};
+use crate::boards::{budget, max_notice_ttl_secs, max_stand_shards, stand_now, stand_shard, stand_stale, Verdict};
+use crate::contacts::{b64, bump, hex, now_ms, unb64, BillItem, Contact, StoredMessage};
+use crate::listings::{REFRESH_SECONDS, RETRY_SECONDS};
 use crate::mailbox::Outgoing;
 use crate::tabs::ORIGIN_PUB;
+use crate::thumbs::THUMB_BYTES;
 use crate::{log, App, Error};
 
 const TAG: &str = "Publications";
 const STORE: &str = "ducat_publications";
+const MARKET_CACHE_STORE: &str = "ducat_market_cache";
+/// The pinned set (§16.18.2): every implementation shards the same way.
+pub const MARKET_CATEGORIES: [&str; 6] = ["news", "serials", "sound", "software", "art", "other"];
+/// A market notice lasts a day, like a listing's; the lap renews it.
+pub const MARKET_TTL_SECS: u64 = 24 * 60 * 60;
+const MARKET_TITLE_CHARS: usize = 60;
+const MARKET_BLURB_CHARS: usize = 280;
+const MARKET_CARDS_KEPT: usize = 8;
+const MARKET_CACHE_TTL_MS: u64 = 6 * 60 * 60 * 1000;
+const MARKET_CACHE_KEEP: usize = 24;
 const MAX_PERIOD_ID_BYTES: usize = 64;
 /// One DHT value minus the seal's overhead.
 pub const SHELF_CHUNK_PLAIN: usize = 32_768 - 40;
@@ -35,6 +55,25 @@ pub const NOTE_NEW_ISSUE: &str = "A new issue";
 
 pub fn is_safe_period_id(id: &str) -> bool {
     !id.is_empty() && id.len() <= MAX_PERIOD_ID_BYTES && id != "." && id != ".." && !id.chars().any(|c| c == '/' || c == '\\' || c == '\0')
+}
+
+pub fn is_market_category(slug: &str) -> bool {
+    MARKET_CATEGORIES.contains(&slug)
+}
+
+/// A BCP-47 primary subtag, lowercased: two or three letters, or nothing.
+/// Anything else would be a board name nobody else reads.
+pub fn market_lang(lang: Option<&str>) -> Option<String> {
+    let l = lang?.trim().to_ascii_lowercase();
+    ((2..=3).contains(&l.len()) && l.chars().all(|c| c.is_ascii_lowercase())).then_some(l)
+}
+
+/// Where a notice lives is its board name, not a field (§16.18.2).
+pub fn market_board(category: &str, lang: Option<&str>) -> String {
+    match lang.filter(|l| !l.is_empty()) {
+        Some(l) => format!("topic:{category}.{l}"),
+        None => format!("topic:{category}"),
+    }
 }
 
 fn random_bytes(n: usize) -> Vec<u8> {
@@ -170,6 +209,21 @@ pub struct Publication {
     pub mkt_at: u64,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mkt_cell: Option<String>,
+    /// The cover (field 300), a JPEG under the board's cap, base64.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mkt_thumb: Option<String>,
+    /// The bare category board's slot when a language narrowed the first.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mkt_bare_board: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mkt_bare_subkey: Option<u32>,
+    #[serde(default)]
+    pub mkt_tried_at: u64,
+    /// The card on the notice now; a claim spends it and the lap re-posts.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mkt_card: Option<String>,
+    #[serde(default)]
+    pub mkt_cards: Vec<String>,
 }
 
 impl Publication {
@@ -179,7 +233,66 @@ impl Publication {
         v.sort_by(|a, b| b.0.cmp(&a.0));
         v
     }
+
+    /// Listed on the market: the choice stands until taken down, whether
+    /// or not a board has taken the notice yet.
+    pub fn on_market(&self) -> bool {
+        self.mkt_cat.is_some()
+    }
+
+    /// The language the notice narrows to; the phone stores "" for none.
+    pub fn market_lang(&self) -> Option<String> {
+        self.mkt_lang.clone().filter(|l| !l.is_empty())
+    }
+
+    pub fn market_placed(&self) -> bool {
+        self.mkt_board.as_deref().map_or(false, |b| !b.is_empty())
+    }
+
+    fn market_still_held(&self, now: u64) -> bool {
+        now.saturating_sub(self.mkt_at) < MARKET_TTL_SECS - 3600
+    }
+
+    /// The cover as it rides the notice, or None when there is none or
+    /// it has somehow grown past the cap the reader refuses at.
+    pub fn cover_bytes(&self) -> Option<Vec<u8>> {
+        let bytes = unb64(self.mkt_thumb.as_deref().filter(|s| !s.is_empty())?)?;
+        if bytes.is_empty() || bytes.len() > THUMB_BYTES {
+            log::warn(TAG, format!("dropping a {}-byte cover: over the board's cap", bytes.len()));
+            return None;
+        }
+        Some(bytes)
+    }
 }
+
+/// A publication as a stranger finds it on a shelf: what the notice
+/// carried, and where it was read from.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct MarketFound {
+    pub category: String,
+    pub board: String,
+    pub subkey: u32,
+    pub title: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub blurb: Option<String>,
+    /// Piconero a period; None is free.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub price_pxmr: Option<u64>,
+    pub card: String,
+    pub poster: String,
+    pub expiry: u64,
+    /// The cover, base64.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub thumb: Option<String>,
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+struct CachedShelf {
+    at: u64,
+    rows: Vec<MarketFound>,
+}
+
+static MARKET_POSTING: Mutex<Option<HashSet<String>>> = Mutex::new(None);
 
 #[derive(Clone, Debug, Serialize)]
 pub struct Due {
@@ -933,6 +1046,415 @@ impl App {
         Ok(h.uri)
     }
 
+    // ----- the market (§16.18.2) ------------------------------------------------------
+
+    /// The cover: any picture, shrunk to the board's ten kilobytes.
+    pub fn set_publication_cover(&self, pub_id: &str, picture: &[u8]) -> Result<(), Error> {
+        let Some(t) = crate::thumbs::thumbnail(picture, THUMB_BYTES) else {
+            return Err(Error::Refused("that picture could not be shrunk to a cover".into()));
+        };
+        let encoded = b64(&t);
+        if !self.edit_pub(pub_id, move |p| p.mkt_thumb = Some(encoded))? {
+            return Err(Error::Refused("no such publication".into()));
+        }
+        Ok(())
+    }
+
+    pub fn remove_publication_cover(&self, pub_id: &str) -> Result<(), Error> {
+        self.edit_pub(pub_id, |p| p.mkt_thumb = None).map(|_| ())
+    }
+
+    /// List a publication worldwide: the choice is kept first, so a board
+    /// that is full today is tried again by the lap, then the boards are
+    /// tried now. True when at least one board took the notice.
+    pub fn list_on_market(&self, pub_id: &str, category: &str, lang: Option<&str>, blurb: Option<&str>) -> Result<bool, Error> {
+        if !is_market_category(category) {
+            return Err(Error::Refused(format!("'{category}' is not one of the market's categories")));
+        }
+        if lang.map_or(false, |l| !l.trim().is_empty()) && market_lang(lang).is_none() {
+            return Err(Error::Refused("a language is a two- or three-letter code, like 'de'".into()));
+        }
+        let lang = market_lang(lang);
+        let blurb: Option<String> = blurb
+            .map(|b| ducat_mobile::contacts::clean_display_text(b.trim().to_string()))
+            .filter(|b| !b.is_empty())
+            .map(|b| b.chars().take(MARKET_BLURB_CHARS).collect());
+        let Some(prior) = self.publication(pub_id) else {
+            return Err(Error::Refused("no such publication".into()));
+        };
+        // A different board name is a different tenancy: the old slots are
+        // cleared while they are still ours, not left to confuse a reader
+        // for the rest of the day.
+        let moved = prior.on_market() && (prior.mkt_cat.as_deref() != Some(category) || prior.market_lang() != lang);
+        if moved {
+            self.clear_market_slots(&prior);
+        }
+        let cat = category.to_string();
+        self.edit_pub(pub_id, move |p| {
+            if moved {
+                p.mkt_board = None;
+                p.mkt_subkey = None;
+                p.mkt_bare_board = None;
+                p.mkt_bare_subkey = None;
+                p.mkt_at = 0;
+            }
+            p.mkt_cat = Some(cat);
+            p.mkt_lang = lang;
+            p.mkt_blurb = blurb;
+            p.mkt_tried_at = 0;
+        })?;
+        self.post_market(pub_id)
+    }
+
+    /// Post, or re-post, a listed publication's notice. One posting at a
+    /// time per publication: the lap and a button can both ask.
+    pub fn post_market(&self, pub_id: &str) -> Result<bool, Error> {
+        {
+            let mut g = MARKET_POSTING.lock().unwrap_or_else(|e| e.into_inner());
+            if !g.get_or_insert_with(HashSet::new).insert(pub_id.to_string()) {
+                return Ok(false);
+            }
+        }
+        let r = self.post_market_locked(pub_id);
+        if let Some(set) = MARKET_POSTING.lock().unwrap_or_else(|e| e.into_inner()).as_mut() {
+            set.remove(pub_id);
+        }
+        r
+    }
+
+    fn post_market_locked(&self, pub_id: &str) -> Result<bool, Error> {
+        let now = App::now();
+        self.edit_pub(pub_id, |p| p.mkt_tried_at = now)?;
+        let Some(p) = self.publication(pub_id) else { return Ok(false) };
+        let Some(cat) = p.mkt_cat.clone() else { return Ok(false) };
+        let lang = p.market_lang();
+        let worn = self.worn()?;
+        // Each posting mints a fresh claim-once card bound to the
+        // publication, so a claim from any generation of the notice still
+        // enrolls (§16.20's bind).
+        let card = self.issue_card(Some(&p.title), MARKET_TTL_SECS, "publish", Some(&worn))?;
+        self.bind_card(pub_id, &card.inbox_key)?;
+        let persona = match self.persona_secret(&worn)? {
+            Some(s) => s,
+            None => self.primary_secret()?,
+        };
+        let beacon = self.stamp_now().ok_or_else(|| Error::Refused("no recent Monero block to stamp a notice against — the wallet's node has not answered yet".into()))?;
+        let title: String = p.title.chars().take(MARKET_TITLE_CHARS).collect();
+        let cover = p.cover_bytes();
+        let price = Some(p.price).filter(|x| *x > 0);
+        // The notice is rebuilt per seal: the bridge's record does not clone.
+        let seal = |board: &str, slot: u32| -> Result<Vec<u8>, Error> {
+            let info = PubListingInfo {
+                card: card.uri.clone(),
+                title: title.clone(),
+                blurb: p.mkt_blurb.clone(),
+                price_pxmr: price,
+                expiry: now + MARKET_TTL_SECS,
+                thumb: cover.clone(),
+                poster: String::new(),
+                beacon_height: 0,
+                beacon_hash: String::new(),
+            };
+            Ok(pub_listing_encode(info, persona.clone(), format!("market:{pub_id}"), board.to_string(), slot, beacon.height, beacon.hash_hex.clone())?)
+        };
+        let tip = self.beacon_tip();
+        let held = p.market_still_held(now);
+        let kept = |board: &Option<String>, slot: Option<u32>| board.clone().filter(|b| !b.is_empty() && !stand_stale(b) && held).zip(slot);
+        // The chosen board first, then the bare category board when a
+        // language narrowed the first: two stamps, paid honestly, and one
+        // failing does not undo the other.
+        let main = self.take_market_slot(&market_board(&cat, lang.as_deref()), kept(&p.mkt_board, p.mkt_subkey), &seal, tip, now)?;
+        let bare = match lang {
+            Some(_) => self.take_market_slot(&market_board(&cat, None), kept(&p.mkt_bare_board, p.mkt_bare_subkey), &seal, tip, now)?,
+            None => None,
+        };
+        let placed = main.is_some() || bare.is_some();
+        let uri = card.uri.clone();
+        let (main_c, bare_c, lang_c) = (main.clone(), bare.clone(), lang.clone());
+        let updated = self.edit_pub(pub_id, move |p| {
+            p.mkt_card = Some(uri.clone());
+            p.mkt_cards.push(uri);
+            while p.mkt_cards.len() > MARKET_CARDS_KEPT {
+                p.mkt_cards.remove(0);
+            }
+            if let Some((b, s)) = main_c {
+                p.mkt_board = Some(b);
+                p.mkt_subkey = Some(s);
+            }
+            match (lang_c.is_some(), bare_c) {
+                (true, Some((b, s))) => {
+                    p.mkt_bare_board = Some(b);
+                    p.mkt_bare_subkey = Some(s);
+                }
+                (true, None) => {}
+                (false, _) => {
+                    p.mkt_bare_board = None;
+                    p.mkt_bare_subkey = None;
+                }
+            }
+            if placed {
+                p.mkt_at = now;
+            }
+        })?;
+        if !updated {
+            for (b, s) in main.iter().chain(bare.iter()) {
+                let _ = stand_post(b.clone(), *s, Vec::new());
+            }
+            log::info(TAG, format!("publication {pub_id} was removed while posting; slot(s) cleared"));
+            return Ok(false);
+        }
+        match (&main, &bare) {
+            (Some((b, s)), None) => log::info(TAG, format!("listed '{}' on {b} slot {s}", p.title)),
+            (Some((b, s)), Some((bb, bs))) => log::info(TAG, format!("listed '{}' on {b} slot {s}, and on {bb} slot {bs}", p.title)),
+            (None, Some((bb, bs))) => log::warn(TAG, format!("listed '{}' on {bb} slot {bs} only; the language board is full", p.title)),
+            (None, None) => log::warn(TAG, format!("'{}': no market slot this week", p.title)),
+        }
+        Ok(placed)
+    }
+
+    /// One board's tenancy: the slot already held is written again, else
+    /// the ladder is climbed for a free one. None when every shard is full.
+    fn take_market_slot(&self, base: &str, existing: Option<(String, u32)>, seal: &dyn Fn(&str, u32) -> Result<Vec<u8>, Error>, tip: u64, now: u64) -> Result<Option<(String, u32)>, Error> {
+        if let Some((board, slot)) = existing {
+            if stand_post(board.clone(), slot, seal(&board, slot)?).is_ok() {
+                return Ok(Some((board, slot)));
+            }
+        }
+        let this_week = stand_now(base);
+        for shard in 0..max_stand_shards() {
+            let Some(name) = stand_shard(&this_week, shard) else { continue };
+            let taken: HashSet<u32> = stand_read(name.clone())
+                .unwrap_or_default()
+                .into_iter()
+                .filter_map(|n| pub_listing_decode(n.data, name.clone(), n.subkey, tip).ok().filter(|d| d.expiry > now).map(|_| n.subkey))
+                .collect();
+            for free in 0..8u32 {
+                if taken.contains(&free) {
+                    continue;
+                }
+                if stand_post(name.clone(), free, seal(&name, free)?).is_ok() {
+                    return Ok(Some((name, free)));
+                }
+            }
+        }
+        log::warn(TAG, format!("every shard of {base} is full"));
+        Ok(None)
+    }
+
+    fn clear_market_slots(&self, p: &Publication) {
+        if !p.market_still_held(App::now()) {
+            return;
+        }
+        for (board, slot) in [(p.mkt_board.clone(), p.mkt_subkey), (p.mkt_bare_board.clone(), p.mkt_bare_subkey)] {
+            if let (Some(b), Some(s)) = (board.filter(|b| !b.is_empty() && !stand_stale(b)), slot) {
+                if let Err(e) = stand_post(b, s, Vec::new()) {
+                    log::warn(TAG, format!("clearing a market slot: {e:?}"));
+                }
+            }
+        }
+    }
+
+    /// Take a publication off the market: the slots are cleared while they
+    /// are still ours, and the re-posting that kept them alive stops. The
+    /// category, language, blurb and cover stay as the remembered choice.
+    pub fn delist_from_market(&self, pub_id: &str) -> Result<(), Error> {
+        let Some(p) = self.publication(pub_id) else { return Ok(()) };
+        self.clear_market_slots(&p);
+        self.edit_pub(pub_id, |p| {
+            p.mkt_cat = None;
+            p.mkt_board = None;
+            p.mkt_subkey = None;
+            p.mkt_bare_board = None;
+            p.mkt_bare_subkey = None;
+            p.mkt_at = 0;
+            p.mkt_tried_at = 0;
+            p.mkt_card = None;
+        })?;
+        Ok(())
+    }
+
+    /// Publications whose notice is due again: a placed one every six hours
+    /// or when its week ended, a board still missing every half hour, and
+    /// one whose card was claimed — that card is spent, so the notice
+    /// needs a fresh one before the next reader.
+    pub fn market_needing_refresh(&self) -> Vec<(String, Publication)> {
+        let now = App::now();
+        let answered: HashSet<String> = self.issued_cards().into_iter().filter(|c| c.purpose == "publish" && c.answered_by.is_some()).map(|c| c.uri).collect();
+        self.publications()
+            .into_iter()
+            .filter(|(_, p)| {
+                if !p.on_market() {
+                    return false;
+                }
+                let retry = now.saturating_sub(p.mkt_tried_at) >= RETRY_SECONDS;
+                let main_due = match p.mkt_board.as_deref().filter(|b| !b.is_empty()) {
+                    None => retry,
+                    Some(b) => now.saturating_sub(p.mkt_at) >= REFRESH_SECONDS || stand_stale(b),
+                };
+                let bare_due = p.market_lang().is_some()
+                    && match p.mkt_bare_board.as_deref().filter(|b| !b.is_empty()) {
+                        None => retry,
+                        Some(b) => stand_stale(b),
+                    };
+                let spent = p.mkt_card.as_deref().map_or(false, |c| answered.contains(c)) && retry;
+                main_due || bare_due || spent
+            })
+            .collect()
+    }
+
+    /// The market's turn on the lap.
+    pub fn market_lap(&self) {
+        for (id, p) in self.market_needing_refresh() {
+            match self.post_market(&id) {
+                Ok(true) => {}
+                Ok(false) => log::info(TAG, format!("{}: no market slot this time", p.title)),
+                Err(e) => log::warn(TAG, format!("re-list {}: {e}", p.title)),
+            }
+        }
+    }
+
+    // ----- the shelf a stranger browses ----------------------------------------------
+
+    fn market_cache_key(category: &str, lang: Option<&str>) -> String {
+        format!("w|{category}|{}", lang.unwrap_or("*"))
+    }
+
+    fn cached_shelf(&self, category: &str, lang: Option<&str>) -> Option<Vec<MarketFound>> {
+        let all: BTreeMap<String, CachedShelf> = self.store(MARKET_CACHE_STORE).get("shelves").unwrap_or_default();
+        let e = all.get(&App::market_cache_key(category, lang))?;
+        if now_ms().saturating_sub(e.at) >= MARKET_CACHE_TTL_MS {
+            return None;
+        }
+        let now = App::now();
+        Some(e.rows.iter().filter(|r| r.expiry > now).cloned().collect())
+    }
+
+    fn remember_shelf(&self, category: &str, lang: Option<&str>, rows: &[MarketFound]) {
+        let _ = self.store(MARKET_CACHE_STORE).update(|m| {
+            let mut all: BTreeMap<String, CachedShelf> = m.get("shelves").cloned().and_then(crate::store::value_as).unwrap_or_default();
+            all.insert(App::market_cache_key(category, lang), CachedShelf { at: now_ms(), rows: rows.to_vec() });
+            if all.len() > MARKET_CACHE_KEEP {
+                let mut by_age: Vec<(String, u64)> = all.iter().map(|(k, v)| (k.clone(), v.at)).collect();
+                by_age.sort_by(|a, b| a.1.cmp(&b.1));
+                for (k, _) in by_age.into_iter().take(all.len() - MARKET_CACHE_KEEP) {
+                    all.remove(&k);
+                }
+            }
+            m.insert("shelves".into(), serde_json::to_value(&all).unwrap_or(Value::Null));
+        });
+    }
+
+    /// One shard: the readable, confirmed, unexpired notices and how many
+    /// slots held anything at all. None when the board could not be read.
+    fn read_market_shard(&self, category: &str, name: &str) -> Option<(Vec<MarketFound>, usize)> {
+        let now = App::now();
+        let ttl_cap = max_notice_ttl_secs();
+        let raw = stand_read(name.to_string()).ok()?;
+        let slots = raw.len();
+        let tip = self.beacon_tip();
+        let mut budget = budget();
+        let rows = raw
+            .into_iter()
+            .filter_map(|n| pub_listing_decode(n.data, name.to_string(), n.subkey, tip).ok().map(|d| (n.subkey, d)))
+            .filter(|(_, d)| tip == 0 || self.confirm_beacon(d.beacon_height, &d.beacon_hash, &mut budget) == Verdict::Confirmed)
+            .filter(|(_, d)| d.expiry > now && d.expiry <= now + ttl_cap)
+            .map(|(subkey, d)| MarketFound {
+                category: category.to_string(),
+                board: name.to_string(),
+                subkey,
+                title: d.title,
+                blurb: d.blurb,
+                price_pxmr: d.price_pxmr,
+                card: d.card,
+                poster: d.poster,
+                expiry: d.expiry,
+                thumb: d.thumb.as_deref().map(b64),
+            })
+            .collect();
+        Some((rows, slots))
+    }
+
+    /// One category's shelf, one row per poster (a publisher re-posts;
+    /// readers want the newest). Shards are read from the bottom until an
+    /// empty one: writers fill the lowest free slot, and an empty board
+    /// costs a reader a flat twenty-one seconds. None when nothing could
+    /// be read at all — that is not an empty shelf.
+    fn read_shelf(&self, category: &str, lang: Option<&str>) -> Option<Vec<MarketFound>> {
+        let base = stand_now(&market_board(category, lang));
+        let mut newest: BTreeMap<String, MarketFound> = BTreeMap::new();
+        let mut read_any = false;
+        for shard in 0..max_stand_shards() {
+            let Some(name) = stand_shard(&base, shard) else { continue };
+            let Some((rows, slots)) = self.read_market_shard(category, &name) else { break };
+            read_any = true;
+            for r in rows {
+                if newest.get(&r.poster).map_or(true, |prev| prev.expiry < r.expiry) {
+                    newest.insert(r.poster.clone(), r);
+                }
+            }
+            if slots == 0 {
+                break;
+            }
+        }
+        read_any.then(|| newest.into_values().collect())
+    }
+
+    fn market_cats(category: Option<&str>) -> Vec<&str> {
+        match category {
+            Some(c) => vec![c],
+            None => MARKET_CATEGORIES.to_vec(),
+        }
+    }
+
+    fn newest_first(rows: &mut [MarketFound]) {
+        rows.sort_by(|a, b| b.expiry.cmp(&a.expiry).then_with(|| a.title.cmp(&b.title)).then_with(|| a.poster.cmp(&b.poster)));
+    }
+
+    /// What the cache remembers of a shelf — painted while the read runs.
+    /// `None` is every category side by side.
+    pub fn browse_market_cached(&self, category: Option<&str>, lang: Option<&str>) -> Vec<MarketFound> {
+        let lang = market_lang(lang);
+        let mut rows: Vec<MarketFound> = App::market_cats(category).into_iter().flat_map(|c| self.cached_shelf(c, lang.as_deref()).unwrap_or_default()).collect();
+        App::newest_first(&mut rows);
+        rows
+    }
+
+    /// Browse one category, or all six at once — §16.18's ring read with
+    /// categories for cells — merged newest first, one row per poster on
+    /// each board. A shelf that answered is remembered; one that could not
+    /// be asked leaves yesterday's rows alone.
+    pub fn browse_market(&self, category: Option<&str>, lang: Option<&str>) -> Vec<MarketFound> {
+        let started = std::time::Instant::now();
+        let lang = market_lang(lang);
+        let cats = App::market_cats(category);
+        let attached = self.node_status().public_internet_ready;
+        let results: Mutex<Vec<(&str, Vec<MarketFound>)>> = Mutex::new(Vec::new());
+        std::thread::scope(|s| {
+            for cat in cats.iter().copied() {
+                let results = &results;
+                let lang = lang.as_deref();
+                let app = self;
+                s.spawn(move || {
+                    if let Some(rows) = app.read_shelf(cat, lang) {
+                        results.lock().unwrap_or_else(|e| e.into_inner()).push((cat, rows));
+                    }
+                });
+            }
+        });
+        let got = results.into_inner().unwrap_or_else(|e| e.into_inner());
+        let replied = got.len();
+        let mut rows = Vec::new();
+        for (cat, found) in got {
+            if !found.is_empty() || attached {
+                self.remember_shelf(cat, lang.as_deref(), &found);
+            }
+            rows.extend(found);
+        }
+        App::newest_first(&mut rows);
+        log::info(TAG, format!("market {}: {} publication(s) from {replied} shelf(s) in {}s", category.unwrap_or("everything"), rows.len(), started.elapsed().as_secs()));
+        rows
+    }
+
     // ----- asks ------------------------------------------------------------------------
 
     fn wanted_target(&self, reader_hex: &str, period: &str) -> Option<String> {
@@ -1027,6 +1549,86 @@ mod tests {
         assert!(!is_safe_period_id(".."));
         assert!(!is_safe_period_id("a/b"));
         assert!(!is_safe_period_id(&"x".repeat(65)));
+    }
+
+    #[test]
+    fn a_market_board_is_named_by_category_and_language() {
+        assert_eq!(market_board("news", None), "topic:news");
+        assert_eq!(market_board("news", Some("de")), "topic:news.de");
+        assert_eq!(market_board("news", Some("")), "topic:news");
+        assert_eq!(market_lang(Some(" DE ")).as_deref(), Some("de"));
+        assert_eq!(market_lang(Some("")), None);
+        assert_eq!(market_lang(Some("de-AT")), None);
+        assert_eq!(market_lang(None), None);
+        assert!(is_market_category("software"));
+        assert!(!is_market_category("fonts"));
+    }
+
+    #[test]
+    fn a_shelf_is_remembered_newest_first_and_forgets_the_expired() {
+        let dir = std::env::temp_dir().join(format!("ducat-market-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        let app = App::open(&dir).unwrap();
+        let now = App::now();
+        let row = |title: &str, poster: &str, expiry: u64| MarketFound {
+            category: "news".into(),
+            board: "topic:news@1-0".into(),
+            subkey: 0,
+            title: title.into(),
+            blurb: None,
+            price_pxmr: None,
+            card: format!("ducat:card/{title}"),
+            poster: poster.into(),
+            expiry,
+            thumb: None,
+        };
+        app.remember_shelf("news", None, &[row("Older", "a", now + 100), row("Newer", "b", now + 200), row("Gone", "c", now - 1)]);
+        app.remember_shelf("art", Some("de"), &[row("Kunst", "d", now + 150)]);
+        let one = app.browse_market_cached(Some("news"), None);
+        assert_eq!(one.iter().map(|r| r.title.as_str()).collect::<Vec<_>>(), vec!["Newer", "Older"]);
+        // The language board is its own shelf; "everything" reads the bare ones.
+        assert!(app.browse_market_cached(Some("art"), None).is_empty());
+        assert_eq!(app.browse_market_cached(None, Some("de")).len(), 1);
+        assert_eq!(app.browse_market_cached(None, None).len(), 2);
+    }
+
+    #[test]
+    fn listing_keeps_the_choice_and_the_cover_fits_the_board() {
+        let dir = std::env::temp_dir().join(format!("ducat-market-list-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        let app = App::open(&dir).unwrap();
+        let id = app.create_publication("The Gazette").unwrap();
+        assert!(app.list_on_market(&id, "fonts", None, None).is_err());
+        assert!(app.list_on_market(&id, "news", Some("de-AT"), None).is_err());
+        // No node: the choice is kept, the boards are not reached.
+        assert!(app.list_on_market(&id, "news", Some("de"), Some("  A paper.  ")).is_err());
+        let p = app.publication(&id).unwrap();
+        assert!(p.on_market());
+        assert_eq!(p.mkt_cat.as_deref(), Some("news"));
+        assert_eq!(p.market_lang().as_deref(), Some("de"));
+        assert_eq!(p.mkt_blurb.as_deref(), Some("A paper."));
+        assert!(!p.market_placed());
+        // Due again on the retry clock, not the refresh one.
+        assert_eq!(app.market_needing_refresh().len(), 0);
+        app.edit_pub(&id, |p| p.mkt_tried_at = 0).unwrap();
+        assert_eq!(app.market_needing_refresh().len(), 1);
+        let mut img = image::RgbImage::new(900, 600);
+        for (x, y, px) in img.enumerate_pixels_mut() {
+            *px = image::Rgb([(x % 256) as u8, (y % 256) as u8, 128]);
+        }
+        let mut png = Vec::new();
+        image::DynamicImage::ImageRgb8(img).write_to(&mut std::io::Cursor::new(&mut png), image::ImageFormat::Png).unwrap();
+        app.set_publication_cover(&id, &png).unwrap();
+        let cover = app.publication(&id).unwrap().cover_bytes().expect("a cover");
+        assert!(cover.len() <= THUMB_BYTES);
+        assert!(app.set_publication_cover(&id, b"not a picture").is_err());
+        app.remove_publication_cover(&id).unwrap();
+        assert!(app.publication(&id).unwrap().cover_bytes().is_none());
+        app.delist_from_market(&id).unwrap();
+        let p = app.publication(&id).unwrap();
+        assert!(!p.on_market());
+        assert_eq!(p.mkt_blurb.as_deref(), Some("A paper."));
+        assert!(app.market_needing_refresh().is_empty());
     }
 
     #[test]

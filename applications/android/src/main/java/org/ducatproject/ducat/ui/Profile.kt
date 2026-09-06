@@ -19,6 +19,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.Image
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import org.ducatproject.ducat.SafeImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.Contact
@@ -154,6 +159,41 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
                             modifier = Modifier.width(72.dp),
                         )
                         Text(value, style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+            }
+
+            // Their car (§15.12), when they drive: the picture and the plate
+            // a rider scans the curb for, kept on the profile so it can be
+            // looked at before the next hail — and, like everything above,
+            // their claim.
+            val car = listOfNotNull(c.carColor, c.carModel).joinToString(" ").ifBlank { null }
+            if (c.carPhoto != null || car != null || c.plate != null) {
+                Spacer(Modifier.height(18.dp))
+                Text(stringResource(R.string.profile_their_car), style = MaterialTheme.typography.titleSmall)
+                Spacer(Modifier.height(8.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    val bmp = remember(c.carPhoto?.size, c.carPhoto?.contentHashCode()) {
+                        c.carPhoto?.let { SafeImage.fromBytes(it, SafeImage.AVATAR_PIXELS) }
+                    }
+                    if (bmp != null) {
+                        Image(
+                            bmp.asImageBitmap(),
+                            stringResource(R.string.profile_car_photo),
+                            Modifier.size(width = 120.dp, height = 76.dp)
+                                .clip(MaterialTheme.shapes.small),
+                            contentScale = ContentScale.Crop,
+                        )
+                        Spacer(Modifier.width(12.dp))
+                    }
+                    Column {
+                        car?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+                        c.plate?.let {
+                            Text(
+                                it, style = MaterialTheme.typography.bodyMedium,
+                                fontFamily = FontFamily.Monospace,
+                            )
+                        }
                     }
                 }
             }

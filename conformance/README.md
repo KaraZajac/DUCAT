@@ -94,6 +94,46 @@ accepting a value type extends the format; later refusing one breaks every peer
 already relying on it.** Strict first is the only reversible choice. §18.1 now
 says so, the reference rejects, and two vectors pin it.
 
+## What comparing names found
+
+The runner compared reject *codes*, and the contact family carries none: every
+rejecting case in `contact.json` names its reject as `"reject": "MALFORMED"`
+with no `reject_code` beside it, and a missing code was read as "whatever we
+produced". For those cases **any refusal counted as agreement** — a reader that
+refused a valid field as unknown passed the gate written to catch it. This one
+did: `purpose` (§16.9, field 217) was absent from `parse_details`, and no
+vector carried the field, so `UNKNOWN_FIELD` on every handshake that said what
+it was for went unnoticed through 401/401. The runner now checks the name in
+whichever spelling a case uses, reports a case that wants a refusal without
+naming one instead of guessing, and four cases pin field 217 at both edges.
+
+### 4. A lifted notice is `BAD_SIG`, and the reference says `MALFORMED`
+
+Comparing names surfaced four disagreements the code comparison had hidden:
+`listing_sealed_wrong_slot`, `listing_sealed_beacon_hash_swapped`,
+`listing_sealed_beacon_height_moved`, `publication_sealed_wrong_board`. The
+vectors say `MALFORMED`; this implementation says `BadSig`.
+
+§16.18.1 puts the board, the slot and the beacon *inside the signature* — "a
+valid notice cannot be lifted onto another one" — so a notice offered from
+another slot, or restamped against another block, is a signature that does not
+verify. §18.5 names that `BAD_SIG` (1) and reserves `MALFORMED` (10) for
+"non-canonical encoding"; §18.9(2) lists *bad signature* and *non-canonical
+encoding* as distinct mutations with distinct specified codes. **The reference
+is the side that is wrong**: `board::open` in `core/src/board.rs` maps a failed
+`verify_raw` to `Malformed` ("this notice was not signed for this slot"), where
+the reference's own `position::open` says `BadSig` for the same failure.
+
+The generator now reads the code off `board::open` instead of writing it down,
+so the vectors record what the reference does and this runner holds it to the
+document: those four stay disagreements until `board::open` says `BadSig`, and
+one regeneration then turns them into `BADSIG`. Not silenced on purpose — an
+expected-failure list would be the blind spot this section is about, with a
+name.
+
+One thing this did *not* settle: §18.5 names no code for a stamp that does not
+show its work. Both implementations say `MALFORMED`, and no vector pins it.
+
 ## Friction that was fixed rather than documented (0.46)
 
 The first pass hit four obstacles that were not protocol bugs — they were the

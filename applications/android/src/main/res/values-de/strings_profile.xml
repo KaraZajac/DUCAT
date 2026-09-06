@@ -56,4 +56,6 @@
     <string name="profile_sign_pending_all">Sie bitten um die Rückgabe der Kaution. Ihre Unterschrift gibt sie frei.</string>
     <string name="profile_sign_release">Freigabe unterschreiben</string>
     <string name="profile_copied">Kopiert</string>
+    <string name="profile_their_car">Ihr Auto</string>
+    <string name="profile_car_photo">Bild von ihrem Auto</string>
 </resources>

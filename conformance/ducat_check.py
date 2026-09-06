@@ -525,6 +525,41 @@ class Results:
         self.disagreements.append((category, name, why, detail))
 
 
+def _norm(name):
+    """`BAD_SIG`, `BADSIG`, `BadSig`: one name. §18.5 spells it with the
+    underscore, the contact family upper-cases the enum's Debug form without
+    one, and the older families carry the enum's own casing."""
+    return str(name).replace("_", "").upper()
+
+
+def reject_mismatch(name, code, expect):
+    """Why our refusal `name`(`code`) is not the one the case asked for, or
+    None when it is.
+
+    A case names its reject in one of two spellings: `reject_name` plus
+    `reject_code` (the older families), or `reject` alone — the NAME, with no
+    code beside it (the contact family). This runner compared codes only, and
+    read a missing `reject_code` as "whatever we produced": for every
+    `reject`-only case *any* refusal counted as agreement, so a reader that
+    refused a valid field as unknown passed the one gate that exists to catch
+    it. Now every spelling the case carries is checked, and a case that wants
+    a refusal without naming one is reported rather than guessed at — an
+    expectation with no answer in it is not one two implementations can
+    disagree about.
+    """
+    want_name = expect.get("reject", expect.get("reject_name"))
+    want_code = expect.get("reject_code")
+    if want_name is None and want_code is None:
+        return (f"we said {name}({code}); the vector expects a refusal "
+                f"but does not say which — refusing to guess")
+    want = f"{want_name}" if want_code is None else f"{want_name}({want_code})"
+    if want_name is not None and _norm(want_name) != _norm(name):
+        return f"we said {name}({code}), vector says {want}"
+    if want_code is not None and want_code != code:
+        return f"we said {name}({code}), vector says {want}"
+    return None
+
+
 def expect_reject(r, cat, case, fn):
     """Run fn; compare against the case's expectation."""
     want_ok = case["expect"].get("ok", True)
@@ -534,10 +569,8 @@ def expect_reject(r, cat, case, fn):
         if want_ok:
             r.bad(cat, case["name"], case.get("why", ""),
                   f"we rejected ({ex.name}) where the vector expects success")
-        elif ex.code != case["expect"].get("reject_code", ex.code):
-            r.bad(cat, case["name"], case.get("why", ""),
-                  f"we said {ex.name}({ex.code}), vector says "
-                  f"{case['expect'].get('reject_name')}({case['expect'].get('reject_code')})")
+        elif (why := reject_mismatch(ex.name, ex.code, case["expect"])):
+            r.bad(cat, case["name"], case.get("why", ""), why)
         else:
             r.ok()
         return None
@@ -675,10 +708,8 @@ def check_step(r, c, state, mode, role, ev, expect):
                   f"{name} from {state}: we rejected ({ex.detail}), "
                   f"vector expects {expect.get('next')}")
             return None
-        if ex.code != expect["reject_code"]:
-            r.bad("state", c["name"], c.get("why", ""),
-                  f"{name} from {state}: we said {ex.name}({ex.code}), "
-                  f"vector says {expect['reject_name']}({expect['reject_code']})")
+        if (why := reject_mismatch(ex.name, ex.code, expect)):
+            r.bad("state", c["name"], c.get("why", ""), f"{name} from {state}: {why}")
             return None
         return "__rejected__"
     if not want_ok:
@@ -862,9 +893,9 @@ def run_escrow_ceremony(cases, r):
                       f"we {'accepted' if err is None else 'refused'}, vector says otherwise")
                 ok = False
                 break
-            if err and CODES[err[0]] != step["expect"]["reject_code"]:
+            if err and (why := reject_mismatch(err[0], CODES[err[0]], step["expect"])):
                 r.bad("contract", c["name"], c.get("why", ""),
-                      f"we said {err[0]}, vector says {step['expect']['reject_name']}")
+                      f"round {step['round']} from {step['from_index']}: {why}")
                 ok = False
                 break
         if ok:
@@ -1072,6 +1103,9 @@ HN_POSTER, HN_SIG, HN_POW = 245, 246, 247
 # §16.18.2: the publication listing, and its own stamp namespace.
 PN_VERSION, PN_CARD, PN_TITLE, PN_BLURB, PN_PRICE, PN_EXPIRY = 265, 266, 267, 268, 269, 270
 PN_POSTER, PN_SIG, PN_POW, PN_BEACON_HEIGHT, PN_BEACON_HASH = 271, 272, 273, 274, 275
+# §16.18.2's cover: one inline picture under the listing thumbnail's rules.
+# Assigned past the family's probe (276), never onto it.
+PN_THUMB = 300
 # §16.18.1's freshness beacon: the Monero block a stamp was mined against.
 # Without it every other field in the preimage is either the poster's own or a
 # floor division of the clock, so the whole of next year could be mined this
@@ -1099,6 +1133,13 @@ DET_PERSONA, DET_OUTBOX, DET_BUNDLE, DET_NAME = 172, 173, 174, 175
 DET_PAYTO = 182
 DET_AVATAR, DET_EMAIL, DET_PHONE, DET_SIGNAL, DET_PRONOUNS = 187, 188, 189, 190, 191
 DET_CAR_MODEL, DET_CAR_COLOR, DET_PLATE = 210, 211, 212
+# §16.9: what the handshake is for — `profile`, `sale`, `hail`, … — so the
+# claimant can scope what it reveals in reply. Text, at most 16 characters.
+DET_PURPOSE = 217
+MAX_PURPOSE_CHARS = 16
+# §16.9: the car's picture, under the listing thumbnail's rules (10 KiB), not
+# the avatar's — it rides a record that may already carry an avatar.
+DET_CAR_PHOTO = 301
 MAX_CAR_MODEL_CHARS, MAX_CAR_COLOR_CHARS, MAX_PLATE_CHARS = 24, 16, 12
 MAX_AVATAR_BYTES = 12 * 1024
 MAX_EMAIL_CHARS, MAX_PHONE_DIGITS, MAX_SIGNAL_CHARS = 254, 15, 48
@@ -1145,6 +1186,22 @@ def _signal_is_plausible(s):
 def _avatar_format_is_known(b):
     return (b.startswith(b"\x89PNG\r\n\x1a\n") or b.startswith(b"\xff\xd8\xff")
             or (len(b) > 12 and b[0:4] == b"RIFF" and b[8:12] == b"WEBP"))
+
+
+def _check_inline_picture(pic, what):
+    """§16.18.3's inline-picture rule, which the publication's cover (§16.18.2,
+    PN_THUMB) and the car's picture (§16.9, DET_CAR_PHOTO) take verbatim:
+    refused empty, refused past 10 KiB, and PNG, JPEG or WebP by magic number.
+    Refused rather than trimmed at both edges, because the bytes are what is
+    signed over and what a decoder on somebody else's phone is handed."""
+    if not pic:
+        raise Reject("Malformed", f"an empty {what} is not a picture; omit the key instead")
+    if len(pic) > MAX_LISTING_THUMB_BYTES:
+        raise Reject("Malformed", f"a {what} may be at most {MAX_LISTING_THUMB_BYTES} bytes")
+    if not _avatar_format_is_known(pic):
+        raise Reject("Malformed", f"a {what} is PNG, JPEG or WebP")
+
+
 HEAD_NEXT = 176
 
 
@@ -1258,6 +1315,14 @@ def parse_details(buf):
         "car_model": _take_text(b, DET_CAR_MODEL, MAX_CAR_MODEL_CHARS, "car model", False),
         "car_color": _take_text(b, DET_CAR_COLOR, MAX_CAR_COLOR_CHARS, "car colour", False),
         "plate": _take_text(b, DET_PLATE, MAX_PLATE_CHARS, "plate", False),
+        # §16.9's picture of the car: the listing thumbnail's rules, checked
+        # below beside the avatar's.
+        "car_photo": _opt(b, DET_CAR_PHOTO, "bytes"),
+        # §16.9's purpose (field 217). Presentation-scoping only — it carries
+        # no authority — but it is a field of the record, and a strict reader
+        # that does not know it refuses every handshake that says what it is
+        # for. This one did, and no vector had carried the field to notice.
+        "purpose": _take_text(b, DET_PURPOSE, MAX_PURPOSE_CHARS, "purpose", False),
     }
     _finish(b)
     if out["avatar"] is not None:
@@ -1268,6 +1333,8 @@ def parse_details(buf):
             raise Reject("Malformed", f"an avatar may be at most {MAX_AVATAR_BYTES} bytes")
         if not _avatar_format_is_known(a):
             raise Reject("Malformed", "an avatar must be PNG, JPEG or WebP")
+    if out["car_photo"] is not None:
+        _check_inline_picture(out["car_photo"], "car picture")
     if out["email"] is not None and not _email_is_plausible(out["email"]):
         raise Reject("Malformed", "that is not the shape of an email address")
     if out["phone"] is not None and not _phone_is_plausible(out["phone"]):
@@ -1519,6 +1586,11 @@ def parse_pub_listing(buf):
     if out["price"] == 0:
         raise Reject("Malformed", "free is spelled by omission")
     out["expiry"] = _take(b, PN_EXPIRY, "uint", "expiry")
+    # §16.18.2's cover: one inline picture under the listing thumbnail's
+    # rules (§16.18.3) — a board slot is read by everyone on every sweep.
+    out["thumb"] = _opt(b, PN_THUMB, "bytes")
+    if out["thumb"] is not None:
+        _check_inline_picture(out["thumb"], "cover")
     _finish(b)
     return out
 
@@ -1537,6 +1609,8 @@ def run_pub_listing(cases, r):
             if n["price"] is not None:
                 fields.append((PN_PRICE, ("uint", n["price"])))
             fields.append((PN_EXPIRY, ("uint", n["expiry"])))
+            if n["thumb"] is not None:
+                fields.append((PN_THUMB, ("bytes", n["thumb"])))
             return _reencode_map(fields)
         out = expect_reject(r, "contact", c, go)
         if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:
@@ -1892,9 +1966,8 @@ def run_position_frame(cases, r):
             if c["expect"]["ok"]:
                 r.bad("contact", c["name"], c.get("why", ""),
                       f"refused a frame the vector accepts: {e.name}")
-            elif e.name.upper() != c["expect"]["reject"].upper():
-                r.bad("contact", c["name"], c.get("why", ""),
-                      f"refused with {e.name}, vector says {c['expect']['reject']}")
+            elif (why := reject_mismatch(e.name, e.code, c["expect"])):
+                r.bad("contact", c["name"], c.get("why", ""), why)
             else:
                 r.passed += 1
             continue
@@ -2402,6 +2475,10 @@ def run_contact_details(cases, r):
                                ("car_color", DET_CAR_COLOR), ("plate", DET_PLATE)):
                 if d[key] is not None:
                     m.append((field, ("text", d[key])))
+            if d["purpose"] is not None:
+                m.append((DET_PURPOSE, ("text", d["purpose"])))
+            if d["car_photo"] is not None:
+                m.append((DET_CAR_PHOTO, ("bytes", d["car_photo"])))
             return _reencode_map(m)
         out = expect_reject(r, "contact", c, go)
         if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:

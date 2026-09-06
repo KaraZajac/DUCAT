@@ -48,7 +48,6 @@
     <string name="market_delist_btn">เอาลง</string>
     <string name="market_listed_as">อยู่ในหมวด %1$s</string>
     <string name="market_list_failed">ลงขายไม่สำเร็จ — โหนดทำงานอยู่ไหม?</string>
-    <string name="market_all_langs">ทุกภาษา</string>
     <string name="market_what_all">ทั้งหมด</string>
     <string name="market_what_digital">ดิจิทัล</string>
     <string name="market_looking">กำลังดูชั้น %1$s…</string>
@@ -80,4 +79,15 @@
     <string name="press_open_room">เปิดห้องข่าว</string>
     <string name="market_refreshing">กำลังตรวจหาความเปลี่ยนแปลง…</string>
     <string name="pub_period_not_a_name">ช่วงเวลาคือชื่อ ไม่ใช่โฟลเดอร์ — ห้ามใช้เครื่องหมายทับ และห้ามเป็นจุดล้วน</string>
+    <string name="market_any_lang">ทุกภาษา</string>
+    <string name="market_add_lang">+ ภาษา</string>
+    <string name="market_pick_lang">ภาษาใด</string>
+    <string name="market_looking_lang">กำลังดูชั้น %1$s ในภาษา %2$s…</string>
+    <string name="market_looking_all">กำลังดูทุกชั้น…</string>
+    <string name="market_looking_all_lang">กำลังดูทุกชั้นในภาษา %1$s…</string>
+    <string name="market_cover_desc">หน้าปก</string>
+    <string name="pub_cover_label">รูปหน้าปก</string>
+    <string name="pub_cover_note">แสดงบนชั้นข้างชื่อเรื่อง ย่อให้พอดีกับประกาศ เพื่อให้การเลือกดูยังคงรวดเร็ว</string>
+    <string name="pub_cover_remove">ลบออก</string>
+    <string name="pub_cover_failed">ใช้รูปนั้นไม่ได้ ลองรูปอื่น</string>
 </resources>

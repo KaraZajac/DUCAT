@@ -27,7 +27,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.painterResource
@@ -43,6 +46,7 @@ import kotlinx.coroutines.delay
 import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.R
+import org.ducatproject.ducat.SafeImage
 import org.ducatproject.ducat.StoredMessage
 import org.ducatproject.ducat.formatXmr
 
@@ -456,6 +460,7 @@ fun RideOfferScreen(
                         style = MaterialTheme.typography.titleMedium,
                     )
                 }
+                CarPicture(contact.carPhoto)
                 val car = listOfNotNull(contact.carColor, contact.carModel)
                     .joinToString(" ").ifBlank { null }
                 car?.let {
@@ -622,6 +627,28 @@ fun RideConfirmed(
     }
 }
 
+/**
+ * The driver's car as they pictured it (§16.9, field 301), beside the
+ * model, colour and plate: a curb full of strangers is scanned by a
+ * picture. Their bytes, so the guarded decode — and nothing drawn when
+ * it will not parse, rather than nothing drawn of the screen.
+ */
+@Composable
+private fun CarPicture(photo: ByteArray?) {
+    val bmp = remember(photo?.size, photo?.contentHashCode()) {
+        photo?.let { SafeImage.fromBytes(it, SafeImage.AVATAR_PIXELS) }
+    }
+    if (bmp != null) {
+        Spacer(Modifier.height(10.dp))
+        Image(
+            bmp.asImageBitmap(),
+            stringResource(R.string.ceremony_car_photo),
+            Modifier.size(width = 180.dp, height = 110.dp).clip(RoundedCornerShape(12.dp)),
+            contentScale = ContentScale.Crop,
+        )
+    }
+}
+
 /** A stranger becomes your ride: the card you scan the curb with. */
 @Composable
 fun DriverFound(
@@ -652,6 +679,7 @@ fun DriverFound(
                 Avatar(contact.displayName(), contact.avatar, size = 88)
                 Spacer(Modifier.height(10.dp))
                 Text(contact.displayName(), style = MaterialTheme.typography.headlineSmall)
+                CarPicture(contact.carPhoto)
                 val car = listOfNotNull(contact.carColor, contact.carModel)
                     .joinToString(" ").ifBlank { null }
                 car?.let {

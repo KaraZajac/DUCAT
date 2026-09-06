@@ -156,4 +156,6 @@
     <string name="rent_delete_title">Delete this listing?</string>
     <string name="rent_delete_body">Taking it down puts it away and keeps its history. Deleting it is permanent — and a re-typed listing counts as a new seller, so however long this one has stood for counts for nothing.</string>
     <string name="rent_delete_keep">Keep it</string>
+    <string name="rent_photo_take">Take a photo</string>
+    <string name="rent_photo_no_camera">No camera app on this phone.</string>
 </resources>

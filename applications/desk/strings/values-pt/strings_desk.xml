@@ -338,4 +338,18 @@
     <string name="desk_keep_someone">Ainda ninguém. Um coração num contacto guarda aqui a sua casa.</string>
     <string name="desk_others">Outros</string>
     <string name="desk_edited">editado</string>
+    <string name="desk_any_language">Qualquer idioma</string>
+    <string name="desk_other_language">Outro idioma…</string>
+    <string name="desk_subscribing">A subscrever…</string>
+    <string name="desk_subscribed_note">Subscrito. A fatura ou o primeiro número chega no Chat; o que tem está na Biblioteca.</string>
+    <string name="desk_choose_cover">Escolher uma capa…</string>
+    <string name="desk_remove_cover">Remover a capa</string>
+    <string name="desk_market_cover_note">A capa viaja com o anúncio, abaixo de dez kilobytes, para que um leitor a veja na prateleira antes de descarregar o que quer que seja.</string>
+    <string name="desk_market_lang_note">Um idioma restringe a prateleira. O anúncio vai também para o quadro de toda a categoria, para que leitores de qualquer idioma o encontrem.</string>
+    <string name="desk_market_world_note">Seis quadros partilhados por toda a rede, renovados semanalmente. Um anúncio é carimbado com um pouco de trabalho e dura um dia; a secretária renova-o enquanto estiver aberta.</string>
+    <string name="desk_no_market_slot">Todos os lugares nesse quadro estão ocupados esta semana. A escolha fica guardada e a secretária continua a tentar.</string>
+    <string name="desk_market_waiting">Listado; à espera de um lugar livre no quadro.</string>
+    <string name="desk_car_picture">Fotografia do carro</string>
+    <string name="desk_car_picture_note">Enviada com o modelo, a cor e a matrícula só quando aceita uma chamada, para que o passageiro reconheça o seu carro na berma.</string>
+    <string name="desk_car">Carro</string>
 </resources>

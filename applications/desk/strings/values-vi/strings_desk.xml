@@ -334,4 +334,18 @@
     <string name="desk_keep_someone">Chưa có ai. Thả tim một liên hệ sẽ giữ nhà của họ ở đây.</string>
     <string name="desk_others">Người khác</string>
     <string name="desk_edited">đã sửa</string>
+    <string name="desk_any_language">Mọi ngôn ngữ</string>
+    <string name="desk_other_language">Ngôn ngữ khác…</string>
+    <string name="desk_subscribing">Đang đăng ký…</string>
+    <string name="desk_subscribed_note">Đã đăng ký. Hóa đơn hoặc số đầu tiên sẽ đến trong Trò chuyện; những gì bạn có nằm trong Thư viện.</string>
+    <string name="desk_choose_cover">Chọn bìa…</string>
+    <string name="desk_remove_cover">Bỏ bìa</string>
+    <string name="desk_market_cover_note">Bìa đi cùng thông báo, dưới mười kilobyte, để người đọc thấy nó trên kệ trước khi tải bất cứ thứ gì.</string>
+    <string name="desk_market_lang_note">Ngôn ngữ thu hẹp kệ. Thông báo cũng lên bảng của cả mục, để người đọc mọi ngôn ngữ tìm thấy nó.</string>
+    <string name="desk_market_world_note">Sáu bảng cả mạng dùng chung, làm mới hằng tuần. Một thông báo được đóng dấu bằng chút công sức và tồn tại một ngày; bàn làm việc làm mới nó khi còn mở.</string>
+    <string name="desk_no_market_slot">Mọi chỗ trên bảng đó tuần này đã kín. Lựa chọn được giữ lại và bàn làm việc sẽ tiếp tục thử.</string>
+    <string name="desk_market_waiting">Đã đăng; đang chờ chỗ trống trên bảng.</string>
+    <string name="desk_car_picture">Ảnh chiếc xe</string>
+    <string name="desk_car_picture_note">Chỉ được gửi cùng mẫu xe, màu và biển số khi bạn nhận một cuốc, để hành khách nhận ra xe của bạn bên lề đường.</string>
+    <string name="desk_car">Xe</string>
 </resources>

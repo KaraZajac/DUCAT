@@ -508,6 +508,7 @@ impl App {
             car_model: theirs.profile.car_model.clone(),
             car_color: theirs.profile.car_color.clone(),
             plate: theirs.profile.plate.clone(),
+            car_photo: theirs.profile.car_photo.clone(),
             their_read_up_to: None,
             // What this card said it was for — a thread born from a
             // `donate` card is the thread whose unprompted payments are
@@ -723,6 +724,7 @@ impl App {
             car_model: theirs.profile.car_model.clone(),
             car_color: theirs.profile.car_color.clone(),
             plate: theirs.profile.plate.clone(),
+            car_photo: theirs.profile.car_photo.clone(),
             their_read_up_to: None,
             // Two directions, two fields: what THEIR card said survives
             // from the prior record; what OUR card said goes in its own

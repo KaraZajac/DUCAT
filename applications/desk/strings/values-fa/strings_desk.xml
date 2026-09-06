@@ -338,4 +338,18 @@
     <string name="desk_keep_someone">هنوز کسی نیست. قلب روی یک مخاطب خانه‌اش را اینجا نگه می‌دارد.</string>
     <string name="desk_others">دیگران</string>
     <string name="desk_edited">ویرایش‌شده</string>
+    <string name="desk_any_language">هر زبانی</string>
+    <string name="desk_other_language">زبان دیگر…</string>
+    <string name="desk_subscribing">در حال اشتراک…</string>
+    <string name="desk_subscribed_note">مشترک شدید. صورت‌حساب یا شمارهٔ اول در گفتگو می‌رسد؛ آنچه دارید در کتابخانه است.</string>
+    <string name="desk_choose_cover">انتخاب جلد…</string>
+    <string name="desk_remove_cover">حذف جلد</string>
+    <string name="desk_market_cover_note">جلد همراه آگهی می‌رود، زیر ده کیلوبایت، تا خواننده پیش از دریافت چیزی آن را روی قفسه ببیند.</string>
+    <string name="desk_market_lang_note">زبان قفسه را محدود می‌کند. آگهی روی تابلوی کل دسته هم می‌رود تا خوانندگان هر زبانی آن را بیابند.</string>
+    <string name="desk_market_world_note">شش تابلو که همهٔ شبکه در آن شریک است و هفتگی نو می‌شود. آگهی با کمی کار مهر می‌خورد و یک روز می‌ماند؛ میز تا وقتی باز است آن را تازه می‌کند.</string>
+    <string name="desk_no_market_slot">این هفته همهٔ جاهای آن تابلو پر است. انتخاب نگه داشته می‌شود و میز به تلاش ادامه می‌دهد.</string>
+    <string name="desk_market_waiting">فهرست شده؛ در انتظار جای خالی روی تابلو.</string>
+    <string name="desk_car_picture">عکس خودرو</string>
+    <string name="desk_car_picture_note">فقط وقتی درخواستی را می‌پذیرید همراه مدل، رنگ و پلاک فرستاده می‌شود تا مسافر خودروی شما را کنار خیابان تشخیص دهد.</string>
+    <string name="desk_car">خودرو</string>
 </resources>

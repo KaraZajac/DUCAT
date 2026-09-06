@@ -56,4 +56,6 @@
     <string name="profile_sign_pending_all">Просять повернути депозит. Ваш підпис звільняє кошти.</string>
     <string name="profile_sign_release">Підписати звільнення</string>
     <string name="profile_copied">Скопійовано</string>
+    <string name="profile_their_car">Їхнє авто</string>
+    <string name="profile_car_photo">Фото їхнього авто</string>
 </resources>

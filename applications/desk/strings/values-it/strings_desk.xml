@@ -338,4 +338,18 @@
     <string name="desk_keep_someone">Ancora nessuno. Un cuore su un contatto tiene qui la sua casa.</string>
     <string name="desk_others">Altri</string>
     <string name="desk_edited">modificato</string>
+    <string name="desk_any_language">Qualsiasi lingua</string>
+    <string name="desk_other_language">Un\'altra lingua…</string>
+    <string name="desk_subscribing">Iscrizione in corso…</string>
+    <string name="desk_subscribed_note">Iscritto. La fattura o il primo numero arriva in Chat; ciò che possiedi è nella Biblioteca.</string>
+    <string name="desk_choose_cover">Scegli una copertina…</string>
+    <string name="desk_remove_cover">Rimuovi la copertina</string>
+    <string name="desk_market_cover_note">La copertina viaggia con l\'annuncio, sotto i dieci kilobyte, così un lettore la vede sullo scaffale prima di scaricare qualsiasi cosa.</string>
+    <string name="desk_market_lang_note">Una lingua restringe lo scaffale. L\'annuncio va anche sulla bacheca dell\'intera categoria, così lo trovano lettori di qualsiasi lingua.</string>
+    <string name="desk_market_world_note">Sei bacheche condivise da tutta la rete, rinnovate ogni settimana. Un annuncio è timbrato con un po\' di lavoro e dura un giorno; la scrivania lo rinnova finché è aperta.</string>
+    <string name="desk_no_market_slot">Ogni posto su quella bacheca è occupato questa settimana. La scelta è conservata e la scrivania continua a provare.</string>
+    <string name="desk_market_waiting">In elenco; in attesa di un posto libero sulla bacheca.</string>
+    <string name="desk_car_picture">Foto dell\'auto</string>
+    <string name="desk_car_picture_note">Inviata con modello, colore e targa solo quando accetti una chiamata, così il passeggero riconosce la tua auto sul marciapiede.</string>
+    <string name="desk_car">Auto</string>
 </resources>

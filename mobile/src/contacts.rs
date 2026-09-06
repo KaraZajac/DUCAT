@@ -177,6 +177,9 @@ pub struct Profile {
     pub car_model: Option<String>,
     pub car_color: Option<String>,
     pub plate: Option<String>,
+    /// The car's picture (§16.9): one small PNG/JPEG/WebP, at most 10 KiB,
+    /// sent only while driving like the model, colour and plate.
+    pub car_photo: Option<Vec<u8>>,
 }
 
 impl Profile {
@@ -261,6 +264,7 @@ pub fn build_contact_details(
         car_model: profile.car_model,
         car_color: profile.car_color,
         plate: profile.plate,
+        car_photo: profile.car_photo,
         purpose,
     }
     .to_value()
@@ -304,6 +308,7 @@ pub fn parse_contact_details(bytes: Vec<u8>) -> Result<PeerDetails, ContactError
             car_model: d.car_model,
             car_color: d.car_color,
             plate: d.plate,
+            car_photo: d.car_photo,
         },
         purpose: d.purpose,
     })
@@ -1795,6 +1800,8 @@ pub struct PubListingInfo {
     /// Piconero a period; `None` is free, and the only spelling of it.
     pub price_pxmr: Option<u64>,
     pub expiry: u64,
+    /// The cover: one inline picture, at most 10 KiB, PNG/JPEG/WebP.
+    pub thumb: Option<Vec<u8>>,
     /// Filled by decode: hex of the listing's own verifying key.
     pub poster: String,
     pub beacon_height: u64,
@@ -1871,6 +1878,7 @@ pub fn pub_listing_encode(
         blurb: info.blurb,
         price_pxmr: info.price_pxmr,
         expiry: info.expiry,
+        thumb: info.thumb,
     };
     let ducat_core::cbor::Value::Map(m) = n.to_value() else { unreachable!() };
     let seed = ducat_core::board::listing_seed(&persona_secret, &listing_id);
@@ -1909,6 +1917,7 @@ pub fn pub_listing_decode(
         blurb: n.blurb,
         price_pxmr: n.price_pxmr,
         expiry: n.expiry,
+        thumb: n.thumb,
         poster: o.poster.iter().map(|b| format!("{b:02x}")).collect::<String>(),
         beacon_height: o.beacon.height,
         beacon_hash: o.beacon.hash.iter().map(|b| format!("{b:02x}")).collect::<String>(),

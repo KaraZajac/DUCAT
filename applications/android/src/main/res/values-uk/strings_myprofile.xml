@@ -32,4 +32,7 @@
     <string name="myprofile_phone_too_long">У телефонному номері щонайбільше 15 цифр.</string>
     <string name="myprofile_signal_too_long">Це довше, ніж може бути ім\'я користувача Signal.</string>
     <string name="myprofile_signal_shape">Ім\'я користувача Signal має вигляд name.12 — ім\'я, крапка, потім цифри.</string>
+    <string name="myprofile_car_photo">Фото авто</string>
+    <string name="myprofile_car_photo_add">Додати фото авто</string>
+    <string name="myprofile_car_photo_note">Сильно стискається. Пасажири бачать його поруч із номером, коли ви приймаєте їхній виклик — по картинці й шукають машину серед чужих біля узбіччя.</string>
 </resources>

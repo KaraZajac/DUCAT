@@ -334,4 +334,18 @@
     <string name="desk_keep_someone">ยังไม่มีใคร หัวใจบนผู้ติดต่อจะเก็บบ้านของเขาไว้ที่นี่</string>
     <string name="desk_others">คนอื่นๆ</string>
     <string name="desk_edited">แก้ไขแล้ว</string>
+    <string name="desk_any_language">ทุกภาษา</string>
+    <string name="desk_other_language">ภาษาอื่น…</string>
+    <string name="desk_subscribing">กำลังสมัคร…</string>
+    <string name="desk_subscribed_note">สมัครแล้ว ใบเรียกเก็บเงินหรือฉบับแรกจะมาที่แชท สิ่งที่คุณมีอยู่ในห้องสมุด</string>
+    <string name="desk_choose_cover">เลือกปก…</string>
+    <string name="desk_remove_cover">เอาปกออก</string>
+    <string name="desk_market_cover_note">ปกไปพร้อมกับประกาศ ขนาดไม่ถึงสิบกิโลไบต์ ผู้อ่านจึงเห็นบนชั้นก่อนจะดึงอะไรมา</string>
+    <string name="desk_market_lang_note">ภาษาทำให้ชั้นแคบลง ประกาศจะขึ้นกระดานของทั้งหมวดด้วย ผู้อ่านทุกภาษาจึงพบได้</string>
+    <string name="desk_market_world_note">กระดานหกแผ่นที่ทั้งเครือข่ายใช้ร่วมกัน ต่ออายุทุกสัปดาห์ ประกาศถูกประทับด้วยงานเล็กน้อยและอยู่ได้หนึ่งวัน เดสก์จะต่ออายุให้ตราบที่ยังเปิดอยู่</string>
+    <string name="desk_no_market_slot">ทุกช่องบนกระดานนั้นเต็มแล้วในสัปดาห์นี้ ตัวเลือกถูกเก็บไว้และเดสก์จะพยายามต่อไป</string>
+    <string name="desk_market_waiting">ลงรายการแล้ว รอช่องว่างบนกระดาน</string>
+    <string name="desk_car_picture">รูปรถ</string>
+    <string name="desk_car_picture_note">ส่งไปพร้อมรุ่น สี และป้ายทะเบียนเฉพาะเมื่อคุณรับเรียกรถ เพื่อให้ผู้โดยสารจำรถของคุณได้ที่ริมถนน</string>
+    <string name="desk_car">รถ</string>
 </resources>

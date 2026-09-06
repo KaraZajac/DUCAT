@@ -147,4 +147,6 @@
     <string name="rent_delete_title">Удалить это объявление?</string>
     <string name="rent_delete_body">Снятие откладывает его вместе с историей. Удаление необратимо — а переписанное объявление считается новым продавцом, сколько бы это ни провисело.</string>
     <string name="rent_delete_keep">Оставить</string>
+    <string name="rent_photo_take">Сделать фото</string>
+    <string name="rent_photo_no_camera">На этом телефоне нет приложения камеры.</string>
 </resources>

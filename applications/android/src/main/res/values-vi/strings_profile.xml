@@ -56,4 +56,6 @@
     <string name="profile_sign_pending_all">Họ đề nghị hoàn lại tiền cọc. Chữ ký của bạn sẽ giải phóng nó.</string>
     <string name="profile_sign_release">Ký giải phóng</string>
     <string name="profile_copied">Đã sao chép</string>
+    <string name="profile_their_car">Xe của họ</string>
+    <string name="profile_car_photo">Ảnh xe của họ</string>
 </resources>

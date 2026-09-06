@@ -56,4 +56,6 @@
     <string name="profile_sign_pending_all">Ils demandent le retour du dépôt. Votre signature le libère.</string>
     <string name="profile_sign_release">Signer la libération</string>
     <string name="profile_copied">Copié</string>
+    <string name="profile_their_car">Leur voiture</string>
+    <string name="profile_car_photo">Photo de leur voiture</string>
 </resources>

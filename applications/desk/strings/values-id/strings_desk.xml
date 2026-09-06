@@ -334,4 +334,18 @@
     <string name="desk_keep_someone">Belum ada. Hati pada kontak menyimpan rumahnya di sini.</string>
     <string name="desk_others">Lainnya</string>
     <string name="desk_edited">disunting</string>
+    <string name="desk_any_language">Bahasa apa pun</string>
+    <string name="desk_other_language">Bahasa lain…</string>
+    <string name="desk_subscribing">Berlangganan…</string>
+    <string name="desk_subscribed_note">Berlangganan. Tagihan atau edisi pertama tiba di Obrolan; yang Anda miliki ada di Perpustakaan.</string>
+    <string name="desk_choose_cover">Pilih sampul…</string>
+    <string name="desk_remove_cover">Hapus sampul</string>
+    <string name="desk_market_cover_note">Sampul ikut dalam pengumuman, di bawah sepuluh kilobyte, sehingga pembaca melihatnya di rak sebelum mengambil apa pun.</string>
+    <string name="desk_market_lang_note">Bahasa mempersempit rak. Pengumuman juga masuk ke papan seluruh kategori, sehingga pembaca bahasa apa pun menemukannya.</string>
+    <string name="desk_market_world_note">Enam papan yang dipakai bersama seluruh jaringan, diperbarui mingguan. Pengumuman dicap dengan sedikit kerja dan bertahan sehari; desk memperbaruinya selama masih terbuka.</string>
+    <string name="desk_no_market_slot">Semua slot di papan itu terisi minggu ini. Pilihan disimpan dan desk terus mencoba.</string>
+    <string name="desk_market_waiting">Terdaftar; menunggu slot kosong di papan.</string>
+    <string name="desk_car_picture">Foto mobil</string>
+    <string name="desk_car_picture_note">Dikirim bersama model, warna, dan pelat hanya saat Anda mengambil panggilan, agar penumpang mengenali mobil Anda di tepi jalan.</string>
+    <string name="desk_car">Mobil</string>
 </resources>

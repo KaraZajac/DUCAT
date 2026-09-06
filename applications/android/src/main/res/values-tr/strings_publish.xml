@@ -32,12 +32,12 @@
     <string name="pub_sub_code_hint">Abone olmak için tara. Alan listeye girer — ücretsiz yayın son sayıyı anında verir, ücretli fatura yollar.</string>
     <string name="market_near_me">Yakınımda</string>
     <string name="market_worldwide">Dünya çapında</string>
-    <string name="market_cat_news">haber</string>
-    <string name="market_cat_serials">diziler</string>
-    <string name="market_cat_sound">ses</string>
-    <string name="market_cat_software">yazılım</string>
-    <string name="market_cat_art">sanat</string>
-    <string name="market_cat_other">diğer</string>
+    <string name="market_cat_news">Haber</string>
+    <string name="market_cat_serials">Diziler</string>
+    <string name="market_cat_sound">Ses</string>
+    <string name="market_cat_software">Yazılım</string>
+    <string name="market_cat_art">Sanat</string>
+    <string name="market_cat_other">Diğer</string>
     <string name="market_empty">Bu raf henüz boş — panolar her hafta döner.</string>
     <string name="market_free">Ücretsiz</string>
     <string name="market_per_period">Sayı başına %1$s</string>
@@ -48,7 +48,6 @@
     <string name="market_delist_btn">Kaldır</string>
     <string name="market_listed_as">%1$s altında listelendi</string>
     <string name="market_list_failed">Listelenemedi — düğüm çalışıyor mu?</string>
-    <string name="market_all_langs">tüm diller</string>
     <string name="market_what_all">Tümü</string>
     <string name="market_what_digital">Dijital</string>
     <string name="market_looking">%1$s rafına bakılıyor…</string>
@@ -80,4 +79,15 @@
     <string name="press_open_room">Basın odasını aç</string>
     <string name="market_refreshing">Değişiklikler denetleniyor…</string>
     <string name="pub_period_not_a_name">Dönem bir klasör değil, bir addır — eğik çizgi olmaz, sadece nokta da olmaz.</string>
+    <string name="market_any_lang">Her dil</string>
+    <string name="market_add_lang">+ dil</string>
+    <string name="market_pick_lang">Hangi dil?</string>
+    <string name="market_looking_lang">%1$s rafına (%2$s) bakılıyor…</string>
+    <string name="market_looking_all">Tüm raflara bakılıyor…</string>
+    <string name="market_looking_all_lang">Tüm raflara (%1$s) bakılıyor…</string>
+    <string name="market_cover_desc">Kapak</string>
+    <string name="pub_cover_label">Kapak görseli</string>
+    <string name="pub_cover_note">Rafta başlığın yanında görünür. Duyuruya sığacak kadar küçültülür, böylece göz atmak hızlı kalır.</string>
+    <string name="pub_cover_remove">Kaldır</string>
+    <string name="pub_cover_failed">O görsel kullanılamadı. Başka birini dene.</string>
 </resources>

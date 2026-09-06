@@ -48,7 +48,6 @@
     <string name="market_delist_btn">بردار</string>
     <string name="market_listed_as">در بخش %1$s</string>
     <string name="market_list_failed">عرضه نشد — گره روشن است؟</string>
-    <string name="market_all_langs">همه زبان‌ها</string>
     <string name="market_what_all">همه</string>
     <string name="market_what_digital">دیجیتال</string>
     <string name="market_looking">در حال دیدن قفسهٔ %1$s…</string>
@@ -80,4 +79,15 @@
     <string name="press_open_room">باز کردن اتاق مطبوعات</string>
     <string name="market_refreshing">در حال بررسی تغییرات…</string>
     <string name="pub_period_not_a_name">دوره یک نام است، نه یک پوشه — بدون اسلش، و نه فقط نقطه.</string>
+    <string name="market_any_lang">همهٔ زبان‌ها</string>
+    <string name="market_add_lang">+ زبان</string>
+    <string name="market_pick_lang">کدام زبان؟</string>
+    <string name="market_looking_lang">در حال دیدن قفسهٔ %1$s به زبان %2$s…</string>
+    <string name="market_looking_all">در حال دیدن همهٔ قفسه‌ها…</string>
+    <string name="market_looking_all_lang">در حال دیدن همهٔ قفسه‌ها به زبان %1$s…</string>
+    <string name="market_cover_desc">جلد</string>
+    <string name="pub_cover_label">تصویر جلد</string>
+    <string name="pub_cover_note">روی قفسه کنار عنوان نشان داده می‌شود. برای جا شدن در آگهی کوچک می‌شود تا مرور سریع بماند.</string>
+    <string name="pub_cover_remove">حذف</string>
+    <string name="pub_cover_failed">آن تصویر قابل استفاده نبود. یکی دیگر را امتحان کنید.</string>
 </resources>

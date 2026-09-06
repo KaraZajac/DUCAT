@@ -147,4 +147,6 @@
     <string name="rent_delete_title">Eliminare questo annuncio?</string>
     <string name="rent_delete_body">Ritirarlo lo mette da parte con la sua storia. Eliminarlo è definitivo: un annuncio riscritto conta come un venditore nuovo, per quanto a lungo questo sia rimasto.</string>
     <string name="rent_delete_keep">Tienilo</string>
+    <string name="rent_photo_take">Scatta una foto</string>
+    <string name="rent_photo_no_camera">Nessuna app fotocamera su questo telefono.</string>
 </resources>

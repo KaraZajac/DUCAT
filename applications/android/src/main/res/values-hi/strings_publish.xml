@@ -48,7 +48,6 @@
     <string name="market_delist_btn">हटाएँ</string>
     <string name="market_listed_as">%1$s में सूचीबद्ध</string>
     <string name="market_list_failed">सूचीबद्ध नहीं हो सका — क्या नोड चालू है?</string>
-    <string name="market_all_langs">सभी भाषाएँ</string>
     <string name="market_what_all">सब कुछ</string>
     <string name="market_what_digital">डिजिटल</string>
     <string name="market_looking">%1$s शेल्फ़ देखी जा रही है…</string>
@@ -80,4 +79,15 @@
     <string name="press_open_room">प्रेस रूम खोलें</string>
     <string name="market_refreshing">बदलाव जाँचे जा रहे हैं…</string>
     <string name="pub_period_not_a_name">अवधि एक नाम है, फ़ोल्डर नहीं — कोई स्लैश नहीं, और केवल बिंदु नहीं।</string>
+    <string name="market_any_lang">कोई भी भाषा</string>
+    <string name="market_add_lang">+ भाषा</string>
+    <string name="market_pick_lang">कौन-सी भाषा?</string>
+    <string name="market_looking_lang">%2$s में %1$s शेल्फ़ देखी जा रही है…</string>
+    <string name="market_looking_all">सभी शेल्फ़ देखी जा रही हैं…</string>
+    <string name="market_looking_all_lang">%1$s में सभी शेल्फ़ देखी जा रही हैं…</string>
+    <string name="market_cover_desc">कवर</string>
+    <string name="pub_cover_label">कवर की तस्वीर</string>
+    <string name="pub_cover_note">शेल्फ़ पर शीर्षक के बगल में दिखती है। सूचना में समाने के लिए छोटी कर दी जाती है, ताकि ब्राउज़ करना तेज़ रहे।</string>
+    <string name="pub_cover_remove">हटाएँ</string>
+    <string name="pub_cover_failed">वह तस्वीर इस्तेमाल नहीं हो सकी। कोई और आज़माएँ।</string>
 </resources>

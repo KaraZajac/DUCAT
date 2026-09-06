@@ -32,4 +32,7 @@
     <string name="myprofile_phone_too_long">Số điện thoại có nhiều nhất 15 chữ số.</string>
     <string name="myprofile_signal_too_long">Chuỗi này dài hơn mức một tên người dùng Signal có thể có.</string>
     <string name="myprofile_signal_shape">Tên người dùng Signal có dạng ten.12 — một cái tên, một dấu chấm, rồi các chữ số.</string>
+    <string name="myprofile_car_photo">Ảnh chiếc xe</string>
+    <string name="myprofile_car_photo_add">Thêm ảnh chiếc xe</string>
+    <string name="myprofile_car_photo_note">Được thu rất nhỏ. Hành khách thấy nó cạnh biển số khi bạn nhận cuốc — người ta nhìn lề đường đầy người lạ bằng một tấm ảnh.</string>
 </resources>

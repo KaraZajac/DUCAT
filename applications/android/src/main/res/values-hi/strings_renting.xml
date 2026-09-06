@@ -147,4 +147,6 @@
     <string name="rent_delete_title">यह लिस्टिंग मिटाएँ?</string>
     <string name="rent_delete_body">हटाने से वह इतिहास सहित रख ली जाती है। मिटाना स्थायी है — और दोबारा लिखी लिस्टिंग नया विक्रेता मानी जाती है, चाहे यह कितनी भी पुरानी रही हो।</string>
     <string name="rent_delete_keep">रहने दें</string>
+    <string name="rent_photo_take">फ़ोटो खींचें</string>
+    <string name="rent_photo_no_camera">इस फ़ोन में कैमरा ऐप नहीं है।</string>
 </resources>

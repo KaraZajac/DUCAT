@@ -32,4 +32,7 @@
     <string name="myprofile_phone_too_long">Bir telefon numarası en fazla 15 rakamdır.</string>
     <string name="myprofile_signal_too_long">Bu, bir Signal kullanıcı adının olabileceğinden daha uzun.</string>
     <string name="myprofile_signal_shape">Bir Signal kullanıcı adı ad.12 gibi görünür — bir ad, bir nokta, sonra rakamlar.</string>
+    <string name="myprofile_car_photo">Aracın fotoğrafı</string>
+    <string name="myprofile_car_photo_add">Aracın fotoğrafını ekle</string>
+    <string name="myprofile_car_photo_note">Epey küçültülür. Yolcular çağrılarını aldığında bunu plakanın yanında görür — yabancılarla dolu bir kaldırım fotoğrafla taranır.</string>
 </resources>

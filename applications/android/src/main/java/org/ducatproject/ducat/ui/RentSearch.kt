@@ -35,6 +35,7 @@ import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.DucatLog
+import org.ducatproject.ducat.Languages
 import org.ducatproject.ducat.Listings
 import org.ducatproject.ducat.Publications
 import org.ducatproject.ducat.Mailbox
@@ -681,15 +682,22 @@ fun MarketBrowse(onOpenChat: (Contact) -> Unit) {
             browsePrefs.getString("cat", null) ?: "news",
         )
     }
-    var myLang by androidx.compose.runtime.saveable.rememberSaveable {
-        androidx.compose.runtime.mutableStateOf(browsePrefs.getBoolean("my_lang", true))
+    // Which language's board: "" is the bare board — everyone — and a tag
+    // is that language's. This was a yes/no on the device language before
+    // the row could name another; a stored yes still means the device's.
+    val deviceLang = java.util.Locale.getDefault().language.takeIf { it.isNotBlank() }
+    var lang by androidx.compose.runtime.saveable.rememberSaveable {
+        androidx.compose.runtime.mutableStateOf(
+            browsePrefs.getString("lang", null)
+                ?: if (browsePrefs.getBoolean("my_lang", true)) deviceLang.orEmpty() else "",
+        )
     }
-    androidx.compose.runtime.LaunchedEffect(scope, what, cat, myLang) {
+    androidx.compose.runtime.LaunchedEffect(scope, what, cat, lang) {
         browsePrefs.edit()
             .putInt("scope", scope)
             .putInt("what", what)
             .putString("cat", cat)
-            .putBoolean("my_lang", myLang)
+            .putString("lang", lang)
             .apply()
     }
     androidx.compose.foundation.layout.Column(
@@ -733,6 +741,13 @@ fun MarketBrowse(onOpenChat: (Contact) -> Unit) {
                     )
                 }
             } else {
+                // Everything first — the six shelves read at once
+                // (§16.18.2) — then each on its own.
+                FilterChip(
+                    selected = cat == Publications.MARKET_EVERYTHING,
+                    onClick = { cat = Publications.MARKET_EVERYTHING },
+                    label = { Text(stringResource(R.string.market_what_all)) },
+                )
                 Publications.MARKET_CATEGORIES.forEach { slug ->
                     FilterChip(
                         selected = cat == slug,
@@ -743,23 +758,96 @@ fun MarketBrowse(onOpenChat: (Contact) -> Unit) {
             }
         }
         if (scope == 1) {
-            val lang = java.util.Locale.getDefault()
+            // The language row (§16.18.2): the bare board is everyone, a
+            // language's board is the publications in that language, and
+            // any of the app's own twenty can be asked for by name — a
+            // reader's language and a device's are not always the same.
+            var pickingLang by androidx.compose.runtime.saveable.rememberSaveable {
+                androidx.compose.runtime.mutableStateOf(false)
+            }
             androidx.compose.foundation.layout.Row(
-                androidx.compose.ui.Modifier.padding(horizontal = 16.dp),
+                androidx.compose.ui.Modifier
+                    .horizontalScroll(androidx.compose.foundation.rememberScrollState())
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp),
             ) {
                 FilterChip(
-                    selected = myLang,
-                    onClick = { myLang = !myLang },
+                    selected = lang.isEmpty(),
+                    onClick = { lang = "" },
                     label = {
                         Text(
-                            if (myLang) lang.getDisplayLanguage(lang)
-                            else stringResource(R.string.market_all_langs),
+                            stringResource(R.string.market_any_lang),
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    },
+                )
+                if (deviceLang != null) {
+                    FilterChip(
+                        selected = lang == deviceLang,
+                        onClick = { lang = deviceLang },
+                        label = {
+                            Text(
+                                marketLanguageName(deviceLang),
+                                style = MaterialTheme.typography.labelSmall,
+                            )
+                        },
+                    )
+                }
+                if (lang.isNotEmpty() && lang != deviceLang) {
+                    // The one asked for by name, for as long as it is read.
+                    FilterChip(
+                        selected = true,
+                        onClick = { pickingLang = true },
+                        label = {
+                            Text(
+                                marketLanguageName(lang),
+                                style = MaterialTheme.typography.labelSmall,
+                            )
+                        },
+                    )
+                }
+                FilterChip(
+                    selected = false,
+                    onClick = { pickingLang = true },
+                    label = {
+                        Text(
+                            stringResource(R.string.market_add_lang),
                             style = MaterialTheme.typography.labelSmall,
                         )
                     },
                 )
             }
-            WorldwideShelf(cat, myLang)
+            if (pickingLang) {
+                AlertDialog(
+                    onDismissRequest = { pickingLang = false },
+                    title = { Text(stringResource(R.string.market_pick_lang)) },
+                    text = {
+                        // Each in its own language, the settings menu's rule:
+                        // a list of languages you cannot read is not a list.
+                        Column(
+                            Modifier.verticalScroll(
+                                androidx.compose.foundation.rememberScrollState(),
+                            ),
+                        ) {
+                            Languages.SUPPORTED.forEach { l ->
+                                Text(
+                                    l.endonym,
+                                    Modifier.fillMaxWidth()
+                                        .clickable { lang = l.tag; pickingLang = false }
+                                        .padding(vertical = 10.dp),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                )
+                            }
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(onClick = { pickingLang = false }) {
+                            Text(stringResource(R.string.common_cancel))
+                        }
+                    },
+                )
+            }
+            WorldwideShelf(cat, lang.ifEmpty { null })
             return@Column
         }
         if (what == 6) {

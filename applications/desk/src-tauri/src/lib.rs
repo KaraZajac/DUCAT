@@ -461,6 +461,7 @@ struct TimelineRow {
     persona: String,
     name: String,
     mine: bool,
+    avatar_data_url: Option<String>,
     post: ducat_mobile::feed::FeedPost,
     blocks: Vec<ducat_mobile::feed::FeedBlock>,
 }
@@ -469,9 +470,14 @@ struct TimelineRow {
 fn timeline(limit: u32) -> Result<Vec<TimelineRow>, String> {
     let a = app()?;
     let me = a.worn().unwrap_or_default();
+    let my_face = a.profile_picture(&me, "avatar").map(|b| picture_url(&b));
     Ok(a.timeline(limit)
         .into_iter()
-        .map(|e| TimelineRow { mine: e.persona == me, blocks: ducat_mobile::feed::feed_blocks(e.post.text.clone()), persona: e.persona, name: e.name, post: e.post })
+        .map(|e| {
+            let mine = e.persona == me;
+            let avatar_data_url = if mine { my_face.clone() } else { a.contact(&e.persona).and_then(|c| c.avatar).map(|b| picture_url(&b)) };
+            TimelineRow { mine, avatar_data_url, blocks: ducat_mobile::feed::feed_blocks(e.post.text.clone()), persona: e.persona, name: e.name, post: e.post }
+        })
         .collect())
 }
 
@@ -633,6 +639,13 @@ struct MyProfile {
     phone: Option<String>,
     signal: Option<String>,
     share: bool,
+    /// The face, and the car a rider looks for (§15.12) — sent only while
+    /// driving, with its picture.
+    avatar_data_url: Option<String>,
+    car_model: Option<String>,
+    car_color: Option<String>,
+    plate: Option<String>,
+    car_photo_data_url: Option<String>,
 }
 
 #[tauri::command]
@@ -644,21 +657,68 @@ fn my_profile() -> Result<MyProfile, String> {
         phone: a.profile_field(&worn, "phone"),
         signal: a.profile_field(&worn, "signal"),
         share: a.share_profile(&worn),
+        avatar_data_url: a.profile_picture(&worn, "avatar").map(|b| picture_url(&b)),
+        car_model: a.profile_field(&worn, "car_model"),
+        car_color: a.profile_field(&worn, "car_color"),
+        plate: a.profile_field(&worn, "plate"),
+        car_photo_data_url: a.profile_picture(&worn, "car_photo").map(|b| picture_url(&b)),
     })
 }
 
 #[tauri::command]
-fn set_my_profile(email: Option<String>, phone: Option<String>, signal: Option<String>, share: bool) -> Result<(), String> {
+fn set_my_profile(email: Option<String>, phone: Option<String>, signal: Option<String>, share: bool, car_model: Option<String>, car_color: Option<String>, plate: Option<String>) -> Result<(), String> {
     let a = app()?;
     let worn = a.worn().map_err(said)?;
     a.set_profile_field(&worn, "email", email.as_deref()).map_err(said)?;
     a.set_profile_field(&worn, "phone", phone.as_deref()).map_err(said)?;
     a.set_profile_field(&worn, "signal", signal.as_deref()).map_err(said)?;
+    a.set_profile_field(&worn, "car_model", car_model.as_deref()).map_err(said)?;
+    a.set_profile_field(&worn, "car_color", car_color.as_deref()).map_err(said)?;
+    a.set_profile_field(&worn, "plate", plate.as_deref()).map_err(said)?;
     a.set_share_profile(&worn, share).map_err(said)?;
     // The standing code's record carries the profile: rewrite it, so the
     // code already on a business card hands out what was just saved.
     a.refresh_profile_cards(&worn);
     Ok(())
+}
+
+/// The face on the record: a file the person chose, shrunk to fit beside
+/// the keys, or nothing to take it down. The standing code is rewritten
+/// like any other profile change.
+#[tauri::command]
+async fn set_my_avatar(path: Option<String>) -> Result<(), String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || {
+        let worn = a.worn().map_err(said)?;
+        let bytes = match path.as_deref().filter(|p| !p.trim().is_empty()) {
+            Some(p) => Some(std::fs::read(p).map_err(s)?),
+            None => None,
+        };
+        a.set_avatar(&worn, bytes.as_deref()).map_err(said)?;
+        a.refresh_profile_cards(&worn);
+        Ok(())
+    })
+    .await
+    .map_err(s)?
+}
+
+/// The car's picture (§16.9, field 301): sent with the plate when a hail
+/// is taken, never on any other handshake.
+#[tauri::command]
+async fn set_my_car_photo(path: Option<String>) -> Result<(), String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || {
+        let worn = a.worn().map_err(said)?;
+        let bytes = match path.as_deref().filter(|p| !p.trim().is_empty()) {
+            Some(p) => Some(std::fs::read(p).map_err(s)?),
+            None => None,
+        };
+        a.set_car_photo(&worn, bytes.as_deref()).map_err(said)?;
+        a.refresh_profile_cards(&worn);
+        Ok(())
+    })
+    .await
+    .map_err(s)?
 }
 
 #[derive(Serialize)]
@@ -718,6 +778,12 @@ struct ContactRow {
     email: Option<String>,
     phone: Option<String>,
     signal: Option<String>,
+    /// The face they sent, and the car (§16.9) if they answered a hail.
+    avatar_data_url: Option<String>,
+    car_model: Option<String>,
+    car_color: Option<String>,
+    plate: Option<String>,
+    car_photo_data_url: Option<String>,
 }
 
 fn contact_row(a: &App, c: Contact) -> ContactRow {
@@ -751,6 +817,11 @@ fn contact_row(a: &App, c: Contact) -> ContactRow {
         email: c.email,
         phone: c.phone,
         signal: c.signal,
+        avatar_data_url: c.avatar.as_deref().map(picture_url),
+        car_photo_data_url: c.car_photo.as_deref().map(picture_url),
+        car_model: c.car_model,
+        car_color: c.car_color,
+        plate: c.plate,
     }
 }
 
@@ -1519,6 +1590,16 @@ struct PublicationRow {
     has_shelf: bool,
     press_code: Option<String>,
     created: u64,
+    /// The market (§16.18.2): listed or not, where the notice sits, and
+    /// the remembered choice so the form reopens as it was left.
+    on_market: bool,
+    market_category: Option<String>,
+    market_lang: Option<String>,
+    market_blurb: Option<String>,
+    market_board: Option<String>,
+    market_bare_board: Option<String>,
+    market_since: u64,
+    cover_data_url: Option<String>,
 }
 
 fn publication_row(a: &App, id: String, p: ducat_app::publications::Publication) -> PublicationRow {
@@ -1539,11 +1620,109 @@ fn publication_row(a: &App, id: String, p: ducat_app::publications::Publication)
             .collect(),
         has_shelf: p.root_rec.is_some(),
         press_code: p.press_code.clone().filter(|_| p.press_code_exp > App::now()),
+        on_market: p.on_market(),
+        market_category: p.mkt_cat.clone(),
+        market_lang: p.market_lang(),
+        market_blurb: p.mkt_blurb.clone(),
+        market_board: p.mkt_board.clone().filter(|b| !b.is_empty()),
+        market_bare_board: p.mkt_bare_board.clone().filter(|b| !b.is_empty()),
+        market_since: p.mkt_at,
+        cover_data_url: p.mkt_thumb.as_deref().and_then(picture_url_b64),
         id,
         title: p.title,
         price_pxmr: p.price,
         created: p.created,
     }
+}
+
+/// A publication on a worldwide shelf, as the Market page shows it.
+#[derive(Serialize)]
+struct MarketRow {
+    category: String,
+    board: String,
+    subkey: u32,
+    title: String,
+    blurb: Option<String>,
+    /// Piconero a period; None is free.
+    price_pxmr: Option<u64>,
+    card: String,
+    poster: String,
+    expiry: u64,
+    cover_data_url: Option<String>,
+    mine: bool,
+    shown: Option<ducat_app::wallet::Shown>,
+}
+
+fn market_row(a: &App, f: ducat_app::publications::MarketFound) -> MarketRow {
+    MarketRow {
+        cover_data_url: f.thumb.as_deref().and_then(picture_url_b64),
+        mine: a.persona_hexes().contains(&f.poster),
+        shown: f.price_pxmr.map(|p| a.show_amount(p)),
+        category: f.category,
+        board: f.board,
+        subkey: f.subkey,
+        title: f.title,
+        blurb: f.blurb,
+        price_pxmr: f.price_pxmr,
+        card: f.card,
+        poster: f.poster,
+        expiry: f.expiry,
+    }
+}
+
+fn check_market_args(category: Option<&str>, lang: Option<&str>) -> Result<(), String> {
+    if let Some(c) = category {
+        if !ducat_app::publications::is_market_category(c) {
+            return Err(format!("'{c}' is not one of the market's categories"));
+        }
+    }
+    if lang.map_or(false, |l| !l.trim().is_empty()) && ducat_app::publications::market_lang(lang).is_none() {
+        return Err("a language is a two- or three-letter code, like 'de'".into());
+    }
+    Ok(())
+}
+
+/// What the shelf said last time — painted while the live read runs.
+/// No category is every category side by side.
+#[tauri::command]
+fn market_browse_world_cached(category: Option<String>, lang: Option<String>) -> Result<Vec<MarketRow>, String> {
+    let a = app()?;
+    check_market_args(category.as_deref(), lang.as_deref())?;
+    Ok(a.browse_market_cached(category.as_deref(), lang.as_deref()).into_iter().map(|f| market_row(a, f)).collect())
+}
+
+#[tauri::command]
+async fn market_browse_world(category: Option<String>, lang: Option<String>) -> Result<Vec<MarketRow>, String> {
+    let a = app()?;
+    check_market_args(category.as_deref(), lang.as_deref())?;
+    tauri::async_runtime::spawn_blocking(move || a.browse_market(category.as_deref(), lang.as_deref()).into_iter().map(|f| market_row(a, f)).collect()).await.map_err(s)
+}
+
+/// List a publication worldwide. True when a board took the notice; false
+/// when every shard was full — the choice is kept and the lap keeps trying.
+#[tauri::command]
+async fn market_post_publication(id: String, category: String, lang: Option<String>, blurb: Option<String>) -> Result<bool, String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.list_on_market(&id, &category, lang.as_deref(), blurb.as_deref()).map_err(said)).await.map_err(s)?
+}
+
+#[tauri::command]
+async fn market_unpost_publication(id: String) -> Result<(), String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.delist_from_market(&id).map_err(said)).await.map_err(s)?
+}
+
+/// The cover: any picture, shrunk to the board's ten kilobytes.
+#[tauri::command]
+fn set_publication_cover(id: String, path: String) -> Result<(), String> {
+    let a = app()?;
+    let bytes = std::fs::read(&path).map_err(s)?;
+    a.set_publication_cover(&id, &bytes).map_err(said)
+}
+
+#[tauri::command]
+fn remove_publication_cover(id: String) -> Result<(), String> {
+    app()?.remove_publication_cover(&id).map_err(said)
 }
 
 #[tauri::command]
@@ -1913,6 +2092,33 @@ fn data_url(b64: &str, mime: &str) -> String {
     format!("data:{mime};base64,{b64}")
 }
 
+/// What a picture's first bytes say it is: the three formats a record may
+/// carry (§16.9), JPEG when in doubt.
+fn picture_mime(bytes: &[u8]) -> &'static str {
+    if bytes.starts_with(&[0x89, b'P', b'N', b'G']) {
+        "image/png"
+    } else if bytes.len() >= 12 && &bytes[..4] == b"RIFF" && &bytes[8..12] == b"WEBP" {
+        "image/webp"
+    } else {
+        "image/jpeg"
+    }
+}
+
+fn picture_url(bytes: &[u8]) -> String {
+    use base64::Engine;
+    data_url(&base64::engine::general_purpose::STANDARD.encode(bytes), picture_mime(bytes))
+}
+
+/// The same for a picture kept as base64, decoded only far enough to name it.
+fn picture_url_b64(b64: &str) -> Option<String> {
+    use base64::Engine;
+    let head = base64::engine::general_purpose::STANDARD.decode(b64.get(..16).unwrap_or(b64)).ok()?;
+    if b64.is_empty() {
+        return None;
+    }
+    Some(data_url(b64, picture_mime(&head)))
+}
+
 fn listing_row(a: &App, l: ducat_app::listings::Listing) -> ListingRow {
     ListingRow {
         kind_name: ducat_app::listings::kind_name(l.kind).into(),
@@ -2280,6 +2486,7 @@ fn sales_in_progress() -> Result<Vec<(String, TabRow)>, String> {
 struct CallView {
     state: ducat_app::calls::CallState,
     contact_name: Option<String>,
+    contact_avatar_data_url: Option<String>,
     rx_frames: u64,
     tx_frames: u64,
     has_audio: bool,
@@ -2290,8 +2497,10 @@ fn call_state() -> Result<CallView, String> {
     let a = app()?;
     let cs = ducat_app::calls::calls();
     let state = cs.state();
+    let who = state.contact_hex().and_then(|h| a.contact(h));
     Ok(CallView {
-        contact_name: state.contact_hex().and_then(|h| a.contact(h)).map(|c| c.display_name()),
+        contact_name: who.as_ref().map(|c| c.display_name()),
+        contact_avatar_data_url: who.as_ref().and_then(|c| c.avatar.as_deref()).map(picture_url),
         state,
         rx_frames: cs.rx_frames.load(std::sync::atomic::Ordering::Relaxed),
         tx_frames: cs.tx_frames.load(std::sync::atomic::Ordering::Relaxed),
@@ -2380,15 +2589,18 @@ struct OrderRow {
     placed_at: u64,
     ready_at: u64,
     customer: Option<String>,
+    customer_avatar_data_url: Option<String>,
     card: Option<String>,
     card_svg: Option<String>,
     shown: ducat_app::wallet::Shown,
 }
 
 fn order_row(a: &App, o: ducat_app::orders::Order) -> OrderRow {
+    let customer = o.persona_hex.as_deref().and_then(|h| a.contact(h));
     OrderRow {
         state: a.order_state(&o),
-        customer: o.persona_hex.as_deref().and_then(|h| a.contact(h)).map(|c| c.display_name()),
+        customer: customer.as_ref().map(|c| c.display_name()),
+        customer_avatar_data_url: customer.as_ref().and_then(|c| c.avatar.as_deref()).map(picture_url),
         pay_uri: o.pay_uri(),
         pay_svg: if o.address.is_empty() { String::new() } else { qr_svg(&o.pay_uri()) },
         card_svg: o.card.as_deref().map(qr_svg),
@@ -2599,6 +2811,8 @@ pub fn run() {
             set_my_name,
             my_profile,
             set_my_profile,
+            set_my_avatar,
+            set_my_car_photo,
             profile_code,
             contacts,
             claim_card,
@@ -2674,6 +2888,12 @@ pub fn run() {
             fetch_gallery,
             picture_data_url,
             enquiry_about,
+            market_browse_world_cached,
+            market_browse_world,
+            market_post_publication,
+            market_unpost_publication,
+            set_publication_cover,
+            remove_publication_cover,
             ledger,
             export_ledger,
             request_payment,

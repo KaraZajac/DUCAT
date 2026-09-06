@@ -56,4 +56,6 @@
     <string name="profile_sign_pending_all">Proszą o zwrot kaucji. Twój podpis ją uwalnia.</string>
     <string name="profile_sign_release">Podpisz zwolnienie</string>
     <string name="profile_copied">Skopiowano</string>
+    <string name="profile_their_car">Ich auto</string>
+    <string name="profile_car_photo">Zdjęcie ich auta</string>
 </resources>

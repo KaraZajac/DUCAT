@@ -509,6 +509,13 @@ private fun PublisherHeader(publisherHex: String, publisherName: String?, muted:
         Modifier.fillMaxWidth().padding(top = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        // The cover the shelf showed when this was subscribed to (§16.18.2),
+        // or a book: nothing after the notice carries a picture.
+        val cover = remember(version, publisherHex) {
+            Publications.coverFor(context, publisherHex)
+        }
+        PubCover(cover, size = 44)
+        Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Text(
                 publisherName ?: "${publisherHex.take(12)}…",

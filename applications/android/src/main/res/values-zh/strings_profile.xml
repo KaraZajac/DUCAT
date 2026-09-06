@@ -56,4 +56,6 @@
     <string name="profile_sign_pending_all">对方请求退回押金。您的签名即释放资金。</string>
     <string name="profile_sign_release">签名放款</string>
     <string name="profile_copied">已复制</string>
+    <string name="profile_their_car">对方的车</string>
+    <string name="profile_car_photo">对方车辆的照片</string>
 </resources>

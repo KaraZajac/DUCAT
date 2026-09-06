@@ -56,4 +56,6 @@
     <string name="profile_sign_pending_all">Mereka meminta deposit dikembalikan. Tanda tangan Anda yang melepaskannya.</string>
     <string name="profile_sign_release">Tanda tangani pelepasan</string>
     <string name="profile_copied">Disalin</string>
+    <string name="profile_their_car">Mobil mereka</string>
+    <string name="profile_car_photo">Foto mobil mereka</string>
 </resources>

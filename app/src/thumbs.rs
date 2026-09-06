@@ -22,6 +22,16 @@ fn encode_jpeg(img: &DynamicImage, quality: u8) -> Option<Vec<u8>> {
 
 /// A JPEG under `budget` bytes, or None if no edge and quality gets there.
 pub fn thumbnail(bytes: &[u8], budget: usize) -> Option<Vec<u8>> {
+    shrink(bytes, budget, &[640, 512, 400, 320, 240])
+}
+
+/// A face for a contact record (§16.9): a small square-ish JPEG, since it
+/// sits beside the keys and is drawn at avatar size.
+pub fn face(bytes: &[u8], budget: usize) -> Option<Vec<u8>> {
+    shrink(bytes, budget, &[128, 96, 64])
+}
+
+fn shrink(bytes: &[u8], budget: usize, edges: &[u32]) -> Option<Vec<u8>> {
     let reader = ImageReader::new(std::io::Cursor::new(bytes)).with_guessed_format().ok()?;
     let (w, h) = reader.into_dimensions().ok()?;
     if w as u64 * h as u64 > COMPOSE_PIXELS {
@@ -29,7 +39,7 @@ pub fn thumbnail(bytes: &[u8], budget: usize) -> Option<Vec<u8>> {
     }
     let src = ImageReader::new(std::io::Cursor::new(bytes)).with_guessed_format().ok()?.decode().ok()?;
     let (sw, sh) = src.dimensions();
-    for edge in [640u32, 512, 400, 320, 240] {
+    for &edge in edges {
         let (tw, th) = if sw >= sh {
             let tw = edge.min(sw);
             (tw, ((tw as u64 * sh as u64) / sw as u64).max(1) as u32)
@@ -65,5 +75,9 @@ mod tests {
         assert!(t.len() <= THUMB_BYTES);
         assert_eq!(&t[..2], &[0xff, 0xd8]);
         assert!(thumbnail(b"not a picture", THUMB_BYTES).is_none());
+        let f = face(&png, 12 * 1024).expect("a face");
+        assert!(f.len() <= 12 * 1024);
+        let (w, h) = ImageReader::new(std::io::Cursor::new(&f)).with_guessed_format().unwrap().into_dimensions().unwrap();
+        assert!(w <= 128 && h <= 128);
     }
 }

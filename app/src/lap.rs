@@ -109,6 +109,7 @@ impl App {
             }
         });
         phase("listings", &mut || self.listings_lap());
+        phase("market", &mut || self.market_lap());
         phase("bills", &mut || self.run_due_bills());
         phase("attachment", &mut || {
             self.fetch_one_attachment();

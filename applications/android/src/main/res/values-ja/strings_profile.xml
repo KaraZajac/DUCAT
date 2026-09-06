@@ -56,4 +56,6 @@
     <string name="profile_sign_pending_all">保証金の返還を求めています。あなたの署名で解放されます。</string>
     <string name="profile_sign_release">解放に署名する</string>
     <string name="profile_copied">コピーしました</string>
+    <string name="profile_their_car">相手の車</string>
+    <string name="profile_car_photo">相手の車の写真</string>
 </resources>

@@ -3,7 +3,9 @@ package org.ducatproject.ducat.ui
 import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +24,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -45,6 +48,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -55,6 +60,7 @@ import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.Publications
 import org.ducatproject.ducat.R
+import org.ducatproject.ducat.SafeImage
 import org.ducatproject.ducat.Swarm
 import org.ducatproject.ducat.TabStore
 import org.ducatproject.ducat.formatXmr
@@ -345,6 +351,77 @@ fun PublishingSection() {
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    // The cover (§16.18.2's PN_THUMB): it rides the notice,
+                    // so it is the first thing a reader sees on the shelf,
+                    // and it is shrunk here to the board's cap for the
+                    // reason a listing's picture is — a notice one byte
+                    // over is refused by every reader. Kept with the
+                    // publication, so every re-post carries it.
+                    var cover by remember(version, pubId) {
+                        mutableStateOf(Publications.coverOf(context, pubId))
+                    }
+                    var coverError by remember(pubId) { mutableStateOf<String?>(null) }
+                    val pickCover = rememberLauncherForActivityResult(
+                        ActivityResultContracts.GetContent(),
+                    ) { uri ->
+                        if (uri != null) {
+                            coverError = null
+                            val shrunk = SafeImage.thumbnail({
+                                context.contentResolver.openInputStream(uri)
+                            })
+                            if (shrunk == null) {
+                                coverError = context.getString(R.string.pub_cover_failed)
+                            } else {
+                                Publications.setCover(context, pubId, shrunk)
+                                cover = shrunk
+                            }
+                        }
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            Modifier.size(72.dp).clip(MaterialTheme.shapes.small)
+                                .background(MaterialTheme.colorScheme.secondaryContainer)
+                                .clickable { pickCover.launch("image/*") },
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            val bmp = remember(cover?.size, cover?.contentHashCode()) {
+                                cover?.let { SafeImage.fromBytes(it, SafeImage.AVATAR_PIXELS) }
+                            }
+                            if (bmp != null) {
+                                Image(
+                                    bmp.asImageBitmap(),
+                                    stringResource(R.string.pub_cover_label),
+                                    Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop,
+                                )
+                            } else {
+                                Icon(
+                                    Icons.Filled.AddAPhoto, null,
+                                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                )
+                            }
+                        }
+                        Spacer(Modifier.width(12.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text(
+                                stringResource(R.string.pub_cover_label),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                            Text(
+                                coverError ?: stringResource(R.string.pub_cover_note),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = if (coverError != null) MaterialTheme.colorScheme.error
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            if (cover != null) {
+                                TextButton(onClick = {
+                                    Publications.setCover(context, pubId, null)
+                                    cover = null
+                                }) { Text(stringResource(R.string.pub_cover_remove)) }
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(6.dp))
                     Row(
                         Modifier.horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(6.dp),

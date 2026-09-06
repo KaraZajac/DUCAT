@@ -48,7 +48,6 @@
     <string name="market_delist_btn">أنزله</string>
     <string name="market_listed_as">مدرج تحت %1$s</string>
     <string name="market_list_failed">تعذر العرض — هل العقدة تعمل؟</string>
-    <string name="market_all_langs">كل اللغات</string>
     <string name="market_what_all">الكل</string>
     <string name="market_what_digital">رقمي</string>
     <string name="market_looking">نتصفح رف %1$s…</string>
@@ -80,4 +79,15 @@
     <string name="press_open_room">افتح غرفة الصحافة</string>
     <string name="market_refreshing">جارٍ التحقق من التغييرات…</string>
     <string name="pub_period_not_a_name">الفترة اسم وليست مجلدًا — بدون شرطات مائلة، ولا نقاط فقط.</string>
+    <string name="market_any_lang">كل اللغات</string>
+    <string name="market_add_lang">+ لغة</string>
+    <string name="market_pick_lang">أي لغة؟</string>
+    <string name="market_looking_lang">نتصفح رف %1$s بلغة %2$s…</string>
+    <string name="market_looking_all">نتصفح كل الرفوف…</string>
+    <string name="market_looking_all_lang">نتصفح كل الرفوف بلغة %1$s…</string>
+    <string name="market_cover_desc">الغلاف</string>
+    <string name="pub_cover_label">صورة الغلاف</string>
+    <string name="pub_cover_note">تظهر على الرف بجانب العنوان. تُصغَّر لتناسب الإشعار، فيبقى التصفح سريعًا.</string>
+    <string name="pub_cover_remove">إزالة</string>
+    <string name="pub_cover_failed">تعذّر استخدام تلك الصورة. جرّب غيرها.</string>
 </resources>

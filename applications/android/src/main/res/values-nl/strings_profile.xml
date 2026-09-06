@@ -56,4 +56,6 @@
     <string name="profile_sign_pending_all">Ze vragen de borg terug. Uw handtekening geeft die vrij.</string>
     <string name="profile_sign_release">Vrijgave ondertekenen</string>
     <string name="profile_copied">Gekopieerd</string>
+    <string name="profile_their_car">Hun auto</string>
+    <string name="profile_car_photo">Foto van hun auto</string>
 </resources>

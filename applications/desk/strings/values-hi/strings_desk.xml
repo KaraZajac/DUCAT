@@ -338,4 +338,18 @@
     <string name="desk_keep_someone">अभी कोई नहीं। संपर्क पर दिल उनका घर यहाँ रखता है।</string>
     <string name="desk_others">अन्य</string>
     <string name="desk_edited">संपादित</string>
+    <string name="desk_any_language">कोई भी भाषा</string>
+    <string name="desk_other_language">कोई और भाषा…</string>
+    <string name="desk_subscribing">सदस्यता ली जा रही है…</string>
+    <string name="desk_subscribed_note">सदस्यता ले ली गई। बिल या पहला अंक चैट में आएगा; जो आपके पास है वह लाइब्रेरी में है।</string>
+    <string name="desk_choose_cover">कवर चुनें…</string>
+    <string name="desk_remove_cover">कवर हटाएँ</string>
+    <string name="desk_market_cover_note">कवर सूचना के साथ जाता है, दस किलोबाइट से कम में, ताकि पाठक कुछ भी लाने से पहले उसे शेल्फ़ पर देख सके।</string>
+    <string name="desk_market_lang_note">भाषा शेल्फ़ को सीमित करती है। सूचना पूरी श्रेणी के बोर्ड पर भी जाती है, ताकि किसी भी भाषा के पाठक उसे पा सकें।</string>
+    <string name="desk_market_world_note">छह बोर्ड जो पूरा नेटवर्क साझा करता है, हर हफ़्ते नए। सूचना पर थोड़े काम की मुहर लगती है और वह एक दिन रहती है; डेस्क खुला रहने तक उसे दोहराता रहता है।</string>
+    <string name="desk_no_market_slot">इस हफ़्ते उस बोर्ड की हर जगह भरी है। चुनाव सहेज लिया गया है और डेस्क कोशिश करता रहेगा।</string>
+    <string name="desk_market_waiting">सूचीबद्ध; बोर्ड पर खाली जगह का इंतज़ार है।</string>
+    <string name="desk_car_picture">गाड़ी की तस्वीर</string>
+    <string name="desk_car_picture_note">मॉडल, रंग और नंबर प्लेट के साथ सिर्फ़ तब भेजी जाती है जब आप कोई सवारी लेते हैं, ताकि सवार सड़क किनारे आपकी गाड़ी पहचान सके।</string>
+    <string name="desk_car">गाड़ी</string>
 </resources>

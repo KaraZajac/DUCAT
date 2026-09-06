@@ -164,6 +164,9 @@ pub struct Contact {
     pub car_color: Option<String>,
     #[serde(default)]
     pub plate: Option<String>,
+    /// The car's picture, sent beside the plate while they were driving.
+    #[serde(rename = "car_photo", with = "opt_bytes_b64", default)]
+    pub car_photo: Option<Vec<u8>>,
     #[serde(rename = "their_read", default)]
     pub their_read_up_to: Option<u64>,
     #[serde(rename = "card_purpose", default)]
@@ -1412,6 +1415,7 @@ mod tests {
             car_model: None,
             car_color: None,
             plate: None,
+            car_photo: None,
             their_read_up_to: None,
             card_purpose: None,
             my_card_purpose: None,

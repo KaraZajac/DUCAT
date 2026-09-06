@@ -32,12 +32,12 @@
     <string name="pub_sub_code_hint">Scan om te abonneren. Claimen zet je op de lijst — een gratis publicatie geeft meteen de nieuwste editie, een betaalde stuurt de rekening.</string>
     <string name="market_near_me">Dichtbij</string>
     <string name="market_worldwide">Wereldwijd</string>
-    <string name="market_cat_news">nieuws</string>
-    <string name="market_cat_serials">feuilletons</string>
-    <string name="market_cat_sound">geluid</string>
-    <string name="market_cat_software">software</string>
-    <string name="market_cat_art">kunst</string>
-    <string name="market_cat_other">overig</string>
+    <string name="market_cat_news">Nieuws</string>
+    <string name="market_cat_serials">Feuilletons</string>
+    <string name="market_cat_sound">Geluid</string>
+    <string name="market_cat_software">Software</string>
+    <string name="market_cat_art">Kunst</string>
+    <string name="market_cat_other">Overig</string>
     <string name="market_empty">Nog niets op deze plank — de borden wisselen wekelijks.</string>
     <string name="market_free">Gratis</string>
     <string name="market_per_period">%1$s per editie</string>
@@ -48,7 +48,6 @@
     <string name="market_delist_btn">Weghalen</string>
     <string name="market_listed_as">Vermeld onder %1$s</string>
     <string name="market_list_failed">Aanbieden mislukt — draait de node?</string>
-    <string name="market_all_langs">alle talen</string>
     <string name="market_what_all">Alles</string>
     <string name="market_what_digital">Digitaal</string>
     <string name="market_looking">De plank %1$s wordt bekeken…</string>
@@ -80,4 +79,15 @@
     <string name="press_open_room">Persruimte openen</string>
     <string name="market_refreshing">Controleren op wijzigingen…</string>
     <string name="pub_period_not_a_name">Een periode is een naam, geen map — geen schuine strepen, en niet alleen punten.</string>
+    <string name="market_any_lang">Elke taal</string>
+    <string name="market_add_lang">+ taal</string>
+    <string name="market_pick_lang">Welke taal?</string>
+    <string name="market_looking_lang">De plank %1$s (%2$s) wordt bekeken…</string>
+    <string name="market_looking_all">Alle planken worden bekeken…</string>
+    <string name="market_looking_all_lang">Alle planken (%1$s) worden bekeken…</string>
+    <string name="market_cover_desc">Omslag</string>
+    <string name="pub_cover_label">Omslagafbeelding</string>
+    <string name="pub_cover_note">Staat op de plank naast de titel. Verkleind zodat het in het bericht past, zodat bladeren snel blijft.</string>
+    <string name="pub_cover_remove">Verwijderen</string>
+    <string name="pub_cover_failed">Die afbeelding kon niet worden gebruikt. Probeer een andere.</string>
 </resources>

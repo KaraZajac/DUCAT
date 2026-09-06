@@ -338,4 +338,18 @@
     <string name="desk_keep_someone">Nog niemand. Een hart bij een contact bewaart zijn thuis hier.</string>
     <string name="desk_others">Anderen</string>
     <string name="desk_edited">bewerkt</string>
+    <string name="desk_any_language">Elke taal</string>
+    <string name="desk_other_language">Een andere taal…</string>
+    <string name="desk_subscribing">Abonneren…</string>
+    <string name="desk_subscribed_note">Geabonneerd. De rekening of het eerste nummer komt in Chat aan; wat je hebt staat in de Bibliotheek.</string>
+    <string name="desk_choose_cover">Kies een omslag…</string>
+    <string name="desk_remove_cover">Omslag verwijderen</string>
+    <string name="desk_market_cover_note">De omslag reist mee met de aankondiging, onder de tien kilobyte, zodat een lezer hem op de plank ziet voordat er iets wordt opgehaald.</string>
+    <string name="desk_market_lang_note">Een taal versmalt de plank. De aankondiging gaat ook op het bord van de hele categorie, zodat lezers van elke taal hem vinden.</string>
+    <string name="desk_market_world_note">Zes borden die het hele netwerk deelt, wekelijks vernieuwd. Een aankondiging wordt met een beetje werk gestempeld en houdt een dag; de desk vernieuwt hem zolang hij open is.</string>
+    <string name="desk_no_market_slot">Elke plek op dat bord is deze week bezet. De keuze blijft bewaard en de desk blijft het proberen.</string>
+    <string name="desk_market_waiting">Aangemeld; wacht op een vrije plek op het bord.</string>
+    <string name="desk_car_picture">Foto van de auto</string>
+    <string name="desk_car_picture_note">Alleen meegestuurd met model, kleur en kenteken wanneer je een rit aanneemt, zodat een passagier je auto langs de stoep herkent.</string>
+    <string name="desk_car">Auto</string>
 </resources>

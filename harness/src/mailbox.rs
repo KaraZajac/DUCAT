@@ -362,6 +362,7 @@ pub async fn issue() -> Result<(), Box<dyn std::error::Error>> {
         car_model: None,
         car_color: None,
         plate: None,
+        car_photo: None,
         purpose: None,
     };
     rc.set_dht_value(inbox.key().clone(), 0, details.to_value().encode(), None)
@@ -473,6 +474,7 @@ pub async fn claim(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
         car_model: None,
         car_color: None,
         plate: None,
+        car_photo: None,
         purpose: None,
     };
     rc.set_dht_value(inbox.clone(), 1, mine.to_value().encode(), None).await?;

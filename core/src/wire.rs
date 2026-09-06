@@ -204,6 +204,11 @@ pub mod f {
     pub const GB_BODY: u64 = 296;
     pub const GB_RE_SENDER: u64 = 297;
     pub const GB_RE_SEQ: u64 = 298;
+    // A publication notice's cover (§16.18.2) and the car's picture on a
+    // driver's profile (§16.9): each an inline thumbnail under the
+    // listing-thumbnail rules.
+    pub const PN_THUMB: u64 = 300;
+    pub const DET_CAR_PHOTO: u64 = 301;
     // Read watermark and ring size on a log head (§16.16, §16.12).
     pub const HEAD_READ: u64 = 201;
     pub const HEAD_RING: u64 = 202;

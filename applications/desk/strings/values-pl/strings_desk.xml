@@ -346,4 +346,18 @@
     <string name="desk_keep_someone">Jeszcze nikogo. Serce przy kontakcie zachowuje tu jego dom.</string>
     <string name="desk_others">Inni</string>
     <string name="desk_edited">edytowano</string>
+    <string name="desk_any_language">Dowolny język</string>
+    <string name="desk_other_language">Inny język…</string>
+    <string name="desk_subscribing">Subskrybowanie…</string>
+    <string name="desk_subscribed_note">Zasubskrybowano. Rachunek lub pierwszy numer trafi do Czatu; to, co masz, jest w Bibliotece.</string>
+    <string name="desk_choose_cover">Wybierz okładkę…</string>
+    <string name="desk_remove_cover">Usuń okładkę</string>
+    <string name="desk_market_cover_note">Okładka podróżuje z ogłoszeniem, poniżej dziesięciu kilobajtów, więc czytelnik widzi ją na półce, zanim cokolwiek pobierze.</string>
+    <string name="desk_market_lang_note">Język zawęża półkę. Ogłoszenie trafia też na tablicę całej kategorii, więc znajdą je czytelnicy w dowolnym języku.</string>
+    <string name="desk_market_world_note">Sześć tablic dzielonych przez całą sieć, odnawianych co tydzień. Ogłoszenie jest stemplowane odrobiną pracy i trwa dzień; biurko odnawia je, dopóki jest otwarte.</string>
+    <string name="desk_no_market_slot">Wszystkie miejsca na tej tablicy są w tym tygodniu zajęte. Wybór zostaje zapamiętany, a biurko próbuje dalej.</string>
+    <string name="desk_market_waiting">Wystawione; czeka na wolne miejsce na tablicy.</string>
+    <string name="desk_car_picture">Zdjęcie samochodu</string>
+    <string name="desk_car_picture_note">Wysyłane z modelem, kolorem i tablicą tylko wtedy, gdy przyjmujesz wezwanie, aby pasażer rozpoznał twój samochód przy krawężniku.</string>
+    <string name="desk_car">Samochód</string>
 </resources>

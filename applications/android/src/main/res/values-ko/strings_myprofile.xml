@@ -32,4 +32,7 @@
     <string name="myprofile_phone_too_long">전화번호는 최대 15자리예요.</string>
     <string name="myprofile_signal_too_long">Signal 사용자 이름으로는 너무 길어요.</string>
     <string name="myprofile_signal_shape">Signal 사용자 이름은 name.12 모양이에요 — 이름, 점, 그다음 숫자.</string>
+    <string name="myprofile_car_photo">차 사진</string>
+    <string name="myprofile_car_photo_add">차 사진 추가</string>
+    <string name="myprofile_car_photo_note">아주 작게 줄여요. 호출을 받으면 승객이 번호판 옆에서 이걸 봐요 — 낯선 사람으로 가득한 길가는 사진으로 훑어보니까요.</string>
 </resources>

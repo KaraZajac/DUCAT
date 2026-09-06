@@ -59,6 +59,18 @@ class MyProfile(context: Context, personaHex: String? = null) {
     fun plate(): String? = prefs.getString(k("my_plate"), null)
     fun setPlate(v: String?) = put(k("my_plate"), v?.trim()?.ifBlank { null })
 
+    // The car's picture (§16.9, field 301): what a curb full of strangers
+    // is scanned by. At the board's thumbnail cap, and gated like the plate.
+    fun carPhoto(): ByteArray? = prefs.getString(k("my_car_photo"), null)
+        ?.let { Base64.decode(it, Base64.NO_WRAP) }
+
+    fun setCarPhoto(v: ByteArray?) {
+        prefs.edit()
+            .putString(k("my_car_photo"), v?.let { Base64.encodeToString(it, Base64.NO_WRAP) })
+            .apply()
+        ContactStore.bump()
+    }
+
     /** 1..6, matching `pronounOptions()`. Null means not set, which is not a
      *  failure state — someone with none renders like anyone else. */
     fun pronouns(): Int? = prefs.getInt(k("my_pronouns"), 0).takeIf { it in 1..6 }
@@ -109,7 +121,9 @@ class MyProfile(context: Context, personaHex: String? = null) {
      *  [purpose] null (an older peer's card, or one that did not say) is read
      *  as *not* a contact exchange — the private default. */
     fun toWire(purpose: String? = "profile", driving: Boolean = false): Profile {
-        if (!shareProfile()) return Profile(null, null, null, null, null, null, null, null)
+        if (!shareProfile()) {
+            return Profile(null, null, null, null, null, null, null, null, null)
+        }
         val relational = purpose == "profile"
         return Profile(
             avatar = avatar(),
@@ -120,6 +134,7 @@ class MyProfile(context: Context, personaHex: String? = null) {
             carModel = if (driving) carModel() else null,
             carColor = if (driving) carColor() else null,
             plate = if (driving) plate() else null,
+            carPhoto = if (driving) carPhoto() else null,
         )
     }
 

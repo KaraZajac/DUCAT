@@ -48,7 +48,6 @@
     <string name="market_delist_btn">下架</string>
     <string name="market_listed_as">已列于%1$s</string>
     <string name="market_list_failed">上架失败 — 节点在运行吗?</string>
-    <string name="market_all_langs">所有语言</string>
     <string name="market_what_all">全部</string>
     <string name="market_what_digital">数字</string>
     <string name="market_looking">正在查看%1$s书架…</string>
@@ -80,4 +79,15 @@
     <string name="press_open_room">打开新闻室</string>
     <string name="market_refreshing">正在检查更新…</string>
     <string name="pub_period_not_a_name">期号是名称，不是文件夹——不能使用斜杠，也不能只有点。</string>
+    <string name="market_any_lang">任何语言</string>
+    <string name="market_add_lang">+ 语言</string>
+    <string name="market_pick_lang">哪种语言？</string>
+    <string name="market_looking_lang">正在查看%1$s书架（%2$s）…</string>
+    <string name="market_looking_all">正在查看所有书架…</string>
+    <string name="market_looking_all_lang">正在查看所有书架（%1$s）…</string>
+    <string name="market_cover_desc">封面</string>
+    <string name="pub_cover_label">封面图片</string>
+    <string name="pub_cover_note">显示在书架上标题旁边。会缩小到能放进通知，这样浏览依然快。</string>
+    <string name="pub_cover_remove">移除</string>
+    <string name="pub_cover_failed">那张图片无法使用，换一张试试。</string>
 </resources>

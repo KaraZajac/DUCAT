@@ -354,4 +354,18 @@
     <string name="desk_keep_someone">لا أحد بعد. القلب على جهة اتصال يحتفظ بمنزلها هنا.</string>
     <string name="desk_others">آخرون</string>
     <string name="desk_edited">معدّل</string>
+    <string name="desk_any_language">أي لغة</string>
+    <string name="desk_other_language">لغة أخرى…</string>
+    <string name="desk_subscribing">جارٍ الاشتراك…</string>
+    <string name="desk_subscribed_note">تم الاشتراك. تصل الفاتورة أو العدد الأول في الدردشة، وما تملكه في المكتبة.</string>
+    <string name="desk_choose_cover">اختر غلافًا…</string>
+    <string name="desk_remove_cover">إزالة الغلاف</string>
+    <string name="desk_market_cover_note">يسافر الغلاف مع الإعلان، بأقل من عشرة كيلوبايت، فيراه القارئ على الرف قبل أن يجلب أي شيء.</string>
+    <string name="desk_market_lang_note">تضيّق اللغة الرف. يُنشر الإعلان أيضًا على لوحة الفئة كلها، فيجده قرّاء أي لغة.</string>
+    <string name="desk_market_world_note">ست لوحات تتشاركها الشبكة كلها، تتجدد أسبوعيًا. يُختم الإعلان بقليل من العمل ويدوم يومًا؛ ويجدده المكتب ما دام مفتوحًا.</string>
+    <string name="desk_no_market_slot">كل الخانات على تلك اللوحة مشغولة هذا الأسبوع. الاختيار محفوظ وسيواصل المكتب المحاولة.</string>
+    <string name="desk_market_waiting">مُدرج؛ بانتظار خانة حرة على اللوحة.</string>
+    <string name="desk_car_picture">صورة السيارة</string>
+    <string name="desk_car_picture_note">تُرسل مع الطراز واللون واللوحة فقط عندما تقبل نداء ركوب، ليميّز الراكب سيارتك عند الرصيف.</string>
+    <string name="desk_car">السيارة</string>
 </resources>

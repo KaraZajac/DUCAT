@@ -338,4 +338,18 @@
     <string name="desk_keep_someone">Nadie aún. Un corazón en un contacto guarda su hogar aquí.</string>
     <string name="desk_others">Otros</string>
     <string name="desk_edited">editado</string>
+    <string name="desk_any_language">Cualquier idioma</string>
+    <string name="desk_other_language">Otro idioma…</string>
+    <string name="desk_subscribing">Suscribiendo…</string>
+    <string name="desk_subscribed_note">Suscrito. La factura o el primer número llega en el Chat; lo que tienes está en la Biblioteca.</string>
+    <string name="desk_choose_cover">Elegir una portada…</string>
+    <string name="desk_remove_cover">Quitar la portada</string>
+    <string name="desk_market_cover_note">La portada viaja con el anuncio, en menos de diez kilobytes, para que el lector la vea en el estante antes de descargar nada.</string>
+    <string name="desk_market_lang_note">Un idioma acota el estante. El anuncio también va al tablón de toda la categoría, para que lo encuentren lectores de cualquier idioma.</string>
+    <string name="desk_market_world_note">Seis tablones que comparte toda la red, renovados cada semana. Un anuncio se sella con un poco de trabajo y dura un día; el escritorio lo renueva mientras está abierto.</string>
+    <string name="desk_no_market_slot">Todos los huecos de ese tablón están ocupados esta semana. La elección se guarda y el escritorio sigue intentándolo.</string>
+    <string name="desk_market_waiting">Listado; esperando un hueco libre en el tablón.</string>
+    <string name="desk_car_picture">Foto del coche</string>
+    <string name="desk_car_picture_note">Se envía con el modelo, el color y la matrícula solo cuando aceptas una llamada, para que el pasajero distinga tu coche en la acera.</string>
+    <string name="desk_car">Coche</string>
 </resources>

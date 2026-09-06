@@ -4,8 +4,8 @@
   // notice on a board is a day long and a card wide; a desk with no GPS
   // takes the place as a geohash cell.
   import { onMount } from "svelte";
-  import { t, i18n } from "./i18n.svelte";
-  import { api, copy, fmtXmr, fmtTime, type FoundRow, type ListingDraft, type ListingRow, confirmDanger } from "./api";
+  import { t, i18n, LANGS } from "./i18n.svelte";
+  import { api, copy, fmtXmr, fmtTime, type FoundRow, type ListingDraft, type ListingRow, type MarketRow, MARKET_CATEGORIES, confirmDanger } from "./api";
   import { gen, drive } from "./state.svelte";
 
   let mode = $state<"browse" | "mine">("browse");
@@ -18,6 +18,77 @@
   let gallery = $state<string[]>([]);
   let galleryBusy = $state(false);
   let asking = $state(false);
+
+  // Where to look: the boards around a place, or the six shelves the
+  // whole network shares (§16.18.2). No category is every shelf at once;
+  // no language is the bare board, which every notice is also on.
+  let scope = $state<"near" | "world">("near");
+  let cat = $state<string | null>(null);
+  let lang = $state<string | null>(null);
+  let world = $state<MarketRow[]>([]);
+  let worldLooked = $state(false);
+  let worldBusy = $state(false);
+  let worldSeq = 0;
+  let subscribing = $state<string | null>(null);
+  let worldMsg = $state<string | null>(null);
+  const deskLang = $derived(LANGS.find((l) => l.code === i18n.lang) ?? LANGS[0]);
+
+  function catLabel(slug: string | null): string {
+    switch (slug) {
+      case "news": return t("market_cat_news");
+      case "serials": return t("market_cat_serials");
+      case "sound": return t("market_cat_sound");
+      case "software": return t("market_cat_software");
+      case "art": return t("market_cat_art");
+      case "other": return t("market_cat_other");
+      default: return t("market_what_all");
+    }
+  }
+
+  // What the shelf said last time paints now; the live read replaces it.
+  // A newer choice while a read runs keeps its own answer.
+  async function lookWorld() {
+    err = null;
+    const my = ++worldSeq;
+    const [c, l] = [cat, lang];
+    try { localStorage.setItem("ducat.market.cat", c ?? ""); localStorage.setItem("ducat.market.lang", l ?? ""); } catch {}
+    worldBusy = true;
+    try {
+      const warm = await api.marketBrowseWorldCached(c, l);
+      if (my === worldSeq && warm.length) { world = warm; worldLooked = true; }
+    } catch {}
+    try {
+      const fresh = await api.marketBrowseWorld(c, l);
+      if (my === worldSeq) world = fresh;
+    } catch (e) {
+      if (my === worldSeq) err = String(e);
+    } finally {
+      if (my === worldSeq) { worldBusy = false; worldLooked = true; }
+    }
+  }
+
+  function pickScope(s: "near" | "world") {
+    scope = s;
+    try { localStorage.setItem("ducat.market.scope", s); } catch {}
+    if (s === "world" && !worldLooked && !worldBusy) lookWorld();
+  }
+  function pickCat(c: string | null) { cat = c; lookWorld(); }
+  function pickLang(l: string | null) { lang = l; lookWorld(); }
+
+  // Claiming the card is subscribing (§16.18.2): the enrolment, the bill
+  // or the first issue, all arrive down the thread it opens.
+  async function subscribe(r: MarketRow) {
+    err = null; worldMsg = null;
+    subscribing = r.card;
+    try {
+      await api.claimCard(r.card, null);
+      worldMsg = t("desk_subscribed_note");
+    } catch (e) {
+      err = String(e);
+    } finally {
+      subscribing = null;
+    }
+  }
 
   let mine = $state<ListingRow[]>([]);
   let editing = $state<ListingDraft | null>(null);
@@ -48,8 +119,14 @@
 
   onMount(() => {
     refresh();
-    try { cell = localStorage.getItem("ducat.cell") ?? ""; } catch {}
+    try {
+      cell = localStorage.getItem("ducat.cell") ?? "";
+      cat = localStorage.getItem("ducat.market.cat") || null;
+      lang = localStorage.getItem("ducat.market.lang") || null;
+      if (localStorage.getItem("ducat.market.scope") === "world") scope = "world";
+    } catch {}
     if (cell) paint();
+    if (scope === "world") lookWorld();
   });
   $effect(() => {
     void gen.value;
@@ -180,6 +257,11 @@
 </div>
 
 {#if mode === "browse"}
+  <div class="tabs" style="margin: 0 0 10px">
+    <button class="tab" class:active={scope === "near"} onclick={() => pickScope("near")}>{t("market_near_me")}</button>
+    <button class="tab" class:active={scope === "world"} onclick={() => pickScope("world")}>{t("market_worldwide")}</button>
+  </div>
+  {#if scope === "near"}
   <div class="card">
     <div class="field">
       <label for="cell">{t("rent_area")}</label>
@@ -225,6 +307,43 @@
       {/each}
     </div>
     {#if found.length === 0 && !searching}<p class="empty">{t("desk_nothing_found")}</p>{/if}
+  {/if}
+  {:else}
+  <div class="card">
+    <div class="chips">
+      <button class="chip" class:on={cat === null} onclick={() => pickCat(null)}>{t("market_what_all")}</button>
+      {#each MARKET_CATEGORIES as c (c)}<button class="chip" class:on={cat === c} onclick={() => pickCat(c)}>{catLabel(c)}</button>{/each}
+    </div>
+    <div class="chips">
+      <button class="chip" class:on={lang === null} onclick={() => pickLang(null)}>{t("desk_any_language")}</button>
+      <button class="chip" class:on={lang === deskLang.code} onclick={() => pickLang(deskLang.code)}>{deskLang.name}</button>
+      <select class="input narrow" value={lang && lang !== deskLang.code ? lang : ""} onchange={(e) => { const v = (e.target as HTMLSelectElement).value; if (v) pickLang(v); }}>
+        <option value="">{t("desk_other_language")}</option>
+        {#each LANGS.filter((l) => l.code !== deskLang.code) as l (l.code)}<option value={l.code}>{l.name}</option>{/each}
+      </select>
+      <button class="btn small" disabled={worldBusy} onclick={lookWorld}>{worldBusy ? t("desk_looking") : t("desk_refresh")}</button>
+    </div>
+    <p class="note">{t("desk_market_world_note")}</p>
+    {#if worldMsg}<p class="note ok-text">{worldMsg}</p>{/if}
+    {#if err}<p class="err">{err}</p>{/if}
+  </div>
+  {#if worldBusy}<p class="meta">{world.length ? t("market_refreshing") : t("market_looking", catLabel(cat))}</p>{/if}
+  <div class="shelf">
+    {#each world as r (r.board + ":" + r.subkey + ":" + r.card)}
+      <div class="shelf-row">
+        {#if r.cover_data_url}<img class="cover" src={r.cover_data_url} alt="" />{:else}<div class="cover none">{catLabel(r.category)}</div>{/if}
+        <div class="shelf-text">
+          <div class="title">{r.title}{#if r.mine}<span class="meta"> · {t("desk_yours")}</span>{/if}</div>
+          {#if r.blurb}<div class="meta">{r.blurb}</div>{/if}
+          <div class="meta">{r.shown ? t("market_per_period", r.shown.primary) : t("market_free")} · {catLabel(r.category)} · {t("desk_until", fmtTime(r.expiry))}</div>
+        </div>
+        <div class="actions nowrap">
+          {#if !r.mine}<button class="btn small primary" disabled={subscribing === r.card} onclick={() => subscribe(r)}>{subscribing === r.card ? t("desk_subscribing") : t("market_subscribe")}</button>{/if}
+        </div>
+      </div>
+    {/each}
+  </div>
+  {#if worldLooked && !worldBusy && world.length === 0}<p class="empty">{t("market_empty")}</p>{/if}
   {/if}
 
 {:else}

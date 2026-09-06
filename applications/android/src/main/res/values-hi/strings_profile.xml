@@ -56,4 +56,6 @@
     <string name="profile_sign_pending_all">उन्होंने जमा वापस माँगी है। आपका हस्ताक्षर ही इसे जारी करता है।</string>
     <string name="profile_sign_release">रिलीज़ पर हस्ताक्षर करें</string>
     <string name="profile_copied">कॉपी हो गया</string>
+    <string name="profile_their_car">उनकी गाड़ी</string>
+    <string name="profile_car_photo">उनकी गाड़ी की तस्वीर</string>
 </resources>

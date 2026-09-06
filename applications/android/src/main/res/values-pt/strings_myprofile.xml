@@ -32,4 +32,7 @@
     <string name="myprofile_phone_too_long">Um número de telefone tem no máximo 15 dígitos.</string>
     <string name="myprofile_signal_too_long">Isso é mais longo do que um nome de usuário do Signal pode ser.</string>
     <string name="myprofile_signal_shape">Um nome de usuário do Signal se parece com nome.12 — um nome, um ponto e depois dígitos.</string>
+    <string name="myprofile_car_photo">Foto do carro</string>
+    <string name="myprofile_car_photo_add">Adicionar uma foto do carro</string>
+    <string name="myprofile_car_photo_note">Bem reduzida. Os passageiros a veem ao lado da placa quando você aceita a chamada deles — é com uma foto que se vasculha uma calçada cheia de estranhos.</string>
 </resources>

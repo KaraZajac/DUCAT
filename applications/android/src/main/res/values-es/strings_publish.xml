@@ -32,12 +32,12 @@
     <string name="pub_sub_code_hint">Escanea para suscribirte. Reclamarlo te une a la lista — una publicación gratis entrega el último número al momento; una de pago envía la factura.</string>
     <string name="market_near_me">Cerca de mí</string>
     <string name="market_worldwide">Mundial</string>
-    <string name="market_cat_news">noticias</string>
-    <string name="market_cat_serials">seriales</string>
-    <string name="market_cat_sound">sonido</string>
-    <string name="market_cat_software">software</string>
-    <string name="market_cat_art">arte</string>
-    <string name="market_cat_other">otros</string>
+    <string name="market_cat_news">Noticias</string>
+    <string name="market_cat_serials">Seriales</string>
+    <string name="market_cat_sound">Sonido</string>
+    <string name="market_cat_software">Software</string>
+    <string name="market_cat_art">Arte</string>
+    <string name="market_cat_other">Otros</string>
     <string name="market_empty">Nada en este estante todavía — los tablones rotan cada semana.</string>
     <string name="market_free">Gratis</string>
     <string name="market_per_period">%1$s por número</string>
@@ -48,7 +48,6 @@
     <string name="market_delist_btn">Retirar</string>
     <string name="market_listed_as">Listado en %1$s</string>
     <string name="market_list_failed">No se pudo publicar — ¿está el nodo activo?</string>
-    <string name="market_all_langs">todos los idiomas</string>
     <string name="market_what_all">Todo</string>
     <string name="market_what_digital">Digital</string>
     <string name="market_looking">Mirando el estante de %1$s…</string>
@@ -80,4 +79,15 @@
     <string name="press_open_room">Abrir la sala de prensa</string>
     <string name="market_refreshing">Buscando cambios…</string>
     <string name="pub_period_not_a_name">Un periodo es un nombre, no una carpeta: sin barras, y no solo puntos.</string>
+    <string name="market_any_lang">Cualquier idioma</string>
+    <string name="market_add_lang">+ idioma</string>
+    <string name="market_pick_lang">¿Qué idioma?</string>
+    <string name="market_looking_lang">Mirando el estante de %1$s en %2$s…</string>
+    <string name="market_looking_all">Mirando todos los estantes…</string>
+    <string name="market_looking_all_lang">Mirando todos los estantes en %1$s…</string>
+    <string name="market_cover_desc">Portada</string>
+    <string name="pub_cover_label">Imagen de portada</string>
+    <string name="pub_cover_note">Se muestra en el estante junto al título. Se reduce para caber en el aviso, así el paseo sigue siendo rápido.</string>
+    <string name="pub_cover_remove">Quitar</string>
+    <string name="pub_cover_failed">No se pudo usar esa imagen. Prueba con otra.</string>
 </resources>

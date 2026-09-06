@@ -334,4 +334,18 @@
     <string name="desk_keep_someone">まだ誰もいません。連絡先へのハートがその人のホームをここに保持します。</string>
     <string name="desk_others">その他</string>
     <string name="desk_edited">編集済み</string>
+    <string name="desk_any_language">どの言語でも</string>
+    <string name="desk_other_language">ほかの言語…</string>
+    <string name="desk_subscribing">購読しています…</string>
+    <string name="desk_subscribed_note">購読しました。請求書または最初の号はチャットに届き、手元にあるものはライブラリにあります。</string>
+    <string name="desk_choose_cover">表紙を選ぶ…</string>
+    <string name="desk_remove_cover">表紙を外す</string>
+    <string name="desk_market_cover_note">表紙は10キロバイト未満で告知と一緒に運ばれ、読者は何かを取り寄せる前に棚でそれを目にします。</string>
+    <string name="desk_market_lang_note">言語を選ぶと棚が絞られます。告知はカテゴリー全体の掲示板にも載るので、どの言語の読者にも見つかります。</string>
+    <string name="desk_market_world_note">ネットワーク全体で共有する6つの掲示板が毎週更新されます。告知には少しの作業で印が押され、1日もちます。デスクは開いている間それを更新し続けます。</string>
+    <string name="desk_no_market_slot">今週はその掲示板の枠がすべて埋まっています。選択は保存され、デスクは試し続けます。</string>
+    <string name="desk_market_waiting">掲載済み。掲示板の空き枠を待っています。</string>
+    <string name="desk_car_picture">車の写真</string>
+    <string name="desk_car_picture_note">配車の呼び出しを受けたときだけ、車種・色・ナンバーと一緒に送られ、乗客が路肩であなたの車を見分けられます。</string>
+    <string name="desk_car">車</string>
 </resources>

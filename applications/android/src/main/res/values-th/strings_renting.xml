@@ -145,4 +145,6 @@
     <string name="rent_delete_title">ลบประกาศนี้?</string>
     <string name="rent_delete_body">การนำลงจะเก็บไว้พร้อมประวัติ การลบเป็นการถาวร — และประกาศที่พิมพ์ใหม่นับเป็นผู้ขายรายใหม่ ไม่ว่าอันนี้จะอยู่มานานแค่ไหน</string>
     <string name="rent_delete_keep">เก็บไว้</string>
+    <string name="rent_photo_take">ถ่ายรูป</string>
+    <string name="rent_photo_no_camera">ไม่มีแอปกล้องในโทรศัพท์เครื่องนี้</string>
 </resources>

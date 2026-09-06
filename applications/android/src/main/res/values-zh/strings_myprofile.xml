@@ -32,4 +32,7 @@
     <string name="myprofile_phone_too_long">电话号码最多 15 位数字。</string>
     <string name="myprofile_signal_too_long">这超过了 Signal 用户名的最大长度。</string>
     <string name="myprofile_signal_shape">Signal 用户名形如 name.12——名字、一个点，然后是数字。</string>
+    <string name="myprofile_car_photo">车辆照片</string>
+    <string name="myprofile_car_photo_add">添加车辆照片</string>
+    <string name="myprofile_car_photo_note">会压得很小。你接下乘客的呼叫时，他们会在车牌旁看到它 — 站满陌生人的路边，就是靠一张照片辨认的。</string>
 </resources>
