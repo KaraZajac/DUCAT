@@ -518,6 +518,8 @@
  "drawer_forget_confirm": "잊기",
  "drawer_forget_title": "%1$s님을 잊을까요?",
  "group_add": "추가",
+ "group_leave": "그룹 나가기",
+ "group_leave_confirm": "%1$s에서 나갈까요? 이 기기에서 사라지며, 다른 사람들은 계속 대화하고, 새 초대가 오면 다시 돌아옵니다.",
  "items_add": "추가",
  "items_back_on": "다시 판매",
  "items_name": "품목",

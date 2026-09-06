@@ -527,6 +527,8 @@
  "drawer_forget_confirm": "भुला दें",
  "drawer_forget_title": "%1$s को भुला दें?",
  "group_add": "जोड़ें",
+ "group_leave": "समूह छोड़ें",
+ "group_leave_confirm": "%1$s छोड़ें? यह इस डिवाइस से हट जाएगा; बाकी लोग आपके बिना बात करते रहेंगे, और नया न्योता इसे वापस ले आएगा।",
  "items_add": "जोड़ें",
  "items_back_on": "फिर से",
  "items_name": "चीज़",

@@ -56,6 +56,11 @@ pub struct Group {
     /// one fans out over pairwise threads as §16.19 says.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub board: Option<Board>,
+    /// Left on this desk: not read, not shown, not written to. The roster
+    /// is grow-only, so nobody else learns; a roster that moves the group
+    /// to a newer board clears it — somebody re-formed with us in it.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub left: bool,
 }
 
 /// One generation of a group's board (§16.24): the record, its key, and
@@ -223,6 +228,14 @@ impl App {
         Ok(())
     }
 
+    /// Leave a group here: it is kept, marked, and skipped by every lap
+    /// and list. A fresh generation from the others brings it back.
+    pub fn leave_group(&self, id_hex: &str) -> Result<(), Error> {
+        let g = self.group(id_hex).ok_or_else(|| Error::Refused("no such group".into()))?;
+        log::info(TAG, format!("{}: left", g.name));
+        self.upsert_group(Group { left: true, ..g })
+    }
+
     fn upsert_group(&self, g: Group) -> Result<(), Error> {
         let _l = GROUPS.lock().unwrap_or_else(|e| e.into_inner());
         let mut cur = self.groups();
@@ -249,7 +262,7 @@ impl App {
             members.push(mine);
         }
         members.dedup();
-        let g = Group { id_hex: id, name: ducat_mobile::contacts::clean_display_text(name.trim().to_string()), members: members.clone(), my_group_seq: 0, disclosed: false, board: None };
+        let g = Group { id_hex: id, name: ducat_mobile::contacts::clean_display_text(name.trim().to_string()), members: members.clone(), my_group_seq: 0, disclosed: false, board: None, left: false };
         // The board first: a group made here rides on one from its first
         // word. Forming it needs the node; a group cannot be made offline.
         let board = self.form_board(&g.id_hex, &g.members, 1)?;
@@ -309,7 +322,7 @@ impl App {
                     log::warn(TAG, "roster for a group we are not in — ignored");
                     return;
                 }
-                let _ = self.upsert_group(Group { id_hex: id_hex.clone(), name: roster.name.clone(), members: members.clone(), my_group_seq: 0, disclosed: false, board: incoming });
+                let _ = self.upsert_group(Group { id_hex: id_hex.clone(), name: roster.name.clone(), members: members.clone(), my_group_seq: 0, disclosed: false, board: incoming, left: false });
                 plan_touch(&format!("g:{id_hex}"));
                 let adder = self.contact(sender_hex).map(|c| c.display_name()).unwrap_or_else(|| format!("{short}…"));
                 log::info(TAG, format!("joined {} ({} member(s)) — added by {adder}", roster.name, members.len()));
@@ -350,7 +363,7 @@ impl App {
                 if merged.len() != known.members.len() || moved {
                     let n = merged.len();
                     let gen = board.as_ref().map(|b| b.generation);
-                    let _ = self.upsert_group(Group { members: merged.clone(), board, ..known.clone() });
+                    let _ = self.upsert_group(Group { members: merged.clone(), board, left: known.left && !moved, ..known.clone() });
                     if moved {
                         // A new generation is a new record: everything on it is unread.
                         plan_touch(&format!("g:{id_hex}"));
@@ -635,6 +648,9 @@ impl App {
     /// Pages the network did not take yet, written again.
     fn flush_boards(&self) {
         for g in self.groups() {
+            if g.left {
+                continue;
+            }
             let Some(board) = g.board.clone() else { continue };
             if !board.dirty {
                 continue;
@@ -801,6 +817,9 @@ impl App {
         let now = Instant::now();
         let mut got = 0;
         for g in self.groups() {
+            if g.left {
+                continue;
+            }
             let Some(board) = g.board.clone() else { continue };
             let slot = format!("g:{}", g.id_hex);
             if plan_due(&slot).map_or(false, |at| at > now) {
@@ -836,6 +855,9 @@ impl App {
     pub(crate) fn mark_boards_changed(&self, keys: &[String]) -> usize {
         let mut n = 0;
         for g in self.groups() {
+            if g.left {
+                continue;
+            }
             if let Some(b) = &g.board {
                 if !b.key.is_empty() && keys.iter().any(|k| k == &b.key) {
                     self.touch_group(&g.id_hex);
@@ -1030,7 +1052,7 @@ mod tests {
         let _ = std::fs::remove_dir_all(&dir);
         let app = App::open(&dir).unwrap();
         let me = app.primary_hex().unwrap();
-        let g = Group { id_hex: "aa".repeat(16), name: "Crew".into(), members: vec!["p1".into(), "p2".into(), me.clone()], my_group_seq: 0, disclosed: false, board: None };
+        let g = Group { id_hex: "aa".repeat(16), name: "Crew".into(), members: vec!["p1".into(), "p2".into(), me.clone()], my_group_seq: 0, disclosed: false, board: None, left: false };
         app.upsert_group(g.clone()).unwrap();
         let mk = |out: bool, seq: u64, gseq: u64, ts: u64| StoredMessage { outgoing: out, seq, body: format!("m{gseq}"), timestamp: ts, group_id: Some(g.id_hex.clone()), group_seq: gseq, ..Default::default() };
         // My copy to p1 and to p2 carry the same group counter: one row.

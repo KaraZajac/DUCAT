@@ -527,6 +527,8 @@
  "drawer_forget_confirm": "Vergessen",
  "drawer_forget_title": "%1$s vergessen?",
  "group_add": "Hinzufügen",
+ "group_leave": "Gruppe verlassen",
+ "group_leave_confirm": "%1$s verlassen? Die Gruppe verschwindet von diesem Gerät; die anderen reden ohne dich weiter, und eine neue Einladung bringt sie zurück.",
  "items_add": "Hinzufügen",
  "items_back_on": "Wieder da",
  "items_name": "Artikel",

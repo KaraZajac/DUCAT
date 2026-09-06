@@ -527,6 +527,8 @@
  "drawer_forget_confirm": "Unut",
  "drawer_forget_title": "%1$s unutulsun mu?",
  "group_add": "Ekle",
+ "group_leave": "Gruptan ayrıl",
+ "group_leave_confirm": "%1$s grubundan ayrılsın mı? Bu cihazdan kaybolur; diğerleri sensiz konuşmaya devam eder, yeni bir davet onu geri getirir.",
  "items_add": "Ekle",
  "items_back_on": "Geri koy",
  "items_name": "Ürün",

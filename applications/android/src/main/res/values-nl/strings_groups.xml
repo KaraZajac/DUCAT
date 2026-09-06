@@ -38,4 +38,7 @@
     <string name="group_creating">Aanmaken…</string>
     <string name="group_forming_board">Het bord wordt gevormd…</string>
     <string name="group_telling_members">De leden worden ingelicht…</string>
+    <string name="group_leave">Groep verlaten</string>
+    <string name="group_leave_action">Verlaten</string>
+    <string name="group_leave_confirm">%1$s verlaten? De groep verdwijnt van dit apparaat; de anderen praten zonder je verder, en een nieuwe uitnodiging brengt hem terug.</string>
 </resources>

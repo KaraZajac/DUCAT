@@ -518,6 +518,8 @@
  "drawer_forget_confirm": "削除",
  "drawer_forget_title": "%1$sを削除しますか？",
  "group_add": "追加",
+ "group_leave": "グループを退出",
+ "group_leave_confirm": "%1$s を退出しますか？この端末から消えます。ほかの人はあなた抜きで続け、新しい招待で戻ります。",
  "items_add": "追加",
  "items_back_on": "再開",
  "items_name": "品目",

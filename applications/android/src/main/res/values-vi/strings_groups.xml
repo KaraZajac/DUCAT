@@ -38,4 +38,7 @@
     <string name="group_creating">Đang tạo…</string>
     <string name="group_forming_board">Đang lập bảng…</string>
     <string name="group_telling_members">Đang báo cho các thành viên…</string>
+    <string name="group_leave">Rời nhóm</string>
+    <string name="group_leave_action">Rời</string>
+    <string name="group_leave_confirm">Rời %1$s? Nhóm sẽ biến mất khỏi thiết bị này; những người khác tiếp tục trò chuyện mà không có bạn, và lời mời mới sẽ đưa nó trở lại.</string>
 </resources>

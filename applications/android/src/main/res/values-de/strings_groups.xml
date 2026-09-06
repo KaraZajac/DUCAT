@@ -38,4 +38,7 @@
     <string name="group_creating">Wird erstellt…</string>
     <string name="group_forming_board">Die Tafel wird angelegt…</string>
     <string name="group_telling_members">Die Mitglieder werden benachrichtigt…</string>
+    <string name="group_leave">Gruppe verlassen</string>
+    <string name="group_leave_action">Verlassen</string>
+    <string name="group_leave_confirm">%1$s verlassen? Die Gruppe verschwindet von diesem Gerät; die anderen reden ohne dich weiter, und eine neue Einladung bringt sie zurück.</string>
 </resources>

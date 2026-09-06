@@ -38,4 +38,7 @@
     <string name="group_creating">正在创建…</string>
     <string name="group_forming_board">正在建立板…</string>
     <string name="group_telling_members">正在通知成员…</string>
+    <string name="group_leave">退出群组</string>
+    <string name="group_leave_action">退出</string>
+    <string name="group_leave_confirm">退出 %1$s？它会从此设备消失；其他人继续聊天，新的邀请会让它回来。</string>
 </resources>

@@ -518,6 +518,8 @@
  "drawer_forget_confirm": "Lupakan",
  "drawer_forget_title": "Lupakan %1$s?",
  "group_add": "Tambah",
+ "group_leave": "Keluar dari grup",
+ "group_leave_confirm": "Keluar dari %1$s? Grup hilang dari perangkat ini; yang lain tetap mengobrol tanpa Anda, dan undangan baru mengembalikannya.",
  "items_add": "Tambah",
  "items_back_on": "Tersedia lagi",
  "items_name": "Barang",

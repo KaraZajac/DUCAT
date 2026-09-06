@@ -38,4 +38,7 @@
     <string name="group_creating">Створюємо…</string>
     <string name="group_forming_board">Створюємо дошку…</string>
     <string name="group_telling_members">Повідомляємо учасників…</string>
+    <string name="group_leave">Вийти з групи</string>
+    <string name="group_leave_action">Вийти</string>
+    <string name="group_leave_confirm">Вийти з %1$s? Група зникне з цього пристрою; інші продовжать без вас, а нове запрошення її поверне.</string>
 </resources>

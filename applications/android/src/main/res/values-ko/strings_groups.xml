@@ -38,4 +38,7 @@
     <string name="group_creating">만드는 중…</string>
     <string name="group_forming_board">게시판을 만드는 중…</string>
     <string name="group_telling_members">구성원에게 알리는 중…</string>
+    <string name="group_leave">그룹 나가기</string>
+    <string name="group_leave_action">나가기</string>
+    <string name="group_leave_confirm">%1$s에서 나갈까요? 이 기기에서 사라지며, 다른 사람들은 계속 대화하고, 새 초대가 오면 다시 돌아옵니다.</string>
 </resources>

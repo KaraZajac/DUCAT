@@ -518,6 +518,8 @@
  "drawer_forget_confirm": "忘掉",
  "drawer_forget_title": "忘掉 %1$s？",
  "group_add": "添加",
+ "group_leave": "退出群组",
+ "group_leave_confirm": "退出 %1$s？它会从此设备消失；其他人继续聊天，新的邀请会让它回来。",
  "items_add": "添加",
  "items_back_on": "重新上架",
  "items_name": "商品",

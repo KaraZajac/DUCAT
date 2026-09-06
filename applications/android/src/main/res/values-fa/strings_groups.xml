@@ -38,4 +38,7 @@
     <string name="group_creating">در حال ساختن…</string>
     <string name="group_forming_board">در حال ساختن تابلو…</string>
     <string name="group_telling_members">در حال خبر دادن به اعضا…</string>
+    <string name="group_leave">ترک گروه</string>
+    <string name="group_leave_action">ترک</string>
+    <string name="group_leave_confirm">%1$s را ترک می‌کنید؟ از این دستگاه ناپدید می‌شود؛ دیگران بدون شما ادامه می‌دهند و دعوت تازه آن را برمی‌گرداند.</string>
 </resources>

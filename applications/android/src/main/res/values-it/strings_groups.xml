@@ -38,4 +38,7 @@
     <string name="group_creating">Creazione…</string>
     <string name="group_forming_board">Formazione della bacheca…</string>
     <string name="group_telling_members">Avviso ai membri…</string>
+    <string name="group_leave">Esci dal gruppo</string>
+    <string name="group_leave_action">Esci</string>
+    <string name="group_leave_confirm">Uscire da %1$s? Sparisce da questo dispositivo; gli altri continuano a parlare senza di te, e un nuovo invito la riporta.</string>
 </resources>

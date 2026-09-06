@@ -527,6 +527,8 @@
  "drawer_forget_confirm": "Vergeten",
  "drawer_forget_title": "%1$s vergeten?",
  "group_add": "Toevoegen",
+ "group_leave": "Groep verlaten",
+ "group_leave_confirm": "%1$s verlaten? De groep verdwijnt van dit apparaat; de anderen praten zonder je verder, en een nieuwe uitnodiging brengt hem terug.",
  "items_add": "Toevoegen",
  "items_back_on": "Weer erop",
  "items_name": "Artikel",

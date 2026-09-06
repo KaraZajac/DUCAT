@@ -527,6 +527,8 @@
  "drawer_forget_confirm": "Dimentica",
  "drawer_forget_title": "Dimenticare %1$s?",
  "group_add": "Aggiungi",
+ "group_leave": "Esci dal gruppo",
+ "group_leave_confirm": "Uscire da %1$s? Sparisce da questo dispositivo; gli altri continuano a parlare senza di te, e un nuovo invito la riporta.",
  "items_add": "Aggiungi",
  "items_back_on": "Rimetti",
  "items_name": "Articolo",

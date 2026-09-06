@@ -32,6 +32,20 @@
   let addingMember = $state(false);
   const currentGroup = $derived(groups.find((g) => g.id_hex === openGroup) ?? null);
 
+  // Local only: the group stops being read and shown here; the others
+  // keep talking, and a fresh invitation brings it back.
+  async function leaveGroup() {
+    if (!currentGroup) return;
+    if (!(await confirmDanger(t("group_leave_confirm", currentGroup.name), t("group_leave")))) return;
+    try {
+      await api.leaveGroup(currentGroup.id_hex);
+      openGroup = null;
+      await refresh();
+    } catch (e) {
+      err = String(e);
+    }
+  }
+
   const current = $derived(rows.find((r) => r.persona_hex === open) ?? null);
 
   // The empty state waits for the first answer; a blank list is not
@@ -656,6 +670,7 @@
         </div>
         <div class="actions nowrap">
           <button class="btn small" onclick={() => (addingMember = !addingMember)}>{addingMember ? t("chat_close") : t("group_add")}</button>
+          <button class="btn small" onclick={leaveGroup}>{t("group_leave")}</button>
         </div>
       </div>
       {#if addingMember}

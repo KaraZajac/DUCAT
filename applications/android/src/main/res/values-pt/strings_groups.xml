@@ -38,4 +38,7 @@
     <string name="group_creating">Criando…</string>
     <string name="group_forming_board">Formando o quadro…</string>
     <string name="group_telling_members">Avisando os membros…</string>
+    <string name="group_leave">Sair do grupo</string>
+    <string name="group_leave_action">Sair</string>
+    <string name="group_leave_confirm">Sair de %1$s? Ele desaparece deste aparelho; os outros continuam a conversar sem você, e um novo convite o traz de volta.</string>
 </resources>

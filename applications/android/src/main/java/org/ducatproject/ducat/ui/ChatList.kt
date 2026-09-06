@@ -77,7 +77,7 @@ fun ChatListScreen(
     var confirm by remember { mutableStateOf<Contact?>(null) }
     // §16.19: the groups, above the pairwise threads they fan into. Every
     // group the phone is in; the pass below keeps the worn hat's.
-    val allGroups = remember(version) { org.ducatproject.ducat.Groups.all(context) }
+    val allGroups = remember(version) { org.ducatproject.ducat.Groups.visible(context) }
 
     // Most recent conversation first — the list's order *is* its meaning, and
     // "who did I talk to last" is the question it answers. Threads that have

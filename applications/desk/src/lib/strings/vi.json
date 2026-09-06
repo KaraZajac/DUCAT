@@ -518,6 +518,8 @@
  "drawer_forget_confirm": "Quên",
  "drawer_forget_title": "Quên %1$s?",
  "group_add": "Thêm",
+ "group_leave": "Rời nhóm",
+ "group_leave_confirm": "Rời %1$s? Nhóm sẽ biến mất khỏi thiết bị này; những người khác tiếp tục trò chuyện mà không có bạn, và lời mời mới sẽ đưa nó trở lại.",
  "items_add": "Thêm",
  "items_back_on": "Bán lại",
  "items_name": "Mặt hàng",

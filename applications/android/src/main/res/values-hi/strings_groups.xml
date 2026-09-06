@@ -38,4 +38,7 @@
     <string name="group_creating">बन रहा है…</string>
     <string name="group_forming_board">बोर्ड बनाया जा रहा है…</string>
     <string name="group_telling_members">सदस्यों को बताया जा रहा है…</string>
+    <string name="group_leave">समूह छोड़ें</string>
+    <string name="group_leave_action">छोड़ें</string>
+    <string name="group_leave_confirm">%1$s छोड़ें? यह इस डिवाइस से हट जाएगा; बाकी लोग आपके बिना बात करते रहेंगे, और नया न्योता इसे वापस ले आएगा।</string>
 </resources>

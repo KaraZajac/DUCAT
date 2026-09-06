@@ -545,6 +545,8 @@
  "drawer_forget_confirm": "Забути",
  "drawer_forget_title": "Забути %1$s?",
  "group_add": "Додати",
+ "group_leave": "Вийти з групи",
+ "group_leave_confirm": "Вийти з %1$s? Група зникне з цього пристрою; інші продовжать без вас, а нове запрошення її поверне.",
  "items_add": "Додати",
  "items_back_on": "Повернути",
  "items_name": "Позиція",

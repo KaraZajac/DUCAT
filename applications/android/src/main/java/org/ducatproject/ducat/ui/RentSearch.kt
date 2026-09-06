@@ -1589,23 +1589,40 @@ private fun ListingCard(
     // start. Looking is now local, free and reversible; asking is still one
     // deliberate press.
     Card(Modifier.fillMaxWidth().clickable(enabled = !busy) { onOpen() }) {
-        Column {
+        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.Top) {
             // §16.18.3's thumbnail, straight off the board — it arrived with
             // the notice, so drawing it costs nothing more than the read
-            // that is already done. A listing without one is not missing
-            // anything: it simply starts at its title.
+            // that is already done. A square at the row's start, not a
+            // banner: the notice's ten kilobytes stretched across the
+            // screen were a blur, and a list of banners is a list nobody
+            // can scan. A listing without one shows its kind's icon in
+            // the same square, so every row starts at the same place.
             val shot = remember(info.thumb) {
                 info.thumb?.let { SafeImage.fromBytes(it, SafeImage.MESSAGE_PIXELS) }
             }
-            if (shot != null) {
-                Image(
-                    shot.asImageBitmap(),
-                    null,
-                    Modifier.fillMaxWidth().height(160.dp),
-                    contentScale = ContentScale.Crop,
-                )
+            Box(
+                Modifier.size(84.dp)
+                    .clip(MaterialTheme.shapes.medium)
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (shot != null) {
+                    Image(
+                        shot.asImageBitmap(),
+                        null,
+                        Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                    )
+                } else {
+                    Icon(
+                        listingIcon(kind), null,
+                        Modifier.size(28.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
-        Column(Modifier.padding(14.dp)) {
+            Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 // The kind's own icon. A house stood in for "not a vehicle",
                 // which put a roof on a kayak, a bicycle and an electrician

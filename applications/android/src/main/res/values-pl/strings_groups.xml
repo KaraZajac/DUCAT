@@ -38,4 +38,7 @@
     <string name="group_creating">Tworzenie…</string>
     <string name="group_forming_board">Tworzenie tablicy…</string>
     <string name="group_telling_members">Powiadamianie członków…</string>
+    <string name="group_leave">Opuść grupę</string>
+    <string name="group_leave_action">Opuść</string>
+    <string name="group_leave_confirm">Opuścić %1$s? Grupa zniknie z tego urządzenia; pozostali rozmawiają dalej bez ciebie, a nowe zaproszenie ją przywróci.</string>
 </resources>

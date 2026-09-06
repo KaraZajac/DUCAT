@@ -38,4 +38,7 @@
     <string name="group_creating">作成中…</string>
     <string name="group_forming_board">ボードを作成中…</string>
     <string name="group_telling_members">メンバーに知らせています…</string>
+    <string name="group_leave">グループを退出</string>
+    <string name="group_leave_action">退出</string>
+    <string name="group_leave_confirm">%1$s を退出しますか？この端末から消えます。ほかの人はあなた抜きで続け、新しい招待で戻ります。</string>
 </resources>

@@ -563,6 +563,8 @@
  "drawer_forget_confirm": "نسيان",
  "drawer_forget_title": "أتنسى %1$s؟",
  "group_add": "إضافة",
+ "group_leave": "مغادرة المجموعة",
+ "group_leave_confirm": "مغادرة %1$s؟ ستختفي من هذا الجهاز؛ يواصل الآخرون الحديث من دونك، ودعوة جديدة تعيدها.",
  "items_add": "إضافة",
  "items_back_on": "أعده",
  "items_name": "صنف",

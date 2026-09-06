@@ -38,4 +38,7 @@
     <string name="group_creating">Membuat…</string>
     <string name="group_forming_board">Membentuk papan…</string>
     <string name="group_telling_members">Memberi tahu anggota…</string>
+    <string name="group_leave">Keluar dari grup</string>
+    <string name="group_leave_action">Keluar</string>
+    <string name="group_leave_confirm">Keluar dari %1$s? Grup hilang dari perangkat ini; yang lain tetap mengobrol tanpa Anda, dan undangan baru mengembalikannya.</string>
 </resources>

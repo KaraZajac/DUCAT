@@ -527,6 +527,8 @@
  "drawer_forget_confirm": "فراموش کن",
  "drawer_forget_title": "%1$s فراموش شود؟",
  "group_add": "افزودن",
+ "group_leave": "ترک گروه",
+ "group_leave_confirm": "%1$s را ترک می‌کنید؟ از این دستگاه ناپدید می‌شود؛ دیگران بدون شما ادامه می‌دهند و دعوت تازه آن را برمی‌گرداند.",
  "items_add": "افزودن",
  "items_back_on": "دوباره موجود",
  "items_name": "کالا",

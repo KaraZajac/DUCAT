@@ -1961,7 +1961,7 @@ fn group_row(a: &App, g: ducat_app::groups::Group) -> GroupRowOut {
 #[tauri::command]
 fn groups() -> Result<Vec<GroupRowOut>, String> {
     let a = app()?;
-    let mut rows: Vec<GroupRowOut> = a.groups().into_iter().map(|g| group_row(a, g)).collect();
+    let mut rows: Vec<GroupRowOut> = a.groups().into_iter().filter(|g| !g.left).map(|g| group_row(a, g)).collect();
     rows.sort_by(|x, y| y.last_at.cmp(&x.last_at));
     Ok(rows)
 }
@@ -1972,6 +1972,15 @@ async fn create_group(name: String, members: Vec<String>) -> Result<GroupRowOut,
     tauri::async_runtime::spawn_blocking(move || a.create_group(&name, &members).map(|g| group_row(a, g)).map_err(said))
         .await
         .map_err(s)?
+}
+
+/// Leave a group on this desk alone: it stops being read and shown. The
+/// roster is grow-only (§16.19), so nobody else learns; a fresh roster
+/// with a newer board brings it back.
+#[tauri::command]
+async fn leave_group(id_hex: String) -> Result<(), String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.leave_group(&id_hex).map_err(said)).await.map_err(s)?
 }
 
 #[tauri::command]
@@ -2975,6 +2984,7 @@ pub fn run() {
             groups,
             create_group,
             add_to_group,
+            leave_group,
             group_thread,
             send_group,
             react_in_group,

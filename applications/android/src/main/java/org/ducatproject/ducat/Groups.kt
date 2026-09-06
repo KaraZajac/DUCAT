@@ -64,6 +64,10 @@ object Groups {
         /** The board this group's words ride on (§16.24); a group without
          *  one fans out over pairwise threads as §16.19 says. */
         val board: Board? = null,
+        /** Left on this phone: not read, not shown, not written to. The
+         *  roster is grow-only, so nobody else learns; a roster that moves
+         *  the group to a newer board clears it. */
+        val left: Boolean = false,
     )
 
     /**
@@ -125,6 +129,7 @@ object Groups {
                     myGroupSeq = o.optLong("my_seq", 0L),
                     disclosed = o.optBoolean("disclosed", false),
                     board = o.optJSONObject("board")?.let(::boardFrom),
+                    left = o.optBoolean("left", false),
                 )
             }
         }.getOrElse { emptyList() }
@@ -155,6 +160,17 @@ object Groups {
     fun get(context: Context, idHex: String): Group? =
         all(context).firstOrNull { it.idHex == idHex }
 
+    /** The groups a list shows: the ones not left. */
+    fun visible(context: Context): List<Group> = all(context).filter { !it.left }
+
+    /** Leave a group here: kept, marked, and skipped by every sweep and
+     *  list. A fresh generation from the others brings it back. */
+    fun leave(context: Context, idHex: String) {
+        val g = get(context, idHex) ?: return
+        DucatLog.i(TAG, "${g.name}: left")
+        upsert(context, g.copy(left = true))
+    }
+
     private val lock = Any()
 
     private fun save(context: Context, groups: List<Group>) {
@@ -165,6 +181,7 @@ object Groups {
                 put("members", JSONArray(g.members))
                 put("my_seq", g.myGroupSeq)
                 put("disclosed", g.disclosed)
+                if (g.left) put("left", true)
                 g.board?.let { put("board", it.toJson()) }
             })
         }
@@ -357,7 +374,7 @@ object Groups {
             board?.owner != known.board?.owner
         if (merged.size != known.members.size || moved) {
             val n = merged.size
-            upsert(context, known.copy(members = merged, board = board))
+            upsert(context, known.copy(members = merged, board = board, left = known.left && !moved))
             if (moved) {
                 // A new generation is a new record: everything on it is unread.
                 touch(idHex)
@@ -792,6 +809,7 @@ object Groups {
     /** Pages the network did not take yet, written again. */
     private fun flushBoards(context: Context) {
         for (g in all(context)) {
+            if (g.left) continue
             val board = g.board ?: continue
             if (!board.dirty) continue
             synchronized(penLocks.getOrPut(g.idHex) { Any() }) {
@@ -932,6 +950,7 @@ object Groups {
         val now = System.currentTimeMillis()
         var got = 0
         for (g in all(context)) {
+            if (g.left) continue
             val board = g.board ?: continue
             val slot = "g:${g.idHex}"
             if (Mailbox.planDueAt(slot) > now) continue

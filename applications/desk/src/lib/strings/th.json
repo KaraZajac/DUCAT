@@ -518,6 +518,8 @@
  "drawer_forget_confirm": "ลืม",
  "drawer_forget_title": "ลืม %1$s?",
  "group_add": "เพิ่ม",
+ "group_leave": "ออกจากกลุ่ม",
+ "group_leave_confirm": "ออกจาก %1$s ไหม กลุ่มจะหายไปจากเครื่องนี้ คนอื่นคุยกันต่อโดยไม่มีคุณ และคำเชิญใหม่จะนำกลับมา",
  "items_add": "เพิ่ม",
  "items_back_on": "กลับมาขาย",
  "items_name": "รายการ",

@@ -527,6 +527,8 @@
  "drawer_forget_confirm": "Forget",
  "drawer_forget_title": "Forget %1$s?",
  "group_add": "Add",
+ "group_leave": "Leave group",
+ "group_leave_confirm": "Leave %1$s? It disappears from this device; the others keep talking without you, and a fresh invitation brings it back.",
  "items_add": "Add",
  "items_back_on": "Back on",
  "items_name": "Item",

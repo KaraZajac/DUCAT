@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.automirrored.filled.CallSplit
@@ -274,6 +275,37 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
             actions = {
                 TextButton(onClick = { addOpen = true }) {
                     Text(stringResource(R.string.group_add))
+                }
+                // Leaving is local: the roster is grow-only, so the
+                // others keep talking and nothing is sent; this phone
+                // simply stops reading and showing it.
+                var menuOpen by remember { mutableStateOf(false) }
+                var confirmLeave by remember { mutableStateOf(false) }
+                IconButton(onClick = { menuOpen = true }) {
+                    Icon(Icons.Filled.MoreVert, null)
+                }
+                androidx.compose.material3.DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                    androidx.compose.material3.DropdownMenuItem(
+                        text = { Text(stringResource(R.string.group_leave)) },
+                        onClick = { menuOpen = false; confirmLeave = true },
+                    )
+                }
+                if (confirmLeave) {
+                    androidx.compose.material3.AlertDialog(
+                        onDismissRequest = { confirmLeave = false },
+                        title = { Text(stringResource(R.string.group_leave)) },
+                        text = { Text(stringResource(R.string.group_leave_confirm, isolate(group.name))) },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                confirmLeave = false
+                                Groups.leave(context, idHex)
+                                onBack()
+                            }) { Text(stringResource(R.string.group_leave_action)) }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { confirmLeave = false }) { Text(stringResource(R.string.common_cancel)) }
+                        },
+                    )
                 }
             },
         )

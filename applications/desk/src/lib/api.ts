@@ -665,6 +665,7 @@ export const api = {
 
   groups: () => invoke<GroupRow[]>("groups"),
   createGroup: (name: string, members: string[]) => invoke<GroupRow>("create_group", { name, members }),
+  leaveGroup: (idHex: string) => invoke<void>("leave_group", { idHex }),
   addToGroup: (idHex: string, personaHex: string) => invoke<void>("add_to_group", { idHex, personaHex }),
   groupThread: (idHex: string) => invoke<GroupMessage[]>("group_thread", { idHex }),
   sendGroup: (idHex: string, body: string, reSenderHex: string | null = null, reSeq: number | null = null) =>

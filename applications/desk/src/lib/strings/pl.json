@@ -545,6 +545,8 @@
  "drawer_forget_confirm": "Zapomnij",
  "drawer_forget_title": "Zapomnieć %1$s?",
  "group_add": "Dodaj",
+ "group_leave": "Opuść grupę",
+ "group_leave_confirm": "Opuścić %1$s? Grupa zniknie z tego urządzenia; pozostali rozmawiają dalej bez ciebie, a nowe zaproszenie ją przywróci.",
  "items_add": "Dodaj",
  "items_back_on": "Z powrotem",
  "items_name": "Pozycja",
