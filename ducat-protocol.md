@@ -2777,6 +2777,10 @@ known only to the one who hearts.
 **Editions, edits, deletions.** Every post is a new edition of the home
 bundle and a rewrite of the head in place. An edit keeps the post's `id`
 and stamps `edited`; a deletion leaves the post out of the next edition.
+The author serves the edition it published: a client MUST NOT replace its
+own home's bundle with one fetched from the network, whatever head a
+read returns — a lagging node's head is stale news, not a newer edition,
+and a mirror written over the author's copy matches no head at all.
 Readers of a home chase its head, as site readers do; a mirror that
 keeps an old edition alive keeps a page the author has since taken down,
 which is §16.22's survivability rule and is the author's to weigh before
