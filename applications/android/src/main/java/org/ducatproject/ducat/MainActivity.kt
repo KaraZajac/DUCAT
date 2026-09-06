@@ -173,6 +173,8 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
         // row's ducat: URI to the same sheet a scanned code opens.
         // §16.22: the sealed-room viewer is an Activity; the shared screen
         // only holds the hook.
+        org.ducatproject.ducat.ui.feedSection = { org.ducatproject.ducat.ui.FeedSection() }
+        org.ducatproject.ducat.ui.heartSetter = { ctx, hex, on -> org.ducatproject.ducat.Home.setHeart(ctx, hex, on) }
         org.ducatproject.ducat.ui.siteOpen = { ctx, recordKey ->
             ctx.startActivity(
                 android.content.Intent(ctx, SiteViewerActivity::class.java)

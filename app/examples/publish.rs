@@ -60,6 +60,15 @@ fn main() {
         Some("get") => {
             let uri = args.get(1).expect("PUB_FAIL get <address>");
             let t0 = Instant::now();
+            // The swarm's own notes, so a stall says where it stalled.
+            std::thread::spawn(|| loop {
+                std::thread::sleep(Duration::from_secs(10));
+                for line in ducat_mobile::node::node_logs() {
+                    if line.starts_with("swarm") {
+                        println!("PUB_NOTE {line}");
+                    }
+                }
+            });
             if releases::parse(uri).is_some() {
                 let r = app.add_release(uri, "").expect("PUB_FAIL add");
                 let dir = app.fetch_release(&r.digest_hex).expect("PUB_FAIL fetch");

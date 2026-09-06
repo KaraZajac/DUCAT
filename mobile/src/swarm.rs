@@ -401,8 +401,14 @@ async fn fetch_once(
         // this stream; the stream really does go quiet and this really
         // does terminate. Do not add a second timer on the strength of
         // the log alone.
+        // Before the first event the stream is resolving the share and
+        // announcing itself — several DHT operations, each of which has
+        // been measured at ten to sixty seconds on a slow day. That phase
+        // gets a longer first window; once the stream has spoken, silence
+        // means what it always meant.
+        let window = if seen == 0 { 240 } else { 90 };
         let ev = tokio::time::timeout(
-            std::time::Duration::from_secs(90),
+            std::time::Duration::from_secs(window),
             events.recv(),
         )
         .await;

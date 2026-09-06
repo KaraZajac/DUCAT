@@ -153,7 +153,7 @@ fun SectionScreen(
         Section.Profile -> ProfileSection()
 
         Section.Contacts -> ContactsAdminSection(onOpenChat)
-        Section.Feed -> FeedSection()
+        Section.Feed -> feedSection()
 
         Section.Library -> LibrarySection()
 
@@ -1294,6 +1294,10 @@ private fun modeIcon(mode: org.ducatproject.ducat.Mode) = when (mode) {
 /** Opens the sealed-room viewer for a fetched site. Injected: WebView is
  *  the phone's business (see MainActivity); the desk compiles a no-op. */
 var siteOpen: (android.content.Context, String) -> Unit = { _, _ -> }
+/** The feed (§16.23) is the phone's screen; the old desk compiles a blank. */
+var feedSection: @Composable () -> Unit = {}
+/** Hearting a persona keeps its home — injected the same way, for the same reason. */
+var heartSetter: (android.content.Context, String, Boolean) -> Unit = { _, _, _ -> }
 
 /** A ducat:site/ address arriving from a deep link or paste, waiting for
  *  the section to add it. */

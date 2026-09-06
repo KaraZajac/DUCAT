@@ -222,7 +222,7 @@ fun ContactProfile(contact: Contact, onBack: () -> Unit, onOpenChat: (Contact) -
                     checked = c.hearted,
                     onCheckedChange = { on ->
                         heartScope.launch(Dispatchers.IO) {
-                            runCatching { org.ducatproject.ducat.Home.setHeart(context, c.personaHex, on) }
+                            runCatching { heartSetter(context, c.personaHex, on) }
                                 .onFailure { DucatLog.w("Profile", "heart: ${it.message}") }
                         }
                     },
