@@ -261,6 +261,15 @@ object Sites {
      *  is a gift knowingly given). */
     fun fetchBundle(context: Context, site: Site): File {
         val dir = bundleDir(context, site.recordKey)
+        // A site published here is served from what was published: the
+        // copy on disk is the edition, and the network can only hand back
+        // an older one — a lagging node's head once had the desk refetch
+        // its own home over its served copy, and every reader then got
+        // "block not found" for the pieces that differed.
+        if (site.mine) {
+            if (dir.isDirectory && dir.walkTopDown().any { it.isFile }) return dir
+            throw IllegalStateException("published here; publish it again to serve it")
+        }
         if (site.fetchedDigestHex == site.digestHex && dir.isDirectory &&
             dir.walkTopDown().any { it.isFile }
         ) {
@@ -547,7 +556,9 @@ object Sites {
                 // Re-reading costs one DHT read per kept site per process,
                 // on this thread, and it is the difference between a promise
                 // and a decoration.
-                val head = runCatching { add(context, recordKey) }.getOrNull()
+                // Ours: the disk is the edition, and a network read that
+                // disagrees is a lagging node, not news.
+                val head = if (site.mine) site else runCatching { add(context, recordKey) }.getOrNull()
                 if (head == null) {
                     // No answer: serve what we hold rather than nothing. A
                     // reader offline with a current copy is the ordinary

@@ -506,6 +506,16 @@ async fn post_feed(text: String, media: Vec<String>, files: Vec<String>) -> Resu
     .map_err(|e| e.to_string())?
 }
 
+/// Stage the home again from what is on disk and publish it: the repair
+/// for a served copy that stopped matching the head.
+#[tauri::command]
+async fn republish_home() -> Result<SiteRow, String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.publish_home().map(|s| site_row(&a, s)).map_err(said))
+        .await
+        .map_err(|e| e.to_string())?
+}
+
 #[tauri::command]
 async fn delete_post(id: String) -> Result<(), String> {
     let a = app()?;
@@ -2555,6 +2565,7 @@ pub fn run() {
             refresh_feeds,
             post_feed,
             delete_post,
+            republish_home,
             home_file_data_url,
             home_key_of,
             set_site_keep,

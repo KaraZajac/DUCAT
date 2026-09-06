@@ -270,6 +270,19 @@ impl App {
             .find(|s| s.record_key == record_key)
             .ok_or_else(|| Error::Refused("no such site".into()))?;
         let dir = self.site_bundle_dir(record_key);
+        // A site published here is served from what was published: the
+        // copy on disk is the edition, and the network can only hand back
+        // an older one. The keep-alive lap once "refetched" the desk's
+        // own home after a lagging node answered with last edition's head,
+        // and the mirror it wrote over `current/` matched neither head —
+        // every reader then got "block not found" for the pieces that
+        // differed.
+        if site.mine() {
+            if has_any_file(&dir) {
+                return Ok(dir);
+            }
+            return Err(Error::Refused("this site is published here; publish it again to serve it".into()));
+        }
         if site.fetched_digest_hex.as_deref() == Some(site.digest_hex.as_str()) && has_any_file(&dir) {
             return Ok(dir);
         }
@@ -437,7 +450,10 @@ impl App {
                 // digest, and a mirror announcing last month's edition is
                 // rejected by everyone holding the current one and dropped
                 // from the swarm for good.
-                match app.add_site(&key) {
+                //
+                // Unless the head is ours. Then the disk is the edition and
+                // a network read that disagrees is a lagging node, not news.
+                match if site.mine() { Ok(site.clone()) } else { app.add_site(&key) } {
                     Ok(head) if head.digest_hex != digest => {
                         log::info(TAG, format!("keep-alive for {}… is a stale edition — refetching", &key[..key.len().min(8)]));
                         if let Err(e) = app.fetch_site_bundle(&key) {
