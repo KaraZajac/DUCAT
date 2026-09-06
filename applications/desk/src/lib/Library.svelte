@@ -121,7 +121,7 @@
   async function savePrice() {
     if (!current) return;
     const n = Number(priceText);
-    if (!Number.isFinite(n) || n < 0) { err = "A price is a number of XMR (0 for free)."; return; }
+    if (!Number.isFinite(n) || n < 0) { err = t("desk_price_is_number"); return; }
     await act("price", () => api.setPublicationPrice(current!.id, Math.floor(n * 1e12)));
   }
 
@@ -141,7 +141,7 @@
       note = "";
       file = null;
       err = null;
-      lastResult = `Published '${period}' — ${current!.price_pxmr > 0 ? `${n} bill(s) sent` : `sent to ${n} subscriber(s)`}.`;
+      lastResult = current!.price_pxmr > 0 ? t("desk_published_billed", period, n) : t("desk_published_sent", period, n);
     });
   }
   let lastResult = $state<string | null>(null);
@@ -154,11 +154,11 @@
   }
 
   function periodState(r: { has_key: boolean; on_shelf: boolean; on_swarm: boolean; fetched_bytes: number | null; asked: boolean }): string {
-    if (r.fetched_bytes != null) return `here · ${fmtBytes(r.fetched_bytes)}`;
-    if (r.has_key && (r.on_shelf || r.on_swarm)) return "ready to fetch";
-    if (r.has_key) return "key held, not on the shelf yet";
-    if (r.asked) return "asked for";
-    return "on their shelf";
+    if (r.fetched_bytes != null) return t("desk_issue_here", fmtBytes(r.fetched_bytes));
+    if (r.has_key && (r.on_shelf || r.on_swarm)) return t("desk_issue_ready");
+    if (r.has_key) return t("desk_issue_key_held");
+    if (r.asked) return t("desk_issue_asked");
+    return t("desk_issue_on_shelf");
   }
 </script>
 
@@ -171,7 +171,7 @@
 </div>
 
 {#if mode === "reading"}
-  {#if loaded && subs.length === 0}
+  {#if loaded && subs.length === 0 && !err}
     <div class="card"><p class="empty">{t("desk_shelf_empty")}</p></div>
   {/if}
   {#each subs as s (s.publisher_hex)}

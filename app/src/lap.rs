@@ -18,6 +18,18 @@ const HOURLY: Duration = Duration::from_secs(60 * 60);
 const WALLET_EVERY: Duration = Duration::from_secs(20);
 
 static RUNNING: AtomicBool = AtomicBool::new(false);
+/// Set by `App::reconnect`: the hourly sweep re-parks every share, and a
+/// node that was just restarted serves nothing until it runs.
+pub(crate) static SWEEP_NOW: AtomicBool = AtomicBool::new(false);
+/// A node that is up but has not been attached for this long is
+/// restarted by the lap. veilid re-attaches on its own after a network
+/// change; when it has not managed to in this many seconds — a laptop
+/// back from sleep on a different network is the usual case — a fresh
+/// start with a purged table is what a person would do by hand.
+const UNATTACHED_RESTART_SECS: u64 = 180;
+/// Restarts are at least this far apart, or a network that is really
+/// down becomes a restart loop.
+const RESTART_SPACING_SECS: u64 = 600;
 
 impl App {
     /// Start the lap thread if it is not running. Safe to call twice.
@@ -42,11 +54,29 @@ impl App {
             .name("desk-lap".into())
             .spawn(move || {
                 let mut last_hourly: Option<Instant> = None;
+                let mut unattached_since: Option<Instant> = None;
+                let mut last_restart: Option<Instant> = None;
                 loop {
                     let status = app.node_status();
+                    // Unattached for minutes while running: restart it.
+                    if status.running && !status.attached {
+                        let since = *unattached_since.get_or_insert_with(Instant::now);
+                        let spaced = last_restart.map_or(true, |t| t.elapsed().as_secs() >= RESTART_SPACING_SECS);
+                        if since.elapsed().as_secs() >= UNATTACHED_RESTART_SECS && spaced {
+                            log::warn(TAG, format!("node unattached for {}s — restarting it", since.elapsed().as_secs()));
+                            match app.reconnect() {
+                                Ok(()) => log::info(TAG, "node restarted"),
+                                Err(e) => log::warn(TAG, format!("node restart: {e}")),
+                            }
+                            last_restart = Some(Instant::now());
+                            unattached_since = None;
+                        }
+                    } else {
+                        unattached_since = None;
+                    }
                     if status.public_internet_ready {
                         app.lap_once();
-                        if last_hourly.map_or(true, |t| t.elapsed() >= HOURLY) {
+                        if SWEEP_NOW.swap(false, Ordering::AcqRel) || last_hourly.map_or(true, |t| t.elapsed() >= HOURLY) {
                             app.reseed_all_sites();
                             app.reseed_all_releases();
                             app.reseed_issues();

@@ -14,6 +14,11 @@
     <string name="net_line_node_id">شناسه گره</string>
     <string name="net_line_peers">همتاها</string>
     <string name="net_peers_value">%1$d زنده، %2$d قابل‌اتکا</string>
+    <string name="net_line_table">جدول مسیریابی</string>
+    <string name="net_table_value">%1$d پاسخ می‌دهند، %2$d نه، از %3$d شناخته‌شده</string>
+    <string name="net_slow_hint">جست‌وجوها کند است: بسیاری از گره‌های شناخته‌شده دیگر پاسخ نمی‌دهند. اتصال دوباره جدول را در حدود یک دقیقه از نو می‌سازد.</string>
+    <string name="net_reconnect">اتصال دوباره</string>
+    <string name="net_reconnecting">در حال اتصال دوباره…</string>
     <string name="net_waiting">%1$d ثانیه در انتظار — نود باید اول بفهمد چطور در دسترس است تا بتواند مسیری بسازد</string>
 
     <string name="net_starting">در حال شروع…</string>

@@ -64,6 +64,7 @@
     <string name="rent_search_allow">Standort erlauben</string>
     <string name="rent_search_no_fix">Noch kein Standort. In Fensternähe oder draußen klappt es meistens.</string>
     <string name="rent_search_no_network">Das Netzwerk war gerade nicht erreichbar, also wurde keine Tafel gelesen. Meist heißt das, die App verbindet sich noch — versuch es gleich noch einmal.</string>
+    <string name="rent_search_no_reply">Die Boards haben gerade nicht geantwortet. Versuche es gleich noch einmal.</string>
     <string name="rent_search_retry">Erneut versuchen</string>
     <string name="rent_search_progress">%1$d von %2$d Gebieten geprüft</string>
     <string name="rent_search_closer">Sieht sich die vollsten Gegenden genauer an…</string>

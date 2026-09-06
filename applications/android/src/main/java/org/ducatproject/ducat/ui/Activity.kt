@@ -221,6 +221,12 @@ fun ActivityScreen() {
                 verticalArrangement = Arrangement.Center,
             ) {
                 CatSpinner(Modifier.size(48.dp), tint = MaterialTheme.colorScheme.primary)
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    stringResource(R.string.activity_reading),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
             return
         }

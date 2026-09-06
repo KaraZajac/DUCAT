@@ -14,6 +14,11 @@
     <string name="net_line_node_id">Knoten-ID</string>
     <string name="net_line_peers">Peers</string>
     <string name="net_peers_value">%1$d aktiv, %2$d zuverlässig</string>
+    <string name="net_line_table">Routing-Tabelle</string>
+    <string name="net_table_value">%1$d antworten, %2$d nicht, von %3$d bekannten</string>
+    <string name="net_slow_hint">Suchen sind langsam: Viele der bekannten Knoten antworten nicht mehr. Neu verbinden baut die Tabelle in etwa einer Minute neu auf.</string>
+    <string name="net_reconnect">Neu verbinden</string>
+    <string name="net_reconnecting">Verbinde neu…</string>
     <string name="net_waiting">warte %1$ds — ein Node muss erst herausfinden, wie er erreichbar ist, bevor er eine Route bauen kann</string>
 
     <string name="net_starting">Startet…</string>

@@ -388,7 +388,23 @@ fun LibrarySection() {
     // Publications.mutedPublishers.
     val muted = remember(v) { Publications.mutedPublishers(context) }
 
-    val shown = rows ?: return
+    val shown = rows
+    if (shown == null) {
+        // Blank while the store is read looked like a library with
+        // nothing in it, for the half-second a big shelf takes.
+        Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                CatSpinner(Modifier.size(40.dp), tint = MaterialTheme.colorScheme.primary)
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    stringResource(R.string.library_reading),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        return
+    }
     if (shown.isEmpty()) {
         Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {

@@ -64,6 +64,7 @@
     <string name="rent_search_allow">Разрешить геолокацию</string>
     <string name="rent_search_no_fix">Местоположение ещё не определено. Обычно помогает окно или улица.</string>
     <string name="rent_search_no_network">Сеть сейчас недоступна, поэтому ни одна доска не прочитана. Обычно это значит, что приложение ещё подключается — попробуйте через минуту.</string>
+    <string name="rent_search_no_reply">Доски сейчас не ответили. Попробуйте ещё раз через минуту.</string>
     <string name="rent_search_retry">Повторить</string>
     <string name="rent_search_progress">Проверено %1$d из %2$d районов</string>
     <string name="rent_search_closer">Смотрим внимательнее на самые оживлённые районы…</string>

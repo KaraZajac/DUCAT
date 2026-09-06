@@ -1,6 +1,7 @@
 <resources>
     <!-- Empty state -->
     <string name="activity_nothing_yet">Rien pour l\'instant</string>
+    <string name="activity_reading">Lecture de la chaîne…</string>
     <string name="activity_empty_desc">Les paiements apparaissent ici une fois la chaîne lue. Recharge depuis Comptes pour voir quelque chose.</string>
 
     <!-- Pending requests -->
@@ -19,7 +20,7 @@
 
     <!-- Event rows -->
     <string name="activity_reading_transaction">Lecture de la transaction…</string>
-    <string name="activity_receipt_chip">🧾 reçu</string>
+    <string name="activity_receipt_chip">🧾 Reçu</string>
     <string name="activity_note_quoted">« %1$s »</string>
     <string name="activity_sending">Envoi en cours — pas encore dans un bloc</string>
     <string name="activity_spent_unknown">Dépensé, mais impossible de dire où</string>

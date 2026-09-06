@@ -245,7 +245,7 @@
     <string name="desk_saving">Saving…</string>
     <string name="desk_refresh_board">Refresh on the board</string>
     <string name="desk_posting">Posting…</string>
-    <string name="desk_cover">cover</string>
+    <string name="desk_cover">Cover</string>
     <string name="desk_cover_note">The cover becomes the ten-kilobyte picture on the board; the rest travel on the swarm and are fetched only when somebody opens the listing.</string>
     <string name="desk_pick_listing">Pick a listing, or start one with the buttons on the left.</string>
     <string name="desk_group_copies_queued">The page did not land yet — it is written again on the next lap.</string>
@@ -284,10 +284,10 @@
     <string name="desk_send_them_money">Send them money</string>
     <string name="desk_pay">Pay</string>
     <string name="desk_more">More</string>
-    <string name="desk_never">never</string>
-    <string name="desk_an_hour">an hour</string>
-    <string name="desk_a_day">a day</string>
-    <string name="desk_a_week">a week</string>
+    <string name="desk_never">Never</string>
+    <string name="desk_an_hour">An hour</string>
+    <string name="desk_a_day">A day</string>
+    <string name="desk_a_week">A week</string>
     <string name="desk_clear_hide_note">Clearing and hiding touch only this desk; forgetting drops the contact.</string>
     <string name="desk_someones_profile">Someone\'s profile…</string>
     <string name="desk_share_the_profile">Share the profile</string>
@@ -380,4 +380,19 @@
     <string name="desk_busy_home">publishing your home</string>
     <string name="desk_busy_seeding">seeding on the swarm</string>
     <string name="desk_busy_address">publishing the address</string>
+    <string name="desk_ask_available">Hello — is "%1$s" still available?</string>
+    <string name="desk_clear">Clear</string>
+    <string name="desk_stop">Stop</string>
+    <string name="desk_fee_unknown">The fee is not known yet — no node has answered.</string>
+    <string name="desk_no_rate_yet">No exchange rate yet — the wallet fetches one shortly.</string>
+    <string name="desk_cannot_price">That item cannot be priced right now.</string>
+    <string name="desk_price_is_number">A price is a number of XMR (0 for free).</string>
+    <string name="desk_published_billed">Published %1$s — bills sent: %2$d.</string>
+    <string name="desk_published_sent">Published %1$s — sent to subscribers: %2$d.</string>
+    <string name="desk_issue_here">here · %1$s</string>
+    <string name="desk_issue_ready">ready to fetch</string>
+    <string name="desk_issue_key_held">key held, not on the shelf yet</string>
+    <string name="desk_issue_asked">asked for</string>
+    <string name="desk_issue_on_shelf">on their shelf</string>
+    <string name="desk_pieces_of">%1$d of %2$d pieces</string>
 </resources>

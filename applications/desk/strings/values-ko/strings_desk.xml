@@ -370,4 +370,19 @@
     <string name="desk_busy_home">내 홈을 게시하는 중</string>
     <string name="desk_busy_seeding">스웜에 배포하는 중</string>
     <string name="desk_busy_address">주소를 게시하는 중</string>
+    <string name="desk_ask_available">안녕하세요 — "%1$s" 아직 구할 수 있나요?</string>
+    <string name="desk_clear">지우기</string>
+    <string name="desk_stop">중지</string>
+    <string name="desk_fee_unknown">수수료를 아직 알 수 없습니다. 응답한 노드가 없습니다.</string>
+    <string name="desk_no_rate_yet">아직 환율이 없습니다. 지갑이 곧 가져옵니다.</string>
+    <string name="desk_cannot_price">지금은 그 항목의 가격을 매길 수 없습니다.</string>
+    <string name="desk_price_is_number">가격은 XMR 숫자입니다(무료는 0).</string>
+    <string name="desk_published_billed">%1$s 발행됨 — 보낸 청구서: %2$d.</string>
+    <string name="desk_published_sent">%1$s 발행됨 — 구독자에게 전송: %2$d.</string>
+    <string name="desk_issue_here">여기 있음 · %1$s</string>
+    <string name="desk_issue_ready">가져올 수 있음</string>
+    <string name="desk_issue_key_held">키는 있음, 아직 책장에 없음</string>
+    <string name="desk_issue_asked">요청함</string>
+    <string name="desk_issue_on_shelf">상대의 책장에 있음</string>
+    <string name="desk_pieces_of">%2$d개 중 %1$d개</string>
 </resources>

@@ -14,6 +14,11 @@
     <string name="net_line_node_id">ID вузла</string>
     <string name="net_line_peers">піри</string>
     <string name="net_peers_value">%1$d живих, %2$d надійних</string>
+    <string name="net_line_table">таблиця маршрутів</string>
+    <string name="net_table_value">%1$d відповідають, %2$d ні, з %3$d відомих</string>
+    <string name="net_slow_hint">Пошук повільний: багато відомих вузлів перестали відповідати. Повторне підключення заново побудує таблицю приблизно за хвилину.</string>
+    <string name="net_reconnect">Перепідключити</string>
+    <string name="net_reconnecting">Перепідключення…</string>
     <string name="net_waiting">очікування %1$d с — вузол мусить з\'ясувати, як він досяжний, перш ніж будувати маршрут</string>
 
     <string name="net_starting">Запуск…</string>

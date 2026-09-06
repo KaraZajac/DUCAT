@@ -66,6 +66,7 @@
       if (my === worldSeq && warm.length) { world = warm; worldLooked = true; }
     } catch {}
     try {
+      if (!(await api.status()).ready) throw new Error(t("rent_search_no_network"));
       const fresh = await api.marketBrowseWorld(c, l);
       if (my === worldSeq) world = fresh;
     } catch (e) {
@@ -156,6 +157,9 @@
     searching = true;
     await paint();
     try {
+      // A browse over a node that has not attached comes back empty, and
+      // "nothing found" would be a confident lie; say what is true.
+      if (!(await api.status()).ready) throw new Error(t("rent_search_no_network"));
       found = await api.browse(cell, kind);
     } catch (e) {
       err = String(e);
@@ -272,7 +276,7 @@
     asking = true;
     try {
       const r = await api.claimCard(openFound.card, null);
-      await api.sendText(r.contact.persona_hex, `Hello — is "${openFound.title}" still available?`);
+      await api.sendText(r.contact.persona_hex, t("desk_ask_available", openFound.title));
       err = null;
       openFound = null;
       alert(t("desk_asked_see_chat"));
@@ -455,7 +459,8 @@
         </button>
       {/each}
     </div>
-    {#if found.length === 0 && !searching}<p class="empty">{t("desk_nothing_found")}</p>{/if}
+    {#if searching}<p class="meta">{t("rent_searching")}</p>{/if}
+    {#if found.length === 0 && !searching && !err}<p class="empty">{t("desk_nothing_found")}</p>{/if}
   {/if}
   {:else}
   <div class="card">
@@ -492,7 +497,7 @@
       </div>
     {/each}
   </div>
-  {#if worldLooked && !worldBusy && world.length === 0}<p class="empty">{t("market_empty")}</p>{/if}
+  {#if worldLooked && !worldBusy && world.length === 0 && !err}<p class="empty">{t("market_empty")}</p>{/if}
   {/if}
 
 {:else}

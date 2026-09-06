@@ -64,6 +64,7 @@
     <string name="rent_search_allow">Izinkan lokasi</string>
     <string name="rent_search_no_fix">Belum ada lokasi. Dekat jendela atau di luar biasanya berhasil.</string>
     <string name="rent_search_no_network">Jaringan tidak bisa dijangkau barusan, jadi tidak ada papan yang terbaca. Biasanya ini berarti aplikasi masih bergabung — coba lagi sebentar lagi.</string>
+    <string name="rent_search_no_reply">Papan tidak menjawab saat ini. Coba lagi sebentar lagi.</string>
     <string name="rent_search_retry">Coba lagi</string>
     <string name="rent_search_progress">%1$d dari %2$d wilayah diperiksa</string>
     <string name="rent_search_closer">Melihat lebih dekat area yang paling ramai…</string>

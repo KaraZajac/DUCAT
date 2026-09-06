@@ -126,6 +126,29 @@ impl App {
         ducat_mobile::node::node_status()
     }
 
+    /// The routing table's health: how many of the nodes this one knows
+    /// still answer. The figure behind a slow day.
+    pub fn routing_health(&self) -> ducat_mobile::node::RoutingHealth {
+        ducat_mobile::node::node_routing_health()
+    }
+
+    /// Stop the node and start it again — the same path as a launch, so
+    /// a dead-heavy routing table is purged before the attach — then
+    /// forget every watch the old node held and ask the lap to re-park
+    /// every share, because both died with it. What a person does by
+    /// hand when the network has been slow for an hour, offered as one
+    /// button and taken automatically by the lap when the node has sat
+    /// unattached for minutes.
+    pub fn reconnect(&self) -> Result<(), Error> {
+        busy::say("reconnecting");
+        ducat_mobile::node::node_stop();
+        let r = self.start_node();
+        mailbox::plan_forget_watches();
+        lap::SWEEP_NOW.store(true, std::sync::atomic::Ordering::Release);
+        busy::clear();
+        r
+    }
+
     /// Unix seconds now.
     pub fn now() -> u64 {
         std::time::SystemTime::now()

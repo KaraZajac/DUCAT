@@ -41,6 +41,7 @@ import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.Publications
 import org.ducatproject.ducat.R
+import org.ducatproject.ducat.saidWhy
 import org.ducatproject.ducat.SafeImage
 
 /**
@@ -158,6 +159,10 @@ private fun ShelfBody(
     /** Still waiting for the node before the shelf can be asked at all:
      *  said in place of "looking at the shelf", which it is not yet. */
     connecting: Boolean = false,
+    /** The last read threw, in the reader's words; the rows from before
+     *  it stay on screen and this stands over them, because stale rows
+     *  with no word look like a shelf that was read. */
+    failed: String? = null,
 ) {
     val context = LocalContext.current
     // One column of our own: the callers place this body in containers
@@ -167,6 +172,14 @@ private fun ShelfBody(
     // crashed this app before (IntStack.peek2); the branches are an
     // if/else chain instead.
     Column(Modifier.fillMaxSize()) {
+        failed?.let {
+            Text(
+                stringResource(R.string.common_read_failed, it),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 4.dp),
+            )
+        }
         if (refreshing && rows.isNotEmpty()) {
             // Painted from memory while the live read runs: say so, quietly.
             Row(
@@ -305,6 +318,7 @@ fun WorldwideShelf(cat: String, lang: String?) {
     var looked by remember { mutableStateOf(false) }
     var refreshing by remember { mutableStateOf(false) }
     var noNetwork by remember { mutableStateOf(false) }
+    var failed by remember { mutableStateOf<String?>(null) }
     var connecting by remember { mutableStateOf(false) }
     var attempt by remember { mutableStateOf(0) }
     // Set by the pull gesture, consumed by the effect: a pull keeps what is
@@ -316,6 +330,7 @@ fun WorldwideShelf(cat: String, lang: String?) {
     var pulled by remember { mutableStateOf(false) }
     LaunchedEffect(cat, lang, attempt) {
         noNetwork = false
+        failed = null
         if (pulled) {
             pulled = false
             refreshing = true
@@ -348,7 +363,7 @@ fun WorldwideShelf(cat: String, lang: String?) {
             val fresh = withContext(Dispatchers.IO) {
                 runCatching {
                     Publications.browseMarket(context, cat, lang)
-                }.getOrNull()
+                }.onFailure { failed = it.saidWhy() ?: it.javaClass.simpleName }.getOrNull()
             }
             if (fresh != null) rows = fresh
         } else {
@@ -379,6 +394,7 @@ fun WorldwideShelf(cat: String, lang: String?) {
             refreshing = refreshing,
             onRefresh = { attempt++ },
             noNetwork = noNetwork,
+            failed = failed,
             connecting = connecting,
         )
     }
@@ -394,6 +410,7 @@ fun LocalShelf() {
     var progress by remember { mutableStateOf(0 to 9) }
     var noFix by remember { mutableStateOf(false) }
     var noNetwork by remember { mutableStateOf(false) }
+    var failed by remember { mutableStateOf<String?>(null) }
     var connecting by remember { mutableStateOf(false) }
     var refreshing by remember { mutableStateOf(false) }
     // Bumped by Try again: a missing fix is often momentary — location
@@ -409,6 +426,7 @@ fun LocalShelf() {
     LaunchedEffect(attempt) {
         noFix = false
         noNetwork = false
+        failed = null
         if (pulled) {
             pulled = false
             refreshing = true
@@ -444,7 +462,7 @@ fun LocalShelf() {
                     Publications.browseLocalPubs(context, fix.first, fix.second) { k, n ->
                         progress = k to n
                     }
-                }.getOrNull()
+                }.onFailure { failed = it.saidWhy() ?: it.javaClass.simpleName }.getOrNull()
             }
             if (got != null) rows = got
         } else {
@@ -474,6 +492,7 @@ fun LocalShelf() {
             refreshing = refreshing,
             onRefresh = { attempt++ },
             noNetwork = noNetwork,
+            failed = failed,
             connecting = connecting,
         )
     }

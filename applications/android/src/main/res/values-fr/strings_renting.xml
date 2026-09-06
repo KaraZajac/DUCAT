@@ -64,6 +64,7 @@
     <string name="rent_search_allow">Autoriser la localisation</string>
     <string name="rent_search_no_fix">Pas encore de position. Près d\'une fenêtre ou dehors, cela marche en général.</string>
     <string name="rent_search_no_network">Le réseau est injoignable pour le moment, aucun tableau n\'a donc été lu. Cela veut généralement dire que l\'application est encore en train de s\'y raccorder — réessayez dans un instant.</string>
+    <string name="rent_search_no_reply">Les tableaux n\'ont pas répondu pour l\'instant. Réessayez dans un instant.</string>
     <string name="rent_search_retry">Réessayer</string>
     <string name="rent_search_progress">%1$d zones sur %2$d vérifiées</string>
     <string name="rent_search_closer">Regarde de plus près les zones les plus chargées…</string>

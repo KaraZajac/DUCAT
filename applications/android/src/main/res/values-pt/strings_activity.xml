@@ -1,6 +1,7 @@
 <resources>
     <!-- Estado vazio -->
     <string name="activity_nothing_yet">Nada ainda</string>
+    <string name="activity_reading">Lendo a cadeia…</string>
     <string name="activity_empty_desc">Os pagamentos aparecem aqui depois que a cadeia foi lida. Recarregue em Contas para ver algo.</string>
 
     <!-- Pedidos pendentes -->
@@ -19,7 +20,7 @@
 
     <!-- Linhas de eventos -->
     <string name="activity_reading_transaction">Lendo a transação…</string>
-    <string name="activity_receipt_chip">🧾 recibo</string>
+    <string name="activity_receipt_chip">🧾 Recibo</string>
     <string name="activity_note_quoted">“%1$s”</string>
     <string name="activity_sending">Enviando — ainda não está em um bloco</string>
     <string name="activity_spent_unknown">Gasto, mas não sabemos dizer onde</string>

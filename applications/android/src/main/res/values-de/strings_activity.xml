@@ -1,6 +1,7 @@
 <resources>
     <!-- Empty state -->
     <string name="activity_nothing_yet">Noch nichts</string>
+    <string name="activity_reading">Kette wird gelesen…</string>
     <string name="activity_empty_desc">Zahlungen erscheinen hier, sobald die Blockchain gelesen ist. Lade unter Konten auf, um etwas zu sehen.</string>
 
     <!-- Pending requests -->

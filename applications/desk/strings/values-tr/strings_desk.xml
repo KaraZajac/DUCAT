@@ -241,7 +241,7 @@
     <string name="desk_saving">Kaydediliyor…</string>
     <string name="desk_refresh_board">Panoda yenile</string>
     <string name="desk_posting">Asılıyor…</string>
-    <string name="desk_cover">kapak</string>
+    <string name="desk_cover">Kapak</string>
     <string name="desk_cover_note">Kapak, panodaki on kilobaytlık resim olur; gerisi sürüde yolculuk eder ve yalnızca birisi ilanı açtığında alınır.</string>
     <string name="desk_pick_listing">Bir ilan seç ya da soldaki düğmelerle bir tane başlat.</string>
     <string name="desk_group_copies_queued">Sayfa henüz yerine ulaşmadı — bir sonraki turda yeniden yazılacak.</string>
@@ -280,10 +280,10 @@
     <string name="desk_send_them_money">Ona para gönder</string>
     <string name="desk_pay">Öde</string>
     <string name="desk_more">Daha</string>
-    <string name="desk_never">asla</string>
-    <string name="desk_an_hour">bir saat</string>
-    <string name="desk_a_day">bir gün</string>
-    <string name="desk_a_week">bir hafta</string>
+    <string name="desk_never">Asla</string>
+    <string name="desk_an_hour">Bir saat</string>
+    <string name="desk_a_day">Bir gün</string>
+    <string name="desk_a_week">Bir hafta</string>
     <string name="desk_clear_hide_note">Temizleme ve gizleme yalnızca bu masayı etkiler; unutmak kişiyi siler.</string>
     <string name="desk_someones_profile">Birinin profili…</string>
     <string name="desk_share_the_profile">Profili paylaş</string>
@@ -374,4 +374,19 @@
     <string name="desk_busy_home">evin yayımlanıyor</string>
     <string name="desk_busy_seeding">sürüde dağıtılıyor</string>
     <string name="desk_busy_address">adres yayımlanıyor</string>
+    <string name="desk_ask_available">Merhaba — "%1$s" hâlâ mevcut mu?</string>
+    <string name="desk_clear">Temizle</string>
+    <string name="desk_stop">Durdur</string>
+    <string name="desk_fee_unknown">Ücret henüz bilinmiyor — hiçbir düğüm yanıt vermedi.</string>
+    <string name="desk_no_rate_yet">Henüz döviz kuru yok — cüzdan birazdan alacak.</string>
+    <string name="desk_cannot_price">Bu ürün şu anda fiyatlandırılamıyor.</string>
+    <string name="desk_price_is_number">Fiyat, XMR cinsinden bir sayıdır (ücretsiz için 0).</string>
+    <string name="desk_published_billed">%1$s yayımlandı — gönderilen faturalar: %2$d.</string>
+    <string name="desk_published_sent">%1$s yayımlandı — abonelere gönderildi: %2$d.</string>
+    <string name="desk_issue_here">burada · %1$s</string>
+    <string name="desk_issue_ready">alınmaya hazır</string>
+    <string name="desk_issue_key_held">anahtar var, henüz rafta değil</string>
+    <string name="desk_issue_asked">istendi</string>
+    <string name="desk_issue_on_shelf">onların rafında</string>
+    <string name="desk_pieces_of">%2$d parçadan %1$d</string>
 </resources>

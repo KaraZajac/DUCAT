@@ -2,6 +2,7 @@
 <resources>
     <string name="section_library">Thư viện</string>
     <string name="library_empty">Chưa có gì ở đây. Khi nhà xuất bản gửi cho bạn một số báo, nó được lưu vào đây — và vẫn còn dù bạn xóa cuộc trò chuyện.</string>
+    <string name="library_reading">Đang đọc kệ của bạn…</string>
     <string name="library_issue">Số %1$s</string>
     <string name="library_on_device">Trên thiết bị này · %1$s</string>
     <string name="library_no_shipment">Đã lưu khóa — chưa có bản tải xuống nào</string>

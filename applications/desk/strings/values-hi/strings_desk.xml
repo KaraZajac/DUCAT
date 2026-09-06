@@ -374,4 +374,19 @@
     <string name="desk_busy_home">आपका घर प्रकाशित किया जा रहा है</string>
     <string name="desk_busy_seeding">स्वार्म पर बाँटा जा रहा है</string>
     <string name="desk_busy_address">पता प्रकाशित किया जा रहा है</string>
+    <string name="desk_ask_available">नमस्ते — क्या "%1$s" अभी भी उपलब्ध है?</string>
+    <string name="desk_clear">साफ़ करें</string>
+    <string name="desk_stop">रोकें</string>
+    <string name="desk_fee_unknown">शुल्क अभी पता नहीं — किसी नोड ने जवाब नहीं दिया।</string>
+    <string name="desk_no_rate_yet">अभी विनिमय दर नहीं — वॉलेट जल्द ही ले आएगा।</string>
+    <string name="desk_cannot_price">उस वस्तु की कीमत अभी तय नहीं की जा सकती।</string>
+    <string name="desk_price_is_number">कीमत XMR में एक संख्या होती है (मुफ़्त के लिए 0)।</string>
+    <string name="desk_published_billed">%1$s प्रकाशित — भेजे गए बिल: %2$d।</string>
+    <string name="desk_published_sent">%1$s प्रकाशित — सदस्यों को भेजा: %2$d।</string>
+    <string name="desk_issue_here">यहाँ · %1$s</string>
+    <string name="desk_issue_ready">लाने के लिए तैयार</string>
+    <string name="desk_issue_key_held">कुंजी है, अभी शेल्फ़ पर नहीं</string>
+    <string name="desk_issue_asked">माँगा गया</string>
+    <string name="desk_issue_on_shelf">उनकी शेल्फ़ पर</string>
+    <string name="desk_pieces_of">%2$d में से %1$d टुकड़े</string>
 </resources>

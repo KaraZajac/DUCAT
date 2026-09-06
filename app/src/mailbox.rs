@@ -174,6 +174,20 @@ pub(crate) fn plan_set_watched(hex: &str, at: Option<Instant>) {
     with_plan(|p| p.entry(hex.to_string()).or_insert_with(PollSlot::fresh).watched = at);
 }
 
+/// After the node was restarted: every watch it held died with it, so
+/// the plan must not believe they are armed for the rest of their eight
+/// minutes. Everything is also due at once — a log that rang while the
+/// node was down rang to nobody.
+pub(crate) fn plan_forget_watches() {
+    with_plan(|p| {
+        for s in p.values_mut() {
+            s.watched = None;
+            s.due = Instant::now();
+            s.backoff_secs = 0;
+        }
+    });
+}
+
 /// After a read: a log that spoke is read every lap; a quiet one waits
 /// twice as long as last time, up to POLL_MAX_SECS.
 pub(crate) fn plan_settle(hex: &str, spoke: bool) {

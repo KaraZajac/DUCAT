@@ -64,6 +64,7 @@
     <string name="rent_search_allow">Cho phép vị trí</string>
     <string name="rent_search_no_fix">Chưa có vị trí. Gần cửa sổ hoặc ra ngoài trời thường là được.</string>
     <string name="rent_search_no_network">Hiện chưa kết nối được tới mạng nên chưa đọc được bảng nào. Thường là ứng dụng vẫn đang tham gia — thử lại sau một lát.</string>
+    <string name="rent_search_no_reply">Các bảng chưa phản hồi lúc này. Hãy thử lại sau giây lát.</string>
     <string name="rent_search_retry">Thử lại</string>
     <string name="rent_search_progress">Đã kiểm tra %1$d trên %2$d khu vực</string>
     <string name="rent_search_closer">Đang xem kỹ hơn những khu vực đông nhất…</string>

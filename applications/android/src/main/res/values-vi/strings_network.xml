@@ -14,6 +14,11 @@
     <string name="net_line_node_id">ID nút</string>
     <string name="net_line_peers">peer</string>
     <string name="net_peers_value">%1$d trực tuyến, %2$d đáng tin</string>
+    <string name="net_line_table">bảng định tuyến</string>
+    <string name="net_table_value">%1$d phản hồi, %2$d không, trong %3$d đã biết</string>
+    <string name="net_slow_hint">Tra cứu đang chậm: nhiều nút đã biết ngừng phản hồi. Kết nối lại sẽ dựng lại bảng trong khoảng một phút.</string>
+    <string name="net_reconnect">Kết nối lại</string>
+    <string name="net_reconnecting">Đang kết nối lại…</string>
     <string name="net_waiting">chờ %1$d giây — node phải tự tìm ra cách nó được liên lạc tới trước khi dựng được tuyến</string>
 
     <string name="net_starting">Đang khởi động…</string>

@@ -1823,8 +1823,19 @@ fun DriveScreen() {
         if (watching != null) {
             Spacer(Modifier.height(16.dp))
             if (notices.isEmpty()) {
+                // "Nothing on the board" is only true once the board could
+                // be read; before the node attaches it is a confident lie,
+                // the same one the map beside this list already refuses.
+                val online by produceState(true) {
+                    while (true) {
+                        value = runCatching {
+                            uniffi.ducat_mobile.nodeStatus().publicInternetReady
+                        }.getOrDefault(false)
+                        delay(4_000)
+                    }
+                }
                 Text(
-                    stringResource(R.string.hail_board_empty),
+                    stringResource(if (online) R.string.hail_board_empty else R.string.hail_joining_network),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

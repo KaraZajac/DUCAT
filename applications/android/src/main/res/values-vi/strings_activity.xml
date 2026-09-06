@@ -1,6 +1,7 @@
 <resources>
     <!-- Empty state -->
     <string name="activity_nothing_yet">Chưa có gì</string>
+    <string name="activity_reading">Đang đọc chuỗi…</string>
     <string name="activity_empty_desc">Các khoản thanh toán hiện ở đây sau khi chuỗi được đọc xong. Nạp tiền từ Tài khoản để thấy gì đó.</string>
 
     <!-- Pending requests -->
@@ -18,7 +19,7 @@
 
     <!-- Event rows -->
     <string name="activity_reading_transaction">Đang đọc giao dịch…</string>
-    <string name="activity_receipt_chip">🧾 biên nhận</string>
+    <string name="activity_receipt_chip">🧾 Biên nhận</string>
     <string name="activity_note_quoted">“%1$s”</string>
     <string name="activity_sending">Đang gửi — chưa vào khối</string>
     <string name="activity_spent_unknown">Đã chi, nhưng không nói được đi đâu</string>

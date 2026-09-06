@@ -64,6 +64,7 @@
     <string name="rent_search_allow">위치 허용</string>
     <string name="rent_search_no_fix">아직 위치를 못 잡았습니다. 창가나 실외면 대개 잡힙니다.</string>
     <string name="rent_search_no_network">지금은 네트워크에 닿지 못해 게시판을 하나도 읽지 못했습니다. 보통은 앱이 아직 연결 중이라는 뜻입니다 — 잠시 후 다시 시도하세요.</string>
+    <string name="rent_search_no_reply">게시판이 지금 응답하지 않았습니다. 잠시 후 다시 시도하세요.</string>
     <string name="rent_search_retry">다시 시도</string>
     <string name="rent_search_progress">%2$d개 지역 중 %1$d개 확인</string>
     <string name="rent_search_closer">가장 붐비는 지역을 더 자세히 보는 중…</string>

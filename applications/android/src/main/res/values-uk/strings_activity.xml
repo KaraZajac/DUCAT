@@ -1,6 +1,7 @@
 <resources>
     <!-- Empty state -->
     <string name="activity_nothing_yet">Поки нічого</string>
+    <string name="activity_reading">Читання ланцюжка…</string>
     <string name="activity_empty_desc">Платежі з\'являться тут, щойно ланцюг буде прочитано. Поповни з вкладки «Рахунки», щоб щось побачити.</string>
 
     <!-- Pending requests -->
@@ -21,7 +22,7 @@
 
     <!-- Event rows -->
     <string name="activity_reading_transaction">Читаємо транзакцію…</string>
-    <string name="activity_receipt_chip">🧾 чек</string>
+    <string name="activity_receipt_chip">🧾 Чек</string>
     <string name="activity_note_quoted">“%1$s”</string>
     <string name="activity_sending">Надсилається — ще не в блоці</string>
     <string name="activity_spent_unknown">Витрачено, але куди — сказати не можемо</string>

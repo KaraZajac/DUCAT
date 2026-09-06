@@ -526,6 +526,36 @@ async fn node_debug(command: String) -> Result<String, String> {
         .map_err(|e| e.to_string())?
 }
 
+/// The routing table's health, for the status page's "slow today" line.
+#[derive(serde::Serialize)]
+struct RoutingHealthView {
+    total: u32,
+    live: u32,
+    dead: u32,
+    reliable: u32,
+    find_node_ms: u32,
+    slow: bool,
+}
+
+#[tauri::command]
+async fn routing_health() -> Result<RoutingHealthView, String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || {
+        let h = a.routing_health();
+        RoutingHealthView { total: h.total, live: h.live, dead: h.dead, reliable: h.reliable, find_node_ms: h.find_node_ms, slow: h.is_slow() }
+    })
+    .await
+    .map_err(|e| e.to_string())
+}
+
+/// Stop the node and start it again, table purged: the button for a
+/// slow afternoon. Watches and shares are re-armed by the lap.
+#[tauri::command]
+async fn reconnect() -> Result<(), String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.reconnect().map_err(said)).await.map_err(|e| e.to_string())?
+}
+
 #[tauri::command]
 async fn republish_home() -> Result<SiteRow, String> {
     let a = app()?;
@@ -2853,6 +2883,8 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             status,
+            routing_health,
+            reconnect,
             fetch_progress,
             releases,
             share_file,

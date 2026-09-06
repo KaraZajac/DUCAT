@@ -52,4 +52,5 @@
     <string name="prices_menu_warn_body">%2$s\'ye geçmek, yeniden ayarlayana kadar o fiyatların satılmasını durdurur. Hiçbir şey silinmez.</string>
     <string name="prices_menu_warn_go">Yine de değiştir</string>
     <string name="common_connecting">Ağa bağlanılıyor…</string>
+    <string name="common_read_failed">Şu anda okunamadı: %1$s</string>
 </resources>

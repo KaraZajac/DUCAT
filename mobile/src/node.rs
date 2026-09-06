@@ -625,17 +625,8 @@ pub fn node_start(storage_dir: String, udp: bool) -> Result<(), NodeError> {
         // only allowed before attaching, so this is the moment; the
         // bootstrap that follows rebuilds it live.
         if let Ok(info) = api.debug("nodeinfo".into()).await {
-            let (mut total, mut dead) = (0u64, 0u64);
-            for line in info.lines() {
-                let l = line.trim();
-                if let Some(rest) = l.strip_prefix("total=") {
-                    total = rest.split(',').next().and_then(|v| v.trim().parse().ok()).unwrap_or(0);
-                    if let Some(d) = l.split("dead=").nth(1) {
-                        dead = d.split(|c: char| !c.is_ascii_digit()).next().and_then(|v| v.parse().ok()).unwrap_or(0);
-                    }
-                    break;
-                }
-            }
+            let RoutingHealth { total, dead, .. } = parse_routing_health(&info);
+            let (total, dead) = (u64::from(total), u64::from(dead));
             if total > 0 && dead * 4 >= total {
                 match api.debug("purge buckets".into()).await {
                     Ok(_) => note(format!("routing table purged before attach — {dead} of {total} entries were dead")),
@@ -650,6 +641,84 @@ pub fn node_start(storage_dir: String, udp: bool) -> Result<(), NodeError> {
 
     *crate::lock(slot()) = Some(Node { api, runtime });
     Ok(())
+}
+
+/// How the routing table is doing — the number behind "the network is
+/// slow today". veilid keeps every node it has met, and the ones that
+/// stopped answering stay in the table as dead entries until it prunes
+/// them; a lookup walks through their timeouts. A quarter dead is where
+/// a page that took a second starts taking ten, and the node purges the
+/// table before it attaches when it finds that (see `node_start`).
+#[derive(uniffi::Record, Clone, Debug, Default, PartialEq, Eq)]
+pub struct RoutingHealth {
+    /// Entries in the table.
+    pub total: u32,
+    /// Answering.
+    pub live: u32,
+    /// Not answering any more.
+    pub dead: u32,
+    /// Answering and reliable.
+    pub reliable: u32,
+    /// Average time a node lookup took, milliseconds; 0 when unknown.
+    pub find_node_ms: u32,
+}
+
+impl RoutingHealth {
+    /// Slow enough to say so. A third of the table dead is ordinary —
+    /// three minutes after a fresh attach the desk's table read
+    /// 96 dead of 279, and its lookups were quick — so the dead count
+    /// alone only counts past half; the lookup latency is the better
+    /// witness: 345 ms average was the reading on the afternoon every
+    /// lap took forty seconds, against 165–210 ms on a fresh table.
+    pub fn is_slow(&self) -> bool {
+        (self.total > 0 && u64::from(self.dead) * 2 >= u64::from(self.total)) || self.find_node_ms >= 300
+    }
+}
+
+/// veilid's `nodeinfo` debug text, read for the figures above. The line
+/// that matters is `total=280, live=190 (dead=85, miss=5, urel=6, reli=184)`
+/// and the `FindNodeA:` latency row; anything else is left alone, and a
+/// text without them gives zeros.
+pub(crate) fn parse_routing_health(info: &str) -> RoutingHealth {
+    fn num_after(l: &str, key: &str) -> u32 {
+        l.split(key)
+            .nth(1)
+            .map(|d| d.trim_start())
+            .and_then(|d| d.split(|c: char| !c.is_ascii_digit()).next())
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(0)
+    }
+    let mut h = RoutingHealth::default();
+    let mut seen_table = false;
+    for line in info.lines() {
+        let l = line.trim();
+        if !seen_table && l.starts_with("total=") {
+            h.total = num_after(l, "total=");
+            h.live = num_after(l, "live=");
+            h.dead = num_after(l, "dead=");
+            h.reliable = num_after(l, "reli=");
+            seen_table = true;
+        } else if let Some(rest) = l.strip_prefix("FindNodeA:") {
+            // "828.787ms slow | 345.011ms avg | …" — the average, whole ms.
+            h.find_node_ms = rest
+                .split('|')
+                .find(|c| c.contains("avg"))
+                .and_then(|c| c.trim().split("ms").next())
+                .and_then(|v| v.trim().parse::<f64>().ok())
+                .map(|v| v.round() as u32)
+                .unwrap_or(0);
+        }
+    }
+    h
+}
+
+/// The routing table's health right now; zeros when the node is not up.
+#[uniffi::export]
+pub fn node_routing_health() -> RoutingHealth {
+    let Ok((api, rt)) = handles() else {
+        return RoutingHealth::default();
+    };
+    rt.block_on(api.debug("nodeinfo".into())).map(|info| parse_routing_health(&info)).unwrap_or_default()
 }
 
 /// A snapshot. Cheap, and safe to call from a recomposition.
@@ -1959,5 +2028,21 @@ mod panic_hook_tests {
         assert!(log.contains("pretend-veilid"), "no thread name: {log}");
         assert!(log.contains("node.rs:"), "no location: {log}");
         std::fs::remove_dir_all(&dir).ok();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn routing_health_reads_nodeinfo() {
+        let info = "Node Ids: [x]\n\nRouting Table Health:\n    All Domains:\n        total=280, live=190 (dead=85, miss=5, urel=6, reli=184)\n    PUB:\n        Summary:\n            Combined:\n                total: {any=280, connectivity=269, distance_metric=274}\nRPC Message Processing Latency:\n           FindNodeA: 828.787ms slow | 345.011ms avg | 155.994ms fast | 292.313ms tm90\n";
+        let h = parse_routing_health(info);
+        assert_eq!(h, RoutingHealth { total: 280, live: 190, dead: 85, reliable: 184, find_node_ms: 345 });
+        assert!(h.is_slow(), "345 ms lookups are slow");
+        assert_eq!(parse_routing_health("nothing here"), RoutingHealth::default());
+        assert!(!RoutingHealth { total: 279, live: 175, dead: 96, reliable: 150, find_node_ms: 200 }.is_slow(), "a third dead with quick lookups is ordinary");
+        assert!(RoutingHealth { total: 287, live: 57, dead: 151, reliable: 50, find_node_ms: 0 }.is_slow(), "half dead is slow whatever the latency says");
     }
 }

@@ -14,6 +14,11 @@
     <string name="net_line_node_id">ID du nœud</string>
     <string name="net_line_peers">pairs</string>
     <string name="net_peers_value">%1$d actifs, %2$d fiables</string>
+    <string name="net_line_table">table de routage</string>
+    <string name="net_table_value">%1$d répondent, %2$d non, sur %3$d connus</string>
+    <string name="net_slow_hint">Les recherches sont lentes : beaucoup des nœuds connus ne répondent plus. Se reconnecter reconstruit la table en une minute environ.</string>
+    <string name="net_reconnect">Se reconnecter</string>
+    <string name="net_reconnecting">Reconnexion…</string>
     <string name="net_waiting">attente %1$ds — un nœud doit comprendre comment il est joignable avant de pouvoir construire une route</string>
 
     <string name="net_starting">Démarrage…</string>

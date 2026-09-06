@@ -51,4 +51,5 @@
     <string name="prices_menu_warn_body">Przejście na %2$s sprawi, że tych cen nie sprzedasz, dopóki nie ustawisz ich na nowo. Nic nie znika.</string>
     <string name="prices_menu_warn_go">Zmień mimo to</string>
     <string name="common_connecting">Łączenie z siecią…</string>
+    <string name="common_read_failed">Nie udało się teraz odczytać: %1$s</string>
 </resources>

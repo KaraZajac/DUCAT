@@ -1,6 +1,7 @@
 <resources>
     <!-- Empty state -->
     <string name="activity_nothing_yet">لا شيء بعد</string>
+    <string name="activity_reading">جارٍ قراءة السلسلة…</string>
     <string name="activity_empty_desc">تظهر المدفوعات هنا بعد قراءة السلسلة. اشحن رصيدك من «الحسابات» لترى شيئًا.</string>
 
     <!-- Pending requests -->

@@ -2,6 +2,7 @@
 <resources>
     <string name="section_library">라이브러리</string>
     <string name="library_empty">아직 아무것도 없어요. 발행인이 호를 보내오면 여기에 보관돼요 — 채팅을 삭제해도 남아 있어요.</string>
+    <string name="library_reading">책장을 읽는 중…</string>
     <string name="library_issue">%1$s호</string>
     <string name="library_on_device">이 기기에 저장됨 · %1$s</string>
     <string name="library_no_shipment">키 보관됨 — 아직 제공된 다운로드 없음</string>

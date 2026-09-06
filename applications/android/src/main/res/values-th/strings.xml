@@ -52,4 +52,5 @@
     <string name="prices_menu_warn_body">การเปลี่ยนไป %2$s จะทำให้ราคาเหล่านั้นขายไม่ได้จนกว่าคุณจะตั้งใหม่ ไม่มีอะไรถูกลบ</string>
     <string name="prices_menu_warn_go">เปลี่ยนต่อไป</string>
     <string name="common_connecting">กำลังเชื่อมต่อเครือข่าย…</string>
+    <string name="common_read_failed">อ่านไม่ได้ในตอนนี้: %1$s</string>
 </resources>

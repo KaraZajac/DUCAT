@@ -1,6 +1,7 @@
 <resources>
     <!-- Empty state -->
     <string name="activity_nothing_yet">ยังไม่มีอะไร</string>
+    <string name="activity_reading">กำลังอ่านเชน…</string>
     <string name="activity_empty_desc">การชำระเงินจะปรากฏที่นี่เมื่ออ่านเชนแล้ว เติมเงินจากหน้าบัญชีเพื่อให้มีรายการแสดง</string>
 
     <!-- Pending requests -->

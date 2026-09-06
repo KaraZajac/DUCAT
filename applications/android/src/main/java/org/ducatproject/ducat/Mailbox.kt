@@ -2015,6 +2015,22 @@ object Mailbox {
         synchronized(plan) { slot(key).watchedAt = at }
     }
 
+    /**
+     * After the node was restarted: every watch it held died with it, so
+     * the plan must not believe they are armed for the rest of their eight
+     * minutes; and everything is due at once, because a log that rang
+     * while the node was down rang to nobody.
+     */
+    fun planForgetWatches() {
+        synchronized(plan) {
+            for (s in plan.values) {
+                s.watchedAt = 0L
+                s.dueAt = 0L
+                s.backoffMs = 0L
+            }
+        }
+    }
+
     /** After a read: a log that spoke is read every sweep; a quiet one waits twice as long, up to POLL_MAX_MS. */
     private fun settle(hex: String, spoke: Boolean) {
         synchronized(plan) {

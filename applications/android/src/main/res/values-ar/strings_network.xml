@@ -14,6 +14,11 @@
     <string name="net_line_node_id">معرّف العقدة</string>
     <string name="net_line_peers">النظراء</string>
     <string name="net_peers_value">%1$d نشط، %2$d موثوق</string>
+    <string name="net_line_table">جدول التوجيه</string>
+    <string name="net_table_value">%1$d يستجيب، %2$d لا يستجيب، من أصل %3$d معروف</string>
+    <string name="net_slow_hint">عمليات البحث بطيئة: كثير من العقد التي يعرفها هذا الجهاز توقفت عن الاستجابة. إعادة الاتصال تبني الجدول من جديد خلال نحو دقيقة.</string>
+    <string name="net_reconnect">إعادة الاتصال</string>
+    <string name="net_reconnecting">جارٍ إعادة الاتصال…</string>
     <string name="net_waiting">انتظار %1$d ث — على العقدة أن تعرف كيف يمكن الوصول إليها قبل أن تستطيع بناء مسار</string>
 
     <string name="net_starting">جارٍ البدء…</string>

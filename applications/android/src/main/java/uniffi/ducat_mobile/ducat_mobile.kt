@@ -1025,6 +1025,8 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1257,6 +1259,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_node_reply(`id`: Long,`message`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Unit
     fun uniffi_ducat_mobile_fn_func_node_route_blob(uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_node_routing_health(uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_start(`storageDir`: RustBuffer.ByValue,`udp`: Byte,uniffi_out_err: UniffiRustCallStatus, 
     ): Unit
@@ -1683,6 +1687,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_checksum_func_node_reply(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_route_blob(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_routing_health(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_start(
     ): Short
@@ -2122,6 +2128,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_route_blob() != 4436.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_routing_health() != 2350.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_start() != 61127.toShort()) {
@@ -5985,6 +5994,73 @@ public object FfiConverterTypeRestoredBackup: FfiConverterRustBuffer<RestoredBac
             FfiConverterSequenceTypeEscrowShareEntry.write(value.`escrowShares`, buf)
             FfiConverterSequenceTypePersonaBackup.write(value.`personas`, buf)
             FfiConverterULong.write(value.`created`, buf)
+    }
+}
+
+
+
+/**
+ * How the routing table is doing — the number behind "the network is
+ * slow today". veilid keeps every node it has met, and the ones that
+ * stopped answering stay in the table as dead entries until it prunes
+ * them; a lookup walks through their timeouts. A quarter dead is where
+ * a page that took a second starts taking ten, and the node purges the
+ * table before it attaches when it finds that (see `node_start`).
+ */
+data class RoutingHealth (
+    /**
+     * Entries in the table.
+     */
+    var `total`: kotlin.UInt, 
+    /**
+     * Answering.
+     */
+    var `live`: kotlin.UInt, 
+    /**
+     * Not answering any more.
+     */
+    var `dead`: kotlin.UInt, 
+    /**
+     * Answering and reliable.
+     */
+    var `reliable`: kotlin.UInt, 
+    /**
+     * Average time a node lookup took, milliseconds; 0 when unknown.
+     */
+    var `findNodeMs`: kotlin.UInt
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeRoutingHealth: FfiConverterRustBuffer<RoutingHealth> {
+    override fun read(buf: ByteBuffer): RoutingHealth {
+        return RoutingHealth(
+            FfiConverterUInt.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterUInt.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: RoutingHealth) = (
+            FfiConverterUInt.allocationSize(value.`total`) +
+            FfiConverterUInt.allocationSize(value.`live`) +
+            FfiConverterUInt.allocationSize(value.`dead`) +
+            FfiConverterUInt.allocationSize(value.`reliable`) +
+            FfiConverterUInt.allocationSize(value.`findNodeMs`)
+    )
+
+    override fun write(value: RoutingHealth, buf: ByteBuffer) {
+            FfiConverterUInt.write(value.`total`, buf)
+            FfiConverterUInt.write(value.`live`, buf)
+            FfiConverterUInt.write(value.`dead`, buf)
+            FfiConverterUInt.write(value.`reliable`, buf)
+            FfiConverterUInt.write(value.`findNodeMs`, buf)
     }
 }
 
@@ -10694,6 +10770,18 @@ public object FfiConverterMapStringString: FfiConverterRustBuffer<Map<kotlin.Str
             return FfiConverterByteArray.lift(
     uniffiRustCallWithError(NodeException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_route_blob(
+        _status)
+}
+    )
+    }
+    
+
+        /**
+         * The routing table's health right now; zeros when the node is not up.
+         */ fun `nodeRoutingHealth`(): RoutingHealth {
+            return FfiConverterTypeRoutingHealth.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_routing_health(
         _status)
 }
     )

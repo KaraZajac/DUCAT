@@ -370,4 +370,19 @@
     <string name="desk_busy_home">กำลังเผยแพร่บ้านของคุณ</string>
     <string name="desk_busy_seeding">กำลังแจกจ่ายบน swarm</string>
     <string name="desk_busy_address">กำลังเผยแพร่ที่อยู่</string>
+    <string name="desk_ask_available">สวัสดี — "%1$s" ยังมีอยู่ไหม</string>
+    <string name="desk_clear">ล้าง</string>
+    <string name="desk_stop">หยุด</string>
+    <string name="desk_fee_unknown">ยังไม่ทราบค่าธรรมเนียม — ยังไม่มีโหนดตอบ</string>
+    <string name="desk_no_rate_yet">ยังไม่มีอัตราแลกเปลี่ยน — กระเป๋าจะดึงมาในไม่ช้า</string>
+    <string name="desk_cannot_price">ยังตั้งราคาสินค้านี้ไม่ได้ในตอนนี้</string>
+    <string name="desk_price_is_number">ราคาคือตัวเลขเป็น XMR (0 คือฟรี)</string>
+    <string name="desk_published_billed">เผยแพร่ %1$s แล้ว — ส่งบิลแล้ว: %2$d</string>
+    <string name="desk_published_sent">เผยแพร่ %1$s แล้ว — ส่งถึงผู้ติดตาม: %2$d</string>
+    <string name="desk_issue_here">อยู่ที่นี่ · %1$s</string>
+    <string name="desk_issue_ready">พร้อมดึงมา</string>
+    <string name="desk_issue_key_held">มีกุญแจแล้ว ยังไม่อยู่บนชั้น</string>
+    <string name="desk_issue_asked">ขอไปแล้ว</string>
+    <string name="desk_issue_on_shelf">อยู่บนชั้นของพวกเขา</string>
+    <string name="desk_pieces_of">%1$d จาก %2$d ชิ้น</string>
 </resources>

@@ -1,6 +1,7 @@
 <resources>
     <!-- Empty state -->
     <string name="activity_nothing_yet">Nothing yet</string>
+    <string name="activity_reading">Reading the chain…</string>
     <string name="activity_empty_desc">Payments appear here once the chain has been read. Top up from Accounts to see something.</string>
 
     <!-- Pending requests -->
@@ -19,7 +20,7 @@
 
     <!-- Event rows -->
     <string name="activity_reading_transaction">Reading the transaction…</string>
-    <string name="activity_receipt_chip">🧾 receipt</string>
+    <string name="activity_receipt_chip">🧾 Receipt</string>
     <string name="activity_note_quoted">“%1$s”</string>
     <string name="activity_sending">Sending — not yet in a block</string>
     <string name="activity_spent_unknown">Spent, but we cannot say where</string>

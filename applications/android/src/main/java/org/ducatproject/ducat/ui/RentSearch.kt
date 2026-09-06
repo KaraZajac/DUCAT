@@ -84,7 +84,7 @@ internal fun boardChipLabel(kind: Int): Int = when (kind) {
  * Why a search never started. Not an error in the list — the list does not
  * exist yet — so it replaces the spinner rather than sitting above one.
  */
-private enum class Stall { NoPermission, NoFix, NoNetwork }
+private enum class Stall { NoPermission, NoFix, NoNetwork, NoReply }
 
 @Composable
 @OptIn(
@@ -391,8 +391,13 @@ private fun RentSearchScreen(
                 // and saying "nothing listed around here" would be a
                 // confident lie. Opening this a few seconds after the app
                 // starts, before the node has attached, does exactly that.
-                if (replied == 0 || (results.isNullOrEmpty() && !attached())) {
+                if (!attached()) {
                     stalled = Stall.NoNetwork
+                } else if (replied == 0) {
+                    // Attached, and still nobody answered: a different
+                    // sentence from "still joining", because the way out
+                    // is different — wait a moment, not a minute.
+                    stalled = Stall.NoReply
                 }
                 if (results == null) results = emptyList()
                 unverified = !org.ducatproject.ducat.Beacons.hasChainView()
@@ -949,6 +954,7 @@ private fun Stalled(stall: Stall, onRetry: () -> Unit) {
                     Stall.NoPermission -> R.string.rent_search_needs_location
                     Stall.NoFix -> R.string.rent_search_no_fix
                     Stall.NoNetwork -> R.string.rent_search_no_network
+                    Stall.NoReply -> R.string.rent_search_no_reply
                 },
             ),
             style = MaterialTheme.typography.bodyMedium,

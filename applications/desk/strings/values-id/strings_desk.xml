@@ -238,7 +238,7 @@
     <string name="desk_saving">Menyimpan…</string>
     <string name="desk_refresh_board">Segarkan di papan</string>
     <string name="desk_posting">Memasang…</string>
-    <string name="desk_cover">sampul</string>
+    <string name="desk_cover">Sampul</string>
     <string name="desk_cover_note">Sampul menjadi gambar sepuluh kilobyte di papan; sisanya berkelana di kawanan dan hanya diambil saat seseorang membuka iklan.</string>
     <string name="desk_pick_listing">Pilih iklan, atau mulai satu dengan tombol di kiri.</string>
     <string name="desk_group_copies_queued">Halaman belum sampai — akan ditulis lagi pada putaran berikutnya.</string>
@@ -276,10 +276,10 @@
     <string name="desk_send_them_money">Kirimi uang</string>
     <string name="desk_pay">Bayar</string>
     <string name="desk_more">Lainnya</string>
-    <string name="desk_never">tidak pernah</string>
-    <string name="desk_an_hour">satu jam</string>
-    <string name="desk_a_day">satu hari</string>
-    <string name="desk_a_week">satu minggu</string>
+    <string name="desk_never">Tidak pernah</string>
+    <string name="desk_an_hour">Satu jam</string>
+    <string name="desk_a_day">Satu hari</string>
+    <string name="desk_a_week">Satu minggu</string>
     <string name="desk_clear_hide_note">Bersihkan dan sembunyikan hanya menyentuh desk ini; lupakan menghapus kontak.</string>
     <string name="desk_someones_profile">Profil seseorang…</string>
     <string name="desk_share_the_profile">Bagikan profil</string>
@@ -370,4 +370,19 @@
     <string name="desk_busy_home">menerbitkan rumahmu</string>
     <string name="desk_busy_seeding">menyebarkan di kawanan</string>
     <string name="desk_busy_address">menerbitkan alamat</string>
+    <string name="desk_ask_available">Halo — apakah "%1$s" masih tersedia?</string>
+    <string name="desk_clear">Kosongkan</string>
+    <string name="desk_stop">Hentikan</string>
+    <string name="desk_fee_unknown">Biaya belum diketahui — belum ada node yang menjawab.</string>
+    <string name="desk_no_rate_yet">Belum ada kurs — dompet akan mengambilnya sebentar lagi.</string>
+    <string name="desk_cannot_price">Barang itu belum bisa diberi harga sekarang.</string>
+    <string name="desk_price_is_number">Harga adalah angka dalam XMR (0 untuk gratis).</string>
+    <string name="desk_published_billed">%1$s diterbitkan — tagihan terkirim: %2$d.</string>
+    <string name="desk_published_sent">%1$s diterbitkan — dikirim ke pelanggan: %2$d.</string>
+    <string name="desk_issue_here">di sini · %1$s</string>
+    <string name="desk_issue_ready">siap diambil</string>
+    <string name="desk_issue_key_held">kunci ada, belum di rak</string>
+    <string name="desk_issue_asked">diminta</string>
+    <string name="desk_issue_on_shelf">di rak mereka</string>
+    <string name="desk_pieces_of">%1$d dari %2$d bagian</string>
 </resources>

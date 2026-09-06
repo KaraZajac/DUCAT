@@ -52,4 +52,5 @@
     <string name="prices_menu_warn_body">Passer en %2$s rend ces prix invendables tant que tu ne les refais pas. Rien n\'est supprimé.</string>
     <string name="prices_menu_warn_go">Changer quand même</string>
     <string name="common_connecting">Connexion au réseau…</string>
+    <string name="common_read_failed">Lecture impossible pour l\'instant : %1$s</string>
 </resources>

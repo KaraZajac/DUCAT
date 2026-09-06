@@ -14,6 +14,11 @@
     <string name="net_line_node_id">नोड आईडी</string>
     <string name="net_line_peers">पीयर</string>
     <string name="net_peers_value">%1$d सक्रिय, %2$d भरोसेमंद</string>
+    <string name="net_line_table">रूटिंग तालिका</string>
+    <string name="net_table_value">%3$d ज्ञात में से %1$d जवाब दे रहे हैं, %2$d नहीं</string>
+    <string name="net_slow_hint">खोज धीमी है: इस नोड को ज्ञात कई नोड जवाब देना बंद कर चुके हैं। फिर से जुड़ने पर तालिका लगभग एक मिनट में नए सिरे से बनती है।</string>
+    <string name="net_reconnect">फिर से जोड़ें</string>
+    <string name="net_reconnecting">फिर से जुड़ रहा है…</string>
     <string name="net_waiting">%1$d सेकंड से प्रतीक्षा — रूट बनाने से पहले नोड को समझना होता है कि उस तक कैसे पहुँचा जा सकता है</string>
 
     <string name="net_starting">शुरू हो रहा है…</string>

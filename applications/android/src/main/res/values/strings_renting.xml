@@ -73,6 +73,7 @@
     <string name="rent_search_allow">Allow location</string>
     <string name="rent_search_no_fix">No location fix yet. Near a window or outside usually does it.</string>
     <string name="rent_search_no_network">Could not reach the network just now, so no board was read. This usually means the app is still joining — try again in a moment.</string>
+    <string name="rent_search_no_reply">The boards did not answer just now. Try again in a moment.</string>
     <string name="rent_search_retry">Try again</string>
     <string name="rent_search_progress">%1$d of %2$d areas checked</string>
     <string name="rent_search_closer">Looking more closely at the busiest areas…</string>

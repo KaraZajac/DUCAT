@@ -14,6 +14,11 @@
     <string name="net_line_node_id">节点 ID</string>
     <string name="net_line_peers">对等节点</string>
     <string name="net_peers_value">%1$d 个在线，%2$d 个可靠</string>
+    <string name="net_line_table">路由表</string>
+    <string name="net_table_value">已知 %3$d 个节点中 %1$d 个响应，%2$d 个无响应</string>
+    <string name="net_slow_hint">查询变慢：许多已知节点已停止响应。重新连接会在大约一分钟内重建路由表。</string>
+    <string name="net_reconnect">重新连接</string>
+    <string name="net_reconnecting">正在重新连接…</string>
     <string name="net_waiting">已等待 %1$d 秒 — 节点得先弄清自己如何可达，才能建路由</string>
 
     <string name="net_starting">启动中…</string>

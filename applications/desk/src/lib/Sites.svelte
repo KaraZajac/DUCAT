@@ -54,7 +54,7 @@
     err = null;
     busy = "publish";
     try {
-      await api.publishSite(dir, title.trim() || "Untitled", updating ?? undefined);
+      await api.publishSite(dir, title.trim() || t("desk_untitled"), updating ?? undefined);
       dir = null;
       title = "";
       lint = null;
@@ -172,7 +172,7 @@
 </div>
 
 <div class="card">
-  {#if loaded && rows.length === 0}
+  {#if loaded && rows.length === 0 && !err}
     <p class="empty">{t("sites_empty_title")}</p>
   {/if}
   {#each rows as r (r.record_key)}

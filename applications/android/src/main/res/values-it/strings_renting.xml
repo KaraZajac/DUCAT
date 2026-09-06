@@ -64,6 +64,7 @@
     <string name="rent_search_allow">Consenti posizione</string>
     <string name="rent_search_no_fix">Ancora nessuna posizione. Vicino a una finestra o all\'aperto di solito funziona.</string>
     <string name="rent_search_no_network">La rete non era raggiungibile in questo momento, quindi nessuna bacheca è stata letta. Di solito vuol dire che l\'app si sta ancora collegando — riprova tra poco.</string>
+    <string name="rent_search_no_reply">Le bacheche non hanno risposto per ora. Riprova tra un momento.</string>
     <string name="rent_search_retry">Riprova</string>
     <string name="rent_search_progress">%1$d di %2$d zone controllate</string>
     <string name="rent_search_closer">Guarda più da vicino le zone più affollate…</string>

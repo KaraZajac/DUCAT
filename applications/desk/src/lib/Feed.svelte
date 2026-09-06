@@ -143,7 +143,7 @@
 
 <div class="feed-grid">
   <div>
-    {#if loaded && rows.length === 0}
+    {#if loaded && rows.length === 0 && !err}
       <div class="card"><p class="empty">{t("desk_feed_empty")}</p></div>
     {/if}
     {#each rows as r (r.persona + ":" + r.post.id)}

@@ -238,7 +238,7 @@
     <string name="desk_saving">Đang lưu…</string>
     <string name="desk_refresh_board">Làm mới trên bảng</string>
     <string name="desk_posting">Đang đăng…</string>
-    <string name="desk_cover">ảnh bìa</string>
+    <string name="desk_cover">Ảnh bìa</string>
     <string name="desk_cover_note">Ảnh bìa thành ảnh mười kilobyte trên bảng; phần còn lại đi qua bầy và chỉ được tải khi có người mở tin.</string>
     <string name="desk_pick_listing">Chọn một tin, hoặc bắt đầu một tin bằng các nút bên trái.</string>
     <string name="desk_group_copies_queued">Trang chưa tới nơi — sẽ được ghi lại ở vòng tiếp theo.</string>
@@ -276,10 +276,10 @@
     <string name="desk_send_them_money">Gửi tiền cho họ</string>
     <string name="desk_pay">Trả</string>
     <string name="desk_more">Thêm</string>
-    <string name="desk_never">không bao giờ</string>
-    <string name="desk_an_hour">một giờ</string>
-    <string name="desk_a_day">một ngày</string>
-    <string name="desk_a_week">một tuần</string>
+    <string name="desk_never">Không bao giờ</string>
+    <string name="desk_an_hour">Một giờ</string>
+    <string name="desk_a_day">Một ngày</string>
+    <string name="desk_a_week">Một tuần</string>
     <string name="desk_clear_hide_note">Xóa và ẩn chỉ tác động lên bàn này; quên sẽ bỏ liên hệ.</string>
     <string name="desk_someones_profile">Hồ sơ của ai đó…</string>
     <string name="desk_share_the_profile">Chia sẻ hồ sơ</string>
@@ -370,4 +370,19 @@
     <string name="desk_busy_home">đang xuất bản nhà của bạn</string>
     <string name="desk_busy_seeding">đang phát trên bầy</string>
     <string name="desk_busy_address">đang xuất bản địa chỉ</string>
+    <string name="desk_ask_available">Chào bạn — "%1$s" còn không?</string>
+    <string name="desk_clear">Xóa</string>
+    <string name="desk_stop">Dừng</string>
+    <string name="desk_fee_unknown">Chưa biết phí — chưa có nút nào trả lời.</string>
+    <string name="desk_no_rate_yet">Chưa có tỷ giá — ví sẽ lấy về trong giây lát.</string>
+    <string name="desk_cannot_price">Hiện chưa định giá được món này.</string>
+    <string name="desk_price_is_number">Giá là một số XMR (0 nếu miễn phí).</string>
+    <string name="desk_published_billed">Đã phát hành %1$s — hóa đơn đã gửi: %2$d.</string>
+    <string name="desk_published_sent">Đã phát hành %1$s — đã gửi tới người đăng ký: %2$d.</string>
+    <string name="desk_issue_here">có ở đây · %1$s</string>
+    <string name="desk_issue_ready">sẵn sàng tải về</string>
+    <string name="desk_issue_key_held">đã có khóa, chưa lên kệ</string>
+    <string name="desk_issue_asked">đã yêu cầu</string>
+    <string name="desk_issue_on_shelf">trên kệ của họ</string>
+    <string name="desk_pieces_of">%1$d trong %2$d phần</string>
 </resources>

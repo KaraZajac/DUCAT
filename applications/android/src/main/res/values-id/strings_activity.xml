@@ -1,6 +1,7 @@
 <resources>
     <!-- Empty state -->
     <string name="activity_nothing_yet">Belum ada apa-apa</string>
+    <string name="activity_reading">Membaca rantai…</string>
     <string name="activity_empty_desc">Pembayaran muncul di sini setelah blockchain selesai dibaca. Isi saldo dari Akun untuk melihat sesuatu.</string>
 
     <!-- Pending requests -->
@@ -18,7 +19,7 @@
 
     <!-- Event rows -->
     <string name="activity_reading_transaction">Membaca transaksi…</string>
-    <string name="activity_receipt_chip">🧾 struk</string>
+    <string name="activity_receipt_chip">🧾 Struk</string>
     <string name="activity_note_quoted">“%1$s”</string>
     <string name="activity_sending">Mengirim — belum masuk blok</string>
     <string name="activity_spent_unknown">Terpakai, tapi kami tidak bisa bilang ke mana</string>

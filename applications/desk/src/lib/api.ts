@@ -5,6 +5,16 @@ import { invoke } from "@tauri-apps/api/core";
 import { ask, open, save } from "@tauri-apps/plugin-dialog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
+/** How the routing table is doing: the figure behind a slow day. */
+export interface RoutingHealth {
+  total: number;
+  live: number;
+  dead: number;
+  reliable: number;
+  find_node_ms: number;
+  slow: boolean;
+}
+
 export interface Status {
   version: string;
   platform: string;
@@ -550,6 +560,8 @@ export type OrderRow = {
 
 export const api = {
   status: () => invoke<Status>("status"),
+  routingHealth: () => invoke<RoutingHealth>("routing_health"),
+  reconnect: () => invoke<void>("reconnect"),
   fetchProgress: (shareKey: string) => invoke<Progress>("fetch_progress", { shareKey }),
 
   releases: () => invoke<ReleaseRow[]>("releases"),

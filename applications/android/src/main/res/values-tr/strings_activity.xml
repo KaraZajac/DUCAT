@@ -1,6 +1,7 @@
 <resources>
     <!-- Empty state -->
     <string name="activity_nothing_yet">Henüz bir şey yok</string>
+    <string name="activity_reading">Zincir okunuyor…</string>
     <string name="activity_empty_desc">Zincir okunduğunda ödemeler burada görünür. Bir şey görmek için Hesaplar\'dan para yükle.</string>
 
     <!-- Pending requests -->
@@ -19,7 +20,7 @@
 
     <!-- Event rows -->
     <string name="activity_reading_transaction">İşlem okunuyor…</string>
-    <string name="activity_receipt_chip">🧾 makbuz</string>
+    <string name="activity_receipt_chip">🧾 Makbuz</string>
     <string name="activity_note_quoted">“%1$s”</string>
     <string name="activity_sending">Gönderiliyor — henüz bir blokta değil</string>
     <string name="activity_spent_unknown">Harcandı, ama nereye olduğunu söyleyemiyoruz</string>

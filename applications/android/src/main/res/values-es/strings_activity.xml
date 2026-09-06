@@ -1,6 +1,7 @@
 <resources>
     <!-- Empty state -->
     <string name="activity_nothing_yet">Nada todavía</string>
+    <string name="activity_reading">Leyendo la cadena…</string>
     <string name="activity_empty_desc">Los pagos aparecen aquí una vez leída la cadena. Recarga desde Cuentas para ver algo.</string>
 
     <!-- Pending requests -->
@@ -19,7 +20,7 @@
 
     <!-- Event rows -->
     <string name="activity_reading_transaction">Leyendo la transacción…</string>
-    <string name="activity_receipt_chip">🧾 recibo</string>
+    <string name="activity_receipt_chip">🧾 Recibo</string>
     <string name="activity_note_quoted">“%1$s”</string>
     <string name="activity_sending">Enviando — aún no está en un bloque</string>
     <string name="activity_spent_unknown">Gastado, pero no podemos decir adónde</string>

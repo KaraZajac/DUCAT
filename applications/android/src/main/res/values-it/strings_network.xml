@@ -14,6 +14,11 @@
     <string name="net_line_node_id">ID del nodo</string>
     <string name="net_line_peers">peer</string>
     <string name="net_peers_value">%1$d attivi, %2$d affidabili</string>
+    <string name="net_line_table">tabella di instradamento</string>
+    <string name="net_table_value">%1$d rispondono, %2$d no, su %3$d noti</string>
+    <string name="net_slow_hint">Le ricerche sono lente: molti dei nodi conosciuti hanno smesso di rispondere. Riconnettersi ricostruisce la tabella in circa un minuto.</string>
+    <string name="net_reconnect">Riconnetti</string>
+    <string name="net_reconnecting">Riconnessione…</string>
     <string name="net_waiting">attesa di %1$ds — un nodo deve capire come è raggiungibile prima di poter costruire una rotta</string>
 
     <string name="net_starting">Avvio…</string>

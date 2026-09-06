@@ -241,7 +241,7 @@
     <string name="desk_saving">Salvataggio…</string>
     <string name="desk_refresh_board">Rinnova in bacheca</string>
     <string name="desk_posting">Pubblicazione…</string>
-    <string name="desk_cover">copertina</string>
+    <string name="desk_cover">Copertina</string>
     <string name="desk_cover_note">La copertina diventa l’immagine da dieci kilobyte in bacheca; il resto viaggia sullo sciame e viene recuperato solo quando qualcuno apre l’annuncio.</string>
     <string name="desk_pick_listing">Scegli un annuncio, o iniziane uno con i pulsanti a sinistra.</string>
     <string name="desk_group_copies_queued">La pagina non è ancora arrivata — verrà riscritta al prossimo giro.</string>
@@ -280,10 +280,10 @@
     <string name="desk_send_them_money">Inviagli denaro</string>
     <string name="desk_pay">Paga</string>
     <string name="desk_more">Altro</string>
-    <string name="desk_never">mai</string>
-    <string name="desk_an_hour">un’ora</string>
-    <string name="desk_a_day">un giorno</string>
-    <string name="desk_a_week">una settimana</string>
+    <string name="desk_never">Mai</string>
+    <string name="desk_an_hour">Un’ora</string>
+    <string name="desk_a_day">Un giorno</string>
+    <string name="desk_a_week">Una settimana</string>
     <string name="desk_clear_hide_note">Svuotare e nascondere toccano solo questo desk; dimenticare elimina il contatto.</string>
     <string name="desk_someones_profile">Il profilo di qualcuno…</string>
     <string name="desk_share_the_profile">Condividi il profilo</string>
@@ -374,4 +374,19 @@
     <string name="desk_busy_home">pubblicazione della tua casa</string>
     <string name="desk_busy_seeding">distribuzione sullo sciame</string>
     <string name="desk_busy_address">pubblicazione dell’indirizzo</string>
+    <string name="desk_ask_available">Ciao — "%1$s" è ancora disponibile?</string>
+    <string name="desk_clear">Svuota</string>
+    <string name="desk_stop">Ferma</string>
+    <string name="desk_fee_unknown">La commissione non è ancora nota: nessun nodo ha risposto.</string>
+    <string name="desk_no_rate_yet">Nessun tasso di cambio ancora: il portafoglio lo recupera a breve.</string>
+    <string name="desk_cannot_price">Quell\'articolo non può essere prezzato al momento.</string>
+    <string name="desk_price_is_number">Un prezzo è un numero di XMR (0 per gratis).</string>
+    <string name="desk_published_billed">Pubblicato %1$s — fatture inviate: %2$d.</string>
+    <string name="desk_published_sent">Pubblicato %1$s — inviato agli abbonati: %2$d.</string>
+    <string name="desk_issue_here">qui · %1$s</string>
+    <string name="desk_issue_ready">pronto da scaricare</string>
+    <string name="desk_issue_key_held">chiave presente, non ancora sullo scaffale</string>
+    <string name="desk_issue_asked">richiesto</string>
+    <string name="desk_issue_on_shelf">sul loro scaffale</string>
+    <string name="desk_pieces_of">%1$d di %2$d parti</string>
 </resources>

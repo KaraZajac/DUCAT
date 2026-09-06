@@ -77,7 +77,7 @@
   }
 
   function addFromCatalogue(i: ItemRow) {
-    if (!i.pxmr) { err = i.snag === "NoRate" ? "No exchange rate yet — the wallet fetches one shortly." : "That item cannot be priced right now."; return; }
+    if (!i.pxmr) { err = i.snag === "NoRate" ? t("desk_no_rate_yet") : t("desk_cannot_price"); return; }
     saleLines = [...saleLines, { d: i.name, a: i.pxmr }];
   }
 
@@ -179,6 +179,19 @@
       await refresh();
     } catch (e) {
       err = String(e);
+    }
+  }
+
+  // Where a tab came in from, in words — the same table Activity keeps.
+  function doorWord(o: string): string {
+    switch (o) {
+      case "pos": return t("activity_door_pos");
+      case "bar": return t("activity_door_bar");
+      case "pub": return t("activity_door_pub");
+      case "donate": return t("activity_door_donate");
+      case "kiosk": return t("desk_door_kiosk");
+      case "taxi": return t("activity_door_taxi");
+      default: return o;
     }
   }
 
@@ -309,7 +322,7 @@
       {#each tabs.filter((x) => x.state === "open" || x.state === "settled" || x.receipt_owed) as tb (tb.id)}
         <button class="thread-row" class:active={openTab?.id === tb.id} onclick={() => (openTab = tb)}>
           <div class="thread-text">
-            <div class="thread-top"><span class="thread-name">{tb.name}{tb.origin !== "bar" ? ` · ${tb.origin}` : ""}</span><span class="thread-when">{tb.shown.primary}</span></div>
+            <div class="thread-top"><span class="thread-name">{tb.name}{tb.origin !== "bar" ? ` · ${doorWord(tb.origin)}` : ""}</span><span class="thread-when">{tb.shown.primary}</span></div>
             <div class="thread-last">{stateWord(tb)} · {t("desk_opened_at", fmtTime(Math.floor(tb.opened_at / 1000)))}</div>
           </div>
         </button>
@@ -317,7 +330,7 @@
       {#if tabs.filter((x) => x.state !== "open" && x.state !== "settled" && !x.receipt_owed).length}
         <details><summary class="meta">{t("bartab_section_settled")}</summary>
           {#each tabs.filter((x) => x.state !== "open" && x.state !== "settled" && !x.receipt_owed) as tb (tb.id)}
-            <div class="row"><div class="lead"><div class="title">{tb.name} <span class="meta">· {tb.shown.primary} · {stateWord(tb)}</span></div><div class="meta">{fmtTime(Math.floor(tb.opened_at / 1000))}</div></div><div class="actions"><button class="btn small" onclick={() => act(() => api.deleteTab(tb.id))}>Clear</button></div></div>
+            <div class="row"><div class="lead"><div class="title">{tb.name} <span class="meta">· {tb.shown.primary} · {stateWord(tb)}</span></div><div class="meta">{fmtTime(Math.floor(tb.opened_at / 1000))}</div></div><div class="actions"><button class="btn small" onclick={() => act(() => api.deleteTab(tb.id))}>{t("desk_clear")}</button></div></div>
           {/each}
         </details>
       {/if}

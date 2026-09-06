@@ -123,7 +123,7 @@
 </div>
 
 <div class="card">
-  {#if loaded && rows.length === 0}
+  {#if loaded && rows.length === 0 && !err}
     <p class="empty">{t("desk_nothing_here")}</p>
   {/if}
   {#each rows as r (r.digest_hex)}

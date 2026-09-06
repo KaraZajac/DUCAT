@@ -14,6 +14,11 @@
     <string name="net_line_node_id">Node-ID</string>
     <string name="net_line_peers">peers</string>
     <string name="net_peers_value">%1$d live, %2$d betrouwbaar</string>
+    <string name="net_line_table">routeringstabel</string>
+    <string name="net_table_value">%1$d antwoorden, %2$d niet, van %3$d bekende</string>
+    <string name="net_slow_hint">Zoekopdrachten zijn traag: veel van de bekende knooppunten antwoorden niet meer. Opnieuw verbinden bouwt de tabel in ongeveer een minuut opnieuw op.</string>
+    <string name="net_reconnect">Opnieuw verbinden</string>
+    <string name="net_reconnecting">Opnieuw verbinden…</string>
     <string name="net_waiting">wacht %1$ds — een node moet eerst uitzoeken hoe hij bereikbaar is voordat hij een route kan bouwen</string>
 
     <string name="net_starting">Starten…</string>

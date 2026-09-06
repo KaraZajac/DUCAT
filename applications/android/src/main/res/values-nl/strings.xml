@@ -51,4 +51,5 @@
     <string name="prices_menu_warn_body">Overstappen naar %2$s maakt die prijzen onverkoopbaar tot je ze opnieuw zet. Er wordt niets gewist.</string>
     <string name="prices_menu_warn_go">Toch wisselen</string>
     <string name="common_connecting">Verbinden met het netwerk…</string>
+    <string name="common_read_failed">Kon dit nu niet lezen: %1$s</string>
 </resources>

@@ -370,4 +370,19 @@
     <string name="desk_busy_home">正在发布你的主页</string>
     <string name="desk_busy_seeding">正在集群上分发</string>
     <string name="desk_busy_address">正在发布地址</string>
+    <string name="desk_ask_available">你好——「%1$s」还在吗？</string>
+    <string name="desk_clear">清空</string>
+    <string name="desk_stop">停止</string>
+    <string name="desk_fee_unknown">手续费尚不清楚——还没有节点回应。</string>
+    <string name="desk_no_rate_yet">还没有汇率——钱包很快会获取。</string>
+    <string name="desk_cannot_price">目前无法为该商品定价。</string>
+    <string name="desk_price_is_number">价格是一个 XMR 数值（0 表示免费）。</string>
+    <string name="desk_published_billed">已发布 %1$s——已发送账单：%2$d。</string>
+    <string name="desk_published_sent">已发布 %1$s——已发送给订阅者：%2$d。</string>
+    <string name="desk_issue_here">已在本机 · %1$s</string>
+    <string name="desk_issue_ready">可获取</string>
+    <string name="desk_issue_key_held">已持有密钥，尚未上架</string>
+    <string name="desk_issue_asked">已请求</string>
+    <string name="desk_issue_on_shelf">在对方书架上</string>
+    <string name="desk_pieces_of">%2$d 块中的 %1$d 块</string>
 </resources>

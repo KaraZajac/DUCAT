@@ -54,6 +54,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.DucatLog
+import org.ducatproject.ducat.saidWhy
 import org.ducatproject.ducat.Home
 import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.R
@@ -87,8 +88,11 @@ fun FeedSection() {
     val me = remember { PersonaStore(context).worn() }
 
     suspend fun refresh() {
-        val t = withContext(Dispatchers.IO) { runCatching { Home.timeline(context) }.getOrDefault(emptyList()) }
-        rows = t
+        // A read that threw is not an empty feed: the rows from last time
+        // stay, and the failure is said where "nothing new" would be.
+        val t = withContext(Dispatchers.IO) { runCatching { Home.timeline(context) } }
+        t.onSuccess { rows = it }
+        t.onFailure { message = context.getString(R.string.common_read_failed, it.saidWhy() ?: it.javaClass.simpleName) }
         myPosts = withContext(Dispatchers.IO) { runCatching { Home.myHomeView(context).third }.getOrDefault(0) }
         loaded = true
     }

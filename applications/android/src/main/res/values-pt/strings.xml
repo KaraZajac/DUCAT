@@ -52,4 +52,5 @@
     <string name="prices_menu_warn_body">Mudar para %2$s deixa esses preços sem poder vender até você defini-los de novo. Nada é apagado.</string>
     <string name="prices_menu_warn_go">Mudar mesmo assim</string>
     <string name="common_connecting">Conectando à rede…</string>
+    <string name="common_read_failed">Não foi possível ler agora: %1$s</string>
 </resources>

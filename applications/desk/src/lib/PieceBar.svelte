@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { t } from "./i18n.svelte";
   // The pieces, not a fraction: a bundle arrives scattered across the
   // swarm, and which parts have landed is what a reader can act on. A bar
   // creeping from the left would describe an order the fetcher does not
@@ -26,7 +27,7 @@
 </script>
 
 {#if progress && progress.pieces_total > 0}
-  <div class="pieces" title={`${progress.pieces_done} of ${progress.pieces_total} pieces`}>
+  <div class="pieces" title={t("desk_pieces_of", progress.pieces_done, progress.pieces_total)}>
     {#each cells as fill}
       <span class:on={fill >= 0.999} style={fill > 0 && fill < 0.999 ? `background: color-mix(in srgb, var(--primary) ${Math.round(fill * 100)}%, var(--surface-2))` : ""}></span>
     {/each}

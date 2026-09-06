@@ -62,4 +62,5 @@
     <!-- Said before the first thing the network is asked for, in place
          of an answer it could not have given yet. -->
     <string name="common_connecting">Connecting to the network…</string>
+    <string name="common_read_failed">Could not read that just now: %1$s</string>
 </resources>

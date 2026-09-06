@@ -241,7 +241,7 @@
     <string name="desk_saving">Opslaan…</string>
     <string name="desk_refresh_board">Vernieuwen op het bord</string>
     <string name="desk_posting">Plaatsen…</string>
-    <string name="desk_cover">omslag</string>
+    <string name="desk_cover">Omslag</string>
     <string name="desk_cover_note">De omslag wordt de afbeelding van tien kilobyte op het bord; de rest reist via de zwerm en wordt pas opgehaald als iemand de advertentie opent.</string>
     <string name="desk_pick_listing">Kies een advertentie, of begin er een met de knoppen links.</string>
     <string name="desk_group_copies_queued">De pagina is nog niet aangekomen — hij wordt in de volgende ronde opnieuw geschreven.</string>
@@ -280,10 +280,10 @@
     <string name="desk_send_them_money">Hem geld sturen</string>
     <string name="desk_pay">Betalen</string>
     <string name="desk_more">Meer</string>
-    <string name="desk_never">nooit</string>
-    <string name="desk_an_hour">een uur</string>
-    <string name="desk_a_day">een dag</string>
-    <string name="desk_a_week">een week</string>
+    <string name="desk_never">Nooit</string>
+    <string name="desk_an_hour">Een uur</string>
+    <string name="desk_a_day">Een dag</string>
+    <string name="desk_a_week">Een week</string>
     <string name="desk_clear_hide_note">Wissen en verbergen raken alleen dit bureau; vergeten verwijdert het contact.</string>
     <string name="desk_someones_profile">Iemands profiel…</string>
     <string name="desk_share_the_profile">Het profiel delen</string>
@@ -374,4 +374,19 @@
     <string name="desk_busy_home">jouw thuis publiceren</string>
     <string name="desk_busy_seeding">verspreiden op de zwerm</string>
     <string name="desk_busy_address">het adres publiceren</string>
+    <string name="desk_ask_available">Hallo — is "%1$s" nog beschikbaar?</string>
+    <string name="desk_clear">Wissen</string>
+    <string name="desk_stop">Stoppen</string>
+    <string name="desk_fee_unknown">De kosten zijn nog niet bekend — geen enkel knooppunt heeft geantwoord.</string>
+    <string name="desk_no_rate_yet">Nog geen wisselkoers — de wallet haalt er zo een op.</string>
+    <string name="desk_cannot_price">Dat artikel kan nu niet geprijsd worden.</string>
+    <string name="desk_price_is_number">Een prijs is een getal in XMR (0 voor gratis).</string>
+    <string name="desk_published_billed">%1$s gepubliceerd — verzonden rekeningen: %2$d.</string>
+    <string name="desk_published_sent">%1$s gepubliceerd — naar abonnees gestuurd: %2$d.</string>
+    <string name="desk_issue_here">hier · %1$s</string>
+    <string name="desk_issue_ready">klaar om op te halen</string>
+    <string name="desk_issue_key_held">sleutel aanwezig, nog niet op de plank</string>
+    <string name="desk_issue_asked">aangevraagd</string>
+    <string name="desk_issue_on_shelf">op hun plank</string>
+    <string name="desk_pieces_of">%1$d van %2$d delen</string>
 </resources>

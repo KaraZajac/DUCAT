@@ -52,4 +52,5 @@
     <string name="prices_menu_warn_body">Chuyển sang %2$s khiến những giá đó không bán được cho tới khi bạn đặt lại. Không có gì bị xoá.</string>
     <string name="prices_menu_warn_go">Vẫn chuyển</string>
     <string name="common_connecting">Đang kết nối mạng…</string>
+    <string name="common_read_failed">Không đọc được lúc này: %1$s</string>
 </resources>

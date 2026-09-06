@@ -247,7 +247,7 @@
     <string name="desk_saving">Zapisywanie…</string>
     <string name="desk_refresh_board">Odśwież na tablicy</string>
     <string name="desk_posting">Wywieszanie…</string>
-    <string name="desk_cover">okładka</string>
+    <string name="desk_cover">Okładka</string>
     <string name="desk_cover_note">Okładka staje się dziesięciokilobajtowym obrazkiem na tablicy; reszta podróżuje rojem i jest pobierana tylko, gdy ktoś otworzy ogłoszenie.</string>
     <string name="desk_pick_listing">Wybierz ogłoszenie albo zacznij nowe przyciskami po lewej.</string>
     <string name="desk_group_copies_queued">Strona jeszcze nie dotarła — zostanie zapisana ponownie w następnym okrążeniu.</string>
@@ -288,10 +288,10 @@
     <string name="desk_send_them_money">Wyślij mu pieniądze</string>
     <string name="desk_pay">Zapłać</string>
     <string name="desk_more">Więcej</string>
-    <string name="desk_never">nigdy</string>
-    <string name="desk_an_hour">godzinie</string>
-    <string name="desk_a_day">dniu</string>
-    <string name="desk_a_week">tygodniu</string>
+    <string name="desk_never">Nigdy</string>
+    <string name="desk_an_hour">Godzinie</string>
+    <string name="desk_a_day">Dniu</string>
+    <string name="desk_a_week">Tygodniu</string>
     <string name="desk_clear_hide_note">Czyszczenie i ukrywanie dotyczą tylko tego biurka; zapomnienie usuwa kontakt.</string>
     <string name="desk_someones_profile">Czyjś profil…</string>
     <string name="desk_share_the_profile">Udostępnij profil</string>
@@ -382,4 +382,19 @@
     <string name="desk_busy_home">publikowanie twojego domu</string>
     <string name="desk_busy_seeding">rozsiewanie w roju</string>
     <string name="desk_busy_address">publikowanie adresu</string>
+    <string name="desk_ask_available">Cześć — czy „%1$s” jest nadal dostępne?</string>
+    <string name="desk_clear">Wyczyść</string>
+    <string name="desk_stop">Zatrzymaj</string>
+    <string name="desk_fee_unknown">Opłata nie jest jeszcze znana — żaden węzeł nie odpowiedział.</string>
+    <string name="desk_no_rate_yet">Brak jeszcze kursu wymiany — portfel wkrótce go pobierze.</string>
+    <string name="desk_cannot_price">Tej pozycji nie można teraz wycenić.</string>
+    <string name="desk_price_is_number">Cena to liczba XMR (0 oznacza za darmo).</string>
+    <string name="desk_published_billed">Opublikowano %1$s — wysłane rachunki: %2$d.</string>
+    <string name="desk_published_sent">Opublikowano %1$s — wysłano do subskrybentów: %2$d.</string>
+    <string name="desk_issue_here">tutaj · %1$s</string>
+    <string name="desk_issue_ready">gotowe do pobrania</string>
+    <string name="desk_issue_key_held">klucz jest, jeszcze nie na półce</string>
+    <string name="desk_issue_asked">poproszono</string>
+    <string name="desk_issue_on_shelf">na ich półce</string>
+    <string name="desk_pieces_of">%1$d z %2$d części</string>
 </resources>

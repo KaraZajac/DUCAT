@@ -1,6 +1,7 @@
 <resources>
     <!-- Empty state -->
     <string name="activity_nothing_yet">还没有内容</string>
+    <string name="activity_reading">正在读取链…</string>
     <string name="activity_empty_desc">读完链上数据后，付款会显示在这里。从「账户」充值就能看到内容。</string>
 
     <!-- Pending requests -->

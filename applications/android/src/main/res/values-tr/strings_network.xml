@@ -14,6 +14,11 @@
     <string name="net_line_node_id">Düğüm kimliği</string>
     <string name="net_line_peers">eşler</string>
     <string name="net_peers_value">%1$d canlı, %2$d güvenilir</string>
+    <string name="net_line_table">yönlendirme tablosu</string>
+    <string name="net_table_value">bilinen %3$d düğümden %1$d yanıt veriyor, %2$d vermiyor</string>
+    <string name="net_slow_hint">Aramalar yavaş: bilinen düğümlerin çoğu yanıt vermeyi bıraktı. Yeniden bağlanmak tabloyu yaklaşık bir dakikada yeniden kurar.</string>
+    <string name="net_reconnect">Yeniden bağlan</string>
+    <string name="net_reconnecting">Yeniden bağlanılıyor…</string>
     <string name="net_waiting">%1$d sn bekleniyor — bir düğümün rota kurabilmesi için önce kendisine nasıl ulaşılabildiğini çözmesi gerekir</string>
 
     <string name="net_starting">Başlatılıyor…</string>

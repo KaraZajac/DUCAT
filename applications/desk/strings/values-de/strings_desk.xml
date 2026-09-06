@@ -280,10 +280,10 @@
     <string name="desk_send_them_money">Ihnen Geld senden</string>
     <string name="desk_pay">Zahlen</string>
     <string name="desk_more">Mehr</string>
-    <string name="desk_never">nie</string>
-    <string name="desk_an_hour">einer Stunde</string>
-    <string name="desk_a_day">einem Tag</string>
-    <string name="desk_a_week">einer Woche</string>
+    <string name="desk_never">Nie</string>
+    <string name="desk_an_hour">Einer Stunde</string>
+    <string name="desk_a_day">Einem Tag</string>
+    <string name="desk_a_week">Einer Woche</string>
     <string name="desk_clear_hide_note">Leeren und Ausblenden betreffen nur diesen Desk; Vergessen löscht den Kontakt.</string>
     <string name="desk_someones_profile">Jemandes Profil…</string>
     <string name="desk_share_the_profile">Profil teilen</string>
@@ -374,4 +374,19 @@
     <string name="desk_busy_home">dein Zuhause veröffentlichen</string>
     <string name="desk_busy_seeding">im Schwarm verteilen</string>
     <string name="desk_busy_address">die Adresse veröffentlichen</string>
+    <string name="desk_ask_available">Hallo — ist „%1$s“ noch zu haben?</string>
+    <string name="desk_clear">Leeren</string>
+    <string name="desk_stop">Stopp</string>
+    <string name="desk_fee_unknown">Die Gebühr ist noch nicht bekannt — kein Node hat geantwortet.</string>
+    <string name="desk_no_rate_yet">Noch kein Wechselkurs — die Wallet holt gleich einen.</string>
+    <string name="desk_cannot_price">Dieser Artikel kann gerade nicht bepreist werden.</string>
+    <string name="desk_price_is_number">Ein Preis ist eine Zahl in XMR (0 für kostenlos).</string>
+    <string name="desk_published_billed">%1$s veröffentlicht — gesendete Rechnungen: %2$d.</string>
+    <string name="desk_published_sent">%1$s veröffentlicht — an Abonnenten gesendet: %2$d.</string>
+    <string name="desk_issue_here">hier · %1$s</string>
+    <string name="desk_issue_ready">bereit zum Abrufen</string>
+    <string name="desk_issue_key_held">Schlüssel vorhanden, noch nicht im Regal</string>
+    <string name="desk_issue_asked">angefragt</string>
+    <string name="desk_issue_on_shelf">in ihrem Regal</string>
+    <string name="desk_pieces_of">%1$d von %2$d Teilen</string>
 </resources>

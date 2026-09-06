@@ -14,6 +14,11 @@
     <string name="net_line_node_id">Node ID</string>
     <string name="net_line_peers">peers</string>
     <string name="net_peers_value">%1$d live, %2$d reliable</string>
+    <string name="net_line_table">routing table</string>
+    <string name="net_table_value">%1$d answering, %2$d not, of %3$d known</string>
+    <string name="net_slow_hint">Lookups are slow: many of the nodes this one knows have stopped answering. Reconnecting builds the table afresh in about a minute.</string>
+    <string name="net_reconnect">Reconnect</string>
+    <string name="net_reconnecting">Reconnecting…</string>
     <string name="net_waiting">waiting %1$ds — a node has to work out how it is reachable before it can build a route</string>
 
     <string name="net_starting">Starting…</string>

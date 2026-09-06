@@ -14,6 +14,11 @@
     <string name="net_line_node_id">ID del nodo</string>
     <string name="net_line_peers">pares</string>
     <string name="net_peers_value">%1$d activos, %2$d confiables</string>
+    <string name="net_line_table">tabla de rutas</string>
+    <string name="net_table_value">%1$d responden, %2$d no, de %3$d conocidos</string>
+    <string name="net_slow_hint">Las búsquedas van lentas: muchos de los nodos conocidos han dejado de responder. Reconectar reconstruye la tabla en un minuto aproximadamente.</string>
+    <string name="net_reconnect">Reconectar</string>
+    <string name="net_reconnecting">Reconectando…</string>
     <string name="net_waiting">esperando %1$ds — un nodo tiene que averiguar cómo es alcanzable antes de poder construir una ruta</string>
 
     <string name="net_starting">Iniciando…</string>

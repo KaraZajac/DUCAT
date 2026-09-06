@@ -241,7 +241,7 @@
     <string name="desk_saving">Guardando…</string>
     <string name="desk_refresh_board">Renovar en el tablón</string>
     <string name="desk_posting">Publicando…</string>
-    <string name="desk_cover">portada</string>
+    <string name="desk_cover">Portada</string>
     <string name="desk_cover_note">La portada se convierte en la imagen de diez kilobytes del tablón; el resto viaja por el enjambre y solo se descarga cuando alguien abre el anuncio.</string>
     <string name="desk_pick_listing">Elige un anuncio, o empieza uno con los botones de la izquierda.</string>
     <string name="desk_group_copies_queued">La página aún no ha llegado — se escribirá de nuevo en la próxima vuelta.</string>
@@ -280,10 +280,10 @@
     <string name="desk_send_them_money">Enviarle dinero</string>
     <string name="desk_pay">Pagar</string>
     <string name="desk_more">Más</string>
-    <string name="desk_never">nunca</string>
-    <string name="desk_an_hour">una hora</string>
-    <string name="desk_a_day">un día</string>
-    <string name="desk_a_week">una semana</string>
+    <string name="desk_never">Nunca</string>
+    <string name="desk_an_hour">Una hora</string>
+    <string name="desk_a_day">Un día</string>
+    <string name="desk_a_week">Una semana</string>
     <string name="desk_clear_hide_note">Vaciar y ocultar solo afectan a este escritorio; olvidar elimina el contacto.</string>
     <string name="desk_someones_profile">El perfil de alguien…</string>
     <string name="desk_share_the_profile">Compartir el perfil</string>
@@ -374,4 +374,19 @@
     <string name="desk_busy_home">publicando tu hogar</string>
     <string name="desk_busy_seeding">sembrando en el enjambre</string>
     <string name="desk_busy_address">publicando la dirección</string>
+    <string name="desk_ask_available">Hola, ¿sigue disponible «%1$s»?</string>
+    <string name="desk_clear">Vaciar</string>
+    <string name="desk_stop">Detener</string>
+    <string name="desk_fee_unknown">Aún no se conoce la comisión: ningún nodo ha respondido.</string>
+    <string name="desk_no_rate_yet">Aún no hay tipo de cambio: la cartera lo obtendrá en breve.</string>
+    <string name="desk_cannot_price">Ese artículo no se puede valorar ahora mismo.</string>
+    <string name="desk_price_is_number">Un precio es una cantidad de XMR (0 si es gratis).</string>
+    <string name="desk_published_billed">Publicado %1$s — facturas enviadas: %2$d.</string>
+    <string name="desk_published_sent">Publicado %1$s — enviado a suscriptores: %2$d.</string>
+    <string name="desk_issue_here">aquí · %1$s</string>
+    <string name="desk_issue_ready">listo para descargar</string>
+    <string name="desk_issue_key_held">clave guardada, aún no en la estantería</string>
+    <string name="desk_issue_asked">solicitado</string>
+    <string name="desk_issue_on_shelf">en su estantería</string>
+    <string name="desk_pieces_of">%1$d de %2$d piezas</string>
 </resources>

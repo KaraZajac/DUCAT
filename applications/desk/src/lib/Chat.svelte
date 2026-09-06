@@ -592,7 +592,9 @@
         <p class="note">{t("desk_card_answered_once")}</p>
       </div>
     {/if}
-    {#if loaded && rows.length === 0 && !adding}
+    {#if err && rows.length === 0}
+      <p class="err">{err}</p>
+    {:else if loaded && rows.length === 0 && !adding}
       <p class="empty">{t("desk_nobody_yet")}</p>
     {/if}
     {#if rows.length + groups.length >= 6}
@@ -776,7 +778,7 @@
           <button class="btn primary" onclick={sendRequest} disabled={!reqAmount.trim()}>{t("desk_send_the_bill")}</button>
         </div>
         {#each standing.filter((b) => b.persona_hex === open) as b (b.id)}
-          <div class="request-bar meta">{t("desk_standing")}: {fmtXmr(b.amount_pxmr)} {b.monthly ? t("pay_repeat_monthly") : t("pay_repeat_weekly")}{b.note ? ` · ${b.note}` : ""} · {t("desk_next_at", fmtTime(Math.floor(b.next_at / 1000)))} <button class="linkish" onclick={async () => { await api.stopStandingBill(b.id); standing = await api.standingBills(); }}>stop</button></div>
+          <div class="request-bar meta">{t("desk_standing")}: {fmtXmr(b.amount_pxmr)} {b.monthly ? t("pay_repeat_monthly") : t("pay_repeat_weekly")}{b.note ? ` · ${b.note}` : ""} · {t("desk_next_at", fmtTime(Math.floor(b.next_at / 1000)))} <button class="linkish" onclick={async () => { await api.stopStandingBill(b.id); standing = await api.standingBills(); }}>{t("desk_stop")}</button></div>
         {/each}
       {/if}
       <div class="bubbles" bind:this={list}>

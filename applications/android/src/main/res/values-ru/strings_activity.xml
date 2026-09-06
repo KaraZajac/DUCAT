@@ -1,6 +1,7 @@
 <resources>
     <!-- Empty state -->
     <string name="activity_nothing_yet">Пока пусто</string>
+    <string name="activity_reading">Чтение цепочки…</string>
     <string name="activity_empty_desc">Платежи появятся здесь после чтения цепочки. Пополни на вкладке «Счета», чтобы что-то увидеть.</string>
 
     <!-- Pending requests -->
@@ -21,7 +22,7 @@
 
     <!-- Event rows -->
     <string name="activity_reading_transaction">Читаем транзакцию…</string>
-    <string name="activity_receipt_chip">🧾 чек</string>
+    <string name="activity_receipt_chip">🧾 Чек</string>
     <string name="activity_note_quoted">«%1$s»</string>
     <string name="activity_sending">Отправляется — ещё не в блоке</string>
     <string name="activity_spent_unknown">Потрачено, но куда — сказать нельзя</string>

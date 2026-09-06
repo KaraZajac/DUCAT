@@ -1,6 +1,7 @@
 <resources>
     <!-- Empty state -->
     <string name="activity_nothing_yet">아직 없어요</string>
+    <string name="activity_reading">체인을 읽는 중…</string>
     <string name="activity_empty_desc">체인을 읽고 나면 결제 내역이 여기에 나타나요. 계좌 탭에서 충전하면 뭔가 보일 거예요.</string>
 
     <!-- Pending requests -->

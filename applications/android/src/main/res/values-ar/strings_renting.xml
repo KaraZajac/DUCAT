@@ -64,6 +64,7 @@
     <string name="rent_search_allow">السماح بالموقع</string>
     <string name="rent_search_no_fix">لا يوجد تحديد للموقع بعد. قرب نافذة أو في الخارج ينجح عادةً.</string>
     <string name="rent_search_no_network">تعذّر الوصول إلى الشبكة الآن، فلم تُقرأ أي لوحة. غالبًا يعني هذا أن التطبيق ما زال ينضم — أعد المحاولة بعد قليل.</string>
+    <string name="rent_search_no_reply">لم تُجب اللوحات الآن. حاول مرة أخرى بعد قليل.</string>
     <string name="rent_search_retry">أعد المحاولة</string>
     <string name="rent_search_progress">تم فحص %1$d من %2$d منطقة</string>
     <string name="rent_search_closer">نلقي نظرة أدق على أكثر المناطق ازدحامًا…</string>

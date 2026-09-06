@@ -64,6 +64,7 @@
     <string name="rent_search_allow">Permitir localização</string>
     <string name="rent_search_no_fix">Ainda sem localização. Perto de uma janela ou ao ar livre costuma resolver.</string>
     <string name="rent_search_no_network">Não deu para alcançar a rede agora, então nenhum quadro foi lido. Normalmente isso quer dizer que o app ainda está entrando — tente de novo daqui a pouco.</string>
+    <string name="rent_search_no_reply">Os quadros não responderam agora. Tente de novo daqui a pouco.</string>
     <string name="rent_search_retry">Tentar de novo</string>
     <string name="rent_search_progress">%1$d de %2$d áreas verificadas</string>
     <string name="rent_search_closer">Olhando mais de perto as áreas mais movimentadas…</string>

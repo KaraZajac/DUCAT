@@ -374,4 +374,19 @@
     <string name="desk_busy_home">انتشار خانه شما</string>
     <string name="desk_busy_seeding">پخش روی گله</string>
     <string name="desk_busy_address">انتشار نشانی</string>
+    <string name="desk_ask_available">سلام — آیا «%1$s» هنوز موجود است؟</string>
+    <string name="desk_clear">پاک کردن</string>
+    <string name="desk_stop">توقف</string>
+    <string name="desk_fee_unknown">کارمزد هنوز مشخص نیست — هیچ گره‌ای پاسخ نداده است.</string>
+    <string name="desk_no_rate_yet">هنوز نرخ تبدیلی نیست — کیف پول به‌زودی آن را می‌گیرد.</string>
+    <string name="desk_cannot_price">هم‌اکنون نمی‌توان برای این کالا قیمت گذاشت.</string>
+    <string name="desk_price_is_number">قیمت عددی به XMR است (۰ برای رایگان).</string>
+    <string name="desk_published_billed">%1$s منتشر شد — صورت‌حساب‌های ارسالی: %2$d.</string>
+    <string name="desk_published_sent">%1$s منتشر شد — برای مشترکان ارسال شد: %2$d.</string>
+    <string name="desk_issue_here">اینجا · %1$s</string>
+    <string name="desk_issue_ready">آمادهٔ دریافت</string>
+    <string name="desk_issue_key_held">کلید موجود است، هنوز روی قفسه نیست</string>
+    <string name="desk_issue_asked">درخواست شده</string>
+    <string name="desk_issue_on_shelf">روی قفسهٔ آن‌ها</string>
+    <string name="desk_pieces_of">%1$d از %2$d قطعه</string>
 </resources>

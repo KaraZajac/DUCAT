@@ -1,6 +1,7 @@
 <resources>
     <!-- Empty state -->
     <string name="activity_nothing_yet">अभी कुछ नहीं</string>
+    <string name="activity_reading">चेन पढ़ी जा रही है…</string>
     <string name="activity_empty_desc">चेन पढ़ ली जाने के बाद भुगतान यहाँ दिखते हैं। कुछ देखने के लिए ‘खाते’ से टॉप-अप करें।</string>
 
     <!-- Pending requests -->

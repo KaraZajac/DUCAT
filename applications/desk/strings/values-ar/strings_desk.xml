@@ -390,4 +390,19 @@
     <string name="desk_busy_home">نشر منزلك</string>
     <string name="desk_busy_seeding">البذر على السرب</string>
     <string name="desk_busy_address">نشر العنوان</string>
+    <string name="desk_ask_available">مرحبًا — هل "%1$s" لا يزال متاحًا؟</string>
+    <string name="desk_clear">مسح</string>
+    <string name="desk_stop">إيقاف</string>
+    <string name="desk_fee_unknown">الرسوم غير معروفة بعد — لم تُجب أي عقدة.</string>
+    <string name="desk_no_rate_yet">لا سعر صرف بعد — ستجلبه المحفظة قريبًا.</string>
+    <string name="desk_cannot_price">تعذّر تسعير هذا العنصر الآن.</string>
+    <string name="desk_price_is_number">السعر رقم بوحدة XMR (0 للمجاني).</string>
+    <string name="desk_published_billed">نُشر %1$s — الفواتير المرسلة: %2$d.</string>
+    <string name="desk_published_sent">نُشر %1$s — أُرسل إلى المشتركين: %2$d.</string>
+    <string name="desk_issue_here">هنا · %1$s</string>
+    <string name="desk_issue_ready">جاهز للجلب</string>
+    <string name="desk_issue_key_held">المفتاح محفوظ، ليس على الرف بعد</string>
+    <string name="desk_issue_asked">مطلوب</string>
+    <string name="desk_issue_on_shelf">على رفّهم</string>
+    <string name="desk_pieces_of">%1$d من %2$d قطعة</string>
 </resources>

@@ -14,6 +14,11 @@
     <string name="net_line_node_id">ノードID</string>
     <string name="net_line_peers">ピア</string>
     <string name="net_peers_value">稼働%1$d、信頼%2$d</string>
+    <string name="net_line_table">ルーティングテーブル</string>
+    <string name="net_table_value">既知の %3$d 台のうち %1$d 台が応答、%2$d 台が無応答</string>
+    <string name="net_slow_hint">検索が遅くなっています。既知のノードの多くが応答しなくなりました。再接続すると約1分でテーブルを作り直します。</string>
+    <string name="net_reconnect">再接続</string>
+    <string name="net_reconnecting">再接続中…</string>
     <string name="net_waiting">待機中 %1$d秒 — 経路を作る前に、ノードは自分がどう到達可能かを把握する必要があります</string>
 
     <string name="net_starting">起動中…</string>

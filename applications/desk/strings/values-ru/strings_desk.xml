@@ -247,7 +247,7 @@
     <string name="desk_saving">Сохранение…</string>
     <string name="desk_refresh_board">Обновить на доске</string>
     <string name="desk_posting">Размещение…</string>
-    <string name="desk_cover">обложка</string>
+    <string name="desk_cover">Обложка</string>
     <string name="desk_cover_note">Обложка становится десятикилобайтной картинкой на доске; остальные путешествуют роем и загружаются, только когда кто-то откроет объявление.</string>
     <string name="desk_pick_listing">Выберите объявление или начните новое кнопками слева.</string>
     <string name="desk_group_copies_queued">Страница ещё не дошла — она будет записана снова на следующем круге.</string>
@@ -288,10 +288,10 @@
     <string name="desk_send_them_money">Отправить ему деньги</string>
     <string name="desk_pay">Заплатить</string>
     <string name="desk_more">Ещё</string>
-    <string name="desk_never">никогда</string>
-    <string name="desk_an_hour">час</string>
-    <string name="desk_a_day">день</string>
-    <string name="desk_a_week">неделю</string>
+    <string name="desk_never">Никогда</string>
+    <string name="desk_an_hour">Час</string>
+    <string name="desk_a_day">День</string>
+    <string name="desk_a_week">Неделю</string>
     <string name="desk_clear_hide_note">Очистка и скрытие касаются только этого стола; забыть — удалить контакт.</string>
     <string name="desk_someones_profile">Чей-то профиль…</string>
     <string name="desk_share_the_profile">Поделиться профилем</string>
@@ -382,4 +382,19 @@
     <string name="desk_busy_home">публикуем ваш дом</string>
     <string name="desk_busy_seeding">раздаём в рой</string>
     <string name="desk_busy_address">публикуем адрес</string>
+    <string name="desk_ask_available">Здравствуйте — «%1$s» ещё доступно?</string>
+    <string name="desk_clear">Очистить</string>
+    <string name="desk_stop">Остановить</string>
+    <string name="desk_fee_unknown">Комиссия пока неизвестна — ни один узел не ответил.</string>
+    <string name="desk_no_rate_yet">Курса пока нет — кошелёк скоро его получит.</string>
+    <string name="desk_cannot_price">Этот товар сейчас нельзя оценить.</string>
+    <string name="desk_price_is_number">Цена — это число в XMR (0 — бесплатно).</string>
+    <string name="desk_published_billed">%1$s опубликован — отправлено счетов: %2$d.</string>
+    <string name="desk_published_sent">%1$s опубликован — отправлено подписчикам: %2$d.</string>
+    <string name="desk_issue_here">здесь · %1$s</string>
+    <string name="desk_issue_ready">можно загрузить</string>
+    <string name="desk_issue_key_held">ключ есть, на полке пока нет</string>
+    <string name="desk_issue_asked">запрошено</string>
+    <string name="desk_issue_on_shelf">на их полке</string>
+    <string name="desk_pieces_of">%1$d из %2$d частей</string>
 </resources>

@@ -370,4 +370,19 @@
     <string name="desk_busy_home">あなたのホームを公開しています</string>
     <string name="desk_busy_seeding">スウォームで配信しています</string>
     <string name="desk_busy_address">アドレスを公開しています</string>
+    <string name="desk_ask_available">こんにちは。「%1$s」はまだ購入できますか？</string>
+    <string name="desk_clear">クリア</string>
+    <string name="desk_stop">停止</string>
+    <string name="desk_fee_unknown">手数料はまだ分かりません。応答したノードがありません。</string>
+    <string name="desk_no_rate_yet">為替レートがまだありません。ウォレットがまもなく取得します。</string>
+    <string name="desk_cannot_price">その商品は今は価格を付けられません。</string>
+    <string name="desk_price_is_number">価格は XMR の数値です（無料は 0）。</string>
+    <string name="desk_published_billed">%1$s を発行しました。送った請求：%2$d 件。</string>
+    <string name="desk_published_sent">%1$s を発行しました。購読者に送信：%2$d 人。</string>
+    <string name="desk_issue_here">手元にあり · %1$s</string>
+    <string name="desk_issue_ready">取得できます</string>
+    <string name="desk_issue_key_held">鍵はあり、まだ棚にはありません</string>
+    <string name="desk_issue_asked">依頼済み</string>
+    <string name="desk_issue_on_shelf">相手の棚にあり</string>
+    <string name="desk_pieces_of">%2$d ピース中 %1$d</string>
 </resources>

@@ -1,6 +1,7 @@
 <resources>
     <!-- Stato vuoto -->
     <string name="activity_nothing_yet">Ancora niente</string>
+    <string name="activity_reading">Lettura della catena…</string>
     <string name="activity_empty_desc">I pagamenti compaiono qui una volta letta la catena. Ricarica dai Conti per vedere qualcosa.</string>
 
     <!-- Richieste in sospeso -->
@@ -19,7 +20,7 @@
 
     <!-- Righe eventi -->
     <string name="activity_reading_transaction">Lettura della transazione…</string>
-    <string name="activity_receipt_chip">🧾 ricevuta</string>
+    <string name="activity_receipt_chip">🧾 Ricevuta</string>
     <string name="activity_note_quoted">“%1$s”</string>
     <string name="activity_sending">In invio — non ancora in un blocco</string>
     <string name="activity_spent_unknown">Speso, ma non sappiamo dire dove</string>

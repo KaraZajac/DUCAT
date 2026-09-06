@@ -1,6 +1,7 @@
 <resources>
     <!-- Empty state -->
     <string name="activity_nothing_yet">Nog niets</string>
+    <string name="activity_reading">Keten wordt gelezen…</string>
     <string name="activity_empty_desc">Betalingen verschijnen hier zodra de keten is gelezen. Waardeer op via Rekeningen om iets te zien.</string>
 
     <!-- Pending requests -->
@@ -19,7 +20,7 @@
 
     <!-- Event rows -->
     <string name="activity_reading_transaction">Transactie lezen…</string>
-    <string name="activity_receipt_chip">🧾 bon</string>
+    <string name="activity_receipt_chip">🧾 Bon</string>
     <string name="activity_note_quoted">“%1$s”</string>
     <string name="activity_sending">Wordt verstuurd — nog niet in een blok</string>
     <string name="activity_spent_unknown">Uitgegeven, maar waarheen kunnen we niet zeggen</string>

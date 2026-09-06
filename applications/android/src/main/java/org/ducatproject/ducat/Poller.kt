@@ -29,6 +29,9 @@ class Poller(private val context: Context) {
 
     /** When the node was last coaxed back to life — see the restart below. */
     private var lastRevive = 0L
+    /** When the node was first seen running but unattached; null while attached. */
+    private var unattachedSince = 0L
+    private var lastRestart = 0L
 
     /** Probe the candidates and remember the first usable one. */
     private fun pickNode(context: Context): String? = try {
@@ -99,7 +102,47 @@ class Poller(private val context: Context) {
                     // the worst case of a spurious call is a lock and a
                     // comparison.
                     val at = System.currentTimeMillis()
-                    if (!s.running && at - lastRevive > REVIVE_EVERY_MS) {
+                    // A restart asked for from the Network screen, or earned:
+                    // a node that is up but has not been attached for minutes.
+                    // veilid re-attaches on its own after a network change;
+                    // when it has not managed to in UNATTACHED_RESTART_MS — a
+                    // phone back from a tunnel on a different network is the
+                    // usual case — stop it, so the revive below starts it
+                    // afresh with a purged table, which is what a person does
+                    // by hand. Restarts are spaced, or a network that is really
+                    // down becomes a restart loop.
+                    if (s.running && !s.attached) {
+                        if (unattachedSince == 0L) unattachedSince = at
+                    } else {
+                        unattachedSince = 0L
+                    }
+                    // The Network screen's Reconnect stopped and started the
+                    // node itself, so the person saw it happen; what it
+                    // cannot reach are the once-per-process share flags,
+                    // reset here so the sweeps re-park everything, and a
+                    // node it failed to start is started below at once.
+                    if (restartAsked) {
+                        restartAsked = false
+                        lastRestart = at
+                        unattachedSince = 0L
+                        DucatLog.i(TAG, "reconnected from the Network screen — re-parking every share")
+                        reseeded = false
+                        outboxReseeded = false
+                        sitesReseeded = false
+                        lastRevive = 0L
+                    }
+                    val earned = unattachedSince != 0L && at - unattachedSince >= UNATTACHED_RESTART_MS &&
+                        at - lastRestart >= RESTART_SPACING_MS
+                    if (s.running && earned) {
+                        lastRestart = at
+                        DucatLog.w(TAG, "restarting the node — unattached for ${(at - unattachedSince) / 1000}s")
+                        unattachedSince = 0L
+                        runCatching { uniffi.ducat_mobile.nodeStop() }
+                        Mailbox.planForgetWatches()
+                        lastRevive = 0L
+                    }
+                    val running = if (earned) false else s.running
+                    if (!running && at - lastRevive > REVIVE_EVERY_MS) {
                         lastRevive = at
                         DucatLog.w(TAG, "transport is down — starting the node again")
                         // A node restart takes every parked share with it —
@@ -823,7 +866,7 @@ class Poller(private val context: Context) {
     private var watchesUp = -1
     private var watchesDown = -1
 
-    private companion object {
+    companion object {
         /** One lane wait. Its length is invisible to latency — a ring
          *  interrupts it — it only sets how often an idle lane loops. */
         const val WAIT_MS = 10_000u
@@ -841,5 +884,21 @@ class Poller(private val context: Context) {
          * it back without knowing to force-quit.
          */
         const val REVIVE_EVERY_MS = 30_000L
+
+        /** How long a running node may sit unattached before it is restarted. */
+        const val UNATTACHED_RESTART_MS = 180_000L
+
+        /** Restarts are at least this far apart. */
+        const val RESTART_SPACING_MS = 600_000L
+
+        /** Set by the Network screen after it restarted the node; taken by
+         *  the next pass, which re-parks every share. */
+        @Volatile var restartAsked = false
+
+        /** The node was just stopped and started by hand: every share must
+         *  be re-parked and every watch is gone. */
+        fun nodeRestarted() {
+            restartAsked = true
+        }
     }
 }

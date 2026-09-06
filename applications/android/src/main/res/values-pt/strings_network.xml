@@ -14,6 +14,11 @@
     <string name="net_line_node_id">ID do nó</string>
     <string name="net_line_peers">pares</string>
     <string name="net_peers_value">%1$d ativos, %2$d confiáveis</string>
+    <string name="net_line_table">tabela de rotas</string>
+    <string name="net_table_value">%1$d respondem, %2$d não, de %3$d conhecidos</string>
+    <string name="net_slow_hint">As buscas estão lentas: muitos dos nós conhecidos deixaram de responder. Reconectar reconstrói a tabela em cerca de um minuto.</string>
+    <string name="net_reconnect">Reconectar</string>
+    <string name="net_reconnecting">Reconectando…</string>
     <string name="net_waiting">aguardando %1$ds — um nó precisa descobrir como está acessível antes de poder montar uma rota</string>
 
     <string name="net_starting">Iniciando…</string>

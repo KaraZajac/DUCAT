@@ -131,7 +131,7 @@
         {#if status}
           {status.ready ? `${t("net_line_attached")} · ${status.peers} ${t("net_line_peers")}` : status.attached ? t("desk_attaching") : t("net_starting")}
         {:else}
-          {t("net_starting")}
+          {t("desk_waiting_node")}
         {/if}
       </span>
     </div>

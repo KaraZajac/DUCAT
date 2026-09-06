@@ -64,6 +64,7 @@
     <string name="rent_search_allow">اجازهٔ موقعیت</string>
     <string name="rent_search_no_fix">هنوز موقعیتی پیدا نشده. نزدیک پنجره یا بیرون معمولاً جواب می‌دهد.</string>
     <string name="rent_search_no_network">الان نشد به شبکه رسید، بنابراین هیچ تخته‌ای خوانده نشد. معمولاً یعنی برنامه هنوز در حال پیوستن است — کمی بعد دوباره تلاش کنید.</string>
+    <string name="rent_search_no_reply">تابلوها هم‌اکنون پاسخ ندادند. کمی بعد دوباره تلاش کنید.</string>
     <string name="rent_search_retry">تلاش دوباره</string>
     <string name="rent_search_progress">%1$d از %2$d منطقه بررسی شد</string>
     <string name="rent_search_closer">نگاه دقیق‌تری به شلوغ‌ترین محله‌ها…</string>

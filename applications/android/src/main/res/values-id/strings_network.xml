@@ -14,6 +14,11 @@
     <string name="net_line_node_id">ID node</string>
     <string name="net_line_peers">peer</string>
     <string name="net_peers_value">%1$d aktif, %2$d andal</string>
+    <string name="net_line_table">tabel perutean</string>
+    <string name="net_table_value">%1$d menjawab, %2$d tidak, dari %3$d yang dikenal</string>
+    <string name="net_slow_hint">Pencarian lambat: banyak node yang dikenal berhenti menjawab. Menyambung ulang membangun tabel dari awal dalam sekitar satu menit.</string>
+    <string name="net_reconnect">Sambung ulang</string>
+    <string name="net_reconnecting">Menyambung ulang…</string>
     <string name="net_waiting">menunggu %1$d dtk — node harus mencari tahu cara ia dijangkau sebelum bisa membangun rute</string>
 
     <string name="net_starting">Memulai…</string>

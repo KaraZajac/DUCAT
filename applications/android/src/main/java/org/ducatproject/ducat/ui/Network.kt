@@ -40,6 +40,11 @@ fun NetworkPanel(storageDir: String) {
     var starting by remember { mutableStateOf(false) }
     var routeResult by remember { mutableStateOf<String?>(null) }
     var elapsed by remember { mutableStateOf(0) }
+    var health by remember { mutableStateOf<uniffi.ducat_mobile.RoutingHealth?>(null) }
+    var reconnecting by remember { mutableStateOf(false) }
+    // A reconnect has been seen going down; only then is "attached" the
+    // node coming back rather than the old one not gone yet.
+    var sawDown by remember { mutableStateOf(false) }
 
     // The node is started by the Application, so this screen begins by asking
     // what is already happening rather than by offering to start something.
@@ -50,11 +55,28 @@ fun NetworkPanel(storageDir: String) {
 
     // Poll while running. Readiness takes seconds to minutes, and a screen that
     // shows one sample tells you nothing about whether it is progressing.
-    LaunchedEffect(status.running) {
-        while (status.running) {
+    // Also while reconnecting: the node stops and starts again under the
+    // poller, and a loop that ended at "stopped" left the screen saying
+    // so for as long as anyone looked at it.
+    LaunchedEffect(status.running, reconnecting) {
+        while (status.running || reconnecting) {
             delay(2000)
             status = withContext(Dispatchers.IO) { nodeStatus() }
-        if (nodeId == null) nodeId = withContext(Dispatchers.IO) { runCatching { uniffi.ducat_mobile.nodeId() }.getOrNull() }
+            if (nodeId == null) nodeId = withContext(Dispatchers.IO) { runCatching { uniffi.ducat_mobile.nodeId() }.getOrNull() }
+            // The table's figures come from the node's own debug text, a
+            // few kilobytes to build; every third sample is plenty.
+            if (elapsed % 6 == 0) {
+                health = withContext(Dispatchers.IO) { runCatching { uniffi.ducat_mobile.nodeRoutingHealth() }.getOrNull() }
+            }
+            // A reconnect is over when the node has gone down and come
+            // back attached, or has had a minute and a half to try.
+            if (reconnecting) {
+                if (!status.running || !status.attached) sawDown = true
+                if ((sawDown && status.attached) || elapsed >= 90) {
+                    reconnecting = false
+                    sawDown = false
+                }
+            }
             elapsed += 2
         }
     }
@@ -97,6 +119,24 @@ fun NetworkPanel(storageDir: String) {
                     status.peers.toLong(), status.reliablePeers.toLong()),
                 status.peers > 0u,
             )
+            // The figure behind a slow day: a table a quarter dead makes
+            // every lookup a walk through timeouts.
+            health?.takeIf { it.total > 0u }?.let { h ->
+                val slow = h.dead.toLong() * 4 >= h.total.toLong() || h.findNodeMs >= 500u
+                Line(
+                    stringResource(R.string.net_line_table),
+                    stringResource(R.string.net_table_value, h.live.toLong(), h.dead.toLong(), h.total.toLong()),
+                    !slow,
+                )
+                if (slow) {
+                    Text(
+                        stringResource(R.string.net_slow_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 18.dp, top = 2.dp, bottom = 4.dp),
+                    )
+                }
+            }
             // The id veilid's own tools print: the first thing to compare
             // when two installs seem to be fighting over one identity.
             nodeId?.let { Line(stringResource(R.string.net_line_node_id), it, true) }
@@ -138,6 +178,21 @@ fun NetworkPanel(storageDir: String) {
                         routeResult = null
                     }) { Text(stringResource(R.string.net_stop)) }
                     Spacer(Modifier.width(8.dp))
+                    // Stop and start with the table purged: what a person
+                    // does by hand when the network has been slow for an
+                    // hour. The poller does it, so the shares and watches
+                    // come back the way they do after any restart.
+                    OutlinedButton(
+                        enabled = !reconnecting,
+                        onClick = {
+                            reconnecting = true
+                            elapsed = 0
+                            routeResult = null
+                        },
+                    ) {
+                        Text(stringResource(if (reconnecting) R.string.net_reconnecting else R.string.net_reconnect))
+                    }
+                    Spacer(Modifier.width(8.dp))
                     // The only proof a route can be built is building one.
                     Button(
                         // Disabled while a probe is in flight (routeResult "…")
@@ -170,6 +225,24 @@ fun NetworkPanel(storageDir: String) {
         if (nodeId == null) nodeId = withContext(Dispatchers.IO) { runCatching { uniffi.ducat_mobile.nodeId() }.getOrNull() }
         if (result != null) status = status.copy(error = startupNote(context, result))
         starting = false
+    }
+
+    // Stop and start, off the main thread: the same path as a launch, so
+    // a dead-heavy table is purged before the attach. The watches the old
+    // node held are forgotten, and the poller is told so it re-parks every
+    // share on its next pass.
+    LaunchedEffect(reconnecting) {
+        if (!reconnecting) return@LaunchedEffect
+        val result = withContext(Dispatchers.IO) {
+            runCatching {
+                nodeStop()
+                org.ducatproject.ducat.Mailbox.planForgetWatches()
+                nodeStart(storageDir, udp = true)
+            }.exceptionOrNull()?.let { it.saidWhy() ?: it.javaClass.simpleName }
+        }
+        org.ducatproject.ducat.Poller.nodeRestarted()
+        status = withContext(Dispatchers.IO) { nodeStatus() }
+        if (result != null) status = status.copy(error = startupNote(context, result))
     }
 
     LaunchedEffect(routeResult) {

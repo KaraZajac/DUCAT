@@ -14,6 +14,11 @@
     <string name="net_line_node_id">ID узла</string>
     <string name="net_line_peers">пиры</string>
     <string name="net_peers_value">%1$d активных, %2$d надёжных</string>
+    <string name="net_line_table">таблица маршрутов</string>
+    <string name="net_table_value">%1$d отвечают, %2$d нет, из %3$d известных</string>
+    <string name="net_slow_hint">Поиск идёт медленно: многие известные узлы перестали отвечать. Переподключение заново построит таблицу примерно за минуту.</string>
+    <string name="net_reconnect">Переподключить</string>
+    <string name="net_reconnecting">Переподключение…</string>
     <string name="net_waiting">ждём %1$d с — узлу нужно понять, как он достижим, прежде чем строить маршрут</string>
 
     <string name="net_starting">Запускаем…</string>

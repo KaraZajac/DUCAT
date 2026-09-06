@@ -17,10 +17,13 @@
   }
   import { onMount } from "svelte";
   import { t, tp, i18n } from "./i18n.svelte";
-  import { api, type Status } from "./api";
+  import { api, type Status, type RoutingHealth } from "./api";
 
   let status = $state<Status | null>(null);
+  let health = $state<RoutingHealth | null>(null);
   let log = $state<string[]>([]);
+  let reconnecting = $state(false);
+  let reconnectSaid = $state("");
 
   async function refresh() {
     try {
@@ -29,6 +32,28 @@
     } catch (e) {
       status = null;
     }
+    // The table's figures come from the node's own debug text, which is
+    // a few kilobytes to build; every third refresh is plenty.
+    try {
+      health = status?.running ? await api.routingHealth() : null;
+    } catch (e) {
+      health = null;
+    }
+  }
+
+  // Stop and start, table purged: what a person does by hand when the
+  // network has been slow for an hour, as one button.
+  async function reconnect() {
+    if (reconnecting) return;
+    reconnecting = true;
+    reconnectSaid = "";
+    try {
+      await api.reconnect();
+    } catch (e) {
+      reconnectSaid = String(e);
+    }
+    reconnecting = false;
+    refresh();
   }
 
   onMount(() => {
@@ -62,8 +87,20 @@
           {status.ready ? t("net_line_attached") : status.attached ? t("desk_node_attaching") : status.running ? t("net_starting") : t("net_stopped")}
         </div>
         <div class="meta">{attachWord(status.state)} · {t("net_line_peers")}: {t("net_peers_value", status.peers, status.reliable_peers)}</div>
+        {#if health && health.total > 0}
+          <div class="meta">{t("net_line_table")}: {t("net_table_value", health.live, health.dead, health.total)}</div>
+          {#if health.slow}
+            <div class="meta hint">{t("net_slow_hint")}</div>
+          {/if}
+        {/if}
       </div>
-      <div class="actions"><span class="meta">{status.data_dir}</span></div>
+      <div class="actions">
+        <span class="meta">{status.data_dir}</span>
+        {#if status.running}
+          <button class="btn" onclick={reconnect} disabled={reconnecting}>{reconnecting ? t("net_reconnecting") : t("net_reconnect")}</button>
+        {/if}
+      </div>
+      {#if reconnectSaid}<p class="err">{reconnectSaid}</p>{/if}
       {#if status.node_id}
         <div class="meta mono">{t("net_line_node_id")}: {status.node_id}</div>
       {/if}
@@ -80,3 +117,7 @@
   <div class="meta" style="margin-bottom: 6px">{t("desk_newest_first")}</div>
   <div class="log">{#each [...log].reverse() as line}<div class={cls(line)}>{pretty(line)}</div>{/each}</div>
 </div>
+
+<style>
+  .hint { max-width: 62ch; margin-top: 4px; }
+</style>

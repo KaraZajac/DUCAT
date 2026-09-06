@@ -213,7 +213,7 @@
       </div>
       {#if quote}
         <p class="note">
-          {#if quote.fee_known}{t("txdetail_fee")} {fmtXmr(quote.fee_pxmr)} · {tp("balance_notes", quote.notes)} · {t("pay_total").toLowerCase()} {fmtXmr(quote.total_pxmr)} · {quote.affordable ? t("desk_left_after", fmtXmr(quote.remaining_pxmr)) : t("desk_more_than_unlocked")}{:else}The fee is not known yet — no node has answered.{/if}
+          {#if quote.fee_known}{t("txdetail_fee")} {fmtXmr(quote.fee_pxmr)} · {tp("balance_notes", quote.notes)} · {t("pay_total").toLowerCase()} {fmtXmr(quote.total_pxmr)} · {quote.affordable ? t("desk_left_after", fmtXmr(quote.remaining_pxmr)) : t("desk_more_than_unlocked")}{:else}{t("desk_fee_unknown")}{/if}
         </p>
       {:else if quoting}
         <p class="note">{t("desk_working_fee")}</p>
@@ -278,6 +278,8 @@
       </div>
     {/if}
   </div>
+{:else if err}
+  <p class="err">{err}</p>
 {:else}
   <p class="empty">{t("desk_opening_wallet")}</p>
 {/if}
