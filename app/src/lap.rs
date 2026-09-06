@@ -74,6 +74,13 @@ impl App {
                     } else {
                         unattached_since = None;
                     }
+                    // The swarm's own notes — a seeder that lost its route,
+                    // a fetch that stalled — into the log, where a person
+                    // can read them; nothing drained them before, so the
+                    // desk's seeding side was silent all day.
+                    for line in ducat_mobile::node::node_logs() {
+                        log::info("Swarm", line);
+                    }
                     if status.public_internet_ready {
                         app.lap_once();
                         if SWEEP_NOW.swap(false, Ordering::AcqRel) || last_hourly.map_or(true, |t| t.elapsed() >= HOURLY) {

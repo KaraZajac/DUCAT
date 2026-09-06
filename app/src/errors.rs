@@ -23,10 +23,16 @@ pub fn plain(e: &Error) -> String {
         Error::Refused(s) => if board_full(s) { FULL.into() } else { s.clone() },
         Error::Node(s) => by_shape(s).unwrap_or_else(|| format!("The network could not do that: {}.", inner(s))),
         Error::Swarm(s) => by_shape(s).unwrap_or_else(|| {
-            if s.to_lowercase().contains("fetch") || s.contains("went quiet") {
-                "The pictures could not be fetched right now; the seller may be away.".into()
-            } else {
+            // A fetch that failed is the ordinary swarm failure — the seller
+            // is away — and it used to get the seeding sentence, so a
+            // listing that would not open said "could not be put on the
+            // network" to the person trying to read it. Seeding words its
+            // own failures with "seed", "announce" or the digest check.
+            let l = s.to_lowercase();
+            if l.contains("seed") || l.contains("announce") || l.contains("digest") || l.contains("index") {
                 "The pictures could not be put on the network. They will be retried.".into()
+            } else {
+                "The pictures could not be fetched right now; the seller may be away.".into()
             }
         }),
     }
@@ -139,6 +145,10 @@ mod tests {
         let e = Error::Swarm("Failed(\"the swarm went quiet\")".into());
         assert_eq!(plain(&e), "The pictures could not be fetched right now; the seller may be away.");
         let e = Error::Swarm("Failed(\"digest is 64 hex chars\")".into());
+        assert_eq!(plain(&e), "The pictures could not be put on the network. They will be retried.");
+        let e = Error::Swarm("Failed(\"giving up — watchdog fired after 3 event(s)\")".into());
+        assert_eq!(plain(&e), "The pictures could not be fetched right now; the seller may be away.");
+        let e = Error::Swarm("Failed(\"seed: no such directory\")".into());
         assert_eq!(plain(&e), "The pictures could not be put on the network. They will be retried.");
     }
 

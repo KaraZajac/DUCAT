@@ -830,7 +830,12 @@ class Poller(private val context: Context) {
                     .filter { it in rangKeys }
                 if (cardKeys.isNotEmpty()) {
                     handled.addAll(cardKeys)
-                    runCatching { Mailbox.collectClaims(context) }
+                    // Named, so the card that rang is read now: without
+                    // `only`, collectClaims reads only the cards whose turn
+                    // it is, and a card on a five-minute backoff rang at
+                    // 18:03 and was found answered at 18:08 — five minutes
+                    // of "nothing happened" after somebody scanned it.
+                    runCatching { Mailbox.collectClaims(context, only = cardKeys.first()) }
                     runCatching { Listings.linkClaims(context) }
                 }
                 // A board that rang (§16.24): its record is watched like a

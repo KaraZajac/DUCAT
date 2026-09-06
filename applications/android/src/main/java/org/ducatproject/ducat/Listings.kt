@@ -24,6 +24,10 @@ import org.json.JSONObject
  * not. Nothing needs a withdrawal message that a hostile writer could forge.
  */
 object Listings {
+    /** A bundle picture's long side, and its JPEG quality — the desk's figures. */
+    private const val BUNDLE_EDGE = 1600
+    private const val BUNDLE_QUALITY = 85
+
     private const val TAG = "DucatListings"
 
     /** How long a posted notice claims to be good for. */
@@ -546,15 +550,33 @@ object Listings {
             // Its type from its own bytes, the way §16.18.3 has the thumbnail
             // checked; what is not one of the three is not a picture.
             val mime = imageMime(f) ?: continue
-            val bounds = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
-            android.graphics.BitmapFactory.decodeFile(f.path, bounds)
-            val ext = when (mime) { "image/png" -> "png"; "image/webp" -> "webp"; else -> "jpg" }
-            val rel = "pictures/${pictures.size.toString().padStart(2, '0')}.$ext"
-            f.copyTo(java.io.File(fresh, rel), overwrite = true)
+            // Re-encoded the way the desk does it: upright, no longer than
+            // BUNDLE_EDGE on its long side, JPEG. A photo used to be copied
+            // as it came — a 1080×2400 PNG screenshot went onto the swarm
+            // at full size — and every kilobyte here is one the reader
+            // waits for over a private route.
+            val rel = "pictures/${pictures.size.toString().padStart(2, '0')}.jpg"
+            val shot = SafeImage.upright({ f.inputStream() }, SafeImage.COMPOSE_PIXELS)
+            if (shot == null) {
+                DucatLog.w(TAG, "${id.take(8)}…: ${f.name} is not a picture this phone can re-encode; left out of the bundle")
+                continue
+            }
+            val scale = BUNDLE_EDGE.toFloat() / maxOf(shot.width, shot.height)
+            val scaled = if (scale < 1f) {
+                android.graphics.Bitmap.createScaledBitmap(
+                    shot, (shot.width * scale).toInt().coerceAtLeast(1), (shot.height * scale).toInt().coerceAtLeast(1), true,
+                )
+            } else {
+                shot
+            }
+            val out = java.io.ByteArrayOutputStream()
+            if (!scaled.compress(android.graphics.Bitmap.CompressFormat.JPEG, BUNDLE_QUALITY, out)) continue
+            val jpeg = out.toByteArray()
+            java.io.File(fresh, rel).writeBytes(jpeg)
             pictures += uniffi.ducat_mobile.ListingPicture(
-                path = rel, mime = mime, bytes = f.length().toULong(),
-                w = bounds.outWidth.coerceAtLeast(0).toUInt(),
-                h = bounds.outHeight.coerceAtLeast(0).toUInt(),
+                path = rel, mime = "image/jpeg", bytes = jpeg.size.toULong(),
+                w = scaled.width.toUInt(),
+                h = scaled.height.toUInt(),
                 caption = "",
             )
         }

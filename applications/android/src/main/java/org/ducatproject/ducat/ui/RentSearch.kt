@@ -501,7 +501,11 @@ private fun RentSearchScreen(
                 // opens the chat are after the suspension and never ran.
                 // Coming back from the form found every card greyed out for
                 // good, and the person never told they had already asked.
-                if (found != null && stalled == null) {
+                // Not gated on the read: a seller does not have to wait for
+                // the boards to answer before offering something on them,
+                // and on a fresh phone that first read was the better part
+                // of a minute with no way to sell in sight.
+                if (stalled == null) {
                     OutlinedButton(
                         enabled = !busy,
                         onClick = { composing = if (showing == 0) Listings.KIND_SALE else showing },

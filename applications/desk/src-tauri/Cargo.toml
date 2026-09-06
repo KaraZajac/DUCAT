@@ -16,6 +16,14 @@ license = "MPL-2.0"
 # `cargo build --manifest-path applications/desk/src-tauri/Cargo.toml`.
 [workspace]
 
+# A debug desk is what the harness drives, but a debug veilid and a debug
+# monero scan burned six cores on the soak box: every RPC timed out under
+# the load and the node's own routing table read as three-quarters dead.
+# Dependencies are built optimised in the dev profile; our own crates stay
+# debug so the drive harness and the backtraces keep working.
+[profile.dev.package."*"]
+opt-level = 2
+
 [lib]
 name = "ducat_desk_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]

@@ -170,7 +170,7 @@ object Mailbox {
                 nodeDhtSet(c.myOutbox, sub, local)
                 DucatLog.i(
                     TAG,
-                    "re-push seq $seq subkey $sub bytes ${local.contentHashCode()}",
+                    "re-push seq $seq subkey $sub (${local.size} B, hash ${local.contentHashCode()})",
                 )
                 pushed++
             }

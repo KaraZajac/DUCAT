@@ -170,10 +170,13 @@ fun BalanceCard(
                     // nonsense to them. Wording that is true either way costs
                     // nothing; separating the two would cost a chain fetch per
                     // output, which is the Ledger's job and not a balance's.
+                    // The figure in the reader's unit, as Accounts says it:
+                    // `locked.toString()` was a bare "0.010000" with no
+                    // currency at all on the first screen a new wallet shows.
                     Text(
                         stringResource(
                             R.string.balance_arriving,
-                            locked.toString(),
+                            org.ducatproject.ducat.Amounts.show(ctx, float.lockedPxmr).primary,
                             minutesFor(ctx, float.blocksToUnlock),
                         ),
                         style = MaterialTheme.typography.bodyMedium,
@@ -196,11 +199,16 @@ fun BalanceCard(
         // "the float running out, which must be said before the counter". The
         // arriving row three lines up makes the same argument for itself — it
         // carries a meaning, not a mood.
-        val tint = if (allLocked) MaterialTheme.colorScheme.error
+        // All locked is not an error either: it is the state every wallet
+        // is in for ten minutes after its first top-up, and painting that
+        // red under a "Top up" button told a person who had just topped up
+        // that something had gone wrong. It carries the arriving row's
+        // colour — money on its way — and no button, because the money is
+        // already coming.
+        val tint = if (allLocked) MaterialTheme.ducat.changePending
         else MaterialTheme.ducat.lowCapacity
         Surface(
-            color = if (allLocked) MaterialTheme.colorScheme.errorContainer
-            else MaterialTheme.ducat.lowCapacity.copy(alpha = 0.16f),
+            color = tint.copy(alpha = 0.16f),
             shape = MaterialTheme.shapes.large,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         ) {
@@ -209,7 +217,7 @@ fun BalanceCard(
                     if (allLocked) stringResource(R.string.balance_all_locked_title)
                     else stringResource(R.string.balance_running_low_title),
                     style = MaterialTheme.typography.titleMedium,
-                    color = if (allLocked) MaterialTheme.colorScheme.onErrorContainer else tint,
+                    color = tint,
                 )
                 Spacer(Modifier.height(4.dp))
                 // The count, here rather than in a second card above.
@@ -225,11 +233,12 @@ fun BalanceCard(
                     if (allLocked) stringResource(R.string.balance_all_locked_body)
                     else stringResource(R.string.balance_running_low_body),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = if (allLocked) MaterialTheme.colorScheme.onErrorContainer
-                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Spacer(Modifier.height(12.dp))
-                Button(onClick = onTopUp) { Text(stringResource(R.string.balance_top_up_action)) }
+                if (!allLocked) {
+                    Spacer(Modifier.height(12.dp))
+                    Button(onClick = onTopUp) { Text(stringResource(R.string.balance_top_up_action)) }
+                }
             }
         }
     }
