@@ -240,7 +240,7 @@ fun NetworkPanel(storageDir: String) {
                 nodeStart(storageDir, udp = true)
             }.exceptionOrNull()?.let { it.saidWhy() ?: it.javaClass.simpleName }
         }
-        org.ducatproject.ducat.Poller.nodeRestarted()
+        org.ducatproject.ducat.Mailbox.nodeRestarted()
         status = withContext(Dispatchers.IO) { nodeStatus() }
         if (result != null) status = status.copy(error = startupNote(context, result))
     }

@@ -2021,6 +2021,22 @@ object Mailbox {
      * minutes; and everything is due at once, because a log that rang
      * while the node was down rang to nobody.
      */
+    /** Set by the Network screen after it stopped and started the node
+     *  by hand; the poller takes it and re-parks every share. Kept here
+     *  rather than on the poller because this file is shared with the
+     *  desk shim and the poller is not. */
+    @Volatile private var restarted = false
+
+    fun nodeRestarted() {
+        restarted = true
+    }
+
+    fun takeNodeRestarted(): Boolean {
+        val r = restarted
+        restarted = false
+        return r
+    }
+
     fun planForgetWatches() {
         synchronized(plan) {
             for (s in plan.values) {

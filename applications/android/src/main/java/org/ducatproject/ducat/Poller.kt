@@ -121,8 +121,7 @@ class Poller(private val context: Context) {
                     // cannot reach are the once-per-process share flags,
                     // reset here so the sweeps re-park everything, and a
                     // node it failed to start is started below at once.
-                    if (restartAsked) {
-                        restartAsked = false
+                    if (Mailbox.takeNodeRestarted()) {
                         lastRestart = at
                         unattachedSince = 0L
                         DucatLog.i(TAG, "reconnected from the Network screen — re-parking every share")
@@ -891,14 +890,5 @@ class Poller(private val context: Context) {
         /** Restarts are at least this far apart. */
         const val RESTART_SPACING_MS = 600_000L
 
-        /** Set by the Network screen after it restarted the node; taken by
-         *  the next pass, which re-parks every share. */
-        @Volatile var restartAsked = false
-
-        /** The node was just stopped and started by hand: every share must
-         *  be re-parked and every watch is gone. */
-        fun nodeRestarted() {
-            restartAsked = true
-        }
     }
 }
