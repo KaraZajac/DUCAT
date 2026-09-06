@@ -356,6 +356,8 @@ body {
 /* ----- till ----- */
 .till-grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px; align-items: start; }
 .input.narrow { max-width: 130px; }
+/* A language name needs room: the placeholder alone is two words. */
+.input.narrow.lang { max-width: 200px; }
 .total-row { display: flex; justify-content: space-between; padding: 12px 0; border-top: 1px solid var(--line); margin-top: 12px; font-size: 15px; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
 .chip { background: var(--surface-2); border: 1px solid var(--line); color: var(--text); padding: 6px 12px; border-radius: var(--radius-s); cursor: pointer; font: inherit; font-size: 13px; }

@@ -317,7 +317,7 @@
     <div class="chips">
       <button class="chip" class:on={lang === null} onclick={() => pickLang(null)}>{t("desk_any_language")}</button>
       <button class="chip" class:on={lang === deskLang.code} onclick={() => pickLang(deskLang.code)}>{deskLang.name}</button>
-      <select class="input narrow" value={lang && lang !== deskLang.code ? lang : ""} onchange={(e) => { const v = (e.target as HTMLSelectElement).value; if (v) pickLang(v); }}>
+      <select class="input narrow lang" value={lang && lang !== deskLang.code ? lang : ""} onchange={(e) => { const v = (e.target as HTMLSelectElement).value; if (v) pickLang(v); }}>
         <option value="">{t("desk_other_language")}</option>
         {#each LANGS.filter((l) => l.code !== deskLang.code) as l (l.code)}<option value={l.code}>{l.name}</option>{/each}
       </select>
