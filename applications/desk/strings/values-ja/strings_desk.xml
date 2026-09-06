@@ -241,7 +241,7 @@
     <string name="desk_cover">表紙</string>
     <string name="desk_cover_note">表紙は掲示板上の10キロバイトの画像になります。残りはスウォームで運ばれ、誰かが出品を開いたときにだけ取得されます。</string>
     <string name="desk_pick_listing">出品を選ぶか、左のボタンで新しく始めてください。</string>
-    <string name="desk_group_copies_queued">一部のコピーがまだ送られていません。キューに入り、再試行されます。</string>
+    <string name="desk_group_copies_queued">ページはまだ届いていません — 次の周回で再度書き込まれます。</string>
     <string name="desk_amount_in_xmr">XMR での金額。</string>
     <string name="desk_kind_reaction">リアクション</string>
     <string name="desk_kind_retraction">取り消し</string>
@@ -257,7 +257,7 @@
     <string name="desk_nobody_yet">まだ誰もいません。誰かのカードに応答するか、「自分」ページで自分のカードを見せてください。</string>
     <string name="desk_groups">グループ</string>
     <string name="desk_group_name_hint">グループの名前</string>
-    <string name="desk_group_note">全員がすでに互いを知っている必要があります。名簿は各メンバーに送られます。</string>
+    <string name="desk_group_note">追加する相手はあなたの連絡先である必要がありますが、メンバー同士が知り合いである必要はありません。名簿はボードの鍵とともに各メンバーへ送られます。</string>
     <string name="desk_n_in_group">グループに %1$d 人</string>
     <string name="desk_people">人</string>
     <string name="desk_members_and_you">%1$s とあなた</string>

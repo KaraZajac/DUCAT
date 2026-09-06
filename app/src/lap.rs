@@ -77,23 +77,52 @@ impl App {
     /// One turn of the lap: cards, then logs, then insurance. Public so a
     /// harness can turn it by hand.
     pub fn lap_once(&self) {
-        let claimed = self.collect_claims(None);
-        if claimed > 0 {
-            log::info(TAG, format!("{claimed} card(s) answered"));
+        // Each phase timed, and the lap narrated when it ran long: a lap
+        // that takes two minutes is a phase that took two minutes, and
+        // the number says which.
+        let t0 = Instant::now();
+        let mut phases: Vec<(&str, u128)> = Vec::new();
+        let mut phase = |name: &'static str, f: &mut dyn FnMut()| {
+            let t = Instant::now();
+            f();
+            phases.push((name, t.elapsed().as_millis()));
+        };
+        phase("cards", &mut || {
+            let claimed = self.collect_claims(None);
+            if claimed > 0 {
+                log::info(TAG, format!("{claimed} card(s) answered"));
+            }
+        });
+        phase("logs", &mut || {
+            let got = self.poll();
+            if got > 0 {
+                log::info(TAG, format!("{got} message(s) arrived"));
+            }
+        });
+        phase("calls", &mut || self.calls_noticed());
+        phase("verify", &mut || self.verify_last_writes());
+        phase("retries", &mut || self.retry_group_outbox());
+        phase("boards", &mut || {
+            let on_boards = self.groups_lap();
+            if on_boards > 0 {
+                log::info(TAG, format!("{on_boards} group message(s) arrived"));
+            }
+        });
+        phase("listings", &mut || self.listings_lap());
+        phase("bills", &mut || self.run_due_bills());
+        phase("attachment", &mut || {
+            self.fetch_one_attachment();
+        });
+        phase("expiry", &mut || {
+            self.expire_all();
+            self.expire_orders();
+            self.sweep_abandoned_tabs(&[]);
+        });
+        phase("feeds", &mut || self.feeds_lap());
+        let total = t0.elapsed().as_millis();
+        if total > 30_000 {
+            let slow: Vec<String> = phases.iter().filter(|(_, ms)| *ms >= 1_000).map(|(n, ms)| format!("{n} {}s", ms / 1000)).collect();
+            log::info(TAG, format!("lap took {}s — {}", total / 1000, slow.join(", ")));
         }
-        let got = self.poll();
-        if got > 0 {
-            log::info(TAG, format!("{got} message(s) arrived"));
-        }
-        self.calls_noticed();
-        self.verify_last_writes();
-        self.retry_group_outbox();
-        self.listings_lap();
-        self.run_due_bills();
-        self.fetch_one_attachment();
-        self.expire_all();
-        self.expire_orders();
-        self.sweep_abandoned_tabs(&[]);
-        self.feeds_lap();
     }
 }

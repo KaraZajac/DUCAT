@@ -244,7 +244,7 @@
     <string name="desk_cover">आवरण</string>
     <string name="desk_cover_note">आवरण बोर्ड पर दस किलोबाइट की तस्वीर बनता है; बाक़ी स्वार्म पर सफ़र करती हैं और तभी लाई जाती हैं जब कोई विज्ञापन खोले।</string>
     <string name="desk_pick_listing">विज्ञापन चुनें, या बाईं ओर के बटनों से एक शुरू करें।</string>
-    <string name="desk_group_copies_queued">कुछ प्रतियाँ अभी नहीं गईं — वे कतार में हैं और फिर कोशिश होगी।</string>
+    <string name="desk_group_copies_queued">पेज अभी नहीं पहुँचा — अगले चक्र में इसे फिर लिखा जाएगा।</string>
     <string name="desk_amount_in_xmr">XMR में राशि।</string>
     <string name="desk_kind_reaction">प्रतिक्रिया</string>
     <string name="desk_kind_retraction">वापसी</string>
@@ -260,7 +260,7 @@
     <string name="desk_nobody_yet">अभी कोई नहीं। किसी के कार्ड का उत्तर दें, या मैं पेज पर अपना दिखाएँ।</string>
     <string name="desk_groups">समूह</string>
     <string name="desk_group_name_hint">समूह का नाम</string>
-    <string name="desk_group_note">इसमें सबको एक-दूसरे को पहले से जानना चाहिए; सूची हर सदस्य को जाती है।</string>
+    <string name="desk_group_note">आप जिसे भी जोड़ें, वह आपका संपर्क होना चाहिए; सदस्यों का एक‑दूसरे को जानना ज़रूरी नहीं। सूची बोर्ड की कुंजी के साथ हर सदस्य को भेजी जाती है।</string>
     <string name="desk_n_in_group">समूह में %1$d</string>
     <string name="desk_people">लोग</string>
     <string name="desk_members_and_you">%1$s और आप</string>

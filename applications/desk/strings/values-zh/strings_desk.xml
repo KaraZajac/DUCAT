@@ -241,7 +241,7 @@
     <string name="desk_cover">封面</string>
     <string name="desk_cover_note">封面成为板上那张十千字节的图片；其余图片通过集群传输，只在有人打开信息时才获取。</string>
     <string name="desk_pick_listing">选择一条信息，或用左侧按钮新建一条。</string>
-    <string name="desk_group_copies_queued">部分副本尚未发出——已排队并会重试。</string>
+    <string name="desk_group_copies_queued">页面尚未写入 — 下一轮会再次写入。</string>
     <string name="desk_amount_in_xmr">以 XMR 计的金额。</string>
     <string name="desk_kind_reaction">回应</string>
     <string name="desk_kind_retraction">撤回</string>
@@ -257,7 +257,7 @@
     <string name="desk_nobody_yet">还没有人。应答别人的名片，或在“我”页面出示你的。</string>
     <string name="desk_groups">群组</string>
     <string name="desk_group_name_hint">群组名称</string>
-    <string name="desk_group_note">成员之间必须已经互相认识；名单会发给每位成员。</string>
+    <string name="desk_group_note">你添加的每个人都必须是你的联系人；成员之间不必互相认识。名单会连同看板的密钥发给每位成员。</string>
     <string name="desk_n_in_group">群里 %1$d 人</string>
     <string name="desk_people">联系人</string>
     <string name="desk_members_and_you">%1$s 和你</string>

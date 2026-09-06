@@ -193,6 +193,17 @@ pub mod f {
     pub const SITE_SHARE: u64 = 282;
     pub const SITE_DIGEST: u64 = 283;
     pub const SITE_UPDATED: u64 = 284;
+    // A group board page (§16.24): a member's messages on the shared
+    // record. 299 is the page's strict-reader probe, never assigned.
+    pub const GB_VERSION: u64 = 290;
+    pub const GB_GEN: u64 = 291;
+    pub const GB_ENTRIES: u64 = 292;
+    pub const GB_SEQ: u64 = 293;
+    pub const GB_TS: u64 = 294;
+    pub const GB_KIND: u64 = 295;
+    pub const GB_BODY: u64 = 296;
+    pub const GB_RE_SENDER: u64 = 297;
+    pub const GB_RE_SEQ: u64 = 298;
     // Read watermark and ring size on a log head (§16.16, §16.12).
     pub const HEAD_READ: u64 = 201;
     pub const HEAD_RING: u64 = 202;

@@ -994,6 +994,13 @@ SITE_VERSION, SITE_TITLE, SITE_SHARE, SITE_DIGEST, SITE_UPDATED = 280, 281, 282,
 MAX_SITE_TITLE_CHARS = 80
 MAX_SWARM_ATTACHMENT_BYTES = 268_435_456
 MAX_SHARE_KEY_CHARS = 128
+# §16.24 group board page: the page, then its entries. 299 is the probe.
+GB_VERSION, GB_GEN, GB_ENTRIES = 290, 291, 292
+GB_SEQ, GB_TS, GB_KIND, GB_BODY, GB_RE_SENDER, GB_RE_SEQ = 293, 294, 295, 296, 297, 298
+# The kinds §16.19 lets into a group, less the roster.
+GB_KIND_TEXT, GB_KIND_REACTION, GB_KIND_RETRACT = 0, 4, 5
+# §16.14: a reaction is a glyph or a word, not a paragraph.
+MAX_REACTION_CHARS = 64
 # §15.12 — the live-position reference (kind 11): record + stream key.
 MSG_POS_RECORD, MSG_POS_STREAM = 218, 219
 # §16.20 — a publication period's key (kind 13): the period pair is the
@@ -1575,6 +1582,102 @@ def run_site_head(cases, r):
         if want and got.hex() != want:
             r.passed -= 1
             r.bad("site.head", c["name"], c.get("why", ""),
+                  "re-encoding differs from the vector")
+
+
+
+def parse_group_entry(v):
+    """§16.24: one entry on a member's page — strict, closed set."""
+    if v[0] != "map":
+        raise Reject("Malformed", "a group entry is a map")
+    b = dict(v[1])
+    out = {
+        "seq": _take(b, GB_SEQ, "uint", "counter"),
+        "ts": _take(b, GB_TS, "uint", "timestamp"),
+        "kind": _take(b, GB_KIND, "uint", "kind"),
+    }
+    if out["seq"] == 0:
+        raise Reject("Malformed", "a group counter starts at one")
+    if out["ts"] == 0:
+        raise Reject("Malformed", "an entry says when it was said")
+    # The body is text under §16.19's message bound; a kind decides below
+    # whether it must be there, may be there, or must not.
+    body = _take_text(b, GB_BODY, MAX_MESSAGE_CHARS, "body", False)
+    re_sender = _opt(b, GB_RE_SENDER, "bytes")
+    re_seq = _opt(b, GB_RE_SEQ, "uint")
+    _finish(b)
+    # A reference is a sender and that sender's counter, together or not at
+    # all: half of one names every member's nth word at once.
+    if (re_sender is None) != (re_seq is None):
+        raise Reject(
+            "Malformed",
+            "a group reference is a sender and a counter, together or not at all",
+        )
+    if re_sender is not None:
+        if len(re_sender) != 32:
+            raise Reject("Malformed", "a reference names a 32-byte sender key")
+        if re_seq == 0:
+            raise Reject("Malformed", "a group counter starts at one")
+    kind = out["kind"]
+    if kind == GB_KIND_TEXT:
+        if body is None or not body.strip():
+            raise Reject("Malformed", "a text says something")
+    elif kind == GB_KIND_REACTION:
+        if body is None or not body.strip() or len(body) > MAX_REACTION_CHARS:
+            raise Reject("Malformed", "a reaction is a short body")
+        if re_sender is None:
+            raise Reject("Malformed", "a reaction names its target")
+    elif kind == GB_KIND_RETRACT:
+        if body is not None:
+            raise Reject("Malformed", "a retraction carries no body")
+        if re_sender is None:
+            raise Reject("Malformed", "a retraction names its target")
+    else:
+        raise Reject("Malformed", "not a kind a board carries")
+    out["body"] = body
+    out["re"] = None if re_sender is None else (re_sender, re_seq)
+    return out
+
+
+def parse_group_page(v):
+    """§16.24: a member's page — strict, closed set, version-gated."""
+    if v[0] != "map":
+        raise Reject("Malformed", "a group page is a map")
+    b = dict(v[1])
+    ver = b.pop(GB_VERSION, (None, None))[1]
+    if ver != 1:
+        raise Reject("Malformed", "unknown group page version")
+    generation = _take(b, GB_GEN, "uint", "generation")
+    if generation == 0:
+        raise Reject("Malformed", "a board generation starts at one")
+    entries = _take(b, GB_ENTRIES, "array", "entries")
+    _finish(b)
+    if not entries:
+        raise Reject("Malformed", "a page says at least one thing")
+    parsed = [parse_group_entry(e) for e in entries]
+    # Ascending by the sender's own counter, no repeats. A reader merges
+    # pages by (sender, GB_SEQ); a page that does not ascend is refused
+    # whole, not sorted, because sorting would accept two spellings of one
+    # page (§18.1).
+    for earlier, later in zip(parsed, parsed[1:]):
+        if later["seq"] <= earlier["seq"]:
+            raise Reject("Malformed", "entries ascend by counter, without repeats")
+    return {"generation": generation, "entries": parsed}
+
+
+def run_group_page(cases, r):
+    for c in cases:
+        def go(c=c):
+            v = decode_canonical(unhex(c["group_page_hex"]))
+            parse_group_page(v)
+            return encode(v)
+        got = expect_reject(r, "group.page", c, go)
+        if got is None:
+            continue
+        want = c["expect"].get("reencodes_to_hex")
+        if want and got.hex() != want:
+            r.passed -= 1
+            r.bad("group.page", c["name"], c.get("why", ""),
                   "re-encoding differs from the vector")
 
 
@@ -2527,6 +2630,7 @@ BY_KIND = {
     "rental.listing": run_listing,
     "pub.listing": run_pub_listing,
     "site.head": run_site_head,
+    "group.page": run_group_page,
     "board.sealed": run_board_sealed,
     "board.beacon_window": run_beacon_window,
     "board.beacon_verdict": run_beacon_verdict,

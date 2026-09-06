@@ -241,7 +241,7 @@
     <string name="desk_cover">표지</string>
     <string name="desk_cover_note">표지는 게시판의 10킬로바이트 이미지가 됩니다. 나머지는 스웜으로 이동하며 누군가 게시물을 열 때만 가져옵니다.</string>
     <string name="desk_pick_listing">게시물을 고르거나 왼쪽 버튼으로 새로 시작하세요.</string>
-    <string name="desk_group_copies_queued">일부 사본이 아직 나가지 않았습니다. 대기열에 있으며 다시 시도됩니다.</string>
+    <string name="desk_group_copies_queued">페이지가 아직 도착하지 않았습니다 — 다음 순회에서 다시 기록됩니다.</string>
     <string name="desk_amount_in_xmr">XMR 금액.</string>
     <string name="desk_kind_reaction">반응</string>
     <string name="desk_kind_retraction">철회</string>
@@ -257,7 +257,7 @@
     <string name="desk_nobody_yet">아직 아무도 없습니다. 누군가의 카드에 응답하거나 나 페이지에서 내 카드를 보여 주세요.</string>
     <string name="desk_groups">그룹</string>
     <string name="desk_group_name_hint">그룹 이름</string>
-    <string name="desk_group_note">모두가 서로를 이미 알아야 합니다. 명단은 각 구성원에게 전송됩니다.</string>
+    <string name="desk_group_note">추가하는 사람은 내 연락처여야 하지만, 구성원끼리 서로 알 필요는 없습니다. 명단은 보드의 키와 함께 각 구성원에게 전달됩니다.</string>
     <string name="desk_n_in_group">그룹에 %1$d명</string>
     <string name="desk_people">사람</string>
     <string name="desk_members_and_you">%1$s 그리고 나</string>

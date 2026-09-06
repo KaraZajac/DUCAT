@@ -2578,6 +2578,82 @@
     {
       "expect": {
         "ok": true,
+        "reencodes_to_hex": "a3190122011901230319012483a4190125011901261a6b49d200190127001901286568656c6c6fa6190125021901261a6b49d2051901270419012864f09f918d1901295820b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b019012a09a5190125051901261a6b49d209190127051901295820b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b019012a01"
+      },
+      "group_page_hex": "a3190122011901230319012483a4190125011901261a6b49d200190127001901286568656c6c6fa6190125021901261a6b49d2051901270419012864f09f918d1901295820b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b019012a09a5190125051901261a6b49d209190127051901295820b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b019012a01",
+      "kind": "group.page",
+      "name": "group_page_valid",
+      "why": "One of each kind a board carries: a text, a reaction naming another member's entry, and a retraction of this member's own first word. The counters ascend but need not be dense — 1, 2, 5 — because a page holds what this member said since the ring last turned, not everything they ever said."
+    },
+    {
+      "expect": {
+        "hint": "entries ascend by counter, without repeats",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "group_page_hex": "a3190122011901230319012483a6190125021901261a6b49d2051901270419012864f09f918d1901295820b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b019012a09a4190125011901261a6b49d200190127001901286568656c6c6fa5190125051901261a6b49d209190127051901295820b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b019012a01",
+      "kind": "group.page",
+      "name": "group_page_unordered",
+      "why": "The same three entries with the first two swapped. A reader merges pages by (sender, GB_SEQ), and a page that does not ascend is one whose writer's counter cannot be trusted — refused whole rather than sorted, because sorting would accept two spellings of one page (§18.1)."
+    },
+    {
+      "expect": {
+        "hint": "a reaction names its target",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "group_page_hex": "a3190122011901230319012483a4190125011901261a6b49d200190127001901286568656c6c6fa4190125021901261a6b49d2051901270419012864f09f918da5190125051901261a6b49d209190127051901295820b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b019012a01",
+      "kind": "group.page",
+      "name": "group_page_reaction_without_target",
+      "why": "A reaction with nothing to react to. The body is the reaction and the reference is what it is a reaction to; without the pair it is a glyph addressed to nobody."
+    },
+    {
+      "expect": {
+        "hint": "a retraction carries no body",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "group_page_hex": "a3190122011901230319012483a4190125011901261a6b49d200190127001901286568656c6c6fa6190125021901261a6b49d2051901270419012864f09f918d1901295820b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b019012a09a6190125051901261a6b49d209190127051901286a6e65766572206d696e641901295820b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b019012a01",
+      "kind": "group.page",
+      "name": "group_page_retraction_with_body",
+      "why": "A retraction that says something. It takes a word back and carries none of its own; a body on it is a second message wearing the retraction's kind."
+    },
+    {
+      "expect": {
+        "hint": "a group reference is a sender and a counter, together or not at all",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "group_page_hex": "a3190122011901230319012483a5190125011901261a6b49d200190127001901286568656c6c6f19012a04a6190125021901261a6b49d2051901270419012864f09f918d1901295820b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b019012a09a5190125051901261a6b49d209190127051901295820b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b019012a01",
+      "kind": "group.page",
+      "name": "group_page_lonely_reference",
+      "why": "GB_RE_SEQ without GB_RE_SENDER on the text. A counter names an entry only beside the sender whose counter it is; half a reference points at every member's fourth word at once."
+    },
+    {
+      "expect": {
+        "hint": "unknown group page version",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "group_page_hex": "a3190122021901230319012483a4190125011901261a6b49d200190127001901286568656c6c6fa6190125021901261a6b49d2051901270419012864f09f918d1901295820b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b019012a09a5190125051901261a6b49d209190127051901295820b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b019012a01",
+      "kind": "group.page",
+      "name": "group_page_bad_version",
+      "why": "Versions gate readers the way they gate every head in this document; a reader that guessed at version 2 would render entries whose kinds it cannot know the meaning of."
+    },
+    {
+      "expect": {
+        "hint": "unrecognised field 299",
+        "ok": false,
+        "reject": "UNKNOWNFIELD"
+      },
+      "group_page_hex": "a4190122011901230319012483a4190125011901261a6b49d200190127001901286568656c6c6fa6190125021901261a6b49d2051901270419012864f09f918d1901295820b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b019012a09a5190125051901261a6b49d209190127051901295820b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b019012a0119012b01",
+      "kind": "group.page",
+      "name": "group_page_unknown_field",
+      "why": "299 — one past the newest (298, GB_RE_SEQ), the closed set's edge, reserved by §18.4.2 for exactly this probe."
+    },
+    {
+      "expect": {
+        "ok": true,
         "reencodes_to_hex": "a41901090119010a783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5919010b75546865205269766572736964652047617a6574746519010e1a6b49d200"
       },
       "kind": "pub.listing",

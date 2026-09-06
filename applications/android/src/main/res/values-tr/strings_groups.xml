@@ -7,7 +7,7 @@
     <string name="group_you">Sen</string>
     <string name="group_add">Ekle</string>
     <string name="group_add_title">Birini ekle</string>
-    <string name="group_add_note">Yalnızca kişilerin sunulur — bir grup, sözleri ancak birbirini tutan insanlar arasında taşır. Katılabilmesi için diğerlerinin de onu eklemesi gerekir.</string>
+    <string name="group_add_note">Yalnızca kişilerin önerilir: eklediğin kişiyi tanıman gerekir. Bir panoda diğerlerini tanıması gerekmez — liste, panonun anahtarıyla ona ulaşır.</string>
     <string name="group_add_nobody">Tanıdığın herkes zaten bu grupta.</string>
     <string name="group_create_title">Yeni grup</string>
     <string name="group_create_note">Kişilerinden seç. Bir grup, sen dahil en az üç kişi ister — iki kişiyle zaten bir konuşmanız var.</string>
@@ -17,6 +17,7 @@
     <string name="group_partial_queued">Bazı kopyalar henüz ulaşmadı — kendi kendilerine denemeyi sürdürecekler.</string>
     <string name="group_disclosure_title">Grup, güvenilen insanlardır</string>
     <string name="group_disclosure_body">Herkes herkesi kişi olarak tutmalı — o zamana dek gönderemezsin.\n\nGruptaki herkes herkesi ekleyebilir. Kimse asla çıkarılamaz.\n\nBugün katılan, öncesinden hiçbir şey görmez — ona verilecek ortak bir geçmiş yok.\n\nMesajlar sahtelenemez: her biri kişiden kişiye mühürlü gider, kimse başkası adına yazamaz.\n\nAyrılmak grubu yalnızca senin telefonunda gizler. Diğerleri onu da birbirlerini de tutar.</string>
+    <string name="group_disclosure_board_body">Buradaki herkes tek bir ortak panoyu okur ve yazar; bir mesaj herkese aynı anda ulaşır — göndermek için herkesi kişi olarak tutman gerekmez. Birini ekleyen onu tutmalıdır; başka kimse tutmak zorunda değil.\n\nGruptaki herkes herkesi ekleyebilir. Kimse asla çıkarılamaz.\n\nBugün katılan, son sayfaları görür — söylenmiş her şeyi değil.\n\nHer mesaj gönderenin anahtarıyla imzalıdır: kimse başkası adına yazamaz ve yazdıkların sana atfedilebilir.\n\nAyrılmak grubu yalnızca senin telefonunda gizler. Diğerleri onu da birbirlerini de tutar.</string>
     <string name="group_disclosure_ok">Anladım</string>
     <plurals name="group_members">
         <item quantity="one">%1$d kişi</item>

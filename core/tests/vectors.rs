@@ -443,7 +443,7 @@ fn every_case_declares_a_known_kind_and_a_unique_name() {
         "bond.check", "slash.check",
         "contact.card", "contact.details", "log.head", "log.ring", "stand.shard", "stand.epoch", "message.chain",
         "message.payment", "hail.notice", "rental.listing", "pub.listing", "site.head", "board.sealed",
-        "board.beacon_window", "board.beacon_verdict", "position.frame",
+        "board.beacon_window", "board.beacon_verdict", "position.frame", "group.page",
     ];
     let dir = std::path::Path::new("../vectors/v1");
     let mut seen: std::collections::HashMap<String, String> = Default::default();
@@ -762,6 +762,27 @@ fn contact_vectors_pass() {
                     }
                     Err(e) => {
                         assert!(!ok, "{name}: refused a head the vector accepts: {e:?}");
+                    }
+                }
+            }
+            "group.page" => {
+                let got = ducat_core::group::GroupPage::from_value(
+                    decode(&unhex(c["group_page_hex"].as_str().unwrap())).unwrap());
+                let ok = c["expect"]["ok"].as_bool().unwrap_or(true);
+                match got {
+                    Ok(p) => {
+                        assert!(ok, "{name}: decoded a page the vector refuses");
+                        assert_eq!(
+                            hexs(&p.to_value().encode()),
+                            c["expect"]["reencodes_to_hex"].as_str().unwrap(), "{name}"
+                        );
+                    }
+                    Err(e) => {
+                        assert!(!ok, "{name}: refused a page the vector accepts: {e:?}");
+                        assert_eq!(
+                            format!("{:?}", e.code).to_uppercase(),
+                            c["expect"]["reject"].as_str().unwrap(), "{name}"
+                        );
                     }
                 }
             }

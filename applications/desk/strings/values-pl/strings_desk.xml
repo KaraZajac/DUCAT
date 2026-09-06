@@ -250,7 +250,7 @@
     <string name="desk_cover">okładka</string>
     <string name="desk_cover_note">Okładka staje się dziesięciokilobajtowym obrazkiem na tablicy; reszta podróżuje rojem i jest pobierana tylko, gdy ktoś otworzy ogłoszenie.</string>
     <string name="desk_pick_listing">Wybierz ogłoszenie albo zacznij nowe przyciskami po lewej.</string>
-    <string name="desk_group_copies_queued">Niektóre kopie jeszcze nie wyszły — czekają w kolejce i zostaną ponowione.</string>
+    <string name="desk_group_copies_queued">Strona jeszcze nie dotarła — zostanie zapisana ponownie w następnym okrążeniu.</string>
     <string name="desk_amount_in_xmr">Kwota w XMR.</string>
     <string name="desk_kind_reaction">Reakcja</string>
     <string name="desk_kind_retraction">Wycofanie</string>
@@ -266,7 +266,7 @@
     <string name="desk_nobody_yet">Jeszcze nikogo. Odpowiedz na czyjąś kartę albo pokaż swoją na stronie Ja.</string>
     <string name="desk_groups">Grupy</string>
     <string name="desk_group_name_hint">Nazwa grupy</string>
-    <string name="desk_group_note">Wszyscy w niej muszą już się znać; lista trafia do każdego członka.</string>
+    <string name="desk_group_note">Musisz znać każdego, kogo dodajesz; członkowie nie muszą znać się nawzajem. Lista trafia do każdego członka razem z kluczem tablicy.</string>
     <string name="desk_n_in_group">%1$d w grupie</string>
     <string name="desk_people">Osoby</string>
     <string name="desk_members_and_you">%1$s i Ty</string>

@@ -7,7 +7,7 @@
     <string name="group_you">自分</string>
     <string name="group_add">追加</string>
     <string name="group_add_title">メンバーを追加</string>
-    <string name="group_add_note">表示されるのは連絡先だけです。グループは互いを連絡先に持つ人どうしの間でしか言葉を運べません。参加するには、他の全員もその人を追加する必要があります。</string>
+    <string name="group_add_note">提示されるのはあなたの連絡先だけです。追加する相手はあなたが知っている必要がありますが、ボードでは他のメンバーを知っている必要はありません。名簿はボードの鍵とともに届きます。</string>
     <string name="group_add_nobody">知っている人は全員すでにこのグループにいます。</string>
     <string name="group_create_title">新しいグループ</string>
     <string name="group_create_note">連絡先から選びます。グループは自分を含めて3人以上 — 2人なら、それはもう会話です。</string>
@@ -17,6 +17,7 @@
     <string name="group_partial_queued">まだ届いていないコピーがあります — 自動で再送を続けます。</string>
     <string name="group_disclosure_title">グループは信頼できる人たち</string>
     <string name="group_disclosure_body">全員が全員を連絡先に持つ必要があります — それまでは送信できません。\n\nグループの誰でも誰でも追加できます。誰も外すことはできません。\n\n今日入った人は、それ以前を何も見られません — 渡せる共有履歴が存在しないのです。\n\nメッセージは偽造できません。一通ずつ封をして人から人へ渡るため、誰も他人として書けません。\n\n退出はあなたの端末で隠すだけです。他の人はグループも、お互いも持ち続けます。</string>
+    <string name="group_disclosure_board_body">ここでは全員が一枚の共有ボードを読み書きするので、一通のメッセージが全員に同時に届きます — 送るために全員を連絡先に持つ必要はありません。誰かを追加する人だけがその人を連絡先に持てばよく、他の人は不要です。\n\nグループの誰でも誰でも追加できます。誰も外すことはできません。\n\n今日入った人は最近のページを見られます — これまでの全部ではありません。\n\nメッセージは送信者の鍵で署名されます。誰も他人として書けず、あなたが書いたものはあなたのものだと示せます。\n\n退出はあなたの端末で隠すだけです。他の人はグループも、お互いも持ち続けます。</string>
     <string name="group_disclosure_ok">了解</string>
     <plurals name="group_members">
         <item quantity="one">%1$d人</item>

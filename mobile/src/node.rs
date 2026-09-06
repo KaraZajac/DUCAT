@@ -618,6 +618,31 @@ pub fn node_start(storage_dir: String, udp: bool) -> Result<(), NodeError> {
         let api = api_startup_json(cb, cfg.to_string())
             .await
             .map_err(|e| format!("startup: {e}"))?;
+        // The routing table comes back from disk, dead entries included,
+        // and a table that is a quarter dead makes every lookup a walk
+        // through timeouts: a desk two hours old read a page in ten
+        // seconds or not at all where a fresh node took one. Purging is
+        // only allowed before attaching, so this is the moment; the
+        // bootstrap that follows rebuilds it live.
+        if let Ok(info) = api.debug("nodeinfo".into()).await {
+            let (mut total, mut dead) = (0u64, 0u64);
+            for line in info.lines() {
+                let l = line.trim();
+                if let Some(rest) = l.strip_prefix("total=") {
+                    total = rest.split(',').next().and_then(|v| v.trim().parse().ok()).unwrap_or(0);
+                    if let Some(d) = l.split("dead=").nth(1) {
+                        dead = d.split(|c: char| !c.is_ascii_digit()).next().and_then(|v| v.parse().ok()).unwrap_or(0);
+                    }
+                    break;
+                }
+            }
+            if total > 0 && dead * 4 >= total {
+                match api.debug("purge buckets".into()).await {
+                    Ok(_) => note(format!("routing table purged before attach — {dead} of {total} entries were dead")),
+                    Err(e) => note(format!("routing table not purged: {e}")),
+                }
+            }
+        }
         api.attach().await.map_err(|e| format!("attach: {e}"))?;
         Ok::<VeilidAPI, String>(api)
     })
@@ -1170,6 +1195,111 @@ pub fn node_dht_create_owned(subkey_count: u32, owner_public: Vec<u8>, owner_sec
                 .map_err(|e| NodeError::Failed(format!("create: {e}")))?;
         }
         Ok(DhtRecord { key: key.to_string(), owner_public, owner_secret, subkey_count })
+    })
+}
+
+/// A group board's shape (§16.24): who formed the generation, every other
+/// member in ascending key order, and how many pages each writes. The
+/// record key follows from this and the owner key alone, so every member
+/// computes it and nobody is told it.
+#[derive(uniffi::Record, Clone)]
+pub struct GroupBoardSpec {
+    pub owner_public: Vec<u8>,
+    /// The nameplate (§16.24): one subkey nobody writes, which puts the
+    /// group and the generation into the record key.
+    pub nameplate: Vec<u8>,
+    /// Every other member, in ascending key order.
+    pub members: Vec<Vec<u8>>,
+    pub pages: u32,
+}
+
+/// Forming a generation: the shape and the owner's secret.
+#[derive(uniffi::Record, Clone)]
+pub struct GroupBoardCreate {
+    pub spec: GroupBoardSpec,
+    pub owner_secret: Vec<u8>,
+}
+
+fn board_schema(spec: &GroupBoardSpec) -> Result<DHTSchema, NodeError> {
+    if spec.pages == 0 || spec.pages > 64 {
+        return Err(NodeError::Failed("a board has between one and sixty-four pages a member".into()));
+    }
+    if spec.nameplate.len() != 32 {
+        return Err(NodeError::Failed("a nameplate is 32 bytes".into()));
+    }
+    let mut members = Vec::with_capacity(spec.members.len() + 1);
+    members.push(DHTSchemaSMPLMember { m_key: BareMemberId::new(&spec.nameplate), m_cnt: 1 });
+    members.extend(
+        spec.members
+            .iter()
+            .map(|m| DHTSchemaSMPLMember { m_key: BareMemberId::new(m), m_cnt: spec.pages as u16 }),
+    );
+    DHTSchema::smpl(spec.pages as u16, members).map_err(|e| NodeError::Failed(format!("schema: {e}")))
+}
+
+/// The record key a board shape names.
+#[uniffi::export]
+pub fn node_dht_board_key(spec: GroupBoardSpec) -> Result<String, NodeError> {
+    let (api, rt) = handles()?;
+    rt.block_on(async {
+        let schema = board_schema(&spec)?;
+        let key = api
+            .get_dht_record_key(schema, PublicKey::new(CRYPTO_KIND_VLD0, BarePublicKey::new(&spec.owner_public)), None)
+            .await
+            .map_err(|e| NodeError::Failed(format!("record key: {e}")))?;
+        Ok(key.to_string())
+    })
+}
+
+/// Form a generation: create the board — or open it, if this node already
+/// holds it — as its owner. Deterministic, like `node_dht_create_owned`.
+#[uniffi::export]
+pub fn node_dht_board_create(req: GroupBoardCreate) -> Result<String, NodeError> {
+    let (api, rt) = handles()?;
+    rt.block_on(async {
+        let rc = api
+            .routing_context()
+            .map_err(|e| NodeError::Failed(format!("routing context: {e}")))?;
+        let schema = board_schema(&req.spec)?;
+        let kp = KeyPair::new(
+            CRYPTO_KIND_VLD0,
+            BareKeyPair::new(BarePublicKey::new(&req.spec.owner_public), BareSecretKey::new(&req.owner_secret)),
+        );
+        let key = api
+            .get_dht_record_key(schema.clone(), PublicKey::new(CRYPTO_KIND_VLD0, BarePublicKey::new(&req.spec.owner_public)), None)
+            .await
+            .map_err(|e| NodeError::Failed(format!("record key: {e}")))?;
+        let opened = rc.open_dht_record(key.clone(), Some(kp.clone())).await.is_ok();
+        if !opened {
+            let _ = rc
+                .create_dht_record(CRYPTO_KIND_VLD0, schema, Some(kp))
+                .await
+                .map_err(|e| NodeError::Failed(format!("create: {e}")))?;
+        }
+        Ok(key.to_string())
+    })
+}
+
+/// Every subkey's sequence on the network, in one call: the way a board
+/// reader learns which pages moved without reading them all. A subkey
+/// nobody has written reads as `u32::MAX`. The record must be open.
+#[uniffi::export]
+pub fn node_dht_inspect(key: String) -> Result<Vec<u32>, NodeError> {
+    let (api, rt) = handles()?;
+    rt.block_on(async {
+        let rc = api
+            .routing_context()
+            .map_err(|e| NodeError::Failed(format!("routing context: {e}")))?;
+        let rk = parse_key(&key)?;
+        let report = rc
+            .inspect_dht_record(rk, None, DHTReportScope::SyncGet)
+            .await
+            .map_err(|e| NodeError::Failed(format!("inspect: {e}")))?;
+        Ok(report
+            .network_seqs()
+            .iter()
+            .map(|s| s.to_string().parse::<u32>().unwrap_or(u32::MAX))
+            .collect())
     })
 }
 

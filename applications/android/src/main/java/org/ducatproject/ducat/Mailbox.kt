@@ -754,11 +754,20 @@ object Mailbox {
                 take
             }
         }
-        for (issued in looking) {
+        // A card just issued is looked at every sweep; one nobody has
+        // answered backs off like a quiet log, up to five minutes — an
+        // unanswered inbox is an empty record, and an empty record is the
+        // slowest read there is. A record that rings, or a caller naming
+        // one card, skips the wait.
+        val nowMs = System.currentTimeMillis()
+        val due = looking.filter { only != null || slot("c:" + it.inboxKey).dueAt <= nowMs }
+        for (issued in due) {
+            var spoke = false
             try {
                 nodeDhtOpen(issued.inboxKey, null, null)
                 missingCard.remove(issued.inboxKey)
-                val read = nodeDhtGetVersioned(issued.inboxKey, 1u, true) ?: continue
+                val read = nodeDhtGetVersioned(issued.inboxKey, 1u, true)
+                if (read == null) { settle("c:" + issued.inboxKey, false); continue }
                 val raw = read.data
                 if (raw.isEmpty()) continue
                 // **Claim-once, enforced by reading the sequence.**
@@ -865,6 +874,7 @@ object Mailbox {
                 store.markCardAnswered(issued.inboxKey, personaHex)
                 WalletStore(context).adoptMinor("card_${issued.inboxKey}", personaHex)
                 collected++
+                spoke = true
                 DucatLog.i(TAG, "card (${issued.purpose}) answered by ${theirs.assertedName}")
                 // Only the standing profile code replaces itself — a sale's
                 // handshake was for that sale, and pre-issuing another would
@@ -933,6 +943,8 @@ object Mailbox {
                     continue
                 }
                 DucatLog.w(TAG, "collectClaims(${issued.inboxKey.take(16)}…): ${e.message}")
+            } finally {
+                settle("c:" + issued.inboxKey, spoke)
             }
         }
         return collected
@@ -1925,6 +1937,27 @@ object Mailbox {
         return n
     }
 
+    /**
+     * A row from a group board (§16.24) under its sender's thread — the
+     * sender need not be a contact; a board member is named by key, and a
+     * thread is keyed by one. No counters move and no receipt is filed: the
+     * board's own per-subkey sequence is the cursor (Groups.Board.seen), not
+     * the pairwise ones, and the kinds a board carries are words, reactions
+     * and withdrawals. Announced on the way in when the words are somebody
+     * else's, by the rule every stored arrival keeps: if it was kept, it
+     * was said. Named "Sam · ladder crew" like a fan-out copy, and by key
+     * alone for a member this phone does not hold.
+     */
+    fun appendGroupRow(context: Context, senderHex: String, row: StoredMessage, announce: Boolean) {
+        val store = ContactStore(context)
+        store.append(senderHex, row)
+        if (!announce) return
+        val who = store.all().firstOrNull { it.personaHex == senderHex }?.displayName()
+            ?: "${senderHex.take(8)}…"
+        val group = row.groupId?.let { Groups.get(context, it) }
+        Notify.message(context, if (group != null) "$who · ${group.name}" else who, senderHex, row)
+    }
+
     // ----- the polling plan ---------------------------------------------
     // Every contact used to be read every sweep, in order, two forced DHT
     // reads each: fine for a handful, minutes of sweep for fifty, and a
@@ -1956,6 +1989,28 @@ object Mailbox {
         synchronized(plan) {
             plan.getOrPut(personaHex) { PollSlot() }.apply { dueAt = 0L; backoffMs = 0L }
         }
+    }
+
+    // A group board (§16.24) rides the same plan under "g:<group id>", a
+    // key no persona hex can collide with, so a board that spoke is read
+    // every sweep and a quiet one backs off exactly as a log does. These
+    // are its door: Groups.lap asks when a board is due, settles it after
+    // a read, and renews its watch on the logs' eight-minute clock. The
+    // contact sweeps above never meet the key — they walk the contact
+    // book, not the plan.
+
+    /** When [key] is next due; 0 for one the plan has not met, which is due at once. */
+    fun planDueAt(key: String): Long = synchronized(plan) { plan[key]?.dueAt ?: 0L }
+
+    /** After a read of [key]: spoke, read every sweep; quiet, back off. */
+    fun planSettle(key: String, spoke: Boolean) = settle(key, spoke)
+
+    /** Whether [key]'s watch is missing or ageing past renewal at [now]. */
+    fun planWatchStale(key: String, now: Long): Boolean =
+        now - synchronized(plan) { plan[key]?.watchedAt ?: 0L } >= WATCH_RENEW_MS
+
+    fun planSetWatched(key: String, at: Long) {
+        synchronized(plan) { slot(key).watchedAt = at }
     }
 
     /** After a read: a log that spoke is read every sweep; a quiet one waits twice as long, up to POLL_MAX_MS. */

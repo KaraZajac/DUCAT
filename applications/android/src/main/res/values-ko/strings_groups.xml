@@ -7,7 +7,7 @@
     <string name="group_you">나</string>
     <string name="group_add">추가</string>
     <string name="group_add_title">사람 추가</string>
-    <string name="group_add_note">연락처만 표시됩니다 — 그룹은 서로를 연락처로 가진 사람들 사이에서만 말을 나릅니다. 참여하려면 다른 모두도 그 사람을 추가해야 합니다.</string>
+    <string name="group_add_note">내 연락처만 제안됩니다. 추가하는 사람은 내가 아는 사람이어야 하지만, 보드에서는 다른 구성원을 알 필요가 없습니다. 명단은 보드의 키와 함께 전달됩니다.</string>
     <string name="group_add_nobody">아는 사람 모두가 이미 이 그룹에 있습니다.</string>
     <string name="group_create_title">새 그룹</string>
     <string name="group_create_note">연락처에서 고르세요. 그룹은 본인 포함 최소 세 명 — 둘이면 이미 대화가 있습니다.</string>
@@ -17,6 +17,7 @@
     <string name="group_partial_queued">아직 도착하지 않은 사본이 있습니다 — 알아서 계속 시도합니다.</string>
     <string name="group_disclosure_title">그룹은 신뢰하는 사람들입니다</string>
     <string name="group_disclosure_body">모두가 모두를 연락처로 가져야 합니다 — 그전에는 보낼 수 없습니다.\n\n그룹의 누구든 누구든 추가할 수 있습니다. 누구도 제거될 수 없습니다.\n\n오늘 들어온 사람은 이전 것을 보지 못합니다 — 줄 수 있는 공유 기록이 없습니다.\n\n메시지는 위조할 수 없습니다. 한 통씩 봉인되어 사람에서 사람으로 가므로 누구도 남인 척 쓸 수 없습니다.\n\n나가기는 내 폰에서 그룹을 숨길 뿐입니다. 다른 사람들은 그룹도, 서로도 계속 가집니다.</string>
+    <string name="group_disclosure_board_body">여기서는 모두가 하나의 공유 게시판을 읽고 씁니다. 메시지 하나가 모두에게 한 번에 닿으므로, 보내기 위해 모두를 연락처로 가질 필요는 없습니다. 누군가를 추가하는 사람만 그 사람을 연락처로 가지면 되고, 다른 사람은 그럴 필요가 없습니다.\n\n그룹의 누구든 누구든 추가할 수 있습니다. 누구도 제거될 수 없습니다.\n\n오늘 들어온 사람은 최근 페이지를 봅니다 — 지금까지의 전부는 아닙니다.\n\n모든 메시지는 보낸 사람의 키로 서명됩니다. 누구도 남인 척 쓸 수 없고, 내가 쓴 것은 내 것으로 드러납니다.\n\n나가기는 내 폰에서 그룹을 숨길 뿐입니다. 다른 사람들은 그룹도, 서로도 계속 가집니다.</string>
     <string name="group_disclosure_ok">알겠습니다</string>
     <plurals name="group_members">
         <item quantity="one">%1$d명</item>

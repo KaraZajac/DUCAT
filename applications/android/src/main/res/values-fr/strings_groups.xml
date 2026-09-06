@@ -7,7 +7,7 @@
     <string name="group_you">Vous</string>
     <string name="group_add">Ajouter</string>
     <string name="group_add_title">Ajouter quelqu’un</string>
-    <string name="group_add_note">Seuls vos contacts sont proposés — un groupe ne porte des mots qu’entre des personnes qui se tiennent mutuellement. Les autres doivent aussi l’ajouter avant qu’elle puisse participer.</string>
+    <string name="group_add_note">Seuls vos contacts sont proposés : vous devez connaître la personne que vous ajoutez. Sur un tableau, elle n\'a pas besoin de connaître les autres — la liste lui parvient avec la clé du tableau.</string>
     <string name="group_add_nobody">Tous vos contacts sont déjà dans ce groupe.</string>
     <string name="group_create_title">Nouveau groupe</string>
     <string name="group_create_note">Choisissez parmi vos contacts. Un groupe demande au moins trois personnes, vous compris — à deux, vous avez déjà une conversation.</string>
@@ -17,6 +17,7 @@
     <string name="group_partial_queued">Certaines copies ne sont pas encore arrivées — elles réessaieront toutes seules.</string>
     <string name="group_disclosure_title">Un groupe, ce sont des gens de confiance</string>
     <string name="group_disclosure_body">Chacun doit tenir chacun comme contact — impossible d’envoyer avant.\n\nN’importe qui dans le groupe peut ajouter n’importe qui. Personne ne peut être retiré, jamais.\n\nQui arrive aujourd’hui ne voit rien d’avant — il n’existe aucun historique commun à lui donner.\n\nLes messages ne peuvent pas être contrefaits : chacun voyage scellé de personne à personne, nul ne peut écrire au nom d’un autre.\n\nPartir ne fait que cacher le groupe sur votre téléphone. Les autres le gardent, et se gardent entre eux.</string>
+    <string name="group_disclosure_board_body">Tout le monde ici lit et écrit un même tableau partagé : un message atteint tout le monde d’un coup — pas besoin de tenir chacun comme contact pour envoyer. Qui ajoute quelqu’un doit le tenir ; personne d’autre n’y est tenu.\n\nN’importe qui dans le groupe peut ajouter n’importe qui. Personne ne peut être retiré, jamais.\n\nQui arrive aujourd’hui voit les pages récentes, pas tout ce qui a jamais été dit.\n\nChaque message est signé par la clé de son expéditeur : nul ne peut écrire au nom d’un autre, et ce que vous écrivez peut vous être attribué.\n\nPartir ne fait que cacher le groupe sur votre téléphone. Les autres le gardent, et se gardent entre eux.</string>
     <string name="group_disclosure_ok">Compris</string>
     <plurals name="group_members">
         <item quantity="one">%1$d personne</item>

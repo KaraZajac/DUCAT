@@ -244,7 +244,7 @@
     <string name="desk_cover">portada</string>
     <string name="desk_cover_note">La portada se convierte en la imagen de diez kilobytes del tablón; el resto viaja por el enjambre y solo se descarga cuando alguien abre el anuncio.</string>
     <string name="desk_pick_listing">Elige un anuncio, o empieza uno con los botones de la izquierda.</string>
-    <string name="desk_group_copies_queued">Algunas copias aún no han salido: están en cola y se reintentan.</string>
+    <string name="desk_group_copies_queued">La página aún no ha llegado — se escribirá de nuevo en la próxima vuelta.</string>
     <string name="desk_amount_in_xmr">Una cantidad en XMR.</string>
     <string name="desk_kind_reaction">Reacción</string>
     <string name="desk_kind_retraction">Retirada</string>
@@ -260,7 +260,7 @@
     <string name="desk_nobody_yet">Nadie todavía. Responde a la tarjeta de alguien, o muéstrale la tuya en la página Yo.</string>
     <string name="desk_groups">Grupos</string>
     <string name="desk_group_name_hint">Un nombre para el grupo</string>
-    <string name="desk_group_note">Todos sus miembros deben conocerse ya entre sí; la lista se envía a cada uno.</string>
+    <string name="desk_group_note">Debes tener a cada persona que añades; no hace falta que se conozcan entre sí. La lista sale a cada miembro con la clave del tablón.</string>
     <string name="desk_n_in_group">%1$d en el grupo</string>
     <string name="desk_people">Personas</string>
     <string name="desk_members_and_you">%1$s y tú</string>

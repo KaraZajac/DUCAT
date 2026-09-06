@@ -371,6 +371,14 @@ class Poller(private val context: Context) {
                 // rather than false forever.
                 runCatching { Groups.retryOutbox(context) }
                     .onFailure { DucatLog.w(TAG, "group retry: ${it.message}") }
+                // §16.24: the boards, on the logs' plan — a page the network
+                // did not take written again, then what moved on each board
+                // that is due, with its watch renewed. The lane answers a
+                // board's ring between sweeps, as it does a log's.
+                runCatching {
+                    val onBoards = Groups.lap(context)
+                    if (onBoards > 0) DucatLog.i(TAG, "$onBoards group message(s) arrived")
+                }.onFailure { DucatLog.w(TAG, "group boards: ${it.message}") }
                 // Recurring bills: the asking repeats, the paying never does
                 // (§16.13 — a request carries no authority). Here for the
                 // same reason as the rest: rent comes due with the phone in
@@ -781,14 +789,23 @@ class Poller(private val context: Context) {
                     runCatching { Mailbox.collectClaims(context) }
                     runCatching { Listings.linkClaims(context) }
                 }
+                // A board that rang (§16.24): its record is watched like a
+                // log's head, and the page that moved is read now rather
+                // than on the sweep's turn.
+                var onBoards = 0
+                for (g in Groups.markBoardsChanged(context, rangKeys)) {
+                    handled.add(g.board?.key ?: continue)
+                    onBoards += runCatching { Groups.pollBoard(context, g) }.getOrDefault(0)
+                }
                 // A message that just landed may be a ringing offer, and no
                 // screen is around to notice it for us.
                 if (got > 0) runCatching { Calls.noticed(context) }
                 val strangers = rangKeys - handled
                 DucatLog.i(
                     TAG,
-                    "lane: ${rangKeys.size} record(s) rang, $got message(s) in " +
-                        "${System.currentTimeMillis() - t0} ms" +
+                    "lane: ${rangKeys.size} record(s) rang, $got message(s)" +
+                        (if (onBoards > 0) " and $onBoards on boards" else "") +
+                        " in ${System.currentTimeMillis() - t0} ms" +
                         if (strangers.isEmpty()) "" else
                             " — ${strangers.size} for the sweep (${strangers.first().take(12)}…)",
                 )

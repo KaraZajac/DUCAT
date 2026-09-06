@@ -999,6 +999,26 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1104,9 +1124,23 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_geohashneighbors(`cell`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_group_board_nameplate(`groupId`: RustBuffer.ByValue,`generation`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_group_board_pages(uniffi_out_err: UniffiRustCallStatus, 
+    ): Int
+    fun uniffi_ducat_mobile_fn_func_group_page_cap(`totalSubkeys`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): Int
+    fun uniffi_ducat_mobile_fn_func_group_page_decode(`bytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_group_page_encode(`generation`: Long,`entries`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_group_page_open(`req`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_group_page_seal(`req`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_group_roster_decode(`bytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_group_roster_encode(`name`: RustBuffer.ByValue,`members`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_group_roster_encode(`name`: RustBuffer.ByValue,`members`: RustBuffer.ByValue,`board`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_hail_decode(`bytes`: RustBuffer.ByValue,`board`: RustBuffer.ByValue,`subkey`: Int,`tipHeight`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1174,6 +1208,10 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_debug(`command`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_node_dht_board_create(`req`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_node_dht_board_key(`spec`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_dht_close(`key`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Unit
     fun uniffi_ducat_mobile_fn_func_node_dht_create(`subkeyCount`: Int,uniffi_out_err: UniffiRustCallStatus, 
@@ -1187,6 +1225,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_node_dht_get(`key`: RustBuffer.ByValue,`subkey`: Int,`forceRefresh`: Byte,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_dht_get_versioned(`key`: RustBuffer.ByValue,`subkey`: Int,`forceRefresh`: Byte,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_node_dht_inspect(`key`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_dht_open(`key`: RustBuffer.ByValue,`writerPublic`: RustBuffer.ByValue,`writerSecret`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
@@ -1504,6 +1544,20 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_geohashneighbors(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_group_board_nameplate(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_group_board_pages(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_group_page_cap(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_group_page_decode(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_group_page_encode(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_group_page_open(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_group_page_seal(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_group_roster_decode(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_group_roster_encode(
@@ -1574,6 +1628,10 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_debug(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_dht_board_create(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_dht_board_key(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_node_dht_close(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_dht_create(
@@ -1587,6 +1645,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_checksum_func_node_dht_get(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_dht_get_versioned(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_node_dht_inspect(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_dht_open(
     ): Short
@@ -1854,10 +1914,31 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_geohashneighbors() != 18841.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_ducat_mobile_checksum_func_group_board_nameplate() != 10846.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_group_board_pages() != 59748.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_group_page_cap() != 41796.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_group_page_decode() != 43964.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_group_page_encode() != 43654.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_group_page_open() != 23962.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_group_page_seal() != 12820.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ducat_mobile_checksum_func_group_roster_decode() != 7284.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_group_roster_encode() != 61959.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_group_roster_encode() != 56245.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_hail_decode() != 34700.toShort()) {
@@ -1959,6 +2040,12 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_node_debug() != 62795.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_dht_board_create() != 39750.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_dht_board_key() != 23966.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ducat_mobile_checksum_func_node_dht_close() != 4986.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -1978,6 +2065,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_dht_get_versioned() != 42103.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_node_dht_inspect() != 10416.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_dht_open() != 42085.toShort()) {
@@ -3522,7 +3612,273 @@ public object FfiConverterTypeFrostProposal: FfiConverterRustBuffer<FrostProposa
 
 
 /**
- * A group roster as it crosses the bridge (§16.19).
+ * Forming a generation: the shape and the owner's secret.
+ */
+data class GroupBoardCreate (
+    var `spec`: GroupBoardSpec, 
+    var `ownerSecret`: kotlin.ByteArray
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeGroupBoardCreate: FfiConverterRustBuffer<GroupBoardCreate> {
+    override fun read(buf: ByteBuffer): GroupBoardCreate {
+        return GroupBoardCreate(
+            FfiConverterTypeGroupBoardSpec.read(buf),
+            FfiConverterByteArray.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: GroupBoardCreate) = (
+            FfiConverterTypeGroupBoardSpec.allocationSize(value.`spec`) +
+            FfiConverterByteArray.allocationSize(value.`ownerSecret`)
+    )
+
+    override fun write(value: GroupBoardCreate, buf: ByteBuffer) {
+            FfiConverterTypeGroupBoardSpec.write(value.`spec`, buf)
+            FfiConverterByteArray.write(value.`ownerSecret`, buf)
+    }
+}
+
+
+
+/**
+ * One generation of a group board (§16.24): who formed it, under what
+ * key, and how many pages each member writes.
+ */
+data class GroupBoardOut (
+    var `generation`: kotlin.ULong, 
+    /**
+     * The persona key of the member who formed this generation, 32 bytes.
+     */
+    var `owner`: kotlin.ByteArray, 
+    /**
+     * The generation's group key, 32 bytes.
+     */
+    var `groupKey`: kotlin.ByteArray, 
+    var `pages`: kotlin.UInt
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeGroupBoardOut: FfiConverterRustBuffer<GroupBoardOut> {
+    override fun read(buf: ByteBuffer): GroupBoardOut {
+        return GroupBoardOut(
+            FfiConverterULong.read(buf),
+            FfiConverterByteArray.read(buf),
+            FfiConverterByteArray.read(buf),
+            FfiConverterUInt.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: GroupBoardOut) = (
+            FfiConverterULong.allocationSize(value.`generation`) +
+            FfiConverterByteArray.allocationSize(value.`owner`) +
+            FfiConverterByteArray.allocationSize(value.`groupKey`) +
+            FfiConverterUInt.allocationSize(value.`pages`)
+    )
+
+    override fun write(value: GroupBoardOut, buf: ByteBuffer) {
+            FfiConverterULong.write(value.`generation`, buf)
+            FfiConverterByteArray.write(value.`owner`, buf)
+            FfiConverterByteArray.write(value.`groupKey`, buf)
+            FfiConverterUInt.write(value.`pages`, buf)
+    }
+}
+
+
+
+/**
+ * A group board's shape (§16.24): who formed the generation, every other
+ * member in ascending key order, and how many pages each writes. The
+ * record key follows from this and the owner key alone, so every member
+ * computes it and nobody is told it.
+ */
+data class GroupBoardSpec (
+    var `ownerPublic`: kotlin.ByteArray, 
+    /**
+     * The nameplate (§16.24): one subkey nobody writes, which puts the
+     * group and the generation into the record key.
+     */
+    var `nameplate`: kotlin.ByteArray, 
+    /**
+     * Every other member, in ascending key order.
+     */
+    var `members`: List<kotlin.ByteArray>, 
+    var `pages`: kotlin.UInt
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeGroupBoardSpec: FfiConverterRustBuffer<GroupBoardSpec> {
+    override fun read(buf: ByteBuffer): GroupBoardSpec {
+        return GroupBoardSpec(
+            FfiConverterByteArray.read(buf),
+            FfiConverterByteArray.read(buf),
+            FfiConverterSequenceByteArray.read(buf),
+            FfiConverterUInt.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: GroupBoardSpec) = (
+            FfiConverterByteArray.allocationSize(value.`ownerPublic`) +
+            FfiConverterByteArray.allocationSize(value.`nameplate`) +
+            FfiConverterSequenceByteArray.allocationSize(value.`members`) +
+            FfiConverterUInt.allocationSize(value.`pages`)
+    )
+
+    override fun write(value: GroupBoardSpec, buf: ByteBuffer) {
+            FfiConverterByteArray.write(value.`ownerPublic`, buf)
+            FfiConverterByteArray.write(value.`nameplate`, buf)
+            FfiConverterSequenceByteArray.write(value.`members`, buf)
+            FfiConverterUInt.write(value.`pages`, buf)
+    }
+}
+
+
+
+/**
+ * One entry of a group board page as it crosses the bridge.
+ */
+data class GroupEntryOut (
+    var `seq`: kotlin.ULong, 
+    var `ts`: kotlin.ULong, 
+    var `kind`: kotlin.UInt, 
+    var `body`: kotlin.String?, 
+    var `reSender`: kotlin.ByteArray?, 
+    var `reSeq`: kotlin.ULong?
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeGroupEntryOut: FfiConverterRustBuffer<GroupEntryOut> {
+    override fun read(buf: ByteBuffer): GroupEntryOut {
+        return GroupEntryOut(
+            FfiConverterULong.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalByteArray.read(buf),
+            FfiConverterOptionalULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: GroupEntryOut) = (
+            FfiConverterULong.allocationSize(value.`seq`) +
+            FfiConverterULong.allocationSize(value.`ts`) +
+            FfiConverterUInt.allocationSize(value.`kind`) +
+            FfiConverterOptionalString.allocationSize(value.`body`) +
+            FfiConverterOptionalByteArray.allocationSize(value.`reSender`) +
+            FfiConverterOptionalULong.allocationSize(value.`reSeq`)
+    )
+
+    override fun write(value: GroupEntryOut, buf: ByteBuffer) {
+            FfiConverterULong.write(value.`seq`, buf)
+            FfiConverterULong.write(value.`ts`, buf)
+            FfiConverterUInt.write(value.`kind`, buf)
+            FfiConverterOptionalString.write(value.`body`, buf)
+            FfiConverterOptionalByteArray.write(value.`reSender`, buf)
+            FfiConverterOptionalULong.write(value.`reSeq`, buf)
+    }
+}
+
+
+
+data class GroupPageOut (
+    var `generation`: kotlin.ULong, 
+    var `entries`: List<GroupEntryOut>
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeGroupPageOut: FfiConverterRustBuffer<GroupPageOut> {
+    override fun read(buf: ByteBuffer): GroupPageOut {
+        return GroupPageOut(
+            FfiConverterULong.read(buf),
+            FfiConverterSequenceTypeGroupEntryOut.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: GroupPageOut) = (
+            FfiConverterULong.allocationSize(value.`generation`) +
+            FfiConverterSequenceTypeGroupEntryOut.allocationSize(value.`entries`)
+    )
+
+    override fun write(value: GroupPageOut, buf: ByteBuffer) {
+            FfiConverterULong.write(value.`generation`, buf)
+            FfiConverterSequenceTypeGroupEntryOut.write(value.`entries`, buf)
+    }
+}
+
+
+
+/**
+ * What a page is sealed for: the key, the landing site, the bytes. One
+ * record, because several buffer arguments at once misbehave on arm64.
+ */
+data class GroupPageSeal (
+    var `groupKey`: kotlin.ByteArray, 
+    var `recordKey`: kotlin.String, 
+    var `subkey`: kotlin.UInt, 
+    var `bytes`: kotlin.ByteArray
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeGroupPageSeal: FfiConverterRustBuffer<GroupPageSeal> {
+    override fun read(buf: ByteBuffer): GroupPageSeal {
+        return GroupPageSeal(
+            FfiConverterByteArray.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterByteArray.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: GroupPageSeal) = (
+            FfiConverterByteArray.allocationSize(value.`groupKey`) +
+            FfiConverterString.allocationSize(value.`recordKey`) +
+            FfiConverterUInt.allocationSize(value.`subkey`) +
+            FfiConverterByteArray.allocationSize(value.`bytes`)
+    )
+
+    override fun write(value: GroupPageSeal, buf: ByteBuffer) {
+            FfiConverterByteArray.write(value.`groupKey`, buf)
+            FfiConverterString.write(value.`recordKey`, buf)
+            FfiConverterUInt.write(value.`subkey`, buf)
+            FfiConverterByteArray.write(value.`bytes`, buf)
+    }
+}
+
+
+
+/**
+ * A group roster as it crosses the bridge (§16.19), with the board a
+ * §16.24 group rides on when it has one.
  */
 data class GroupRosterOut (
     var `name`: kotlin.String, 
@@ -3530,7 +3886,12 @@ data class GroupRosterOut (
      * Every member's persona key, 32 bytes each. Grow-only: a reader merges
      * by union and never removes.
      */
-    var `members`: List<kotlin.ByteArray>
+    var `members`: List<kotlin.ByteArray>, 
+    /**
+     * The board (§16.24): all four present, or none — a roster without a
+     * board describes a §16.19 group.
+     */
+    var `board`: GroupBoardOut?
 ) {
     
     companion object
@@ -3544,17 +3905,20 @@ public object FfiConverterTypeGroupRosterOut: FfiConverterRustBuffer<GroupRoster
         return GroupRosterOut(
             FfiConverterString.read(buf),
             FfiConverterSequenceByteArray.read(buf),
+            FfiConverterOptionalTypeGroupBoardOut.read(buf),
         )
     }
 
     override fun allocationSize(value: GroupRosterOut) = (
             FfiConverterString.allocationSize(value.`name`) +
-            FfiConverterSequenceByteArray.allocationSize(value.`members`)
+            FfiConverterSequenceByteArray.allocationSize(value.`members`) +
+            FfiConverterOptionalTypeGroupBoardOut.allocationSize(value.`board`)
     )
 
     override fun write(value: GroupRosterOut, buf: ByteBuffer) {
             FfiConverterString.write(value.`name`, buf)
             FfiConverterSequenceByteArray.write(value.`members`, buf)
+            FfiConverterOptionalTypeGroupBoardOut.write(value.`board`, buf)
     }
 }
 
@@ -7320,6 +7684,38 @@ public object FfiConverterOptionalTypeFeedRef: FfiConverterRustBuffer<FeedRef?> 
 /**
  * @suppress
  */
+public object FfiConverterOptionalTypeGroupBoardOut: FfiConverterRustBuffer<GroupBoardOut?> {
+    override fun read(buf: ByteBuffer): GroupBoardOut? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeGroupBoardOut.read(buf)
+    }
+
+    override fun allocationSize(value: GroupBoardOut?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeGroupBoardOut.allocationSize(value)
+        }
+    }
+
+    override fun write(value: GroupBoardOut?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeGroupBoardOut.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterOptionalTypeGroupSend: FfiConverterRustBuffer<GroupSend?> {
     override fun read(buf: ByteBuffer): GroupSend? {
         if (buf.get().toInt() == 0) {
@@ -7950,6 +8346,34 @@ public object FfiConverterSequenceTypeFromParty: FfiConverterRustBuffer<List<Fro
         buf.putInt(value.size)
         value.iterator().forEach {
             FfiConverterTypeFromParty.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypeGroupEntryOut: FfiConverterRustBuffer<List<GroupEntryOut>> {
+    override fun read(buf: ByteBuffer): List<GroupEntryOut> {
+        val len = buf.getInt()
+        return List<GroupEntryOut>(len) {
+            FfiConverterTypeGroupEntryOut.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<GroupEntryOut>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeGroupEntryOut.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<GroupEntryOut>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeGroupEntryOut.write(it, buf)
         }
     }
 }
@@ -8899,6 +9323,97 @@ public object FfiConverterSequenceTypeFeedBlock: FfiConverterRustBuffer<List<Fee
     
 
         /**
+         * The nameplate (§16.24): the member id that puts the group and the
+         * generation into the record key. SHA-256 of a label, the group id and
+         * the generation; nobody holds its key and nothing is written under it.
+         */ fun `groupBoardNameplate`(`groupId`: kotlin.ByteArray, `generation`: kotlin.ULong): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_group_board_nameplate(
+        FfiConverterByteArray.lower(`groupId`),FfiConverterULong.lower(`generation`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Pages a member writes on a board.
+         */ fun `groupBoardPages`(): kotlin.UInt {
+            return FfiConverterUInt.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_group_board_pages(
+        _status)
+}
+    )
+    }
+    
+
+        /**
+         * The most a sealed page may be on a record with this many subkeys.
+         */ fun `groupPageCap`(`totalSubkeys`: kotlin.UInt): kotlin.UInt {
+            return FfiConverterUInt.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_group_page_cap(
+        FfiConverterUInt.lower(`totalSubkeys`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Decode a page under the strict reader.
+         */
+    @Throws(ContactException::class) fun `groupPageDecode`(`bytes`: kotlin.ByteArray): GroupPageOut {
+            return FfiConverterTypeGroupPageOut.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_group_page_decode(
+        FfiConverterByteArray.lower(`bytes`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Encode a page — and check it, so a client never writes what a reader
+         * would refuse.
+         */
+    @Throws(ContactException::class) fun `groupPageEncode`(`generation`: kotlin.ULong, `entries`: List<GroupEntryOut>): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_group_page_encode(
+        FfiConverterULong.lower(`generation`),FfiConverterSequenceTypeGroupEntryOut.lower(`entries`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Open a page read from its subkey.
+         */
+    @Throws(ContactException::class) fun `groupPageOpen`(`req`: GroupPageSeal): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_group_page_open(
+        FfiConverterTypeGroupPageSeal.lower(`req`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Seal a page for its subkey; the nonce is drawn here, fresh.
+         */
+    @Throws(ContactException::class) fun `groupPageSeal`(`req`: GroupPageSeal): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_group_page_seal(
+        FfiConverterTypeGroupPageSeal.lower(`req`),_status)
+}
+    )
+    }
+    
+
+        /**
          * Decode a roster payload. Strict on shape, tolerant of nothing: a roster
          * that does not parse is a roster nobody should act on.
          */
@@ -8917,11 +9432,11 @@ public object FfiConverterSequenceTypeFeedBlock: FfiConverterRustBuffer<List<Fee
          * the wire produce byte-for-byte, which is what lets a future vector pin it.
          * Field 1 the name, field 2 the members.
          */
-    @Throws(ContactException::class) fun `groupRosterEncode`(`name`: kotlin.String, `members`: List<kotlin.ByteArray>): kotlin.ByteArray {
+    @Throws(ContactException::class) fun `groupRosterEncode`(`name`: kotlin.String, `members`: List<kotlin.ByteArray>, `board`: GroupBoardOut?): kotlin.ByteArray {
             return FfiConverterByteArray.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_group_roster_encode(
-        FfiConverterString.lower(`name`),FfiConverterSequenceByteArray.lower(`members`),_status)
+        FfiConverterString.lower(`name`),FfiConverterSequenceByteArray.lower(`members`),FfiConverterOptionalTypeGroupBoardOut.lower(`board`),_status)
 }
     )
     }
@@ -9476,6 +9991,33 @@ public object FfiConverterSequenceTypeFeedBlock: FfiConverterRustBuffer<List<Fee
     }
     
 
+        /**
+         * Form a generation: create the board — or open it, if this node already
+         * holds it — as its owner. Deterministic, like `node_dht_create_owned`.
+         */
+    @Throws(NodeException::class) fun `nodeDhtBoardCreate`(`req`: GroupBoardCreate): kotlin.String {
+            return FfiConverterString.lift(
+    uniffiRustCallWithError(NodeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_dht_board_create(
+        FfiConverterTypeGroupBoardCreate.lower(`req`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * The record key a board shape names.
+         */
+    @Throws(NodeException::class) fun `nodeDhtBoardKey`(`spec`: GroupBoardSpec): kotlin.String {
+            return FfiConverterString.lift(
+    uniffiRustCallWithError(NodeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_dht_board_key(
+        FfiConverterTypeGroupBoardSpec.lower(`spec`),_status)
+}
+    )
+    }
+    
+
     @Throws(NodeException::class) fun `nodeDhtClose`(`key`: kotlin.String)
         = 
     uniffiRustCallWithError(NodeException) { _status ->
@@ -9572,6 +10114,21 @@ public object FfiConverterSequenceTypeFeedBlock: FfiConverterRustBuffer<List<Fee
     uniffiRustCallWithError(NodeException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_dht_get_versioned(
         FfiConverterString.lower(`key`),FfiConverterUInt.lower(`subkey`),FfiConverterBoolean.lower(`forceRefresh`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Every subkey's sequence on the network, in one call: the way a board
+         * reader learns which pages moved without reading them all. A subkey
+         * nobody has written reads as `u32::MAX`. The record must be open.
+         */
+    @Throws(NodeException::class) fun `nodeDhtInspect`(`key`: kotlin.String): List<kotlin.UInt> {
+            return FfiConverterSequenceUInt.lift(
+    uniffiRustCallWithError(NodeException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_node_dht_inspect(
+        FfiConverterString.lower(`key`),_status)
 }
     )
     }

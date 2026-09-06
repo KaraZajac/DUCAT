@@ -244,7 +244,7 @@
     <string name="desk_cover">couverture</string>
     <string name="desk_cover_note">La couverture devient l’image de dix kilo-octets sur le tableau ; le reste voyage sur l’essaim et n’est récupéré que si quelqu’un ouvre l’annonce.</string>
     <string name="desk_pick_listing">Choisissez une annonce, ou commencez-en une avec les boutons à gauche.</string>
-    <string name="desk_group_copies_queued">Certaines copies ne sont pas encore parties — elles sont en file et seront réessayées.</string>
+    <string name="desk_group_copies_queued">La page n\'est pas encore arrivée — elle sera réécrite au prochain tour.</string>
     <string name="desk_amount_in_xmr">Un montant en XMR.</string>
     <string name="desk_kind_reaction">Réaction</string>
     <string name="desk_kind_retraction">Retrait</string>
@@ -260,7 +260,7 @@
     <string name="desk_nobody_yet">Personne pour l’instant. Répondez à la carte de quelqu’un, ou montrez la vôtre sur la page Moi.</string>
     <string name="desk_groups">Groupes</string>
     <string name="desk_group_name_hint">Un nom pour le groupe</string>
-    <string name="desk_group_note">Tous ses membres doivent déjà se connaître ; la liste est envoyée à chacun.</string>
+    <string name="desk_group_note">Vous devez connaître chaque personne que vous ajoutez ; les membres n\'ont pas besoin de se connaître entre eux. La liste part vers chaque membre avec la clé du tableau.</string>
     <string name="desk_n_in_group">%1$d dans le groupe</string>
     <string name="desk_people">Personnes</string>
     <string name="desk_members_and_you">%1$s et vous</string>

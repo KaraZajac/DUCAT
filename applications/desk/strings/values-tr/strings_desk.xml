@@ -244,7 +244,7 @@
     <string name="desk_cover">kapak</string>
     <string name="desk_cover_note">Kapak, panodaki on kilobaytlık resim olur; gerisi sürüde yolculuk eder ve yalnızca birisi ilanı açtığında alınır.</string>
     <string name="desk_pick_listing">Bir ilan seç ya da soldaki düğmelerle bir tane başlat.</string>
-    <string name="desk_group_copies_queued">Bazı kopyalar henüz gitmedi — sırada ve yeniden denenecek.</string>
+    <string name="desk_group_copies_queued">Sayfa henüz yerine ulaşmadı — bir sonraki turda yeniden yazılacak.</string>
     <string name="desk_amount_in_xmr">XMR olarak bir tutar.</string>
     <string name="desk_kind_reaction">Tepki</string>
     <string name="desk_kind_retraction">Geri çekme</string>
@@ -260,7 +260,7 @@
     <string name="desk_nobody_yet">Henüz kimse yok. Birinin kartını yanıtla ya da Ben sayfasında seninkini göster.</string>
     <string name="desk_groups">Gruplar</string>
     <string name="desk_group_name_hint">Grup için bir ad</string>
-    <string name="desk_group_note">İçindeki herkes birbirini zaten tanımalı; liste her üyeye gider.</string>
+    <string name="desk_group_note">Eklediğin herkesi tanıman gerekir; üyelerin birbirini tanıması gerekmez. Liste, panonun anahtarıyla birlikte her üyeye gider.</string>
     <string name="desk_n_in_group">grupta %1$d kişi</string>
     <string name="desk_people">Kişiler</string>
     <string name="desk_members_and_you">%1$s ve sen</string>

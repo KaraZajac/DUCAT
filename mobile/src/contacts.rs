@@ -1079,13 +1079,29 @@ pub struct PublicationKeyOut {
     pub swarm_digest: Option<Vec<u8>>,
 }
 
-/// A group roster as it crosses the bridge (§16.19).
+/// A group roster as it crosses the bridge (§16.19), with the board a
+/// §16.24 group rides on when it has one.
 #[derive(uniffi::Record, Clone)]
 pub struct GroupRosterOut {
     pub name: String,
     /// Every member's persona key, 32 bytes each. Grow-only: a reader merges
     /// by union and never removes.
     pub members: Vec<Vec<u8>>,
+    /// The board (§16.24): all four present, or none — a roster without a
+    /// board describes a §16.19 group.
+    pub board: Option<GroupBoardOut>,
+}
+
+/// One generation of a group board (§16.24): who formed it, under what
+/// key, and how many pages each member writes.
+#[derive(uniffi::Record, Clone)]
+pub struct GroupBoardOut {
+    pub generation: u64,
+    /// The persona key of the member who formed this generation, 32 bytes.
+    pub owner: Vec<u8>,
+    /// The generation's group key, 32 bytes.
+    pub group_key: Vec<u8>,
+    pub pages: u32,
 }
 
 /// Encode a roster payload (§16.19): canonical CBOR, one shape both sides of
@@ -1095,6 +1111,7 @@ pub struct GroupRosterOut {
 pub fn group_roster_encode(
     name: String,
     members: Vec<Vec<u8>>,
+    board: Option<GroupBoardOut>,
 ) -> Result<Vec<u8>, ContactError> {
     use ducat_core::cbor::Value;
     if members.is_empty() {
@@ -1111,6 +1128,21 @@ pub fn group_roster_encode(
         2u64,
         Value::Array(members.into_iter().map(Value::Bytes).collect()),
     );
+    if let Some(b) = board {
+        if b.generation == 0 {
+            return Err(ContactError::Refused("a board generation starts at one".into()));
+        }
+        if b.owner.len() != 32 || b.group_key.len() != 32 {
+            return Err(ContactError::Refused("a board's owner and key are 32 bytes each".into()));
+        }
+        if b.pages == 0 || b.pages > 64 {
+            return Err(ContactError::Refused("a board has between one and sixty-four pages a member".into()));
+        }
+        map.insert(3u64, Value::Uint(b.generation));
+        map.insert(4u64, Value::Bytes(b.owner));
+        map.insert(5u64, Value::Bytes(b.group_key));
+        map.insert(6u64, Value::Uint(b.pages as u64));
+    }
     Ok(Value::Map(map).encode())
 }
 
@@ -1140,7 +1172,159 @@ pub fn group_roster_decode(bytes: Vec<u8>) -> Result<GroupRosterOut, ContactErro
     if members.is_empty() {
         return Err(ContactError::Refused("a roster with nobody in it is not one".into()));
     }
-    Ok(GroupRosterOut { name, members })
+    // The board: all four keys or none. A roster is a §16.19 object and
+    // this map is its own tiny shape, so a key it does not know is
+    // refused the way the strict reader would.
+    for k in m.keys() {
+        if !(1..=6).contains(k) {
+            return Err(ContactError::Refused(format!("a roster has no field {k}")));
+        }
+    }
+    let has: Vec<bool> = (3..=6u64).map(|k| m.contains_key(&k)).collect();
+    let board = if has.iter().all(|h| !*h) {
+        None
+    } else if has.iter().all(|h| *h) {
+        let generation = match m.get(&3) {
+            Some(Value::Uint(n)) if *n >= 1 => *n,
+            _ => return Err(ContactError::Refused("a board generation starts at one".into())),
+        };
+        let bytes32 = |k: u64, what: &str| match m.get(&k) {
+            Some(Value::Bytes(b)) if b.len() == 32 => Ok(b.clone()),
+            _ => Err(ContactError::Refused(format!("a board's {what} is 32 bytes"))),
+        };
+        let owner = bytes32(4, "owner")?;
+        let group_key = bytes32(5, "key")?;
+        let pages = match m.get(&6) {
+            Some(Value::Uint(n)) if (1..=64).contains(n) => *n as u32,
+            _ => return Err(ContactError::Refused("a board has between one and sixty-four pages a member".into())),
+        };
+        if !members.contains(&owner) {
+            return Err(ContactError::Refused("a board's owner is one of its members".into()));
+        }
+        Some(GroupBoardOut { generation, owner, group_key, pages })
+    } else {
+        return Err(ContactError::Refused("a board is named whole or not at all".into()));
+    };
+    Ok(GroupRosterOut { name, members, board })
+}
+
+// ----- group boards (§16.24) --------------------------------------------------
+
+/// One entry of a group board page as it crosses the bridge.
+#[derive(uniffi::Record, Clone)]
+pub struct GroupEntryOut {
+    pub seq: u64,
+    pub ts: u64,
+    pub kind: u32,
+    pub body: Option<String>,
+    pub re_sender: Option<Vec<u8>>,
+    pub re_seq: Option<u64>,
+}
+
+#[derive(uniffi::Record, Clone)]
+pub struct GroupPageOut {
+    pub generation: u64,
+    pub entries: Vec<GroupEntryOut>,
+}
+
+/// What a page is sealed for: the key, the landing site, the bytes. One
+/// record, because several buffer arguments at once misbehave on arm64.
+#[derive(uniffi::Record, Clone)]
+pub struct GroupPageSeal {
+    pub group_key: Vec<u8>,
+    pub record_key: String,
+    pub subkey: u32,
+    pub bytes: Vec<u8>,
+}
+
+fn entry_in(e: GroupEntryOut) -> Result<ducat_core::group::GroupEntry, ContactError> {
+    let re = match (e.re_sender, e.re_seq) {
+        (None, None) => None,
+        (Some(who), Some(seq)) => {
+            let who: [u8; 32] = who
+                .try_into()
+                .map_err(|_| ContactError::Refused("a group reference names a 32-byte sender".into()))?;
+            Some((who, seq))
+        }
+        _ => return Err(ContactError::Refused("a group reference is a sender and a counter, together".into())),
+    };
+    Ok(ducat_core::group::GroupEntry { seq: e.seq, ts: e.ts, kind: e.kind as u64, body: e.body, re })
+}
+
+fn entry_out(e: ducat_core::group::GroupEntry) -> GroupEntryOut {
+    GroupEntryOut {
+        seq: e.seq,
+        ts: e.ts,
+        kind: e.kind as u32,
+        body: e.body,
+        re_sender: e.re.map(|(who, _)| who.to_vec()),
+        re_seq: e.re.map(|(_, seq)| seq),
+    }
+}
+
+/// Encode a page — and check it, so a client never writes what a reader
+/// would refuse.
+#[uniffi::export]
+pub fn group_page_encode(generation: u64, entries: Vec<GroupEntryOut>) -> Result<Vec<u8>, ContactError> {
+    let entries = entries.into_iter().map(entry_in).collect::<Result<Vec<_>, _>>()?;
+    let page = ducat_core::group::GroupPage { generation, entries };
+    let bytes = page.encode();
+    ducat_core::group::GroupPage::decode(&bytes).map_err(refuse)?;
+    Ok(bytes)
+}
+
+/// Decode a page under the strict reader.
+#[uniffi::export]
+pub fn group_page_decode(bytes: Vec<u8>) -> Result<GroupPageOut, ContactError> {
+    let page = ducat_core::group::GroupPage::decode(&bytes).map_err(refuse)?;
+    Ok(GroupPageOut { generation: page.generation, entries: page.entries.into_iter().map(entry_out).collect() })
+}
+
+/// Seal a page for its subkey; the nonce is drawn here, fresh.
+#[uniffi::export]
+pub fn group_page_seal(req: GroupPageSeal) -> Result<Vec<u8>, ContactError> {
+    let k: [u8; 32] = req
+        .group_key
+        .try_into()
+        .map_err(|_| ContactError::Refused("a group key is 32 bytes".into()))?;
+    let mut nonce = [0u8; ducat_core::group::NONCE_LEN];
+    nonce.copy_from_slice(&crate::random_bytes(ducat_core::group::NONCE_LEN as u32));
+    Ok(ducat_core::group::seal_page(&k, &req.record_key, req.subkey, &nonce, &req.bytes))
+}
+
+/// Open a page read from its subkey.
+#[uniffi::export]
+pub fn group_page_open(req: GroupPageSeal) -> Result<Vec<u8>, ContactError> {
+    let k: [u8; 32] = req
+        .group_key
+        .try_into()
+        .map_err(|_| ContactError::Refused("a group key is 32 bytes".into()))?;
+    ducat_core::group::open_page(&k, &req.record_key, req.subkey, &req.bytes).map_err(refuse)
+}
+
+/// The most a sealed page may be on a record with this many subkeys.
+#[uniffi::export]
+pub fn group_page_cap(total_subkeys: u32) -> u32 {
+    ducat_core::group::page_cap(total_subkeys) as u32
+}
+
+/// The nameplate (§16.24): the member id that puts the group and the
+/// generation into the record key. SHA-256 of a label, the group id and
+/// the generation; nobody holds its key and nothing is written under it.
+#[uniffi::export]
+pub fn group_board_nameplate(group_id: Vec<u8>, generation: u64) -> Vec<u8> {
+    use sha2::{Digest, Sha256};
+    let mut h = Sha256::new();
+    h.update(b"ducat group board");
+    h.update(&group_id);
+    h.update(generation.to_be_bytes());
+    h.finalize().to_vec()
+}
+
+/// Pages a member writes on a board.
+#[uniffi::export]
+pub fn group_board_pages() -> u32 {
+    ducat_core::group::PAGES
 }
 
 /// Open an inbound sealed message and check it follows the thread.

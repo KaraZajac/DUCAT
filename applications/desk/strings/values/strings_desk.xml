@@ -248,7 +248,7 @@
     <string name="desk_cover">cover</string>
     <string name="desk_cover_note">The cover becomes the ten-kilobyte picture on the board; the rest travel on the swarm and are fetched only when somebody opens the listing.</string>
     <string name="desk_pick_listing">Pick a listing, or start one with the buttons on the left.</string>
-    <string name="desk_group_copies_queued">Some copies did not go out yet — they are queued and retried.</string>
+    <string name="desk_group_copies_queued">The page did not land yet — it is written again on the next lap.</string>
     <string name="desk_amount_in_xmr">An amount in XMR.</string>
     <string name="desk_kind_reaction">Reaction</string>
     <string name="desk_kind_retraction">Retraction</string>
@@ -264,7 +264,7 @@
     <string name="desk_nobody_yet">Nobody yet. Answer somebody\'s card, or show them yours on the Me page.</string>
     <string name="desk_groups">Groups</string>
     <string name="desk_group_name_hint">A name for the group</string>
-    <string name="desk_group_note">Everyone in it must already know everyone else; the roster goes out to each member.</string>
+    <string name="desk_group_note">You must hold everyone you add; they need not hold each other. The roster goes out to each member with the board\'s key.</string>
     <string name="desk_n_in_group">%1$d in the group</string>
     <string name="desk_people">People</string>
     <string name="desk_members_and_you">%1$s and you</string>

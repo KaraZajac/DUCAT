@@ -511,6 +511,15 @@ async fn post_feed(text: String, media: Vec<String>, files: Vec<String>) -> Resu
 
 /// Stage the home again from what is on disk and publish it: the repair
 /// for a served copy that stopped matching the head.
+/// veilid's own view of this node, for a support screen or a drive
+/// script: `nodeinfo`, `route list`, whatever its CLI takes.
+#[tauri::command]
+async fn node_debug(command: String) -> Result<String, String> {
+    tauri::async_runtime::spawn_blocking(move || ducat_mobile::node::node_debug(command).map_err(|e| e.to_string()))
+        .await
+        .map_err(|e| e.to_string())?
+}
+
 #[tauri::command]
 async fn republish_home() -> Result<SiteRow, String> {
     let a = app()?;
@@ -1704,6 +1713,8 @@ fn set_muted(publisher_hex: String, muted: bool) -> Result<(), String> {
 struct GroupRowOut {
     id_hex: String,
     name: String,
+    /// The board's generation when the group rides on one (§16.24).
+    board: Option<u64>,
     members: Vec<ContactRow>,
     missing: Vec<String>,
     mine: String,
@@ -1729,6 +1740,7 @@ fn group_row(a: &App, g: ducat_app::groups::Group) -> GroupRowOut {
         unread: App::group_unread(&a.group_seen(&g.id_hex), &a.look_at(&rows)),
         last_body: last.map(|r| r.message.body.clone()),
         last_at: last.map_or(0, |r| r.message.timestamp),
+        board: g.board.as_ref().map(|b| b.generation),
         id_hex: g.id_hex,
         name: g.name,
     }
@@ -1776,6 +1788,8 @@ struct GroupMessage {
 #[tauri::command]
 fn group_thread(id_hex: String) -> Result<Vec<GroupMessage>, String> {
     let a = app()?;
+    // Looking at it: its board is read every lap while this page is open.
+    a.touch_group(&id_hex);
     let ours = a.persona_hexes();
     let rows = a.group_thread(&id_hex);
     let marks = ducat_app::groups::group_marks(&rows);
@@ -2571,6 +2585,7 @@ pub fn run() {
             post_feed,
             delete_post,
             republish_home,
+            node_debug,
             home_file_data_url,
             home_key_of,
             set_site_keep,

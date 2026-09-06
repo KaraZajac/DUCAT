@@ -7,7 +7,7 @@
     <string name="group_you">Bạn</string>
     <string name="group_add">Thêm</string>
     <string name="group_add_title">Thêm người</string>
-    <string name="group_add_note">Chỉ danh bạ của bạn được đưa ra — nhóm chỉ chuyển lời giữa những người giữ nhau trong danh bạ. Những người khác cũng phải thêm người đó thì họ mới tham gia được.</string>
+    <string name="group_add_note">Chỉ các liên hệ của bạn được đề xuất: bạn phải có người mình thêm trong danh bạ. Trên bảng, họ không cần biết những người khác — danh sách đến với họ cùng khóa của bảng.</string>
     <string name="group_add_nobody">Mọi người bạn quen đều đã ở trong nhóm này.</string>
     <string name="group_create_title">Nhóm mới</string>
     <string name="group_create_note">Chọn từ danh bạ. Nhóm cần ít nhất ba người, kể cả bạn — hai người thì đã là một cuộc trò chuyện rồi.</string>
@@ -17,6 +17,7 @@
     <string name="group_partial_queued">Một số bản sao chưa tới — chúng sẽ tự tiếp tục thử.</string>
     <string name="group_disclosure_title">Nhóm là những người tin cậy</string>
     <string name="group_disclosure_body">Mọi người phải giữ mọi người trong danh bạ — trước đó bạn không gửi được.\n\nAi trong nhóm cũng thêm được bất kỳ ai. Không ai có thể bị xoá, mãi mãi.\n\nNgười vào hôm nay không thấy gì của trước đó — không tồn tại lịch sử chung để trao.\n\nTin nhắn không thể giả mạo: từng tin đi niêm phong người-tới-người, không ai viết thay được ai.\n\nRời nhóm chỉ ẩn nó trên máy bạn. Những người còn lại vẫn giữ nhóm, và giữ nhau.</string>
+    <string name="group_disclosure_board_body">Mọi người ở đây đọc và viết trên một bảng chung, nên một tin nhắn đến với tất cả cùng lúc — bạn không cần giữ mọi người trong danh bạ để gửi. Ai thêm một người thì phải giữ người đó; những người khác không cần.\n\nAi trong nhóm cũng thêm được bất kỳ ai. Không ai có thể bị xoá, mãi mãi.\n\nNgười vào hôm nay thấy các trang gần đây, không phải mọi điều từng được nói.\n\nMỗi tin nhắn được ký bằng khoá của người gửi: không ai viết thay được ai, và điều bạn viết có thể được quy về bạn.\n\nRời nhóm chỉ ẩn nó trên máy bạn. Những người còn lại vẫn giữ nhóm, và giữ nhau.</string>
     <string name="group_disclosure_ok">Đã hiểu</string>
     <plurals name="group_members">
         <item quantity="one">%1$d người</item>

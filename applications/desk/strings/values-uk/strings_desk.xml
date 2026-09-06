@@ -250,7 +250,7 @@
     <string name="desk_cover">обкладинка</string>
     <string name="desk_cover_note">Обкладинка стає десятикілобайтною картинкою на дошці; решта мандрують роєм і завантажуються, лише коли хтось відкриє оголошення.</string>
     <string name="desk_pick_listing">Виберіть оголошення або почніть нове кнопками ліворуч.</string>
-    <string name="desk_group_copies_queued">Деякі копії ще не пішли — вони в черзі й будуть надіслані знову.</string>
+    <string name="desk_group_copies_queued">Сторінка ще не дійшла — її буде записано знову на наступному колі.</string>
     <string name="desk_amount_in_xmr">Сума в XMR.</string>
     <string name="desk_kind_reaction">Реакція</string>
     <string name="desk_kind_retraction">Відкликання</string>
@@ -266,7 +266,7 @@
     <string name="desk_nobody_yet">Поки нікого. Відповідайте на чиюсь картку або покажіть свою на сторінці Я.</string>
     <string name="desk_groups">Групи</string>
     <string name="desk_group_name_hint">Назва групи</string>
-    <string name="desk_group_note">Усі в ній мають уже знати одне одного; список розсилається кожному учаснику.</string>
+    <string name="desk_group_note">Ви маєте знати кожного, кого додаєте; учасникам не потрібно знати одне одного. Список надсилається кожному учаснику разом із ключем дошки.</string>
     <string name="desk_n_in_group">%1$d у групі</string>
     <string name="desk_people">Люди</string>
     <string name="desk_members_and_you">%1$s і ви</string>

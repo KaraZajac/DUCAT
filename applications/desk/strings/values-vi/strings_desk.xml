@@ -241,7 +241,7 @@
     <string name="desk_cover">ảnh bìa</string>
     <string name="desk_cover_note">Ảnh bìa thành ảnh mười kilobyte trên bảng; phần còn lại đi qua bầy và chỉ được tải khi có người mở tin.</string>
     <string name="desk_pick_listing">Chọn một tin, hoặc bắt đầu một tin bằng các nút bên trái.</string>
-    <string name="desk_group_copies_queued">Một số bản sao chưa đi — đang xếp hàng và sẽ thử lại.</string>
+    <string name="desk_group_copies_queued">Trang chưa tới nơi — sẽ được ghi lại ở vòng tiếp theo.</string>
     <string name="desk_amount_in_xmr">Một số tiền bằng XMR.</string>
     <string name="desk_kind_reaction">Phản ứng</string>
     <string name="desk_kind_retraction">Rút lại</string>
@@ -257,7 +257,7 @@
     <string name="desk_nobody_yet">Chưa có ai. Trả lời thẻ của ai đó, hoặc cho họ xem thẻ của bạn ở trang Tôi.</string>
     <string name="desk_groups">Nhóm</string>
     <string name="desk_group_name_hint">Tên nhóm</string>
-    <string name="desk_group_note">Mọi người trong nhóm phải đã biết nhau; danh sách được gửi tới từng thành viên.</string>
+    <string name="desk_group_note">Bạn phải có mọi người mình thêm trong danh bạ; các thành viên không cần biết nhau. Danh sách được gửi tới từng thành viên cùng khóa của bảng.</string>
     <string name="desk_n_in_group">%1$d trong nhóm</string>
     <string name="desk_people">Mọi người</string>
     <string name="desk_members_and_you">%1$s và bạn</string>

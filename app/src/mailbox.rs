@@ -115,7 +115,17 @@ static POLL_LOCKS: Mutex<Option<HashMap<String, Arc<Mutex<()>>>>> = Mutex::new(N
 // ----- the polling plan -------------------------------------------------------
 /// Logs read per lap, and how many side by side.
 const POLL_BUDGET: usize = 24;
-const POLL_WIDTH: usize = 8;
+const POLL_WIDTH_DEFAULT: usize = 8;
+
+/// How many reads run side by side. `DUCAT_POLL_WIDTH` overrides it for
+/// a measurement: more than the node can carry makes every read slower,
+/// not the lap faster.
+fn poll_width() -> usize {
+    static W: std::sync::OnceLock<usize> = std::sync::OnceLock::new();
+    *W.get_or_init(|| {
+        std::env::var("DUCAT_POLL_WIDTH").ok().and_then(|v| v.parse().ok()).filter(|w| *w >= 1).unwrap_or(POLL_WIDTH_DEFAULT)
+    })
+}
 /// A quiet log is read at least this often, watch or no watch.
 const POLL_MAX_SECS: u64 = 300;
 /// veilid lets a watch run ten minutes; renew well inside that.
@@ -141,23 +151,32 @@ fn with_plan<T>(f: impl FnOnce(&mut HashMap<String, PollSlot>) -> T) -> T {
     f(g.get_or_insert_with(HashMap::new))
 }
 
+/// Due now, every lap, until it goes quiet again.
+pub(crate) fn plan_touch(key: &str) {
+    with_plan(|p| {
+        let s = p.entry(key.to_string()).or_insert_with(PollSlot::fresh);
+        s.due = Instant::now();
+        s.backoff_secs = 0;
+    });
+}
+
 /// When this log is next due; None for a contact the plan has not met,
 /// who is due at once.
-fn plan_due(hex: &str) -> Option<Instant> {
+pub(crate) fn plan_due(hex: &str) -> Option<Instant> {
     with_plan(|p| p.get(hex).map(|s| s.due))
 }
 
-fn plan_watched(hex: &str) -> Option<Instant> {
+pub(crate) fn plan_watched(hex: &str) -> Option<Instant> {
     with_plan(|p| p.get(hex).and_then(|s| s.watched))
 }
 
-fn plan_set_watched(hex: &str, at: Option<Instant>) {
+pub(crate) fn plan_set_watched(hex: &str, at: Option<Instant>) {
     with_plan(|p| p.entry(hex.to_string()).or_insert_with(PollSlot::fresh).watched = at);
 }
 
 /// After a read: a log that spoke is read every lap; a quiet one waits
 /// twice as long as last time, up to POLL_MAX_SECS.
-fn plan_settle(hex: &str, spoke: bool) {
+pub(crate) fn plan_settle(hex: &str, spoke: bool) {
     with_plan(|p| {
         let s = p.entry(hex.to_string()).or_insert_with(PollSlot::fresh);
         s.backoff_secs = if spoke { 0 } else { (s.backoff_secs * 2).clamp(15, POLL_MAX_SECS) };
@@ -573,41 +592,74 @@ impl App {
                 take
             }
         };
-        for issued in looking {
-            match self.collect_one(&issued) {
-                Ok(true) => collected += 1,
-                Ok(false) => {}
-                Err(e) if is_offline(&e) => {
-                    // One line, not one per card: offline fails them all alike.
-                    log::info(TAG, "offline — claims wait for the network");
-                    break;
-                }
-                Err(e) if is_missing(&e) => {
-                    // **A card whose record the network has lost is dead.**
-                    // There is no local expiry stamp to read; "Key not
-                    // found" is the only news we get, and it takes several
-                    // in a row — one miss is a network that could not find
-                    // a holder this minute.
-                    let n = {
-                        let mut g = MISSING_CARD.lock().unwrap_or_else(|e| e.into_inner());
-                        let map = g.get_or_insert_with(HashMap::new);
-                        let n = map.get(&issued.inbox_key).copied().unwrap_or(0) + 1;
+        // A card just issued is looked at every lap; one nobody has
+        // answered backs off like a quiet log, up to five minutes — an
+        // unanswered inbox is an empty record, and an empty record is the
+        // slowest read there is. A record that rings (mark_changed) or a
+        // caller naming one card skips the wait.
+        let now = Instant::now();
+        let looking: Vec<IssuedCard> = looking
+            .into_iter()
+            .filter(|c| only.is_some() || plan_due(&format!("c:{}", c.inbox_key)).map_or(true, |at| at <= now))
+            .collect();
+        // Side by side, POLL_WIDTH at a time: an unanswered inbox is an
+        // empty record and an empty read is the slowest there is; eight
+        // in turn was two minutes of every lap.
+        let mut offline = false;
+        for chunk in looking.chunks(poll_width()) {
+            let results: Vec<(IssuedCard, Result<bool, Error>)> = std::thread::scope(|sc| {
+                let handles: Vec<_> = chunk
+                    .iter()
+                    .map(|issued| {
+                        let app = self.clone();
+                        let issued = issued.clone();
+                        sc.spawn(move || {
+                            let r = app.collect_one(&issued);
+                            (issued, r)
+                        })
+                    })
+                    .collect();
+                handles.into_iter().filter_map(|h| h.join().ok()).collect()
+            });
+            for (issued, r) in results {
+                let slot = format!("c:{}", issued.inbox_key);
+                match r {
+                    Ok(true) => {
+                        collected += 1;
+                        plan_settle(&slot, true);
+                    }
+                    Ok(false) => plan_settle(&slot, false),
+                    Err(e) if is_offline(&e) => offline = true,
+                    Err(e) if is_missing(&e) => {
+                        let n = {
+                            let mut g = MISSING_CARD.lock().unwrap_or_else(|e| e.into_inner());
+                            let map = g.get_or_insert_with(HashMap::new);
+                            let n = map.get(&issued.inbox_key).copied().unwrap_or(0) + 1;
+                            if n >= MISSES_BEFORE_RETIRING {
+                                map.remove(&issued.inbox_key);
+                            } else {
+                                map.insert(issued.inbox_key.clone(), n);
+                            }
+                            n
+                        };
                         if n >= MISSES_BEFORE_RETIRING {
-                            map.remove(&issued.inbox_key);
-                        } else {
-                            map.insert(issued.inbox_key.clone(), n);
+                            let _ = self.forget_issued_card(&issued.inbox_key);
+                            log::info(TAG, "retired an expired code — the network no longer holds it");
+                            if issued.purpose == "profile" {
+                                self.reissue_profile_code(&issued);
+                            }
                         }
-                        n
-                    };
-                    if n >= MISSES_BEFORE_RETIRING {
-                        let _ = self.forget_issued_card(&issued.inbox_key);
-                        log::info(TAG, "retired an expired code — the network no longer holds it");
-                        if issued.purpose == "profile" {
-                            self.reissue_profile_code(&issued);
-                        }
+                        plan_settle(&slot, false);
+                    }
+                    Err(e) => {
+                        log::warn(TAG, format!("collect_claims({}…): {e}", &issued.inbox_key[..16.min(issued.inbox_key.len())]));
+                        plan_settle(&slot, false);
                     }
                 }
-                Err(e) => log::warn(TAG, format!("collect_claims({}…): {e}", &issued.inbox_key[..16.min(issued.inbox_key.len())])),
+            }
+            if offline {
+                log::info(TAG, "offline — claims wait for the network");
+                break;
             }
         }
         collected
@@ -1314,7 +1366,7 @@ impl App {
         let read = due.len();
         let mut got = 0;
         let mut offline = false;
-        for chunk in due.chunks(POLL_WIDTH) {
+        for chunk in due.chunks(poll_width()) {
             let results: Vec<(String, String, Result<usize, Error>)> = std::thread::scope(|s| {
                 let handles: Vec<_> = chunk
                     .iter()
@@ -1369,11 +1421,7 @@ impl App {
     /// The user is looking at this thread, or just spoke in it: read its
     /// log every lap again until it goes quiet.
     pub fn touch_contact(&self, persona_hex: &str) {
-        with_plan(|p| {
-            let s = p.entry(persona_hex.to_string()).or_insert_with(PollSlot::fresh);
-            s.due = Instant::now();
-            s.backoff_secs = 0;
-        });
+        plan_touch(persona_hex);
     }
 
     /// Records the network rang for (`node_changed_keys`): their contacts
@@ -1389,7 +1437,13 @@ impl App {
                 n += 1;
             }
         }
-        n
+        for card in self.issued_cards().into_iter().filter(|c| c.answered_by.is_none()) {
+            if keys.iter().any(|k| k == &card.inbox_key) {
+                plan_touch(&format!("c:{}", card.inbox_key));
+                n += 1;
+            }
+        }
+        n + self.mark_boards_changed(keys)
     }
 
     /// A watch on every log whose watch is missing or ageing, oldest
@@ -1398,26 +1452,35 @@ impl App {
     /// that one is simply tried again after its first read.
     fn arm_watches(&self) -> (usize, usize) {
         let now = Instant::now();
-        let mut stale: Vec<(Contact, Option<Instant>)> = self
+        // (plan slot, record key) for every log, and every unanswered
+        // card's inbox — a claim rings the lap the same way a message does.
+        let mut stale: Vec<((String, String), Option<Instant>)> = self
             .contacts()
             .into_iter()
-            .filter_map(|c| {
-                let at = plan_watched(&c.persona_hex);
+            .map(|c| (c.persona_hex.clone(), c.their_outbox.clone()))
+            .chain(
+                self.issued_cards()
+                    .into_iter()
+                    .filter(|c| c.answered_by.is_none())
+                    .map(|c| (format!("c:{}", c.inbox_key), c.inbox_key.clone())),
+            )
+            .filter_map(|(slot, key)| {
+                let at = plan_watched(&slot);
                 at.map_or(true, |t| now.duration_since(t).as_secs() >= WATCH_RENEW_SECS)
-                    .then_some((c, at))
+                    .then_some(((slot, key), at))
             })
             .collect();
         stale.sort_by_key(|(_, at)| *at);
         stale.truncate(POLL_BUDGET);
         let (mut up, mut down) = (0, 0);
-        for chunk in stale.chunks(POLL_WIDTH) {
+        for chunk in stale.chunks(poll_width()) {
             let armed: Vec<(String, bool)> = std::thread::scope(|s| {
                 let handles: Vec<_> = chunk
                     .iter()
-                    .map(|(c, _)| {
-                        let key = c.their_outbox.clone();
-                        let hex = c.persona_hex.clone();
-                        s.spawn(move || (hex, node_dht_watch(key).unwrap_or(false)))
+                    .map(|((slot, key), _)| {
+                        let key = key.clone();
+                        let slot = slot.clone();
+                        s.spawn(move || (slot, node_dht_watch(key).unwrap_or(false)))
                     })
                     .collect();
                 handles.into_iter().filter_map(|h| h.join().ok()).collect()

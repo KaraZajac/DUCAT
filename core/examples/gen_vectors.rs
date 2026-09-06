@@ -1055,6 +1055,8 @@ fn normalize(category: &str, mut c: J) -> (&'static str, J) {
                 ("contact", "pub.listing")
             } else if obj.contains_key("site_head_hex") {
                 ("contact", "site.head")
+            } else if obj.contains_key("group_page_hex") {
+                ("contact", "group.page")
             } else if obj.contains_key("subkey_count") {
                 ("contact", "log.ring")
             } else if obj.contains_key("shard") {
@@ -2904,6 +2906,85 @@ fn contact_cases() -> Vec<J> {
                 "why": "285 — one past the newest (284, SITE_UPDATED), the closed set's edge, which must move with it.",
                 "site_head_hex": hex(&ducat_core::cbor::Value::Map(m).encode()),
                 "expect": { "ok": false, "reject": "UNKNOWNFIELD", "hint": "unrecognised field 285" } }));
+        }
+    }
+
+    // §16.24: the group board page — one member's entries under one
+    // generation, sealed per subkey with the record key and subkey as AAD.
+    // The strict reader's rules are the board's: entries ascend by the
+    // sender's own counter, a reference is a pair, a reaction and a
+    // retraction name a target, and 299 is the probe nobody may assign.
+    {
+        use ducat_core::group::{GroupEntry, GroupPage, KIND_REACTION, KIND_RETRACT, KIND_TEXT};
+        let mut gcase = |name: &str, why: &str, p: &GroupPage, bad: Option<(RejectCode, &str)>| {
+            let hex_body = hex(&p.to_value().encode());
+            v.push(match bad {
+                None => json!({ "name": name, "why": why, "group_page_hex": hex_body,
+                                "expect": { "ok": true, "reencodes_to_hex": hex_body } }),
+                Some((code, hint)) => json!({ "name": name, "why": why, "group_page_hex": hex_body,
+                                "expect": { "ok": false, "reject": format!("{:?}", code).to_uppercase(), "hint": hint } }),
+            });
+        };
+        let bob = [0xB0u8; 32];
+        let page = GroupPage {
+            generation: 3,
+            entries: vec![
+                GroupEntry { seq: 1, ts: 1_800_000_000, kind: KIND_TEXT, body: Some("hello".into()), re: None },
+                GroupEntry { seq: 2, ts: 1_800_000_005, kind: KIND_REACTION, body: Some("👍".into()), re: Some((bob, 9)) },
+                GroupEntry { seq: 5, ts: 1_800_000_009, kind: KIND_RETRACT, body: None, re: Some((bob, 1)) },
+            ],
+        };
+        gcase("group_page_valid",
+            "One of each kind a board carries: a text, a reaction naming another member's entry, and a retraction of this member's own first word. The counters ascend but need not be dense — 1, 2, 5 — because a page holds what this member said since the ring last turned, not everything they ever said.",
+            &page, None);
+        let mut unordered = page.clone();
+        unordered.entries.swap(0, 1);
+        gcase("group_page_unordered",
+            "The same three entries with the first two swapped. A reader merges pages by (sender, GB_SEQ), and a page that does not ascend is one whose writer's counter cannot be trusted — refused whole rather than sorted, because sorting would accept two spellings of one page (§18.1).",
+            &unordered, Some((RejectCode::Malformed, "entries ascend by counter, without repeats")));
+        let mut no_target = page.clone();
+        no_target.entries[1].re = None;
+        gcase("group_page_reaction_without_target",
+            "A reaction with nothing to react to. The body is the reaction and the reference is what it is a reaction to; without the pair it is a glyph addressed to nobody.",
+            &no_target, Some((RejectCode::Malformed, "a reaction names its target")));
+        let mut with_body = page.clone();
+        with_body.entries[2].body = Some("never mind".into());
+        gcase("group_page_retraction_with_body",
+            "A retraction that says something. It takes a word back and carries none of its own; a body on it is a second message wearing the retraction's kind.",
+            &with_body, Some((RejectCode::Malformed, "a retraction carries no body")));
+        {
+            // A counter without a sender. GroupEntry::to_value writes the pair
+            // whole, so the half has to be assembled by hand.
+            let Value::Map(mut m) = page.to_value() else { unreachable!() };
+            if let Some(Value::Array(entries)) = m.get_mut(&f::GB_ENTRIES) {
+                if let Some(Value::Map(e)) = entries.get_mut(0) {
+                    e.insert(f::GB_RE_SEQ, Value::Uint(4));
+                }
+            }
+            v.push(json!({ "name": "group_page_lonely_reference",
+                "why": "GB_RE_SEQ without GB_RE_SENDER on the text. A counter names an entry only beside the sender whose counter it is; half a reference points at every member's fourth word at once.",
+                "group_page_hex": hex(&Value::Map(m).encode()),
+                "expect": { "ok": false, "reject": "MALFORMED",
+                            "hint": "a group reference is a sender and a counter, together or not at all" } }));
+        }
+        {
+            let Value::Map(mut m) = page.to_value() else { unreachable!() };
+            m.insert(f::GB_VERSION, Value::Uint(2));
+            v.push(json!({ "name": "group_page_bad_version",
+                "why": "Versions gate readers the way they gate every head in this document; a reader that guessed at version 2 would render entries whose kinds it cannot know the meaning of.",
+                "group_page_hex": hex(&Value::Map(m).encode()),
+                "expect": { "ok": false, "reject": "MALFORMED", "hint": "unknown group page version" } }));
+        }
+        {
+            // The closed set's edge, pinned on both sides (the blind-spot
+            // rule): 299, one past GB_RE_SEQ, which §18.4.2 reserves so that
+            // the edge never moves.
+            let Value::Map(mut m) = page.to_value() else { unreachable!() };
+            m.insert(299, Value::Uint(1));
+            v.push(json!({ "name": "group_page_unknown_field",
+                "why": "299 — one past the newest (298, GB_RE_SEQ), the closed set's edge, reserved by §18.4.2 for exactly this probe.",
+                "group_page_hex": hex(&Value::Map(m).encode()),
+                "expect": { "ok": false, "reject": "UNKNOWNFIELD", "hint": "unrecognised field 299" } }));
         }
     }
 

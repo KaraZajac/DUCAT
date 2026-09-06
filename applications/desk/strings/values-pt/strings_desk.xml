@@ -244,7 +244,7 @@
     <string name="desk_cover">capa</string>
     <string name="desk_cover_note">A capa torna-se a imagem de dez kilobytes no quadro; o resto viaja pelo enxame e só é obtido quando alguém abre o anúncio.</string>
     <string name="desk_pick_listing">Escolhe um anúncio, ou começa um com os botões à esquerda.</string>
-    <string name="desk_group_copies_queued">Algumas cópias ainda não saíram — estão em fila e serão tentadas de novo.</string>
+    <string name="desk_group_copies_queued">A página ainda não chegou — será escrita de novo na próxima volta.</string>
     <string name="desk_amount_in_xmr">Um valor em XMR.</string>
     <string name="desk_kind_reaction">Reação</string>
     <string name="desk_kind_retraction">Retirada</string>
@@ -260,7 +260,7 @@
     <string name="desk_nobody_yet">Ainda ninguém. Responde ao cartão de alguém, ou mostra-lhe o teu na página Eu.</string>
     <string name="desk_groups">Grupos</string>
     <string name="desk_group_name_hint">Um nome para o grupo</string>
-    <string name="desk_group_note">Todos os membros já se têm de conhecer entre si; a lista é enviada a cada um.</string>
+    <string name="desk_group_note">Você precisa ter cada pessoa que adiciona; elas não precisam se conhecer. A lista sai para cada membro com a chave do quadro.</string>
     <string name="desk_n_in_group">%1$d no grupo</string>
     <string name="desk_people">Pessoas</string>
     <string name="desk_members_and_you">%1$s e tu</string>

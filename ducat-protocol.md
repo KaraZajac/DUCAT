@@ -1185,7 +1185,7 @@ Ship Phase 1–2 as a working federation at a single seed market before touching
 - **O18.** **Cancellation fees erode the permissionless lane.** §7.3 makes no-show fees enforceable only against collateral. The pressure this creates — providers preferring bonded counterparties precisely because cancellation *costs* them something — pushes the network toward the collateralized lane and quietly hollows out the slow permissionless one A4 depends on (§17.6). Whether the unbonded lane survives contact with real no-show rates is an empirical question no amount of spec work answers.
 - **O19.** **iOS cannot present over NFC, permanently.** Apple's HCE entitlement is conditioned on EEA establishment, organization enrollment, and financial-regulatory standing (§15.3.2) — structurally incompatible with A4, and not a hurdle an open protocol clears. The best-UX medium is therefore available to roughly half the supply side, and QR carries the rest. This is outside DUCAT's control and will not improve through protocol design; it is stated so no one plans around a tap that cannot exist.
 - **O20. (closed in 0.48, §18.7.)** Transport identifiers assigned. The NFC AID is `F0 44 55 43 41 54` (`0xF0` ‖ `"DUCAT"`), and the "pending real RID registration" caveat was mistaken — ISO/IEC 7816-5 reserves the `0xF…` range for **proprietary identifiers requiring no registration at all**, which is what Android HCE documents for exactly this case. There was nothing to wait for. BLE takes one random 128-bit service UUID and three characteristics sharing a base; the Bluetooth SIG registers only 16-bit UUIDs, and the 128-bit space exists so anyone can allocate without asking. **Residue, and it is a real one:** no registry means no uniqueness guarantee, so nothing prevents another vendor choosing the same AID bytes — mitigated by using the full name rather than the four-character contraction, since AIDs may run to 16 bytes and the 5-byte minimum was never a maximum. The L2CAP PSM stays deliberately unassigned: LE CoC PSMs are allocated dynamically by the local stack, so a spec pinning one would pin a value it does not control; it is published in a characteristic and read.
-- **O21. Conformance suite exists, schema published, second implementation runs it (§18.9.1, §18.11).** 386 vectors, every case carrying a `kind` that is the sole discriminator, validated against a **hand-written** `schema.json` — hand-written because a schema emitted by the generator would agree with the generator's mistakes, and it earned that by catching two defects on its first run. A second implementation written from Part V agreed on 101 cases and disagreed on 3, **all three defects in this document**, of which the important one was negative integers being *unspecified* — the reference accepted them, the second implementation refused them, and both were conformant, a divergence no vector set could detect because there was no correct answer to test against. 104/104 after correction. Most of the second implementation's effort went into the harness rather than the protocol; that friction is now removed (§18.11). **Still not closed, and what remains cannot be engineered away: an implementer who has never read `core/`.** Everything accidental has been cleared out of their way — a normative case schema, one event encoding instead of five, `why` required on every case, and two commands that validate any change. The gap is authorship.
+- **O21. Conformance suite exists, schema published, second implementation runs it (§18.9.1, §18.11).** 393 vectors, every case carrying a `kind` that is the sole discriminator, validated against a **hand-written** `schema.json` — hand-written because a schema emitted by the generator would agree with the generator's mistakes, and it earned that by catching two defects on its first run. A second implementation written from Part V agreed on 101 cases and disagreed on 3, **all three defects in this document**, of which the important one was negative integers being *unspecified* — the reference accepted them, the second implementation refused them, and both were conformant, a divergence no vector set could detect because there was no correct answer to test against. 104/104 after correction. Most of the second implementation's effort went into the harness rather than the protocol; that friction is now removed (§18.11). **Still not closed, and what remains cannot be engineered away: an implementer who has never read `core/`.** Everything accidental has been cleared out of their way — a normative case schema, one event encoding instead of five, `why` required on every case, and two commands that validate any change. The gap is authorship.
 - **O22. (closed in 0.44, §4.3.3.)** An escrow participant who loses their device. Resolved once the question was asked correctly: a share cannot be *reconstructed* — measured, `prepare_multisig` draws 88 characters of fresh randomness beyond what the wallet keys determine — but it does not need to be, because it is already a 2,286-byte file that a virgin `wallet-rpc` will open directly. The recovery ask therefore moved from **the counterparty's signature**, which no protocol can compel from an adversary, to **the other participants re-sharing multisig info**, which endorses no outcome and is a step every participant performs routinely. **Residue:** a stale bundle still cannot recover an escrow opened after it, so this now depends on a client prompting for re-export at ceremony completion — a UX obligation rather than a protocol impossibility. And an end-to-end spend from a restored share is still undemonstrated (§4.3.3's last limit).
 ---
 *End of Part I. The remaining parts specify the three mechanisms Part I leans on hardest: the tap that opens every transaction, the identity that optionally survives one, and the settlement that makes it fast enough to matter.*
@@ -2477,6 +2477,8 @@ a photograph carries where it was taken, and a listing is a public board.
 
 ## 16.19 Small groups over pairwise threads
 
+*Groups formed under §16.24 keep their words on a shared board and send with one write; this section is the roster, the invitation, and the transport of groups without a board.*
+
 A group is §17.9's roster pattern carrying words instead of DKG rounds: a member list, then fan-out — the sender seals the same body into each member's existing pairwise thread. There is **no group key, no shared record, and no new object on the network** that says *these N people are a group*. Every property a thread has — §16.11's forward secrecy per pair, prekey partitioning, deniability — comes along unchanged, because nothing changes about how a message is sealed. The cost is stated rather than hidden: N−1 writes per message, which bounds this at *small* — a household, a stall's two phones, the three people organising a thing — and that bound is the shape, not a limitation to engineer away.
 
 **Authenticity needs nothing added.** Each copy travels in a pairwise thread whose keys only its two ends hold, so a member cannot write as another member — the property a shared group key gives away first. What no signing can add is cross-member consistency: a sender *can* say different things to different members, and only a shared record could prevent it, at the price of everything above. The group is N conversations that agree because their participants do.
@@ -2792,6 +2794,144 @@ seen are published into the next edition of that post by the author.
 readable by everyone who ever took the persona's card. A future revision
 MAY encrypt the head with a key handed to hearted contacts over the
 mailbox; the document shapes above do not change for it.
+
+## 16.24 Group boards: one record, one write per message
+
+§16.19 fans a group message into N−1 pairwise threads, and its cost is the
+group's size: a message is N−1 sealed writes, a lap reads N−1 logs, and
+sending needs a full mesh. A **group board** replaces the fan-out with one
+shared record that every member writes their own part of and everyone
+reads. A message is one write; a lap is one inspection; a newcomer reads
+the recent pages instead of nothing; and every member sees the same
+record, so a sender can no longer say different things to different
+members. What it gives up is named at the end of this section, plainly.
+
+### The record
+
+A board is a DHT record with the **SMPL schema**: one owner and a list of
+members, each writing only their own subkeys, each write signed by that
+member's own key. A member cannot write as another member; the record
+enforces it, not the group key.
+
+- The **owner** is the persona key of the member who formed this
+  generation (below), with `o_cnt = PAGES` subkeys.
+- The **first member entry is the nameplate**: a 32-byte member id that
+  is the SHA-256 of `"ducat group board"`, the group id (§16.19's 16
+  bytes) and the generation as eight big-endian bytes, with `m_cnt = 1`.
+  Nobody holds a key for it and nothing is ever written under it. It is
+  what makes two groups of the same people two records, and one group's
+  generations two records even when the member list did not change.
+- The **members** follow: every other member's persona key, in ascending
+  byte order, each with `m_cnt = PAGES` subkeys.
+- `PAGES` is 4. The owner owns subkeys `0` to `PAGES−1`; the nameplate's
+  one subkey is `PAGES`; the member at index *i* of the ordering owns
+  `PAGES·(1+i)+1` to `PAGES·(2+i)`.
+- The record key is what the DHT derives from the owner key and the
+  schema, so anyone holding the roster computes it and nobody has to be
+  told it. The group, the generation and the membership are all in the
+  key.
+
+The DHT bounds the record at 1 MiB and 1024 subkeys, and a subkey at
+32 KiB. A board therefore holds at most **255 members**, and a page may
+hold at most `min(32768, 1048576 ÷ subkeys)` bytes sealed; a writer MUST
+stay under that and a reader MUST accept anything up to it. A group of
+32 has 8 KiB pages; a group of 255 has 1 KiB pages and a shorter memory.
+
+### Pages
+
+A member's subkeys are a **ring of pages**. The member appends each
+message to the current page; when the next message would carry the
+sealed page past its bound, the member starts the next page in the ring,
+overwriting the oldest. The record holds each member's last few pages;
+what scrolled off lives on the readers' disks.
+
+A page is a wire object (§18.4) and a strict-reader object (§18.8):
+
+| Field | Name | Value |
+|---|---|---|
+| 290 | `GB_VERSION` | `1` |
+| 291 | `GB_GEN` | the generation this page was written under |
+| 292 | `GB_ENTRIES` | an array of one or more entry maps, ascending by `GB_SEQ`, no repeats |
+
+An entry:
+
+| Field | Name | Value |
+|---|---|---|
+| 293 | `GB_SEQ` | the sender's own counter in the group — `group_seq` of §16.19, the same counter |
+| 294 | `GB_TS` | seconds since the epoch, non-zero |
+| 295 | `GB_KIND` | `0` text, `4` reaction, `5` retraction — the kinds §16.19 lets into a group, less the roster |
+| 296 | `GB_BODY` | the text; a reaction's body is the reaction; absent on a retraction |
+| 297 | `GB_RE_SENDER` | the target's sender persona key, 32 bytes |
+| 298 | `GB_RE_SEQ` | the target's `GB_SEQ` |
+
+`GB_RE_SENDER` and `GB_RE_SEQ` travel together or not at all; a reaction
+and a retraction MUST carry them, a text MAY (a reply). Field **299** is
+never to be assigned: it is the page's strict-reader probe, pinned by a
+vector. A page whose `GB_GEN` is not the generation the reader holds for
+that record is refused whole.
+
+**Sealing.** A page is sealed with XChaCha20-Poly1305 under the
+generation's **group key** (32 random bytes, minted by whoever forms the
+generation), a fresh 24-byte nonce prefixed to the ciphertext, and the
+record key and subkey index as associated data, exactly as §16.20 seals a
+publication chunk — a page cannot be moved to another subkey or another
+board and still open.
+
+**Reading.** A reader inspects the record for subkeys whose sequence
+moved (the DHT reports every subkey's sequence in one call), reads those
+pages, opens them, and merges entries by `(sender, GB_SEQ)`, where the
+sender is the member the subkey belongs to — the schema says so; the page
+does not. Entries already held are skipped. Per-sender order is the
+counter; across senders the order is `GB_TS`, then the sender key, so two
+phones show one order — §16.19's arrival-order caveat is gone. A member
+watches the record for the same reason a contact's log is watched; the
+DHT admits a bounded number of watchers per record, and a large group's
+members past that bound poll on their lap's schedule.
+
+### Generations
+
+The record is fixed by its member list, so growing the group means a new
+record. A **generation** is one record with one group key.
+
+- **Generation 1** is formed by the group's creator at creation.
+- **Adding** a member: any member may. The adder forms generation `g+1`
+  — owner the adder, members the grown set, a fresh group key — and sends
+  the roster (below) to every member, the newcomer included. The adder
+  must hold the newcomer as a contact; nobody else has to. **The full mesh
+  of §16.19 is no longer required for sending.**
+- A roster naming a **higher generation from a current member** moves the
+  reader to that record: it writes there from then on, and keeps the old
+  record and key so what it already read stays open. A roster naming a
+  lower or equal generation changes nothing, with one tie-break: two
+  members forming `g+1` at once make two records, and the one whose owner
+  key is lower in byte order is the generation; a member who formed the
+  other MUST form `g+2` with the union of both rosters.
+- **Nobody is removed**, for §16.19's reason; a generation could exclude
+  someone, and a rule for who may do that is a later revision's.
+
+The roster message stays what §16.19 says — `GROUP_ROSTER`, kind 12,
+sealed pairwise — and its payload gains four keys after the name (1) and
+the member list (2): **3** the generation, **4** the owner's persona key,
+**5** the group key, **6** `PAGES`. A roster without them describes a
+§16.19 group without a board, and such groups keep working as they did.
+
+### What is stated plainly to the person
+
+The disclosure of §16.19 changes in three places. A newcomer **sees the
+recent pages**, not nothing. Sending needs the board, not everyone
+holding everyone; the adder holds the newcomer. And messages are
+**attributable to the sender's persona key** — the record signs them —
+where the pairwise thread was deniable.
+
+### What the board trades away
+
+Per-message forward secrecy becomes **per-generation**: a group key that
+leaks opens every page still on the record and whatever the leaking
+device stored, until the next generation. Deniability goes: a page is
+signed by the writer's persona key, which is the key a contact card
+already binds. Authenticity does not go — the schema keeps each member in
+their own subkeys — and consistency and history are gained. Money stays
+pairwise (§16.19); the roster stays pairwise because it carries the key.
 
 ## 17.1 The core insight: bond once, ride hundreds of times
 
@@ -3288,7 +3428,9 @@ Part V numbers four objects (`TapPresent`, `FullOffer`, `ACCEPT`, `RECEIPT`) and
 | 286 | the period a reader asks to be sold (§16.20) | **Assigned** |
 | 287 | a listing's inline thumbnail (§16.18) | **Assigned** |
 | 288–289 | a listing's picture gallery: swarm share and index digest (§16.18) | **Assigned** |
-| 290+ | Unallocated | — |
+| 290–298 | group board page (§16.24) | **Assigned** |
+| 299 | never to be assigned — the group page's strict-reader probe, pinned by a vector | **Reserved** |
+| 300+ | Unallocated | — |
 
 The `96+ Unallocated` row above was stale from 0.14 onward: 96–103 had been in use since `TERMS` and `MANDATE` shipped, and a second implementer allocating from 96 would have collided head-on. Registries decay silently unless something checks them, which is the argument for the type-code rule below.
 
@@ -3440,6 +3582,7 @@ Format: a JSON manifest of cases with hex-encoded inputs, expected outputs, and 
 | `stand.epoch` | A stand's generation gets the pinned board name, and a name that already names one is refused (§15.12) |
 | `message.chain` | A 1:1 message thread links and sequences without gaps or substitutions (§16.10) |
 | `message.payment` | A payment request or notice carries an amount, and text does not (§16.13) |
+| `group.page` | A group board page opens under the strict reader: entries ascend, references travel in pairs, reactions and retractions name a target, and a field nobody assigned is refused (§16.24) |
 
 Three rules about the cases themselves, each earned:
 

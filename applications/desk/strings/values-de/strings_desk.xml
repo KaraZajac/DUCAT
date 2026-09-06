@@ -244,7 +244,7 @@
     <string name="desk_cover">Titelbild</string>
     <string name="desk_cover_note">Das Titelbild wird zum Zehn-Kilobyte-Bild am Brett; der Rest reist über den Schwarm und wird nur geholt, wenn jemand das Angebot öffnet.</string>
     <string name="desk_pick_listing">Wähle ein Angebot oder beginne eines mit den Schaltflächen links.</string>
-    <string name="desk_group_copies_queued">Einige Kopien sind noch nicht raus – sie sind eingereiht und werden erneut versucht.</string>
+    <string name="desk_group_copies_queued">Die Seite ist noch nicht angekommen — sie wird in der nächsten Runde erneut geschrieben.</string>
     <string name="desk_amount_in_xmr">Ein Betrag in XMR.</string>
     <string name="desk_kind_reaction">Reaktion</string>
     <string name="desk_kind_retraction">Rücknahme</string>
@@ -260,7 +260,7 @@
     <string name="desk_nobody_yet">Noch niemand. Beantworte jemandes Karte oder zeige deine auf der Ich-Seite.</string>
     <string name="desk_groups">Gruppen</string>
     <string name="desk_group_name_hint">Ein Name für die Gruppe</string>
-    <string name="desk_group_note">Alle darin müssen einander schon kennen; die Liste geht an jedes Mitglied.</string>
+    <string name="desk_group_note">Du musst jeden kennen, den du hinzufügst; die Mitglieder müssen sich nicht untereinander kennen. Die Mitgliederliste geht mit dem Schlüssel des Boards an jedes Mitglied.</string>
     <string name="desk_n_in_group">%1$d in der Gruppe</string>
     <string name="desk_people">Personen</string>
     <string name="desk_members_and_you">%1$s und du</string>

@@ -241,7 +241,7 @@
     <string name="desk_cover">ปก</string>
     <string name="desk_cover_note">ปกจะกลายเป็นรูปสิบกิโลไบต์บนกระดาน ที่เหลือเดินทางบน swarm และดึงมาเมื่อมีคนเปิดประกาศเท่านั้น</string>
     <string name="desk_pick_listing">เลือกประกาศ หรือเริ่มใหม่ด้วยปุ่มทางซ้าย</string>
-    <string name="desk_group_copies_queued">สำเนาบางส่วนยังไม่ออกไป — อยู่ในคิวและจะลองใหม่</string>
+    <string name="desk_group_copies_queued">หน้ายังไปไม่ถึง — จะเขียนอีกครั้งในรอบถัดไป</string>
     <string name="desk_amount_in_xmr">จำนวนเงินเป็น XMR</string>
     <string name="desk_kind_reaction">ปฏิกิริยา</string>
     <string name="desk_kind_retraction">ถอนกลับ</string>
@@ -257,7 +257,7 @@
     <string name="desk_nobody_yet">ยังไม่มีใคร ตอบการ์ดของใครสักคน หรือแสดงของคุณที่หน้าฉัน</string>
     <string name="desk_groups">กลุ่ม</string>
     <string name="desk_group_name_hint">ชื่อกลุ่ม</string>
-    <string name="desk_group_note">ทุกคนในกลุ่มต้องรู้จักกันอยู่แล้ว รายชื่อจะส่งไปยังสมาชิกแต่ละคน</string>
+    <string name="desk_group_note">คุณต้องรู้จักทุกคนที่คุณเพิ่ม แต่สมาชิกไม่จำเป็นต้องรู้จักกัน รายชื่อจะถูกส่งไปยังสมาชิกแต่ละคนพร้อมกุญแจของบอร์ด</string>
     <string name="desk_n_in_group">%1$d คนในกลุ่ม</string>
     <string name="desk_people">ผู้คน</string>
     <string name="desk_members_and_you">%1$s และคุณ</string>

@@ -244,7 +244,7 @@
     <string name="desk_cover">جلد</string>
     <string name="desk_cover_note">جلد تصویر ده‌کیلوبایتی روی تابلو می‌شود؛ بقیه روی گله سفر می‌کنند و فقط وقتی کسی آگهی را باز کند واکشی می‌شوند.</string>
     <string name="desk_pick_listing">آگهی‌ای را انتخاب کنید، یا با دکمه‌های سمت چپ یکی بسازید.</string>
-    <string name="desk_group_copies_queued">برخی نسخه‌ها هنوز نرفته‌اند — در صف‌اند و دوباره تلاش می‌شود.</string>
+    <string name="desk_group_copies_queued">صفحه هنوز نرسیده است — در دور بعدی دوباره نوشته می‌شود.</string>
     <string name="desk_amount_in_xmr">مبلغی به XMR.</string>
     <string name="desk_kind_reaction">واکنش</string>
     <string name="desk_kind_retraction">پس‌گرفتن</string>
@@ -260,7 +260,7 @@
     <string name="desk_nobody_yet">هنوز کسی نیست. به کارت کسی پاسخ دهید، یا کارت خودتان را در صفحهٔ من نشانش دهید.</string>
     <string name="desk_groups">گروه‌ها</string>
     <string name="desk_group_name_hint">نامی برای گروه</string>
-    <string name="desk_group_note">همهٔ اعضا باید از قبل یکدیگر را بشناسند؛ فهرست برای هر عضو فرستاده می‌شود.</string>
+    <string name="desk_group_note">هر کسی را که اضافه می‌کنید باید بشناسید؛ لازم نیست اعضا یکدیگر را بشناسند. فهرست همراه با کلید تابلو برای هر عضو فرستاده می‌شود.</string>
     <string name="desk_n_in_group">%1$d در گروه</string>
     <string name="desk_people">افراد</string>
     <string name="desk_members_and_you">%1$s و شما</string>

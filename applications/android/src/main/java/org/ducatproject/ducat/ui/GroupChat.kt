@@ -57,8 +57,12 @@ private class SplitPartial(val fails: List<String>, val billed: List<String>) :
  * member, and says *who* rather than dimming a button, because "add Dave" is
  * an instruction and a grey button is a shrug. The one-time one is the plain
  * statement of the shape: trusted people, add-only, no history for newcomers,
- * unforgeable member-to-member, leaving is local. Shown once per group per
- * phone, at creation or on first open after being added.
+ * unforgeable member-to-member, leaving is local. A group on a board (§16.24)
+ * gets the statement that section changes in three places — a newcomer sees
+ * the recent pages, sending needs the board rather than everyone holding
+ * everyone, and words are attributable to the sender's key — and no mesh
+ * gate at all. Shown once per group per phone, at creation or on first open
+ * after being added.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,6 +84,9 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
     var missing by remember(idHex) { mutableStateOf<List<String>>(emptyList()) }
     LaunchedEffect(version, idHex) {
         val (fresh, book, gaps) = withContext(Dispatchers.IO) {
+            // Looking at it: its board (§16.24) is read every sweep while
+            // this screen is open, the way an open thread's log is.
+            Groups.touch(idHex)
             Triple(Groups.thread(context, idHex), store.all(), Groups.missing(context, idHex))
         }
         rows = fresh
@@ -211,7 +218,12 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
             title = { Text(stringResource(R.string.group_disclosure_title)) },
             text = {
                 Column {
-                    Text(stringResource(R.string.group_disclosure_body))
+                    Text(
+                        stringResource(
+                            if (group.board != null) R.string.group_disclosure_board_body
+                            else R.string.group_disclosure_body,
+                        ),
+                    )
                 }
             },
             confirmButton = {
@@ -455,7 +467,11 @@ fun GroupChatScreen(idHex: String, onBack: () -> Unit) {
                             reSender = target?.get(0),
                             reSeq = target?.get(1)?.toLong(),
                         )
-                        if (all) null else context.getString(R.string.group_partial_queued)
+                        // On a board the words are on disk and in the
+                        // thread the moment send returns; a page the
+                        // network did not take yet is the lap's to write,
+                        // not the person's to type again.
+                        if (all || group.board != null) null else context.getString(R.string.group_partial_queued)
                     }
                 },
                 enabled = missing.isEmpty() && draft.isNotBlank() && !sending,

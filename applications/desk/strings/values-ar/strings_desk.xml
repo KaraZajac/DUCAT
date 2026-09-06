@@ -256,7 +256,7 @@
     <string name="desk_cover">الغلاف</string>
     <string name="desk_cover_note">يصبح الغلاف صورة العشرة كيلوبايت على اللوحة؛ والبقية تسافر على السرب ولا تُجلب إلا عندما يفتح أحدهم الإعلان.</string>
     <string name="desk_pick_listing">اختر إعلانًا، أو ابدأ واحدًا بالأزرار على اليسار.</string>
-    <string name="desk_group_copies_queued">بعض النسخ لم تخرج بعد — وهي في الطابور وسيُعاد إرسالها.</string>
+    <string name="desk_group_copies_queued">لم تصل الصفحة بعد — ستُكتب مجددًا في الجولة التالية.</string>
     <string name="desk_amount_in_xmr">مبلغ بـ XMR.</string>
     <string name="desk_kind_reaction">تفاعل</string>
     <string name="desk_kind_retraction">سحب</string>
@@ -272,7 +272,7 @@
     <string name="desk_nobody_yet">لا أحد بعد. أجب عن بطاقة أحدهم، أو أرِه بطاقتك في صفحة أنا.</string>
     <string name="desk_groups">المجموعات</string>
     <string name="desk_group_name_hint">اسم للمجموعة</string>
-    <string name="desk_group_note">يجب أن يعرف الجميع فيها بعضهم مسبقًا؛ تُرسل القائمة إلى كل عضو.</string>
+    <string name="desk_group_note">يجب أن يكون كل من تضيفه من جهات اتصالك؛ ولا يلزم أن يعرف الأعضاء بعضهم. تُرسل القائمة إلى كل عضو مع مفتاح اللوحة.</string>
     <string name="desk_n_in_group">%1$d في المجموعة</string>
     <string name="desk_people">الأشخاص</string>
     <string name="desk_members_and_you">%1$s وأنت</string>

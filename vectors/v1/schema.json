@@ -200,7 +200,8 @@
             "board.sealed",
             "board.beacon_window",
             "board.beacon_verdict",
-            "position.frame"
+            "position.frame",
+            "group.page"
           ]
         },
         "name": {

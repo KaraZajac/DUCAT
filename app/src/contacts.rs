@@ -721,6 +721,18 @@ impl App {
         self.contacts_store().view(|m| read_thread(m, persona_hex))
     }
 
+    /// A row from a group board (§16.24) under its sender's thread — the
+    /// sender need not be a contact; a board member is named by key.
+    pub(crate) fn append_group_row(&self, persona_hex: &str, row: StoredMessage) -> Result<(), Error> {
+        self.contacts_store().update(|m| {
+            let mut thread = read_thread(m, persona_hex);
+            thread.push(row);
+            write_thread(m, persona_hex, &thread);
+        })?;
+        bump();
+        Ok(())
+    }
+
     /// One inbound row and the inbound counters, in one write.
     pub fn append_and_advance(
         &self,

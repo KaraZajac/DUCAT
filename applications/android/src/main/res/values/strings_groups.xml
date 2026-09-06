@@ -7,7 +7,7 @@
     <string name="group_you">You</string>
     <string name="group_add">Add</string>
     <string name="group_add_title">Add someone</string>
-    <string name="group_add_note">Only your contacts are offered — a group can only carry words between people who hold each other. Everyone else must add them too before they can join in.</string>
+    <string name="group_add_note">Only your contacts are offered: you must hold the person you add. On a board they need not hold the others — the roster reaches them with the board\'s key.</string>
     <string name="group_add_nobody">Everyone you know is already in this group.</string>
     <string name="group_create_title">New group</string>
     <string name="group_create_note">Pick from your contacts. A group needs at least three people, you included — with two, you already have a conversation.</string>
@@ -17,6 +17,7 @@
     <string name="group_partial_queued">Some copies have not landed yet — they will keep trying on their own.</string>
     <string name="group_disclosure_title">A group is trusted people</string>
     <string name="group_disclosure_body">Everyone must hold everyone as a contact — you can’t send until you do.\n\nAnyone in the group can add anyone. Nobody can be removed, ever.\n\nSomeone added today sees nothing from before — there is no shared history to give them.\n\nMessages can’t be forged: each one travels sealed, person to person, so nobody can write as anybody else.\n\nLeaving only hides the group on your phone. The others keep it, and keep each other.</string>
+    <string name="group_disclosure_board_body">Everyone here reads and writes one shared board, so one message reaches everyone at once — you don’t need to hold everyone as a contact to send. Whoever adds someone must hold them; nobody else has to.\n\nAnyone in the group can add anyone. Nobody can be removed, ever.\n\nSomeone added today sees the recent pages, not everything ever said.\n\nEach message is signed by its sender’s key: nobody can write as anybody else, and what you write can be shown to be yours.\n\nLeaving only hides the group on your phone. The others keep it, and keep each other.</string>
     <string name="group_disclosure_ok">Understood</string>
     <plurals name="group_members">
         <item quantity="one">%1$d person</item>

@@ -244,7 +244,7 @@
     <string name="desk_cover">copertina</string>
     <string name="desk_cover_note">La copertina diventa l’immagine da dieci kilobyte in bacheca; il resto viaggia sullo sciame e viene recuperato solo quando qualcuno apre l’annuncio.</string>
     <string name="desk_pick_listing">Scegli un annuncio, o iniziane uno con i pulsanti a sinistra.</string>
-    <string name="desk_group_copies_queued">Alcune copie non sono ancora partite — sono in coda e verranno ritentate.</string>
+    <string name="desk_group_copies_queued">La pagina non è ancora arrivata — verrà riscritta al prossimo giro.</string>
     <string name="desk_amount_in_xmr">Un importo in XMR.</string>
     <string name="desk_kind_reaction">Reazione</string>
     <string name="desk_kind_retraction">Ritiro</string>
@@ -260,7 +260,7 @@
     <string name="desk_nobody_yet">Ancora nessuno. Rispondi alla carta di qualcuno, o mostragli la tua nella pagina Io.</string>
     <string name="desk_groups">Gruppi</string>
     <string name="desk_group_name_hint">Un nome per il gruppo</string>
-    <string name="desk_group_note">Tutti i membri devono già conoscersi tra loro; l’elenco viene inviato a ciascuno.</string>
+    <string name="desk_group_note">Devi avere tra i contatti chiunque aggiungi; i membri non devono conoscersi tra loro. L\'elenco parte verso ogni membro con la chiave della bacheca.</string>
     <string name="desk_n_in_group">%1$d nel gruppo</string>
     <string name="desk_people">Persone</string>
     <string name="desk_members_and_you">%1$s e tu</string>
