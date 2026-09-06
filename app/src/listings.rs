@@ -864,7 +864,18 @@ impl App {
         let bundle = self.bundle_dir(listing_id);
         let dir = if bundle.join(LISTING_FILE).is_file() { bundle } else { self.photo_dir(listing_id) };
         if !crate::has_any_file(&dir) {
-            log::info(TAG, format!("gallery of {}… has nothing left to serve", &listing_id[..8.min(listing_id.len())]));
+            // A restore brings the listing back without its pictures (the
+            // backup is one small file). The notice still names a share
+            // nobody serves, so every reader waits on it and then hears the
+            // seller is away. Re-post without the gallery: the inline
+            // thumbnail travels with the notice, and the owner can add the
+            // pictures again.
+            log::info(TAG, format!("gallery of {}… has nothing left to serve — re-posting without it", &listing_id[..8.min(listing_id.len())]));
+            if l.posted_at > 0 {
+                if let Err(e) = self.post_listing(listing_id) {
+                    log::warn(TAG, format!("gallery of {}…: re-post without pictures: {e}", &listing_id[..8.min(listing_id.len())]));
+                }
+            }
             return;
         }
         swarm::swarm_stop_share(share.clone());

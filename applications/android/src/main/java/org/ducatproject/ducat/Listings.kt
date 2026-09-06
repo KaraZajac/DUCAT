@@ -701,13 +701,28 @@ object Listings {
         val digest = o.optString("gallery_dig").takeIf { it.isNotBlank() } ?: return
         val fingerprint = bundleFingerprint(context, o)
         if (fingerprint == null) {
-            // Said, not swallowed: a listing whose pictures are gone cannot
-            // serve the gallery its notice still advertises, and the owner
-            // is the only one who can put that right.
+            // A restore brings the listing back without its pictures — the
+            // backup is one small file — and the notice still names a share
+            // nobody serves, so every reader waits on it and then hears the
+            // seller is away. Re-post without the gallery: the inline
+            // thumbnail travels with the notice, and the owner can add the
+            // pictures again.
             DucatLog.i(
                 "Listings",
-                "gallery of ${listingId.take(8)}… has nothing left to serve",
+                "gallery of ${listingId.take(8)}… has nothing left to serve — re-posting without it",
             )
+            synchronized(postLocks.getOrPut(listingId) { Any() }) {
+                o.remove("gallery")
+                o.remove("gallery_dig")
+                o.remove("bundle_fp")
+                put(context, o)
+            }
+            if (o.optString("board").isNotBlank()) {
+                Thread {
+                    runCatching { post(context, listingId) }
+                        .onFailure { DucatLog.w("Listings", "gallery of ${listingId.take(8)}…: re-post without pictures: ${it.message}") }
+                }.apply { isDaemon = true; name = "gallery-repost" }.start()
+            }
             return
         }
         Thread {
