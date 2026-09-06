@@ -234,18 +234,34 @@ object Home {
 
     /** Read every hearted home's head; fetch what moved. Returns how many have a new edition. */
     fun refreshFeeds(context: Context): Int {
+        // Heads FEED_WIDTH side by side: one read is a second or ten
+        // depending on the network, and a timeline of a few hundred homes
+        // must not take the whole of its ten-minute turn on reads alone.
         var fresh = 0
-        for (c in hearted(context)) {
-            val key = runCatching { keyOf(c.personaHex) }.getOrNull() ?: continue
-            val before = Sites.all(context).firstOrNull { it.recordKey == key }?.fetchedDigestHex
-            val site = runCatching { Sites.add(context, key) }.getOrNull() ?: continue
-            if (before != site.digestHex) {
-                runCatching { Sites.fetchBundle(context, site) }
-                    .onSuccess { fresh++; DucatLog.i(TAG, "${c.displayName()} has a new edition") }
-                    .onFailure { DucatLog.w(TAG, "${c.displayName()}'s home: ${it.message}") }
-            }
+        for (chunk in hearted(context).chunked(FEED_WIDTH)) {
+            val tasks = chunk.map { c -> java.util.concurrent.Callable<Boolean> { refreshOneFeed(context, c) } }
+            for (f in feedPool.invokeAll(tasks)) if (runCatching { f.get() }.getOrDefault(false)) fresh++
         }
         return fresh
+    }
+
+    /** One hearted home: its head, and its bundle when the head moved. True when there is a new edition on disk. */
+    private fun refreshOneFeed(context: Context, c: Contact): Boolean {
+        val key = runCatching { keyOf(c.personaHex) }.getOrNull() ?: return false
+        val before = Sites.all(context).firstOrNull { it.recordKey == key }?.fetchedDigestHex
+        val site = runCatching { Sites.add(context, key) }.getOrNull() ?: return false
+        if (before == site.digestHex) return false
+        return runCatching { Sites.fetchBundle(context, site) }
+            .onSuccess { DucatLog.i(TAG, "${c.displayName()} has a new edition") }
+            .onFailure { DucatLog.w(TAG, "${c.displayName()}'s home: ${it.message}") }
+            .isSuccess
+    }
+
+    private const val FEED_WIDTH = 4
+    private val feedPool: java.util.concurrent.ExecutorService by lazy {
+        java.util.concurrent.Executors.newFixedThreadPool(FEED_WIDTH) { r ->
+            Thread(r, "feed-heads").apply { isDaemon = true }
+        }
     }
 
     /** Not every sweep: heads move rarely and the reads add up. */

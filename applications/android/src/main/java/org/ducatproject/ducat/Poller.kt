@@ -432,9 +432,14 @@ class Poller(private val context: Context) {
                     // for every contact — that was one network op per
                     // contact per sweep for nothing.
                     var (up, down) = Mailbox.armWatches(context)
+                    // Unanswered cards the same way: a watch lasts ten
+                    // minutes, so one renewal every eight is the whole
+                    // cost, not one per card per sweep.
+                    val nowMs = System.currentTimeMillis()
                     store.issuedCards().filter { it.answeredBy == null }.forEach {
+                        if (nowMs - (cardWatchedAt[it.inboxKey] ?: 0L) < CARD_WATCH_RENEW_MS) return@forEach
                         runCatching { uniffi.ducat_mobile.nodeDhtWatch(it.inboxKey) }
-                            .onSuccess { ok -> if (ok) up++ else down++ }
+                            .onSuccess { ok -> if (ok) { up++; cardWatchedAt[it.inboxKey] = nowMs } else down++ }
                             .onFailure { down++ }
                     }
                     if (down > 0 && (up != watchesUp || down != watchesDown)) {
@@ -790,6 +795,10 @@ class Poller(private val context: Context) {
             }.onFailure { DucatLog.w(TAG, "lane: ${it.javaClass.simpleName}: ${it.message}") }
         }
     }
+
+    /** When each unanswered card's inbox watch was last renewed. */
+    private val cardWatchedAt = HashMap<String, Long>()
+    private val CARD_WATCH_RENEW_MS = 8 * 60_000L
 
     /** Watch health as last narrated — only changes are logged. */
     private var watchesUp = -1

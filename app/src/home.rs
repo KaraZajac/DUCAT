@@ -26,6 +26,8 @@ const THUMB_BUDGET: usize = 160 * 1024;
 /// How often the lap looks at hearted homes: the head reads are cheap but
 /// not free, and a feed is not a chat.
 const FEEDS_EVERY_SECS: u64 = 10 * 60;
+/// Heads read side by side on a feeds lap.
+const FEED_WIDTH: usize = 8;
 /// Posts kept in `feed.json` before the oldest move to an older page.
 const PAGE_KEEP: usize = 120;
 
@@ -327,30 +329,50 @@ impl App {
     }
 
     /// Read every hearted home's head; fetch what moved. Returns how many
-    /// homes have a new edition.
+    /// homes have a new edition. The heads are read FEED_WIDTH side by
+    /// side: one read is a second or ten depending on the network, and
+    /// a timeline of a few hundred homes must not take the whole of its
+    /// ten-minute turn on reads alone.
     pub fn refresh_feeds(&self) -> usize {
+        let hearted = self.hearted();
         let mut fresh = 0;
-        for c in self.hearted() {
-            let Ok(key) = self.home_key_of(&c.persona_hex) else { continue };
-            let before = self.sites().into_iter().find(|s| s.record_key == key).and_then(|s| s.fetched_digest_hex);
-            match self.add_site(&key) {
-                Ok(site) => {
-                    if before.as_deref() != Some(site.digest_hex.as_str()) {
-                        match self.fetch_site_bundle(&key) {
-                            Ok(_) => {
-                                fresh += 1;
-                                log::info(TAG, format!("{} has a new edition", c.display_name()));
-                            }
-                            Err(e) => log::warn(TAG, format!("{}'s home: {e}", c.display_name())),
-                        }
-                    }
-                }
-                Err(_) => {}
-            }
+        for chunk in hearted.chunks(FEED_WIDTH) {
+            let moved: Vec<bool> = std::thread::scope(|s| {
+                let handles: Vec<_> = chunk
+                    .iter()
+                    .map(|c| {
+                        let app = self.clone();
+                        let c = c.clone();
+                        s.spawn(move || app.refresh_one_feed(&c))
+                    })
+                    .collect();
+                handles.into_iter().map(|h| h.join().unwrap_or(false)).collect()
+            });
+            fresh += moved.into_iter().filter(|m| *m).count();
         }
         fresh
     }
 
+    /// One hearted home: its head, and its bundle when the head moved.
+    /// True when there is a new edition on disk.
+    fn refresh_one_feed(&self, c: &crate::contacts::Contact) -> bool {
+        let Ok(key) = self.home_key_of(&c.persona_hex) else { return false };
+        let before = self.sites().into_iter().find(|s| s.record_key == key).and_then(|s| s.fetched_digest_hex);
+        let Ok(site) = self.add_site(&key) else { return false };
+        if before.as_deref() == Some(site.digest_hex.as_str()) {
+            return false;
+        }
+        match self.fetch_site_bundle(&key) {
+            Ok(_) => {
+                log::info(TAG, format!("{} has a new edition", c.display_name()));
+                true
+            }
+            Err(e) => {
+                log::warn(TAG, format!("{}'s home: {e}", c.display_name()));
+                false
+            }
+        }
+    }
     /// Not every lap: the heads move rarely and the reads add up.
     pub fn feeds_lap(&self) {
         let now = App::now();
