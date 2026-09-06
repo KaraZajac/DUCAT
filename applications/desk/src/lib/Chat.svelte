@@ -3,7 +3,7 @@
   // Chat: every thread on the left, the open one on the right. A desk has
   // the room for both at once, which is the one place it beats the phone.
   import { onMount, tick } from "svelte";
-  import { t, tp } from "./i18n.svelte";
+  import { t, tp, lc } from "./i18n.svelte";
   import { api, confirmDanger, copy, fmtTime, fmtXmr, type ContactRow, type GroupMessage, type GroupRow, type MessageRow, type StandingRow } from "./api";
   import { gen, drive, pending } from "./state.svelte";
   import Busy from "./Busy.svelte";
@@ -615,7 +615,7 @@
       <input class="input find" type="search" placeholder={t("desk_find_conversation")} bind:value={finding} />
     {/if}
     {#if groups.length || rows.length >= 2}
-      <div class="list-head"><span>{t("desk_groups")}</span><button class="linkish" onclick={() => (makingGroup = !makingGroup)}>{makingGroup ? t("chat_close").toLowerCase() : t("desk_new").toLowerCase()}</button></div>
+      <div class="list-head"><span>{t("desk_groups")}</span><button class="linkish" onclick={() => (makingGroup = !makingGroup)}>{makingGroup ? lc(t("chat_close")) : lc(t("desk_new"))}</button></div>
     {/if}
     {#if makingGroup}
       <div class="add-card">
@@ -833,7 +833,7 @@
                 {:else if m.att_here}
                   <div class="bubble-att">{@html icons.attach} {m.att_name ?? m.att_mime} · <button class="linkish" onclick={() => showFile(m)}>{t("desk_show")}</button></div>
                 {:else if m.att_on_swarm}
-                  <div class="bubble-att">{@html icons.attach} {m.att_name ?? m.att_mime} · {(m.att_len / 1024 / 1024).toFixed(1)} MB · <button class="linkish" disabled={fetching === m.att_hash} onclick={() => fetchBig(m)}>{fetching === m.att_hash ? t("releases_fetching").toLowerCase() : t("chat_download_file")}</button></div>
+                  <div class="bubble-att">{@html icons.attach} {m.att_name ?? m.att_mime} · {(m.att_len / 1024 / 1024).toFixed(1)} MB · <button class="linkish" disabled={fetching === m.att_hash} onclick={() => fetchBig(m)}>{fetching === m.att_hash ? lc(t("releases_fetching")) : t("chat_download_file")}</button></div>
                 {:else}
                   <div class="bubble-att">{@html icons.attach} {m.att_name ?? m.att_mime ?? t("chat_file_fallback")} · {t("desk_arriving_word")}</div>
                 {/if}
@@ -864,7 +864,7 @@
               <div class="bubble-meta">
                 {fmtTime(m.timestamp)}
                 {#if m.outgoing}{m.delivered ? (m.read_by_them ? ` · ${t("desk_read")}` : ` · ${t("desk_sent_word")}`) : ` · ${t("chat_not_sent_yet")}`}{/if}
-                {#if !m.forward_secret && !m.dead_letter} · {t("chat_no_forward_secrecy").toLowerCase()}{/if}
+                {#if !m.forward_secret && !m.dead_letter} · {lc(t("chat_no_forward_secrecy"))}{/if}
               </div>
               {#if m.react_mine || m.react_theirs}
                 <div class="reactions">{#if m.react_theirs}<span title={current?.name}>{m.react_theirs}</span>{/if}{#if m.react_mine}<span class="mine" title={t("desk_you")}>{m.react_mine}</span>{/if}</div>

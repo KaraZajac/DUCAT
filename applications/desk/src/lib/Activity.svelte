@@ -3,7 +3,7 @@
   // it was for, and a running balance. Exported as CSV or JSON for the
   // books, which is a thing a desk is for.
   import { onMount } from "svelte";
-  import { t, tp, i18n } from "./i18n.svelte";
+  import { t, tp, i18n, lc } from "./i18n.svelte";
   import { api, fmtXmr, fmtTime, type BusinessSummary, type LedgerEvent, type LedgerSummary } from "./api";
   import { gen } from "./state.svelte";
 
@@ -69,7 +69,7 @@
     if (!path) return;
     try {
       const n = await api.exportLedger(path, json);
-      msg = t("desk_written_to", n, path);
+      msg = lc(t("desk_written_to", n, path);
     } catch (e) {
       err = String(e);
     }
@@ -128,7 +128,7 @@
     <div class="stat"><div class="stat-v">{fmtXmr(summary.in_pxmr)}</div><div class="meta">{t("activity_sum_in")} · {summary.in_count}</div></div>
     <div class="stat"><div class="stat-v">{fmtXmr(summary.out_pxmr)}</div><div class="meta">{t("activity_sum_out")} · {summary.out_count} · {t("activity_sum_fees")} {fmtXmr(summary.fees_pxmr)}</div></div>
     <div class="stat"><div class="stat-v">{signed(summary.net_pxmr)}</div><div class="meta">{t("activity_sum_net")}</div></div>
-    {#if business && business.sales_count}<div class="stat"><div class="stat-v">{fmtXmr(business.sales_pxmr)}</div><div class="meta">{tp("desk_sales_at_till", business.sales_count)}{business.by_origin.map(([o, d]) => ` · ${doorWord(o)} ${d.count}`).join("")}{business.tax_collected_pxmr ? ` · ${t("activity_tax_collected").toLowerCase()} ${fmtXmr(business.tax_collected_pxmr)}` : ""}</div></div>{/if}
+    {#if business && business.sales_count}<div class="stat"><div class="stat-v">{fmtXmr(business.sales_pxmr)}</div><div class="meta">{tp("desk_sales_at_till", business.sales_count)}{business.by_origin.map(([o, d]) => ` · ${doorWord(o)} ${d.count}`).join("")}{business.tax_collected_pxmr ? ` · ${lc(t("activity_tax_collected"))} ${fmtXmr(business.tax_collected_pxmr)}` : ""}</div></div>{/if}
     {#if summary.donations_pxmr}<div class="stat"><div class="stat-v">{fmtXmr(summary.donations_pxmr)}</div><div class="meta">{t("desk_given")}</div></div>{/if}
   </div>
 {/if}
@@ -146,7 +146,7 @@
       <button class="ledger-row" class:out={e.direction === "Sent"} onclick={() => (open = open === e.txid + e.timestamp ? null : e.txid + e.timestamp)}>
         <div class="lw">{e.timestamp ? fmtTime(e.timestamp) : e.pending ? t("desk_pending") : "—"}</div>
         <div class="lc">
-          <div class="title">{whoLine(e)}{e.donation ? " · " + t("activity_donation_chip").toLowerCase() : ""}</div>
+          <div class="title">{whoLine(e)}{e.donation ? " · " + lc(t("activity_donation_chip")) : ""}</div>
           <div class="meta">{metaOf(e)}</div>
         </div>
         <div class="la"><div class="title">{signed(e.net_pxmr)}</div><div class="meta">{t("desk_then_balance", fmtXmr(Math.max(0, e.balance_after_pxmr)))}</div></div>
@@ -154,7 +154,7 @@
       {#if open === e.txid + e.timestamp}
         <div class="ledger-detail">
           {#if e.txid}<div class="addr">{e.txid}</div>{/if}
-          <div class="meta">{t("txdetail_block").toLowerCase()} {e.height || "—"} · {e.source === "Notice" ? t("desk_source_notice") : e.source === "OurRecord" ? t("desk_source_record") : e.source === "Order" ? t("desk_source_order") : t("desk_source_unknown")}{e.tax_pxmr ? ` · ${t("txdetail_tax").toLowerCase()} ${fmtXmr(e.tax_pxmr)}` : ""}</div>
+          <div class="meta">{lc(t("txdetail_block"))} {e.height || "—"} · {e.source === "Notice" ? t("desk_source_notice") : e.source === "OurRecord" ? t("desk_source_record") : e.source === "Order" ? t("desk_source_order") : t("desk_source_unknown")}{e.tax_pxmr ? ` · ${t("txdetail_tax"))} ${fmtXmr(e.tax_pxmr)}` : ""}</div>
           {#if e.items.length}<div class="bill">{#each e.items as i}<div class="bill-line"><span>{i.d}</span><span>{fmtXmr(i.a)}</span></div>{/each}</div>{/if}
         </div>
       {/if}

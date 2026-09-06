@@ -3,7 +3,7 @@
   // The till: a sale to whoever is in front of you, tabs that run, and the
   // catalogue both draw from. The phone's POS and Bar Tab, side by side.
   import { onMount } from "svelte";
-  import { t, tp } from "./i18n.svelte";
+  import { t, tp, lc } from "./i18n.svelte";
   import { api, copy, fmtXmr, fmtTime, type Code, type ContactRow, type ItemRow, type TabRow, confirmDanger } from "./api";
   import { gen } from "./state.svelte";
 
@@ -197,7 +197,7 @@
 
   function stateWord(tab: TabRow): string {
     switch (tab.state) {
-      case "open": return t("bartab_section_running").toLowerCase();
+      case "open": return lc(t("bartab_section_running"));
       case "settled": return tab.seen_tx ? t("bartab_state_payment_seen") : t("bartab_state_billed_unpaid");
       case "paid": return tab.receipt_owed ? t("desk_paid_receipt_owed") : t("bartab_state_paid");
       case "paid_oob": return tab.receipt_owed ? t("desk_paid_oob_receipt_owed") : t("bartab_state_paid_oob");

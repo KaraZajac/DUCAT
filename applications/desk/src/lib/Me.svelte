@@ -2,7 +2,7 @@
   // Me: the name on your cards, the code somebody scans to reach you, and
   // the hats you wear.
   import { onMount } from "svelte";
-  import { t, i18n, LANGS, applyLanguage } from "./i18n.svelte";
+  import { t, i18n, LANGS, applyLanguage, lc } from "./i18n.svelte";
   import { api, copy, fmtWhen, type Code, type PersonaRow, type MyProfile } from "./api";
   import { gen, drive } from "./state.svelte";
 
@@ -354,7 +354,7 @@
   {#each personas as p (p.hex)}
     <div class="row">
       <div class="lead">
-        <div class="title">{p.name || (p.primary ? t("personas_primary") : t("desk_unnamed"))} {#if p.worn}<span class="meta">· {t("personas_worn").toLowerCase()}</span>{/if}</div>
+        <div class="title">{p.name || (p.primary ? t("personas_primary") : t("desk_unnamed"))} {#if p.worn}<span class="meta">· {lc(t("personas_worn"))}</span>{/if}</div>
         <div class="meta">{p.my_name ? t("desk_cards_say", p.my_name) : t("desk_no_name_yet")} · <span class="mono">{p.hex.slice(0, 16)}…</span></div>
       </div>
       <div class="actions">

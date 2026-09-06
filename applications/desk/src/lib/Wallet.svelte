@@ -2,7 +2,7 @@
   // Wallet: what is here, what is on its way, where money comes in, and
   // one form to send it. Stagenet until a mainnet build exists.
   import { onMount } from "svelte";
-  import { t, tp } from "./i18n.svelte";
+  import { t, tp, lc } from "./i18n.svelte";
   import { api, copy, fmtXmr, fmtTime, type NoteRow, type Quote, type SentRow, type WalletView } from "./api";
   import { gen } from "./state.svelte";
 
@@ -213,7 +213,7 @@
       </div>
       {#if quote}
         <p class="note">
-          {#if quote.fee_known}{t("txdetail_fee")} {fmtXmr(quote.fee_pxmr)} · {tp("balance_notes", quote.notes)} · {t("pay_total").toLowerCase()} {fmtXmr(quote.total_pxmr)} · {quote.affordable ? t("desk_left_after", fmtXmr(quote.remaining_pxmr)) : t("desk_more_than_unlocked")}{:else}{t("desk_fee_unknown")}{/if}
+          {#if quote.fee_known}{t("txdetail_fee")} {fmtXmr(quote.fee_pxmr)} · {tp("balance_notes", quote.notes)} · {lc(t("pay_total"))} {fmtXmr(quote.total_pxmr)} · {quote.affordable ? t("desk_left_after", fmtXmr(quote.remaining_pxmr)) : t("desk_more_than_unlocked")}{:else}{t("desk_fee_unknown")}{/if}
         </p>
       {:else if quoting}
         <p class="note">{t("desk_working_fee")}</p>
@@ -231,7 +231,7 @@
       {#each sends as s (s.txid_hex + s.timestamp)}
         <div class="row">
           <div class="lead">
-            <div class="title">{fmtXmr(s.amount_pxmr)} <span class="meta">· {t("desk_fee_x", fmtXmr(s.fee_pxmr))}{s.recovered ? ` · ${t("desk_recovered")}` : ""}{s.donation ? ` · ${t("activity_donation_chip").toLowerCase()}` : ""}</span></div>
+            <div class="title">{fmtXmr(s.amount_pxmr)} <span class="meta">· {t("desk_fee_x", fmtXmr(s.fee_pxmr))}{s.recovered ? ` · ${t("desk_recovered")}` : ""}{s.donation ? ` · ${lc(t("activity_donation_chip"))}` : ""}</span></div>
             <div class="meta">{fmtTime(s.timestamp)} · {t("pay_sending_to", s.contact_name ?? s.to_address.slice(0, 16) + "…")}{s.note ? ` · ${s.note}` : ""}</div>
           </div>
           {#if s.txid_hex}<div class="addr">{s.txid_hex}</div>{/if}
@@ -266,7 +266,7 @@
       </div>
     {:else}
       <p class="note">
-        {#if view.node}{t("desk_asking_node")} <span class="mono">{view.node}</span>{view.own_node ? ` (${t("monero_your_node").toLowerCase()})` : ` (${t("desk_public_node_note")})`}{:else}{t("monero_no_node")}.{/if}
+        {#if view.node}{t("desk_asking_node")} <span class="mono">{view.node}</span>{view.own_node ? ` (${lc(t("monero_your_node"))})` : ` (${t("desk_public_node_note")})`}{:else}{t("monero_no_node")}.{/if}
         <button class="linkish" onclick={() => (editingNode = true)}>{t("monero_change_your_node")}</button>
         {#if view.own_node}<button class="linkish" onclick={() => { ownNode = ""; saveNode(); }}>{t("monero_back_to_public")}</button>{/if}
       </p>

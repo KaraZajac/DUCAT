@@ -4,7 +4,7 @@
   // notice on a board is a day long and a card wide; a desk with no GPS
   // takes the place as a geohash cell.
   import { onMount } from "svelte";
-  import { t, i18n, LANGS } from "./i18n.svelte";
+  import { t, i18n, LANGS, lc } from "./i18n.svelte";
   import { api, copy, fmtXmr, fmtTime, fmtBytes, type FoundRow, type ListingAttachment, type ListingBundle, type ListingDraft, type ListingRow, type MarketRow, LISTING_DESCRIPTION_MAX, MARKET_CATEGORIES, confirmDanger } from "./api";
   import { gen, drive } from "./state.svelte";
   import Busy from "./Busy.svelte";
@@ -526,7 +526,7 @@
         <div class="field">
           <label for="pr">{t("desk_price")}</label>
           <input id="pr" class="input narrow" bind:value={editing.price_text} />
-          <select class="input narrow" bind:value={editing.price_is_fiat}><option value={true}>{t("desk_in_your_currency").toLowerCase()}</option><option value={false}>{t("desk_in_xmr")}</option></select>
+          <select class="input narrow" bind:value={editing.price_is_fiat}><option value={true}>{lc(t("desk_in_your_currency"))}</option><option value={false}>{t("desk_in_xmr")}</option></select>
         </div>
         {#if editing.kind !== 5}<div class="field"><label for="q">{t("rent_how_many")}</label><input id="q" class="input narrow" type="number" min="1" max="999" bind:value={editing.quantity} /></div>{/if}
         {#if editing.kind === 2}

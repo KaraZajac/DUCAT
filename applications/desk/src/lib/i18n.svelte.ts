@@ -119,3 +119,14 @@ export function tp(key: string, n: number, ...args: (string | number)[]): string
 export function locale(): string {
   return i18n.lang === "en" ? navigator.language || "en" : i18n.lang;
 }
+
+// A translated word used inside a sentence, lowercased only where the
+// language's rules allow it. `toLowerCase()` on a translated string was
+// applied everywhere: German nouns keep their capital, Turkish has a
+// dotless i that the locale-blind call gets wrong, and the scripts
+// without case are simply untouched.
+const LOWERCASE_OK = new Set(["en", "es", "fr", "it", "pt", "nl", "id", "vi", "pl", "ru", "uk"]);
+export function lc(word: string): string {
+  const code = String(i18n.lang ?? "en").slice(0, 2);
+  return LOWERCASE_OK.has(code) ? word.toLocaleLowerCase(code) : word;
+}
