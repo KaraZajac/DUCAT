@@ -51,4 +51,5 @@
     <string name="prices_menu_warn_title">Deine Karte ist in %1$s ausgezeichnet</string>
     <string name="prices_menu_warn_body">Ein Wechsel zu %2$s macht diese Preise unverkäuflich, bis du sie neu setzt. Gelöscht wird nichts.</string>
     <string name="prices_menu_warn_go">Trotzdem wechseln</string>
+    <string name="common_connecting">Verbindung zum Netzwerk wird aufgebaut…</string>
 </resources>

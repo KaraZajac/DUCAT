@@ -163,4 +163,10 @@
     <string name="rent_spec_fuel">Brandstof</string>
     <string name="rent_photo_open">Groter bekijken</string>
     <string name="rent_photo_close">Sluiten</string>
+    <string name="rent_posting">Plaatsen…</string>
+    <string name="busy_stamping_notice">De aankondiging wordt gestempeld…</string>
+    <string name="busy_writing_board">Op het bord schrijven…</string>
+    <string name="busy_pictures_swarm">De foto’s gaan de zwerm op…</string>
+    <string name="busy_files_swarm">De bestanden gaan de zwerm op…</string>
+    <string name="rent_price_at_rate">%1$s · ongeveer %2$s tegen de koers van vandaag</string>
 </resources>

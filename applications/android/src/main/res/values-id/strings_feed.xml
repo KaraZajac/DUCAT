@@ -38,4 +38,6 @@
         <item quantity="other">%d berkas</item>
     </plurals>
     <string name="feed_failed">Tidak berhasil. Coba lagi sebentar lagi.</string>
+    <string name="feed_publishing_home">Menerbitkan rumahmu…</string>
+    <string name="feed_no_network">Jaringan tidak bisa dijangkau barusan, jadi tidak ada rumah yang dilihat. Biasanya ini berarti aplikasi masih bergabung — coba lagi sebentar lagi.</string>
 </resources>

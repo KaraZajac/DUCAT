@@ -90,4 +90,9 @@
     <string name="pub_cover_note">Mostrata sullo scaffale accanto al titolo. Ridotta per stare nell\'avviso, così sfogliare resta veloce.</string>
     <string name="pub_cover_remove">Rimuovi</string>
     <string name="pub_cover_failed">Quell’immagine non si è potuta usare. Provane un’altra.</string>
+    <string name="market_listing">Pubblicazione…</string>
+    <string name="busy_minting_card">Creazione della scheda…</string>
+    <string name="busy_stamping_shelf">Timbro per lo scaffale %1$s…</string>
+    <string name="busy_stamping_shelf_lang">Timbro per lo scaffale %1$s in %2$s…</string>
+    <string name="busy_stamping_local">Timbro per la bacheca vicino a te…</string>
 </resources>

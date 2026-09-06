@@ -38,4 +38,6 @@
         <item quantity="other">%d 個のファイル</item>
     </plurals>
     <string name="feed_failed">うまくいきませんでした。しばらくしてからもう一度お試しください。</string>
+    <string name="feed_publishing_home">あなたのホームを公開中…</string>
+    <string name="feed_no_network">いまネットワークに届かなかったため、ホームをひとつも見られていません。たいていはアプリがまだ参加中です。少ししてからもう一度お試しください。</string>
 </resources>

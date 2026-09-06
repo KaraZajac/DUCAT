@@ -38,4 +38,6 @@
         <item quantity="other">%d dosya</item>
     </plurals>
     <string name="feed_failed">Olmadı. Birazdan tekrar dene.</string>
+    <string name="feed_publishing_home">Evin yayımlanıyor…</string>
+    <string name="feed_no_network">Şu anda ağa ulaşılamadı, bu yüzden hiçbir eve bakılmadı. Genelde uygulama hâlâ bağlanıyor demektir — birazdan tekrar dene.</string>
 </resources>

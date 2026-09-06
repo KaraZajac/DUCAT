@@ -219,17 +219,25 @@ object Groups {
      * (§16.24). Forming it needs the node, so a group cannot be made
      * offline — and one that could not be formed is not saved at all.
      */
-    fun create(context: Context, name: String, memberHexes: List<String>): Group {
+    fun create(context: Context, name: String, memberHexes: List<String>): Group = try {
         // The doorway: a group made now belongs to the worn persona.
         val mine = PersonaStore(context).worn()
         val id = ByteArray(16).also { java.security.SecureRandom().nextBytes(it) }
         val members = (memberHexes + mine).distinct()
+        // Two waits, each said as it starts (Busy): the record formed on
+        // the DHT, then the sealed roster down every member's thread. Said
+        // here rather than inside the helpers, which the poll and `add`
+        // also call with nobody's button held down.
+        Busy.say(context.getString(R.string.group_forming_board))
         val board = formBoard(context, id.toHexString(), members, 1L)
         val g = Group(id.toHexString(), name, members, 0L, disclosed = false, board = board)
         upsert(context, g)
+        Busy.say(context.getString(R.string.group_telling_members))
         sendRoster(context, g)
         DucatLog.i(TAG, "created ${g.name} with ${members.size} member(s), on a board")
-        return g
+        g
+    } finally {
+        Busy.clear()
     }
 
     /**

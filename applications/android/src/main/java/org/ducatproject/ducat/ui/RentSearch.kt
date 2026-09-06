@@ -44,6 +44,7 @@ import org.ducatproject.ducat.Listings
 import org.ducatproject.ducat.Publications
 import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.R
+import org.ducatproject.ducat.formatXmr
 import uniffi.ducat_mobile.RentalInfo
 
 /**
@@ -257,6 +258,8 @@ private fun RentSearchScreen(
     }
 
     var stalled by remember { mutableStateOf<Stall?>(null) }
+    // Waiting for the node before the first board is asked, and saying so.
+    var connecting by remember { mutableStateOf(false) }
     var progress by remember { mutableStateOf<Pair<Int, Int>?>(null) }
     // §16.18.1's accepted degradation, made visible. With no chain view the
     // stamps on these listings show on signature and work alone — honest
@@ -317,9 +320,21 @@ private fun RentSearchScreen(
                     uniffi.ducat_mobile.nodeStatus().publicInternetReady
                 }.getOrDefault(false)
                 if (!attached()) {
-                    stalled = Stall.NoNetwork
-                    searching = false
-                    return@launch
+                    // Not yet, rather than not at all. A few seconds into
+                    // the app's life the node is still joining, and this
+                    // used to report that as no network — "Nothing listed"
+                    // behind a Try again, the first thing the Marketplace
+                    // ever showed. The shelves' own rule (awaitAttached):
+                    // say what is being waited for, then wait for it. The
+                    // stall is for a node that never comes.
+                    connecting = true
+                    val joined = withContext(Dispatchers.IO) { awaitAttached(120_000) }
+                    connecting = false
+                    if (!joined) {
+                        stalled = Stall.NoNetwork
+                        searching = false
+                        return@launch
+                    }
                 }
                 val replied = withContext(Dispatchers.IO) {
                     runCatching {
@@ -503,6 +518,21 @@ private fun RentSearchScreen(
                             }
                         },
                     )
+                    // Before the first read: the node, not the boards. Its
+                    // own line, because "looking at the boards around you"
+                    // while no board can be reached is the first untruth
+                    // of the two this screen used to tell.
+                    connecting -> Row(verticalAlignment = Alignment.CenterVertically) {
+                        CatSpinner(
+                            Modifier.size(22.dp),
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            stringResource(R.string.common_connecting),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
                     // "Still looking" is decided on the tab you are actually
                     // looking at, not on the raw pile.
                     //
@@ -1270,6 +1300,11 @@ private fun ListingSheet(
                 val dig = info.galleryDigest
                 if (share != null && dig != null && gallery.dir == null) {
                     Galleries.start(context, share, dig)
+                    // The state above was read before the fetch existed, so
+                    // it says "not fetching" and the heartbeat below never
+                    // starts; re-read it now that it is, or the sheet sits
+                    // on the thumbnail forever while the bundle lands.
+                    tick++
                 }
             }
             // While anything is moving, re-read on a heartbeat so the bar
@@ -1299,7 +1334,25 @@ private fun ListingSheet(
             viewing?.let { i ->
                 if (i in shots.indices) PictureViewer(shots, i, onClose = { viewing = null })
             }
-            if (shots.isNotEmpty()) {
+            if (shots.size == 1) {
+                // One photograph stands where the cover stood, at its own
+                // shape and the sheet's full width, centred when a portrait
+                // shot cannot fill it; a strip of one would leave a third
+                // of the sheet empty beside it.
+                val (b, caption) = shots[0]
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Image(
+                        b.asImageBitmap(),
+                        caption.ifBlank { stringResource(R.string.rent_photo_open) },
+                        Modifier.heightIn(max = 320.dp)
+                            .aspectRatio(b.width.toFloat() / b.height.coerceAtLeast(1))
+                            .clip(MaterialTheme.shapes.medium)
+                            .clickable { viewing = 0 },
+                        contentScale = ContentScale.Fit,
+                    )
+                }
+                Spacer(Modifier.height(12.dp))
+            } else if (shots.isNotEmpty()) {
                 // The gallery arrived: the photographs themselves, full
                 // width, in the order the seller put them in. A tap opens
                 // one the size of the screen.
@@ -1320,12 +1373,23 @@ private fun ListingSheet(
                 }
                 Spacer(Modifier.height(12.dp))
             } else if (cover != null) {
+                // At its own shape while the gallery is on its way: the
+                // notice's ten kilobytes were cropped to a full-width
+                // banner, which showed the middle third of a portrait
+                // shot and told the reader nothing the strip would not
+                // contradict a moment later. Full width for a landscape
+                // picture, capped in height for a portrait one — no
+                // fillMaxWidth, or the cap would be met by cropping again
+                // rather than by narrowing — and where the strip's first
+                // picture will stand, so the one replaces the other in
+                // place.
                 Image(
                     cover.asImageBitmap(),
                     null,
-                    Modifier.fillMaxWidth().height(240.dp)
+                    Modifier.heightIn(max = 320.dp)
+                        .aspectRatio(cover.width.toFloat() / cover.height.coerceAtLeast(1))
                         .clip(MaterialTheme.shapes.medium),
-                    contentScale = ContentScale.Crop,
+                    contentScale = ContentScale.Fit,
                 )
                 Spacer(Modifier.height(8.dp))
             }
@@ -1359,14 +1423,37 @@ private fun ListingSheet(
                 )
             }
             Spacer(Modifier.height(6.dp))
+            // The seller's own figure first, once the bundle carries it
+            // (§16.18.3's priceText): "USD 12" is what they meant, and the
+            // notice's piconero — converted at this reader's rate — is what
+            // that was worth at the last refresh, said small beside it, so
+            // a rate that moved since reads as a rate that moved and not as
+            // a seller who cannot make up their mind. Until the bundle
+            // lands, and for a listing priced in XMR, the converted figure
+            // stands alone as it always did; the cards keep it too, since
+            // the document is never theirs to read.
+            val kind = info.kind.toInt()
+            val shown = Amounts.show(context, info.pricePxmr.toLong())
+            val sellerFigure = bundle?.doc?.priceText?.takeIf { it.isNotBlank() }?.let { isolate(it) }
+            val headline = sellerFigure ?: shown.primary
             Text(
-                run {
-                    val shown = Amounts.show(context, info.pricePxmr.toLong()).primary
-                    if (info.kind.toInt() == Listings.KIND_SALE) shown
-                    else stringResource(priceLabelShort(info.kind.toInt()), shown)
-                },
+                if (kind == Listings.KIND_SALE) headline
+                else stringResource(priceLabelShort(kind), headline),
                 style = MaterialTheme.typography.bodyMedium,
             )
+            if (sellerFigure != null) {
+                val xmr = "${formatXmr(info.pricePxmr.toLong())} XMR"
+                // What this reader's rate makes of it, when there is one:
+                // Shown puts the currency figure in whichever slot the
+                // preference says, and the XMR line is the same string
+                // either way.
+                val fiat = listOfNotNull(shown.primary, shown.secondary).firstOrNull { it != xmr }
+                Text(
+                    if (fiat != null) stringResource(R.string.rent_price_at_rate, xmr, fiat) else xmr,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             if (info.depositPxmr > 0uL) {
                 Text(
                     stringResource(

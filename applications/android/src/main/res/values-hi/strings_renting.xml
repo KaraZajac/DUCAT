@@ -163,4 +163,10 @@
     <string name="rent_spec_fuel">ईंधन</string>
     <string name="rent_photo_open">बड़ा करके देखें</string>
     <string name="rent_photo_close">बंद करें</string>
+    <string name="rent_posting">लगाया जा रहा है…</string>
+    <string name="busy_stamping_notice">सूचना पर मुहर लगाई जा रही है…</string>
+    <string name="busy_writing_board">बोर्ड पर लिखा जा रहा है…</string>
+    <string name="busy_pictures_swarm">तस्वीरें झुंड पर रखी जा रही हैं…</string>
+    <string name="busy_files_swarm">फ़ाइलें झुंड पर रखी जा रही हैं…</string>
+    <string name="rent_price_at_rate">%1$s · आज की दर पर लगभग %2$s</string>
 </resources>

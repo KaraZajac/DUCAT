@@ -17,7 +17,7 @@ use serde::Serialize;
 
 use crate::contacts::hex_to_bytes;
 use crate::sites::Site;
-use crate::{copy_tree, log, releases, App, Error};
+use crate::{busy, copy_tree, log, releases, App, Error};
 
 const TAG: &str = "Home";
 pub const HOME_SUBKEYS: u32 = 1;
@@ -174,6 +174,7 @@ impl App {
         if media.len() > feed::MAX_MEDIA || files.len() > feed::MAX_FILES {
             return Err(Error::Refused("too many pictures or files for one post".into()));
         }
+        let _phase = busy::scope();
         let worn = self.worn()?;
         let mut doc = self.my_feed()?;
         doc.name = self.my_name(Some(&worn))?.unwrap_or_default();
@@ -256,6 +257,8 @@ impl App {
     /// Put the home on the network: the persona's pages if it keeps any,
     /// `feed.json`, its thumbnails and older pages, and a page per post.
     pub fn publish_home(&self) -> Result<Site, Error> {
+        let _phase = busy::scope();
+        busy::say("publishing your home");
         let worn = self.worn()?;
         let home = self.ensure_home()?;
         let doc = self.my_feed()?;

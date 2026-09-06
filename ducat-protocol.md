@@ -2483,7 +2483,7 @@ names is a bundle, and a bundle MAY carry more than pictures: a
 
 ```
 { "v": 1, "id": "<the listing id, 8–64 lowercase hex or the poster's own id>",
-  "title": "...", "description": "...", "updated": <seconds>,
+  "title": "...", "description": "...", "price_text": "USD 12", "updated": <seconds>,
   "pictures": [ { "path": "pictures/00.jpg", "mime": "image/jpeg",
                   "bytes": 36108, "w": 1400, "h": 1000, "caption": "" } ],
   "files":    [ { "path": "files/manual.pdf", "name": "manual.pdf",
@@ -2500,7 +2500,10 @@ bundle path (§16.23's rule: relative, no `..`, no leading slash);
 `mime` is an image type for a picture and any registered type for a
 file; `specs` is at most 32 string pairs the client shows as a table,
 in addition to — never instead of — the notice's own fields. `updated`
-is the seconds the bundle was written. A bundle with no `listing.json`
+is the seconds the bundle was written. `price_text`, at most 32 printable
+characters, is the price as the seller typed it — words for the reader's
+eye, so a listing typed as twelve dollars does not read as 12.04 after
+the rate moved; the notice's `price_pxmr` is the price that settles. A bundle with no `listing.json`
 is the picture-only gallery this section began with, and a reader
 shows it as such; a `listing.json` that does not open is refused whole
 and the pictures shown alone, because a bad document must not hide

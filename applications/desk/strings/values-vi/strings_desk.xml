@@ -357,4 +357,17 @@
     <string name="desk_details">Chi tiết</string>
     <string name="desk_save_as">Lưu thành…</string>
     <string name="desk_seller_away">Người bán hiện không liên lạc được, nên chưa tải được ảnh và tệp.</string>
+    <string name="desk_creating">Đang tạo…</string>
+    <string name="desk_at_todays_rate">khoảng %1$s theo tỷ giá hôm nay</string>
+    <string name="desk_busy_pictures">đang đưa ảnh lên bầy</string>
+    <string name="desk_busy_card">đang phát hành thẻ</string>
+    <string name="desk_busy_stamping">đang đóng dấu thông báo</string>
+    <string name="desk_busy_stamping_for">đang đóng dấu cho %1$s</string>
+    <string name="desk_busy_reading_board">đang đọc bảng</string>
+    <string name="desk_busy_writing_board">đang ghi lên bảng</string>
+    <string name="desk_busy_forming_board">đang lập bảng</string>
+    <string name="desk_busy_roster">đang gửi danh sách thành viên</string>
+    <string name="desk_busy_home">đang xuất bản nhà của bạn</string>
+    <string name="desk_busy_seeding">đang phát trên bầy</string>
+    <string name="desk_busy_address">đang xuất bản địa chỉ</string>
 </resources>

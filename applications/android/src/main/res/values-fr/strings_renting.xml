@@ -163,4 +163,10 @@
     <string name="rent_spec_fuel">Carburant</string>
     <string name="rent_photo_open">Voir en plus grand</string>
     <string name="rent_photo_close">Fermer</string>
+    <string name="rent_posting">Affichage…</string>
+    <string name="busy_stamping_notice">Horodatage de l’annonce…</string>
+    <string name="busy_writing_board">Écriture sur le tableau…</string>
+    <string name="busy_pictures_swarm">Mise des photos sur l’essaim…</string>
+    <string name="busy_files_swarm">Mise des fichiers sur l’essaim…</string>
+    <string name="rent_price_at_rate">%1$s · environ %2$s au cours du jour</string>
 </resources>

@@ -8,7 +8,7 @@ use std::sync::OnceLock;
 
 use ducat_app::contacts::{Contact, StoredMessage};
 use ducat_app::mailbox::{Claim, Outgoing};
-use ducat_app::{App, CardProblem, Error};
+use ducat_app::{App, Error};
 use serde::Serialize;
 use tauri::{Emitter, Manager, WebviewUrl, WebviewWindowBuilder};
 
@@ -559,14 +559,10 @@ fn home_key_of(persona_hex: String) -> Result<String, String> {
     app()?.home_key_of(&persona_hex).map_err(said)
 }
 
+/// The sentence a screen shows: the app's plain reading of the error,
+/// never the Rust wrapping.
 fn said(e: Error) -> String {
-    match e {
-        Error::Card(CardProblem::AlreadyUsed) => "That card has already been answered — ask them for a fresh one.".into(),
-        Error::Card(CardProblem::Own) => "That card is your own.".into(),
-        Error::Card(CardProblem::NotPublished) => "The card's details have not reached the network yet — try again in a minute.".into(),
-        Error::Card(CardProblem::Expired) => "That card has expired — ask them for a fresh one.".into(),
-        e => e.to_string(),
-    }
+    ducat_app::errors::plain(&e)
 }
 
 #[derive(Serialize)]
@@ -1121,6 +1117,13 @@ fn unread_threads() -> Result<usize, String> {
 #[tauri::command]
 fn generation() -> u64 {
     ducat_app::contacts::generation()
+}
+
+/// What the app is waiting on right now — "stamping the notice" — for
+/// the screen whose button started it.
+#[tauri::command]
+fn busy_note() -> Option<String> {
+    ducat_app::busy::note()
 }
 
 /// Read the logs now rather than at the lap's next turn — after a send,
@@ -2281,6 +2284,9 @@ struct FoundRow {
     gallery_dig: Option<String>,
     mine: bool,
     shown: ducat_app::wallet::Shown,
+    /// The seller's own figure ("USD 12"), from a bundle already on this
+    /// disk; the card keeps the converted figure until one lands.
+    price_text: Option<String>,
 }
 
 fn found_row(a: &App, f: ducat_app::listings::Found) -> FoundRow {
@@ -2290,6 +2296,7 @@ fn found_row(a: &App, f: ducat_app::listings::Found) -> FoundRow {
         thumb_data_url: f.thumb.as_deref().map(|t| data_url(t, "image/jpeg")),
         mine: ours.contains(&f.poster),
         shown: a.show_amount(f.price),
+        price_text: f.gallery.as_deref().zip(f.gallery_dig.as_deref()).and_then(|(s, d)| a.cached_bundle_doc(s, d)).and_then(|d| d.price_text),
         card: f.card,
         poster: f.poster,
         kind: f.kind,
@@ -2891,6 +2898,7 @@ pub fn run() {
             remove_contact,
             unread_threads,
             generation,
+            busy_note,
             poll_now,
             wallet_status,
             wallet_notes,

@@ -38,4 +38,6 @@
         <item quantity="other">파일 %d개</item>
     </plurals>
     <string name="feed_failed">진행되지 않았습니다. 잠시 후 다시 시도하세요.</string>
+    <string name="feed_publishing_home">당신의 홈을 올리는 중…</string>
+    <string name="feed_no_network">지금은 네트워크에 닿지 못해 홈을 하나도 살펴보지 못했습니다. 보통은 앱이 아직 연결 중이라는 뜻입니다 — 잠시 후 다시 시도하세요.</string>
 </resources>

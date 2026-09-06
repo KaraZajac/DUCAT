@@ -90,4 +90,9 @@
     <string name="pub_cover_note">Показується на полиці поруч із назвою. Стискається до розміру оголошення, щоб перегляд лишався швидким.</string>
     <string name="pub_cover_remove">Прибрати</string>
     <string name="pub_cover_failed">Це зображення не вдалося використати. Спробуйте інше.</string>
+    <string name="market_listing">Виставляємо…</string>
+    <string name="busy_minting_card">Створюємо картку…</string>
+    <string name="busy_stamping_shelf">Ставимо позначку для полиці «%1$s»…</string>
+    <string name="busy_stamping_shelf_lang">Ставимо позначку для полиці «%1$s» мовою %2$s…</string>
+    <string name="busy_stamping_local">Ставимо позначку для дошки поруч із вами…</string>
 </resources>

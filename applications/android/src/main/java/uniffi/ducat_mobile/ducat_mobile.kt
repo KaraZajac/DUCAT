@@ -4219,6 +4219,13 @@ data class ListingDoc (
     var `id`: kotlin.String, 
     var `title`: kotlin.String, 
     var `description`: kotlin.String, 
+    /**
+     * The price as the seller typed it — "USD 12" — so a reader sees the
+     * seller's own figure beside the XMR their rate makes of it, instead
+     * of 12.04 from a rate that moved. Words, not a number: nothing here
+     * is settled by it; the signed notice carries the price that is.
+     */
+    var `priceText`: kotlin.String?, 
     var `updated`: kotlin.ULong, 
     var `pictures`: List<ListingPicture>, 
     var `files`: List<ListingFile>, 
@@ -4242,6 +4249,7 @@ public object FfiConverterTypeListingDoc: FfiConverterRustBuffer<ListingDoc> {
             FfiConverterString.read(buf),
             FfiConverterString.read(buf),
             FfiConverterString.read(buf),
+            FfiConverterOptionalString.read(buf),
             FfiConverterULong.read(buf),
             FfiConverterSequenceTypeListingPicture.read(buf),
             FfiConverterSequenceTypeListingFile.read(buf),
@@ -4254,6 +4262,7 @@ public object FfiConverterTypeListingDoc: FfiConverterRustBuffer<ListingDoc> {
             FfiConverterString.allocationSize(value.`id`) +
             FfiConverterString.allocationSize(value.`title`) +
             FfiConverterString.allocationSize(value.`description`) +
+            FfiConverterOptionalString.allocationSize(value.`priceText`) +
             FfiConverterULong.allocationSize(value.`updated`) +
             FfiConverterSequenceTypeListingPicture.allocationSize(value.`pictures`) +
             FfiConverterSequenceTypeListingFile.allocationSize(value.`files`) +
@@ -4265,6 +4274,7 @@ public object FfiConverterTypeListingDoc: FfiConverterRustBuffer<ListingDoc> {
             FfiConverterString.write(value.`id`, buf)
             FfiConverterString.write(value.`title`, buf)
             FfiConverterString.write(value.`description`, buf)
+            FfiConverterOptionalString.write(value.`priceText`, buf)
             FfiConverterULong.write(value.`updated`, buf)
             FfiConverterSequenceTypeListingPicture.write(value.`pictures`, buf)
             FfiConverterSequenceTypeListingFile.write(value.`files`, buf)

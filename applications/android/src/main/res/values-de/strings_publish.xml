@@ -90,4 +90,9 @@
     <string name="pub_cover_note">Steht im Regal neben dem Titel. Wird passend zur Anzeige verkleinert, damit das Stöbern schnell bleibt.</string>
     <string name="pub_cover_remove">Entfernen</string>
     <string name="pub_cover_failed">Dieses Bild ließ sich nicht verwenden. Versuch ein anderes.</string>
+    <string name="market_listing">Wird eingestellt…</string>
+    <string name="busy_minting_card">Karte wird erstellt…</string>
+    <string name="busy_stamping_shelf">Wird für das Regal „%1$s“ gestempelt…</string>
+    <string name="busy_stamping_shelf_lang">Wird für das Regal „%1$s“ auf %2$s gestempelt…</string>
+    <string name="busy_stamping_local">Wird für das Brett in deiner Nähe gestempelt…</string>
 </resources>

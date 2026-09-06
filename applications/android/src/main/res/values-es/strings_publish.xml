@@ -90,4 +90,9 @@
     <string name="pub_cover_note">Se muestra en el estante junto al título. Se reduce para caber en el aviso, así el paseo sigue siendo rápido.</string>
     <string name="pub_cover_remove">Quitar</string>
     <string name="pub_cover_failed">No se pudo usar esa imagen. Prueba con otra.</string>
+    <string name="market_listing">Publicando…</string>
+    <string name="busy_minting_card">Creando la tarjeta…</string>
+    <string name="busy_stamping_shelf">Sellando para el estante de %1$s…</string>
+    <string name="busy_stamping_shelf_lang">Sellando para el estante de %1$s en %2$s…</string>
+    <string name="busy_stamping_local">Sellando para el tablón cercano…</string>
 </resources>

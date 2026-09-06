@@ -35,4 +35,8 @@
         <item quantity="one">Send %1$d request</item>
         <item quantity="other">Send %1$d requests</item>
     </plurals>
+    <!-- The phases of making a group, said as each starts (Busy). -->
+    <string name="group_creating">Creating…</string>
+    <string name="group_forming_board">Forming the board…</string>
+    <string name="group_telling_members">Telling the members…</string>
 </resources>

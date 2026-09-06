@@ -38,4 +38,6 @@
         <item quantity="other">%d файлів</item>
     </plurals>
     <string name="feed_failed">Не вдалося. Спробуйте ще раз за хвилину.</string>
+    <string name="feed_publishing_home">Публікуємо ваш дім…</string>
+    <string name="feed_no_network">Мережа зараз недоступна, тож жодного дому не переглянуто. Зазвичай це означає, що застосунок ще підключається — спробуйте за хвилину.</string>
 </resources>

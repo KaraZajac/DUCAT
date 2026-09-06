@@ -51,4 +51,5 @@
     <string name="prices_menu_warn_title">メニューは%1$sで値付けされています</string>
     <string name="prices_menu_warn_body">%2$sに切り替えると、付け直すまでその値段では売れなくなります。消えるものはありません。</string>
     <string name="prices_menu_warn_go">それでも切り替える</string>
+    <string name="common_connecting">ネットワークに接続中…</string>
 </resources>

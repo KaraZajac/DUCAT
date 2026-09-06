@@ -51,4 +51,5 @@
     <string name="prices_menu_warn_title">你的菜单以 %1$s 计价</string>
     <string name="prices_menu_warn_body">切换到 %2$s 后，这些价格在你重新设定之前无法售出。不会删除任何东西。</string>
     <string name="prices_menu_warn_go">仍然切换</string>
+    <string name="common_connecting">正在连接网络…</string>
 </resources>

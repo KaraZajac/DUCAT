@@ -90,4 +90,9 @@
     <string name="pub_cover_note">Rafta başlığın yanında görünür. Duyuruya sığacak kadar küçültülür, böylece göz atmak hızlı kalır.</string>
     <string name="pub_cover_remove">Kaldır</string>
     <string name="pub_cover_failed">O görsel kullanılamadı. Başka birini dene.</string>
+    <string name="market_listing">Listeleniyor…</string>
+    <string name="busy_minting_card">Kart oluşturuluyor…</string>
+    <string name="busy_stamping_shelf">%1$s rafı için damgalanıyor…</string>
+    <string name="busy_stamping_shelf_lang">%1$s rafı (%2$s) için damgalanıyor…</string>
+    <string name="busy_stamping_local">Yakınınızdaki pano için damgalanıyor…</string>
 </resources>

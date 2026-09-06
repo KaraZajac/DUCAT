@@ -27,7 +27,7 @@ use crate::boards::{budget, max_notice_ttl_secs, max_stand_shards, stand_now, st
 use crate::contacts::{b64, bump, now_ms, unb64};
 use crate::home::{file_name_of, mime_of};
 use crate::thumbs::THUMB_BYTES;
-use crate::{log, App, Error};
+use crate::{busy, log, App, Error};
 
 const TAG: &str = "Listings";
 const STORE: &str = "ducat_listings";
@@ -132,6 +132,19 @@ pub fn kind_name(kind: u32) -> &'static str {
 
 fn board_name(cell: &str) -> String {
     format!("local:{cell}")
+}
+
+/// The seller's own figure for the bundle (§16.18.3): "USD 12", the
+/// currency and the number as typed, when the listing was priced in one.
+/// Words for a reader, not a price: the signed notice carries that.
+fn price_text_of(l: &Listing) -> Option<String> {
+    let typed = l.price_typed.as_deref()?.trim();
+    let cur = l.price_currency.as_deref()?.trim();
+    if typed.is_empty() || cur.is_empty() {
+        return None;
+    }
+    let text = format!("{} {typed}", cur.to_uppercase());
+    (text.chars().count() <= listing_doc::MAX_PRICE_TEXT && !text.chars().any(char::is_control)).then_some(text)
 }
 
 /// A listing as kept — the phone's JSON keys.
@@ -390,6 +403,7 @@ fn description_ok(id: &str, title: &str, description: &str) -> Result<(), Error>
         id: id.to_string(),
         title: title.to_string(),
         description: description.to_string(),
+        price_text: None,
         updated: 0,
         pictures: Vec::new(),
         files: Vec::new(),
@@ -745,6 +759,7 @@ impl App {
         };
         put(&App::bundle_title_of(&l.title, l.kind));
         put(&l.description);
+        put(price_text_of(l).as_deref().unwrap_or(""));
         for (k, v) in App::bundle_specs(l) {
             put(&k);
             put(&v);
@@ -771,6 +786,7 @@ impl App {
             id: l.id.clone(),
             title: App::bundle_title_of(&l.title, l.kind),
             description: l.description.clone(),
+            price_text: price_text_of(l),
             updated: App::now(),
             pictures: Vec::new(),
             files: Vec::new(),
@@ -809,6 +825,7 @@ impl App {
     /// final path. The old share is stopped first: a share is its bytes,
     /// and the bytes are about to change.
     fn seed_bundle(&self, l: &Listing) -> Option<(String, String)> {
+        busy::say("putting the pictures on the swarm");
         let short = &l.id[..8.min(l.id.len())];
         let dir = self.bundle_dir(&l.id);
         let next = dir.with_extension("next");
@@ -955,6 +972,25 @@ impl App {
         Ok(self.read_bundle(&dir))
     }
 
+    /// The document of a bundle already on this disk — fetched before, or
+    /// one of this desk's own — without asking the network. None when it
+    /// has not landed, or landed without a document.
+    pub fn cached_bundle_doc(&self, share: &str, digest_hex: &str) -> Option<ListingDoc> {
+        // Where a fetch lands first: one stat per card on a board. The
+        // listings store is read only for a bundle this desk seeds itself.
+        let fetched = self.gallery_dir(digest_hex).join(LISTING_FILE);
+        let file = if fetched.is_file() {
+            fetched
+        } else {
+            self.listings()
+                .into_iter()
+                .find(|l| l.gallery.as_deref() == Some(share) && l.gallery_dig.as_deref() == Some(digest_hex))
+                .map(|l| self.bundle_dir(&l.id).join(LISTING_FILE))?
+        };
+        let text = std::fs::read_to_string(file).ok()?;
+        listing_doc::listing_doc_parse(text).ok()
+    }
+
     /// Copy a file out of a fetched bundle to where the person chose. Only
     /// a bundle file: the path came from a screen, and a screen can be wrong.
     pub fn export_bundle_file(&self, file: &Path, dest: &Path) -> Result<u64, Error> {
@@ -1014,6 +1050,7 @@ impl App {
     }
 
     fn post_locked(&self, id: &str) -> Result<bool, Error> {
+        let _phase = busy::scope();
         let now = App::now();
         self.edit_listing(id, |l| {
             l.wanted = true;
@@ -1063,6 +1100,7 @@ impl App {
             o.owner.clone()
         };
         let name = self.my_name(Some(&owner_hex))?;
+        busy::say("issuing the card");
         let card = self.issue_card(name.as_deref(), TTL_SECONDS, "rental", Some(&owner_hex))?;
         let persona = match self.persona_secret(&owner_hex)? {
             Some(s) => s,
@@ -1073,9 +1111,16 @@ impl App {
         let seal = |board: &str, slot: u32| -> Result<Vec<u8>, Error> {
             Ok(rental_encode(o.public_notice(&card.uri), persona.clone(), id.to_string(), board.to_string(), slot, beacon.height, beacon.hash_hex.clone())?)
         };
+        // Each try is two waits the screen names: the stamp, then the write.
+        let post = |board: &str, slot: u32| -> Result<bool, Error> {
+            busy::say("stamping the notice");
+            let sealed = seal(board, slot)?;
+            busy::say("writing to the board");
+            Ok(stand_post(board.to_string(), slot, sealed).is_ok())
+        };
         let mut placed: Option<(String, u32)> = None;
         if let (Some(existing), Some(slot)) = (o.board.clone().filter(|b| !b.is_empty() && !stand_stale(b) && o.still_held(now)), o.subkey) {
-            if stand_post(existing.clone(), slot, seal(&existing, slot)?).is_ok() {
+            if post(&existing, slot)? {
                 placed = Some((existing, slot));
             }
         }
@@ -1083,6 +1128,7 @@ impl App {
             let tip = self.beacon_tip();
             'ladder: for shard in 0..max_stand_shards() {
                 let Some(name) = stand_shard(&stand_now(&board_name(&o.cell)), shard) else { continue };
+                busy::say("reading the board");
                 let taken: HashSet<u32> = stand_read(name.clone())
                     .unwrap_or_default()
                     .into_iter()
@@ -1092,7 +1138,7 @@ impl App {
                     if taken.contains(&free) {
                         continue;
                     }
-                    if stand_post(name.clone(), free, seal(&name, free)?).is_ok() {
+                    if post(&name, free)? {
                         placed = Some((name, free));
                         break 'ladder;
                     }

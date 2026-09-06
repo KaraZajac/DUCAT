@@ -365,4 +365,19 @@
     <string name="desk_details">Details</string>
     <string name="desk_save_as">Save as…</string>
     <string name="desk_seller_away">The seller is not reachable right now, so the pictures and files could not be fetched.</string>
+    <!-- What a button is waiting on (Busy.svelte): the app layer says a
+         phase in English; these are the reader's words for each. -->
+    <string name="desk_creating">Creating…</string>
+    <string name="desk_at_todays_rate">about %1$s at today\'s rate</string>
+    <string name="desk_busy_pictures">putting the pictures on the swarm</string>
+    <string name="desk_busy_card">issuing the card</string>
+    <string name="desk_busy_stamping">stamping the notice</string>
+    <string name="desk_busy_stamping_for">stamping for %1$s</string>
+    <string name="desk_busy_reading_board">reading the board</string>
+    <string name="desk_busy_writing_board">writing to the board</string>
+    <string name="desk_busy_forming_board">forming the board</string>
+    <string name="desk_busy_roster">sending the roster</string>
+    <string name="desk_busy_home">publishing your home</string>
+    <string name="desk_busy_seeding">seeding on the swarm</string>
+    <string name="desk_busy_address">publishing the address</string>
 </resources>

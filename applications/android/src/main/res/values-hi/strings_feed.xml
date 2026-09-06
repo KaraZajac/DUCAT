@@ -38,4 +38,6 @@
         <item quantity="other">%d फ़ाइलें</item>
     </plurals>
     <string name="feed_failed">यह नहीं हो सका। थोड़ी देर में फिर कोशिश करें।</string>
+    <string name="feed_publishing_home">आपका घर प्रकाशित हो रहा है…</string>
+    <string name="feed_no_network">अभी नेटवर्क तक नहीं पहुँचा जा सका, इसलिए कोई घर नहीं देखा गया। आम तौर पर इसका मतलब है कि ऐप अभी जुड़ ही रहा है — थोड़ी देर में फिर कोशिश करें।</string>
 </resources>

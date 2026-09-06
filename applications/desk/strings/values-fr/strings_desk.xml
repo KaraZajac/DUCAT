@@ -361,4 +361,17 @@
     <string name="desk_details">Détails</string>
     <string name="desk_save_as">Enregistrer sous…</string>
     <string name="desk_seller_away">Le vendeur n\'est pas joignable pour le moment, les photos et les fichiers n\'ont donc pas pu être récupérés.</string>
+    <string name="desk_creating">Création…</string>
+    <string name="desk_at_todays_rate">environ %1$s au cours du jour</string>
+    <string name="desk_busy_pictures">mise des photos sur l’essaim</string>
+    <string name="desk_busy_card">émission de la carte</string>
+    <string name="desk_busy_stamping">tamponnage de l’annonce</string>
+    <string name="desk_busy_stamping_for">tamponnage pour %1$s</string>
+    <string name="desk_busy_reading_board">lecture du tableau</string>
+    <string name="desk_busy_writing_board">écriture sur le tableau</string>
+    <string name="desk_busy_forming_board">formation du tableau</string>
+    <string name="desk_busy_roster">envoi de la liste des membres</string>
+    <string name="desk_busy_home">publication de votre chez-soi</string>
+    <string name="desk_busy_seeding">diffusion sur l’essaim</string>
+    <string name="desk_busy_address">publication de l’adresse</string>
 </resources>

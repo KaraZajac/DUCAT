@@ -27,6 +27,14 @@ import androidx.compose.ui.unit.dp
  */
 val DucatControlShape: CornerBasedShape = RoundedCornerShape(10.dp)
 
+/**
+ * The shape a face, an initial, or a hero icon sits in: a rounded rectangle
+ * whose radius follows its size, never a circle. The desk draws the same
+ * ones the same way, and everything else in the app is a rectangle with
+ * rounded corners, so a disc would be the one odd shape on the screen.
+ */
+fun faceShape(size: androidx.compose.ui.unit.Dp): CornerBasedShape = RoundedCornerShape(size * 0.28f)
+
 @Composable
 fun Button(
     onClick: () -> Unit,

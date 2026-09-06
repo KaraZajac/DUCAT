@@ -90,4 +90,9 @@
     <string name="pub_cover_note">Aparece na estante ao lado do título. Reduzida para caber no aviso, para que folhear continue rápido.</string>
     <string name="pub_cover_remove">Remover</string>
     <string name="pub_cover_failed">Não deu para usar essa imagem. Tente outra.</string>
+    <string name="market_listing">Publicando…</string>
+    <string name="busy_minting_card">Criando o cartão…</string>
+    <string name="busy_stamping_shelf">Carimbando para a estante de %1$s…</string>
+    <string name="busy_stamping_shelf_lang">Carimbando para a estante de %1$s em %2$s…</string>
+    <string name="busy_stamping_local">Carimbando para o quadro perto de você…</string>
 </resources>

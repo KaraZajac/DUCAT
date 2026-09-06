@@ -38,4 +38,6 @@
         <item quantity="other">%d archivos</item>
     </plurals>
     <string name="feed_failed">Eso no salió. Inténtalo de nuevo en un momento.</string>
+    <string name="feed_publishing_home">Publicando tu hogar…</string>
+    <string name="feed_no_network">No se pudo llegar a la red ahora mismo, así que no se miró ningún hogar. Suele significar que la app aún se está uniendo: inténtalo de nuevo en un momento.</string>
 </resources>

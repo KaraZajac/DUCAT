@@ -39,7 +39,6 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.Amounts
-import org.ducatproject.ducat.Languages
 import org.ducatproject.ducat.Publications
 import org.ducatproject.ducat.R
 import org.ducatproject.ducat.SafeImage
@@ -56,23 +55,12 @@ var marketListYours: () -> Unit = {}
 
 /** A category slug's human name. */
 @Composable
-internal fun marketCategoryLabel(slug: String): String = stringResource(
-    when (slug) {
-        "news" -> R.string.market_cat_news
-        "serials" -> R.string.market_cat_serials
-        "sound" -> R.string.market_cat_sound
-        "software" -> R.string.market_cat_software
-        "art" -> R.string.market_cat_art
-        else -> R.string.market_cat_other
-    },
-)
+internal fun marketCategoryLabel(slug: String): String =
+    stringResource(Publications.categoryLabelRes(slug))
 
-/** A board language's name, in that language — the picker's own rule
- *  (Languages.SUPPORTED). A device language the app does not ship is
- *  still named by the platform rather than shown as a tag. */
-internal fun marketLanguageName(tag: String): String =
-    Languages.endonymFor(tag)
-        ?: java.util.Locale.forLanguageTag(tag).let { it.getDisplayLanguage(it) }.ifBlank { tag }
+/** A board language's name, in that language — Publications' rule, so the
+ *  chip and the phrase about stamping for it say the same word. */
+internal fun marketLanguageName(tag: String): String = Publications.languageName(tag)
 
 /**
  * A publication's cover (§16.18.2), or a book where there is none. The
@@ -167,6 +155,9 @@ private fun ShelfBody(
      *  could not ask is a confident lie, and the lie was the only thing a
      *  phone still joining ever saw here. */
     noNetwork: Boolean = false,
+    /** Still waiting for the node before the shelf can be asked at all:
+     *  said in place of "looking at the shelf", which it is not yet. */
+    connecting: Boolean = false,
 ) {
     val context = LocalContext.current
     // One column of our own: the callers place this body in containers
@@ -188,7 +179,9 @@ private fun ShelfBody(
                 )
                 Spacer(Modifier.padding(4.dp))
                 Text(
-                    stringResource(R.string.market_refreshing),
+                    stringResource(
+                        if (connecting) R.string.common_connecting else R.string.market_refreshing,
+                    ),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -205,7 +198,7 @@ private fun ShelfBody(
                 CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
                 Spacer(Modifier.padding(6.dp))
                 Text(
-                    looking,
+                    if (connecting) stringResource(R.string.common_connecting) else looking,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -279,18 +272,21 @@ private fun ShelfPull(
 }
 
 
+/** Whether the node is on the network right now — its own view of itself,
+ *  which is the only test there is: a read of a board nobody can reach
+ *  does not fail, it succeeds empty. */
+internal fun attachedNow(): Boolean =
+    runCatching { uniffi.ducat_mobile.nodeStatus().publicInternetReady }.getOrDefault(false)
+
 /** Wait for the node before asking the network anything: a shelf read
  *  while unattached "succeeds" empty in a blink, and an empty answer
  *  from a device that could not ask is a confident lie — one that used
- *  to overwrite the remembered rows already on screen. */
-private suspend fun awaitAttached(maxMs: Long): Boolean {
+ *  to overwrite the remembered rows already on screen. Shared with the
+ *  board search and the feed, which had the same gap. */
+internal suspend fun awaitAttached(maxMs: Long): Boolean {
     val end = System.currentTimeMillis() + maxMs
     while (System.currentTimeMillis() < end) {
-        if (runCatching { uniffi.ducat_mobile.nodeStatus().publicInternetReady }
-                .getOrDefault(false)
-        ) {
-            return true
-        }
+        if (attachedNow()) return true
         kotlinx.coroutines.delay(1_500)
     }
     return false
@@ -309,6 +305,7 @@ fun WorldwideShelf(cat: String, lang: String?) {
     var looked by remember { mutableStateOf(false) }
     var refreshing by remember { mutableStateOf(false) }
     var noNetwork by remember { mutableStateOf(false) }
+    var connecting by remember { mutableStateOf(false) }
     var attempt by remember { mutableStateOf(0) }
     // Set by the pull gesture, consumed by the effect: a pull keeps what is
     // on screen under the pull's own spinner, where a new category or Try
@@ -340,7 +337,12 @@ fun WorldwideShelf(cat: String, lang: String?) {
             looked = true
             refreshing = true
         }
-        if (withContext(Dispatchers.IO) { awaitAttached(120_000) }) {
+        // Waited for, and said: "looking at the shelf" over a node that is
+        // still joining was the wrong sentence for most of the first minute.
+        if (!attachedNow()) connecting = true
+        val joined = withContext(Dispatchers.IO) { awaitAttached(120_000) }
+        connecting = false
+        if (joined) {
             // A read that threw is not an empty shelf: the remembered rows
             // stay, the same way an unattached read leaves them alone.
             val fresh = withContext(Dispatchers.IO) {
@@ -377,6 +379,7 @@ fun WorldwideShelf(cat: String, lang: String?) {
             refreshing = refreshing,
             onRefresh = { attempt++ },
             noNetwork = noNetwork,
+            connecting = connecting,
         )
     }
 }
@@ -391,6 +394,7 @@ fun LocalShelf() {
     var progress by remember { mutableStateOf(0 to 9) }
     var noFix by remember { mutableStateOf(false) }
     var noNetwork by remember { mutableStateOf(false) }
+    var connecting by remember { mutableStateOf(false) }
     var refreshing by remember { mutableStateOf(false) }
     // Bumped by Try again: a missing fix is often momentary — location
     // just switched on, or the phone found the sky — and a dead end with
@@ -429,7 +433,12 @@ fun LocalShelf() {
             looked = true
             refreshing = true
         }
-        if (withContext(Dispatchers.IO) { awaitAttached(120_000) }) {
+        // Waited for, and said: "looking at the shelf" over a node that is
+        // still joining was the wrong sentence for most of the first minute.
+        if (!attachedNow()) connecting = true
+        val joined = withContext(Dispatchers.IO) { awaitAttached(120_000) }
+        connecting = false
+        if (joined) {
             val got = withContext(Dispatchers.IO) {
                 runCatching {
                     Publications.browseLocalPubs(context, fix.first, fix.second) { k, n ->
@@ -465,6 +474,7 @@ fun LocalShelf() {
             refreshing = refreshing,
             onRefresh = { attempt++ },
             noNetwork = noNetwork,
+            connecting = connecting,
         )
     }
 }

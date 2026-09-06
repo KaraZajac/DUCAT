@@ -90,4 +90,9 @@
     <string name="pub_cover_note">Hiện trên kệ cạnh tiêu đề. Được thu nhỏ để vừa thông báo, nên việc dạo xem vẫn nhanh.</string>
     <string name="pub_cover_remove">Gỡ</string>
     <string name="pub_cover_failed">Không dùng được ảnh đó. Thử ảnh khác.</string>
+    <string name="market_listing">Đang đăng bán…</string>
+    <string name="busy_minting_card">Đang tạo thẻ…</string>
+    <string name="busy_stamping_shelf">Đang đóng dấu cho kệ %1$s…</string>
+    <string name="busy_stamping_shelf_lang">Đang đóng dấu cho kệ %1$s bằng %2$s…</string>
+    <string name="busy_stamping_local">Đang đóng dấu cho bảng gần bạn…</string>
 </resources>

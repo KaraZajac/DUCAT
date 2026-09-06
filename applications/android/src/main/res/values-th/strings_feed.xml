@@ -38,4 +38,6 @@
         <item quantity="other">%d ไฟล์</item>
     </plurals>
     <string name="feed_failed">ไม่สำเร็จ ลองอีกครั้งในอีกสักครู่</string>
+    <string name="feed_publishing_home">กำลังเผยแพร่บ้านของคุณ…</string>
+    <string name="feed_no_network">ตอนนี้เข้าถึงเครือข่ายไม่ได้ จึงยังไม่ได้ดูบ้านใดเลย ปกติแปลว่าแอปกำลังเข้าร่วมอยู่ ลองอีกครั้งในอีกสักครู่</string>
 </resources>

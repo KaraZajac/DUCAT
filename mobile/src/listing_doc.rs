@@ -19,6 +19,7 @@ pub const MAX_SPECS: usize = 32;
 pub const MAX_CAPTION: usize = 300;
 pub const MAX_SPEC_CHARS: usize = 120;
 pub const MAX_NAME: usize = 200;
+pub const MAX_PRICE_TEXT: usize = 32;
 
 #[derive(Debug, thiserror::Error, uniffi::Error)]
 pub enum ListingDocError {
@@ -59,6 +60,12 @@ pub struct ListingDoc {
     pub title: String,
     #[serde(default)]
     pub description: String,
+    /// The price as the seller typed it — "USD 12" — so a reader sees the
+    /// seller's own figure beside the XMR their rate makes of it, instead
+    /// of 12.04 from a rate that moved. Words, not a number: nothing here
+    /// is settled by it; the signed notice carries the price that is.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub price_text: Option<String>,
     pub updated: u64,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub pictures: Vec<ListingPicture>,
@@ -92,6 +99,11 @@ pub fn listing_doc_check(doc: &ListingDoc) -> Result<(), ListingDocError> {
     }
     if doc.title.trim().is_empty() || doc.title.chars().count() > MAX_TITLE {
         return refuse("title is empty or too long");
+    }
+    if let Some(t) = &doc.price_text {
+        if t.trim().is_empty() || t.chars().count() > MAX_PRICE_TEXT || t.chars().any(|c| c.is_control()) {
+            return refuse("price text is empty, too long, or not printable");
+        }
     }
     if doc.description.chars().count() > MAX_DESCRIPTION {
         return refuse(format!("description longer than {MAX_DESCRIPTION} characters"));
@@ -195,6 +207,7 @@ mod tests {
             id: "1a077560cf4-1ab8c8-2".into(),
             title: "Brass desk lamp".into(),
             description: "A **brass** lamp. See ![the base](pictures/00.jpg).".into(),
+            price_text: Some("USD 12".into()),
             updated: 1_800_000_000,
             pictures: vec![ListingPicture { path: "pictures/00.jpg".into(), mime: "image/jpeg".into(), bytes: 36108, w: 1400, h: 1000, caption: "".into() }],
             files: vec![ListingFile { path: "files/manual.pdf".into(), name: "manual.pdf".into(), mime: "application/pdf".into(), bytes: 100 }],

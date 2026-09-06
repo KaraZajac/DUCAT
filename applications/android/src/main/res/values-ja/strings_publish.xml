@@ -90,4 +90,9 @@
     <string name="pub_cover_note">棚でタイトルの横に表示されます。掲示に収まるよう縮小されるので、閲覧は軽いままです。</string>
     <string name="pub_cover_remove">削除</string>
     <string name="pub_cover_failed">その画像は使えませんでした。別のものをお試しください。</string>
+    <string name="market_listing">出品中…</string>
+    <string name="busy_minting_card">カードを作成中…</string>
+    <string name="busy_stamping_shelf">%1$s の棚に向けて刻印中…</string>
+    <string name="busy_stamping_shelf_lang">%1$s の棚（%2$s）に向けて刻印中…</string>
+    <string name="busy_stamping_local">近くの掲示板に向けて刻印中…</string>
 </resources>

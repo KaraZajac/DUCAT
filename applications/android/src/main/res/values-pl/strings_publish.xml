@@ -90,4 +90,9 @@
     <string name="pub_cover_note">Widoczny na półce obok tytułu. Zmniejszony, by zmieścić się w ogłoszeniu, więc przeglądanie pozostaje szybkie.</string>
     <string name="pub_cover_remove">Usuń</string>
     <string name="pub_cover_failed">Nie udało się użyć tego obrazu. Spróbuj innego.</string>
+    <string name="market_listing">Wystawianie…</string>
+    <string name="busy_minting_card">Tworzenie karty…</string>
+    <string name="busy_stamping_shelf">Stemplowanie dla półki %1$s…</string>
+    <string name="busy_stamping_shelf_lang">Stemplowanie dla półki %1$s w języku %2$s…</string>
+    <string name="busy_stamping_local">Stemplowanie dla tablicy w pobliżu…</string>
 </resources>

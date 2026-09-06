@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
@@ -113,7 +112,7 @@ fun PublishingSection() {
             ) {
                 Box(
                     Modifier.size(72.dp)
-                        .clip(CircleShape)
+                        .clip(faceShape(72.dp))
                         .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -504,6 +503,8 @@ fun PublishingSection() {
                         ) {
                             if (listing) {
                                 CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                                Spacer(Modifier.width(8.dp))
+                                Text(stringResource(R.string.market_listing))
                             } else {
                                 Text(stringResource(R.string.market_list_btn))
                             }
@@ -515,6 +516,11 @@ fun PublishingSection() {
                                 org.ducatproject.ducat.ContactStore.bump()
                             }) { Text(stringResource(R.string.market_delist_btn)) }
                         }
+                    }
+                    if (listing) {
+                        // The phase under way — the card, a stamp per board,
+                        // the write — as Publications.listOnMarket says it.
+                        BusyLine(Modifier.padding(top = 4.dp))
                     }
                     if (mktCat != null) {
                         Text(

@@ -455,6 +455,12 @@ object Listings {
         val text = buildString {
             append(o.optString("title")).append('\u0000')
             append(description).append('\u0000')
+            // The seller's figure rides the document too, so a listing
+            // re-priced in the owner's money is a bundle that changed. Only
+            // when there is one: a listing priced in XMR keeps the
+            // fingerprint it had, and is not re-laid for a field it never
+            // carries.
+            priceTextOf(o)?.let { append(it).append('\u0000') }
             append(docSpecs(o).toString()).append('\u0000')
             for (f in photos + files) append(f.name).append(':').append(f.length()).append('\u0000')
         }
@@ -489,6 +495,22 @@ object Listings {
             out[k] = withoutDisplayHazards(s)
         }
         return out
+    }
+
+    /**
+     * The seller's own figure — "USD 12" — for the document's `priceText`
+     * (§16.18.3). The notice carries what that was worth in piconero at the
+     * last refresh, and a reader's rate makes 12.04 of it; this is the
+     * number the seller actually meant, shown beside that. Only when the
+     * owner priced in their own money: a listing priced in XMR has nothing
+     * to say that the notice does not. Words, at the wire's cap, and
+     * nothing is settled by them — the signed notice carries the price
+     * that is.
+     */
+    private fun priceTextOf(o: JSONObject): String? {
+        val typed = o.optString("priceTyped", "").trim().takeIf { it.isNotBlank() } ?: return null
+        val cur = o.optString("priceCurrency", "").trim().takeIf { it.isNotBlank() } ?: return null
+        return withoutDisplayHazards("${cur.uppercase()} $typed").take(32)
     }
 
     /**
@@ -548,6 +570,7 @@ object Listings {
             id = id,
             title = o.optString("title").trim().take(120),
             description = description,
+            priceText = priceTextOf(o),
             updated = (System.currentTimeMillis() / 1000).toULong(),
             pictures = pictures,
             files = attached,
@@ -931,7 +954,12 @@ object Listings {
     }
 
     fun post(context: Context, id: String): Boolean =
-        synchronized(postLocks.getOrPut(id) { Any() }) { postLocked(context, id) }
+        synchronized(postLocks.getOrPut(id) { Any() }) {
+            // Each phase is said as it starts (Busy, below); cleared however
+            // this ends, or the last phrase would stand under the next
+            // button pressed.
+            try { postLocked(context, id) } finally { Busy.clear() }
+        }
 
     private fun postLocked(context: Context, id: String): Boolean {
         val now = System.currentTimeMillis() / 1000
@@ -957,6 +985,7 @@ object Listings {
         val fingerprint = bundleFingerprint(context, o)
         val had = o.optString("gallery")
         if (fingerprint != null && (had.isBlank() || o.optString("bundle_fp") != fingerprint)) {
+            Busy.say(context.getString(R.string.busy_pictures_swarm))
             if (had.isNotBlank()) runCatching { Swarm.stopShare(had) }
             val seeded = seedGallery(context, id)
             synchronized(lock) {
@@ -1015,15 +1044,29 @@ object Listings {
         // the poster invents is exactly the precomputation the field exists to
         // stop; a listing that went up unstamped would also be refused by
         // every reader, which is a worse way to find out.
+        Busy.say(context.getString(R.string.busy_stamping_notice))
         val beacon = Beacons.stampNow(context)
             ?: throw Beacons.NoBlock()
 
         // Seconds of Argon2, on the poll thread. See board.rs.
-        fun seal(board: String, slot: UInt): ByteArray =
-            uniffi.ducat_mobile.rentalEncode(
+        fun seal(board: String, slot: UInt): ByteArray {
+            Busy.say(context.getString(R.string.busy_stamping_notice))
+            return uniffi.ducat_mobile.rentalEncode(
                 notice, persona, id, board, slot,
                 beacon.height.toULong(), beacon.hashHex,
             )
+        }
+
+        // Stamp, then write — said as two phases because they are two
+        // waits: the stamp is this phone's own seconds of work, the write
+        // is the network's, and on a quiet board the second is the longer.
+        // A stamp that throws is still the slot's failure, as it was when
+        // the two sat inside one runCatching.
+        fun land(board: String, slot: UInt): Boolean = runCatching {
+            val bytes = seal(board, slot)
+            Busy.say(context.getString(R.string.busy_writing_board))
+            uniffi.ducat_mobile.standPost(board, slot, bytes)
+        }.isSuccess
 
         // §15.12's overflow ladder, which listings need far more than hails
         // do: a hail is one person for ten minutes, but a five-kilometre
@@ -1054,9 +1097,7 @@ object Listings {
         if (existing != null && existingSlot != null) {
             // Refreshing in place: keep the tenancy rather than taking a
             // second slot and leaving the first to expire as a ghost.
-            if (runCatching { uniffi.ducat_mobile.standPost(existing, existingSlot, seal(existing, existingSlot)) }
-                    .isSuccess
-            ) {
+            if (land(existing, existingSlot)) {
                 placed = existing to existingSlot
             }
         }
@@ -1087,9 +1128,7 @@ object Listings {
                     // standPost verifies its own landing, so a slot two
                     // writers raced for is a throw here rather than a notice
                     // that quietly vanished under someone else's.
-                    if (runCatching { uniffi.ducat_mobile.standPost(name, free, seal(name, free)) }
-                            .isSuccess
-                    ) {
+                    if (land(name, free)) {
                         placed = name to free
                         break@ladder
                     }

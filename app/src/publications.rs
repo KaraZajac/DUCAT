@@ -29,7 +29,7 @@ use crate::listings::{REFRESH_SECONDS, RETRY_SECONDS};
 use crate::mailbox::Outgoing;
 use crate::tabs::ORIGIN_PUB;
 use crate::thumbs::THUMB_BYTES;
-use crate::{log, App, Error};
+use crate::{busy, log, App, Error};
 
 const TAG: &str = "Publications";
 const STORE: &str = "ducat_publications";
@@ -900,6 +900,8 @@ impl App {
         let name = file.file_name().map(|f| f.to_string_lossy().into_owned()).unwrap_or_else(|| "issue.bin".into());
         let dest = staging.join(&name);
         std::fs::copy(file, &dest)?;
+        let _phase = busy::scope();
+        busy::say("seeding on the swarm");
         let share = swarm::swarm_seed(dest.to_string_lossy().into_owned())?;
         let (k, d, f) = (share.share_key.clone(), share.index_digest_hex.clone(), dest.to_string_lossy().into_owned());
         self.edit_pub(pub_id, move |p| {
@@ -1123,6 +1125,7 @@ impl App {
     }
 
     fn post_market_locked(&self, pub_id: &str) -> Result<bool, Error> {
+        let _phase = busy::scope();
         let now = App::now();
         self.edit_pub(pub_id, |p| p.mkt_tried_at = now)?;
         let Some(p) = self.publication(pub_id) else { return Ok(false) };
@@ -1132,6 +1135,7 @@ impl App {
         // Each posting mints a fresh claim-once card bound to the
         // publication, so a claim from any generation of the notice still
         // enrolls (§16.20's bind).
+        busy::say("issuing the card");
         let card = self.issue_card(Some(&p.title), MARKET_TTL_SECS, "publish", Some(&worn))?;
         self.bind_card(pub_id, &card.inbox_key)?;
         let persona = match self.persona_secret(&worn)? {
@@ -1215,14 +1219,23 @@ impl App {
     /// One board's tenancy: the slot already held is written again, else
     /// the ladder is climbed for a free one. None when every shard is full.
     fn take_market_slot(&self, base: &str, existing: Option<(String, u32)>, seal: &dyn Fn(&str, u32) -> Result<Vec<u8>, Error>, tip: u64, now: u64) -> Result<Option<(String, u32)>, Error> {
+        // Each try is two waits the screen names: the stamp for this
+        // board, then the write.
+        let post = |board: &str, slot: u32| -> Result<bool, Error> {
+            busy::say(format!("stamping for {base}"));
+            let sealed = seal(board, slot)?;
+            busy::say("writing to the board");
+            Ok(stand_post(board.to_string(), slot, sealed).is_ok())
+        };
         if let Some((board, slot)) = existing {
-            if stand_post(board.clone(), slot, seal(&board, slot)?).is_ok() {
+            if post(&board, slot)? {
                 return Ok(Some((board, slot)));
             }
         }
         let this_week = stand_now(base);
         for shard in 0..max_stand_shards() {
             let Some(name) = stand_shard(&this_week, shard) else { continue };
+            busy::say("reading the board");
             let taken: HashSet<u32> = stand_read(name.clone())
                 .unwrap_or_default()
                 .into_iter()
@@ -1232,7 +1245,7 @@ impl App {
                 if taken.contains(&free) {
                     continue;
                 }
-                if stand_post(name.clone(), free, seal(&name, free)?).is_ok() {
+                if post(&name, free)? {
                     return Ok(Some((name, free)));
                 }
             }

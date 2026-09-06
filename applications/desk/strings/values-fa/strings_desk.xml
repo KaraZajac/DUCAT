@@ -361,4 +361,17 @@
     <string name="desk_details">جزئیات</string>
     <string name="desk_save_as">ذخیره با نام…</string>
     <string name="desk_seller_away">فروشنده در حال حاضر در دسترس نیست، بنابراین عکس‌ها و فایل‌ها دریافت نشدند.</string>
+    <string name="desk_creating">در حال ساختن…</string>
+    <string name="desk_at_todays_rate">حدود %1$s به نرخ امروز</string>
+    <string name="desk_busy_pictures">گذاشتن عکس‌ها روی گله</string>
+    <string name="desk_busy_card">صدور کارت</string>
+    <string name="desk_busy_stamping">مهر زدن آگهی</string>
+    <string name="desk_busy_stamping_for">مهر زدن برای %1$s</string>
+    <string name="desk_busy_reading_board">خواندن تابلو</string>
+    <string name="desk_busy_writing_board">نوشتن روی تابلو</string>
+    <string name="desk_busy_forming_board">ساختن تابلو</string>
+    <string name="desk_busy_roster">فرستادن فهرست اعضا</string>
+    <string name="desk_busy_home">انتشار خانه شما</string>
+    <string name="desk_busy_seeding">پخش روی گله</string>
+    <string name="desk_busy_address">انتشار نشانی</string>
 </resources>

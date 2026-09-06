@@ -6,6 +6,7 @@
   import { t, tp, LANGS } from "./i18n.svelte";
   import { api, confirmDanger, copy, fmtBytes, fmtXmr, fmtTime, type Code, type ContactRow, type PublicationRow, type SubscriptionRow, MARKET_CATEGORIES } from "./api";
   import { gen, drive } from "./state.svelte";
+  import Busy from "./Busy.svelte";
 
   let mode = $state<"reading" | "press">("reading");
   let pubs = $state<PublicationRow[]>([]);
@@ -288,6 +289,7 @@
         <div class="actions">
           <button class="btn" disabled={busy === "market"} onclick={listWorld}>{busy === "market" ? t("desk_posting") : current.on_market ? t("desk_refresh_board") : t("market_list_btn")}</button>
           {#if current.on_market}<button class="btn small danger" disabled={busy === "delist"} onclick={() => act("delist", () => api.marketUnpostPublication(current!.id))}>{t("market_delist_btn")}</button>{/if}
+          <Busy on={busy === "market"} />
         </div>
         {#if current.on_market}
           <p class="meta">{t("market_listed_as", catLabel(current.market_category))}{current.market_lang ? ` · ${langName(current.market_lang)}` : ""} · {current.market_board ? t("desk_on_board_since", fmtTime(current.market_since)) : t("desk_market_waiting")}</p>
@@ -318,6 +320,7 @@
         <label class="toggle"><input type="checkbox" bind:checked={preferSwarm} /> {t("desk_prefer_swarm")}</label>
         <div class="actions">
           <button class="btn primary" disabled={!file || !period.trim() || busy === "publish"} onclick={publish}>{busy === "publish" ? t("pub_publishing") : t("pub_publish")}</button>
+          <Busy on={busy === "publish"} />
           <button class="btn small danger" onclick={async () => { if (!(await confirmDanger(t("pub_delete_body"), t("pub_delete_title")))) return; act("del", async () => { await api.deletePublication(current!.id); selected = null; }); }}>{t("pub_delete_btn")}</button>
         </div>
         {#if lastResult}<p class="note ok-text">{lastResult}</p>{/if}

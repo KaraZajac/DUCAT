@@ -13,7 +13,7 @@ use ducat_mobile::{node, swarm};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
-use crate::{copy_tree, has_any_file, log, App, Error};
+use crate::{busy, copy_tree, has_any_file, log, App, Error};
 
 const STORE: &str = "ducat_sites";
 const TAG: &str = "Sites";
@@ -328,6 +328,7 @@ impl App {
         if let Some(hit) = clearnet_in(source) {
             return Err(Error::Refused(format!("that page reaches the network — {hit}")));
         }
+        let _phase = busy::scope();
 
         // 1. The address first, because everything below is named after it.
         let prior = record_key.and_then(|k| self.sites().into_iter().find(|s| s.record_key == k));
@@ -378,10 +379,12 @@ impl App {
         }
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::rename(&fresh, &dir)?;
+        busy::say("seeding on the swarm");
         let share = swarm::swarm_seed(dir.to_string_lossy().into_owned())?;
 
         // 4. The head last: until it is written the address points at
         //    nothing, and after it the whole network can read the page.
+        busy::say("publishing the address");
         let mut entry = base;
         entry.share = share.share_key.clone();
         entry.digest_hex = share.index_digest_hex.clone();

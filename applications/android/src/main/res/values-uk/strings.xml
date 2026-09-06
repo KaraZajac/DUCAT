@@ -50,4 +50,5 @@
     <string name="prices_menu_warn_title">Твоє меню в %1$s</string>
     <string name="prices_menu_warn_body">Перехід на %2$s зробить ці ціни непродажними, доки не виставиш їх заново. Нічого не видаляється.</string>
     <string name="prices_menu_warn_go">Усе одно змінити</string>
+    <string name="common_connecting">Підключаємось до мережі…</string>
 </resources>

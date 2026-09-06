@@ -361,4 +361,17 @@
     <string name="desk_details">Detalhes</string>
     <string name="desk_save_as">Guardar como…</string>
     <string name="desk_seller_away">O vendedor não está contactável neste momento, por isso não foi possível obter as fotos e os ficheiros.</string>
+    <string name="desk_creating">A criar…</string>
+    <string name="desk_at_todays_rate">cerca de %1$s ao câmbio de hoje</string>
+    <string name="desk_busy_pictures">a pôr as fotos no enxame</string>
+    <string name="desk_busy_card">a emitir o cartão</string>
+    <string name="desk_busy_stamping">a carimbar o anúncio</string>
+    <string name="desk_busy_stamping_for">a carimbar para %1$s</string>
+    <string name="desk_busy_reading_board">a ler o quadro</string>
+    <string name="desk_busy_writing_board">a escrever no quadro</string>
+    <string name="desk_busy_forming_board">a formar o quadro</string>
+    <string name="desk_busy_roster">a enviar a lista de membros</string>
+    <string name="desk_busy_home">a publicar a tua casa</string>
+    <string name="desk_busy_seeding">a semear no enxame</string>
+    <string name="desk_busy_address">a publicar o endereço</string>
 </resources>

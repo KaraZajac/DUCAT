@@ -247,6 +247,39 @@ object Publications {
     fun marketBoard(category: String, lang: String?): String =
         "topic:$category" + (lang?.takeIf { it.isNotBlank() }?.let { ".$it" } ?: "")
 
+    /** A category slug's human name — the chips' own (ui.Market reads it
+     *  from here, so the shelf and the phrase about it cannot disagree). */
+    fun categoryLabelRes(slug: String): Int = when (slug) {
+        "news" -> R.string.market_cat_news
+        "serials" -> R.string.market_cat_serials
+        "sound" -> R.string.market_cat_sound
+        "software" -> R.string.market_cat_software
+        "art" -> R.string.market_cat_art
+        else -> R.string.market_cat_other
+    }
+
+    /** A board language's name, in that language — the picker's own rule
+     *  (Languages.SUPPORTED). A device language the app does not ship is
+     *  still named by the platform rather than shown as a tag. */
+    fun languageName(tag: String): String =
+        Languages.endonymFor(tag)
+            ?: java.util.Locale.forLanguageTag(tag).let { it.getDisplayLanguage(it) }.ifBlank { tag }
+
+    /**
+     * "Stamping for the News shelf in Deutsch…" — a shard's name, said as
+     * the shelf the person picked. The name is `topic:<slug>[.<lang>]` or
+     * `local:<cell>`, with the generation and the shard after it (standNow).
+     */
+    private fun stampingFor(context: Context, board: String): String {
+        val base = board.substringBefore('@')
+        if (!base.startsWith("topic:")) return context.getString(R.string.busy_stamping_local)
+        val rest = base.removePrefix("topic:")
+        val shelf = context.getString(categoryLabelRes(rest.substringBefore('.')))
+        val lang = rest.substringAfter('.', "")
+        return if (lang.isBlank()) context.getString(R.string.busy_stamping_shelf, shelf)
+        else context.getString(R.string.busy_stamping_shelf_lang, shelf, languageName(lang))
+    }
+
     /** The shelf that is every category at once: not a board name — the
      *  six read side by side and merged (§16.18.2's "everything"). */
     const val MARKET_EVERYTHING = "*"
@@ -278,6 +311,21 @@ object Publications {
         /** A geohash cell to ALSO post on — the town paper's own board.
          *  Two stamps, paid honestly (§16.18.2). */
         localCell: String? = null,
+    ): Boolean = try {
+        placeOnMarket(context, pubId, category, lang, blurb, localCell)
+    } finally {
+        // Each phase is said as it starts (Busy, below); cleared however
+        // this ends, or the last phrase would stand under the next button.
+        Busy.clear()
+    }
+
+    private fun placeOnMarket(
+        context: Context,
+        pubId: String,
+        category: String,
+        lang: String?,
+        blurb: String?,
+        localCell: String?,
     ): Boolean {
         if (category !in MARKET_CATEGORIES) return false
         val name = publications(context).firstOrNull { it.first == pubId }?.second
@@ -286,6 +334,7 @@ object Publications {
         val ownerHex = personas.worn()
         val secret = personas.secretFor(ownerHex) ?: personas.secret()
         val now = System.currentTimeMillis() / 1000
+        Busy.say(context.getString(R.string.busy_minting_card))
         val card = runCatching {
             Mailbox.issueCard(
                 context, name, MARKET_TTL_SECS.toULong(),
@@ -310,15 +359,20 @@ object Publications {
             beaconHeight = 0uL,
             beaconHash = "",
         )
+        // The block every copy is stamped against, fetched once — said for
+        // the board the person picked, which is the first one sealed.
+        Busy.say(stampingFor(context, marketBoard(category, lang)))
         val beacon = Beacons.stampNow(context) ?: run {
             DucatLog.w("Publications", "market: no recent block to stamp against")
             return false
         }
-        fun seal(board: String, slot: UInt): ByteArray =
-            uniffi.ducat_mobile.pubListingEncode(
+        fun seal(board: String, slot: UInt): ByteArray {
+            Busy.say(stampingFor(context, board))
+            return uniffi.ducat_mobile.pubListingEncode(
                 info, secret, "market:$pubId", board, slot,
                 beacon.height.toULong(), beacon.hashHex,
             )
+        }
         val prior = readPub(context, pubId)
         fun priorSlot(boardKey: String, slotKey: String): Pair<String, UInt>? {
             val b = prior?.optString(boardKey)?.takeIf { it.isNotBlank() } ?: return null
@@ -412,9 +466,17 @@ object Publications {
         now: Long,
         seal: (String, UInt) -> ByteArray,
     ): Pair<String, UInt>? {
+        // Stamp, then write — two waits, said as two (Busy): the stamp is
+        // this phone's own seconds, the write is the network's. A stamp
+        // that throws is still the slot's failure, as it was inline.
+        fun land(board: String, slot: UInt): Boolean = runCatching {
+            val bytes = seal(board, slot)
+            Busy.say(context.getString(R.string.busy_writing_board))
+            uniffi.ducat_mobile.standPost(board, slot, bytes)
+        }.isSuccess
         if (prior != null && prior.first.substringBefore('@') == base && !standStale(prior.first)) {
             val (b, s) = prior
-            if (runCatching { uniffi.ducat_mobile.standPost(b, s, seal(b, s)) }.isSuccess) {
+            if (land(b, s)) {
                 return prior
             }
         }
@@ -431,9 +493,7 @@ object Publications {
                 }.toSet()
             for (free in 0u..7u) {
                 if (free in taken) continue
-                if (runCatching { uniffi.ducat_mobile.standPost(board, free, seal(board, free)) }
-                        .isSuccess
-                ) {
+                if (land(board, free)) {
                     return board to free
                 }
             }

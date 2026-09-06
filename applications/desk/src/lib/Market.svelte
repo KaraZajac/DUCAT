@@ -7,6 +7,7 @@
   import { t, i18n, LANGS } from "./i18n.svelte";
   import { api, copy, fmtXmr, fmtTime, fmtBytes, type FoundRow, type ListingAttachment, type ListingBundle, type ListingDraft, type ListingRow, type MarketRow, LISTING_DESCRIPTION_MAX, MARKET_CATEGORIES, confirmDanger } from "./api";
   import { gen, drive } from "./state.svelte";
+  import Busy from "./Busy.svelte";
 
   let mode = $state<"browse" | "mine">("browse");
   let err = $state<string | null>(null);
@@ -101,6 +102,7 @@
   let editing = $state<ListingDraft | null>(null);
   let editingId = $state<string | null>(null);
   let busy = $state<string | null>(null);
+  let postNote = $state<string | null>(null);
   let photoUrls = $state<Record<string, string>>({});
 
   const kinds = $derived.by(() => { void i18n.lang; return [
@@ -161,6 +163,15 @@
       searching = false;
     }
   }
+
+  // The rate's figure out of a Shown, whichever side of it it sits on.
+  function fiatOf(s: { primary: string; secondary: string | null }): string | null {
+    return [s.primary, s.secondary].find((x) => x && !x.endsWith(" XMR")) ?? null;
+  }
+
+  // The board's cover stands in until the bundle's pictures land.
+  const coverShown = $derived(!!openFound?.thumb_data_url && !bundle?.pictures.length);
+  const fetching = $derived(t("desk_fetching_pictures") + (bundleProgress ? ` ${bundleProgress.done} / ${bundleProgress.total}` : ""));
 
   function openListing(f: FoundRow) {
     openFound = f;
@@ -274,11 +285,13 @@
 
   function newDraft(k: number) {
     editingId = null;
+    postNote = null;
     editing = { id: null, kind: k, title: "", area: "", cell: cell || "", price_text: "", price_is_fiat: true, specs: {}, private_details: "", description: "", quantity: 1 };
   }
 
   function editListing(l: ListingRow) {
     editingId = l.id;
+    postNote = null;
     editing = {
       id: l.id, kind: l.kind, title: l.title, area: l.area, cell: l.cell,
       price_text: l.price_typed ?? (l.price_pxmr / 1e12).toString(), price_is_fiat: !!l.price_typed,
@@ -313,6 +326,16 @@
     } finally {
       busy = null;
     }
+  }
+
+  // True when a slot took it; false is every shard full, which the lap
+  // keeps trying and the screen says once.
+  async function postIt() {
+    postNote = null;
+    await act("post", async () => {
+      const took = await api.postListing(editingId!);
+      if (!took) postNote = t("desk_no_market_slot");
+    });
   }
 
   async function addPhoto() {
@@ -361,16 +384,26 @@
     <div class="card">
       <div class="page-head" style="margin-bottom: 8px"><h3 style="margin: 0">{openFound.title}</h3><button class="btn small" onclick={closeListing}>{t("main_back")}</button></div>
       <div class="found-detail">
-        {#if openFound.thumb_data_url && !bundle?.pictures.length}<img class="thumb big" src={openFound.thumb_data_url} alt="" />{/if}
+        {#if coverShown}
+          <div class="cover-wait">
+            <img class="cover-pic" src={openFound.thumb_data_url} alt="" />
+            {#if bundleBusy}<p class="meta">{fetching}</p>{/if}
+          </div>
+        {/if}
         <div class="grow">
-          <div class="balance-big" style="font-size: 22px">{openFound.shown.primary}</div>
+          {#if bundle?.doc?.price_text}
+            <div class="balance-big" style="font-size: 22px">{bundle.doc.price_text}</div>
+            <div class="meta">{fmtXmr(openFound.price_pxmr)}{fiatOf(openFound.shown) ? ` · ${t("desk_at_todays_rate", fiatOf(openFound.shown)!)}` : ""}</div>
+          {:else}
+            <div class="balance-big" style="font-size: 22px">{openFound.shown.primary}</div>
+          {/if}
           <div class="meta">{openFound.kind_name} · {openFound.area}{openFound.cell ? ` · ${openFound.cell}` : ""} · {t("desk_until", fmtTime(openFound.expiry))}{openFound.quantity > 1 ? ` · ${t("rent_n_available", openFound.quantity)}` : ""}</div>
           {#if openFound.deposit_pxmr}<div class="meta">{t("desk_deposit_x", fmtXmr(openFound.deposit_pxmr))}</div>{/if}
           <div class="actions">
             {#if !openFound.mine}<button class="btn primary" disabled={asking} onclick={ask}>{asking ? t("desk_asking") : t("rent_ask_about_it")}</button>{:else}<span class="meta">{t("desk_this_is_yours")}</span>{/if}
             {#if openFound.gallery && !bundle && !bundleBusy}<button class="btn" onclick={() => loadBundle(openFound!)}>{bundleErr ? t("rent_search_retry") : t("desk_see_pictures")}</button>{/if}
           </div>
-          {#if bundleBusy}<p class="meta">{t("desk_fetching_pictures")}{bundleProgress ? ` ${bundleProgress.done} / ${bundleProgress.total}` : ""}</p>{/if}
+          {#if bundleBusy && !coverShown}<p class="meta">{fetching}</p>{/if}
           {#if bundleErr}<p class="note">{t("desk_seller_away")}</p><p class="err">{bundleErr}</p>{/if}
           <p class="note">{t("desk_ask_note")}</p>
         </div>
@@ -417,7 +450,7 @@
           {#if f.thumb_data_url}<img class="thumb" src={f.thumb_data_url} alt="" />{:else}<div class="thumb none">{f.kind_name}</div>{/if}
           <div class="found-text">
             <div class="title">{f.title}</div>
-            <div class="meta">{f.shown.primary} · {f.kind_name}{f.mine ? ` · ${t("desk_yours")}` : ""}</div>
+            <div class="meta">{f.price_text ? `${f.price_text} · ${fmtXmr(f.price_pxmr)}` : f.shown.primary} · {f.kind_name}{f.mine ? ` · ${t("desk_yours")}` : ""}</div>
           </div>
         </button>
       {/each}
@@ -521,14 +554,16 @@
             {#if drive.on}<input id="ppath" class="input narrow" hidden placeholder="/path/to/picture" onchange={(e) => act("photo", () => api.addListingPhoto(editingId!, (e.target as HTMLInputElement).value))} />{/if}
             {#if drive.on}<input id="fpath" class="input narrow" hidden placeholder="/path/to/file" onchange={(e) => act("file", () => api.addListingFile(editingId!, (e.target as HTMLInputElement).value))} />{/if}
             {#if mine.find((l) => l.id === editingId)?.posted}
-              <button class="btn" disabled={busy === "post"} onclick={() => act("post", () => api.postListing(editingId!))}>{t("desk_refresh_board")}</button>
-              <button class="btn danger" onclick={() => act("unpost", () => api.unpostListing(editingId!))}>{t("rent_take_down")}</button>
+              <button class="btn" disabled={busy === "post"} onclick={postIt}>{busy === "post" ? t("desk_posting") : t("desk_refresh_board")}</button>
+              <button class="btn danger" disabled={busy === "post"} onclick={() => act("unpost", () => api.unpostListing(editingId!))}>{t("rent_take_down")}</button>
             {:else}
-              <button class="btn" disabled={busy === "post"} onclick={() => act("post", () => api.postListing(editingId!))}>{busy === "post" ? t("desk_posting") : t("rent_post_it")}</button>
+              <button class="btn" disabled={busy === "post"} onclick={postIt}>{busy === "post" ? t("desk_posting") : t("rent_post_it")}</button>
             {/if}
+            <Busy on={busy === "post"} />
             <button class="btn danger" onclick={async () => { if (!(await confirmDanger(t("desk_confirm_delete_listing")))) return; act("rm", async () => { await api.removeListing(editingId!); editing = null; editingId = null; }); }}>{t("rent_delete")}</button>
           {/if}
         </div>
+        {#if postNote}<p class="note">{postNote}</p>{/if}
         {#if editingId}
           {@const l = mine.find((x) => x.id === editingId)}
           {#if l && l.photos.length}

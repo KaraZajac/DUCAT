@@ -51,4 +51,5 @@
     <string name="prices_menu_warn_title">Menün %1$s cinsinden</string>
     <string name="prices_menu_warn_body">%2$s\'ye geçmek, yeniden ayarlayana kadar o fiyatların satılmasını durdurur. Hiçbir şey silinmez.</string>
     <string name="prices_menu_warn_go">Yine de değiştir</string>
+    <string name="common_connecting">Ağa bağlanılıyor…</string>
 </resources>

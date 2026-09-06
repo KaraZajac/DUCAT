@@ -161,4 +161,10 @@
     <string name="rent_spec_fuel">เชื้อเพลิง</string>
     <string name="rent_photo_open">ดูภาพขยาย</string>
     <string name="rent_photo_close">ปิด</string>
+    <string name="rent_posting">กำลังติดประกาศ…</string>
+    <string name="busy_stamping_notice">กำลังประทับตราประกาศ…</string>
+    <string name="busy_writing_board">กำลังเขียนลงบอร์ด…</string>
+    <string name="busy_pictures_swarm">กำลังนำรูปขึ้นฝูง…</string>
+    <string name="busy_files_swarm">กำลังนำไฟล์ขึ้นฝูง…</string>
+    <string name="rent_price_at_rate">%1$s · ราว %2$s ตามอัตราวันนี้</string>
 </resources>

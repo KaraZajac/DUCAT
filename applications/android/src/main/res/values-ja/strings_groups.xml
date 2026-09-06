@@ -35,4 +35,7 @@
         <item quantity="one">リクエストを%1$d件送信</item>
         <item quantity="other">リクエストを%1$d件送信</item>
     </plurals>
+    <string name="group_creating">作成中…</string>
+    <string name="group_forming_board">ボードを作成中…</string>
+    <string name="group_telling_members">メンバーに知らせています…</string>
 </resources>

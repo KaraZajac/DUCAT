@@ -163,4 +163,10 @@
     <string name="rent_spec_fuel">Топливо</string>
     <string name="rent_photo_open">Посмотреть крупнее</string>
     <string name="rent_photo_close">Закрыть</string>
+    <string name="rent_posting">Размещение…</string>
+    <string name="busy_stamping_notice">Ставим отметку на объявление…</string>
+    <string name="busy_writing_board">Записываем на доску…</string>
+    <string name="busy_pictures_swarm">Отдаём фотографии в рой…</string>
+    <string name="busy_files_swarm">Отдаём файлы в рой…</string>
+    <string name="rent_price_at_rate">%1$s · около %2$s по сегодняшнему курсу</string>
 </resources>

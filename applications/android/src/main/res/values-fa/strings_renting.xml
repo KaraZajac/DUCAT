@@ -161,4 +161,10 @@
     <string name="rent_spec_fuel">سوخت</string>
     <string name="rent_photo_open">بزرگ‌تر ببین</string>
     <string name="rent_photo_close">بستن</string>
+    <string name="rent_posting">در حال نصب…</string>
+    <string name="busy_stamping_notice">در حال مهر زدن آگهی…</string>
+    <string name="busy_writing_board">در حال نوشتن روی تابلو…</string>
+    <string name="busy_pictures_swarm">در حال گذاشتن عکس‌ها روی ازدحام…</string>
+    <string name="busy_files_swarm">در حال گذاشتن فایل‌ها روی ازدحام…</string>
+    <string name="rent_price_at_rate">%1$s · حدود %2$s به نرخ امروز</string>
 </resources>

@@ -35,4 +35,7 @@
         <item quantity="one">%1$d Anfrage senden</item>
         <item quantity="other">%1$d Anfragen senden</item>
     </plurals>
+    <string name="group_creating">Wird erstellt…</string>
+    <string name="group_forming_board">Die Tafel wird angelegt…</string>
+    <string name="group_telling_members">Die Mitglieder werden benachrichtigt…</string>
 </resources>

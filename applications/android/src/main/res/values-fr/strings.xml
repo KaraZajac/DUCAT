@@ -51,4 +51,5 @@
     <string name="prices_menu_warn_title">Ta carte est en %1$s</string>
     <string name="prices_menu_warn_body">Passer en %2$s rend ces prix invendables tant que tu ne les refais pas. Rien n\'est supprimé.</string>
     <string name="prices_menu_warn_go">Changer quand même</string>
+    <string name="common_connecting">Connexion au réseau…</string>
 </resources>

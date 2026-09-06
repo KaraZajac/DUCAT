@@ -90,4 +90,9 @@
     <string name="pub_cover_note">Staat op de plank naast de titel. Verkleind zodat het in het bericht past, zodat bladeren snel blijft.</string>
     <string name="pub_cover_remove">Verwijderen</string>
     <string name="pub_cover_failed">Die afbeelding kon niet worden gebruikt. Probeer een andere.</string>
+    <string name="market_listing">Aanbieden…</string>
+    <string name="busy_minting_card">Kaart wordt gemaakt…</string>
+    <string name="busy_stamping_shelf">Stempelen voor de plank %1$s…</string>
+    <string name="busy_stamping_shelf_lang">Stempelen voor de plank %1$s (%2$s)…</string>
+    <string name="busy_stamping_local">Stempelen voor het bord bij jou in de buurt…</string>
 </resources>

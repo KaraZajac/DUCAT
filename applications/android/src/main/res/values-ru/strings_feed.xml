@@ -38,4 +38,6 @@
         <item quantity="other">%d файлов</item>
     </plurals>
     <string name="feed_failed">Не получилось. Попробуйте ещё раз через минуту.</string>
+    <string name="feed_publishing_home">Публикуем ваш дом…</string>
+    <string name="feed_no_network">Сеть сейчас недоступна, поэтому ни один дом не просмотрен. Обычно это значит, что приложение ещё подключается — попробуйте через минуту.</string>
 </resources>

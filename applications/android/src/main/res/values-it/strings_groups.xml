@@ -35,4 +35,7 @@
         <item quantity="one">Invia %1$d richiesta</item>
         <item quantity="other">Invia %1$d richieste</item>
     </plurals>
+    <string name="group_creating">Creazione…</string>
+    <string name="group_forming_board">Formazione della bacheca…</string>
+    <string name="group_telling_members">Avviso ai membri…</string>
 </resources>

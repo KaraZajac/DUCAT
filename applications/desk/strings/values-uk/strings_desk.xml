@@ -369,4 +369,17 @@
     <string name="desk_details">Подробиці</string>
     <string name="desk_save_as">Зберегти як…</string>
     <string name="desk_seller_away">Продавець зараз недоступний, тому світлини та файли отримати не вдалося.</string>
+    <string name="desk_creating">Створення…</string>
+    <string name="desk_at_todays_rate">близько %1$s за сьогоднішнім курсом</string>
+    <string name="desk_busy_pictures">викладаємо фотографії в рій</string>
+    <string name="desk_busy_card">випускаємо картку</string>
+    <string name="desk_busy_stamping">ставимо штамп на оголошення</string>
+    <string name="desk_busy_stamping_for">ставимо штамп для %1$s</string>
+    <string name="desk_busy_reading_board">читаємо дошку</string>
+    <string name="desk_busy_writing_board">пишемо на дошку</string>
+    <string name="desk_busy_forming_board">створюємо дошку</string>
+    <string name="desk_busy_roster">надсилаємо список учасників</string>
+    <string name="desk_busy_home">публікуємо ваш дім</string>
+    <string name="desk_busy_seeding">роздаємо в рій</string>
+    <string name="desk_busy_address">публікуємо адресу</string>
 </resources>

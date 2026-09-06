@@ -161,4 +161,10 @@
     <string name="rent_spec_fuel">燃料</string>
     <string name="rent_photo_open">放大查看</string>
     <string name="rent_photo_close">关闭</string>
+    <string name="rent_posting">正在张贴…</string>
+    <string name="busy_stamping_notice">正在给公告盖戳…</string>
+    <string name="busy_writing_board">正在写入板…</string>
+    <string name="busy_pictures_swarm">正在把图片放上蜂群…</string>
+    <string name="busy_files_swarm">正在把文件放上蜂群…</string>
+    <string name="rent_price_at_rate">%1$s · 按今日汇率约 %2$s</string>
 </resources>

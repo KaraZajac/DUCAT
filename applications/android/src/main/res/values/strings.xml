@@ -59,4 +59,7 @@
     <string name="prices_menu_warn_title">Your menu is priced in %1$s</string>
     <string name="prices_menu_warn_body">Switching to %2$s stops those prices being sellable until you set them again. Nothing is deleted.</string>
     <string name="prices_menu_warn_go">Switch anyway</string>
+    <!-- Said before the first thing the network is asked for, in place
+         of an answer it could not have given yet. -->
+    <string name="common_connecting">Connecting to the network…</string>
 </resources>

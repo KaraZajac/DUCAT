@@ -361,4 +361,17 @@
     <string name="desk_details">Ayrıntılar</string>
     <string name="desk_save_as">Farklı kaydet…</string>
     <string name="desk_seller_away">Satıcıya şu anda ulaşılamıyor, bu yüzden fotoğraflar ve dosyalar getirilemedi.</string>
+    <string name="desk_creating">Oluşturuluyor…</string>
+    <string name="desk_at_todays_rate">bugünkü kurla yaklaşık %1$s</string>
+    <string name="desk_busy_pictures">fotoğraflar sürüye konuyor</string>
+    <string name="desk_busy_card">kart düzenleniyor</string>
+    <string name="desk_busy_stamping">ilan damgalanıyor</string>
+    <string name="desk_busy_stamping_for">%1$s için damgalanıyor</string>
+    <string name="desk_busy_reading_board">pano okunuyor</string>
+    <string name="desk_busy_writing_board">panoya yazılıyor</string>
+    <string name="desk_busy_forming_board">pano oluşturuluyor</string>
+    <string name="desk_busy_roster">üye listesi gönderiliyor</string>
+    <string name="desk_busy_home">evin yayımlanıyor</string>
+    <string name="desk_busy_seeding">sürüde dağıtılıyor</string>
+    <string name="desk_busy_address">adres yayımlanıyor</string>
 </resources>

@@ -35,4 +35,7 @@
         <item quantity="one">요청 %1$d건 보내기</item>
         <item quantity="other">요청 %1$d건 보내기</item>
     </plurals>
+    <string name="group_creating">만드는 중…</string>
+    <string name="group_forming_board">게시판을 만드는 중…</string>
+    <string name="group_telling_members">구성원에게 알리는 중…</string>
 </resources>

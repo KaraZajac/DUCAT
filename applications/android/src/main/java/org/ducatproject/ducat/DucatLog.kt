@@ -372,3 +372,34 @@ object DucatLog {
         // A whole card would carry its writer secret.
         .replace(Regex("ducat:card/\\S+"), "ducat:card/[card]")
 }
+
+/**
+ * What the phone is doing right now, for the person who pressed the button.
+ *
+ * Posting a listing is a swarm seed, a Monero stamp, seconds of Argon2 and
+ * a walk along a board; listing a publication is two of those stamps; a
+ * group is a record formed on the DHT. Five seconds to two minutes, and the
+ * whole of it was one spinner — which reads as "hung" at exactly the moment
+ * the phone is working hardest. The long paths say each phase as they
+ * enter it, and [ui.BusyLine] draws the current one under the button.
+ *
+ * One slot, not one per job. The phrase is the *phone's* current phase, and
+ * a person presses one of these buttons at a time; a background re-post
+ * narrating over a foreground one still says something true. Whoever says
+ * must clear, in a `finally` — a phrase left behind would be shown under
+ * the next button pressed, about work that ended an hour ago.
+ *
+ * Beside the log rather than in a file of its own for the same reason
+ * [reportLastExit] uses reflection: the desk compiles this file, and it
+ * compiles the protocol files that speak here, from an explicit list.
+ */
+object Busy {
+    private val phrase = MutableStateFlow<String?>(null)
+
+    /** The phase under way, or null when nothing long is. */
+    val now: StateFlow<String?> = phrase
+
+    fun say(text: String) { phrase.value = text }
+
+    fun clear() { phrase.value = null }
+}

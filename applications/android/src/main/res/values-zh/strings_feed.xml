@@ -38,4 +38,6 @@
         <item quantity="other">%d 个文件</item>
     </plurals>
     <string name="feed_failed">没有成功。请稍后再试。</string>
+    <string name="feed_publishing_home">正在发布你的主页…</string>
+    <string name="feed_no_network">现在连不上网络，所以没有查看任何主页。通常是应用还在接入中，稍后再试一次。</string>
 </resources>

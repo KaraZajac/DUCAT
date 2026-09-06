@@ -6,6 +6,7 @@
   import { t, tp } from "./i18n.svelte";
   import { api, confirmDanger, copy, fmtTime, fmtXmr, type ContactRow, type GroupMessage, type GroupRow, type MessageRow, type StandingRow } from "./api";
   import { gen, drive, pending } from "./state.svelte";
+  import Busy from "./Busy.svelte";
 
   let rows = $state<ContactRow[]>([]);
   let open = $state<string | null>(null);
@@ -26,6 +27,7 @@
   let groupThread = $state<GroupMessage[]>([]);
   let makingGroup = $state(false);
   let groupName = $state("");
+  let creating = $state(false);
   let groupPick = $state<Set<string>>(new Set());
   let addingMember = $state(false);
   const currentGroup = $derived(groups.find((g) => g.id_hex === openGroup) ?? null);
@@ -112,8 +114,9 @@
   }
 
   async function createGroup() {
-    if (!groupName.trim() || groupPick.size === 0) return;
+    if (!groupName.trim() || groupPick.size === 0 || creating) return;
     err = null;
+    creating = true;
     try {
       const g = await api.createGroup(groupName.trim(), [...groupPick]);
       makingGroup = false;
@@ -123,6 +126,8 @@
       await selectGroup(g.id_hex);
     } catch (e) {
       err = String(e);
+    } finally {
+      creating = false;
     }
   }
 
@@ -604,7 +609,8 @@
             <button class="chip" class:on={groupPick.has(r.persona_hex)} onclick={() => { const n = new Set(groupPick); n.has(r.persona_hex) ? n.delete(r.persona_hex) : n.add(r.persona_hex); groupPick = n; }}>{r.name}</button>
           {/each}
         </div>
-        <button class="btn primary" disabled={!groupName.trim() || groupPick.size === 0} onclick={createGroup}>{t("desk_create")}</button>
+        <button class="btn primary" disabled={!groupName.trim() || groupPick.size === 0 || creating} onclick={createGroup}>{creating ? t("desk_creating") : t("desk_create")}</button>
+        <Busy on={creating} />
         <p class="note">{t("desk_group_note")}</p>
       </div>
     {/if}

@@ -38,4 +38,6 @@
         <item quantity="other">%d file</item>
     </plurals>
     <string name="feed_failed">Non è andata. Riprova tra un momento.</string>
+    <string name="feed_publishing_home">Pubblicazione della tua casa…</string>
+    <string name="feed_no_network">La rete non era raggiungibile in questo momento, quindi nessuna casa è stata guardata. Di solito vuol dire che l’app si sta ancora collegando — riprova tra poco.</string>
 </resources>

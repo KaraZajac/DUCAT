@@ -50,4 +50,5 @@
     <string name="prices_menu_warn_title">Il tuo menù è in %1$s</string>
     <string name="prices_menu_warn_body">Passare a %2$s rende quei prezzi non vendibili finché non li rimetti. Non si cancella nulla.</string>
     <string name="prices_menu_warn_go">Cambia comunque</string>
+    <string name="common_connecting">Connessione alla rete…</string>
 </resources>

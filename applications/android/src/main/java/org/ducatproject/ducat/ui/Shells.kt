@@ -324,7 +324,7 @@ private fun BookingsList(kinds: List<Int> = Listings.KINDS) {
             ) {
                 Box(
                     Modifier.size(72.dp)
-                        .clip(androidx.compose.foundation.shape.CircleShape)
+                        .clip(faceShape(72.dp))
                         .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentAlignment = Alignment.Center,
                 ) {

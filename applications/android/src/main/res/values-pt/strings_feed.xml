@@ -38,4 +38,6 @@
         <item quantity="other">%d ficheiros</item>
     </plurals>
     <string name="feed_failed">Não correu bem. Tenta de novo daqui a pouco.</string>
+    <string name="feed_publishing_home">Publicando a sua casa…</string>
+    <string name="feed_no_network">Não deu para alcançar a rede agora, então nenhuma casa foi consultada. Normalmente isso quer dizer que o app ainda está entrando — tente de novo daqui a pouco.</string>
 </resources>

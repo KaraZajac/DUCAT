@@ -90,4 +90,11 @@
     <string name="pub_cover_note">Shown on the shelf beside the title. Shrunk to fit the notice, so browsing stays quick.</string>
     <string name="pub_cover_remove">Remove</string>
     <string name="pub_cover_failed">That picture could not be used. Try another.</string>
+    <!-- The phases of a market listing, said as each starts (Busy): the
+         card, a stamp per board, the write. -->
+    <string name="market_listing">Listing…</string>
+    <string name="busy_minting_card">Minting the card…</string>
+    <string name="busy_stamping_shelf">Stamping for the %1$s shelf…</string>
+    <string name="busy_stamping_shelf_lang">Stamping for the %1$s shelf in %2$s…</string>
+    <string name="busy_stamping_local">Stamping for the board near you…</string>
 </resources>

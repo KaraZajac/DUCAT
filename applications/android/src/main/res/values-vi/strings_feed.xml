@@ -38,4 +38,6 @@
         <item quantity="other">%d tệp</item>
     </plurals>
     <string name="feed_failed">Không thành công. Thử lại sau giây lát.</string>
+    <string name="feed_publishing_home">Đang đưa nhà của bạn lên…</string>
+    <string name="feed_no_network">Hiện chưa kết nối được tới mạng nên chưa xem được nhà nào. Thường là ứng dụng vẫn đang tham gia — thử lại sau một lát.</string>
 </resources>

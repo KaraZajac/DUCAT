@@ -90,4 +90,9 @@
     <string name="pub_cover_note">선반에서 제목 옆에 보여요. 공지에 들어가도록 줄이니, 둘러보기는 계속 가벼워요.</string>
     <string name="pub_cover_remove">삭제</string>
     <string name="pub_cover_failed">그 이미지는 쓸 수 없었어요. 다른 걸 시도해 보세요.</string>
+    <string name="market_listing">올리는 중…</string>
+    <string name="busy_minting_card">카드 생성 중…</string>
+    <string name="busy_stamping_shelf">%1$s 선반에 각인하는 중…</string>
+    <string name="busy_stamping_shelf_lang">%1$s 선반(%2$s)에 각인하는 중…</string>
+    <string name="busy_stamping_local">근처 게시판에 각인하는 중…</string>
 </resources>

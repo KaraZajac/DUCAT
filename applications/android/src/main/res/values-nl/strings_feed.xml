@@ -38,4 +38,6 @@
         <item quantity="other">%d bestanden</item>
     </plurals>
     <string name="feed_failed">Dat is niet gelukt. Probeer het zo nog eens.</string>
+    <string name="feed_publishing_home">Je thuis wordt gepubliceerd…</string>
+    <string name="feed_no_network">Het netwerk was even niet bereikbaar, dus er is geen thuis bekeken. Meestal betekent dat dat de app nog verbinding maakt — probeer het zo nog eens.</string>
 </resources>

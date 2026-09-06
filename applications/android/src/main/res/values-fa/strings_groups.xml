@@ -35,4 +35,7 @@
         <item quantity="one">ارسال %1$d درخواست</item>
         <item quantity="other">ارسال %1$d درخواست</item>
     </plurals>
+    <string name="group_creating">در حال ساختن…</string>
+    <string name="group_forming_board">در حال ساختن تابلو…</string>
+    <string name="group_telling_members">در حال خبر دادن به اعضا…</string>
 </resources>

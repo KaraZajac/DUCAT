@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.OpenInNew
@@ -30,6 +29,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -76,6 +76,11 @@ fun FeedSection() {
     var media by remember { mutableStateOf<List<Uri>>(emptyList()) }
     var files by remember { mutableStateOf<List<Uri>>(emptyList()) }
     var busy by remember { mutableStateOf(false) }
+    // The look for new posts, apart from the post: one flag for both put
+    // "Posting…" on the Post button while a look was running.
+    var refreshing by remember { mutableStateOf(false) }
+    // Waiting for the node, and saying so.
+    var connecting by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf<String?>(null) }
     var confirmDelete by remember { mutableStateOf<FeedEntry?>(null) }
     var myPosts by remember { mutableStateOf(0) }
@@ -88,6 +93,20 @@ fun FeedSection() {
         loaded = true
     }
     LaunchedEffect(Unit) { refresh() }
+
+    // Whether the node is up — waited for when it is not, and said while
+    // it is waited for. Both the look and the post ask the network, and
+    // either one run a few seconds after launch, before the node had
+    // attached, came back with a confident answer that was a lie: "Nothing
+    // new", or a post that "did not go through". The boards' own rule
+    // (Market.awaitAttached): say what is being waited for, then wait.
+    suspend fun joined(): Boolean {
+        if (attachedNow()) return true
+        connecting = true
+        val ok = withContext(Dispatchers.IO) { awaitAttached(60_000) }
+        connecting = false
+        return ok
+    }
 
     val pickPhotos = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
         media = (media + uris).take(8)
@@ -121,13 +140,18 @@ fun FeedSection() {
                 Text(stringResource(R.string.section_feed), style = MaterialTheme.typography.headlineSmall, modifier = Modifier.weight(1f))
                 IconButton(onClick = {
                     scope.launch {
-                        busy = true
-                        val n = withContext(Dispatchers.IO) { runCatching { Home.refreshFeeds(context) }.getOrDefault(0) }
-                        refresh()
-                        message = if (n > 0) context.resources.getQuantityString(R.plurals.feed_new_editions, n, n) else context.getString(R.string.feed_nothing_new)
-                        busy = false
+                        refreshing = true
+                        message = null
+                        if (joined()) {
+                            val n = withContext(Dispatchers.IO) { runCatching { Home.refreshFeeds(context) }.getOrDefault(0) }
+                            refresh()
+                            message = if (n > 0) context.resources.getQuantityString(R.plurals.feed_new_editions, n, n) else context.getString(R.string.feed_nothing_new)
+                        } else {
+                            message = context.getString(R.string.feed_no_network)
+                        }
+                        refreshing = false
                     }
-                }, enabled = !busy) { Icon(Icons.Filled.Refresh, stringResource(R.string.feed_refresh)) }
+                }, enabled = !busy && !refreshing) { Icon(Icons.Filled.Refresh, stringResource(R.string.feed_refresh)) }
                 Button(onClick = { composing = !composing }) {
                     Text(if (composing) stringResource(R.string.common_cancel) else stringResource(R.string.feed_post))
                 }
@@ -139,6 +163,13 @@ fun FeedSection() {
                 modifier = Modifier.padding(top = 4.dp, bottom = 8.dp),
             )
             message?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(bottom = 8.dp)) }
+            if (connecting) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 8.dp)) {
+                    CircularProgressIndicator(Modifier.size(14.dp), strokeWidth = 2.dp)
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.common_connecting), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
         }
         if (composing) {
             item {
@@ -162,19 +193,36 @@ fun FeedSection() {
                             OutlinedButton(onClick = { pickFiles.launch(arrayOf("*/*")) }, enabled = !busy) { Text(stringResource(R.string.feed_add_files)) }
                             Spacer(Modifier.weight(1f))
                             Button(
-                                enabled = !busy && (text.isNotBlank() || media.isNotEmpty() || files.isNotEmpty()),
+                                enabled = !busy && !refreshing && (text.isNotBlank() || media.isNotEmpty() || files.isNotEmpty()),
                                 onClick = {
                                     scope.launch {
                                         busy = true
                                         message = null
-                                        val r = withContext(Dispatchers.IO) { runCatching { Home.post(context, text, media, files) } }
-                                        r.onSuccess { text = ""; media = emptyList(); files = emptyList(); composing = false; message = context.getString(R.string.feed_posted) }
-                                            .onFailure { DucatLog.w("Feed", "post: ${it.message}"); message = context.getString(R.string.feed_failed) }
-                                        refresh()
+                                        if (joined()) {
+                                            val r = withContext(Dispatchers.IO) { runCatching { Home.post(context, text, media, files) } }
+                                            r.onSuccess { text = ""; media = emptyList(); files = emptyList(); composing = false; message = context.getString(R.string.feed_posted) }
+                                                .onFailure { DucatLog.w("Feed", "post: ${it.message}"); message = context.getString(R.string.feed_failed) }
+                                            refresh()
+                                        } else {
+                                            message = context.getString(R.string.feed_no_network)
+                                        }
                                         busy = false
                                     }
                                 },
-                            ) { Text(if (busy) stringResource(R.string.feed_posting) else stringResource(R.string.feed_post)) }
+                            ) {
+                                if (busy) {
+                                    CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(stringResource(R.string.feed_posting))
+                                } else {
+                                    Text(stringResource(R.string.feed_post))
+                                }
+                            }
+                        }
+                        if (busy) {
+                            // The shares, then the home — as Home.post says
+                            // each one as it starts.
+                            BusyLine(Modifier.padding(top = 6.dp))
                         }
                         Text(stringResource(R.string.feed_post_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp))
                     }
@@ -207,7 +255,7 @@ private fun FeedCard(e: FeedEntry, mine: Boolean, onOpen: () -> Unit, onDelete: 
         Column(Modifier.padding(14.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
-                    Modifier.size(36.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer),
+                    Modifier.size(36.dp).clip(faceShape(36.dp)).background(MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center,
                 ) { Text((e.name.ifBlank { "?" }).take(1).uppercase(), style = MaterialTheme.typography.titleMedium) }
                 Spacer(Modifier.width(10.dp))

@@ -749,9 +749,20 @@ fun GroupCreateScreen(onDone: (String) -> Unit, onCancel: () -> Unit) {
                     enabled = !busy && name.isNotBlank() && chosen.size >= 2,
                     modifier = Modifier.weight(1f),
                 ) {
-                    if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                    else Text(stringResource(R.string.group_create_button))
+                    if (busy) {
+                        CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                        Spacer(Modifier.width(8.dp))
+                        Text(stringResource(R.string.group_creating))
+                    } else {
+                        Text(stringResource(R.string.group_create_button))
+                    }
                 }
+            }
+            if (busy) {
+                // Forming the board, then telling the members — as
+                // Groups.create says each one as it starts.
+                Spacer(Modifier.height(6.dp))
+                BusyLine()
             }
         }
     }

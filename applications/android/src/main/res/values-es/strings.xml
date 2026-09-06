@@ -50,4 +50,5 @@
     <string name="prices_menu_warn_title">Tu carta está en %1$s</string>
     <string name="prices_menu_warn_body">Cambiar a %2$s deja esos precios sin poder cobrarse hasta que los vuelvas a poner. No se borra nada.</string>
     <string name="prices_menu_warn_go">Cambiar igual</string>
+    <string name="common_connecting">Conectando a la red…</string>
 </resources>

@@ -38,4 +38,6 @@
         <item quantity="other">%d فایل</item>
     </plurals>
     <string name="feed_failed">انجام نشد. کمی بعد دوباره امتحان کنید.</string>
+    <string name="feed_publishing_home">در حال انتشار خانه‌تان…</string>
+    <string name="feed_no_network">الان نشد به شبکه رسید، بنابراین به هیچ خانه‌ای سر زده نشد. معمولاً یعنی برنامه هنوز در حال پیوستن است — کمی بعد دوباره تلاش کنید.</string>
 </resources>

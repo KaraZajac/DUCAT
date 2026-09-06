@@ -90,4 +90,9 @@
     <string name="pub_cover_note">Tampil di rak di samping judul. Diperkecil agar muat di pemberitahuan, supaya menjelajah tetap cepat.</string>
     <string name="pub_cover_remove">Hapus</string>
     <string name="pub_cover_failed">Gambar itu tidak bisa dipakai. Coba yang lain.</string>
+    <string name="market_listing">Memasang…</string>
+    <string name="busy_minting_card">Membuat kartu…</string>
+    <string name="busy_stamping_shelf">Menstempel untuk rak %1$s…</string>
+    <string name="busy_stamping_shelf_lang">Menstempel untuk rak %1$s dalam bahasa %2$s…</string>
+    <string name="busy_stamping_local">Menstempel untuk papan dekat Anda…</string>
 </resources>

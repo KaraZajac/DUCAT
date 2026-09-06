@@ -38,4 +38,6 @@
         <item quantity="other">%d ملفات</item>
     </plurals>
     <string name="feed_failed">لم ينجح ذلك. حاول مرة أخرى بعد قليل.</string>
+    <string name="feed_publishing_home">جارٍ نشر منزلك…</string>
+    <string name="feed_no_network">تعذّر الوصول إلى الشبكة الآن، فلم يُطّلع على أي منزل. غالبًا يعني هذا أن التطبيق ما زال ينضم — أعد المحاولة بعد قليل.</string>
 </resources>

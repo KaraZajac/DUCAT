@@ -35,4 +35,7 @@
         <item quantity="one">Отправить %1$d запрос</item>
         <item quantity="other">Отправить запросы: %1$d</item>
     </plurals>
+    <string name="group_creating">Создаём…</string>
+    <string name="group_forming_board">Создаём доску…</string>
+    <string name="group_telling_members">Сообщаем участникам…</string>
 </resources>

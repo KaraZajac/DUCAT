@@ -90,4 +90,9 @@
     <string name="pub_cover_note">روی قفسه کنار عنوان نشان داده می‌شود. برای جا شدن در آگهی کوچک می‌شود تا مرور سریع بماند.</string>
     <string name="pub_cover_remove">حذف</string>
     <string name="pub_cover_failed">آن تصویر قابل استفاده نبود. یکی دیگر را امتحان کنید.</string>
+    <string name="market_listing">در حال عرضه…</string>
+    <string name="busy_minting_card">در حال ساخت کارت…</string>
+    <string name="busy_stamping_shelf">در حال مهر زدن برای قفسهٔ %1$s…</string>
+    <string name="busy_stamping_shelf_lang">در حال مهر زدن برای قفسهٔ %1$s به زبان %2$s…</string>
+    <string name="busy_stamping_local">در حال مهر زدن برای تابلوی نزدیک شما…</string>
 </resources>

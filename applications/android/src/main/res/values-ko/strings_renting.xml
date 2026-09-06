@@ -161,4 +161,10 @@
     <string name="rent_spec_fuel">연료</string>
     <string name="rent_photo_open">크게 보기</string>
     <string name="rent_photo_close">닫기</string>
+    <string name="rent_posting">게시 중…</string>
+    <string name="busy_stamping_notice">게시물에 각인하는 중…</string>
+    <string name="busy_writing_board">게시판에 쓰는 중…</string>
+    <string name="busy_pictures_swarm">사진을 스웜에 올리는 중…</string>
+    <string name="busy_files_swarm">파일을 스웜에 올리는 중…</string>
+    <string name="rent_price_at_rate">%1$s · 오늘 환율로 약 %2$s</string>
 </resources>

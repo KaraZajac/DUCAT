@@ -35,4 +35,7 @@
         <item quantity="one">发送 %1$d 条请求</item>
         <item quantity="other">发送 %1$d 条请求</item>
     </plurals>
+    <string name="group_creating">正在创建…</string>
+    <string name="group_forming_board">正在建立板…</string>
+    <string name="group_telling_members">正在通知成员…</string>
 </resources>

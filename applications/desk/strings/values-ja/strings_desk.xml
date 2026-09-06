@@ -357,4 +357,17 @@
     <string name="desk_details">詳細</string>
     <string name="desk_save_as">名前を付けて保存…</string>
     <string name="desk_seller_away">出品者に今は接続できないため、写真とファイルを取得できませんでした。</string>
+    <string name="desk_creating">作成中…</string>
+    <string name="desk_at_todays_rate">本日のレートで約 %1$s</string>
+    <string name="desk_busy_pictures">写真をスウォームに載せています</string>
+    <string name="desk_busy_card">カードを発行しています</string>
+    <string name="desk_busy_stamping">掲示に印を押しています</string>
+    <string name="desk_busy_stamping_for">%1$s 向けに印を押しています</string>
+    <string name="desk_busy_reading_board">掲示板を読んでいます</string>
+    <string name="desk_busy_writing_board">掲示板に書き込んでいます</string>
+    <string name="desk_busy_forming_board">掲示板を作っています</string>
+    <string name="desk_busy_roster">メンバー名簿を送っています</string>
+    <string name="desk_busy_home">あなたのホームを公開しています</string>
+    <string name="desk_busy_seeding">スウォームで配信しています</string>
+    <string name="desk_busy_address">アドレスを公開しています</string>
 </resources>

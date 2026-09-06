@@ -5,6 +5,7 @@
   import { t, tp } from "./i18n.svelte";
   import { api, confirmDanger, fmtTime, type ContactRow, type FeedBlock, type HomeView, type TimelineRow, fmtBytes } from "./api";
   import { gen, drive } from "./state.svelte";
+  import Busy from "./Busy.svelte";
   import { icons } from "./icons";
 
   let rows = $state<TimelineRow[]>([]);
@@ -127,6 +128,7 @@
       <button class="btn small" onclick={() => addPhotos()}>{t("desk_add_photos")}</button>
       <button class="btn small" onclick={() => addFiles()}>{t("desk_add_files")}</button>
       <button class="btn primary" disabled={posting || (!text.trim() && !media.length && !files.length)} onclick={post}>{posting ? t("desk_posting") : t("desk_post")}</button>
+      <Busy on={posting} />
     </div>
     {#if drive.on}
       <input id="feedmedia" class="input" hidden placeholder="/path/to/picture" onchange={(e) => addPhotos((e.target as HTMLInputElement).value)} />

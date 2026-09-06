@@ -38,4 +38,8 @@
         <item quantity="other">%d files</item>
     </plurals>
     <string name="feed_failed">That did not go through. Try again in a moment.</string>
+    <!-- Publishing the home is the last phase of a post (Busy); and the
+         honest answer when the node was not up to look at anybody's. -->
+    <string name="feed_publishing_home">Publishing your home…</string>
+    <string name="feed_no_network">Could not reach the network just now, so no home was looked at. This usually means the app is still joining — try again in a moment.</string>
 </resources>

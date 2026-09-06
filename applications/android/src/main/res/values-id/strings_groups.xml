@@ -35,4 +35,7 @@
         <item quantity="one">Kirim %1$d permintaan</item>
         <item quantity="other">Kirim %1$d permintaan</item>
     </plurals>
+    <string name="group_creating">Membuat…</string>
+    <string name="group_forming_board">Membentuk papan…</string>
+    <string name="group_telling_members">Memberi tahu anggota…</string>
 </resources>

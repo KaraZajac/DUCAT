@@ -35,4 +35,7 @@
         <item quantity="one">%1$d istek gönder</item>
         <item quantity="other">%1$d istek gönder</item>
     </plurals>
+    <string name="group_creating">Oluşturuluyor…</string>
+    <string name="group_forming_board">Pano oluşturuluyor…</string>
+    <string name="group_telling_members">Üyelere bildiriliyor…</string>
 </resources>

@@ -51,4 +51,5 @@
     <string name="prices_menu_warn_title">Menumu dihargai dalam %1$s</string>
     <string name="prices_menu_warn_body">Pindah ke %2$s membuat harga itu tak bisa dijual sampai kamu setel ulang. Tidak ada yang dihapus.</string>
     <string name="prices_menu_warn_go">Tetap pindah</string>
+    <string name="common_connecting">Menyambung ke jaringan…</string>
 </resources>

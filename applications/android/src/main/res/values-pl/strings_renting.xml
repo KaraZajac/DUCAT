@@ -163,4 +163,10 @@
     <string name="rent_spec_fuel">Paliwo</string>
     <string name="rent_photo_open">Zobacz w powiększeniu</string>
     <string name="rent_photo_close">Zamknij</string>
+    <string name="rent_posting">Wywieszanie…</string>
+    <string name="busy_stamping_notice">Stemplowanie ogłoszenia…</string>
+    <string name="busy_writing_board">Zapisywanie na tablicy…</string>
+    <string name="busy_pictures_swarm">Wysyłanie zdjęć do roju…</string>
+    <string name="busy_files_swarm">Wysyłanie plików do roju…</string>
+    <string name="rent_price_at_rate">%1$s · około %2$s po dzisiejszym kursie</string>
 </resources>

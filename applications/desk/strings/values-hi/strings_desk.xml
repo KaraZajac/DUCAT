@@ -361,4 +361,17 @@
     <string name="desk_details">ब्योरा</string>
     <string name="desk_save_as">इस नाम से सहेजें…</string>
     <string name="desk_seller_away">विक्रेता अभी पहुँच में नहीं है, इसलिए तस्वीरें और फ़ाइलें नहीं लाई जा सकीं।</string>
+    <string name="desk_creating">बनाया जा रहा है…</string>
+    <string name="desk_at_todays_rate">आज की दर पर लगभग %1$s</string>
+    <string name="desk_busy_pictures">तस्वीरें स्वार्म पर रखी जा रही हैं</string>
+    <string name="desk_busy_card">कार्ड जारी किया जा रहा है</string>
+    <string name="desk_busy_stamping">सूचना पर मुहर लगाई जा रही है</string>
+    <string name="desk_busy_stamping_for">%1$s के लिए मुहर लगाई जा रही है</string>
+    <string name="desk_busy_reading_board">बोर्ड पढ़ा जा रहा है</string>
+    <string name="desk_busy_writing_board">बोर्ड पर लिखा जा रहा है</string>
+    <string name="desk_busy_forming_board">बोर्ड बनाया जा रहा है</string>
+    <string name="desk_busy_roster">सदस्य सूची भेजी जा रही है</string>
+    <string name="desk_busy_home">आपका घर प्रकाशित किया जा रहा है</string>
+    <string name="desk_busy_seeding">स्वार्म पर बाँटा जा रहा है</string>
+    <string name="desk_busy_address">पता प्रकाशित किया जा रहा है</string>
 </resources>

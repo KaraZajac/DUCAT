@@ -22,7 +22,7 @@ use std::path::{Path, PathBuf};
 use ducat_mobile::swarm;
 use serde::{Deserialize, Serialize};
 
-use crate::{dir_bytes, has_any_file, log, App, Error};
+use crate::{busy, dir_bytes, has_any_file, log, App, Error};
 
 const PREFIX: &str = "ducat:file/";
 const STORE: &str = "ducat_releases";
@@ -137,6 +137,8 @@ impl App {
             .unwrap_or("file")
             .to_string();
         std::fs::copy(source, staging.join(&name))?;
+        let _phase = busy::scope();
+        busy::say("seeding on the swarm");
         let share = swarm::swarm_seed(staging.to_string_lossy().into_owned())?;
         let dir = self.release_dir(&share.index_digest_hex);
         let _ = std::fs::remove_dir_all(&dir);

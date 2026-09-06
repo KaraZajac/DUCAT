@@ -161,4 +161,10 @@
     <string name="rent_spec_fuel">燃料</string>
     <string name="rent_photo_open">大きく見る</string>
     <string name="rent_photo_close">閉じる</string>
+    <string name="rent_posting">掲示中…</string>
+    <string name="busy_stamping_notice">掲示に刻印中…</string>
+    <string name="busy_writing_board">掲示板に書き込み中…</string>
+    <string name="busy_pictures_swarm">写真をスウォームに載せています…</string>
+    <string name="busy_files_swarm">ファイルをスウォームに載せています…</string>
+    <string name="rent_price_at_rate">%1$s · 本日のレートで約 %2$s</string>
 </resources>

@@ -10,7 +10,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Check
@@ -106,7 +105,7 @@ fun MyProfileEditor(personaHex: String? = null) {
     Column(Modifier.fillMaxSize().padding(20.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
-                Modifier.size(72.dp).clip(CircleShape)
+                Modifier.size(72.dp).clip(faceShape(72.dp))
                     .background(MaterialTheme.colorScheme.secondaryContainer)
                     .clickable { pick.launch("image/*") },
                 contentAlignment = Alignment.Center,

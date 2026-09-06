@@ -357,4 +357,17 @@
     <string name="desk_details">Rincian</string>
     <string name="desk_save_as">Simpan sebagai…</string>
     <string name="desk_seller_away">Penjual sedang tidak dapat dihubungi, jadi foto dan berkas tidak dapat diambil.</string>
+    <string name="desk_creating">Membuat…</string>
+    <string name="desk_at_todays_rate">sekitar %1$s dengan kurs hari ini</string>
+    <string name="desk_busy_pictures">menaruh foto di kawanan</string>
+    <string name="desk_busy_card">menerbitkan kartu</string>
+    <string name="desk_busy_stamping">mencap pengumuman</string>
+    <string name="desk_busy_stamping_for">mencap untuk %1$s</string>
+    <string name="desk_busy_reading_board">membaca papan</string>
+    <string name="desk_busy_writing_board">menulis ke papan</string>
+    <string name="desk_busy_forming_board">membentuk papan</string>
+    <string name="desk_busy_roster">mengirim daftar anggota</string>
+    <string name="desk_busy_home">menerbitkan rumahmu</string>
+    <string name="desk_busy_seeding">menyebarkan di kawanan</string>
+    <string name="desk_busy_address">menerbitkan alamat</string>
 </resources>

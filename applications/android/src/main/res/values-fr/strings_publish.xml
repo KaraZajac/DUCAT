@@ -90,4 +90,9 @@
     <string name="pub_cover_note">Affichée sur l\'étagère à côté du titre. Réduite pour tenir dans l\'annonce, pour que le parcours reste rapide.</string>
     <string name="pub_cover_remove">Retirer</string>
     <string name="pub_cover_failed">Cette image n’a pas pu être utilisée. Essayez-en une autre.</string>
+    <string name="market_listing">Publication…</string>
+    <string name="busy_minting_card">Création de la carte…</string>
+    <string name="busy_stamping_shelf">Horodatage pour l’étagère %1$s…</string>
+    <string name="busy_stamping_shelf_lang">Horodatage pour l’étagère %1$s en %2$s…</string>
+    <string name="busy_stamping_local">Horodatage pour le tableau près de vous…</string>
 </resources>

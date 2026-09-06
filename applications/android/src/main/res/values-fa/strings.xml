@@ -50,4 +50,5 @@
     <string name="prices_menu_warn_title">فهرست تو به %1$s قیمت خورده</string>
     <string name="prices_menu_warn_body">تغییر به %2$s این قیمت‌ها را تا وقتی دوباره تنظیمشان نکنی غیرقابل فروش می‌کند. چیزی پاک نمی‌شود.</string>
     <string name="prices_menu_warn_go">با این حال تغییر بده</string>
+    <string name="common_connecting">در حال اتصال به شبکه…</string>
 </resources>

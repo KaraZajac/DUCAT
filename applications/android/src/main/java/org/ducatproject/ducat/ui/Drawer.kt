@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
@@ -677,7 +676,7 @@ private fun ProfileSection() {
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Box(
-                            Modifier.size(40.dp).clip(CircleShape).background(
+                            Modifier.size(40.dp).clip(faceShape(40.dp)).background(
                                 if (pr.color != 0) {
                                     androidx.compose.ui.graphics.Color(pr.color)
                                 } else {
@@ -1229,7 +1228,7 @@ fun ModesScreen() {
                 ) {
                     Box(
                         Modifier.size(42.dp)
-                            .clip(CircleShape)
+                            .clip(faceShape(42.dp))
                             .background(
                                 if (active) {
                                     MaterialTheme.colorScheme.primary
@@ -1473,7 +1472,7 @@ fun SitesSection() {
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Box(
-                    Modifier.size(72.dp).clip(CircleShape)
+                    Modifier.size(72.dp).clip(faceShape(72.dp))
                         .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentAlignment = Alignment.Center,
                 ) {

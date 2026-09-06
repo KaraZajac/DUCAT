@@ -414,6 +414,8 @@ export type ListingDoc = {
   id: string;
   title: string;
   description: string;
+  // The price as the seller typed it, "USD 12"; words, not a number.
+  price_text?: string | null;
   updated: number;
   pictures?: { path: string; mime: string; bytes: number; w: number; h: number; caption: string }[];
   files?: { path: string; name: string; mime: string; bytes: number }[];
@@ -440,6 +442,8 @@ export interface FoundRow {
   gallery_dig: string | null;
   mine: boolean;
   shown: Shown;
+  // The seller's own figure, from a bundle already on this disk.
+  price_text: string | null;
 }
 
 export interface Enquiry {
@@ -597,6 +601,8 @@ export const api = {
   removeContact: (personaHex: string) => invoke<void>("remove_contact", { personaHex }),
   unreadThreads: () => invoke<number>("unread_threads"),
   generation: () => invoke<number>("generation"),
+  // What the app is waiting on while a call is in flight; see Busy.svelte.
+  busyNote: () => invoke<string | null>("busy_note"),
   pollNow: (personaHex?: string) => invoke<number>("poll_now", { personaHex: personaHex ?? null }),
 
   walletStatus: () => invoke<WalletView>("wallet_status"),

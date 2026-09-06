@@ -17,7 +17,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::contacts::{bump, hex, hex_to_bytes, StoredMessage};
 use crate::mailbox::{plan_due, plan_set_watched, plan_settle, plan_touch, plan_watched, Outgoing};
-use crate::{log, App, Error};
+use crate::{busy, log, App, Error};
 
 const TAG: &str = "Groups";
 const STORE: &str = "ducat_groups";
@@ -241,6 +241,7 @@ impl App {
     }
 
     pub fn create_group(&self, name: &str, member_hexes: &[String]) -> Result<Group, Error> {
+        let _phase = busy::scope();
         let mine = self.worn()?;
         let id = hex(&ducat_mobile::create_persona_secret()[..16]);
         let mut members: Vec<String> = member_hexes.to_vec();
@@ -254,6 +255,7 @@ impl App {
         let board = self.form_board(&g.id_hex, &g.members, 1)?;
         let g = Group { board: Some(board), ..g };
         self.upsert_group(g.clone())?;
+        busy::say("sending the roster");
         self.send_roster(&g);
         log::info(TAG, format!("created {} with {} member(s), on a board", g.name, members.len()));
         Ok(g)
@@ -264,6 +266,7 @@ impl App {
         if g.members.iter().any(|m| m == persona_hex) {
             return Ok(());
         }
+        let _phase = busy::scope();
         let mut grown = g.clone();
         grown.members.push(persona_hex.to_string());
         // A different member list is a different record: the adder forms
@@ -271,6 +274,7 @@ impl App {
         let next = g.board.as_ref().map_or(1, |b| b.generation + 1);
         grown.board = Some(self.form_board(&grown.id_hex, &grown.members, next)?);
         self.upsert_group(grown.clone())?;
+        busy::say("sending the roster");
         self.send_roster(&grown);
         log::info(TAG, format!("{}: added {}…", g.name, &persona_hex[..8.min(persona_hex.len())]));
         Ok(())
@@ -357,7 +361,9 @@ impl App {
                 }
                 if lost {
                     // Two of us formed the same generation; mine lost the
-                    // tie. The next one carries everyone.
+                    // tie. The next one carries everyone. Nobody pressed a
+                    // button for this: the phase note is cleared on the way out.
+                    let _phase = busy::scope();
                     let next = self.group(&id_hex).and_then(|g| g.board).map_or(1, |b| b.generation + 1);
                     match self.form_board(&id_hex, &merged, next) {
                         Ok(b) => {
@@ -472,6 +478,7 @@ impl App {
     /// Form a generation: mint its key, create its record as the member
     /// whose persona is in this roster.
     fn form_board(&self, id_hex: &str, members: &[String], generation: u64) -> Result<Board, Error> {
+        busy::say("forming the board");
         let mine = self.mine_in(members);
         let secret = self
             .persona_secret(&mine)?

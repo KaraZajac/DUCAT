@@ -361,4 +361,17 @@
     <string name="desk_details">Details</string>
     <string name="desk_save_as">Opslaan als…</string>
     <string name="desk_seller_away">De verkoper is nu niet bereikbaar, dus de foto\'s en bestanden konden niet worden opgehaald.</string>
+    <string name="desk_creating">Aanmaken…</string>
+    <string name="desk_at_todays_rate">ongeveer %1$s tegen de koers van vandaag</string>
+    <string name="desk_busy_pictures">de foto\'s op de zwerm zetten</string>
+    <string name="desk_busy_card">de kaart uitgeven</string>
+    <string name="desk_busy_stamping">het bericht stempelen</string>
+    <string name="desk_busy_stamping_for">stempelen voor %1$s</string>
+    <string name="desk_busy_reading_board">het bord lezen</string>
+    <string name="desk_busy_writing_board">op het bord schrijven</string>
+    <string name="desk_busy_forming_board">het bord aanleggen</string>
+    <string name="desk_busy_roster">de ledenlijst versturen</string>
+    <string name="desk_busy_home">jouw thuis publiceren</string>
+    <string name="desk_busy_seeding">verspreiden op de zwerm</string>
+    <string name="desk_busy_address">het adres publiceren</string>
 </resources>

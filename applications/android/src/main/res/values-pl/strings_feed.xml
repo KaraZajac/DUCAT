@@ -38,4 +38,6 @@
         <item quantity="other">%d plików</item>
     </plurals>
     <string name="feed_failed">To się nie udało. Spróbuj ponownie za chwilę.</string>
+    <string name="feed_publishing_home">Publikowanie twojego domu…</string>
+    <string name="feed_no_network">Nie udało się teraz połączyć z siecią, więc żaden dom nie został sprawdzony. Zwykle znaczy to, że aplikacja jeszcze się podłącza — spróbuj za chwilę.</string>
 </resources>

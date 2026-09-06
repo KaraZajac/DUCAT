@@ -35,4 +35,7 @@
         <item quantity="one">Envoyer %1$d demande</item>
         <item quantity="other">Envoyer %1$d demandes</item>
     </plurals>
+    <string name="group_creating">Création…</string>
+    <string name="group_forming_board">Formation du tableau…</string>
+    <string name="group_telling_members">Les membres sont prévenus…</string>
 </resources>

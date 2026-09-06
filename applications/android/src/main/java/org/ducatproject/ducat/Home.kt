@@ -104,7 +104,15 @@ object Home {
      * themselves as shares, the post at the top of the feed — then the
      * home republished so the network has it.
      */
-    fun post(context: Context, text: String, media: List<Uri>, files: List<Uri>): FeedPost {
+    fun post(context: Context, text: String, media: List<Uri>, files: List<Uri>): FeedPost = try {
+        postNow(context, text, media, files)
+    } finally {
+        // Each phase is said as it starts (Busy, below); cleared however
+        // this ends, or the last phrase would stand under the next button.
+        Busy.clear()
+    }
+
+    private fun postNow(context: Context, text: String, media: List<Uri>, files: List<Uri>): FeedPost {
         val body = text.trim()
         require(body.isNotEmpty() || media.isNotEmpty() || files.isNotEmpty()) { "a post needs some words, a picture, or a file" }
         require(body.length <= 4000) { "a post is at most 4000 characters" }
@@ -116,6 +124,10 @@ object Home {
         val staging = File(context.cacheDir, "post_staging/$id").apply { deleteRecursively(); mkdirs() }
         val mediaOut = ArrayList<FeedMedia>()
         val filesOut = ArrayList<FeedFile>()
+        // Every picture and file is a share of its own before the post
+        // names it — a route allocation apiece, which is the slow half of
+        // a post with photographs in it.
+        if (media.isNotEmpty()) Busy.say(context.getString(R.string.busy_pictures_swarm))
         media.forEachIndexed { n, uri ->
             val thumb = SafeImage.thumbnail({ context.contentResolver.openInputStream(uri) }, THUMB_BUDGET)
             val copy = copyIn(context, uri, staging)
@@ -135,6 +147,7 @@ object Home {
                 filesOut.add(FeedFile(name = copy.name, addr = Releases.uriOf(r.shareKey, r.digestHex), mime = mimeOf(copy.name), bytes = copy.length().toULong()))
             }
         }
+        if (files.isNotEmpty()) Busy.say(context.getString(R.string.busy_files_swarm))
         for (uri in files) {
             val copy = copyIn(context, uri, staging)
             val r = Releases.share(context, copy, copy.name)
@@ -173,7 +186,14 @@ object Home {
     }
 
     /** Put the home on the network: pages if any, feed.json, thumbnails, older pages, a page per post. */
-    fun publishHome(context: Context): Sites.Site {
+    fun publishHome(context: Context): Sites.Site = try {
+        Busy.say(context.getString(R.string.feed_publishing_home))
+        publishHomeNow(context)
+    } finally {
+        Busy.clear()
+    }
+
+    private fun publishHomeNow(context: Context): Sites.Site {
         val worn = PersonaStore(context).worn()
         val home = ensureHome(context)
         val doc = myFeed(context)

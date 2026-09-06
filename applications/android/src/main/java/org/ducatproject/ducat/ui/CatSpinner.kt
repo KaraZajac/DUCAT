@@ -6,7 +6,10 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -21,6 +24,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.vector.PathParser
+import org.ducatproject.ducat.Busy
 
 /**
  * The wait, wearing the brand.
@@ -87,3 +91,29 @@ fun CatSpinner(modifier: Modifier = Modifier, tint: Color) {
     }
 }
 
+
+/**
+ * The wait's caption: what the long job under a button is doing right now
+ * — "Stamping the notice…", "Writing to the board…" — read off [Busy] and
+ * drawn small under the button that started it. The button keeps its own
+ * spinner; this is the sentence beside it.
+ *
+ * Nothing when nothing is being said, so a screen can leave it in place;
+ * [idle] fills the gap before the first phase speaks, so a button that
+ * just went busy is never over a blank line. No early return: this file
+ * compiles on the desk and a bare return out of a composable has crashed
+ * the phone before (IntStack.peek2).
+ */
+@Composable
+fun BusyLine(modifier: Modifier = Modifier, idle: String? = null) {
+    val said by Busy.now.collectAsState()
+    val text = said ?: idle
+    if (text != null) {
+        Text(
+            text,
+            modifier,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}

@@ -1386,9 +1386,13 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
                 },
                 modifier = Modifier.weight(1f).height(48.dp),
             ) {
-                if (posting) CircularProgressIndicator(
-                    Modifier.size(18.dp), strokeWidth = 2.dp,
-                ) else Text(stringResource(R.string.rent_post_it))
+                if (posting) {
+                    CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.rent_posting))
+                } else {
+                    Text(stringResource(R.string.rent_post_it))
+                }
             }
             Spacer(Modifier.width(8.dp))
             TextButton(onClick = leave) { Text(stringResource(R.string.rent_cancel)) }
@@ -1398,14 +1402,14 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
             // twenty-one seconds — long enough that a button spinner alone
             // reads as a hang. The comet plus the sentence say what is
             // actually happening and that leaving it alone is fine.
+            //
+            // The sentence is the phase under way — the swarm seed, the
+            // stamp, the board walk, as Listings.post says each one as it
+            // starts — and the standing line until the first has spoken.
             Spacer(Modifier.height(8.dp))
             DucatBar(progress = null)
             Spacer(Modifier.height(6.dp))
-            Text(
-                stringResource(R.string.rent_posting_board),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            BusyLine(idle = stringResource(R.string.rent_posting_board))
         }
         if (fix == null) {
             val allowed = locationAllowed(context)

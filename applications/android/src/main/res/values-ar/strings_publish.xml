@@ -90,4 +90,9 @@
     <string name="pub_cover_note">تظهر على الرف بجانب العنوان. تُصغَّر لتناسب الإشعار، فيبقى التصفح سريعًا.</string>
     <string name="pub_cover_remove">إزالة</string>
     <string name="pub_cover_failed">تعذّر استخدام تلك الصورة. جرّب غيرها.</string>
+    <string name="market_listing">جارٍ العرض…</string>
+    <string name="busy_minting_card">جارٍ إنشاء البطاقة…</string>
+    <string name="busy_stamping_shelf">جارٍ الختم لرف %1$s…</string>
+    <string name="busy_stamping_shelf_lang">جارٍ الختم لرف %1$s بلغة %2$s…</string>
+    <string name="busy_stamping_local">جارٍ الختم للوحة القريبة منك…</string>
 </resources>

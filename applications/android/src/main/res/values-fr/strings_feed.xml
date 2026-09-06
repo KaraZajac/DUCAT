@@ -38,4 +38,6 @@
         <item quantity="other">%d fichiers</item>
     </plurals>
     <string name="feed_failed">Cela n\'a pas abouti. Réessayez dans un instant.</string>
+    <string name="feed_publishing_home">Publication de votre chez-soi…</string>
+    <string name="feed_no_network">Le réseau est injoignable pour le moment, aucun chez-soi n’a donc été consulté. Cela veut généralement dire que l’application est encore en train de s’y raccorder — réessayez dans un instant.</string>
 </resources>

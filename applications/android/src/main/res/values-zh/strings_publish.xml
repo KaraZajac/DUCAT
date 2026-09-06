@@ -90,4 +90,9 @@
     <string name="pub_cover_note">显示在书架上标题旁边。会缩小到能放进通知，这样浏览依然快。</string>
     <string name="pub_cover_remove">移除</string>
     <string name="pub_cover_failed">那张图片无法使用，换一张试试。</string>
+    <string name="market_listing">正在上架…</string>
+    <string name="busy_minting_card">正在生成名片…</string>
+    <string name="busy_stamping_shelf">正在为%1$s书架盖戳…</string>
+    <string name="busy_stamping_shelf_lang">正在为%1$s书架（%2$s）盖戳…</string>
+    <string name="busy_stamping_local">正在为你附近的板盖戳…</string>
 </resources>

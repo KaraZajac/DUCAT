@@ -369,4 +369,17 @@
     <string name="desk_details">Szczegóły</string>
     <string name="desk_save_as">Zapisz jako…</string>
     <string name="desk_seller_away">Sprzedający jest teraz nieosiągalny, więc nie udało się pobrać zdjęć i plików.</string>
+    <string name="desk_creating">Tworzenie…</string>
+    <string name="desk_at_todays_rate">około %1$s po dzisiejszym kursie</string>
+    <string name="desk_busy_pictures">umieszczanie zdjęć w roju</string>
+    <string name="desk_busy_card">wystawianie karty</string>
+    <string name="desk_busy_stamping">stemplowanie ogłoszenia</string>
+    <string name="desk_busy_stamping_for">stemplowanie dla %1$s</string>
+    <string name="desk_busy_reading_board">odczyt tablicy</string>
+    <string name="desk_busy_writing_board">zapis na tablicy</string>
+    <string name="desk_busy_forming_board">zakładanie tablicy</string>
+    <string name="desk_busy_roster">wysyłanie listy członków</string>
+    <string name="desk_busy_home">publikowanie twojego domu</string>
+    <string name="desk_busy_seeding">rozsiewanie w roju</string>
+    <string name="desk_busy_address">publikowanie adresu</string>
 </resources>

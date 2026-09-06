@@ -90,4 +90,9 @@
     <string name="pub_cover_note">แสดงบนชั้นข้างชื่อเรื่อง ย่อให้พอดีกับประกาศ เพื่อให้การเลือกดูยังคงรวดเร็ว</string>
     <string name="pub_cover_remove">ลบออก</string>
     <string name="pub_cover_failed">ใช้รูปนั้นไม่ได้ ลองรูปอื่น</string>
+    <string name="market_listing">กำลังลงขาย…</string>
+    <string name="busy_minting_card">กำลังสร้างการ์ด…</string>
+    <string name="busy_stamping_shelf">กำลังประทับตราสำหรับชั้น %1$s…</string>
+    <string name="busy_stamping_shelf_lang">กำลังประทับตราสำหรับชั้น %1$s ในภาษา %2$s…</string>
+    <string name="busy_stamping_local">กำลังประทับตราสำหรับบอร์ดใกล้คุณ…</string>
 </resources>

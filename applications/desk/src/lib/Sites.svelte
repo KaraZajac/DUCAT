@@ -4,6 +4,7 @@
   import { t, tp } from "./i18n.svelte";
   import { api, confirmDanger, copy, fmtWhen, type Progress, type SiteRow } from "./api";
   import PieceBar from "./PieceBar.svelte";
+  import Busy from "./Busy.svelte";
 
   let rows = $state<SiteRow[]>([]);
   let err = $state<string | null>(null);
@@ -155,6 +156,7 @@
       {busy === "publish" ? t("desk_seeding") : updating ? t("desk_publish_update") : t("desk_publish")}
     </button>
     {#if updating}<button class="btn" onclick={() => { updating = null; showPublish = false; title = ""; dir = null; lint = null; }}>{t("common_cancel")}</button>{/if}
+    <Busy on={busy === "publish"} />
   </div>
   <p class="note">{t("desk_site_check_note")}</p>
 </div>

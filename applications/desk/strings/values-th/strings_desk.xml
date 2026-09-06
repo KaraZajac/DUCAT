@@ -357,4 +357,17 @@
     <string name="desk_details">รายละเอียด</string>
     <string name="desk_save_as">บันทึกเป็น…</string>
     <string name="desk_seller_away">ตอนนี้ติดต่อผู้ขายไม่ได้ จึงดึงรูปภาพและไฟล์มาไม่ได้</string>
+    <string name="desk_creating">กำลังสร้าง…</string>
+    <string name="desk_at_todays_rate">ประมาณ %1$s ตามอัตราวันนี้</string>
+    <string name="desk_busy_pictures">กำลังนำรูปขึ้น swarm</string>
+    <string name="desk_busy_card">กำลังออกการ์ด</string>
+    <string name="desk_busy_stamping">กำลังประทับตราประกาศ</string>
+    <string name="desk_busy_stamping_for">กำลังประทับตราสำหรับ %1$s</string>
+    <string name="desk_busy_reading_board">กำลังอ่านกระดาน</string>
+    <string name="desk_busy_writing_board">กำลังเขียนลงกระดาน</string>
+    <string name="desk_busy_forming_board">กำลังตั้งกระดาน</string>
+    <string name="desk_busy_roster">กำลังส่งรายชื่อสมาชิก</string>
+    <string name="desk_busy_home">กำลังเผยแพร่บ้านของคุณ</string>
+    <string name="desk_busy_seeding">กำลังแจกจ่ายบน swarm</string>
+    <string name="desk_busy_address">กำลังเผยแพร่ที่อยู่</string>
 </resources>

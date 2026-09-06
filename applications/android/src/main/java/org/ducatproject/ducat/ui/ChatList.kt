@@ -641,7 +641,7 @@ internal fun Avatar(name: String, picture: ByteArray? = null, size: Int = 40) {
     Box(
         Modifier
             .size(size.dp)
-            .clip(RoundedCornerShape(size.dp / 2))
+            .clip(faceShape(size.dp))
             .background(MaterialTheme.colorScheme.secondaryContainer),
         contentAlignment = Alignment.Center,
     ) {
