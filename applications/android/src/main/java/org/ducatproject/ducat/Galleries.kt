@@ -84,6 +84,7 @@ object Galleries {
      */
     fun bundle(context: Context, digestHex: String): Bundle? {
         val dir = dirFor(context, digestHex)
+        DucatLog.i(TAG, "bundle ${digestHex.take(12)}…: dir=${dir.isDirectory} doc=${File(dir, DOC).isFile}")
         if (!dir.isDirectory) return null
         val docFile = File(dir, DOC)
         val doc = if (docFile.isFile) {
