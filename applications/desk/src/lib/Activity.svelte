@@ -69,7 +69,7 @@
     if (!path) return;
     try {
       const n = await api.exportLedger(path, json);
-      msg = lc(t("desk_written_to", n, path);
+      msg = t("desk_written_to", n, path);
     } catch (e) {
       err = String(e);
     }
@@ -154,7 +154,7 @@
       {#if open === e.txid + e.timestamp}
         <div class="ledger-detail">
           {#if e.txid}<div class="addr">{e.txid}</div>{/if}
-          <div class="meta">{lc(t("txdetail_block"))} {e.height || "—"} · {e.source === "Notice" ? t("desk_source_notice") : e.source === "OurRecord" ? t("desk_source_record") : e.source === "Order" ? t("desk_source_order") : t("desk_source_unknown")}{e.tax_pxmr ? ` · ${t("txdetail_tax"))} ${fmtXmr(e.tax_pxmr)}` : ""}</div>
+          <div class="meta">{lc(t("txdetail_block"))} {e.height || "—"} · {e.source === "Notice" ? t("desk_source_notice") : e.source === "OurRecord" ? t("desk_source_record") : e.source === "Order" ? t("desk_source_order") : t("desk_source_unknown")}{e.tax_pxmr ? ` · ${lc(t("txdetail_tax"))} ${fmtXmr(e.tax_pxmr)}` : ""}</div>
           {#if e.items.length}<div class="bill">{#each e.items as i}<div class="bill-line"><span>{i.d}</span><span>{fmtXmr(i.a)}</span></div>{/each}</div>{/if}
         </div>
       {/if}
