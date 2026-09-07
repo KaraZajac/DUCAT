@@ -21,7 +21,13 @@ jobs:
     name: phone — every ABI
     runs-on: ubuntu-latest
     steps:
+      # The whole history, because the version code is the commit count:
+      # a depth-one checkout made the first CI-built release versionCode 1,
+      # which Android reads as older than every build before it and will
+      # not install over any of them.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-java@v4
         with:
@@ -54,6 +60,22 @@ jobs:
           rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
           echo y | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --install "ndk;27.2.12479018" >/dev/null
           bash mobile/build-android.sh
+
+      # The same debug key every release has carried, so a phone updates in
+      # place. Without the secret the runner mints a fresh key, and an APK
+      # signed with it cannot update an install signed with any other —
+      # the person sees "package conflicts with an existing package".
+      - name: the signing key every release shares
+        env:
+          DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
+        run: |
+          if [ -z "$DEBUG_KEYSTORE_B64" ]; then
+            echo "::warning::no DEBUG_KEYSTORE_B64 secret: this APK is signed with a key minted on this runner and will not update an earlier install"
+            exit 0
+          fi
+          mkdir -p ~/.android
+          echo "$DEBUG_KEYSTORE_B64" | base64 -d > ~/.android/debug.keystore
+          keytool -list -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey | grep -i 'fingerprint'
 
       - name: the APKs
         run: cd applications && ./gradlew --no-daemon :android:assembleDebug
