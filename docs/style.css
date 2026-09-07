@@ -573,6 +573,45 @@ code, pre { font-family: var(--mono); font-size: 0.93em; }
 .phone figcaption strong { color: var(--text); font-weight: 600; }
 figure.phone { margin: 0; }
 
+/* ---- Desk client shots -------------------------------------------------
+   The desktop screenshots are landscape (1540x1384), so they cannot ride the
+   .phone frame — two to a row on a wide screen, one on a narrow one, with the
+   same border, shadow and hover the phones use so the two clients read as one
+   product rather than two galleries. */
+.desk-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.75rem;
+  max-width: 940px;
+  margin: 0 auto 2rem;
+}
+.desk {
+  margin: 0;
+  text-align: center;
+  min-width: 0;
+}
+.desk img {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  display: block;
+  background: var(--bg-3);
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+.desk:hover img {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow: var(--shadow-hi);
+}
+.desk figcaption {
+  margin-top: 0.7rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.desk figcaption strong { color: var(--text); font-weight: 600; }
+
 /* split: text beside phones */
 .feature-split {
   display: grid;
