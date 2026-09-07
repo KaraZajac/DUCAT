@@ -130,6 +130,15 @@ fn poll_width() -> usize {
 const POLL_MAX_SECS: u64 = 300;
 /// veilid lets a watch run ten minutes; renew well inside that.
 const WATCH_RENEW_SECS: u64 = 8 * 60;
+/// A watch is kept only on what can ring soon: a thread that spoke within
+/// this window, and a card issued within [CARD_WATCH_HOT_SECS]. A watch
+/// is not free — veilid pings every node holding it every ten seconds and
+/// inspects the record every thirty when nothing changes — and a phone
+/// watching its whole address book was moving 300 KB/s all day for logs
+/// that had been silent for weeks. A quiet thread keeps the five-minute
+/// poll, which is what it had whenever its watch was refused anyway.
+const WATCH_HOT_SECS: u64 = 24 * 60 * 60;
+const CARD_WATCH_HOT_SECS: u64 = 60 * 60;
 
 #[derive(Clone, Copy)]
 struct PollSlot {
@@ -1466,18 +1475,31 @@ impl App {
     /// first, POLL_BUDGET per lap. veilid refuses a watch on a record this
     /// process has not opened — a contact not yet read since start — and
     /// that one is simply tried again after its first read.
+    /// Whether this thread's last message, either way, is younger than
+    /// `secs` — the test for keeping its watch. A thread with no messages
+    /// yet counts as hot: the first word is the one worth ringing for.
+    fn spoke_within(&self, persona_hex: &str, wall: u64, secs: u64) -> bool {
+        match self.thread(persona_hex).last() {
+            None => true,
+            Some(m) => wall.saturating_sub(m.timestamp) < secs,
+        }
+    }
+
     fn arm_watches(&self) -> (usize, usize) {
         let now = Instant::now();
         // (plan slot, record key) for every log, and every unanswered
         // card's inbox — a claim rings the lap the same way a message does.
+        let wall = App::now();
         let mut stale: Vec<((String, String), Option<Instant>)> = self
             .contacts()
             .into_iter()
+            .filter(|c| self.spoke_within(&c.persona_hex, wall, WATCH_HOT_SECS))
             .map(|c| (c.persona_hex.clone(), c.their_outbox.clone()))
             .chain(
                 self.issued_cards()
                     .into_iter()
-                    .filter(|c| c.answered_by.is_none())
+                    // `made` is milliseconds (now_ms at issue); the wall clock here is seconds.
+                    .filter(|c| c.answered_by.is_none() && c.made > 0 && wall.saturating_sub(c.made / 1000) < CARD_WATCH_HOT_SECS)
                     .map(|c| (format!("c:{}", c.inbox_key), c.inbox_key.clone())),
             )
             .filter_map(|(slot, key)| {

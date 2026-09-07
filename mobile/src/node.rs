@@ -8,7 +8,7 @@
 //! Everything the UI sees is a snapshot it polls. Nothing here blocks a caller
 //! on the network, because the caller is the main thread.
 
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 use std::sync::{Mutex, OnceLock};
 
 use veilid_core::*;
@@ -489,11 +489,24 @@ pub fn node_start(storage_dir: String, udp: bool) -> Result<(), NodeError> {
         // permit costs nothing. The fanout under each operation (5 nodes,
         // quorum 3) is unchanged - this widens how many questions we ask
         // together, not how hard each question hits the network.
+        //
+        // Measured again 2026-09-06: 72 made every burst four and a half
+        // times wider than veilid's own 16, and a phone that holds a normal
+        // address book was moving 300 KB/s all day. 24 keeps a board ring
+        // reasonably quick and stops the bursts stacking.
         let dht_ops = std::env::var("DUCAT_DHT_OPS")
             .ok()
             .and_then(|v| v.parse::<u64>().ok())
-            .unwrap_or(72);
+            .unwrap_or(24);
         cfg["network"]["dht"]["max_concurrent_operations"] = serde_json::json!(dht_ops);
+        // The subkey caches default to a thirty-second of RAM each — nearly
+        // 400 MB set aside on a 6 GB phone for caches that hold a few
+        // kilobytes of ours — and the remote store to 256 MB on disk. A
+        // node with DHTV off stores nothing for others anyway; the caps
+        // are kept small and the same on every device.
+        cfg["network"]["dht"]["local_max_subkey_cache_memory_mb"] = serde_json::json!(16);
+        cfg["network"]["dht"]["remote_max_subkey_cache_memory_mb"] = serde_json::json!(16);
+        cfg["network"]["dht"]["remote_max_storage_space_mb"] = serde_json::json!(64);
         // Probe knob for the residual gate (bench use): veilid's RPC worker
         // count, 0 = automatic. Unset means leave the default.
         if let Some(n) = std::env::var("DUCAT_RPC_CONCURRENCY")
@@ -721,6 +734,22 @@ pub fn node_routing_health() -> RoutingHealth {
     rt.block_on(api.debug("nodeinfo".into())).map(|info| parse_routing_health(&info)).unwrap_or_default()
 }
 
+/// Records this node instance has opened, and whether with a writer.
+///
+/// veilid queues a *rehydration* of a record on every `open_dht_record`
+/// of a record it already holds — an InspectValue fanout over every
+/// subkey and a SetValue fanout for each subkey short of five-node
+/// consensus (storage_manager/open_record.rs). DUCAT opened records on
+/// every poll, so every lap re-published the whole address book's logs to
+/// the network: on 2026-09-06 that was two hundred messages a second and
+/// half a megabyte a second on the desk, up and down alike. A record is
+/// opened once per node instance now; a later open with a writer where
+/// the first had none re-opens, because veilid binds the writer at open.
+fn opened() -> &'static Mutex<HashMap<String, (bool, u32)>> {
+    static OPENED: OnceLock<Mutex<HashMap<String, (bool, u32)>>> = OnceLock::new();
+    OPENED.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
 /// A snapshot. Cheap, and safe to call from a recomposition.
 #[uniffi::export]
 pub fn node_status() -> NodeStatus {
@@ -809,6 +838,7 @@ pub fn node_stop() {
     crate::lock(call_queue()).clear();
     call_sender_up().store(false, std::sync::atomic::Ordering::SeqCst);
     crate::lock(watched()).clear();
+    crate::lock(opened()).clear();
     crate::lock(inbox()).clear();
     *crate::lock(swarm_feeder()) = None;
     crate::lock(swarm_routes()).clear();
@@ -1437,11 +1467,19 @@ pub fn node_dht_open(
             )),
             _ => None,
         };
+        let want_writer = writer.is_some();
+        if let Some((has_writer, max)) = crate::lock(opened()).get(&key).copied() {
+            if has_writer || !want_writer {
+                return Ok(max);
+            }
+        }
         let desc = rc
             .open_dht_record(rk, writer)
             .await
             .map_err(|e| NodeError::Failed(format!("open: {e}")))?;
-        Ok(desc.schema().max_subkey())
+        let max = desc.schema().max_subkey();
+        crate::lock(opened()).insert(key, (want_writer, max));
+        Ok(max)
     })
 }
 
@@ -1561,6 +1599,7 @@ pub fn node_dht_delete(key: String) -> Result<(), NodeError> {
             .routing_context()
             .map_err(|e| NodeError::Failed(format!("routing context: {e}")))?;
         let rk = parse_key(&key)?;
+        crate::lock(opened()).remove(&key);
         rc.delete_dht_record(rk)
             .await
             .map_err(|e| NodeError::Failed(format!("delete: {e}")))
@@ -1633,6 +1672,7 @@ pub fn node_dht_close(key: String) -> Result<(), NodeError> {
         rc.close_dht_record(parse_key(&key)?)
             .await
             .map_err(|e| NodeError::Failed(format!("close: {e}")))?;
+        crate::lock(opened()).remove(&key);
         Ok(())
     })
 }

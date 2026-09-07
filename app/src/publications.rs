@@ -563,6 +563,9 @@ impl App {
                     continue;
                 }
                 let dir = self.issue_dir(&publisher, &period);
+                if swarm::swarm_seeding(key.clone()) {
+                    continue;
+                }
                 swarm::swarm_stop_share(key.clone());
                 if let Err(e) = swarm::swarm_fetch(key, digest, dir.to_string_lossy().into_owned(), true) {
                     log::warn(TAG, format!("re-park '{period}': {e}"));
@@ -922,6 +925,9 @@ impl App {
                     continue;
                 }
                 let dir = Path::new(&i.file).parent().map(|d| d.to_path_buf()).unwrap_or_default();
+                if swarm::swarm_seeding(i.key.clone()) {
+                    continue;
+                }
                 swarm::swarm_stop_share(i.key.clone());
                 if let Err(e) = swarm::swarm_fetch(i.key, i.digest, dir.to_string_lossy().into_owned(), true) {
                     log::warn(TAG, format!("re-seed '{period}': {e}"));

@@ -1384,6 +1384,7 @@ class ContactStore(context: Context) {
                 purpose = o.optString("purpose", "profile"),
                 owner = o.optString("owner", ""),
                 answeredBy = if (o.isNull("answered_by")) null else o.optString("answered_by"),
+                made = o.optLong("made", 0L),
             )
         }
     }
@@ -2286,6 +2287,8 @@ data class IssuedCardState(
     /** Which of our personas cut this card; empty = the primary era. */
     val owner: String = "",
     val answeredBy: String? = null,
+    /** This device's clock at issue, milliseconds; 0 on cards from before it was kept. */
+    val made: Long = 0L,
 )
 
 private fun JSONObject.optStringOrNull(k: String): String? =

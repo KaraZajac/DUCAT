@@ -287,6 +287,12 @@ impl App {
                 if !still(&app) {
                     return;
                 }
+                // Already serving: leave it. Tearing a live seed down to
+                // re-park it is a fresh route, three record writes and a
+                // full re-index, every hour, for nothing.
+                if swarm::swarm_seeding(r.share_key.clone()) {
+                    return;
+                }
                 swarm::swarm_stop_share(r.share_key.clone());
                 let res = swarm::swarm_fetch(
                     r.share_key.clone(),

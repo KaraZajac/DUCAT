@@ -878,6 +878,10 @@ impl App {
             }
             return;
         }
+        // Already serving: leave it (see releases::reseed_release).
+        if swarm::swarm_seeding(share.clone()) {
+            return;
+        }
         swarm::swarm_stop_share(share.clone());
         match swarm::swarm_fetch(share, digest, dir.to_string_lossy().into_owned(), true) {
             Ok(_) => log::info(TAG, format!("gallery of {}… serving again", &listing_id[..8.min(listing_id.len())])),

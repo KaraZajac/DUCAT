@@ -43,11 +43,30 @@ fn veilid_view() {
 fn serve_forever() -> ! {
     veilid_view();
     // The swarm's own notes while serving, so a seeder that lost its
-    // route says so.
+    // route says so — and the routing table's health every five minutes,
+    // because a host node's table decays where a phone's does not, and
+    // the figures over an hour are what tell the two apart.
+    let mut ticks = 0u64;
     loop {
         std::thread::sleep(Duration::from_secs(2));
         for line in ducat_mobile::node::node_logs() {
             println!("PUB_NOTE {line}");
+        }
+        ticks += 1;
+        if ticks % 150 == 0 {
+            let h = ducat_mobile::node::node_routing_health();
+            let s = ducat_mobile::node::node_status();
+            println!("PUB_HEALTH t+{}m state={} peers={} total={} live={} dead={} find={}ms", ticks / 30, s.state, s.peers, h.total, h.live, h.dead, h.find_node_ms);
+            // The node's own traffic and message counters, so a bare node's
+            // baseline can be told from what a client adds on top of it.
+            if let Ok(stats) = ducat_mobile::node::node_debug("network stats".into()) {
+                for line in stats.lines() {
+                    let l = line.trim();
+                    if l.starts_with("Down:") || l.starts_with("Up:") || l.starts_with("Cache hits:") {
+                        println!("PUB_NET t+{}m {l}", ticks / 30);
+                    }
+                }
+            }
         }
     }
 }

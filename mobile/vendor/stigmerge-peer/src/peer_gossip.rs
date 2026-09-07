@@ -135,13 +135,23 @@ impl<C: Connection + Send + Sync + 'static> PeerGossipInner<C> {
             // whose record cannot be resolved must not silence us to every
             // other peer — a dead entry in a frozen roster is the normal
             // case, not the exception, once a share's origin is gone.
-            let remote_share = match self.share_resolver.add_share(known_peer).await {
-                Ok(s) => s,
-                Err(err) => {
-                    warn!(?err, ?known_peer, "resolve known peer for reannounce");
-                    crate::peer_reputation::note_failure(known_peer);
-                    continue;
-                }
+            // DUCAT modification (see ../STIGMERGE-NOTICE.md): a peer we
+            // have already resolved is advertised over the route we hold —
+            // the resolver's watch keeps that route current. Resolving
+            // every known peer again on every tick was a header read, an
+            // index read, a have-map read, a route import and a new watch,
+            // per peer, per share, every five minutes, for ever; it was the
+            // largest standing cost of a parked share.
+            let route_id = match self.share_resolver.current_route(known_peer).await {
+                Some(r) => r,
+                None => match self.share_resolver.add_share(known_peer).await {
+                    Ok(s) => s.route_id,
+                    Err(err) => {
+                        warn!(?err, ?known_peer, "resolve known peer for reannounce");
+                        crate::peer_reputation::note_failure(known_peer);
+                        continue;
+                    }
+                },
             };
             let key = self.share.key.clone();
 
@@ -158,10 +168,7 @@ impl<C: Connection + Send + Sync + 'static> PeerGossipInner<C> {
                 }
             }
             // Attempt to advertise
-            match self
-                .request_advertise_peer(&remote_share.route_id, &key)
-                .await
-            {
+            match self.request_advertise_peer(&route_id, &key).await {
                 Ok(()) => {
                     trace!("advertised {key} (self) to {known_peer}");
                     self.advertisements

@@ -1974,6 +1974,10 @@ object Mailbox {
     private const val POLL_WIDTH = 4
     private const val POLL_MAX_MS = 5 * 60_000L
     private const val WATCH_RENEW_MS = 8 * 60_000L
+    /** How recently a thread must have spoken to keep its watch. */
+    const val WATCH_HOT_MS = 24 * 60 * 60_000L
+    /** How young an unanswered card must be to keep its watch. */
+    const val CARD_WATCH_HOT_MS = 60 * 60_000L
 
     private class PollSlot(var dueAt: Long = 0L, var backoffMs: Long = 0L, var watchedAt: Long = 0L)
 
@@ -2064,7 +2068,20 @@ object Mailbox {
      */
     fun armWatches(context: Context): Pair<Int, Int> {
         val now = System.currentTimeMillis()
-        val stale = ContactStore(context).all()
+        val store = ContactStore(context)
+        // Only a thread that spoke within WATCH_HOT_MS keeps its watch. A
+        // watch is not free — veilid pings every node holding it every ten
+        // seconds and inspects the record every thirty when nothing
+        // changes — and a phone watching its whole address book moved
+        // 300 KB/s all day for logs silent for weeks. A quiet thread keeps
+        // the five-minute poll, which is what it had whenever its watch
+        // was refused anyway. A thread with no messages yet counts as hot.
+        val stale = store.all()
+            .filter { c ->
+                // Message timestamps are seconds; the clock here is millis.
+                val last = store.thread(c.personaHex).lastOrNull()?.timestamp
+                last == null || now / 1000L - last < WATCH_HOT_MS / 1000L
+            }
             .filter { now - slot(it.personaHex).watchedAt >= WATCH_RENEW_MS }
             .sortedBy { slot(it.personaHex).watchedAt }
             .take(POLL_BUDGET)

@@ -168,6 +168,12 @@ class Poller(private val context: Context) {
                     }
                 }
 
+                // The node's own traffic counters, every five minutes, so a
+                // phone's bandwidth can be read off its log the way the
+                // desk's can off its status page: what veilid moved, and how
+                // many messages it sent, since the last line.
+                netStatLine()
+
                 // Keep what is on the boards on them.
                 //
                 // A notice carries a 24-hour expiry and `needRefresh` returns
@@ -486,7 +492,11 @@ class Poller(private val context: Context) {
                     // minutes, so one renewal every eight is the whole
                     // cost, not one per card per sweep.
                     val nowMs = System.currentTimeMillis()
-                    store.issuedCards().filter { it.answeredBy == null }.forEach {
+                    // Only a card issued in the last hour: an older one is
+                    // on its five-minute backoff, and a day of unanswered
+                    // cards watched forever was thirty dead records pinged
+                    // every ten seconds.
+                    store.issuedCards().filter { it.answeredBy == null && it.made > 0L && nowMs - it.made < Mailbox.CARD_WATCH_HOT_MS }.forEach {
                         if (nowMs - (cardWatchedAt[it.inboxKey] ?: 0L) < CARD_WATCH_RENEW_MS) return@forEach
                         runCatching { uniffi.ducat_mobile.nodeDhtWatch(it.inboxKey) }
                             .onSuccess { ok -> if (ok) { up++; cardWatchedAt[it.inboxKey] = nowMs } else down++ }
@@ -537,7 +547,7 @@ class Poller(private val context: Context) {
     private val warming = java.util.concurrent.atomic.AtomicBoolean(false)
     @Volatile private var lastWarm = 0L
     @Volatile private var lastShelfWarm = 0L
-    private val warmEveryMs = 7 * 60_000L
+    private val warmEveryMs = 20 * 60_000L
     private val shelfWarmEveryMs = 15 * 60_000L
 
     @Volatile private var reseeded = false
@@ -860,6 +870,34 @@ class Poller(private val context: Context) {
                 )
             }.onFailure { DucatLog.w(TAG, "lane: ${it.javaClass.simpleName}: ${it.message}") }
         }
+    }
+
+    private var netStatAt = 0L
+    private var netStatLookups = 0L
+    private var netStatDown = 0L
+    private var netStatUp = 0L
+
+    private fun netStatLine() {
+        val now = System.currentTimeMillis()
+        if (now - netStatAt < 5 * 60_000L) return
+        val text = runCatching { uniffi.ducat_mobile.nodeDebug("network stats") }.getOrNull() ?: return
+        val lookups = Regex("Cache hits: (\\d+)/(\\d+)").find(text)?.groupValues?.get(2)?.toLongOrNull() ?: 0L
+        val down = Regex("Down:.*?\\((\\d+) bytes\\)").find(text)?.groupValues?.get(1)?.toLongOrNull() ?: 0L
+        val up = Regex("Up:.*?\\((\\d+) bytes\\)").find(text)?.groupValues?.get(1)?.toLongOrNull() ?: 0L
+        if (netStatAt > 0L) {
+            val secs = ((now - netStatAt) / 1000L).coerceAtLeast(1L)
+            // The table's state counts beside the rate: entries in the
+            // Initial and Missing states are pinged every second, so they
+            // are the first thing to look at when the rate is high.
+            val table = runCatching { uniffi.ducat_mobile.nodeDebug("nodeinfo") }.getOrNull()
+                ?.lines()?.firstOrNull { it.contains("total=") }?.trim() ?: "table ?"
+            DucatLog.i(
+                TAG,
+                "netstat: ${(down - netStatDown) / secs / 1024} KB/s down, ${(up - netStatUp) / secs / 1024} KB/s up, " +
+                    "${(lookups - netStatLookups) / secs} msg/s over ${secs}s — $table",
+            )
+        }
+        netStatAt = now; netStatLookups = lookups; netStatDown = down; netStatUp = up
     }
 
     /** When each unanswered card's inbox watch was last renewed. */

@@ -192,3 +192,13 @@ until then. A piece with fewer than five blocks — every file under 160 KiB
 the pool waited on them: one piece per bootstrap, for ever, until a
 watchdog restarted the fetch. The sender is now dropped once the queue is
 filled and a worker treats the closed channel as its finish line.
+
+## Peer gossip advertises over the route it holds (2026-09-06)
+
+`peer_gossip.rs` `advertise_self` resolved every known peer again on every
+tick — a header read, an index read, a have-map read, a route import and a
+new watch, per peer, per share, every five minutes, for ever. It was the
+largest standing cost of a parked share: one seeded listing on a phone was
+30 KB/s all day. A peer whose route the resolver already holds is now
+advertised over that route (the resolver's watch keeps it current); a peer
+with no route yet is resolved as before.
