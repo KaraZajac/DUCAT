@@ -38,22 +38,26 @@ right-click the app and choose Open the first time.
 
 ## Setting up takes about a minute
 
-Five steps, no account, nothing to sign up for. Every screenshot below is the
+Six steps, no account, nothing to sign up for. Every screenshot below is the
 app running on a phone, not a mockup.
 
 <p align="center">
-  <img src="docs/screenshots/onboarding-identity.png" width="260" alt="Step 1 of 5: create your identity — a keypair on this phone">
+  <img src="docs/screenshots/onboarding-identity.png" width="260" alt="Step 1 of 6: create your identity — a keypair on this phone">
   &nbsp;
-  <img src="docs/screenshots/onboarding-trust.png" width="260" alt="Step 4 of 5: how strangers trust each other here">
+  <img src="docs/screenshots/onboarding-trust.png" width="260" alt="Step 5 of 6: how strangers trust each other here">
   &nbsp;
-  <img src="docs/screenshots/onboarding-backup.png" width="260" alt="Step 5 of 5: back it up now, with one encrypted file">
+  <img src="docs/screenshots/onboarding-backup.png" width="260" alt="Step 6 of 6: back it up now, with one encrypted file">
 </p>
 
 Your identity is a keypair made on the phone — no email, no phone number, nobody
 to register with, *which is also why nobody can restore it for you*. The app
-says that out loud rather than burying it, and the last step is the backup,
+says that out loud rather than burying it. The second step asks what people
+should call you and whether contacts may pay you directly, and states the
+linkability cost of saying yes right there. The last step is the backup,
 because a wallet you cannot restore is the one way a person actually loses
-money here.
+money here. Walked from a wiped phone on 2026-09-06: setup, first card, first
+chat, first funds, first payment and first listing, about twenty minutes end
+to end, most of it waiting for the chain.
 
 ## Money that is yours
 
@@ -96,10 +100,13 @@ Those conversations carry commerce, not just text: itemised bills whose lines
 **must** sum to their total or the message is refused, payments, and receipts
 issued by the payee pointing at the transaction they acknowledge. Replies,
 reactions and unsend work the way you expect; a search box finds what anyone
-said — receipts included, since a bill's items live in its body. Small
-**groups** run as fan-out over the pairwise threads — no group key, no shared
-record, nobody to forge as, and the app states the shape plainly before your
-first one. A group can **split a bill**: one total becomes a pairwise request
+said — receipts included, since a bill's items live in its body. A **group**
+is a roster that only grows, carried over the pairwise threads, and its words
+ride **one shared board record per generation** (§16.24): every member writes
+its own pages under a group key the roster carries, so a message to five people
+is one write instead of five, and the record cannot be told apart from any other
+by the network. Nobody can forge as anyone else, leaving is local, and the app
+states the shape plainly before your first one. A group can **split a bill**: one total becomes a pairwise request
 to each person and a sentence in the group everyone can check the arithmetic
 against, and each request flips Paid ✓ as its §16.14 reference lands. A
 standing rent or dues becomes a **recurring bill** — the *asking* repeats on a
@@ -107,7 +114,7 @@ schedule; every payment is still approved by hand, because a request carries
 no authority.
 
 <p align="center">
-  <img src="images/group-chat.png" width="260" alt="A group: five people over pairwise threads, replies and reactions, nobody to forge as">
+  <img src="images/group-board.png" width="260" alt="A group on a board: replies and reactions, one shared record per generation, nobody to forge as">
   &nbsp;
   <img src="images/chat-search.png" width="260" alt="Searching what people said: name hits first, then messages — receipts included">
 </p> Encryption is
@@ -132,7 +139,8 @@ $6.00 against about $9 — **and the driver keeps all of it**, where a rideshare
 would have paid them roughly 71% of what the rider handed over. Pricing inside
 that gap is what lets the rider pay less *and* the driver earn more at the same
 time; it is the absent platform cut, handed to both of them. Acceptance arrives
-with a face on it: name, car, colour, plate, ETA.
+with a face on it: name, car, colour, plate, ETA — and, when the driver has set
+them, a small picture of the car and of the driver, carried on the card itself.
 
 One trade, stated plainly on the screen: address search, routing and map tiles
 query OpenStreetMap's servers — the single place DUCAT sends location
@@ -216,7 +224,25 @@ gearbox, fuel, price and the stake — plus a card to open a conversation with.
 
 The same boards carry **things for sale** and **somebody's time** — a record
 player and a bike repair are found the way a car is, asked about the same way,
-and settled through the same stakes.
+and settled through the same stakes. A notice carries a thumbnail; opening a
+listing fetches its **bundle** from the seller's own phone — a description of
+up to 8 000 characters, up to 24 photographs at full size, a small table of
+specs, and attached files — with the seller's own figure ("USD 8") shown beside
+what that is worth at today's rate. The bundle is a directory with a
+`listing.json` at its root (§16.18.3), refused whole on any key it does not
+name, so a bad document cannot hide good pictures.
+
+<p align="center">
+  <img src="images/marketplace-listing.png" width="260" alt="A listing opened: its pictures, the seller's description, the price they typed and today's conversion">
+  &nbsp;
+  <img src="images/marketplace-worldwide.png" width="260" alt="Worldwide: publications on topic boards, every shelf at once">
+</p>
+
+Publications — a newspaper, a serial, a piece of software — are sold
+**worldwide** on topic boards rather than by neighbourhood: a post lands on the
+topic's board and on its language's board both, and "Everything" reads all six
+shelves side by side. A cover rides the notice the way a thumbnail rides a
+listing.
 
 ## Why a stranger can trust you
 
@@ -289,10 +315,47 @@ survives thread and contact deletion, and rides the backup. The memo travels in
 the sealed notice — never on the chain, because a public memo is a note stapled
 to a banknote.
 
+A long action says which stage it is in — "putting the pictures on the swarm",
+"issuing the card", "writing to the board" — and an error arrives as a
+sentence. Every list says why it is empty: not connected, still looking,
+nothing here, or a read that failed, four different sentences with four
+different ways out. Faces are rounded rectangles on both clients, a profile
+can carry a picture and a car can carry one too, and the Status page shows the
+node's routing table — how many of the nodes it knows still answer — with a
+**Reconnect** that stops and starts the node with its table purged, which is
+what a person does by hand when the network has been slow for an hour. Both
+clients do it themselves when the node has sat unattached for three minutes.
+
+<p align="center">
+  <img src="images/status.png" width="260" alt="Status: node attached, peers, the routing table's live and dead counts, Reconnect">
+</p>
+
+## The same application on a desk
+
+<p align="center">
+  <img src="images/desk-chat.png" width="420" alt="The desk's Chat page: groups on boards above the pairwise threads, a conversation pane">
+  &nbsp;
+  <img src="images/desk-market.png" width="420" alt="The desk's Market page: listings near a cell with their thumbnails">
+</p>
+
+<p align="center">
+  <img src="images/desk-kiosk.png" width="420" alt="The desk as a kiosk: an order with a code any Monero wallet can pay, and a card a DUCAT customer answers instead">
+  &nbsp;
+  <img src="images/desk-status.png" width="420" alt="The desk's Status page: the node, its routing table, Reconnect, the log">
+</p>
+
+The desktop client is a native window over the same Rust the phone runs —
+`app/` holds the logic, `applications/desk/` the window — so a shopkeeper's
+till, a kiosk, the library's press room, the market and the feed are one
+implementation on every screen. It speaks the phone's twenty languages from
+the same resources. Proven against the phone across every rite: chat, groups
+on boards, bills and receipts, a kiosk order paid from a phone that had never
+met the desk, files and sites served and fetched, calls with real sound.
+
 ## The repository
 
 ```
-ducat-protocol.md   the spec — 1.1.0-dev1 on this branch (1.0.0-rc1 is the frozen line), changelog first
+ducat-protocol.md   the spec — 1.1.0-dev9 on this branch (1.0.0-rc1 is the frozen line), changelog first
 core/               reference implementation (Rust)
 vectors/            406 conformance cases + schema — the published artifact
 conformance/        four checkers: schema, second implementation, spec audit,
@@ -417,6 +480,23 @@ walked the metered taxi day — claim-once pickup code, terms into the chat at
 start, the per-minute bill checked to the cent — after the meter itself was
 caught deriving money from the wall clock and moved to the one that only runs
 forward.
+
+**2026-09-06.** A phone wiped to nothing was walked through setup, its first
+card, first chat, first funds, first payment, first listing, a kiosk sale paid
+end to end with the receipt back in three minutes, and then wiped again and
+restored from its own backup — contacts, threads, wallet and listing all
+back, the listing re-posted by the next sweep without the photographs the
+backup does not carry. Groups moved from fan-out to shared boards the same
+week and were proven desk↔phone, including two groups of the same people and
+a member leaving. The same day the network cost was measured with veilid's own
+counters rather than guessed: a phone holding an address book and ten listings
+was moving 300 KB/s all day, because every poll re-opened its records and
+veilid re-publishes a record on every open, because every contact and card was
+watched, and because each seeded listing re-resolved every peer every five
+minutes. Opening once, watching only threads that spoke within a day, and
+advertising over the route already held cut it by a quarter to a third; what
+remains is mostly the node's own upkeep and the seeds, and the phone now logs
+its own figures every five minutes so the next cut can be measured too.
 
 A driver's watches did not work for the whole life of the feature, which is
 worth stating plainly because it was invisible: arming one requires the DHT
