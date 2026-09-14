@@ -82,6 +82,13 @@ impl App {
             ("subcards_raw", "ducat_publications", "subcards"),
             ("recurring_raw", "ducat_recurring", "bills"),
             ("sites_raw", "ducat_sites", "sites"),
+            // §9.5 / §9.2: a burn cannot be made again and a receipt cannot
+            // be asked for twice — the envelopes are the identity's history.
+            ("burns_raw", "trust", "burns"),
+            ("verified_burns_raw", "trust", "verified"),
+            ("attestations_given_raw", "trust", "given"),
+            ("attestations_received_raw", "trust", "received"),
+            ("attestations_about_raw", "trust", "about"),
         ] {
             if let Some(v) = raw(store, key) {
                 o.insert(name.into(), v);
@@ -283,6 +290,11 @@ impl App {
                     ("subcards_raw", "ducat_publications", "subcards"),
                     ("recurring_raw", "ducat_recurring", "bills"),
                     ("sites_raw", "ducat_sites", "sites"),
+                    ("burns_raw", "trust", "burns"),
+                    ("verified_burns_raw", "trust", "verified"),
+                    ("attestations_given_raw", "trust", "given"),
+                    ("attestations_received_raw", "trust", "received"),
+                    ("attestations_about_raw", "trust", "about"),
                 ] {
                     if let Some(v) = o.get(name) {
                         self.store(store).put(key, &from_phone(v.clone()))?;
@@ -426,6 +438,19 @@ mod tests {
         a.save_prekeys(b"bundle", &[7; 32], &[(5, vec![5; 32])], false).unwrap();
         let t = a.open_or_resume_tab(&"cd".repeat(32), crate::tabs::ORIGIN_BAR).unwrap();
         let id = a.create_publication("Zine").unwrap();
+        // §9.5 / §9.2: what was verified about others and said about us.
+        a.store("trust")
+            .put(
+                "verified",
+                &vec![crate::trust::VerifiedBurn { persona_hex: "cd".repeat(32), txid_hex: "ee".repeat(32), amount_pxmr: 20_000_000_000, height: 2_207_293, purpose: "identity".into(), checked_at: 9 }],
+            )
+            .unwrap();
+        a.store("trust")
+            .put(
+                "about",
+                &vec![crate::trust::AttestationRecord { signer_hex: "ab".repeat(32), subject_hex: "cd".repeat(32), amount_pxmr: 5, rating: 4, ts: 8, txid_hex: None, note: None, envelope_hex: "00".into() }],
+            )
+            .unwrap();
         let bytes = a.export_backup_bytes("correct horse battery").unwrap();
         assert!(bytes.len() > 200);
         let path = base.join("bundle.ducat");
@@ -453,6 +478,8 @@ mod tests {
         assert_eq!(b.tab(&t.id).unwrap().persona_hex, "cd".repeat(32));
         assert_eq!(b.publication(&id).unwrap().title, "Zine");
         assert!(b.bundles_need_republish());
+        assert_eq!(b.burn_of(&"cd".repeat(32)).map(|v| (v.amount_pxmr, v.height)), Some((20_000_000_000, 2_207_293)));
+        assert_eq!(b.record_of(&"cd".repeat(32)).receipts, 1);
         assert!(b.import_backup_from(&path, "wrong passphrase").is_err());
     }
 }

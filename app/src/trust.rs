@@ -31,10 +31,16 @@ const STORE: &str = "trust";
 const NODE_TIMEOUT_MS: u32 = 20_000;
 
 /// One of this desk's own burns.
+///
+/// The JSON names are the phone's (`Trust.kt`), so that a bundle exported
+/// on either client restores on the other.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct BurnRecord {
+    #[serde(rename = "persona")]
     pub persona_hex: String,
+    #[serde(rename = "txid")]
     pub txid_hex: String,
+    #[serde(rename = "amount")]
     pub amount_pxmr: u64,
     pub purpose: String,
     /// The `OutProofV2`, made at send time.
@@ -43,19 +49,24 @@ pub struct BurnRecord {
     #[serde(default)]
     pub height: u64,
     /// The signed `BURN_PROOF` envelope, hex — written once the height is known.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default, rename = "envelope", skip_serializing_if = "Option::is_none")]
     pub envelope_hex: Option<String>,
+    #[serde(rename = "made")]
     pub made_at: u64,
 }
 
 /// A stranger's burn, checked and kept beside the contact.
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct VerifiedBurn {
+    #[serde(rename = "persona")]
     pub persona_hex: String,
+    #[serde(rename = "txid")]
     pub txid_hex: String,
+    #[serde(rename = "amount")]
     pub amount_pxmr: u64,
     pub height: u64,
     pub purpose: String,
+    #[serde(rename = "checked")]
     pub checked_at: u64,
 }
 
@@ -233,17 +244,21 @@ impl App {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct AttestationRecord {
     /// Who spoke.
+    #[serde(rename = "signer")]
     pub signer_hex: String,
     /// Who was spoken about.
+    #[serde(rename = "subject")]
     pub subject_hex: String,
+    #[serde(rename = "amount")]
     pub amount_pxmr: u64,
     pub rating: u8,
     pub ts: u64,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default, rename = "txid", skip_serializing_if = "Option::is_none")]
     pub txid_hex: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub note: Option<String>,
     /// The signed envelope, hex, so it can be shown again.
+    #[serde(rename = "envelope")]
     pub envelope_hex: String,
 }
 
@@ -463,6 +478,29 @@ mod tests {
             checked_at: 1,
         });
         app.store(STORE).put("verified", &all).unwrap();
+    }
+
+    /// The JSON names are a contract with the phone's `Trust.kt`: a bundle
+    /// written there is read here, and the other way round.
+    #[test]
+    fn the_records_are_written_under_the_phones_names() {
+        let burn = BurnRecord { persona_hex: "aa".into(), txid_hex: "bb".into(), amount_pxmr: 1, purpose: "identity".into(), proof: "p".into(), height: 2, envelope_hex: Some("cc".into()), made_at: 3 };
+        let v = serde_json::to_value(&burn).unwrap();
+        let keys: Vec<&str> = v.as_object().unwrap().keys().map(String::as_str).collect();
+        assert_eq!(keys, ["amount", "envelope", "height", "made", "persona", "proof", "purpose", "txid"]);
+        let seen = VerifiedBurn { persona_hex: "aa".into(), txid_hex: "bb".into(), amount_pxmr: 1, height: 2, purpose: "identity".into(), checked_at: 3 };
+        let v = serde_json::to_value(&seen).unwrap();
+        let keys: Vec<&str> = v.as_object().unwrap().keys().map(String::as_str).collect();
+        assert_eq!(keys, ["amount", "checked", "height", "persona", "purpose", "txid"]);
+        let said = AttestationRecord { signer_hex: "aa".into(), subject_hex: "bb".into(), amount_pxmr: 1, rating: 5, ts: 2, txid_hex: Some("cc".into()), note: Some("n".into()), envelope_hex: "dd".into() };
+        let v = serde_json::to_value(&said).unwrap();
+        let keys: Vec<&str> = v.as_object().unwrap().keys().map(String::as_str).collect();
+        assert_eq!(keys, ["amount", "envelope", "note", "rating", "signer", "subject", "ts", "txid"]);
+        // The phone omits what is null; so do we, and we read it back.
+        let bare = AttestationRecord { txid_hex: None, note: None, ..said };
+        let text = serde_json::to_string(&bare).unwrap();
+        assert!(!text.contains("txid") && !text.contains("note"));
+        assert_eq!(serde_json::from_str::<AttestationRecord>(&text).unwrap(), bare);
     }
 
     #[test]
