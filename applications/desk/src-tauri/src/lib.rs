@@ -1412,6 +1412,8 @@ struct TrustView {
     receipts_weighted: u32,
     rating_x10: u32,
     known_by: Vec<String>,
+    /// The worn persona's own largest finished burn — what a seller's minimum is measured against.
+    my_burn_pxmr: Option<u64>,
 }
 
 #[tauri::command]
@@ -1426,6 +1428,7 @@ fn trust_of(persona_hex: String) -> Result<TrustView, String> {
         receipts_weighted: record.weighted,
         rating_x10: record.rating_x10,
         known_by: a.known_by(&persona_hex),
+        my_burn_pxmr: a.worn().ok().and_then(|w| a.my_burn(&w)).map(|b| b.amount_pxmr),
     })
 }
 
@@ -2295,6 +2298,7 @@ struct ListingRow {
     cell: String,
     price_pxmr: u64,
     deposit_pxmr: u64,
+    min_burn_pxmr: u64,
     specs: serde_json::Map<String, serde_json::Value>,
     private_details: String,
     quantity: u64,
@@ -2366,6 +2370,7 @@ fn listing_row(a: &App, l: ducat_app::listings::Listing) -> ListingRow {
         cell: l.cell,
         price_pxmr: l.price_pxmr,
         deposit_pxmr: l.deposit_pxmr,
+        min_burn_pxmr: l.min_burn_pxmr,
         specs: l.specs,
         private_details: l.private_details,
         description: l.description,
@@ -2400,6 +2405,8 @@ struct ListingDraft {
     #[serde(default)]
     description: String,
     quantity: u64,
+    #[serde(default)]
+    min_burn_pxmr: u64,
 }
 
 #[tauri::command]
@@ -2419,7 +2426,7 @@ fn save_listing(draft: ListingDraft) -> Result<ListingRow, String> {
         (ducat_app::wallet::parse_xmr(&draft.price_text).ok_or("that is not an amount of XMR")?, None, None)
     };
     let mut l = a
-        .draft_listing(draft.kind, &draft.title, &draft.area, &draft.description, price_pxmr, &cell, draft.specs, &draft.private_details, typed.as_deref(), currency.as_deref(), draft.quantity, None)
+        .draft_listing(draft.kind, &draft.title, &draft.area, &draft.description, price_pxmr, &cell, draft.specs, &draft.private_details, typed.as_deref(), currency.as_deref(), draft.quantity, draft.min_burn_pxmr, None)
         .map_err(said)?;
     if let Some(id) = draft.id.filter(|i| !i.is_empty()) {
         if let Some(old) = a.listing(&id) {
@@ -2493,6 +2500,7 @@ struct FoundRow {
     cell: Option<String>,
     price_pxmr: u64,
     deposit_pxmr: u64,
+    min_burn_pxmr: u64,
     expiry: u64,
     specs: serde_json::Map<String, serde_json::Value>,
     features: Vec<String>,
@@ -2523,6 +2531,7 @@ fn found_row(a: &App, f: ducat_app::listings::Found) -> FoundRow {
         cell: f.cell,
         price_pxmr: f.price,
         deposit_pxmr: f.deposit,
+        min_burn_pxmr: f.min_burn,
         expiry: f.expiry,
         specs: f.specs,
         features: f.features,

@@ -436,4 +436,9 @@
     <string name="desk_vouches_sent">Seni kimin tanıdığı, onlara gösterildi</string>
     <string name="desk_vouches_none_known">Onları kimin tanıdığını gösterdiler; hiçbiri senin kişilerinden değil</string>
     <string name="desk_known_by_one">%1$s onları tanıyor</string>
+    <string name="desk_min_burn_label">Alıcılar için en az yakma (XMR)</string>
+    <string name="desk_min_burn_hint">Hiçbir şey istememek için boş bırak. Alıcılar taahhütten önce görür; adları daha az yakmışsa istemcileri uyarır.</string>
+    <string name="desk_min_burn_x">Satıcı, alıcıların en az %1$s yakmış olmasını istiyor</string>
+    <string name="desk_min_burn_short">Bu kimlik %1$s yaktı, istenenden az. Seninle iş yapmayabilirler.</string>
+    <string name="desk_min_burn_none">Bu kimlik henüz hiçbir şey yakmadı. Seninle iş yapmayabilirler.</string>
 </resources>

@@ -436,4 +436,9 @@
     <string name="desk_vouches_sent">Wie jou kent, aan hen getoond</string>
     <string name="desk_vouches_none_known">Ze toonden wie hen kent; geen van hen is een contact van jou</string>
     <string name="desk_known_by_one">%1$s kent hen</string>
+    <string name="desk_min_burn_label">Minimale verbranding voor kopers (XMR)</string>
+    <string name="desk_min_burn_hint">Laat leeg om niets te vragen. Kopers zien het voordat ze toezeggen; hun client waarschuwt als hun naam minder heeft verbrand.</string>
+    <string name="desk_min_burn_x">De verkoper vraagt dat kopers ten minste %1$s hebben verbrand</string>
+    <string name="desk_min_burn_short">Deze persona heeft %1$s verbrand, minder dan gevraagd. Ze handelen misschien niet met je.</string>
+    <string name="desk_min_burn_none">Deze persona heeft nog niets verbrand. Ze handelen misschien niet met je.</string>
 </resources>

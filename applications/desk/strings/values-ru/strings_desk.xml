@@ -444,4 +444,9 @@
     <string name="desk_vouches_sent">Кто вас знает, показано им</string>
     <string name="desk_vouches_none_known">Они показали, кто их знает; никого из них нет в ваших контактах</string>
     <string name="desk_known_by_one">%1$s их знает</string>
+    <string name="desk_min_burn_label">Минимальное сжигание для покупателей (XMR)</string>
+    <string name="desk_min_burn_hint">Оставьте пустым, чтобы ничего не требовать. Покупатели видят это до того, как обязуются; их клиент предупредит, если их имя сожгло меньше.</string>
+    <string name="desk_min_burn_x">Продавец просит, чтобы покупатели сожгли не меньше %1$s</string>
+    <string name="desk_min_burn_short">Эта персона сожгла %1$s, меньше, чем требуется. С вами могут не иметь дела.</string>
+    <string name="desk_min_burn_none">Эта персона ещё ничего не сожгла. С вами могут не иметь дела.</string>
 </resources>

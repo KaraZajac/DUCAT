@@ -1096,6 +1096,7 @@ RN_FEATURES = 239
 RN_TRIM = 240
 RN_SIZE_M2 = 241
 RN_QUANTITY = 248
+RN_MIN_BURN = 320
 # §16.18's pictures: one small one inline on the board, and the swarm share
 # carrying the rest. Every reader of every slot pays for the inline one on
 # every browse sweep, which is why it is capped small and the gallery is not
@@ -1570,6 +1571,10 @@ def parse_listing(buf):
     if q is not None and q > 999:
         raise Reject("Malformed", "more than a listing is for")
     out["quantity"] = q if q is not None else 1
+    mb = _opt(b, RN_MIN_BURN, "uint")
+    if mb is not None and mb == 0:
+        raise Reject("Malformed", "a minimum is written only when there is one")
+    out["min_burn"] = mb if mb is not None else 0
 
     feats = _opt(b, RN_FEATURES, "array")
     out["features"] = []
@@ -2101,6 +2106,8 @@ def run_listing(cases, r):
                 fields.append((RN_GALLERY, ("text", n["gallery_share"])))
             if n.get("gallery_digest") is not None:
                 fields.append((RN_GALLERY_DIGEST, ("bytes", n["gallery_digest"])))
+            if n.get("min_burn"):
+                fields.append((RN_MIN_BURN, ("uint", n["min_burn"])))
             return _reencode_map(fields)
         out = expect_reject(r, "contact", c, go)
         if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:

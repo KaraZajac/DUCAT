@@ -2239,6 +2239,9 @@ pub struct RentalNotice {
     /// ordinary listing costs nothing on a board that is expensive to read,
     /// and every listing that means "one" has the same bytes.
     pub quantity: u64,
+    /// The least a buyer must have burned (§9.5), in pXMR; 0 means the
+    /// poster asks nothing, and 0 is never written.
+    pub min_burn_pxmr: u64,
     /// One small picture, inline (§16.18). PNG, JPEG or WebP, at most
     /// [`MAX_LISTING_THUMB_BYTES`]. The seller picks which of their
     /// photographs this is; the rest ride the gallery below.
@@ -2502,6 +2505,9 @@ impl RentalNotice {
         if self.quantity > 1 {
             m.insert(f::RN_QUANTITY, Value::Uint(self.quantity));
         }
+        if self.min_burn_pxmr > 0 {
+            m.insert(f::RN_MIN_BURN, Value::Uint(self.min_burn_pxmr));
+        }
         if let Some(t) = &self.thumb {
             m.insert(f::RN_THUMB, Value::Bytes(t.clone()));
         }
@@ -2579,6 +2585,13 @@ impl RentalNotice {
         let size_m2 = r.opt_uint(f::RN_SIZE_M2)?;
         let subtype = r.opt_uint(f::RN_SUBTYPE)?;
         let quantity = r.opt_uint(f::RN_QUANTITY)?;
+        // A minimum is written only when there is one — the same rule as the
+        // quantity, for the same reason: one listing, one byte string.
+        let min_burn = r.opt_uint(f::RN_MIN_BURN)?;
+        if min_burn == Some(0) {
+            return Err(Reject::with_detail(RejectCode::Malformed, "a minimum is written only when there is one"));
+        }
+        let min_burn_pxmr = min_burn.unwrap_or(0);
 
         // A place has no gearbox and a car has no bedrooms. Refusing the
         // mismatch keeps a reader from having to guess which fields it is
@@ -2750,7 +2763,7 @@ impl RentalNotice {
         Ok(RentalNotice {
             version, card, kind, title, area, cell, price_pxmr, deposit_pxmr, expiry,
             make, model, year, gearbox, fuel, seats, color, trim,
-            rooms, sleeps, size_m2, subtype, features, quantity,
+            rooms, sleeps, size_m2, subtype, features, quantity, min_burn_pxmr,
             thumb, gallery_share, gallery_digest,
         })
     }
@@ -2781,6 +2794,7 @@ mod rental_tests {
             subtype,
             features: vec!["good condition".into()],
             quantity: 1,
+            min_burn_pxmr: 0,
             thumb: None, gallery_share: None, gallery_digest: None,
         }
     }
@@ -2845,6 +2859,20 @@ mod rental_tests {
         }
     }
 
+    #[test]
+    fn a_minimum_travels_and_nothing_is_never_written() {
+        let mut n = a_room();
+        n.min_burn_pxmr = 10_000_000_000;
+        let back = RentalNotice::from_value(n.to_value()).unwrap();
+        assert_eq!(back.min_burn_pxmr, 10_000_000_000);
+        n.min_burn_pxmr = 0;
+        let Value::Map(m) = n.to_value() else { panic!() };
+        assert!(!m.contains_key(&f::RN_MIN_BURN), "nothing asked writes no field");
+        let mut with_zero = m.clone();
+        with_zero.insert(f::RN_MIN_BURN, Value::Uint(0));
+        assert!(RentalNotice::from_value(Value::Map(with_zero)).is_err(), "a written zero is refused");
+    }
+
     fn a_car() -> RentalNotice {
         RentalNotice {
             version: 2,
@@ -2870,6 +2898,7 @@ mod rental_tests {
             subtype: Some(1),
             features: vec!["child seat".into(), "roof box".into()],
             quantity: 1,
+            min_burn_pxmr: 0,
             thumb: None, gallery_share: None, gallery_digest: None,
         }
     }
@@ -2893,6 +2922,7 @@ mod rental_tests {
             subtype: Some(2),
             features: vec!["wifi".into()],
             quantity: 1,
+            min_burn_pxmr: 0,
             thumb: None, gallery_share: None, gallery_digest: None,
         }
     }

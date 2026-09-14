@@ -432,4 +432,9 @@
     <string name="desk_vouches_sent">Ai biết bạn, đã cho họ xem</string>
     <string name="desk_vouches_none_known">Họ đã cho xem ai biết họ; không ai trong số đó là liên hệ của bạn</string>
     <string name="desk_known_by_one">%1$s biết họ</string>
+    <string name="desk_min_burn_label">Mức đốt tối thiểu cho người mua (XMR)</string>
+    <string name="desk_min_burn_hint">Để trống nếu không yêu cầu gì. Người mua thấy nó trước khi cam kết; ứng dụng của họ sẽ cảnh báo nếu danh tính của họ đốt ít hơn.</string>
+    <string name="desk_min_burn_x">Người bán yêu cầu người mua đã đốt ít nhất %1$s</string>
+    <string name="desk_min_burn_short">Danh tính này đã đốt %1$s, ít hơn yêu cầu. Họ có thể không giao dịch với bạn.</string>
+    <string name="desk_min_burn_none">Danh tính này chưa đốt gì. Họ có thể không giao dịch với bạn.</string>
 </resources>

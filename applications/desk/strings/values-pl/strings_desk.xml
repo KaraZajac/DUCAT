@@ -444,4 +444,9 @@
     <string name="desk_vouches_sent">Kto cię zna, pokazane im</string>
     <string name="desk_vouches_none_known">Pokazali, kto ich zna; nikt z nich nie jest twoim kontaktem</string>
     <string name="desk_known_by_one">%1$s ich zna</string>
+    <string name="desk_min_burn_label">Minimalne spalenie dla kupujących (XMR)</string>
+    <string name="desk_min_burn_hint">Zostaw puste, by nie wymagać niczego. Kupujący widzą to, zanim się zobowiążą; ich klient ostrzega, jeśli ich nazwa spaliła mniej.</string>
+    <string name="desk_min_burn_x">Sprzedający wymaga, by kupujący spalili co najmniej %1$s</string>
+    <string name="desk_min_burn_short">Ta persona spaliła %1$s, mniej niż wymagają. Mogą nie chcieć z tobą handlować.</string>
+    <string name="desk_min_burn_none">Ta persona nie spaliła jeszcze niczego. Mogą nie chcieć z tobą handlować.</string>
 </resources>

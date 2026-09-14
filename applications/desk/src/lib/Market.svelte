@@ -298,7 +298,7 @@
   function newDraft(k: number) {
     editingId = null;
     postNote = null;
-    editing = { id: null, kind: k, title: "", area: "", cell: cell || "", price_text: "", price_is_fiat: true, specs: {}, private_details: "", description: "", quantity: 1 };
+    editing = { id: null, kind: k, title: "", area: "", cell: cell || "", price_text: "", price_is_fiat: true, specs: {}, private_details: "", description: "", quantity: 1, min_burn_pxmr: 0 };
   }
 
   function editListing(l: ListingRow) {
@@ -307,7 +307,7 @@
     editing = {
       id: l.id, kind: l.kind, title: l.title, area: l.area, cell: l.cell,
       price_text: l.price_typed ?? (l.price_pxmr / 1e12).toString(), price_is_fiat: !!l.price_typed,
-      specs: { ...l.specs }, private_details: l.private_details, description: l.description, quantity: l.quantity,
+      specs: { ...l.specs }, private_details: l.private_details, description: l.description, quantity: l.quantity, min_burn_pxmr: l.min_burn_pxmr,
     };
   }
 
@@ -414,6 +414,7 @@
           {/if}
           <div class="meta">{openFound.kind_name} · {openFound.area}{openFound.cell ? ` · ${openFound.cell}` : ""} · {t("desk_until", fmtTime(openFound.expiry))}{openFound.quantity > 1 ? ` · ${t("rent_n_available", openFound.quantity)}` : ""}</div>
           {#if openFound.deposit_pxmr}<div class="meta">{t("desk_deposit_x", fmtXmr(openFound.deposit_pxmr))}</div>{/if}
+          {#if openFound.min_burn_pxmr}<div class="meta">{t("desk_min_burn_x", fmtXmr(openFound.min_burn_pxmr))}</div>{#if !openFound.mine && trust && (trust.my_burn_pxmr ?? 0) < openFound.min_burn_pxmr}<p class="note warn-text">{trust.my_burn_pxmr ? t("desk_min_burn_short", fmtXmr(trust.my_burn_pxmr)) : t("desk_min_burn_none")}</p>{/if}{/if}
           <div class="actions">
             {#if !openFound.mine}<button class="btn primary" disabled={asking} onclick={ask}>{asking ? t("desk_asking") : t("rent_ask_about_it")}</button>{:else}<span class="meta">{t("desk_this_is_yours")}</span>{/if}
             {#if openFound.gallery && !bundle && !bundleBusy}<button class="btn" onclick={() => loadBundle(openFound!)}>{bundleErr ? t("rent_search_retry") : t("desk_see_pictures")}</button>{/if}
@@ -540,6 +541,7 @@
           <select class="input narrow" bind:value={editing.price_is_fiat}><option value={true}>{lc(t("desk_in_your_currency"))}</option><option value={false}>{t("desk_in_xmr")}</option></select>
         </div>
         {#if editing.kind !== 5}<div class="field"><label for="q">{t("rent_how_many")}</label><input id="q" class="input narrow" type="number" min="1" max="999" bind:value={editing.quantity} /></div>{/if}
+        <div class="field"><label for="mb">{t("desk_min_burn_label")}</label><input id="mb" class="input narrow" placeholder="0" value={editing.min_burn_pxmr ? (editing.min_burn_pxmr / 1e12).toString() : ""} oninput={(e) => { const n = Number((e.currentTarget as HTMLInputElement).value.trim()); editing!.min_burn_pxmr = Number.isFinite(n) && n > 0 ? Math.round(n * 1e12) : 0; }} /><span class="meta">{t("desk_min_burn_hint")}</span></div>
         {#if editing.kind === 2}
           <div class="field"><span class="meta">{t("desk_kind_vehicle")}</span>
             <input class="input narrow" placeholder={t("rent_make")} value={String(editing.specs.make ?? "")} oninput={(e) => (editing!.specs.make = (e.target as HTMLInputElement).value)} />

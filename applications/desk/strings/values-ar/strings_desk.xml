@@ -452,4 +452,9 @@
     <string name="desk_vouches_sent">من يعرفك، عُرض عليهم</string>
     <string name="desk_vouches_none_known">عرضوا من يعرفهم؛ لا أحد منهم ضمن جهات اتصالك</string>
     <string name="desk_known_by_one">%1$s يعرفهم</string>
+    <string name="desk_min_burn_label">الحد الأدنى للحرق للمشترين (XMR)</string>
+    <string name="desk_min_burn_hint">اتركه فارغًا لعدم طلب شيء. يراه المشترون قبل الالتزام؛ ويحذرهم تطبيقهم إن كان اسمهم قد حرق أقل.</string>
+    <string name="desk_min_burn_x">يطلب البائع أن يكون المشترون قد حرقوا %1$s على الأقل</string>
+    <string name="desk_min_burn_short">حرقت هذه الشخصية %1$s، أقل مما يطلبون. قد لا يتعاملون معك.</string>
+    <string name="desk_min_burn_none">لم تحرق هذه الشخصية شيئًا بعد. قد لا يتعاملون معك.</string>
 </resources>

@@ -163,6 +163,9 @@ pub struct Listing {
     pub price_pxmr: u64,
     #[serde(rename = "depositPxmr", default)]
     pub deposit_pxmr: u64,
+    /// §9.5: the least a buyer must have burned for this poster to deal; 0 asks nothing.
+    #[serde(rename = "minBurnPxmr", default)]
+    pub min_burn_pxmr: u64,
     #[serde(default)]
     pub specs: Map<String, Value>,
     #[serde(rename = "private", default)]
@@ -251,6 +254,7 @@ impl Listing {
             cell: Some(self.cell.clone()).filter(|c| !c.is_empty()),
             price_pxmr: self.price_pxmr,
             deposit_pxmr: self.deposit_pxmr,
+            min_burn_pxmr: self.min_burn_pxmr,
             expiry: App::now() + TTL_SECONDS,
             make: if vehicle { txt("make") } else { None },
             model: if vehicle { txt("model") } else { None },
@@ -287,6 +291,8 @@ pub struct Found {
     pub price: u64,
     #[serde(default)]
     pub deposit: u64,
+    #[serde(default)]
+    pub min_burn: u64,
     pub expiry: u64,
     #[serde(default)]
     pub specs: Map<String, Value>,
@@ -336,6 +342,7 @@ impl From<RentalInfo> for Found {
             cell: r.cell,
             price: r.price_pxmr,
             deposit: r.deposit_pxmr,
+            min_burn: r.min_burn_pxmr,
             expiry: r.expiry,
             specs,
             features: r.features,
@@ -522,7 +529,7 @@ impl App {
 
     /// A fresh draft. `lat_e7`/`lon_e7` place it on the map; a desk with no
     /// GPS takes them typed, or a geohash cell directly.
-    pub fn draft_listing(&self, kind: u32, title: &str, area: &str, description: &str, price_pxmr: u64, cell: &str, specs: Map<String, Value>, private_details: &str, price_typed: Option<&str>, price_currency: Option<&str>, quantity: u64, thumb: Option<&[u8]>) -> Result<Listing, Error> {
+    pub fn draft_listing(&self, kind: u32, title: &str, area: &str, description: &str, price_pxmr: u64, cell: &str, specs: Map<String, Value>, private_details: &str, price_typed: Option<&str>, price_currency: Option<&str>, quantity: u64, min_burn_pxmr: u64, thumb: Option<&[u8]>) -> Result<Listing, Error> {
         let clean = |s: &str| ducat_mobile::contacts::clean_display_text(s.trim().to_string());
         let id = new_id();
         let title = clean(title);
@@ -539,6 +546,7 @@ impl App {
             cell: cell.trim().to_lowercase(),
             price_pxmr,
             deposit_pxmr: stake_for(deal_for(kind), price_pxmr),
+            min_burn_pxmr,
             specs,
             private_details: private_details.to_string(),
             quantity: quantity.clamp(1, MAX_QUANTITY),
@@ -1475,7 +1483,7 @@ mod tests {
         specs.insert("make".into(), Value::from("Volvo"));
         specs.insert("rooms".into(), Value::from(3));
         specs.insert("features".into(), serde_json::json!(["roof rack"]));
-        let l = app.draft_listing(KIND_VEHICLE, "  An estate ", "Uptown", "", 5_000_000_000_000, "DQCHE", specs, "keys under the mat", Some("500"), Some("USD"), 2, None).unwrap();
+        let l = app.draft_listing(KIND_VEHICLE, "  An estate ", "Uptown", "", 5_000_000_000_000, "DQCHE", specs, "keys under the mat", Some("500"), Some("USD"), 2, 0, None).unwrap();
         assert_eq!(l.cell, "dqche");
         assert_eq!(l.deposit_pxmr, stake_for(Deal::Vehicle, 5_000_000_000_000));
         let n = l.public_notice("ducat:card/x");
@@ -1516,7 +1524,7 @@ mod tests {
         specs.insert("make".into(), Value::from("Anglepoise"));
         specs.insert("era".into(), Value::from("1950s"));
         let text = "A **brass** lamp.\n\n![the base](pictures/00.jpg)";
-        let l = app.draft_listing(KIND_SALE, "Brass lamp", "Uptown", text, 5_000_000_000_000, "dqche", specs, "", None, None, 1, None).unwrap();
+        let l = app.draft_listing(KIND_SALE, "Brass lamp", "Uptown", text, 5_000_000_000_000, "dqche", specs, "", None, None, 1, 0, None).unwrap();
         app.put_draft(l.clone()).unwrap();
         // Two pictures and a file, the way a person adds them.
         let src = dir.join("src");
@@ -1568,8 +1576,8 @@ mod tests {
         assert!(l.files.is_empty() && app.attachments(&l.id).is_empty());
         assert_ne!(app.bundle_fingerprint(&l), fp);
         // A description that would walk a reader out of the room is refused at the door.
-        assert!(app.draft_listing(KIND_SALE, "x", "", "See [this](https://example.com)", 1, "dqche", Map::new(), "", None, None, 1, None).is_err());
-        assert!(app.draft_listing(KIND_SALE, "x", "", &"y".repeat(MAX_DESCRIPTION + 1), 1, "dqche", Map::new(), "", None, None, 1, None).is_err());
+        assert!(app.draft_listing(KIND_SALE, "x", "", "See [this](https://example.com)", 1, "dqche", Map::new(), "", None, None, 1, 0, None).is_err());
+        assert!(app.draft_listing(KIND_SALE, "x", "", &"y".repeat(MAX_DESCRIPTION + 1), 1, "dqche", Map::new(), "", None, None, 1, 0, None).is_err());
         let _ = std::fs::remove_dir_all(&dir);
     }
 }

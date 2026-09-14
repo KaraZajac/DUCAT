@@ -222,7 +222,7 @@ export interface NoteRow {
 
 export type BurnRow = { txid_hex: string; amount_pxmr: number; purpose: string; height: number; ready: boolean; envelope_hex: string | null; made_at: number };
 export type BurnView = { address: string; floor_pxmr: number; persona_hex: string; persona_name: string; rows: BurnRow[] };
-export type TrustView = { burn_pxmr: number | null; burn_height: number | null; receipts: number; receipts_weighted: number; rating_x10: number; known_by: string[] };
+export type TrustView = { burn_pxmr: number | null; burn_height: number | null; receipts: number; receipts_weighted: number; rating_x10: number; known_by: string[]; my_burn_pxmr: number | null };
 export type VerifiedBurnRow = { persona_hex: string; amount_pxmr: number; height: number; purpose: string };
 export interface SentRow {
   txid_hex: string;
@@ -396,6 +396,7 @@ export interface ListingRow {
   cell: string;
   price_pxmr: number;
   deposit_pxmr: number;
+  min_burn_pxmr: number;
   specs: Record<string, unknown>;
   private_details: string;
   quantity: number;
@@ -424,6 +425,7 @@ export interface ListingDraft {
   private_details: string;
   description: string;
   quantity: number;
+  min_burn_pxmr: number;
 }
 
 // §16.18.3's bundle: the document behind a notice, and what landed with it.
@@ -454,6 +456,7 @@ export interface FoundRow {
   cell: string | null;
   price_pxmr: number;
   deposit_pxmr: number;
+  min_burn_pxmr: number;
   expiry: number;
   specs: Record<string, unknown>;
   features: string[];

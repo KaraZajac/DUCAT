@@ -432,4 +432,9 @@
     <string name="desk_vouches_sent">ใครรู้จักคุณ แสดงให้พวกเขาเห็น</string>
     <string name="desk_vouches_none_known">พวกเขาแสดงว่าใครรู้จักพวกเขา แต่ไม่มีใครเป็นผู้ติดต่อของคุณ</string>
     <string name="desk_known_by_one">%1$s รู้จักพวกเขา</string>
+    <string name="desk_min_burn_label">การเผาขั้นต่ำสำหรับผู้ซื้อ (XMR)</string>
+    <string name="desk_min_burn_hint">เว้นว่างไว้เพื่อไม่ขออะไร ผู้ซื้อจะเห็นก่อนตัดสินใจ และแอปของพวกเขาจะเตือนหากชื่อของพวกเขาเผาน้อยกว่านี้</string>
+    <string name="desk_min_burn_x">ผู้ขายขอให้ผู้ซื้อเผาอย่างน้อย %1$s</string>
+    <string name="desk_min_burn_short">ตัวตนนี้เผาไป %1$s น้อยกว่าที่ขอ พวกเขาอาจไม่ทำธุรกรรมกับคุณ</string>
+    <string name="desk_min_burn_none">ตัวตนนี้ยังไม่ได้เผาอะไรเลย พวกเขาอาจไม่ทำธุรกรรมกับคุณ</string>
 </resources>

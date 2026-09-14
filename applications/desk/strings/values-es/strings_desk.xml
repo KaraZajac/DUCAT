@@ -436,4 +436,9 @@
     <string name="desk_vouches_sent">Quién te conoce, mostrado a ellos</string>
     <string name="desk_vouches_none_known">Mostraron quién los conoce; ninguno es contacto tuyo</string>
     <string name="desk_known_by_one">%1$s los conoce</string>
+    <string name="desk_min_burn_label">Quema mínima para compradores (XMR)</string>
+    <string name="desk_min_burn_hint">Déjalo vacío para no pedir nada. Los compradores lo ven antes de comprometerse; su cliente les avisa si su nombre ha quemado menos.</string>
+    <string name="desk_min_burn_x">El vendedor pide que los compradores hayan quemado al menos %1$s</string>
+    <string name="desk_min_burn_short">Esta persona ha quemado %1$s, menos de lo que piden. Puede que no traten contigo.</string>
+    <string name="desk_min_burn_none">Esta persona aún no ha quemado nada. Puede que no traten contigo.</string>
 </resources>

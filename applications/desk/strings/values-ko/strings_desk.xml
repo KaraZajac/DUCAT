@@ -432,4 +432,9 @@
     <string name="desk_vouches_sent">당신을 아는 사람들, 상대에게 보임</string>
     <string name="desk_vouches_none_known">상대가 아는 사람들을 보였지만, 당신의 연락처에는 없습니다</string>
     <string name="desk_known_by_one">%1$s가 아는 사람</string>
+    <string name="desk_min_burn_label">구매자에게 요구하는 최소 소각 (XMR)</string>
+    <string name="desk_min_burn_hint">비워 두면 아무것도 요구하지 않습니다. 구매자는 약속하기 전에 이를 보며, 이름의 소각이 더 적으면 구매자 측 앱이 경고합니다.</string>
+    <string name="desk_min_burn_x">판매자는 구매자가 최소 %1$s를 소각했기를 요구합니다</string>
+    <string name="desk_min_burn_short">이 페르소나는 %1$s를 소각했으며 요구액에 못 미칩니다. 거래를 거절당할 수 있습니다.</string>
+    <string name="desk_min_burn_none">이 페르소나는 아직 아무것도 소각하지 않았습니다. 거래를 거절당할 수 있습니다.</string>
 </resources>

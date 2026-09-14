@@ -432,4 +432,9 @@
     <string name="desk_vouches_sent">认识你的人，已出示给对方</string>
     <string name="desk_vouches_none_known">对方出示了认识他们的人；其中没有你的联系人</string>
     <string name="desk_known_by_one">%1$s认识对方</string>
+    <string name="desk_min_burn_label">买家的最低销毁额（XMR）</string>
+    <string name="desk_min_burn_hint">留空表示不作要求。买家在承诺前会看到它；若其身份销毁得更少，买家的客户端会发出警告。</string>
+    <string name="desk_min_burn_x">卖家要求买家至少已销毁 %1$s</string>
+    <string name="desk_min_burn_short">此身份已销毁 %1$s，低于对方要求。对方可能不与你交易。</string>
+    <string name="desk_min_burn_none">此身份尚未销毁任何金额。对方可能不与你交易。</string>
 </resources>

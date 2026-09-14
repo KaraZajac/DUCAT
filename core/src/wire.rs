@@ -407,6 +407,9 @@ pub mod f {
     /// Refused on a skill — an hourly rate for one person's time cannot be
     /// stocked, and "3 available" against it would be a lie.
     pub const RN_QUANTITY: u64 = 248;
+    /// §16.18 / §9.5: the least a buyer's persona must have burned, pXMR, for
+    /// the poster to deal. Absent means the poster asks nothing.
+    pub const RN_MIN_BURN: u64 = 320;
 
     // What a notice on a public board costs and who wrote it (see board.rs).
     // A stand's write key is the cell name hashed, so these do not make a slot

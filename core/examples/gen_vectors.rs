@@ -2674,6 +2674,7 @@ fn contact_cases() -> Vec<J> {
             subtype: Some(1),
             features: vec!["child seat".into()],
             quantity: 1,
+            min_burn_pxmr: 0,
             thumb: None, gallery_share: None, gallery_digest: None,
         };
         let room = RentalNotice {
@@ -2786,6 +2787,9 @@ fn contact_cases() -> Vec<J> {
 
         // The stall with six of something. Almost every listing is one thing,
         // so one is the *absent* case and the only spelling of it.
+        lcase("listing_with_a_minimum",
+            "A seller may ask that buyers have burned at least this much (§9.5); a buyer's client must show it before the buyer commits. One field, in piconero.",
+            &RentalNotice { min_burn_pxmr: 10_000_000_000, ..room.clone() }, None);
         let six = RentalNotice {
             kind: 4,
             title: "Sea kayak, single".into(),
@@ -2795,6 +2799,7 @@ fn contact_cases() -> Vec<J> {
             make: None, model: None, year: None, gearbox: None, fuel: None,
             seats: None, color: None, trim: None,
             quantity: 6,
+            min_burn_pxmr: 0,
             ..car.clone()
         };
         lcase("listing_quantity_six",

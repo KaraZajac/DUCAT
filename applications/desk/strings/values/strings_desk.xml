@@ -442,4 +442,9 @@
     <string name="desk_vouches_sent">Who knows you, shown to them</string>
     <string name="desk_vouches_none_known">They showed who knows them; none of them are your contacts</string>
     <string name="desk_known_by_one">%1$s knows them</string>
+    <string name="desk_min_burn_label">Minimum burn for buyers (XMR)</string>
+    <string name="desk_min_burn_hint">Leave empty to ask nothing. Buyers see it before they commit; their client warns them if their name has burned less.</string>
+    <string name="desk_min_burn_x">The seller asks that buyers have burned at least %1$s</string>
+    <string name="desk_min_burn_short">This persona has burned %1$s, less than they ask. They may not deal with you.</string>
+    <string name="desk_min_burn_none">This persona has burned nothing yet. They may not deal with you.</string>
 </resources>

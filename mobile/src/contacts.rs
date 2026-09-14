@@ -1649,6 +1649,9 @@ pub struct RentalInfo {
     pub features: Vec<String>,
     /// How many the poster has. One unless they said otherwise.
     pub quantity: u64,
+    /// The least a buyer must have burned (§9.5), pXMR; 0 asks nothing.
+    #[uniffi(default = 0)]
+    pub min_burn_pxmr: u64,
     /// §16.18's picture: one small image inline, and the swarm share that
     /// carries the rest. The pair travels whole or not at all.
     #[uniffi(default = None)]
@@ -1672,7 +1675,7 @@ fn rental_from_core(n: ducat_core::contact::RentalNotice) -> RentalInfo {
         make: n.make, model: n.model, year: n.year, gearbox: n.gearbox,
         fuel: n.fuel, seats: n.seats, color: n.color, trim: n.trim,
         rooms: n.rooms, sleeps: n.sleeps, size_m2: n.size_m2,
-        subtype: n.subtype, features: n.features, quantity: n.quantity,
+        subtype: n.subtype, features: n.features, quantity: n.quantity, min_burn_pxmr: n.min_burn_pxmr,
         thumb: n.thumb,
         gallery_share: n.gallery_share,
         gallery_digest: n
@@ -1718,6 +1721,7 @@ pub fn rental_encode(
         // Zero would be a listing of nothing, and the UI has no way to mean
         // it; a caller that leaves it unset means one.
         quantity: info.quantity.max(1),
+        min_burn_pxmr: info.min_burn_pxmr,
         thumb: info.thumb,
         gallery_share: info.gallery_share,
         gallery_digest: match &info.gallery_digest {

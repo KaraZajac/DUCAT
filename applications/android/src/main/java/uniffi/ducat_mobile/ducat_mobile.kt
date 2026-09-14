@@ -6232,6 +6232,10 @@ data class RentalInfo (
      */
     var `quantity`: kotlin.ULong, 
     /**
+     * The least a buyer must have burned (§9.5), pXMR; 0 asks nothing.
+     */
+    var `minBurnPxmr`: kotlin.ULong = 0uL, 
+    /**
      * §16.18's picture: one small image inline, and the swarm share that
      * carries the rest. The pair travels whole or not at all.
      */
@@ -6274,6 +6278,7 @@ public object FfiConverterTypeRentalInfo: FfiConverterRustBuffer<RentalInfo> {
             FfiConverterOptionalULong.read(buf),
             FfiConverterSequenceString.read(buf),
             FfiConverterULong.read(buf),
+            FfiConverterULong.read(buf),
             FfiConverterOptionalByteArray.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
@@ -6306,6 +6311,7 @@ public object FfiConverterTypeRentalInfo: FfiConverterRustBuffer<RentalInfo> {
             FfiConverterOptionalULong.allocationSize(value.`subtype`) +
             FfiConverterSequenceString.allocationSize(value.`features`) +
             FfiConverterULong.allocationSize(value.`quantity`) +
+            FfiConverterULong.allocationSize(value.`minBurnPxmr`) +
             FfiConverterOptionalByteArray.allocationSize(value.`thumb`) +
             FfiConverterOptionalString.allocationSize(value.`galleryShare`) +
             FfiConverterOptionalString.allocationSize(value.`galleryDigest`)
@@ -6337,6 +6343,7 @@ public object FfiConverterTypeRentalInfo: FfiConverterRustBuffer<RentalInfo> {
             FfiConverterOptionalULong.write(value.`subtype`, buf)
             FfiConverterSequenceString.write(value.`features`, buf)
             FfiConverterULong.write(value.`quantity`, buf)
+            FfiConverterULong.write(value.`minBurnPxmr`, buf)
             FfiConverterOptionalByteArray.write(value.`thumb`, buf)
             FfiConverterOptionalString.write(value.`galleryShare`, buf)
             FfiConverterOptionalString.write(value.`galleryDigest`, buf)
