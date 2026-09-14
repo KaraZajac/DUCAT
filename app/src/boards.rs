@@ -12,7 +12,7 @@ use std::collections::HashMap;
 use std::sync::Mutex;
 
 use ducat_mobile::contacts::{standEpoch, standEpochName, standShardName};
-use ducat_mobile::monero::monero_block_ref;
+use ducat_mobile::monero::{monero_block_ref, monero_second_opinion_nodes};
 
 use crate::contacts::{now_ms, CONTACTS};
 use crate::{log, App};
@@ -173,12 +173,37 @@ impl App {
         if got.hash_hex.is_empty() {
             return Verdict::Unknown;
         }
-        remember(height, &got.hash_hex);
         if got.hash_hex.eq_ignore_ascii_case(hash_hex) {
-            Verdict::Confirmed
-        } else {
+            remember(height, &got.hash_hex);
+            return Verdict::Confirmed;
+        }
+        // Discarding somebody's notice is the expensive answer, and one node
+        // is one node's word (§17.5's three answers). A second node has to
+        // agree before the notice goes; anything else — a different hash, an
+        // unreachable node, no answer — is *not yet*, never *no*.
+        let mut seconded = false;
+        for n in monero_second_opinion_nodes(self.last_good_node(), self.monero_own_url()) {
+            let Ok(other) = monero_block_ref(n.url.clone(), height) else { continue };
+            if other.hash_hex.is_empty() {
+                continue;
+            }
+            if other.hash_hex.eq_ignore_ascii_case(hash_hex) {
+                // The node in use is the odd one out: believe the notice and
+                // keep nothing, since this desk cannot tell which is lying.
+                log::warn(TAG, format!("the node in use disagrees with {} about block {height}", n.url));
+                return Verdict::Confirmed;
+            }
+            if other.hash_hex.eq_ignore_ascii_case(&got.hash_hex) {
+                seconded = true;
+                break;
+            }
+        }
+        if seconded {
+            remember(height, &got.hash_hex);
             log::warn(TAG, format!("a notice claims block {height} with a hash that block does not have"));
             Verdict::Wrong
+        } else {
+            Verdict::Unknown
         }
     }
 }

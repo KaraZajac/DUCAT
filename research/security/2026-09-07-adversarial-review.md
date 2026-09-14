@@ -25,7 +25,7 @@ the fix landed), **open**, **deferred** (design decision recorded, not scheduled
 | W7 | Medium (S) | SafeImage.kt, §16.18.3 | Board thumbnails are decoded by the platform decoder automatically | **deferred**: decode board images in Rust and hand RGBA to the UI |
 | W8 | Low | core/src/board.rs | A card can be lifted into a foreign notice: the poster key is unrelated to the card inside | **deferred** |
 | W9 | Low | core/src/hpke.rs | Sealed-message ceiling (8 KiB) unspecified and below what a legal message may carry (255-member roster) | **fixed 2026-09-14** — ceiling 16 KiB in code and stated in §16.10 |
-| W10 | Low | core/src/board.rs, Beacons.kt | Beacon freshness trusts one Monero node | **open** |
+| W10 | Low | core/src/board.rs, Beacons.kt | Beacon freshness trusts one Monero node | **fixed 2026-09-14** — a beacon mismatch is `Unknown` until a second node seconds it; if the second node backs the notice, the node in use is the odd one out and the notice stands |
 | W11 | Low | core/src/backup.rs, BackupSettings.kt | Export accepts an 8-character passphrase such as "password" | **fixed 2026-09-14** — core's export refuses `Weak`; both clients disable the button on the same grade |
 | W12 | Low | §16.18 | HAIL_NOTICE version drift: spec says 1, code and vectors require 2 | **fixed 2026-09-14** — §16.18 says 2 |
 | W13 | Low | core/src/contact.rs | `RentalNotice.features` bypasses the display-hazard filter | **fixed 2026-09-14** — features pass `display_hazard`; vector `listing_feature_with_bidi`; checker agrees |

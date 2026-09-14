@@ -273,8 +273,39 @@ object Beacons {
         val got = runCatching { uniffi.ducat_mobile.moneroBlockRef(url, height.toULong()) }
             .getOrNull() ?: return Verdict.UNKNOWN
         if (got.hashHex.isBlank()) return Verdict.UNKNOWN
+        if (got.hashHex.equals(hashHex, true)) {
+            synchronized(this) { remember(height, got.hashHex) }
+            return Verdict.CONFIRMED
+        }
+        // Discarding somebody's notice is the expensive answer, and one node
+        // is one node's word (§17.5's three answers). A second node has to
+        // agree before the notice goes; anything else — a different hash, an
+        // unreachable node, no answer — is *not yet*, never *no*.
+        val store = NodeStore(context)
+        val others = runCatching {
+            uniffi.ducat_mobile.moneroSecondOpinionNodes(
+                store.lastGood()?.trim()?.ifBlank { null },
+                store.ownUrl()?.trim()?.ifBlank { null },
+            ).map { it.url }
+        }.getOrDefault(emptyList())
+        var seconded = false
+        for (other in others) {
+            val theirs = runCatching { uniffi.ducat_mobile.moneroBlockRef(other, height.toULong()) }
+                .getOrNull() ?: continue
+            if (theirs.hashHex.isBlank()) continue
+            if (theirs.hashHex.equals(hashHex, true)) {
+                // The node in use is the odd one out: believe the notice and
+                // keep nothing, since this phone cannot tell which is lying.
+                DucatLog.w(TAG, "the node in use disagrees with $other about block $height")
+                return Verdict.CONFIRMED
+            }
+            if (theirs.hashHex.equals(got.hashHex, true)) {
+                seconded = true
+                break
+            }
+        }
+        if (!seconded) return Verdict.UNKNOWN
         synchronized(this) { remember(height, got.hashHex) }
-        if (got.hashHex.equals(hashHex, true)) return Verdict.CONFIRMED
         DucatLog.w(TAG, "a notice claims block $height with a hash that block does not have")
         return Verdict.WRONG
     }
