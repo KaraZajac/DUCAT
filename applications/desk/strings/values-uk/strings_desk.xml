@@ -418,4 +418,17 @@
     <string name="desk_checking">Перевірка…</string>
     <string name="desk_burn_checked">Перевірено: спалено %1$s у блоці %2$s</string>
     <string name="desk_burn_check_failed">Не вдалося перевірити: %1$s</string>
+    <string name="desk_receipts_summary">%1$s квитанцій, %2$s від персон зі спаленням</string>
+    <string name="desk_show_my_record">Показати мою історію</string>
+    <string name="desk_show_my_record_hint">Надсилає в розмову квитанції, які інші дали цій персоні</string>
+    <string name="desk_rate_them">Оцінити</string>
+    <string name="desk_rating_note_hint">Одне речення, необов’язково</string>
+    <string name="desk_send_rating">Надіслати оцінку</string>
+    <string name="desk_rating_note">Підписана цією персоною і зважується її спаленням усюди, де читається</string>
+    <string name="desk_rating_sent">Ваша оцінка для них</string>
+    <string name="desk_rating_received">Оцінка для вас, збережена у вашій історії</string>
+    <string name="desk_record_sent">Ваша історія, показана їм</string>
+    <string name="desk_record_received">Їхня історія: прочитано %1$s квитанцій</string>
+    <string name="desk_gate_over_burn">Більше, ніж вони спалили (%1$s). Якщо вони зникнуть, їх ніщо не втримає.</string>
+    <string name="desk_gate_no_burn">Вони не спалили нічого, що ви перевірили. Якщо вони зникнуть, їх ніщо не втримає.</string>
 </resources>

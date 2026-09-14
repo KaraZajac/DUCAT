@@ -410,4 +410,17 @@
     <string name="desk_checking">जाँच हो रही है…</string>
     <string name="desk_burn_checked">जाँचा गया: ब्लॉक %2$s में %1$s जलाया</string>
     <string name="desk_burn_check_failed">जाँच नहीं हो सकी: %1$s</string>
+    <string name="desk_receipts_summary">%1$s रसीदें, %2$s जले हुए पर्सोना से</string>
+    <string name="desk_show_my_record">मेरा रिकॉर्ड दिखाएँ</string>
+    <string name="desk_show_my_record_hint">दूसरों द्वारा इस पर्सोना को दी गई रसीदें बातचीत में भेजता है</string>
+    <string name="desk_rate_them">रेट करें</string>
+    <string name="desk_rating_note_hint">एक वाक्य, वैकल्पिक</string>
+    <string name="desk_send_rating">रेटिंग भेजें</string>
+    <string name="desk_rating_note">इस पर्सोना द्वारा हस्ताक्षरित, जहाँ भी पढ़ी जाए उसके जलाने से भारित</string>
+    <string name="desk_rating_sent">उनके लिए आपकी रेटिंग</string>
+    <string name="desk_rating_received">आपके लिए एक रेटिंग, आपके रिकॉर्ड में रखी गई</string>
+    <string name="desk_record_sent">आपका रिकॉर्ड, उन्हें दिखाया</string>
+    <string name="desk_record_received">उनका रिकॉर्ड: %1$s रसीदें पढ़ी गईं</string>
+    <string name="desk_gate_over_burn">उन्होंने जितना जलाया (%1$s) उससे अधिक। अगर वे गायब हो जाएँ तो कुछ उन्हें नहीं रोकता।</string>
+    <string name="desk_gate_no_burn">उन्होंने ऐसा कुछ नहीं जलाया जिसे आपने जाँचा हो। अगर वे गायब हो जाएँ तो कुछ उन्हें नहीं रोकता।</string>
 </resources>

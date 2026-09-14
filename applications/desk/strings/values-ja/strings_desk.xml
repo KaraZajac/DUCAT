@@ -406,4 +406,17 @@
     <string name="desk_checking">確認中…</string>
     <string name="desk_burn_checked">確認済み: ブロック %2$s で %1$s をバーン</string>
     <string name="desk_burn_check_failed">確認できませんでした: %1$s</string>
+    <string name="desk_receipts_summary">受領 %1$s 件、うちバーン済みのペルソナから %2$s 件</string>
+    <string name="desk_show_my_record">実績を見せる</string>
+    <string name="desk_show_my_record_hint">このペルソナが他者から受け取った受領を会話に送ります</string>
+    <string name="desk_rate_them">評価する</string>
+    <string name="desk_rating_note_hint">一文、任意</string>
+    <string name="desk_send_rating">評価を送る</string>
+    <string name="desk_rating_note">このペルソナが署名し、読まれる先ではそのバーンで重み付けされます</string>
+    <string name="desk_rating_sent">あなたからの評価</string>
+    <string name="desk_rating_received">あなたへの評価。実績に保存されました</string>
+    <string name="desk_record_sent">あなたの実績を提示しました</string>
+    <string name="desk_record_received">相手の実績: 受領 %1$s 件を確認</string>
+    <string name="desk_gate_over_burn">相手のバーン額 (%1$s) を超えています。相手が消えても、何も引き留めません。</string>
+    <string name="desk_gate_no_burn">あなたが確認したバーンはありません。相手が消えても、何も引き留めません。</string>
 </resources>

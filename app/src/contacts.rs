@@ -744,6 +744,23 @@ impl App {
         new_in_seq: u64,
         new_prev_link: Option<Vec<u8>>,
     ) -> Result<(), Error> {
+        // §9.2/§9.5: a receipt about us, or a record shown to us, rides a
+        // text body; read it once the row is durable.
+        let trust_body = (!row.outgoing && row.kind == 0).then(|| row.body.clone());
+        self.append_and_advance_inner(persona_hex, row, new_in_seq, new_prev_link)?;
+        if let Some(b) = trust_body {
+            self.ingest_trust_links(persona_hex, &b);
+        }
+        Ok(())
+    }
+
+    fn append_and_advance_inner(
+        &self,
+        persona_hex: &str,
+        row: StoredMessage,
+        new_in_seq: u64,
+        new_prev_link: Option<Vec<u8>>,
+    ) -> Result<(), Error> {
         self.contacts_store().update(|m| {
             let mut thread = read_thread(m, persona_hex);
             let surfaces = row.surfaces();

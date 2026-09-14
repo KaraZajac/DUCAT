@@ -410,4 +410,17 @@
     <string name="desk_checking">Prüfe…</string>
     <string name="desk_burn_checked">Geprüft: %1$s verbrannt in Block %2$s</string>
     <string name="desk_burn_check_failed">Konnte nicht geprüft werden: %1$s</string>
+    <string name="desk_receipts_summary">%1$s Belege, %2$s von Personas mit Burn</string>
+    <string name="desk_show_my_record">Meine Belege zeigen</string>
+    <string name="desk_show_my_record_hint">Schickt die Belege, die andere dieser Persona gaben, in die Unterhaltung</string>
+    <string name="desk_rate_them">Bewerten</string>
+    <string name="desk_rating_note_hint">Ein Satz, optional</string>
+    <string name="desk_send_rating">Bewertung senden</string>
+    <string name="desk_rating_note">Von dieser Persona signiert und überall, wo es gelesen wird, nach ihrem Burn gewichtet</string>
+    <string name="desk_rating_sent">Deine Bewertung für sie</string>
+    <string name="desk_rating_received">Eine Bewertung für dich, in deinen Belegen aufbewahrt</string>
+    <string name="desk_record_sent">Deine Belege, ihnen gezeigt</string>
+    <string name="desk_record_received">Ihre Belege: %1$s gelesen</string>
+    <string name="desk_gate_over_burn">Mehr, als sie verbrannt haben (%1$s). Verschwinden sie, hält sie nichts.</string>
+    <string name="desk_gate_no_burn">Sie haben nichts verbrannt, das du geprüft hast. Verschwinden sie, hält sie nichts.</string>
 </resources>

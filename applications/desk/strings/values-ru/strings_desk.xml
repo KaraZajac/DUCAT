@@ -418,4 +418,17 @@
     <string name="desk_checking">Проверка…</string>
     <string name="desk_burn_checked">Проверено: сожжено %1$s в блоке %2$s</string>
     <string name="desk_burn_check_failed">Не удалось проверить: %1$s</string>
+    <string name="desk_receipts_summary">%1$s квитанций, %2$s от персон со сжиганием</string>
+    <string name="desk_show_my_record">Показать мою историю</string>
+    <string name="desk_show_my_record_hint">Отправляет в разговор квитанции, которые другие дали этой персоне</string>
+    <string name="desk_rate_them">Оценить</string>
+    <string name="desk_rating_note_hint">Одно предложение, необязательно</string>
+    <string name="desk_send_rating">Отправить оценку</string>
+    <string name="desk_rating_note">Подписана этой персоной и взвешивается её сжиганием везде, где читается</string>
+    <string name="desk_rating_sent">Ваша оценка для них</string>
+    <string name="desk_rating_received">Оценка для вас, сохранена в вашей истории</string>
+    <string name="desk_record_sent">Ваша история, показана им</string>
+    <string name="desk_record_received">Их история: прочитано %1$s квитанций</string>
+    <string name="desk_gate_over_burn">Больше, чем они сожгли (%1$s). Если они исчезнут, их ничто не удержит.</string>
+    <string name="desk_gate_no_burn">Они не сожгли ничего, что вы проверили. Если они исчезнут, их ничто не удержит.</string>
 </resources>

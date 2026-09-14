@@ -410,4 +410,17 @@
     <string name="desk_checking">Vérification…</string>
     <string name="desk_burn_checked">Vérifié : %1$s brûlés dans le bloc %2$s</string>
     <string name="desk_burn_check_failed">Impossible de vérifier : %1$s</string>
+    <string name="desk_receipts_summary">%1$s reçus, dont %2$s de personas ayant brûlé</string>
+    <string name="desk_show_my_record">Montrer mon dossier</string>
+    <string name="desk_show_my_record_hint">Envoie dans la conversation les reçus que d’autres ont donnés à ce persona</string>
+    <string name="desk_rate_them">Noter</string>
+    <string name="desk_rating_note_hint">Une phrase, facultatif</string>
+    <string name="desk_send_rating">Envoyer la note</string>
+    <string name="desk_rating_note">Signée par ce persona, pondérée par sa preuve partout où elle est lue</string>
+    <string name="desk_rating_sent">Votre note pour eux</string>
+    <string name="desk_rating_received">Une note pour vous, gardée dans votre dossier</string>
+    <string name="desk_record_sent">Votre dossier, montré</string>
+    <string name="desk_record_received">Leur dossier : %1$s reçus lus</string>
+    <string name="desk_gate_over_burn">Plus que ce qu’ils ont brûlé (%1$s). S’ils disparaissent, rien ne les retient.</string>
+    <string name="desk_gate_no_burn">Ils n’ont rien brûlé que vous ayez vérifié. S’ils disparaissent, rien ne les retient.</string>
 </resources>

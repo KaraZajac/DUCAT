@@ -410,4 +410,17 @@
     <string name="desk_checking">A verificar…</string>
     <string name="desk_burn_checked">Verificado: queimou %1$s no bloco %2$s</string>
     <string name="desk_burn_check_failed">Não foi possível verificar: %1$s</string>
+    <string name="desk_receipts_summary">%1$s recibos, %2$s de personas com queima</string>
+    <string name="desk_show_my_record">Mostrar o meu registo</string>
+    <string name="desk_show_my_record_hint">Envia para a conversa os recibos que outros deram a esta persona</string>
+    <string name="desk_rate_them">Avaliar</string>
+    <string name="desk_rating_note_hint">Uma frase, opcional</string>
+    <string name="desk_send_rating">Enviar a avaliação</string>
+    <string name="desk_rating_note">Assinada por esta persona, ponderada pela sua queima onde quer que seja lida</string>
+    <string name="desk_rating_sent">A sua avaliação para eles</string>
+    <string name="desk_rating_received">Uma avaliação para si, guardada no seu registo</string>
+    <string name="desk_record_sent">O seu registo, mostrado a eles</string>
+    <string name="desk_record_received">O registo deles: %1$s recibos lidos</string>
+    <string name="desk_gate_over_burn">Mais do que queimaram (%1$s). Se desaparecerem, nada os segura.</string>
+    <string name="desk_gate_no_burn">Não queimaram nada que tenha verificado. Se desaparecerem, nada os segura.</string>
 </resources>

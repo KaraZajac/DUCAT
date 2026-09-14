@@ -406,4 +406,17 @@
     <string name="desk_checking">Đang kiểm tra…</string>
     <string name="desk_burn_checked">Đã kiểm tra: đốt %1$s trong khối %2$s</string>
     <string name="desk_burn_check_failed">Không thể kiểm tra: %1$s</string>
+    <string name="desk_receipts_summary">%1$s biên nhận, %2$s từ các danh tính đã đốt</string>
+    <string name="desk_show_my_record">Cho xem hồ sơ của tôi</string>
+    <string name="desk_show_my_record_hint">Gửi các biên nhận người khác đã trao cho danh tính này vào cuộc trò chuyện</string>
+    <string name="desk_rate_them">Đánh giá</string>
+    <string name="desk_rating_note_hint">Một câu, tùy chọn</string>
+    <string name="desk_send_rating">Gửi đánh giá</string>
+    <string name="desk_rating_note">Được ký bởi danh tính này, có trọng số theo lần đốt của nó ở bất cứ nơi nào được đọc</string>
+    <string name="desk_rating_sent">Đánh giá của bạn dành cho họ</string>
+    <string name="desk_rating_received">Một đánh giá dành cho bạn, được lưu vào hồ sơ</string>
+    <string name="desk_record_sent">Hồ sơ của bạn, đã cho họ xem</string>
+    <string name="desk_record_received">Hồ sơ của họ: đã đọc %1$s biên nhận</string>
+    <string name="desk_gate_over_burn">Nhiều hơn số họ đã đốt (%1$s). Nếu họ biến mất, không gì giữ được họ.</string>
+    <string name="desk_gate_no_burn">Họ chưa đốt gì mà bạn đã kiểm tra. Nếu họ biến mất, không gì giữ được họ.</string>
 </resources>

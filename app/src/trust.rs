@@ -15,7 +15,8 @@
 use serde::{Deserialize, Serialize};
 
 use ducat_core::trust::{
-    burn_message, open_burn_proof, sign_burn_proof, BurnProof, BURN_PROOF_VERSION,
+    burn_message, open_attestation, open_burn_proof, sign_attestation, sign_burn_proof, Attestation, BurnProof,
+    ATTESTATION_VERSION, BURN_PROOF_VERSION, MAX_ATTESTATION_NOTE_CHARS, RATING_MAX, RATING_MIN,
 };
 use ducat_mobile::contacts::persona_public_hex;
 use ducat_mobile::monero::{monero_second_opinion_nodes, monero_tx_status, TxStatus};
@@ -225,5 +226,321 @@ impl App {
         self.store(STORE).put("verified", &all)?;
         log::info(TAG, format!("verified a burn of {} pXMR by {}… at block {}", verified.amount_pxmr, &persona_hex[..8.min(persona_hex.len())], verified.height));
         Ok(verified)
+    }
+}
+
+/// §9.2 — a rated receipt, given, received, or read about someone.
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub struct AttestationRecord {
+    /// Who spoke.
+    pub signer_hex: String,
+    /// Who was spoken about.
+    pub subject_hex: String,
+    pub amount_pxmr: u64,
+    pub rating: u8,
+    pub ts: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub txid_hex: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub note: Option<String>,
+    /// The signed envelope, hex, so it can be shown again.
+    pub envelope_hex: String,
+}
+
+/// What a reader can say about a persona's record: how many receipts it has
+/// read, and how many distinct signers among them have a burn this reader
+/// verified itself. One voice per signer: a burned persona that rates the
+/// same subject ten times is counted once, by its latest receipt, so a record
+/// cannot be padded by a friend with one burn.
+#[derive(Clone, Debug, Serialize, Deserialize, Default, PartialEq, Eq)]
+pub struct RecordSummary {
+    pub receipts: u32,
+    pub weighted: u32,
+    /// Mean rating over the weighted signers' latest receipts, times ten (so 47 = 4.7); zero when none.
+    pub rating_x10: u32,
+}
+
+const ATTEST_PREFIX: &str = "ducat:attest/";
+const RECORD_PREFIX: &str = "ducat:record/";
+
+impl App {
+    fn attestations(&self, key: &str) -> Vec<AttestationRecord> {
+        self.store(STORE).get(key).unwrap_or_default()
+    }
+
+    fn put_attestations(&self, key: &str, v: &[AttestationRecord]) -> Result<(), Error> {
+        self.store(STORE).put(key, &v.to_vec())?;
+        Ok(())
+    }
+
+    fn record_from(a: &Attestation, envelope_hex: &str) -> AttestationRecord {
+        AttestationRecord {
+            signer_hex: hexs(&a.signer),
+            subject_hex: hexs(&a.subject),
+            amount_pxmr: a.amount_pxmr,
+            rating: a.rating,
+            ts: a.ts,
+            txid_hex: a.txid.map(|t| hexs(&t)),
+            note: a.note.clone(),
+            envelope_hex: envelope_hex.to_lowercase(),
+        }
+    }
+
+    /// Rate a counterparty after a settled deal: sign an attestation under
+    /// the worn persona and return it as a `ducat:attest/` link to send.
+    pub fn attest(&self, subject_hex: &str, amount_pxmr: u64, rating: u8, note: Option<&str>, txid_hex: Option<&str>) -> Result<String, Error> {
+        if !(RATING_MIN..=RATING_MAX).contains(&rating) {
+            return Err(Error::Refused("a rating is 1 to 5".into()));
+        }
+        let note = note.map(str::trim).filter(|n| !n.is_empty()).map(str::to_string);
+        if note.as_ref().map_or(false, |n| n.chars().count() > MAX_ATTESTATION_NOTE_CHARS) {
+            return Err(Error::Refused("a note is one sentence".into()));
+        }
+        let worn = self.worn()?;
+        if worn == subject_hex.to_lowercase() {
+            return Err(Error::Refused("a persona cannot attest to itself".into()));
+        }
+        let secret = self.persona_secret(&worn)?.ok_or_else(|| Error::Refused("no such persona".into()))?;
+        let Ok(sk): Result<[u8; 32], _> = secret.as_slice().try_into() else { return Err(Error::Refused("persona key".into())) };
+        let key = ducat_core::sig::SecretKey::ed25519_from_bytes(&sk);
+        let subject = unhex(subject_hex).filter(|b| b.len() == 32).ok_or_else(|| Error::Refused("persona".into()))?;
+        let txid = match txid_hex {
+            Some(t) => Some(unhex(t).filter(|b| b.len() == 32).and_then(|b| <[u8; 32]>::try_from(b).ok()).ok_or_else(|| Error::Refused("txid".into()))?),
+            None => None,
+        };
+        let a = Attestation {
+            version: ATTESTATION_VERSION,
+            suite: 1,
+            signer: key.public().to_bytes().to_vec(),
+            subject,
+            amount_pxmr,
+            rating,
+            ts: App::now(),
+            txid,
+            note,
+        };
+        let env = hexs(&sign_attestation(&a, &key));
+        let mut given = self.attestations("given");
+        given.push(Self::record_from(&a, &env));
+        self.put_attestations("given", &given)?;
+        Ok(format!("{ATTEST_PREFIX}{env}"))
+    }
+
+    /// The receipts others gave this desk's personas, as a `ducat:record/`
+    /// link to send when somebody asks for the record.
+    pub fn my_record_link(&self) -> Result<String, Error> {
+        let worn = self.worn()?;
+        let mine: Vec<String> = self
+            .attestations("received")
+            .into_iter()
+            .filter(|r| r.subject_hex == worn)
+            .map(|r| r.envelope_hex)
+            .collect();
+        if mine.is_empty() {
+            return Err(Error::Refused("nothing on the record yet".into()));
+        }
+        Ok(format!("{RECORD_PREFIX}{}", mine.join(".")))
+    }
+
+    /// What we hold about a persona's record, weighted by the signers whose
+    /// burns we have verified ourselves (§9.2).
+    pub fn record_of(&self, persona_hex: &str) -> RecordSummary {
+        let about: Vec<AttestationRecord> = self.attestations("about").into_iter().filter(|r| r.subject_hex == persona_hex).collect();
+        let mut out = RecordSummary { receipts: about.len() as u32, ..Default::default() };
+        let mut latest: std::collections::BTreeMap<&str, &AttestationRecord> = std::collections::BTreeMap::new();
+        for r in &about {
+            let keep = latest.get(r.signer_hex.as_str()).map_or(true, |have| r.ts > have.ts);
+            if keep {
+                latest.insert(&r.signer_hex, r);
+            }
+        }
+        let mut sum = 0u32;
+        for (signer, r) in latest {
+            if self.burn_of(signer).is_some() {
+                out.weighted += 1;
+                sum += r.rating as u32 * 10;
+            }
+        }
+        if out.weighted > 0 {
+            out.rating_x10 = sum / out.weighted;
+        }
+        out
+    }
+
+    /// Called for every incoming text: a `ducat:attest/` link is a receipt
+    /// about one of our personas from the sender; a `ducat:record/` link is
+    /// the sender showing what others said about them. Both are opened under
+    /// the signer they name, and refused unless the sender is who the object
+    /// says it is — a receipt about us must be signed by the sender, and a
+    /// record shown by someone must be about them.
+    pub(crate) fn ingest_trust_links(&self, from_hex: &str, body: &str) {
+        let body = body.trim();
+        if let Some(hex) = body.strip_prefix(ATTEST_PREFIX) {
+            let _ = self.receive_attestation(from_hex, hex);
+        } else if let Some(rest) = body.strip_prefix(RECORD_PREFIX) {
+            let _ = self.read_record(from_hex, rest);
+        }
+    }
+
+    pub fn receive_attestation(&self, from_hex: &str, envelope_hex: &str) -> Result<AttestationRecord, Error> {
+        let env = unhex(envelope_hex).ok_or_else(|| Error::Refused("not hex".into()))?;
+        let a = open_attestation(&env).map_err(|e| Error::Refused(format!("attestation: {e:?}")))?;
+        if hexs(&a.signer) != from_hex.to_lowercase() {
+            return Err(Error::Refused("the receipt is not signed by the sender".into()));
+        }
+        let mine = self.persona_hexes();
+        if !mine.contains(&hexs(&a.subject)) {
+            return Err(Error::Refused("the receipt is not about us".into()));
+        }
+        let rec = Self::record_from(&a, envelope_hex);
+        let mut all = self.attestations("received");
+        all.retain(|r| !(r.signer_hex == rec.signer_hex && r.ts == rec.ts));
+        all.push(rec.clone());
+        self.put_attestations("received", &all)?;
+        log::info(TAG, format!("a receipt from {}…: {} stars", &from_hex[..8.min(from_hex.len())], rec.rating));
+        Ok(rec)
+    }
+
+    pub fn read_record(&self, from_hex: &str, dotted: &str) -> Result<RecordSummary, Error> {
+        let mut about = self.attestations("about");
+        let mut taken = 0u32;
+        for hex in dotted.split('.').filter(|h| !h.is_empty()).take(64) {
+            let Some(env) = unhex(hex) else { continue };
+            let Ok(a) = open_attestation(&env) else { continue };
+            if hexs(&a.subject) != from_hex.to_lowercase() {
+                continue;
+            }
+            let rec = Self::record_from(&a, hex);
+            about.retain(|r| !(r.signer_hex == rec.signer_hex && r.subject_hex == rec.subject_hex && r.ts == rec.ts));
+            about.push(rec);
+            taken += 1;
+        }
+        self.put_attestations("about", &about)?;
+        log::info(TAG, format!("{}… showed a record: {taken} receipt(s) read", &from_hex[..8.min(from_hex.len())]));
+        Ok(self.record_of(from_hex))
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn temp_app(tag: &str) -> App {
+        let dir = std::env::temp_dir().join(format!("ducat-trust-{}-{tag}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        App::open(&dir).unwrap()
+    }
+
+    /// An attestation signed by `app`'s worn persona at a chosen time, so a
+    /// test can write two from one signer without waiting a second.
+    fn signed_by(app: &App, subject_hex: &str, rating: u8, ts: u64) -> String {
+        let worn = app.worn().unwrap();
+        let secret: [u8; 32] = app.persona_secret(&worn).unwrap().unwrap().try_into().unwrap();
+        let key = ducat_core::sig::SecretKey::ed25519_from_bytes(&secret);
+        let a = Attestation {
+            version: ATTESTATION_VERSION,
+            suite: 1,
+            signer: key.public().to_bytes().to_vec(),
+            subject: unhex(subject_hex).unwrap(),
+            amount_pxmr: 1_000_000_000_000,
+            rating,
+            ts,
+            txid: None,
+            note: None,
+        };
+        hexs(&sign_attestation(&a, &key))
+    }
+
+    fn stage_verified_burn(app: &App, persona_hex: &str) {
+        let mut all = app.verified_burns();
+        all.push(VerifiedBurn {
+            persona_hex: persona_hex.to_string(),
+            txid_hex: "00".repeat(32),
+            amount_pxmr: BURN_FLOOR_PXMR,
+            height: 1,
+            purpose: "identity".into(),
+            checked_at: 1,
+        });
+        app.store(STORE).put("verified", &all).unwrap();
+    }
+
+    #[test]
+    fn a_receipt_travels_to_its_subject_and_is_shown_as_a_record() {
+        let rater = temp_app("travels-rater");
+        let subject = temp_app("travels-subject");
+        let reader = temp_app("travels-reader");
+        let (rater_hex, subject_hex) = (rater.worn().unwrap(), subject.worn().unwrap());
+
+        let link = rater.attest(&subject_hex, 5_000_000_000, 5, Some("  prompt, as described  "), None).unwrap();
+        assert!(link.starts_with(ATTEST_PREFIX));
+        assert_eq!(rater.attestations("given").len(), 1);
+        assert_eq!(rater.attestations("given")[0].note.as_deref(), Some("prompt, as described"));
+
+        // Nothing on the record until a receipt arrives.
+        assert!(subject.my_record_link().is_err());
+        // Ingested from the thread as the subject sees it: sender = signer.
+        subject.ingest_trust_links(&rater_hex, &format!("  {link}\n"));
+        let record = subject.my_record_link().unwrap();
+        assert!(record.starts_with(RECORD_PREFIX));
+
+        // A third party reads the record the subject shows it.
+        let dotted = record.strip_prefix(RECORD_PREFIX).unwrap();
+        let summary = reader.read_record(&subject_hex, dotted).unwrap();
+        assert_eq!(summary, RecordSummary { receipts: 1, weighted: 0, rating_x10: 0 });
+
+        // Once the reader has verified the rater's burn, the voice counts.
+        stage_verified_burn(&reader, &rater_hex);
+        assert_eq!(reader.record_of(&subject_hex), RecordSummary { receipts: 1, weighted: 1, rating_x10: 50 });
+    }
+
+    #[test]
+    fn one_voice_per_signer_rated_by_the_latest() {
+        let rater = temp_app("voice-rater");
+        let subject = temp_app("voice-subject");
+        let reader = temp_app("voice-reader");
+        let (rater_hex, subject_hex) = (rater.worn().unwrap(), subject.worn().unwrap());
+        let first = signed_by(&rater, &subject_hex, 5, 1_700_000_000);
+        let second = signed_by(&rater, &subject_hex, 3, 1_700_000_001);
+        subject.receive_attestation(&rater_hex, &first).unwrap();
+        subject.receive_attestation(&rater_hex, &second).unwrap();
+        // The same envelope twice is one receipt.
+        subject.receive_attestation(&rater_hex, &second).unwrap();
+        assert_eq!(subject.attestations("received").len(), 2);
+
+        let dotted = subject.my_record_link().unwrap();
+        stage_verified_burn(&reader, &rater_hex);
+        let summary = reader.read_record(&subject_hex, dotted.strip_prefix(RECORD_PREFIX).unwrap()).unwrap();
+        assert_eq!(summary, RecordSummary { receipts: 2, weighted: 1, rating_x10: 30 });
+    }
+
+    #[test]
+    fn receipts_are_refused_unless_the_sender_is_who_the_object_says() {
+        let rater = temp_app("refused-rater");
+        let subject = temp_app("refused-subject");
+        let stranger = temp_app("refused-stranger");
+        let (rater_hex, subject_hex, stranger_hex) = (rater.worn().unwrap(), subject.worn().unwrap(), stranger.worn().unwrap());
+        let env = signed_by(&rater, &subject_hex, 4, 1_700_000_000);
+
+        // Handed on by someone other than its signer: discarded.
+        assert!(subject.receive_attestation(&stranger_hex, &env).is_err());
+        // About somebody else: discarded.
+        assert!(stranger.receive_attestation(&rater_hex, &env).is_err());
+        assert!(subject.attestations("received").is_empty());
+
+        // A record shown by the wrong persona keeps nothing.
+        let summary = stranger.read_record(&rater_hex, &env).unwrap();
+        assert_eq!(summary.receipts, 0);
+        assert!(stranger.attestations("about").is_empty());
+        // Garbage between the dots is skipped, not fatal.
+        let summary = stranger.read_record(&subject_hex, &format!("zz.{env}..00")).unwrap();
+        assert_eq!(summary.receipts, 1);
+
+        // What the signer's own client refuses before signing.
+        assert!(rater.attest(&rater_hex, 1, 5, None, None).is_err());
+        assert!(rater.attest(&subject_hex, 1, 0, None, None).is_err());
+        assert!(rater.attest(&subject_hex, 1, 6, None, None).is_err());
+        assert!(rater.attest(&subject_hex, 1, 5, Some(&"x".repeat(141)), None).is_err());
+        assert!(rater.attest(&subject_hex, 1, 5, None, Some("not a txid")).is_err());
     }
 }

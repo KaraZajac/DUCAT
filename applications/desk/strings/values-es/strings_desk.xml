@@ -410,4 +410,17 @@
     <string name="desk_checking">Comprobando…</string>
     <string name="desk_burn_checked">Comprobado: quemó %1$s en el bloque %2$s</string>
     <string name="desk_burn_check_failed">No se pudo comprobar: %1$s</string>
+    <string name="desk_receipts_summary">%1$s recibos, %2$s de personas con quema</string>
+    <string name="desk_show_my_record">Mostrar mi historial</string>
+    <string name="desk_show_my_record_hint">Envía a la conversación los recibos que otros dieron a esta persona</string>
+    <string name="desk_rate_them">Valorar</string>
+    <string name="desk_rating_note_hint">Una frase, opcional</string>
+    <string name="desk_send_rating">Enviar la valoración</string>
+    <string name="desk_rating_note">Firmada por esta persona y ponderada por su quema allí donde se lea</string>
+    <string name="desk_rating_sent">Tu valoración para ellos</string>
+    <string name="desk_rating_received">Una valoración para ti, guardada en tu historial</string>
+    <string name="desk_record_sent">Tu historial, mostrado a ellos</string>
+    <string name="desk_record_received">Su historial: %1$s recibos leídos</string>
+    <string name="desk_gate_over_burn">Más de lo que han quemado (%1$s). Si desaparecen, nada los retiene.</string>
+    <string name="desk_gate_no_burn">No han quemado nada que hayas comprobado. Si desaparecen, nada los retiene.</string>
 </resources>

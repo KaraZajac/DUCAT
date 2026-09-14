@@ -406,4 +406,17 @@
     <string name="desk_checking">Memeriksa…</string>
     <string name="desk_burn_checked">Terverifikasi: membakar %1$s di blok %2$s</string>
     <string name="desk_burn_check_failed">Tidak bisa diperiksa: %1$s</string>
+    <string name="desk_receipts_summary">%1$s tanda terima, %2$s dari persona yang membakar</string>
+    <string name="desk_show_my_record">Tunjukkan catatan saya</string>
+    <string name="desk_show_my_record_hint">Mengirim tanda terima yang orang lain berikan untuk persona ini ke percakapan</string>
+    <string name="desk_rate_them">Beri nilai</string>
+    <string name="desk_rating_note_hint">Satu kalimat, opsional</string>
+    <string name="desk_send_rating">Kirim nilai</string>
+    <string name="desk_rating_note">Ditandatangani persona ini, dibobot oleh bakarannya di mana pun dibaca</string>
+    <string name="desk_rating_sent">Nilai Anda untuk mereka</string>
+    <string name="desk_rating_received">Sebuah nilai untuk Anda, disimpan di catatan Anda</string>
+    <string name="desk_record_sent">Catatan Anda, ditunjukkan kepada mereka</string>
+    <string name="desk_record_received">Catatan mereka: %1$s tanda terima dibaca</string>
+    <string name="desk_gate_over_burn">Lebih dari yang mereka bakar (%1$s). Jika mereka menghilang, tidak ada yang menahan mereka.</string>
+    <string name="desk_gate_no_burn">Mereka belum membakar apa pun yang Anda periksa. Jika mereka menghilang, tidak ada yang menahan mereka.</string>
 </resources>

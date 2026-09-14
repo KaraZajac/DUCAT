@@ -406,4 +406,17 @@
     <string name="desk_checking">확인 중…</string>
     <string name="desk_burn_checked">확인됨: 블록 %2$s에서 %1$s 소각</string>
     <string name="desk_burn_check_failed">확인할 수 없음: %1$s</string>
+    <string name="desk_receipts_summary">영수증 %1$s개, 소각한 페르소나로부터 %2$s개</string>
+    <string name="desk_show_my_record">내 기록 보이기</string>
+    <string name="desk_show_my_record_hint">다른 사람들이 이 페르소나에게 준 영수증을 대화에 보냅니다</string>
+    <string name="desk_rate_them">평가하기</string>
+    <string name="desk_rating_note_hint">한 문장, 선택</string>
+    <string name="desk_send_rating">평가 보내기</string>
+    <string name="desk_rating_note">이 페르소나가 서명하며, 읽히는 곳마다 그 소각으로 가중됩니다</string>
+    <string name="desk_rating_sent">당신이 준 평가</string>
+    <string name="desk_rating_received">당신에 대한 평가, 기록에 보관됨</string>
+    <string name="desk_record_sent">당신의 기록, 상대에게 보임</string>
+    <string name="desk_record_received">상대의 기록: 영수증 %1$s개 읽음</string>
+    <string name="desk_gate_over_burn">상대가 소각한 금액(%1$s)보다 많습니다. 사라져도 잡아둘 것이 없습니다.</string>
+    <string name="desk_gate_no_burn">당신이 확인한 소각이 없습니다. 사라져도 잡아둘 것이 없습니다.</string>
 </resources>

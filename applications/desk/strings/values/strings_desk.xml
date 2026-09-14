@@ -416,4 +416,17 @@
     <string name="desk_checking">Checking…</string>
     <string name="desk_burn_checked">Checked: burned %1$s in block %2$s</string>
     <string name="desk_burn_check_failed">Could not check it: %1$s</string>
+    <string name="desk_receipts_summary">%1$s receipts, %2$s from burned personas</string>
+    <string name="desk_show_my_record">Show my record</string>
+    <string name="desk_show_my_record_hint">Sends the receipts others gave this persona into the conversation</string>
+    <string name="desk_rate_them">Rate them</string>
+    <string name="desk_rating_note_hint">One sentence, optional</string>
+    <string name="desk_send_rating">Send the rating</string>
+    <string name="desk_rating_note">Signed by this persona, weighted by its burn wherever it is read</string>
+    <string name="desk_rating_sent">Your rating for them</string>
+    <string name="desk_rating_received">A rating for you, kept on your record</string>
+    <string name="desk_record_sent">Your record, shown to them</string>
+    <string name="desk_record_received">Their record: %1$s receipts read</string>
+    <string name="desk_gate_over_burn">More than they have burned (%1$s). If they vanish, nothing holds them.</string>
+    <string name="desk_gate_no_burn">They have burned nothing you have checked. If they vanish, nothing holds them.</string>
 </resources>

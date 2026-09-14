@@ -406,4 +406,17 @@
     <string name="desk_checking">核验中…</string>
     <string name="desk_burn_checked">已核验：在区块 %2$s 销毁了 %1$s</string>
     <string name="desk_burn_check_failed">无法核验：%1$s</string>
+    <string name="desk_receipts_summary">%1$s 份收据，其中 %2$s 份来自已销毁的身份</string>
+    <string name="desk_show_my_record">出示我的记录</string>
+    <string name="desk_show_my_record_hint">把他人给此身份的收据发到对话中</string>
+    <string name="desk_rate_them">评价对方</string>
+    <string name="desk_rating_note_hint">一句话，可选</string>
+    <string name="desk_send_rating">发送评价</string>
+    <string name="desk_rating_note">由此身份签名，在任何读取处都按其销毁额加权</string>
+    <string name="desk_rating_sent">你给对方的评价</string>
+    <string name="desk_rating_received">给你的一份评价，已记入你的记录</string>
+    <string name="desk_record_sent">你的记录，已出示给对方</string>
+    <string name="desk_record_received">对方的记录：已读取 %1$s 份收据</string>
+    <string name="desk_gate_over_burn">超过对方销毁的金额（%1$s）。若对方消失，没有什么能约束他们。</string>
+    <string name="desk_gate_no_burn">对方没有任何你核验过的销毁。若对方消失，没有什么能约束他们。</string>
 </resources>

@@ -467,6 +467,33 @@
       await refresh();
     } catch (e) { burnNote = t("desk_burn_check_failed", String(e)); } finally { checkingBurn = false; }
   }
+  const ATTEST_LINK = /ducat:attest\/[0-9a-fA-F]+/;
+  const RECORD_LINK = /ducat:record\/[0-9a-fA-F.]+/;
+  let rating = $state(false);
+  let ratingStars = $state(5);
+  let ratingNote = $state("");
+  async function sendRating() {
+    if (!current) return;
+    err = null;
+    try {
+      await api.attest(current.persona_hex, ratingStars, ratingNote.trim() || null);
+      rating = false; ratingNote = "";
+      await refresh();
+    } catch (e) { err = String(e); }
+  }
+  async function showMyRecord() {
+    if (!current) return;
+    err = null;
+    try {
+      const link = await api.myRecordLink();
+      await api.sendText(current.persona_hex, link);
+      await refresh();
+    } catch (e) { err = String(e); }
+  }
+  function xmrToPxmr(s: string): number {
+    const n = Number(s.trim());
+    return Number.isFinite(n) && n > 0 ? Math.round(n * 1e12) : 0;
+  }
   async function showMyBurn() {
     if (!current) return;
     err = null;
@@ -756,6 +783,7 @@
               {#if current.petname && current.asserted_name && current.petname !== current.asserted_name}{t("desk_calls_themself", current.asserted_name)} · {/if}
               {#if !current.has_keys}{t("desk_keys_not_arrived")} · {/if}
               {#if current.burn_pxmr}{t("desk_burned_since", fmtXmr(current.burn_pxmr), String(current.burn_height ?? 0))} · {/if}
+              {#if current.receipts > 0}{t("desk_receipts_summary", String(current.receipts), String(current.receipts_weighted))}{#if current.receipts_weighted > 0} · {(current.rating_x10 / 10).toFixed(1)} ★{/if} · {/if}
               {#if current.pending_address}{t("desk_address_held")} · {/if}
               {#if current.email}{current.email} · {/if}{#if current.phone}{current.phone} · {/if}{#if current.signal}Signal {current.signal} · {/if}
               <button class="linkish mono" title={t("desk_copy_their_key")} onclick={() => copy(current?.persona_hex ?? "")}>{current.persona_hex.slice(0, 12)}…</button>
@@ -774,6 +802,8 @@
           <button class="btn small" class:active={requesting} onclick={() => { requesting = !requesting; payingOut = false; }}>{t("pay_request")}</button>
           <button class="btn small" onclick={() => { renaming = true; newName = current?.petname ?? ""; }}>{t("profiles_rename")}</button>
           <button class="btn small" title={t("desk_show_my_burn_hint")} disabled={!current.has_keys} onclick={showMyBurn}>{t("desk_show_my_burn")}</button>
+          <button class="btn small" title={t("desk_show_my_record_hint")} disabled={!current.has_keys} onclick={showMyRecord}>{t("desk_show_my_record")}</button>
+          {#if thread.some((m) => m.kind === 3)}<button class="btn small" class:active={rating} disabled={!current.has_keys} onclick={() => (rating = !rating)}>{t("desk_rate_them")}</button>{/if}
           <button class="btn small" class:active={current.hearted} title={current.hearted ? t("desk_unheart") : t("desk_heart")} disabled={!current.has_keys} onclick={toggleHeart}>{@html current.hearted ? icons.heartFull : icons.heart}</button>
           <button class="btn small" class:active={showSettings} title={t("chat_conversation_settings")} onclick={() => (showSettings = !showSettings)}>{@html icons.more} {t("desk_more")}</button>
         </div>
@@ -805,7 +835,16 @@
           <span class="meta">{t("chat_someones_profile")}</span>
         </div>
       {/if}
+      {#if rating}
+        <div class="request-bar">
+          {#each [1, 2, 3, 4, 5] as n}<button class="btn small" class:active={ratingStars === n} onclick={() => (ratingStars = n)}>{n} ★</button>{/each}
+          <input class="input" placeholder={t("desk_rating_note_hint")} maxlength="140" bind:value={ratingNote} onkeydown={(e) => e.key === "Enter" && sendRating()} />
+          <button class="btn primary" onclick={sendRating}>{t("desk_send_rating")}</button>
+          <span class="meta">{t("desk_rating_note")}</span>
+        </div>
+      {/if}
       {#if payingOut}
+        {#if xmrToPxmr(payAmount) > (current.burn_pxmr ?? 0)}<p class="note warn-text">{current.burn_pxmr ? t("desk_gate_over_burn", fmtXmr(current.burn_pxmr)) : t("desk_gate_no_burn")}</p>{/if}
         <div class="request-bar">
           <input class="input narrow" placeholder="XMR" bind:value={payAmount} />
           <input class="input" placeholder={t("desk_note_hint")} bind:value={payNote} onkeydown={(e) => e.key === "Enter" && payUnprompted()} />
@@ -879,7 +918,11 @@
                   <button class="btn small" disabled={answering !== null} title={t("desk_take_bill_back")} onclick={() => cancelMine(m)}>{answering === keyOf(m) ? "…" : t("chat_cancel_request")}</button>
                 </div>
               {/if}
-              {#if burnIn(m.body)}
+              {#if ATTEST_LINK.test(m.body)}
+                <div class="bubble-body">{m.outgoing ? t("desk_rating_sent") : t("desk_rating_received")}</div>
+              {:else if RECORD_LINK.test(m.body)}
+                <div class="bubble-body">{m.outgoing ? t("desk_record_sent") : t("desk_record_received", String(current.receipts))}</div>
+              {:else if burnIn(m.body)}
                 <div class="bubble-body">{t("desk_burn_proof_msg")}</div>
                 {#if !m.outgoing && m.kind === 0}
                   <div class="actions" style="margin: 6px 0 2px"><button class="btn small primary" disabled={checkingBurn} onclick={() => checkBurn(burnIn(m.body)!)}>{checkingBurn ? t("desk_checking") : t("desk_check_burn")}</button></div>

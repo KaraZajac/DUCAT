@@ -406,4 +406,17 @@
     <string name="desk_checking">กำลังตรวจสอบ…</string>
     <string name="desk_burn_checked">ตรวจสอบแล้ว: เผา %1$s ในบล็อก %2$s</string>
     <string name="desk_burn_check_failed">ตรวจสอบไม่ได้: %1$s</string>
+    <string name="desk_receipts_summary">ใบเสร็จ %1$s ใบ, %2$s จากตัวตนที่เผาแล้ว</string>
+    <string name="desk_show_my_record">แสดงประวัติของฉัน</string>
+    <string name="desk_show_my_record_hint">ส่งใบเสร็จที่คนอื่นให้ตัวตนนี้เข้าไปในบทสนทนา</string>
+    <string name="desk_rate_them">ให้คะแนน</string>
+    <string name="desk_rating_note_hint">หนึ่งประโยค ไม่บังคับ</string>
+    <string name="desk_send_rating">ส่งคะแนน</string>
+    <string name="desk_rating_note">ลงนามโดยตัวตนนี้ และถ่วงน้ำหนักด้วยการเผาของมันทุกที่ที่ถูกอ่าน</string>
+    <string name="desk_rating_sent">คะแนนของคุณสำหรับพวกเขา</string>
+    <string name="desk_rating_received">คะแนนสำหรับคุณ เก็บไว้ในประวัติของคุณ</string>
+    <string name="desk_record_sent">ประวัติของคุณ แสดงให้พวกเขาเห็น</string>
+    <string name="desk_record_received">ประวัติของพวกเขา: อ่านใบเสร็จ %1$s ใบ</string>
+    <string name="desk_gate_over_burn">มากกว่าที่พวกเขาเผา (%1$s) หากพวกเขาหายไป ไม่มีอะไรยึดพวกเขาไว้</string>
+    <string name="desk_gate_no_burn">พวกเขาไม่ได้เผาอะไรที่คุณตรวจสอบแล้ว หากพวกเขาหายไป ไม่มีอะไรยึดพวกเขาไว้</string>
 </resources>

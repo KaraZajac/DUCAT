@@ -410,4 +410,17 @@
     <string name="desk_checking">Controleren…</string>
     <string name="desk_burn_checked">Gecontroleerd: %1$s verbrand in blok %2$s</string>
     <string name="desk_burn_check_failed">Kon niet controleren: %1$s</string>
+    <string name="desk_receipts_summary">%1$s ontvangsten, %2$s van persona’s met een verbranding</string>
+    <string name="desk_show_my_record">Mijn staat tonen</string>
+    <string name="desk_show_my_record_hint">Stuurt de ontvangsten die anderen deze persona gaven in het gesprek</string>
+    <string name="desk_rate_them">Beoordelen</string>
+    <string name="desk_rating_note_hint">Eén zin, optioneel</string>
+    <string name="desk_send_rating">Beoordeling versturen</string>
+    <string name="desk_rating_note">Ondertekend door deze persona, gewogen naar zijn verbranding waar het ook gelezen wordt</string>
+    <string name="desk_rating_sent">Jouw beoordeling voor hen</string>
+    <string name="desk_rating_received">Een beoordeling voor jou, bewaard in je staat</string>
+    <string name="desk_record_sent">Jouw staat, aan hen getoond</string>
+    <string name="desk_record_received">Hun staat: %1$s ontvangsten gelezen</string>
+    <string name="desk_gate_over_burn">Meer dan zij hebben verbrand (%1$s). Als ze verdwijnen, houdt niets hen tegen.</string>
+    <string name="desk_gate_no_burn">Ze hebben niets verbrand dat je hebt gecontroleerd. Als ze verdwijnen, houdt niets hen tegen.</string>
 </resources>

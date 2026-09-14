@@ -410,4 +410,17 @@
     <string name="desk_checking">Denetleniyor…</string>
     <string name="desk_burn_checked">Denetlendi: %2$s bloğunda %1$s yakıldı</string>
     <string name="desk_burn_check_failed">Denetlenemedi: %1$s</string>
+    <string name="desk_receipts_summary">%1$s makbuz, %2$s yakma yapmış kimliklerden</string>
+    <string name="desk_show_my_record">Sicilimi göster</string>
+    <string name="desk_show_my_record_hint">Başkalarının bu kimliğe verdiği makbuzları sohbete gönderir</string>
+    <string name="desk_rate_them">Değerlendir</string>
+    <string name="desk_rating_note_hint">Bir cümle, isteğe bağlı</string>
+    <string name="desk_send_rating">Değerlendirmeyi gönder</string>
+    <string name="desk_rating_note">Bu kimlikçe imzalanır, okunduğu her yerde onun yakmasıyla ağırlıklandırılır</string>
+    <string name="desk_rating_sent">Onlara verdiğin değerlendirme</string>
+    <string name="desk_rating_received">Sana bir değerlendirme, siciline eklendi</string>
+    <string name="desk_record_sent">Sicilin, onlara gösterildi</string>
+    <string name="desk_record_received">Onların sicili: %1$s makbuz okundu</string>
+    <string name="desk_gate_over_burn">Yaktıklarından (%1$s) fazla. Ortadan kaybolurlarsa onları tutan bir şey yok.</string>
+    <string name="desk_gate_no_burn">Denetlediğin bir yakma yok. Ortadan kaybolurlarsa onları tutan bir şey yok.</string>
 </resources>

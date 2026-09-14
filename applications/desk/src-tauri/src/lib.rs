@@ -789,6 +789,11 @@ struct ContactRow {
     /// §9.5: what we have verified of this persona's burn, if anything.
     burn_pxmr: Option<u64>,
     burn_height: Option<u64>,
+    /// §9.2: receipts we have read about this persona, and how many came
+    /// from personas whose burn we verified ourselves.
+    receipts: u32,
+    receipts_weighted: u32,
+    rating_x10: u32,
     name: String,
     named: bool,
     petname: Option<String>,
@@ -817,6 +822,7 @@ struct ContactRow {
 
 fn contact_row(a: &App, c: Contact) -> ContactRow {
     let burn = a.burn_of(&c.persona_hex);
+    let record = a.record_of(&c.persona_hex);
     let thread = a.thread(&c.persona_hex);
     // The preview is the last thing said, not the last thing done to it —
     // and a withdrawn message was unsaid.
@@ -838,6 +844,9 @@ fn contact_row(a: &App, c: Contact) -> ContactRow {
         hearted: c.hearted,
         burn_pxmr: burn.as_ref().map(|b| b.amount_pxmr),
         burn_height: burn.as_ref().map(|b| b.height),
+        receipts: record.receipts,
+        receipts_weighted: record.weighted,
+        rating_x10: record.rating_x10,
         persona_hex: c.persona_hex,
         petname: c.petname,
         asserted_name: c.asserted_name,
@@ -1369,6 +1378,27 @@ fn my_burn_link() -> Result<String, String> {
     let worn = a.worn().map_err(said)?;
     let b = a.my_burn(&worn).ok_or("no finished burn to show yet")?;
     Ok(format!("ducat:burn/{}", b.envelope_hex.unwrap_or_default()))
+}
+
+/// §9.2: rate a counterparty after a settled deal. The amount is the latest
+/// receipt in the thread; the attestation goes to them as a link.
+#[tauri::command]
+async fn attest(persona_hex: String, rating: u8, note: Option<String>) -> Result<(), String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || {
+        let c = a.contact(&persona_hex).ok_or("no such contact")?;
+        let amount = a.thread(&persona_hex).iter().rev().find(|m| m.kind == 3).map(|m| m.amount_pxmr).unwrap_or(0);
+        let link = a.attest(&persona_hex, amount, rating, note.as_deref(), None).map_err(said)?;
+        a.send(&c, Outgoing::text(&link)).map(|_| ()).map_err(said)
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+/// The worn persona's record — the receipts others gave it — as a link to send.
+#[tauri::command]
+fn my_record_link() -> Result<String, String> {
+    app()?.my_record_link().map_err(said)
 }
 
 /// Check a stranger's burn proof (§9.5) and remember the verdict.
@@ -3090,6 +3120,8 @@ pub fn run() {
             burn,
             verify_burn,
             my_burn_link,
+            attest,
+            my_record_link,
             wallet_max,
             set_own_node,
             wallet_rescan,

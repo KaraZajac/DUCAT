@@ -109,6 +109,9 @@ export interface ContactRow {
   persona_hex: string;
   burn_pxmr: number | null;
   burn_height: number | null;
+  receipts: number;
+  receipts_weighted: number;
+  rating_x10: number;
   name: string;
   named: boolean;
   petname: string | null;
@@ -636,6 +639,8 @@ export const api = {
   walletSends: () => invoke<SentRow[]>("wallet_sends"),
   burnView: () => invoke<BurnView>("burn_view"),
   myBurnLink: () => invoke<string>("my_burn_link"),
+  attest: (personaHex: string, rating: number, note: string | null) => invoke<void>("attest", { personaHex, rating, note }),
+  myRecordLink: () => invoke<string>("my_record_link"),
   burn: (amountXmr: string, purpose: string) => invoke<BurnRow>("burn", { amountXmr, purpose }),
   verifyBurn: (personaHex: string, envelopeHex: string) => invoke<VerifiedBurnRow>("verify_burn", { personaHex, envelopeHex }),
   walletQuote: (amountXmr: string, priority = 1) => invoke<Quote>("wallet_quote", { amountXmr, priority }),

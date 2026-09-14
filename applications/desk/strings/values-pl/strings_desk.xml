@@ -418,4 +418,17 @@
     <string name="desk_checking">Sprawdzanie…</string>
     <string name="desk_burn_checked">Sprawdzono: spalono %1$s w bloku %2$s</string>
     <string name="desk_burn_check_failed">Nie udało się sprawdzić: %1$s</string>
+    <string name="desk_receipts_summary">%1$s pokwitowań, %2$s od person ze spaleniem</string>
+    <string name="desk_show_my_record">Pokaż moją historię</string>
+    <string name="desk_show_my_record_hint">Wysyła do rozmowy pokwitowania, które inni dali tej personie</string>
+    <string name="desk_rate_them">Oceń</string>
+    <string name="desk_rating_note_hint">Jedno zdanie, opcjonalnie</string>
+    <string name="desk_send_rating">Wyślij ocenę</string>
+    <string name="desk_rating_note">Podpisana przez tę personę, ważona jej spaleniem wszędzie, gdzie jest czytana</string>
+    <string name="desk_rating_sent">Twoja ocena dla nich</string>
+    <string name="desk_rating_received">Ocena dla ciebie, zachowana w twojej historii</string>
+    <string name="desk_record_sent">Twoja historia, pokazana im</string>
+    <string name="desk_record_received">Ich historia: odczytano %1$s pokwitowań</string>
+    <string name="desk_gate_over_burn">Więcej, niż spalili (%1$s). Jeśli znikną, nic ich nie trzyma.</string>
+    <string name="desk_gate_no_burn">Nie spalili niczego, co sprawdziłeś. Jeśli znikną, nic ich nie trzyma.</string>
 </resources>

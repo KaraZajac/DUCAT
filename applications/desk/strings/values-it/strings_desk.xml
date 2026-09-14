@@ -410,4 +410,17 @@
     <string name="desk_checking">Verifica in corso…</string>
     <string name="desk_burn_checked">Verificato: ha bruciato %1$s nel blocco %2$s</string>
     <string name="desk_burn_check_failed">Impossibile verificare: %1$s</string>
+    <string name="desk_receipts_summary">%1$s ricevute, %2$s da persone che hanno bruciato</string>
+    <string name="desk_show_my_record">Mostra il mio storico</string>
+    <string name="desk_show_my_record_hint">Invia nella conversazione le ricevute che altri hanno dato a questa persona</string>
+    <string name="desk_rate_them">Valuta</string>
+    <string name="desk_rating_note_hint">Una frase, facoltativa</string>
+    <string name="desk_send_rating">Invia la valutazione</string>
+    <string name="desk_rating_note">Firmata da questa persona, pesata dalla sua prova ovunque venga letta</string>
+    <string name="desk_rating_sent">La tua valutazione per loro</string>
+    <string name="desk_rating_received">Una valutazione per te, conservata nel tuo storico</string>
+    <string name="desk_record_sent">Il tuo storico, mostrato a loro</string>
+    <string name="desk_record_received">Il loro storico: %1$s ricevute lette</string>
+    <string name="desk_gate_over_burn">Più di quanto hanno bruciato (%1$s). Se spariscono, nulla li trattiene.</string>
+    <string name="desk_gate_no_burn">Non hanno bruciato nulla che tu abbia verificato. Se spariscono, nulla li trattiene.</string>
 </resources>

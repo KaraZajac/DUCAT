@@ -426,4 +426,17 @@
     <string name="desk_checking">جارٍ التحقق…</string>
     <string name="desk_burn_checked">تم التحقق: حُرق %1$s في الكتلة %2$s</string>
     <string name="desk_burn_check_failed">تعذر التحقق: %1$s</string>
+    <string name="desk_receipts_summary">%1$s إيصالات، %2$s من شخصيات حرقت</string>
+    <string name="desk_show_my_record">عرض سجلي</string>
+    <string name="desk_show_my_record_hint">يرسل الإيصالات التي منحها الآخرون لهذه الشخصية إلى المحادثة</string>
+    <string name="desk_rate_them">قيّمهم</string>
+    <string name="desk_rating_note_hint">جملة واحدة، اختياري</string>
+    <string name="desk_send_rating">إرسال التقييم</string>
+    <string name="desk_rating_note">موقّع بهذه الشخصية، ويُرجَّح بحرقها أينما قُرئ</string>
+    <string name="desk_rating_sent">تقييمك لهم</string>
+    <string name="desk_rating_received">تقييم لك، محفوظ في سجلك</string>
+    <string name="desk_record_sent">سجلك، عُرض عليهم</string>
+    <string name="desk_record_received">سجلهم: قُرئ %1$s إيصالات</string>
+    <string name="desk_gate_over_burn">أكثر مما حرقوه (%1$s). إن اختفوا فلا شيء يلزمهم.</string>
+    <string name="desk_gate_no_burn">لم يحرقوا شيئًا تحققت منه. إن اختفوا فلا شيء يلزمهم.</string>
 </resources>

@@ -410,4 +410,17 @@
     <string name="desk_checking">در حال بررسی…</string>
     <string name="desk_burn_checked">بررسی شد: %1$s در بلوک %2$s سوزانده شده</string>
     <string name="desk_burn_check_failed">بررسی ممکن نشد: %1$s</string>
+    <string name="desk_receipts_summary">%1$s رسید، %2$s از شخصیت‌های سوزانده</string>
+    <string name="desk_show_my_record">نمایش سابقهٔ من</string>
+    <string name="desk_show_my_record_hint">رسیدهایی را که دیگران به این شخصیت داده‌اند به گفتگو می‌فرستد</string>
+    <string name="desk_rate_them">امتیاز دادن</string>
+    <string name="desk_rating_note_hint">یک جمله، اختیاری</string>
+    <string name="desk_send_rating">ارسال امتیاز</string>
+    <string name="desk_rating_note">با امضای این شخصیت و در هر جا که خوانده شود با سوزاندنش وزن‌دهی می‌شود</string>
+    <string name="desk_rating_sent">امتیاز شما به آن‌ها</string>
+    <string name="desk_rating_received">امتیازی برای شما، در سابقه‌تان نگه داشته شد</string>
+    <string name="desk_record_sent">سابقهٔ شما، به آن‌ها نشان داده شد</string>
+    <string name="desk_record_received">سابقهٔ آن‌ها: %1$s رسید خوانده شد</string>
+    <string name="desk_gate_over_burn">بیش از آنچه سوزانده‌اند (%1$s). اگر ناپدید شوند چیزی آن‌ها را نگه نمی‌دارد.</string>
+    <string name="desk_gate_no_burn">چیزی که شما بررسی کرده باشید نسوزانده‌اند. اگر ناپدید شوند چیزی آن‌ها را نگه نمی‌دارد.</string>
 </resources>
