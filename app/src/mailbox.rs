@@ -20,6 +20,7 @@ use std::time::Instant;
 
 use ducat_mobile::contacts::{
     build_contact_details, build_log_head, create_contact_card, generate_prekeys, generate_writer_keys,
+    open_sealed_contact_details, seal_contact_details, sealed_half_prekey_id, OpenSealIn, SealDetailsIn,
     log_still_readable, log_subkey, open_message, parse_contact_details, parse_log_head, prune_prekey,
     read_contact_card, seal_message, sealed_prekey_id, thread_aad, AttachmentRef, BillLine, CallSend, GroupSend,
     OpenedMessage, PositionSend, PublicationSend, SealIn,
@@ -430,21 +431,22 @@ impl App {
         // Single use, checked by reading rather than trusting a local flag:
         // the inbox has exactly one reply subkey.
         if let Some(already) = node_dht_get(inbox.clone(), 1, true)?.filter(|a| !a.is_empty()) {
-            // Whose reply? If it is this desk's, the card was claimed here
-            // and the thread it opened still exists — the right answer is
-            // that thread, not "somebody got there first".
-            let mine = parse_contact_details(already, inbox.clone(), true).ok().filter(|d| self.persona_hexes().contains(&hex(&d.persona)));
-            if let Some(mine) = mine {
-                let known = self.contacts().into_iter().find(|c| c.my_outbox == mine.outbox_key).or_else(|| {
-                    node_dht_get(inbox.clone(), 0, true)
-                        .ok()
-                        .flatten()
-                        .and_then(|raw| parse_contact_details(raw, inbox.clone(), false).ok())
-                        .and_then(|theirs| self.contact(&hex(&theirs.persona)))
+            // Whose reply? Not a question this desk can answer by reading:
+            // since W4 a claimant's half is sealed to the *issuer's* bundle,
+            // so even our own reply is opaque to us. The answer we have is
+            // the thread: if the issuer's own half names a log we already
+            // hold as a contact's, this card was claimed here and that
+            // thread is the right answer, not "somebody got there first".
+            let _ = already;
+            let known = node_dht_get(inbox.clone(), 0, true)
+                .ok()
+                .flatten()
+                .and_then(|raw| parse_contact_details(raw, inbox.clone(), false).ok())
+                .and_then(|theirs| {
+                    self.contact(&hex(&theirs.persona)).filter(|c| c.their_outbox == theirs.outbox_key)
                 });
-                if let Some(k) = known {
-                    return Ok(Claim::Known(k));
-                }
+            if let Some(k) = known {
+                return Ok(Claim::Known(k));
             }
             return Err(Error::Card(CardProblem::AlreadyUsed));
         }
@@ -489,26 +491,34 @@ impl App {
             &zip_secrets(&prekeys.one_time_ids, &prekeys.one_time_secrets),
             false,
         )?;
-        node_dht_set(
+        let signed_half = build_contact_details(
+            persona,
+            outbox.key.clone(),
+            prekeys.bundle.clone(),
+            // **Our** name — what the reply asserts about its sender —
+            // never the petname we just chose for them.
+            self.my_name(Some(&owner_hex))?,
+            None,
+            // Scoped to what the issuer said the handshake is for
+            // (§16.9); a null purpose — an older card — is not a
+            // contact exchange, the private default.
+            self.profile_wire(&owner_hex, theirs.purpose.as_deref(), as_driver),
+            theirs.purpose.clone(),
             inbox.clone(),
-            1,
-            build_contact_details(
-                persona,
-                outbox.key.clone(),
-                prekeys.bundle.clone(),
-                // **Our** name — what the reply asserts about its sender —
-                // never the petname we just chose for them.
-                self.my_name(Some(&owner_hex))?,
-                None,
-                // Scoped to what the issuer said the handshake is for
-                // (§16.9); a null purpose — an older card — is not a
-                // contact exchange, the private default.
-                self.profile_wire(&owner_hex, theirs.purpose.as_deref(), as_driver),
-                theirs.purpose.clone(),
-                inbox.clone(),
-                true,
-            )?,
+            true,
         )?;
+        // §16.9 (W4): sealed to the issuer's bundle, because this record's
+        // key is public board text for a hail or a listing, and a signed
+        // reply is a reply the whole board can read.
+        let sealed = seal_contact_details(SealDetailsIn {
+            signed: signed_half,
+            their_bundle: theirs.prekey_bundle.clone(),
+            inbox_key: inbox.clone(),
+        })?;
+        if !sealed.one_time {
+            log::warn(TAG, "the issuer had no one-time prekey left — this reply rests on their signed prekey");
+        }
+        node_dht_set(inbox.clone(), 1, sealed.bytes)?;
         // What this thread already had, if we have met before: their log is
         // only new if the card names a different one. Ours is new by
         // construction.
@@ -727,7 +737,26 @@ impl App {
         // is the claimant's own and not a name typed into a bare map. A reply
         // that does not open is a stranger writing into the slot: the card
         // is contested, not merely unread.
-        let theirs = match parse_contact_details(read.data, issued.inbox_key.clone(), true) {
+        // Sealed to one of our prekeys (§16.9, W4): the id names which, and
+        // a one-time key is spent by opening it.
+        let opened = (|| -> Result<ducat_mobile::contacts::OpenedSeal, Error> {
+            let id = sealed_half_prekey_id(read.data.clone())?;
+            let secrets: Vec<Vec<u8>> = if id == 0 { self.signed_prekey_secrets() } else { self.one_time_secret(id).into_iter().collect() };
+            let mut last = Error::Refused("no prekey of ours opens this reply".into());
+            for secret in secrets {
+                match open_sealed_contact_details(OpenSealIn { sealed: read.data.clone(), prekey_secret: secret, inbox_key: issued.inbox_key.clone() }) {
+                    Ok(o) => return Ok(o),
+                    Err(e) => last = e.into(),
+                }
+            }
+            Err(last)
+        })();
+        let theirs = match opened.and_then(|o| {
+            if o.one_time {
+                let _ = self.burn_one_time(o.prekey_id);
+            }
+            Ok(parse_contact_details(o.signed, issued.inbox_key.clone(), true)?)
+        }) {
             Ok(t) => t,
             Err(e) => {
                 log::warn(TAG, format!("card ({}) was answered with something that does not open ({e}) — discarding it unclaimed", issued.purpose));

@@ -1057,6 +1057,12 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1328,6 +1334,8 @@ internal interface UniffiLib : Library {
     ): Byte
     fun uniffi_ducat_mobile_fn_func_open_message(`sealedBytes`: RustBuffer.ByValue,`prekeySecret`: RustBuffer.ByValue,`isOneTime`: Byte,`expectedSeq`: Long,`prevLink`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_open_sealed_contact_details(`input`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_parse_contact_details(`bytes`: RustBuffer.ByValue,`inboxKey`: RustBuffer.ByValue,`claimant`: Byte,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_parse_log_head(`bytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -1370,8 +1378,12 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_rental_encode(`info`: RustBuffer.ByValue,`personaSecret`: RustBuffer.ByValue,`listingId`: RustBuffer.ByValue,`board`: RustBuffer.ByValue,`subkey`: Int,`beaconHeight`: Long,`beaconHashHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_seal_contact_details(`input`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_seal_message(`input`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_sealed_half_prekey_id(`sealed`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Int
     fun uniffi_ducat_mobile_fn_func_sealed_prekey_id(`sealedBytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
     fun uniffi_ducat_mobile_fn_func_site_head_decode(`bytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -1786,6 +1798,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_open_message(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_open_sealed_contact_details(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_parse_contact_details(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_parse_log_head(
@@ -1828,7 +1842,11 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_rental_encode(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_seal_contact_details(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_seal_message(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_sealed_half_prekey_id(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_sealed_prekey_id(
     ): Short
@@ -2277,6 +2295,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_open_message() != 55240.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_ducat_mobile_checksum_func_open_sealed_contact_details() != 13884.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ducat_mobile_checksum_func_parse_contact_details() != 64932.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -2340,7 +2361,13 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_rental_encode() != 60190.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_ducat_mobile_checksum_func_seal_contact_details() != 39652.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ducat_mobile_checksum_func_seal_message() != 61152.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_sealed_half_prekey_id() != 8249.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_sealed_prekey_id() != 10001.toShort()) {
@@ -5081,6 +5108,49 @@ public object FfiConverterTypeNodeStatus: FfiConverterRustBuffer<NodeStatus> {
 
 
 /**
+ * Everything opening a sealed half needs, in one record.
+ */
+data class OpenSealIn (
+    var `sealed`: kotlin.ByteArray, 
+    /**
+     * The prekey secret the sealed half names. The caller looks it up by the
+     * id it can read with [`sealed_half_prekey_id`].
+     */
+    var `prekeySecret`: kotlin.ByteArray, 
+    var `inboxKey`: kotlin.String
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeOpenSealIn: FfiConverterRustBuffer<OpenSealIn> {
+    override fun read(buf: ByteBuffer): OpenSealIn {
+        return OpenSealIn(
+            FfiConverterByteArray.read(buf),
+            FfiConverterByteArray.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: OpenSealIn) = (
+            FfiConverterByteArray.allocationSize(value.`sealed`) +
+            FfiConverterByteArray.allocationSize(value.`prekeySecret`) +
+            FfiConverterString.allocationSize(value.`inboxKey`)
+    )
+
+    override fun write(value: OpenSealIn, buf: ByteBuffer) {
+            FfiConverterByteArray.write(value.`sealed`, buf)
+            FfiConverterByteArray.write(value.`prekeySecret`, buf)
+            FfiConverterString.write(value.`inboxKey`, buf)
+    }
+}
+
+
+
+/**
  * A message that arrived, after decryption and chain checking.
  */
 data class OpenedMessage (
@@ -5252,6 +5322,51 @@ public object FfiConverterTypeOpenedMessage: FfiConverterRustBuffer<OpenedMessag
             FfiConverterOptionalULong.write(value.`groupSeq`, buf)
             FfiConverterOptionalByteArray.write(value.`groupReSender`, buf)
             FfiConverterOptionalULong.write(value.`groupReSeq`, buf)
+    }
+}
+
+
+
+/**
+ * What a sealed half opened to, and which key it cost.
+ */
+data class OpenedSeal (
+    /**
+     * The signed half, still to go through [`parse_contact_details`].
+     */
+    var `signed`: kotlin.ByteArray, 
+    var `prekeyId`: kotlin.UInt, 
+    /**
+     * True when that key was a one-time one and must now be retired.
+     */
+    var `oneTime`: kotlin.Boolean
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeOpenedSeal: FfiConverterRustBuffer<OpenedSeal> {
+    override fun read(buf: ByteBuffer): OpenedSeal {
+        return OpenedSeal(
+            FfiConverterByteArray.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterBoolean.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: OpenedSeal) = (
+            FfiConverterByteArray.allocationSize(value.`signed`) +
+            FfiConverterUInt.allocationSize(value.`prekeyId`) +
+            FfiConverterBoolean.allocationSize(value.`oneTime`)
+    )
+
+    override fun write(value: OpenedSeal, buf: ByteBuffer) {
+            FfiConverterByteArray.write(value.`signed`, buf)
+            FfiConverterUInt.write(value.`prekeyId`, buf)
+            FfiConverterBoolean.write(value.`oneTime`, buf)
     }
 }
 
@@ -6672,6 +6787,54 @@ public object FfiConverterTypeScannedCard: FfiConverterRustBuffer<ScannedCard> {
 
 
 /**
+ * Everything sealing a claimant's half needs, in one record.
+ */
+data class SealDetailsIn (
+    /**
+     * The signed half from [`build_contact_details`], role claimant.
+     */
+    var `signed`: kotlin.ByteArray, 
+    /**
+     * The issuer's prekey bundle, as published in subkey 0.
+     */
+    var `theirBundle`: kotlin.ByteArray, 
+    /**
+     * The inbox this half is written into; the associated data.
+     */
+    var `inboxKey`: kotlin.String
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeSealDetailsIn: FfiConverterRustBuffer<SealDetailsIn> {
+    override fun read(buf: ByteBuffer): SealDetailsIn {
+        return SealDetailsIn(
+            FfiConverterByteArray.read(buf),
+            FfiConverterByteArray.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: SealDetailsIn) = (
+            FfiConverterByteArray.allocationSize(value.`signed`) +
+            FfiConverterByteArray.allocationSize(value.`theirBundle`) +
+            FfiConverterString.allocationSize(value.`inboxKey`)
+    )
+
+    override fun write(value: SealDetailsIn, buf: ByteBuffer) {
+            FfiConverterByteArray.write(value.`signed`, buf)
+            FfiConverterByteArray.write(value.`theirBundle`, buf)
+            FfiConverterString.write(value.`inboxKey`, buf)
+    }
+}
+
+
+
+/**
  * Everything one sealed message needs, in a single record.
  *
  * **One argument, deliberately.** `seal_message` used to take its fields
@@ -6818,6 +6981,38 @@ public object FfiConverterTypeSealIn: FfiConverterRustBuffer<SealIn> {
             FfiConverterOptionalTypeGroupSend.write(value.`group`, buf)
             FfiConverterOptionalTypePublicationSend.write(value.`publication`, buf)
             FfiConverterOptionalTypeCallSend.write(value.`call`, buf)
+    }
+}
+
+
+
+data class SealedHalf (
+    var `bytes`: kotlin.ByteArray, 
+    var `oneTime`: kotlin.Boolean
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeSealedHalf: FfiConverterRustBuffer<SealedHalf> {
+    override fun read(buf: ByteBuffer): SealedHalf {
+        return SealedHalf(
+            FfiConverterByteArray.read(buf),
+            FfiConverterBoolean.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: SealedHalf) = (
+            FfiConverterByteArray.allocationSize(value.`bytes`) +
+            FfiConverterBoolean.allocationSize(value.`oneTime`)
+    )
+
+    override fun write(value: SealedHalf, buf: ByteBuffer) {
+            FfiConverterByteArray.write(value.`bytes`, buf)
+            FfiConverterBoolean.write(value.`oneTime`, buf)
     }
 }
 
@@ -12083,6 +12278,19 @@ public object FfiConverterMapStringString: FfiConverterRustBuffer<Map<kotlin.Str
     
 
         /**
+         * Open a claimant's sealed half (§16.9, W4).
+         */
+    @Throws(ContactException::class) fun `openSealedContactDetails`(`input`: OpenSealIn): OpenedSeal {
+            return FfiConverterTypeOpenedSeal.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_open_sealed_contact_details(
+        FfiConverterTypeOpenSealIn.lower(`input`),_status)
+}
+    )
+    }
+    
+
+        /**
          * Open one half of a contact inbox: verify the envelope under the persona
          * it names (§16.9) and check it was written for this `inbox_key` in this
          * role. A half signed by any other key, written for another inbox, or the
@@ -12406,6 +12614,26 @@ public object FfiConverterMapStringString: FfiConverterRustBuffer<Map<kotlin.Str
     
 
         /**
+         * Seal a claimant's half to the issuer's bundle (§16.9, W4).
+         *
+         * A card on a public board hands its inbox's record key to every reader of
+         * that board, so a merely *signed* reply is a reply everyone can read — the
+         * claimant's persona, name, reach-me identifiers, a driver's plate and the
+         * photograph of their car. Sealed, what a board reader finds there is noise.
+         * Returns the bytes for subkey 1 and whether a one-time key carried it;
+         * `false` is a real weakening the caller is expected to surface.
+         */
+    @Throws(ContactException::class) fun `sealContactDetails`(`input`: SealDetailsIn): SealedHalf {
+            return FfiConverterTypeSealedHalf.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_seal_contact_details(
+        FfiConverterTypeSealDetailsIn.lower(`input`),_status)
+}
+    )
+    }
+    
+
+        /**
          * Seal one message in a thread.
          */
     @Throws(ContactException::class) fun `sealMessage`(`input`: SealIn): SealedOut {
@@ -12413,6 +12641,20 @@ public object FfiConverterMapStringString: FfiConverterRustBuffer<Map<kotlin.Str
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_seal_message(
         FfiConverterTypeSealIn.lower(`input`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Which prekey a sealed half was sealed to, so the caller can find the
+         * secret before it tries to open it.
+         */
+    @Throws(ContactException::class) fun `sealedHalfPrekeyId`(`sealed`: kotlin.ByteArray): kotlin.UInt {
+            return FfiConverterUInt.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_sealed_half_prekey_id(
+        FfiConverterByteArray.lower(`sealed`),_status)
 }
     )
     }

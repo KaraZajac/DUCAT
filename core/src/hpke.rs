@@ -112,6 +112,17 @@ pub fn message_info(suite: u8) -> Vec<u8> {
     v
 }
 
+/// The `info` string for §16.9's claimant half — a different purpose from a
+/// thread message, so a sealed reply cannot open as one or the reverse.
+pub fn accept_info(suite: u8) -> Vec<u8> {
+    let mut v = Vec::from(&b"DUCAT-v1"[..]);
+    v.push(0);
+    v.extend_from_slice(b"CONTACT_ACCEPT");
+    v.push(0);
+    v.push(suite);
+    v
+}
+
 /// Seal a plaintext to a recipient public key.
 ///
 /// `aad` is authenticated but not encrypted; the caller binds the ciphertext to

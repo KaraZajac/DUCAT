@@ -81,6 +81,31 @@ fn a_truncated_uri_is_refused_rather_than_half_parsed() {
 
 // --- inbox details --------------------------------------------------------
 
+/// Entropy for the sealing test: `core` holds none of its own, and a test
+/// wants the same bytes every run.
+struct TestRng([u8; 39], usize);
+impl ducat_core::hpke::rand_core::TryRng for TestRng {
+    type Error = core::convert::Infallible;
+    fn try_next_u32(&mut self) -> Result<u32, Self::Error> {
+        let mut b = [0u8; 4];
+        self.try_fill_bytes(&mut b)?;
+        Ok(u32::from_le_bytes(b))
+    }
+    fn try_next_u64(&mut self) -> Result<u64, Self::Error> {
+        let mut b = [0u8; 8];
+        self.try_fill_bytes(&mut b)?;
+        Ok(u64::from_le_bytes(b))
+    }
+    fn try_fill_bytes(&mut self, dst: &mut [u8]) -> Result<(), Self::Error> {
+        for d in dst.iter_mut() {
+            *d = self.0[self.1 % self.0.len()].wrapping_add(self.1 as u8);
+            self.1 += 1;
+        }
+        Ok(())
+    }
+}
+impl ducat_core::hpke::rand_core::TryCryptoRng for TestRng {}
+
 fn details() -> ContactDetails {
     ContactDetails {
         version: ducat_core::contact::DETAILS_VERSION,
@@ -132,6 +157,56 @@ fn details_open_only_under_their_own_persona_inbox_and_role() {
     assert!(open_details(&env, "VLD0:another-inbox", ROLE_CLAIMANT).is_err(), "another inbox");
     assert!(open_details(&sign_details(&d, &other), &d.inbox_key, ROLE_CLAIMANT).is_err(), "somebody else's key");
     assert!(open_details(&d.to_value().encode(), &d.inbox_key, ROLE_CLAIMANT).is_err(), "a bare map");
+}
+
+/// §16.9 (W4): the claimant's half is sealed to the issuer's prekey bundle,
+/// because a card on a public board hands its inbox's key to every reader of
+/// that board — and a signed reply is a reply everyone can read.
+#[test]
+fn a_claimants_half_is_sealed_to_the_issuers_bundle_and_bound_to_the_inbox() {
+    use ducat_core::contact::{open_details, open_sealed_details, seal_details, sign_details, ROLE_CLAIMANT};
+    use ducat_core::hpke::{derive_keypair, PreKey, PreKeyBundle};
+    use ducat_core::sig::SecretKey;
+    let sk = SecretKey::ed25519_from_bytes(&[0x61; 32]);
+    let mut d = details();
+    d.persona = sk.public().to_bytes().to_vec();
+    d.role = ROLE_CLAIMANT;
+    let signed = sign_details(&d, &sk);
+
+    let (one_secret, one_public) = derive_keypair(b"the issuer's one-time key");
+    let (signed_secret, signed_public) = derive_keypair(b"the issuer's signed prekey");
+    let bundle = PreKeyBundle {
+        version: 1,
+        suite: 1,
+        signed_prekey: signed_public,
+        one_time: vec![PreKey { id: 7, public: one_public }],
+        expiry: 1_800_000_000,
+    };
+    let mut rng = TestRng(*b"a fixed stream for a deterministic test", 0);
+    let (sealed, one_time) = seal_details(&mut rng, &signed, &bundle, &d.inbox_key).unwrap();
+    assert!(one_time, "a one-time key is preferred while there is one");
+    // Nothing of the reply is legible to a board reader.
+    assert!(!sealed.windows(3).any(|w| w == b"sam"), "the asserted name is in the clear");
+
+    let (back, id) = open_sealed_details(&sealed, &one_secret, &d.inbox_key).unwrap();
+    assert_eq!(id, 7);
+    assert_eq!(open_details(&back, &d.inbox_key, ROLE_CLAIMANT).unwrap(), d);
+
+    // The inbox key is the associated data: the same bytes in another card's
+    // record do not open, so a reply cannot be replayed into a handshake its
+    // sender never joined.
+    assert!(open_sealed_details(&sealed, &one_secret, "VLD0:another-inbox").is_err());
+    // And the wrong prekey secret opens nothing.
+    assert!(open_sealed_details(&sealed, &signed_secret, &d.inbox_key).is_err());
+
+    // With no one-time keys left the signed prekey carries it, and the caller
+    // is told the secrecy is weaker.
+    let bare = PreKeyBundle { one_time: Vec::new(), ..bundle };
+    let (sealed, one_time) = seal_details(&mut rng, &signed, &bare, &d.inbox_key).unwrap();
+    assert!(!one_time);
+    let (back, id) = open_sealed_details(&sealed, &signed_secret, &d.inbox_key).unwrap();
+    assert_eq!(id, ducat_core::hpke::SIGNED_PREKEY_ID);
+    assert_eq!(open_details(&back, &d.inbox_key, ROLE_CLAIMANT).unwrap(), d);
 }
 
 #[test]

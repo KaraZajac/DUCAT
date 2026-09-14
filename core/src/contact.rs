@@ -36,6 +36,7 @@ use crate::reject::{Reject, RejectCode};
 use crate::cbor::decode;
 use crate::sig::{ObjectType, PublicKey, SecretKey, SignedBytes, Suite};
 use crate::wire::{f, open, peek_body, seal, type_code, Reader};
+use crate::hpke::rand_core::CryptoRng;
 
 /// The longest a display name may be.
 ///
@@ -208,6 +209,49 @@ pub const ROLE_CLAIMANT: u8 = 1;
 pub fn sign_details(d: &ContactDetails, key: &SecretKey) -> Vec<u8> {
     let body = SignedBytes::from_value(d.to_value());
     seal(&body, ObjectType::ContactAccept, key)
+}
+
+/// Seal the claimant's signed half to the issuer's prekey bundle (§16.9).
+///
+/// The issuer's half (subkey 0) is written before anybody has claimed the
+/// card, so it can only be signed; the claimant's half can do better. A card
+/// on a public board hands its inbox's record key to every reader of that
+/// board, and a *signed* reply is a reply everyone can read — the claimant's
+/// persona, the name they asserted, their reach-me identifiers, a driver's
+/// plate and the photograph of their car. So the claimant seals its half to
+/// the prekey bundle the issuer published in subkey 0, and what a board
+/// reader now finds there is noise.
+///
+/// The inbox key is the associated data: a sealed half lifted into another
+/// card's record does not open, so nobody can replay somebody's reply into a
+/// handshake they never joined.
+pub fn seal_details(
+    rng: &mut impl CryptoRng,
+    signed: &[u8],
+    bundle: &crate::hpke::PreKeyBundle,
+    inbox_key: &str,
+) -> Result<(Vec<u8>, bool), Reject> {
+    let (prekey, one_time) = bundle.select();
+    let info = crate::hpke::accept_info(bundle.suite);
+    let (enc, ciphertext) = crate::hpke::seal(rng, &prekey.public, &info, inbox_key.as_bytes(), signed)?;
+    let sealed = crate::hpke::SealedMessage {
+        version: 1,
+        suite: bundle.suite,
+        prekey_id: prekey.id,
+        enc,
+        ciphertext,
+    };
+    Ok((sealed.to_value().encode(), one_time))
+}
+
+/// Open a claimant's sealed half with the prekey secret it names. Returns the
+/// signed envelope — which still has to go through [`open_details`] — and the
+/// prekey id, so the caller can retire a one-time key it will never need again.
+pub fn open_sealed_details(bytes: &[u8], prekey_secret: &[u8; 32], inbox_key: &str) -> Result<(Vec<u8>, u32), Reject> {
+    let sealed = crate::hpke::SealedMessage::from_value(decode(bytes)?)?;
+    let info = crate::hpke::accept_info(sealed.suite);
+    let plain = crate::hpke::open(prekey_secret, &sealed.enc, &info, inbox_key.as_bytes(), &sealed.ciphertext)?;
+    Ok((plain, sealed.prekey_id))
 }
 
 /// Open a signed half of a contact inbox: verify the envelope under the

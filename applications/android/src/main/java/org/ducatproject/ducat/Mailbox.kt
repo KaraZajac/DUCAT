@@ -420,17 +420,20 @@ object Mailbox {
             // a newer card from the same person has been claimed since, the
             // persona in the card's details is the same and finds the same
             // thread.
-            val mine = runCatching { parseContactDetails(already, scanned.inboxKey, true) }.getOrNull()
-                ?.takeIf { personas.allHexes().contains(it.persona.toHexString()) }
-            if (mine != null) {
-                val known = store.all().firstOrNull { it.myOutbox == mine.outboxKey }
-                    ?: runCatching { nodeDhtGet(scanned.inboxKey, 0u, true) }.getOrNull()
-                        ?.let { raw -> runCatching { parseContactDetails(raw, scanned.inboxKey, false) }.getOrNull() }
-                        ?.let { theirs ->
-                            store.all().firstOrNull { it.personaHex == theirs.persona.toHexString() }
-                        }
-                if (known != null) throw CardAlreadyMine(known)
-            }
+            // Not a question this phone can answer by reading: since W4 a
+            // claimant's half is sealed to the *issuer's* bundle, so even our
+            // own reply is opaque to us. The answer we have is the thread —
+            // if the issuer's own half names a log we already hold, this card
+            // was claimed here and that thread is the right answer.
+            @Suppress("UNUSED_EXPRESSION") already
+            val known = runCatching { nodeDhtGet(scanned.inboxKey, 0u, true) }.getOrNull()
+                ?.let { raw -> runCatching { parseContactDetails(raw, scanned.inboxKey, false) }.getOrNull() }
+                ?.let { theirs ->
+                    store.all().firstOrNull {
+                        it.personaHex == theirs.persona.toHexString() && it.theirOutbox == theirs.outboxKey
+                    }
+                }
+            if (known != null) throw CardAlreadyMine(known)
             // Typed, because callers have to tell this apart from "the network
             // is not up yet" and from a genuinely malformed card, and matching
             // on English prose to do it would break in every other language.
@@ -484,9 +487,7 @@ object Mailbox {
             prekeys.signedSecret,
             prekeys.oneTimeIds.mapIndexed { i, id -> id.toInt() to prekeys.oneTimeSecrets[i] }.toMap(),
         )
-        nodeDhtSet(
-            scanned.inboxKey, 1u,
-            buildContactDetails(
+        val signedHalf = buildContactDetails(
                 persona, outbox.key, prekeys.bundle,
                 // **Our** name, not the one we just chose for them. This
                 // argument is `display_name` — what the reply asserts about
@@ -510,10 +511,23 @@ object Mailbox {
                 // sends the car, which is what a rider is scanning the curb for.
                 MyProfile(context).toWire(purpose = theirs.purpose, driving = asDriver),
                 theirs.purpose,
-                // §16.9: the inbox this half is written into, and which half it is.
-                scanned.inboxKey, true,
+            // §16.9: the inbox this half is written into, and which half it is.
+            scanned.inboxKey, true,
+        )
+        // §16.9 (W4): sealed to the issuer's bundle, because this record's key
+        // is public board text for a hail or a listing, and a signed reply is
+        // a reply the whole board can read.
+        val sealed = uniffi.ducat_mobile.sealContactDetails(
+            uniffi.ducat_mobile.SealDetailsIn(
+                signed = signedHalf,
+                theirBundle = theirs.prekeyBundle,
+                inboxKey = scanned.inboxKey,
             ),
         )
+        if (!sealed.oneTime) {
+            DucatLog.w(TAG, "the issuer had no one-time prekey left — this reply rests on their signed prekey")
+        }
+        nodeDhtSet(scanned.inboxKey, 1u, sealed.bytes)
 
         // What this thread already had, if we have met before.
         //
@@ -823,7 +837,25 @@ object Mailbox {
                 // below is the claimant's own and not a name typed into a bare
                 // map. A reply that does not open is a stranger writing into
                 // the slot: the card is contested, not merely unread.
-                val opened = runCatching { parseContactDetails(raw, issued.inboxKey, true) }
+                // Sealed to one of our prekeys (§16.9, W4): the id names
+                // which, and a one-time key is spent by opening it.
+                val opened = runCatching {
+                    val id = uniffi.ducat_mobile.sealedHalfPrekeyId(raw).toInt()
+                    val secrets = if (id == 0) store.signedPrekeySecrets() else listOfNotNull(store.oneTimeSecret(id))
+                    var half: uniffi.ducat_mobile.OpenedSeal? = null
+                    var why: Throwable? = null
+                    for (secret in secrets) {
+                        val got = runCatching {
+                            uniffi.ducat_mobile.openSealedContactDetails(
+                                uniffi.ducat_mobile.OpenSealIn(sealed = raw, prekeySecret = secret, inboxKey = issued.inboxKey),
+                            )
+                        }
+                        if (got.isSuccess) { half = got.getOrNull(); break } else why = got.exceptionOrNull()
+                    }
+                    val h = half ?: throw (why ?: IllegalStateException("no prekey of ours opens this reply"))
+                    if (h.oneTime) store.burnOneTime(h.prekeyId.toInt())
+                    parseContactDetails(h.signed, issued.inboxKey, true)
+                }
                 val theirs = opened.getOrNull()
                 if (theirs == null) {
                     DucatLog.w(

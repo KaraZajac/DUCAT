@@ -326,6 +326,87 @@ pub fn parse_contact_details(bytes: Vec<u8>, inbox_key: String, claimant: bool) 
     })
 }
 
+/// Everything sealing a claimant's half needs, in one record.
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct SealDetailsIn {
+    /// The signed half from [`build_contact_details`], role claimant.
+    pub signed: Vec<u8>,
+    /// The issuer's prekey bundle, as published in subkey 0.
+    pub their_bundle: Vec<u8>,
+    /// The inbox this half is written into; the associated data.
+    pub inbox_key: String,
+}
+
+/// What a sealed half opened to, and which key it cost.
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct OpenedSeal {
+    /// The signed half, still to go through [`parse_contact_details`].
+    pub signed: Vec<u8>,
+    pub prekey_id: u32,
+    /// True when that key was a one-time one and must now be retired.
+    pub one_time: bool,
+}
+
+/// Seal a claimant's half to the issuer's bundle (§16.9, W4).
+///
+/// A card on a public board hands its inbox's record key to every reader of
+/// that board, so a merely *signed* reply is a reply everyone can read — the
+/// claimant's persona, name, reach-me identifiers, a driver's plate and the
+/// photograph of their car. Sealed, what a board reader finds there is noise.
+/// Returns the bytes for subkey 1 and whether a one-time key carried it;
+/// `false` is a real weakening the caller is expected to surface.
+#[uniffi::export]
+pub fn seal_contact_details(input: SealDetailsIn) -> Result<SealedHalf, ContactError> {
+    let bundle = ducat_core::hpke::PreKeyBundle::from_value(
+        ducat_core::cbor::decode(&input.their_bundle).map_err(refuse)?,
+    )
+    .map_err(refuse)?;
+    let mut rng = SystemRng;
+    let (bytes, one_time) =
+        ducat_core::contact::seal_details(&mut rng, &input.signed, &bundle, &input.inbox_key).map_err(refuse)?;
+    Ok(SealedHalf { bytes, one_time })
+}
+
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct SealedHalf {
+    pub bytes: Vec<u8>,
+    pub one_time: bool,
+}
+
+/// Everything opening a sealed half needs, in one record.
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct OpenSealIn {
+    pub sealed: Vec<u8>,
+    /// The prekey secret the sealed half names. The caller looks it up by the
+    /// id it can read with [`sealed_half_prekey_id`].
+    pub prekey_secret: Vec<u8>,
+    pub inbox_key: String,
+}
+
+/// Which prekey a sealed half was sealed to, so the caller can find the
+/// secret before it tries to open it.
+#[uniffi::export]
+pub fn sealed_half_prekey_id(sealed: Vec<u8>) -> Result<u32, ContactError> {
+    let m = ducat_core::hpke::SealedMessage::from_value(
+        ducat_core::cbor::decode(&sealed).map_err(refuse)?,
+    )
+    .map_err(refuse)?;
+    Ok(m.prekey_id)
+}
+
+/// Open a claimant's sealed half (§16.9, W4).
+#[uniffi::export]
+pub fn open_sealed_contact_details(input: OpenSealIn) -> Result<OpenedSeal, ContactError> {
+    let secret: [u8; 32] = input
+        .prekey_secret
+        .as_slice()
+        .try_into()
+        .map_err(|_| ContactError::Refused("prekey secret is not 32 bytes".into()))?;
+    let (signed, prekey_id) =
+        ducat_core::contact::open_sealed_details(&input.sealed, &secret, &input.inbox_key).map_err(refuse)?;
+    Ok(OpenedSeal { signed, prekey_id, one_time: prekey_id != ducat_core::hpke::SIGNED_PREKEY_ID })
+}
+
 // --- the outbox ring (§16.12) ---------------------------------------------
 
 /// Encode a head, republishing our current prekeys with it.
