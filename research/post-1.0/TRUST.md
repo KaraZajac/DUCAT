@@ -296,3 +296,60 @@ protect a person from a counterparty who is dangerous rather than dishonest, and
 it says nothing about quality (§9.3.1's judgment class stays out of scope). A
 determined scammer who expects to net more than the burn will burn. The score is
 a floor under which one should not trade unbonded, not a promise.
+
+## 8. Build plan (agreed 2026-09-14)
+
+Order of work, each step landing on its own with its gates green. Sizes are
+working days for one person; "proof" is what closes the step.
+
+### Phase 1 — money lost today (before any trust work)
+
+| Step | What | Proof |
+|---|---|---|
+| 1.1 | Kiosk: `Seen` renders as settling; the paid panel and Ready need `Confirmed`; an operator setting "hand over on first sight up to X" (default off) with the risk stated beside it. Both clients. Pool-sighted orders take the second opinion too. (M1, M10) | kiosk walk on two phones: a sighting shows settling, a block shows paid; the cap works |
+| 1.2 | Phone second opinion to the desk's rule: `InBlock` settles, pool/unknown/silence defer, ten-minute stall → "settle anyway", small-sale floor, confirmations by amount, own node honoured, never the node in use. (M3/N2 phone side, N22) | `SecondOpinion` unit tests on a walked clock; bar-tab walk |
+| 1.3 | Fee ceiling: a real `max_per_weight`, refuse a built fee over the quote by 25% or over 5% of the amount, both send paths and the escrow proposer; co-signers refuse a fee over the ceiling. (N1, N10) | unit tests with a lying quote; a stagenet send |
+| 1.4 | Escrow consent from the transaction, not the balance: `frost_destinations` returns inputs total and fee; the co-signer requires inputs ≥ funded, sizes its residual from inputs − fixed − fee, bounds the fee; the arbiter's screen lists parsed outputs and refuses any address outside the two parties; the joiner checks fare against the accept and stake against the schedule; the consent tap carries the displayed figure. (M2, M4, M5, M11) | ceremony tests with a hostile proposer; a bonded ride on the emulators |
+| 1.5 | Fetch byte cap and index validation at decode; seeder back-pressure; per-kind budgets. (N4/D2, N5, N26) | a hostile index in the harness is refused before a byte lands |
+
+### Phase 2 — the spec
+
+| Step | What | Proof |
+|---|---|---|
+| 2.1 | §9.5 "Costly identity on Monero": the burn address and its derivation, `BURN_PROOF` (txid, amount, height, OutProofV2, message = persona ‖ purpose), the verification rule (own node plus second opinion; *unknown* never *yes*), the score curve, what a reader MUST refuse. | audit_spec 0 problems |
+| 2.2 | `ATTESTATION` (type 12) given its fields: the rated `RECEIPT` of §9.2 — subject persona, rating, the settled amount, the signer's persona, the txid or receipt hash it stands on — and the attestation record's layout in the persona's DHT record; the backup slot that already exists. | vectors for the burn proof, the attestation, and the refusals; 2 implementations agreeing |
+| 2.3 | The gate rule: a client MUST warn when the amount at risk exceeds what the counterparty's burn + bond covers, and MAY refuse; a seller MAY set a minimum buyer score. Words, not numbers, in the UI. | the sentence in §9.5 and the client behaviour in 4.2 |
+
+### Phase 3 — the bridge
+
+| Step | What | Proof |
+|---|---|---|
+| 3.1 | Keep the transaction secret key at send time (per send, in the wallet store, owner-only). | a burn can be proved a day later |
+| 3.2 | `OutProofV2` generation and verification in Rust (`mobile/src/monero.rs`): the Schnorr-style proof over the transaction public key and the recipient's public view key, with the message bound. | `check_tx_proof` on monero-wallet-rpc (stagenet) agrees on every proof we make and refuses every proof we alter; vectors pin the encoding |
+| 3.3 | Burn: send to the DUCAT burn address from the wallet, keep the proof in the persona's attestation record and the backup. | a burn on stagenet, restored from a backup, still verifies |
+
+### Phase 4 — the clients
+
+| Step | What | Proof |
+|---|---|---|
+| 4.1 | Burn from the wallet screen, the cost said plainly and irreversibly; the proof stored and carried. Both clients. | walk on phone and desk |
+| 4.2 | The badge on listings, hails, tills and in the thread; the gate; "ask for their record" in a thread, answered from the attestation record; a seller's minimum. | marketplace walk with a burned seller and an unburned one |
+| 4.3 | Rated receipts after a settled deal, signed to the counterparty's persona, weighted by the signer's own burn; shown on request. | kiosk and rental walks produce receipts both sides can show |
+| 4.4 | Vouching along in-person card edges, computed locally, never published. | "2 of your contacts know this person" on a three-phone walk |
+
+### Phase 5 — later
+
+Bonds through §17.2's float once §9.3's arbiter market exists; private
+receipt tokens (blind or linkable-ring signatures); zero-knowledge "one of
+the bonded set vouches" proofs; per-listing pseudonymous personas for public
+cards (W4/N3).
+
+### Decisions taken
+
+- **Burn floor**: start at the price of a coffee — 0.01 XMR at today's rate,
+  a named constant to tune — and let the gate, not the floor, do the work.
+- **Receipts name the reviewer** to the reader in the first version; the
+  private form is Phase 5.
+- **Phase 1 before Phase 2**: the review's open money items are money lost
+  today; the trust work starts when they are closed.
+- **No second chain, no token**, for the reasons in §1 and §5.4.
