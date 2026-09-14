@@ -817,6 +817,57 @@ fn main() {
             }
             println!("MB_FAIL no vouches came");
         }
-        _ => panic!("MB_FAIL usage: host | guest <card uri> [name] | customer <card uri> | reader <press code> | party <name> [card...] | callee <card> | caller <card> [secs] | rated | rater <card> | checker | burner <card> | vouched [name] | voucher <name> <x card> | knower <voucher card>... <x card>"),
+        Some("lister") => {
+            // A seller: post a room in a cell with a minimum burn for buyers,
+            // then stay up — answer the claim its card gets, say hello in the
+            // thread, and keep the board slot fresh — until killed.
+            //   lister <cell geohash, ≤5 chars> <minimum XMR, 0 for none>
+            let cell = args.get(1).cloned().unwrap_or_else(|| "u33dc".into());
+            let min_xmr: f64 = args.get(2).and_then(|s| s.parse().ok()).unwrap_or(0.0);
+            let min_pxmr = (min_xmr * 1e12).round() as u64;
+            app.set_my_name(None, "Lister Desk").expect("MB_FAIL name");
+            let mut specs = serde_json::Map::new();
+            specs.insert("rooms".into(), serde_json::json!(1));
+            specs.insert("sleeps".into(), serde_json::json!(2));
+            let l = app
+                .draft_listing(ducat_app::listings::KIND_PLACE, "A spare room, quiet street", "north side", "A quiet room with its own key. Ask and I will send the address.", 50_000_000_000, &cell, specs, "Door code 4711", None, None, 1, min_pxmr, None)
+                .expect("MB_FAIL draft");
+            println!("MB_DRAFT {} min_burn={} pXMR", l.id, l.min_burn_pxmr);
+            match app.post_listing(&l.id) {
+                Ok(true) => println!("MB_LISTED {} in {cell}", l.id),
+                Ok(false) => println!("MB_FAIL the board refused the listing"),
+                Err(e) => {
+                    println!("MB_FAIL post: {e}");
+                    return;
+                }
+            }
+            let t0 = Instant::now();
+            let mut greeted: std::collections::HashSet<String> = Default::default();
+            while t0.elapsed() < Duration::from_secs(3600) {
+                app.lap_once();
+                for c in app.contacts() {
+                    if greeted.contains(&c.persona_hex) {
+                        continue;
+                    }
+                    if c.their_bundle.is_some() {
+                        match app.send(&c, Outgoing::text("Hello — the room is free this week. Ask me anything.")) {
+                            Ok(_) => {
+                                println!("MB_CLAIM_SEEN by {}; said hello", c.display_name());
+                                greeted.insert(c.persona_hex.clone());
+                            }
+                            Err(e) => println!("MB_FAIL hello: {e}"),
+                        }
+                    }
+                }
+                for c in app.contacts() {
+                    for m in app.thread(&c.persona_hex).into_iter().filter(|m| !m.outgoing && m.kind == 3) {
+                        println!("MB_RECEIPT {} XMR from {} txid={}", ducat_app::wallet::format_xmr(m.amount_pxmr), c.display_name(), m.txid_hex.as_deref().unwrap_or("-"));
+                    }
+                }
+                std::thread::sleep(Duration::from_secs(10));
+            }
+            println!("MB_OK lister stayed up an hour");
+        }
+        _ => panic!("MB_FAIL usage: host | guest <card uri> [name] | customer <card uri> | reader <press code> | party <name> [card...] | callee <card> | caller <card> [secs] | rated | rater <card> | checker | burner <card> | vouched [name] | voucher <name> <x card> | knower <voucher card>... <x card> | lister <cell> <min xmr>"),
     }
 }
