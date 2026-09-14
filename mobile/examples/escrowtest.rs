@@ -328,7 +328,9 @@ fn main() {
             let prop = cer::frost_propose(cid.clone(), 2, k2, dest, node(), from)
                 .expect("propose");
             println!("  driver proposes: {} pXMR of {}", prop.payout_pxmr, prop.total_pxmr);
-            let ans = cer::frost_cosign(cid.clone(), 3, 2, k3, prop.payload).expect("cosign");
+            // The arbiter checks the release against what was funded; no local fee
+            // estimate here, so the reserve is the ceiling (§17.9, 1.4).
+            let ans = cer::frost_cosign(cid.clone(), 3, 2, k3, prop.payload, prop.total_pxmr, 0).expect("cosign");
             println!("  ARBITER co-signs (fee {} pXMR) — the ruling is a signature", ans.fee_pxmr);
             let txid =
                 cer::frost_complete(cid, 2, 3, ans.payload, node()).expect("complete");
@@ -368,8 +370,9 @@ fn main() {
             // only account of the split it has any reason to believe. This is
             // the case the unit tests cannot reach: real inputs, with real
             // decoys, which the walk to the payments has to step over exactly.
-            let seen = ducat_mobile::ceremony::frost_destinations(prop.payload.clone())
-                .expect("read the proposed outputs");
+            let seen = ducat_mobile::ceremony::frost_view(prop.payload.clone())
+                .expect("read the proposed outputs")
+                .destinations;
             for d in &seen {
                 let who = if d.residual { "residual" } else { "fixed   " };
                 println!("  co-signer reads: {who} {:>14} pXMR  {}", d.amount_pxmr, d.address);
@@ -386,7 +389,7 @@ fn main() {
             );
             println!("  outputs agree with the proposal — the walk aligned over real inputs");
 
-            let ans = ducat_mobile::ceremony::frost_cosign(cid.clone(), 2, 1, keys2, prop.payload)
+            let ans = ducat_mobile::ceremony::frost_cosign(cid.clone(), 2, 1, keys2, prop.payload, prop.total_pxmr, 0)
                 .expect("cosign");
             println!("  co-signed (fee {} pXMR)", ans.fee_pxmr);
             let txid = ducat_mobile::ceremony::frost_complete(cid, 1, 2, ans.payload, node())
