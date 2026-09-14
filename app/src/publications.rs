@@ -539,7 +539,7 @@ impl App {
         std::fs::create_dir_all(&part)?;
         if let Some((key, digest)) = self.shipment(publisher_hex, period) {
             log::info(TAG, format!("fetching '{period}' from {}… off the swarm", &publisher_hex[..8.min(publisher_hex.len())]));
-            swarm::swarm_fetch(key.clone(), digest.clone(), part.to_string_lossy().into_owned(), mirroring)?;
+            swarm::swarm_fetch_capped(key.clone(), digest.clone(), part.to_string_lossy().into_owned(), mirroring, swarm::caps::ISSUE)?;
             self.mark_held(publisher_hex, period, &key, &digest)?;
         } else {
             log::info(TAG, format!("fetching '{period}' from {}… off the shelf", &publisher_hex[..8.min(publisher_hex.len())]));
@@ -567,7 +567,8 @@ impl App {
                     continue;
                 }
                 swarm::swarm_stop_share(key.clone());
-                if let Err(e) = swarm::swarm_fetch(key, digest, dir.to_string_lossy().into_owned(), true) {
+                // Somebody else's issue, mirrored: the per-kind ceiling.
+                if let Err(e) = swarm::swarm_fetch_capped(key, digest, dir.to_string_lossy().into_owned(), true, swarm::caps::ISSUE) {
                     log::warn(TAG, format!("re-park '{period}': {e}"));
                 }
             }
@@ -929,7 +930,9 @@ impl App {
                     continue;
                 }
                 swarm::swarm_stop_share(i.key.clone());
-                if let Err(e) = swarm::swarm_fetch(i.key, i.digest, dir.to_string_lossy().into_owned(), true) {
+                // Our own published issue, back on the network: the
+                // standing ceiling, since we chose what went into it.
+                if let Err(e) = swarm::swarm_fetch_capped(i.key, i.digest, dir.to_string_lossy().into_owned(), true, swarm::caps::DEFAULT) {
                     log::warn(TAG, format!("re-seed '{period}': {e}"));
                 }
             }

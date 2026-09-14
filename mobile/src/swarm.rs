@@ -19,10 +19,72 @@ use veilnet::connection::veilid::connection::Connection as VeilidConnection;
 pub enum SwarmError {
     #[error("swarm: {0}")]
     Failed(String),
+    /// The share's index declares more bytes than this fetch was allowed
+    /// (research/security, N4/D2). Its own variant so a screen can say the
+    /// two numbers to the person instead of showing them a failure.
+    #[error("{0}")]
+    TooLarge(String),
+    /// The transfer is alive but delivering nothing (N18). Distinct from
+    /// "went quiet", which is silence: this one is a peer answering slowly
+    /// enough to hold an unattended fetch open for ever.
+    #[error("{0}")]
+    TooSlow(String),
 }
 
 fn fail<E: std::fmt::Display>(e: E) -> SwarmError {
     SwarmError::Failed(e.to_string())
+}
+
+/// Per-kind fetch ceilings, in bytes (research/security phase 1: N4/D2, N26).
+///
+/// The index says how big a share is and, until these, the fetcher believed
+/// it: a hearted home fetched on the lap, with nobody watching, could be any
+/// size its publisher liked. The engine now refuses an index that declares
+/// more than the caller will take, before it creates a single file — so
+/// every caller must say what kind of thing it asked for, because "a photo
+/// of a bicycle" and "a film" are not the same promise.
+///
+/// The same table is spelled out for the phone in Swarm.kt; keep them
+/// together.
+pub mod caps {
+    /// A listing's pictures (§16.18.3). Photographs, thumbnailed.
+    pub const GALLERY: u64 = 64 * 1024 * 1024;
+    /// Somebody's home page and feed, fetched unattended when hearted.
+    pub const HOME: u64 = 256 * 1024 * 1024;
+    /// A kept site's bundle, also fetched unattended.
+    pub const SITE: u64 = 256 * 1024 * 1024;
+    /// One issue of a publication.
+    pub const ISSUE: u64 = 256 * 1024 * 1024;
+    /// A release whose entry does not name its own size. A release is the
+    /// one thing here that is legitimately huge, and its address carries no
+    /// length until somebody has fetched it once.
+    pub const RELEASE: u64 = 4 * 1024 * 1024 * 1024;
+    /// Slack over a sealed attachment's declared length: the AEAD tag and
+    /// whatever the blob is wrapped in. The room check does the real work.
+    pub const ATTACHMENT_SLACK: u64 = 1024 * 1024;
+    /// What an uncapped caller gets. Not a budget — a ceiling, so that the
+    /// "any size at all" shape cannot come back through a caller nobody
+    /// updated.
+    pub const DEFAULT: u64 = 4 * 1024 * 1024 * 1024;
+}
+
+/// Bytes as a person would say them, for an error they will read.
+fn bytes_human(n: u64) -> String {
+    const UNITS: [(&str, u64); 4] = [
+        ("GB", 1_000_000_000),
+        ("MB", 1_000_000),
+        ("kB", 1_000),
+        ("bytes", 1),
+    ];
+    for (unit, scale) in UNITS {
+        if n >= scale {
+            if scale == 1 {
+                return format!("{n} bytes");
+            }
+            return format!("{:.1} {unit}", n as f64 / scale as f64);
+        }
+    }
+    format!("{n} bytes")
 }
 
 /// The one borrowed connection, shared by every seed and fetch — a second
@@ -269,6 +331,33 @@ pub fn swarm_fetch(
     // files verifies, downloads nothing, and stays.
     stay_seeding: bool,
 ) -> Result<u64, SwarmError> {
+    swarm_fetch_capped(
+        share_key,
+        index_digest_hex,
+        root,
+        stay_seeding,
+        caps::DEFAULT,
+    )
+}
+
+/// The same fetch, with a ceiling on how big the share may say it is.
+///
+/// The index is the publisher's claim and the fetcher used to believe it:
+/// every file it named was created and sized before a byte was verified.
+/// `max_bytes` is what the caller will actually take — 64 MiB for a
+/// listing's pictures, 256 MiB for somebody's home — and a share that
+/// declares more is refused before anything is created, with
+/// [`SwarmError::TooLarge`] so the caller can say both numbers out loud.
+///
+/// See [`caps`] for the table both clients use.
+#[uniffi::export]
+pub fn swarm_fetch_capped(
+    share_key: String,
+    index_digest_hex: String,
+    root: String,
+    stay_seeding: bool,
+    max_bytes: u64,
+) -> Result<u64, SwarmError> {
     let conn = ensure_conn()?;
     let (_, rt) = crate::node::swarm_handles()
         .ok_or_else(|| SwarmError::Failed("the node is not running".into()))?;
@@ -301,10 +390,6 @@ pub fn swarm_fetch(
                 "swarm: fetch attempt (stalls {stalls}, waited {waited}s) for {}…",
                 &share_key[..share_key.len().min(20)]
             ));
-            let before = crate::lock(progress_map())
-                .get(&share_key)
-                .map(|p| p.position)
-                .unwrap_or(0);
             let outcome = fetch_once(
                 conn.clone(),
                 root.clone(),
@@ -312,20 +397,18 @@ pub fn swarm_fetch(
                 key.clone(),
                 share_key.clone(),
                 stay_seeding,
+                max_bytes,
             )
             .await;
-            let after = crate::lock(progress_map())
-                .get(&share_key)
-                .map(|p| p.position)
-                .unwrap_or(0);
-            // An attempt that moved bytes buys the next one a clean slate:
-            // a swarm seeded through a dead origin's frozen peer list deals
-            // pieces by lottery among live and dead candidates, and each
-            // re-bootstrap redraws. Progress means somebody is serving —
-            // only six DRY windows in a row mean nobody is.
-            if after > before {
-                stalls = 0;
-            }
+            // The stall budget is NOT reset by an attempt that moved bytes
+            // (N18). It used to be: any progress at all bought the next
+            // attempt a clean slate, so a peer that served one block per
+            // re-bootstrap could keep an unattended fetch — a hearted home,
+            // a kept site — bootstrapping for ever. Six attempts is the
+            // whole budget now, whatever happens inside them; a fetch that
+            // is genuinely moving finishes inside one, and the minimum
+            // throughput rule inside `fetch_once` ends the ones that are
+            // not.
             match outcome {
                 Err(SwarmError::Failed(e)) if e.contains("TryAgain") && waited < 40 => {
                     crate::node::note(format!("swarm: route not ready, retrying — {e}"));
@@ -336,9 +419,21 @@ pub fn swarm_fetch(
                     crate::node::note("swarm: went quiet, re-bootstrapping".into());
                     stalls += 1;
                 }
+                Err(SwarmError::TooSlow(e)) if stalls < 6 => {
+                    crate::node::note(format!("swarm: {e} — re-bootstrapping"));
+                    stalls += 1;
+                }
                 other => {
-                    if let Err(SwarmError::Failed(e)) = &other {
-                        crate::node::note(format!("swarm: giving up — {e}"));
+                    match &other {
+                        Err(SwarmError::Failed(e)) | Err(SwarmError::TooSlow(e)) => {
+                            crate::node::note(format!("swarm: giving up — {e}"));
+                        }
+                        // Not a failure to retry: the share is what it is,
+                        // and it is bigger than this caller will take.
+                        Err(SwarmError::TooLarge(e)) => {
+                            crate::node::note(format!("swarm: refused — {e}"));
+                        }
+                        Ok(_) => {}
                     }
                     return other;
                 }
@@ -347,6 +442,16 @@ pub fn swarm_fetch(
     })
 }
 
+/// The rule for a fetch that is alive but not arriving (N18).
+///
+/// A peer that answers just often enough keeps the engine's own watchdog
+/// happy for ever, which on an unattended fetch — a hearted home, a kept
+/// site — means a fetch that never ends and a node that never rests. Fewer
+/// than one verified piece (1 MiB) a minute, over three minutes, with a
+/// bootstrapped swarm to ask, is not a slow link: it is nobody serving.
+const THROUGHPUT_WINDOW: std::time::Duration = std::time::Duration::from_secs(180);
+const MIN_PIECES_PER_WINDOW: u64 = 3;
+
 async fn fetch_once(
     conn: VeilidConnection,
     root: String,
@@ -354,6 +459,7 @@ async fn fetch_once(
     key: veilid_core::RecordKey,
     progress_key: String,
     stay_seeding: bool,
+    max_bytes: u64,
 ) -> Result<u64, SwarmError> {
     let mut share = Share::new(
         conn,
@@ -361,6 +467,9 @@ async fn fetch_once(
             root: std::path::PathBuf::from(root),
             want_index_digest: Some(want),
             share_keys: vec![key],
+            // The ceiling, enforced inside the engine before it creates or
+            // sizes a single file of the publisher's choosing.
+            max_bytes: Some(max_bytes),
         },
     )
     .map_err(fail)?;
@@ -373,6 +482,17 @@ async fn fetch_once(
         tokio::spawn(async move {
             let _ = share.join().await;
         });
+        // Refused for its size: both numbers, in words the caller can put
+        // in front of a person.
+        if let Some(t) = stigmerge_peer::share::too_large(&e) {
+            let said = format!(
+                "this bundle says it is {}; the most this will take is {}",
+                bytes_human(t.declared),
+                bytes_human(t.max)
+            );
+            crate::node::note(format!("swarm: refused — {said}"));
+            return Err(SwarmError::TooLarge(said));
+        }
         crate::node::note(format!("swarm: bootstrap refused — {e}"));
         return Err(fail(e));
     }
@@ -395,6 +515,12 @@ async fn fetch_once(
     let mut advanced = false;
     let mut quiet_windows = 0u32;
     let born = std::time::Instant::now();
+    // Minimum throughput (N18): pieces verified, and the window they are
+    // counted over. The window opens at the first status the fetcher sends,
+    // not at birth — before that the share is still being resolved, which
+    // is DHT work and can honestly take minutes.
+    let mut pieces_seen: u64 = 0;
+    let mut window: Option<(std::time::Instant, u64)> = None;
     loop {
         // The watchdog: verification of what is already on disk emits
         // progress, so a healthy fetch — resumed or fresh — always has
@@ -424,9 +550,30 @@ async fn fetch_once(
         // been measured at ten to sixty seconds on a slow day. That phase
         // gets a longer first window; once the stream has spoken, silence
         // means what it always meant.
-        let window = if seen == 0 { 240 } else { 90 };
+        // The throughput rule, checked on every pass — an attempt that is
+        // producing events but no verified pieces must end too.
+        if let Some((started, base)) = window {
+            if started.elapsed() >= THROUGHPUT_WINDOW {
+                let gained = pieces_seen.saturating_sub(base);
+                if gained < MIN_PIECES_PER_WINDOW {
+                    crate::node::note(format!(
+                        "swarm: {gained} piece(s) in {}s — too slow to be serving",
+                        THROUGHPUT_WINDOW.as_secs()
+                    ));
+                    cancel.cancel();
+                    tokio::spawn(async move {
+                        let _ = share.join().await;
+                    });
+                    return Err(SwarmError::TooSlow(
+                        "the swarm is answering but not delivering".into(),
+                    ));
+                }
+                window = Some((std::time::Instant::now(), pieces_seen));
+            }
+        }
+        let watchdog = if seen == 0 { 240 } else { 90 };
         let ev = tokio::time::timeout(
-            std::time::Duration::from_secs(window),
+            std::time::Duration::from_secs(watchdog),
             events.recv(),
         )
         .await;
@@ -470,6 +617,10 @@ async fn fetch_once(
                 verify_length,
             }) => {
                 total = fetch_length;
+                pieces_seen = pieces_seen.max(verify_position);
+                if window.is_none() {
+                    window = Some((std::time::Instant::now(), pieces_seen));
+                }
                 // Early reports are the resume point — what disk already
                 // held, re-verified in a burst; only movement past that,
                 // later than the burst, is the network actually serving.

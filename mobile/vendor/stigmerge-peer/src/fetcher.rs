@@ -61,6 +61,14 @@ use crate::share_resolver::{ShareNotifier, ShareResolver};
 use crate::types::{FileBlockFetch, LocalShareInfo, PieceState, RemoteShareInfo};
 use crate::{piece_verifier, Error, Result, Retry};
 
+/// Bad pieces one peer may deliver before it is dropped from a fetch.
+///
+/// DUCAT modification (see ../STIGMERGE-NOTICE.md). Three rather than one:
+/// a piece can fail to verify for honest reasons — a truncated write, a
+/// block that arrived twice from two peers racing on the same lease — and
+/// one strike would partition a swarm on ordinary noise.
+const MAX_BAD_PIECES: u32 = 3;
+
 pub struct Fetcher<C: Connection> {
     conn: C,
     share: LocalShareInfo,
@@ -289,12 +297,24 @@ impl<C: Connection + Clone + Send + Sync + 'static> Fetcher<C> {
             .set_wanted_pieces(&wanted_pieces)
             .await;
         for have_block in diff.have {
+            // DUCAT modification (see ../STIGMERGE-NOTICE.md): the want
+            // index came off the wire; `[i]` on it is a remote panic.
+            let Some(piece) = self
+                .share
+                .want_index
+                .payload()
+                .pieces()
+                .get(have_block.piece_index)
+            else {
+                warn!(piece_index = have_block.piece_index, "index names a piece it does not carry");
+                continue;
+            };
             self.piece_verifier
                 .update_piece(PieceState::new(
                     have_block.file_index,
                     have_block.piece_index,
                     have_block.piece_offset,
-                    self.share.want_index.payload().pieces()[have_block.piece_index].block_count(),
+                    piece.block_count(),
                     have_block.block_index,
                 ))
                 .await?;
@@ -332,6 +352,17 @@ impl<C: Connection + Clone + Send + Sync + 'static> Fetcher<C> {
         let mut parked: std::collections::HashSet<RecordKey> = Default::default();
         let mut revive = tokio::time::interval(Duration::from_secs(5));
         revive.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
+        // DUCAT modification (see ../STIGMERGE-NOTICE.md): strikes.
+        //
+        // A piece that fails to verify was delivered by whoever held its
+        // lease, and upstream scored that peer a *success* for having
+        // answered — `note_success` on delivery, `note_failure` only on a
+        // network error — so a mirror that answers every request with
+        // garbage stayed top of the pool for ever while the piece went
+        // round again. Three bad pieces and the peer is out of this fetch:
+        // benched by the reputation registry and not respawned here.
+        let mut strikes: HashMap<RecordKey, u32> = HashMap::new();
+        let mut struck_out: std::collections::HashSet<RecordKey> = Default::default();
 
         for remote_share in self.initial_shares.iter() {
             let remote_share_key = remote_share.key.clone();
@@ -395,6 +426,13 @@ impl<C: Connection + Clone + Send + Sync + 'static> Fetcher<C> {
                         );
                         continue;
                     }
+                    // DUCAT modification (see ../STIGMERGE-NOTICE.md): a
+                    // peer that struck out on this fetch does not come back
+                    // through discovery either.
+                    if struck_out.contains(&remote_share.key) {
+                        trace!(key = ?remote_share.key, "struck out, ignoring");
+                        continue;
+                    }
                     self.piece_lease_manager.add_peer(&remote_share.key, &remote_share.have_map).await;
                     if !share_tasks.contains_key(&remote_share.key) {
                         let remote_share_key = remote_share.key.clone();
@@ -416,7 +454,17 @@ impl<C: Connection + Clone + Send + Sync + 'static> Fetcher<C> {
                 }
                 res = tasks.join_next_with_id() => {
                     let (id, res) = match res {
-                        Some(res) => res?,
+                        Some(Ok(joined)) => joined,
+                        // DUCAT modification (see ../STIGMERGE-NOTICE.md): a
+                        // pool we aborted ourselves — a peer that struck out
+                        // — is not a failed fetch. Upstream's `?` here would
+                        // have turned our own strike into a restart of the
+                        // whole transfer.
+                        Some(Err(err)) if err.is_cancelled() => {
+                            task_shares.remove(&err.id());
+                            continue;
+                        }
+                        Some(Err(err)) => return Err(err.into()),
                         None => continue,
                     };
                     trace!(?res, ?id, "pool exited");
@@ -428,6 +476,14 @@ impl<C: Connection + Clone + Send + Sync + 'static> Fetcher<C> {
                         }
                     };
                     share_tasks.remove(&remote_share_key);
+
+                    // DUCAT modification (see ../STIGMERGE-NOTICE.md): a
+                    // peer that struck out is not respawned or parked — it
+                    // is done with this fetch.
+                    if struck_out.contains(&remote_share_key) {
+                        debug!(key = ?remote_share_key, "struck out, not respawning");
+                        continue;
+                    }
 
                     // An exited pool is not redialed hot: if its peer is on
                     // the bench it parks until the revive tick, which also
@@ -502,7 +558,20 @@ impl<C: Connection + Clone + Send + Sync + 'static> Fetcher<C> {
                     let piece_status = res?;
                     match piece_status {
                         PieceStatus::ValidPiece{ index_complete, piece_index, .. } => {
-                            let piece_length = self.share.want_index.payload().pieces()[piece_index].length();
+                            // DUCAT modification (see ../STIGMERGE-NOTICE.md):
+                            // the index came off the wire; `[i]` on it is a
+                            // remote panic.
+                            let piece_length = self.share.want_index.payload().pieces()
+                                .get(piece_index).map(|p| p.length()).unwrap_or(0);
+                            // DUCAT modification (see ../STIGMERGE-NOTICE.md):
+                            // a peer is credited for a piece that VERIFIED,
+                            // not for having answered. The pool used to call
+                            // `note_success` the moment the blocks landed,
+                            // which cleared a poisoner's whole record every
+                            // time it handed over garbage.
+                            if let Some(key) = self.piece_lease_manager.lease_holder(piece_index).await {
+                                crate::peer_reputation::note_success(&key);
+                            }
                             if let Err(err) = self.piece_lease_manager.release_piece(
                                 piece_index,
                                 CompletionResult::Success,
@@ -528,12 +597,30 @@ impl<C: Connection + Clone + Send + Sync + 'static> Fetcher<C> {
                             }
                         }
                         PieceStatus::InvalidPiece{ piece_index, .. } => {
+                            // DUCAT modification (see ../STIGMERGE-NOTICE.md):
+                            // whoever delivered a piece that will not verify
+                            // is scored for it, before the lease that names
+                            // them is released.
+                            let culprit = self.piece_lease_manager.lease_holder(piece_index).await;
                             // Re-queue all the blocks in the failed piece
                             if let Err(err) = self.piece_lease_manager.release_piece(
                                 piece_index,
                                 CompletionResult::Failure(FailureReason::VerificationFailed),
                             ).await {
                                 warn!(?err, ?piece_index, "failed to release invalid piece");
+                            }
+                            if let Some(key) = culprit {
+                                crate::peer_reputation::note_failure(&key);
+                                let n = strikes.entry(key.clone()).or_insert(0);
+                                *n += 1;
+                                warn!(?key, ?piece_index, strikes = *n, "piece did not verify");
+                                if *n >= MAX_BAD_PIECES && struck_out.insert(key.clone()) {
+                                    warn!(?key, "dropped from this fetch after {MAX_BAD_PIECES} bad pieces");
+                                    if let Some(handle) = share_tasks.remove(&key) {
+                                        handle.abort();
+                                    }
+                                    parked.remove(&key);
+                                }
                             }
                         }
                         PieceStatus::IncompletePiece { .. } => {}
@@ -606,7 +693,11 @@ impl<C: Connection + Clone + Send + Sync + 'static> FetchPool<C> {
                         Ok(lease) => {
                             match self.fetch_lease(&lease, cancel.clone()).await {
                                 Ok(()) => {
-                                    crate::peer_reputation::note_success(&self.remote_share.key);
+                                    // DUCAT modification (see
+                                    // ../STIGMERGE-NOTICE.md): delivery is
+                                    // not success. The credit is given in
+                                    // the fetcher's ValidPiece branch, where
+                                    // the piece has actually verified.
                                     backoff.reset();
                                     continue;
                                 }
@@ -666,7 +757,16 @@ impl<C: Connection + Clone + Send + Sync + 'static> FetchPool<C> {
             .local_share
             .want_index
             .file_index_for_piece(lease.piece_index());
-        let piece_info = &self.local_share.want_index.payload().pieces()[lease.piece_index()];
+        // DUCAT modification (see ../STIGMERGE-NOTICE.md): bounds, for the
+        // same reason as everywhere else the wire's index is indexed.
+        let piece_info = self
+            .local_share
+            .want_index
+            .payload()
+            .pieces()
+            .get(lease.piece_index())
+            .ok_or_else(|| Error::msg(format!("no piece {} in the index", lease.piece_index())))?
+            .clone();
 
         let (blocks_tx, blocks_rx) = flume::bounded(piece_info.block_count());
 

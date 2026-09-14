@@ -1,10 +1,8 @@
-use std::cmp::min;
 use std::collections::HashMap;
 use std::io::SeekFrom;
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use stigmerge_fileindex::BLOCK_SIZE_BYTES;
 use tokio::fs::File;
 use tokio::io::{AsyncSeekExt, AsyncWriteExt};
 use veilid_core::Target;
@@ -39,6 +37,46 @@ impl<C: Connection + Send + Sync> BlockFetcher<C> {
         block: &FileBlockFetch,
         flush: bool,
     ) -> Result<(PieceState, usize)> {
+        // DUCAT modification (see ../STIGMERGE-NOTICE.md): the index is
+        // read before the wire is, and `[i]` on a list a stranger sized is
+        // a remote panic.
+        let file_spec = remote_share
+            .index
+            .files()
+            .get(block.file_index)
+            .ok_or_else(|| Error::msg(format!("no file {} in the index", block.file_index)))?;
+        let piece_spec = remote_share
+            .index
+            .payload()
+            .pieces()
+            .get(block.piece_index)
+            .ok_or_else(|| Error::msg(format!("no piece {} in the index", block.piece_index)))?;
+        // DUCAT modification (see ../STIGMERGE-NOTICE.md): how long this
+        // block is, from the index, before anyone answers.
+        //
+        // Upstream took whatever came back and clamped it to a whole block
+        // — so the reply to the *last* block of a piece, which is short,
+        // could be a full block of garbage, and the file grew past the
+        // length its index declares. The verifier then read to end of file
+        // and that piece could never verify again, from anybody: one
+        // hostile mirror, one reply, and the tail of the download is dead.
+        // A block is exactly as long as the index says it is.
+        let expected = crate::types::expected_block_len(piece_spec.length(), block.block_index)
+            .ok_or_else(|| {
+                Error::msg(format!(
+                    "block {} is past the end of piece {}",
+                    block.block_index, block.piece_index
+                ))
+            })?;
+        let file_length = file_spec.contents().length() as u64;
+        let starting_piece = file_spec.contents().starting_piece();
+        let offset = block
+            .block_offset_in_file(starting_piece)
+            .ok_or_else(|| Error::msg("block offset outside the file"))?;
+        if offset.saturating_add(expected as u64) > file_length {
+            return Err(Error::msg("block would write past the end of the file"));
+        }
+
         // Request block from peer with retry logic
         let result = self
             .request_block(
@@ -48,32 +86,42 @@ impl<C: Connection + Send + Sync> BlockFetcher<C> {
             )
             .await?
             .ok_or(Error::msg("block not found"))?;
+        if result.len() != expected {
+            return Err(Error::msg(format!(
+                "block {} of piece {} came back {} bytes; the index says {}",
+                block.block_index,
+                block.piece_index,
+                result.len(),
+                expected
+            )));
+        }
+
         // Write the block to the file
         let fh = match self.files.get_mut(&block.file_index) {
             Some(fh) => fh,
             None => {
-                let path = self
-                    .root
-                    .join(remote_share.index.files()[block.file_index].path());
+                let path = self.root.join(file_spec.path());
                 let fh = File::options()
                     .write(true)
                     .truncate(false)
                     .create(true)
                     .open(path)
                     .await?;
+                // DUCAT modification (see ../STIGMERGE-NOTICE.md): the file
+                // is exactly as long as the index says, from the first
+                // write. `truncate(false)` was deliberate — a resumed fetch
+                // must keep what is already on disk — but it also meant a
+                // file that had been made too long stayed too long, and the
+                // piece that covers the tail could never verify. Setting
+                // the declared length keeps every real byte (the length is
+                // the sum of the pieces) and drops anything past it.
+                fh.set_len(file_length).await?;
                 self.files.insert(block.file_index, fh);
                 self.files.get_mut(&block.file_index).unwrap()
             }
         };
-        let starting_piece = remote_share.index.files()[block.file_index]
-            .contents()
-            .starting_piece();
-        fh.seek(SeekFrom::Start(
-            block.block_offset_in_file(starting_piece) as u64,
-        ))
-        .await?;
-        let block_end = min(result.len(), BLOCK_SIZE_BYTES);
-        fh.write_all(&result[0..block_end]).await?;
+        fh.seek(SeekFrom::Start(offset)).await?;
+        fh.write_all(&result[..expected]).await?;
         if flush {
             fh.flush().await?;
         }
@@ -82,10 +130,10 @@ impl<C: Connection + Send + Sync> BlockFetcher<C> {
                 block.file_index,
                 block.piece_index,
                 block.piece_offset,
-                remote_share.index.payload().pieces()[block.piece_index].block_count(),
+                piece_spec.block_count(),
                 block.block_index,
             ),
-            block_end,
+            expected,
         ))
     }
 

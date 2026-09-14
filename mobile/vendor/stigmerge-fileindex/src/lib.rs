@@ -2,7 +2,7 @@ use std::{
     cmp::min,
     collections::HashMap,
     convert::TryInto,
-    io,
+    fmt, io,
     path::{Path, PathBuf},
 };
 
@@ -33,6 +33,228 @@ pub const PIECE_SIZE_BYTES: usize = PIECE_SIZE_BLOCKS * BLOCK_SIZE_BYTES;
 /// layout (zero-length files occupy none).
 pub fn piece_count_for_len(len: usize) -> usize {
     len / PIECE_SIZE_BYTES + if len % PIECE_SIZE_BYTES > 0 { 1 } else { 0 }
+}
+
+// DUCAT modification (see ../../STIGMERGE-NOTICE.md): what an index off the
+// wire is allowed to declare.
+//
+// An index is written by the publisher and read by everyone who fetches the
+// share. Upstream believed every number in it: the piece and slice lengths
+// were taken as read, and `Indexer::from_wanted` then created and sized
+// every file the index named before a single byte was verified. A share
+// whose index said "one file, 900 GB" cost the publisher one DHT write and
+// the reader its whole disk; one that pointed a file's slice past the end
+// of the pieces list panicked the verifier instead.
+//
+// These are absolute ceilings — not the per-fetch budget, which the
+// embedding application sets per kind of thing (see `Mode::Fetch::max_bytes`
+// in stigmerge-peer). They only say what cannot be a real DUCAT share at
+// all, so that the shape can be refused before anything is created.
+
+/// The largest payload any index may declare, whatever the caller's budget.
+///
+/// u64 rather than usize: 16 GiB does not fit a 32-bit usize, and the check
+/// must not itself overflow on a 32-bit target.
+pub const MAX_PAYLOAD_BYTES: u64 = 16 * 1024 * 1024 * 1024;
+
+/// The most files one share may name.
+pub const MAX_FILES: usize = 65_536;
+
+/// The most pieces one index may carry: a 16 GiB payload is at most 16 384
+/// whole pieces, plus at most one short tail piece per file.
+pub const MAX_PIECES: usize = (MAX_PAYLOAD_BYTES / PIECE_SIZE_BYTES as u64) as usize + MAX_FILES;
+
+/// Why an index off the wire was refused before anything was created for it.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ShapeError {
+    /// More files than any real share carries.
+    TooManyFiles(usize),
+    /// More pieces than a legal payload can be cut into.
+    TooManyPieces(usize),
+    /// A piece longer than a piece, or empty. Every piece of a real index is
+    /// between one byte and `PIECE_SIZE_BYTES`.
+    PieceLength { piece_index: usize, length: usize },
+    /// The pieces add up to more than any share may be.
+    PayloadTooLarge(u64),
+    /// A file's slice starts inside a piece. DUCAT shares are piece-aligned
+    /// (see the notice): every file starts on a fresh piece, for ever, so a
+    /// non-zero offset is either a foreign index or an attempt to push a
+    /// write past the end of a file.
+    UnalignedSlice { file_index: usize },
+    /// A file's pieces are not all in the pieces list.
+    SliceOutsidePieces {
+        file_index: usize,
+        starting_piece: usize,
+        piece_count: usize,
+        have_pieces: usize,
+    },
+    /// A file's own pieces do not add up to its declared length.
+    SliceLengthMismatch {
+        file_index: usize,
+        declared: usize,
+        pieces: u64,
+    },
+    /// Two files claim the same piece, or no file claims it. Either way the
+    /// index does not describe a payload anybody could have indexed.
+    PieceNotClaimedOnce { piece_index: usize, claims: usize },
+    /// The files and the pieces disagree about how long the payload is, or
+    /// the header does.
+    LengthMismatch { declared: u64, pieces: u64, files: u64 },
+}
+
+impl fmt::Display for ShapeError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ShapeError::TooManyFiles(n) => {
+                write!(f, "the index names {n} files, more than {MAX_FILES}")
+            }
+            ShapeError::TooManyPieces(n) => {
+                write!(f, "the index carries {n} pieces, more than {MAX_PIECES}")
+            }
+            ShapeError::PieceLength {
+                piece_index,
+                length,
+            } => write!(
+                f,
+                "piece {piece_index} declares {length} bytes; a piece is 1..={PIECE_SIZE_BYTES}"
+            ),
+            ShapeError::PayloadTooLarge(n) => {
+                write!(f, "the index declares {n} bytes, more than {MAX_PAYLOAD_BYTES}")
+            }
+            ShapeError::UnalignedSlice { file_index } => write!(
+                f,
+                "file {file_index} starts inside a piece; shares are piece-aligned"
+            ),
+            ShapeError::SliceOutsidePieces {
+                file_index,
+                starting_piece,
+                piece_count,
+                have_pieces,
+            } => write!(
+                f,
+                "file {file_index} wants pieces {starting_piece}..{} of {have_pieces}",
+                starting_piece + piece_count
+            ),
+            ShapeError::SliceLengthMismatch {
+                file_index,
+                declared,
+                pieces,
+            } => write!(
+                f,
+                "file {file_index} declares {declared} bytes; its pieces hold {pieces}"
+            ),
+            ShapeError::PieceNotClaimedOnce {
+                piece_index,
+                claims,
+            } => write!(f, "piece {piece_index} is claimed by {claims} files"),
+            ShapeError::LengthMismatch {
+                declared,
+                pieces,
+                files,
+            } => write!(
+                f,
+                "the index declares {declared} bytes, its pieces hold {pieces} and its files {files}"
+            ),
+        }
+    }
+}
+
+impl std::error::Error for ShapeError {}
+
+/// Refuse an index whose declared shape could not describe real content.
+///
+/// DUCAT modification (see ../../STIGMERGE-NOTICE.md). Called at decode,
+/// where the payload length is not yet known (it lives in the share header),
+/// and again once header and index have met — `declared_length` is `Some`
+/// on the second pass.
+///
+/// Everything checked here is true of every index this indexer produces, so
+/// an honest share is unaffected; each rule is one way an index off the wire
+/// could otherwise make a fetcher create, size or seek something the
+/// publisher chose.
+pub fn check_index_shape(
+    pieces: &[PayloadPiece],
+    files: &[FileSpec],
+    declared_length: Option<usize>,
+) -> std::result::Result<(), ShapeError> {
+    if files.len() > MAX_FILES {
+        return Err(ShapeError::TooManyFiles(files.len()));
+    }
+    if pieces.len() > MAX_PIECES {
+        return Err(ShapeError::TooManyPieces(pieces.len()));
+    }
+    let mut pieces_total: u64 = 0;
+    for (piece_index, piece) in pieces.iter().enumerate() {
+        if piece.length == 0 || piece.length > PIECE_SIZE_BYTES {
+            return Err(ShapeError::PieceLength {
+                piece_index,
+                length: piece.length,
+            });
+        }
+        pieces_total += piece.length as u64;
+        if pieces_total > MAX_PAYLOAD_BYTES {
+            return Err(ShapeError::PayloadTooLarge(pieces_total));
+        }
+    }
+
+    // Every piece claimed by exactly one file. Without this an index can
+    // balance its arithmetic by handing one piece to two files and leaving
+    // another to nobody — the sums below would still agree.
+    let mut claims: Vec<usize> = vec![0; pieces.len()];
+    let mut files_total: u64 = 0;
+    for (file_index, file) in files.iter().enumerate() {
+        if file.contents.piece_offset != 0 {
+            return Err(ShapeError::UnalignedSlice { file_index });
+        }
+        let piece_count = piece_count_for_len(file.contents.length);
+        let starting_piece = file.contents.starting_piece;
+        let end = match starting_piece.checked_add(piece_count) {
+            Some(end) if end <= pieces.len() => end,
+            _ => {
+                return Err(ShapeError::SliceOutsidePieces {
+                    file_index,
+                    starting_piece,
+                    piece_count,
+                    have_pieces: pieces.len(),
+                })
+            }
+        };
+        let mut slice_total: u64 = 0;
+        for piece_index in starting_piece..end {
+            claims[piece_index] += 1;
+            slice_total += pieces[piece_index].length as u64;
+        }
+        if slice_total != file.contents.length as u64 {
+            return Err(ShapeError::SliceLengthMismatch {
+                file_index,
+                declared: file.contents.length,
+                pieces: slice_total,
+            });
+        }
+        files_total += file.contents.length as u64;
+    }
+    for (piece_index, n) in claims.into_iter().enumerate() {
+        if n != 1 {
+            return Err(ShapeError::PieceNotClaimedOnce { piece_index, claims: n });
+        }
+    }
+    if files_total != pieces_total {
+        return Err(ShapeError::LengthMismatch {
+            declared: declared_length.map(|d| d as u64).unwrap_or(pieces_total),
+            pieces: pieces_total,
+            files: files_total,
+        });
+    }
+    if let Some(declared) = declared_length {
+        if declared as u64 != pieces_total {
+            return Err(ShapeError::LengthMismatch {
+                declared: declared as u64,
+                pieces: pieces_total,
+                files: files_total,
+            });
+        }
+    }
+    Ok(())
 }
 
 /// Internal buffer size used when concurrently indexing a file.
@@ -71,6 +293,24 @@ impl Index {
     /// Get the file layout that the index represents.
     pub fn files(&self) -> &Vec<FileSpec> {
         &self.files
+    }
+
+    /// How many bytes this index says the payload is.
+    ///
+    /// DUCAT modification (see ../../STIGMERGE-NOTICE.md): the number a
+    /// caller's byte ceiling is compared against, before anything is
+    /// created on disk for the share. It is the publisher's claim — worth
+    /// nothing on its own, which is why [`Index::check_shape`] must pass
+    /// first: after that the header's length, the pieces and the files all
+    /// agree, so refusing on this number refuses the whole fetch.
+    pub fn declared_length(&self) -> u64 {
+        self.payload.length as u64
+    }
+
+    /// Refuse an index off the wire whose declared shape could not describe
+    /// real content (DUCAT modification; see [`check_index_shape`]).
+    pub fn check_shape(&self) -> std::result::Result<(), ShapeError> {
+        check_index_shape(&self.payload.pieces, &self.files, Some(self.payload.length))
     }
 
     /// Create a new empty index with the same root path.

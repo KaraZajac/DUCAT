@@ -330,7 +330,7 @@ impl StableShareRecord {
         );
         let (payload_pieces, payload_files) =
             <(Vec<PayloadPiece>, Vec<FileSpec>)>::decode(index_bytes.concat().as_slice())?;
-        Ok(Index::new(
+        let index = Index::new(
             root.to_path_buf(),
             PayloadSpec::new(
                 header.payload_digest(),
@@ -338,7 +338,14 @@ impl StableShareRecord {
                 payload_pieces,
             ),
             payload_files,
-        ))
+        );
+        // DUCAT modification (see ../STIGMERGE-NOTICE.md): the decoder
+        // checked the index against itself; this is where the header's
+        // declared payload length joins it, and the three numbers — header,
+        // pieces, files — must be one number. Otherwise the fetcher's byte
+        // ceiling would be weighed against a figure the pieces contradict.
+        index.check_shape().map_err(crate::proto::Error::from)?;
+        Ok(index)
     }
 
     #[instrument(skip_all)]

@@ -745,7 +745,10 @@ object Listings {
                         return@runCatching
                     }
                     Swarm.stopShare(share)
-                    Swarm.fetch(share, digest, dir.absolutePath, staySeeding = true)
+                    Swarm.fetch(
+                        share, digest, dir.absolutePath, staySeeding = true,
+                        maxBytes = Swarm.Caps.GALLERY,
+                    )
                     DucatLog.i("Listings", "gallery of ${listingId.take(8)}… serving again")
                 }.onFailure {
                     DucatLog.w("Listings", "gallery of ${listingId.take(8)}…: ${it.message}")

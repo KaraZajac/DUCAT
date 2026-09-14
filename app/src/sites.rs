@@ -293,7 +293,9 @@ impl App {
         // `next/`, and the rename below pulls the floor out from under it.
         log::info(TAG, format!("fetching '{}' ({}…)", site.title, &site.digest_hex[..12]));
         let t0 = std::time::Instant::now();
-        if let Err(e) = swarm::swarm_fetch(site.share.clone(), site.digest_hex.clone(), fresh.to_string_lossy().into_owned(), false) {
+        // A site bundle, and a hearted home is one: this is the fetch the
+        // lap makes unattended, so it takes the ceiling hardest (N4/D2).
+        if let Err(e) = swarm::swarm_fetch_capped(site.share.clone(), site.digest_hex.clone(), fresh.to_string_lossy().into_owned(), false, swarm::caps::SITE) {
             log::warn(TAG, format!("'{}' did not arrive after {:.0}s: {e}", site.title, t0.elapsed().as_secs_f64()));
             return Err(e.into());
         }
@@ -471,7 +473,8 @@ impl App {
                 // strand the first task; stopping one nobody serves is a
                 // no-op.
                 swarm::swarm_stop_share(share.clone());
-                match swarm::swarm_fetch(share.clone(), digest.clone(), dir.to_string_lossy().into_owned(), true) {
+                // Unattended again, on the keep-alive lap.
+                match swarm::swarm_fetch_capped(share.clone(), digest.clone(), dir.to_string_lossy().into_owned(), true, swarm::caps::SITE) {
                     Ok(_) => {
                         // Whatever the store says now wins: a remove or an
                         // unticked box that landed while the fetch was out.

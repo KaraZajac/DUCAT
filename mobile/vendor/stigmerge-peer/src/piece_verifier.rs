@@ -2,7 +2,7 @@ use std::{cmp::Ordering, collections::HashMap, io::SeekFrom, ops::Deref, sync::A
 
 // DUCAT modification: BLAKE3 pieces (see ../STIGMERGE-NOTICE.md).
 use blake3::Hasher as Blake3;
-use stigmerge_fileindex::{Index, BLOCK_SIZE_BYTES, PIECE_SIZE_BLOCKS, PIECE_SIZE_BYTES};
+use stigmerge_fileindex::{Index, BLOCK_SIZE_BYTES, PIECE_SIZE_BYTES};
 use tokio::{
     fs::File,
     io::{AsyncReadExt, AsyncSeekExt},
@@ -180,26 +180,54 @@ impl PieceVerifierInner {
     async fn verify_piece(&self, file_index: usize, piece_index: usize) -> Result<bool> {
         let index = self.index.read().await;
 
-        let file_spec = &index.files()[file_index];
+        // DUCAT modification (see ../STIGMERGE-NOTICE.md): both indexes
+        // came off the wire, and `[i]` on a list a stranger sized is a
+        // remote panic. An index that names neither is not verifiable.
+        let file_spec = index
+            .files()
+            .get(file_index)
+            .ok_or_else(|| crate::Error::msg(format!("no file {file_index} in the index")))?;
+        let piece_spec = index
+            .payload()
+            .pieces()
+            .get(piece_index)
+            .ok_or_else(|| crate::Error::msg(format!("no piece {piece_index} in the index")))?;
         let mut fh = File::open(index.root().join(file_spec.path())).await?;
-        let piece_spec = &index.payload().pieces()[piece_index];
 
         // Piece-aligned multi-file (DUCAT): seek relative to this file's
         // own slice. Single-file shares have starting_piece 0, so the old
         // math is the special case of this one.
         let starting_piece = file_spec.contents().starting_piece();
-        fh.seek(SeekFrom::Start(
-            ((piece_index - starting_piece) * PIECE_SIZE_BYTES) as u64,
-        ))
-        .await?;
+        let offset = piece_index
+            .checked_sub(starting_piece)
+            .and_then(|rel| (rel as u64).checked_mul(PIECE_SIZE_BYTES as u64))
+            .ok_or_else(|| {
+                crate::Error::msg(format!(
+                    "piece {piece_index} is not inside file {file_index}"
+                ))
+            })?;
+        fh.seek(SeekFrom::Start(offset)).await?;
+        // DUCAT modification (see ../STIGMERGE-NOTICE.md): exactly the
+        // piece's declared length, not "to the end of the file".
+        //
+        // Upstream read up to a whole piece and stopped at EOF, so a file
+        // longer than the index says — which one hostile mirror could
+        // arrange by answering the last block request with a long reply —
+        // fed extra bytes into the hash, and the tail piece could never
+        // verify again from anybody. The declared length is the only
+        // length the digest was taken over.
+        let mut remaining = piece_spec.length();
         let mut buf = [0u8; BLOCK_SIZE_BYTES];
         let mut digest = Blake3::new();
-        for _ in 0..PIECE_SIZE_BLOCKS {
-            let rd = fh.read(&mut buf[..]).await?;
+        while remaining > 0 {
+            let want = remaining.min(BLOCK_SIZE_BYTES);
+            let rd = fh.read(&mut buf[..want]).await?;
             if rd == 0 {
-                break;
+                // Short on disk: not corrupt, just not here yet.
+                return Ok(false);
             }
             digest.update(&buf[..rd]);
+            remaining -= rd;
         }
         let expected_digest = piece_spec.digest();
         let actual_digest: [u8; 32] = digest.finalize().into();
@@ -216,16 +244,26 @@ impl PieceVerifierInner {
                     0
                 };
             let starting_piece = file.contents().starting_piece();
-            for piece_index in starting_piece..starting_piece + n_pieces {
-                result.insert(
-                    (file_index, piece_index),
-                    PieceState::new(
+            for piece_index in starting_piece..starting_piece.saturating_add(n_pieces) {
+                // DUCAT modification (see ../STIGMERGE-NOTICE.md): a file
+                // whose slice runs off the end of the pieces list panicked
+                // here, on the publisher's arithmetic, before any of the
+                // share's bytes were touched. `check_index_shape` refuses
+                // that index at decode now; this is the second lock on the
+                // same door, for an index built locally or by a future
+                // caller that never went through the wire.
+                let Some(piece) = index.payload().pieces().get(piece_index) else {
+                    warn!(
                         file_index,
                         piece_index,
-                        0,
-                        index.payload().pieces()[piece_index].block_count(),
-                        0,
-                    ),
+                        n_pieces = index.payload().pieces().len(),
+                        "index names a piece it does not carry"
+                    );
+                    break;
+                };
+                result.insert(
+                    (file_index, piece_index),
+                    PieceState::new(file_index, piece_index, 0, piece.block_count(), 0),
                 );
             }
         }
@@ -270,7 +308,7 @@ impl PieceStatus {
 #[cfg(test)]
 mod tests {
     use std::io::{Seek, Write};
-    use stigmerge_fileindex::Indexer;
+    use stigmerge_fileindex::{Indexer, PIECE_SIZE_BLOCKS};
 
     use crate::tests::temp_file;
 

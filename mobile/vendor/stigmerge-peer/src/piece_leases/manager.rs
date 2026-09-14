@@ -175,4 +175,21 @@ impl PieceLeaseManager {
     ) -> Result<f64> {
         self.inner.lock().await.release_piece(piece_index, result)
     }
+
+    /// Which peer holds the lease on this piece, if anybody does.
+    ///
+    /// DUCAT modification (see ../../STIGMERGE-NOTICE.md): a piece that
+    /// fails to verify was delivered by somebody, and until now nobody
+    /// asked who. The lease is the only record of it, and it is gone the
+    /// moment the piece is released — so the fetcher asks first, and can
+    /// then score the peer that actually poisoned the piece rather than
+    /// scoring it a success for having answered at all.
+    pub async fn lease_holder(&self, piece_index: usize) -> Option<RecordKey> {
+        self.inner
+            .lock()
+            .await
+            .active_leases
+            .get(&piece_index)
+            .map(|lease| lease.peer_key().clone())
+    }
 }

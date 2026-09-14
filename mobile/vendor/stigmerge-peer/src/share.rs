@@ -53,7 +53,80 @@ pub enum Mode {
         /// Share key(s) used to bootstrap into the swarm of peers sharing this
         /// content. At least one is required.
         share_keys: Vec<RecordKey>,
+
+        /// DUCAT modification (see ../STIGMERGE-NOTICE.md): the most this
+        /// fetch may be, in bytes.
+        ///
+        /// The index says how big the payload is and the fetcher believed
+        /// it — it created and sized every file named before a byte was
+        /// verified, so a hearted home fetched unattended could be any size
+        /// its publisher liked. The embedding application knows what kind
+        /// of thing it asked for and therefore what a sane ceiling is (a
+        /// gallery is not a release); it passes that here, and an index
+        /// that declares more is refused before anything is created.
+        ///
+        /// `None` keeps the old behaviour and is for tests and harnesses;
+        /// the absolute ceilings in `stigmerge_fileindex` still apply.
+        max_bytes: Option<u64>,
     },
+}
+
+/// DUCAT modification (see ../STIGMERGE-NOTICE.md): an index that declares
+/// more than the caller will take.
+///
+/// Its own type, and not a plain message, so the embedding application can
+/// say it to the person in their own words and units — "this bundle says it
+/// is 3.2 GB; the cap for a home is 256 MB" — rather than showing them a
+/// sentence from the engine.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct TooLarge {
+    /// What the share's index and header say the payload is.
+    pub declared: u64,
+    /// The ceiling this fetch was given.
+    pub max: u64,
+}
+
+impl std::fmt::Display for TooLarge {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "the share declares {} bytes; this fetch will take at most {}",
+            self.declared, self.max
+        )
+    }
+}
+
+impl std::error::Error for TooLarge {}
+
+/// The [`TooLarge`] in an error chain, if that is why a fetch was refused.
+pub fn too_large(e: &Error) -> Option<TooLarge> {
+    for cause in e.chain() {
+        if let Some(t) = cause.downcast_ref::<TooLarge>() {
+            return Some(*t);
+        }
+    }
+    None
+}
+
+/// Is this index within the caller's budget?
+///
+/// DUCAT modification (see ../STIGMERGE-NOTICE.md). Its own function so the
+/// rule can be tested without a swarm: it is the whole of the byte ceiling,
+/// and it is asked exactly once, in `start`, before the fetcher creates a
+/// single file. `None` is "no budget given" — the absolute ceilings in
+/// `stigmerge_fileindex` still apply, and `read_index` has already made the
+/// header, the pieces and the files agree on the number weighed here.
+pub fn check_budget(
+    index: &stigmerge_fileindex::Index,
+    max_bytes: Option<u64>,
+) -> std::result::Result<(), TooLarge> {
+    match max_bytes {
+        Some(max) if index.declared_length() > max => Err(TooLarge {
+            declared: index.declared_length(),
+            max,
+        }),
+        _ => Ok(()),
+    }
 }
 
 impl Mode {
@@ -167,6 +240,7 @@ impl<C: Connection + Clone + Send + Sync + 'static> Share<C> {
             Mode::Fetch {
                 share_keys,
                 want_index_digest,
+                max_bytes,
                 ..
             } => {
                 for share_key in share_keys.iter() {
@@ -181,6 +255,15 @@ impl<C: Connection + Clone + Send + Sync + 'static> Share<C> {
                         StableShareRecord::read_index(&mut self.conn, share_key, &header, &root)
                             .await?;
                     let remote_index_digest = index.digest()?;
+
+                    // DUCAT modification (see ../STIGMERGE-NOTICE.md): the
+                    // byte ceiling, here and nowhere later. Below this line
+                    // the indexer creates and sizes every file the index
+                    // names; above it, nothing of the publisher's has
+                    // touched the disk. `read_index` has already made the
+                    // header, the pieces and the files agree on this
+                    // number, so refusing on it refuses the whole fetch.
+                    check_budget(&index, *max_bytes)?;
 
                     // Verify the index matches what we want
                     if let Some(want_digest) = want_index_digest {
@@ -200,12 +283,17 @@ impl<C: Connection + Clone + Send + Sync + 'static> Share<C> {
                             .routing_context()
                             .api()
                             .import_remote_private_route(header.route_data().to_vec())?;
-                        let have_map = StableHaveMap::read_remote(
-                            &mut self.conn,
-                            header.have_map().unwrap().key(),
-                            &index,
-                        )
-                        .await?;
+                        // DUCAT modification (see ../STIGMERGE-NOTICE.md):
+                        // a header off the wire need not carry a have-map
+                        // reference, and `unwrap()` on a field a stranger
+                        // fills in is a remote panic. A share without one
+                        // is simply not one we can fetch from.
+                        let have_map_ref = header
+                            .have_map()
+                            .ok_or_else(|| Error::msg("share header names no have-map"))?;
+                        let have_map =
+                            StableHaveMap::read_remote(&mut self.conn, have_map_ref.key(), &index)
+                                .await?;
 
                         // Store the remote share
                         remote_shares.push(RemoteShareInfo {
@@ -405,5 +493,56 @@ impl<C: Connection + Clone + Send + Sync + 'static> Share<C> {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::io::Write;
+
+    use stigmerge_fileindex::{Indexer, PIECE_SIZE_BYTES};
+    use tempfile::NamedTempFile;
+
+    use super::*;
+
+    async fn index_of(bytes: usize) -> stigmerge_fileindex::Index {
+        let mut tempf = NamedTempFile::new().expect("temp file");
+        tempf.write_all(&vec![b'z'; bytes]).expect("write");
+        let indexer = Indexer::from_file(tempf.path()).await.expect("indexer");
+        indexer.index().await.expect("index")
+    }
+
+    /// DUCAT modification (see ../STIGMERGE-NOTICE.md): the byte ceiling.
+    /// An index declaring more than the caller will take is refused, and
+    /// both numbers come back so the caller can say them to a person.
+    #[tokio::test]
+    async fn a_share_bigger_than_the_budget_is_refused() {
+        let index = index_of(PIECE_SIZE_BYTES * 3).await;
+        let declared = index.declared_length();
+        assert_eq!(declared, (PIECE_SIZE_BYTES * 3) as u64);
+
+        // Under the ceiling: fetched.
+        check_budget(&index, Some(declared)).expect("exactly the budget is inside it");
+        check_budget(&index, Some(declared + 1)).expect("under the budget");
+        check_budget(&index, None).expect("no budget given");
+
+        // Over it: refused, by name, with both figures.
+        let err = check_budget(&index, Some(declared - 1)).expect_err("over the budget");
+        assert_eq!(
+            err,
+            TooLarge {
+                declared,
+                max: declared - 1
+            }
+        );
+        let err = check_budget(&index, Some(1)).expect_err("a gallery-sized budget");
+        assert_eq!(err.declared, declared);
+        assert_eq!(err.max, 1);
+
+        // And it survives being carried as an anyhow error, which is how
+        // `start` hands it back to the embedding application.
+        let wrapped: Error = err.into();
+        assert_eq!(too_large(&wrapped), Some(err));
+        assert_eq!(too_large(&Error::msg("something else")), None);
     }
 }

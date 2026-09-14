@@ -883,7 +883,7 @@ impl App {
             return;
         }
         swarm::swarm_stop_share(share.clone());
-        match swarm::swarm_fetch(share, digest, dir.to_string_lossy().into_owned(), true) {
+        match swarm::swarm_fetch_capped(share, digest, dir.to_string_lossy().into_owned(), true, swarm::caps::GALLERY) {
             Ok(_) => log::info(TAG, format!("gallery of {}… serving again", &listing_id[..8.min(listing_id.len())])),
             Err(e) => log::warn(TAG, format!("gallery of {}…: {e}", &listing_id[..8.min(listing_id.len())])),
         }
@@ -908,7 +908,8 @@ impl App {
         let part = dir.with_extension("part");
         let _ = std::fs::remove_dir_all(&part);
         std::fs::create_dir_all(&part)?;
-        swarm::swarm_fetch(share.to_string(), digest_hex.to_string(), part.to_string_lossy().into_owned(), false)?;
+        // Photographs of a thing for sale (§16.18.3), nothing more.
+        swarm::swarm_fetch_capped(share.to_string(), digest_hex.to_string(), part.to_string_lossy().into_owned(), false, swarm::caps::GALLERY)?;
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::rename(&part, &dir)?;
         Ok(dir)

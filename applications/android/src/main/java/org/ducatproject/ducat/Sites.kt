@@ -309,7 +309,10 @@ object Sites {
         // Never staySeeding here: a seed parked now would be rooted at
         // `next/`, and the rename below pulls the floor out from under it.
         // The park happens after the swap, from the dir that will last.
-        Swarm.fetch(site.share, site.digestHex, fresh.absolutePath)
+        // A site bundle — and a hearted home is one, through Home.refreshFeeds:
+        // this is the fetch the lap makes unattended, so it takes the ceiling
+        // hardest (N4/D2).
+        Swarm.fetch(site.share, site.digestHex, fresh.absolutePath, maxBytes = Swarm.Caps.SITE)
         Swarm.stopShare(site.fetchedShare ?: site.share)
         dir.deleteRecursively()
         check(fresh.renameTo(dir)) { "could not move the site into place" }
@@ -614,7 +617,7 @@ object Sites {
                 // Stop-then-stay: parking the same share twice would strand
                 // the first task; stopping a share nobody serves is a no-op.
                 Swarm.stopShare(share)
-                Swarm.fetch(share, digest, dir.absolutePath, staySeeding = true)
+                Swarm.fetch(share, digest, dir.absolutePath, staySeeding = true, maxBytes = Swarm.Caps.SITE)
                 // And again on the way out, because *this* is the call that
                 // parks the seeder. A `remove` or an unticked box landing
                 // while the fetch was out did its own stopShare before this

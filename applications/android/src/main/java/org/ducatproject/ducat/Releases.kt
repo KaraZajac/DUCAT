@@ -248,7 +248,13 @@ object Releases {
         if (isHere(context, r.digestHex)) return dir
         val part = java.io.File(dir.parentFile, "${r.digestHex}.part")
         part.deleteRecursively(); part.mkdirs()
-        Swarm.fetch(r.shareKey, r.digestHex, part.absolutePath)
+        // A release names its own bytes once anybody has held it; until then
+        // the standing ceiling, a release being the one thing here that is
+        // legitimately huge (N4/D2).
+        Swarm.fetch(
+            r.shareKey, r.digestHex, part.absolutePath,
+            maxBytes = if (r.bytes > 0) r.bytes else Swarm.Caps.RELEASE,
+        )
         dir.deleteRecursively()
         check(part.renameTo(dir)) { "could not move the release into place" }
         put(
@@ -282,7 +288,11 @@ object Releases {
                     return@runCatching
                 }
                 Swarm.stopShare(r.shareKey)
-                Swarm.fetch(r.shareKey, r.digestHex, dir.absolutePath, staySeeding = true)
+                // On disk already, so its size is known exactly.
+                Swarm.fetch(
+                    r.shareKey, r.digestHex, dir.absolutePath, staySeeding = true,
+                    maxBytes = if (r.bytes > 0) r.bytes else Swarm.Caps.RELEASE,
+                )
                 if (all(context).none { it.digestHex == digestHex && it.keepAlive }) {
                     Swarm.stopShare(r.shareKey)
                     DucatLog.i("Releases", "reseed finished for a release no longer kept — stopped")

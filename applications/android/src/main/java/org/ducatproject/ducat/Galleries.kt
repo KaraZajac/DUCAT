@@ -177,7 +177,8 @@ object Galleries {
             try {
                 part.deleteRecursively()
                 part.mkdirs()
-                Swarm.fetch(share, digestHex, part.absolutePath)
+                // Photographs of a thing for sale, nothing more (N4/D2).
+                Swarm.fetch(share, digestHex, part.absolutePath, maxBytes = Swarm.Caps.GALLERY)
                 dir.deleteRecursively()
                 check(part.renameTo(dir)) { "could not move the gallery into place" }
                 DucatLog.i(TAG, "gallery ${digestHex.take(12)}… fetched")

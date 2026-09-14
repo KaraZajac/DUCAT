@@ -1,21 +1,145 @@
-use std::{collections::HashMap, sync::Arc, time::Duration};
+use std::{
+    collections::HashMap,
+    sync::Arc,
+    time::{Duration, Instant},
+};
 
 use stigmerge_fileindex::{BLOCK_SIZE_BYTES, PIECE_SIZE_BLOCKS};
 use tokio::{
     fs::File,
     io::{AsyncReadExt, AsyncSeekExt},
     select,
-    sync::Mutex,
+    sync::{Mutex, Semaphore},
     task::JoinSet,
     time::interval,
 };
 use tokio_util::sync::CancellationToken;
 use tracing::{error, instrument, trace, warn};
-use veilid_core::{OperationId, VeilidAppCall};
+use veilid_core::{OperationId, RouteId, VeilidAppCall};
 use veilnet::{
     connection::{RoutingContext, UpdateHandler, API},
     Connection,
 };
+
+// DUCAT modification (see ../STIGMERGE-NOTICE.md): seeder back-pressure.
+//
+// Serving is the one thing a DUCAT node does for strangers, and upstream did
+// it with no ceiling anywhere: an unbounded queue took every block request
+// that arrived, the loop spawned a task per request, and each task held a
+// 32 KiB buffer while queuing behind one mutex that was held across the
+// network reply. A peer that asked fast enough — or many peers, or one peer
+// with a script — grew the queue, the task set and the memory without limit,
+// on somebody's phone. Nothing about it needed the piece to exist.
+//
+// Three bounds, cheapest first: a rate per route, a bounded queue, and a
+// ceiling on replies in flight. Each drops what it cannot take rather than
+// buffering it — a dropped block request costs the asker one retry, which is
+// the fetcher's ordinary weather, and costs us nothing.
+
+/// Block requests waiting to be served. Beyond this the queue is full and
+/// new requests are dropped.
+const MAX_QUEUED_BLOCK_REQUESTS: usize = 256;
+
+/// Replies in flight at once. Each holds one block (32 KiB) while it is read
+/// and sent, so this is also the seeder's memory ceiling: 256 KiB.
+const MAX_INFLIGHT_REPLIES: usize = 8;
+
+/// Requests one route may spend in [`ROUTE_BUCKET_WINDOW`].
+///
+/// Sixty-four 32 KiB blocks in ten seconds is about 205 KiB/s per inbound
+/// route: a rate a phone can serve all day rather than the best a desk on a
+/// fast line could manage. It is deliberately a *pace*, not a cliff — a
+/// request that arrives with no token waits for one (up to
+/// [`MAX_SHAPE_WAIT`]) instead of being dropped, so an honest fetcher asking
+/// faster than this is slowed rather than starved of replies it will sit and
+/// wait for. A flood outruns the wait and is dropped at the queue.
+///
+/// Worth knowing when tuning it: the live proof runs moved 25 MiB in 97.5 s
+/// (~80 requests per 10 s) and 100 MiB in 279.9 s (~114), both above this,
+/// so this rate does cap a single fast transfer. That is the trade the
+/// review asked for — a seeder is a background service on somebody else's
+/// device, and without a rate the peer that asks hardest decides how much of
+/// it they get.
+const ROUTE_BUCKET_CAPACITY: f64 = 64.0;
+
+/// The window [`ROUTE_BUCKET_CAPACITY`] is spent over.
+const ROUTE_BUCKET_WINDOW: Duration = Duration::from_secs(10);
+
+/// The longest a request will wait for a token before it is dropped.
+///
+/// Past this the asker has given up on the reply anyway, so serving it is
+/// work spent on nobody.
+const MAX_SHAPE_WAIT: Duration = Duration::from_secs(5);
+
+/// Routes remembered by the bucket. Our own private routes rotate, so the
+/// map would otherwise grow for the life of the process.
+const MAX_TRACKED_ROUTES: usize = 64;
+
+/// How long a route is remembered after its last request.
+const ROUTE_BUCKET_FORGET: Duration = Duration::from_secs(300);
+
+/// A token bucket per inbound private route.
+///
+/// The route the call arrived on is all a seeder can key on: a request over
+/// a private route carries no sender, by design. It is therefore a rate per
+/// swarm rather than per asker — which is the honest shape of the limit, and
+/// the reason it is set well above what one healthy fetcher uses.
+#[derive(Default)]
+struct RouteBuckets {
+    inner: std::sync::Mutex<HashMap<Option<RouteId>, Bucket>>,
+}
+
+struct Bucket {
+    tokens: f64,
+    last: Instant,
+}
+
+impl RouteBuckets {
+    /// Spend a token for this route, or say how long until there is one.
+    fn take(&self, route: &Option<RouteId>) -> std::result::Result<(), Duration> {
+        let now = Instant::now();
+        let per_second = ROUTE_BUCKET_CAPACITY / ROUTE_BUCKET_WINDOW.as_secs_f64();
+        let mut map = self
+            .inner
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        if map.len() > MAX_TRACKED_ROUTES {
+            map.retain(|_, b| now.duration_since(b.last) < ROUTE_BUCKET_FORGET);
+        }
+        let bucket = map.entry(route.clone()).or_insert(Bucket {
+            tokens: ROUTE_BUCKET_CAPACITY,
+            last: now,
+        });
+        let refill = now.duration_since(bucket.last).as_secs_f64() * per_second;
+        bucket.tokens = (bucket.tokens + refill).min(ROUTE_BUCKET_CAPACITY);
+        bucket.last = now;
+        if bucket.tokens >= 1.0 {
+            bucket.tokens -= 1.0;
+            Ok(())
+        } else {
+            Err(Duration::from_secs_f64((1.0 - bucket.tokens) / per_second))
+        }
+    }
+
+    /// Wait for this route's turn, or give up on the request.
+    ///
+    /// True when a token was spent and the block may be served.
+    async fn pace(&self, route: &Option<RouteId>) -> bool {
+        let mut waited = Duration::ZERO;
+        loop {
+            match self.take(route) {
+                Ok(()) => return true,
+                Err(wait) => {
+                    if waited + wait > MAX_SHAPE_WAIT {
+                        return false;
+                    }
+                    tokio::time::sleep(wait).await;
+                    waited += wait;
+                }
+            }
+        }
+    }
+}
 
 use crate::{
     error::CancelError,
@@ -32,32 +156,51 @@ pub struct Seeder<C: Connection> {
     have_map: StableHaveMap,
 
     inner: Arc<Mutex<SeederInner<C>>>,
+
+    /// DUCAT modification (see ../STIGMERGE-NOTICE.md): a connection handle
+    /// for replies, so a reply is not sent while holding the lock that the
+    /// next read needs. The clone shares the node; it is a handle, not a
+    /// second connection.
+    reply_conn: C,
+
+    /// DUCAT modification (see ../STIGMERGE-NOTICE.md): the per-route pace.
+    buckets: Arc<RouteBuckets>,
 }
 
-impl<C: Connection + Send + Sync + 'static> Seeder<C> {
+impl<C: Connection + Clone + Send + Sync + 'static> Seeder<C> {
     pub async fn new(mut conn: C, share: LocalShareInfo, verifier: PieceVerifier) -> Result<Self> {
         let (status_handler, verified_rx) = PieceStatusNotifier::new();
         verifier.subscribe(Box::new(status_handler)).await;
 
         let have_map = StableHaveMap::new_local(&mut conn, &share.want_index).await?;
 
+        let reply_conn = conn.clone();
         Ok(Seeder {
             verifier,
             verified_rx,
             have_map,
             inner: Arc::new(Mutex::new(SeederInner::new(conn, share))),
+            reply_conn,
+            buckets: Arc::new(RouteBuckets::default()),
         })
     }
 
     #[instrument(skip_all, err)]
-    pub async fn run(mut self, cancel: CancellationToken, retry: Retry) -> Result<()> {
+    // DUCAT modification (see ../STIGMERGE-NOTICE.md): `retry` is no longer
+    // used — the block path does not retry a reply behind a lock any more,
+    // it drops what it cannot serve — but the parameter stays so the
+    // orchestration in `share.rs` reads the same for every task.
+    pub async fn run(mut self, cancel: CancellationToken, _retry: Retry) -> Result<()> {
         let block_request_rx = {
             let inner = self.inner.lock().await;
             let (block_req_handler, block_request_rx) = BlockRequestHandler::new(cancel.clone());
             inner.conn.add_update_handler(Box::new(block_req_handler));
             block_request_rx
         };
-        let mut tasks = JoinSet::new();
+        let mut tasks: JoinSet<Result<()>> = JoinSet::new();
+        // DUCAT modification (see ../STIGMERGE-NOTICE.md): the ceiling on
+        // replies in flight, and therefore on the seeder's memory.
+        let inflight = Arc::new(Semaphore::new(MAX_INFLIGHT_REPLIES));
         let mut have_map_sync_interval = interval(Duration::from_secs(30));
         loop {
             select! {
@@ -86,40 +229,78 @@ impl<C: Connection + Send + Sync + 'static> Seeder<C> {
                         }
                     };
                 }
+                // DUCAT modification (see ../STIGMERGE-NOTICE.md): finished
+                // reply tasks are reaped here. Upstream never joined them,
+                // so a long-lived seeder's JoinSet grew with every block it
+                // ever served, and a failed read was never noticed.
+                Some(res) = tasks.join_next(), if !tasks.is_empty() => {
+                    match res {
+                        Ok(Ok(())) => {}
+                        Ok(Err(err)) if crate::error::is_cancelled(&err) => {}
+                        Ok(Err(err)) => warn!(?err, "serving a block"),
+                        Err(err) if err.is_cancelled() => {}
+                        Err(err) => warn!(?err, "block reply task"),
+                    }
+                }
                 res = block_request_rx.recv_async() => {
-                    let (app_call_id, block_req) = res?;
-                    backoff_retry!(cancel, retry, {
-                        let block_req = block_req.clone();
-                        trace!("app_call: {:?}", block_req);
-                        if self.have_map.has_piece(block_req.piece) {
-                            let mut buf = [0u8; BLOCK_SIZE_BYTES];
-                            let inner = self.inner.clone();
-                            let cancel = cancel.child_token();
-                            tasks.spawn(async move {
-                                let read_reply = async {
-                                    // TODO: improve app_call handler concurrency here?
-                                    let mut inner = inner.lock().await;
-                                    let rd = inner.read_block_into(&block_req, &mut buf).await?;
-                                    inner.reply_block_contents(app_call_id, Some(&buf[..rd])).await?;
-                                    Ok::<(), anyhow::Error>(())
-                                };
-                                select! {
-                                    _ = cancel.cancelled() => {
-                                        Err(CancelError.into())
-                                    }
-                                    res = read_reply => {
-                                        res
+                    let (app_call_id, block_req, route) = res?;
+                    trace!("app_call: {:?}", block_req);
+                    // DUCAT modification (see ../STIGMERGE-NOTICE.md): one
+                    // permit per reply in flight, and an excess request is
+                    // dropped rather than queued behind a lock. The asker
+                    // retries; that is the fetcher's ordinary weather.
+                    let Ok(permit) = inflight.clone().try_acquire_owned() else {
+                        trace!(piece = block_req.piece, "seeder at capacity, dropping a request");
+                        continue;
+                    };
+                    let have = self.have_map.has_piece(block_req.piece);
+                    let inner = self.inner.clone();
+                    let mut reply_conn = self.reply_conn.clone();
+                    let buckets = self.buckets.clone();
+                    let task_cancel = cancel.child_token();
+                    tasks.spawn(async move {
+                        let _permit = permit;
+                        let work = async {
+                            // DUCAT modification (see ../STIGMERGE-NOTICE.md):
+                            // the route's turn. A fetcher asking faster than
+                            // this seeder serves is paced, not starved; one
+                            // asking absurdly fast outruns the wait and is
+                            // dropped, which costs it a retry and costs this
+                            // device nothing.
+                            if !buckets.pace(&route).await {
+                                trace!(piece = block_req.piece, "over the route's rate, dropping");
+                                return Ok(());
+                            }
+                            // The read happens under the lock — one file
+                            // handle cache, one set of seeks. The reply does
+                            // not: upstream held the lock across the network
+                            // send, so every other request on this share
+                            // waited on one peer's round trip.
+                            let contents = if have {
+                                let mut inner_guard = inner.lock().await;
+                                match inner_guard.read_block(&block_req).await {
+                                    Ok(buf) => Some(buf),
+                                    Err(err) => {
+                                        warn!(?err, piece = block_req.piece, "reading a block");
+                                        inner_guard.flush_file_cache();
+                                        None
                                     }
                                 }
-                            });
-                        } else {
-                            self.inner.lock().await.reply_block_contents(app_call_id, None).await?;
+                            } else {
+                                None
+                            };
+                            SeederInner::<C>::reply_on(
+                                &mut reply_conn,
+                                app_call_id,
+                                contents.as_deref(),
+                            )
+                            .await
+                        };
+                        select! {
+                            _ = task_cancel.cancelled() => Err(CancelError.into()),
+                            res = work => res,
                         }
-                    }, {
-                        // In the event we've gotten stuck retrying an error,
-                        // flush the file handle cache for good measure.
-                        self.inner.lock().await.flush_file_cache();
-                    })?;
+                    });
                 }
                 _ = have_map_sync_interval.tick() => {
                     self.have_map.sync(&mut self.inner.lock().await.conn).await?;
@@ -131,12 +312,15 @@ impl<C: Connection + Send + Sync + 'static> Seeder<C> {
 
 struct BlockRequestHandler {
     cancel: CancellationToken,
-    block_request_tx: flume::Sender<(OperationId, BlockRequest)>,
+    block_request_tx: flume::Sender<(OperationId, BlockRequest, Option<RouteId>)>,
 }
 
 impl BlockRequestHandler {
-    fn new(cancel: CancellationToken) -> (Self, flume::Receiver<(OperationId, BlockRequest)>) {
-        let (block_request_tx, block_request_rx) = flume::unbounded();
+    fn new(cancel: CancellationToken) -> (Self, flume::Receiver<(OperationId, BlockRequest, Option<RouteId>)>) {
+        // DUCAT modification (see ../STIGMERGE-NOTICE.md): bounded. The
+        // queue used to be unbounded, so a peer that asked faster than the
+        // disk could answer grew it without limit — on a phone.
+        let (block_request_tx, block_request_rx) = flume::bounded(MAX_QUEUED_BLOCK_REQUESTS);
         (
             Self {
                 cancel,
@@ -154,14 +338,25 @@ impl UpdateHandler for BlockRequestHandler {
     fn app_call(&self, app_call: &VeilidAppCall) {
         match proto::Request::decode(app_call.message()) {
             Ok(proto::Request::BlockRequest(block_req)) => {
-                let _ = self
+                // DUCAT modification (see ../STIGMERGE-NOTICE.md): a full
+                // queue is not a broken seeder — the request is dropped and
+                // the asker retries. Only a channel with no receiver means
+                // this task is gone. The route the call arrived on rides
+                // along, because that is all a seeder can meter on: a
+                // request over a private route carries no sender, by design.
+                match self
                     .block_request_tx
-                    .send((app_call.id(), block_req))
-                    .map_err(|err| {
+                    .try_send((app_call.id(), block_req, app_call.route_id().cloned()))
+                {
+                    Ok(()) => {}
+                    Err(flume::TrySendError::Full(_)) => {
+                        trace!("block request queue full, dropping");
+                    }
+                    Err(err @ flume::TrySendError::Disconnected(_)) => {
                         error!(?err, "send block request to seeder");
                         self.cancel.cancel();
-                        err
-                    });
+                    }
+                }
             }
             Ok(_) => {}
             Err(err) => {
@@ -194,50 +389,128 @@ impl<C: Connection> SeederInner<C> {
         self.files.clear();
     }
 
-    async fn reply_block_contents(
-        &mut self,
-        call_id: OperationId,
-        contents: Option<&[u8]>,
-    ) -> Result<()> {
-        self.conn.require_attachment().await?;
-        self.conn
-            .routing_context()
+    /// DUCAT modification (see ../STIGMERGE-NOTICE.md): replying takes a
+    /// connection handle rather than `&mut self`, so the reply happens
+    /// outside the lock the reads share.
+    async fn reply_on(conn: &mut C, call_id: OperationId, contents: Option<&[u8]>) -> Result<()> {
+        conn.require_attachment().await?;
+        conn.routing_context()
             .api()
             .app_call_reply(call_id, contents.unwrap_or(&[]).to_vec())
             .await?;
         Ok(())
     }
 
-    async fn read_block_into(&mut self, block_req: &BlockRequest, buf: &mut [u8]) -> Result<usize> {
+    /// Read one block of one piece, exactly as long as the index says it is.
+    ///
+    /// DUCAT modification (see ../STIGMERGE-NOTICE.md): bounded, and the
+    /// buffer is sized to the block rather than always a whole one. A block
+    /// index at or past the piece's block count used to seek merrily past
+    /// the end of the file and reply with whatever a short read returned —
+    /// the request came off the wire, and the only thing checked about it
+    /// was whether we held the piece.
+    async fn read_block(&mut self, block_req: &BlockRequest) -> Result<Vec<u8>> {
         // Piece-aligned multi-file (DUCAT): the index says whose piece this
         // is, and the seek is relative to that file's own slice.
-        let piece: usize = TryInto::<usize>::try_into(block_req.piece).unwrap();
+        let piece: usize = TryInto::<usize>::try_into(block_req.piece)?;
+        let piece_len = self
+            .share
+            .want_index
+            .payload()
+            .pieces()
+            .get(piece)
+            .ok_or_else(|| crate::Error::msg(format!("no piece {piece} in this share")))?
+            .length();
+        let block_index: usize = block_req.block.into();
+        let want = crate::types::expected_block_len(piece_len, block_index).ok_or_else(|| {
+            crate::Error::msg(format!(
+                "block {block_index} is past the end of piece {piece}"
+            ))
+        })?;
+        let consumed = block_index * BLOCK_SIZE_BYTES;
         let file_index = self.share.want_index.file_index_for_piece(piece);
-        let starting_piece = self.share.want_index.files()[file_index]
+        let starting_piece = self
+            .share
+            .want_index
+            .files()
+            .get(file_index)
+            .ok_or_else(|| crate::Error::msg(format!("no file {file_index} in this share")))?
             .contents()
             .starting_piece();
+        let offset = piece
+            .checked_sub(starting_piece)
+            .and_then(|rel| (rel as u64).checked_mul((PIECE_SIZE_BLOCKS * BLOCK_SIZE_BYTES) as u64))
+            .and_then(|at| at.checked_add(consumed as u64))
+            .ok_or_else(|| crate::Error::msg("block offset outside the file"))?;
         let fh = self.get_file_for_block(file_index).await?;
-        fh.seek(std::io::SeekFrom::Start(
-            (((piece - starting_piece) * PIECE_SIZE_BLOCKS * BLOCK_SIZE_BYTES)
-                + (Into::<usize>::into(block_req.block) * BLOCK_SIZE_BYTES))
-                .try_into()
-                .unwrap(),
-        ))
-        .await?;
-        let rd = fh.read(buf).await?;
-        Ok(rd)
+        fh.seek(std::io::SeekFrom::Start(offset)).await?;
+        // Exactly `want` bytes: a short read here would be a short reply,
+        // and the fetcher now refuses one — rightly, since we said we held
+        // this piece.
+        let mut buf = vec![0u8; want];
+        fh.read_exact(&mut buf).await?;
+        Ok(buf)
     }
 
     async fn get_file_for_block(&mut self, file_index: usize) -> Result<&mut File> {
         if !self.files.contains_key(&file_index) {
-            let file_path = self
-                .share
-                .root
-                .join(self.share.want_index.files()[file_index].path());
+            let file_path = self.share.root.join(
+                self.share
+                    .want_index
+                    .files()
+                    .get(file_index)
+                    .ok_or_else(|| crate::Error::msg(format!("no file {file_index} in this share")))?
+                    .path(),
+            );
             let fh = File::open(file_path).await?;
             self.files.insert(file_index, fh);
         }
-        Ok(self.files.get_mut(&file_index).unwrap())
+        self.files
+            .get_mut(&file_index)
+            .ok_or_else(|| crate::Error::msg("file handle vanished"))
+    }
+}
+
+// DUCAT modification (see ../STIGMERGE-NOTICE.md): the pace, on its own.
+#[cfg(test)]
+mod bucket_tests {
+    use super::*;
+
+    #[test]
+    fn a_route_gets_its_budget_and_then_waits() {
+        let buckets = RouteBuckets::default();
+        let route = None;
+
+        // The burst is there to be spent.
+        for i in 0..(ROUTE_BUCKET_CAPACITY as usize) {
+            buckets.take(&route).unwrap_or_else(|_| panic!("token {i}"));
+        }
+
+        // And then the asker waits for the next one, rather than being told
+        // no: a fetcher that asks faster than this seeder serves is paced.
+        let wait = buckets.take(&route).expect_err("the budget is spent");
+        assert!(wait > Duration::ZERO, "a wait of {wait:?}");
+        // One token at 64 per 10 s is about 156 ms; never more than the
+        // whole window.
+        assert!(wait <= ROUTE_BUCKET_WINDOW, "a wait of {wait:?}");
+    }
+
+    #[test]
+    fn the_budget_is_per_route() {
+        let buckets = RouteBuckets::default();
+        let route = |b: u8| {
+            Some(RouteId::new(
+                veilid_core::CRYPTO_KIND_VLD0,
+                veilid_core::BareRouteId::new(&[b; 32]),
+            ))
+        };
+        let (a, b) = (route(1), route(2));
+        for _ in 0..(ROUTE_BUCKET_CAPACITY as usize) {
+            buckets.take(&a).expect("a's budget");
+        }
+        buckets.take(&a).expect_err("a is spent");
+        // b has not asked for anything, and does not pay for a.
+        buckets.take(&b).expect("b's own budget");
     }
 }
 

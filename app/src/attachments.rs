@@ -182,7 +182,9 @@ impl App {
                 continue;
             }
             swarm::swarm_stop_share(share.to_string());
-            if let Err(e) = swarm::swarm_fetch(share.to_string(), digest.to_string(), dir.to_string_lossy().into_owned(), true) {
+            // Our own outbox blob, already on this disk: the ceiling is
+            // the standing one, not a per-kind budget (N4/D2).
+            if let Err(e) = swarm::swarm_fetch_capped(share.to_string(), digest.to_string(), dir.to_string_lossy().into_owned(), true, swarm::caps::DEFAULT) {
                 log::warn(TAG, format!("re-park {}: {e}", dir.file_name().map(|f| f.to_string_lossy().into_owned()).unwrap_or_default()));
             }
         }
@@ -285,7 +287,17 @@ impl App {
         let _ = std::fs::remove_dir_all(&tmp);
         std::fs::create_dir_all(&tmp)?;
         let r: Result<PathBuf, Error> = (|| {
-            swarm::swarm_fetch(share.clone(), digest.clone(), tmp.to_string_lossy().into_owned(), false)?;
+            // The ceiling is what the sealed message said the attachment
+            // weighs, plus slack for the AEAD tag and the blob's wrapper
+            // (N4/D2). The room check above still does the real work — this
+            // stops a share whose index contradicts the message it rode on.
+            swarm::swarm_fetch_capped(
+                share.clone(),
+                digest.clone(),
+                tmp.to_string_lossy().into_owned(),
+                false,
+                m.att_len.saturating_add(swarm::caps::ATTACHMENT_SLACK),
+            )?;
             let blob = walk_largest(&tmp).ok_or_else(|| Error::Refused("the share held no file".into()))?;
             let ct = std::fs::read(&blob)?;
             if sha256_hex(&ct) != hash {

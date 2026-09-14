@@ -34,6 +34,11 @@ pub enum Error {
     DecodePath(#[from] Utf8Error),
     #[error("index names a path outside the share: {0}")]
     UnsafePath(PathBuf),
+    // DUCAT modification (see ../../../STIGMERGE-NOTICE.md): an index whose
+    // declared shape could not describe real content is refused at decode,
+    // before a fetcher creates a file for it or a verifier indexes one.
+    #[error("the index does not describe a real payload: {0}")]
+    UnsafeIndex(#[from] stigmerge_fileindex::ShapeError),
     #[error("{0}")]
     InternalUsize(#[from] TryFromIntError),
     #[error("{0}")]

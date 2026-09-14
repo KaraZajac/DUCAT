@@ -163,6 +163,73 @@ Recorded per the MPL's Exhibit A expectations and plain courtesy:
    cancellation it asked for and still reports a task error or a real
    panic (`fetcher.rs` ×2, `share.rs::join`). **Upstream candidate.**
 
+13. **The index is a claim, not a fact (2026-09-14).** The security pass
+   (research/security/2026-09-07-adversarial-review.md, N4/D2, N5, N11,
+   N14, N18, N25, N26) found the whole engine taking the publisher's
+   numbers as read. Five changes, all **upstream candidates**:
+
+   *Shape, at decode.* `stigmerge_fileindex::check_index_shape` refuses
+   an index that could not describe content anybody indexed: a piece
+   longer than a piece or empty, a file's slice outside the pieces list
+   or starting inside one, pieces that do not add up to the file's
+   length, a piece claimed by two files or by none, and absolute
+   ceilings (16 GiB, 65 536 files, 81 920 pieces) that no real share
+   reaches. The wire decoder
+   (`stigmerge-peer/src/proto/index.rs`) calls it before anything is
+   created, and `record::read_index` calls it again once the header's
+   payload length has joined the index — header, pieces and files must
+   be one number, because that number is what the byte ceiling is
+   weighed against. Before this, a 900 GB file on one piece was a legal
+   index, and `Indexer::from_wanted` created and sized every file named
+   in it before a byte was verified
+   (tests `hostile_shapes_are_refused_at_decode`, and the `tests.rs`
+   shape suite in stigmerge-fileindex).
+
+   *A byte ceiling per fetch.* `Mode::Fetch` gained `max_bytes`, and
+   `share::check_budget` refuses a share whose declared length exceeds
+   it, in `start`, before the indexer touches the disk. The refusal is
+   its own error type (`share::TooLarge`, with both figures and
+   `share::too_large` to find it in a chain) so the embedding
+   application can say it to a person in their own units. DUCAT's
+   per-kind table lives in `mobile/src/swarm.rs` (`swarm::caps`) and
+   `Swarm.kt` (`Swarm.Caps`).
+
+   *Two panics and the arithmetic around them.* `share.rs` no longer
+   `unwrap()`s a have-map reference a stranger filled in;
+   `piece_verifier` bounds every index lookup and skips a piece the
+   index does not carry rather than panicking on it; `types.rs` does
+   its offsets and shifts checked (`block_offset_in_file` returns
+   `Option`, `is_complete` cannot shift off the end of the word);
+   `fetcher`, `block_fetcher` and `seeder` use `.get()` where they used
+   `[i]`.
+
+   *Seeder back-pressure (N5).* Serving is the one thing a node does
+   for strangers and it had no ceiling anywhere: an unbounded queue, a
+   task per block request each holding a 32 KiB buffer, all serialized
+   behind one mutex held across the network reply, and the have-not
+   path blocking the loop on a reply. Now a token bucket per inbound
+   private route (64 requests per 10 s — a route carries no sender, so
+   this is a rate per swarm), a bounded queue (256), a semaphore of 8
+   replies in flight (so 256 KiB of buffers, not unbounded), the read
+   under the lock and the reply outside it, finished reply tasks
+   reaped, and a block index at or past the piece's block count
+   refused instead of seeking past the end of the file.
+
+   *Tail-piece poisoning and strikes (N11, N18).* Both ends now derive
+   a block's length from the piece the index declares
+   (`types::expected_block_len`, one function, both ends): the fetcher
+   refuses a reply of any other length instead of clamping it to a
+   whole block, and sets the file to its declared length on first open
+   — a long reply to the short last block used to grow the file past
+   its index, and the verifier, which read to end of file, could then
+   never verify that piece again from anybody. The verifier now hashes
+   exactly the piece's declared length. A peer is credited when a piece
+   *verifies*, not when it answers (`note_success` moved from
+   `FetchPool` to the fetcher's `ValidPiece` branch), an unverifiable
+   piece scores the peer that held its lease
+   (`PieceLeaseManager::lease_holder`), and three bad pieces drop that
+   peer from the fetch.
+
 Proven live 2026-08-30, two DUCAT nodes on real Veilid: 25 MiB in 97.5 s
 and 100 MiB in 279.9 s (~3 Mbit/s through private routes), payload
 BLAKE3 identical on both ends, clean exits

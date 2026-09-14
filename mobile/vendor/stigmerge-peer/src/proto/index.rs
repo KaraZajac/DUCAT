@@ -99,6 +99,19 @@ impl Decoder for (Vec<PayloadPiece>, Vec<FileSpec>) {
             idx_files.push(spec);
         }
 
+        // DUCAT modification (see ../../../STIGMERGE-NOTICE.md): and the
+        // numbers beside the paths are the publisher's too. Upstream took
+        // every piece and slice length as read — so an index could declare a
+        // 900 GB file, point a slice past the end of its own pieces list
+        // (panicking the verifier), or hand one piece to two files. Every
+        // rule here holds for every index this stack produces; none of them
+        // can be true of content anybody actually indexed. Refused whole,
+        // before `Indexer::from_wanted` creates and sizes a single file.
+        //
+        // The payload length lives in the share header, not here, so the
+        // total is checked again where the two meet (`record::read_index`).
+        stigmerge_fileindex::check_index_shape(&idx_pieces, &idx_files, None)?;
+
         Ok((idx_pieces, idx_files))
     }
 }
@@ -181,5 +194,80 @@ mod tests {
         // And the honest shape still decodes.
         let message = idx.encode().expect("encode index");
         <(Vec<PayloadPiece>, Vec<FileSpec>)>::decode(message.as_slice()).expect("plain path");
+    }
+
+    /// DUCAT modification (see ../../../STIGMERGE-NOTICE.md): an index off
+    /// the wire that declares a shape nobody could have indexed is refused
+    /// at decode — before `Indexer::from_wanted` creates and sizes a file
+    /// for every name in it.
+    #[tokio::test]
+    async fn hostile_shapes_are_refused_at_decode() {
+        use stigmerge_fileindex::{PayloadSlice, PIECE_SIZE_BYTES};
+
+        let root = PathBuf::from("/tmp");
+        let honest_piece = PayloadPiece::new([1u8; 32], PIECE_SIZE_BYTES);
+
+        // "One file, 900 GB", on one piece: the shape D2 is about. The
+        // fetcher would have created and sized that file.
+        let colossal = Index::new(
+            root.clone(),
+            PayloadSpec::new([2u8; 32], 900_000_000_000, vec![honest_piece.clone()]),
+            vec![FileSpec::new(
+                PathBuf::from("film.mkv"),
+                PayloadSlice::new(0, 0, 900_000_000_000),
+            )],
+        );
+        let err = <(Vec<PayloadPiece>, Vec<FileSpec>)>::decode(
+            colossal.encode().expect("encode").as_slice(),
+        )
+        .expect_err("900 GB on one piece");
+        assert!(matches!(err, Error::UnsafeIndex(_)), "{err}");
+
+        // A piece longer than a piece.
+        let fat = Index::new(
+            root.clone(),
+            PayloadSpec::new(
+                [2u8; 32],
+                PIECE_SIZE_BYTES * 64,
+                vec![PayloadPiece::new([1u8; 32], PIECE_SIZE_BYTES * 64)],
+            ),
+            vec![FileSpec::new(
+                PathBuf::from("a.bin"),
+                PayloadSlice::new(0, 0, PIECE_SIZE_BYTES * 64),
+            )],
+        );
+        let err =
+            <(Vec<PayloadPiece>, Vec<FileSpec>)>::decode(fat.encode().expect("encode").as_slice())
+                .expect_err("a 64 MiB piece");
+        assert!(matches!(err, Error::UnsafeIndex(_)), "{err}");
+
+        // A slice that starts past the end of the pieces list: the panic in
+        // the verifier, arriving as bytes.
+        let past = Index::new(
+            root.clone(),
+            PayloadSpec::new([2u8; 32], PIECE_SIZE_BYTES, vec![honest_piece.clone()]),
+            vec![FileSpec::new(
+                PathBuf::from("a.bin"),
+                PayloadSlice::new(4096, 0, PIECE_SIZE_BYTES),
+            )],
+        );
+        let err =
+            <(Vec<PayloadPiece>, Vec<FileSpec>)>::decode(past.encode().expect("encode").as_slice())
+                .expect_err("a slice past the pieces");
+        assert!(matches!(err, Error::UnsafeIndex(_)), "{err}");
+
+        // And the honest one-piece-one-file index still decodes.
+        let honest = Index::new(
+            root,
+            PayloadSpec::new([2u8; 32], PIECE_SIZE_BYTES, vec![honest_piece]),
+            vec![FileSpec::new(
+                PathBuf::from("a.bin"),
+                PayloadSlice::new(0, 0, PIECE_SIZE_BYTES),
+            )],
+        );
+        <(Vec<PayloadPiece>, Vec<FileSpec>)>::decode(
+            honest.encode().expect("encode").as_slice(),
+        )
+        .expect("an honest index");
     }
 }

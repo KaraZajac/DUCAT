@@ -1582,7 +1582,14 @@ object Mailbox {
         val tmp = java.io.File(context.filesDir, "att_tmp/$hash")
         return try {
             tmp.mkdirs()
-            Swarm.fetch(share, digest, tmp.absolutePath, staySeeding = false)
+            // The ceiling is what the sealed message said the attachment
+            // weighs, plus slack for the AEAD tag and the blob's wrapper
+            // (N4/D2). The room check above still does the real work — this
+            // stops a share whose index contradicts the message it rode on.
+            Swarm.fetch(
+                share, digest, tmp.absolutePath, staySeeding = false,
+                maxBytes = m.attLen + Swarm.Caps.ATTACHMENT_SLACK,
+            )
             val blob = tmp.walkTopDown().filter { it.isFile }
                 .maxByOrNull { it.length() }
                 ?: throw IllegalStateException("the share held no file")

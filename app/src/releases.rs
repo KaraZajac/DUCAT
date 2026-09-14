@@ -234,11 +234,16 @@ impl App {
         std::fs::create_dir_all(&part)?;
         log::info(TAG, format!("fetching '{}' ({}…)", r.title, &r.digest_hex[..12]));
         let t0 = std::time::Instant::now();
-        if let Err(e) = swarm::swarm_fetch(
+        // A release names its own bytes once anybody has held it; until
+        // then the ceiling is the standing one, because a release is the
+        // one thing here that is legitimately huge (N4/D2).
+        let cap = if r.bytes > 0 { r.bytes } else { swarm::caps::RELEASE };
+        if let Err(e) = swarm::swarm_fetch_capped(
             r.share_key.clone(),
             r.digest_hex.clone(),
             part.to_string_lossy().into_owned(),
             false,
+            cap,
         ) {
             log::warn(TAG, format!("'{}' did not arrive after {:.0}s: {e}", r.title, t0.elapsed().as_secs_f64()));
             return Err(e.into());
@@ -294,11 +299,13 @@ impl App {
                     return;
                 }
                 swarm::swarm_stop_share(r.share_key.clone());
-                let res = swarm::swarm_fetch(
+                // On disk already, so its size is known exactly.
+                let res = swarm::swarm_fetch_capped(
                     r.share_key.clone(),
                     r.digest_hex.clone(),
                     dir.to_string_lossy().into_owned(),
                     true,
+                    if r.bytes > 0 { r.bytes } else { swarm::caps::RELEASE },
                 );
                 match res {
                     Ok(_) => {
