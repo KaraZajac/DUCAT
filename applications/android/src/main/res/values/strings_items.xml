@@ -14,4 +14,7 @@
     <string name="items_picker_no_rate">No exchange rate yet — these prices cannot be rung up until this till reaches the network.</string>
     <string name="items_sold_out">Sold out</string>
     <string name="items_back_on">Back on</string>
+    <string name="items_up_to">Up to (XMR)</string>
+    <string name="items_floor_title">Small sales settle on one block</string>
+    <string name="items_floor_note">At or under this amount one block settles a sale, and a sale settles even when no second node can be reached. Above it a payment waits for three blocks — ten over one XMR — and for another node to see it in a block. Zero means no sale is small.</string>
 </resources>

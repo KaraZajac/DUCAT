@@ -83,4 +83,5 @@
     <string name="pay_donation_hint">Questa è una donazione: la ricevuta arriverà in questa chat appena ricevuta, e l’estratto la archivierà sotto Donazioni.</string>
     <string name="pay_relay_unconfirmed">Nessun nodo Monero ha confermato di aver preso il pagamento. Potrebbe passare lo stesso: le banconote usate restano riservate finché la catena non decide. Controlla l’estratto prima di pagare di nuovo.</string>
     <string name="pay_request_kept">Richiesta conservata: partirà da sola appena torna la rete.</string>
+    <string name="pay_fee_capped">Se la commissione effettiva supera questa cifra di oltre un quarto, non viene inviato nulla.</string>
 </resources>

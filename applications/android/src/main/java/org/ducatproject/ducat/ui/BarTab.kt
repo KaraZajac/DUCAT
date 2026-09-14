@@ -839,6 +839,44 @@ private fun TabDetail(tab: RunningTab, onBack: () -> Unit) {
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                // How far there is to go, in the unit that decides it: the
+                // receipt goes out when the payment is deep enough for its
+                // size, and one block is not that for anything large.
+                //
+                // Remembered: each of these reads the wallet's outputs or the
+                // opinion's notes, and this is inside a composable that
+                // redraws whenever anything on the screen moves.
+                val settling = remember(tab.id, tab.seenTx, tab.settledTotal, v) {
+                    Triple(
+                        org.ducatproject.ducat.SecondOpinion.blocksSoFar(context, tab.seenTx),
+                        org.ducatproject.ducat.SecondOpinion
+                            .confirmationsNeeded(context, tab.settledTotal),
+                        org.ducatproject.ducat.SecondOpinion.stalled(context, tab.seenTx),
+                    )
+                }
+                Text(
+                    stringResource(
+                        R.string.pos_settling_blocks, settling.first, settling.second,
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                // Ten minutes and no second node has it in a block. The bar
+                // is the one who can decide their own node's word will do.
+                if (settling.third) {
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        stringResource(R.string.pos_not_corroborated),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                    TextButton(
+                        onClick = {
+                            org.ducatproject.ducat.SecondOpinion
+                                .settleAnyway(context, tab.seenTx!!)
+                        },
+                    ) { Text(stringResource(R.string.pos_settle_anyway)) }
+                }
             } else Column(Modifier.padding(horizontal = 16.dp)) {
                 // The same news the list carries, on the screen somebody opens
                 // to decide what to do about it. Promising a receipt "when the

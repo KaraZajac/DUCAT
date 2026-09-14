@@ -8,6 +8,8 @@
     <string name="kiosk_order">Pedir</string>
     <string name="kiosk_scan_note">Escanea esto con cualquier monedero Monero. El importe ya viene puesto.</string>
     <string name="kiosk_waiting">Esperando tu pago…</string>
+    <string name="kiosk_settling">Liquidando</string>
+    <string name="kiosk_settling_note">Hemos visto tu pago. El pedido estará listo cuando la cadena lo tenga.</string>
     <string name="kiosk_cancel_order">Cancelar</string>
     <string name="kiosk_paid_title">Gracias</string>
     <string name="kiosk_paid_number">Pedido n.º %1$d</string>
@@ -17,11 +19,11 @@
     <string name="kiosk_back_to_counter">Volver al mostrador</string>
     <string name="kiosk_leave">Salir del modo quiosco</string>
     <string name="kiosk_state_awaiting">esperando pago</string>
-    <string name="kiosk_state_seen">pagado — visto, aún no en la cadena</string>
+    <string name="kiosk_state_seen">liquidándose — visto, aún no en un bloque</string>
     <string name="kiosk_state_confirmed">liquidado</string>
     <string name="kiosk_state_abandoned">se fue</string>
     <string name="kiosk_notify_title">Pedido n.º %1$d</string>
-    <string name="kiosk_notify_body">%1$s visto: el pedido está pagado</string>
+    <string name="kiosk_notify_body">%1$s visto — liquidándose</string>
     <string name="kiosk_mode_title">Quiosco</string>
     <string name="kiosk_mode_body">Una pantalla mirando al cliente: toca lo que quiere y luego acerca el teléfono o escanea para recibir la cuenta en su propio teléfono. Para salir hace falta tu PIN.</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->
@@ -46,4 +48,6 @@
     <string name="kiosk_all_off">Ahora mismo no hay nada disponible.</string>
     <string name="kiosk_tip_pct">%1$d%%</string>
     <string name="kiosk_declined">Rechazaron esta cuenta. No va a llegar nada: atiende al siguiente cliente, o arréglala tras la puerta del personal.</string>
+    <string name="kiosk_sight_title">Entregar a la primera vista</string>
+    <string name="kiosk_sight_note">Un pago visto pero aún no en un bloque todavía puede sustituirse; hasta esta cantidad el quiosco confía en la observación.</string>
 </resources>

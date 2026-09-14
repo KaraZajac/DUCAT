@@ -14,4 +14,7 @@
     <string name="items_picker_no_rate">まだ為替レートがありません。ネットワークにつながるまで、この価格では会計できません。</string>
     <string name="items_sold_out">売り切れ</string>
     <string name="items_back_on">再開</string>
+    <string name="items_up_to">上限 (XMR)</string>
+    <string name="items_floor_title">少額の売上は 1 ブロックで決済</string>
+    <string name="items_floor_note">この金額以下なら 1 ブロックで売上が決済され、第二のノードに届かなくても決済されます。これを超えると、支払いは 3 ブロック — 1 XMR を超えるなら 10 ブロック — と、別のノードがブロック内で確認するのを待ちます。ゼロは小さい売上はないという意味です。</string>
 </resources>

@@ -90,4 +90,16 @@
     <string name="split_back_to_them">پیشنهاد: %1$s به %3$s برمی‌گردد، %2$s به شما.</string>
     <string name="split_fee_yours">‏کارمزد شبکه از سهم شما کم می‌شود، پس کمی کمتر از آن می‌رسد.</string>
     <string name="split_fee_theirs">‏کارمزد شبکه از سهم %1$s کم می‌شود، پس سهم شما دقیقاً می‌رسد.</string>
+    <string name="bond_outputs_title">این تراکنش پرداخت می‌کند:</string>
+    <string name="bond_output_mine">%1$s برای شما</string>
+    <string name="bond_output_payer">%1$s بازگشت به پرداخت‌کننده</string>
+    <string name="bond_output_theirs">%1$s برای آنها</string>
+    <string name="bond_output_unchecked">%1$s به نشانی‌ای که این گوشی نمی‌تواند بررسی کند</string>
+    <string name="bond_output_residual">(کارمزد شبکه را می‌پردازد)</string>
+    <string name="bond_refuse_shape">این آزادسازی به %1$d مقصد پرداخت می‌کند. یک تسویه حداکثر به دو مقصد می‌پردازد، پس چیزی امضا نشد.</string>
+    <string name="bond_refuse_nameless">این آزادسازی به نشانی‌ای پرداخت می‌کند که خوانده نمی‌شود. چیزی امضا نشد.</string>
+    <string name="bond_refuse_arithmetic">مبلغ‌های این آزادسازی با هم جور نیستند. چیزی امضا نشد.</string>
+    <string name="bond_refuse_claim">آنچه این آزادسازی می‌گوید می‌پردازد با آنچه واقعاً می‌پردازد یکی نیست. چیزی امضا نشد.</string>
+    <string name="bond_superseded">پیش از زدن دکمه، پیشنهاد دیگری رسید. مبلغ‌ها را دوباره بررسی کنید.</string>
+    <string name="bond_misstated">این آزادسازی به شما %1$s می‌پردازد، نه %2$s نشان‌داده‌شده. چیزی امضا نشد.</string>
 </resources>

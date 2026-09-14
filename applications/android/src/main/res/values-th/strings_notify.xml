@@ -19,6 +19,8 @@
     <string name="notify_paid_body_tip">%1$s (ทิป %2$s) — ส่งใบเสร็จแล้ว</string>
     <string name="notify_unconfirmed_title">ยืนยันการชำระเงินไม่ได้</string>
     <string name="notify_unconfirmed_body">โหนดอื่นไม่มีบันทึกรายการนี้ บิลนี้ยังค้างชำระ</string>
+    <string name="notify_uncorroborated_title">ยังไม่มีการยืนยันการชำระเงิน</string>
+    <string name="notify_uncorroborated_body">ติดต่อโหนดที่สองเพื่อยืนยันไม่ได้ การขายจะยังค้างบิลจนกว่าคุณจะชำระเอง</string>
     <string name="notify_unbacked_title">ยืนยันเอสโครว์ไม่ได้</string>
     <string name="notify_unbacked_body">โหนดอื่นไม่เห็นเงินจำนวนนี้ ยังไม่มีอะไรได้รับการค้ำประกัน</string>
     <string name="notify_payto_changed_title">ที่อยู่สำหรับชำระเงินเปลี่ยนไป</string>

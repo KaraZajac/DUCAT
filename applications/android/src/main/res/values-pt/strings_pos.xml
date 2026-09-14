@@ -20,7 +20,10 @@
     <string name="pos_scan_hint">O cliente escaneia isto no DUCAT. A conta acima chega no telefone dele no mesmo instante.</string>
     <string name="pos_tap_hint">Ou encoste os telefones — a mesma conta de qualquer jeito</string>
     <string name="pos_payment_seen">Pagamento visto ✓</string>
-    <string name="pos_payment_settling">O pagamento está na rede — liquidando, uns dois minutos. O recibo sai sozinho quando o pagamento chega.</string>
+    <string name="pos_payment_settling">O pagamento deles está na rede — a liquidar. O recibo segue sozinho quando a cadeia o tiver a profundidade suficiente.</string>
+    <string name="pos_settling_blocks">%1$d de %2$d blocos</string>
+    <string name="pos_not_corroborated">Nenhum segundo nó confirmou este pagamento. Fica por pagar até que um o confirme, ou até que o liquide você mesmo.</string>
+    <string name="pos_settle_anyway">Liquidar mesmo assim</string>
     <string name="pos_bill_sent_to">Conta enviada para %1$s</string>
     <string name="pos_the_customer">o cliente</string>
     <string name="pos_billed_hint">A pessoa confirma no próprio telefone. Quando o pagamento entra na cadeia, o recibo vai automaticamente — nada mais a fazer aqui.</string>

@@ -90,4 +90,16 @@
     <string name="split_back_to_them">Vorschlag: %1$s zurück an %3$s, %2$s an dich.</string>
     <string name="split_fee_yours">Die Netzgebühr geht von deinem Anteil ab, es kommt also etwas weniger an.</string>
     <string name="split_fee_theirs">Die Netzgebühr geht von %1$ss Anteil ab, deiner kommt genau so an.</string>
+    <string name="bond_outputs_title">Diese Transaktion zahlt:</string>
+    <string name="bond_output_mine">%1$s an dich</string>
+    <string name="bond_output_payer">%1$s zurück an den Zahler</string>
+    <string name="bond_output_theirs">%1$s an sie</string>
+    <string name="bond_output_unchecked">%1$s an eine Adresse, die dieses Telefon nicht prüfen kann</string>
+    <string name="bond_output_residual">(zahlt die Netzwerkgebühr)</string>
+    <string name="bond_refuse_shape">Diese Freigabe zahlt an %1$d Stellen. Eine Abrechnung zahlt an höchstens zwei — es wurde nichts signiert.</string>
+    <string name="bond_refuse_nameless">Diese Freigabe zahlt an eine Adresse, die nicht gelesen werden kann. Es wurde nichts signiert.</string>
+    <string name="bond_refuse_arithmetic">Die Beträge in dieser Freigabe gehen nicht auf. Es wurde nichts signiert.</string>
+    <string name="bond_refuse_claim">Was diese Freigabe zu zahlen behauptet und was sie wirklich zahlt, stimmen nicht überein. Es wurde nichts signiert.</string>
+    <string name="bond_superseded">Vor deinem Tippen ist ein anderer Vorschlag eingetroffen. Prüfe die Beträge noch einmal.</string>
+    <string name="bond_misstated">Diese Freigabe zahlt dir %1$s, nicht die angezeigten %2$s. Es wurde nichts signiert.</string>
 </resources>

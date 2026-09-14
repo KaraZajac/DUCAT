@@ -14,4 +14,7 @@
     <string name="items_picker_no_rate">अभी कोई विनिमय दर नहीं — जब तक यह मशीन नेटवर्क तक नहीं पहुँचती, ये दाम वसूले नहीं जा सकते।</string>
     <string name="items_sold_out">खत्म</string>
     <string name="items_back_on">फिर से</string>
+    <string name="items_up_to">अधिकतम (XMR)</string>
+    <string name="items_floor_title">छोटी बिक्री एक ब्लॉक पर निपटती है</string>
+    <string name="items_floor_note">इस राशि तक एक ब्लॉक ही बिक्री निपटा देता है, और दूसरा नोड न मिलने पर भी बिक्री निपट जाती है। इससे ऊपर भुगतान तीन ब्लॉक — एक XMR से ऊपर दस — और किसी दूसरे नोड द्वारा ब्लॉक में देखे जाने की प्रतीक्षा करता है। शून्य का अर्थ है कोई बिक्री छोटी नहीं।</string>
 </resources>

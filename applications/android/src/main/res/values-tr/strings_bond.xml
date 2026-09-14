@@ -90,4 +90,16 @@
     <string name="split_back_to_them">Öneri: %1$s %3$s tarafına geri, %2$s sana.</string>
     <string name="split_fee_yours">Ağ ücreti senin payından çıkar, bu yüzden biraz daha azı gelir.</string>
     <string name="split_fee_theirs">Ağ ücreti %1$s’nin payından çıkar, seninki tam olarak gelir.</string>
+    <string name="bond_outputs_title">Bu işlem şunlara ödüyor:</string>
+    <string name="bond_output_mine">%1$s sana</string>
+    <string name="bond_output_payer">%1$s ödeyene geri</string>
+    <string name="bond_output_theirs">%1$s onlara</string>
+    <string name="bond_output_unchecked">%1$s bu telefonun doğrulayamadığı bir adrese</string>
+    <string name="bond_output_residual">(ağ ücretini öder)</string>
+    <string name="bond_refuse_shape">Bu serbest bırakma %1$d yere ödüyor. Bir mutabakat en fazla ikiye öder; hiçbir şey imzalanmadı.</string>
+    <string name="bond_refuse_nameless">Bu serbest bırakma okunamayan bir adrese ödüyor. Hiçbir şey imzalanmadı.</string>
+    <string name="bond_refuse_arithmetic">Bu serbest bırakmadaki tutarlar tutmuyor. Hiçbir şey imzalanmadı.</string>
+    <string name="bond_refuse_claim">Bu serbest bırakmanın ödediğini söylediği ile gerçekte ödediği uyuşmuyor. Hiçbir şey imzalanmadı.</string>
+    <string name="bond_superseded">Dokunmadan önce başka bir öneri geldi. Tutarları yeniden kontrol et.</string>
+    <string name="bond_misstated">Bu serbest bırakma sana %1$s ödüyor, gösterilen %2$s değil. Hiçbir şey imzalanmadı.</string>
 </resources>

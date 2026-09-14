@@ -90,4 +90,16 @@
     <string name="split_back_to_them">Proposed: %1$s back to %3$s, %2$s to you.</string>
     <string name="split_fee_yours">The network fee comes out of your share, so a little less than that arrives.</string>
     <string name="split_fee_theirs">The network fee comes out of %1$s\'s share, so yours arrives exactly.</string>
+    <string name="bond_outputs_title">This transaction pays:</string>
+    <string name="bond_output_mine">%1$s to you</string>
+    <string name="bond_output_payer">%1$s back to the payer</string>
+    <string name="bond_output_theirs">%1$s to them</string>
+    <string name="bond_output_unchecked">%1$s to an address this phone cannot check</string>
+    <string name="bond_output_residual">(pays the network fee)</string>
+    <string name="bond_refuse_shape">This release pays %1$d places. A settlement pays at most two, so nothing was signed.</string>
+    <string name="bond_refuse_nameless">This release pays an address that cannot be read. Nothing was signed.</string>
+    <string name="bond_refuse_arithmetic">The amounts in this release do not add up. Nothing was signed.</string>
+    <string name="bond_refuse_claim">What this release says it pays and what it really pays do not match. Nothing was signed.</string>
+    <string name="bond_superseded">A different proposal arrived before you tapped. Check the amounts again.</string>
+    <string name="bond_misstated">This release pays you %1$s, not the %2$s shown. Nothing was signed.</string>
 </resources>

@@ -19,6 +19,8 @@
     <string name="notify_paid_body_tip">%1$s (tip %2$s) — receipt sent</string>
     <string name="notify_unconfirmed_title">Payment not confirmed</string>
     <string name="notify_unconfirmed_body">Another node has no record of it. This tab stays unpaid.</string>
+    <string name="notify_uncorroborated_title">Payment not corroborated</string>
+    <string name="notify_uncorroborated_body">No second node could be reached to confirm it. The sale stays billed until you settle it.</string>
     <string name="notify_unbacked_title">Escrow not confirmed</string>
     <string name="notify_unbacked_body">Another node does not see the money. Nothing is secured yet.</string>
     <string name="notify_payto_changed_title">Payment address changed</string>

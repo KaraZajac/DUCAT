@@ -19,6 +19,8 @@
     <string name="notify_paid_body_tip">%1$s (mancia %2$s) — ricevuta inviata</string>
     <string name="notify_unconfirmed_title">Pagamento non confermato</string>
     <string name="notify_unconfirmed_body">Un altro nodo non ne ha traccia. Questo conto resta da pagare.</string>
+    <string name="notify_uncorroborated_title">Pagamento non riscontrato</string>
+    <string name="notify_uncorroborated_body">Non è stato possibile raggiungere un secondo nodo per confermarlo. La vendita resta fatturata finché non la saldi.</string>
     <string name="notify_unbacked_title">Deposito non confermato</string>
     <string name="notify_unbacked_body">Un altro nodo non vede il denaro. Non c\'è ancora nulla di garantito.</string>
     <string name="notify_payto_changed_title">Indirizzo di pagamento cambiato</string>

@@ -83,4 +83,5 @@
     <string name="pay_donation_hint">This is a donation — your receipt will land in this chat once it arrives, and your statement will file it under Donations.</string>
     <string name="pay_relay_unconfirmed">No Monero node confirmed taking the payment. It may still go through — the notes it used stay reserved until the chain settles it. Check the statement before paying again.</string>
     <string name="pay_request_kept">Request kept — it goes out by itself when the network is back.</string>
+    <string name="pay_fee_capped">If the built fee comes back more than a quarter above this, nothing is sent.</string>
 </resources>

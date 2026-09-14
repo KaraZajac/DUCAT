@@ -19,6 +19,8 @@
     <string name="notify_paid_body_tip">%1$s (gorjeta %2$s) — recibo enviado</string>
     <string name="notify_unconfirmed_title">Pagamento não confirmado</string>
     <string name="notify_unconfirmed_body">Outro nó não tem registro dele. Esta conta continua sem ser paga.</string>
+    <string name="notify_uncorroborated_title">Pagamento não corroborado</string>
+    <string name="notify_uncorroborated_body">Não foi possível alcançar um segundo nó para o confirmar. A venda fica faturada até que a liquide.</string>
     <string name="notify_unbacked_title">Custódia não confirmada</string>
     <string name="notify_unbacked_body">Outro nó não vê o dinheiro. Ainda não há nada garantido.</string>
     <string name="notify_payto_changed_title">Endereço de pagamento mudou</string>

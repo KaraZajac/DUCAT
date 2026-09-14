@@ -8,6 +8,8 @@
     <string name="kiosk_order">Đặt món</string>
     <string name="kiosk_scan_note">Quét bằng bất kỳ ví Monero nào. Số tiền đã điền sẵn.</string>
     <string name="kiosk_waiting">Đang chờ bạn thanh toán…</string>
+    <string name="kiosk_settling">Đang thanh toán</string>
+    <string name="kiosk_settling_note">Chúng tôi đã thấy khoản thanh toán của bạn. Đơn hàng hoàn tất khi nó vào chuỗi.</string>
     <string name="kiosk_cancel_order">Hủy</string>
     <string name="kiosk_paid_title">Cảm ơn</string>
     <string name="kiosk_paid_number">Đơn số %1$d</string>
@@ -17,11 +19,11 @@
     <string name="kiosk_back_to_counter">Về lại quầy</string>
     <string name="kiosk_leave">Thoát chế độ kiosk</string>
     <string name="kiosk_state_awaiting">đang chờ thanh toán</string>
-    <string name="kiosk_state_seen">đã trả — đã thấy, chưa lên chuỗi</string>
+    <string name="kiosk_state_seen">đang thanh toán — đã thấy, chưa vào khối</string>
     <string name="kiosk_state_confirmed">đã tất toán</string>
     <string name="kiosk_state_abandoned">bỏ đi</string>
     <string name="kiosk_notify_title">Đơn số %1$d</string>
-    <string name="kiosk_notify_body">Đã thấy %1$s — đơn đã được thanh toán</string>
+    <string name="kiosk_notify_body">Đã thấy %1$s — đang thanh toán</string>
     <string name="kiosk_mode_title">Kiosk</string>
     <string name="kiosk_mode_body">Một màn hình hướng về phía khách: họ chạm chọn thứ mình muốn, rồi chạm điện thoại hoặc quét mã, và hoá đơn về thẳng điện thoại của họ. Muốn thoát thì cần mã PIN của bạn.</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->
@@ -46,4 +48,6 @@
     <string name="kiosk_all_off">Hiện tại đã hết hàng.</string>
     <string name="kiosk_tip_pct">%1$d%%</string>
     <string name="kiosk_declined">Họ đã từ chối hóa đơn này. Sẽ không có tiền vào — chuyển sang khách tiếp theo, hoặc xử lý sau cửa nhân viên.</string>
+    <string name="kiosk_sight_title">Giao ngay khi thấy lần đầu</string>
+    <string name="kiosk_sight_note">Khoản thanh toán đã thấy nhưng chưa vào khối vẫn có thể bị thay thế; đến mức này, ki-ốt tin vào những gì đã thấy.</string>
 </resources>

@@ -20,7 +20,10 @@
     <string name="pos_scan_hint">वे इसे DUCAT में स्कैन करते हैं। स्कैन होते ही ऊपर वाला बिल उनके फ़ोन पर पहुँच जाता है।</string>
     <string name="pos_tap_hint">या फ़ोन टैप करें — बिल दोनों तरह एक ही</string>
     <string name="pos_payment_seen">भुगतान दिखा ✓</string>
-    <string name="pos_payment_settling">उनका भुगतान नेटवर्क में है — चुकता हो रहा है, करीब दो मिनट। पहुँचते ही रसीद अपने-आप चली जाती है।</string>
+    <string name="pos_payment_settling">उनका भुगतान नेटवर्क में है — निपट रहा है। जब चेन पर पर्याप्त गहराई आ जाएगी, रसीद अपने आप चली जाएगी।</string>
+    <string name="pos_settling_blocks">%2$d में से %1$d ब्लॉक</string>
+    <string name="pos_not_corroborated">किसी दूसरे नोड ने इस भुगतान की पुष्टि नहीं की है। जब तक कोई पुष्टि न करे या आप खुद न निपटाएँ, यह अदत्त रहेगा।</string>
+    <string name="pos_settle_anyway">फिर भी निपटाएँ</string>
     <string name="pos_bill_sent_to">बिल %1$s को भेजा</string>
     <string name="pos_the_customer">ग्राहक</string>
     <string name="pos_billed_hint">वे अपने फ़ोन पर पुष्टि करते हैं। भुगतान चेन पर पहुँचते ही रसीद अपने-आप उन तक जाती है — यहाँ कुछ और करना नहीं।</string>

@@ -8,6 +8,8 @@
     <string name="kiosk_order">Pesan</string>
     <string name="kiosk_scan_note">Pindai dengan dompet Monero apa pun. Jumlahnya sudah terisi.</string>
     <string name="kiosk_waiting">Menunggu pembayaranmu…</string>
+    <string name="kiosk_settling">Sedang diselesaikan</string>
+    <string name="kiosk_settling_note">Pembayaran Anda sudah terlihat. Pesanan selesai setelah masuk ke rantai.</string>
     <string name="kiosk_cancel_order">Batal</string>
     <string name="kiosk_paid_title">Terima kasih</string>
     <string name="kiosk_paid_number">Pesanan #%1$d</string>
@@ -17,11 +19,11 @@
     <string name="kiosk_back_to_counter">Kembali ke konter</string>
     <string name="kiosk_leave">Keluar dari mode kios</string>
     <string name="kiosk_state_awaiting">menunggu dibayar</string>
-    <string name="kiosk_state_seen">dibayar — terlihat, belum di rantai</string>
+    <string name="kiosk_state_seen">sedang diselesaikan — terlihat, belum masuk blok</string>
     <string name="kiosk_state_confirmed">selesai</string>
     <string name="kiosk_state_abandoned">pergi</string>
     <string name="kiosk_notify_title">Pesanan #%1$d</string>
-    <string name="kiosk_notify_body">%1$s terlihat — pesanan sudah dibayar</string>
+    <string name="kiosk_notify_body">%1$s terlihat — sedang diselesaikan</string>
     <string name="kiosk_mode_title">Kios</string>
     <string name="kiosk_mode_body">Layar yang menghadap pelanggan: mereka menekan apa yang diinginkan, lalu menempelkan ponsel atau memindai, dan tagihannya sampai di ponsel mereka sendiri. Keluar dari mode ini perlu PIN kamu.</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->
@@ -46,4 +48,6 @@
     <string name="kiosk_all_off">Semuanya sedang tidak tersedia.</string>
     <string name="kiosk_tip_pct">%1$d%%</string>
     <string name="kiosk_declined">Mereka menolak tagihan ini. Tidak ada yang akan masuk — lanjut ke pelanggan berikutnya, atau bereskan lewat pintu staf.</string>
+    <string name="kiosk_sight_title">Serahkan saat pertama terlihat</string>
+    <string name="kiosk_sight_note">Pembayaran yang terlihat tetapi belum masuk blok masih bisa diganti; sampai jumlah ini kios memercayai penampakan itu.</string>
 </resources>

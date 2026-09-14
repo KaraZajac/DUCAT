@@ -8,6 +8,8 @@
     <string name="kiosk_order">Ordina</string>
     <string name="kiosk_scan_note">Inquadra con un qualsiasi portafoglio Monero. L\'importo è già inserito.</string>
     <string name="kiosk_waiting">In attesa del tuo pagamento…</string>
+    <string name="kiosk_settling">In regolamento</string>
+    <string name="kiosk_settling_note">Il tuo pagamento è stato visto. L\'ordine è concluso quando la catena lo registra.</string>
     <string name="kiosk_cancel_order">Annulla</string>
     <string name="kiosk_paid_title">Grazie</string>
     <string name="kiosk_paid_number">Ordine n. %1$d</string>
@@ -17,11 +19,11 @@
     <string name="kiosk_back_to_counter">Torna al banco</string>
     <string name="kiosk_leave">Esci dalla modalità chiosco</string>
     <string name="kiosk_state_awaiting">in attesa di pagamento</string>
-    <string name="kiosk_state_seen">pagato — visto, non ancora sulla catena</string>
+    <string name="kiosk_state_seen">in fase di regolamento — visto, non ancora in un blocco</string>
     <string name="kiosk_state_confirmed">liquidato</string>
     <string name="kiosk_state_abandoned">se n\'è andato</string>
     <string name="kiosk_notify_title">Ordine n. %1$d</string>
-    <string name="kiosk_notify_body">%1$s visti — l\'ordine è pagato</string>
+    <string name="kiosk_notify_body">%1$s visto — in fase di regolamento</string>
     <string name="kiosk_mode_title">Chiosco</string>
     <string name="kiosk_mode_body">Uno schermo rivolto al cliente: tocca quello che vuole, poi avvicina il telefono o scansiona, e il conto gli arriva sul proprio telefono. Per uscire serve il tuo PIN.</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->
@@ -46,4 +48,6 @@
     <string name="kiosk_all_off">Al momento non c\'è nulla disponibile.</string>
     <string name="kiosk_tip_pct">%1$d%%</string>
     <string name="kiosk_declined">Hanno rifiutato questo conto. Non arriverà nulla: passa al cliente successivo, o sistemalo dietro la porta del personale.</string>
+    <string name="kiosk_sight_title">Consegna alla prima vista</string>
+    <string name="kiosk_sight_note">Un pagamento visto ma non ancora in un blocco può essere sostituito; fino a questo importo il chiosco si fida di ciò che ha visto.</string>
 </resources>

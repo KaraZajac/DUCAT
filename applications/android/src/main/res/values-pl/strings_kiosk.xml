@@ -8,6 +8,8 @@
     <string name="kiosk_order">Zamów</string>
     <string name="kiosk_scan_note">Zeskanuj dowolnym portfelem Monero. Kwota jest już wpisana.</string>
     <string name="kiosk_waiting">Czekamy na twoją płatność…</string>
+    <string name="kiosk_settling">Rozliczanie</string>
+    <string name="kiosk_settling_note">Widzimy Twoją płatność. Zamówienie będzie gotowe, gdy trafi do łańcucha.</string>
     <string name="kiosk_cancel_order">Anuluj</string>
     <string name="kiosk_paid_title">Dziękujemy</string>
     <string name="kiosk_paid_number">Zamówienie nr %1$d</string>
@@ -17,11 +19,11 @@
     <string name="kiosk_back_to_counter">Wróć do lady</string>
     <string name="kiosk_leave">Wyjdź z trybu kiosku</string>
     <string name="kiosk_state_awaiting">czeka na zapłatę</string>
-    <string name="kiosk_state_seen">zapłacone — widziane, jeszcze nie w łańcuchu</string>
+    <string name="kiosk_state_seen">rozliczanie — widziana, jeszcze nie w bloku</string>
     <string name="kiosk_state_confirmed">rozliczone</string>
     <string name="kiosk_state_abandoned">odszedł</string>
     <string name="kiosk_notify_title">Zamówienie nr %1$d</string>
-    <string name="kiosk_notify_body">Widać %1$s — zamówienie opłacone</string>
+    <string name="kiosk_notify_body">%1$s widziane — rozliczanie</string>
     <string name="kiosk_mode_title">Kiosk</string>
     <string name="kiosk_mode_body">Ekran zwrócony do klienta: dotyka tego, co chce, potem przykłada telefon albo skanuje, a rachunek trafia na jego własny telefon. Wyjście wymaga twojego PIN-u.</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->
@@ -46,4 +48,6 @@
     <string name="kiosk_all_off">Chwilowo nic nie jest dostępne.</string>
     <string name="kiosk_tip_pct">%1$d%%</string>
     <string name="kiosk_declined">Odrzucili ten rachunek. Nic nie wpłynie — przejdź do następnego klienta albo uporządkuj to za drzwiami dla obsługi.</string>
+    <string name="kiosk_sight_title">Wydawaj przy pierwszym zauważeniu</string>
+    <string name="kiosk_sight_note">Płatność zauważona, ale jeszcze nie w bloku, może zostać zastąpiona; do tej kwoty kiosk ufa temu, co zobaczył.</string>
 </resources>

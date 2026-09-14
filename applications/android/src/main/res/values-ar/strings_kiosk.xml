@@ -8,6 +8,8 @@
     <string name="kiosk_order">اطلب</string>
     <string name="kiosk_scan_note">امسح هذا بأي محفظة مونيرو. المبلغ مملوء بالفعل.</string>
     <string name="kiosk_waiting">بانتظار دفعتك…</string>
+    <string name="kiosk_settling">قيد التسوية</string>
+    <string name="kiosk_settling_note">تم رؤية دفعتك. يكتمل الطلب عندما تصبح على السلسلة.</string>
     <string name="kiosk_cancel_order">إلغاء</string>
     <string name="kiosk_paid_title">شكرًا</string>
     <string name="kiosk_paid_number">طلب رقم %1$d</string>
@@ -17,11 +19,11 @@
     <string name="kiosk_back_to_counter">العودة إلى المنضدة</string>
     <string name="kiosk_leave">الخروج من وضع الكشك</string>
     <string name="kiosk_state_awaiting">بانتظار الدفع</string>
-    <string name="kiosk_state_seen">مدفوع — شوهد، ولم يصل السلسلة بعد</string>
+    <string name="kiosk_state_seen">قيد التسوية — شوهدت ولم تدخل كتلة بعد</string>
     <string name="kiosk_state_confirmed">تمت التسوية</string>
     <string name="kiosk_state_abandoned">غادر</string>
     <string name="kiosk_notify_title">طلب رقم %1$d</string>
-    <string name="kiosk_notify_body">شوهد %1$s — الطلب مدفوع</string>
+    <string name="kiosk_notify_body">شوهد %1$s — قيد التسوية</string>
     <string name="kiosk_mode_title">كشك</string>
     <string name="kiosk_mode_body">شاشة تواجه الزبون: يضغط على ما يريد، ثم يقرّب هاتفه أو يمسح الرمز فتصله الفاتورة على هاتفه. الخروج يحتاج رمزك السري.</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->
@@ -46,4 +48,6 @@
     <string name="kiosk_all_off">كل شيء خارج القائمة حالياً.</string>
     <string name="kiosk_tip_pct">%1$d%%</string>
     <string name="kiosk_declined">رفضوا هذه الفاتورة. لن يصل شيء — ابدأ مع الزبون التالي، أو رتّبها من باب الموظفين.</string>
+    <string name="kiosk_sight_title">التسليم عند أول ظهور</string>
+    <string name="kiosk_sight_note">الدفعة التي شوهدت ولم تدخل كتلة بعد يمكن استبدالها؛ حتى هذا المبلغ يثق الكشك بالمشاهدة.</string>
 </resources>

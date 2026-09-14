@@ -20,7 +20,10 @@
     <string name="pos_scan_hint">손님이 DUCAT에서 이걸 스캔해요. 스캔하는 순간 위 계산서가 손님 휴대폰에 도착해요.</string>
     <string name="pos_tap_hint">또는 폰을 맞대세요 — 어느 쪽이든 같은 계산서예요</string>
     <string name="pos_payment_seen">결제 확인 ✓</string>
-    <string name="pos_payment_settling">결제가 네트워크에 들어갔어요 — 정산까지 2분쯤이에요. 도착하면 영수증이 저절로 가요.</string>
+    <string name="pos_payment_settling">상대의 결제가 네트워크에 있습니다 — 정산 중. 체인에서 충분히 깊어지면 영수증이 자동으로 나갑니다.</string>
+    <string name="pos_settling_blocks">%2$d개 중 %1$d블록</string>
+    <string name="pos_not_corroborated">이 결제를 확인한 두 번째 노드가 없습니다. 어느 노드가 확인하거나 직접 정산할 때까지 미결제로 남습니다.</string>
+    <string name="pos_settle_anyway">그래도 정산</string>
     <string name="pos_bill_sent_to">%1$s에게 계산서를 보냈어요</string>
     <string name="pos_the_customer">손님</string>
     <string name="pos_billed_hint">손님이 자기 휴대폰에서 확인해요. 결제가 체인에 오르면 영수증이 자동으로 가요 — 여기서 할 일은 없어요.</string>

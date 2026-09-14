@@ -8,6 +8,8 @@
     <string name="kiosk_order">Pedir</string>
     <string name="kiosk_scan_note">Escaneie com qualquer carteira Monero. O valor já vai preenchido.</string>
     <string name="kiosk_waiting">Aguardando seu pagamento…</string>
+    <string name="kiosk_settling">A liquidar</string>
+    <string name="kiosk_settling_note">O seu pagamento foi visto. O pedido fica concluído quando a cadeia o tiver.</string>
     <string name="kiosk_cancel_order">Cancelar</string>
     <string name="kiosk_paid_title">Obrigado</string>
     <string name="kiosk_paid_number">Pedido nº %1$d</string>
@@ -17,11 +19,11 @@
     <string name="kiosk_back_to_counter">Voltar ao balcão</string>
     <string name="kiosk_leave">Sair do modo quiosque</string>
     <string name="kiosk_state_awaiting">aguardando pagamento</string>
-    <string name="kiosk_state_seen">pago — visto, ainda não na rede</string>
+    <string name="kiosk_state_seen">a liquidar — visto, ainda não num bloco</string>
     <string name="kiosk_state_confirmed">liquidado</string>
     <string name="kiosk_state_abandoned">foi embora</string>
     <string name="kiosk_notify_title">Pedido nº %1$d</string>
-    <string name="kiosk_notify_body">%1$s vistos — o pedido está pago</string>
+    <string name="kiosk_notify_body">%1$s visto — a liquidar</string>
     <string name="kiosk_mode_title">Quiosque</string>
     <string name="kiosk_mode_body">Um ecrã virado para o cliente: toca no que quer, depois encosta o telefone ou digitaliza, e a conta chega ao telefone dele. Sair precisa do seu PIN.</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->
@@ -46,4 +48,6 @@
     <string name="kiosk_all_off">De momento não há nada disponível.</string>
     <string name="kiosk_tip_pct">%1$d%%</string>
     <string name="kiosk_declined">Recusaram esta conta. Não vem nada — passa ao próximo cliente, ou trata disso atrás da porta do pessoal.</string>
+    <string name="kiosk_sight_title">Entregar à primeira vista</string>
+    <string name="kiosk_sight_note">Um pagamento visto mas ainda não num bloco pode ser substituído; até este valor o quiosque confia no que viu.</string>
 </resources>

@@ -19,6 +19,8 @@
     <string name="notify_paid_body_tip">%1$s (टिप %2$s) — रसीद भेजी गई</string>
     <string name="notify_unconfirmed_title">भुगतान की पुष्टि नहीं हुई</string>
     <string name="notify_unconfirmed_body">किसी दूसरे नोड के पास इसका कोई रिकॉर्ड नहीं है। यह बिल बकाया रहेगा।</string>
+    <string name="notify_uncorroborated_title">भुगतान की पुष्टि नहीं</string>
+    <string name="notify_uncorroborated_body">पुष्टि के लिए कोई दूसरा नोड नहीं मिला। जब तक आप निपटा न दें, बिक्री बिल की हुई बनी रहेगी।</string>
     <string name="notify_unbacked_title">एस्क्रो की पुष्टि नहीं हुई</string>
     <string name="notify_unbacked_body">किसी दूसरे नोड को यह राशि नहीं दिख रही। अभी कुछ भी सुरक्षित नहीं है।</string>
     <string name="notify_payto_changed_title">भुगतान पता बदल गया</string>

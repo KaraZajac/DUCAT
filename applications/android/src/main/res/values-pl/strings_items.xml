@@ -14,4 +14,7 @@
     <string name="items_picker_no_rate">Brak kursu wymiany — tych cen nie da się rozliczyć, dopóki kasa nie połączy się z siecią.</string>
     <string name="items_sold_out">Nie ma</string>
     <string name="items_back_on">Z powrotem</string>
+    <string name="items_up_to">Do (XMR)</string>
+    <string name="items_floor_title">Małe sprzedaże rozliczają się po jednym bloku</string>
+    <string name="items_floor_note">Do tej kwoty włącznie jeden blok rozlicza sprzedaż, a sprzedaż rozlicza się nawet wtedy, gdy nie da się dosięgnąć żadnego drugiego węzła. Powyżej płatność czeka na trzy bloki — dziesięć powyżej jednego XMR — i na to, aż inny węzeł zobaczy ją w bloku. Zero znaczy, że żadna sprzedaż nie jest mała.</string>
 </resources>

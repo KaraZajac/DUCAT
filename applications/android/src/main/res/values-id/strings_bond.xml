@@ -89,4 +89,16 @@
     <string name="split_back_to_them">Usulan: %1$s kembali ke %3$s, %2$s untuk Anda.</string>
     <string name="split_fee_yours">Biaya jaringan diambil dari bagian Anda, jadi yang sampai sedikit lebih kecil.</string>
     <string name="split_fee_theirs">Biaya jaringan diambil dari bagian %1$s, jadi bagian Anda sampai persis.</string>
+    <string name="bond_outputs_title">Transaksi ini membayar:</string>
+    <string name="bond_output_mine">%1$s untuk Anda</string>
+    <string name="bond_output_payer">%1$s kembali ke pembayar</string>
+    <string name="bond_output_theirs">%1$s untuk mereka</string>
+    <string name="bond_output_unchecked">%1$s ke alamat yang tidak dapat diperiksa ponsel ini</string>
+    <string name="bond_output_residual">(membayar biaya jaringan)</string>
+    <string name="bond_refuse_shape">Pelepasan ini membayar ke %1$d tempat. Penyelesaian membayar paling banyak dua, jadi tidak ada yang ditandatangani.</string>
+    <string name="bond_refuse_nameless">Pelepasan ini membayar ke alamat yang tidak dapat dibaca. Tidak ada yang ditandatangani.</string>
+    <string name="bond_refuse_arithmetic">Jumlah dalam pelepasan ini tidak cocok. Tidak ada yang ditandatangani.</string>
+    <string name="bond_refuse_claim">Yang dikatakan pelepasan ini akan dibayar dan yang benar-benar dibayar tidak cocok. Tidak ada yang ditandatangani.</string>
+    <string name="bond_superseded">Usulan lain tiba sebelum Anda mengetuk. Periksa lagi jumlahnya.</string>
+    <string name="bond_misstated">Pelepasan ini membayar Anda %1$s, bukan %2$s yang ditampilkan. Tidak ada yang ditandatangani.</string>
 </resources>

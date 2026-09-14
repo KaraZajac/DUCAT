@@ -90,4 +90,16 @@
     <string name="split_back_to_them">Voorstel: %1$s terug naar %3$s, %2$s naar jou.</string>
     <string name="split_fee_yours">De netwerkkosten gaan van jouw deel af, dus er komt iets minder binnen.</string>
     <string name="split_fee_theirs">De netwerkkosten gaan van het deel van %1$s af; dat van jou komt precies binnen.</string>
+    <string name="bond_outputs_title">Deze transactie betaalt:</string>
+    <string name="bond_output_mine">%1$s naar jou</string>
+    <string name="bond_output_payer">%1$s terug naar de betaler</string>
+    <string name="bond_output_theirs">%1$s naar hen</string>
+    <string name="bond_output_unchecked">%1$s naar een adres dat deze telefoon niet kan controleren</string>
+    <string name="bond_output_residual">(betaalt de netwerkkosten)</string>
+    <string name="bond_refuse_shape">Deze vrijgave betaalt aan %1$d adressen. Een afrekening betaalt er hoogstens twee, dus er is niets ondertekend.</string>
+    <string name="bond_refuse_nameless">Deze vrijgave betaalt aan een adres dat niet te lezen is. Er is niets ondertekend.</string>
+    <string name="bond_refuse_arithmetic">De bedragen in deze vrijgave kloppen niet. Er is niets ondertekend.</string>
+    <string name="bond_refuse_claim">Wat deze vrijgave zegt te betalen en wat ze werkelijk betaalt, komen niet overeen. Er is niets ondertekend.</string>
+    <string name="bond_superseded">Er kwam een ander voorstel binnen voordat je tikte. Controleer de bedragen opnieuw.</string>
+    <string name="bond_misstated">Deze vrijgave betaalt je %1$s, niet de getoonde %2$s. Er is niets ondertekend.</string>
 </resources>

@@ -20,7 +20,10 @@
     <string name="pos_scan_hint">Lo scansionano in DUCAT. Il conto qui sopra arriva sul loro telefono nel momento in cui lo fanno.</string>
     <string name="pos_tap_hint">O avvicinate i telefoni — stesso conto in ogni caso</string>
     <string name="pos_payment_seen">Pagamento visto ✓</string>
-    <string name="pos_payment_settling">Il loro pagamento è in rete — in liquidazione, circa due minuti. La ricevuta parte da sola quando va a segno.</string>
+    <string name="pos_payment_settling">Il loro pagamento è in rete — in regolamento. La ricevuta parte da sola quando la catena lo tiene abbastanza in profondità.</string>
+    <string name="pos_settling_blocks">%1$d di %2$d blocchi</string>
+    <string name="pos_not_corroborated">Nessun secondo nodo ha confermato questo pagamento. Resta non pagato finché uno non lo conferma, o finché non lo saldi tu.</string>
+    <string name="pos_settle_anyway">Salda comunque</string>
     <string name="pos_bill_sent_to">Conto inviato a %1$s</string>
     <string name="pos_the_customer">il cliente</string>
     <string name="pos_billed_hint">Confermano sul loro telefono. Quando il pagamento arriva sulla catena la ricevuta gli va automaticamente — qui non resta niente da fare.</string>

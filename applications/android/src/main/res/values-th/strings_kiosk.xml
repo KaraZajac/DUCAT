@@ -8,6 +8,8 @@
     <string name="kiosk_order">สั่ง</string>
     <string name="kiosk_scan_note">สแกนด้วยกระเป๋า Monero อันไหนก็ได้ ยอดเงินกรอกไว้ให้แล้ว</string>
     <string name="kiosk_waiting">กำลังรอการชำระของคุณ…</string>
+    <string name="kiosk_settling">กำลังชำระ</string>
+    <string name="kiosk_settling_note">เราเห็นการชำระเงินของคุณแล้ว คำสั่งซื้อจะเสร็จเมื่ออยู่บนเชน</string>
     <string name="kiosk_cancel_order">ยกเลิก</string>
     <string name="kiosk_paid_title">ขอบคุณ</string>
     <string name="kiosk_paid_number">ออเดอร์ที่ %1$d</string>
@@ -17,11 +19,11 @@
     <string name="kiosk_back_to_counter">กลับไปที่เคาน์เตอร์</string>
     <string name="kiosk_leave">ออกจากโหมดคีออสก์</string>
     <string name="kiosk_state_awaiting">รอชำระเงิน</string>
-    <string name="kiosk_state_seen">จ่ายแล้ว — เห็นแล้ว ยังไม่ขึ้นเชน</string>
+    <string name="kiosk_state_seen">กำลังชำระ — พบแล้ว ยังไม่อยู่ในบล็อก</string>
     <string name="kiosk_state_confirmed">ชำระเรียบร้อย</string>
     <string name="kiosk_state_abandoned">เดินจากไป</string>
     <string name="kiosk_notify_title">ออเดอร์ที่ %1$d</string>
-    <string name="kiosk_notify_body">เห็น %1$s แล้ว — ออเดอร์ชำระแล้ว</string>
+    <string name="kiosk_notify_body">พบ %1$s — กำลังชำระ</string>
     <string name="kiosk_mode_title">คีออสก์</string>
     <string name="kiosk_mode_body">หน้าจอที่หันเข้าหาลูกค้า ลูกค้ากดสิ่งที่ต้องการ แล้วแตะโทรศัพท์หรือสแกน บิลจะไปอยู่บนโทรศัพท์ของเขาเอง ออกจากโหมดนี้ต้องใช้ PIN ของคุณ</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->
@@ -46,4 +48,6 @@
     <string name="kiosk_all_off">ตอนนี้หมดทุกอย่าง</string>
     <string name="kiosk_tip_pct">%1$d%%</string>
     <string name="kiosk_declined">ลูกค้าปฏิเสธบิลนี้ จะไม่มีเงินเข้ามา — เริ่มกับลูกค้าคนถัดไป หรือจัดการหลังประตูพนักงาน</string>
+    <string name="kiosk_sight_title">ส่งมอบเมื่อพบครั้งแรก</string>
+    <string name="kiosk_sight_note">การชำระเงินที่พบแล้วแต่ยังไม่อยู่ในบล็อกยังถูกแทนที่ได้ จนถึงจำนวนนี้ ตู้จะเชื่อสิ่งที่เห็น</string>
 </resources>

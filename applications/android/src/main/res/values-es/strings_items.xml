@@ -14,4 +14,7 @@
     <string name="items_picker_no_rate">Todavía no hay tipo de cambio: no se pueden cobrar estos precios hasta que la caja llegue a la red.</string>
     <string name="items_sold_out">Agotado</string>
     <string name="items_back_on">Volver a poner</string>
+    <string name="items_up_to">Hasta (XMR)</string>
+    <string name="items_floor_title">Las ventas pequeñas se liquidan con un bloque</string>
+    <string name="items_floor_note">Hasta esta cantidad basta un bloque, y la venta se liquida aunque no se pueda alcanzar ningún segundo nodo. Por encima, el pago espera tres bloques — diez por encima de un XMR — y a que otro nodo lo vea en un bloque. Cero significa que ninguna venta es pequeña.</string>
 </resources>

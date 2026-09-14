@@ -20,7 +20,10 @@
     <string name="pos_scan_hint">Покупець сканує це в DUCAT. Рахунок вище прилітає на його телефон тієї ж миті.</string>
     <string name="pos_tap_hint">Або приклади телефони — рахунок той самий</string>
     <string name="pos_payment_seen">Платіж помічено ✓</string>
-    <string name="pos_payment_settling">Їхній платіж уже в мережі — розраховується, близько двох хвилин. Чек надішлеться сам, коли платіж ляже.</string>
+    <string name="pos_payment_settling">Їхній платіж у мережі — триває розрахунок. Чек піде сам, коли ланцюг закріпить його достатньо глибоко.</string>
+    <string name="pos_settling_blocks">%1$d з %2$d блоків</string>
+    <string name="pos_not_corroborated">Жоден другий вузол не підтвердив цей платіж. Він лишається неоплаченим, доки хтось не підтвердить або доки ви не закриєте його самі.</string>
+    <string name="pos_settle_anyway">Усе одно закрити</string>
     <string name="pos_bill_sent_to">Рахунок надіслано — %1$s</string>
     <string name="pos_the_customer">покупець</string>
     <string name="pos_billed_hint">Вони підтверджують на власному телефоні. Коли платіж ляже на ланцюг, чек піде їм автоматично — тут більше нічого робити.</string>

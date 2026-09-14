@@ -94,4 +94,16 @@
     <string name="split_back_to_them">المقترح: %1$s تعود إلى %3$s، و%2$s إليك.</string>
     <string name="split_fee_yours">‏رسوم الشبكة تُخصم من حصتك، لذا يصل أقل قليلاً من ذلك.</string>
     <string name="split_fee_theirs">‏رسوم الشبكة تُخصم من حصة %1$s، لذا تصل حصتك كاملة.</string>
+    <string name="bond_outputs_title">هذه المعاملة تدفع:</string>
+    <string name="bond_output_mine">%1$s لك</string>
+    <string name="bond_output_payer">%1$s إلى الدافع</string>
+    <string name="bond_output_theirs">%1$s لهم</string>
+    <string name="bond_output_unchecked">%1$s إلى عنوان لا يستطيع هذا الهاتف التحقق منه</string>
+    <string name="bond_output_residual">(يدفع رسوم الشبكة)</string>
+    <string name="bond_refuse_shape">هذا الإفراج يدفع إلى %1$d جهات. التسوية تدفع إلى اثنتين على الأكثر، فلم يُوقَّع شيء.</string>
+    <string name="bond_refuse_nameless">هذا الإفراج يدفع إلى عنوان لا يمكن قراءته. لم يُوقَّع شيء.</string>
+    <string name="bond_refuse_arithmetic">المبالغ في هذا الإفراج لا تتطابق. لم يُوقَّع شيء.</string>
+    <string name="bond_refuse_claim">ما يقوله هذا الإفراج عن مدفوعاته لا يطابق ما يدفعه فعلاً. لم يُوقَّع شيء.</string>
+    <string name="bond_superseded">وصل اقتراح آخر قبل ضغطك. تحقق من المبالغ مرة أخرى.</string>
+    <string name="bond_misstated">هذا الإفراج يدفع لك %1$s وليس %2$s المعروضة. لم يُوقَّع شيء.</string>
 </resources>

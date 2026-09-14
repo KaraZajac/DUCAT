@@ -20,7 +20,10 @@
     <string name="pos_scan_hint">Klient skanuje to w DUCAT. Rachunek powyżej trafia na jego telefon w tej samej chwili.</string>
     <string name="pos_tap_hint">Albo zetknijcie telefony — ten sam rachunek tak czy tak</string>
     <string name="pos_payment_seen">Płatność widoczna ✓</string>
-    <string name="pos_payment_settling">Ich płatność jest w sieci — rozliczanie, około dwóch minut. Paragon wyśle się sam, gdy dojdzie.</string>
+    <string name="pos_payment_settling">Ich płatność jest w sieci — rozliczanie. Paragon wyśle się sam, gdy łańcuch przykryje ją dostatecznie głęboko.</string>
+    <string name="pos_settling_blocks">%1$d z %2$d bloków</string>
+    <string name="pos_not_corroborated">Żaden drugi węzeł nie potwierdził tej płatności. Pozostanie nieopłacona, dopóki któryś nie potwierdzi albo dopóki sam jej nie rozliczysz.</string>
+    <string name="pos_settle_anyway">Rozlicz mimo to</string>
     <string name="pos_bill_sent_to">Rachunek wysłany do %1$s</string>
     <string name="pos_the_customer">klienta</string>
     <string name="pos_billed_hint">Potwierdzają na własnym telefonie. Gdy płatność trafi na łańcuch, paragon pójdzie do nich automatycznie — tu nie ma już nic do zrobienia.</string>

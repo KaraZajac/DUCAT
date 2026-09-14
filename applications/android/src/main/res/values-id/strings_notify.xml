@@ -19,6 +19,8 @@
     <string name="notify_paid_body_tip">%1$s (tip %2$s) — struk terkirim</string>
     <string name="notify_unconfirmed_title">Pembayaran belum dikonfirmasi</string>
     <string name="notify_unconfirmed_body">Node lain tidak punya catatannya. Tagihan ini tetap belum dibayar.</string>
+    <string name="notify_uncorroborated_title">Pembayaran belum dikuatkan</string>
+    <string name="notify_uncorroborated_body">Tidak ada simpul kedua yang bisa dihubungi untuk mengonfirmasinya. Penjualan tetap tertagih sampai Anda menyelesaikannya.</string>
     <string name="notify_unbacked_title">Escrow belum dikonfirmasi</string>
     <string name="notify_unbacked_body">Node lain tidak melihat uangnya. Belum ada yang dijamin.</string>
     <string name="notify_payto_changed_title">Alamat pembayaran berubah</string>

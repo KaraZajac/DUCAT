@@ -14,4 +14,7 @@
     <string name="items_picker_no_rate">Noch kein Wechselkurs — diese Preise lassen sich nicht kassieren, bis die Kasse ins Netz kommt.</string>
     <string name="items_sold_out">Aus</string>
     <string name="items_back_on">Wieder da</string>
+    <string name="items_up_to">Bis zu (XMR)</string>
+    <string name="items_floor_title">Kleine Verkäufe gelten nach einem Block</string>
+    <string name="items_floor_note">Bis zu diesem Betrag genügt ein Block, und ein Verkauf gilt auch dann, wenn kein zweiter Knoten erreichbar ist. Darüber wartet eine Zahlung auf drei Blöcke – zehn über einem XMR – und darauf, dass ein anderer Knoten sie in einem Block sieht. Null heißt: kein Verkauf ist klein.</string>
 </resources>

@@ -551,11 +551,20 @@ export type OrderRow = {
   card: string | null;
   card_svg: string | null;
   state: "Awaiting" | "Seen" | "Confirmed" | "Abandoned";
+  /** Blocks on top of the payment, and how many this order's size needs. */
+  blocks: number;
+  blocks_needed: number;
   placed_at: number;
   ready_at: number;
   customer: string | null;
   customer_avatar_data_url: string | null;
   shown: Shown;
+};
+
+/** How much of a stranger's word this counter takes. Zero is "never". */
+export type CounterRisk = {
+  sight_cap_pxmr: number;
+  small_sale_floor_pxmr: number;
 };
 
 export const api = {
@@ -746,6 +755,9 @@ export const api = {
   orderCard: (id: string) => invoke<OrderRow>("order_card", { id }),
   abandonOrder: (id: string) => invoke<void>("abandon_order", { id }),
   sayReady: (id: string) => invoke<void>("say_ready", { id }),
+  counterRisk: () => invoke<CounterRisk>("counter_risk"),
+  setCounterRisk: (sightCapXmr: string, smallSaleFloorXmr: string) =>
+    invoke<void>("set_counter_risk", { sightCapXmr, smallSaleFloorXmr }),
 
   react: (personaHex: string, seq: number, reOwn: boolean, emoji: string) => invoke<void>("react", { personaHex, seq, reOwn, emoji }),
   retractMessage: (personaHex: string, seq: number) => invoke<void>("retract_message", { personaHex, seq }),

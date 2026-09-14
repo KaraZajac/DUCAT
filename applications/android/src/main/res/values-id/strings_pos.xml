@@ -20,7 +20,10 @@
     <string name="pos_scan_hint">Mereka memindai ini di DUCAT. Tagihan di atas tiba di ponsel mereka begitu mereka memindai.</string>
     <string name="pos_tap_hint">Atau tempelkan ponsel — tagihannya sama saja</string>
     <string name="pos_payment_seen">Pembayaran terlihat ✓</string>
-    <string name="pos_payment_settling">Pembayaran mereka sudah di jaringan — sedang diselesaikan, sekitar dua menit. Struk terkirim sendiri saat pembayaran masuk.</string>
+    <string name="pos_payment_settling">Pembayaran mereka ada di jaringan — sedang diselesaikan. Tanda terima terkirim sendiri setelah cukup dalam di rantai.</string>
+    <string name="pos_settling_blocks">%1$d dari %2$d blok</string>
+    <string name="pos_not_corroborated">Belum ada simpul kedua yang mengonfirmasi pembayaran ini. Statusnya belum lunas sampai ada yang mengonfirmasi, atau sampai Anda menyelesaikannya sendiri.</string>
+    <string name="pos_settle_anyway">Tetap selesaikan</string>
     <string name="pos_bill_sent_to">Tagihan terkirim ke %1$s</string>
     <string name="pos_the_customer">pelanggan</string>
     <string name="pos_billed_hint">Mereka mengonfirmasi di ponsel mereka sendiri. Saat pembayaran masuk di blockchain, struk terkirim ke mereka otomatis — tidak ada lagi yang perlu dilakukan di sini.</string>

@@ -20,7 +20,10 @@
     <string name="pos_scan_hint">顾客在 DUCAT 里扫这个码。一扫，上面的账单立刻出现在对方手机上。</string>
     <string name="pos_tap_hint">或者手机碰一碰 — 账单一样送达</string>
     <string name="pos_payment_seen">已看到付款 ✓</string>
-    <string name="pos_payment_settling">对方的付款已进入网络 — 结算中，约两分钟。到账后收据会自动发送。</string>
+    <string name="pos_payment_settling">对方的付款已在网络中 — 结算中。等链上足够深，收据会自动送出。</string>
+    <string name="pos_settling_blocks">%2$d 个区块中的 %1$d 个</string>
+    <string name="pos_not_corroborated">还没有第二个节点确认这笔付款。在有节点确认或你自己结算之前，它仍算未付。</string>
+    <string name="pos_settle_anyway">仍然结算</string>
     <string name="pos_bill_sent_to">账单已发给 %1$s</string>
     <string name="pos_the_customer">顾客</string>
     <string name="pos_billed_hint">对方在自己手机上确认。付款上链后收据会自动发给对方 — 这边不用再做什么。</string>

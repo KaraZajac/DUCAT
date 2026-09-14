@@ -26,7 +26,9 @@ import org.ducatproject.ducat.Amounts
 import org.ducatproject.ducat.Catalogue
 import org.ducatproject.ducat.formatXmr
 import org.ducatproject.ducat.ContactStore
+import org.ducatproject.ducat.Orders
 import org.ducatproject.ducat.R
+import org.ducatproject.ducat.SecondOpinion
 
 /**
  * What this till sells, and what each thing costs.
@@ -37,7 +39,7 @@ import org.ducatproject.ducat.R
  * using either.
  */
 @Composable
-fun ItemsScreen() {
+fun ItemsScreen(kiosk: Boolean = false) {
     val context = LocalContext.current
     val version by ContactStore.changes.collectAsState()
     val items = remember(version) { Catalogue.all(context) }
@@ -166,6 +168,76 @@ fun ItemsScreen() {
         HorizontalDivider(Modifier.padding(vertical = 8.dp))
         TaxSetting()
         Spacer(Modifier.height(8.dp))
+        // How much of a stranger's word this counter is willing to take, in
+        // the two places it is asked: how deep a payment must be before a
+        // small sale is called paid, and — on the kiosk, where goods leave a
+        // counter unattended — whether a mempool sighting alone may release
+        // them. Both are the operator's risk to size, so both are typed here
+        // rather than decided for them.
+        HorizontalDivider(Modifier.padding(vertical = 8.dp))
+        AmountSetting(
+            title = stringResource(R.string.items_floor_title),
+            note = stringResource(R.string.items_floor_note),
+            pxmr = SecondOpinion.floorPxmr(context),
+        ) { SecondOpinion.setFloorPxmr(context, it) }
+        if (kiosk) {
+            Spacer(Modifier.height(8.dp))
+            AmountSetting(
+                title = stringResource(R.string.kiosk_sight_title),
+                note = stringResource(R.string.kiosk_sight_note),
+                pxmr = Orders.sightCapPxmr(context),
+            ) { Orders.setSightCapPxmr(context, it) }
+        }
+        Spacer(Modifier.height(8.dp))
+    }
+}
+
+/**
+ * An amount the operator sets, in XMR, where zero means *never*.
+ *
+ * The typed text is held rather than re-rendered from the stored figure: a
+ * field that reformats under the cursor is unusable, and "0.0" mid-typing is
+ * not the same as a decision to turn the thing off.
+ */
+@Composable
+private fun AmountSetting(
+    title: String,
+    note: String,
+    pxmr: Long,
+    onSet: (Long) -> Unit,
+) {
+    var typed by rememberSaveable(title) {
+        mutableStateOf(if (pxmr > 0) formatXmr(pxmr) else "")
+    }
+    Column {
+        Text(title, style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(4.dp))
+        Text(
+            note,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(8.dp))
+        OutlinedTextField(
+            value = typed,
+            onValueChange = {
+                typed = it.filter { c -> Amounts.isNumberChar(c) }
+                // Blank is zero — the way to turn it off is to clear the
+                // field, and anything unparseable leaves the stored figure
+                // where it was rather than silently becoming nothing.
+                if (typed.isBlank()) {
+                    onSet(0L)
+                } else {
+                    Amounts.parse(typed)?.let(Amounts::toPxmr)?.let(onSet)
+                }
+            },
+            label = { Text(stringResource(R.string.items_up_to)) },
+            singleLine = true,
+            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal,
+            ),
+            modifier = Modifier.width(200.dp),
+        )
     }
 }
 

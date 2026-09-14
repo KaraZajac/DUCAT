@@ -20,7 +20,10 @@
     <string name="pos_scan_hint">Zij scannen dit in DUCAT. De rekening hierboven komt op hun telefoon aan zodra ze dat doen.</string>
     <string name="pos_tap_hint">Of houd de telefoons tegen elkaar — dezelfde rekening, hoe dan ook</string>
     <string name="pos_payment_seen">Betaling gezien ✓</string>
-    <string name="pos_payment_settling">Hun betaling is in het netwerk — wordt afgerond, ongeveer twee minuten. De bon verstuurt zichzelf zodra hij landt.</string>
+    <string name="pos_payment_settling">Hun betaling zit in het netwerk — wordt afgewikkeld. De bon gaat vanzelf zodra de keten hem diep genoeg heeft.</string>
+    <string name="pos_settling_blocks">%1$d van %2$d blokken</string>
+    <string name="pos_not_corroborated">Geen tweede node heeft deze betaling bevestigd. Ze blijft onbetaald tot er een bevestigt, of tot je haar zelf afwikkelt.</string>
+    <string name="pos_settle_anyway">Toch afwikkelen</string>
     <string name="pos_bill_sent_to">Rekening verstuurd aan %1$s</string>
     <string name="pos_the_customer">de klant</string>
     <string name="pos_billed_hint">Ze bevestigen op hun eigen telefoon. Zodra de betaling op de keten landt, gaat de bon automatisch naar ze — hier is niets meer te doen.</string>

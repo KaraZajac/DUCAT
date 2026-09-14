@@ -14,4 +14,7 @@
     <string name="items_picker_no_rate">ยังไม่มีอัตราแลกเปลี่ยน — ยังคิดเงินตามราคานี้ไม่ได้จนกว่าเครื่องจะต่อเครือข่ายได้</string>
     <string name="items_sold_out">หมด</string>
     <string name="items_back_on">กลับมาขาย</string>
+    <string name="items_up_to">ไม่เกิน (XMR)</string>
+    <string name="items_floor_title">การขายเล็กน้อยชำระด้วยบล็อกเดียว</string>
+    <string name="items_floor_note">ที่จำนวนนี้หรือต่ำกว่า บล็อกเดียวก็ปิดการขายได้ และการขายจะปิดแม้ติดต่อโหนดที่สองไม่ได้ สูงกว่านั้น การชำระเงินจะรอสามบล็อก — สิบบล็อกหากเกินหนึ่ง XMR — และรอให้โหนดอื่นเห็นในบล็อก ศูนย์หมายความว่าไม่มีการขายใดเล็ก</string>
 </resources>

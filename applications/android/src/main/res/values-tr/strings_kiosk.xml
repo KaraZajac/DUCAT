@@ -8,6 +8,8 @@
     <string name="kiosk_order">Sipariş ver</string>
     <string name="kiosk_scan_note">Herhangi bir Monero cüzdanıyla okut. Tutar zaten yazılı.</string>
     <string name="kiosk_waiting">Ödemen bekleniyor…</string>
+    <string name="kiosk_settling">Kapanıyor</string>
+    <string name="kiosk_settling_note">Ödemeniz görüldü. Zincire geçtiğinde siparişiniz tamamlanır.</string>
     <string name="kiosk_cancel_order">Vazgeç</string>
     <string name="kiosk_paid_title">Teşekkürler</string>
     <string name="kiosk_paid_number">Sipariş no %1$d</string>
@@ -17,11 +19,11 @@
     <string name="kiosk_back_to_counter">Tezgâha dön</string>
     <string name="kiosk_leave">Kiosk modundan çık</string>
     <string name="kiosk_state_awaiting">ödeme bekliyor</string>
-    <string name="kiosk_state_seen">ödendi — görüldü, henüz zincirde değil</string>
+    <string name="kiosk_state_seen">kapanıyor — görüldü, henüz bir blokta değil</string>
     <string name="kiosk_state_confirmed">kapandı</string>
     <string name="kiosk_state_abandoned">gitti</string>
     <string name="kiosk_notify_title">Sipariş no %1$d</string>
-    <string name="kiosk_notify_body">%1$s görüldü — sipariş ödendi</string>
+    <string name="kiosk_notify_body">%1$s görüldü — kapanıyor</string>
     <string name="kiosk_mode_title">Kiosk</string>
     <string name="kiosk_mode_body">Müşteriye dönük bir ekran: istediğine dokunur, sonra telefonunu yaklaştırır ya da tarar; hesap kendi telefonuna gelir. Çıkmak için PIN\'in gerekir.</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->
@@ -46,4 +48,6 @@
     <string name="kiosk_all_off">Şu an hiçbir şey yok.</string>
     <string name="kiosk_tip_pct">%1$d%%</string>
     <string name="kiosk_declined">Bu hesabı reddettiler. Gelen olmayacak — sonraki müşteriye geç ya da personel kapısının ardında düzelt.</string>
+    <string name="kiosk_sight_title">İlk görüldüğünde teslim et</string>
+    <string name="kiosk_sight_note">Görülen ama henüz bir blokta olmayan bir ödeme hâlâ değiştirilebilir; bu tutara kadar kiosk gördüğüne güvenir.</string>
 </resources>

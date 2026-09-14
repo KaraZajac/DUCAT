@@ -14,4 +14,7 @@
     <string name="items_picker_no_rate">Ainda sem taxa de câmbio — não é possível cobrar estes preços até a caixa alcançar a rede.</string>
     <string name="items_sold_out">Esgotado</string>
     <string name="items_back_on">Repor</string>
+    <string name="items_up_to">Até (XMR)</string>
+    <string name="items_floor_title">As vendas pequenas liquidam com um bloco</string>
+    <string name="items_floor_note">Até este valor basta um bloco, e a venda liquida mesmo quando nenhum segundo nó está acessível. Acima disso, um pagamento espera três blocos — dez acima de um XMR — e que outro nó o veja num bloco. Zero significa que nenhuma venda é pequena.</string>
 </resources>

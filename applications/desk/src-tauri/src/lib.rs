@@ -2700,6 +2700,10 @@ struct OrderRow {
     pay_uri: String,
     pay_svg: String,
     state: ducat_app::orders::OrderState,
+    /// Blocks on top of this order's payment, and how many its size needs —
+    /// the counter's "settling, N of M blocks". A sighting is zero of them.
+    blocks: u64,
+    blocks_needed: u64,
     placed_at: u64,
     ready_at: u64,
     customer: Option<String>,
@@ -2711,8 +2715,11 @@ struct OrderRow {
 
 fn order_row(a: &App, o: ducat_app::orders::Order) -> OrderRow {
     let customer = o.persona_hex.as_deref().and_then(|h| a.contact(h));
+    let (blocks, blocks_needed) = a.order_settling(&o);
     OrderRow {
         state: a.order_state(&o),
+        blocks,
+        blocks_needed,
         customer: customer.as_ref().map(|c| c.display_name()),
         customer_avatar_data_url: customer.as_ref().and_then(|c| c.avatar.as_deref()).map(picture_url),
         pay_uri: o.pay_uri(),
@@ -2768,6 +2775,43 @@ async fn abandon_order(id: String) -> Result<(), String> {
 async fn say_ready(id: String) -> Result<(), String> {
     let a = app()?;
     tauri::async_runtime::spawn_blocking(move || a.say_ready(&id).map_err(said)).await.map_err(s)?
+}
+
+/// The two figures that say how much of a stranger's word this counter takes:
+/// how much may leave on a mempool sighting alone, and under what size a
+/// single block — and one node's word — settles a sale. Both default to zero,
+/// which is "never"; both are the operator's risk to size.
+#[derive(Serialize)]
+struct CounterRisk {
+    sight_cap_pxmr: u64,
+    small_sale_floor_pxmr: u64,
+}
+
+#[tauri::command]
+fn counter_risk() -> Result<CounterRisk, String> {
+    let a = app()?;
+    Ok(CounterRisk {
+        sight_cap_pxmr: a.kiosk_sight_cap_pxmr(),
+        small_sale_floor_pxmr: a.small_sale_floor_pxmr(),
+    })
+}
+
+/// Typed in XMR, through the parser every other amount on this desk goes
+/// through. Blank is zero, which is how both settings are turned off; an
+/// amount that is not an amount is refused rather than quietly becoming one.
+#[tauri::command]
+fn set_counter_risk(sight_cap_xmr: String, small_sale_floor_xmr: String) -> Result<(), String> {
+    let a = app()?;
+    let read = |t: &str| -> Result<u64, String> {
+        if t.trim().is_empty() {
+            return Ok(0);
+        }
+        ducat_app::wallet::parse_xmr(t).ok_or_else(|| "that is not an amount".to_string())
+    };
+    let cap = read(&sight_cap_xmr)?;
+    let floor = read(&small_sale_floor_xmr)?;
+    a.set_kiosk_sight_cap_pxmr(cap).map_err(said)?;
+    a.set_small_sale_floor_pxmr(floor).map_err(said)
 }
 
 // ----- the log ---------------------------------------------------------------
@@ -3059,6 +3103,8 @@ pub fn run() {
             order_card,
             abandon_order,
             say_ready,
+            counter_risk,
+            set_counter_risk,
         ])
         .run(tauri::generate_context!())
         .expect("error while running the desk");

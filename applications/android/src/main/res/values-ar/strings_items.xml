@@ -14,4 +14,7 @@
     <string name="items_picker_no_rate">لا يوجد سعر صرف بعد — لا يمكن تحصيل هذه الأسعار حتى تتصل نقطة البيع بالشبكة.</string>
     <string name="items_sold_out">نفد</string>
     <string name="items_back_on">أعده</string>
+    <string name="items_up_to">حتى (XMR)</string>
+    <string name="items_floor_title">المبيعات الصغيرة تُسوَّى بكتلة واحدة</string>
+    <string name="items_floor_note">عند هذا المبلغ أو دونه تكفي كتلة واحدة لتسوية البيع، ويُسوَّى البيع حتى لو تعذّر الوصول إلى عقدة ثانية. وفوقه تنتظر الدفعة ثلاث كتل — وعشرًا فوق واحد XMR — وأن تراها عقدة أخرى داخل كتلة. الصفر يعني أن لا بيع صغير.</string>
 </resources>

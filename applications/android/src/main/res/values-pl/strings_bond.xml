@@ -92,4 +92,16 @@
     <string name="split_back_to_them">Propozycja: %1$s wraca do %3$s, %2$s dla ciebie.</string>
     <string name="split_fee_yours">Opłata sieciowa schodzi z twojej części, więc dotrze nieco mniej.</string>
     <string name="split_fee_theirs">Opłata sieciowa schodzi z części %1$s, więc twoja dotrze co do grosza.</string>
+    <string name="bond_outputs_title">Ta transakcja płaci:</string>
+    <string name="bond_output_mine">%1$s dla ciebie</string>
+    <string name="bond_output_payer">%1$s z powrotem do płacącego</string>
+    <string name="bond_output_theirs">%1$s dla nich</string>
+    <string name="bond_output_unchecked">%1$s na adres, którego ten telefon nie może sprawdzić</string>
+    <string name="bond_output_residual">(płaci opłatę sieciową)</string>
+    <string name="bond_refuse_shape">To zwolnienie płaci na %1$d adresy. Rozliczenie płaci najwyżej na dwa, więc nic nie zostało podpisane.</string>
+    <string name="bond_refuse_nameless">To zwolnienie płaci na adres, którego nie da się odczytać. Nic nie zostało podpisane.</string>
+    <string name="bond_refuse_arithmetic">Kwoty w tym zwolnieniu się nie zgadzają. Nic nie zostało podpisane.</string>
+    <string name="bond_refuse_claim">To, co to zwolnienie deklaruje, i to, co faktycznie płaci, nie zgadza się. Nic nie zostało podpisane.</string>
+    <string name="bond_superseded">Zanim dotknąłeś, przyszła inna propozycja. Sprawdź kwoty ponownie.</string>
+    <string name="bond_misstated">To zwolnienie płaci ci %1$s, a nie pokazane %2$s. Nic nie zostało podpisane.</string>
 </resources>

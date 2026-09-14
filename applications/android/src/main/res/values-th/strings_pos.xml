@@ -20,7 +20,10 @@
     <string name="pos_scan_hint">ให้ลูกค้าสแกนโค้ดนี้ใน DUCAT บิลด้านบนจะถึงโทรศัพท์ของเขาทันทีที่สแกน</string>
     <string name="pos_tap_hint">หรือแตะโทรศัพท์กัน — ได้บิลเดียวกันทั้งสองทาง</string>
     <string name="pos_payment_seen">เห็นการชำระแล้ว ✓</string>
-    <string name="pos_payment_settling">การชำระของเขาอยู่ในเครือข่ายแล้ว — กำลังปิดยอด ราวสองนาที ใบเสร็จจะส่งตัวเองเมื่อเงินเข้า</string>
+    <string name="pos_payment_settling">การชำระเงินของเขาอยู่ในเครือข่ายแล้ว — กำลังชำระ ใบเสร็จจะส่งเองเมื่ออยู่ลึกพอบนเชน</string>
+    <string name="pos_settling_blocks">%1$d จาก %2$d บล็อก</string>
+    <string name="pos_not_corroborated">ยังไม่มีโหนดที่สองยืนยันการชำระเงินนี้ จะยังไม่ถือว่าจ่ายแล้วจนกว่าจะมีโหนดยืนยัน หรือจนกว่าคุณจะชำระเอง</string>
+    <string name="pos_settle_anyway">ชำระต่อไป</string>
     <string name="pos_bill_sent_to">ส่งบิลถึง %1$s แล้ว</string>
     <string name="pos_the_customer">ลูกค้า</string>
     <string name="pos_billed_hint">เขายืนยันบนโทรศัพท์ของเขาเอง เมื่อการชำระเข้าเชน ใบเสร็จจะส่งถึงเขาโดยอัตโนมัติ — ที่นี่ไม่มีอะไรต้องทำต่อ</string>

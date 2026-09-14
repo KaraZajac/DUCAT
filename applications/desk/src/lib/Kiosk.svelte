@@ -6,7 +6,7 @@
   // order into a bill with a receipt.
   import { onMount } from "svelte";
   import { t, tp } from "./i18n.svelte";
-  import { api, copy, fmtXmr, fmtTime, type ItemRow, type OrderRow, confirmDanger } from "./api";
+  import { api, copy, fmtXmr, fmtTime, type CounterRisk, type ItemRow, type OrderRow, confirmDanger } from "./api";
   import { gen } from "./state.svelte";
 
   let items = $state<ItemRow[]>([]);
@@ -18,6 +18,12 @@
   let linePrice = $state("");
   let withCard = $state(true);
   let open = $state<string | null>(null);
+  // How much of a stranger's word this counter takes. Held as the operator
+  // typed it, not reformatted under their cursor.
+  let risk = $state<CounterRisk | null>(null);
+  let sightCap = $state("");
+  let floor = $state("");
+  let riskErr = $state<string | null>(null);
 
   const current = $derived(orders.find((o) => o.id === open) ?? null);
   const total = $derived(lines.reduce((s, l) => s + l.a, 0));
@@ -34,7 +40,30 @@
     }
   }
 
-  onMount(async () => { await refresh(); loaded = true; });
+  /** Bare, for a field somebody edits — fmtXmr is for reading. */
+  const bare = (pxmr: number) => (pxmr > 0 ? fmtXmr(pxmr).replace(" XMR", "") : "");
+
+  async function saveRisk() {
+    riskErr = null;
+    try {
+      await api.setCounterRisk(sightCap, floor);
+      risk = await api.counterRisk();
+    } catch (e) {
+      riskErr = String(e);
+    }
+  }
+
+  onMount(async () => {
+    await refresh();
+    try {
+      risk = await api.counterRisk();
+      sightCap = bare(risk.sight_cap_pxmr);
+      floor = bare(risk.small_sale_floor_pxmr);
+    } catch (e) {
+      riskErr = String(e);
+    }
+    loaded = true;
+  });
   $effect(() => {
     void gen.value;
     refresh();
@@ -69,10 +98,23 @@
     try { await fn(); await refresh(); } catch (e) { err = String(e); } finally { busy = null; }
   }
 
+  // §15.11: goods do not leave on a sighting alone. They may leave on one up
+  // to the amount the operator said they would risk, and no further — a
+  // payment in the mempool can still be replaced.
+  const handsOver = (o: OrderRow) =>
+    (risk?.sight_cap_pxmr ?? 0) > 0 && o.total_pxmr > 0 && o.total_pxmr <= (risk?.sight_cap_pxmr ?? 0);
+
+  /** Paid, in the sense that the counter may hand the order over. */
+  const released = (o: OrderRow) => o.state === "Confirmed" || (o.state === "Seen" && handsOver(o));
+
   function stateWord(o: OrderRow): string {
     switch (o.state) {
       case "Awaiting": return o.customer ? t("desk_billed_to", o.customer) : t("kiosk_state_awaiting");
-      case "Seen": return t("kiosk_state_seen");
+      // Seen is not paid: it said "paid — seen, not yet on the chain" and the
+      // counter read the first word.
+      case "Seen": return handsOver(o)
+        ? t("bartab_state_paid")
+        : `${t("kiosk_state_seen")} · ${t("pos_settling_blocks", o.blocks, o.blocks_needed)}`;
       case "Confirmed": return o.ready_at ? t("desk_paid_called_ready") : t("bartab_state_paid");
       case "Abandoned": return t("kiosk_state_abandoned");
       default: return o.state;
@@ -117,6 +159,18 @@
       </button>
     {/each}
     {#if loaded && orders.length === 0}<p class="empty">{t("kiosk_no_orders")}</p>{/if}
+
+    <h4>{t("kiosk_sight_title")}</h4>
+    <p class="note">{t("kiosk_sight_note")}</p>
+    <div class="field">
+      <input class="input narrow" placeholder={t("items_up_to")} bind:value={sightCap} onchange={saveRisk} />
+    </div>
+    <h4>{t("items_floor_title")}</h4>
+    <p class="note">{t("items_floor_note")}</p>
+    <div class="field">
+      <input class="input narrow" placeholder={t("items_up_to")} bind:value={floor} onchange={saveRisk} />
+    </div>
+    {#if riskErr}<p class="err">{riskErr}</p>{/if}
   </div>
 
   <div class="card sale-status">
@@ -128,6 +182,15 @@
         {#each current.lines as [d, a]}<div class="bill-line"><span>{d}</span><span>{fmtXmr(a)}</span></div>{/each}
         {#if current.tax_pxmr}<div class="bill-line"><span>{t("pos_tax")}</span><span>{fmtXmr(current.tax_pxmr)}</span></div>{/if}
       </div>
+      {#if current.state === "Seen" && !handsOver(current)}
+        <div class="settling">
+          <span class="settle-spin"></span>
+          <div>
+            <div><strong>{t("kiosk_settling")}</strong> · {t("pos_settling_blocks", current.blocks, current.blocks_needed)}</div>
+            <div class="meta">{t("kiosk_settling_note")}</div>
+          </div>
+        </div>
+      {/if}
       {#if current.state === "Awaiting" && !current.customer}
         <div class="code-pair">
           {#if current.pay_svg}
@@ -143,7 +206,7 @@
         <div class="actions"><button class="btn small" onclick={() => copy(current?.pay_uri ?? "")}>{t("desk_copy_pay_code")}</button>{#if current.card}<button class="btn small" onclick={() => copy(current?.card ?? "")}>{t("desk_copy_card")}</button>{/if}</div>
       {/if}
       <div class="actions">
-        {#if current.state === "Confirmed" && current.customer && !current.ready_at}
+        {#if released(current) && current.customer && !current.ready_at}
           <button class="btn primary" disabled={busy === "ready"} onclick={() => act("ready", () => api.sayReady(current!.id))}>{t("kiosk_say_ready")}</button>
         {/if}
         {#if current.state === "Awaiting"}
@@ -155,3 +218,14 @@
     {/if}
   </div>
 </div>
+
+<style>
+  /* Seen, and not yet money: the counter must read a wait here, not a tick. */
+  .settling { display: flex; align-items: center; gap: 10px; margin: 8px 0; }
+  .settle-spin {
+    width: 14px; height: 14px; flex: none; border-radius: 50%;
+    border: 2px solid var(--primary-soft); border-top-color: var(--primary);
+    animation: settle-turn 0.9s linear infinite;
+  }
+  @keyframes settle-turn { to { transform: rotate(360deg); } }
+</style>

@@ -812,8 +812,51 @@ private fun PresentScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                 )
+                Spacer(Modifier.height(4.dp))
+                // How far there is to go, in the unit that decides it: a
+                // payment is settled when it is deep enough for its size,
+                // and "settling" on its own says nothing about that.
+                //
+                // Remembered: each of these reads the wallet's outputs or the
+                // opinion's notes, and this screen redraws on every tick.
+                val settling = remember(saleTab?.seenTx, saleTab?.settledTotal, version) {
+                    Triple(
+                        org.ducatproject.ducat.SecondOpinion.blocksSoFar(context, saleTab?.seenTx),
+                        org.ducatproject.ducat.SecondOpinion.confirmationsNeeded(
+                            context, saleTab?.settledTotal ?: 0L,
+                        ),
+                        saleTab?.seenTx?.takeIf {
+                            org.ducatproject.ducat.SecondOpinion.stalled(context, it)
+                        },
+                    )
+                }
+                Text(
+                    stringResource(
+                        R.string.pos_settling_blocks, settling.first, settling.second,
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
                 Spacer(Modifier.height(10.dp))
                 CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+                // Ten minutes with nobody to corroborate the payment. The
+                // sale stays billed until somebody does — or until the
+                // person behind the counter puts their own word there.
+                settling.third
+                    ?.let { tx ->
+                        Spacer(Modifier.height(10.dp))
+                        Text(
+                            stringResource(R.string.pos_not_corroborated),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        )
+                        TextButton(
+                            onClick = {
+                                org.ducatproject.ducat.SecondOpinion.settleAnyway(context, tx)
+                            },
+                        ) { Text(stringResource(R.string.pos_settle_anyway)) }
+                    }
             }
             Sale.Billed -> {
                 Text(

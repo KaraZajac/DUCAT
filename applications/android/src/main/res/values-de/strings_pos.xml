@@ -20,7 +20,10 @@
     <string name="pos_scan_hint">Das wird in DUCAT gescannt. Die Rechnung oben landet in dem Moment auf dem anderen Telefon.</string>
     <string name="pos_tap_hint">Oder Telefone aneinanderhalten — dieselbe Rechnung so oder so</string>
     <string name="pos_payment_seen">Zahlung gesehen ✓</string>
-    <string name="pos_payment_settling">Die Zahlung ist im Netzwerk — wird beglichen, etwa zwei Minuten. Die Quittung schickt sich selbst, sobald sie ankommt.</string>
+    <string name="pos_payment_settling">Ihre Zahlung ist im Netz – wird abgeschlossen. Der Beleg geht von selbst raus, sobald sie tief genug in der Blockchain steht.</string>
+    <string name="pos_settling_blocks">%1$d von %2$d Blöcken</string>
+    <string name="pos_not_corroborated">Kein zweiter Knoten hat diese Zahlung bestätigt. Sie bleibt offen, bis einer das tut – oder bis du sie selbst abschließt.</string>
+    <string name="pos_settle_anyway">Trotzdem abschließen</string>
     <string name="pos_bill_sent_to">Rechnung an %1$s gesendet</string>
     <string name="pos_the_customer">die Kundschaft</string>
     <string name="pos_billed_hint">Bestätigt wird auf dem eigenen Telefon. Sobald die Zahlung auf der Blockchain ankommt, geht die Quittung automatisch raus — hier bleibt nichts zu tun.</string>

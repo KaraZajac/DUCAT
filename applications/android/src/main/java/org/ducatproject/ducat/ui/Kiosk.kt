@@ -30,6 +30,7 @@ import org.ducatproject.ducat.Mode
 import org.ducatproject.ducat.ModeStore
 import org.ducatproject.ducat.Orders
 import org.ducatproject.ducat.R
+import org.ducatproject.ducat.SecondOpinion
 import org.ducatproject.ducat.TabStore
 import org.ducatproject.ducat.formatXmr
 
@@ -586,24 +587,38 @@ internal fun BilledPanel(
     // nothing on it. The tab book has said this for a while
     // (`bartab_declined_hint`); the kiosk is the screen a stranger is
     // standing at, so it needed it more.
-    val refused = remember(order.id, order.tabId, version) {
-        order.tabId
-            ?.let { org.ducatproject.ducat.TabStore(context).get(it) }
-            ?.let { tab ->
-                val thread = ContactStore(context).thread(tab.personaHex)
-                tab.billIn(thread)
-                    ?.let { (it.seq to it.timestamp) in billAnswers(thread).refused }
-                    ?: false
-            }
-            ?: false
+    // One read of the tab book, shared by the refusal check and by the
+    // settling panel's block count — the tab is where a billed order's
+    // sighted transaction lives.
+    val tab = remember(order.id, order.tabId, version) {
+        order.tabId?.let { org.ducatproject.ducat.TabStore(context).get(it) }
     }
-    // Paid is a sighting or the chain, and nothing else. "Anything but
-    // awaiting" also covered withdrawn: staff took the bill back from the
-    // orders list, closed the panel, and the customer's screen thanked them
-    // for money that never came. A withdrawn order is a finished one — back
-    // to the counter.
+    val refused = remember(order.id, tab, version) {
+        tab?.let { t ->
+            val thread = ContactStore(context).thread(t.personaHex)
+            t.billIn(thread)
+                ?.let { (it.seq to it.timestamp) in billAnswers(thread).refused }
+                ?: false
+        } ?: false
+    }
+    // Paid is the chain, and — if the counter has priced that risk itself —
+    // a sighting under its cap. Nothing else. "Anything but awaiting" also
+    // covered withdrawn: staff took the bill back from the orders list,
+    // closed the panel, and the customer's screen thanked them for money that
+    // never came. A withdrawn order is a finished one — back to the counter.
+    //
+    // A sighting on its own used to reach [PaidPanel], which is §15.11's
+    // "goods MUST NOT be released on sight alone" read backwards: the panel
+    // that says *thank you* is the one the counter hands the coffee over on,
+    // and a transaction still in the mempool can be replaced.
     when (state) {
-        Orders.State.Seen, Orders.State.Confirmed -> return PaidPanel(order, onDone)
+        Orders.State.Confirmed -> return PaidPanel(order, onDone)
+        Orders.State.Seen ->
+            return if (Orders.handsOverOnSight(context, order)) {
+                PaidPanel(order, onDone)
+            } else {
+                SettlingPanel(order, tab, onDone)
+            }
         Orders.State.Abandoned -> {
             LaunchedEffect(order.id) { onDone() }
             return
@@ -687,6 +702,63 @@ internal fun BilledPanel(
     }
 }
 
+/**
+ * Seen, and not yet money.
+ *
+ * The customer's payment exists — real bytes in the mempool, or a block or
+ * two deep — and the counter has not been told to hand anything over yet. So
+ * this says what is actually true, counts the blocks, and offers nothing
+ * else: the screen a stranger reads must not imply a transaction that a
+ * replacement could still undo.
+ *
+ * [tab] is the tab behind a billed order, if there is one; the transaction it
+ * sighted is the one the blocks are counted on.
+ */
+@Composable
+internal fun SettlingPanel(
+    order: Orders.Order,
+    tab: org.ducatproject.ducat.RunningTab?,
+    onDone: () -> Unit,
+) {
+    val context = LocalContext.current
+    val version by ContactStore.changes.collectAsState()
+    val (have, need) = remember(order.id, order.seenTx, tab?.seenTx, version) {
+        Orders.settlingBlocks(context, order, tab)
+    }
+    Column(
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        CatSpinner(Modifier.size(48.dp), tint = MaterialTheme.colorScheme.primary)
+        Spacer(Modifier.height(8.dp))
+        Text(
+            stringResource(R.string.kiosk_settling),
+            style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            Amounts.show(context, order.totalPxmr).primary,
+            style = MaterialTheme.typography.headlineMedium,
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            stringResource(R.string.pos_settling_blocks, have, need),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            stringResource(R.string.kiosk_settling_note),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(16.dp))
+        TextButton(onClick = onDone) { Text(stringResource(R.string.kiosk_next_customer)) }
+    }
+}
+
 /** Paid, whichever way they paid. */
 @Composable
 private fun PaidPanel(order: Orders.Order, onDone: () -> Unit) {
@@ -727,16 +799,19 @@ private fun PayPanelMonero(order: Orders.Order, onDone: () -> Unit, onCancel: ()
     val live = remember(order.id, version) {
         Orders.all(context).firstOrNull { it.id == order.id } ?: order
     }
-    // Sighted or on the chain — not merely "no longer awaiting". Expiry
-    // gives up on an unpaid order after half an hour, and a code left up
-    // that long turned into "Thank you, order #12" on its own: the poller
-    // had stopped looking for the money, and the screen said it had come.
-    // An order nobody is looking for any more goes back to the counter.
-    val paid = live.state == Orders.State.Seen || live.state == Orders.State.Confirmed
+    // On the chain — not merely "no longer awaiting", and no longer merely
+    // sighted. Expiry gives up on an unpaid order after half an hour, and a
+    // code left up that long turned into "Thank you, order #12" on its own:
+    // the poller had stopped looking for the money, and the screen said it
+    // had come. An order nobody is looking for any more goes back to the
+    // counter. A sighting thanks them only up to the counter's own cap.
+    val paid = live.state == Orders.State.Confirmed ||
+        (live.state == Orders.State.Seen && Orders.handsOverOnSight(context, live))
     if (live.state == Orders.State.Abandoned) {
         LaunchedEffect(live.id) { onDone() }
         return
     }
+    if (live.state == Orders.State.Seen && !paid) return SettlingPanel(live, null, onDone)
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -837,7 +912,9 @@ private fun StaffPanel(onClose: () -> Unit, startOn: Int = 0) {
             )
         }
         if (tab == 1) {
-            ItemsScreen()
+            // The kiosk's own settings ride here: this tab is the only staff
+            // surface a kiosk has, and the sighting cap is a kiosk rule.
+            ItemsScreen(kiosk = true)
             return@Column
         }
         Box(Modifier.weight(1f)) { StaffOrders() }
@@ -846,6 +923,22 @@ private fun StaffPanel(onClose: () -> Unit, startOn: Int = 0) {
         // behind the PIN, and the same place the till and the bar find it.
     }
 }
+
+/**
+ * One row of the staff list, worked out once per change.
+ *
+ * [handOver] is the whole question the screen exists to answer: may this
+ * order's goods leave the counter? Never merely "seen" — that is a
+ * transaction still replaceable — unless the operator set a cap and this
+ * order is under it.
+ */
+private data class StaffRow(
+    val state: Orders.State,
+    val blocks: Int,
+    val needed: Int,
+    val handOver: Boolean,
+    val stalledTx: String?,
+)
 
 /** Today's orders, and the way out of kiosk mode. */
 @Composable
@@ -869,10 +962,29 @@ private fun StaffOrders() {
     // row used to ask [Orders.stateOf] three times, and each ask decrypted
     // and parsed every tab the shop has ever opened — on every frame the
     // list scrolled.
-    val (orders, states) = remember(version) {
+    val (orders, rows) = remember(version) {
         val all = Orders.all(context)
         val tabs = TabStore(context).all().associateBy { it.id }
-        all to all.associate { it.id to Orders.stateOf(it, it.tabId?.let(tabs::get)) }
+        // Everything the row needs about one order, worked out once per
+        // change rather than once per frame: each of these reads the tab
+        // book, the wallet or the second opinion's notes.
+        all to all.associate { o ->
+            val tab = o.tabId?.let(tabs::get)
+            val state = Orders.stateOf(o, tab)
+            val (have, need) = Orders.settlingBlocks(context, o, tab)
+            val tx = Orders.settlingTx(o, tab)
+            o.id to StaffRow(
+                state = state,
+                blocks = have,
+                needed = need,
+                // The counter may hand over on a sighting only as far as it
+                // said it would: §15.11's release rule, with the operator's
+                // own cap in place of a bond.
+                handOver = state == Orders.State.Confirmed ||
+                    (state == Orders.State.Seen && Orders.handsOverOnSight(context, o)),
+                stalledTx = tx?.takeIf { SecondOpinion.stalled(context, it) },
+            )
+        }
     }
     val tick by ThreadSends.ticks.collectAsState()
     val working = remember(tick, orders) {
@@ -913,7 +1025,8 @@ private fun StaffOrders() {
         }
         LazyColumn(Modifier.fillMaxSize()) {
             items(orders) { o ->
-                val state = states[o.id] ?: o.state
+                val row = rows[o.id] ?: StaffRow(o.state, 0, 0, false, null)
+                val state = row.state
                 ListItem(
                     headlineContent = {
                         Text(stringResource(R.string.kiosk_paid_number, o.number))
@@ -951,11 +1064,30 @@ private fun StaffOrders() {
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
+                            // How far off settlement is, in the unit that
+                            // decides it. "Seen" on its own tells a counter
+                            // nothing about whether the goods may go.
+                            if (state == Orders.State.Seen) {
+                                Text(
+                                    stringResource(
+                                        R.string.pos_settling_blocks, row.blocks, row.needed,
+                                    ),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            // Ten minutes with nobody to corroborate the
+                            // payment. The counter is the one who can decide
+                            // that their own node's word will do; nothing
+                            // else on this screen can.
+                            row.stalledTx?.let { tx ->
+                                TextButton(
+                                    onClick = { SecondOpinion.settleAnyway(context, tx) },
+                                ) { Text(stringResource(R.string.pos_settle_anyway)) }
+                            }
                             // Paid and waiting: the one message the counter
                             // owes somebody who stepped outside to wait.
-                            if (o.personaHex != null && o.readyAt == 0L &&
-                                (state == Orders.State.Seen || state == Orders.State.Confirmed)
-                            ) {
+                            if (o.personaHex != null && o.readyAt == 0L && row.handOver) {
                                 TextButton(
                                     enabled = o.id !in working,
                                     onClick = { staffSend(o.id) { Orders.sayReady(context, o) } },

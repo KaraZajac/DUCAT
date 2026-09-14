@@ -8,6 +8,8 @@
     <string name="kiosk_order">주문하기</string>
     <string name="kiosk_scan_note">아무 모네로 지갑으로나 스캔하세요. 금액은 이미 채워져 있습니다.</string>
     <string name="kiosk_waiting">결제를 기다리는 중…</string>
+    <string name="kiosk_settling">정산 중</string>
+    <string name="kiosk_settling_note">결제를 확인했습니다. 체인에 기록되면 주문이 완료됩니다.</string>
     <string name="kiosk_cancel_order">취소</string>
     <string name="kiosk_paid_title">감사합니다</string>
     <string name="kiosk_paid_number">주문 %1$d번</string>
@@ -17,11 +19,11 @@
     <string name="kiosk_back_to_counter">카운터로 돌아가기</string>
     <string name="kiosk_leave">키오스크 모드 나가기</string>
     <string name="kiosk_state_awaiting">결제 대기</string>
-    <string name="kiosk_state_seen">결제됨 — 확인됨, 아직 체인에는 없음</string>
+    <string name="kiosk_state_seen">정산 중 — 확인됨, 아직 블록에 없음</string>
     <string name="kiosk_state_confirmed">정산됨</string>
     <string name="kiosk_state_abandoned">그냥 감</string>
     <string name="kiosk_notify_title">주문 %1$d번</string>
-    <string name="kiosk_notify_body">%1$s 확인 — 주문이 결제되었습니다</string>
+    <string name="kiosk_notify_body">%1$s 확인됨 — 정산 중</string>
     <string name="kiosk_mode_title">키오스크</string>
     <string name="kiosk_mode_body">손님을 향한 화면입니다. 원하는 것을 누르고 휴대폰을 대거나 스캔하면 항목별 청구서가 손님 휴대폰으로 갑니다. 나가려면 PIN이 필요합니다.</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->
@@ -46,4 +48,6 @@
     <string name="kiosk_all_off">지금은 모두 품절입니다.</string>
     <string name="kiosk_tip_pct">%1$d%%</string>
     <string name="kiosk_declined">이 청구를 거절했어요. 들어올 돈은 없어요 — 다음 손님을 받거나, 직원 화면에서 정리하세요.</string>
+    <string name="kiosk_sight_title">처음 확인되면 건네기</string>
+    <string name="kiosk_sight_note">확인되었지만 아직 블록에 없는 결제는 교체될 수 있습니다. 이 금액까지는 키오스크가 그 확인을 믿습니다.</string>
 </resources>

@@ -90,4 +90,16 @@
     <string name="split_back_to_them">Proposition : %1$s revient à %3$s, %2$s pour toi.</string>
     <string name="split_fee_yours">Les frais de réseau sortent de votre part : il arrivera un peu moins que cela.</string>
     <string name="split_fee_theirs">Les frais de réseau sortent de la part de %1$s ; la vôtre arrive exactement.</string>
+    <string name="bond_outputs_title">Cette transaction verse :</string>
+    <string name="bond_output_mine">%1$s pour toi</string>
+    <string name="bond_output_payer">%1$s de retour au payeur</string>
+    <string name="bond_output_theirs">%1$s pour eux</string>
+    <string name="bond_output_unchecked">%1$s vers une adresse que ce téléphone ne peut pas vérifier</string>
+    <string name="bond_output_residual">(paie les frais de réseau)</string>
+    <string name="bond_refuse_shape">Cette libération verse à %1$d destinataires. Un règlement en verse à deux au plus — rien n\'a été signé.</string>
+    <string name="bond_refuse_nameless">Cette libération verse à une adresse illisible. Rien n\'a été signé.</string>
+    <string name="bond_refuse_arithmetic">Les montants de cette libération ne s\'additionnent pas. Rien n\'a été signé.</string>
+    <string name="bond_refuse_claim">Ce que cette libération annonce et ce qu\'elle verse réellement ne correspondent pas. Rien n\'a été signé.</string>
+    <string name="bond_superseded">Une autre proposition est arrivée avant ton appui. Vérifie de nouveau les montants.</string>
+    <string name="bond_misstated">Cette libération te verse %1$s, pas les %2$s affichés. Rien n\'a été signé.</string>
 </resources>

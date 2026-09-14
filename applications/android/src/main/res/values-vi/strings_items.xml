@@ -14,4 +14,7 @@
     <string name="items_picker_no_rate">Chưa có tỷ giá — chưa thể thu theo các mức giá này cho tới khi máy kết nối được mạng.</string>
     <string name="items_sold_out">Hết</string>
     <string name="items_back_on">Bán lại</string>
+    <string name="items_up_to">Tối đa (XMR)</string>
+    <string name="items_floor_title">Giao dịch nhỏ hoàn tất sau một khối</string>
+    <string name="items_floor_note">Ở mức này trở xuống, một khối là đủ để hoàn tất giao dịch, và giao dịch vẫn hoàn tất ngay cả khi không liên lạc được nút thứ hai. Trên mức đó, khoản thanh toán chờ ba khối — mười khối nếu trên một XMR — và chờ một nút khác thấy nó trong khối. Số không nghĩa là không giao dịch nào là nhỏ.</string>
 </resources>

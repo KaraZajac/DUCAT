@@ -89,4 +89,16 @@
     <string name="split_back_to_them">提案：%1$s が %3$s に戻り、%2$s があなたに。</string>
     <string name="split_fee_yours">ネットワーク手数料はあなたの取り分から引かれるので、届くのは少し少なくなります。</string>
     <string name="split_fee_theirs">ネットワーク手数料は%1$sの取り分から引かれるので、あなたの分はそのまま届きます。</string>
+    <string name="bond_outputs_title">この取引の支払い先:</string>
+    <string name="bond_output_mine">%1$s をあなたへ</string>
+    <string name="bond_output_payer">%1$s を支払った側へ</string>
+    <string name="bond_output_theirs">%1$s を相手へ</string>
+    <string name="bond_output_unchecked">%1$s をこの端末が確認できないアドレスへ</string>
+    <string name="bond_output_residual">(ネットワーク手数料を負担)</string>
+    <string name="bond_refuse_shape">この解放は %1$d か所に支払います。清算の支払い先は最大 2 か所なので、署名しませんでした。</string>
+    <string name="bond_refuse_nameless">この解放は読み取れないアドレスに支払います。署名しませんでした。</string>
+    <string name="bond_refuse_arithmetic">この解放の金額が合いません。署名しませんでした。</string>
+    <string name="bond_refuse_claim">この解放が支払うと述べている内容と、実際に支払う内容が一致しません。署名しませんでした。</string>
+    <string name="bond_superseded">タップの前に別の提案が届きました。金額をもう一度確認してください。</string>
+    <string name="bond_misstated">この解放があなたに支払うのは %1$s で、表示された %2$s ではありません。署名しませんでした。</string>
 </resources>

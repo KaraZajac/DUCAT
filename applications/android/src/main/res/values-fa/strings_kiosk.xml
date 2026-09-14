@@ -8,6 +8,8 @@
     <string name="kiosk_order">سفارش</string>
     <string name="kiosk_scan_note">با هر کیف پول مونرو اسکن کنید. مبلغ از پیش پر شده است.</string>
     <string name="kiosk_waiting">در انتظار پرداخت شما…</string>
+    <string name="kiosk_settling">در حال تسویه</string>
+    <string name="kiosk_settling_note">پرداخت شما دیده شد. سفارش وقتی کامل می‌شود که زنجیره آن را ثبت کند.</string>
     <string name="kiosk_cancel_order">انصراف</string>
     <string name="kiosk_paid_title">سپاسگزاریم</string>
     <string name="kiosk_paid_number">سفارش شمارهٔ %1$d</string>
@@ -17,11 +19,11 @@
     <string name="kiosk_back_to_counter">بازگشت به پیشخوان</string>
     <string name="kiosk_leave">خروج از حالت کیوسک</string>
     <string name="kiosk_state_awaiting">در انتظار پرداخت</string>
-    <string name="kiosk_state_seen">پرداخت‌شده — دیده شد، هنوز روی زنجیره نیست</string>
+    <string name="kiosk_state_seen">در حال تسویه — دیده شده، هنوز در بلاک نیست</string>
     <string name="kiosk_state_confirmed">تسویه‌شده</string>
     <string name="kiosk_state_abandoned">رفت</string>
     <string name="kiosk_notify_title">سفارش شمارهٔ %1$d</string>
-    <string name="kiosk_notify_body">%1$s دیده شد — سفارش پرداخت شده است</string>
+    <string name="kiosk_notify_body">%1$s دیده شد — در حال تسویه</string>
     <string name="kiosk_mode_title">کیوسک</string>
     <string name="kiosk_mode_body">صفحه‌ای رو به مشتری: آنچه می‌خواهد را می‌زند، بعد گوشی‌اش را نزدیک می‌کند یا اسکن می‌کند و صورت‌حساب روی گوشی خودش می‌آید. برای خروج پین لازم است.</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->
@@ -46,4 +48,6 @@
     <string name="kiosk_all_off">الان همه‌چیز از فهرست خارج است.</string>
     <string name="kiosk_tip_pct">%1$d%%</string>
     <string name="kiosk_declined">این صورت‌حساب را رد کردند. چیزی نمی‌آید — مشتری بعدی را شروع کنید یا از در کارکنان مرتبش کنید.</string>
+    <string name="kiosk_sight_title">تحویل در نخستین مشاهده</string>
+    <string name="kiosk_sight_note">پرداختی که دیده شده اما هنوز در بلاک نیست می‌تواند جایگزین شود؛ تا این مبلغ، کیوسک به مشاهده اعتماد می‌کند.</string>
 </resources>

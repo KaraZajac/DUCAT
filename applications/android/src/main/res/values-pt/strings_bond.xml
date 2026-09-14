@@ -90,4 +90,16 @@
     <string name="split_back_to_them">Proposta: %1$s de volta para %3$s, %2$s para você.</string>
     <string name="split_fee_yours">A taxa da rede sai da sua parte, por isso chega um pouco menos.</string>
     <string name="split_fee_theirs">A taxa da rede sai da parte de %1$s, por isso a sua chega exata.</string>
+    <string name="bond_outputs_title">Esta transação paga:</string>
+    <string name="bond_output_mine">%1$s para você</string>
+    <string name="bond_output_payer">%1$s de volta a quem pagou</string>
+    <string name="bond_output_theirs">%1$s para eles</string>
+    <string name="bond_output_unchecked">%1$s para um endereço que este telefone não pode verificar</string>
+    <string name="bond_output_residual">(paga a taxa de rede)</string>
+    <string name="bond_refuse_shape">Esta liberação paga a %1$d destinos. Um acerto paga a dois no máximo, por isso nada foi assinado.</string>
+    <string name="bond_refuse_nameless">Esta liberação paga a um endereço que não pode ser lido. Nada foi assinado.</string>
+    <string name="bond_refuse_arithmetic">Os valores desta liberação não batem. Nada foi assinado.</string>
+    <string name="bond_refuse_claim">O que esta liberação diz pagar e o que realmente paga não coincidem. Nada foi assinado.</string>
+    <string name="bond_superseded">Chegou outra proposta antes de você tocar. Confira os valores de novo.</string>
+    <string name="bond_misstated">Esta liberação paga a você %1$s, não os %2$s mostrados. Nada foi assinado.</string>
 </resources>

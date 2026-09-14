@@ -89,4 +89,16 @@
     <string name="split_back_to_them">Đề xuất: %1$s trả lại cho %3$s, %2$s cho bạn.</string>
     <string name="split_fee_yours">Phí mạng trừ vào phần của bạn, nên số đến sẽ ít hơn một chút.</string>
     <string name="split_fee_theirs">Phí mạng trừ vào phần của %1$s, nên phần của bạn đến đúng bằng đó.</string>
+    <string name="bond_outputs_title">Giao dịch này trả:</string>
+    <string name="bond_output_mine">%1$s cho bạn</string>
+    <string name="bond_output_payer">%1$s trả lại người trả tiền</string>
+    <string name="bond_output_theirs">%1$s cho họ</string>
+    <string name="bond_output_unchecked">%1$s tới một địa chỉ mà điện thoại này không kiểm tra được</string>
+    <string name="bond_output_residual">(trả phí mạng)</string>
+    <string name="bond_refuse_shape">Lần giải ngân này trả cho %1$d nơi. Một lần thanh toán chỉ trả tối đa hai nơi, nên không ký gì cả.</string>
+    <string name="bond_refuse_nameless">Lần giải ngân này trả tới một địa chỉ không đọc được. Không ký gì cả.</string>
+    <string name="bond_refuse_arithmetic">Các số tiền trong lần giải ngân này không khớp. Không ký gì cả.</string>
+    <string name="bond_refuse_claim">Những gì lần giải ngân này nói sẽ trả và những gì nó thực sự trả không khớp nhau. Không ký gì cả.</string>
+    <string name="bond_superseded">Một đề nghị khác đã đến trước khi bạn chạm. Hãy kiểm tra lại các số tiền.</string>
+    <string name="bond_misstated">Lần giải ngân này trả cho bạn %1$s, không phải %2$s như đã hiển thị. Không ký gì cả.</string>
 </resources>

@@ -20,7 +20,10 @@
     <string name="pos_scan_hint">They scan this in DUCAT. The bill above arrives on their phone the moment they do.</string>
     <string name="pos_tap_hint">Or tap phones — same bill either way</string>
     <string name="pos_payment_seen">Payment seen ✓</string>
-    <string name="pos_payment_settling">Their payment is in the network — settling, about two minutes. The receipt sends itself when it lands.</string>
+    <string name="pos_payment_settling">Their payment is in the network — settling. The receipt sends itself once the chain has it deep enough.</string>
+    <string name="pos_settling_blocks">%1$d of %2$d blocks</string>
+    <string name="pos_not_corroborated">No second node has confirmed this payment. It stays unpaid until one does, or until you settle it yourself.</string>
+    <string name="pos_settle_anyway">Settle anyway</string>
     <string name="pos_bill_sent_to">Bill sent to %1$s</string>
     <string name="pos_the_customer">the customer</string>
     <string name="pos_billed_hint">They confirm on their own phone. When the payment lands on chain the receipt goes to them automatically — nothing left to do here.</string>

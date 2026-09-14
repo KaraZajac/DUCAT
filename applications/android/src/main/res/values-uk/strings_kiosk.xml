@@ -8,6 +8,8 @@
     <string name="kiosk_order">Замовити</string>
     <string name="kiosk_scan_note">Відскануйте будь-яким гаманцем Monero. Суму вже підставлено.</string>
     <string name="kiosk_waiting">Чекаємо на вашу оплату…</string>
+    <string name="kiosk_settling">Триває розрахунок</string>
+    <string name="kiosk_settling_note">Ми бачимо ваш платіж. Замовлення завершиться, коли він потрапить у ланцюг.</string>
     <string name="kiosk_cancel_order">Скасувати</string>
     <string name="kiosk_paid_title">Дякуємо</string>
     <string name="kiosk_paid_number">Замовлення № %1$d</string>
@@ -17,11 +19,11 @@
     <string name="kiosk_back_to_counter">Назад до прилавка</string>
     <string name="kiosk_leave">Вийти з режиму кіоска</string>
     <string name="kiosk_state_awaiting">чекає на оплату</string>
-    <string name="kiosk_state_seen">оплачено — видно, ще не в ланцюжку</string>
+    <string name="kiosk_state_seen">розрахунок — помічено, ще не в блоці</string>
     <string name="kiosk_state_confirmed">розраховано</string>
     <string name="kiosk_state_abandoned">пішов</string>
     <string name="kiosk_notify_title">Замовлення № %1$d</string>
-    <string name="kiosk_notify_body">Видно %1$s — замовлення оплачено</string>
+    <string name="kiosk_notify_body">%1$s помічено — триває розрахунок</string>
     <string name="kiosk_mode_title">Кіоск</string>
     <string name="kiosk_mode_body">Екран, повернутий до покупця: він натискає те, що хоче, тоді прикладає телефон або сканує — і рахунок приходить на його власний телефон. Щоб вийти, потрібен твій PIN.</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->
@@ -46,4 +48,6 @@
     <string name="kiosk_all_off">Зараз нічого немає.</string>
     <string name="kiosk_tip_pct">%1$d%%</string>
     <string name="kiosk_declined">Вони відхилили цей рахунок. Нічого не надійде — переходьте до наступного клієнта або залагодьте це за службовими дверима.</string>
+    <string name="kiosk_sight_title">Видавати за першою появою</string>
+    <string name="kiosk_sight_note">Платіж, який помічено, але ще не в блоці, можна підмінити; до цієї суми кіоск довіряє побаченому.</string>
 </resources>

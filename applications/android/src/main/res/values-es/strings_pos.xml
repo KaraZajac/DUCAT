@@ -20,7 +20,10 @@
     <string name="pos_scan_hint">Lo escanean en DUCAT. La cuenta de arriba llega a su teléfono en el momento en que lo hacen.</string>
     <string name="pos_tap_hint">O acerquen los teléfonos — la misma cuenta de cualquier forma</string>
     <string name="pos_payment_seen">Pago visto ✓</string>
-    <string name="pos_payment_settling">Su pago está en la red — saldándose, unos dos minutos. El recibo se envía solo cuando cae.</string>
+    <string name="pos_payment_settling">Su pago está en la red — liquidándose. El recibo se envía solo cuando la cadena lo tenga a suficiente profundidad.</string>
+    <string name="pos_settling_blocks">%1$d de %2$d bloques</string>
+    <string name="pos_not_corroborated">Ningún segundo nodo ha confirmado este pago. Sigue sin pagar hasta que alguno lo haga, o hasta que lo liquides tú.</string>
+    <string name="pos_settle_anyway">Liquidar de todos modos</string>
     <string name="pos_bill_sent_to">Cuenta enviada a %1$s</string>
     <string name="pos_the_customer">el cliente</string>
     <string name="pos_billed_hint">Confirman en su propio teléfono. Cuando el pago cae en la cadena, el recibo les llega automáticamente — no queda nada por hacer aquí.</string>

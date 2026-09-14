@@ -83,4 +83,5 @@
     <string name="pay_donation_hint">Isto é uma doação — o recibo chegará neste chat assim que for recebida, e o seu extrato a arquivará em Doações.</string>
     <string name="pay_relay_unconfirmed">Nenhum nó Monero confirmou ter aceitado o pagamento. Ainda assim pode passar: as notas usadas ficam reservadas até a cadeia decidir. Confira o extrato antes de pagar de novo.</string>
     <string name="pay_request_kept">Pedido guardado: sai sozinho assim que a rede voltar.</string>
+    <string name="pay_fee_capped">Se a taxa real ficar mais de um quarto acima disto, nada é enviado.</string>
 </resources>

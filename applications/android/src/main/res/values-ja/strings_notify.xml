@@ -19,6 +19,8 @@
     <string name="notify_paid_body_tip">%1$s（チップ %2$s）— 領収書を送信</string>
     <string name="notify_unconfirmed_title">支払いを確認できません</string>
     <string name="notify_unconfirmed_body">他のノードに記録がありません。この伝票は未払いのままです。</string>
+    <string name="notify_uncorroborated_title">支払いの裏づけなし</string>
+    <string name="notify_uncorroborated_body">確認できる第二のノードに届きませんでした。決済するまで、この売上は請求のままです。</string>
     <string name="notify_unbacked_title">エスクローを確認できません</string>
     <string name="notify_unbacked_body">他のノードにこの資金が見えません。まだ何も保証されていません。</string>
     <string name="notify_payto_changed_title">支払い先が変わりました</string>

@@ -8,6 +8,8 @@
     <string name="kiosk_order">注文する</string>
     <string name="kiosk_scan_note">お手持ちの Monero ウォレットで読み取ってください。金額は入力済みです。</string>
     <string name="kiosk_waiting">お支払いをお待ちしています…</string>
+    <string name="kiosk_settling">決済中</string>
+    <string name="kiosk_settling_note">お支払いを確認しました。チェーンに記録されると注文が完了します。</string>
     <string name="kiosk_cancel_order">キャンセル</string>
     <string name="kiosk_paid_title">ありがとうございます</string>
     <string name="kiosk_paid_number">注文番号 %1$d</string>
@@ -17,11 +19,11 @@
     <string name="kiosk_back_to_counter">カウンターに戻る</string>
     <string name="kiosk_leave">キオスクモードを終了</string>
     <string name="kiosk_state_awaiting">支払い待ち</string>
-    <string name="kiosk_state_seen">支払い済み — 確認済み、まだチェーン上ではありません</string>
+    <string name="kiosk_state_seen">決済中 — 検出済み、まだブロックに入っていません</string>
     <string name="kiosk_state_confirmed">決済済み</string>
     <string name="kiosk_state_abandoned">立ち去りました</string>
     <string name="kiosk_notify_title">注文番号 %1$d</string>
-    <string name="kiosk_notify_body">%1$s を確認 — 注文は支払い済みです</string>
+    <string name="kiosk_notify_body">%1$s を検出 — 決済中</string>
     <string name="kiosk_mode_title">キオスク</string>
     <string name="kiosk_mode_body">お客さんに向けた画面です。欲しいものを押してもらい、スマホをかざすか読み取ってもらうと、明細つきの請求がその人のスマホに届きます。抜けるにはPINが要ります。</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->
@@ -46,4 +48,6 @@
     <string name="kiosk_all_off">いまはすべて品切れです。</string>
     <string name="kiosk_tip_pct">%1$d%%</string>
     <string name="kiosk_declined">この請求は断られました。入金はありません。次のお客様へ進むか、スタッフ用の画面で整理してください。</string>
+    <string name="kiosk_sight_title">検出した時点で渡す</string>
+    <string name="kiosk_sight_note">検出されてもまだブロックに入っていない支払いは差し替えられることがあります。この金額までは、キオスクはその検出を信用します。</string>
 </resources>

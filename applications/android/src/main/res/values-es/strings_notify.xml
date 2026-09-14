@@ -19,6 +19,8 @@
     <string name="notify_paid_body_tip">%1$s (propina %2$s) — recibo enviado</string>
     <string name="notify_unconfirmed_title">Pago sin confirmar</string>
     <string name="notify_unconfirmed_body">Otro nodo no tiene constancia de él. Esta cuenta sigue sin pagar.</string>
+    <string name="notify_uncorroborated_title">Pago sin corroborar</string>
+    <string name="notify_uncorroborated_body">No se pudo alcanzar ningún segundo nodo para confirmarlo. La venta sigue facturada hasta que la liquides.</string>
     <string name="notify_unbacked_title">Depósito sin confirmar</string>
     <string name="notify_unbacked_body">Otro nodo no ve el dinero. Todavía no hay nada asegurado.</string>
     <string name="notify_payto_changed_title">La dirección de pago cambió</string>

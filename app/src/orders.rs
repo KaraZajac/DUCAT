@@ -18,6 +18,9 @@ const STORE: &str = "ducat_orders";
 /// menu never share an amount.
 const TAG_RANGE: u64 = 1_000_000;
 const ADDRESS_SLOTS: u32 = 64;
+/// The counter's own risk: hand the goods over on a mempool sighting, up to
+/// this much. Zero — the default — means never.
+const SIGHT_CAP_KEY: &str = "sight_cap";
 const ABANDON_AFTER_SECS: u64 = 30 * 60;
 const KEEP: usize = 500;
 
@@ -78,6 +81,48 @@ fn new_id() -> String {
 }
 
 impl App {
+    /// How much this counter will hand over on a sighting alone.
+    ///
+    /// Off by default, and §15.11 is why: a payment that has been seen but is
+    /// not in a block yet can still be replaced, so releasing goods on the
+    /// sighting alone is an unbonded credit to a stranger. A queue for coffee
+    /// is a real constraint all the same, and a shop that knows what a flat
+    /// white costs may price that risk itself — so the sighting buys nothing
+    /// by default and exactly what the operator says it buys otherwise.
+    pub fn kiosk_sight_cap_pxmr(&self) -> u64 {
+        self.store(STORE).get(SIGHT_CAP_KEY).unwrap_or(0)
+    }
+
+    pub fn set_kiosk_sight_cap_pxmr(&self, pxmr: u64) -> Result<(), Error> {
+        self.store(STORE).put(SIGHT_CAP_KEY, &pxmr)?;
+        bump();
+        Ok(())
+    }
+
+    /// May this order's goods leave the counter on a sighting alone?
+    ///
+    /// Per order, because the answer is about *this* basket: a counter that
+    /// trusts a sighting for a coffee does not thereby trust one for the
+    /// espresso machine.
+    pub fn hands_over_on_sight(&self, o: &Order) -> bool {
+        let cap = self.kiosk_sight_cap_pxmr();
+        cap > 0 && o.total_pxmr > 0 && o.total_pxmr <= cap
+    }
+
+    /// How deep this order's payment is, and how deep its size needs it —
+    /// the counter's "settling, N of M blocks". Zero blocks is the mempool,
+    /// which is a sighting and not a settlement.
+    pub fn order_settling(&self, o: &Order) -> (u64, u64) {
+        let tx = o
+            .seen_tx
+            .clone()
+            .or_else(|| o.tab_id.as_deref().and_then(|t| self.tab(t)).and_then(|t| t.seen_tx));
+        let have = tx
+            .and_then(|tx| self.entries().into_iter().find(|e| e.tx_hash_hex.eq_ignore_ascii_case(&tx)))
+            .map_or(0, |e| App::confirmations_of(e.height, self.tip()));
+        (have, self.confirmations_needed(o.total_pxmr))
+    }
+
     pub fn orders(&self) -> Vec<Order> {
         let mut v: Vec<Order> = self.store(STORE).get("orders").unwrap_or_default();
         v.sort_by(|a, b| b.placed_at.cmp(&a.placed_at));
@@ -273,11 +318,28 @@ impl App {
         let all = self.orders();
         let entries = self.entries();
         let landed: std::collections::HashSet<String> = entries.iter().map(|e| e.tx_hash_hex.to_lowercase()).collect();
+        let tip = self.tip();
         for o in all.iter().filter(|o| o.state == OrderState::Seen) {
-            if o.seen_tx.as_deref().map_or(false, |t| landed.contains(&t.to_lowercase())) {
-                let _ = self.update_order(Order { state: OrderState::Confirmed, ..o.clone() });
-                log::info(TAG, format!("order #{} confirmed on chain", o.number));
+            let Some(tx) = o.seen_tx.as_deref() else { continue };
+            if !landed.contains(&tx.to_lowercase()) {
+                continue;
             }
+            // Deep enough for what it is worth: one block under the operator's
+            // floor, three up to a monero, ten above.
+            let height = entries.iter().find(|e| e.tx_hash_hex.eq_ignore_ascii_case(tx)).map_or(0, |e| e.height);
+            if App::confirmations_of(height, tip) < self.confirmations_needed(o.total_pxmr) {
+                continue;
+            }
+            // And a node that is not ours has it in a block. This branch used
+            // to promote on the txid landing alone — our own node's word,
+            // twice — while the never-sighted branch below asked. A forged
+            // block is exactly as convincing to a sighted order as to an
+            // unsighted one.
+            if !self.settles(tx, o.total_pxmr) {
+                continue;
+            }
+            let _ = self.update_order(Order { state: OrderState::Confirmed, ..o.clone() });
+            log::info(TAG, format!("order #{} confirmed on chain", o.number));
         }
         let mut waiting: Vec<&Order> = all.iter().filter(|o| o.state == OrderState::Awaiting && o.tab_id.is_none() && !o.address.is_empty()).collect();
         if waiting.is_empty() {
@@ -288,6 +350,9 @@ impl App {
         let mut claimed: Vec<String> = all.iter().filter_map(|o| o.seen_tx.clone()).collect();
         for o in waiting {
             let Some(hit) = entries.iter().find(|e| e.amount_pxmr == o.total_pxmr && !e.tx_hash_hex.is_empty() && !claimed.contains(&e.tx_hash_hex) && !ours.contains(&e.tx_hash_hex.to_lowercase()) && o.billed_minor.map_or(true, |m| e.minor == m)) else { continue };
+            if App::confirmations_of(hit.height, tip) < self.confirmations_needed(o.total_pxmr) {
+                continue;
+            }
             if !self.settles(&hit.tx_hash_hex, o.total_pxmr) {
                 continue;
             }
@@ -328,5 +393,26 @@ mod tests {
         assert_eq!(app.order_state(&o), OrderState::Awaiting);
         app.abandon_order(&o.id).unwrap();
         assert_eq!(app.order(&o.id).unwrap().state, OrderState::Abandoned);
+    }
+
+    #[test]
+    fn a_sighting_releases_nothing_until_the_operator_prices_it() {
+        let dir = std::env::temp_dir().join(format!("ducat-orders-cap-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        let app = App::open(&dir).unwrap();
+        let w = ducat_mobile::create_wallet(1, true);
+        app.wallet_save(&w.address, &w.spend_key_hex, 1, true).unwrap();
+        let o = app.place_order(vec![BillItem { description: "Soup".into(), amount_pxmr: 5_000_000_000 }], None).unwrap();
+        // Off by default: a payment in the mempool can still be replaced.
+        assert_eq!(app.kiosk_sight_cap_pxmr(), 0);
+        assert!(!app.hands_over_on_sight(&o));
+        // The operator's cap, and only up to it.
+        app.set_kiosk_sight_cap_pxmr(o.total_pxmr).unwrap();
+        assert!(app.hands_over_on_sight(&o));
+        app.set_kiosk_sight_cap_pxmr(o.total_pxmr - 1).unwrap();
+        assert!(!app.hands_over_on_sight(&o));
+        // Nothing sighted is nothing settling, and an ordinary sale wants
+        // three blocks.
+        assert_eq!(app.order_settling(&o), (0, 3));
     }
 }

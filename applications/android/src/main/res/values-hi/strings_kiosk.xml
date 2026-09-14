@@ -8,6 +8,8 @@
     <string name="kiosk_order">ऑर्डर करें</string>
     <string name="kiosk_scan_note">किसी भी मोनेरो वॉलेट से स्कैन करें। रक़म पहले से भरी है।</string>
     <string name="kiosk_waiting">आपके भुगतान का इंतज़ार…</string>
+    <string name="kiosk_settling">निपट रहा है</string>
+    <string name="kiosk_settling_note">आपका भुगतान देखा गया है। जब यह चेन पर आ जाएगा तब ऑर्डर पूरा होगा।</string>
     <string name="kiosk_cancel_order">रद्द करें</string>
     <string name="kiosk_paid_title">धन्यवाद</string>
     <string name="kiosk_paid_number">ऑर्डर #%1$d</string>
@@ -17,11 +19,11 @@
     <string name="kiosk_back_to_counter">काउंटर पर वापस</string>
     <string name="kiosk_leave">कियोस्क मोड से बाहर</string>
     <string name="kiosk_state_awaiting">भुगतान का इंतज़ार</string>
-    <string name="kiosk_state_seen">चुकाया — दिखा, अभी चेन पर नहीं</string>
+    <string name="kiosk_state_seen">निपट रहा है — देखा गया, अभी ब्लॉक में नहीं</string>
     <string name="kiosk_state_confirmed">निपट गया</string>
     <string name="kiosk_state_abandoned">चला गया</string>
     <string name="kiosk_notify_title">ऑर्डर #%1$d</string>
-    <string name="kiosk_notify_body">%1$s दिखा — ऑर्डर चुका दिया गया</string>
+    <string name="kiosk_notify_body">%1$s देखा गया — निपट रहा है</string>
     <string name="kiosk_mode_title">कियोस्क</string>
     <string name="kiosk_mode_body">ग्राहक की तरफ़ मुड़ी एक स्क्रीन: वे जो चाहें टैप करें, फिर फ़ोन पास लाएँ या स्कैन करें — बिल उनके अपने फ़ोन पर आ जाता है। बाहर निकलने के लिए आपका पिन चाहिए।</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->
@@ -46,4 +48,6 @@
     <string name="kiosk_all_off">अभी सब कुछ मेन्यू से हटा है।</string>
     <string name="kiosk_tip_pct">%1$d%%</string>
     <string name="kiosk_declined">उन्होंने यह बिल अस्वीकार कर दिया। अब कुछ नहीं आएगा — अगला ग्राहक लें, या स्टाफ़ दरवाज़े से इसे निपटा दें।</string>
+    <string name="kiosk_sight_title">पहली बार दिखते ही सौंपें</string>
+    <string name="kiosk_sight_note">जो भुगतान दिखा है पर अभी ब्लॉक में नहीं है, उसे बदला जा सकता है; इस राशि तक कियोस्क उस दृश्य पर भरोसा करता है।</string>
 </resources>

@@ -90,4 +90,16 @@
     <string name="split_back_to_them">Proposta: %1$s torna a %3$s, %2$s a te.</string>
     <string name="split_fee_yours">La commissione di rete esce dalla tua parte, quindi arriva un po\' meno.</string>
     <string name="split_fee_theirs">La commissione di rete esce dalla parte di %1$s, quindi la tua arriva esatta.</string>
+    <string name="bond_outputs_title">Questa transazione paga:</string>
+    <string name="bond_output_mine">%1$s a te</string>
+    <string name="bond_output_payer">%1$s indietro al pagante</string>
+    <string name="bond_output_theirs">%1$s a loro</string>
+    <string name="bond_output_unchecked">%1$s a un indirizzo che questo telefono non può verificare</string>
+    <string name="bond_output_residual">(paga la commissione di rete)</string>
+    <string name="bond_refuse_shape">Questo rilascio paga %1$d destinazioni. Una liquidazione ne paga al massimo due, quindi non è stato firmato nulla.</string>
+    <string name="bond_refuse_nameless">Questo rilascio paga un indirizzo che non si riesce a leggere. Non è stato firmato nulla.</string>
+    <string name="bond_refuse_arithmetic">Gli importi di questo rilascio non tornano. Non è stato firmato nulla.</string>
+    <string name="bond_refuse_claim">Ciò che questo rilascio dichiara di pagare e ciò che paga davvero non coincidono. Non è stato firmato nulla.</string>
+    <string name="bond_superseded">È arrivata un\'altra proposta prima del tuo tocco. Ricontrolla gli importi.</string>
+    <string name="bond_misstated">Questo rilascio ti paga %1$s, non i %2$s mostrati. Non è stato firmato nulla.</string>
 </resources>

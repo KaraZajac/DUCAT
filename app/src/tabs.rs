@@ -577,6 +577,13 @@ impl App {
                 .find(|e| tab.seen_tx.as_deref().map_or(false, |s| e.tx_hash_hex.eq_ignore_ascii_case(s)) && matches(e))
                 .or_else(|| entries.iter().find(|e| matches(e)));
             let Some(hit) = hit else { continue };
+            // The blocks a payment of this size needs before a receipt goes
+            // out (§17.5, N22): one under the operator's floor, three up to
+            // a monero, ten above. The phone waits the same way; two clients
+            // settling differently is what the second opinion exists to stop.
+            if App::confirmations_of(hit.height, self.tip()) < self.confirmations_needed(hit.amount_pxmr) {
+                continue;
+            }
             if !self.settles(&hit.tx_hash_hex, hit.amount_pxmr) {
                 continue;
             }

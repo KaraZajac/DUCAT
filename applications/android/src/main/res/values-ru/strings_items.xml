@@ -14,4 +14,7 @@
     <string name="items_picker_no_rate">Курса обмена пока нет — эти цены не получится принять, пока касса не выйдет в сеть.</string>
     <string name="items_sold_out">Закончилось</string>
     <string name="items_back_on">Вернуть</string>
+    <string name="items_up_to">До (XMR)</string>
+    <string name="items_floor_title">Мелкие продажи закрываются одним блоком</string>
+    <string name="items_floor_note">На этой сумме и ниже продажу закрывает один блок, и она закрывается, даже если второй узел недоступен. Выше платёж ждёт три блока — десять свыше одного XMR — и того, чтобы другой узел увидел его в блоке. Ноль значит, что мелких продаж нет.</string>
 </resources>

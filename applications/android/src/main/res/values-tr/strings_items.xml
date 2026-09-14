@@ -14,4 +14,7 @@
     <string name="items_picker_no_rate">Henüz kur yok — kasa ağa ulaşana kadar bu fiyatlar tahsil edilemez.</string>
     <string name="items_sold_out">Tükendi</string>
     <string name="items_back_on">Geri koy</string>
+    <string name="items_up_to">Şu tutara kadar (XMR)</string>
+    <string name="items_floor_title">Küçük satışlar tek blokla kapanır</string>
+    <string name="items_floor_note">Bu tutar ve altında tek blok satışı kapatır ve ikinci bir düğüme ulaşılamasa bile satış kapanır. Üstünde ödeme üç blok — bir XMR üzerinde on blok — ve başka bir düğümün onu blokta görmesini bekler. Sıfır, hiçbir satışın küçük olmadığı anlamına gelir.</string>
 </resources>

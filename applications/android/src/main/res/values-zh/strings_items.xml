@@ -14,4 +14,7 @@
     <string name="items_picker_no_rate">还没有汇率——在收银机连上网络之前，这些价格无法结账。</string>
     <string name="items_sold_out">售罄</string>
     <string name="items_back_on">重新上架</string>
+    <string name="items_up_to">上限 (XMR)</string>
+    <string name="items_floor_title">小额销售一个区块即结算</string>
+    <string name="items_floor_note">在此金额及以下，一个区块即可结算，且即使联系不到第二个节点也照样结算。超过它，付款要等三个区块 — 超过 1 XMR 则等十个 — 并等另一个节点在区块里看到它。零表示没有小额销售。</string>
 </resources>

@@ -92,4 +92,16 @@
     <string name="split_back_to_them">Предложено: %1$s обратно %3$s, %2$s — тебе.</string>
     <string name="split_fee_yours">Комиссия сети берётся из вашей доли, поэтому придёт чуть меньше.</string>
     <string name="split_fee_theirs">Комиссия сети берётся из доли %1$s, поэтому ваша придёт ровно.</string>
+    <string name="bond_outputs_title">Эта транзакция платит:</string>
+    <string name="bond_output_mine">%1$s вам</string>
+    <string name="bond_output_payer">%1$s обратно плательщику</string>
+    <string name="bond_output_theirs">%1$s им</string>
+    <string name="bond_output_unchecked">%1$s на адрес, который этот телефон не может проверить</string>
+    <string name="bond_output_residual">(платит сетевую комиссию)</string>
+    <string name="bond_refuse_shape">Этот выпуск платит по %1$d адресам. Расчёт платит не более чем по двум — ничего не подписано.</string>
+    <string name="bond_refuse_nameless">Этот выпуск платит на адрес, который невозможно прочитать. Ничего не подписано.</string>
+    <string name="bond_refuse_arithmetic">Суммы в этом выпуске не сходятся. Ничего не подписано.</string>
+    <string name="bond_refuse_claim">То, что этот выпуск обещает заплатить, и то, что он платит на деле, не совпадает. Ничего не подписано.</string>
+    <string name="bond_superseded">Перед нажатием пришло другое предложение. Проверьте суммы ещё раз.</string>
+    <string name="bond_misstated">Этот выпуск платит вам %1$s, а не показанные %2$s. Ничего не подписано.</string>
 </resources>

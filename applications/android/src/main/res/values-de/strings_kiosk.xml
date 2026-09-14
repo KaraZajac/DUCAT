@@ -8,6 +8,8 @@
     <string name="kiosk_order">Bestellen</string>
     <string name="kiosk_scan_note">Mit einer beliebigen Monero-Wallet scannen. Der Betrag steht schon drin.</string>
     <string name="kiosk_waiting">Warte auf deine Zahlung…</string>
+    <string name="kiosk_settling">Wird abgeschlossen</string>
+    <string name="kiosk_settling_note">Deine Zahlung wurde gesehen. Die Bestellung ist fertig, sobald die Blockchain sie hat.</string>
     <string name="kiosk_cancel_order">Abbrechen</string>
     <string name="kiosk_paid_title">Danke</string>
     <string name="kiosk_paid_number">Bestellung Nr. %1$d</string>
@@ -17,11 +19,11 @@
     <string name="kiosk_back_to_counter">Zurück zur Theke</string>
     <string name="kiosk_leave">Kioskmodus verlassen</string>
     <string name="kiosk_state_awaiting">wartet auf Zahlung</string>
-    <string name="kiosk_state_seen">bezahlt — gesehen, noch nicht auf der Kette</string>
+    <string name="kiosk_state_seen">wird abgeschlossen – gesehen, noch nicht in einem Block</string>
     <string name="kiosk_state_confirmed">abgerechnet</string>
     <string name="kiosk_state_abandoned">ist gegangen</string>
     <string name="kiosk_notify_title">Bestellung Nr. %1$d</string>
-    <string name="kiosk_notify_body">%1$s gesehen — die Bestellung ist bezahlt</string>
+    <string name="kiosk_notify_body">%1$s gesehen – wird abgeschlossen</string>
     <string name="kiosk_mode_title">Kiosk</string>
     <string name="kiosk_mode_body">Ein Bildschirm, der zum Kunden zeigt: er tippt an, was er will, hält dann sein Telefon dran oder scannt — und bekommt die Rechnung auf sein eigenes Telefon. Zum Verlassen braucht es deine PIN.</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->
@@ -46,4 +48,6 @@
     <string name="kiosk_all_off">Gerade ist alles von der Karte.</string>
     <string name="kiosk_tip_pct">%1$d%%</string>
     <string name="kiosk_declined">Sie haben diese Rechnung abgelehnt. Es kommt nichts — nimm den nächsten Kunden, oder räum sie hinter der Personaltür auf.</string>
+    <string name="kiosk_sight_title">Bei der ersten Sichtung herausgeben</string>
+    <string name="kiosk_sight_note">Eine Zahlung, die gesehen, aber noch nicht in einem Block ist, kann noch ersetzt werden; bis zu diesem Betrag vertraut der Kiosk der Sichtung.</string>
 </resources>

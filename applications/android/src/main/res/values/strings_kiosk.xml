@@ -8,6 +8,8 @@
     <string name="kiosk_order">Order</string>
     <string name="kiosk_scan_note">Scan this with any Monero wallet. The amount is already filled in.</string>
     <string name="kiosk_waiting">Waiting for your payment…</string>
+    <string name="kiosk_settling">Settling</string>
+    <string name="kiosk_settling_note">Your payment has been seen. The order is done once the chain has it.</string>
     <string name="kiosk_cancel_order">Cancel</string>
     <string name="kiosk_paid_title">Thank you</string>
     <string name="kiosk_paid_number">Order #%1$d</string>
@@ -17,11 +19,11 @@
     <string name="kiosk_back_to_counter">Back to the counter</string>
     <string name="kiosk_leave">Leave kiosk mode</string>
     <string name="kiosk_state_awaiting">waiting to be paid</string>
-    <string name="kiosk_state_seen">paid — seen, not yet on the chain</string>
+    <string name="kiosk_state_seen">settling — seen, not yet in a block</string>
     <string name="kiosk_state_confirmed">settled</string>
     <string name="kiosk_state_abandoned">walked away</string>
     <string name="kiosk_notify_title">Order #%1$d</string>
-    <string name="kiosk_notify_body">%1$s seen — the order is paid</string>
+    <string name="kiosk_notify_body">%1$s seen — settling</string>
     <string name="kiosk_mode_title">Kiosk</string>
     <string name="kiosk_mode_body">A screen facing the customer: they tap what they want, then tap or scan to get the bill on their own phone. Leaving needs your PIN.</string>
     <!-- Pair, then bill: the counter speaks DUCAT -->
@@ -46,4 +48,6 @@
     <string name="kiosk_all_off">Everything is off the menu just now.</string>
     <string name="kiosk_tip_pct">%1$d%%</string>
     <string name="kiosk_declined">They declined this bill. Nothing is coming — start the next customer, or tidy it up behind the staff door.</string>
+    <string name="kiosk_sight_title">Hand over on first sight</string>
+    <string name="kiosk_sight_note">A payment seen but not yet in a block can still be replaced; up to this amount the kiosk trusts the sighting.</string>
 </resources>

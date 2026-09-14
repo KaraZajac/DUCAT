@@ -20,7 +20,10 @@
     <string name="pos_scan_hint">يمسحونه في DUCAT. والفاتورة أعلاه تصل إلى هاتفهم لحظة المسح.</string>
     <string name="pos_tap_hint">أو قرّبا الهاتفين — الفاتورة نفسها في الحالين</string>
     <string name="pos_payment_seen">ظهرت الدفعة ✓</string>
-    <string name="pos_payment_settling">دفعتهم في الشبكة — قيد التسوية، نحو دقيقتين. الإيصال يرسل نفسه عند وصولها.</string>
+    <string name="pos_payment_settling">دفعتهم في الشبكة — قيد التسوية. يُرسل الإيصال تلقائيًا عندما تستقر على السلسلة بعمق كافٍ.</string>
+    <string name="pos_settling_blocks">%1$d من %2$d كتل</string>
+    <string name="pos_not_corroborated">لم تؤكد أي عقدة ثانية هذه الدفعة. تبقى غير مدفوعة حتى تؤكدها عقدة أخرى أو تسوّيها بنفسك.</string>
+    <string name="pos_settle_anyway">سوِّ على أي حال</string>
     <string name="pos_bill_sent_to">أُرسلت الفاتورة إلى %1$s</string>
     <string name="pos_the_customer">الزبون</string>
     <string name="pos_billed_hint">يؤكدون على هاتفهم. وعند وصول الدفعة إلى السلسلة يذهب الإيصال إليهم تلقائيًا — لا شيء يتبقى هنا.</string>

@@ -89,4 +89,16 @@
     <string name="split_back_to_them">제안: %1$s %3$s에게 반환, %2$s 당신에게.</string>
     <string name="split_fee_yours">네트워크 수수료는 당신 몫에서 나가므로 그보다 조금 적게 도착합니다.</string>
     <string name="split_fee_theirs">네트워크 수수료는 %1$s의 몫에서 나가므로 당신 몫은 그대로 도착합니다.</string>
+    <string name="bond_outputs_title">이 거래가 지급하는 곳:</string>
+    <string name="bond_output_mine">%1$s 내 몫</string>
+    <string name="bond_output_payer">%1$s 지급인에게 반환</string>
+    <string name="bond_output_theirs">%1$s 상대에게</string>
+    <string name="bond_output_unchecked">%1$s 이 기기가 확인할 수 없는 주소로</string>
+    <string name="bond_output_residual">(네트워크 수수료 부담)</string>
+    <string name="bond_refuse_shape">이 해제는 %1$d 곳에 지급합니다. 정산은 최대 두 곳에만 지급하므로 아무것도 서명하지 않았습니다.</string>
+    <string name="bond_refuse_nameless">이 해제는 읽을 수 없는 주소로 지급합니다. 아무것도 서명하지 않았습니다.</string>
+    <string name="bond_refuse_arithmetic">이 해제의 금액이 맞지 않습니다. 아무것도 서명하지 않았습니다.</string>
+    <string name="bond_refuse_claim">이 해제가 지급한다고 밝힌 내용과 실제로 지급하는 내용이 다릅니다. 아무것도 서명하지 않았습니다.</string>
+    <string name="bond_superseded">누르기 전에 다른 제안이 도착했습니다. 금액을 다시 확인하세요.</string>
+    <string name="bond_misstated">이 해제가 당신에게 지급하는 금액은 %1$s이며, 표시된 %2$s이 아닙니다. 아무것도 서명하지 않았습니다.</string>
 </resources>

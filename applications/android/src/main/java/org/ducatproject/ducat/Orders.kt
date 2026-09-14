@@ -301,6 +301,59 @@ object Orders {
     const val ORIGIN = "kiosk"
 
     /**
+     * The counter's own risk: hand the goods over on a mempool sighting, up
+     * to this much.
+     *
+     * Off by default — zero — and §15.11 is why: a payment that has been seen
+     * but is not in a block yet can still be replaced, so releasing goods on
+     * the sighting alone is an unbonded credit to a stranger. A queue for
+     * coffee is nonetheless a real constraint, and a shop that knows what a
+     * flat white costs is entitled to price that risk itself. So the sighting
+     * buys nothing by default and buys exactly what the operator says it
+     * buys, no more.
+     *
+     * With the tax rate rather than in the order book, for the same reason
+     * [Tax] gives: this is business configuration the operator sets once, not
+     * per-order state, and it is not a secret.
+     */
+    fun sightCapPxmr(context: Context): Long =
+        context.getSharedPreferences("ducat_business", Context.MODE_PRIVATE)
+            .getLong("kiosk_sight_cap", 0L)
+
+    fun setSightCapPxmr(context: Context, pxmr: Long) {
+        context.getSharedPreferences("ducat_business", Context.MODE_PRIVATE).edit()
+            .putLong("kiosk_sight_cap", pxmr.coerceAtLeast(0L)).apply()
+        ContactStore.bump()
+    }
+
+    /**
+     * May this order's goods leave the counter on a sighting alone?
+     *
+     * The cap is read per order because the answer is about *this* basket: a
+     * counter that trusts a sighting for a coffee does not thereby trust one
+     * for the espresso machine.
+     */
+    fun handsOverOnSight(context: Context, order: Order): Boolean {
+        val cap = sightCapPxmr(context)
+        return cap > 0 && order.totalPxmr in 1..cap
+    }
+
+    /**
+     * Where the money behind this order has got to, for the screens: how many
+     * blocks are on top of it, and how many its size needs.
+     *
+     * Zero blocks is the mempool — which is a sighting, not a settlement.
+     */
+    fun settlingBlocks(context: Context, order: Order, tab: RunningTab?): Pair<Int, Int> {
+        val tx = order.seenTx ?: tab?.seenTx
+        return SecondOpinion.blocksSoFar(context, tx) to
+            SecondOpinion.confirmationsNeeded(context, order.totalPxmr)
+    }
+
+    /** The transaction a stalled second opinion is waiting on, if we know it. */
+    fun settlingTx(order: Order, tab: RunningTab?): String? = order.seenTx ?: tab?.seenTx
+
+    /**
      * A basket, waiting for whoever is about to tap or scan.
      *
      * No address and no noise: this order does not know yet who it belongs
@@ -557,11 +610,27 @@ object Orders {
         val wallet = WalletStore(context)
         val entries = wallet.entries()
         val landed = entries.map { it.txHashHex }.toSet()
+        val tip = wallet.tip()
         everything.filter { it.state == State.Seen && it.seenTx != null }.forEach { order ->
-            if (order.seenTx in landed) {
-                update(context, order.copy(state = State.Confirmed))
-                DucatLog.i(TAG, "order #${order.number} confirmed on chain")
-            }
+            if (order.seenTx !in landed) return@forEach
+            val landedAt = entries
+                .firstOrNull { it.txHashHex.equals(order.seenTx, ignoreCase = true) }
+                ?.height ?: 0L
+            // Deep enough for what it is worth: one block under the
+            // operator's floor, three up to a monero, ten above. A kiosk
+            // order is goods leaving a counter, which is the one place the
+            // spec says a sighting buys nothing.
+            val deep = SecondOpinion.confirmationsOf(landedAt, tip) >=
+                SecondOpinion.confirmationsNeeded(context, order.totalPxmr)
+            if (!deep) return@forEach
+            // And a node that is not ours has it in a block. This branch used
+            // to promote on the txid landing alone — our own node's word,
+            // twice — while the never-sighted branch below asked. A forged
+            // block is exactly as convincing to a sighted order as to an
+            // unsighted one.
+            if (!SecondOpinion.settles(context, order.seenTx!!, order.totalPxmr)) return@forEach
+            update(context, order.copy(state = State.Confirmed))
+            DucatLog.i(TAG, "order #${order.number} confirmed on chain")
         }
 
         // Unpaired orders only — the same filter the sighting and expiry
@@ -592,7 +661,12 @@ object Orders {
             // receipt goes out, and for the same reason: everything above this
             // line trusted one node's account of the chain, and what follows
             // is goods leaving a counter.
-            if (!SecondOpinion.settles(context, hit.txHashHex)) continue
+            if (SecondOpinion.confirmationsOf(hit.height, tip) <
+                SecondOpinion.confirmationsNeeded(context, order.totalPxmr)
+            ) {
+                continue
+            }
+            if (!SecondOpinion.settles(context, hit.txHashHex, order.totalPxmr)) continue
             claimed += hit.txHashHex
             update(context, order.copy(state = State.Confirmed, seenTx = hit.txHashHex))
             Notify.post(

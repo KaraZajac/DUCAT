@@ -14,4 +14,7 @@
     <string name="items_picker_no_rate">Pas encore de taux de change — impossible d\'encaisser ces prix tant que la caisse n\'atteint pas le réseau.</string>
     <string name="items_sold_out">Épuisé</string>
     <string name="items_back_on">Remettre</string>
+    <string name="items_up_to">Jusqu\'à (XMR)</string>
+    <string name="items_floor_title">Les petites ventes sont réglées après un bloc</string>
+    <string name="items_floor_note">À ce montant ou en dessous, un bloc suffit, et la vente se règle même si aucun second nœud n\'est joignable. Au-dessus, un paiement attend trois blocs — dix au-delà d\'un XMR — et qu\'un autre nœud le voie dans un bloc. Zéro veut dire qu\'aucune vente n\'est petite.</string>
 </resources>

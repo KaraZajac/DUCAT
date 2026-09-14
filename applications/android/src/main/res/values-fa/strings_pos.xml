@@ -20,7 +20,10 @@
     <string name="pos_scan_hint">این را در DUCAT اسکن می‌کنند. همان لحظه صورت‌حساب بالا روی گوشی‌شان می‌رسد.</string>
     <string name="pos_tap_hint">یا گوشی‌ها را به هم نزدیک کنید — هر دو راه، همان صورت‌حساب</string>
     <string name="pos_payment_seen">پرداخت دیده شد ✓</string>
-    <string name="pos_payment_settling">پرداخت‌شان در شبکه است — در حال تسویه، حدود دو دقیقه. رسید بعد از نشستن، خودش می‌رود.</string>
+    <string name="pos_payment_settling">پرداخت آن‌ها در شبکه است — در حال تسویه. رسید وقتی به عمق کافی در زنجیره برسد خودش ارسال می‌شود.</string>
+    <string name="pos_settling_blocks">%1$d از %2$d بلاک</string>
+    <string name="pos_not_corroborated">هیچ گره دومی این پرداخت را تأیید نکرده است. تا زمانی که گره‌ای تأیید کند یا خودتان تسویه کنید، پرداخت‌نشده می‌ماند.</string>
+    <string name="pos_settle_anyway">به‌هرحال تسویه کن</string>
     <string name="pos_bill_sent_to">صورت‌حساب برای %1$s رفت</string>
     <string name="pos_the_customer">مشتری</string>
     <string name="pos_billed_hint">روی گوشی خودشان تأیید می‌کنند. وقتی پرداخت روی زنجیره نشست، رسید خودکار برایشان می‌رود — اینجا کاری نمانده.</string>

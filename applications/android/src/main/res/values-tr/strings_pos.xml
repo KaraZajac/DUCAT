@@ -20,7 +20,10 @@
     <string name="pos_scan_hint">Bunu DUCAT\'ta tararlar. Taradıkları anda yukarıdaki hesap telefonlarına düşer.</string>
     <string name="pos_tap_hint">Ya da telefonları dokundurun — iki yolda da aynı hesap</string>
     <string name="pos_payment_seen">Ödeme görüldü ✓</string>
-    <string name="pos_payment_settling">Ödemeleri ağda — kapanıyor, yaklaşık iki dakika. Makbuz, ödeme düşünce kendini gönderir.</string>
+    <string name="pos_payment_settling">Ödemeleri ağda — kapanıyor. Zincirde yeterince derine indiğinde fiş kendiliğinden gider.</string>
+    <string name="pos_settling_blocks">%2$d bloktan %1$d</string>
+    <string name="pos_not_corroborated">Bu ödemeyi doğrulayan ikinci bir düğüm yok. Bir düğüm doğrulayana ya da siz kendiniz kapatana kadar ödenmemiş kalır.</string>
+    <string name="pos_settle_anyway">Yine de kapat</string>
     <string name="pos_bill_sent_to">Hesap gönderildi: %1$s</string>
     <string name="pos_the_customer">müşteri</string>
     <string name="pos_billed_hint">Kendi telefonlarında onaylarlar. Ödeme zincire düştüğünde makbuz otomatik olarak onlara gider — burada yapılacak bir şey kalmadı.</string>

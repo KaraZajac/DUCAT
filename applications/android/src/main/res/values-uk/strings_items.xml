@@ -14,4 +14,7 @@
     <string name="items_picker_no_rate">Курсу обміну ще немає — ці ціни не вдасться прийняти, доки каса не вийде в мережу.</string>
     <string name="items_sold_out">Скінчилось</string>
     <string name="items_back_on">Повернути</string>
+    <string name="items_up_to">До (XMR)</string>
+    <string name="items_floor_title">Дрібні продажі закриваються одним блоком</string>
+    <string name="items_floor_note">На цій сумі та нижче продаж закриває один блок, і продаж закривається, навіть коли жоден другий вузол недоступний. Вище платіж чекає на три блоки — десять понад один XMR — і на те, щоб інший вузол побачив його в блоці. Нуль означає, що дрібних продажів немає.</string>
 </resources>

@@ -19,6 +19,8 @@
     <string name="notify_paid_body_tip">%1$s (fooi %2$s) — bon verstuurd</string>
     <string name="notify_unconfirmed_title">Betaling niet bevestigd</string>
     <string name="notify_unconfirmed_body">Een andere node kent hem niet. Deze rekening blijft openstaan.</string>
+    <string name="notify_uncorroborated_title">Betaling niet bevestigd</string>
+    <string name="notify_uncorroborated_body">Er was geen tweede node bereikbaar om het te bevestigen. De verkoop blijft gefactureerd tot je hem afwikkelt.</string>
     <string name="notify_unbacked_title">Escrow niet bevestigd</string>
     <string name="notify_unbacked_body">Een andere node ziet het geld niet. Er is nog niets zeker.</string>
     <string name="notify_payto_changed_title">Betaaladres gewijzigd</string>

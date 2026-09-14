@@ -89,4 +89,16 @@
     <string name="split_back_to_them">ข้อเสนอ: %1$s คืนให้ %3$s %2$s ให้คุณ</string>
     <string name="split_fee_yours">ค่าธรรมเนียมเครือข่ายหักจากส่วนของคุณ จึงได้รับน้อยกว่านั้นเล็กน้อย</string>
     <string name="split_fee_theirs">ค่าธรรมเนียมเครือข่ายหักจากส่วนของ %1$s ส่วนของคุณจึงมาถึงครบ</string>
+    <string name="bond_outputs_title">ธุรกรรมนี้จ่ายให้:</string>
+    <string name="bond_output_mine">%1$s ให้คุณ</string>
+    <string name="bond_output_payer">%1$s คืนให้ผู้จ่าย</string>
+    <string name="bond_output_theirs">%1$s ให้พวกเขา</string>
+    <string name="bond_output_unchecked">%1$s ไปยังที่อยู่ที่โทรศัพท์นี้ตรวจสอบไม่ได้</string>
+    <string name="bond_output_residual">(จ่ายค่าธรรมเนียมเครือข่าย)</string>
+    <string name="bond_refuse_shape">การปล่อยเงินนี้จ่ายไป %1$d แห่ง การชำระบัญชีจ่ายได้มากที่สุดสองแห่ง จึงไม่ได้ลงนามสิ่งใด</string>
+    <string name="bond_refuse_nameless">การปล่อยเงินนี้จ่ายไปยังที่อยู่ที่อ่านไม่ได้ จึงไม่ได้ลงนามสิ่งใด</string>
+    <string name="bond_refuse_arithmetic">จำนวนเงินในการปล่อยเงินนี้ไม่ลงตัว จึงไม่ได้ลงนามสิ่งใด</string>
+    <string name="bond_refuse_claim">สิ่งที่การปล่อยเงินนี้บอกว่าจะจ่ายกับสิ่งที่จ่ายจริงไม่ตรงกัน จึงไม่ได้ลงนามสิ่งใด</string>
+    <string name="bond_superseded">มีข้อเสนออื่นเข้ามาก่อนที่คุณจะแตะ ตรวจสอบจำนวนเงินอีกครั้ง</string>
+    <string name="bond_misstated">การปล่อยเงินนี้จ่ายให้คุณ %1$s ไม่ใช่ %2$s ที่แสดงไว้ จึงไม่ได้ลงนามสิ่งใด</string>
 </resources>

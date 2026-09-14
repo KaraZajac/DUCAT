@@ -20,7 +20,10 @@
     <string name="pos_scan_hint">お客がDUCATでこれをスキャンすると、その瞬間に上の請求が相手の端末に届きます。</string>
     <string name="pos_tap_hint">または端末同士をタップ — どちらでも同じ請求です</string>
     <string name="pos_payment_seen">支払い確認 ✓</string>
-    <string name="pos_payment_settling">支払いはネットワーク上にあります — 精算中、約2分です。着金するとレシートは自動で送られます。</string>
+    <string name="pos_payment_settling">相手の支払いはネットワーク上にあります — 決済中。チェーンで十分な深さになると、領収書は自動で送られます。</string>
+    <string name="pos_settling_blocks">%2$d ブロック中 %1$d</string>
+    <string name="pos_not_corroborated">この支払いを確認した第二のノードはまだありません。どこかが確認するか、あなたが自分で決済するまで未払いのままです。</string>
+    <string name="pos_settle_anyway">それでも決済する</string>
     <string name="pos_bill_sent_to">%1$sに請求を送りました</string>
     <string name="pos_the_customer">お客</string>
     <string name="pos_billed_hint">お客は自分の端末で確認します。支払いがチェーンに着金するとレシートは自動で相手へ届きます — ここでやることはもうありません。</string>

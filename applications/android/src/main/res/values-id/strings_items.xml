@@ -14,4 +14,7 @@
     <string name="items_picker_no_rate">Belum ada kurs — harga ini belum bisa ditagih sampai mesin kasir terhubung ke jaringan.</string>
     <string name="items_sold_out">Habis</string>
     <string name="items_back_on">Tersedia lagi</string>
+    <string name="items_up_to">Hingga (XMR)</string>
+    <string name="items_floor_title">Penjualan kecil selesai dengan satu blok</string>
+    <string name="items_floor_note">Pada jumlah ini atau kurang, satu blok sudah menyelesaikan penjualan, dan penjualan tetap selesai meski tak ada simpul kedua yang bisa dihubungi. Di atasnya, pembayaran menunggu tiga blok — sepuluh di atas satu XMR — dan menunggu simpul lain melihatnya di dalam blok. Nol berarti tidak ada penjualan yang kecil.</string>
 </resources>

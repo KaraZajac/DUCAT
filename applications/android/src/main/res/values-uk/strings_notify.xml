@@ -19,6 +19,8 @@
     <string name="notify_paid_body_tip">%1$s (чайові %2$s) — чек надіслано</string>
     <string name="notify_unconfirmed_title">Платіж не підтверджено</string>
     <string name="notify_unconfirmed_body">На іншому вузлі його немає. Цей рахунок лишається неоплаченим.</string>
+    <string name="notify_uncorroborated_title">Платіж не підтверджено</string>
+    <string name="notify_uncorroborated_body">Не вдалося зв\'язатися з другим вузлом для підтвердження. Продаж лишається виставленим, доки ви його не закриєте.</string>
     <string name="notify_unbacked_title">Депозит не підтверджено</string>
     <string name="notify_unbacked_body">Інший вузол не бачить цих грошей. Поки що нічого не забезпечено.</string>
     <string name="notify_payto_changed_title">Адреса для оплати змінилася</string>

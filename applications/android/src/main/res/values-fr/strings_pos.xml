@@ -20,7 +20,10 @@
     <string name="pos_scan_hint">Le client le scanne dans DUCAT. La facture ci-dessus arrive sur son téléphone à l\'instant même.</string>
     <string name="pos_tap_hint">Ou approchez les téléphones — même facture dans les deux cas</string>
     <string name="pos_payment_seen">Paiement vu ✓</string>
-    <string name="pos_payment_settling">Son paiement est dans le réseau — règlement en cours, environ deux minutes. Le reçu s\'envoie tout seul quand il arrive.</string>
+    <string name="pos_payment_settling">Leur paiement est sur le réseau — règlement en cours. Le reçu part tout seul quand la chaîne l\'a assez profondément.</string>
+    <string name="pos_settling_blocks">%1$d bloc(s) sur %2$d</string>
+    <string name="pos_not_corroborated">Aucun second nœud n\'a confirmé ce paiement. Il reste impayé jusqu\'à ce qu\'un nœud le confirme, ou que vous le régliez vous-même.</string>
+    <string name="pos_settle_anyway">Régler quand même</string>
     <string name="pos_bill_sent_to">Facture envoyée à %1$s</string>
     <string name="pos_the_customer">le client</string>
     <string name="pos_billed_hint">Le client confirme sur son propre téléphone. Quand le paiement arrive sur la chaîne, le reçu lui parvient automatiquement — plus rien à faire ici.</string>

@@ -90,7 +90,7 @@ object Donations {
                 val outs = received[txid] ?: continue
                 val amount = outs.sumOf { it.amountPxmr }
                 if (amount <= 0) continue
-                if (!SecondOpinion.settles(context, txid)) continue
+                if (!SecondOpinion.settles(context, txid, amount)) continue
                 // Mark first, thank second — a death in the gap costs the
                 // donor a receipt they can ask for again, never two receipts
                 // for one gift.

@@ -14,4 +14,7 @@
     <string name="items_picker_no_rate">Ancora nessun tasso di cambio: questi prezzi non si possono incassare finché la cassa non raggiunge la rete.</string>
     <string name="items_sold_out">Esaurito</string>
     <string name="items_back_on">Rimetti</string>
+    <string name="items_up_to">Fino a (XMR)</string>
+    <string name="items_floor_title">Le piccole vendite si saldano con un blocco</string>
+    <string name="items_floor_note">Fino a questo importo basta un blocco, e la vendita si salda anche se nessun secondo nodo è raggiungibile. Sopra, un pagamento aspetta tre blocchi — dieci oltre un XMR — e che un altro nodo lo veda in un blocco. Zero significa che nessuna vendita è piccola.</string>
 </resources>

@@ -19,6 +19,8 @@
     <string name="notify_paid_body_tip">%1$s (pourboire %2$s) — reçu envoyé</string>
     <string name="notify_unconfirmed_title">Paiement non confirmé</string>
     <string name="notify_unconfirmed_body">Un autre nœud n\'en a aucune trace. Cette note reste impayée.</string>
+    <string name="notify_uncorroborated_title">Paiement non corroboré</string>
+    <string name="notify_uncorroborated_body">Aucun second nœud n\'a pu être joint pour le confirmer. La vente reste facturée jusqu\'à ce que vous la régliez.</string>
     <string name="notify_unbacked_title">Séquestre non confirmé</string>
     <string name="notify_unbacked_body">Un autre nœud ne voit pas l\'argent. Rien n\'est encore garanti.</string>
     <string name="notify_payto_changed_title">Adresse de paiement modifiée</string>

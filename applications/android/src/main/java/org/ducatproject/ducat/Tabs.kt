@@ -909,6 +909,7 @@ class TabStore(private val context: Context) {
                 .filterNot { it.txHashHex.lowercase() in ours }
             val claimed = (store.all().mapNotNull { it.paidKi } + store.claimedKis())
                 .toMutableSet()
+            val tip = WalletStore(context).tip()
 
             for (tab in settled) {
                 // §15.10's attribution: a bill billed to this contact's
@@ -991,7 +992,18 @@ class TabStore(private val context: Context) {
                 // Ahead of the claim, not after it: a deferral has to leave
                 // this pass exactly as it found it, and a claimed key image
                 // would lock the output out of the retry.
-                if (!SecondOpinion.settles(context, hit.txHashHex)) continue
+                //
+                // And deep enough for what it is worth (§17.5): one block
+                // under the operator's small-sale floor, three up to a
+                // monero, ten above it — Monero's own lock. A receipt is the
+                // shop saying the money is theirs, and one block is not a
+                // promise anybody should give over a monero.
+                if (SecondOpinion.confirmationsOf(hit.height, tip) <
+                    SecondOpinion.confirmationsNeeded(context, hit.amountPxmr)
+                ) {
+                    continue
+                }
+                if (!SecondOpinion.settles(context, hit.txHashHex, hit.amountPxmr)) continue
                 claimed += hit.keyImage
                 val contact = contacts.all()
                     .firstOrNull { it.personaHex == tab.personaHex } ?: continue
