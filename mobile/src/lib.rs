@@ -16,6 +16,7 @@ pub mod callcodec;
 pub mod ceremony;
 pub mod contacts;
 pub mod monero;
+pub mod txproof;
 pub mod node;
 pub mod swarm;
 pub mod feed;

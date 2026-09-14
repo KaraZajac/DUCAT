@@ -1066,7 +1066,12 @@ For the high-exposure tier the limit stands undiminished. What the protocol offe
 
 §9.1 prices an identity with a bond, and §17.2 explains why a bond on Monero is a multisig with the market's arbiter set: there is no timelock to build one from, and there is no arbiter set until §9.3's market exists. This section adds the leg that needs nobody else: **a persona sacrifices XMR, and proves it to whoever asks.** Bisq prices identity the same way (burned BSQ outranks bonded BSQ ten to one, because a burn cannot be recovered), and JoinMarket's fidelity bonds gave the arithmetic; what Monero adds is that the sacrifice is **private** — the chain shows a transaction, not its amount or its sender, and the proof binds the persona only to the reader it is handed to.
 
-**The burn address.** One address for the network, published here with its derivation, whose keys nobody holds: the public spend key and the public view key are each the hash-to-point of a fixed string (`"DUCAT-BURN-v1"` followed by `0` and the key's role), so anyone can recompute the address and see that no discrete logarithm was chosen. An output sent there is gone. The literal address, mainnet and stagenet, is fixed when the derivation is implemented; it is a constant of the protocol from then on, and a burn to any other address is not a burn.
+**The burn address.** One address for the network, published here with its derivation, whose keys nobody holds: the public spend key and the public view key are each Monero's own `hash_to_ec` of `keccak256("DUCAT-BURN-v1" ‖ 0 ‖ role)` with `role` the bytes `spend` or `view`, so anyone with Monero's tooling can recompute the address and see that no discrete logarithm was chosen. An output sent there is gone. The addresses are constants of the protocol from this draft on, and a burn to any other address is not a burn:
+
+```
+mainnet   4B7jExgfEf4GwCKipy7G7gKQgbXpJzrVHC2Rnx3KpEbt7XewEkG3vAfY4cQoxTonXzKWo5oeqgXJ7aMNzgELcxp81SQVk3e
+stagenet  5BKmKobctGAGwCKipy7G7gKQgbXpJzrVHC2Rnx3KpEbt7XewEkG3vAfY4cQoxTonXzKWo5oeqgXJ7aMNzgELcxp81RrV3de
+```
 
 **The proof.** `BURN_PROOF` is a wire object: the transaction id, the amount in pXMR, the block height, and a Monero `OutProofV2` — the proof a sender makes from the transaction's secret key that this transaction paid this amount to this address — with its **message** bound to `"DUCAT-BURN-v1"`, the persona public key, and a purpose label. The message is what makes it a persona's burn rather than anyone's: a proof lifted from one persona verifies under another's name only if the message is rewritten, which breaks the signature. Fields 304–309 in §18.4.2, object type 28; the vectors pin the shape and the signature, the chain arithmetic is the reader's.
 

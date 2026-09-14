@@ -32,6 +32,8 @@ uniffi = { version = "0.28", features = ["cli"] }
 ureq = { version = "2", default-features = false, features = ["tls"] }
 monero-simple-request-rpc = "0.1.0"
 monero-daemon-rpc = "0.2.0"
+# §9.5: payment proofs are Monero base58 blocks, the same encoding addresses use.
+monero-base58 = "0.1.0"
 sha2 = "0.10"
 ed25519-dalek = "2"
 # The §17.9 ceremony engine (src/ceremony.rs) ships in the library: FROST
