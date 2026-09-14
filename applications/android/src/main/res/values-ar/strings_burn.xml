@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5's costly identity: burning XMR under a persona, the proof the
+     burn leaves, and what a reader's own node makes of somebody else's. -->
+<resources>
+    <string name="burn_title">هوية لها ثمن</string>
+    <string name="burn_back">رجوع</string>
+    <string name="burn_what_body">الحرق يرسل XMR إلى عنوان لا يملك أحد مفاتيحه. المال يذهب بلا رجعة: لا شيء يعود، ولا أحد يستطيع التراجع.</string>
+    <string name="burn_what_get">ما تحصل عليه هو إثبات أن هذا الاسم بالذات، دون سواه، تخلّى عن ذلك المبلغ. تعرضه على من يفكر في التعامل معك، وعقدته هو من يتحقق منه. لا يُنشر شيء.</string>
+    <string name="burn_persona">الحرق باسم %1$s</string>
+    <string name="burn_amount_label">المبلغ بعملة XMR</string>
+    <string name="burn_floor">أقل من %1$s لا يثبت الحرق شيئًا، وسيرفضه من يقرأه.</string>
+    <string name="burn_purpose_label">لأي غرض</string>
+    <string name="burn_purpose_support">وسم قصير: الهوية، إعلان، محكّم.</string>
+    <string name="burn_irreversible">لا يمكن التراجع عن هذا.</string>
+    <string name="burn_action">احرق %1$s</string>
+    <string name="burn_pin_why">أنت على وشك إتلاف مال. لا شيء يعيده.</string>
+    <string name="burn_address_title">إلى أين يذهب</string>
+    <string name="burn_address_note">مفتاحا هذا العنوان كلاهما بصمة نص منشور، فبإمكان أي أحد أن يحسبه بنفسه ويرى أن أحدًا لم يختر سرًّا. ما يصل إلى هنا لا يمكن إنفاقه أبدًا.</string>
+    <string name="burn_copy_address">نسخ العنوان</string>
+    <string name="burn_address_copied">نُسخ عنوان الحرق</string>
+    <string name="burn_yours">عمليات الحرق لديك</string>
+    <string name="burn_none">لم يُحرق شيء بهذا الاسم بعد.</string>
+    <string name="burn_waiting">في انتظار كتلته</string>
+    <string name="burn_in_block">في الكتلة %1$s</string>
+    <string name="burn_no_proof">لم يُصنع إثبات لهذه العملية، فلا يمكن عرضها.</string>
+    <string name="burn_copy_proof">نسخ الإثبات</string>
+    <string name="burn_proof_copied">نُسخ الإثبات</string>
+    <string name="burn_failed">لم تتم عملية الحرق.</string>
+    <string name="burn_entry_note">احرق بعض XMR باسمك، ليرى الغريب أن هذا الاسم كلّفك شيئًا.</string>
+    <string name="burn_entry_action">احرق XMR</string>
+    <string name="burn_entry_burned">حُرق %1$s</string>
+    <string name="burn_err_under_floor">هذا دون الحد الأدنى — حرق بهذا الصغر لا يثبت لأحد شيئًا.</string>
+    <string name="burn_err_no_purpose">اذكر غرض هذا الحرق.</string>
+    <string name="burn_err_purpose_long">هذا الوسم طويل أكثر من اللازم.</string>
+    <string name="burn_err_no_persona">لا يملك هذا الهاتف مفتاحًا لذلك الاسم.</string>
+    <string name="burn_err_no_node">لم تستجب أي عقدة Monero، فلم يُرسل شيء.</string>
+    <string name="burn_err_unreadable">هذا ليس إثباتًا يستطيع هذا الهاتف قراءته.</string>
+    <string name="burn_err_other_persona">هذا الإثبات يسمّي شخصًا آخر.</string>
+    <string name="burn_err_under_floor_theirs">الحرق الذي يثبته دون الحد الأدنى.</string>
+    <string name="burn_err_node_refuses">عقدتك أنت لا تؤيد هذا الإثبات.</string>
+    <string name="burn_err_wrong_amount">الإثبات يثبت مبلغًا غير الذي يدّعيه.</string>
+    <string name="burn_err_no_block">معاملته ليست في كتلة بعد.</string>
+    <string name="burn_err_no_second">لا توجد عقدة ثانية تراها في كتلة بعد. حاول بعد بضع دقائق.</string>
+</resources>

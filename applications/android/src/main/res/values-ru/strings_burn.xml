@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5's costly identity: burning XMR under a persona, the proof the
+     burn leaves, and what a reader's own node makes of somebody else's. -->
+<resources>
+    <string name="burn_title">Имя, которое стоит денег</string>
+    <string name="burn_back">Назад</string>
+    <string name="burn_what_body">Сжигание отправляет XMR на адрес, ключей от которого нет ни у кого. Деньги пропадают: ничего не возвращается, и отменить это невозможно.</string>
+    <string name="burn_what_get">Вы получаете доказательство, что именно это имя, и никакое другое, отдало столько. Вы показываете его тому, кто решает, иметь ли с вами дело, и его собственный узел это проверяет. Ничего не публикуется.</string>
+    <string name="burn_persona">Сжигание от имени %1$s</string>
+    <string name="burn_amount_label">Сумма в XMR</string>
+    <string name="burn_floor">Меньше %1$s сжигание ничего не доказывает, и читающий его отклонит.</string>
+    <string name="burn_purpose_label">Для чего это</string>
+    <string name="burn_purpose_support">Короткая метка: личность, объявление, арбитр.</string>
+    <string name="burn_irreversible">Это нельзя отменить.</string>
+    <string name="burn_action">Сжечь %1$s</string>
+    <string name="burn_pin_why">Вы собираетесь уничтожить деньги. Вернуть их невозможно.</string>
+    <string name="burn_address_title">Куда это уходит</string>
+    <string name="burn_address_note">Оба ключа этого адреса — хеши опубликованной строки, так что любой может вычислить его сам и убедиться, что никто не выбирал секрет. Пришедшее сюда невозможно потратить никогда.</string>
+    <string name="burn_copy_address">Скопировать адрес</string>
+    <string name="burn_address_copied">Адрес сжигания скопирован</string>
+    <string name="burn_yours">Ваши сжигания</string>
+    <string name="burn_none">Под этим именем ещё ничего не сожжено.</string>
+    <string name="burn_waiting">Ждёт своего блока</string>
+    <string name="burn_in_block">В блоке %1$s</string>
+    <string name="burn_no_proof">Для этого сжигания доказательство не сделано, показать его нельзя.</string>
+    <string name="burn_copy_proof">Скопировать доказательство</string>
+    <string name="burn_proof_copied">Доказательство скопировано</string>
+    <string name="burn_failed">Сжигание не состоялось.</string>
+    <string name="burn_entry_note">Сожгите XMR под своим именем, чтобы незнакомец видел: оно вам чего-то стоило.</string>
+    <string name="burn_entry_action">Сжечь XMR</string>
+    <string name="burn_entry_burned">Сожжено %1$s</string>
+    <string name="burn_err_under_floor">Это ниже порога — такое маленькое сжигание никому ничего не доказывает.</string>
+    <string name="burn_err_no_purpose">Укажите, для чего это сжигание.</string>
+    <string name="burn_err_purpose_long">Эта метка слишком длинная.</string>
+    <string name="burn_err_no_persona">На этом телефоне нет ключа для этого имени.</string>
+    <string name="burn_err_no_node">Ни один узел Monero не ответил, поэтому ничего не отправлено.</string>
+    <string name="burn_err_unreadable">Это не доказательство, которое этот телефон может прочитать.</string>
+    <string name="burn_err_other_persona">Это доказательство называет другого.</string>
+    <string name="burn_err_under_floor_theirs">Сжигание, которое оно доказывает, ниже порога.</string>
+    <string name="burn_err_node_refuses">Ваш собственный узел это доказательство не подтверждает.</string>
+    <string name="burn_err_wrong_amount">Доказательство подтверждает не ту сумму, о которой заявлено.</string>
+    <string name="burn_err_no_block">Его транзакции ещё нет ни в одном блоке.</string>
+    <string name="burn_err_no_second">Второй узел ещё не видит её в блоке. Попробуйте через несколько минут.</string>
+</resources>

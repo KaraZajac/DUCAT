@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5's costly identity: burning XMR under a persona, the proof the
+     burn leaves, and what a reader's own node makes of somebody else's. -->
+<resources>
+    <string name="burn_title">هویتی که هزینه دارد</string>
+    <string name="burn_back">بازگشت</string>
+    <string name="burn_what_body">سوزاندن یعنی فرستادن XMR به نشانی‌ای که کلیدهایش دست هیچ‌کس نیست. آن پول از دست می‌رود: چیزی برنمی‌گردد و کسی نمی‌تواند آن را برگرداند.</string>
+    <string name="burn_what_get">آنچه به دست می‌آورید گواهی است که همین نام، و نه نامی دیگر، آن اندازه را رها کرده است. آن را به کسی نشان می‌دهید که در فکر معامله با شماست، و گرهٔ خودِ او آن را وارسی می‌کند. چیزی منتشر نمی‌شود.</string>
+    <string name="burn_persona">سوزاندن به نام %1$s</string>
+    <string name="burn_amount_label">مبلغ به XMR</string>
+    <string name="burn_floor">کمتر از %1$s سوزاندن چیزی را ثابت نمی‌کند و خواننده آن را نمی‌پذیرد.</string>
+    <string name="burn_purpose_label">برای چه کاری</string>
+    <string name="burn_purpose_support">یک برچسب کوتاه: هویت، یک آگهی، یک داور.</string>
+    <string name="burn_irreversible">این کار برگشت‌پذیر نیست.</string>
+    <string name="burn_action">سوزاندن %1$s</string>
+    <string name="burn_pin_why">می‌خواهید پول را نابود کنید. هیچ چیز آن را بازنمی‌گرداند.</string>
+    <string name="burn_address_title">به کجا می‌رود</string>
+    <string name="burn_address_note">هر دو کلید این نشانی درهم‌سازی یک رشتهٔ منتشرشده‌اند، پس هر کس می‌تواند خودش آن را دوباره حساب کند و ببیند که کسی رازی برنگزیده است. آنچه به اینجا برسد هرگز خرج‌شدنی نیست.</string>
+    <string name="burn_copy_address">رونوشت نشانی</string>
+    <string name="burn_address_copied">نشانی سوزاندن رونوشت شد</string>
+    <string name="burn_yours">سوزاندن‌های شما</string>
+    <string name="burn_none">با این نام هنوز چیزی سوزانده نشده است.</string>
+    <string name="burn_waiting">در انتظار بلوک خود</string>
+    <string name="burn_in_block">در بلوک %1$s</string>
+    <string name="burn_no_proof">برای این یکی گواهی ساخته نشد، پس نمی‌توان نشانش داد.</string>
+    <string name="burn_copy_proof">رونوشت گواهی</string>
+    <string name="burn_proof_copied">گواهی رونوشت شد</string>
+    <string name="burn_failed">سوزاندن انجام نشد.</string>
+    <string name="burn_entry_note">با نام خود مقداری XMR بسوزانید تا غریبه ببیند که این نام برایتان هزینه داشته است.</string>
+    <string name="burn_entry_action">سوزاندن XMR</string>
+    <string name="burn_entry_burned">%1$s سوزانده شد</string>
+    <string name="burn_err_under_floor">این کمتر از کف است — سوزاندنی به این کوچکی برای هیچ‌کس چیزی ثابت نمی‌کند.</string>
+    <string name="burn_err_no_purpose">بگویید این سوزاندن برای چیست.</string>
+    <string name="burn_err_purpose_long">این برچسب بیش از اندازه بلند است.</string>
+    <string name="burn_err_no_persona">این گوشی کلیدی برای آن نام ندارد.</string>
+    <string name="burn_err_no_node">هیچ گرهٔ Monero پاسخ نداد، پس چیزی فرستاده نشد.</string>
+    <string name="burn_err_unreadable">این گواهی‌ای نیست که این گوشی بتواند بخواند.</string>
+    <string name="burn_err_other_persona">این گواهی نام کس دیگری را می‌برد.</string>
+    <string name="burn_err_under_floor_theirs">سوزاندنی که ثابت می‌کند کمتر از کف است.</string>
+    <string name="burn_err_node_refuses">گرهٔ خودتان این گواهی را تأیید نمی‌کند.</string>
+    <string name="burn_err_wrong_amount">گواهی مبلغی جز آنچه ادعا می‌کند ثابت می‌کند.</string>
+    <string name="burn_err_no_block">تراکنش آن هنوز در هیچ بلوکی نیست.</string>
+    <string name="burn_err_no_second">هنوز هیچ گرهٔ دومی آن را در بلوکی ندیده است. چند دقیقهٔ دیگر دوباره تلاش کنید.</string>
+</resources>

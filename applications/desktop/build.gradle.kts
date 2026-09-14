@@ -46,6 +46,12 @@ val sharedLogic = listOf(
     "org/ducatproject/ducat/ui/Monero.kt",
     "org/ducatproject/ducat/ui/SyncStatus.kt",
     "org/ducatproject/ducat/ui/Accounts.kt",
+    // §9.5's costly identity: the store and the screen the money screen
+    // opens. They cross because Accounts.kt does — a wallet screen that
+    // could not reach the burn would not compile — and because a burn
+    // proof is a wire object neither client may spell its own way.
+    "org/ducatproject/ducat/Trust.kt",
+    "org/ducatproject/ducat/ui/Burn.kt",
     "org/ducatproject/ducat/ui/Network.kt",
     "org/ducatproject/ducat/ui/Logs.kt",
     "org/ducatproject/ducat/ui/Diagnostics.kt",

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5's costly identity: burning XMR under a persona, the proof the
+     burn leaves, and what a reader's own node makes of somebody else's. -->
+<resources>
+    <string name="burn_title">代償のある身元</string>
+    <string name="burn_back">戻る</string>
+    <string name="burn_what_body">バーンは、誰も鍵を持たないアドレスへ XMR を送ります。そのお金は失われます。戻ってくるものはなく、取り消せる人もいません。</string>
+    <string name="burn_what_get">得られるのは、ほかならぬこの名前がそれだけ手放したという証明です。取引するかどうか考えている相手に見せると、相手自身のノードが確かめます。公開されるものは何もありません。</string>
+    <string name="burn_persona">%1$s としてバーンします</string>
+    <string name="burn_amount_label">XMR の金額</string>
+    <string name="burn_floor">%1$s 未満のバーンは何も証明せず、読み手は受け取りません。</string>
+    <string name="burn_purpose_label">何のためか</string>
+    <string name="burn_purpose_support">短いラベル。身元、出品、仲裁人など。</string>
+    <string name="burn_irreversible">これは取り消せません。</string>
+    <string name="burn_action">%1$s をバーンする</string>
+    <string name="burn_pin_why">これからお金を消します。取り戻す手段はありません。</string>
+    <string name="burn_address_title">送り先</string>
+    <string name="burn_address_note">このアドレスの二つの鍵はどちらも公開された文字列のハッシュです。誰でも自分で計算し直せて、秘密が選ばれていないことを確かめられます。ここに届いたものは決して使えません。</string>
+    <string name="burn_copy_address">アドレスをコピー</string>
+    <string name="burn_address_copied">バーン用アドレスをコピーしました</string>
+    <string name="burn_yours">あなたのバーン</string>
+    <string name="burn_none">この名前ではまだ何もバーンしていません。</string>
+    <string name="burn_waiting">ブロックに入るのを待っています</string>
+    <string name="burn_in_block">ブロック %1$s に記録済み</string>
+    <string name="burn_no_proof">これには証明が作られていないため、見せられません。</string>
+    <string name="burn_copy_proof">証明をコピー</string>
+    <string name="burn_proof_copied">証明をコピーしました</string>
+    <string name="burn_failed">バーンは実行されませんでした。</string>
+    <string name="burn_entry_note">自分の名前で XMR をバーンすると、初めての相手にもその名前が代償を伴うことが伝わります。</string>
+    <string name="burn_entry_action">XMR をバーンする</string>
+    <string name="burn_entry_burned">%1$s をバーン済み</string>
+    <string name="burn_err_under_floor">下限を下回っています。それほど小さなバーンは誰に対しても何も証明しません。</string>
+    <string name="burn_err_no_purpose">何のためのバーンか書いてください。</string>
+    <string name="burn_err_purpose_long">そのラベルは長すぎます。</string>
+    <string name="burn_err_no_persona">この端末にはその名前の鍵がありません。</string>
+    <string name="burn_err_no_node">応答した Monero ノードがなかったため、何も送られていません。</string>
+    <string name="burn_err_unreadable">これはこの端末が読める証明ではありません。</string>
+    <string name="burn_err_other_persona">この証明は別の相手を指しています。</string>
+    <string name="burn_err_under_floor_theirs">それが証明するバーンは下限を下回っています。</string>
+    <string name="burn_err_node_refuses">あなた自身のノードはこの証明を裏づけません。</string>
+    <string name="burn_err_wrong_amount">証明が示す金額は、申告された金額と違います。</string>
+    <string name="burn_err_no_block">その取引はまだブロックに入っていません。</string>
+    <string name="burn_err_no_second">二つ目のノードはまだブロックの中に見つけていません。数分後にもう一度お試しください。</string>
+</resources>

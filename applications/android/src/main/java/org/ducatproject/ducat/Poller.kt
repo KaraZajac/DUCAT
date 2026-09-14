@@ -387,6 +387,13 @@ class Poller(private val context: Context) {
                     runCatching { Orders.expire(context) }
                 }.onFailure { DucatLog.w(TAG, "pool: ${it.message}") }
 
+                // §9.5: a burn waiting for its block. The proof was made at
+                // send time, but the envelope cannot be signed until the
+                // chain says which block it is in — which happens minutes
+                // later, with the phone in a pocket.
+                runCatching { Trust.burnLap(context) }
+                    .onFailure { DucatLog.w(TAG, "burn lap: ${it.message}") }
+
                 // Stewardship (§18.7): a good tenant cleans its own unit.
                 // Cards whose purpose is spent leave the registry, and this
                 // device stops holding their records; the network's copies

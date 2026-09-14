@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5's costly identity: burning XMR under a persona, the proof the
+     burn leaves, and what a reader's own node makes of somebody else's. -->
+<resources>
+    <string name="burn_title">Une identité qui coûte</string>
+    <string name="burn_back">Retour</string>
+    <string name="burn_what_body">Brûler envoie des XMR vers une adresse dont personne ne détient les clés. L\'argent est perdu : rien ne revient, et personne ne peut annuler.</string>
+    <string name="burn_what_get">Ce que vous obtenez, c\'est la preuve que ce nom-là, et aucun autre, a sacrifié cette somme. Vous la montrez à qui hésite à traiter avec vous, et son propre nœud la vérifie. Rien n\'est publié.</string>
+    <string name="burn_persona">Brûler en tant que %1$s</string>
+    <string name="burn_amount_label">Montant en XMR</string>
+    <string name="burn_floor">En dessous de %1$s, un brûlage ne prouve rien et sera refusé.</string>
+    <string name="burn_purpose_label">À quoi cela sert</string>
+    <string name="burn_purpose_support">Une étiquette courte : identité, une annonce, un arbitre.</string>
+    <string name="burn_irreversible">Cela ne peut pas être annulé.</string>
+    <string name="burn_action">Brûler %1$s</string>
+    <string name="burn_pin_why">Vous allez détruire de l\'argent. Rien ne le ramène.</string>
+    <string name="burn_address_title">Où cela va</string>
+    <string name="burn_address_note">Les deux clés de cette adresse sont les empreintes d\'un texte publié : chacun peut la recalculer et constater que personne n\'a choisi de secret. Ce qui arrive ici ne pourra jamais être dépensé.</string>
+    <string name="burn_copy_address">Copier l\'adresse</string>
+    <string name="burn_address_copied">Adresse de brûlage copiée</string>
+    <string name="burn_yours">Vos brûlages</string>
+    <string name="burn_none">Rien n\'a encore été brûlé sous ce nom.</string>
+    <string name="burn_waiting">En attente de son bloc</string>
+    <string name="burn_in_block">Dans le bloc %1$s</string>
+    <string name="burn_no_proof">Aucune preuve n\'a été faite pour celui-ci, il ne peut pas être montré.</string>
+    <string name="burn_copy_proof">Copier la preuve</string>
+    <string name="burn_proof_copied">Preuve copiée</string>
+    <string name="burn_failed">Le brûlage n\'a pas abouti.</string>
+    <string name="burn_entry_note">Brûlez des XMR sous votre nom, pour qu\'un inconnu voie qu\'il vous a coûté quelque chose.</string>
+    <string name="burn_entry_action">Brûler des XMR</string>
+    <string name="burn_entry_burned">%1$s brûlés</string>
+    <string name="burn_err_under_floor">C\'est en dessous du seuil — un brûlage aussi petit ne prouve rien à personne.</string>
+    <string name="burn_err_no_purpose">Dites à quoi sert ce brûlage.</string>
+    <string name="burn_err_purpose_long">Cette étiquette est trop longue.</string>
+    <string name="burn_err_no_persona">Ce téléphone ne détient aucune clé pour ce nom.</string>
+    <string name="burn_err_no_node">Aucun nœud Monero n\'a répondu, rien n\'a été envoyé.</string>
+    <string name="burn_err_unreadable">Ce n\'est pas une preuve que ce téléphone sache lire.</string>
+    <string name="burn_err_other_persona">Cette preuve nomme quelqu\'un d\'autre.</string>
+    <string name="burn_err_under_floor_theirs">Le brûlage qu\'elle prouve est en dessous du seuil.</string>
+    <string name="burn_err_node_refuses">Votre propre nœud ne confirme pas cette preuve.</string>
+    <string name="burn_err_wrong_amount">La preuve établit un montant différent de celui annoncé.</string>
+    <string name="burn_err_no_block">Sa transaction n\'est pas encore dans un bloc.</string>
+    <string name="burn_err_no_second">Aucun second nœud ne l\'a encore dans un bloc. Réessayez dans quelques minutes.</string>
+</resources>

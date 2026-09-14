@@ -27,6 +27,9 @@ use monero_wallet::ringct::EncryptedAmount;
 use monero_wallet::transaction::Transaction;
 use rand_core::{OsRng, RngCore};
 
+use ducat_core::sig::SecretKey;
+use ducat_core::trust::{open_burn_proof, sign_burn_proof, BurnProof, BURN_PROOF_VERSION};
+
 pub use ducat_core::trust::{burn_message, BURN_DOMAIN, OUT_PROOF_HEADER};
 
 /// Monero's `config::HASH_KEY_TXPROOF_V2`.
@@ -461,6 +464,103 @@ pub fn monero_verify_out_proof(
     Ok(VerifiedProof { amount_pxmr, height: fetched.height })
 }
 
+// --- §9.5's envelope ---------------------------------------------------------
+//
+// The proof above is Monero's; the object it travels in is DUCAT's
+// (`core/src/trust.rs`). Signing and opening it live here rather than in
+// Kotlin so that both clients produce the same bytes under the same rules —
+// a `BURN_PROOF` is a wire object, and a second implementation of a wire
+// object written in a screen's language is how drafts drift.
+
+/// Everything signing a `BURN_PROOF` needs, in one record.
+///
+/// One argument, deliberately. A uniffi export whose by-value buffers spill
+/// past the registers segfaults on arm64 and on nothing we can test here
+/// (the `seal_message` tombstone); one record travels as one buffer.
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct BurnProofIn {
+    /// The persona's 32-byte secret. The envelope is signed under it, and
+    /// the persona it names is derived from it — the two cannot disagree.
+    pub persona_secret: Vec<u8>,
+    /// The transaction that paid the burn address.
+    pub txid_hex: String,
+    /// What the out-proof proves was paid, in pXMR.
+    pub amount_pxmr: u64,
+    /// The block it is in. Zero is refused here as it is on the wire: a
+    /// burn without a block is not a burn yet.
+    pub height: u64,
+    /// Monero's `OutProofV2`, made from the transaction key at send time.
+    pub proof: String,
+    /// The label in the proof's message: "identity", "listing", "arbiter".
+    pub purpose: String,
+}
+
+/// Sign a `BURN_PROOF` (§9.5) under the persona it names (§18.3).
+///
+/// The object is read back through `BurnProof::from_value` before it is
+/// sealed, so every refusal a reader would make — nothing burned, no block,
+/// a torn proof, a purpose too long — is made here instead of being
+/// discovered by the stranger the envelope was handed to.
+#[uniffi::export]
+pub fn burn_proof_sign(input: BurnProofIn) -> Result<Vec<u8>, ProofError> {
+    let secret: [u8; 32] = input
+        .persona_secret
+        .as_slice()
+        .try_into()
+        .map_err(|_| malformed("persona secret is not 32 bytes"))?;
+    let key = SecretKey::ed25519_from_bytes(&secret);
+    let object = BurnProof {
+        version: BURN_PROOF_VERSION,
+        suite: 1,
+        txid: hex32(&input.txid_hex, "txid")?,
+        amount_pxmr: input.amount_pxmr,
+        height: input.height,
+        proof: input.proof,
+        persona: key.public().to_bytes().to_vec(),
+        purpose: input.purpose,
+    };
+    BurnProof::from_value(object.to_value()).map_err(|e| malformed(format!("{e:?}")))?;
+    Ok(sign_burn_proof(&object, &key))
+}
+
+/// A `BURN_PROOF` opened: the envelope's signature checked under the persona
+/// named inside it, and nothing else. What the chain must still say — the
+/// out-proof against the burn address for that amount, the block on a second
+/// node — is the reader's work, above this (§9.5).
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct BurnProofView {
+    /// The persona the proof names, which the reader must compare with the
+    /// persona presenting it.
+    pub persona_hex: String,
+    pub txid_hex: String,
+    pub amount_pxmr: u64,
+    pub height: u64,
+    pub proof: String,
+    pub purpose: String,
+    /// The message the `OutProofV2` must have been made over — handed out
+    /// rather than rebuilt by the caller, so the two cannot differ by a
+    /// separator.
+    pub message: Vec<u8>,
+}
+
+#[uniffi::export]
+pub fn burn_proof_open(envelope: Vec<u8>) -> Result<BurnProofView, ProofError> {
+    let b = open_burn_proof(&envelope).map_err(|e| malformed(format!("{e:?}")))?;
+    Ok(BurnProofView {
+        persona_hex: hex_of(&b.persona),
+        txid_hex: hex_of(&b.txid),
+        amount_pxmr: b.amount_pxmr,
+        height: b.height,
+        message: b.message(),
+        proof: b.proof,
+        purpose: b.purpose,
+    })
+}
+
+fn hex_of(b: &[u8]) -> String {
+    b.iter().map(|x| format!("{x:02x}")).collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -565,6 +665,62 @@ mod tests {
         view.tx_key = point_bytes(&(b * r));
         let proof = make_out_proof_v2(&txid, b"m", &[r], &sub).unwrap();
         assert_eq!(check_out_proof_v2(&view, &txid, &sub, b"m", &proof).unwrap(), 777);
+    }
+
+
+    #[test]
+    fn a_signed_burn_proof_opens_to_what_was_signed_and_refuses_what_the_wire_refuses() {
+        // A real burn, end to end in miniature: send to the burn address,
+        // prove it, seal the proof under the persona, hand it over.
+        let r = random_scalar();
+        let burn = burn_address(Network::Stagenet);
+        let txid = [0x77u8; 32];
+        let secret = [0x21u8; 32];
+        let persona = SecretKey::ed25519_from_bytes(&secret).public().to_bytes().to_vec();
+        let message = burn_message(&persona, "identity");
+        let view = synthetic(&r, &burn, 10_000_000_000);
+        let proof = make_out_proof_v2(&txid, &message, &[r], &burn).unwrap();
+
+        let input = BurnProofIn {
+            persona_secret: secret.to_vec(),
+            txid_hex: hx(&txid),
+            amount_pxmr: 10_000_000_000,
+            height: 2_207_293,
+            proof: proof.clone(),
+            purpose: "identity".into(),
+        };
+        let envelope = burn_proof_sign(input.clone()).unwrap();
+        let opened = burn_proof_open(envelope.clone()).unwrap();
+        assert_eq!(opened.persona_hex, hex_of(&persona));
+        assert_eq!(opened.txid_hex, hx(&txid));
+        assert_eq!(opened.amount_pxmr, 10_000_000_000);
+        assert_eq!(opened.height, 2_207_293);
+        assert_eq!(opened.purpose, "identity");
+        // The message travels rather than being rebuilt by the reader, and
+        // it is the one the proof was actually made over.
+        assert_eq!(opened.message, message);
+        assert_eq!(
+            check_out_proof_v2(&view, &txid, &burn, &opened.message, &opened.proof).unwrap(),
+            10_000_000_000,
+        );
+
+        // What §9.5 refuses, refused before it can be handed to anyone.
+        for (why, bad) in [
+            ("no block yet", BurnProofIn { height: 0, ..input.clone() }),
+            ("nothing burned", BurnProofIn { amount_pxmr: 0, ..input.clone() }),
+            ("purpose too long", BurnProofIn { purpose: "p".repeat(33), ..input.clone() }),
+            ("not an out proof", BurnProofIn { proof: "InProofV2".to_string() + &proof[10..], ..input.clone() }),
+            ("txid is not hex", BurnProofIn { txid_hex: "zz".into(), ..input.clone() }),
+            ("half a secret", BurnProofIn { persona_secret: vec![0x21; 16], ..input.clone() }),
+        ] {
+            assert!(burn_proof_sign(bad).is_err(), "{why}");
+        }
+
+        // A tampered envelope is not opened: the signature covers the body.
+        let mut torn = envelope.clone();
+        *torn.last_mut().unwrap() ^= 1;
+        assert!(burn_proof_open(torn).is_err());
+        assert!(burn_proof_open(vec![]).is_err());
     }
 
     #[test]

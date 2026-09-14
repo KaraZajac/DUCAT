@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5's costly identity: burning XMR under a persona, the proof the
+     burn leaves, and what a reader's own node makes of somebody else's. -->
+<resources>
+    <string name="burn_title">Kostspielige Identität</string>
+    <string name="burn_back">Zurück</string>
+    <string name="burn_what_body">Beim Verbrennen gehen XMR an eine Adresse, zu der niemand die Schlüssel hat. Das Geld ist weg: Nichts kommt zurück, und niemand kann es rückgängig machen.</string>
+    <string name="burn_what_get">Sie erhalten einen Nachweis, dass genau dieser Name so viel aufgegeben hat. Sie zeigen ihn jemandem, der überlegt, mit Ihnen Geschäfte zu machen; dessen eigener Knoten prüft ihn. Veröffentlicht wird nichts.</string>
+    <string name="burn_persona">Verbrennen als %1$s</string>
+    <string name="burn_amount_label">Betrag in XMR</string>
+    <string name="burn_floor">Unter %1$s beweist eine Verbrennung nichts, und ein Leser lehnt sie ab.</string>
+    <string name="burn_purpose_label">Wofür es ist</string>
+    <string name="burn_purpose_support">Ein kurzes Stichwort: Identität, ein Angebot, ein Schiedsrichter.</string>
+    <string name="burn_irreversible">Das lässt sich nicht rückgängig machen.</string>
+    <string name="burn_action">%1$s verbrennen</string>
+    <string name="burn_pin_why">Sie sind dabei, Geld zu vernichten. Nichts holt es zurück.</string>
+    <string name="burn_address_title">Wohin es geht</string>
+    <string name="burn_address_note">Beide Schlüssel dieser Adresse sind Hashes einer veröffentlichten Zeichenfolge, also kann jeder sie selbst nachrechnen und sehen, dass niemand ein Geheimnis gewählt hat. Was hier ankommt, kann nie ausgegeben werden.</string>
+    <string name="burn_copy_address">Adresse kopieren</string>
+    <string name="burn_address_copied">Verbrennungsadresse kopiert</string>
+    <string name="burn_yours">Ihre Verbrennungen</string>
+    <string name="burn_none">Unter diesem Namen wurde noch nichts verbrannt.</string>
+    <string name="burn_waiting">Wartet auf seinen Block</string>
+    <string name="burn_in_block">In Block %1$s</string>
+    <string name="burn_no_proof">Dafür wurde kein Nachweis erstellt, er lässt sich nicht zeigen.</string>
+    <string name="burn_copy_proof">Nachweis kopieren</string>
+    <string name="burn_proof_copied">Nachweis kopiert</string>
+    <string name="burn_failed">Die Verbrennung kam nicht zustande.</string>
+    <string name="burn_entry_note">Verbrennen Sie XMR unter Ihrem Namen, damit Fremde sehen, dass er Sie etwas gekostet hat.</string>
+    <string name="burn_entry_action">XMR verbrennen</string>
+    <string name="burn_entry_burned">%1$s verbrannt</string>
+    <string name="burn_err_under_floor">Das liegt unter der Untergrenze — eine so kleine Verbrennung beweist niemandem etwas.</string>
+    <string name="burn_err_no_purpose">Sagen Sie, wofür die Verbrennung ist.</string>
+    <string name="burn_err_purpose_long">Dieses Stichwort ist zu lang.</string>
+    <string name="burn_err_no_persona">Dieses Telefon hat keinen Schlüssel für diesen Namen.</string>
+    <string name="burn_err_no_node">Kein Monero-Knoten hat geantwortet, es wurde nichts gesendet.</string>
+    <string name="burn_err_unreadable">Das ist kein Nachweis, den dieses Telefon lesen kann.</string>
+    <string name="burn_err_other_persona">Dieser Nachweis nennt jemand anderen.</string>
+    <string name="burn_err_under_floor_theirs">Die nachgewiesene Verbrennung liegt unter der Untergrenze.</string>
+    <string name="burn_err_node_refuses">Ihr eigener Knoten bestätigt diesen Nachweis nicht.</string>
+    <string name="burn_err_wrong_amount">Der Nachweis belegt einen anderen Betrag als den angegebenen.</string>
+    <string name="burn_err_no_block">Seine Transaktion ist noch in keinem Block.</string>
+    <string name="burn_err_no_second">Noch hat kein zweiter Knoten sie in einem Block. Versuchen Sie es in ein paar Minuten erneut.</string>
+</resources>

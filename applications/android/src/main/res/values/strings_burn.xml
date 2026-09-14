@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5's costly identity: burning XMR under a persona, the proof the
+     burn leaves, and what a reader's own node makes of somebody else's. -->
+<resources>
+    <string name="burn_title">Costly identity</string>
+    <string name="burn_back">Back</string>
+    <string name="burn_what_body">A burn sends XMR to an address whose keys nobody holds. The money is gone: nothing comes back, and nobody can undo it.</string>
+    <string name="burn_what_get">What you get is a proof that this name, and no other, gave up that much. You show it to someone deciding whether to deal with you, and their own node checks it. Nothing is published.</string>
+    <string name="burn_persona">Burning as %1$s</string>
+    <string name="burn_amount_label">Amount in XMR</string>
+    <string name="burn_floor">Under %1$s a burn proves nothing, and a reader will refuse it.</string>
+    <string name="burn_purpose_label">What it is for</string>
+    <string name="burn_purpose_support">A short label: identity, a listing, an arbiter.</string>
+    <string name="burn_irreversible">This cannot be undone.</string>
+    <string name="burn_action">Burn %1$s</string>
+    <string name="burn_pin_why">You are about to destroy money. Nothing brings it back.</string>
+    <string name="burn_address_title">Where it goes</string>
+    <string name="burn_address_note">Both keys of this address are hashes of a published string, so anyone can work it out for themselves and see that nobody chose a secret. What arrives here can never be spent.</string>
+    <string name="burn_copy_address">Copy the address</string>
+    <string name="burn_address_copied">Burn address copied</string>
+    <string name="burn_yours">Your burns</string>
+    <string name="burn_none">Nothing burned under this name yet.</string>
+    <string name="burn_waiting">Waiting for its block</string>
+    <string name="burn_in_block">In block %1$s</string>
+    <string name="burn_no_proof">No proof was made for this one, so it cannot be shown.</string>
+    <string name="burn_copy_proof">Copy the proof</string>
+    <string name="burn_proof_copied">Proof copied</string>
+    <string name="burn_failed">The burn did not go through.</string>
+    <string name="burn_entry_note">Burn XMR under your name, so a stranger can see that it cost you something.</string>
+    <string name="burn_entry_action">Burn XMR</string>
+    <string name="burn_entry_burned">Burned %1$s</string>
+    <string name="burn_err_under_floor">That is under the floor — a burn that small proves nothing to anybody.</string>
+    <string name="burn_err_no_purpose">Say what the burn is for.</string>
+    <string name="burn_err_purpose_long">That label is too long.</string>
+    <string name="burn_err_no_persona">This phone holds no key for that name.</string>
+    <string name="burn_err_no_node">No Monero node answered, so nothing was sent.</string>
+    <string name="burn_err_unreadable">This is not a proof this phone can read.</string>
+    <string name="burn_err_other_persona">This proof names somebody else.</string>
+    <string name="burn_err_under_floor_theirs">The burn it proves is under the floor.</string>
+    <string name="burn_err_node_refuses">Your own node does not bear this proof out.</string>
+    <string name="burn_err_wrong_amount">The proof proves a different amount from the one it claims.</string>
+    <string name="burn_err_no_block">Its transaction is not in a block yet.</string>
+    <string name="burn_err_no_second">No second node has it in a block yet. Try again in a few minutes.</string>
+</resources>

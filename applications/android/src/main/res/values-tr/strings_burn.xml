@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5's costly identity: burning XMR under a persona, the proof the
+     burn leaves, and what a reader's own node makes of somebody else's. -->
+<resources>
+    <string name="burn_title">Bedeli olan kimlik</string>
+    <string name="burn_back">Geri</string>
+    <string name="burn_what_body">Yakma, anahtarları kimsede olmayan bir adrese XMR gönderir. Para gider: hiçbir şey geri gelmez ve kimse bunu geri alamaz.</string>
+    <string name="burn_what_get">Elinize geçen şey, başka hiçbir adın değil, tam da bu adın o kadarından vazgeçtiğinin kanıtıdır. Sizinle iş yapmayı düşünen birine gösterirsiniz, onun kendi düğümü doğrular. Hiçbir şey yayımlanmaz.</string>
+    <string name="burn_persona">%1$s olarak yakılıyor</string>
+    <string name="burn_amount_label">XMR tutarı</string>
+    <string name="burn_floor">%1$s altında bir yakma hiçbir şey kanıtlamaz ve karşı taraf reddeder.</string>
+    <string name="burn_purpose_label">Ne için olduğu</string>
+    <string name="burn_purpose_support">Kısa bir etiket: kimlik, bir ilan, bir hakem.</string>
+    <string name="burn_irreversible">Bu geri alınamaz.</string>
+    <string name="burn_action">%1$s yak</string>
+    <string name="burn_pin_why">Parayı yok etmek üzeresiniz. Hiçbir şey onu geri getirmez.</string>
+    <string name="burn_address_title">Nereye gidiyor</string>
+    <string name="burn_address_note">Bu adresin iki anahtarı da yayımlanmış bir metnin özetidir; herkes kendisi hesaplayıp kimsenin bir sır seçmediğini görebilir. Buraya ulaşan hiçbir zaman harcanamaz.</string>
+    <string name="burn_copy_address">Adresi kopyala</string>
+    <string name="burn_address_copied">Yakma adresi kopyalandı</string>
+    <string name="burn_yours">Yakmalarınız</string>
+    <string name="burn_none">Bu adla henüz hiçbir şey yakılmadı.</string>
+    <string name="burn_waiting">Bloğunu bekliyor</string>
+    <string name="burn_in_block">%1$s numaralı blokta</string>
+    <string name="burn_no_proof">Bunun için kanıt üretilmedi, bu yüzden gösterilemez.</string>
+    <string name="burn_copy_proof">Kanıtı kopyala</string>
+    <string name="burn_proof_copied">Kanıt kopyalandı</string>
+    <string name="burn_failed">Yakma gerçekleşmedi.</string>
+    <string name="burn_entry_note">Kendi adınızla XMR yakın ki bir yabancı bu adın size bir bedele mal olduğunu görsün.</string>
+    <string name="burn_entry_action">XMR yak</string>
+    <string name="burn_entry_burned">%1$s yakıldı</string>
+    <string name="burn_err_under_floor">Bu alt sınırın altında — bu kadar küçük bir yakma kimseye bir şey kanıtlamaz.</string>
+    <string name="burn_err_no_purpose">Yakmanın ne için olduğunu yazın.</string>
+    <string name="burn_err_purpose_long">Bu etiket çok uzun.</string>
+    <string name="burn_err_no_persona">Bu telefonda o ada ait bir anahtar yok.</string>
+    <string name="burn_err_no_node">Hiçbir Monero düğümü yanıt vermedi, bu yüzden hiçbir şey gönderilmedi.</string>
+    <string name="burn_err_unreadable">Bu, bu telefonun okuyabileceği bir kanıt değil.</string>
+    <string name="burn_err_other_persona">Bu kanıt başka birini gösteriyor.</string>
+    <string name="burn_err_under_floor_theirs">Kanıtladığı yakma alt sınırın altında.</string>
+    <string name="burn_err_node_refuses">Kendi düğümünüz bu kanıtı doğrulamıyor.</string>
+    <string name="burn_err_wrong_amount">Kanıt, iddia ettiğinden başka bir tutarı kanıtlıyor.</string>
+    <string name="burn_err_no_block">İşlemi henüz bir blokta değil.</string>
+    <string name="burn_err_no_second">Henüz ikinci bir düğüm onu blokta görmüyor. Birkaç dakika sonra tekrar deneyin.</string>
+</resources>

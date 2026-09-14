@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5's costly identity: burning XMR under a persona, the proof the
+     burn leaves, and what a reader's own node makes of somebody else's. -->
+<resources>
+    <string name="burn_title">ऐसी पहचान जिसकी कीमत चुकी हो</string>
+    <string name="burn_back">वापस</string>
+    <string name="burn_what_body">जलाने का मतलब है XMR को उस पते पर भेजना जिसकी चाबियाँ किसी के पास नहीं हैं। वह पैसा चला जाता है: कुछ वापस नहीं आता और कोई इसे पलट नहीं सकता।</string>
+    <string name="burn_what_get">बदले में आपको यह प्रमाण मिलता है कि यही नाम, कोई और नहीं, इतनी रकम छोड़ चुका है। आप इसे उस व्यक्ति को दिखाते हैं जो आपसे सौदा करने पर विचार कर रहा है, और उसका अपना नोड इसे जाँचता है। कुछ भी प्रकाशित नहीं होता।</string>
+    <string name="burn_persona">%1$s के नाम से जलाना</string>
+    <string name="burn_amount_label">XMR में रकम</string>
+    <string name="burn_floor">%1$s से कम जलाना कुछ भी साबित नहीं करता, और पढ़ने वाला उसे ठुकरा देगा।</string>
+    <string name="burn_purpose_label">यह किसलिए है</string>
+    <string name="burn_purpose_support">एक छोटा लेबल: पहचान, कोई विज्ञापन, कोई मध्यस्थ।</string>
+    <string name="burn_irreversible">इसे पलटा नहीं जा सकता।</string>
+    <string name="burn_action">%1$s जलाएँ</string>
+    <string name="burn_pin_why">आप पैसा नष्ट करने जा रहे हैं। उसे कोई वापस नहीं ला सकता।</string>
+    <string name="burn_address_title">यह कहाँ जाता है</string>
+    <string name="burn_address_note">इस पते की दोनों चाबियाँ एक प्रकाशित पाठ के हैश हैं, इसलिए कोई भी इसे खुद गिनकर देख सकता है कि किसी ने कोई रहस्य नहीं चुना। यहाँ पहुँचा हुआ धन कभी खर्च नहीं हो सकता।</string>
+    <string name="burn_copy_address">पता कॉपी करें</string>
+    <string name="burn_address_copied">जलाने का पता कॉपी हो गया</string>
+    <string name="burn_yours">आपके जलाए हुए</string>
+    <string name="burn_none">इस नाम से अभी तक कुछ नहीं जलाया गया।</string>
+    <string name="burn_waiting">अपने ब्लॉक की प्रतीक्षा में</string>
+    <string name="burn_in_block">ब्लॉक %1$s में</string>
+    <string name="burn_no_proof">इसके लिए कोई प्रमाण नहीं बना, इसलिए इसे दिखाया नहीं जा सकता।</string>
+    <string name="burn_copy_proof">प्रमाण कॉपी करें</string>
+    <string name="burn_proof_copied">प्रमाण कॉपी हो गया</string>
+    <string name="burn_failed">जलाना पूरा नहीं हुआ।</string>
+    <string name="burn_entry_note">अपने नाम से XMR जलाएँ, ताकि कोई अजनबी देख सके कि इस नाम की कीमत चुकाई गई है।</string>
+    <string name="burn_entry_action">XMR जलाएँ</string>
+    <string name="burn_entry_burned">%1$s जलाया गया</string>
+    <string name="burn_err_under_floor">यह न्यूनतम से कम है — इतना छोटा जलाना किसी को कुछ साबित नहीं करता।</string>
+    <string name="burn_err_no_purpose">बताइए कि यह जलाना किसलिए है।</string>
+    <string name="burn_err_purpose_long">यह लेबल बहुत लंबा है।</string>
+    <string name="burn_err_no_persona">इस फ़ोन के पास उस नाम की कोई चाबी नहीं है।</string>
+    <string name="burn_err_no_node">किसी Monero नोड ने जवाब नहीं दिया, इसलिए कुछ भी नहीं भेजा गया।</string>
+    <string name="burn_err_unreadable">यह ऐसा प्रमाण नहीं है जिसे यह फ़ोन पढ़ सके।</string>
+    <string name="burn_err_other_persona">यह प्रमाण किसी और का नाम लेता है।</string>
+    <string name="burn_err_under_floor_theirs">यह जिस जलाने को साबित करता है वह न्यूनतम से कम है।</string>
+    <string name="burn_err_node_refuses">आपका अपना नोड इस प्रमाण की पुष्टि नहीं करता।</string>
+    <string name="burn_err_wrong_amount">प्रमाण जिस रकम को साबित करता है वह बताई गई रकम से अलग है।</string>
+    <string name="burn_err_no_block">इसका लेनदेन अभी किसी ब्लॉक में नहीं है।</string>
+    <string name="burn_err_no_second">अभी किसी दूसरे नोड ने इसे ब्लॉक में नहीं देखा। कुछ मिनट बाद फिर कोशिश करें।</string>
+</resources>

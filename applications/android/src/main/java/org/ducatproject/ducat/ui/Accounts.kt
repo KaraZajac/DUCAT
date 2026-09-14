@@ -19,7 +19,9 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import org.ducatproject.ducat.Amounts
+import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.R
+import org.ducatproject.ducat.Trust
 import org.ducatproject.ducat.Wallet
 import org.ducatproject.ducat.WalletStore
 import org.ducatproject.ducat.formatXmr
@@ -49,6 +51,14 @@ fun AccountsScreen() {
     val address = wallet.address()
     var showQr by remember { mutableStateOf(false) }
     var rescanOpen by rememberSaveable { mutableStateOf(false) }
+    // §9.5's screen, opened from here because a burn is a send: the money
+    // leaves from this wallet, and this is where somebody looks for it.
+    var burnOpen by rememberSaveable { mutableStateOf(false) }
+    val burned = remember(version) {
+        Trust.myBurn(context, PersonaStore(context).worn())
+    }
+
+    if (burnOpen) BurnScreen(onClose = { burnOpen = false })
 
     if (rescanOpen) {
         SkipAheadDialog(
@@ -232,6 +242,37 @@ fun AccountsScreen() {
                         SyncStatus(b)
                     }
                 }
+            }
+        }
+
+        // §9.5. Under the balances rather than beside the top-up address:
+        // this is the one thing on the money screen that takes money away
+        // for good, and it should be read after what there is, not before.
+        Spacer(Modifier.height(16.dp))
+        Card(Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(16.dp)) {
+                Text(stringResource(R.string.burn_title), style = MaterialTheme.typography.titleMedium)
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    stringResource(R.string.burn_entry_note),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                burned?.let {
+                    Spacer(Modifier.height(10.dp))
+                    Text(
+                        stringResource(
+                            R.string.burn_entry_burned,
+                            Amounts.show(context, it.amountPxmr, wallet.stagenet()).primary,
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+                Spacer(Modifier.height(14.dp))
+                OutlinedButton(
+                    onClick = { burnOpen = true },
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text(stringResource(R.string.burn_entry_action)) }
             }
         }
     }

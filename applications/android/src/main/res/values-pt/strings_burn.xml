@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5's costly identity: burning XMR under a persona, the proof the
+     burn leaves, and what a reader's own node makes of somebody else's. -->
+<resources>
+    <string name="burn_title">Identidade que custa</string>
+    <string name="burn_back">Voltar</string>
+    <string name="burn_what_body">Queimar envia XMR para um endereço cujas chaves ninguém tem. O dinheiro desaparece: nada volta e ninguém pode desfazer.</string>
+    <string name="burn_what_get">O que recebe é a prova de que este nome, e nenhum outro, abriu mão daquele valor. Mostra-a a quem está a decidir se negoceia consigo, e o nó da outra pessoa verifica-a. Nada é publicado.</string>
+    <string name="burn_persona">A queimar como %1$s</string>
+    <string name="burn_amount_label">Valor em XMR</string>
+    <string name="burn_floor">Abaixo de %1$s uma queima não prova nada e quem a ler vai recusá-la.</string>
+    <string name="burn_purpose_label">Para que serve</string>
+    <string name="burn_purpose_support">Uma etiqueta curta: identidade, um anúncio, um árbitro.</string>
+    <string name="burn_irreversible">Isto não pode ser desfeito.</string>
+    <string name="burn_action">Queimar %1$s</string>
+    <string name="burn_pin_why">Está prestes a destruir dinheiro. Nada o traz de volta.</string>
+    <string name="burn_address_title">Para onde vai</string>
+    <string name="burn_address_note">As duas chaves deste endereço são resumos de um texto publicado, por isso qualquer pessoa o pode recalcular e ver que ninguém escolheu um segredo. O que chega aqui nunca poderá ser gasto.</string>
+    <string name="burn_copy_address">Copiar o endereço</string>
+    <string name="burn_address_copied">Endereço de queima copiado</string>
+    <string name="burn_yours">As suas queimas</string>
+    <string name="burn_none">Ainda não foi queimado nada com este nome.</string>
+    <string name="burn_waiting">À espera do seu bloco</string>
+    <string name="burn_in_block">No bloco %1$s</string>
+    <string name="burn_no_proof">Não foi feita prova desta, por isso não pode ser mostrada.</string>
+    <string name="burn_copy_proof">Copiar a prova</string>
+    <string name="burn_proof_copied">Prova copiada</string>
+    <string name="burn_failed">A queima não se concretizou.</string>
+    <string name="burn_entry_note">Queime XMR com o seu nome, para que um desconhecido veja que lhe custou alguma coisa.</string>
+    <string name="burn_entry_action">Queimar XMR</string>
+    <string name="burn_entry_burned">%1$s queimados</string>
+    <string name="burn_err_under_floor">Está abaixo do mínimo — uma queima tão pequena não prova nada a ninguém.</string>
+    <string name="burn_err_no_purpose">Diga para que serve a queima.</string>
+    <string name="burn_err_purpose_long">Essa etiqueta é demasiado longa.</string>
+    <string name="burn_err_no_persona">Este telemóvel não tem nenhuma chave para esse nome.</string>
+    <string name="burn_err_no_node">Nenhum nó Monero respondeu, por isso nada foi enviado.</string>
+    <string name="burn_err_unreadable">Isto não é uma prova que este telemóvel consiga ler.</string>
+    <string name="burn_err_other_persona">Esta prova nomeia outra pessoa.</string>
+    <string name="burn_err_under_floor_theirs">A queima que prova está abaixo do mínimo.</string>
+    <string name="burn_err_node_refuses">O seu próprio nó não confirma esta prova.</string>
+    <string name="burn_err_wrong_amount">A prova demonstra um valor diferente do que declara.</string>
+    <string name="burn_err_no_block">A transação ainda não está num bloco.</string>
+    <string name="burn_err_no_second">Nenhum segundo nó a tem ainda num bloco. Tente de novo daqui a alguns minutos.</string>
+</resources>

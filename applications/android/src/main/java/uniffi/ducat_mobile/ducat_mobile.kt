@@ -1045,6 +1045,14 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1070,6 +1078,10 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_attachment_seal(`key`: RustBuffer.ByValue,`nonce`: RustBuffer.ByValue,`plaintext`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_attestation_open(`envelope`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_attestation_sign(`input`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_build_contact_details(`personaSecret`: RustBuffer.ByValue,`outboxKey`: RustBuffer.ByValue,`prekeyBundle`: RustBuffer.ByValue,`displayName`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,`profile`: RustBuffer.ByValue,`purpose`: RustBuffer.ByValue,`inboxKey`: RustBuffer.ByValue,`claimant`: Byte,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_build_log_head(`nextSeq`: Long,`prekeyBundle`: RustBuffer.ByValue,`readUpTo`: RustBuffer.ByValue,`ring`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -1077,6 +1089,10 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_bundle_one_time_count(`bundleBytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Int
     fun uniffi_ducat_mobile_fn_func_bundle_one_time_ids(`bundleBytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_burn_proof_open(`envelope`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_burn_proof_sign(`input`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_call_conceal(uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1516,6 +1532,10 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_attachment_seal(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_attestation_open(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_attestation_sign(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_build_contact_details(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_build_log_head(
@@ -1523,6 +1543,10 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_checksum_func_bundle_one_time_count(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_bundle_one_time_ids(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_burn_proof_open(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_burn_proof_sign(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_call_conceal(
     ): Short
@@ -1872,6 +1896,12 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_attachment_seal() != 27745.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_ducat_mobile_checksum_func_attestation_open() != 57486.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_attestation_sign() != 6712.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ducat_mobile_checksum_func_build_contact_details() != 48125.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -1882,6 +1912,12 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_bundle_one_time_ids() != 16903.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_burn_proof_open() != 46894.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_burn_proof_sign() != 50079.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_call_conceal() != 6119.toShort()) {
@@ -2713,6 +2749,140 @@ public object FfiConverterTypeAttachmentRef: FfiConverterRustBuffer<AttachmentRe
 
 
 /**
+ * Everything signing an `ATTESTATION` needs, in one record (one by-value
+ * buffer: several segfault on arm64).
+ */
+data class AttestationIn (
+    /**
+     * The signer's 32-byte persona secret; the signer named inside is
+     * derived from it, so the two cannot disagree.
+     */
+    var `personaSecret`: kotlin.ByteArray, 
+    /**
+     * Who is spoken about — a persona's public key, hex.
+     */
+    var `subjectHex`: kotlin.String, 
+    /**
+     * What settled between them, in pXMR.
+     */
+    var `amountPxmr`: kotlin.ULong, 
+    /**
+     * 1..=5.
+     */
+    var `rating`: kotlin.UByte, 
+    /**
+     * Seconds since the epoch.
+     */
+    var `ts`: kotlin.ULong, 
+    /**
+     * The transaction the deal settled on, hex, when there was one.
+     */
+    var `txidHex`: kotlin.String?, 
+    /**
+     * One sentence, at most 140 characters, or nothing.
+     */
+    var `note`: kotlin.String?
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAttestationIn: FfiConverterRustBuffer<AttestationIn> {
+    override fun read(buf: ByteBuffer): AttestationIn {
+        return AttestationIn(
+            FfiConverterByteArray.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterUByte.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: AttestationIn) = (
+            FfiConverterByteArray.allocationSize(value.`personaSecret`) +
+            FfiConverterString.allocationSize(value.`subjectHex`) +
+            FfiConverterULong.allocationSize(value.`amountPxmr`) +
+            FfiConverterUByte.allocationSize(value.`rating`) +
+            FfiConverterULong.allocationSize(value.`ts`) +
+            FfiConverterOptionalString.allocationSize(value.`txidHex`) +
+            FfiConverterOptionalString.allocationSize(value.`note`)
+    )
+
+    override fun write(value: AttestationIn, buf: ByteBuffer) {
+            FfiConverterByteArray.write(value.`personaSecret`, buf)
+            FfiConverterString.write(value.`subjectHex`, buf)
+            FfiConverterULong.write(value.`amountPxmr`, buf)
+            FfiConverterUByte.write(value.`rating`, buf)
+            FfiConverterULong.write(value.`ts`, buf)
+            FfiConverterOptionalString.write(value.`txidHex`, buf)
+            FfiConverterOptionalString.write(value.`note`, buf)
+    }
+}
+
+
+
+/**
+ * An `ATTESTATION` opened: the signature checked under the signer named
+ * inside, the shape checked the way the wire checks it, and nothing more.
+ */
+data class AttestationView (
+    var `signerHex`: kotlin.String, 
+    var `subjectHex`: kotlin.String, 
+    var `amountPxmr`: kotlin.ULong, 
+    var `rating`: kotlin.UByte, 
+    var `ts`: kotlin.ULong, 
+    var `txidHex`: kotlin.String?, 
+    var `note`: kotlin.String?
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAttestationView: FfiConverterRustBuffer<AttestationView> {
+    override fun read(buf: ByteBuffer): AttestationView {
+        return AttestationView(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterUByte.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterOptionalString.read(buf),
+            FfiConverterOptionalString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: AttestationView) = (
+            FfiConverterString.allocationSize(value.`signerHex`) +
+            FfiConverterString.allocationSize(value.`subjectHex`) +
+            FfiConverterULong.allocationSize(value.`amountPxmr`) +
+            FfiConverterUByte.allocationSize(value.`rating`) +
+            FfiConverterULong.allocationSize(value.`ts`) +
+            FfiConverterOptionalString.allocationSize(value.`txidHex`) +
+            FfiConverterOptionalString.allocationSize(value.`note`)
+    )
+
+    override fun write(value: AttestationView, buf: ByteBuffer) {
+            FfiConverterString.write(value.`signerHex`, buf)
+            FfiConverterString.write(value.`subjectHex`, buf)
+            FfiConverterULong.write(value.`amountPxmr`, buf)
+            FfiConverterUByte.write(value.`rating`, buf)
+            FfiConverterULong.write(value.`ts`, buf)
+            FfiConverterOptionalString.write(value.`txidHex`, buf)
+            FfiConverterOptionalString.write(value.`note`, buf)
+    }
+}
+
+
+
+/**
  * What onboarding has to protect.
  */
 data class BackupInput (
@@ -2912,6 +3082,148 @@ public object FfiConverterTypeBlockRef: FfiConverterRustBuffer<BlockRef> {
     override fun write(value: BlockRef, buf: ByteBuffer) {
             FfiConverterULong.write(value.`tipHeight`, buf)
             FfiConverterString.write(value.`hashHex`, buf)
+    }
+}
+
+
+
+/**
+ * Everything signing a `BURN_PROOF` needs, in one record.
+ *
+ * One argument, deliberately. A uniffi export whose by-value buffers spill
+ * past the registers segfaults on arm64 and on nothing we can test here
+ * (the `seal_message` tombstone); one record travels as one buffer.
+ */
+data class BurnProofIn (
+    /**
+     * The persona's 32-byte secret. The envelope is signed under it, and
+     * the persona it names is derived from it — the two cannot disagree.
+     */
+    var `personaSecret`: kotlin.ByteArray, 
+    /**
+     * The transaction that paid the burn address.
+     */
+    var `txidHex`: kotlin.String, 
+    /**
+     * What the out-proof proves was paid, in pXMR.
+     */
+    var `amountPxmr`: kotlin.ULong, 
+    /**
+     * The block it is in. Zero is refused here as it is on the wire: a
+     * burn without a block is not a burn yet.
+     */
+    var `height`: kotlin.ULong, 
+    /**
+     * Monero's `OutProofV2`, made from the transaction key at send time.
+     */
+    var `proof`: kotlin.String, 
+    /**
+     * The label in the proof's message: "identity", "listing", "arbiter".
+     */
+    var `purpose`: kotlin.String
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeBurnProofIn: FfiConverterRustBuffer<BurnProofIn> {
+    override fun read(buf: ByteBuffer): BurnProofIn {
+        return BurnProofIn(
+            FfiConverterByteArray.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: BurnProofIn) = (
+            FfiConverterByteArray.allocationSize(value.`personaSecret`) +
+            FfiConverterString.allocationSize(value.`txidHex`) +
+            FfiConverterULong.allocationSize(value.`amountPxmr`) +
+            FfiConverterULong.allocationSize(value.`height`) +
+            FfiConverterString.allocationSize(value.`proof`) +
+            FfiConverterString.allocationSize(value.`purpose`)
+    )
+
+    override fun write(value: BurnProofIn, buf: ByteBuffer) {
+            FfiConverterByteArray.write(value.`personaSecret`, buf)
+            FfiConverterString.write(value.`txidHex`, buf)
+            FfiConverterULong.write(value.`amountPxmr`, buf)
+            FfiConverterULong.write(value.`height`, buf)
+            FfiConverterString.write(value.`proof`, buf)
+            FfiConverterString.write(value.`purpose`, buf)
+    }
+}
+
+
+
+/**
+ * A `BURN_PROOF` opened: the envelope's signature checked under the persona
+ * named inside it, and nothing else. What the chain must still say — the
+ * out-proof against the burn address for that amount, the block on a second
+ * node — is the reader's work, above this (§9.5).
+ */
+data class BurnProofView (
+    /**
+     * The persona the proof names, which the reader must compare with the
+     * persona presenting it.
+     */
+    var `personaHex`: kotlin.String, 
+    var `txidHex`: kotlin.String, 
+    var `amountPxmr`: kotlin.ULong, 
+    var `height`: kotlin.ULong, 
+    var `proof`: kotlin.String, 
+    var `purpose`: kotlin.String, 
+    /**
+     * The message the `OutProofV2` must have been made over — handed out
+     * rather than rebuilt by the caller, so the two cannot differ by a
+     * separator.
+     */
+    var `message`: kotlin.ByteArray
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeBurnProofView: FfiConverterRustBuffer<BurnProofView> {
+    override fun read(buf: ByteBuffer): BurnProofView {
+        return BurnProofView(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterByteArray.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: BurnProofView) = (
+            FfiConverterString.allocationSize(value.`personaHex`) +
+            FfiConverterString.allocationSize(value.`txidHex`) +
+            FfiConverterULong.allocationSize(value.`amountPxmr`) +
+            FfiConverterULong.allocationSize(value.`height`) +
+            FfiConverterString.allocationSize(value.`proof`) +
+            FfiConverterString.allocationSize(value.`purpose`) +
+            FfiConverterByteArray.allocationSize(value.`message`)
+    )
+
+    override fun write(value: BurnProofView, buf: ByteBuffer) {
+            FfiConverterString.write(value.`personaHex`, buf)
+            FfiConverterString.write(value.`txidHex`, buf)
+            FfiConverterULong.write(value.`amountPxmr`, buf)
+            FfiConverterULong.write(value.`height`, buf)
+            FfiConverterString.write(value.`proof`, buf)
+            FfiConverterString.write(value.`purpose`, buf)
+            FfiConverterByteArray.write(value.`message`, buf)
     }
 }
 
@@ -7230,6 +7542,65 @@ public object FfiConverterTypeWriterKeys: FfiConverterRustBuffer<WriterKeys> {
 
 
 
+sealed class AttestException: kotlin.Exception() {
+    
+    class Malformed(
+        
+        val v1: kotlin.String
+        ) : AttestException() {
+        override val message
+            get() = "v1=${ v1 }"
+    }
+    
+
+    companion object ErrorHandler : UniffiRustCallStatusErrorHandler<AttestException> {
+        override fun lift(error_buf: RustBuffer.ByValue): AttestException = FfiConverterTypeAttestError.lift(error_buf)
+    }
+
+    
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeAttestError : FfiConverterRustBuffer<AttestException> {
+    override fun read(buf: ByteBuffer): AttestException {
+        
+
+        return when(buf.getInt()) {
+            1 -> AttestException.Malformed(
+                FfiConverterString.read(buf),
+                )
+            else -> throw RuntimeException("invalid error enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: AttestException): ULong {
+        return when(value) {
+            is AttestException.Malformed -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+                + FfiConverterString.allocationSize(value.v1)
+            )
+        }
+    }
+
+    override fun write(value: AttestException, buf: ByteBuffer) {
+        when(value) {
+            is AttestException.Malformed -> {
+                buf.putInt(1)
+                FfiConverterString.write(value.v1, buf)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+
+}
+
+
+
+
+
 sealed class BackupException: kotlin.Exception() {
     
     class ImplausibleRestoreHeight(
@@ -9720,6 +10091,37 @@ public object FfiConverterMapStringString: FfiConverterRustBuffer<Map<kotlin.Str
     
 
         /**
+         * Open a rated receipt. Whose word it is, is the caller's to weigh: a
+         * receipt about you must have come from its signer; a record somebody
+         * shows must be about them.
+         */
+    @Throws(AttestException::class) fun `attestationOpen`(`envelope`: kotlin.ByteArray): AttestationView {
+            return FfiConverterTypeAttestationView.lift(
+    uniffiRustCallWithError(AttestException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_attestation_open(
+        FfiConverterByteArray.lower(`envelope`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Sign a rated receipt under the persona whose secret is given. The object
+         * is read back through the wire's own reader before it is sealed, so every
+         * refusal a stranger would make — a rating outside 1..=5, a note longer
+         * than a sentence, a persona attesting to itself — is made here.
+         */
+    @Throws(AttestException::class) fun `attestationSign`(`input`: AttestationIn): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(AttestException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_attestation_sign(
+        FfiConverterTypeAttestationIn.lower(`input`),_status)
+}
+    )
+    }
+    
+
+        /**
          * the keys to seal with.
          */
     @Throws(ContactException::class) fun `buildContactDetails`(`personaSecret`: kotlin.ByteArray, `outboxKey`: kotlin.String, `prekeyBundle`: kotlin.ByteArray, `displayName`: kotlin.String?, `payto`: kotlin.String?, `profile`: Profile, `purpose`: kotlin.String?, `inboxKey`: kotlin.String, `claimant`: kotlin.Boolean): kotlin.ByteArray {
@@ -9775,6 +10177,34 @@ public object FfiConverterMapStringString: FfiConverterRustBuffer<Map<kotlin.Str
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_bundle_one_time_ids(
         FfiConverterByteArray.lower(`bundleBytes`),_status)
+}
+    )
+    }
+    
+
+    @Throws(ProofException::class) fun `burnProofOpen`(`envelope`: kotlin.ByteArray): BurnProofView {
+            return FfiConverterTypeBurnProofView.lift(
+    uniffiRustCallWithError(ProofException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_burn_proof_open(
+        FfiConverterByteArray.lower(`envelope`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Sign a `BURN_PROOF` (§9.5) under the persona it names (§18.3).
+         *
+         * The object is read back through `BurnProof::from_value` before it is
+         * sealed, so every refusal a reader would make — nothing burned, no block,
+         * a torn proof, a purpose too long — is made here instead of being
+         * discovered by the stranger the envelope was handed to.
+         */
+    @Throws(ProofException::class) fun `burnProofSign`(`input`: BurnProofIn): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(ProofException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_burn_proof_sign(
+        FfiConverterTypeBurnProofIn.lower(`input`),_status)
 }
     )
     }

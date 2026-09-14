@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5's costly identity: burning XMR under a persona, the proof the
+     burn leaves, and what a reader's own node makes of somebody else's. -->
+<resources>
+    <string name="burn_title">Identiteit die iets kost</string>
+    <string name="burn_back">Terug</string>
+    <string name="burn_what_body">Verbranden stuurt XMR naar een adres waarvan niemand de sleutels heeft. Het geld is weg: er komt niets terug en niemand kan het ongedaan maken.</string>
+    <string name="burn_what_get">Wat u krijgt is een bewijs dat juist deze naam, en geen andere, dat bedrag heeft opgegeven. U laat het zien aan iemand die overweegt zaken met u te doen, en diens eigen node controleert het. Er wordt niets gepubliceerd.</string>
+    <string name="burn_persona">Verbranden als %1$s</string>
+    <string name="burn_amount_label">Bedrag in XMR</string>
+    <string name="burn_floor">Onder %1$s bewijst een verbranding niets en zal de lezer haar weigeren.</string>
+    <string name="burn_purpose_label">Waarvoor het is</string>
+    <string name="burn_purpose_support">Een kort label: identiteit, een advertentie, een scheidsrechter.</string>
+    <string name="burn_irreversible">Dit kan niet ongedaan worden gemaakt.</string>
+    <string name="burn_action">%1$s verbranden</string>
+    <string name="burn_pin_why">U staat op het punt geld te vernietigen. Niets haalt het terug.</string>
+    <string name="burn_address_title">Waar het heen gaat</string>
+    <string name="burn_address_note">Beide sleutels van dit adres zijn hashes van een gepubliceerde tekst, dus iedereen kan het zelf narekenen en zien dat niemand een geheim heeft gekozen. Wat hier aankomt, kan nooit worden uitgegeven.</string>
+    <string name="burn_copy_address">Adres kopiëren</string>
+    <string name="burn_address_copied">Verbrandingsadres gekopieerd</string>
+    <string name="burn_yours">Uw verbrandingen</string>
+    <string name="burn_none">Onder deze naam is nog niets verbrand.</string>
+    <string name="burn_waiting">Wacht op zijn blok</string>
+    <string name="burn_in_block">In blok %1$s</string>
+    <string name="burn_no_proof">Hiervoor is geen bewijs gemaakt, dus het kan niet worden getoond.</string>
+    <string name="burn_copy_proof">Bewijs kopiëren</string>
+    <string name="burn_proof_copied">Bewijs gekopieerd</string>
+    <string name="burn_failed">De verbranding is niet doorgegaan.</string>
+    <string name="burn_entry_note">Verbrand XMR onder uw naam, zodat een vreemde ziet dat die u iets heeft gekost.</string>
+    <string name="burn_entry_action">XMR verbranden</string>
+    <string name="burn_entry_burned">%1$s verbrand</string>
+    <string name="burn_err_under_floor">Dat ligt onder de ondergrens — zo\'n kleine verbranding bewijst niemand iets.</string>
+    <string name="burn_err_no_purpose">Zeg waarvoor de verbranding is.</string>
+    <string name="burn_err_purpose_long">Dat label is te lang.</string>
+    <string name="burn_err_no_persona">Deze telefoon heeft geen sleutel voor die naam.</string>
+    <string name="burn_err_no_node">Geen enkele Monero-node antwoordde, dus er is niets verzonden.</string>
+    <string name="burn_err_unreadable">Dit is geen bewijs dat deze telefoon kan lezen.</string>
+    <string name="burn_err_other_persona">Dit bewijs noemt iemand anders.</string>
+    <string name="burn_err_under_floor_theirs">De verbranding die het bewijst ligt onder de ondergrens.</string>
+    <string name="burn_err_node_refuses">Uw eigen node bevestigt dit bewijs niet.</string>
+    <string name="burn_err_wrong_amount">Het bewijs toont een ander bedrag dan het beweert.</string>
+    <string name="burn_err_no_block">De transactie staat nog niet in een blok.</string>
+    <string name="burn_err_no_second">Nog geen tweede node heeft haar in een blok. Probeer het over een paar minuten opnieuw.</string>
+</resources>

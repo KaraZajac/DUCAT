@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5's costly identity: burning XMR under a persona, the proof the
+     burn leaves, and what a reader's own node makes of somebody else's. -->
+<resources>
+    <string name="burn_title">Identitas yang berbiaya</string>
+    <string name="burn_back">Kembali</string>
+    <string name="burn_what_body">Membakar mengirim XMR ke alamat yang kuncinya tidak dipegang siapa pun. Uangnya hilang: tidak ada yang kembali, dan tidak ada yang bisa membatalkannya.</string>
+    <string name="burn_what_get">Yang Anda peroleh adalah bukti bahwa nama inilah, dan bukan nama lain, yang merelakan sebanyak itu. Anda tunjukkan kepada orang yang sedang menimbang untuk berurusan dengan Anda, dan node miliknya sendiri memeriksanya. Tidak ada yang dipublikasikan.</string>
+    <string name="burn_persona">Membakar sebagai %1$s</string>
+    <string name="burn_amount_label">Jumlah dalam XMR</string>
+    <string name="burn_floor">Di bawah %1$s sebuah pembakaran tidak membuktikan apa pun, dan pembacanya akan menolaknya.</string>
+    <string name="burn_purpose_label">Untuk apa ini</string>
+    <string name="burn_purpose_support">Label singkat: identitas, sebuah iklan, seorang arbiter.</string>
+    <string name="burn_irreversible">Ini tidak bisa dibatalkan.</string>
+    <string name="burn_action">Bakar %1$s</string>
+    <string name="burn_pin_why">Anda akan memusnahkan uang. Tidak ada yang bisa mengembalikannya.</string>
+    <string name="burn_address_title">Ke mana perginya</string>
+    <string name="burn_address_note">Kedua kunci alamat ini adalah hash dari teks yang diterbitkan, jadi siapa pun bisa menghitungnya sendiri dan melihat bahwa tidak ada yang memilih rahasia. Apa yang tiba di sini tidak akan pernah bisa dibelanjakan.</string>
+    <string name="burn_copy_address">Salin alamatnya</string>
+    <string name="burn_address_copied">Alamat pembakaran disalin</string>
+    <string name="burn_yours">Pembakaran Anda</string>
+    <string name="burn_none">Belum ada yang dibakar dengan nama ini.</string>
+    <string name="burn_waiting">Menunggu bloknya</string>
+    <string name="burn_in_block">Di blok %1$s</string>
+    <string name="burn_no_proof">Tidak ada bukti yang dibuat untuk yang satu ini, jadi tidak bisa ditunjukkan.</string>
+    <string name="burn_copy_proof">Salin buktinya</string>
+    <string name="burn_proof_copied">Bukti disalin</string>
+    <string name="burn_failed">Pembakaran tidak jadi dilakukan.</string>
+    <string name="burn_entry_note">Bakar XMR dengan nama Anda, agar orang asing melihat bahwa nama itu ada harganya.</string>
+    <string name="burn_entry_action">Bakar XMR</string>
+    <string name="burn_entry_burned">%1$s dibakar</string>
+    <string name="burn_err_under_floor">Itu di bawah batas bawah — pembakaran sekecil itu tidak membuktikan apa pun kepada siapa pun.</string>
+    <string name="burn_err_no_purpose">Sebutkan untuk apa pembakaran ini.</string>
+    <string name="burn_err_purpose_long">Label itu terlalu panjang.</string>
+    <string name="burn_err_no_persona">Ponsel ini tidak memegang kunci untuk nama itu.</string>
+    <string name="burn_err_no_node">Tidak ada node Monero yang menjawab, jadi tidak ada yang dikirim.</string>
+    <string name="burn_err_unreadable">Ini bukan bukti yang bisa dibaca ponsel ini.</string>
+    <string name="burn_err_other_persona">Bukti ini menyebut orang lain.</string>
+    <string name="burn_err_under_floor_theirs">Pembakaran yang dibuktikannya ada di bawah batas bawah.</string>
+    <string name="burn_err_node_refuses">Node Anda sendiri tidak membenarkan bukti ini.</string>
+    <string name="burn_err_wrong_amount">Bukti ini membuktikan jumlah yang berbeda dari yang diakuinya.</string>
+    <string name="burn_err_no_block">Transaksinya belum masuk blok.</string>
+    <string name="burn_err_no_second">Belum ada node kedua yang melihatnya di dalam blok. Coba lagi beberapa menit.</string>
+</resources>

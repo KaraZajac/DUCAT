@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5's costly identity: burning XMR under a persona, the proof the
+     burn leaves, and what a reader's own node makes of somebody else's. -->
+<resources>
+    <string name="burn_title">Danh tính có giá</string>
+    <string name="burn_back">Quay lại</string>
+    <string name="burn_what_body">Đốt là gửi XMR tới một địa chỉ mà không ai giữ khóa. Tiền mất hẳn: không có gì trở lại và không ai hoàn tác được.</string>
+    <string name="burn_what_get">Thứ bạn nhận được là bằng chứng rằng chính cái tên này, chứ không phải tên nào khác, đã bỏ ra chừng ấy. Bạn đưa nó cho người đang cân nhắc giao dịch với bạn, và nút của họ tự kiểm tra. Không có gì được công bố.</string>
+    <string name="burn_persona">Đốt với tên %1$s</string>
+    <string name="burn_amount_label">Số tiền bằng XMR</string>
+    <string name="burn_floor">Dưới %1$s thì một lần đốt không chứng minh được gì, và người đọc sẽ từ chối.</string>
+    <string name="burn_purpose_label">Để làm gì</string>
+    <string name="burn_purpose_support">Một nhãn ngắn: danh tính, một tin rao, một trọng tài.</string>
+    <string name="burn_irreversible">Việc này không thể hoàn tác.</string>
+    <string name="burn_action">Đốt %1$s</string>
+    <string name="burn_pin_why">Bạn sắp hủy tiền. Không gì lấy lại được.</string>
+    <string name="burn_address_title">Tiền đi đâu</string>
+    <string name="burn_address_note">Cả hai khóa của địa chỉ này đều là băm của một chuỗi đã công bố, nên ai cũng tự tính lại được và thấy rằng không ai chọn một bí mật nào. Thứ đến đây sẽ không bao giờ tiêu được.</string>
+    <string name="burn_copy_address">Sao chép địa chỉ</string>
+    <string name="burn_address_copied">Đã sao chép địa chỉ đốt</string>
+    <string name="burn_yours">Các lần đốt của bạn</string>
+    <string name="burn_none">Chưa đốt gì dưới tên này.</string>
+    <string name="burn_waiting">Đang chờ khối của nó</string>
+    <string name="burn_in_block">Trong khối %1$s</string>
+    <string name="burn_no_proof">Lần này không tạo được bằng chứng nên không thể đưa ra.</string>
+    <string name="burn_copy_proof">Sao chép bằng chứng</string>
+    <string name="burn_proof_copied">Đã sao chép bằng chứng</string>
+    <string name="burn_failed">Việc đốt không thành.</string>
+    <string name="burn_entry_note">Hãy đốt XMR dưới tên của bạn, để người lạ thấy rằng cái tên ấy có giá.</string>
+    <string name="burn_entry_action">Đốt XMR</string>
+    <string name="burn_entry_burned">Đã đốt %1$s</string>
+    <string name="burn_err_under_floor">Số này dưới mức sàn — một lần đốt nhỏ như vậy không chứng minh được gì với ai.</string>
+    <string name="burn_err_no_purpose">Hãy nói lần đốt này để làm gì.</string>
+    <string name="burn_err_purpose_long">Nhãn đó quá dài.</string>
+    <string name="burn_err_no_persona">Điện thoại này không giữ khóa cho tên đó.</string>
+    <string name="burn_err_no_node">Không nút Monero nào trả lời, nên chưa gửi gì cả.</string>
+    <string name="burn_err_unreadable">Đây không phải bằng chứng mà điện thoại này đọc được.</string>
+    <string name="burn_err_other_persona">Bằng chứng này nêu tên người khác.</string>
+    <string name="burn_err_under_floor_theirs">Lần đốt mà nó chứng minh nằm dưới mức sàn.</string>
+    <string name="burn_err_node_refuses">Nút của chính bạn không xác nhận bằng chứng này.</string>
+    <string name="burn_err_wrong_amount">Bằng chứng chứng minh một số tiền khác với số đã nêu.</string>
+    <string name="burn_err_no_block">Giao dịch của nó chưa vào khối nào.</string>
+    <string name="burn_err_no_second">Chưa nút thứ hai nào thấy nó trong một khối. Hãy thử lại sau vài phút.</string>
+</resources>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5's costly identity: burning XMR under a persona, the proof the
+     burn leaves, and what a reader's own node makes of somebody else's. -->
+<resources>
+    <string name="burn_title">Ім’я, яке коштує</string>
+    <string name="burn_back">Назад</string>
+    <string name="burn_what_body">Спалення надсилає XMR на адресу, ключів від якої немає ні в кого. Гроші зникають: ніщо не повертається, і скасувати це неможливо.</string>
+    <string name="burn_what_get">Ви одержуєте доказ, що саме це ім’я, і жодне інше, віддало стільки. Ви показуєте його тому, хто вирішує, чи мати з вами справу, і його власний вузол це перевіряє. Нічого не публікується.</string>
+    <string name="burn_persona">Спалення від імені %1$s</string>
+    <string name="burn_amount_label">Сума в XMR</string>
+    <string name="burn_floor">Менше ніж %1$s спалення нічого не доводить, і читач його відхилить.</string>
+    <string name="burn_purpose_label">Для чого це</string>
+    <string name="burn_purpose_support">Коротка позначка: особа, оголошення, арбітр.</string>
+    <string name="burn_irreversible">Це неможливо скасувати.</string>
+    <string name="burn_action">Спалити %1$s</string>
+    <string name="burn_pin_why">Ви збираєтеся знищити гроші. Ніщо їх не поверне.</string>
+    <string name="burn_address_title">Куди це йде</string>
+    <string name="burn_address_note">Обидва ключі цієї адреси — це хеші опублікованого рядка, тож кожен може обчислити її сам і побачити, що ніхто не обирав таємниці. Те, що надходить сюди, не можна витратити ніколи.</string>
+    <string name="burn_copy_address">Скопіювати адресу</string>
+    <string name="burn_address_copied">Адресу спалення скопійовано</string>
+    <string name="burn_yours">Ваші спалення</string>
+    <string name="burn_none">Під цим іменем ще нічого не спалено.</string>
+    <string name="burn_waiting">Чекає на свій блок</string>
+    <string name="burn_in_block">У блоці %1$s</string>
+    <string name="burn_no_proof">Для цього спалення доказу не зроблено, тож показати його не можна.</string>
+    <string name="burn_copy_proof">Скопіювати доказ</string>
+    <string name="burn_proof_copied">Доказ скопійовано</string>
+    <string name="burn_failed">Спалення не відбулося.</string>
+    <string name="burn_entry_note">Спаліть XMR під своїм іменем, щоб незнайомець бачив: воно вам чогось коштувало.</string>
+    <string name="burn_entry_action">Спалити XMR</string>
+    <string name="burn_entry_burned">Спалено %1$s</string>
+    <string name="burn_err_under_floor">Це нижче за поріг — таке мале спалення нікому нічого не доводить.</string>
+    <string name="burn_err_no_purpose">Скажіть, для чого це спалення.</string>
+    <string name="burn_err_purpose_long">Ця позначка задовга.</string>
+    <string name="burn_err_no_persona">Цей телефон не має ключа до цього імені.</string>
+    <string name="burn_err_no_node">Жоден вузол Monero не відповів, тож нічого не надіслано.</string>
+    <string name="burn_err_unreadable">Це не доказ, який цей телефон може прочитати.</string>
+    <string name="burn_err_other_persona">Цей доказ називає когось іншого.</string>
+    <string name="burn_err_under_floor_theirs">Спалення, яке він доводить, нижче за поріг.</string>
+    <string name="burn_err_node_refuses">Ваш власний вузол цього доказу не підтверджує.</string>
+    <string name="burn_err_wrong_amount">Доказ підтверджує іншу суму, ніж заявлено.</string>
+    <string name="burn_err_no_block">Його транзакції ще немає в жодному блоці.</string>
+    <string name="burn_err_no_second">Другий вузол ще не бачить її в блоці. Спробуйте за кілька хвилин.</string>
+</resources>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5's costly identity: burning XMR under a persona, the proof the
+     burn leaves, and what a reader's own node makes of somebody else's. -->
+<resources>
+    <string name="burn_title">대가를 치른 이름</string>
+    <string name="burn_back">뒤로</string>
+    <string name="burn_what_body">소각은 아무도 열쇠를 갖고 있지 않은 주소로 XMR을 보냅니다. 그 돈은 사라집니다. 돌아오는 것도 없고 되돌릴 수 있는 사람도 없습니다.</string>
+    <string name="burn_what_get">얻는 것은 다른 이름이 아닌 바로 이 이름이 그만큼을 내놓았다는 증명입니다. 거래를 고민하는 상대에게 보여 주면 상대의 노드가 직접 확인합니다. 공개되는 것은 없습니다.</string>
+    <string name="burn_persona">%1$s(으)로 소각</string>
+    <string name="burn_amount_label">XMR 금액</string>
+    <string name="burn_floor">%1$s 미만의 소각은 아무것도 증명하지 못하며 읽는 쪽이 거절합니다.</string>
+    <string name="burn_purpose_label">무엇을 위한 것인지</string>
+    <string name="burn_purpose_support">짧은 이름표: 신원, 매물, 중재인.</string>
+    <string name="burn_irreversible">이것은 되돌릴 수 없습니다.</string>
+    <string name="burn_action">%1$s 소각</string>
+    <string name="burn_pin_why">이제 돈을 없앱니다. 되찾을 방법은 없습니다.</string>
+    <string name="burn_address_title">어디로 가는지</string>
+    <string name="burn_address_note">이 주소의 두 열쇠는 모두 공개된 문자열의 해시입니다. 누구나 직접 계산해 아무도 비밀을 고르지 않았음을 확인할 수 있습니다. 여기 도착한 것은 영원히 쓸 수 없습니다.</string>
+    <string name="burn_copy_address">주소 복사</string>
+    <string name="burn_address_copied">소각 주소를 복사했습니다</string>
+    <string name="burn_yours">나의 소각</string>
+    <string name="burn_none">이 이름으로는 아직 아무것도 소각하지 않았습니다.</string>
+    <string name="burn_waiting">블록에 담기기를 기다리는 중</string>
+    <string name="burn_in_block">%1$s 블록에 있음</string>
+    <string name="burn_no_proof">이 건은 증명이 만들어지지 않아 보여 줄 수 없습니다.</string>
+    <string name="burn_copy_proof">증명 복사</string>
+    <string name="burn_proof_copied">증명을 복사했습니다</string>
+    <string name="burn_failed">소각이 이루어지지 않았습니다.</string>
+    <string name="burn_entry_note">자기 이름으로 XMR을 소각하면, 처음 만나는 사람도 그 이름에 대가가 따랐음을 볼 수 있습니다.</string>
+    <string name="burn_entry_action">XMR 소각</string>
+    <string name="burn_entry_burned">%1$s 소각함</string>
+    <string name="burn_err_under_floor">하한보다 적습니다. 그렇게 작은 소각은 누구에게도 아무것도 증명하지 못합니다.</string>
+    <string name="burn_err_no_purpose">무엇을 위한 소각인지 적어 주세요.</string>
+    <string name="burn_err_purpose_long">그 이름표는 너무 깁니다.</string>
+    <string name="burn_err_no_persona">이 기기에는 그 이름의 열쇠가 없습니다.</string>
+    <string name="burn_err_no_node">응답한 Monero 노드가 없어 아무것도 보내지 않았습니다.</string>
+    <string name="burn_err_unreadable">이것은 이 기기가 읽을 수 있는 증명이 아닙니다.</string>
+    <string name="burn_err_other_persona">이 증명은 다른 사람을 가리킵니다.</string>
+    <string name="burn_err_under_floor_theirs">이 증명이 보여 주는 소각은 하한보다 적습니다.</string>
+    <string name="burn_err_node_refuses">당신의 노드는 이 증명을 뒷받침하지 않습니다.</string>
+    <string name="burn_err_wrong_amount">증명이 보여 주는 금액이 내세운 금액과 다릅니다.</string>
+    <string name="burn_err_no_block">그 거래는 아직 블록에 들어가지 않았습니다.</string>
+    <string name="burn_err_no_second">두 번째 노드는 아직 블록에서 찾지 못했습니다. 몇 분 뒤에 다시 시도해 주세요.</string>
+</resources>

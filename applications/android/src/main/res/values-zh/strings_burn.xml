@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5's costly identity: burning XMR under a persona, the proof the
+     burn leaves, and what a reader's own node makes of somebody else's. -->
+<resources>
+    <string name="burn_title">有代价的身份</string>
+    <string name="burn_back">返回</string>
+    <string name="burn_what_body">销毁就是把 XMR 发到一个谁都没有钥匙的地址。钱就此消失：没有任何回头路，也没有人能撤销。</string>
+    <string name="burn_what_get">你得到的是一份证明：正是这个名字，而不是别的名字，放弃了那么多钱。把它出示给正在考虑与你交易的人，对方用自己的节点核对。不会公开任何东西。</string>
+    <string name="burn_persona">以 %1$s 的名义销毁</string>
+    <string name="burn_amount_label">金额（XMR）</string>
+    <string name="burn_floor">低于 %1$s 的销毁什么也证明不了，对方会拒收。</string>
+    <string name="burn_purpose_label">用于什么</string>
+    <string name="burn_purpose_support">一个简短的标签：身份、一则出售、一位仲裁人。</string>
+    <string name="burn_irreversible">此操作无法撤销。</string>
+    <string name="burn_action">销毁 %1$s</string>
+    <string name="burn_pin_why">你即将销毁金钱。没有任何办法能把它拿回来。</string>
+    <string name="burn_address_title">钱去了哪里</string>
+    <string name="burn_address_note">这个地址的两把钥匙都是一段公开字符串的哈希，任何人都可以自己算出来，看到没有人选过秘密。送到这里的钱永远花不出去。</string>
+    <string name="burn_copy_address">复制地址</string>
+    <string name="burn_address_copied">已复制销毁地址</string>
+    <string name="burn_yours">你的销毁记录</string>
+    <string name="burn_none">这个名字下还没有销毁过任何东西。</string>
+    <string name="burn_waiting">正在等待进入区块</string>
+    <string name="burn_in_block">已在区块 %1$s 中</string>
+    <string name="burn_no_proof">这一笔没有做出证明，因此无法出示。</string>
+    <string name="burn_copy_proof">复制证明</string>
+    <string name="burn_proof_copied">已复制证明</string>
+    <string name="burn_failed">销毁没有完成。</string>
+    <string name="burn_entry_note">以你的名字销毁一些 XMR，陌生人就能看出这个名字曾让你付出代价。</string>
+    <string name="burn_entry_action">销毁 XMR</string>
+    <string name="burn_entry_burned">已销毁 %1$s</string>
+    <string name="burn_err_under_floor">低于下限——这么小的销毁对谁都证明不了什么。</string>
+    <string name="burn_err_no_purpose">写清楚这次销毁是为了什么。</string>
+    <string name="burn_err_purpose_long">这个标签太长了。</string>
+    <string name="burn_err_no_persona">这台手机没有那个名字的钥匙。</string>
+    <string name="burn_err_no_node">没有任何 Monero 节点回应，因此什么也没有发送。</string>
+    <string name="burn_err_unreadable">这不是这台手机能读懂的证明。</string>
+    <string name="burn_err_other_persona">这份证明指向的是另一个人。</string>
+    <string name="burn_err_under_floor_theirs">它所证明的销毁低于下限。</string>
+    <string name="burn_err_node_refuses">你自己的节点不能佐证这份证明。</string>
+    <string name="burn_err_wrong_amount">证明所证实的金额与它声称的不一致。</string>
+    <string name="burn_err_no_block">它的交易还没有进入区块。</string>
+    <string name="burn_err_no_second">还没有第二个节点在区块里看到它。请过几分钟再试。</string>
+</resources>

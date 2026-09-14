@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5's costly identity: burning XMR under a persona, the proof the
+     burn leaves, and what a reader's own node makes of somebody else's. -->
+<resources>
+    <string name="burn_title">Tożsamość, która kosztuje</string>
+    <string name="burn_back">Wstecz</string>
+    <string name="burn_what_body">Spalenie wysyła XMR na adres, do którego nikt nie ma kluczy. Pieniądze przepadają: nic nie wraca i nikt tego nie cofnie.</string>
+    <string name="burn_what_get">Otrzymujesz dowód, że właśnie ta nazwa — i żadna inna — oddała tyle. Pokazujesz go komuś, kto zastanawia się, czy z tobą handlować, a jego własny węzeł go sprawdza. Nic nie jest publikowane.</string>
+    <string name="burn_persona">Spalanie jako %1$s</string>
+    <string name="burn_amount_label">Kwota w XMR</string>
+    <string name="burn_floor">Poniżej %1$s spalenie niczego nie dowodzi i czytający je odrzuci.</string>
+    <string name="burn_purpose_label">Do czego to służy</string>
+    <string name="burn_purpose_support">Krótka etykieta: tożsamość, ogłoszenie, arbiter.</string>
+    <string name="burn_irreversible">Tego nie da się cofnąć.</string>
+    <string name="burn_action">Spal %1$s</string>
+    <string name="burn_pin_why">Zaraz zniszczysz pieniądze. Nic ich nie przywróci.</string>
+    <string name="burn_address_title">Dokąd to trafia</string>
+    <string name="burn_address_note">Oba klucze tego adresu są skrótami opublikowanego tekstu, więc każdy może go sam wyliczyć i zobaczyć, że nikt nie wybrał sekretu. Tego, co tu trafi, nigdy nie da się wydać.</string>
+    <string name="burn_copy_address">Kopiuj adres</string>
+    <string name="burn_address_copied">Skopiowano adres spalania</string>
+    <string name="burn_yours">Twoje spalenia</string>
+    <string name="burn_none">Pod tą nazwą nic jeszcze nie spalono.</string>
+    <string name="burn_waiting">Czeka na swój blok</string>
+    <string name="burn_in_block">W bloku %1$s</string>
+    <string name="burn_no_proof">Dla tego spalenia nie powstał dowód, więc nie można go pokazać.</string>
+    <string name="burn_copy_proof">Kopiuj dowód</string>
+    <string name="burn_proof_copied">Skopiowano dowód</string>
+    <string name="burn_failed">Spalenie nie doszło do skutku.</string>
+    <string name="burn_entry_note">Spal XMR pod swoją nazwą, aby obcy widział, że coś cię ona kosztowała.</string>
+    <string name="burn_entry_action">Spal XMR</string>
+    <string name="burn_entry_burned">Spalono %1$s</string>
+    <string name="burn_err_under_floor">To poniżej progu — tak małe spalenie nikomu niczego nie dowodzi.</string>
+    <string name="burn_err_no_purpose">Napisz, do czego służy to spalenie.</string>
+    <string name="burn_err_purpose_long">Ta etykieta jest za długa.</string>
+    <string name="burn_err_no_persona">Ten telefon nie ma klucza do tej nazwy.</string>
+    <string name="burn_err_no_node">Żaden węzeł Monero nie odpowiedział, więc nic nie wysłano.</string>
+    <string name="burn_err_unreadable">To nie jest dowód, który ten telefon potrafi odczytać.</string>
+    <string name="burn_err_other_persona">Ten dowód wskazuje kogoś innego.</string>
+    <string name="burn_err_under_floor_theirs">Spalenie, którego dowodzi, jest poniżej progu.</string>
+    <string name="burn_err_node_refuses">Twój własny węzeł nie potwierdza tego dowodu.</string>
+    <string name="burn_err_wrong_amount">Dowód wykazuje inną kwotę niż deklarowana.</string>
+    <string name="burn_err_no_block">Jego transakcja nie jest jeszcze w bloku.</string>
+    <string name="burn_err_no_second">Żaden drugi węzeł nie ma jej jeszcze w bloku. Spróbuj za kilka minut.</string>
+</resources>

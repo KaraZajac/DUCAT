@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5's costly identity: burning XMR under a persona, the proof the
+     burn leaves, and what a reader's own node makes of somebody else's. -->
+<resources>
+    <string name="burn_title">ตัวตนที่มีราคา</string>
+    <string name="burn_back">ย้อนกลับ</string>
+    <string name="burn_what_body">การเผาคือการส่ง XMR ไปยังที่อยู่ซึ่งไม่มีใครถือกุญแจ เงินนั้นหายไป ไม่มีอะไรกลับคืน และไม่มีใครย้อนกลับได้</string>
+    <string name="burn_what_get">สิ่งที่คุณได้คือหลักฐานว่าชื่อนี้เท่านั้น ไม่ใช่ชื่ออื่น ที่สละเงินจำนวนนั้น คุณนำไปแสดงต่อคนที่กำลังตัดสินใจว่าจะทำธุระกับคุณหรือไม่ และโหนดของเขาเองเป็นผู้ตรวจสอบ ไม่มีสิ่งใดถูกเผยแพร่</string>
+    <string name="burn_persona">เผาในนาม %1$s</string>
+    <string name="burn_amount_label">จำนวนเงินเป็น XMR</string>
+    <string name="burn_floor">ต่ำกว่า %1$s การเผาไม่พิสูจน์อะไรเลย และผู้อ่านจะปฏิเสธ</string>
+    <string name="burn_purpose_label">เพื่ออะไร</string>
+    <string name="burn_purpose_support">ป้ายสั้น ๆ เช่น ตัวตน ประกาศขาย ผู้ชี้ขาด</string>
+    <string name="burn_irreversible">สิ่งนี้ย้อนกลับไม่ได้</string>
+    <string name="burn_action">เผา %1$s</string>
+    <string name="burn_pin_why">คุณกำลังจะทำลายเงิน ไม่มีสิ่งใดนำมันกลับคืนได้</string>
+    <string name="burn_address_title">เงินไปที่ไหน</string>
+    <string name="burn_address_note">กุญแจทั้งสองของที่อยู่นี้คือแฮชของข้อความที่เผยแพร่ไว้ ใครก็คำนวณเองได้และเห็นว่าไม่มีใครเลือกความลับไว้ สิ่งที่มาถึงที่นี่จะใช้จ่ายไม่ได้ตลอดไป</string>
+    <string name="burn_copy_address">คัดลอกที่อยู่</string>
+    <string name="burn_address_copied">คัดลอกที่อยู่สำหรับเผาแล้ว</string>
+    <string name="burn_yours">การเผาของคุณ</string>
+    <string name="burn_none">ยังไม่มีการเผาใดในชื่อนี้</string>
+    <string name="burn_waiting">กำลังรอบล็อกของมัน</string>
+    <string name="burn_in_block">อยู่ในบล็อก %1$s</string>
+    <string name="burn_no_proof">รายการนี้ไม่มีหลักฐานที่สร้างไว้ จึงแสดงไม่ได้</string>
+    <string name="burn_copy_proof">คัดลอกหลักฐาน</string>
+    <string name="burn_proof_copied">คัดลอกหลักฐานแล้ว</string>
+    <string name="burn_failed">การเผาไม่สำเร็จ</string>
+    <string name="burn_entry_note">เผา XMR ในชื่อของคุณ เพื่อให้คนแปลกหน้าเห็นว่าชื่อนั้นมีราคา</string>
+    <string name="burn_entry_action">เผา XMR</string>
+    <string name="burn_entry_burned">เผาแล้ว %1$s</string>
+    <string name="burn_err_under_floor">ต่ำกว่าขั้นต่ำ การเผาเล็กเพียงนั้นไม่พิสูจน์อะไรกับใครเลย</string>
+    <string name="burn_err_no_purpose">บอกด้วยว่าการเผานี้เพื่ออะไร</string>
+    <string name="burn_err_purpose_long">ป้ายนี้ยาวเกินไป</string>
+    <string name="burn_err_no_persona">โทรศัพท์เครื่องนี้ไม่มีกุญแจของชื่อนั้น</string>
+    <string name="burn_err_no_node">ไม่มีโหนด Monero ตอบกลับ จึงยังไม่ได้ส่งอะไรออกไป</string>
+    <string name="burn_err_unreadable">นี่ไม่ใช่หลักฐานที่โทรศัพท์เครื่องนี้อ่านได้</string>
+    <string name="burn_err_other_persona">หลักฐานนี้ระบุถึงคนอื่น</string>
+    <string name="burn_err_under_floor_theirs">การเผาที่มันพิสูจน์อยู่ต่ำกว่าขั้นต่ำ</string>
+    <string name="burn_err_node_refuses">โหนดของคุณเองไม่ยืนยันหลักฐานนี้</string>
+    <string name="burn_err_wrong_amount">หลักฐานพิสูจน์จำนวนเงินที่ต่างจากที่อ้างไว้</string>
+    <string name="burn_err_no_block">ธุรกรรมของมันยังไม่อยู่ในบล็อกใด</string>
+    <string name="burn_err_no_second">ยังไม่มีโหนดที่สองเห็นมันอยู่ในบล็อก ลองใหม่ในอีกไม่กี่นาที</string>
+</resources>
