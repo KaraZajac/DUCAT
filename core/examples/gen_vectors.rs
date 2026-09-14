@@ -2640,6 +2640,15 @@ fn contact_cases() -> Vec<J> {
             "expect": { "ok": false, "reject": "MALFORMED", "hint": "unknown message kind" } }));
     }
 
+    fn lcase_raw(v: &mut Vec<J>, name: &str, why: &str, listing_hex: &str, bad: Option<(&str, &str)>) {
+        v.push(match bad {
+            None => json!({ "name": name, "why": why, "listing_hex": listing_hex,
+                            "expect": { "ok": true, "reencodes_to_hex": listing_hex } }),
+            Some((code, hint)) => json!({ "name": name, "why": why, "listing_hex": listing_hex,
+                            "expect": { "ok": false, "reject": code, "hint": hint } }),
+        });
+    }
+
     // §16.18: the listing — the other object that lives on a public board,
     // and the one that stays there for days.
     {
@@ -2894,6 +2903,20 @@ fn contact_cases() -> Vec<J> {
             "Petrol, diesel, electric or hybrid. A fifth value is a claim this reader cannot render — the same rule as the gearbox beside it, which had a vector while this did not.",
             &RentalNotice { fuel: Some(5), ..car.clone() },
             Some((RejectCode::Malformed, "unknown fuel")));
+
+        {
+            // Built by hand: the encoder always writes the field, which is
+            // the point — an absent one is a second spelling of the same
+            // listing, and one listing has one encoding.
+            let mut bare = room.to_value();
+            if let ducat_core::cbor::Value::Map(m) = &mut bare {
+                m.remove(&f::RN_DEPOSIT);
+            }
+            let bare_hex = hex(&bare.encode());
+            lcase_raw(&mut v, "listing_without_a_deposit_field",
+                "Zero is a legal stake and is written as zero, so an absent field is a second spelling of the same listing — and two byte strings for one listing is the seam a signature over bytes is meant to close.",
+                &bare_hex, Some(("MALFORMED", "missing field")));
+        }
 
         let forge = |q: u64| {
             let ducat_core::cbor::Value::Map(mut m) = six.to_value() else { unreachable!() };

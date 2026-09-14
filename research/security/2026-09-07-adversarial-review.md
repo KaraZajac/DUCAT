@@ -34,7 +34,7 @@ the fix landed), **open**, **deferred** (design decision recorded, not scheduled
 | W16 | Low | §15.3.2 | "offer_commit is necessarily empty" has no wire meaning | **open** |
 | W17 | Low (S) | core/src/escrow.rs | `SLASH_CLAIM` does not name the claimant | **open** |
 | W18 | Low | app/src/publications.rs | Shelf index may promise any number of chunks; issue assembled in memory | **open** |
-| W19 | Info | core/src/contact.rs | Two encodings of "no deposit" | **open** |
+| W19 | Info | core/src/contact.rs | Two encodings of "no deposit" | **fixed 2026-09-14** — the deposit is always written, zero included; an absent field is MALFORMED, with a vector |
 | W20 | Info | core/src/board.rs | `beacon_verdict` is dead code; both clients re-implement it | **open** |
 
 ## Desk (Tauri)

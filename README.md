@@ -375,7 +375,7 @@ met the desk, files and sites served and fetched, calls with real sound.
 ```
 ducat-protocol.md   the spec — 1.1.0-dev9 on this branch (1.0.0-rc1 is the frozen line), changelog first
 core/               reference implementation (Rust)
-vectors/            437 conformance cases + schema — the published artifact
+vectors/            438 conformance cases + schema — the published artifact
 conformance/        four checkers: schema, second implementation, spec audit,
                     declared dependencies
 harness/            end-to-end over real Veilid routes and real settlement

@@ -2449,6 +2449,17 @@
     },
     {
       "expect": {
+        "hint": "missing field",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "rental.listing",
+      "listing_hex": "ad18dc0218dd783164756361743a326d31435156434169506a496657354558376a6131693864524173434c5a336e534345674b485a42485a5918de0118df781853756e6e7920726f6f6d206e65617220746865207061726b18e0694b7265757a6265726718e165753333646218e21b00000005d21dba0018e41a6b49d20018ec0118ed0218ee0218ef81647769666918f1181c",
+      "name": "listing_without_a_deposit_field",
+      "why": "Zero is a legal stake and is written as zero, so an absent field is a second spelling of the same listing — and two byte strings for one listing is the seam a signature over bytes is meant to close."
+    },
+    {
+      "expect": {
         "hint": "a quantity is written only when it is more than one",
         "ok": false,
         "reject": "MALFORMED"

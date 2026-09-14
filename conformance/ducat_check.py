@@ -1520,7 +1520,8 @@ def parse_listing(buf):
     out["price"] = _take(b, RN_PRICE, "uint", "price")
     if out["price"] == 0:
         raise Reject("Malformed", "a listing with no price is not an offer")
-    out["deposit"] = _opt(b, RN_DEPOSIT, "uint")
+    # One encoding, not two: the deposit is always written, zero included.
+    out["deposit"] = _take(b, RN_DEPOSIT, "uint", "deposit")
     if out["deposit"] is None:
         out["deposit"] = 0
     out["expiry"] = _take(b, RN_EXPIRY, "uint", "expiry")

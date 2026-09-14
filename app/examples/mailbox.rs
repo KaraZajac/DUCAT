@@ -832,7 +832,22 @@ fn main() {
             let l = app
                 .draft_listing(ducat_app::listings::KIND_PLACE, "A spare room, quiet street", "north side", "A quiet room with its own key. Ask and I will send the address.", 50_000_000_000, &cell, specs, "Door code 4711", None, None, 1, min_pxmr, None)
                 .expect("MB_FAIL draft");
+            // A draft is not a listing until it is kept: `draft_listing`
+            // builds one and hands it back, and `post_listing` looks it up by
+            // id. Without this the board answers "no such listing" and the
+            // exercise blames the board (found by the market walk).
+            app.put_draft(l.clone()).expect("MB_FAIL keep the draft");
             println!("MB_DRAFT {} min_burn={} pXMR", l.id, l.min_burn_pxmr);
+            // A notice is stamped against a Monero block, and the wallet's
+            // node may not have answered yet — `ready()` waits for Veilid
+            // only. Wait for the tip rather than failing on the first try.
+            if app.last_good_node().or_else(|| app.pick_node()).is_some() {
+                let t = Instant::now();
+                while app.stamp_now().is_none() && t.elapsed() < Duration::from_secs(180) {
+                    println!("MB_WAIT the wallet's node has no tip yet");
+                    std::thread::sleep(Duration::from_secs(10));
+                }
+            }
             match app.post_listing(&l.id) {
                 Ok(true) => println!("MB_LISTED {} in {cell}", l.id),
                 Ok(false) => println!("MB_FAIL the board refused the listing"),
@@ -843,6 +858,7 @@ fn main() {
             }
             let t0 = Instant::now();
             let mut greeted: std::collections::HashSet<String> = Default::default();
+            let mut paid: std::collections::HashSet<(String, u64, u64)> = Default::default();
             while t0.elapsed() < Duration::from_secs(3600) {
                 app.lap_once();
                 for c in app.contacts() {
@@ -860,8 +876,13 @@ fn main() {
                     }
                 }
                 for c in app.contacts() {
-                    for m in app.thread(&c.persona_hex).into_iter().filter(|m| !m.outgoing && m.kind == 3) {
-                        println!("MB_RECEIPT {} XMR from {} txid={}", ducat_app::wallet::format_xmr(m.amount_pxmr), c.display_name(), m.txid_hex.as_deref().unwrap_or("-"));
+                    // Kind 2 is a payment notice, kind 3 a receipt: an
+                    // unprompted payment arrives as the former, and watching
+                    // only for the latter is why the first walk saw nothing.
+                    for m in app.thread(&c.persona_hex).into_iter().filter(|m| !m.outgoing && (m.kind == 2 || m.kind == 3)) {
+                        if paid.insert((c.persona_hex.clone(), m.seq, m.timestamp)) {
+                            println!("MB_PAID kind {} {} XMR from {} txid={}", m.kind, ducat_app::wallet::format_xmr(m.amount_pxmr), c.display_name(), m.txid_hex.as_deref().unwrap_or("-"));
+                        }
                     }
                 }
                 std::thread::sleep(Duration::from_secs(10));

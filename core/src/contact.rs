@@ -2613,7 +2613,11 @@ impl RentalNotice {
                 "a listing with no price is not an offer",
             ));
         }
-        let deposit_pxmr = r.opt_uint(f::RN_DEPOSIT)?.unwrap_or(0);
+        // One encoding, not two: the field is always written — zero is a
+        // legal stake and is written as zero — so an absent deposit is a
+        // second spelling of the same listing, and two byte strings for one
+        // listing is the seam a signature over bytes is meant to close.
+        let deposit_pxmr = r.uint(f::RN_DEPOSIT)?;
         let expiry = r.uint(f::RN_EXPIRY)?;
 
         let make = r.opt_text(f::RN_MAKE, MAX_RENTAL_WORD_CHARS)?;
