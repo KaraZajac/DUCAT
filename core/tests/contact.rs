@@ -83,7 +83,7 @@ fn a_truncated_uri_is_refused_rather_than_half_parsed() {
 
 fn details() -> ContactDetails {
     ContactDetails {
-        version: 1,
+        version: ducat_core::contact::DETAILS_VERSION,
         suite: 1,
         persona: vec![0xCC; 32],
         outbox_key: "VLD0:abc:def".into(),
@@ -105,6 +105,33 @@ fn details() -> ContactDetails {
 fn details_round_trip() {
     let d = details();
     assert_eq!(ContactDetails::from_value(d.to_value()).unwrap(), d);
+}
+
+/// §16.9: the unsigned map of version 1 is refused, not read as older-but-fine.
+#[test]
+fn details_version_one_is_refused() {
+    let mut d = details();
+    d.version = 1;
+    assert!(ContactDetails::from_value(d.to_value()).is_err());
+}
+
+/// §16.9: a half opens only under the persona it names, for the inbox and
+/// the role it was written for.
+#[test]
+fn details_open_only_under_their_own_persona_inbox_and_role() {
+    use ducat_core::contact::{open_details, sign_details, ROLE_CLAIMANT, ROLE_ISSUER};
+    use ducat_core::sig::SecretKey;
+    let sk = SecretKey::ed25519_from_bytes(&[0x51; 32]);
+    let other = SecretKey::ed25519_from_bytes(&[0x52; 32]);
+    let mut d = details();
+    d.persona = sk.public().to_bytes().to_vec();
+    d.role = ROLE_CLAIMANT;
+    let env = sign_details(&d, &sk);
+    assert_eq!(open_details(&env, &d.inbox_key, ROLE_CLAIMANT).unwrap(), d);
+    assert!(open_details(&env, &d.inbox_key, ROLE_ISSUER).is_err(), "the other half");
+    assert!(open_details(&env, "VLD0:another-inbox", ROLE_CLAIMANT).is_err(), "another inbox");
+    assert!(open_details(&sign_details(&d, &other), &d.inbox_key, ROLE_CLAIMANT).is_err(), "somebody else's key");
+    assert!(open_details(&d.to_value().encode(), &d.inbox_key, ROLE_CLAIMANT).is_err(), "a bare map");
 }
 
 #[test]

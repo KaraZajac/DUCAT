@@ -349,7 +349,7 @@ pub async fn issue() -> Result<(), Box<dyn std::error::Error>> {
 
     let (_, bundle) = prekeys(0x40);
     let details = ContactDetails {
-        version: 1,
+        version: ducat_core::contact::DETAILS_VERSION,
         suite: 1,
         persona: persona.public().to_bytes().to_vec(),
         outbox_key: outbox.to_string(),
@@ -364,8 +364,11 @@ pub async fn issue() -> Result<(), Box<dyn std::error::Error>> {
         plate: None,
         car_photo: None,
         purpose: None,
+        // §16.9: signed for this inbox, as the issuer's half.
+        inbox_key: inbox.key().to_string(),
+        role: ducat_core::contact::ROLE_ISSUER,
     };
-    rc.set_dht_value(inbox.key().clone(), 0, details.to_value().encode(), None)
+    rc.set_dht_value(inbox.key().clone(), 0, ducat_core::contact::sign_details(&details, &persona), None)
         .await?;
     println!("  wrote    subkey 0 — who I am and where to leave things");
 
@@ -463,7 +466,7 @@ pub async fn claim(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
     let (outbox, outbox_kp) = make_log(&rc).await?;
     let (_, bundle) = prekeys(0x80);
     let mine = ContactDetails {
-        version: 1,
+        version: ducat_core::contact::DETAILS_VERSION,
         suite: 1,
         persona: persona.public().to_bytes().to_vec(),
         outbox_key: outbox.to_string(),
@@ -476,8 +479,11 @@ pub async fn claim(uri: &str) -> Result<(), Box<dyn std::error::Error>> {
         plate: None,
         car_photo: None,
         purpose: None,
+        // §16.9: signed for this inbox, as the claimant's half.
+        inbox_key: inbox.to_string(),
+        role: ducat_core::contact::ROLE_CLAIMANT,
     };
-    rc.set_dht_value(inbox.clone(), 1, mine.to_value().encode(), None).await?;
+    rc.set_dht_value(inbox.clone(), 1, ducat_core::contact::sign_details(&mine, &persona), None).await?;
     println!("  wrote    subkey 1 — the handshake is complete");
 
     // And say something, sealed to prekeys read out of the record rather than

@@ -548,9 +548,15 @@ fn contact_vectors_pass() {
                 }
             }
             "contact.details" => {
-                let got = decode(&unhex(c["details_hex"].as_str().unwrap()))
-                    .map_err(|e| e.into())
-                    .and_then(ContactDetails::from_value);
+                // §16.9: the vector carries the signed envelope. The body is
+                // peeked for the inbox and role it names, then the envelope is
+                // opened under the persona inside it — a bare map fails at the
+                // peek, a foreign signature at the open.
+                let env = unhex(c["details_hex"].as_str().unwrap());
+                let got = ducat_core::wire::peek_body(&env)
+                    .and_then(|b| decode(&b).map_err(|e| e.into()))
+                    .and_then(ContactDetails::from_value)
+                    .and_then(|peek| ducat_core::contact::open_details(&env, &peek.inbox_key, peek.role));
                 assert_eq!(got.is_ok(), want_ok(), "{name}: {got:?}");
                 match got {
                     Ok(d) => assert_eq!(
