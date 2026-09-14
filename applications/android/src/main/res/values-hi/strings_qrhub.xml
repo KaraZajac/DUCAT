@@ -18,4 +18,6 @@
     <string name="qrhub_issue_failed">आपका कोड जारी नहीं हो सका। नेटवर्क जाँचें और फिर कोशिश करें।</string>
     <string name="qrhub_try_again">फिर कोशिश करें</string>
     <string name="qrhub_offline">अभी कनेक्ट नहीं है — जब तक यह फ़ोन नेटवर्क से नहीं जुड़ता, कोई यह कोड नहीं ले सकता।</string>
+    <string name="qrhub_tap_card_body">%1$s ने NFC से एक कार्ड दिया। जोड़ें?</string>
+    <string name="qrhub_tap_card_body_unnamed">बिना नाम वाले किसी ने NFC से एक कार्ड दिया। जोड़ें?</string>
 </resources>

@@ -52,4 +52,6 @@
     <string name="prices_menu_warn_go">Cambiar igual</string>
     <string name="common_connecting">Conectando a la red…</string>
     <string name="common_read_failed">No se pudo leer ahora mismo: %1$s</string>
+    <string name="common_show">Mostrar</string>
+    <string name="common_hide">Ocultar</string>
 </resources>

@@ -64,4 +64,6 @@
     <string name="releases_remove_body">यह इस फ़ोन से चली जाएगी और यह फ़ोन इसे देना बंद कर देगा। जो और इसे जीवित रखे हुए हैं उनके पास रहेगी; कोई नहीं रखे तो पता काम करना बंद कर देगा।</string>
     <string name="releases_remove_keep">रहने दें</string>
     <string name="releases_shared">साझा किया: %1$s</string>
+    <string name="releases_add_link_title">इसे अपनी लाइब्रेरी में रखें?</string>
+    <string name="releases_add_link_body">किसी ने DUCAT को एक फ़ाइल का पता दिया। इसे रखने से प्रविष्टि आपकी शेल्फ़ में जुड़ती है; जब तक आप न माँगें, कुछ डाउनलोड नहीं होता।</string>
 </resources>

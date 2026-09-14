@@ -154,4 +154,7 @@
     <string name="chat_copied">Повідомлення скопійовано</string>
     <string name="chat_download_file">Завантажити</string>
     <string name="chat_file_too_big_swarm">цей файл — %1$d МБ; поки що файли обмежені 64 МБ</string>
+    <string name="chat_open_link_title">Відкрити це посилання?</string>
+    <string name="chat_open_link_body">Вона відкриється поза DUCAT. Власник цього сайту побачить, що ви його завантажили.</string>
+    <string name="chat_open_link_go">Відкрити</string>
 </resources>

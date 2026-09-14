@@ -23,4 +23,7 @@
     <string name="pin_use_device_lock">Использовать разблокировку телефона</string>
     <string name="pin_device_title">Разблокируй, чтобы подтвердить</string>
     <string name="pin_device_subtitle">Подтверди, что это ты, прежде чем платёж уйдёт.</string>
+    <string name="pin_device_subtitle_reset">Запись PIN-кода отсутствует. Разблокируйте телефон, чтобы задать новый.</string>
+    <string name="pin_tampered_body">У этого кошелька есть PIN-код, но его запись пропала с телефона. Разблокируйте блокировкой самого телефона, чтобы задать новый.</string>
+    <string name="pin_tampered_no_lock">У этого кошелька есть PIN-код, но его запись пропала с телефона, а у телефона нет собственной блокировки для проверки. Восстановитесь из резервной копии, чтобы продолжить.</string>
 </resources>

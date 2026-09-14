@@ -53,4 +53,6 @@
     <string name="prices_menu_warn_go">Tetap pindah</string>
     <string name="common_connecting">Menyambung ke jaringan…</string>
     <string name="common_read_failed">Tidak dapat membaca saat ini: %1$s</string>
+    <string name="common_show">Tampilkan</string>
+    <string name="common_hide">Sembunyikan</string>
 </resources>

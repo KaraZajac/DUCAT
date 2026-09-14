@@ -21,4 +21,7 @@
     <string name="pin_use_device_lock">Usa lo sblocco del telefono</string>
     <string name="pin_device_title">Sblocca per approvare</string>
     <string name="pin_device_subtitle">Conferma che sei tu prima che questo pagamento parta.</string>
+    <string name="pin_device_subtitle_reset">Il record del PIN manca. Sblocca il telefono per impostarne uno nuovo.</string>
+    <string name="pin_tampered_body">Questo portafoglio ha un PIN, ma il suo record è sparito dal telefono. Sblocca con il blocco del telefono per impostarne uno nuovo.</string>
+    <string name="pin_tampered_no_lock">Questo portafoglio ha un PIN, ma il suo record è sparito dal telefono, e il telefono non ha un blocco proprio da verificare. Ripristina da un backup per continuare.</string>
 </resources>

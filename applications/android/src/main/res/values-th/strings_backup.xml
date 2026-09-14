@@ -11,4 +11,5 @@
     <string name="backup_opened">เปิดแล้ว — ส่วนแบ่งค้ำประกัน %1$d ส่วน, ความสูงกู้คืน %2$d</string>
     <string name="backup_could_not_open">เปิดไม่ได้ — วลีรหัสผ่านผิด หรือไฟล์ถูกแก้ไข</string>
     <string name="backup_share_title">บันทึกไฟล์สำรอง DUCAT ของคุณ</string>
+    <string name="backup_pin_why">ข้อมูลสำรองมีกุญแจใช้จ่าย ใส่ PIN เพื่อส่งออกหรือนำเข้า</string>
 </resources>

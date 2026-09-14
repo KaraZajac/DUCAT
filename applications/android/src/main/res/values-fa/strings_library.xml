@@ -64,4 +64,6 @@
     <string name="releases_remove_body">از این تلفن می‌رود و این تلفن دیگر آن را ارائه نمی‌کند. هر کس دیگری که زنده نگهش داشته هنوز آن را دارد؛ اگر کسی نباشد، نشانی دیگر باز نمی‌شود.</string>
     <string name="releases_remove_keep">بماند</string>
     <string name="releases_shared">هم‌رسانی شد: %1$s</string>
+    <string name="releases_add_link_title">در کتابخانه‌تان بایگانی شود؟</string>
+    <string name="releases_add_link_body">چیزی یک نشانی پرونده به DUCAT داد. بایگانی آن، مدخل را به قفسه‌تان می‌افزاید؛ تا درخواست نکنید چیزی دریافت نمی‌شود.</string>
 </resources>

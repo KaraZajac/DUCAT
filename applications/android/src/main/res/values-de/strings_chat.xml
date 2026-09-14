@@ -152,4 +152,7 @@
     <string name="chat_copied">Nachricht kopiert</string>
     <string name="chat_download_file">Herunterladen</string>
     <string name="chat_file_too_big_swarm">diese Datei hat %1$d MB — Dateien gehen vorerst bis 64 MB</string>
+    <string name="chat_open_link_title">Diesen Link öffnen?</string>
+    <string name="chat_open_link_body">Er öffnet sich außerhalb von DUCAT. Wer die Seite betreibt, sieht, dass du sie geladen hast.</string>
+    <string name="chat_open_link_go">Öffnen</string>
 </resources>

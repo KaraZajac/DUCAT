@@ -21,4 +21,7 @@
     <string name="pin_use_device_lock">Usar o desbloqueio do telefone</string>
     <string name="pin_device_title">Desbloqueie para aprovar</string>
     <string name="pin_device_subtitle">Confirme que é você antes de este pagamento sair.</string>
+    <string name="pin_device_subtitle_reset">O registo do PIN está em falta. Desbloqueie o telemóvel para definir um novo.</string>
+    <string name="pin_tampered_body">Esta carteira tem PIN, mas o seu registo desapareceu do telemóvel. Desbloqueie com o bloqueio do próprio telemóvel para definir um novo.</string>
+    <string name="pin_tampered_no_lock">Esta carteira tem PIN, mas o seu registo desapareceu do telemóvel, e o telemóvel não tem bloqueio próprio para verificar. Restaure a partir de uma cópia de segurança para continuar.</string>
 </resources>

@@ -20,4 +20,7 @@
     <string name="pin_use_device_lock">使用手机解锁</string>
     <string name="pin_device_title">解锁以确认</string>
     <string name="pin_device_subtitle">在这笔付款发出前，确认是你本人。</string>
+    <string name="pin_device_subtitle_reset">PIN 的记录缺失。解锁手机以设置新的 PIN。</string>
+    <string name="pin_tampered_body">此钱包设有 PIN，但其记录已从手机上消失。用手机自身的锁解锁以设置新的 PIN。</string>
+    <string name="pin_tampered_no_lock">此钱包设有 PIN，但其记录已从手机上消失，而手机也没有自身的锁可供核对。请从备份恢复以继续。</string>
 </resources>

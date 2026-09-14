@@ -53,4 +53,6 @@
     <string name="prices_menu_warn_go">Trotzdem wechseln</string>
     <string name="common_connecting">Verbindung zum Netzwerk wird aufgebaut…</string>
     <string name="common_read_failed">Konnte gerade nicht lesen: %1$s</string>
+    <string name="common_show">Anzeigen</string>
+    <string name="common_hide">Verbergen</string>
 </resources>

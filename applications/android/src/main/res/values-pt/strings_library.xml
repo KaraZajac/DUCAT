@@ -64,4 +64,6 @@ A edição é sua. Isto é só o que custa lê-la noutro lado.</string>
     <string name="releases_remove_body">Sai deste telemóvel e este telemóvel deixa de o servir. Quem o mantiver vivo continua a tê-lo; se ninguém o fizer, o endereço deixa de resolver.</string>
     <string name="releases_remove_keep">Manter</string>
     <string name="releases_shared">Partilhado: %1$s</string>
+    <string name="releases_add_link_title">Guardar isto na sua biblioteca?</string>
+    <string name="releases_add_link_body">Algo entregou ao DUCAT o endereço de um ficheiro. Guardá-lo adiciona a entrada à sua prateleira; nada é descarregado até que o peça.</string>
 </resources>

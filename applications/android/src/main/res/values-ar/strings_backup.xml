@@ -11,4 +11,5 @@
     <string name="backup_opened">فُتح — %1$d حصة (حصص) ضمان، ارتفاع الاستعادة %2$d</string>
     <string name="backup_could_not_open">تعذّر فتحه — عبارة المرور خاطئة، أو الملف قد عُدِّل</string>
     <string name="backup_share_title">احفظ نسخة DUCAT الاحتياطية</string>
+    <string name="backup_pin_why">تحمل النسخة الاحتياطية مفتاح الإنفاق. أدخل رمز PIN للتصدير أو الاستيراد.</string>
 </resources>

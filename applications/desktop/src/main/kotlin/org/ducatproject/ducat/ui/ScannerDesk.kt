@@ -44,6 +44,9 @@ fun QrScannerContent(
     prompt: String,
     onResult: (String) -> Unit,
     onDismiss: (() -> Unit)? = null,
+    /** The phone's NFC door. No radio here, so nothing ever arrives by it;
+     *  the parameter exists so the shared callers compile unchanged. */
+    @Suppress("UNUSED_PARAMETER") onNfc: ((String) -> Unit)? = null,
 ) {
     val clipboard = LocalClipboardManager.current
     var text by remember { mutableStateOf("") }

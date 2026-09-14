@@ -18,4 +18,6 @@
     <string name="qrhub_issue_failed">Kodemu tidak bisa diterbitkan. Periksa jaringan dan coba lagi.</string>
     <string name="qrhub_try_again">Coba lagi</string>
     <string name="qrhub_offline">Belum terhubung — tidak ada yang bisa mengambil kode ini sampai ponsel ini bergabung ke jaringan.</string>
+    <string name="qrhub_tap_card_body">%1$s menunjukkan kartu lewat NFC. Tambahkan?</string>
+    <string name="qrhub_tap_card_body_unnamed">Seseorang tanpa nama menunjukkan kartu lewat NFC. Tambahkan?</string>
 </resources>

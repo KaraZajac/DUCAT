@@ -166,73 +166,41 @@ object DucatLog {
                 val stream = info.javaClass.getMethod("getTraceInputStream").invoke(info)
                     as? java.io.InputStream ?: return
                 val raw = stream.use { it.readBytes() }
-                // Into Downloads, because the point is that somebody can
-                // find it. files/ needs adb; Android/data/<pkg>/files is
-                // "external" in name only — scoped storage hides it from
-                // every file manager on Android 11 and up, which is where
-                // the first attempt at this put it and why it could not be
-                // fetched. MediaStore's Downloads collection needs no
-                // permission and shows up in Files like any download.
-                val name = "ducat-tombstone.pb"
-                val saved = saveToDownloads(context, name, raw)
-                val where = saved ?: java.io.File(context.filesDir, name)
-                    .apply { writeBytes(raw) }.absolutePath
-                add(Level.Error, "Tombstone", "${raw.size} bytes saved to $where")
+                // App-private, not Downloads. A tombstone is a dump of the
+                // process's memory at the moment it died — register
+                // contents, stack pages, whatever the wallet held — and the
+                // public Downloads collection is readable by every app on
+                // the phone with the storage permission and by anyone who
+                // plugs it in. It used to go there so a person could find
+                // it without adb; that convenience was the wrong trade for
+                // this file. Named by the exit's own timestamp, so the same
+                // death reported at every launch is one file, and only the
+                // newest two are kept.
+                val dir = java.io.File(context.filesDir, "tombstones").apply { mkdirs() }
+                val f = java.io.File(dir, "tombstone-${longOf("getTimestamp")}.pb")
+                if (!f.isFile) f.writeBytes(raw)
+                dir.listFiles { c -> c.isFile && c.name.endsWith(".pb") }
+                    ?.sortedByDescending { it.name }
+                    ?.drop(2)
+                    ?.forEach { it.delete() }
                 // Printable runs naming a shared object, in order, deduped.
                 // The faulting frame's library is in here even when the
-                // frame numbers are not.
+                // frame numbers are not — and it is the one thing worth
+                // saying in the log, which travels; the file does not.
                 val seen = LinkedHashSet<String>()
                 Regex("[\\x20-\\x7e]{6,}").findAll(String(raw, Charsets.ISO_8859_1))
                     .map { it.value }
                     .filter { it.contains(".so") || it.contains("ducat") }
                     .forEach { seen.add(it.trim()) }
-                seen.take(12).forEach { add(Level.Error, "Tombstone", it) }
+                add(
+                    Level.Error, "Tombstone",
+                    "${raw.size} bytes kept at ${f.absolutePath}" +
+                        (seen.take(12).takeIf { it.isNotEmpty() }
+                            ?.joinToString(prefix = " — ", separator = ", ") ?: ""),
+                )
             }
         }
     }
-
-    /**
-     * Put a file in Downloads, where a person can find and send it.
-     *
-     * Reflection for the same reason as the exit reasons above: the desk
-     * compiles this file against a shim with no MediaStore, and the API-29
-     * guard means it never runs there. Returns the display path, or null if
-     * this phone will not take it.
-     */
-    private fun saveToDownloads(
-        context: android.content.Context,
-        name: String,
-        bytes: ByteArray,
-    ): String? = runCatching {
-        if (android.os.Build.VERSION.SDK_INT < 29) return null
-        val media = Class.forName("android.provider.MediaStore\$Downloads")
-        val uri = media.getField("EXTERNAL_CONTENT_URI").get(null) as android.net.Uri
-        // ContentValues and ContentResolver are not in the desk's shim
-        // either, so they are reached the same way.
-        val cvClass = Class.forName("android.content.ContentValues")
-        val values = cvClass.getDeclaredConstructor().newInstance()
-        val putString = cvClass.getMethod("put", String::class.java, String::class.java)
-        putString.invoke(values, "_display_name", name)
-        putString.invoke(values, "mime_type", "application/octet-stream")
-        val resolver = context.javaClass.getMethod("getContentResolver").invoke(context)
-            ?: return null
-        val rClass = resolver.javaClass
-        // Replace last time's, rather than stacking (1), (2), (3) copies.
-        runCatching {
-            rClass.getMethod(
-                "delete", android.net.Uri::class.java, String::class.java,
-                Array<String>::class.java,
-            ).invoke(resolver, uri, "_display_name = ?", arrayOf(name))
-        }
-        val item = rClass
-            .getMethod("insert", android.net.Uri::class.java, cvClass)
-            .invoke(resolver, uri, values) as? android.net.Uri ?: return null
-        val stream = rClass
-            .getMethod("openOutputStream", android.net.Uri::class.java)
-            .invoke(resolver, item) as? java.io.OutputStream ?: return null
-        stream.use { it.write(bytes) }
-        "Downloads/$name"
-    }.getOrNull()
 
     private val lineFormat = Regex("^(\\d+)\\|(I|W|E)\\|([^|]*)\\|(.*)$")
 

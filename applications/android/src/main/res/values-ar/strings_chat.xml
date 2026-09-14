@@ -156,4 +156,7 @@
     <string name="chat_copied">نُسخت الرسالة</string>
     <string name="chat_download_file">تنزيل</string>
     <string name="chat_file_too_big_swarm">حجم هذا الملف %1$d م.ب — الملفات حتى 64 م.ب حاليًا</string>
+    <string name="chat_open_link_title">فتح هذا الرابط؟</string>
+    <string name="chat_open_link_body">سيُفتح خارج DUCAT. سيرى من يدير ذلك الموقع أنك حمّلته.</string>
+    <string name="chat_open_link_go">فتح</string>
 </resources>

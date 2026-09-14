@@ -28,9 +28,6 @@ class SiteViewerActivity : ComponentActivity() {
         if (!File(root, "index.html").isFile) {
             finish(); return
         }
-        // With the separator: a bare prefix let `../current-anything/` next
-        // to the bundle pass as inside it.
-        val rootCanon = root.canonicalPath + File.separator
 
         val web = WebView(this)
         web.settings.apply {
@@ -59,10 +56,13 @@ class SiteViewerActivity : ComponentActivity() {
                 if (url.host == "site.local") {
                     val rel = url.path?.trimStart('/')?.ifBlank { "index.html" }
                         ?: "index.html"
-                    val f = File(root, rel)
                     // The one wall that matters twice: inside the bundle,
-                    // and only the bundle.
-                    if (f.canonicalPath.startsWith(rootCanon) && f.isFile) {
+                    // and only the bundle. Sites.insideRoot asks it without
+                    // throwing — this runs on the WebView's thread, and a
+                    // path a page chose must not be able to take the
+                    // process down from here.
+                    val f = Sites.insideRoot(root, rel)
+                    if (f != null && f.isFile) {
                         return WebResourceResponse(mimeFor(rel), null, f.inputStream())
                     }
                 }

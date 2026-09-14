@@ -151,4 +151,7 @@
     <string name="chat_copied">메시지를 복사했어요</string>
     <string name="chat_download_file">다운로드</string>
     <string name="chat_file_too_big_swarm">이 파일은 %1$d MB입니다 — 현재 파일은 64 MB까지입니다</string>
+    <string name="chat_open_link_title">이 링크를 열까요?</string>
+    <string name="chat_open_link_body">DUCAT 밖에서 열립니다. 그 사이트 운영자는 당신이 접속했음을 알게 됩니다.</string>
+    <string name="chat_open_link_go">열기</string>
 </resources>

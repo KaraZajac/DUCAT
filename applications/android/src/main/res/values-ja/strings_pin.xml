@@ -20,4 +20,7 @@
     <string name="pin_use_device_lock">スマホのロック解除を使う</string>
     <string name="pin_device_title">承認のためロック解除</string>
     <string name="pin_device_subtitle">この支払いを送る前に、本人であることを確認します。</string>
+    <string name="pin_device_subtitle_reset">PIN の記録がありません。新しい PIN を設定するには端末のロックを解除してください。</string>
+    <string name="pin_tampered_body">このウォレットには PIN がありますが、その記録が端末から消えています。新しい PIN を設定するには端末のロックで解除してください。</string>
+    <string name="pin_tampered_no_lock">このウォレットには PIN がありますが、その記録が端末から消えており、端末自体にも確認できるロックがありません。続けるにはバックアップから復元してください。</string>
 </resources>

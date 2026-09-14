@@ -66,4 +66,6 @@ Numer należy do ciebie. To tylko cena za przeczytanie go gdzie indziej.</string
     <string name="releases_remove_body">Zniknie z tego telefonu, a telefon przestanie go udostępniać. Kto inny utrzymuje go przy życiu, wciąż go ma; jeśli nikt, adres przestaje działać.</string>
     <string name="releases_remove_keep">Zostaw</string>
     <string name="releases_shared">Udostępniono: %1$s</string>
+    <string name="releases_add_link_title">Zapisać to w bibliotece?</string>
+    <string name="releases_add_link_body">Coś przekazało DUCAT adres pliku. Zapisanie dodaje wpis na półkę; nic nie jest pobierane, dopóki o to nie poprosisz.</string>
 </resources>

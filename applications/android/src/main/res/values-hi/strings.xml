@@ -52,4 +52,6 @@
     <string name="prices_menu_warn_go">फिर भी बदलें</string>
     <string name="common_connecting">नेटवर्क से जुड़ रहा है…</string>
     <string name="common_read_failed">अभी पढ़ा नहीं जा सका: %1$s</string>
+    <string name="common_show">दिखाएँ</string>
+    <string name="common_hide">छिपाएँ</string>
 </resources>

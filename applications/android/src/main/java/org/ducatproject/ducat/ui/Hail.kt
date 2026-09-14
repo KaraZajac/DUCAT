@@ -892,8 +892,9 @@ private data class DriveOffer(
     val sentAt: Long = 0,
 )
 
-private fun ridePrefs(context: android.content.Context) =
-    context.getSharedPreferences("ducat_rides", android.content.Context.MODE_PRIVATE)
+// The store's own handle — encrypted, and the same file the posted hail is
+// in — rather than a second, plaintext opening of it by name.
+private fun ridePrefs(context: android.content.Context) = RideStore.prefs(context)
 
 private fun saveDriveOffer(context: android.content.Context, o: DriveOffer) {
     ridePrefs(context).edit()

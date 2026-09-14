@@ -11,4 +11,5 @@
     <string name="backup_opened">열었어요 — 에스크로 조각 %1$d개, 복원 높이 %2$d</string>
     <string name="backup_could_not_open">열 수 없었어요 — 암호 문구가 틀렸거나 파일이 변경됐어요</string>
     <string name="backup_share_title">DUCAT 백업 저장</string>
+    <string name="backup_pin_why">백업에는 지출 키가 들어 있습니다. 내보내거나 가져오려면 PIN을 입력하세요.</string>
 </resources>

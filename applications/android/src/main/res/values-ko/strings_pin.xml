@@ -20,4 +20,7 @@
     <string name="pin_use_device_lock">휴대폰 잠금 해제 사용</string>
     <string name="pin_device_title">승인하려면 잠금 해제</string>
     <string name="pin_device_subtitle">이 결제가 나가기 전에 본인인지 확인합니다.</string>
+    <string name="pin_device_subtitle_reset">PIN 기록이 없습니다. 새 PIN을 설정하려면 휴대전화 잠금을 해제하세요.</string>
+    <string name="pin_tampered_body">이 지갑에는 PIN이 있지만 그 기록이 휴대전화에서 사라졌습니다. 새 PIN을 설정하려면 휴대전화 자체 잠금으로 해제하세요.</string>
+    <string name="pin_tampered_no_lock">이 지갑에는 PIN이 있지만 그 기록이 휴대전화에서 사라졌고, 휴대전화에는 확인할 자체 잠금이 없습니다. 계속하려면 백업에서 복원하세요.</string>
 </resources>

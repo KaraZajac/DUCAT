@@ -11,4 +11,5 @@
     <string name="backup_opened">Открыто — долей эскроу: %1$d, высота восстановления %2$d</string>
     <string name="backup_could_not_open">Не удалось открыть — неверная парольная фраза, или файл был изменён</string>
     <string name="backup_share_title">Сохранить резервную копию DUCAT</string>
+    <string name="backup_pin_why">Резервная копия содержит ключ трат. Введите PIN-код, чтобы экспортировать или импортировать её.</string>
 </resources>

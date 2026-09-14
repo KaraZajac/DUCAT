@@ -23,4 +23,7 @@
     <string name="pin_use_device_lock">Використати розблокування телефона</string>
     <string name="pin_device_title">Розблокуй, щоб підтвердити</string>
     <string name="pin_device_subtitle">Підтверди, що це ти, перш ніж платіж піде.</string>
+    <string name="pin_device_subtitle_reset">Запис PIN-коду відсутній. Розблокуйте телефон, щоб задати новий.</string>
+    <string name="pin_tampered_body">У цього гаманця є PIN-код, але його запис зник із телефона. Розблокуйте блокуванням самого телефона, щоб задати новий.</string>
+    <string name="pin_tampered_no_lock">У цього гаманця є PIN-код, але його запис зник із телефона, а телефон не має власного блокування для перевірки. Відновіть із резервної копії, щоб продовжити.</string>
 </resources>

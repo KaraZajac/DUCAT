@@ -110,8 +110,15 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
     }
 
     private fun readIntent(i: android.content.Intent?) {
-        i?.getStringExtra("open_group")?.let { openGroup.value = it }
-            ?: i?.getStringExtra("open_chat")?.let { openChat.value = it }
+        // Only from our own notifications. This activity is exported — the
+        // launcher and ducat: links need it to be — so any app can start it
+        // with these extras and land somebody in a thread of its choosing.
+        // A notification's tap carries the token this process minted
+        // (Notify.token); nothing else can, and nothing else is heard.
+        if (i?.getStringExtra(Notify.TOKEN_EXTRA) == Notify.token) {
+            i.getStringExtra("open_group")?.let { openGroup.value = it }
+                ?: i.getStringExtra("open_chat")?.let { openChat.value = it }
+        }
         // §18.7 token mode: the manifest registers ducat: links, and this URI
         // used to stop right here, read by nobody — a tapped card opened the
         // app to Home, silently. It now reaches the same claim the scanner
@@ -124,11 +131,13 @@ class MainActivity : androidx.fragment.app.FragmentActivity() {
                 org.ducatproject.ducat.ui.pendingSiteAdd.value = uri
                 openSites.value = true
             } else if (uri != null && org.ducatproject.ducat.Releases.parse(uri) != null) {
-                // A release address: share key and digest together, so it
-                // is filed the moment it is tapped and fetched when the
-                // reader asks. Parsed rather than prefix-matched, because
-                // a malformed one must reach the claim road below and be
-                // refused there, not be filed as a release nothing serves.
+                // A release address: share key and digest together. The
+                // Library shows it and asks before filing it (ReleasesCard
+                // — a link can be sent by anyone), and fetches only when
+                // the reader asks. Parsed rather than prefix-matched,
+                // because a malformed one must reach the claim road below
+                // and be refused there, not be filed as a release nothing
+                // serves.
                 org.ducatproject.ducat.ui.pendingReleaseAdd.value = uri
                 openLibrary.value = true
             } else {
@@ -627,6 +636,20 @@ fun DucatApp(themeMode: ThemeMode, onThemeChange: (ThemeMode) -> Unit) {
                 overlay = Overlay.Drawer(Section.Sites)
             }
             MainActivity.openSites.value = false
+        }
+    }
+    // A ducat:file/ link, the same way: the Library is where the address is
+    // shown and the person asked. Set by readIntent and, until now, read by
+    // nobody — the question waited for whoever next opened the Library.
+    val wantLibrary by MainActivity.openLibrary.collectAsState()
+    LaunchedEffect(wantLibrary) {
+        if (wantLibrary) {
+            if (kiosk) {
+                org.ducatproject.ducat.ui.pendingReleaseAdd.value = null
+            } else {
+                overlay = Overlay.Drawer(Section.Library)
+            }
+            MainActivity.openLibrary.value = false
         }
     }
     val tappedCard by MainActivity.claimLink.collectAsState()

@@ -64,4 +64,6 @@ Le numéro est à vous. Ceci n\'est que le prix à payer pour le lire ailleurs.<
     <string name="releases_remove_body">Il quitte ce téléphone, qui cesse de le servir. Ceux qui le maintiennent en vie l\'ont toujours ; si personne ne le fait, l\'adresse ne résout plus.</string>
     <string name="releases_remove_keep">Le garder</string>
     <string name="releases_shared">Partagé : %1$s</string>
+    <string name="releases_add_link_title">Classer ceci dans votre bibliothèque ?</string>
+    <string name="releases_add_link_body">Quelque chose a transmis une adresse de fichier à DUCAT. La classer ajoute l’entrée à votre étagère ; rien n’est téléchargé tant que vous ne le demandez pas.</string>
 </resources>

@@ -23,4 +23,7 @@
     <string name="pin_use_device_lock">Użyj blokady telefonu</string>
     <string name="pin_device_title">Odblokuj, aby zatwierdzić</string>
     <string name="pin_device_subtitle">Potwierdź, że to ty, zanim ta płatność wyjdzie.</string>
+    <string name="pin_device_subtitle_reset">Brakuje zapisu PIN-u. Odblokuj telefon, aby ustawić nowy.</string>
+    <string name="pin_tampered_body">Ten portfel ma PIN, ale jego zapis zniknął z telefonu. Odblokuj blokadą telefonu, aby ustawić nowy.</string>
+    <string name="pin_tampered_no_lock">Ten portfel ma PIN, ale jego zapis zniknął z telefonu, a telefon nie ma własnej blokady do sprawdzenia. Przywróć z kopii zapasowej, aby kontynuować.</string>
 </resources>

@@ -68,4 +68,6 @@
     <string name="releases_remove_body">سيختفي من هذا الهاتف، وسيتوقف الهاتف عن تقديمه. من يبقيه حيًّا غيرك ما زال يملكه؛ وإن لم يفعل أحد، فلن يعود العنوان يعمل.</string>
     <string name="releases_remove_keep">أبقِه</string>
     <string name="releases_shared">تمت المشاركة: %1$s</string>
+    <string name="releases_add_link_title">حفظ هذا في مكتبتك؟</string>
+    <string name="releases_add_link_body">وصل إلى DUCAT عنوان ملف. حفظه يضيف المدخل إلى رفّك، ولن يُجلب شيء حتى تطلبه.</string>
 </resources>

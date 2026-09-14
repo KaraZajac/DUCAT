@@ -76,4 +76,6 @@ The issue is yours to keep. This is only what it costs to read it somewhere else
     <string name="releases_remove_body">It goes from this phone, and this phone stops serving it. Anyone else keeping it alive still has it; if nobody is, the address stops resolving.</string>
     <string name="releases_remove_keep">Keep it</string>
     <string name="releases_shared">Shared: %1$s</string>
+    <string name="releases_add_link_title">File this in your library?</string>
+    <string name="releases_add_link_body">Something handed DUCAT a file address. Filing it adds the entry to your shelf; nothing is fetched until you ask for it.</string>
 </resources>

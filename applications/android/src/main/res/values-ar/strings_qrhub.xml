@@ -18,4 +18,6 @@
     <string name="qrhub_issue_failed">تعذّر نشر رمزك. تحقّق من الشبكة وأعد المحاولة.</string>
     <string name="qrhub_try_again">أعد المحاولة</string>
     <string name="qrhub_offline">غير متصل بعد — لا يمكن لأحد أخذ هذا الرمز قبل أن ينضم هذا الهاتف إلى الشبكة.</string>
+    <string name="qrhub_tap_card_body">قُدّمت بطاقة عبر NFC من %1$s. هل تريد إضافتهم؟</string>
+    <string name="qrhub_tap_card_body_unnamed">قُدّمت بطاقة عبر NFC من شخص لم يذكر اسمًا. هل تريد إضافته؟</string>
 </resources>

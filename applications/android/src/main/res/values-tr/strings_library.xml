@@ -64,4 +64,6 @@ Sayı sizindir. Bu yalnızca onu başka bir yerde okumanın bedeli.</string>
     <string name="releases_remove_body">Bu telefondan gider ve telefon onu sunmayı bırakır. Onu canlı tutan başkalarında durmaya devam eder; kimse tutmuyorsa adres artık çözülmez.</string>
     <string name="releases_remove_keep">Kalsın</string>
     <string name="releases_shared">Paylaşıldı: %1$s</string>
+    <string name="releases_add_link_title">Bunu kitaplığına eklemek ister misin?</string>
+    <string name="releases_add_link_body">Bir şey DUCAT’a bir dosya adresi verdi. Eklemek girdiyi rafına koyar; sen istemedikçe hiçbir şey indirilmez.</string>
 </resources>

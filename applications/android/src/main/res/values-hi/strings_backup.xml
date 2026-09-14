@@ -11,4 +11,5 @@
     <string name="backup_opened">खुल गया — %1$d एस्क्रो हिस्से, रीस्टोर हाइट %2$d</string>
     <string name="backup_could_not_open">खुला नहीं — पासफ़्रेज़ गलत है, या फ़ाइल से छेड़छाड़ हुई है</string>
     <string name="backup_share_title">अपना DUCAT बैकअप सहेजें</string>
+    <string name="backup_pin_why">बैकअप में खर्च की कुंजी होती है। निर्यात या आयात के लिए PIN दर्ज करें।</string>
 </resources>

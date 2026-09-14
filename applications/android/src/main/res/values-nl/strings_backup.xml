@@ -11,4 +11,5 @@
     <string name="backup_opened">Geopend — %1$d escrow-share(s), herstelhoogte %2$d</string>
     <string name="backup_could_not_open">Kon het niet openen — verkeerde wachtwoordzin, of het bestand is gewijzigd</string>
     <string name="backup_share_title">Sla je DUCAT-back-up op</string>
+    <string name="backup_pin_why">Een back-up bevat de uitgavesleutel. Voer de pincode in om er een te exporteren of importeren.</string>
 </resources>

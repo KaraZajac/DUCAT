@@ -2509,18 +2509,57 @@ private fun LinkableText(body: String, fg: androidx.compose.ui.graphics.Color) {
             append(body.substring(at + url.length))
         }
     }
+    // A web link is confirmed, in full, before anything opens. The bubble
+    // shows a shortened form, and a shortened form is exactly what a link
+    // written to mislead counts on — "example.com/…" over an address that
+    // goes somewhere else — opened by a tap that was aiming at the sentence
+    // beside it. A ducat: link is not asked about here because it is asked
+    // about where it lands: it stays inside this app (setPackage — the
+    // scheme is ours, but any app may register it), and the claim road
+    // names the card before anything is added.
+    var linkAsk by remember { mutableStateOf<String?>(null) }
+    val open: (String) -> Unit = { target ->
+        runCatching {
+            context.startActivity(
+                android.content.Intent(
+                    android.content.Intent.ACTION_VIEW,
+                    android.net.Uri.parse(target),
+                ).apply { if (target.startsWith("ducat:")) setPackage(context.packageName) },
+            )
+        }.onFailure { DucatLog.w("Chat", "open link: ${it.message}") }
+    }
+    linkAsk?.let { target ->
+        AlertDialog(
+            onDismissRequest = { linkAsk = null },
+            title = { Text(stringResource(R.string.chat_open_link_title)) },
+            text = {
+                Column {
+                    Text(stringResource(R.string.chat_open_link_body))
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        target,
+                        fontFamily = FontFamily.Monospace,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { linkAsk = null; open(target) }) {
+                    Text(stringResource(R.string.chat_open_link_go))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { linkAsk = null }) {
+                    Text(stringResource(R.string.common_cancel))
+                }
+            },
+        )
+    }
     Text(
         text,
         color = fg,
         modifier = Modifier.clickable {
-            runCatching {
-                context.startActivity(
-                    android.content.Intent(
-                        android.content.Intent.ACTION_VIEW,
-                        android.net.Uri.parse(url),
-                    )
-                )
-            }
+            if (url.startsWith("ducat:")) open(url) else linkAsk = url
         },
     )
 }
@@ -2600,7 +2639,10 @@ private fun AudioBubble(file: java.io.File, fg: androidx.compose.ui.graphics.Col
     }
 }
 
-/** Any other file: name and size, tap to open with whatever handles its type. */
+/**
+ * Any other file: name and size. A tap opens the kinds a viewer renders and
+ * nothing runs; everything else goes out through the share sheet.
+ */
 @Composable
 private fun FileBubble(
     file: java.io.File,
@@ -2616,11 +2658,32 @@ private fun FileBubble(
                 val uri = androidx.core.content.FileProvider.getUriForFile(
                     context, context.packageName + ".backups", file,
                 )
-                context.startActivity(
-                    android.content.Intent(android.content.Intent.ACTION_VIEW)
-                        .setDataAndType(uri, mime)
-                        .addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                )
+                if (opensInPlace(mime)) {
+                    context.startActivity(
+                        android.content.Intent(android.content.Intent.ACTION_VIEW)
+                            .setDataAndType(uri, mime)
+                            .addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    )
+                } else {
+                    // The type is the sender's word, and "open with
+                    // whatever claims it" is how an installer, a document
+                    // with macros or an archive of one gets a tap it never
+                    // earned. Out to wherever the reader keeps things
+                    // instead — the same rule a publication's issue gets
+                    // (librarySave), and for the same reason.
+                    val send = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                        type = mime
+                        putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                        // With ClipData: the sheet builds its preview from
+                        // it, and the grant is unambiguous only when it is
+                        // there (see BackupSettings.share).
+                        clipData = android.content.ClipData.newUri(
+                            context.contentResolver, name, uri,
+                        )
+                        addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
+                    context.startActivity(android.content.Intent.createChooser(send, name))
+                }
             }.onFailure { DucatLog.w("Chat", "open file: ${it.message}") }
         },
         verticalAlignment = Alignment.CenterVertically,
@@ -2637,6 +2700,20 @@ private fun FileBubble(
             )
         }
     }
+}
+
+/**
+ * Types a tap may hand straight to a viewer: rendered, never run.
+ *
+ * Declared by the sender, so this is a list of what the *viewer* will do
+ * with the bytes, not a claim about the bytes — a picture that is not a
+ * picture fails to decode, which is the worst an image viewer can do with
+ * it.
+ */
+private fun opensInPlace(mime: String): Boolean {
+    val m = mime.lowercase().substringBefore(';').trim()
+    return m.startsWith("image/") || m.startsWith("video/") || m.startsWith("audio/") ||
+        m == "application/pdf" || m == "text/plain"
 }
 
 /**

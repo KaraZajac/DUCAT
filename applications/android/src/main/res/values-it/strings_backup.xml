@@ -11,4 +11,5 @@
     <string name="backup_opened">Aperto — %1$d quote di garanzia, altezza di ripristino %2$d</string>
     <string name="backup_could_not_open">Impossibile aprirlo — passphrase sbagliata, o il file è stato alterato</string>
     <string name="backup_share_title">Salva il tuo backup DUCAT</string>
+    <string name="backup_pin_why">Un backup contiene la chiave di spesa. Inserisci il PIN per esportarne o importarne uno.</string>
 </resources>

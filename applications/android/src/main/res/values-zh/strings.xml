@@ -53,4 +53,6 @@
     <string name="prices_menu_warn_go">仍然切换</string>
     <string name="common_connecting">正在连接网络…</string>
     <string name="common_read_failed">暂时无法读取：%1$s</string>
+    <string name="common_show">显示</string>
+    <string name="common_hide">隐藏</string>
 </resources>

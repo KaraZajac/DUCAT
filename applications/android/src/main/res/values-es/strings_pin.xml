@@ -21,4 +21,7 @@
     <string name="pin_use_device_lock">Usar el desbloqueo del teléfono</string>
     <string name="pin_device_title">Desbloquea para aprobar</string>
     <string name="pin_device_subtitle">Confirma que eres tú antes de que salga este pago.</string>
+    <string name="pin_device_subtitle_reset">Falta el registro del PIN. Desbloquea el teléfono para establecer uno nuevo.</string>
+    <string name="pin_tampered_body">Esta cartera tiene PIN, pero su registro desapareció del teléfono. Desbloquea con el bloqueo del propio teléfono para establecer uno nuevo.</string>
+    <string name="pin_tampered_no_lock">Esta cartera tiene PIN, pero su registro desapareció del teléfono, y el teléfono no tiene bloqueo propio que comprobar. Restaura desde una copia de seguridad para continuar.</string>
 </resources>

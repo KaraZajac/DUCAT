@@ -52,4 +52,6 @@
     <string name="prices_menu_warn_go">حوّل على أي حال</string>
     <string name="common_connecting">جارٍ الاتصال بالشبكة…</string>
     <string name="common_read_failed">تعذّرت القراءة الآن: %1$s</string>
+    <string name="common_show">إظهار</string>
+    <string name="common_hide">إخفاء</string>
 </resources>

@@ -11,4 +11,5 @@
     <string name="backup_opened">Terbuka — %1$d bagian escrow, tinggi pemulihan %2$d</string>
     <string name="backup_could_not_open">Tidak bisa dibuka — frasa sandi salah, atau file-nya sudah diubah</string>
     <string name="backup_share_title">Simpan cadangan DUCAT-mu</string>
+    <string name="backup_pin_why">Cadangan memuat kunci belanja. Masukkan PIN untuk mengekspor atau mengimpornya.</string>
 </resources>

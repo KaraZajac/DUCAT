@@ -63,4 +63,6 @@
     <string name="releases_remove_body">它会从这部手机上消失，这部手机也不再提供它。仍在让它活着的人手里还有；如果没有人，这个地址就打不开了。</string>
     <string name="releases_remove_keep">保留</string>
     <string name="releases_shared">已分享：%1$s</string>
+    <string name="releases_add_link_title">收入你的资料库？</string>
+    <string name="releases_add_link_body">有内容向 DUCAT 递来了一个文件地址。收入后会在你的书架上添加条目；在你要求之前不会获取任何内容。</string>
 </resources>

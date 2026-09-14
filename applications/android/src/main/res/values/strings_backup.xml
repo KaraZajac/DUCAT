@@ -11,4 +11,5 @@
     <string name="backup_opened">Opened — %1$d escrow share(s), restore height %2$d</string>
     <string name="backup_could_not_open">Could not open it — wrong passphrase, or the file has been altered</string>
     <string name="backup_share_title">Save your DUCAT backup</string>
+    <string name="backup_pin_why">A backup carries the spend key. Enter the PIN to export or import one.</string>
 </resources>

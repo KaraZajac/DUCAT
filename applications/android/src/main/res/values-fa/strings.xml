@@ -52,4 +52,6 @@
     <string name="prices_menu_warn_go">با این حال تغییر بده</string>
     <string name="common_connecting">در حال اتصال به شبکه…</string>
     <string name="common_read_failed">هم‌اکنون خوانده نشد: %1$s</string>
+    <string name="common_show">نمایش</string>
+    <string name="common_hide">پنهان کردن</string>
 </resources>

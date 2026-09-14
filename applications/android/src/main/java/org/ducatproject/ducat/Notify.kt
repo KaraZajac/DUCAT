@@ -67,6 +67,12 @@ object Notify {
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
                 openChat?.let { putExtra("open_chat", it) }
                 openGroup?.let { putExtra("open_group", it) }
+                // Signed, in effect: MainActivity is exported for the
+                // launcher and for ducat: links, so any app could send it
+                // these extras and drop somebody into a thread of its
+                // choosing. It honours them only with this alongside, and
+                // only this process's notifications carry it.
+                putExtra(TOKEN_EXTRA, token)
             },
             // The extra varies per notification; without UPDATE_CURRENT every
             // notification reuses the first one's intent and every tap lands
@@ -95,6 +101,18 @@ object Notify {
     private val reqCode = java.util.concurrent.atomic.AtomicInteger(
         100 + ((System.currentTimeMillis() / 1000) % 100_000).toInt(),
     )
+
+    /** The extra a notification's tap carries to prove it is ours. */
+    const val TOKEN_EXTRA = "notify_token"
+
+    /**
+     * Minted once per process, never stored, never logged. A notification
+     * posted by an earlier process therefore opens the app rather than the
+     * thread — the one cost of a value no other app can have read.
+     */
+    val token: String = ByteArray(16)
+        .also { java.security.SecureRandom().nextBytes(it) }
+        .joinToString("") { "%02x".format(it) }
 
     /**
      * Whether what this app posts can reach the person at all.

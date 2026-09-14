@@ -11,4 +11,5 @@
     <string name="backup_opened">Abierto — %1$d parte(s) del depósito en garantía, altura de restauración %2$d</string>
     <string name="backup_could_not_open">No se pudo abrir — frase secreta incorrecta, o el archivo fue alterado</string>
     <string name="backup_share_title">Guarda tu respaldo de DUCAT</string>
+    <string name="backup_pin_why">Una copia de seguridad lleva la clave de gasto. Introduce el PIN para exportar o importar una.</string>
 </resources>

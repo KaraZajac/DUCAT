@@ -64,4 +64,6 @@ Het nummer is van jou. Dit is alleen wat het kost om het ergens anders te lezen.
     <string name="releases_remove_body">Het gaat van deze telefoon af en deze telefoon levert het niet meer. Wie het in leven houdt heeft het nog; houdt niemand het, dan lost het adres niet meer op.</string>
     <string name="releases_remove_keep">Behouden</string>
     <string name="releases_shared">Gedeeld: %1$s</string>
+    <string name="releases_add_link_title">In je bibliotheek opbergen?</string>
+    <string name="releases_add_link_body">Iets gaf DUCAT een bestandsadres. Opbergen zet het item op je plank; er wordt niets opgehaald tot je erom vraagt.</string>
 </resources>

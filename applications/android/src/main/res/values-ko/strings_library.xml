@@ -63,4 +63,6 @@
     <string name="releases_remove_body">이 휴대폰에서 사라지고, 이 휴대폰은 더 이상 제공하지 않습니다. 살려 두는 다른 사람이 있다면 그쪽에는 남습니다. 아무도 없으면 그 주소는 열리지 않게 됩니다.</string>
     <string name="releases_remove_keep">그대로 두기</string>
     <string name="releases_shared">공유함: %1$s</string>
+    <string name="releases_add_link_title">라이브러리에 보관할까요?</string>
+    <string name="releases_add_link_body">무언가가 DUCAT에 파일 주소를 건넸습니다. 보관하면 선반에 항목이 추가되며, 요청하기 전에는 아무것도 가져오지 않습니다.</string>
 </resources>

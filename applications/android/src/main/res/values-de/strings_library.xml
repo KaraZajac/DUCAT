@@ -64,4 +64,6 @@ Die Ausgabe gehört dir. Das hier ist nur der Preis dafür, sie anderswo zu lese
     <string name="releases_remove_body">Sie verschwindet von diesem Telefon, und dieses Telefon stellt sie nicht mehr bereit. Wer sie sonst am Leben hält, hat sie weiterhin; hält niemand sie, löst die Adresse nicht mehr auf.</string>
     <string name="releases_remove_keep">Behalten</string>
     <string name="releases_shared">Geteilt: %1$s</string>
+    <string name="releases_add_link_title">In deiner Bibliothek ablegen?</string>
+    <string name="releases_add_link_body">Etwas hat DUCAT eine Dateiadresse übergeben. Ablegen fügt den Eintrag deinem Regal hinzu; geladen wird erst, wenn du es verlangst.</string>
 </resources>

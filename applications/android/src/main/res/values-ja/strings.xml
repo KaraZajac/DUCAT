@@ -53,4 +53,6 @@
     <string name="prices_menu_warn_go">それでも切り替える</string>
     <string name="common_connecting">ネットワークに接続中…</string>
     <string name="common_read_failed">今は読み取れませんでした：%1$s</string>
+    <string name="common_show">表示</string>
+    <string name="common_hide">非表示</string>
 </resources>

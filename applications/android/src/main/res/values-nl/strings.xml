@@ -52,4 +52,6 @@
     <string name="prices_menu_warn_go">Toch wisselen</string>
     <string name="common_connecting">Verbinden met het netwerk…</string>
     <string name="common_read_failed">Kon dit nu niet lezen: %1$s</string>
+    <string name="common_show">Tonen</string>
+    <string name="common_hide">Verbergen</string>
 </resources>

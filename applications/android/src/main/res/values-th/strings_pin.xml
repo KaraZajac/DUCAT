@@ -20,4 +20,7 @@
     <string name="pin_use_device_lock">ใช้การปลดล็อกของเครื่อง</string>
     <string name="pin_device_title">ปลดล็อกเพื่ออนุมัติ</string>
     <string name="pin_device_subtitle">ยืนยันว่าเป็นคุณ ก่อนที่เงินก้อนนี้จะออกไป</string>
+    <string name="pin_device_subtitle_reset">ไม่พบบันทึก PIN ปลดล็อกโทรศัพท์เพื่อตั้งค่าใหม่</string>
+    <string name="pin_tampered_body">กระเป๋านี้มี PIN แต่บันทึกหายไปจากโทรศัพท์ ปลดล็อกด้วยการล็อกของโทรศัพท์เองเพื่อตั้งค่าใหม่</string>
+    <string name="pin_tampered_no_lock">กระเป๋านี้มี PIN แต่บันทึกหายไปจากโทรศัพท์ และโทรศัพท์ไม่มีการล็อกของตัวเองให้ตรวจสอบ กู้คืนจากข้อมูลสำรองเพื่อดำเนินการต่อ</string>
 </resources>

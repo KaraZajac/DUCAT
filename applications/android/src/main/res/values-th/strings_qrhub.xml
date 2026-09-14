@@ -18,4 +18,6 @@
     <string name="qrhub_issue_failed">เผยแพร่โค้ดของคุณไม่สำเร็จ ตรวจสอบเครือข่ายแล้วลองอีกครั้ง</string>
     <string name="qrhub_try_again">ลองอีกครั้ง</string>
     <string name="qrhub_offline">ยังไม่ได้เชื่อมต่อ — ไม่มีใครรับรหัสนี้ได้จนกว่าเครื่องนี้จะเข้าร่วมเครือข่าย</string>
+    <string name="qrhub_tap_card_body">%1$s ยื่นบัตรผ่าน NFC เพิ่มหรือไม่</string>
+    <string name="qrhub_tap_card_body_unnamed">มีคนที่ไม่ระบุชื่อยื่นบัตรผ่าน NFC เพิ่มหรือไม่</string>
 </resources>

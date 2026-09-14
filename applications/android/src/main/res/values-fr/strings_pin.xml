@@ -21,4 +21,7 @@
     <string name="pin_use_device_lock">Utiliser le déverrouillage du téléphone</string>
     <string name="pin_device_title">Déverrouille pour approuver</string>
     <string name="pin_device_subtitle">Confirme que c\'est bien toi avant que ce paiement parte.</string>
+    <string name="pin_device_subtitle_reset">L’enregistrement du code PIN est absent. Déverrouillez le téléphone pour en définir un nouveau.</string>
+    <string name="pin_tampered_body">Ce portefeuille a un code PIN, mais son enregistrement a disparu du téléphone. Déverrouillez avec le verrou du téléphone pour en définir un nouveau.</string>
+    <string name="pin_tampered_no_lock">Ce portefeuille a un code PIN, mais son enregistrement a disparu du téléphone, et le téléphone n’a pas de verrou propre à vérifier. Restaurez une sauvegarde pour continuer.</string>
 </resources>

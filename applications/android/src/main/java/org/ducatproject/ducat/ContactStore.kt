@@ -2777,6 +2777,20 @@ class WalletStore(context: Context) {
 
     fun address(): String? = prefs.getString("wallet_address", null)
 
+    /**
+     * That a PIN was chosen on this install, kept beside the spend key.
+     *
+     * [Pin] keeps its verifier in a file of its own, and a missing verifier
+     * used to read as "no PIN yet" — an invitation to set one, offered to
+     * whoever had just deleted the file. This mark lives in the wallet's
+     * store instead, so it cannot be removed without removing the wallet
+     * with it, and [Pin.tampered] reads the two together. Not a backup key:
+     * a restored phone chooses its PIN afresh, in setup, as it always has.
+     */
+    fun markPinSet() = prefs.edit().putBoolean("pin_chosen", true).apply()
+
+    fun pinEverSet(): Boolean = prefs.getBoolean("pin_chosen", false)
+
     // --- per-contact subaddresses (§15.10) --------------------------------
     //
     // One counterparty, one address: a primary handed to everyone is a

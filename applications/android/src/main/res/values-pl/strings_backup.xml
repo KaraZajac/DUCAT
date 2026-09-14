@@ -11,4 +11,5 @@
     <string name="backup_opened">Otwarto — udziały escrow: %1$d, wysokość przywracania: %2$d</string>
     <string name="backup_could_not_open">Nie udało się otworzyć — złe hasło albo plik został zmieniony</string>
     <string name="backup_share_title">Zapisz kopię zapasową DUCAT</string>
+    <string name="backup_pin_why">Kopia zapasowa zawiera klucz wydatkowy. Wpisz PIN, aby ją wyeksportować lub zaimportować.</string>
 </resources>

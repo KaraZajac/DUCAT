@@ -63,4 +63,6 @@
     <string name="releases_remove_body">มันจะหายจากโทรศัพท์เครื่องนี้ และเครื่องนี้จะหยุดให้บริการ ใครที่ยังหล่อเลี้ยงไว้ก็ยังมีอยู่ ถ้าไม่มีใครเลย ที่อยู่จะใช้ไม่ได้อีก</string>
     <string name="releases_remove_keep">เก็บไว้</string>
     <string name="releases_shared">แบ่งปันแล้ว: %1$s</string>
+    <string name="releases_add_link_title">เก็บสิ่งนี้ในคลังของคุณหรือไม่</string>
+    <string name="releases_add_link_body">มีบางอย่างส่งที่อยู่ไฟล์ให้ DUCAT การเก็บจะเพิ่มรายการลงชั้นของคุณ จะไม่ดึงข้อมูลจนกว่าคุณจะขอ</string>
 </resources>

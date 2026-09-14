@@ -63,4 +63,6 @@
     <string name="releases_remove_body">この端末から消え、この端末は配信をやめます。ほかに生かしている人がいればその人の手元には残ります。誰もいなければ、そのアドレスは開かなくなります。</string>
     <string name="releases_remove_keep">残す</string>
     <string name="releases_shared">共有しました：%1$s</string>
+    <string name="releases_add_link_title">ライブラリに保存しますか？</string>
+    <string name="releases_add_link_body">何かが DUCAT にファイルのアドレスを渡しました。保存すると棚に項目が加わります。求めるまで何も取得されません。</string>
 </resources>

@@ -151,4 +151,7 @@
     <string name="chat_copied">คัดลอกข้อความแล้ว</string>
     <string name="chat_download_file">ดาวน์โหลด</string>
     <string name="chat_file_too_big_swarm">ไฟล์นี้มีขนาด %1$d MB — ตอนนี้ไฟล์จำกัดที่ 64 MB</string>
+    <string name="chat_open_link_title">เปิดลิงก์นี้หรือไม่</string>
+    <string name="chat_open_link_body">จะเปิดนอก DUCAT ผู้ดูแลเว็บไซต์นั้นจะเห็นว่าคุณโหลดมัน</string>
+    <string name="chat_open_link_go">เปิด</string>
 </resources>

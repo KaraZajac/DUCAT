@@ -125,9 +125,13 @@ object LibraryFetch {
     fun dirFor(context: Context, publisherHex: String, period: String): File {
         val root = File(context.filesDir, "publications")
         val d = File(root, "$publisherHex/$period")
-        require(d.canonicalPath.startsWith(root.canonicalPath + File.separator)) {
-            "a period id may not leave the library"
-        }
+        // The filesystem's answer, or a refusal — never a throw of its own:
+        // canonicalPath raises on a NUL byte, and a period id is a
+        // publisher's string.
+        val inside = runCatching {
+            d.canonicalPath.startsWith(root.canonicalPath + File.separator)
+        }.getOrDefault(false)
+        require(inside) { "a period id may not leave the library" }
         return d
     }
 
@@ -812,14 +816,47 @@ private fun ReleasesCard(tick: Long) {
     var addr by remember { mutableStateOf("") }
     var word by remember { mutableStateOf<String?>(null) }
 
-    // A tapped ducat:file/ link, filed the moment this screen is up.
+    // A tapped ducat:file/ link. Not filed on arrival: unlike an address
+    // typed in here, a link can be sent by anyone — an NDEF sticker, a page
+    // in the sealed room, any app on the phone — and a Library that fills
+    // itself with whatever it is handed is a Library somebody else curates.
+    // The address is shown and the person asked, the way a tapped site
+    // (Drawer) and a tapped card (MainActivity) are.
     val pending by pendingReleaseAdd.collectAsState()
+    var linkAsk by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(pending) {
         val uri = pending ?: return@LaunchedEffect
         pendingReleaseAdd.value = null
-        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-            runCatching { org.ducatproject.ducat.Releases.add(context, uri) }
-        }
+        linkAsk = uri
+    }
+    linkAsk?.let { uri ->
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { linkAsk = null },
+            title = { Text(stringResource(R.string.releases_add_link_title)) },
+            text = {
+                Column {
+                    Text(stringResource(R.string.releases_add_link_body))
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        uri,
+                        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+            },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    linkAsk = null
+                    val added = org.ducatproject.ducat.Releases.add(context, uri)
+                    word = if (added == null) context.getString(R.string.releases_addr_bad) else null
+                }) { Text(stringResource(R.string.releases_add_go)) }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = { linkAsk = null }) {
+                    Text(stringResource(R.string.releases_add_cancel))
+                }
+            },
+        )
     }
 
     val picker = androidx.activity.compose.rememberLauncherForActivityResult(

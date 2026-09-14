@@ -9,11 +9,11 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-feature android:name="android.hardware.nfc.hce" android:required="false" />
 
-    <!-- BLE, for the §18.7 service. Not required: a device without it falls to QR. -->
-    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
-    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
-        android:usesPermissionFlags="neverForLocation" />
+    <!-- §18.7's BLE transport is not built yet. Nothing here asks for
+         Bluetooth, so no permission is declared for it: a permission the
+         code cannot use is one an install prompt and a reviewer still have
+         to account for. The feature stays declared optional so no store
+         filters on it when the transport does arrive. -->
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="false" />
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -51,7 +51,6 @@
          at the far end. NodeService adds the type when a call connects and
          drops it when the call ends. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".DucatApplication"
@@ -76,11 +75,18 @@
         <!-- adjustResize so the message list shrinks for the keyboard instead of
              being covered by it; Compose's imePadding needs the window to
              actually resize. -->
+        <!-- An empty taskAffinity keeps this activity in a task of its own
+             name: with the default (the package name) another app could
+             start an activity declaring the same affinity and have it land
+             in DUCAT's task, above the wallet, wearing its entry in recents.
+             launchMode stays singleTask — every deep link and notification
+             tap depends on it (see SiteViewerActivity). -->
         <activity
             android:windowSoftInputMode="adjustResize"
             android:name=".MainActivity"
             android:theme="@style/Theme.Ducat.Splash"
             android:exported="true"
+            android:taskAffinity=""
             android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

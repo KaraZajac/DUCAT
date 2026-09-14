@@ -68,7 +68,12 @@ private fun unpack(context: android.content.Context, uri: android.net.Uri, into:
                 val e = zip.nextEntry ?: break
                 if (e.isDirectory) continue
                 val out = File(into, e.name)
-                require(out.canonicalPath.startsWith(root)) {
+                // Asked without throwing on its own account: canonicalPath
+                // raises on a NUL in the name, and the name is the
+                // archive's. A refusal is the same sentence either way.
+                val inside = runCatching { out.canonicalPath.startsWith(root) }
+                    .getOrDefault(false)
+                require(inside) {
                     "that archive tries to write outside the page: ${e.name}"
                 }
                 out.parentFile?.mkdirs()

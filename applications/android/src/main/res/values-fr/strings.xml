@@ -53,4 +53,6 @@
     <string name="prices_menu_warn_go">Changer quand même</string>
     <string name="common_connecting">Connexion au réseau…</string>
     <string name="common_read_failed">Lecture impossible pour l\'instant : %1$s</string>
+    <string name="common_show">Afficher</string>
+    <string name="common_hide">Masquer</string>
 </resources>

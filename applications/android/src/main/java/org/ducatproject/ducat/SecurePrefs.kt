@@ -26,8 +26,10 @@ import androidx.security.crypto.MasterKey
  * to be recreated per call, and the migration must run exactly once.
  *
  * NOTE: only the sensitive files go through here. Settings — locale, units,
- * theme, the ride draft, the map cache — stay plain: no secret is in them and
- * every extra migrating file is extra risk for no privacy gained.
+ * theme, the map cache — stay plain: no secret is in them and every extra
+ * migrating file is extra risk for no privacy gained. The standing hail
+ * (`ducat_rides`) is not a setting: it names a pickup and the inbox a
+ * driver answers to, so it crossed over.
  */
 object SecurePrefs {
     /** Encrypted files get a distinct name: the library manages the file, and

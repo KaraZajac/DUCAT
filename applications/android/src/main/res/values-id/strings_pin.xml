@@ -20,4 +20,7 @@
     <string name="pin_use_device_lock">Pakai kunci layar ponsel</string>
     <string name="pin_device_title">Buka kunci untuk menyetujui</string>
     <string name="pin_device_subtitle">Pastikan ini kamu sebelum pembayaran ini keluar.</string>
+    <string name="pin_device_subtitle_reset">Catatan PIN hilang. Buka kunci ponsel untuk membuat PIN baru.</string>
+    <string name="pin_tampered_body">Dompet ini punya PIN, tetapi catatannya hilang dari ponsel. Buka dengan kunci ponsel sendiri untuk membuat PIN baru.</string>
+    <string name="pin_tampered_no_lock">Dompet ini punya PIN, tetapi catatannya hilang dari ponsel, dan ponsel tidak punya kunci sendiri untuk diperiksa. Pulihkan dari cadangan untuk melanjutkan.</string>
 </resources>

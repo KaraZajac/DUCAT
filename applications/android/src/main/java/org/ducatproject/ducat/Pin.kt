@@ -40,6 +40,25 @@ object Pin {
         !prefs(context).getString("verifier", null).isNullOrBlank()
 
     /**
+     * No verifier, on a device that once had one.
+     *
+     * A missing verifier used to mean "no PIN yet", and the gate answered it
+     * by offering to set one — which made deleting this store the way past
+     * every gate in the app. The wallet's store remembers that a PIN was
+     * chosen ([WalletStore.markPinSet]), in a file that cannot go without the
+     * wallet going with it; the two disagreeing is not a first run, whatever
+     * this store says. The gate then asks the phone's own lock to vouch for
+     * the person before a new PIN may be chosen. A genuine first run, and a
+     * device that onboarded before PINs existed, carry no mark and are
+     * unchanged.
+     */
+    fun tampered(context: Context): Boolean {
+        val gone = !isSet(context) && WalletStore(context).pinEverSet()
+        if (gone) DucatLog.w(TAG, "the PIN record is missing on a device that had one")
+        return gone
+    }
+
+    /**
      * Set or replace the PIN. Callers that are *replacing* one must have
      * checked the old one first — this cannot tell the difference between an
      * owner and somebody who picked the phone up.
@@ -52,6 +71,9 @@ object Pin {
             .putInt("failures", 0)
             .putLong("locked_until", 0L)
             .apply()
+        // After the verifier, so a crash between the two leaves a PIN with
+        // no mark (a first run again) rather than a mark with no PIN.
+        WalletStore(context).markPinSet()
         DucatLog.i(TAG, "a PIN is set on this device")
     }
 

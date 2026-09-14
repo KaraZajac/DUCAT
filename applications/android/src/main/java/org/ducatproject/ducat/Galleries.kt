@@ -118,13 +118,8 @@ object Galleries {
      * a bad one would cross: canonicalised and compared, the way a home's
      * bundle does it.
      */
-    fun file(context: Context, digestHex: String, rel: String): File? {
-        if (rel.contains("..") || rel.contains(':') || rel.startsWith("//")) return null
-        val root = dirFor(context, digestHex)
-        val f = File(root, rel.trimStart('/'))
-        val rootCanon = root.canonicalPath + File.separator
-        return f.takeIf { it.isFile && it.canonicalPath.startsWith(rootCanon) }
-    }
+    fun file(context: Context, digestHex: String, rel: String): File? =
+        Sites.insideRoot(dirFor(context, digestHex), rel)?.takeIf { it.isFile }
 
     /** Every image in the bundle, wherever it sits, in path order: the
      *  reading for a bundle with no document, which is every bundle written

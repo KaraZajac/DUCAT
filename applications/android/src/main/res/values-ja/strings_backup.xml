@@ -11,4 +11,5 @@
     <string name="backup_opened">開きました — エスクローシェア%1$d件、復元高 %2$d</string>
     <string name="backup_could_not_open">開けませんでした — パスフレーズが違うか、ファイルが改変されています</string>
     <string name="backup_share_title">DUCATのバックアップを保存</string>
+    <string name="backup_pin_why">バックアップには支出鍵が含まれます。書き出しや取り込みには PIN を入力してください。</string>
 </resources>

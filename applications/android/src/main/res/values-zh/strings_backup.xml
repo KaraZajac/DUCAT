@@ -11,4 +11,5 @@
     <string name="backup_opened">已打开 — %1$d 份托管份额，恢复高度 %2$d</string>
     <string name="backup_could_not_open">打不开 — 口令不对，或文件被改动过</string>
     <string name="backup_share_title">保存你的 DUCAT 备份</string>
+    <string name="backup_pin_why">备份包含支出密钥。请输入 PIN 以导出或导入。</string>
 </resources>

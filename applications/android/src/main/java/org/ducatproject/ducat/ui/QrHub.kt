@@ -74,6 +74,69 @@ fun QrHub(
         onDismiss = { intro = null },
         onNamed = { val go = intro; intro = null; go?.invoke() },
     )
+    /** Claim a card, behind the name gate when we have no name to give. */
+    val claimCard: (String) -> Unit = { text ->
+        val go: () -> Unit = {
+            claiming = true; scanError = null
+            claimingCard = text
+            // Scanned this one before: the thread it opened is the
+            // answer, and the claim finds it.
+            claimOffScreen(context, text)
+        }
+        if (nameGateNeeded(context)) intro = go else go()
+    }
+
+    // A card that arrived over NFC is asked about before it is claimed. A
+    // scan is aimed — the person held the camera at a code in front of
+    // them — but while this tab is up the phone is a reader, and a card
+    // held near it in a pocket or across a counter is read just the same.
+    // So a tap names the card first, as a link tapped in another app does
+    // (MainActivity), and claims only on a yes. The camera's road is
+    // unchanged: pointing it at a code is the consent.
+    var tapPending by remember { mutableStateOf<String?>(null) }
+    var tapAsk by remember { mutableStateOf<Pair<String, String>?>(null) }
+    LaunchedEffect(tapPending) {
+        val text = tapPending ?: return@LaunchedEffect
+        // Cleared at the end, not first: clearing the key cancels this
+        // effect at the read below.
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            runCatching { uniffi.ducat_mobile.readContactCard(text) }
+        }.onSuccess { card ->
+            if (card.expired) scanError = context.getString(R.string.main_card_link_expired)
+            else tapAsk = text to card.assertedName.orEmpty()
+        }.onFailure {
+            DucatLog.w(TAG, "tapped card unreadable: ${it.message}")
+            scanError = context.getString(claimFailureRes(it))
+        }
+        tapPending = null
+    }
+    tapAsk?.let { (text, who) ->
+        AlertDialog(
+            onDismissRequest = { tapAsk = null },
+            title = { Text(stringResource(R.string.main_card_link_title)) },
+            text = {
+                // The card's own claim about itself (§16.9), like every
+                // name here.
+                Text(
+                    stringResource(
+                        if (who.isBlank()) R.string.qrhub_tap_card_body_unnamed
+                        else R.string.qrhub_tap_card_body,
+                        who,
+                    ),
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { tapAsk = null; claimCard(text) }) {
+                    Text(stringResource(R.string.main_card_link_add))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { tapAsk = null }) {
+                    Text(stringResource(R.string.main_card_link_not_now))
+                }
+            },
+        )
+    }
 
 
     BackHandler(onBack = onClose)
@@ -274,36 +337,37 @@ fun QrHub(
                         // Content, not a dialog: this screen already is one,
                         // and a nested dialog painted over its own tab bar —
                         // which is why the toggle appeared not to exist.
+                        val onCode: (String) -> Unit = { raw ->
+                            val text = raw.trim()
+                            if (claiming) {
+                                // A second code while the first is being
+                                // claimed would be a second claim; the
+                                // scanner already swallows the same one.
+                            } else if (!text.startsWith("ducat:card/")) {
+                                // A Monero code. Not a contact and never
+                                // becomes one — hand it to the pay screen,
+                                // which is what the person scanning it
+                                // wanted in the first place. The amount
+                                // goes with it: a code that named one was
+                                // being read for its address alone, and
+                                // the payer left to retype the figure.
+                                val m = moneroUri(text)
+                                if (m != null) onScanAddress(m.first, m.second)
+                                else scanError = context.getString(R.string.qrhub_not_a_code)
+                            } else {
+                                claimCard(text)
+                            }
+                        }
                         QrScannerContent(
                             prompt = stringResource(R.string.qrhub_scan_prompt),
-                            onResult = { raw ->
+                            onResult = onCode,
+                            // A card over NFC is asked about first (tapAsk);
+                            // anything else that arrives that way is what
+                            // it is, and takes the camera's road.
+                            onNfc = { raw ->
                                 val text = raw.trim()
-                                if (claiming) {
-                                    // A second code while the first is being
-                                    // claimed would be a second claim; the
-                                    // scanner already swallows the same one.
-                                } else if (!text.startsWith("ducat:card/")) {
-                                    // A Monero code. Not a contact and never
-                                    // becomes one — hand it to the pay screen,
-                                    // which is what the person scanning it
-                                    // wanted in the first place. The amount
-                                    // goes with it: a code that named one was
-                                    // being read for its address alone, and
-                                    // the payer left to retype the figure.
-                                    val m = moneroUri(text)
-                                    if (m != null) onScanAddress(m.first, m.second)
-                                    else scanError = context.getString(R.string.qrhub_not_a_code)
-                                } else {
-                                    val go: () -> Unit = {
-                                        claiming = true; scanError = null
-                                        claimingCard = text
-                                        // Scanned this one before: the thread
-                                        // it opened is the answer, and the
-                                        // claim finds it.
-                                        claimOffScreen(context, text)
-                                    }
-                                    if (nameGateNeeded(context)) intro = go else go()
-                                }
+                                if (text.startsWith("ducat:card/") && !claiming) tapPending = text
+                                else onCode(raw)
                             },
                         )
                     } else {

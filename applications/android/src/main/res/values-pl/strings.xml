@@ -52,4 +52,6 @@
     <string name="prices_menu_warn_go">Zmień mimo to</string>
     <string name="common_connecting">Łączenie z siecią…</string>
     <string name="common_read_failed">Nie udało się teraz odczytać: %1$s</string>
+    <string name="common_show">Pokaż</string>
+    <string name="common_hide">Ukryj</string>
 </resources>

@@ -151,4 +151,7 @@
     <string name="chat_copied">Đã sao chép tin nhắn</string>
     <string name="chat_download_file">Tải xuống</string>
     <string name="chat_file_too_big_swarm">tệp đó %1$d MB — hiện tệp tối đa 64 MB</string>
+    <string name="chat_open_link_title">Mở liên kết này?</string>
+    <string name="chat_open_link_body">Liên kết mở bên ngoài DUCAT. Người vận hành trang đó sẽ thấy bạn đã tải nó.</string>
+    <string name="chat_open_link_go">Mở</string>
 </resources>

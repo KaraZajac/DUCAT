@@ -21,4 +21,7 @@
     <string name="pin_use_device_lock">Use phone unlock</string>
     <string name="pin_device_title">Unlock to approve</string>
     <string name="pin_device_subtitle">Confirm it is you before this payment leaves.</string>
+    <string name="pin_device_subtitle_reset">The PIN’s record is missing. Unlock the phone to set a new one.</string>
+    <string name="pin_tampered_body">This wallet has a PIN, but its record is gone from the phone. Unlock with the phone’s own lock to set a new one.</string>
+    <string name="pin_tampered_no_lock">This wallet has a PIN, but its record is gone from the phone, and the phone has no lock of its own to check. Restore from a backup to continue.</string>
 </resources>

@@ -63,4 +63,6 @@ Edisi ini milik Anda. Ini hanya harga untuk membacanya di tempat lain.</string>
     <string name="releases_remove_body">Ia hilang dari ponsel ini, dan ponsel ini berhenti menyajikannya. Siapa pun yang menjaganya hidup masih memilikinya; jika tak ada, alamatnya berhenti bekerja.</string>
     <string name="releases_remove_keep">Biarkan</string>
     <string name="releases_shared">Dibagikan: %1$s</string>
+    <string name="releases_add_link_title">Simpan ini di pustaka Anda?</string>
+    <string name="releases_add_link_body">Sesuatu memberi DUCAT alamat berkas. Menyimpannya menambahkan entri ke rak Anda; tidak ada yang diunduh sampai Anda memintanya.</string>
 </resources>

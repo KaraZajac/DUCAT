@@ -53,4 +53,6 @@
     <string name="prices_menu_warn_go">Всё равно сменить</string>
     <string name="common_connecting">Подключаемся к сети…</string>
     <string name="common_read_failed">Не удалось прочитать сейчас: %1$s</string>
+    <string name="common_show">Показать</string>
+    <string name="common_hide">Скрыть</string>
 </resources>

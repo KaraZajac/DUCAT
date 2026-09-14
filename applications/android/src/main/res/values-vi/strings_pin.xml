@@ -20,4 +20,7 @@
     <string name="pin_use_device_lock">Dùng khoá màn hình điện thoại</string>
     <string name="pin_device_title">Mở khoá để duyệt</string>
     <string name="pin_device_subtitle">Xác nhận đúng là bạn trước khi khoản này rời đi.</string>
+    <string name="pin_device_subtitle_reset">Bản ghi mã PIN bị thiếu. Mở khóa điện thoại để đặt mã mới.</string>
+    <string name="pin_tampered_body">Ví này có mã PIN nhưng bản ghi của nó đã mất khỏi điện thoại. Mở khóa bằng khóa của chính điện thoại để đặt mã mới.</string>
+    <string name="pin_tampered_no_lock">Ví này có mã PIN nhưng bản ghi của nó đã mất khỏi điện thoại, và điện thoại không có khóa riêng để kiểm tra. Khôi phục từ bản sao lưu để tiếp tục.</string>
 </resources>

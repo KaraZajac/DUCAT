@@ -366,6 +366,9 @@ kotlin.sourceSets["main"].kotlin.apply {
         "org/ducatproject/ducat/ui/ScannerDesk.kt",
         "org/ducatproject/ducat/ui/LocationDesk.kt",
         "org/ducatproject/ducat/ui/RouteMapDesk.kt",
+        // The desk's half of the phone's ui/SecureScreen.kt: FLAG_SECURE is an
+        // Android window flag, so the desk's version does nothing.
+        "org/ducatproject/ducat/ui/SecureScreenDesk.kt",
         "org/ducatproject/ducat/DeskWindowHandle.kt",
         "org/ducatproject/ducat/nfc/TapDesk.kt",
     )

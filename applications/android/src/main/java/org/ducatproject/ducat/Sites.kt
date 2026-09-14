@@ -174,6 +174,35 @@ object Sites {
     fun bundleDir(context: Context, recordKey: String): File =
         File(context.filesDir, "sites/${dirNameOf(recordKey)}/current")
 
+    /**
+     * A file a stranger named, kept inside [root] — or nothing.
+     *
+     * Every bundle path this app opens was chosen by whoever built the
+     * bundle: a page's image, a listing's picture, a home's thumbnail. The
+     * old check at each door was `canonicalPath.startsWith(root)`, which is
+     * the right question asked unsafely — `File.canonicalPath` throws on a
+     * NUL byte, and a throw from inside a WebView callback or a list's
+     * `remember` is the whole process, not a refused picture. So the
+     * refusals come first, on the string: no control characters, no
+     * backslashes (a separator on the platform this bundle may have been
+     * built on, and a way to spell one past a check that splits on `/`),
+     * no `..` or empty segments, no scheme-looking colons. Only then is the
+     * filesystem asked, and asked inside runCatching, and the answer is
+     * compared with the separator on — a bare prefix let `current-x/` next
+     * to `current/` pass as inside it.
+     */
+    fun insideRoot(root: File, rel: String): File? {
+        val path = rel.trimStart('/')
+        if (path.isEmpty()) return null
+        if (path.any { it < ' ' || it == '\u007f' || it == '\\' || it == ':' }) return null
+        val parts = path.split('/')
+        if (parts.any { it.isEmpty() || it == "." || it == ".." }) return null
+        val f = File(root, path)
+        val rootCanon = runCatching { root.canonicalPath }.getOrNull() ?: return null
+        val canon = runCatching { f.canonicalPath }.getOrNull() ?: return null
+        return f.takeIf { canon.startsWith(rootCanon + File.separator) }
+    }
+
     private fun dirNameOf(recordKey: String): String =
         java.security.MessageDigest.getInstance("SHA-256")
             .digest(recordKey.toByteArray()).toHexString()

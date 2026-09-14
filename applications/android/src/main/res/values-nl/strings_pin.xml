@@ -21,4 +21,7 @@
     <string name="pin_use_device_lock">Telefoonvergrendeling gebruiken</string>
     <string name="pin_device_title">Ontgrendel om goed te keuren</string>
     <string name="pin_device_subtitle">Bevestig dat jij het bent voordat deze betaling weggaat.</string>
+    <string name="pin_device_subtitle_reset">Het pincoderecord ontbreekt. Ontgrendel de telefoon om een nieuwe in te stellen.</string>
+    <string name="pin_tampered_body">Deze wallet heeft een pincode, maar het record ervan is van de telefoon verdwenen. Ontgrendel met de eigen vergrendeling van de telefoon om een nieuwe in te stellen.</string>
+    <string name="pin_tampered_no_lock">Deze wallet heeft een pincode, maar het record ervan is van de telefoon verdwenen, en de telefoon heeft geen eigen vergrendeling om te controleren. Herstel vanuit een back-up om verder te gaan.</string>
 </resources>

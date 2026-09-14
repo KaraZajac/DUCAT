@@ -11,4 +11,5 @@
     <string name="backup_opened">باز شد — %1$d سهم امانی، ارتفاع بازیابی %2$d</string>
     <string name="backup_could_not_open">باز نشد — عبارت عبور اشتباه است یا فایل دستکاری شده</string>
     <string name="backup_share_title">ذخیرهٔ پشتیبان DUCAT</string>
+    <string name="backup_pin_why">پشتیبان کلید خرج را در بر دارد. برای صدور یا وارد کردن، PIN را وارد کنید.</string>
 </resources>

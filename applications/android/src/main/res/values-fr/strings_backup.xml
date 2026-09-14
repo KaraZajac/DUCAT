@@ -11,4 +11,5 @@
     <string name="backup_opened">Ouvert — %1$d part(s) de séquestre, hauteur de restauration %2$d</string>
     <string name="backup_could_not_open">Impossible de l\'ouvrir — mauvaise phrase secrète, ou le fichier a été modifié</string>
     <string name="backup_share_title">Enregistre ta sauvegarde DUCAT</string>
+    <string name="backup_pin_why">Une sauvegarde contient la clé de dépense. Saisissez le code PIN pour en exporter ou importer une.</string>
 </resources>

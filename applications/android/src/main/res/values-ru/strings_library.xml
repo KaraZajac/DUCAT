@@ -66,4 +66,6 @@
     <string name="releases_remove_body">Он уйдёт с этого телефона, и телефон перестанет его раздавать. У тех, кто держит его живым, он остаётся; если таких нет, адрес перестанет открываться.</string>
     <string name="releases_remove_keep">Оставить</string>
     <string name="releases_shared">Выложено: %1$s</string>
+    <string name="releases_add_link_title">Добавить это в библиотеку?</string>
+    <string name="releases_add_link_body">Что-то передало DUCAT адрес файла. Добавление помещает запись на вашу полку; ничего не загружается, пока вы не попросите.</string>
 </resources>

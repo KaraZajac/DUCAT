@@ -38,6 +38,10 @@ class Intent(val action: String? = null, val data: android.net.Uri? = null) {
     }
 
     fun addFlags(flags: Int): Intent = this
+
+    /** A ducat: link opened from a chat is pinned to this app on the phone;
+     *  the desk has no other app to keep it from, so this is a no-op. */
+    fun setPackage(name: String?): Intent = this
     fun getStringExtra(name: String): String? = extras[name] as? String
     fun setType(t: String): Intent = apply { type = t }
     val dataString: String? get() = null

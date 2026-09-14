@@ -12,7 +12,11 @@ import android.content.Context
  * rider hails one ride at a time.
  */
 class RideStore(context: Context) {
-    private val prefs = context.getSharedPreferences("ducat_rides", Context.MODE_PRIVATE)
+    // Encrypted at rest, like the stores it points into: a standing hail
+    // names the inbox a driver's claim answers to and carries our card, and
+    // the driver's outgoing offer sits in the same file. A plaintext copy of
+    // where somebody is being picked up from is not a setting.
+    private val prefs = prefs(context)
 
     data class PostedRide(
         /** The board shard the notice is pinned to, e.g. "geo:abcdef-2". */
@@ -91,7 +95,20 @@ class RideStore(context: Context) {
      * a sweep is removing the ones that expired. A lost tombstone is a board
      * slot nobody reclaims.
      */
-    private companion object { val lock = Any() }
+    companion object {
+        private val lock = Any()
+
+        /**
+         * The file itself, for the driver's half.
+         *
+         * The outgoing offer and the taken-offer mark live in ui/Hail.kt
+         * beside the types they persist, and they share this file with the
+         * posted hail: one handle, so both halves are the same encrypted
+         * store and the plaintext original is migrated in exactly once.
+         */
+        fun prefs(context: Context): android.content.SharedPreferences =
+            securePrefs(context, "ducat_rides")
+    }
 
     fun addTombstone(t: Tombstone) = synchronized(lock) {
         val arr = org.json.JSONArray(prefs.getString("tombstones", "[]"))

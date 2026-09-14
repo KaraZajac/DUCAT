@@ -21,4 +21,7 @@
     <string name="pin_use_device_lock">Telefon kilidini kullan</string>
     <string name="pin_device_title">Onaylamak için kilidi aç</string>
     <string name="pin_device_subtitle">Bu ödeme çıkmadan önce sen olduğunu doğrula.</string>
+    <string name="pin_device_subtitle_reset">PIN kaydı eksik. Yeni bir PIN belirlemek için telefonun kilidini aç.</string>
+    <string name="pin_tampered_body">Bu cüzdanın PIN’i var ama kaydı telefondan silinmiş. Yeni bir PIN belirlemek için telefonun kendi kilidiyle aç.</string>
+    <string name="pin_tampered_no_lock">Bu cüzdanın PIN’i var ama kaydı telefondan silinmiş ve telefonun denetlenecek kendi kilidi yok. Devam etmek için yedekten geri yükle.</string>
 </resources>

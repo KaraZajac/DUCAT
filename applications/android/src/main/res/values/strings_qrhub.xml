@@ -18,4 +18,6 @@
     <string name="qrhub_issue_failed">Your code could not be published. Check the network and try again.</string>
     <string name="qrhub_try_again">Try again</string>
     <string name="qrhub_offline">Not connected yet — nobody can take this code until this phone finishes joining the network.</string>
+    <string name="qrhub_tap_card_body">A card was presented over NFC by %1$s. Add them?</string>
+    <string name="qrhub_tap_card_body_unnamed">A card was presented over NFC by someone who gave no name. Add them?</string>
 </resources>

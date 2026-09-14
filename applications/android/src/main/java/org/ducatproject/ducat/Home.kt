@@ -305,12 +305,14 @@ object Home {
 
     /** A file from a persona's home bundle, for the timeline's thumbnails. */
     fun homeFile(context: Context, personaHex: String, rel: String): File? {
-        if (rel.contains("..") || rel.contains(':') || rel.startsWith("//")) return null
         val key = runCatching { keyOf(personaHex) }.getOrNull() ?: return null
-        val root = if (personaHex == PersonaStore(context).worn() && File(dir(context, personaHex), rel.trimStart('/')).isFile) dir(context, personaHex) else Sites.bundleDir(context, key)
-        val f = File(root, rel.trimStart('/'))
-        val rootCanon = root.canonicalPath + File.separator
-        return f.takeIf { it.isFile && it.canonicalPath.startsWith(rootCanon) }
+        // Our own home's working copy first, when it has the file; then the
+        // fetched bundle. Both through the one check, which refuses rather
+        // than throws on a name a stranger's feed chose.
+        if (personaHex == PersonaStore(context).worn()) {
+            Sites.insideRoot(dir(context, personaHex), rel)?.takeIf { it.isFile }?.let { return it }
+        }
+        return Sites.insideRoot(Sites.bundleDir(context, key), rel)?.takeIf { it.isFile }
     }
 
     fun myHomeView(context: Context): Triple<String, Boolean, Int> {

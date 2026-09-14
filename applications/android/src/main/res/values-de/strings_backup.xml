@@ -11,4 +11,5 @@
     <string name="backup_opened">Geöffnet — %1$d Treuhand-Anteil(e), Wiederherstellungshöhe %2$d</string>
     <string name="backup_could_not_open">Ließ sich nicht öffnen — falsche Passphrase, oder die Datei wurde verändert</string>
     <string name="backup_share_title">Dein DUCAT-Backup speichern</string>
+    <string name="backup_pin_why">Ein Backup enthält den Ausgabeschlüssel. Gib die PIN ein, um eines zu exportieren oder zu importieren.</string>
 </resources>

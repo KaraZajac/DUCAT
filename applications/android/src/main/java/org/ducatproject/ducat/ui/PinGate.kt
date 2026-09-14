@@ -29,6 +29,13 @@ import org.ducatproject.ducat.R
  * quietly waved through. There is no third path where money leaves without
  * somebody proving they are the owner.
  *
+ * With one exception to "none": a device that *had* a PIN and has lost the
+ * record of it ([Pin.tampered]) is not offered a fresh start. Choosing a new
+ * PIN there waits on the phone's own lock vouching for the person, and where
+ * the phone has no lock to ask, on a restore from backup — because "set a new
+ * one" over a deleted verifier is exactly the reset the PIN promises not to
+ * have.
+ *
  * The check runs off the main thread on purpose — deriving the verifier is
  * two hundred thousand rounds, which is the point of it, and a UI thread that
  * did it would freeze for as long as it took.
@@ -53,15 +60,24 @@ fun PinGate(
     if (!open) return
     val context = LocalContext.current
     val setting = remember { !Pin.isSet(context) }
+    // Setting again over a record that went missing — see Pin.tampered.
+    val tampered = remember { setting && Pin.tampered(context) }
     // The phone's own lock, where there is one. Never offered while *setting*
     // a PIN — the point of that step is that this app has a secret of its own,
-    // and a fingerprint cannot stand in for choosing one.
-    val deviceLock = remember { !setting && DeviceLock.available(context) }
+    // and a fingerprint cannot stand in for choosing one. Except when the
+    // PIN is being set *again*: then the lock is the only thing left on the
+    // phone that can say whose hand this is, and it is asked first.
+    val deviceLock = remember { (!setting || tampered) && DeviceLock.available(context) }
     var asking by remember { mutableStateOf(false) }
+    // The phone's lock has vouched for the person, on the tampered path.
+    // Nothing passes on it alone; it only unlocks choosing a new PIN.
+    var vouched by remember { mutableStateOf(false) }
     // Raise it without being asked once they have used it once. The PIN stays
-    // on screen underneath, so declining the prompt is not a dead end.
+    // on screen underneath, so declining the prompt is not a dead end. On the
+    // tampered path it is raised regardless: there is nothing else to do
+    // until it has answered.
     LaunchedEffect(deviceLock) {
-        if (deviceLock && DeviceLock.preferred(context)) asking = true
+        if (deviceLock && (tampered || DeviceLock.preferred(context))) asking = true
     }
     // **Deliberately not saveable, unlike every other field in the app.**
     // Saved state is handed to system_server and can be written to disk;
@@ -88,18 +104,30 @@ fun PinGate(
         DeviceLock.backend?.prompt(
             context,
             context.getString(R.string.pin_device_title),
-            context.getString(R.string.pin_device_subtitle),
+            context.getString(
+                if (tampered) R.string.pin_device_subtitle_reset
+                else R.string.pin_device_subtitle,
+            ),
         ) { ok ->
             asking = false
             if (ok) {
-                DeviceLock.remember(context, true)
-                onPassed()
+                if (tampered) {
+                    // Vouched for, not through: the new PIN still has to be
+                    // chosen, and the lock is not remembered as a preference
+                    // off the back of a repair.
+                    vouched = true
+                } else {
+                    DeviceLock.remember(context, true)
+                    onPassed()
+                }
             }
         } ?: run { asking = false }
     }
 
     val digitsOk = entered.length in Pin.MIN_DIGITS..Pin.MAX_DIGITS
-    val ready = if (setting) digitsOk && again == entered else digitsOk && lockedFor == 0L
+    val ready =
+        if (setting) digitsOk && again == entered && (!tampered || vouched)
+        else digitsOk && lockedFor == 0L
 
     AlertDialog(
         onDismissRequest = { if (!busy) onDismiss() },
@@ -110,9 +138,21 @@ fun PinGate(
         },
         text = {
             Column {
+                // Off screenshots and recordings while the digits are typed.
+                // Inside the dialog, so it is the dialog's window that gets
+                // the flag — the activity's would not cover this surface.
+                SecureWhileShown()
                 Text(
                     stringResource(
-                        if (setting) R.string.pin_set_body else why,
+                        when {
+                            // Said while it can be acted on: the record is
+                            // gone, this is not a first run, and what is
+                            // being asked for before a new PIN.
+                            tampered && deviceLock -> R.string.pin_tampered_body
+                            tampered -> R.string.pin_tampered_no_lock
+                            setting -> R.string.pin_set_body
+                            else -> why
+                        },
                     ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -161,7 +201,7 @@ fun PinGate(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                if (deviceLock && !asking) {
+                if (deviceLock && !asking && !vouched) {
                     Spacer(Modifier.height(12.dp))
                     // A button rather than a setting. Somebody who wants this
                     // presses it once and is never asked again; somebody who

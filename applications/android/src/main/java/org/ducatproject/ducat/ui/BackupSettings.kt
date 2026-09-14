@@ -7,6 +7,10 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -14,6 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import org.ducatproject.ducat.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -48,10 +55,13 @@ import org.ducatproject.ducat.saidWhy
 @Composable
 fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: ByteArray?) {
     val context = LocalContext.current
-    // Saveable, as setup's is: a rotation rebuilt this card, and a
-    // passphrase chosen with care — and the "Exported N bytes" that said
-    // the last tap worked — were gone with no sign they had been there.
-    var passphrase by rememberSaveable { mutableStateOf("") }
+    // **Deliberately not saveable**, like the PIN and unlike the message
+    // under it. Saved state is handed to system_server and written to
+    // disk; the passphrase to a file that holds the spend key must not
+    // travel that way, and a rotation costing a retype is the right price.
+    // It was saveable once, for the reason the message still is — a turn
+    // of the phone emptied the field with no sign it had been typed.
+    var passphrase by remember { mutableStateOf("") }
     var message by rememberSaveable { mutableStateOf<String?>(null) }
     var restored by remember { mutableStateOf<String?>(null) }
     var pendingImport by remember { mutableStateOf<Uri?>(null) }
@@ -75,6 +85,9 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
             is ThreadSends.Outcome.Landed -> {
                 restored = RestoreRun.landed?.second
                 message = o.result
+                // Its work is done; a passphrase left in a field is a
+                // passphrase on a screen somebody walks away from.
+                passphrase = ""
             }
             is ThreadSends.Outcome.Failed -> {
                 // A wrong passphrase and a tampered file are the same error,
@@ -97,6 +110,7 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
                 val f = File(o.result!!)
                 share(context, f)
                 message = context.getString(R.string.backup_exported_bytes, f.length())
+                passphrase = ""
             }
             is ThreadSends.Outcome.Failed -> {
                 DucatLog.w("Backup", "export: ${o.error.javaClass.simpleName}: ${o.error.message}")
@@ -107,10 +121,34 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
 
     val picker = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
-    ) { uri -> pendingImport = uri }
+    ) { uri ->
+        // A cancelled pick leaves nothing waiting on the passphrase.
+        if (uri == null) RestoreRun.phrase = null else pendingImport = uri
+    }
+
+    // Both doors behind the PIN. An export is the spend key leaving the
+    // phone in a file, and an import replaces the wallet with another —
+    // each is the whole of what the PIN guards, and neither used to ask
+    // for it: a passphrase of eight characters typed by whoever was
+    // holding the phone was enough. Held rather than run, so the only path
+    // from the tap to the act goes through the gate (as Chat's does).
+    var pinAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+    PinGate(
+        open = pinAction != null,
+        onDismiss = { pinAction = null },
+        onPassed = {
+            val go = pinAction
+            pinAction = null
+            go?.invoke()
+        },
+        why = R.string.backup_pin_why,
+    )
 
     Card(Modifier.fillMaxWidth().padding(vertical = 8.dp), shape = RoundedCornerShape(16.dp)) {
         Column(Modifier.padding(16.dp)) {
+            // A passphrase is typed here and a restored wallet's address
+            // shown; neither belongs in a screenshot or a recording.
+            SecureWhileShown()
             Text(stringResource(R.string.backup_title),
                 style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(4.dp))
@@ -120,10 +158,10 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
             )
 
             Spacer(Modifier.height(12.dp))
-            OutlinedTextField(
+            PassphraseField(
                 value = passphrase,
                 onValueChange = { passphrase = it; message = null },
-                label = { Text(stringResource(R.string.backup_passphrase)) },
+                label = stringResource(R.string.backup_passphrase),
                 // The rule both buttons are enforcing, said out loud — the
                 // same way onboarding says it, with the same string.
                 //
@@ -141,70 +179,85 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
                     // kept somewhere else where an attacker can grind at it.
                     PassphraseNote(passphrase)
                 },
-                singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
 
             Spacer(Modifier.height(12.dp))
             Row {
+                // What Export does once the PIN has passed. The passphrase
+                // is read when the gate opens, not when it closes: the
+                // field is still on screen behind the dialog either way,
+                // and a value captured at the tap is the one the person
+                // saw graded.
+                val export: () -> Unit = {
+                    val phrase = passphrase
+                    exporting = true; message = null
+                    ThreadSends.launch(ContactStore(context), BACKUP_EXPORT_KEY, null) {
+                        val bytes = exportBackup(
+                            BackupInput(
+                                spendKeyHex!!,
+                                restoreHeight,
+                                // The user's own settings travel with
+                                // their keys: a restore that keeps the
+                                // money and loses the name and the
+                                // privacy choice quietly changed both.
+                                NameStore(
+                                    context,
+                                    PersonaStore(context).personaHex(),
+                                ).get(),
+                                ContactStore(context).publishAddress(),
+                                MyProfile(
+                                    context,
+                                    PersonaStore(context).personaHex(),
+                                ).toWire(),
+                                ContactStore(context).backupContacts(),
+                                ContactStore(context).backupPrekeys().first,
+                                ContactStore(context).backupPrekeys().second,
+                                ContactStore(context).backupPrekeys().third.toULong(),
+                                ContactStore(context).backupAppState(),
+                                // §4.3.3, and the reason this screen
+                                // talks about freshness. They live in
+                                // their own store, which is how they
+                                // came to be left out of the one this
+                                // is assembled from.
+                                Ceremony.backupShares(context),
+                                // The compartments, primary first —
+                                // a restore is becoming this phone,
+                                // every hat included.
+                                PersonaStore(context).backupPersonas(context),
+                            ),
+                            phrase,
+                            personaSecret!!,
+                        )
+                        val f = setupBackupFile(context)
+                        f.parentFile?.mkdirs()
+                        f.writeBytes(bytes)
+                        ContactStore(context).markBackupExported()
+                        f.absolutePath
+                    }
+                }
                 Button(
                     enabled = !busy && passphrase.length >= 8 &&
                         spendKeyHex != null && personaSecret != null,
-                    onClick = {
-                        exporting = true; message = null
-                        ThreadSends.launch(ContactStore(context), BACKUP_EXPORT_KEY, null) {
-                            val bytes = exportBackup(
-                                BackupInput(
-                                    spendKeyHex!!,
-                                    restoreHeight,
-                                    // The user's own settings travel with
-                                    // their keys: a restore that keeps the
-                                    // money and loses the name and the
-                                    // privacy choice quietly changed both.
-                                    NameStore(
-                                        context,
-                                        PersonaStore(context).personaHex(),
-                                    ).get(),
-                                    ContactStore(context).publishAddress(),
-                                    MyProfile(
-                                        context,
-                                        PersonaStore(context).personaHex(),
-                                    ).toWire(),
-                                    ContactStore(context).backupContacts(),
-                                    ContactStore(context).backupPrekeys().first,
-                                    ContactStore(context).backupPrekeys().second,
-                                    ContactStore(context).backupPrekeys().third.toULong(),
-                                    ContactStore(context).backupAppState(),
-                                    // §4.3.3, and the reason this screen
-                                    // talks about freshness. They live in
-                                    // their own store, which is how they
-                                    // came to be left out of the one this
-                                    // is assembled from.
-                                    Ceremony.backupShares(context),
-                                    // The compartments, primary first —
-                                    // a restore is becoming this phone,
-                                    // every hat included.
-                                    PersonaStore(context).backupPersonas(context),
-                                ),
-                                passphrase,
-                                personaSecret!!,
-                            )
-                            val f = setupBackupFile(context)
-                            f.parentFile?.mkdirs()
-                            f.writeBytes(bytes)
-                            ContactStore(context).markBackupExported()
-                            f.absolutePath
-                        }
-                    },
+                    onClick = { pinAction = export },
                 ) {
                     if (busy) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                    else Text(stringResource(R.string.backup_export))
+                    else Text(stringResource(R.string.backup_import).let { stringResource(R.string.backup_export) })
                 }
 
                 Spacer(Modifier.width(8.dp))
                 OutlinedButton(
                     enabled = !busy && passphrase.length >= 8,
-                    onClick = { picker.launch(arrayOf("*/*")) },
+                    onClick = {
+                        pinAction = {
+                            // Kept by the process while the picker is up:
+                            // the file comes back to whichever activity is
+                            // alive then, and the field — deliberately not
+                            // saved — may have been rebuilt empty.
+                            RestoreRun.phrase = passphrase
+                            picker.launch(arrayOf("*/*"))
+                        }
+                    },
                 ) { Text(stringResource(R.string.backup_import)) }
             }
 
@@ -273,6 +326,11 @@ internal object RestoreRun {
 
     @Volatile
     var landed: Pair<uniffi.ducat_mobile.RestoredBackup, String>? = null
+
+    /** The passphrase typed before the picker went up, held by the process
+     *  rather than saved state — see the Import button. Cleared once used. */
+    @Volatile
+    var phrase: String? = null
 }
 
 /**
@@ -410,4 +468,43 @@ internal fun PassphraseNote(passphrase: String) {
                 MaterialTheme.ducat.settled
     }
     Text(text, color = colour)
+}
+
+/**
+ * A passphrase field that hides what is typed, with a switch to show it.
+ *
+ * Hidden by default because this is typed in public — a shop counter, a
+ * bus — and shown on request because a passphrase nobody can read back is
+ * one that gets mistyped twice and then written on paper. `supportingText`
+ * is the caller's grade of it, drawn under the field like any other note.
+ */
+@Composable
+internal fun PassphraseField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    supportingText: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var shown by remember { mutableStateOf(false) }
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        singleLine = true,
+        visualTransformation =
+            if (shown) androidx.compose.ui.text.input.VisualTransformation.None
+            else androidx.compose.ui.text.input.PasswordVisualTransformation(),
+        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+            keyboardType = androidx.compose.ui.text.input.KeyboardType.Password,
+            autoCorrectEnabled = false,
+        ),
+        trailingIcon = {
+            TextButton(onClick = { shown = !shown }) {
+                Text(stringResource(if (shown) R.string.common_hide else R.string.common_show))
+            }
+        },
+        supportingText = supportingText,
+        modifier = modifier,
+    )
 }

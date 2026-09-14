@@ -21,4 +21,7 @@
     <string name="pin_use_device_lock">फ़ोन का अनलॉक इस्तेमाल करें</string>
     <string name="pin_device_title">मंज़ूरी के लिए अनलॉक करें</string>
     <string name="pin_device_subtitle">यह भुगतान जाने से पहले पुष्टि करें कि यह आप ही हैं।</string>
+    <string name="pin_device_subtitle_reset">PIN का रिकॉर्ड गायब है। नया PIN रखने के लिए फ़ोन अनलॉक करें।</string>
+    <string name="pin_tampered_body">इस वॉलेट में PIN है, पर उसका रिकॉर्ड फ़ोन से गायब है। नया PIN रखने के लिए फ़ोन के अपने लॉक से अनलॉक करें।</string>
+    <string name="pin_tampered_no_lock">इस वॉलेट में PIN है, पर उसका रिकॉर्ड फ़ोन से गायब है, और फ़ोन में जाँचने के लिए अपना कोई लॉक नहीं है। जारी रखने के लिए बैकअप से पुनर्स्थापित करें।</string>
 </resources>

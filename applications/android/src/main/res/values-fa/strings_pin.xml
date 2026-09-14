@@ -21,4 +21,7 @@
     <string name="pin_use_device_lock">از قفل گوشی استفاده کن</string>
     <string name="pin_device_title">برای تأیید قفل را باز کن</string>
     <string name="pin_device_subtitle">پیش از خارج شدن این پرداخت تأیید کن که خودت هستی.</string>
+    <string name="pin_device_subtitle_reset">سابقهٔ PIN موجود نیست. برای تعیین PIN تازه، قفل گوشی را باز کنید.</string>
+    <string name="pin_tampered_body">این کیف پول PIN دارد، اما سابقه‌اش از گوشی پاک شده است. با قفل خود گوشی باز کنید تا PIN تازه‌ای تعیین شود.</string>
+    <string name="pin_tampered_no_lock">این کیف پول PIN دارد، اما سابقه‌اش از گوشی پاک شده و گوشی قفل خودی برای بررسی ندارد. برای ادامه از پشتیبان بازیابی کنید.</string>
 </resources>

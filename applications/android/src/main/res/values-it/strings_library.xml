@@ -64,4 +64,6 @@ Il numero è suo. Questo è solo ciò che costa leggerlo altrove.</string>
     <string name="releases_remove_body">Se ne va da questo telefono, che smette di servirlo. Chi lo tiene in vita ce l\'ha ancora; se non lo fa nessuno, l\'indirizzo non risolve più.</string>
     <string name="releases_remove_keep">Tienilo</string>
     <string name="releases_shared">Condiviso: %1$s</string>
+    <string name="releases_add_link_title">Archiviare nella tua libreria?</string>
+    <string name="releases_add_link_body">Qualcosa ha passato a DUCAT l’indirizzo di un file. Archiviarlo aggiunge la voce allo scaffale; nulla viene scaricato finché non lo chiedi.</string>
 </resources>

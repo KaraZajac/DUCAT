@@ -11,4 +11,5 @@
     <string name="backup_opened">Đã mở — %1$d phần ký quỹ, chiều cao khôi phục %2$d</string>
     <string name="backup_could_not_open">Không mở được — sai cụm mật khẩu, hoặc tệp đã bị sửa đổi</string>
     <string name="backup_share_title">Lưu bản sao lưu DUCAT của bạn</string>
+    <string name="backup_pin_why">Bản sao lưu chứa khóa chi tiêu. Nhập mã PIN để xuất hoặc nhập.</string>
 </resources>

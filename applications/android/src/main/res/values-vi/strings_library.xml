@@ -63,4 +63,6 @@ Số này là của bạn. Đây chỉ là cái giá để đọc nó ở nơi k
     <string name="releases_remove_body">Nó rời khỏi máy này và máy này ngừng phục vụ nó. Ai còn giữ nó sống thì vẫn có; nếu không ai giữ, địa chỉ sẽ không còn mở được.</string>
     <string name="releases_remove_keep">Giữ lại</string>
     <string name="releases_shared">Đã chia sẻ: %1$s</string>
+    <string name="releases_add_link_title">Lưu vào thư viện của bạn?</string>
+    <string name="releases_add_link_body">Có gì đó đã đưa cho DUCAT một địa chỉ tệp. Lưu lại sẽ thêm mục vào kệ của bạn; không tải gì cho đến khi bạn yêu cầu.</string>
 </resources>
