@@ -855,10 +855,13 @@ OBJECT_TYPE_CODES = {
     "TapPresent": 1, "FullOffer": 2, "ACCEPT": 3, "RECEIPT": 4, "TXPROOF": 5,
     "REFUND": 6, "CANCEL": 7, "MANDATE": 8, "CONTACT_OFFER": 9,
     "CONTACT_ACCEPT": 10, "bond_proof": 11, "attestation": 12,
+    # The same two under the labels core signs with (sig.rs).
+    "BOND_PROOF": 11, "ATTESTATION": 12,
     "DISPUTE": 13, "RULING": 14, "HAIL": 15, "HAIL_REPLY": 16, "TapStatic": 17,
     "TXID": 18, "ESCROW_SETUP": 19, "ESCROW_READY": 20, "RELEASE": 21,
     "SLASH_CLAIM": 22, "MESSAGE": 23, "PREKEY_BUNDLE": 24,
     "SEALED_MESSAGE": 25, "LOG_HEAD": 26, "BOARD_NOTICE": 27,
+    "BURN_PROOF": 28,
 }
 
 
@@ -1150,6 +1153,23 @@ DET_CAR_PHOTO = 301
 # inside the signature.
 DET_INBOX = 302
 DET_ROLE = 303
+# §9.5 BURN_PROOF and §9.2 ATTESTATION (core/src/trust.rs)
+BP_TXID = 304
+BP_AMOUNT = 305
+BP_HEIGHT = 306
+BP_PROOF = 307
+BP_PERSONA = 308
+BP_PURPOSE = 309
+AT_SUBJECT = 310
+AT_AMOUNT = 311
+AT_RATING = 312
+AT_TS = 313
+AT_TXID = 314
+AT_NOTE = 315
+AT_SIGNER = 316
+MAX_OUT_PROOF_CHARS = 10 + 17 * 132
+MAX_BURN_PURPOSE_CHARS = 32
+MAX_ATTESTATION_NOTE_CHARS = 140
 MAX_CAR_MODEL_CHARS, MAX_CAR_COLOR_CHARS, MAX_PLATE_CHARS = 24, 16, 12
 MAX_AVATAR_BYTES = 12 * 1024
 MAX_EMAIL_CHARS, MAX_PHONE_DIGITS, MAX_SIGNAL_CHARS = 254, 15, 48
@@ -1262,6 +1282,17 @@ def _take_text(body, key, max_chars, what, required):
         raise Reject("Malformed", f"{what} is present but empty")
     if len(val) > max_chars:
         raise Reject("Malformed", f"{what} exceeds {max_chars} characters")
+    # Core's display_hazard (wire.rs): bidi overrides and isolates, the
+    # deprecated formatting controls, and C0/C1 controls are refused in every
+    # text field, because these render beside a name on a stranger's screen.
+    # The reference has done this for every text since 0.5x; this checker
+    # only did it for email until attestation_note_with_bidi pinned the gap.
+    for ch in val:
+        o = ord(ch)
+        if (0x202A <= o <= 0x202E or 0x2066 <= o <= 0x206F
+                or o <= 0x08 or 0x0B <= o <= 0x0C or 0x0E <= o <= 0x1F
+                or o == 0x7F or 0x80 <= o <= 0x9F):
+            raise Reject("Malformed", f"{what} carries a display hazard")
     return val
 
 
@@ -2462,6 +2493,133 @@ def _reencode_map(fields):
     return encode(("map", fields))
 
 
+def _open_signed(buf, type_name, persona_field, what):
+    """§18.3 envelope under the persona named in the body: peek the body for
+    the key, then verify. Returns (body_map, body_bytes) with the type
+    already checked. Shared by the trust objects (§9.5, §9.2)."""
+    env = _body(buf)
+    if 1 not in env or 2 not in env:
+        raise Reject("Malformed", "not a signed envelope")
+    body_bytes = _take(env, 1, "bytes", "envelope body")
+    sig = _take(env, 2, "bytes", "envelope signature")
+    _finish(env)
+    if len(sig) != 64:
+        raise Reject("Malformed", "signature is 64 bytes")
+    peek = _body(body_bytes)
+    _expect_type(peek, type_name, type_name)
+    if persona_field not in peek or peek[persona_field][0] != "bytes":
+        raise Reject("Malformed", f"no {what}")
+    persona = peek[persona_field][1]
+    suite = peek.get(2, (None, None))[1]
+    if suite not in (1, 2):
+        raise Reject("UnsupportedSuite", "unknown suite")
+    return _body(body_bytes), body_bytes, sig, persona, suite
+
+
+def parse_burn_proof(buf):
+    b, body_bytes, sig, persona, suite = _open_signed(buf, "BURN_PROOF", BP_PERSONA, "persona")
+    _expect_type(b, "BURN_PROOF", "BURN_PROOF")
+    version = _take(b, 1, "uint", "version")
+    if version != 1:
+        raise Reject("Malformed", "burn proof version is not 1")
+    out = {
+        "version": version,
+        "suite": _take(b, 2, "uint", "suite"),
+        "txid": _take(b, BP_TXID, "bytes", "txid"),
+        "amount_pxmr": _take(b, BP_AMOUNT, "uint", "amount"),
+        "height": _take(b, BP_HEIGHT, "uint", "height"),
+        "proof": _take_text(b, BP_PROOF, MAX_OUT_PROOF_CHARS, "proof", True),
+        "persona": _take(b, BP_PERSONA, "bytes", "persona"),
+        "purpose": _take_text(b, BP_PURPOSE, MAX_BURN_PURPOSE_CHARS, "purpose", True),
+    }
+    _finish(b)
+    if len(out["txid"]) != 32 or len(out["persona"]) != 32:
+        raise Reject("Malformed", "txid and persona are 32 bytes")
+    if out["amount_pxmr"] == 0:
+        raise Reject("Malformed", "a burn of nothing")
+    if out["height"] == 0:
+        raise Reject("Malformed", "a burn needs a block")
+    rest = out["proof"][len("OutProofV2"):] if out["proof"].startswith("OutProofV2") else None
+    if rest is None or not rest or len(rest) % 132 != 0 or not rest.isalnum():
+        raise Reject("Malformed", "not an OutProofV2")
+    verify_sig(suite, persona, sig, sig_input("BURN_PROOF", suite, body_bytes))
+    return out
+
+
+def run_burn_proof(cases, r):
+    for c in cases:
+        def go(c=c):
+            d = parse_burn_proof(unhex(c["burn_proof_hex"]))
+            m = [(0, ("uint", OBJECT_TYPE_CODES["BURN_PROOF"])),
+                 (1, ("uint", d["version"])), (2, ("uint", d["suite"])),
+                 (BP_TXID, ("bytes", d["txid"])), (BP_AMOUNT, ("uint", d["amount_pxmr"])),
+                 (BP_HEIGHT, ("uint", d["height"])), (BP_PROOF, ("text", d["proof"])),
+                 (BP_PERSONA, ("bytes", d["persona"])), (BP_PURPOSE, ("text", d["purpose"]))]
+            return _reencode_map(m)
+        out = expect_reject(r, "contact", c, go)
+        if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:
+            r.passed -= 1
+            r.bad("contact", c["name"], c.get("why", ""),
+                  f"re-encoded to {out.hex()}, vector says "
+                  f"{c['expect']['reencodes_to_hex']}")
+
+
+def parse_attestation(buf):
+    b, body_bytes, sig, signer, suite = _open_signed(buf, "ATTESTATION", AT_SIGNER, "signer")
+    _expect_type(b, "ATTESTATION", "ATTESTATION")
+    version = _take(b, 1, "uint", "version")
+    if version != 1:
+        raise Reject("Malformed", "attestation version is not 1")
+    rating = _take(b, AT_RATING, "uint", "rating")
+    if rating < 1 or rating > 5:
+        raise Reject("Malformed", "rating is 1 to 5")
+    out = {
+        "version": version,
+        "suite": _take(b, 2, "uint", "suite"),
+        "subject": _take(b, AT_SUBJECT, "bytes", "subject"),
+        "amount_pxmr": _take(b, AT_AMOUNT, "uint", "amount"),
+        "rating": rating,
+        "ts": _take(b, AT_TS, "uint", "time"),
+        "txid": _opt(b, AT_TXID, "bytes"),
+        "note": _take_text(b, AT_NOTE, MAX_ATTESTATION_NOTE_CHARS, "note", False),
+        "signer": _take(b, AT_SIGNER, "bytes", "signer"),
+    }
+    _finish(b)
+    if len(out["subject"]) != 32 or len(out["signer"]) != 32:
+        raise Reject("Malformed", "subject and signer are 32 bytes")
+    if out["txid"] is not None and len(out["txid"]) != 32:
+        raise Reject("Malformed", "txid is 32 bytes")
+    if out["ts"] == 0:
+        raise Reject("Malformed", "an attestation needs a time")
+    if out["subject"] == out["signer"]:
+        raise Reject("Malformed", "a persona cannot attest to itself")
+    # core signs type 12 under the lower-case label it has carried since 0.47.
+    verify_sig(suite, signer, sig, sig_input("attestation", suite, body_bytes))
+    return out
+
+
+def run_attestation(cases, r):
+    for c in cases:
+        def go(c=c):
+            a = parse_attestation(unhex(c["attestation_hex"]))
+            m = [(0, ("uint", OBJECT_TYPE_CODES["ATTESTATION"])),
+                 (1, ("uint", a["version"])), (2, ("uint", a["suite"])),
+                 (AT_SUBJECT, ("bytes", a["subject"])), (AT_AMOUNT, ("uint", a["amount_pxmr"])),
+                 (AT_RATING, ("uint", a["rating"])), (AT_TS, ("uint", a["ts"]))]
+            if a["txid"] is not None:
+                m.append((AT_TXID, ("bytes", a["txid"])))
+            if a["note"] is not None:
+                m.append((AT_NOTE, ("text", a["note"])))
+            m.append((AT_SIGNER, ("bytes", a["signer"])))
+            return _reencode_map(m)
+        out = expect_reject(r, "contact", c, go)
+        if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:
+            r.passed -= 1
+            r.bad("contact", c["name"], c.get("why", ""),
+                  f"re-encoded to {out.hex()}, vector says "
+                  f"{c['expect']['reencodes_to_hex']}")
+
+
 def run_contact_card(cases, r):
     for c in cases:
         def go(c=c):
@@ -2743,6 +2901,8 @@ BY_KIND = {
     "pub.listing": run_pub_listing,
     "site.head": run_site_head,
     "group.page": run_group_page,
+    "burn.proof": run_burn_proof,
+    "attestation.receipt": run_attestation,
     "board.sealed": run_board_sealed,
     "board.beacon_window": run_beacon_window,
     "board.beacon_verdict": run_beacon_verdict,

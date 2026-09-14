@@ -1112,6 +1112,10 @@ fn normalize(category: &str, mut c: J) -> (&'static str, J) {
                 ("contact", "message.chain")
             } else if obj.contains_key("details_hex") {
                 ("contact", "contact.details")
+            } else if obj.contains_key("burn_proof_hex") {
+                ("contact", "burn.proof")
+            } else if obj.contains_key("attestation_hex") {
+                ("contact", "attestation.receipt")
             } else if obj.contains_key("payment_hex") {
                 ("contact", "message.payment")
             } else if obj.contains_key("head_hex") {
@@ -3314,6 +3318,87 @@ fn contact_cases() -> Vec<J> {
                             "reject": sealed_reject(&sealed, ducat_core::board::PUB, elsewhere, subkey),
                             "hint": "this notice was not signed for this slot" } }));
         }
+    }
+
+    // ---- §9.5 burn proofs and §9.2 attestations: the shapes, signed under
+    // the persona inside. The chain arithmetic is the reader's and is not a
+    // vector; what these pin is that a shape nobody should act on is refused
+    // before a node is asked anything.
+    {
+        use ducat_core::trust::*;
+        let burner = SecretKey::ed25519_from_bytes(&[0xB0; 32]);
+        let other = SecretKey::ed25519_from_bytes(&[0xB1; 32]);
+        let pair = "A".repeat(44 + 88);
+        let base = BurnProof {
+            version: BURN_PROOF_VERSION, suite: 1,
+            txid: [0x0B; 32],
+            amount_pxmr: BURN_FLOOR_PXMR,
+            height: 1_800_000,
+            proof: format!("{OUT_PROOF_HEADER}{pair}"),
+            persona: burner.public().to_bytes().to_vec(),
+            purpose: "identity".into(),
+        };
+        let mut burn = |name: &str, why: &str, b: &BurnProof, bad: Option<(RejectCode, &str)>| {
+            let hex_body = hex(&b.to_value().encode());
+            let hex_env = hex(&sign_burn_proof(b, &burner));
+            v.push(match bad {
+                None => json!({ "name": name, "why": why, "burn_proof_hex": hex_env,
+                                "expect": { "ok": true, "reencodes_to_hex": hex_body } }),
+                Some((code, hint)) => json!({ "name": name, "why": why, "burn_proof_hex": hex_env,
+                                "expect": { "ok": false, "reject": format!("{:?}", code).to_uppercase(), "hint": hint } }),
+            });
+        };
+        burn("burn_valid", "A persona's proof that it burned the floor: the transaction, the amount the proof proves, the block, Monero's out-proof whose message names the persona and a purpose, signed under that persona.", &base, None);
+        burn("burn_two_keys", "A transaction paying a subaddress elsewhere carries additional keys, and the out-proof then carries one pair per key.", &BurnProof { proof: format!("{OUT_PROOF_HEADER}{pair}{pair}"), ..base.clone() }, None);
+        burn("burn_of_nothing", "Zero is not a sacrifice, and a reader must not have to notice that after asking a node.", &BurnProof { amount_pxmr: 0, ..base.clone() }, Some((RejectCode::Malformed, "a burn of nothing")));
+        burn("burn_without_a_block", "The block is the birth certificate; a burn with none has not happened yet.", &BurnProof { height: 0, ..base.clone() }, Some((RejectCode::Malformed, "a burn needs a block")));
+        burn("burn_proof_is_an_in_proof", "An InProof proves receipt, not payment. Only an OutProofV2 says this persona paid the burn address.", &BurnProof { proof: format!("InProofV2{pair}"), ..base.clone() }, Some((RejectCode::Malformed, "not an OutProofV2")));
+        burn("burn_proof_torn", "A proof is whole base58 pairs; a torn one cannot be checked and must not be tried.", &BurnProof { proof: format!("{OUT_PROOF_HEADER}{pair}AA"), ..base.clone() }, Some((RejectCode::Malformed, "not an OutProofV2")));
+        burn("burn_purpose_too_long", "A purpose is a label, not a message; the message's length is bounded so the proof's is.", &BurnProof { purpose: "p".repeat(MAX_PURPOSE_CHARS + 1), ..base.clone() }, Some((RejectCode::Malformed, "text over bound")));
+        burn("burn_version_two", "There is one version; a reader that accepted another would be guessing its shape.", &BurnProof { version: 2, ..base.clone() }, Some((RejectCode::Malformed, "burn proof version is not 1")));
+        v.push(json!({ "name": "burn_signed_by_another_key",
+            "why": "The body names one persona and the envelope is signed by another. The key to check with is the one in the body, and this is the lifted proof a reader must refuse.",
+            "burn_proof_hex": hex(&sign_burn_proof(&base, &other)),
+            "expect": { "ok": false, "reject": "BADSIG", "hint": "signature does not verify" } }));
+        v.push(json!({ "name": "burn_bare_body_not_an_envelope",
+            "why": "Without the envelope nothing ties the object to the persona presenting it; the out-proof's message does, but only once the object is trusted to be theirs.",
+            "burn_proof_hex": hex(&base.to_value().encode()),
+            "expect": { "ok": false, "reject": "MALFORMED", "hint": "not a signed envelope" } }));
+
+        let signer = SecretKey::ed25519_from_bytes(&[0xA0; 32]);
+        let subject = SecretKey::ed25519_from_bytes(&[0xA1; 32]);
+        let abase = Attestation {
+            version: ATTESTATION_VERSION, suite: 1,
+            signer: signer.public().to_bytes().to_vec(),
+            subject: subject.public().to_bytes().to_vec(),
+            amount_pxmr: 250_000_000_000,
+            rating: 5,
+            ts: 1_760_000_000,
+            txid: Some([0x0A; 32]),
+            note: Some("On time, as described.".into()),
+        };
+        let mut att = |name: &str, why: &str, a: &Attestation, bad: Option<(RejectCode, &str)>| {
+            let hex_body = hex(&a.to_value().encode());
+            let hex_env = hex(&sign_attestation(a, &signer));
+            v.push(match bad {
+                None => json!({ "name": name, "why": why, "attestation_hex": hex_env,
+                                "expect": { "ok": true, "reencodes_to_hex": hex_body } }),
+                Some((code, hint)) => json!({ "name": name, "why": why, "attestation_hex": hex_env,
+                                "expect": { "ok": false, "reject": format!("{:?}", code).to_uppercase(), "hint": hint } }),
+            });
+        };
+        att("attestation_valid", "A rated receipt: who is speaking, who is spoken about, what settled, a rating from the closed set, when, the transaction, a sentence — signed under the speaker.", &abase, None);
+        att("attestation_bare", "The transaction and the sentence are optional; a rating with an amount and a time is a whole attestation.", &Attestation { txid: None, note: None, ..abase.clone() }, None);
+        att("attestation_rating_zero", "The set is 1 to 5. Zero is not 'no rating'; omission would be, and the field is required.", &Attestation { rating: 0, ..abase.clone() }, Some((RejectCode::Malformed, "rating is 1 to 5")));
+        att("attestation_rating_six", "The top of the set is 5; a client draws stars, it does not average free numbers.", &Attestation { rating: 6, ..abase.clone() }, Some((RejectCode::Malformed, "rating is 1 to 5")));
+        att("attestation_without_a_time", "When it was given is part of what it means; an attestation from nowhen weighs nothing.", &Attestation { ts: 0, ..abase.clone() }, Some((RejectCode::Malformed, "an attestation needs a time")));
+        att("attestation_of_oneself", "The one review nobody needs. Refused at the shape rather than weighted to nothing, so no client has to remember to.", &Attestation { subject: abase.signer.clone(), ..abase.clone() }, Some((RejectCode::Malformed, "a persona cannot attest to itself")));
+        att("attestation_note_too_long", "A sentence beside a rating, not a review; a reader draws it in one line.", &Attestation { note: Some("n".repeat(MAX_ATTESTATION_NOTE_CHARS + 1)), ..abase.clone() }, Some((RejectCode::Malformed, "text over bound")));
+        att("attestation_note_with_bidi", "Drawn beside a name on a stranger's screen: the display-hazard rule every text field follows.", &Attestation { note: Some("fine\u{202E}".into()), ..abase.clone() }, Some((RejectCode::Malformed, "display hazard")));
+        v.push(json!({ "name": "attestation_signed_by_the_subject",
+            "why": "The subject signing about itself with its own key: the envelope verifies under the signer named in the body, which is not this key.",
+            "attestation_hex": hex(&sign_attestation(&abase, &subject)),
+            "expect": { "ok": false, "reject": "BADSIG", "hint": "signature does not verify" } }));
     }
 
     v

@@ -25,4 +25,5 @@ pub mod state;
 pub mod board;
 pub mod wire;
 pub mod transport;
+pub mod trust;
 pub mod verify;

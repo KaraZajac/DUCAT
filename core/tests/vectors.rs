@@ -444,6 +444,7 @@ fn every_case_declares_a_known_kind_and_a_unique_name() {
         "contact.card", "contact.details", "log.head", "log.ring", "stand.shard", "stand.epoch", "message.chain",
         "message.payment", "hail.notice", "rental.listing", "pub.listing", "site.head", "board.sealed",
         "board.beacon_window", "board.beacon_verdict", "position.frame", "group.page",
+        "burn.proof", "attestation.receipt",
     ];
     let dir = std::path::Path::new("../vectors/v1");
     let mut seen: std::collections::HashMap<String, String> = Default::default();
@@ -566,6 +567,22 @@ fn contact_vectors_pass() {
                     Err(e) => assert_eq!(
                         format!("{:?}", e.code).to_uppercase(), want_code(), "{name}"
                     ),
+                }
+            }
+            "burn.proof" => {
+                let got = ducat_core::trust::open_burn_proof(&unhex(c["burn_proof_hex"].as_str().unwrap()));
+                assert_eq!(got.is_ok(), want_ok(), "{name}: {got:?}");
+                match got {
+                    Ok(b) => assert_eq!(hexs(&b.to_value().encode()), c["expect"]["reencodes_to_hex"].as_str().unwrap(), "{name}"),
+                    Err(e) => assert_eq!(format!("{:?}", e.code).to_uppercase(), want_code(), "{name}"),
+                }
+            }
+            "attestation.receipt" => {
+                let got = ducat_core::trust::open_attestation(&unhex(c["attestation_hex"].as_str().unwrap()));
+                assert_eq!(got.is_ok(), want_ok(), "{name}: {got:?}");
+                match got {
+                    Ok(a) => assert_eq!(hexs(&a.to_value().encode()), c["expect"]["reencodes_to_hex"].as_str().unwrap(), "{name}"),
+                    Err(e) => assert_eq!(format!("{:?}", e.code).to_uppercase(), want_code(), "{name}"),
                 }
             }
             "log.head" => {

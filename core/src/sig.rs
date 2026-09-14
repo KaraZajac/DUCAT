@@ -73,6 +73,8 @@ pub enum ObjectType {
     /// somebody else's signed listing across every slot in a cell and have it
     /// read as that person flooding the board.
     BoardNotice,
+    /// §9.5: a persona's proof that it burned XMR, its message naming it.
+    BurnProof,
 }
 
 impl ObjectType {
@@ -105,6 +107,7 @@ impl ObjectType {
             ObjectType::SealedMessage => b"SEALED_MESSAGE",
             ObjectType::LogHead => b"LOG_HEAD",
             ObjectType::BoardNotice => b"BOARD_NOTICE",
+            ObjectType::BurnProof => b"BURN_PROOF",
         }
     }
 }

@@ -215,6 +215,33 @@ pub mod f {
     /// Which half this is: 0 the issuer's (subkey 0), 1 the claimant's
     /// (subkey 1). Inside the signature for the same reason.
     pub const DET_ROLE: u64 = 303;
+    /// §9.5 `BURN_PROOF`: the transaction that paid the burn address.
+    pub const BP_TXID: u64 = 304;
+    /// The amount the proof proves, in pXMR — the reader trusts the proof's
+    /// arithmetic, never this number alone.
+    pub const BP_AMOUNT: u64 = 305;
+    /// The block the transaction is in: the persona's birth certificate.
+    pub const BP_HEIGHT: u64 = 306;
+    /// The Monero `OutProofV2` string, whose message binds the persona.
+    pub const BP_PROOF: u64 = 307;
+    /// The persona the proof's message names — also the envelope's signer.
+    pub const BP_PERSONA: u64 = 308;
+    /// What the burn was for: a short label in the message.
+    pub const BP_PURPOSE: u64 = 309;
+    /// §9.2 `ATTESTATION`: the persona being spoken about.
+    pub const AT_SUBJECT: u64 = 310;
+    /// The amount that settled, in pXMR.
+    pub const AT_AMOUNT: u64 = 311;
+    /// A rating from the closed set 1..=5.
+    pub const AT_RATING: u64 = 312;
+    /// Seconds since the epoch, when it was given.
+    pub const AT_TS: u64 = 313;
+    /// The transaction the deal settled on, when there was one.
+    pub const AT_TXID: u64 = 314;
+    /// A sentence, optional, hazard-checked like every other display text.
+    pub const AT_NOTE: u64 = 315;
+    /// The persona giving the attestation — also the envelope's signer.
+    pub const AT_SIGNER: u64 = 316;
     // Read watermark and ring size on a log head (§16.16, §16.12).
     pub const HEAD_READ: u64 = 201;
     pub const HEAD_RING: u64 = 202;
@@ -642,6 +669,7 @@ pub(crate) fn type_code(t: ObjectType) -> u64 {
         // signature field rather than being wrapped — but sig_input needs the
         // type to exist, and an exhaustive match is how that stays true.
         ObjectType::BoardNotice => 27,
+        ObjectType::BurnProof => 28,
     }
 }
 
@@ -659,6 +687,7 @@ fn type_from_code(c: u64) -> Option<ObjectType> {
         10 => ObjectType::ContactAccept,
         11 => ObjectType::BondProof,
         12 => ObjectType::Attestation,
+        28 => ObjectType::BurnProof,
         _ => return None,
     })
 }
