@@ -214,7 +214,7 @@
     <string name="desk_add_a_contact">إضافة جهة اتصال</string>
     <string name="desk_sub_code_note">من يجيب عن هذا يُسجَّل. الإصدار المجاني يرسل له أحدث عدد؛ والمدفوع يرسل فاتورة.</string>
     <string name="desk_shelf_word">على الرف</string>
-    <string name="desk_and">و</string>
+    <string name="desk_and">" و"</string>
     <string name="desk_not_published">غير منشور</string>
     <string name="desk_sent_to_n">أُرسل إلى %1$d</string>
     <string name="desk_billed_n">فُوتر %1$d</string>
@@ -451,4 +451,5 @@
     <string name="desk_vouch_received">يقولون إنهم يعرفونك؛ حُفظ مع تزكياتك</string>
     <string name="desk_vouches_sent">من يعرفك، عُرض عليهم</string>
     <string name="desk_vouches_none_known">عرضوا من يعرفهم؛ لا أحد منهم ضمن جهات اتصالك</string>
+    <string name="desk_known_by_one">%1$s يعرفهم</string>
 </resources>

@@ -199,7 +199,7 @@
     <string name="desk_add_a_contact">Thêm liên hệ</string>
     <string name="desk_sub_code_note">Ai trả lời mã này sẽ được ghi danh. Ấn phẩm miễn phí gửi họ số mới nhất; ấn phẩm có giá gửi hóa đơn.</string>
     <string name="desk_shelf_word">trên kệ</string>
-    <string name="desk_and">và</string>
+    <string name="desk_and">" và "</string>
     <string name="desk_not_published">chưa xuất bản</string>
     <string name="desk_sent_to_n">đã gửi tới %1$d</string>
     <string name="desk_billed_n">đã lập hóa đơn %1$d</string>
@@ -431,4 +431,5 @@
     <string name="desk_vouch_received">Họ nói rằng họ biết bạn; được lưu cùng các bảo đảm của bạn</string>
     <string name="desk_vouches_sent">Ai biết bạn, đã cho họ xem</string>
     <string name="desk_vouches_none_known">Họ đã cho xem ai biết họ; không ai trong số đó là liên hệ của bạn</string>
+    <string name="desk_known_by_one">%1$s biết họ</string>
 </resources>

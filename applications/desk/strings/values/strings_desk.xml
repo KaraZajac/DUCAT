@@ -206,7 +206,7 @@
     <string name="desk_add_a_contact">Add a contact</string>
     <string name="desk_sub_code_note">Whoever answers this is enrolled. A free publication sends them the latest issue; a priced one sends a bill.</string>
     <string name="desk_shelf_word">on the shelf</string>
-    <string name="desk_and">and</string>
+    <string name="desk_and">" and "</string>
     <string name="desk_not_published">not published</string>
     <string name="desk_sent_to_n">sent to %1$d</string>
     <string name="desk_billed_n">billed %1$d</string>
@@ -441,4 +441,5 @@
     <string name="desk_vouch_received">They say they know you; kept with your vouches</string>
     <string name="desk_vouches_sent">Who knows you, shown to them</string>
     <string name="desk_vouches_none_known">They showed who knows them; none of them are your contacts</string>
+    <string name="desk_known_by_one">%1$s knows them</string>
 </resources>

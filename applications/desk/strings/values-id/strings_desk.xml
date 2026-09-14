@@ -199,7 +199,7 @@
     <string name="desk_add_a_contact">Tambah kontak</string>
     <string name="desk_sub_code_note">Siapa pun yang menjawab ini terdaftar. Publikasi gratis mengirim edisi terbaru; yang berbayar mengirim tagihan.</string>
     <string name="desk_shelf_word">di rak</string>
-    <string name="desk_and">dan</string>
+    <string name="desk_and">" dan "</string>
     <string name="desk_not_published">belum diterbitkan</string>
     <string name="desk_sent_to_n">dikirim ke %1$d</string>
     <string name="desk_billed_n">ditagih %1$d</string>
@@ -431,4 +431,5 @@
     <string name="desk_vouch_received">Mereka mengatakan mengenal Anda; disimpan bersama jaminan Anda</string>
     <string name="desk_vouches_sent">Siapa yang mengenal Anda, ditunjukkan kepada mereka</string>
     <string name="desk_vouches_none_known">Mereka menunjukkan siapa yang mengenal mereka; tidak ada yang menjadi kontak Anda</string>
+    <string name="desk_known_by_one">%1$s mengenal mereka</string>
 </resources>

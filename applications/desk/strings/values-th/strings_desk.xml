@@ -199,7 +199,7 @@
     <string name="desk_add_a_contact">เพิ่มผู้ติดต่อ</string>
     <string name="desk_sub_code_note">ใครตอบสิ่งนี้จะได้ลงทะเบียน สิ่งพิมพ์ฟรีส่งฉบับล่าสุดให้ ส่วนแบบมีราคาส่งบิล</string>
     <string name="desk_shelf_word">บนชั้น</string>
-    <string name="desk_and">และ</string>
+    <string name="desk_and">" และ "</string>
     <string name="desk_not_published">ยังไม่เผยแพร่</string>
     <string name="desk_sent_to_n">ส่งให้ %1$d ราย</string>
     <string name="desk_billed_n">เรียกเก็บ %1$d ราย</string>
@@ -431,4 +431,5 @@
     <string name="desk_vouch_received">พวกเขาบอกว่ารู้จักคุณ เก็บไว้กับการรับรองของคุณ</string>
     <string name="desk_vouches_sent">ใครรู้จักคุณ แสดงให้พวกเขาเห็น</string>
     <string name="desk_vouches_none_known">พวกเขาแสดงว่าใครรู้จักพวกเขา แต่ไม่มีใครเป็นผู้ติดต่อของคุณ</string>
+    <string name="desk_known_by_one">%1$s รู้จักพวกเขา</string>
 </resources>

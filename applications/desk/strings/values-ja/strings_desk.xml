@@ -199,7 +199,7 @@
     <string name="desk_add_a_contact">連絡先を追加</string>
     <string name="desk_sub_code_note">これに応答した人が登録されます。無料の出版物は最新号を送り、有料のものは請求を送ります。</string>
     <string name="desk_shelf_word">棚に</string>
-    <string name="desk_and">と</string>
+    <string name="desk_and">"と"</string>
     <string name="desk_not_published">未公開</string>
     <string name="desk_sent_to_n">%1$d 人に送信</string>
     <string name="desk_billed_n">%1$d 人に請求</string>
@@ -431,4 +431,5 @@
     <string name="desk_vouch_received">相手はあなたを知っていると言っています。保証として保存しました</string>
     <string name="desk_vouches_sent">あなたの知人を提示しました</string>
     <string name="desk_vouches_none_known">相手の知人が示されましたが、あなたの連絡先には誰もいません</string>
+    <string name="desk_known_by_one">%1$sが知っている相手</string>
 </resources>

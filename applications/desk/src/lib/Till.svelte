@@ -4,6 +4,7 @@
   // catalogue both draw from. The phone's POS and Bar Tab, side by side.
   import { onMount } from "svelte";
   import { t, tp, lc } from "./i18n.svelte";
+  import { knownWords } from "./trustwords";
   import { api, copy, fmtXmr, fmtTime, type Code, type ContactRow, type ItemRow, type TabRow, confirmDanger } from "./api";
   import { gen } from "./state.svelte";
 
@@ -315,7 +316,7 @@
       {#if pickingContact}
         <p class="note">{t("desk_whose_tab")}</p>
         {#each contacts as c (c.persona_hex)}
-          <button class="thread-row" onclick={() => startTab(c)}>{#if c.avatar_data_url}<img class="avatar pic" src={c.avatar_data_url} alt="" />{:else}<div class="avatar">{c.name.slice(0, 1).toUpperCase()}</div>{/if}<div class="thread-text"><div class="thread-name">{c.name}</div>{#if c.burn_pxmr || c.receipts > 0 || c.known_by.length > 0}<div class="thread-last">{#if c.burn_pxmr}{t("desk_burned_since", fmtXmr(c.burn_pxmr), String(c.burn_height ?? 0))}{/if}{#if c.burn_pxmr && c.receipts > 0} · {/if}{#if c.receipts > 0}{t("desk_receipts_summary", String(c.receipts), String(c.receipts_weighted))}{/if}{#if c.known_by.length > 0} · {c.known_by.length <= 2 ? t("desk_known_by_names", c.known_by.join(t("desk_and"))) : t("desk_known_by_count", String(c.known_by.length))}{/if}</div>{/if}</div></button>
+          <button class="thread-row" onclick={() => startTab(c)}>{#if c.avatar_data_url}<img class="avatar pic" src={c.avatar_data_url} alt="" />{:else}<div class="avatar">{c.name.slice(0, 1).toUpperCase()}</div>{/if}<div class="thread-text"><div class="thread-name">{c.name}</div>{#if c.burn_pxmr || c.receipts > 0 || c.known_by.length > 0}<div class="thread-last">{#if c.burn_pxmr}{t("desk_burned_since", fmtXmr(c.burn_pxmr), String(c.burn_height ?? 0))}{/if}{#if c.burn_pxmr && c.receipts > 0} · {/if}{#if c.receipts > 0}{t("desk_receipts_summary", String(c.receipts), String(c.receipts_weighted))}{/if}{#if c.known_by.length > 0} · {knownWords(c.known_by)}{/if}</div>{/if}</div></button>
         {/each}
         {#if loaded && contacts.length === 0}<p class="empty">{t("desk_no_contacts")}</p>{/if}
       {/if}

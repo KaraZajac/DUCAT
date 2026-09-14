@@ -199,7 +199,7 @@
     <string name="desk_add_a_contact">添加联系人</string>
     <string name="desk_sub_code_note">应答此码的人即被登记。免费出版物会给他们发最新一期；收费的则发送账单。</string>
     <string name="desk_shelf_word">在书架上</string>
-    <string name="desk_and">和</string>
+    <string name="desk_and">"和"</string>
     <string name="desk_not_published">未发布</string>
     <string name="desk_sent_to_n">已发送给 %1$d 人</string>
     <string name="desk_billed_n">已开单 %1$d 人</string>
@@ -431,4 +431,5 @@
     <string name="desk_vouch_received">对方表示认识你；已存入你的担保</string>
     <string name="desk_vouches_sent">认识你的人，已出示给对方</string>
     <string name="desk_vouches_none_known">对方出示了认识他们的人；其中没有你的联系人</string>
+    <string name="desk_known_by_one">%1$s认识对方</string>
 </resources>

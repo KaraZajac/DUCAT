@@ -199,7 +199,7 @@
     <string name="desk_add_a_contact">연락처 추가</string>
     <string name="desk_sub_code_note">응답한 사람이 등록됩니다. 무료 출판물은 최신 호를 보내고, 유료 출판물은 청구서를 보냅니다.</string>
     <string name="desk_shelf_word">서가에</string>
-    <string name="desk_and">및</string>
+    <string name="desk_and">"와 "</string>
     <string name="desk_not_published">미게시</string>
     <string name="desk_sent_to_n">%1$d명에게 전송</string>
     <string name="desk_billed_n">%1$d명에게 청구</string>
@@ -431,4 +431,5 @@
     <string name="desk_vouch_received">상대가 당신을 안다고 합니다. 보증에 보관됨</string>
     <string name="desk_vouches_sent">당신을 아는 사람들, 상대에게 보임</string>
     <string name="desk_vouches_none_known">상대가 아는 사람들을 보였지만, 당신의 연락처에는 없습니다</string>
+    <string name="desk_known_by_one">%1$s가 아는 사람</string>
 </resources>

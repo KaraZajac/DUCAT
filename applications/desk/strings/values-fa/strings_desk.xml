@@ -202,7 +202,7 @@
     <string name="desk_add_a_contact">افزودن مخاطب</string>
     <string name="desk_sub_code_note">هر که به این پاسخ دهد ثبت‌نام می‌شود. نشریهٔ رایگان آخرین شماره را می‌فرستد؛ نشریهٔ پولی صورت‌حساب می‌فرستد.</string>
     <string name="desk_shelf_word">روی قفسه</string>
-    <string name="desk_and">و</string>
+    <string name="desk_and">" و "</string>
     <string name="desk_not_published">منتشر نشده</string>
     <string name="desk_sent_to_n">فرستاده شده به %1$d</string>
     <string name="desk_billed_n">صورت‌حساب %1$d</string>
@@ -435,4 +435,5 @@
     <string name="desk_vouch_received">می‌گویند شما را می‌شناسند؛ همراه ضمانت‌هایتان نگه داشته شد</string>
     <string name="desk_vouches_sent">چه کسی شما را می‌شناسد، به آن‌ها نشان داده شد</string>
     <string name="desk_vouches_none_known">نشان دادند چه کسانی آن‌ها را می‌شناسند؛ هیچ‌کدام از مخاطبان شما نیستند</string>
+    <string name="desk_known_by_one">%1$s آن‌ها را می‌شناسد</string>
 </resources>

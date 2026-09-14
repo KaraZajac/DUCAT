@@ -202,7 +202,7 @@
     <string name="desk_add_a_contact">संपर्क जोड़ें</string>
     <string name="desk_sub_code_note">जो इसका उत्तर देता है वह नामांकित हो जाता है। मुफ़्त प्रकाशन उसे नवीनतम अंक भेजता है; सशुल्क प्रकाशन बिल भेजता है।</string>
     <string name="desk_shelf_word">शेल्फ़ पर</string>
-    <string name="desk_and">और</string>
+    <string name="desk_and">" और "</string>
     <string name="desk_not_published">अप्रकाशित</string>
     <string name="desk_sent_to_n">%1$d को भेजा</string>
     <string name="desk_billed_n">%1$d को बिल</string>
@@ -435,4 +435,5 @@
     <string name="desk_vouch_received">वे कहते हैं कि वे आपको जानते हैं; आपकी गवाहियों के साथ रखा गया</string>
     <string name="desk_vouches_sent">आपको कौन जानता है, उन्हें दिखाया</string>
     <string name="desk_vouches_none_known">उन्होंने दिखाया कि उन्हें कौन जानता है; उनमें से कोई आपका संपर्क नहीं है</string>
+    <string name="desk_known_by_one">%1$s उन्हें जानता/जानती है</string>
 </resources>

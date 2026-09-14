@@ -4,6 +4,7 @@
   // the room for both at once, which is the one place it beats the phone.
   import { onMount, tick } from "svelte";
   import { t, tp, lc } from "./i18n.svelte";
+  import { knownWords } from "./trustwords";
   import { api, confirmDanger, copy, fmtTime, fmtXmr, type ContactRow, type GroupMessage, type GroupRow, type MessageRow, type StandingRow } from "./api";
   import { gen, drive, pending } from "./state.svelte";
   import Busy from "./Busy.svelte";
@@ -471,11 +472,6 @@
   const RECORD_LINK = /ducat:record\/[0-9a-fA-F.]+/;
   const VOUCH_LINK = /^\s*ducat:vouch\/[0-9a-fA-F]+\s*$/;
   const VOUCHES_LINK = /^\s*ducat:vouches\/[0-9a-fA-F.]+\s*$/;
-  function knownWords(names: string[]): string {
-    if (names.length === 0) return "";
-    if (names.length <= 2) return t("desk_known_by_names", names.join(t("desk_and")));
-    return t("desk_known_by_count", String(names.length));
-  }
   async function vouchFor() {
     if (!current) return;
     err = null;

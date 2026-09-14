@@ -5,6 +5,7 @@
   // takes the place as a geohash cell.
   import { onMount } from "svelte";
   import { t, i18n, LANGS, lc } from "./i18n.svelte";
+  import { knownWords } from "./trustwords";
   import { api, copy, fmtXmr, fmtTime, fmtBytes, type FoundRow, type ListingAttachment, type ListingBundle, type ListingDraft, type ListingRow, type MarketRow, LISTING_DESCRIPTION_MAX, MARKET_CATEGORIES, confirmDanger, type TrustView } from "./api";
   import { gen, drive } from "./state.svelte";
   import Busy from "./Busy.svelte";
@@ -395,7 +396,7 @@
     <div class="card">
       <div class="page-head" style="margin-bottom: 8px"><h3 style="margin: 0">{openFound.title}</h3><button class="btn small" onclick={closeListing}>{t("main_back")}</button></div>
       {#if !openFound.mine && trust}
-        <p class="note">{#if trust.burn_pxmr}{t("desk_burned_since", fmtXmr(trust.burn_pxmr), String(trust.burn_height ?? 0))}{:else}{t("desk_no_burn_known")}{/if}{#if trust.receipts > 0} · {t("desk_receipts_summary", String(trust.receipts), String(trust.receipts_weighted))}{#if trust.receipts_weighted > 0} · {(trust.rating_x10 / 10).toFixed(1)} ★{/if}{/if}{#if trust.known_by.length > 0} · {trust.known_by.length <= 2 ? t("desk_known_by_names", trust.known_by.join(t("desk_and"))) : t("desk_known_by_count", String(trust.known_by.length))}{/if}</p>
+        <p class="note">{#if trust.burn_pxmr}{t("desk_burned_since", fmtXmr(trust.burn_pxmr), String(trust.burn_height ?? 0))}{:else}{t("desk_no_burn_known")}{/if}{#if trust.receipts > 0} · {t("desk_receipts_summary", String(trust.receipts), String(trust.receipts_weighted))}{#if trust.receipts_weighted > 0} · {(trust.rating_x10 / 10).toFixed(1)} ★{/if}{/if}{#if trust.known_by.length > 0} · {knownWords(trust.known_by)}{/if}</p>
       {/if}
       <div class="found-detail">
         {#if coverShown}

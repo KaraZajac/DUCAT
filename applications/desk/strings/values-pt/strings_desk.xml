@@ -202,7 +202,7 @@
     <string name="desk_add_a_contact">Adicionar um contacto</string>
     <string name="desk_sub_code_note">Quem responde a isto fica inscrito. Uma publicação gratuita envia-lhe o último número; uma paga envia-lhe uma conta.</string>
     <string name="desk_shelf_word">na estante</string>
-    <string name="desk_and">e</string>
+    <string name="desk_and">" e "</string>
     <string name="desk_not_published">não publicado</string>
     <string name="desk_sent_to_n">enviado a %1$d</string>
     <string name="desk_billed_n">cobrado %1$d</string>
@@ -435,4 +435,5 @@
     <string name="desk_vouch_received">Dizem que o conhecem; guardado com os seus avales</string>
     <string name="desk_vouches_sent">Quem o conhece, mostrado a eles</string>
     <string name="desk_vouches_none_known">Mostraram quem os conhece; nenhum é seu contacto</string>
+    <string name="desk_known_by_one">%1$s conhece-os</string>
 </resources>

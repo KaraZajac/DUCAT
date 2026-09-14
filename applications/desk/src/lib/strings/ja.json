@@ -304,6 +304,7 @@
  "desk_kiosk_lede": "カウンターでの注文。各注文には番号と、どの Monero ウォレットでも支払えるコードが付きます。DUCAT を使うお客は代わりにカードに応答して領収書を受け取れます。",
  "desk_known_by_count": "あなたの連絡先のうち %1$s 人が知っている相手",
  "desk_known_by_names": "%1$sが知っている相手",
+ "desk_known_by_one": "%1$sが知っている相手",
  "desk_language": "言語",
  "desk_language_note": "スマートフォンの19言語をそのまま引き継いでいます。デスクだけが話す文はまだ英語のことがあります。",
  "desk_language_system": "システムに従う",

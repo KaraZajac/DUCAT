@@ -202,7 +202,7 @@
     <string name="desk_add_a_contact">Kişi ekle</string>
     <string name="desk_sub_code_note">Bunu yanıtlayan kaydolur. Ücretsiz bir yayın ona son sayıyı gönderir; ücretli olan fatura gönderir.</string>
     <string name="desk_shelf_word">rafta</string>
-    <string name="desk_and">ve</string>
+    <string name="desk_and">" ve "</string>
     <string name="desk_not_published">yayımlanmadı</string>
     <string name="desk_sent_to_n">%1$d kişiye gönderildi</string>
     <string name="desk_billed_n">%1$d faturalandı</string>
@@ -435,4 +435,5 @@
     <string name="desk_vouch_received">Seni tanıdıklarını söylüyorlar; kefaletlerinle birlikte saklandı</string>
     <string name="desk_vouches_sent">Seni kimin tanıdığı, onlara gösterildi</string>
     <string name="desk_vouches_none_known">Onları kimin tanıdığını gösterdiler; hiçbiri senin kişilerinden değil</string>
+    <string name="desk_known_by_one">%1$s onları tanıyor</string>
 </resources>

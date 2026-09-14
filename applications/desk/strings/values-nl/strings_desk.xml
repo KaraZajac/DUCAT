@@ -202,7 +202,7 @@
     <string name="desk_add_a_contact">Een contact toevoegen</string>
     <string name="desk_sub_code_note">Wie dit beantwoordt is ingeschreven. Een gratis publicatie stuurt hem het nieuwste nummer; een betaalde stuurt een rekening.</string>
     <string name="desk_shelf_word">op de plank</string>
-    <string name="desk_and">en</string>
+    <string name="desk_and">" en "</string>
     <string name="desk_not_published">niet gepubliceerd</string>
     <string name="desk_sent_to_n">verzonden naar %1$d</string>
     <string name="desk_billed_n">gefactureerd %1$d</string>
@@ -435,4 +435,5 @@
     <string name="desk_vouch_received">Zij zeggen dat ze jou kennen; bewaard bij je borgstellingen</string>
     <string name="desk_vouches_sent">Wie jou kent, aan hen getoond</string>
     <string name="desk_vouches_none_known">Ze toonden wie hen kent; geen van hen is een contact van jou</string>
+    <string name="desk_known_by_one">%1$s kent hen</string>
 </resources>

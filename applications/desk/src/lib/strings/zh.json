@@ -304,6 +304,7 @@
  "desk_kiosk_lede": "柜台点单。每笔订单都有编号和一张任何门罗币钱包都能支付的码；使用 DUCAT 的顾客可改为应答其名片并获得收据。",
  "desk_known_by_count": "你的 %1$s 位联系人认识对方",
  "desk_known_by_names": "%1$s认识对方",
+ "desk_known_by_one": "%1$s认识对方",
  "desk_language": "语言",
  "desk_language_note": "沿用手机的十九种语言；只有桌面端才说的句子可能仍是英文。",
  "desk_language_system": "跟随系统",

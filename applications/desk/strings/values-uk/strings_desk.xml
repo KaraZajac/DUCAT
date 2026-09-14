@@ -208,7 +208,7 @@
     <string name="desk_add_a_contact">Додати контакт</string>
     <string name="desk_sub_code_note">Хто відповість на це, той підписаний. Безкоштовне видання надсилає йому останній випуск; платне — рахунок.</string>
     <string name="desk_shelf_word">на полиці</string>
-    <string name="desk_and">і</string>
+    <string name="desk_and">" і "</string>
     <string name="desk_not_published">не опубліковано</string>
     <string name="desk_sent_to_n">надіслано %1$d</string>
     <string name="desk_billed_n">виставлено %1$d</string>
@@ -443,4 +443,5 @@
     <string name="desk_vouch_received">Вони кажуть, що знають вас; збережено з вашими поручительствами</string>
     <string name="desk_vouches_sent">Хто вас знає, показано їм</string>
     <string name="desk_vouches_none_known">Вони показали, хто їх знає; нікого з них немає у ваших контактах</string>
+    <string name="desk_known_by_one">%1$s їх знає</string>
 </resources>

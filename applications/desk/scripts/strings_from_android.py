@@ -38,6 +38,13 @@ USED = re.compile(r"\bt[pn]?\(\s*[\"']([a-z0-9_]+)[\"']")
 def text_of(node) -> str:
     """Android's escaping undone: \\' \\" \\n and the entities the parser already handled."""
     t = "".join(node.itertext())
+    # Android keeps the whitespace inside a quoted value and trims it outside;
+    # " and " is a joiner, and its spaces are the point.
+    stripped = t.strip()
+    if len(stripped) >= 2 and stripped.startswith('"') and stripped.endswith('"'):
+        t = stripped[1:-1]
+    else:
+        t = " ".join(t.split()) if t.strip() != t else t
     t = t.replace("\\'", "'").replace('\\"', '"').replace("\\n", "\n").replace("\\@", "@")
     return t
 
