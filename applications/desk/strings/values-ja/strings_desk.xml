@@ -385,4 +385,17 @@
     <string name="desk_issue_asked">依頼済み</string>
     <string name="desk_issue_on_shelf">相手の棚にあり</string>
     <string name="desk_pieces_of">%2$d ピース中 %1$d</string>
+    <string name="desk_burn">バーン</string>
+    <string name="desk_burn_title">意図して燃やすお金</string>
+    <string name="desk_burn_body">バーンは、誰も鍵を持たないアドレスへ XMR を送ります。取り消せません。得られるのは、このペルソナに結びついた「ここにいるために支払った」という証明です。詐欺師は新しい名前ごとに払い直すことになります。</string>
+    <string name="desk_burn_floor">有効な最小額: %1$s</string>
+    <string name="desk_burn_under">%1$s として</string>
+    <string name="desk_burn_purpose">目的</string>
+    <string name="desk_burn_x_xmr">%1$s XMR をバーン</string>
+    <string name="desk_burn_confirm">%1$s XMR をバーンしますか？取り消せません。証明はブロックが届くまで提示できません。</string>
+    <string name="desk_burn_waiting">ブロック待ち</string>
+    <string name="desk_burn_in_block">ブロック %1$s に収録</string>
+    <string name="desk_burn_copy_proof">証明をコピー</string>
+    <string name="desk_burned">バーン済み</string>
+    <string name="desk_burn_none">このペルソナではまだ何もバーンしていません。</string>
 </resources>

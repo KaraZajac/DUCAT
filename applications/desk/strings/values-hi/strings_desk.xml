@@ -389,4 +389,17 @@
     <string name="desk_issue_asked">माँगा गया</string>
     <string name="desk_issue_on_shelf">उनकी शेल्फ़ पर</string>
     <string name="desk_pieces_of">%2$d में से %1$d टुकड़े</string>
+    <string name="desk_burn">जलाएँ</string>
+    <string name="desk_burn_title">पैसा जो आप जानबूझकर जलाते हैं</string>
+    <string name="desk_burn_body">जलाने से XMR ऐसे पते पर जाता है जिसकी कुंजी किसी के पास नहीं। इसे पलटा नहीं जा सकता। आपको इस पर्सोना से जुड़ा प्रमाण मिलता है कि आपने यहाँ होने के लिए कुछ चुकाया — ठग को हर नए नाम के लिए फिर चुकाना पड़ेगा।</string>
+    <string name="desk_burn_floor">न्यूनतम जो गिना जाता है: %1$s</string>
+    <string name="desk_burn_under">%1$s के अंतर्गत</string>
+    <string name="desk_burn_purpose">किसलिए</string>
+    <string name="desk_burn_x_xmr">%1$s XMR जलाएँ</string>
+    <string name="desk_burn_confirm">%1$s XMR जलाएँ? इसे पलटा नहीं जा सकता, और ब्लॉक आने तक प्रमाण दिखाया नहीं जा सकता।</string>
+    <string name="desk_burn_waiting">अपने ब्लॉक की प्रतीक्षा में</string>
+    <string name="desk_burn_in_block">ब्लॉक %1$s में</string>
+    <string name="desk_burn_copy_proof">प्रमाण कॉपी करें</string>
+    <string name="desk_burned">जलाया</string>
+    <string name="desk_burn_none">इस पर्सोना के अंतर्गत अभी कुछ नहीं जलाया गया।</string>
 </resources>

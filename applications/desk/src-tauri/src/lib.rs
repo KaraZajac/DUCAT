@@ -1287,6 +1287,84 @@ async fn wallet_quote(amount_xmr: String, priority: u32) -> Result<ducat_app::wa
     tauri::async_runtime::spawn_blocking(move || a.quote(amount, priority)).await.map_err(s)
 }
 
+#[derive(Serialize)]
+struct BurnRow {
+    txid_hex: String,
+    amount_pxmr: u64,
+    purpose: String,
+    height: u64,
+    ready: bool,
+    envelope_hex: Option<String>,
+    made_at: u64,
+}
+
+#[derive(Serialize)]
+struct BurnView {
+    address: String,
+    floor_pxmr: u64,
+    persona_hex: String,
+    persona_name: String,
+    rows: Vec<BurnRow>,
+}
+
+/// §9.5: the worn persona's burns, the address they go to, and the floor.
+#[tauri::command]
+fn burn_view() -> Result<BurnView, String> {
+    let a = app()?;
+    let worn = a.worn().map_err(said)?;
+    let persona_name = a.personas().map_err(said)?.into_iter().find(|p| p.hex == worn).map(|p| p.name).unwrap_or_default();
+    let mut rows: Vec<BurnRow> = a
+        .burns()
+        .into_iter()
+        .filter(|b| b.persona_hex == worn)
+        .map(|b| BurnRow {
+            txid_hex: b.txid_hex,
+            amount_pxmr: b.amount_pxmr,
+            purpose: b.purpose,
+            height: b.height,
+            ready: b.envelope_hex.is_some(),
+            envelope_hex: b.envelope_hex,
+            made_at: b.made_at,
+        })
+        .collect();
+    rows.sort_by(|x, y| y.made_at.cmp(&x.made_at));
+    Ok(BurnView { address: a.burn_address(), floor_pxmr: ducat_app::trust::BURN_FLOOR_PXMR, persona_hex: worn, persona_name, rows })
+}
+
+/// Burn under the worn persona. Irreversible; the page says so before the tap.
+#[tauri::command]
+async fn burn(amount_xmr: String, purpose: String) -> Result<BurnRow, String> {
+    let a = app()?;
+    let amount = ducat_app::wallet::parse_xmr(&amount_xmr).ok_or("that is not an amount")?;
+    tauri::async_runtime::spawn_blocking(move || {
+        let worn = a.worn().map_err(said)?;
+        let b = a.burn(&worn, amount, &purpose).map_err(said)?;
+        Ok(BurnRow { txid_hex: b.txid_hex, amount_pxmr: b.amount_pxmr, purpose: b.purpose, height: b.height, ready: false, envelope_hex: None, made_at: b.made_at })
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+#[derive(Serialize)]
+struct VerifiedBurnRow {
+    persona_hex: String,
+    amount_pxmr: u64,
+    height: u64,
+    purpose: String,
+}
+
+/// Check a stranger's burn proof (§9.5) and remember the verdict.
+#[tauri::command]
+async fn verify_burn(persona_hex: String, envelope_hex: String) -> Result<VerifiedBurnRow, String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || {
+        let v = a.verify_burn(&persona_hex, &envelope_hex).map_err(said)?;
+        Ok(VerifiedBurnRow { persona_hex: v.persona_hex, amount_pxmr: v.amount_pxmr, height: v.height, purpose: v.purpose })
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
 #[tauri::command]
 async fn wallet_send(to: String, amount_xmr: String, note: Option<String>, priority: u32, contact_hex: Option<String>) -> Result<String, String> {
     let a = app()?;
@@ -2990,6 +3068,9 @@ pub fn run() {
             wallet_sends,
             wallet_quote,
             wallet_send,
+            burn_view,
+            burn,
+            verify_burn,
             wallet_max,
             set_own_node,
             wallet_rescan,

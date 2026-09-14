@@ -389,4 +389,17 @@
     <string name="desk_issue_asked">aangevraagd</string>
     <string name="desk_issue_on_shelf">op hun plank</string>
     <string name="desk_pieces_of">%1$d van %2$d delen</string>
+    <string name="desk_burn">Verbranden</string>
+    <string name="desk_burn_title">Geld dat je met opzet verbrandt</string>
+    <string name="desk_burn_body">Verbranden stuurt XMR naar een adres waarvan niemand de sleutels heeft. Het kan niet ongedaan worden gemaakt. Wat je krijgt is een bewijs, gebonden aan deze persona, dat je iets betaalde om hier te zijn — een oplichter zou het voor elke nieuwe naam opnieuw moeten betalen.</string>
+    <string name="desk_burn_floor">Minimum dat telt: %1$s</string>
+    <string name="desk_burn_under">Onder %1$s</string>
+    <string name="desk_burn_purpose">Waarvoor</string>
+    <string name="desk_burn_x_xmr">%1$s XMR verbranden</string>
+    <string name="desk_burn_confirm">%1$s XMR verbranden? Het kan niet ongedaan worden gemaakt, en het bewijs is pas te tonen als het blok er is.</string>
+    <string name="desk_burn_waiting">wacht op zijn blok</string>
+    <string name="desk_burn_in_block">in blok %1$s</string>
+    <string name="desk_burn_copy_proof">Bewijs kopiëren</string>
+    <string name="desk_burned">Verbrand</string>
+    <string name="desk_burn_none">Onder deze persona is nog niets verbrand.</string>
 </resources>

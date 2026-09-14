@@ -324,8 +324,8 @@ working days for one person; "proof" is what closes the step.
 
 | Step | What | Proof |
 |---|---|---|
-| 3.1 | Keep the transaction secret key at send time (per send, in the wallet store, owner-only). | a burn can be proved a day later |
-| 3.2 | `OutProofV2` generation and verification in Rust (`mobile/src/monero.rs`): the Schnorr-style proof over the transaction public key and the recipient's public view key, with the message bound. | `check_tx_proof` on monero-wallet-rpc (stagenet) agrees on every proof we make and refuses every proof we alter; vectors pin the encoding |
+| 3.1 | Keep the transaction secret key at send time (per send, in the wallet store, owner-only). **Done 2026-09-14**: the send path derives the key the crate derives and hands it back; both clients keep it on the send record. | a burn can be proved a day later |
+| 3.2 | `OutProofV2` generation and verification in Rust (`mobile/src/txproof.rs`): the Schnorr-style proof over the transaction public key and the recipient's public view key, with the message bound. **Done 2026-09-14.** | **Proven**: the first burn to the stagenet burn address (txid `0b1a7ac3…9301b`, block 2207293, 0.01 XMR); monero-wallet-rpc's proof verifies in our code for exactly that amount, our proof from the transaction key is accepted by monero-wallet-rpc (`good: true, received: 10000000000`), and a wrong message fails both ways (`mobile/examples/txproof_oracle.rs`) |
 | 3.3 | Burn: send to the DUCAT burn address from the wallet, keep the proof in the persona's attestation record and the backup. | a burn on stagenet, restored from a backup, still verifies |
 
 ### Phase 4 — the clients

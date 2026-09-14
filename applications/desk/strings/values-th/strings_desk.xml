@@ -385,4 +385,17 @@
     <string name="desk_issue_asked">ขอไปแล้ว</string>
     <string name="desk_issue_on_shelf">อยู่บนชั้นของพวกเขา</string>
     <string name="desk_pieces_of">%1$d จาก %2$d ชิ้น</string>
+    <string name="desk_burn">เผา</string>
+    <string name="desk_burn_title">เงินที่คุณตั้งใจเผา</string>
+    <string name="desk_burn_body">การเผาส่ง XMR ไปยังที่อยู่ที่ไม่มีใครถือกุญแจ ย้อนกลับไม่ได้ สิ่งที่คุณได้คือหลักฐานที่ผูกกับตัวตนนี้ว่าคุณจ่ายบางอย่างเพื่ออยู่ที่นี่ นักต้มตุ๋นจะต้องจ่ายใหม่ทุกครั้งที่ใช้ชื่อใหม่</string>
+    <string name="desk_burn_floor">ขั้นต่ำที่นับ: %1$s</string>
+    <string name="desk_burn_under">ในนาม %1$s</string>
+    <string name="desk_burn_purpose">เพื่ออะไร</string>
+    <string name="desk_burn_x_xmr">เผา %1$s XMR</string>
+    <string name="desk_burn_confirm">เผา %1$s XMR หรือไม่ ย้อนกลับไม่ได้ และหลักฐานจะแสดงได้เมื่อบล็อกมาถึงเท่านั้น</string>
+    <string name="desk_burn_waiting">รอบล็อก</string>
+    <string name="desk_burn_in_block">ในบล็อก %1$s</string>
+    <string name="desk_burn_copy_proof">คัดลอกหลักฐาน</string>
+    <string name="desk_burned">เผาแล้ว</string>
+    <string name="desk_burn_none">ยังไม่มีการเผาในนามตัวตนนี้</string>
 </resources>

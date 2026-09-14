@@ -389,4 +389,17 @@
     <string name="desk_issue_asked">demandé</string>
     <string name="desk_issue_on_shelf">sur leur étagère</string>
     <string name="desk_pieces_of">%1$d pièces sur %2$d</string>
+    <string name="desk_burn">Brûler</string>
+    <string name="desk_burn_title">De l’argent que vous brûlez exprès</string>
+    <string name="desk_burn_body">Brûler envoie des XMR à une adresse dont personne ne détient les clés. C’est irréversible. Vous obtenez une preuve, liée à ce persona, que vous avez payé pour être ici — un escroc devrait payer à nouveau pour chaque nouveau nom.</string>
+    <string name="desk_burn_floor">Minimum qui compte : %1$s</string>
+    <string name="desk_burn_under">Sous %1$s</string>
+    <string name="desk_burn_purpose">Pour quoi</string>
+    <string name="desk_burn_x_xmr">Brûler %1$s XMR</string>
+    <string name="desk_burn_confirm">Brûler %1$s XMR ? C’est irréversible, et la preuve ne se montre qu’une fois le bloc arrivé.</string>
+    <string name="desk_burn_waiting">en attente de son bloc</string>
+    <string name="desk_burn_in_block">dans le bloc %1$s</string>
+    <string name="desk_burn_copy_proof">Copier la preuve</string>
+    <string name="desk_burned">Brûlé</string>
+    <string name="desk_burn_none">Rien n’a encore été brûlé sous ce persona.</string>
 </resources>

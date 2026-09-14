@@ -385,4 +385,17 @@
     <string name="desk_issue_asked">diminta</string>
     <string name="desk_issue_on_shelf">di rak mereka</string>
     <string name="desk_pieces_of">%1$d dari %2$d bagian</string>
+    <string name="desk_burn">Bakar</string>
+    <string name="desk_burn_title">Uang yang sengaja Anda bakar</string>
+    <string name="desk_burn_body">Membakar mengirim XMR ke alamat yang kuncinya tidak dipegang siapa pun. Tidak bisa dibatalkan. Yang Anda dapat adalah bukti, terikat pada persona ini, bahwa Anda membayar untuk berada di sini — penipu harus membayarnya lagi untuk setiap nama baru.</string>
+    <string name="desk_burn_floor">Minimum yang dihitung: %1$s</string>
+    <string name="desk_burn_under">Atas nama %1$s</string>
+    <string name="desk_burn_purpose">Untuk apa</string>
+    <string name="desk_burn_x_xmr">Bakar %1$s XMR</string>
+    <string name="desk_burn_confirm">Bakar %1$s XMR? Tidak bisa dibatalkan, dan bukti belum bisa ditunjukkan sampai bloknya tiba.</string>
+    <string name="desk_burn_waiting">menunggu bloknya</string>
+    <string name="desk_burn_in_block">di blok %1$s</string>
+    <string name="desk_burn_copy_proof">Salin bukti</string>
+    <string name="desk_burned">Dibakar</string>
+    <string name="desk_burn_none">Belum ada yang dibakar atas nama persona ini.</string>
 </resources>

@@ -3,7 +3,7 @@
   // one form to send it. Stagenet until a mainnet build exists.
   import { onMount } from "svelte";
   import { t, tp, lc } from "./i18n.svelte";
-  import { api, copy, fmtXmr, fmtTime, type NoteRow, type Quote, type SentRow, type WalletView } from "./api";
+  import { api, copy, fmtXmr, fmtTime, confirmDanger, type BurnView, type NoteRow, type Quote, type SentRow, type WalletView } from "./api";
   import { gen } from "./state.svelte";
 
   let view = $state<WalletView | null>(null);
@@ -17,6 +17,24 @@
   let quote = $state<Quote | null>(null);
   let quoting = $state(false);
   let sending = $state(false);
+  // §9.5: burning under the worn persona.
+  let burnView = $state<BurnView | null>(null);
+  let burnAmount = $state("0.01");
+  let burnPurpose = $state("identity");
+  let burning = $state(false);
+  let burnErr = $state<string | null>(null);
+  async function loadBurns() {
+    try { burnView = await api.burnView(); } catch (e) { burnErr = String(e); }
+  }
+  async function doBurn() {
+    if (!(await confirmDanger(t("desk_burn_confirm", burnAmount.trim())))) return;
+    burning = true; burnErr = null;
+    try {
+      await api.burn(burnAmount.trim(), burnPurpose.trim());
+      await loadBurns();
+    } catch (e) { burnErr = String(e); } finally { burning = false; }
+  }
+  $effect(() => { if (tab === "burn") loadBurns(); });
   let sentTx = $state<string | null>(null);
   let ownNode = $state("");
   let editingNode = $state(false);
@@ -29,7 +47,7 @@
     rescanning = true;
     try { await api.walletRescan(h); await refresh(); } catch (e) { err = String(e); } finally { rescanning = false; }
   }
-  let tab = $state<"send" | "receive" | "history">("receive");
+  let tab = $state<"send" | "receive" | "history" | "burn">("receive");
   let showNotes = $state(false);
 
   // The empty state waits for the first answer; a blank list is not
@@ -167,9 +185,41 @@
     <button class="tab" class:active={tab === "receive"} onclick={() => (tab = "receive")}>{t("desk_receive")}</button>
     <button class="tab" class:active={tab === "send"} onclick={() => (tab = "send")}>{t("pay_send")}</button>
     <button class="tab" class:active={tab === "history"} onclick={() => (tab = "history")}>{t("desk_history")}</button>
+    <button class="tab" class:active={tab === "burn"} onclick={() => (tab = "burn")}>{t("desk_burn")}</button>
   </div>
 
-  {#if tab === "receive"}
+  {#if tab === "burn"}
+    <div class="card">
+      <h3>{t("desk_burn_title")}</h3>
+      <p class="note">{t("desk_burn_body")}</p>
+      {#if burnView}
+        <p class="meta">{t("desk_burn_under", burnView.persona_name || burnView.persona_hex.slice(0, 8))} · {t("desk_burn_floor", fmtXmr(burnView.floor_pxmr))}</p>
+        <div class="addr">{burnView.address}</div>
+        <div class="row">
+          <label for="burnAmt">XMR</label>
+          <input id="burnAmt" class="input" bind:value={burnAmount} />
+          <label for="burnWhy">{t("desk_burn_purpose")}</label>
+          <input id="burnWhy" class="input" bind:value={burnPurpose} maxlength="32" />
+        </div>
+        <div class="actions">
+          <button class="btn danger" disabled={burning || !burnAmount.trim() || !burnPurpose.trim()} onclick={doBurn}>{burning ? t("desk_sending") : t("desk_burn_x_xmr", burnAmount.trim())}</button>
+        </div>
+        {#if burnErr}<p class="err">{burnErr}</p>{/if}
+        {#if burnView.rows.length === 0}
+          <p class="empty">{t("desk_burn_none")}</p>
+        {:else}
+          <ul class="list">
+            {#each burnView.rows as b (b.txid_hex)}
+              <li class="row">
+                <span>{t("desk_burned")} {fmtXmr(b.amount_pxmr)} · {b.purpose} · {b.ready ? t("desk_burn_in_block", String(b.height)) : t("desk_burn_waiting")}</span>
+                {#if b.envelope_hex}<button class="btn small" onclick={() => copy(b.envelope_hex ?? "")}>{t("desk_burn_copy_proof")}</button>{/if}
+              </li>
+            {/each}
+          </ul>
+        {/if}
+      {/if}
+    </div>
+  {:else if tab === "receive"}
     <div class="card">
       <h3>{t("desk_your_address")}</h3>
       {#if view.address}

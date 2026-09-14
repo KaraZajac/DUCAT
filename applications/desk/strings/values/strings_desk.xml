@@ -395,4 +395,17 @@
     <string name="desk_issue_asked">asked for</string>
     <string name="desk_issue_on_shelf">on their shelf</string>
     <string name="desk_pieces_of">%1$d of %2$d pieces</string>
+    <string name="desk_burn">Burn</string>
+    <string name="desk_burn_title">Money you set fire to, on purpose</string>
+    <string name="desk_burn_body">A burn sends XMR to an address nobody holds the keys to. It cannot be undone. What you get is a proof, tied to this persona, that you paid something to be here — a scammer would have to pay it again for every new name.</string>
+    <string name="desk_burn_floor">Least that counts: %1$s</string>
+    <string name="desk_burn_under">Under %1$s</string>
+    <string name="desk_burn_purpose">What for</string>
+    <string name="desk_burn_x_xmr">Burn %1$s XMR</string>
+    <string name="desk_burn_confirm">Burn %1$s XMR? It cannot be undone, and the proof is not yours to show until the block arrives.</string>
+    <string name="desk_burn_waiting">waiting for its block</string>
+    <string name="desk_burn_in_block">in block %1$s</string>
+    <string name="desk_burn_copy_proof">Copy proof</string>
+    <string name="desk_burned">Burned</string>
+    <string name="desk_burn_none">Nothing burned under this persona yet.</string>
 </resources>

@@ -393,6 +393,74 @@ fn hex32(h: &str, what: &str) -> Result<[u8; 32], ProofError> {
         .ok_or_else(|| malformed(format!("{what} is 32 bytes of hex")))
 }
 
+/// What a node says about a transaction, as a proof check needs it: its
+/// bytes, and whether it is in a block yet.
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct FetchedTx {
+    pub tx_hex: String,
+    /// Zero while the transaction is still in the pool.
+    pub height: u64,
+}
+
+/// Ask one node for a transaction by id. `None` when the node cannot be
+/// reached or does not have it; a proof cannot be checked without the bytes.
+#[uniffi::export]
+pub fn monero_fetch_tx(node_url: String, txid_hex: String, timeout_ms: u32) -> Option<FetchedTx> {
+    use std::io::Read as _;
+    let want = txid_hex.trim().to_lowercase();
+    if crate::hex_to_bytes(&want).filter(|b| b.len() == 32).is_none() {
+        return None;
+    }
+    let agent = ureq::AgentBuilder::new()
+        .timeout_connect(std::time::Duration::from_millis(timeout_ms.max(1_000) as u64))
+        .timeout_read(std::time::Duration::from_millis(timeout_ms.max(1_000) as u64))
+        .build();
+    let body = serde_json::json!({ "txs_hashes": [want.clone()] });
+    let resp = agent
+        .post(&format!("{}/get_transactions", node_url.trim_end_matches('/')))
+        .set("Content-Type", "application/json")
+        .send_string(&body.to_string())
+        .ok()?;
+    let mut text = String::new();
+    resp.into_reader().take(4 * 1024 * 1024).read_to_string(&mut text).ok()?;
+    let v: serde_json::Value = serde_json::from_str(&text).ok()?;
+    if v["status"].as_str() != Some("OK") {
+        return None;
+    }
+    let tx = v["txs"].as_array()?.iter().find(|t| t["tx_hash"].as_str().map_or(false, |h| h.eq_ignore_ascii_case(&want)))?;
+    let tx_hex = tx["as_hex"].as_str().filter(|h| !h.is_empty())?.to_string();
+    let in_pool = tx["in_pool"].as_bool().unwrap_or(false);
+    let height = if in_pool { 0 } else { tx["block_height"].as_u64().unwrap_or(0) };
+    Some(FetchedTx { tx_hex, height })
+}
+
+/// A proof checked against a node: the amount it proves and the block the
+/// transaction is in (zero while still in the pool).
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct VerifiedProof {
+    pub amount_pxmr: u64,
+    pub height: u64,
+}
+
+/// Fetch the transaction from `node_url` and check `proof` against it. The
+/// caller still asks the second-opinion node whether the transaction is in
+/// a block (§9.5's third check); this answers the first two.
+#[uniffi::export]
+pub fn monero_verify_out_proof(
+    node_url: String,
+    txid_hex: String,
+    address: String,
+    stagenet: bool,
+    message: Vec<u8>,
+    proof: String,
+    timeout_ms: u32,
+) -> Result<VerifiedProof, ProofError> {
+    let fetched = monero_fetch_tx(node_url, txid_hex.clone(), timeout_ms)
+        .ok_or_else(|| ProofError::Unsupported("the node did not produce the transaction".into()))?;
+    let amount_pxmr = monero_check_out_proof(fetched.tx_hex, txid_hex, address, stagenet, message, proof)?;
+    Ok(VerifiedProof { amount_pxmr, height: fetched.height })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

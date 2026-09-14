@@ -389,4 +389,17 @@
     <string name="desk_issue_asked">angefragt</string>
     <string name="desk_issue_on_shelf">in ihrem Regal</string>
     <string name="desk_pieces_of">%1$d von %2$d Teilen</string>
+    <string name="desk_burn">Verbrennen</string>
+    <string name="desk_burn_title">Geld, das du absichtlich verbrennst</string>
+    <string name="desk_burn_body">Ein Burn schickt XMR an eine Adresse, zu der niemand die Schlüssel hat. Das lässt sich nicht rückgängig machen. Was du bekommst, ist ein an diese Persona gebundener Nachweis, dass du etwas bezahlt hast, um hier zu sein — ein Betrüger müsste es für jeden neuen Namen erneut bezahlen.</string>
+    <string name="desk_burn_floor">Mindestens zählt: %1$s</string>
+    <string name="desk_burn_under">Unter %1$s</string>
+    <string name="desk_burn_purpose">Wofür</string>
+    <string name="desk_burn_x_xmr">%1$s XMR verbrennen</string>
+    <string name="desk_burn_confirm">%1$s XMR verbrennen? Das lässt sich nicht rückgängig machen, und der Nachweis ist erst vorzeigbar, wenn der Block da ist.</string>
+    <string name="desk_burn_waiting">wartet auf seinen Block</string>
+    <string name="desk_burn_in_block">in Block %1$s</string>
+    <string name="desk_burn_copy_proof">Nachweis kopieren</string>
+    <string name="desk_burned">Verbrannt</string>
+    <string name="desk_burn_none">Unter dieser Persona wurde noch nichts verbrannt.</string>
 </resources>

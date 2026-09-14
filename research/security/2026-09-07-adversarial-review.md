@@ -42,7 +42,7 @@ the fix landed), **open**, **deferred** (design decision recorded, not scheduled
 | # | Sev | Where | Finding | Status |
 |---|---|---|---|---|
 | D1 | High | app/src/store.rs, wallet.rs, identity.rs | Spend key and persona secrets in plain JSON with umask permissions | **fixed** (owner-only dir 0700 and files 0600); encryption at rest still open |
-| D2 | Medium | mobile/src/swarm.rs, home.rs, sites.rs | No size ceiling on fetched bundles; hearted homes fetched unattended | **open** — `max_bytes` on the fetch plus index validation at decode |
+| D2 | Medium | mobile/src/swarm.rs, home.rs, sites.rs | No size ceiling on fetched bundles; hearted homes fetched unattended | **fixed** (ab3aba7d) |
 | D3 | Low | src-tauri/src/lib.rs | Sealed room relies on the per-response CSP alone; `.disable_javascript()` not set | **open** (one call) |
 | D4 | Low | mobile/src/monero.rs | Monero RPC over plain http | **accepted for now** — every public stagenet node's TLS is self-signed or CAcert; documented in the node list |
 | D5 | Low | lib.rs | Broad main-window command surface (`picture_data_url`, `node_debug`, `log_tail`) | **open** |
@@ -78,24 +78,24 @@ the fix landed), **open**, **deferred** (design decision recorded, not scheduled
 
 | # | Sev | Where | Finding | Status |
 |---|---|---|---|---|
-| N1 | High | mobile/src/monero.rs, ceremony.rs | Fee rate taken from the node with no cap (`max_per_weight = u64::MAX`) | **open** — ceiling and post-build refusal on both clients |
-| N2 | High | monero.rs, opinion.rs, SecondOpinion.kt | Second opinion defeated: returned tx hash unchecked, plain http, "unreachable" settles, pool presence counts as known | **partial**: desk policy rewritten (`InBlock` settles, pool/unknown/unreachable defer, small-sale floor, confirmations by amount, own-node honoured, node identity by host:port); phone `SecondOpinion.kt` and its callers still on the old rule |
+| N1 | High | mobile/src/monero.rs, ceremony.rs | Fee rate taken from the node with no cap (`max_per_weight = u64::MAX`) | **fixed** (e2ab23c6): named ceiling, built fee refused over the quote by a quarter or a twentieth of the amount, escrow proposer and co-signer alike |
+| N2 | High | monero.rs, opinion.rs, SecondOpinion.kt | Second opinion defeated: returned tx hash unchecked, plain http, "unreachable" settles, pool presence counts as known | **fixed** on both clients (b53efabc, 6f3d4e9c): only `InBlock` elsewhere settles, the rest defer, ten-minute stall → "settle anyway", small-sale floor, confirmations by amount, own node honoured, returned tx hashed; nodes stay http because no public stagenet node has a publicly trusted certificate |
 | N3 | High | contacts.rs, mailbox.rs, Hailing.kt | Public cards reveal the poster's persona and the claimant's identity to every board reader | **open** — per-listing pseudonymous personas and W4 |
-| N4 | High | stigmerge index.rs, fileindex, swarm.rs, Mailbox.kt | A share's index declares any size and the fetcher believes it | **open** (with D2) |
-| N5 | High (S) | stigmerge seeder.rs | Seeder spawns an unbounded task per block request behind a lock | **open** |
+| N4 | High | stigmerge index.rs, fileindex, swarm.rs, Mailbox.kt | A share's index declares any size and the fetcher believes it | **fixed** (ab3aba7d): index shape checked at decode, byte ceiling per kind before any file is created |
+| N5 | High (S) | stigmerge seeder.rs | Seeder spawns an unbounded task per block request behind a lock | **fixed** (ab3aba7d): bounded queue, eight in flight, reply outside the lock, per-route pacing |
 | N6 | Medium | groups.rs, Groups.kt | Any member can wedge or partition a group with one roster | see W2 |
 | N7 | Medium | mailbox.rs, Mailbox.kt, contacts.rs | A stale record holder makes the reader dead-letter the current message | **open** — distinct `Stale` error, wait instead of advance |
 | N8 | Medium | mailbox.rs, Mailbox.kt, node.rs | Public cards claimed, burned or silently killed by anyone | **partial**: an unparsable reply is now treated as contested on both clients; K slots / stamped replies deferred |
 | N9 | Medium | Mailbox.kt, ContactStore.kt, mailbox.rs | A hostile contact forces 1024 reads and thread rewrites per lap | **open** |
-| N10 | Medium | Ceremony.kt, ceremony.rs | Escrow co-signer never bounds the fee in the proposed transaction | **open** (with M2) |
-| N11 | Medium | stigmerge block_fetcher.rs, piece_verifier.rs | One hostile mirror poisons a tail piece and is scored a success | **open** |
+| N10 | Medium | Ceremony.kt, ceremony.rs | Escrow co-signer never bounds the fee in the proposed transaction | **fixed** (e2ab23c6) |
+| N11 | Medium | stigmerge block_fetcher.rs, piece_verifier.rs | One hostile mirror poisons a tail piece and is scored a success | **fixed** (ab3aba7d): exact block length, file sized on open, credit on verification, three strikes |
 | N12 | Medium | stigmerge header.rs, node.rs | A share key with a secret re-opens our own records with writer None | **open** |
 | N13 | Medium | stigmerge peer_gossip.rs | Gossip amplification; unbounded peer tables | **open** |
-| N14 | Medium | stigmerge share.rs, piece_verifier.rs | Two panics reachable from a publisher's bytes | **open** |
+| N14 | Medium | stigmerge share.rs, piece_verifier.rs | Two panics reachable from a publisher's bytes | **fixed** (ab3aba7d) |
 | N15 | Medium | node.rs, geo.rs | Cell boards brickable for a week with writes at seq u32::MAX; future weeks computable | **deferred** |
 | N16 | Medium | monero.rs, opinion.rs, SecondOpinion.kt | Sends broadcast to five clearnet nodes even with an own node | **partial** (desk honours the own node; relay list still fans out) |
 | N17 | Medium | app/src/publications.rs | Shelf index drives unbounded reads and memory | see W18 |
-| N18 | Medium | stigmerge fetcher.rs, swarm.rs | No strike cap; a moving attempt resets the stall budget | **open** |
+| N18 | Medium | stigmerge fetcher.rs, swarm.rs | No strike cap; a moving attempt resets the stall budget | **fixed** (ab3aba7d): strikes, and a minimum-throughput rule instead of the reset |
 | N19 | Low/Med | Wallet2.kt, wallet.rs | One node's `is_key_image_spent` is final | **open** |
 | N20–N27 | Low/Info | | Beacon over one node; one-hop safety route; settlement at one confirmation (desk now scales confirmations); sender-named record deletion; group timestamps; stigmerge block bounds; bundle budgets; open-once registry ignores the writer | **open** |
 
@@ -103,17 +103,17 @@ the fix landed), **open**, **deferred** (design decision recorded, not scheduled
 
 | # | Sev | Where | Finding | Status |
 |---|---|---|---|---|
-| M1 | High | ui/Kiosk.kt, Orders.kt, orders.rs | Kiosk hands over goods on a mempool sighting with no bond (§15.11 says MUST NOT) | **open** — `Seen` renders as settling; operator-set "hand over on sight up to X" |
-| M2 | High | Ceremony.kt, ceremony.rs | Release consent sized from the scanned balance, not the transaction's inputs; a partial sweep takes the co-signer's stake | **open** |
-| M3 | High | SecondOpinion.kt, opinion.rs, monero.rs | Second opinion defeated by an on-path attacker and by mempool presence | see N2 |
-| M4 | High | ui/Chat.kt, Ceremony.kt | The arbiter signs the proposer's payload while shown only the proposer's claim | **open** |
-| M5 | Medium | Ceremony.kt | The joining party adopts the inviter's fare, stakes and funder index unchecked | **open** |
+| M1 | High | ui/Kiosk.kt, Orders.kt, orders.rs | Kiosk hands over goods on a mempool sighting with no bond (§15.11 says MUST NOT) | **fixed** (6f3d4e9c): `Seen` renders as settling on both clients; paid panel and Ready need `Confirmed` or an operator cap, default off |
+| M2 | High | Ceremony.kt, ceremony.rs | Release consent sized from the scanned balance, not the transaction's inputs; a partial sweep takes the co-signer's stake | **fixed** (e2ab23c6): consent from inputs, outputs and fee; a partial sweep and an unscanned escrow are refused |
+| M3 | High | SecondOpinion.kt, opinion.rs, monero.rs | Second opinion defeated by an on-path attacker and by mempool presence | **fixed**, see N2 |
+| M4 | High | ui/Chat.kt, Ceremony.kt | The arbiter signs the proposer's payload while shown only the proposer's claim | **fixed** (e2ab23c6): every parsed output listed with its attribution, approval bound to what was printed; an unplaceable payout warns rather than refuses until the payee's address rides the round-0 frame |
+| M5 | Medium | Ceremony.kt | The joining party adopts the inviter's fare, stakes and funder index unchecked | **fixed** (e2ab23c6) |
 | M6 | Medium | Ledger.kt, ContactStore.kt, ledger.rs | Any contact can relabel, itemise and "tax" a row of the merchant's statement | **open** |
 | M7 | Medium | Donations.kt, donations.rs | A donation receipt is issued for any transaction the wallet received | **open** |
 | M8 | Medium | ContactStore.kt, backup.rs, Ledger.kt | Restore loses send records; spends become epoch-dated "unexplained" rows | **open** |
 | M9 | Medium | ui/Pay.kt, Pin.kt | Stale-rate rule and payer verification policy not applied | **open** |
-| M10 | Low | Orders.kt, orders.rs | Pool-sighted orders promoted without the second opinion | **open** |
-| M11 | Low | Ceremony.kt | Consent TOCTOU on a superseding proposal | **open** |
+| M10 | Low | Orders.kt, orders.rs | Pool-sighted orders promoted without the second opinion | **fixed** (6f3d4e9c) |
+| M11 | Low | Ceremony.kt | Consent TOCTOU on a superseding proposal | **fixed** (e2ab23c6): the tap carries the displayed figure and a digest |
 | M12 | Low | Publications.kt | An ask can be billed twice by two polls | **open** |
 | M13 | Low | Orders.kt | A code paid after expiry lands unmatched | **open** |
 | M14 | Info | core/ | Part IV (`fast/1`, bonds, slash claims, market arbiter set) exists only in core | **open** — see research/post-1.0/TRUST.md |

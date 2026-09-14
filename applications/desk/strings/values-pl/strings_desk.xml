@@ -397,4 +397,17 @@
     <string name="desk_issue_asked">poproszono</string>
     <string name="desk_issue_on_shelf">na ich półce</string>
     <string name="desk_pieces_of">%1$d z %2$d części</string>
+    <string name="desk_burn">Spal</string>
+    <string name="desk_burn_title">Pieniądze, które palisz celowo</string>
+    <string name="desk_burn_body">Spalenie wysyła XMR na adres, do którego nikt nie ma kluczy. Nie da się tego cofnąć. Dostajesz dowód, związany z tą personą, że zapłaciłeś za bycie tutaj — oszust musiałby płacić od nowa za każde nowe imię.</string>
+    <string name="desk_burn_floor">Najmniej, ile się liczy: %1$s</string>
+    <string name="desk_burn_under">Jako %1$s</string>
+    <string name="desk_burn_purpose">Po co</string>
+    <string name="desk_burn_x_xmr">Spal %1$s XMR</string>
+    <string name="desk_burn_confirm">Spalić %1$s XMR? Nie da się tego cofnąć, a dowód można pokazać dopiero, gdy nadejdzie blok.</string>
+    <string name="desk_burn_waiting">czeka na blok</string>
+    <string name="desk_burn_in_block">w bloku %1$s</string>
+    <string name="desk_burn_copy_proof">Kopiuj dowód</string>
+    <string name="desk_burned">Spalono</string>
+    <string name="desk_burn_none">Jako ta persona nic jeszcze nie spalono.</string>
 </resources>

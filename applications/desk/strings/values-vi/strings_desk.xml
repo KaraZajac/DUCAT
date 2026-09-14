@@ -385,4 +385,17 @@
     <string name="desk_issue_asked">đã yêu cầu</string>
     <string name="desk_issue_on_shelf">trên kệ của họ</string>
     <string name="desk_pieces_of">%1$d trong %2$d phần</string>
+    <string name="desk_burn">Đốt</string>
+    <string name="desk_burn_title">Tiền bạn cố ý đốt</string>
+    <string name="desk_burn_body">Đốt gửi XMR đến một địa chỉ không ai giữ khóa. Không thể hoàn tác. Thứ bạn nhận là một bằng chứng gắn với danh tính này rằng bạn đã trả giá để có mặt ở đây — kẻ lừa đảo sẽ phải trả lại cho mỗi cái tên mới.</string>
+    <string name="desk_burn_floor">Mức tối thiểu được tính: %1$s</string>
+    <string name="desk_burn_under">Dưới tên %1$s</string>
+    <string name="desk_burn_purpose">Để làm gì</string>
+    <string name="desk_burn_x_xmr">Đốt %1$s XMR</string>
+    <string name="desk_burn_confirm">Đốt %1$s XMR? Không thể hoàn tác, và bằng chứng chỉ có thể đưa ra khi khối đã đến.</string>
+    <string name="desk_burn_waiting">đang chờ khối</string>
+    <string name="desk_burn_in_block">trong khối %1$s</string>
+    <string name="desk_burn_copy_proof">Sao chép bằng chứng</string>
+    <string name="desk_burned">Đã đốt</string>
+    <string name="desk_burn_none">Chưa đốt gì dưới danh tính này.</string>
 </resources>

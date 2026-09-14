@@ -397,4 +397,17 @@
     <string name="desk_issue_asked">запитано</string>
     <string name="desk_issue_on_shelf">на їхній полиці</string>
     <string name="desk_pieces_of">%1$d з %2$d частин</string>
+    <string name="desk_burn">Спалити</string>
+    <string name="desk_burn_title">Гроші, які ви спалюєте навмисно</string>
+    <string name="desk_burn_body">Спалення надсилає XMR на адресу, ключів від якої немає ні в кого. Це незворотно. Ви отримуєте доказ, прив’язаний до цієї персони, що заплатили за те, щоб бути тут, — шахраю довелося б платити заново за кожне нове ім’я.</string>
+    <string name="desk_burn_floor">Мінімум, що зараховується: %1$s</string>
+    <string name="desk_burn_under">Від імені %1$s</string>
+    <string name="desk_burn_purpose">Для чого</string>
+    <string name="desk_burn_x_xmr">Спалити %1$s XMR</string>
+    <string name="desk_burn_confirm">Спалити %1$s XMR? Це незворотно, а доказ можна показувати лише після появи блоку.</string>
+    <string name="desk_burn_waiting">чекає на блок</string>
+    <string name="desk_burn_in_block">у блоці %1$s</string>
+    <string name="desk_burn_copy_proof">Скопіювати доказ</string>
+    <string name="desk_burned">Спалено</string>
+    <string name="desk_burn_none">Від імені цієї персони ще нічого не спалено.</string>
 </resources>

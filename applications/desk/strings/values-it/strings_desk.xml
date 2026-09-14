@@ -389,4 +389,17 @@
     <string name="desk_issue_asked">richiesto</string>
     <string name="desk_issue_on_shelf">sul loro scaffale</string>
     <string name="desk_pieces_of">%1$d di %2$d parti</string>
+    <string name="desk_burn">Brucia</string>
+    <string name="desk_burn_title">Denaro che bruci di proposito</string>
+    <string name="desk_burn_body">Bruciare invia XMR a un indirizzo di cui nessuno ha le chiavi. Non si può annullare. Ottieni una prova, legata a questa persona, di aver pagato qualcosa per essere qui: un truffatore dovrebbe pagarla di nuovo per ogni nuovo nome.</string>
+    <string name="desk_burn_floor">Minimo che conta: %1$s</string>
+    <string name="desk_burn_under">Sotto %1$s</string>
+    <string name="desk_burn_purpose">Per cosa</string>
+    <string name="desk_burn_x_xmr">Brucia %1$s XMR</string>
+    <string name="desk_burn_confirm">Bruciare %1$s XMR? Non si può annullare, e la prova non si può mostrare finché non arriva il blocco.</string>
+    <string name="desk_burn_waiting">in attesa del blocco</string>
+    <string name="desk_burn_in_block">nel blocco %1$s</string>
+    <string name="desk_burn_copy_proof">Copia prova</string>
+    <string name="desk_burned">Bruciato</string>
+    <string name="desk_burn_none">Non è ancora stato bruciato nulla sotto questa persona.</string>
 </resources>

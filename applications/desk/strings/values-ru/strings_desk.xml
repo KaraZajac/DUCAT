@@ -397,4 +397,17 @@
     <string name="desk_issue_asked">запрошено</string>
     <string name="desk_issue_on_shelf">на их полке</string>
     <string name="desk_pieces_of">%1$d из %2$d частей</string>
+    <string name="desk_burn">Сжечь</string>
+    <string name="desk_burn_title">Деньги, которые вы сжигаете нарочно</string>
+    <string name="desk_burn_body">Сжигание отправляет XMR на адрес, ключей от которого нет ни у кого. Это необратимо. Вы получаете доказательство, привязанное к этой персоне, что вы заплатили за то, чтобы быть здесь, — мошеннику пришлось бы платить заново за каждое новое имя.</string>
+    <string name="desk_burn_floor">Минимум, который засчитывается: %1$s</string>
+    <string name="desk_burn_under">От имени %1$s</string>
+    <string name="desk_burn_purpose">Для чего</string>
+    <string name="desk_burn_x_xmr">Сжечь %1$s XMR</string>
+    <string name="desk_burn_confirm">Сжечь %1$s XMR? Это необратимо, а доказательство можно показывать только после появления блока.</string>
+    <string name="desk_burn_waiting">ждёт свой блок</string>
+    <string name="desk_burn_in_block">в блоке %1$s</string>
+    <string name="desk_burn_copy_proof">Скопировать доказательство</string>
+    <string name="desk_burned">Сожжено</string>
+    <string name="desk_burn_none">От имени этой персоны ещё ничего не сожжено.</string>
 </resources>

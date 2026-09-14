@@ -84,6 +84,8 @@ impl App {
                     if status.public_internet_ready {
                         app.lap_once();
                         if SWEEP_NOW.swap(false, Ordering::AcqRel) || last_hourly.map_or(true, |t| t.elapsed() >= HOURLY) {
+                            // §9.5: a burn that has reached its block gets its envelope.
+                            app.burn_lap();
                             app.reseed_all_sites();
                             app.reseed_all_releases();
                             app.reseed_issues();

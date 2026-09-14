@@ -389,4 +389,17 @@
     <string name="desk_issue_asked">istendi</string>
     <string name="desk_issue_on_shelf">onların rafında</string>
     <string name="desk_pieces_of">%2$d parçadan %1$d</string>
+    <string name="desk_burn">Yak</string>
+    <string name="desk_burn_title">Bile isteye yaktığın para</string>
+    <string name="desk_burn_body">Yakmak, kimsenin anahtarına sahip olmadığı bir adrese XMR gönderir. Geri alınamaz. Karşılığında, bu kimliğe bağlı, burada olmak için bir bedel ödediğinin kanıtını alırsın — bir dolandırıcı her yeni ad için yeniden ödemek zorunda kalır.</string>
+    <string name="desk_burn_floor">Sayılan en az: %1$s</string>
+    <string name="desk_burn_under">%1$s adına</string>
+    <string name="desk_burn_purpose">Ne için</string>
+    <string name="desk_burn_x_xmr">%1$s XMR yak</string>
+    <string name="desk_burn_confirm">%1$s XMR yakılsın mı? Geri alınamaz ve kanıt, blok gelene kadar gösterilemez.</string>
+    <string name="desk_burn_waiting">bloğunu bekliyor</string>
+    <string name="desk_burn_in_block">%1$s bloğunda</string>
+    <string name="desk_burn_copy_proof">Kanıtı kopyala</string>
+    <string name="desk_burned">Yakıldı</string>
+    <string name="desk_burn_none">Bu kimlik adına henüz bir şey yakılmadı.</string>
 </resources>

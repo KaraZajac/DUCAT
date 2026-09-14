@@ -29,6 +29,8 @@ path = "src/lib.rs"
 
 [dependencies]
 ducat-mobile = { path = "../mobile" }
+# §9.5's objects (burn proofs, attestations) are wire objects the desk signs and opens itself.
+ducat-core = { path = "../core" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sha2 = "0.10"

@@ -45,6 +45,7 @@ pub mod sites;
 pub mod store;
 pub mod tabs;
 pub mod thumbs;
+pub mod trust;
 pub mod wallet;
 
 use std::path::{Path, PathBuf};

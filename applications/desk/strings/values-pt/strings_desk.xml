@@ -389,4 +389,17 @@
     <string name="desk_issue_asked">pedido</string>
     <string name="desk_issue_on_shelf">na estante deles</string>
     <string name="desk_pieces_of">%1$d de %2$d partes</string>
+    <string name="desk_burn">Queimar</string>
+    <string name="desk_burn_title">Dinheiro que queima de propósito</string>
+    <string name="desk_burn_body">Queimar envia XMR para um endereço cujas chaves ninguém tem. Não pode ser desfeito. O que recebe é uma prova, ligada a esta persona, de que pagou algo para estar aqui — um burlão teria de pagar de novo por cada nome novo.</string>
+    <string name="desk_burn_floor">Mínimo que conta: %1$s</string>
+    <string name="desk_burn_under">Sob %1$s</string>
+    <string name="desk_burn_purpose">Para quê</string>
+    <string name="desk_burn_x_xmr">Queimar %1$s XMR</string>
+    <string name="desk_burn_confirm">Queimar %1$s XMR? Não pode ser desfeito, e a prova só pode ser mostrada quando o bloco chegar.</string>
+    <string name="desk_burn_waiting">à espera do bloco</string>
+    <string name="desk_burn_in_block">no bloco %1$s</string>
+    <string name="desk_burn_copy_proof">Copiar prova</string>
+    <string name="desk_burned">Queimado</string>
+    <string name="desk_burn_none">Ainda nada foi queimado sob esta persona.</string>
 </resources>

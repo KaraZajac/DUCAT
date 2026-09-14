@@ -389,4 +389,17 @@
     <string name="desk_issue_asked">درخواست شده</string>
     <string name="desk_issue_on_shelf">روی قفسهٔ آن‌ها</string>
     <string name="desk_pieces_of">%1$d از %2$d قطعه</string>
+    <string name="desk_burn">سوزاندن</string>
+    <string name="desk_burn_title">پولی که عمداً می‌سوزانید</string>
+    <string name="desk_burn_body">سوزاندن XMR را به نشانی‌ای می‌فرستد که هیچ‌کس کلیدش را ندارد. برگشت‌ناپذیر است. آنچه می‌گیرید مدرکی است وابسته به این شخصیت که برای بودن در اینجا چیزی پرداخته‌اید — کلاهبردار باید آن را برای هر نام تازه دوباره بپردازد.</string>
+    <string name="desk_burn_floor">کمترین مقداری که به حساب می‌آید: %1$s</string>
+    <string name="desk_burn_under">به نام %1$s</string>
+    <string name="desk_burn_purpose">برای چه</string>
+    <string name="desk_burn_x_xmr">سوزاندن %1$s XMR</string>
+    <string name="desk_burn_confirm">%1$s XMR سوزانده شود؟ برگشت‌ناپذیر است و مدرک تا رسیدن بلوک قابل نمایش نیست.</string>
+    <string name="desk_burn_waiting">در انتظار بلوک</string>
+    <string name="desk_burn_in_block">در بلوک %1$s</string>
+    <string name="desk_burn_copy_proof">کپی مدرک</string>
+    <string name="desk_burned">سوزانده شد</string>
+    <string name="desk_burn_none">هنوز چیزی به نام این شخصیت سوزانده نشده است.</string>
 </resources>

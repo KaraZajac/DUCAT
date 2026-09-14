@@ -385,4 +385,17 @@
     <string name="desk_issue_asked">已请求</string>
     <string name="desk_issue_on_shelf">在对方书架上</string>
     <string name="desk_pieces_of">%2$d 块中的 %1$d 块</string>
+    <string name="desk_burn">销毁</string>
+    <string name="desk_burn_title">你有意销毁的钱</string>
+    <string name="desk_burn_body">销毁会把 XMR 发送到一个无人持有密钥的地址，无法撤销。你得到的是一份与此身份绑定的证明：你为在这里付出过代价——骗子每换一个新名字都得再付一次。</string>
+    <string name="desk_burn_floor">有效的最低额：%1$s</string>
+    <string name="desk_burn_under">以 %1$s 名义</string>
+    <string name="desk_burn_purpose">用途</string>
+    <string name="desk_burn_x_xmr">销毁 %1$s XMR</string>
+    <string name="desk_burn_confirm">销毁 %1$s XMR？无法撤销，且在区块到达前证明尚不能出示。</string>
+    <string name="desk_burn_waiting">等待区块</string>
+    <string name="desk_burn_in_block">位于区块 %1$s</string>
+    <string name="desk_burn_copy_proof">复制证明</string>
+    <string name="desk_burned">已销毁</string>
+    <string name="desk_burn_none">此身份尚未销毁任何金额。</string>
 </resources>

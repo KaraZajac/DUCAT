@@ -405,4 +405,17 @@
     <string name="desk_issue_asked">مطلوب</string>
     <string name="desk_issue_on_shelf">على رفّهم</string>
     <string name="desk_pieces_of">%1$d من %2$d قطعة</string>
+    <string name="desk_burn">حرق</string>
+    <string name="desk_burn_title">مال تحرقه عمدًا</string>
+    <string name="desk_burn_body">الحرق يرسل XMR إلى عنوان لا يملك أحد مفاتيحه. لا يمكن التراجع عنه. ما تحصل عليه هو إثبات مرتبط بهذه الشخصية بأنك دفعت شيئًا لتكون هنا — وسيضطر المحتال إلى دفعه مجددًا مع كل اسم جديد.</string>
+    <string name="desk_burn_floor">أقل ما يُحتسب: %1$s</string>
+    <string name="desk_burn_under">باسم %1$s</string>
+    <string name="desk_burn_purpose">الغرض</string>
+    <string name="desk_burn_x_xmr">حرق %1$s XMR</string>
+    <string name="desk_burn_confirm">حرق %1$s XMR؟ لا يمكن التراجع عنه، ولن يكون الإثبات جاهزًا للعرض حتى تصل الكتلة.</string>
+    <string name="desk_burn_waiting">في انتظار كتلته</string>
+    <string name="desk_burn_in_block">في الكتلة %1$s</string>
+    <string name="desk_burn_copy_proof">نسخ الإثبات</string>
+    <string name="desk_burned">حُرق</string>
+    <string name="desk_burn_none">لم يُحرق شيء باسم هذه الشخصية بعد.</string>
 </resources>
