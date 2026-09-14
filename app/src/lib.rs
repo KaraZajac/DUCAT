@@ -61,6 +61,13 @@ impl App {
         let root = root.as_ref().to_path_buf();
         std::fs::create_dir_all(root.join("files"))?;
         std::fs::create_dir_all(root.join("prefs"))?;
+        // The state directory holds the wallet's spend key and the persona
+        // secrets in plain JSON, so the directory itself is the wall: owner
+        // only, set on every open because a root made by an older desk, a
+        // copy, or a restore arrives with whatever mode the umask gave it.
+        store::make_private_dir(&root)?;
+        store::make_private_dir(&root.join("files"))?;
+        store::make_private_dir(&root.join("prefs"))?;
         log::init(&root);
         Ok(App { root })
     }

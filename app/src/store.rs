@@ -62,6 +62,9 @@ impl Store {
         }
         let tmp = self.path.with_extension("json.tmp");
         std::fs::write(&tmp, serde_json::to_vec_pretty(m)?)?;
+        // Owner-only before the rename, so no other user on the machine
+        // sees a window where a store holding a spend key is world-readable.
+        make_private_file(&tmp)?;
         std::fs::rename(&tmp, &self.path)
     }
 
@@ -172,4 +175,27 @@ mod tests {
         assert_eq!(s.get_string("legacy").as_deref(), Some("[4,5]"));
         std::fs::remove_dir_all(dir).ok();
     }
+}
+
+/// Owner-only mode on a directory (0700). Nothing to do where the platform
+/// has no such bits; Windows keeps a user's profile private by ACL.
+pub fn make_private_dir(dir: &std::path::Path) -> std::io::Result<()> {
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        std::fs::set_permissions(dir, std::fs::Permissions::from_mode(0o700))?;
+    }
+    let _ = dir;
+    Ok(())
+}
+
+/// Owner-only mode on a file (0600).
+pub fn make_private_file(file: &std::path::Path) -> std::io::Result<()> {
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        std::fs::set_permissions(file, std::fs::Permissions::from_mode(0o600))?;
+    }
+    let _ = file;
+    Ok(())
 }
