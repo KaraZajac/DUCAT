@@ -290,9 +290,16 @@ object Home {
         val key = runCatching { keyOf(personaHex) }.getOrNull() ?: return null
         val f = File(Sites.bundleDir(context, key), "feed.json")
         if (!f.isFile) return null
-        return runCatching { uniffi.ducat_mobile.feedParse(f.readText()) }
+        val doc = runCatching { uniffi.ducat_mobile.feedParse(f.readText()) }
             .onFailure { DucatLog.w(TAG, "${personaHex.take(8)}'s feed is unreadable: ${it.message}") }
-            .getOrNull()
+            .getOrNull() ?: return null
+        // §16.23: the document's persona MUST be the home it was fetched from —
+        // a hearted persona cannot attribute posts to anyone else, including us.
+        if (!doc.persona.equals(personaHex, ignoreCase = true)) {
+            DucatLog.w(TAG, "${personaHex.take(8)}'s feed names another persona (${doc.persona.take(8)}…); refused")
+            return null
+        }
+        return doc
     }
 
     /** Everyone kept, and me, newest first. */

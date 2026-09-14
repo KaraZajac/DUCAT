@@ -20,16 +20,16 @@ the fix landed), **open**, **deferred** (design decision recorded, not scheduled
 | W2 | Medium | app/src/groups.rs, Groups.kt, §16.24 | One member can silently exclude another or brick the board by forming a generation with a subset or a bogus owner; the union rule only applies to ties | **open** — spec now states the MUST (superset, owner = sender, successor generation); clients not yet enforcing |
 | W3 | Medium | mobile/src/node.rs, §16.24 | A group board's DHT descriptor publishes the full roster as persona keys to every storing node | **deferred**: derive per-group member keys; state the exposure in §16.24 |
 | W4 | Medium | §16.9, §15.12 | A public card carries the inbox's decryption key, so every board reader can read the claimant's reply (persona, plate, car photo) | **open** — seal subkey 1 to the issuer's prekey bundle (planned on top of W1) |
-| W5 | Medium | mobile/src/feed.rs, app/src/home.rs, Home.kt | `feed.json`'s `persona` never compared with the home it was fetched from; a hearted persona can attribute posts to anyone, including the reader | **open** — spec states the MUST; clients not yet |
+| W5 | Medium | mobile/src/feed.rs, app/src/home.rs, Home.kt | `feed.json`'s `persona` never compared with the home it was fetched from; a hearted persona can attribute posts to anyone, including the reader | **fixed 2026-09-14** — the desk's `feed_of` refuses a document whose persona is not the home it was fetched from; the phone the same (Home.kt) |
 | W6 | Medium | §16.9 | First-writer denial: any board reader burns every card on a cell with one free DHT write | **deferred**: stamp on replies to board cards, or K reply slots; stated cost in the spec pending |
 | W7 | Medium (S) | SafeImage.kt, §16.18.3 | Board thumbnails are decoded by the platform decoder automatically | **deferred**: decode board images in Rust and hand RGBA to the UI |
 | W8 | Low | core/src/board.rs | A card can be lifted into a foreign notice: the poster key is unrelated to the card inside | **deferred** |
-| W9 | Low | core/src/hpke.rs | Sealed-message ceiling (8 KiB) unspecified and below what a legal message may carry (255-member roster) | **open** |
+| W9 | Low | core/src/hpke.rs | Sealed-message ceiling (8 KiB) unspecified and below what a legal message may carry (255-member roster) | **fixed 2026-09-14** — ceiling 16 KiB in code and stated in §16.10 |
 | W10 | Low | core/src/board.rs, Beacons.kt | Beacon freshness trusts one Monero node | **open** |
-| W11 | Low | core/src/backup.rs, BackupSettings.kt | Export accepts an 8-character passphrase such as "password" | **open** — refuse `Weak` |
-| W12 | Low | §16.18 | HAIL_NOTICE version drift: spec says 1, code and vectors require 2 | **open** (one line) |
-| W13 | Low | core/src/contact.rs | `RentalNotice.features` bypasses the display-hazard filter | **open** |
-| W14 | Low | core/src/wire.rs | `wire::open` verifies only object types 1–12 | **open** |
+| W11 | Low | core/src/backup.rs, BackupSettings.kt | Export accepts an 8-character passphrase such as "password" | **fixed 2026-09-14** — core's export refuses `Weak`; both clients disable the button on the same grade |
+| W12 | Low | §16.18 | HAIL_NOTICE version drift: spec says 1, code and vectors require 2 | **fixed 2026-09-14** — §16.18 says 2 |
+| W13 | Low | core/src/contact.rs | `RentalNotice.features` bypasses the display-hazard filter | **fixed 2026-09-14** — features pass `display_hazard`; vector `listing_feature_with_bidi`; checker agrees |
+| W14 | Low | core/src/wire.rs | `wire::open` verifies only object types 1–12 | **fixed 2026-09-14** — `type_from_code` decodes every registered code |
 | W15 | Low | core/src/state.rs | The 120 s contact window is not held by the state machine | **open** |
 | W16 | Low | §15.3.2 | "offer_commit is necessarily empty" has no wire meaning | **open** |
 | W17 | Low (S) | core/src/escrow.rs | `SLASH_CLAIM` does not name the claimant | **open** |
@@ -43,7 +43,7 @@ the fix landed), **open**, **deferred** (design decision recorded, not scheduled
 |---|---|---|---|---|
 | D1 | High | app/src/store.rs, wallet.rs, identity.rs | Spend key and persona secrets in plain JSON with umask permissions | **fixed** (owner-only dir 0700 and files 0600); encryption at rest still open |
 | D2 | Medium | mobile/src/swarm.rs, home.rs, sites.rs | No size ceiling on fetched bundles; hearted homes fetched unattended | **fixed** (ab3aba7d) |
-| D3 | Low | src-tauri/src/lib.rs | Sealed room relies on the per-response CSP alone; `.disable_javascript()` not set | **open** (one call) |
+| D3 | Low | src-tauri/src/lib.rs | Sealed room relies on the per-response CSP alone; `.disable_javascript()` not set | **fixed 2026-09-14** — `.disable_javascript()` on the room's window |
 | D4 | Low | mobile/src/monero.rs | Monero RPC over plain http | **accepted for now** — every public stagenet node's TLS is self-signed or CAcert; documented in the node list |
 | D5 | Low | lib.rs | Broad main-window command surface (`picture_data_url`, `node_debug`, `log_tail`) | **open** |
 | D6 | Low | app/src/log.rs | ducat.log carries names and amounts beside plaintext state | mitigated by D1 |

@@ -421,6 +421,8 @@ async fn open_site_room(handle: tauri::AppHandle, record_key: String, path: Opti
     let first = tauri::menu::MenuItemBuilder::with_id("room-home", "First page").accelerator("Alt+Home").build(&handle).map_err(|e| e.to_string())?;
     let menu = tauri::menu::MenuBuilder::new(&handle).items(&[&back, &forward, &first]).build().map_err(|e| e.to_string())?;
     WebviewWindowBuilder::new(&handle, &label, WebviewUrl::CustomProtocol(format!("ducat-site://localhost/{page}").parse().map_err(|e| format!("{e}"))?))
+        // §16.22: scripts off — by the engine, not only by the response's CSP.
+        .disable_javascript()
         .title(&title)
         .inner_size(1000.0, 760.0)
         .min_inner_size(480.0, 360.0)
@@ -1402,6 +1404,18 @@ async fn attest(persona_hex: String, rating: u8, note: Option<String>) -> Result
     .map_err(|e| e.to_string())?
 }
 
+/// The grade the phone shows under its passphrase field, for the desk's page.
+#[tauri::command]
+fn passphrase_strength(passphrase: String) -> String {
+    match ducat_mobile::passphrase_strength(passphrase) {
+        ducat_mobile::PassphraseStrength::TooShort => "too_short",
+        ducat_mobile::PassphraseStrength::Weak => "weak",
+        ducat_mobile::PassphraseStrength::Fair => "fair",
+        ducat_mobile::PassphraseStrength::Strong => "strong",
+    }
+    .into()
+}
+
 /// §9.5: what this desk knows about any persona at a decision — a listing's
 /// poster, a customer at the till — in the same words the thread uses.
 #[derive(Clone, Debug, serde::Serialize)]
@@ -2271,6 +2285,9 @@ async fn export_backup(path: String, passphrase: String) -> Result<u64, String> 
     let a = app()?;
     if passphrase.chars().count() < 8 {
         return Err("a passphrase is eight characters at least".into());
+    }
+    if matches!(ducat_mobile::passphrase_strength(passphrase.clone()), ducat_mobile::PassphraseStrength::Weak) {
+        return Err("that passphrase is too weak to protect a wallet".into());
     }
     tauri::async_runtime::spawn_blocking(move || a.export_backup_to(std::path::Path::new(&path), &passphrase).map_err(said))
         .await
@@ -3188,6 +3205,7 @@ pub fn run() {
             attest,
             my_record_link,
             trust_of,
+            passphrase_strength,
             vouch,
             my_vouches_link,
             wallet_max,

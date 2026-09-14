@@ -33,13 +33,13 @@ fn sample() -> Backup {
 #[test]
 fn a_backup_round_trips() {
     let b = sample();
-    let blob = export(&b, b"correct horse battery", [7u8; 16], [9u8; 24]).unwrap();
-    assert_eq!(import(&blob, b"correct horse battery").unwrap(), b);
+    let blob = export(&b, b"correct horse battery staple ocean", [7u8; 16], [9u8; 24]).unwrap();
+    assert_eq!(import(&blob, b"correct horse battery staple ocean").unwrap(), b);
 }
 
 #[test]
 fn the_wrong_passphrase_does_not_open_it() {
-    let blob = export(&sample(), b"correct horse battery", [7u8; 16], [9u8; 24]).unwrap();
+    let blob = export(&sample(), b"correct horse battery staple ocean", [7u8; 16], [9u8; 24]).unwrap();
     assert_eq!(
         import(&blob, b"incorrect horse").unwrap_err().code,
         RejectCode::BadSig
@@ -51,12 +51,12 @@ fn the_wrong_passphrase_does_not_open_it() {
 /// a guess was close.
 #[test]
 fn tampering_is_detected_anywhere_in_the_file() {
-    let blob = export(&sample(), b"correct horse battery", [7u8; 16], [9u8; 24]).unwrap();
+    let blob = export(&sample(), b"correct horse battery staple ocean", [7u8; 16], [9u8; 24]).unwrap();
     for i in [0usize, 20, 45, blob.len() - 1] {
         let mut bad = blob.clone();
         bad[i] ^= 0x01;
         assert!(
-            import(&bad, b"correct horse battery").is_err(),
+            import(&bad, b"correct horse battery staple ocean").is_err(),
             "byte {} could be flipped undetected",
             i
         );
@@ -78,12 +78,12 @@ fn a_foreign_file_is_refused_before_any_key_work() {
 #[test]
 fn each_export_is_distinct() {
     let b = sample();
-    let a1 = export(&b, b"same passphrase", [1u8; 16], [2u8; 24]).unwrap();
-    let a2 = export(&b, b"same passphrase", [3u8; 16], [4u8; 24]).unwrap();
+    let a1 = export(&b, b"same passphrase every single time", [1u8; 16], [2u8; 24]).unwrap();
+    let a2 = export(&b, b"same passphrase every single time", [3u8; 16], [4u8; 24]).unwrap();
     assert_ne!(a1, a2);
     // Both still open.
-    assert_eq!(import(&a1, b"same passphrase").unwrap(), b);
-    assert_eq!(import(&a2, b"same passphrase").unwrap(), b);
+    assert_eq!(import(&a1, b"same passphrase every single time").unwrap(), b);
+    assert_eq!(import(&a2, b"same passphrase every single time").unwrap(), b);
 }
 
 #[test]
@@ -101,8 +101,8 @@ fn a_trivial_passphrase_is_refused_at_export() {
 #[test]
 fn the_restore_height_survives_the_round_trip() {
     let b = sample();
-    let blob = export(&b, b"passphrase here", [5u8; 16], [6u8; 24]).unwrap();
-    let back = import(&blob, b"passphrase here").unwrap();
+    let blob = export(&b, b"the passphrase goes right here now", [5u8; 16], [6u8; 24]).unwrap();
+    let back = import(&blob, b"the passphrase goes right here now").unwrap();
     assert_eq!(back.monero_restore_height, 2_183_500);
     assert_ne!(back.monero_restore_height, 0, "a zero height means scan everything");
 }
@@ -112,8 +112,8 @@ fn the_restore_height_survives_the_round_trip() {
 #[test]
 fn identity_and_contacts_both_survive() {
     let b = sample();
-    let blob = export(&b, b"passphrase here", [5u8; 16], [6u8; 24]).unwrap();
-    let back = import(&blob, b"passphrase here").unwrap();
+    let blob = export(&b, b"the passphrase goes right here now", [5u8; 16], [6u8; 24]).unwrap();
+    let back = import(&blob, b"the passphrase goes right here now").unwrap();
     assert_eq!(back.persona_secret, b.persona_secret);
     assert_eq!(back.rendezvous.len(), 2);
     assert_eq!(
@@ -129,8 +129,8 @@ fn identity_and_contacts_both_survive() {
 #[test]
 fn an_unknown_version_is_refused_rather_than_guessed() {
     // Version is bound as AAD *and* carried inside, so the check is real.
-    let blob = export(&sample(), b"passphrase here", [5u8; 16], [6u8; 24]).unwrap();
-    let back = import(&blob, b"passphrase here");
+    let blob = export(&sample(), b"the passphrase goes right here now", [5u8; 16], [6u8; 24]).unwrap();
+    let back = import(&blob, b"the passphrase goes right here now");
     assert!(back.is_ok());
     assert_eq!(BACKUP_VERSION, 1);
 }
@@ -149,12 +149,15 @@ fn an_unknown_version_is_refused_rather_than_guessed() {
 /// decryptable rather than editing this constant.
 #[test]
 fn the_format_is_frozen() {
-    let blob = export(&sample(), b"a fixed passphrase", [0x42; 16], [0x37; 24]).unwrap();
+    // The passphrase changed once, on 2026-09-14, when export began refusing
+    // a Weak one ("a fixed passphrase" is three words); the digest below is
+    // the same format under the new input. Import still opens the old files.
+    let blob = export(&sample(), b"a fixed passphrase for the tests", [0x42; 16], [0x37; 24]).unwrap();
     use sha2::{Digest, Sha256};
     let digest = Sha256::digest(&blob);
     assert_eq!(
         hex(&digest),
-        "ddd2a4b11c42fb7cbd62b9d994983a0513aa5163d0ac45dd21e02e14ab3a8341",
+        "69bcd36b3bb264578cc690fce177267b729591acefb719eff5dd4532d3dc2cc9",
         "the backup format changed — every existing backup would fail to import"
     );
 }
@@ -176,8 +179,8 @@ fn verification_thresholds_survive() {
         cumulative_at: 100_000,
         cumulative_window_s: 7_200,
     };
-    let blob = export(&b, b"passphrase here", [5u8; 16], [6u8; 24]).unwrap();
-    assert_eq!(import(&blob, b"passphrase here").unwrap().verification, b.verification);
+    let blob = export(&b, b"the passphrase goes right here now", [5u8; 16], [6u8; 24]).unwrap();
+    assert_eq!(import(&blob, b"the passphrase goes right here now").unwrap().verification, b.verification);
 }
 
 /// An import is a trust boundary. A policy whose ladder inverts — a larger
@@ -191,9 +194,9 @@ fn an_inverted_policy_is_refused_at_import() {
         app_secret_at: 1_000, // below the weaker tier
         ..VerificationPolicy::default()
     };
-    let blob = export(&b, b"passphrase here", [5u8; 16], [6u8; 24]).unwrap();
+    let blob = export(&b, b"the passphrase goes right here now", [5u8; 16], [6u8; 24]).unwrap();
     assert_eq!(
-        import(&blob, b"passphrase here").unwrap_err().code,
+        import(&blob, b"the passphrase goes right here now").unwrap_err().code,
         RejectCode::PolicyRefused
     );
 }
@@ -205,8 +208,8 @@ fn an_inverted_policy_is_refused_at_import() {
 #[test]
 fn an_escrow_share_survives_the_round_trip() {
     let b = sample();
-    let blob = export(&b, b"passphrase here", [5u8; 16], [6u8; 24]).unwrap();
-    let back = import(&blob, b"passphrase here").unwrap();
+    let blob = export(&b, b"the passphrase goes right here now", [5u8; 16], [6u8; 24]).unwrap();
+    let back = import(&blob, b"the passphrase goes right here now").unwrap();
     assert_eq!(back.escrow_shares, b.escrow_shares);
     assert_eq!(back.escrow_shares[0].key_file.len(), 2286);
     assert_ne!(
@@ -221,9 +224,9 @@ fn an_escrow_share_survives_the_round_trip() {
 fn an_empty_key_file_is_not_a_share() {
     let mut b = sample();
     b.escrow_shares[0].key_file.clear();
-    let blob = export(&b, b"passphrase here", [5u8; 16], [6u8; 24]).unwrap();
+    let blob = export(&b, b"the passphrase goes right here now", [5u8; 16], [6u8; 24]).unwrap();
     assert_eq!(
-        import(&blob, b"passphrase here").unwrap_err().code,
+        import(&blob, b"the passphrase goes right here now").unwrap_err().code,
         RejectCode::Malformed
     );
 }
@@ -235,8 +238,8 @@ fn an_empty_key_file_is_not_a_share() {
 fn a_bundle_with_no_open_escrows_is_still_valid() {
     let mut b = sample();
     b.escrow_shares.clear();
-    let blob = export(&b, b"passphrase here", [5u8; 16], [6u8; 24]).unwrap();
-    let back = import(&blob, b"passphrase here").unwrap();
+    let blob = export(&b, b"the passphrase goes right here now", [5u8; 16], [6u8; 24]).unwrap();
+    let back = import(&blob, b"the passphrase goes right here now").unwrap();
     assert!(back.escrow_shares.is_empty());
     assert_eq!(back.persona_secret, b.persona_secret);
 }
@@ -247,8 +250,8 @@ fn a_bundle_with_no_open_escrows_is_still_valid() {
 fn a_bundle_carries_the_profile_name() {
     let mut b = sample();
     b.display_name = Some("kara".into());
-    let blob = export(&b, b"correct horse battery", [7u8; 16], [9u8; 24]).unwrap();
-    let back = import(&blob, b"correct horse battery").unwrap();
+    let blob = export(&b, b"correct horse battery staple ocean", [7u8; 16], [9u8; 24]).unwrap();
+    let back = import(&blob, b"correct horse battery staple ocean").unwrap();
     assert_eq!(back.display_name.as_deref(), Some("kara"));
 }
 
@@ -260,15 +263,15 @@ fn publishing_defaults_to_off_and_survives_when_on() {
     let mut b = sample();
     assert!(!b.publish_payto, "off is the default");
     let off = import(
-        &export(&b, b"correct horse battery", [7u8; 16], [9u8; 24]).unwrap(),
-        b"correct horse battery",
+        &export(&b, b"correct horse battery staple ocean", [7u8; 16], [9u8; 24]).unwrap(),
+        b"correct horse battery staple ocean",
     ).unwrap();
     assert!(!off.publish_payto, "a bundle with it off must not restore it on");
 
     b.publish_payto = true;
     let on = import(
-        &export(&b, b"correct horse battery", [7u8; 16], [9u8; 24]).unwrap(),
-        b"correct horse battery",
+        &export(&b, b"correct horse battery staple ocean", [7u8; 16], [9u8; 24]).unwrap(),
+        b"correct horse battery staple ocean",
     ).unwrap();
     assert!(on.publish_payto, "a deliberate choice must survive");
 }
@@ -291,8 +294,8 @@ fn a_profile_survives_export_and_import() {
     b.signal = Some("sam_oc.42".into());
     b.pronouns = Some(5);
 
-    let blob = export(&b, b"a real passphrase", [7u8; 16], [9u8; 24]).expect("export");
-    let back = import(&blob, b"a real passphrase").expect("import");
+    let blob = export(&b, b"a real passphrase nobody guesses", [7u8; 16], [9u8; 24]).expect("export");
+    let back = import(&blob, b"a real passphrase nobody guesses").expect("import");
 
     assert_eq!(back.display_name.as_deref(), Some("sam"));
     assert!(back.publish_payto);
@@ -307,8 +310,8 @@ fn a_profile_survives_export_and_import() {
 /// someone who published nothing — never as someone who published a default.
 #[test]
 fn an_older_bundle_restores_with_an_empty_profile() {
-    let blob = export(&sample(), b"a real passphrase", [7u8; 16], [9u8; 24]).expect("export");
-    let back = import(&blob, b"a real passphrase").expect("import");
+    let blob = export(&sample(), b"a real passphrase nobody guesses", [7u8; 16], [9u8; 24]).expect("export");
+    let back = import(&blob, b"a real passphrase nobody guesses").expect("import");
     assert!(back.avatar.is_none());
     assert!(back.email.is_none());
     assert!(back.phone.is_none());
@@ -341,14 +344,14 @@ fn a_car_picture_rides_the_roster_entry() {
         car_photo: Some(JPEG.to_vec()),
         share_profile: true,
     }];
-    let blob = export(&b, b"a real passphrase", [7u8; 16], [9u8; 24]).expect("export");
-    let back = import(&blob, b"a real passphrase").expect("import");
+    let blob = export(&b, b"a real passphrase nobody guesses", [7u8; 16], [9u8; 24]).expect("export");
+    let back = import(&blob, b"a real passphrase nobody guesses").expect("import");
     assert_eq!(back.personas[0].car_photo.as_deref(), Some(JPEG));
     assert!(back.personas[0].avatar.is_none(), "the car is not the face");
     // Undressed, the key is absent rather than empty.
     b.personas[0].car_photo = None;
-    let blob = export(&b, b"a real passphrase", [7u8; 16], [9u8; 24]).expect("export");
-    assert!(import(&blob, b"a real passphrase").expect("import").personas[0].car_photo.is_none());
+    let blob = export(&b, b"a real passphrase nobody guesses", [7u8; 16], [9u8; 24]).expect("export");
+    assert!(import(&blob, b"a real passphrase nobody guesses").expect("import").personas[0].car_photo.is_none());
 }
 
 /// The compartments survive: the roster, and which persona owns whom.
@@ -399,16 +402,16 @@ fn personas_and_owners_survive_the_round_trip() {
         out_prev: None,
         owner: Some("22aa".into()),
     }];
-    let blob = export(&b, b"a real passphrase", [7u8; 16], [9u8; 24]).expect("export");
-    let back = import(&blob, b"a real passphrase").expect("import");
+    let blob = export(&b, b"a real passphrase nobody guesses", [7u8; 16], [9u8; 24]).expect("export");
+    let back = import(&blob, b"a real passphrase nobody guesses").expect("import");
     assert_eq!(back.personas, b.personas);
     assert_eq!(back.contacts[0].owner.as_deref(), Some("22aa"));
 
     // A bundle with no roster — the single-persona era — restores with an
     // empty list, never an invented one.
     let plain = sample();
-    let blob = export(&plain, b"a real passphrase", [7u8; 16], [9u8; 24]).expect("export");
-    assert!(import(&blob, b"a real passphrase").expect("import").personas.is_empty());
+    let blob = export(&plain, b"a real passphrase nobody guesses", [7u8; 16], [9u8; 24]).expect("export");
+    assert!(import(&blob, b"a real passphrase nobody guesses").expect("import").personas.is_empty());
 }
 
 /// The relationships survive: every field another client would need.
@@ -436,8 +439,8 @@ fn contacts_and_prekeys_survive_the_round_trip() {
     b.prekey_next_id = 43;
     b.app_state = Some(b"{\"threads\":{}}".to_vec());
 
-    let blob = export(&b, b"a real passphrase", [7u8; 16], [9u8; 24]).expect("export");
-    let back = import(&blob, b"a real passphrase").expect("import");
+    let blob = export(&b, b"a real passphrase nobody guesses", [7u8; 16], [9u8; 24]).expect("export");
+    let back = import(&blob, b"a real passphrase nobody guesses").expect("import");
 
     assert_eq!(back.contacts, b.contacts);
     assert_eq!(back.prekey_signed_secret, b.prekey_signed_secret);
@@ -453,8 +456,8 @@ fn contacts_and_prekeys_survive_the_round_trip() {
 /// A bundle from before relationships restores with none, never with junk.
 #[test]
 fn an_older_bundle_restores_with_no_contacts() {
-    let blob = export(&sample(), b"a real passphrase", [7u8; 16], [9u8; 24]).expect("export");
-    let back = import(&blob, b"a real passphrase").expect("import");
+    let blob = export(&sample(), b"a real passphrase nobody guesses", [7u8; 16], [9u8; 24]).expect("export");
+    let back = import(&blob, b"a real passphrase nobody guesses").expect("import");
     assert!(back.contacts.is_empty());
     assert!(back.prekey_one_time.is_empty());
     assert!(back.app_state.is_none());

@@ -460,13 +460,13 @@ mod tests {
         a.store("trust")
             .put("vouches_about", &vec![crate::trust::VouchRecord { signer_hex: "ab".repeat(32), subject_hex: "cd".repeat(32), ts: 8, envelope_hex: "00".into() }])
             .unwrap();
-        let bytes = a.export_backup_bytes("correct horse battery").unwrap();
+        let bytes = a.export_backup_bytes("correct horse battery staple ocean").unwrap();
         assert!(bytes.len() > 200);
         let path = base.join("bundle.ducat");
         std::fs::write(&path, &bytes).unwrap();
 
         let b = App::open(base.join("b")).unwrap();
-        let r = b.import_backup_from(&path, "correct horse battery").unwrap();
+        let r = b.import_backup_from(&path, "correct horse battery staple ocean").unwrap();
         assert_eq!(r.contacts, 1);
         assert_eq!(r.personas, 2);
         assert_eq!(b.primary_hex().unwrap(), me);

@@ -401,6 +401,12 @@ impl App {
         let key = self.home_key_of(persona_hex).ok()?;
         let text = std::fs::read_to_string(self.site_bundle_dir(&key).join(feed::FEED_FILE)).ok()?;
         match feed::feed_parse(text) {
+            // §16.23: the document's persona MUST be the home it was fetched
+            // from — a hearted persona cannot attribute posts to anyone else.
+            Ok(d) if !d.persona.eq_ignore_ascii_case(persona_hex) => {
+                log::warn(TAG, format!("{}'s feed names another persona ({}…); refused", &persona_hex[..8.min(persona_hex.len())], &d.persona[..8.min(d.persona.len())]));
+                None
+            }
             Ok(d) => Some(d),
             Err(e) => {
                 log::warn(TAG, format!("{}'s feed is unreadable: {e}", &persona_hex[..8.min(persona_hex.len())]));

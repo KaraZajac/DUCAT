@@ -566,7 +566,7 @@ const MAX_PLAUSIBLE_HEIGHT: u64 = 100_000_000;
 pub enum BackupError {
     #[error("restore height is above any plausible chain height")]
     ImplausibleRestoreHeight,
-    #[error("passphrase is too short to protect a wallet")]
+    #[error("passphrase is too short or too weak to protect a wallet")]
     WeakPassphrase,
     #[error("malformed key material")]
     BadKey,
@@ -821,13 +821,13 @@ mod backup_tests {
         let persona = create_persona_secret();
         let blob = export_backup(
             BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: w.restore_height, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![] },
-            "a real passphrase".into(),
+            "a real passphrase nobody guesses".into(),
             persona.clone(),
         )
         .expect("export");
         assert!(blob.len() > 100);
 
-        let back = ducat_core::backup::import(&blob, b"a real passphrase").expect("import");
+        let back = ducat_core::backup::import(&blob, b"a real passphrase nobody guesses").expect("import");
         assert_eq!(back.persona_secret, persona);
         assert_eq!(back.monero_seed, w.spend_key_hex);
         assert_eq!(back.monero_restore_height, 2_190_000);
@@ -855,7 +855,7 @@ mod backup_tests {
         assert!(matches!(
             export_backup(
                 BackupInput { spend_key_hex: "nothex".into(), restore_height: 1, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![] },
-                "a real passphrase".into(),
+                "a real passphrase nobody guesses".into(),
                 create_persona_secret(),
             ),
             Err(BackupError::BadKey)
@@ -874,7 +874,7 @@ mod restore_height_tests {
         assert!(matches!(
             export_backup(
                 BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: u64::MAX, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![] },
-                "a real passphrase".into(),
+                "a real passphrase nobody guesses".into(),
                 create_persona_secret(),
             ),
             Err(BackupError::ImplausibleRestoreHeight)
@@ -889,7 +889,7 @@ mod restore_height_tests {
         let w = create_wallet(0, true);
         assert!(export_backup(
             BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 0, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![] },
-            "a real passphrase".into(),
+            "a real passphrase nobody guesses".into(),
             create_persona_secret(),
         )
         .is_ok());
@@ -1068,11 +1068,11 @@ mod import_tests {
         let w = create_wallet(1000, true);
         let blob = export_backup(
             BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: 1000, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![] },
-            "a real passphrase".into(),
+            "a real passphrase nobody guesses".into(),
             create_persona_secret(),
         )
         .unwrap();
-        let r = import_backup(blob, "a real passphrase".into()).unwrap();
+        let r = import_backup(blob, "a real passphrase nobody guesses".into()).unwrap();
         assert_eq!(r.spend_key_hex, w.spend_key_hex);
         assert_eq!(
             address_for_spend_key(r.spend_key_hex, true).unwrap(),
@@ -1086,7 +1086,7 @@ mod import_tests {
         let w = create_wallet(1, true);
         let blob = export_backup(
             BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 1, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![] },
-            "a real passphrase".into(),
+            "a real passphrase nobody guesses".into(),
             create_persona_secret(),
         )
         .unwrap();
@@ -1096,7 +1096,7 @@ mod import_tests {
         let mut torn = blob;
         let n = torn.len() - 1;
         torn[n] ^= 1;
-        let tampered = import_backup(torn, "a real passphrase".into())
+        let tampered = import_backup(torn, "a real passphrase nobody guesses".into())
             .err()
             .map(|e| e.to_string());
         assert!(wrong.is_some() && wrong == tampered, "{wrong:?} vs {tampered:?}");
@@ -1131,7 +1131,7 @@ mod import_tests {
             app_state: None,
             created: 1_700_000_000,
         };
-        ducat_core::backup::export(&bundle, b"a real passphrase", [3u8; 16], [4u8; 24]).unwrap()
+        ducat_core::backup::export(&bundle, b"a real passphrase nobody guesses", [3u8; 16], [4u8; 24]).unwrap()
     }
 
     /// A bundle that decrypts has proved the passphrase, not the seed.
@@ -1146,7 +1146,7 @@ mod import_tests {
         for seed in ["", "nothex", "1f1f1f", &"ab".repeat(33)] {
             assert!(
                 matches!(
-                    import_backup(bundle_with_seed(seed), "a real passphrase".into()),
+                    import_backup(bundle_with_seed(seed), "a real passphrase nobody guesses".into()),
                     Err(BackupError::BadKey)
                 ),
                 "a bundle whose seed is {seed:?} was accepted"
@@ -1155,7 +1155,7 @@ mod import_tests {
         // And the good one still opens, or the check has eaten the feature.
         let w = create_wallet(1000, true);
         assert!(
-            import_backup(bundle_with_seed(&w.spend_key_hex), "a real passphrase".into()).is_ok()
+            import_backup(bundle_with_seed(&w.spend_key_hex), "a real passphrase nobody guesses".into()).is_ok()
         );
     }
 
@@ -1168,11 +1168,11 @@ mod import_tests {
         let before = now();
         let blob = export_backup(
             BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 1000, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![] },
-            "a real passphrase".into(),
+            "a real passphrase nobody guesses".into(),
             create_persona_secret(),
         )
         .unwrap();
-        let r = import_backup(blob, "a real passphrase".into()).unwrap();
+        let r = import_backup(blob, "a real passphrase nobody guesses".into()).unwrap();
         assert!(r.created >= before, "created {} predates the export", r.created);
         assert!(r.created <= now(), "created {} is in the future", r.created);
     }
@@ -1181,7 +1181,7 @@ mod import_tests {
     #[test]
     fn the_age_is_the_bundles_own_and_not_the_readers() {
         let w = create_wallet(1000, true);
-        let r = import_backup(bundle_with_seed(&w.spend_key_hex), "a real passphrase".into())
+        let r = import_backup(bundle_with_seed(&w.spend_key_hex), "a real passphrase nobody guesses".into())
             .unwrap();
         assert_eq!(r.created, 1_700_000_000);
     }

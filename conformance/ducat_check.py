@@ -1586,6 +1586,9 @@ def parse_listing(buf):
             kind, val = item if isinstance(item, tuple) else (None, item)
             if kind != "text" or not isinstance(val, str) or not val or len(val) > 16:
                 raise Reject("Malformed", "a feature is a short word")
+            # The display-hazard rule every text field follows, through the
+            # one reader that knows it.
+            _take_text({0: ("text", val)}, 0, 16, "feature", True)
             out["features"].append(val)
 
     # The picture. Refused rather than trimmed, and the format checked

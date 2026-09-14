@@ -925,6 +925,15 @@ pub fn export(
             "passphrase is too short to protect a wallet",
         ));
     }
+    // Eight characters of one word is "password": the length floor alone let
+    // the weakest passphrase the format allows protect a whole wallet. The
+    // estimate that grades the field grades the export too.
+    if matches!(passphrase_strength(&String::from_utf8_lossy(passphrase)), PassphraseStrength::Weak) {
+        return Err(Reject::with_detail(
+            RejectCode::PolicyRefused,
+            "passphrase is too weak to protect a wallet",
+        ));
+    }
     let key = derive(passphrase, &salt)?;
     let cipher = XChaCha20Poly1305::new((&key).into());
     let plaintext = backup.to_value().encode();

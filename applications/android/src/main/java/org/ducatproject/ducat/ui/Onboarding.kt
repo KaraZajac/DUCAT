@@ -626,7 +626,7 @@ private fun RestoreStep(
                 Spacer(Modifier.height(12.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Button(
-                        enabled = !busy && passphrase.length >= 8,
+                        enabled = !busy && passphraseUsable(passphrase),
                         onClick = { picker.launch(arrayOf("*/*")) },
                     ) {
                         if (busy) {
@@ -727,7 +727,7 @@ private fun BackupStep(onDone: () -> Unit) {
             }
         }
     }
-    val longEnough = passphrase.length >= 8
+    val longEnough = passphraseUsable(passphrase)
 
     Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
         Column(Modifier.padding(20.dp)) {

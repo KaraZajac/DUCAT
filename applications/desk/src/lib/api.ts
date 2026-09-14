@@ -648,6 +648,7 @@ export const api = {
   attest: (personaHex: string, rating: number, note: string | null) => invoke<void>("attest", { personaHex, rating, note }),
   myRecordLink: (personaHex: string) => invoke<string>("my_record_link", { personaHex }),
   trustOf: (personaHex: string) => invoke<TrustView>("trust_of", { personaHex }),
+  passphraseStrength: (passphrase: string) => invoke<"too_short" | "weak" | "fair" | "strong">("passphrase_strength", { passphrase }),
   vouch: (personaHex: string) => invoke<void>("vouch", { personaHex }),
   myVouchesLink: (personaHex: string) => invoke<string>("my_vouches_link", { personaHex }),
   burn: (amountXmr: string, purpose: string) => invoke<BurnRow>("burn", { amountXmr, purpose }),

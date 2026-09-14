@@ -98,6 +98,13 @@
     if (p) await setPicture(which, p);
   }
   let passphrase = $state("");
+  // The same grade the phone shows; a weak one cannot be exported at all.
+  let strength = $state<"too_short" | "weak" | "fair" | "strong">("too_short");
+  $effect(() => {
+    const p = passphrase;
+    if (!p) { strength = "too_short"; return; }
+    api.passphraseStrength(p).then((s) => { if (passphrase === p) strength = s; }).catch(() => {});
+  });
   let backupMsg = $state<string | null>(null);
   let backupBusy = $state(false);
   let exportedAt = $state(0);
@@ -338,7 +345,8 @@
   <div class="field">
     <label for="pass">{t("backup_passphrase")}</label>
     <input id="pass" class="input" type="password" bind:value={passphrase} placeholder={t("desk_passphrase_hint")} />
-    <button class="btn" disabled={passphrase.length < 8 || backupBusy} onclick={() => exportBackup()}>{t("backup_export")}…</button>
+    {#if passphrase.length > 0}<span class="meta">{strength === "too_short" ? t("onb_backup_passphrase_short") : strength === "weak" ? t("onb_backup_passphrase_weak") : strength === "fair" ? t("onb_backup_passphrase_fair") : t("onb_backup_passphrase_good")}</span>{/if}
+    <button class="btn" disabled={passphrase.length < 8 || strength === "weak" || backupBusy} onclick={() => exportBackup()}>{t("backup_export")}…</button>
     <button class="btn" disabled={passphrase.length < 8 || backupBusy} onclick={() => importBackup()}>{t("backup_import")}…</button>
         {#if drive.on}
           <input id="bpath" class="input" hidden placeholder="/path/to/export.ducat" onchange={(e) => exportBackup((e.target as HTMLInputElement).value)} />

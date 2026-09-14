@@ -237,7 +237,7 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
                     }
                 }
                 Button(
-                    enabled = !busy && passphrase.length >= 8 &&
+                    enabled = !busy && passphraseUsable(passphrase) &&
                         spendKeyHex != null && personaSecret != null,
                     onClick = { pinAction = export },
                 ) {
@@ -247,7 +247,7 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
 
                 Spacer(Modifier.width(8.dp))
                 OutlinedButton(
-                    enabled = !busy && passphrase.length >= 8,
+                    enabled = !busy && passphraseUsable(passphrase),
                     onClick = {
                         pinAction = {
                             // Kept by the process while the picker is up:
@@ -508,3 +508,12 @@ internal fun PassphraseField(
         modifier = modifier,
     )
 }
+
+/**
+ * Whether a passphrase may protect a wallet: eight characters at least, and
+ * not graded Weak — core refuses the export on the same rule, so the button
+ * goes dark for the same reason the export would be refused.
+ */
+fun passphraseUsable(passphrase: String): Boolean =
+    passphrase.length >= 8 &&
+        uniffi.ducat_mobile.passphraseStrength(passphrase) != uniffi.ducat_mobile.PassphraseStrength.WEAK

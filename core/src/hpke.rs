@@ -275,10 +275,12 @@ impl PreKeyBundle {
     }
 }
 
-/// The largest ciphertext a legal §16.10 message can produce: 2000 characters
-/// at UTF-8's four-byte worst case, plus CBOR framing and the AEAD tag, rounded
-/// up. Anything larger is refused before a key is touched.
-pub const MAX_CIPHERTEXT: usize = 8 * 1024;
+/// The largest ciphertext a legal message can produce, and the ceiling §16.10
+/// now states: 2000 characters at UTF-8's four-byte worst case, or a
+/// `GROUP_ROSTER` naming 255 members (§16.19 — 8 KiB of keys before framing),
+/// plus CBOR framing and the AEAD tag, with room to spare; half a DHT
+/// subkey. Anything larger is refused before a key is touched.
+pub const MAX_CIPHERTEXT: usize = 16 * 1024;
 
 /// A message as it travels: which key it was sealed to, and the sealed bytes.
 #[derive(Debug, Clone, PartialEq, Eq)]

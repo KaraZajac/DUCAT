@@ -789,7 +789,7 @@ fn backup_cases() -> Vec<J> {
         publish_payto: false,
         created: 1_800_000_000,
     };
-    let pass = b"a fixed passphrase";
+    let pass = b"a fixed passphrase for the vectors";
     let salt = [0x42u8; 16];
     let nonce = [0x37u8; 24];
     let blob = export(&base, pass, salt, nonce).expect("export");
@@ -2787,6 +2787,9 @@ fn contact_cases() -> Vec<J> {
 
         // The stall with six of something. Almost every listing is one thing,
         // so one is the *absent* case and the only spelling of it.
+        lcase("listing_feature_with_bidi",
+            "A feature is drawn as a chip beside a stranger's title: the display-hazard rule every text field follows, which the feature array had bypassed.",
+            &RentalNotice { features: vec!["fine\u{202E}".into()], ..room.clone() }, Some((RejectCode::Malformed, "display hazard")));
         lcase("listing_with_a_minimum",
             "A seller may ask that buyers have burned at least this much (§9.5); a buyer's client must show it before the buyer commits. One field, in piconero.",
             &RentalNotice { min_burn_pxmr: 10_000_000_000, ..room.clone() }, None);

@@ -2703,6 +2703,11 @@ impl RentalNotice {
                             "a feature is a short word",
                         ));
                     }
+                    // Drawn as a chip beside a stranger's title: the rule
+                    // every other display text follows.
+                    if crate::wire::display_hazard(&t).is_some() {
+                        return Err(Reject::with_detail(RejectCode::Malformed, "display hazard in a feature"));
+                    }
                     out.push(t);
                 }
                 out
