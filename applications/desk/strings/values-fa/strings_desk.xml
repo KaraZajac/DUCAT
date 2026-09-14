@@ -402,4 +402,12 @@
     <string name="desk_burn_copy_proof">کپی مدرک</string>
     <string name="desk_burned">سوزانده شد</string>
     <string name="desk_burn_none">هنوز چیزی به نام این شخصیت سوزانده نشده است.</string>
+    <string name="desk_burned_since">%1$s سوزانده، از بلوک %2$s</string>
+    <string name="desk_show_my_burn">نمایش سوزاندن من</string>
+    <string name="desk_show_my_burn_hint">مدرک سوزاندن این شخصیت را به گفتگو می‌فرستد تا طرف مقابل بررسی کند</string>
+    <string name="desk_burn_proof_msg">یک مدرک سوزاندن</string>
+    <string name="desk_check_burn">بررسی</string>
+    <string name="desk_checking">در حال بررسی…</string>
+    <string name="desk_burn_checked">بررسی شد: %1$s در بلوک %2$s سوزانده شده</string>
+    <string name="desk_burn_check_failed">بررسی ممکن نشد: %1$s</string>
 </resources>

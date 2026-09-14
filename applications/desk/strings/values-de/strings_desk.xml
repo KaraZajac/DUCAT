@@ -402,4 +402,12 @@
     <string name="desk_burn_copy_proof">Nachweis kopieren</string>
     <string name="desk_burned">Verbrannt</string>
     <string name="desk_burn_none">Unter dieser Persona wurde noch nichts verbrannt.</string>
+    <string name="desk_burned_since">%1$s verbrannt, seit Block %2$s</string>
+    <string name="desk_show_my_burn">Meinen Burn zeigen</string>
+    <string name="desk_show_my_burn_hint">Schickt den Burn-Nachweis dieser Persona in die Unterhaltung, damit die Gegenseite ihn prüfen kann</string>
+    <string name="desk_burn_proof_msg">Ein Burn-Nachweis</string>
+    <string name="desk_check_burn">Prüfen</string>
+    <string name="desk_checking">Prüfe…</string>
+    <string name="desk_burn_checked">Geprüft: %1$s verbrannt in Block %2$s</string>
+    <string name="desk_burn_check_failed">Konnte nicht geprüft werden: %1$s</string>
 </resources>

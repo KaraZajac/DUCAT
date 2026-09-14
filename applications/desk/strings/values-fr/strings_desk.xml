@@ -402,4 +402,12 @@
     <string name="desk_burn_copy_proof">Copier la preuve</string>
     <string name="desk_burned">Brûlé</string>
     <string name="desk_burn_none">Rien n’a encore été brûlé sous ce persona.</string>
+    <string name="desk_burned_since">A brûlé %1$s, depuis le bloc %2$s</string>
+    <string name="desk_show_my_burn">Montrer ma preuve</string>
+    <string name="desk_show_my_burn_hint">Envoie la preuve de ce persona dans la conversation, pour qu’il la vérifie</string>
+    <string name="desk_burn_proof_msg">Une preuve de brûlage</string>
+    <string name="desk_check_burn">Vérifier</string>
+    <string name="desk_checking">Vérification…</string>
+    <string name="desk_burn_checked">Vérifié : %1$s brûlés dans le bloc %2$s</string>
+    <string name="desk_burn_check_failed">Impossible de vérifier : %1$s</string>
 </resources>

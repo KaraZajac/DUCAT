@@ -398,4 +398,12 @@
     <string name="desk_burn_copy_proof">Salin bukti</string>
     <string name="desk_burned">Dibakar</string>
     <string name="desk_burn_none">Belum ada yang dibakar atas nama persona ini.</string>
+    <string name="desk_burned_since">Membakar %1$s, sejak blok %2$s</string>
+    <string name="desk_show_my_burn">Tunjukkan bakaran saya</string>
+    <string name="desk_show_my_burn_hint">Mengirim bukti bakaran persona ini ke percakapan, agar mereka periksa</string>
+    <string name="desk_burn_proof_msg">Sebuah bukti bakaran</string>
+    <string name="desk_check_burn">Periksa</string>
+    <string name="desk_checking">Memeriksa…</string>
+    <string name="desk_burn_checked">Terverifikasi: membakar %1$s di blok %2$s</string>
+    <string name="desk_burn_check_failed">Tidak bisa diperiksa: %1$s</string>
 </resources>

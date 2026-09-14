@@ -786,6 +786,9 @@ async fn profile_code() -> Result<Code, String> {
 #[derive(Serialize)]
 struct ContactRow {
     persona_hex: String,
+    /// §9.5: what we have verified of this persona's burn, if anything.
+    burn_pxmr: Option<u64>,
+    burn_height: Option<u64>,
     name: String,
     named: bool,
     petname: Option<String>,
@@ -813,6 +816,7 @@ struct ContactRow {
 }
 
 fn contact_row(a: &App, c: Contact) -> ContactRow {
+    let burn = a.burn_of(&c.persona_hex);
     let thread = a.thread(&c.persona_hex);
     // The preview is the last thing said, not the last thing done to it —
     // and a withdrawn message was unsaid.
@@ -832,6 +836,8 @@ fn contact_row(a: &App, c: Contact) -> ContactRow {
         last_outgoing: last.map_or(false, |r| r.outgoing),
         has_keys: c.their_bundle.is_some(),
         hearted: c.hearted,
+        burn_pxmr: burn.as_ref().map(|b| b.amount_pxmr),
+        burn_height: burn.as_ref().map(|b| b.height),
         persona_hex: c.persona_hex,
         petname: c.petname,
         asserted_name: c.asserted_name,
@@ -1351,6 +1357,18 @@ struct VerifiedBurnRow {
     amount_pxmr: u64,
     height: u64,
     purpose: String,
+}
+
+/// The worn persona's finished burn as a `ducat:burn/` link, to paste into a
+/// thread. There is no wire object for "here is my proof" yet; a text body
+/// carrying the envelope is how a burn is shown today, and the reader's
+/// client recognises the prefix.
+#[tauri::command]
+fn my_burn_link() -> Result<String, String> {
+    let a = app()?;
+    let worn = a.worn().map_err(said)?;
+    let b = a.my_burn(&worn).ok_or("no finished burn to show yet")?;
+    Ok(format!("ducat:burn/{}", b.envelope_hex.unwrap_or_default()))
 }
 
 /// Check a stranger's burn proof (§9.5) and remember the verdict.
@@ -3071,6 +3089,7 @@ pub fn run() {
             burn_view,
             burn,
             verify_burn,
+            my_burn_link,
             wallet_max,
             set_own_node,
             wallet_rescan,

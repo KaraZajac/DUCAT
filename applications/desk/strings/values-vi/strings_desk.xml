@@ -398,4 +398,12 @@
     <string name="desk_burn_copy_proof">Sao chép bằng chứng</string>
     <string name="desk_burned">Đã đốt</string>
     <string name="desk_burn_none">Chưa đốt gì dưới danh tính này.</string>
+    <string name="desk_burned_since">Đã đốt %1$s, từ khối %2$s</string>
+    <string name="desk_show_my_burn">Cho xem lần đốt của tôi</string>
+    <string name="desk_show_my_burn_hint">Gửi bằng chứng đốt của danh tính này vào cuộc trò chuyện để họ kiểm tra</string>
+    <string name="desk_burn_proof_msg">Một bằng chứng đốt</string>
+    <string name="desk_check_burn">Kiểm tra</string>
+    <string name="desk_checking">Đang kiểm tra…</string>
+    <string name="desk_burn_checked">Đã kiểm tra: đốt %1$s trong khối %2$s</string>
+    <string name="desk_burn_check_failed">Không thể kiểm tra: %1$s</string>
 </resources>

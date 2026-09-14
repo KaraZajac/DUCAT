@@ -398,4 +398,12 @@
     <string name="desk_burn_copy_proof">คัดลอกหลักฐาน</string>
     <string name="desk_burned">เผาแล้ว</string>
     <string name="desk_burn_none">ยังไม่มีการเผาในนามตัวตนนี้</string>
+    <string name="desk_burned_since">เผา %1$s ตั้งแต่บล็อก %2$s</string>
+    <string name="desk_show_my_burn">แสดงการเผาของฉัน</string>
+    <string name="desk_show_my_burn_hint">ส่งหลักฐานการเผาของตัวตนนี้เข้าไปในบทสนทนาให้อีกฝ่ายตรวจสอบ</string>
+    <string name="desk_burn_proof_msg">หลักฐานการเผา</string>
+    <string name="desk_check_burn">ตรวจสอบ</string>
+    <string name="desk_checking">กำลังตรวจสอบ…</string>
+    <string name="desk_burn_checked">ตรวจสอบแล้ว: เผา %1$s ในบล็อก %2$s</string>
+    <string name="desk_burn_check_failed">ตรวจสอบไม่ได้: %1$s</string>
 </resources>

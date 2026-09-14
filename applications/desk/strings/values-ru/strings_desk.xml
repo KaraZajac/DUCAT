@@ -410,4 +410,12 @@
     <string name="desk_burn_copy_proof">Скопировать доказательство</string>
     <string name="desk_burned">Сожжено</string>
     <string name="desk_burn_none">От имени этой персоны ещё ничего не сожжено.</string>
+    <string name="desk_burned_since">Сожжено %1$s, с блока %2$s</string>
+    <string name="desk_show_my_burn">Показать моё сжигание</string>
+    <string name="desk_show_my_burn_hint">Отправляет доказательство сжигания этой персоны в разговор, чтобы собеседник его проверил</string>
+    <string name="desk_burn_proof_msg">Доказательство сжигания</string>
+    <string name="desk_check_burn">Проверить</string>
+    <string name="desk_checking">Проверка…</string>
+    <string name="desk_burn_checked">Проверено: сожжено %1$s в блоке %2$s</string>
+    <string name="desk_burn_check_failed">Не удалось проверить: %1$s</string>
 </resources>

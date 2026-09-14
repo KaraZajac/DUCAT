@@ -402,4 +402,12 @@
     <string name="desk_burn_copy_proof">Copiar prueba</string>
     <string name="desk_burned">Quemado</string>
     <string name="desk_burn_none">Aún no se ha quemado nada bajo esta persona.</string>
+    <string name="desk_burned_since">Quemó %1$s, desde el bloque %2$s</string>
+    <string name="desk_show_my_burn">Mostrar mi quema</string>
+    <string name="desk_show_my_burn_hint">Envía la prueba de quema de esta persona a la conversación, para que la comprueben</string>
+    <string name="desk_burn_proof_msg">Una prueba de quema</string>
+    <string name="desk_check_burn">Comprobar</string>
+    <string name="desk_checking">Comprobando…</string>
+    <string name="desk_burn_checked">Comprobado: quemó %1$s en el bloque %2$s</string>
+    <string name="desk_burn_check_failed">No se pudo comprobar: %1$s</string>
 </resources>

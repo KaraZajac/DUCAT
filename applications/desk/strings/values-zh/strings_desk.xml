@@ -398,4 +398,12 @@
     <string name="desk_burn_copy_proof">复制证明</string>
     <string name="desk_burned">已销毁</string>
     <string name="desk_burn_none">此身份尚未销毁任何金额。</string>
+    <string name="desk_burned_since">已销毁 %1$s，自区块 %2$s 起</string>
+    <string name="desk_show_my_burn">出示我的销毁证明</string>
+    <string name="desk_show_my_burn_hint">把此身份的销毁证明发到对话中，供对方核验</string>
+    <string name="desk_burn_proof_msg">一份销毁证明</string>
+    <string name="desk_check_burn">核验</string>
+    <string name="desk_checking">核验中…</string>
+    <string name="desk_burn_checked">已核验：在区块 %2$s 销毁了 %1$s</string>
+    <string name="desk_burn_check_failed">无法核验：%1$s</string>
 </resources>

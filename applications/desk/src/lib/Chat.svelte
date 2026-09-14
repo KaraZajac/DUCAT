@@ -450,6 +450,32 @@
     const m = body.match(CARD_LINK);
     return m ? m[0] : null;
   }
+  // §9.5: a burn proof travels in a thread as a ducat:burn/<envelope> link.
+  const BURN_LINK = /ducat:burn\/([0-9a-fA-F]+)/;
+  function burnIn(body: string): string | null {
+    const m = body.match(BURN_LINK);
+    return m ? m[1] : null;
+  }
+  let burnNote = $state<string | null>(null);
+  let checkingBurn = $state(false);
+  async function checkBurn(hex: string) {
+    if (!current) return;
+    checkingBurn = true; burnNote = null;
+    try {
+      const v = await api.verifyBurn(current.persona_hex, hex);
+      burnNote = t("desk_burn_checked", fmtXmr(v.amount_pxmr), String(v.height));
+      await refresh();
+    } catch (e) { burnNote = t("desk_burn_check_failed", String(e)); } finally { checkingBurn = false; }
+  }
+  async function showMyBurn() {
+    if (!current) return;
+    err = null;
+    try {
+      const link = await api.myBurnLink();
+      await api.sendText(current.persona_hex, link);
+      await refresh();
+    } catch (e) { err = String(e); }
+  }
 
   // A site address in a message opens in the sealed room, added to the
   // Sites page on the way.
@@ -729,6 +755,7 @@
             <div class="meta">
               {#if current.petname && current.asserted_name && current.petname !== current.asserted_name}{t("desk_calls_themself", current.asserted_name)} · {/if}
               {#if !current.has_keys}{t("desk_keys_not_arrived")} · {/if}
+              {#if current.burn_pxmr}{t("desk_burned_since", fmtXmr(current.burn_pxmr), String(current.burn_height ?? 0))} · {/if}
               {#if current.pending_address}{t("desk_address_held")} · {/if}
               {#if current.email}{current.email} · {/if}{#if current.phone}{current.phone} · {/if}{#if current.signal}Signal {current.signal} · {/if}
               <button class="linkish mono" title={t("desk_copy_their_key")} onclick={() => copy(current?.persona_hex ?? "")}>{current.persona_hex.slice(0, 12)}…</button>
@@ -746,6 +773,7 @@
           <button class="btn small" class:active={payingOut} disabled={!current.their_address} title={current.their_address ? t("desk_send_them_money") : t("pay_no_address_hint", current.name)} onclick={() => { payingOut = !payingOut; requesting = false; }}>{t("desk_pay")}</button>
           <button class="btn small" class:active={requesting} onclick={() => { requesting = !requesting; payingOut = false; }}>{t("pay_request")}</button>
           <button class="btn small" onclick={() => { renaming = true; newName = current?.petname ?? ""; }}>{t("profiles_rename")}</button>
+          <button class="btn small" title={t("desk_show_my_burn_hint")} disabled={!current.has_keys} onclick={showMyBurn}>{t("desk_show_my_burn")}</button>
           <button class="btn small" class:active={current.hearted} title={current.hearted ? t("desk_unheart") : t("desk_heart")} disabled={!current.has_keys} onclick={toggleHeart}>{@html current.hearted ? icons.heartFull : icons.heart}</button>
           <button class="btn small" class:active={showSettings} title={t("chat_conversation_settings")} onclick={() => (showSettings = !showSettings)}>{@html icons.more} {t("desk_more")}</button>
         </div>
@@ -851,7 +879,13 @@
                   <button class="btn small" disabled={answering !== null} title={t("desk_take_bill_back")} onclick={() => cancelMine(m)}>{answering === keyOf(m) ? "…" : t("chat_cancel_request")}</button>
                 </div>
               {/if}
-              {#if cardIn(m.body)}
+              {#if burnIn(m.body)}
+                <div class="bubble-body">{t("desk_burn_proof_msg")}</div>
+                {#if !m.outgoing && m.kind === 0}
+                  <div class="actions" style="margin: 6px 0 2px"><button class="btn small primary" disabled={checkingBurn} onclick={() => checkBurn(burnIn(m.body)!)}>{checkingBurn ? t("desk_checking") : t("desk_check_burn")}</button></div>
+                  {#if burnNote}<div class="meta">{burnNote}</div>{/if}
+                {/if}
+              {:else if cardIn(m.body)}
                 <div class="bubble-body">{m.body.replace(CARD_LINK, "").trim()}</div>
                 <div class="card-link"><code>{cardIn(m.body)}</code><button class="linkish" title={t("chat_copy")} onclick={() => copy(cardIn(m.body)!)}>{@html icons.copy}</button></div>
               {:else if m.body && !(m.att_hash && (m.body === "📷" || m.body === "🎤" || m.body.startsWith("📎 ")))}<div class="bubble-body">{m.body}</div>{/if}

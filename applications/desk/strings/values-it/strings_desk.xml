@@ -402,4 +402,12 @@
     <string name="desk_burn_copy_proof">Copia prova</string>
     <string name="desk_burned">Bruciato</string>
     <string name="desk_burn_none">Non è ancora stato bruciato nulla sotto questa persona.</string>
+    <string name="desk_burned_since">Ha bruciato %1$s, dal blocco %2$s</string>
+    <string name="desk_show_my_burn">Mostra la mia prova</string>
+    <string name="desk_show_my_burn_hint">Invia la prova di questa persona nella conversazione, perché la verifichino</string>
+    <string name="desk_burn_proof_msg">Una prova di bruciatura</string>
+    <string name="desk_check_burn">Verifica</string>
+    <string name="desk_checking">Verifica in corso…</string>
+    <string name="desk_burn_checked">Verificato: ha bruciato %1$s nel blocco %2$s</string>
+    <string name="desk_burn_check_failed">Impossibile verificare: %1$s</string>
 </resources>

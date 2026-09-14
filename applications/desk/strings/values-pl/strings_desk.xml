@@ -410,4 +410,12 @@
     <string name="desk_burn_copy_proof">Kopiuj dowód</string>
     <string name="desk_burned">Spalono</string>
     <string name="desk_burn_none">Jako ta persona nic jeszcze nie spalono.</string>
+    <string name="desk_burned_since">Spalono %1$s, od bloku %2$s</string>
+    <string name="desk_show_my_burn">Pokaż moje spalenie</string>
+    <string name="desk_show_my_burn_hint">Wysyła dowód spalenia tej persony do rozmowy, aby druga strona go sprawdziła</string>
+    <string name="desk_burn_proof_msg">Dowód spalenia</string>
+    <string name="desk_check_burn">Sprawdź</string>
+    <string name="desk_checking">Sprawdzanie…</string>
+    <string name="desk_burn_checked">Sprawdzono: spalono %1$s w bloku %2$s</string>
+    <string name="desk_burn_check_failed">Nie udało się sprawdzić: %1$s</string>
 </resources>

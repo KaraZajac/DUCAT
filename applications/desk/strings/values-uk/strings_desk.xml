@@ -410,4 +410,12 @@
     <string name="desk_burn_copy_proof">Скопіювати доказ</string>
     <string name="desk_burned">Спалено</string>
     <string name="desk_burn_none">Від імені цієї персони ще нічого не спалено.</string>
+    <string name="desk_burned_since">Спалено %1$s, з блоку %2$s</string>
+    <string name="desk_show_my_burn">Показати моє спалення</string>
+    <string name="desk_show_my_burn_hint">Надсилає доказ спалення цієї персони в розмову, щоб співрозмовник його перевірив</string>
+    <string name="desk_burn_proof_msg">Доказ спалення</string>
+    <string name="desk_check_burn">Перевірити</string>
+    <string name="desk_checking">Перевірка…</string>
+    <string name="desk_burn_checked">Перевірено: спалено %1$s у блоці %2$s</string>
+    <string name="desk_burn_check_failed">Не вдалося перевірити: %1$s</string>
 </resources>

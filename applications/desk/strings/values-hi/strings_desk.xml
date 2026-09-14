@@ -402,4 +402,12 @@
     <string name="desk_burn_copy_proof">प्रमाण कॉपी करें</string>
     <string name="desk_burned">जलाया</string>
     <string name="desk_burn_none">इस पर्सोना के अंतर्गत अभी कुछ नहीं जलाया गया।</string>
+    <string name="desk_burned_since">%1$s जलाया, ब्लॉक %2$s से</string>
+    <string name="desk_show_my_burn">मेरा जलाना दिखाएँ</string>
+    <string name="desk_show_my_burn_hint">इस पर्सोना का जलाने का प्रमाण बातचीत में भेजता है, ताकि वे जाँच सकें</string>
+    <string name="desk_burn_proof_msg">जलाने का एक प्रमाण</string>
+    <string name="desk_check_burn">जाँचें</string>
+    <string name="desk_checking">जाँच हो रही है…</string>
+    <string name="desk_burn_checked">जाँचा गया: ब्लॉक %2$s में %1$s जलाया</string>
+    <string name="desk_burn_check_failed">जाँच नहीं हो सकी: %1$s</string>
 </resources>

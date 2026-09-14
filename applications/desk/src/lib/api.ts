@@ -107,6 +107,8 @@ export interface Code {
 export interface ContactRow {
   hearted: boolean;
   persona_hex: string;
+  burn_pxmr: number | null;
+  burn_height: number | null;
   name: string;
   named: boolean;
   petname: string | null;
@@ -633,6 +635,7 @@ export const api = {
   walletNotes: () => invoke<NoteRow[]>("wallet_notes"),
   walletSends: () => invoke<SentRow[]>("wallet_sends"),
   burnView: () => invoke<BurnView>("burn_view"),
+  myBurnLink: () => invoke<string>("my_burn_link"),
   burn: (amountXmr: string, purpose: string) => invoke<BurnRow>("burn", { amountXmr, purpose }),
   verifyBurn: (personaHex: string, envelopeHex: string) => invoke<VerifiedBurnRow>("verify_burn", { personaHex, envelopeHex }),
   walletQuote: (amountXmr: string, priority = 1) => invoke<Quote>("wallet_quote", { amountXmr, priority }),

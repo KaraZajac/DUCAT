@@ -418,4 +418,12 @@
     <string name="desk_burn_copy_proof">نسخ الإثبات</string>
     <string name="desk_burned">حُرق</string>
     <string name="desk_burn_none">لم يُحرق شيء باسم هذه الشخصية بعد.</string>
+    <string name="desk_burned_since">حُرق %1$s، منذ الكتلة %2$s</string>
+    <string name="desk_show_my_burn">عرض حرقي</string>
+    <string name="desk_show_my_burn_hint">يرسل إثبات حرق هذه الشخصية إلى المحادثة ليتحقق منه الطرف الآخر</string>
+    <string name="desk_burn_proof_msg">إثبات حرق</string>
+    <string name="desk_check_burn">تحقق منه</string>
+    <string name="desk_checking">جارٍ التحقق…</string>
+    <string name="desk_burn_checked">تم التحقق: حُرق %1$s في الكتلة %2$s</string>
+    <string name="desk_burn_check_failed">تعذر التحقق: %1$s</string>
 </resources>

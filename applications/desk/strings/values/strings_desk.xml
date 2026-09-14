@@ -408,4 +408,12 @@
     <string name="desk_burn_copy_proof">Copy proof</string>
     <string name="desk_burned">Burned</string>
     <string name="desk_burn_none">Nothing burned under this persona yet.</string>
+    <string name="desk_burned_since">Burned %1$s, since block %2$s</string>
+    <string name="desk_show_my_burn">Show my burn</string>
+    <string name="desk_show_my_burn_hint">Sends this persona\'s burn proof into the conversation, for them to check</string>
+    <string name="desk_burn_proof_msg">A burn proof</string>
+    <string name="desk_check_burn">Check it</string>
+    <string name="desk_checking">Checking…</string>
+    <string name="desk_burn_checked">Checked: burned %1$s in block %2$s</string>
+    <string name="desk_burn_check_failed">Could not check it: %1$s</string>
 </resources>
