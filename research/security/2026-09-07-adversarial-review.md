@@ -48,7 +48,7 @@ the fix landed), **open**, **deferred** (design decision recorded, not scheduled
 | D5 | Low | lib.rs | Broad main-window command surface (`picture_data_url`, `node_debug`, `log_tail`) | **open** |
 | D6 | Low | app/src/log.rs | ducat.log carries names and amounts beside plaintext state | mitigated by D1 |
 | D7 | Low (S) | app/src/attachments.rs | Record-road attachment trusts `att_len` up to 512 MB | **fixed 2026-09-14** — the record road checks its own bound before it sizes an allocation |
-| D8–D10 | Info | | `shrink_picture` without the 24 MP guard; main-window CSP omissions; passphrase floor | **D8 fixed 2026-09-14** — `shrink_picture` reads the header and refuses over 24 MP, as every other picture on the desk already did; D9/D10 open |
+| D8–D10 | Info | | `shrink_picture` without the 24 MP guard; main-window CSP omissions; passphrase floor | **D8 fixed 2026-09-14** — `shrink_picture` reads the header and refuses over 24 MP, as every other picture on the desk already did; **D9 fixed** — the main window names object-src, frame-src, base-uri and form-action, the four a `default-src` does not cover; **D10 closed by W11** |
 
 ## Android
 
