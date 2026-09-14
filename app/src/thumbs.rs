@@ -10,7 +10,9 @@ use image::{DynamicImage, GenericImageView, ImageReader};
 pub const THUMB_BYTES: usize = 10 * 1024;
 /// Anything larger is not decoded at all — a decompression bomb is a
 /// picture too.
-const COMPOSE_PIXELS: u64 = 24_000_000;
+/// The most pixels any picture on this desk is decoded at — a small file may
+/// declare far more, and the decoder would allocate for all of them.
+pub const COMPOSE_PIXELS: u64 = 24_000_000;
 
 fn encode_jpeg(img: &DynamicImage, quality: u8) -> Option<Vec<u8>> {
     let mut out = Vec::new();

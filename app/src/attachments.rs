@@ -66,6 +66,14 @@ fn mime_of(path: &Path) -> &'static str {
 /// 1600 — the same ladder the phone walks.
 fn shrink_picture(bytes: &[u8]) -> Option<Vec<u8>> {
     use image::imageops::FilterType;
+    // Dimensions from the header before anything is decoded: a small file can
+    // declare a hundred thousand pixels a side, and the decoder would allocate
+    // for all of them. The same ceiling every other picture on this desk
+    // passes (`thumbs::COMPOSE_PIXELS`).
+    let (w0, h0) = image::ImageReader::new(std::io::Cursor::new(bytes)).with_guessed_format().ok()?.into_dimensions().ok()?;
+    if w0 as u64 * h0 as u64 > crate::thumbs::COMPOSE_PIXELS {
+        return None;
+    }
     let src = image::ImageReader::new(std::io::Cursor::new(bytes)).with_guessed_format().ok()?.decode().ok()?;
     let (w, h) = (src.width(), src.height());
     let long = w.max(h);
@@ -230,6 +238,12 @@ impl App {
                 continue;
             }
             let r: Result<usize, Error> = (|| {
+                // The record road's own bound, checked here and not only at
+                // the decoder: this number sizes an allocation and a loop, and
+                // a road's ceiling belongs beside the road (D7).
+                if m.att_len > MAX_RECORD_BYTES as u64 {
+                    return Err(Error::Refused(format!("a record attachment is at most {MAX_RECORD_BYTES} bytes")));
+                }
                 let rec = m.att_record.clone().unwrap_or_default();
                 node_dht_open(rec.clone(), None, None)?;
                 let ct_len = m.att_len as usize + 16;
