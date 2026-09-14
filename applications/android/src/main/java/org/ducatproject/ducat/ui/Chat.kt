@@ -3556,7 +3556,12 @@ private fun TrayItem(
     enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    // The label is part of the control: a finger aims at the icon, a reader
+    // of the word taps the word (phase4-phone-walk.md, nit 3).
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.clickable(enabled = enabled, onClick = onClick),
+    ) {
         FilledTonalIconButton(
             onClick = onClick,
             enabled = enabled,

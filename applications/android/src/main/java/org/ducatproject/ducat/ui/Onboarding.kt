@@ -456,9 +456,13 @@ private fun Progress(step: Step, restored: Boolean) {
  */
 @Composable
 private fun PinStep(onDone: () -> Unit) {
-    var asking by remember { mutableStateOf(false) }
+    // Saveable, not plain remember: a restore keeps the poller busy for a
+    // minute after "Restored wallet", and every store bump that re-derived
+    // the onboarding state took this step out of composition and back —
+    // closing the dialog under the person's fingers (phase4-phone-walk.md).
+    var asking by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
     val context = LocalContext.current
-    var done by remember { mutableStateOf(org.ducatproject.ducat.Pin.isSet(context)) }
+    var done by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(org.ducatproject.ducat.Pin.isSet(context)) }
     StepCard(
         title = stringResource(R.string.onb_pin_title),
         body = stringResource(if (done) R.string.onb_pin_done else R.string.onb_pin_body),

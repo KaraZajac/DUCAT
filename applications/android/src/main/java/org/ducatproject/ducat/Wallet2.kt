@@ -198,8 +198,11 @@ object Wallet {
         }
         val spend = store.spendKeyHex()
         if (spend == null) {
-            // Distinct from "no node", and the difference is everything: this
-            // wallet cannot ever scan, and no amount of waiting fixes it.
+            // A phone still in setup has no wallet at all: nothing to scan,
+            // nothing to warn about. The warning below is for the other case —
+            // an address without its key — and the difference is everything:
+            // that wallet cannot ever scan, and no amount of waiting fixes it.
+            if (store.address() == null) return false
             DucatLog.w(TAG, "no spend key stored — this wallet predates wallet persistence")
             return false
         }

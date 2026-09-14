@@ -68,7 +68,7 @@ fun PinGate(
     // PIN is being set *again*: then the lock is the only thing left on the
     // phone that can say whose hand this is, and it is asked first.
     val deviceLock = remember { (!setting || tampered) && DeviceLock.available(context) }
-    var asking by remember { mutableStateOf(false) }
+    var asking by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
     // The phone's lock has vouched for the person, on the tampered path.
     // Nothing passes on it alone; it only unlocks choosing a new PIN.
     var vouched by remember { mutableStateOf(false) }

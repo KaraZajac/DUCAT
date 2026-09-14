@@ -697,7 +697,12 @@ fn main() {
             let mut shown = false;
             let mut seen_vouch: std::collections::HashSet<String> = Default::default();
             while t0.elapsed() < Duration::from_secs(1800) {
-                app.collect_claims(None);
+                // A profile card is claimed once; cut the next one as soon as
+                // somebody has taken this one, so several vouchers can come.
+                if app.collect_claims(None) > 0 {
+                    let handle = app.profile_code(None).expect("MB_FAIL issue");
+                    println!("MB_CARD {}", handle.uri);
+                }
                 app.poll();
                 for c in app.contacts() {
                     let thread = app.thread(&c.persona_hex);
