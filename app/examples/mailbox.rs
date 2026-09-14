@@ -632,12 +632,20 @@ fn main() {
             };
             println!("MB_CLAIMED {}", c.display_name());
             let worn = app.worn().expect("MB_FAIL worn");
-            let rec = match app.burn(&worn, ducat_app::trust::BURN_FLOOR_PXMR, "identity") {
-                Ok(r) => r,
-                Err(e) => {
-                    println!("MB_FAIL burn: {e}");
-                    return;
+            // A burn from an earlier run that never got its block is money
+            // already gone: finish it rather than burn again.
+            let rec = match app.burns().into_iter().find(|b| b.persona_hex == worn && b.envelope_hex.is_none()) {
+                Some(b) => {
+                    println!("MB_REUSE txid={} from an earlier run", b.txid_hex);
+                    b
                 }
+                None => match app.burn(&worn, ducat_app::trust::BURN_FLOOR_PXMR, "identity") {
+                    Ok(r) => r,
+                    Err(e) => {
+                        println!("MB_FAIL burn: {e}");
+                        return;
+                    }
+                },
             };
             println!("MB_BURNED txid={} {} XMR proof={} chars", rec.txid_hex, ducat_app::wallet::format_xmr(rec.amount_pxmr), rec.proof.len());
             let t0 = Instant::now();

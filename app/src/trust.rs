@@ -199,7 +199,10 @@ impl App {
         if b.amount_pxmr < BURN_FLOOR_PXMR {
             return Err(Error::Refused("under the floor".into()));
         }
-        let node = self.last_good_node().ok_or_else(|| Error::Refused("no Monero node yet".into()))?;
+        // A desk that has never used its wallet has no node yet; pick one
+        // rather than refuse — checking a stranger's burn is exactly what a
+        // desk that has paid nobody yet wants to do.
+        let node = self.last_good_node().or_else(|| self.pick_node()).ok_or_else(|| Error::Refused("no Monero node answers right now".into()))?;
         let address = self.burn_address();
         let v = monero_verify_out_proof(node, hexs(&b.txid), address, self.wallet_stagenet(), b.message(), b.proof.clone(), NODE_TIMEOUT_MS)
             .map_err(|e| Error::Refused(format!("the node does not bear it out: {e}")))?;
