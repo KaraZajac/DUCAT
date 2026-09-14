@@ -278,6 +278,24 @@ co-signature *is* the ruling; a captured arbiter can at worst pick between the
 named parties, never pay itself. Chain-proven on stagenet in every shape,
 including a two-input FROST release.
 
+And when there is no deal yet — a listing from a name you have never seen, a
+till you are about to pay — the question is what that name *cost*. DUCAT's
+answer is a **burn (§9.5)**: a persona may destroy XMR by sending it to an
+address nobody holds the keys to, derived from a hash anyone can recompute, and
+carry Monero's own payment proof for it, bound to that persona by name. The
+proof travels as a link in a thread; the other side's client checks it against
+its own node for exactly the proven amount and asks a second node whether the
+transaction is in a block, and from then on the persona wears it in words
+wherever a decision is made — *burned 0.01 XMR, since block N* — never as a
+score. The gate is the rule that matters: the client warns whenever what you are
+about to put at risk exceeds what the other side has burned, because a name that
+cost nothing has nothing to lose by vanishing. After a settled deal either side
+may sign a **rated receipt (§9.2)** to the other — one to five, one sentence —
+and a persona shows its record on request; every reader weighs those receipts
+itself, one voice per signer, counting only signers whose own burn it has
+verified, so a record is envelopes, never a number somebody else computed.
+Nothing about any of this is published anywhere.
+
 ## It tells you what things cost you
 
 <p align="center">
