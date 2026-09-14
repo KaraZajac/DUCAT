@@ -688,8 +688,15 @@ private fun BondSection(c: Contact) {
                     // Read here, not inside the act: by the time that runs
                     // this screen may be gone and its ceremony with it.
                     val idHex = ceremony?.optString("id").orEmpty()
+                    // With the fingerprint of the proposal this screen was
+                    // drawn from: a fresh round 0 supersedes a parked one at
+                    // any moment, and a yes meant for the deposit coming home
+                    // must not sign the sweep that replaced it (M11).
+                    val shown = ceremony?.optString("pendingDigest").orEmpty()
                     act {
-                        org.ducatproject.ducat.Ceremony.approveRideRelease(context, idHex)
+                        org.ducatproject.ducat.Ceremony.approveRideRelease(
+                            context, idHex, shownDigest = shown,
+                        )
                         null
                     }
                 },

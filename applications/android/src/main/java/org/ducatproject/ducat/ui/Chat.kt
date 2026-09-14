@@ -3435,13 +3435,42 @@ private fun RideBondBanner(contact: Contact) {
     val verifiedToMe =
         if (org.ducatproject.ducat.Ceremony.isArbiter(ride)) -1L
         else ride.optLong("pendingToMe", -1L)
+    // Every output of the parked proposal, sized and attributed when it was
+    // parked — address, amount, which side of the split, and whether it is
+    // the residual claimant who also pays the fee. The consent screens below
+    // list these, which is what turns "the driver says you get 2.23" into
+    // "this transaction pays these two addresses these two amounts" (M4).
+    val parked = remember(ride) { org.ducatproject.ducat.Ceremony.parkedOuts(ride) }
+    // What the payer gets back, **as the transaction states it**. The claim
+    // beside the payload is the fallback and never the preference: an
+    // arbiter has no output of its own to size, so before this it was shown
+    // the proposer's claim and nothing else.
+    val parsedPayerBack = parked
+        .filter { it.side == org.ducatproject.ducat.Ceremony.Side.PAYER }
+        .takeIf { it.isNotEmpty() }
+        ?.sumOf { it.amountPxmr }
     val riderBack = when {
+        parsedPayerBack != null -> parsedPayerBack
+        // Nothing parked went to the payer's refund address at all, and the
+        // outputs *were* read: the split gives them nothing back.
+        parked.isNotEmpty() -> 0L
         verifiedToMe < 0 -> ride.optLong(
             "pendingRiderBack", (funded - fare).coerceAtLeast(0L),
         )
         rider -> verifiedToMe
         else -> (funded - verifiedToMe).coerceAtLeast(0L)
     }
+    // And what the other side takes, from the same reading: every output
+    // that is not the payer's refund. Stated rather than derived from
+    // `funded - riderBack`, which is this device's scan minus a claim.
+    val parsedToOther = parked
+        .filter { it.side != org.ducatproject.ducat.Ceremony.Side.PAYER }
+        .sumOf { it.amountPxmr }
+        .takeIf { parked.isNotEmpty() }
+    // The fingerprint of the proposal these figures were read from. It rides
+    // the consent tap so a counter-offer that lands while the screen is open
+    // cannot inherit its yes (M11).
+    val parkedDigest = ride.optString("pendingDigest")
     val idHex = ride.optString("id")
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<Trouble?>(null) }
@@ -3616,8 +3645,30 @@ private fun RideBondBanner(contact: Contact) {
             }
         }
     }
+    // **The tap carries what the screen showed.**
+    //
+    // Both figures go back into the ceremony: what this device was told it
+    // would be paid, and the fingerprint of the proposal that was read to
+    // produce it. `approveRideRelease` re-reads the record and refuses when
+    // either has moved — a counter-offer landing on the poller thread while
+    // the consent screen is open used to be signed by a tap meant for the
+    // proposal it replaced (M11).
     val signReally: () -> Unit = {
-        act(rideKey) { org.ducatproject.ducat.Ceremony.approveRideRelease(context, idHex) }
+        act(rideKey) {
+            org.ducatproject.ducat.Ceremony.approveRideRelease(
+                context, idHex,
+                // What this device was told the transaction pays *it* —
+                // `pendingToMe`, read from the payload when the proposal was
+                // parked, which is the same figure the ceremony re-derives
+                // below. Never the split's other side, which includes any
+                // output going somewhere neither party could place. An
+                // arbiter is paid nothing by any release and so has no figure
+                // of its own to hold the payload to: what it checks is the
+                // claim against the parse, which the ceremony does.
+                shownToMePxmr = verifiedToMe,
+                shownDigest = parkedDigest,
+            )
+        }
     }
     val signNow: () -> Unit = { pinAction = signReally }
     /**
@@ -3946,19 +3997,26 @@ private fun RideBondBanner(contact: Contact) {
                 // For a bond the whole escrow goes to them, so that is the
                 // number — not a split of it, which is what the ride
                 // arithmetic below would have produced.
+                // Every one of these figures is now the transaction's own —
+                // the outputs were parsed and sized when the proposal was
+                // parked, and the residual side's amount computed from
+                // `inputs − fixed − fee` rather than from this device's
+                // scanned balance (M2). `funded` remains the fallback for a
+                // proposal parked before this, which has no parsed outputs
+                // on its record.
                 amount = when {
-                    plainBond -> funded
+                    plainBond -> parsedToOther ?: funded
                     rider -> riderBack
-                    else -> (funded - riderBack).coerceAtLeast(0L)
+                    else -> parsedToOther ?: (funded - riderBack).coerceAtLeast(0L)
                 },
                 note = if (plainBond) {
                     stringResource(
                         R.string.bond_close_all_to_them,
                         isolate(contact.displayName()),
-                        Amounts.show(context, funded).primary,
+                        Amounts.show(context, parsedToOther ?: funded).primary,
                     )
                 } else splitStated(
-                    riderBack, (funded - riderBack).coerceAtLeast(0L),
+                    riderBack, parsedToOther ?: (funded - riderBack).coerceAtLeast(0L),
                     rider, contact.displayName(),
                 ),
                 action = stringResource(R.string.bond_sign_split),
@@ -4000,6 +4058,9 @@ private fun RideBondBanner(contact: Contact) {
             errorNote = error?.let { retryNote(it) },
             secondaryLabel = step.secondary,
             onSecondary = step.onSecondary,
+            // Only where there is a transaction to show: the release is the
+            // one step whose tap is a signature over somebody else's bytes.
+            outputs = if (stage == "release_pending") parked else emptyList(),
         )
     }
 
@@ -4396,7 +4457,7 @@ private fun RideBondBanner(contact: Contact) {
                     // propose — §15.12's settlement). State the split the
                     // payload was read to make, and offer the only two moves:
                     // sign it, or counter.
-                    val toDriver = (funded - riderBack).coerceAtLeast(0L)
+                    val toDriver = parsedToOther ?: (funded - riderBack).coerceAtLeast(0L)
                     BondLine(
                         spin = false,
                         text = stringResource(
@@ -4416,6 +4477,7 @@ private fun RideBondBanner(contact: Contact) {
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSecondaryContainer,
                     )
+                    ParsedOutputs(parked)
                     Spacer(Modifier.height(6.dp))
                     Button(
                         // **Behind the PIN, like its twin.** This is the same
@@ -4657,6 +4719,64 @@ private fun retryNote(t: Trouble): String? {
  */
 internal fun bridgeMessage(raw: String): String =
     raw.removePrefix("v1=").trim()
+
+/**
+ * **Where this transaction actually sends the money.**
+ *
+ * One line per output, with the address in full, what it receives, and whose
+ * this device believes it is. The claim beside a proposal is written by the
+ * party who gains from being believed (§17.5), and an arbiter — on neither
+ * side of the split — used to be shown that claim and nothing else (M4).
+ *
+ * The residual line is marked, because it is the one whose amount is not in
+ * the transaction at all: it takes `inputs − fixed − fee`, which is why it
+ * also carries the network fee.
+ *
+ * An address this device cannot attribute is said to be unchecked rather
+ * than quietly rendered like the others. That is the honest answer more
+ * often than it looks: a subaddress is published per counterparty (§15.10),
+ * so the one a seller published to its buyer is not the one it published to
+ * the arbiter, and neither need be the one it proposes to pay itself at.
+ * What every party *can* check is the payer's refund address, which is in
+ * the round-0 frame all of them echoed, and its own.
+ */
+@Composable
+internal fun ParsedOutputs(outs: List<org.ducatproject.ducat.Ceremony.Payout>) {
+    if (outs.isEmpty()) return
+    val context = LocalContext.current
+    Spacer(Modifier.height(6.dp))
+    Text(
+        stringResource(R.string.bond_outputs_title),
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSecondaryContainer,
+    )
+    for (o in outs) {
+        Spacer(Modifier.height(2.dp))
+        Text(
+            stringResource(
+                when (o.side) {
+                    org.ducatproject.ducat.Ceremony.Side.MINE -> R.string.bond_output_mine
+                    org.ducatproject.ducat.Ceremony.Side.PAYER -> R.string.bond_output_payer
+                    org.ducatproject.ducat.Ceremony.Side.THEIRS -> R.string.bond_output_theirs
+                    org.ducatproject.ducat.Ceremony.Side.UNKNOWN -> R.string.bond_output_unchecked
+                },
+                Amounts.show(context, o.amountPxmr).primary,
+            ) + if (o.residual) " " + stringResource(R.string.bond_output_residual) else "",
+            style = MaterialTheme.typography.labelSmall,
+            color = if (o.side == org.ducatproject.ducat.Ceremony.Side.UNKNOWN) {
+                MaterialTheme.ducat.changePending
+            } else {
+                MaterialTheme.colorScheme.onSecondaryContainer
+            },
+        )
+        Text(
+            o.address,
+            fontFamily = FontFamily.Monospace,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
 
 /** A plain note under a button — the consequence of pressing it. */
 @Composable

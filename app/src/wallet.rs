@@ -14,7 +14,7 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Mutex;
 
 use ducat_mobile::monero::{
-    monero_default_nodes, monero_fee_estimate, monero_pick_node, monero_rate, monero_scan, monero_send, monero_spent,
+    monero_default_nodes, monero_fee_estimate, monero_pick_node, monero_rate, monero_scan, monero_send_checked, monero_spent,
     monero_subaddress, MoneroError, OwnedOutput, SendResult,
 };
 use serde::{Deserialize, Serialize};
@@ -741,7 +741,13 @@ impl App {
         }
         let intent = self.record_send_intent(to_address, amount_pxmr, plan.notes.iter().map(|n| n.key_image.clone()).collect(), contact_hex, note, donation)?;
         log::info(TAG, format!("sending {} XMR using {} note(s) to {}…", format_xmr(amount_pxmr), plan.notes.len(), &to_address[..12.min(to_address.len())]));
-        match monero_send(node, spend, plan.notes.iter().map(|n| n.blob.clone()).collect(), to_address.to_string(), amount_pxmr, priority) {
+        // The quote the confirm step showed, carried into the build (N1).
+        // `plan.fee_pxmr` is the same estimate `quote()` renders, so the
+        // number on the screen is the number the built fee is held to: a
+        // quarter over it, or a twentieth of the payment, and nothing is
+        // signed. Zero means the estimate could not be fetched — the screen
+        // says "unknown" there too — and only the absolute ceilings hold.
+        match monero_send_checked(node, spend, plan.notes.iter().map(|n| n.blob.clone()).collect(), to_address.to_string(), amount_pxmr, priority, plan.fee_pxmr) {
             Ok(r) => {
                 log::info(TAG, format!("sent {}… fee {} XMR, accepted by {} node(s)", &r.txid_hex[..16.min(r.txid_hex.len())], format_xmr(r.fee_pxmr), r.accepted_by));
                 self.resolve_send_intent(&intent, &r.txid_hex, r.fee_pxmr)?;

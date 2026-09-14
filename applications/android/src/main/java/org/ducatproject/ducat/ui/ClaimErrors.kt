@@ -164,6 +164,20 @@ fun moneyFailure(
     // refund cannot be divided from it yet. A wait, not an accusation.
     t is org.ducatproject.ducat.Ceremony.EscrowBehind ->
         context.getString(org.ducatproject.ducat.R.string.escrow_behind)
+    // The consent refusals (M2/M4/M11). Each one is a person about to agree
+    // to a division of money being told, in their own language, that the
+    // bytes and the claim beside them disagree — so each carries the
+    // sentence with it rather than a message somebody has to read in
+    // English at the worst possible moment.
+    t is org.ducatproject.ducat.Ceremony.ReleaseRefused ->
+        context.getString(t.bodyRes, *t.args)
+    t is org.ducatproject.ducat.Ceremony.ReleaseSuperseded ->
+        context.getString(org.ducatproject.ducat.R.string.bond_superseded)
+    t is org.ducatproject.ducat.Ceremony.ReleaseMisstated -> context.getString(
+        org.ducatproject.ducat.R.string.bond_misstated,
+        org.ducatproject.ducat.Amounts.show(context, t.actualPxmr).primary,
+        org.ducatproject.ducat.Amounts.show(context, t.statedPxmr).primary,
+    )
     // Before node trouble, which it would otherwise match on the timeout
     // quoted inside it: signed and pushed, and no node confirmed. "Nothing
     // was sent" is the one thing this does not know.

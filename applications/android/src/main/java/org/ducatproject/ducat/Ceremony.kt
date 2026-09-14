@@ -784,37 +784,81 @@ object Ceremony {
             }
             val i = indexOf(inv.roster, mineHex)
             val n = inv.roster.size
-            // **Our own money comes home to our own address.**
+            // **Every economic term in the frame is the inviter's word for
+            // it, and the ceremony id binds only the roster and the nonce.**
             //
-            // Every economic term in a round-0 frame is the inviter's word for
-            // it, and the ceremony id binds only the roster and the nonce — so
-            // the id check above proves the frame is self-consistent, never
-            // that it is what the two of us agreed. An honest client always
-            // names *itself* the funder (see start), so this is invisible in
-            // normal use. A modified one names the victim as funder and keeps
-            // its own address in refundAddr.
+            // The id check above proves the frame is self-consistent, never
+            // that it says what the two of us agreed (M5). Three things this
+            // device can hold it to, and it held it to none of them:
             //
-            // refundAddr is the funder's residual destination in every split
-            // proposeRideSplit can build — the ordinary one, the counter, and
-            // the ask-the-arbiter one. Adopted verbatim, there was no split
-            // the funder could construct that returned their own money.
-            //
-            // So the funder mints it locally, from the same seed start uses,
-            // and ignores what was sent. The frame echoed back to the roster
-            // still carries the inviter's value: the echo is the ceremony's
-            // self-description and every copy has to agree on it, and what
-            // this device *spends to* is its own record, not the echo.
-            val invitedRefund = inv.refundAddr
-            val myRefund = if (i == inv.funderIdx && inv.kind != KIND_BOND) {
-                WalletStore(context).addressFor("ride_$idHex") ?: invitedRefund
-            } else invitedRefund
-            if (myRefund != invitedRefund) {
+            // 1. **The funder index.** An honest client always names *itself*
+            //    the funder — see [start], where `funderIdx` is this device's
+            //    own place in the roster — so an invitation naming the
+            //    *joiner* the funder is not something the app can produce. It
+            //    is how a modified client asks somebody else to pay for its
+            //    deal. There is no such thing as being invited to fund.
+            if (i == inv.funderIdx) {
                 DucatLog.w(
                     TAG,
-                    "bond $idHex: the invite named this device the funder and " +
-                        "supplied someone else's refund address — using our own",
+                    "bond $idHex: the invite names this device the funder — refused",
                 )
+                return
             }
+            // 2. **The fare.** §15.12's escrow names its own amount so the
+            //    driver checks it against the fare the accept echoed rather
+            //    than against a separate message. The accept is the rider's
+            //    (kind 7), it carries the offer's amount, and it is in this
+            //    thread — so a frame quoting a different fare is quoting
+            //    nobody's agreement. Dropped rather than refused for ever:
+            //    the inviter retransmits round 0 ([nudge]), and by then an
+            //    accept that was merely still in flight has landed.
+            //
+            //    The arbiter is exempt: it has no offer and no accept with
+            //    either principal, and never pays or is paid.
+            if (inv.kind == KIND_RIDE && i != inv.arbiterIdx) {
+                val accepted = ContactStore(context).thread(contact.personaHex)
+                    .lastOrNull { it.kind == 7 && !it.outgoing }
+                    ?.amountPxmr
+                if (accepted == null || accepted != inv.farePxmr) {
+                    DucatLog.w(
+                        TAG,
+                        "ride $idHex: the frame's fare ${inv.farePxmr} is not the " +
+                            "accepted offer (${accepted ?: "none in this thread"}) — not joining yet",
+                    )
+                    return
+                }
+                // 3. **The stake this device is being asked for.** The
+                //    schedule in [Stakes] is the whole trust argument and
+                //    both clients compute it from the fare, so an invite
+                //    asking for more than it is asking for something nobody
+                //    offered. Joining is automatic and silent, which is
+                //    exactly why the ceiling has to be here: there is no
+                //    screen between the invitation and the commitment.
+                //    A larger stake is a thing two people could legitimately
+                //    agree to — it needs a screen that shows it beside the
+                //    fare, which is a separate piece of work.
+                val schedule = Stakes.stakeFor(Stakes.Deal.Ride, inv.farePxmr)
+                if (inv.hostDepPxmr > schedule) {
+                    DucatLog.w(
+                        TAG,
+                        "ride $idHex: the invite asks a stake of ${inv.hostDepPxmr} " +
+                            "against a schedule of $schedule — refused",
+                    )
+                    return
+                }
+            }
+            // **Where the payer's money comes home**, kept as the frame
+            // named it.
+            //
+            // `refundAddr` is the funder's residual destination in every
+            // split [proposeRideSplit] can build — the ordinary one, the
+            // counter, and the ask-the-arbiter one — and a joiner is never
+            // the funder (refused above), so adopting the frame's value is
+            // adopting the *other* party's address for the other party's
+            // money. That is the point: every copy of this ceremony holds
+            // the same refund address, so every co-signer and the arbiter
+            // can check an output against it later ([readRelease]).
+            val myRefund = inv.refundAddr
             val commit =
                 uniffi.ducat_mobile.dkgCommit(id, i.toUShort(), T.toUShort(), n.toUShort())
             // The join echoes the invite's own kind/funder/fare — the frame
@@ -1167,7 +1211,13 @@ object Ceremony {
         val i = o.optInt("i")
         val keys = hexToBytes(o.optString("keys"))
             ?: throw IllegalStateException("this device holds no key share")
-        val dest = WalletStore(context).address()
+        // The subaddress allocated to this counterparty (§15.10), not the
+        // primary: a primary address on chain beside a known counterparty
+        // links the two of them for anybody comparing notes. It is also the
+        // address this bond's other side has for us, so their consent screen
+        // can name the destination instead of calling it unplaceable
+        // ([readRelease]).
+        val dest = WalletStore(context).addressFor(contact.personaHex)
             ?: throw IllegalStateException("no wallet to return the deposit to")
         val nodeUrl = node(context) ?: throw NoNode()
 
@@ -1277,7 +1327,7 @@ object Ceremony {
                     // the proposer's. A payload this device cannot read is
                     // refused outright rather than shown: nobody should be
                     // asked to approve bytes we could not open.
-                    val toMe = runCatching { releaseToMe(context, o, payload) }
+                    val release = runCatching { readRelease(context, o, payload) }
                         .getOrElse { e ->
                             DucatLog.w(
                                 TAG,
@@ -1285,6 +1335,7 @@ object Ceremony {
                             )
                             return@runCatching
                         }
+                    val toMe = release.toMePxmr
                     o.put("stage", "release_pending")
                     o.put("pendingPayload", payload.toHexString())
                     o.put("proposerIdx", senderIdx)
@@ -1292,6 +1343,14 @@ object Ceremony {
                     else o.remove("pendingRiderBack")
                     if (toMe != null) o.put("pendingToMe", toMe)
                     else o.remove("pendingToMe")
+                    // Every output, with its address and what it actually
+                    // receives, written down once here rather than re-parsed
+                    // on every recomposition — the consent screen is drawn
+                    // from this and from nothing the proposer wrote beside
+                    // the bytes (M4). The fingerprint travels with it so the
+                    // tap can prove which proposal it was answering (M11).
+                    o.put("pendingOuts", outsJson(release))
+                    o.put("pendingDigest", release.digest)
                     save(context, idHex, o)
                     ContactStore.bump()
                     DucatLog.i(TAG, "escrow $idHex: release proposed — waiting for the yes")
@@ -2610,7 +2669,19 @@ object Ceremony {
                 ?: throw IllegalStateException(
                     "the driver has not published an address — ask them to propose instead")
         } else {
-            WalletStore(context).address()
+            // **The subaddress allocated to this counterparty, not the
+            // primary.** §15.10's rule, which every other payment in the app
+            // already follows: a primary address on chain beside a
+            // counterparty is a public link between them, and two of them
+            // comparing notes is all it takes. It is also what lets the far
+            // side *recognise* the output — on a ride the address this
+            // allocates is exactly the one the handshake published to them,
+            // so their consent screen names it instead of calling it
+            // unplaceable ([readRelease]). Falls back to the primary when
+            // there is no wallet to derive from, which is the old behaviour.
+            val payerHex = otherPrincipal(o)
+                ?: throw IllegalStateException("no counterparty")
+            WalletStore(context).addressFor(payerHex)
                 ?: throw IllegalStateException("no wallet to receive the fare")
         }
 
@@ -2769,6 +2840,256 @@ object Ceremony {
         IllegalStateException("the proposal pays $actualPxmr, not $statedPxmr")
 
     /**
+     * A proposal this device will not sign, with the sentence to say so.
+     *
+     * Typed with a resource rather than a message, because every one of these
+     * is read by a person at the moment they were about to agree to a
+     * division of money — and an English string thrown from the protocol
+     * layer is the one thing nineteen translations cannot help with.
+     */
+    class ReleaseRefused(val bodyRes: Int, vararg val args: Any) :
+        IllegalStateException("release refused (res $bodyRes)")
+
+    /**
+     * The consent screen was drawn from a different proposal than the one now
+     * on the record — a counter-offer landed in the seconds between reading
+     * and tapping (M11).
+     */
+    class ReleaseSuperseded : IllegalStateException("the proposal changed before the signature")
+
+    /** Where one output of a proposed release goes, as this device can tell. */
+    enum class Side {
+        /** An address this device's own wallet controls. */
+        MINE,
+
+        /** The payer's refund address, exactly as the round-0 frame names it. */
+        PAYER,
+
+        /** The other principal's address, as this device's contact record
+         *  holds it — what they published in the handshake. */
+        THEIRS,
+
+        /**
+         * An address this device cannot attribute to anybody.
+         *
+         * Not the same as wrong, and deliberately not refused on its own. A
+         * subaddress is published *per counterparty* (§15.10), so the address
+         * a seller published to its buyer is not the one it published to the
+         * arbiter, and the one it proposes to pay itself at need be neither.
+         * What this device can prove is the payer's side — the refund address
+         * is in the frame every party echoed — and its own. The rest is shown
+         * in full, said to be unchecked, and left to the person.
+         */
+        UNKNOWN,
+    }
+
+    /** One output of a proposed release, sized and attributed. */
+    data class Payout(
+        val address: String,
+        /** What it actually receives. For the residual claimant this is
+         *  `inputs − fixed − fee`, computed here; the wire carries no
+         *  amount for it, which is the whole of M2. */
+        val amountPxmr: Long,
+        val residual: Boolean,
+        val side: Side,
+    )
+
+    /**
+     * A proposed release, read out of the bytes that would be signed.
+     *
+     * §17.5's rule about payments is a rule about consent too: every figure
+     * travelling *beside* a proposal is written by the party who gains from
+     * being believed. So the screen is drawn from the payload — all of it,
+     * not just the outputs. The residual claimant takes
+     * `inputs − fixed − fee`, and a screen looking only at the outputs can
+     * see one of those three terms.
+     */
+    data class Release(
+        val outs: List<Payout>,
+        /** What the release spends, all together. */
+        val inputsTotalPxmr: Long,
+        val inputs: Int,
+        val feePxmr: Long,
+        /** What this device is paid by it, or null when no output is its own. */
+        val toMePxmr: Long?,
+        /** What comes home to the payer, or null when nothing does. */
+        val payerBackPxmr: Long?,
+        /** A fingerprint of the payload this was read from, carried through
+         *  the consent tap so a proposal swapped underneath the screen cannot
+         *  borrow its yes (M11). */
+        val digest: String,
+    )
+
+    /**
+     * The parsed outputs, as the record keeps them for the screen.
+     *
+     * A JSON array on the ceremony record rather than a re-parse per frame:
+     * reading a proposal is a bridge call and a consent screen recomposes
+     * whenever anything on the thread moves. Written once, when the proposal
+     * is parked, by the same code that decided it was signable at all.
+     */
+    private fun outsJson(r: Release): String =
+        JSONArray().apply {
+            for (p in r.outs) {
+                put(
+                    JSONObject()
+                        .put("addr", p.address)
+                        .put("pxmr", p.amountPxmr)
+                        .put("residual", p.residual)
+                        .put("side", p.side.name),
+                )
+            }
+        }.toString()
+
+    /** [outsJson] read back. Empty when nothing was parked. */
+    fun parkedOuts(o: JSONObject): List<Payout> {
+        val raw = o.optString("pendingOuts")
+        if (raw.isBlank()) return emptyList()
+        return runCatching {
+            val arr = JSONArray(raw)
+            (0 until arr.length()).map { idx ->
+                val e = arr.getJSONObject(idx)
+                Payout(
+                    address = e.optString("addr"),
+                    amountPxmr = e.optLong("pxmr"),
+                    residual = e.optBoolean("residual"),
+                    side = runCatching { Side.valueOf(e.optString("side")) }
+                        .getOrDefault(Side.UNKNOWN),
+                )
+            }
+        }.getOrDefault(emptyList())
+    }
+
+    /** SHA-256 of the bytes, hex — the fingerprint a consent tap carries. */
+    internal fun digestOf(payload: ByteArray): String =
+        java.security.MessageDigest.getInstance("SHA-256").digest(payload).toHexString()
+
+    /**
+     * The residual claimant's share: everything the inputs hold after the
+     * fixed slices and the network fee.
+     *
+     * Carved out and internal so the arithmetic that decides whether
+     * somebody's stake comes home is testable without a chain, an escrow or
+     * a counterparty. Returns null when the terms do not close — the crate's
+     * own `validate` refuses such a transaction before this is ever reached,
+     * so a null here means the walk and the crate disagree, which is a
+     * refusal and never a zero.
+     */
+    internal fun residualOf(inputsTotalPxmr: Long, fixedPxmr: Long, feePxmr: Long): Long? {
+        if (inputsTotalPxmr < 0 || fixedPxmr < 0 || feePxmr < 0) return null
+        val spent = fixedPxmr + feePxmr
+        if (spent < 0 || spent > inputsTotalPxmr) return null
+        return inputsTotalPxmr - spent
+    }
+
+    /**
+     * Read a proposed release, size every output, and say who each one pays.
+     *
+     * Refuses outright on a shape no DUCAT release has: a third output, an
+     * output with no address at all (change named by a view pair, which
+     * nothing here builds and nobody could recognise), the same address paid
+     * twice, or arithmetic that does not close. Those are not judgement
+     * calls — they are proposals this device could not honestly describe,
+     * and a consent screen fed by a description it cannot stand behind is
+     * worse than no screen.
+     */
+    fun readRelease(context: Context, o: JSONObject, payload: ByteArray): Release {
+        val v = uniffi.ducat_mobile.frostView(payload)
+        val mine = myPayoutAddresses(context, o)
+        // The payer's refund address as the round-0 frame names it — the one
+        // economic term in a proposal every party can check, because every
+        // party echoed the frame it came in and wrote it down (see the join).
+        val payerAddr = o.optString("refundAddr")
+        val outs = sizeRelease(
+            v.destinations, mine, payerAddr,
+            otherPrincipal(o)?.let { contactFor(context, it)?.theirAddress }
+                ?: arbitersPayeeAddress(context, o),
+            v.inputsTotalPxmr.toLong(), v.feePxmr.toLong(),
+        )
+        return Release(
+            outs = outs,
+            inputsTotalPxmr = v.inputsTotalPxmr.toLong(),
+            inputs = v.inputs.toInt(),
+            feePxmr = v.feePxmr.toLong(),
+            toMePxmr = outs.filter { it.address in mine }.sumOf { it.amountPxmr }
+                .takeIf { outs.any { p -> p.address in mine } },
+            payerBackPxmr = outs.filter { payerAddr.isNotEmpty() && it.address == payerAddr }
+                .sumOf { it.amountPxmr }
+                .takeIf { payerAddr.isNotEmpty() && outs.any { p -> p.address == payerAddr } },
+            digest = digestOf(payload),
+        )
+    }
+
+    /**
+     * [readRelease]'s whole judgement, over terms already read: the shapes it
+     * refuses, the residual arithmetic and who each output pays.
+     *
+     * Pure — no context, no wallet, no chain — because this is the code that
+     * decides whether somebody's stake comes home, and a rule that can only
+     * be exercised by running a ceremony is a rule nobody exercises.
+     *
+     * The refusals are shapes no DUCAT release has: a third output, an output
+     * with no address at all (change named by a view pair, which nothing here
+     * builds and nobody could recognise), or the same address paid twice.
+     * They are not judgement calls — they are proposals this device could not
+     * honestly describe, and a consent screen fed by a description it cannot
+     * stand behind is worse than no screen.
+     */
+    internal fun sizeRelease(
+        dests: List<uniffi.ducat_mobile.TxDestination>,
+        mine: Set<String>,
+        payerAddr: String,
+        theirs: String?,
+        inputsTotalPxmr: Long,
+        feePxmr: Long,
+    ): List<Payout> {
+        if (dests.size > 2) throw ReleaseRefused(R.string.bond_refuse_shape, dests.size)
+        if (dests.any { it.address.isBlank() }) throw ReleaseRefused(R.string.bond_refuse_nameless)
+        if (dests.map { it.address }.distinct().size != dests.size) {
+            throw ReleaseRefused(R.string.bond_refuse_nameless)
+        }
+        val fixed = dests.filter { !it.residual }.sumOf { it.amountPxmr.toLong() }
+        val residual = residualOf(inputsTotalPxmr, fixed, feePxmr)
+            ?: throw ReleaseRefused(R.string.bond_refuse_arithmetic)
+        return dests.map { d ->
+            Payout(
+                address = d.address,
+                amountPxmr = if (d.residual) residual else d.amountPxmr.toLong(),
+                residual = d.residual,
+                side = when {
+                    payerAddr.isNotEmpty() && d.address == payerAddr -> Side.PAYER
+                    d.address in mine -> Side.MINE
+                    theirs != null && d.address == theirs -> Side.THEIRS
+                    else -> Side.UNKNOWN
+                },
+            )
+        }
+    }
+
+    /**
+     * The payee's address as an **arbiter** holds it.
+     *
+     * An arbiter is on neither side of the split, so [otherPrincipal] gives
+     * it nothing: both remaining roster entries are principals. What it can
+     * do is look up the one who is not the payer, which is the party a
+     * release pays, and see whether its own contact record agrees with the
+     * address in the proposal. Often it will not — a subaddress is published
+     * per counterparty — and then the screen says the address is unchecked
+     * rather than pretending either way.
+     */
+    private fun arbitersPayeeAddress(context: Context, o: JSONObject): String? {
+        if (!isArbiter(o)) return null
+        val roster = o.optJSONArray("roster")?.let { arr ->
+            (0 until arr.length()).map { arr.getString(it) }
+        } ?: return null
+        val funder = o.optInt("funderIdx")
+        val payeeHex = roster
+            .filterIndexed { idx, _ -> idx + 1 != funder && idx + 1 != o.optInt("arbiterIdx") }
+            .singleOrNull() ?: return null
+        return contactFor(context, payeeHex)?.theirAddress
+    }
+
+    /**
      * Every address this deal could legitimately pay this device at.
      *
      * All three are derived from this device's own wallet, never from the
@@ -2794,50 +3115,42 @@ object Ceremony {
      *
      * §17.5's rule about payments is a rule about consent too. The figure that
      * travels beside a proposal is written by the party who gains from being
-     * believed, and until now the co-signer approved a payload it never
+     * believed, and until this the co-signer approved a payload it never
      * parsed: the screen stated amounts and the bytes could have paid anyone.
      *
-     * Two shapes, because a split has two. A fixed output naming one of this
-     * device's addresses is exact, and needs nothing else to check. Being the
-     * *residual* claimant instead means taking whatever the fixed outputs and
-     * the fee leave behind, so it takes the escrow's total to size — and that
-     * total must be this device's own scan ([checkRideFunding], corroborated),
-     * never the proposal's word for it. Without one, the answer is null and
-     * not zero: unknown and nothing are different answers, and collapsing them
-     * would refuse honest releases on a phone that has not scanned yet.
-     *
-     * The residual figure is stated before the fee, which is the convention
-     * the split screen has always used — the fee comes out of the residual
-     * side, whoever that is, and is a few ten-thousandths of an XMR.
+     * **Sized from the transaction, not from the balance.** A fixed output
+     * naming one of this device's addresses is exact. Being the *residual*
+     * claimant instead means taking whatever the fixed outputs and the fee
+     * leave behind — `inputs − fixed − fee` — and this used to substitute the
+     * escrow's scanned balance for `inputs`. Those are the same number only
+     * when the release sweeps the whole escrow, and nothing made it: a
+     * proposer spending one of the escrow's two notes paid every fixed slice
+     * in full and halved the residual, which is the co-signer's own stake,
+     * while every figure on the screen still added up (M2). The inputs are
+     * now read from the payload, and the co-signer refuses a release that
+     * does not spend at least what its own scan says the escrow holds — in
+     * `frost_cosign`, where a refusal costs nothing, rather than only here.
      */
     fun releaseToMe(context: Context, o: JSONObject, payload: ByteArray): Long? =
-        releaseToMe(
-            uniffi.ducat_mobile.frostDestinations(payload),
-            myPayoutAddresses(context, o),
-            o.optLong("fundedPxmr"),
-        )
-
-    /** [releaseToMe]'s arithmetic, over outputs already read. */
-    fun releaseToMe(
-        dests: List<uniffi.ducat_mobile.TxDestination>,
-        mine: Set<String>,
-        fundedPxmr: Long,
-    ): Long? {
-        val fixedToMe = dests
-            .filter { !it.residual && it.address in mine }
-            .sumOf { it.amountPxmr.toLong() }
-        if (dests.none { it.residual && it.address in mine }) return fixedToMe
-        val fixed = dests.filter { !it.residual }.sumOf { it.amountPxmr.toLong() }
-        if (fundedPxmr <= 0 || fundedPxmr < fixed) return null
-        return fixedToMe + (fundedPxmr - fixed)
-    }
+        readRelease(context, o, payload).toMePxmr
 
     /**
      * The rider's yes: co-sign the parked proposal and send the signature
      * back. This is the §15 moment of the bonded ride — both parties present,
      * the tap that moves the money.
+     *
+     * `shownToMePxmr` and `shownDigest` are what the screen that was tapped
+     * had in front of it. Both are checked against the record as it stands
+     * *now*, because a proposal can be superseded between a screen being
+     * drawn and a finger reaching it (M11) and the replacement would
+     * otherwise inherit the yes.
      */
-    fun approveRideRelease(context: Context, idHex: String) {
+    fun approveRideRelease(
+        context: Context,
+        idHex: String,
+        shownToMePxmr: Long = -1L,
+        shownDigest: String = "",
+    ) {
         val o = load(context, idHex) ?: throw IllegalStateException("no such ceremony")
         check(o.optString("stage") == "release_pending") { "no release is waiting" }
         val id = hexToBytes(idHex)!!
@@ -2855,14 +3168,36 @@ object Ceremony {
         val proposer = contactFor(context, proposerHex)
             ?: throw IllegalStateException("the driver is not a contact")
 
+        // **The proposal on the record is the one the screen was drawn from,
+        // or there is no yes here.**
+        //
+        // A fresh proposal supersedes a parked one at any moment — that is
+        // the counter-offer, and it lands on the poller thread while a
+        // consent screen is open. The screen carries back the fingerprint of
+        // what it showed, so a replacement cannot borrow its tap (M11); the
+        // banner re-renders from the record and asks again.
+        if (shownDigest.isNotEmpty() && digestOf(payload) != shownDigest) {
+            DucatLog.w(TAG, "escrow $idHex: the proposal changed under the consent screen")
+            throw ReleaseSuperseded()
+        }
+
         // Read the bytes again at the moment of consent, and refuse to sign
         // anything that pays this device less than the screen stated. The
         // figure was checked once when the proposal arrived; this catches a
         // payload swapped underneath it since, and costs one parse.
-        val stated = o.optLong("pendingToMe", -1L)
+        val release = readRelease(context, o, payload)
+        val stated = maxOf(o.optLong("pendingToMe", -1L), shownToMePxmr)
         if (stated >= 0) {
-            val actual = releaseToMe(context, o, payload)
-            if (actual != null && actual < stated) {
+            val actual = release.toMePxmr
+            // Short by more than the fee reserve, not short at all. The two
+            // figures come from the same parse of the same payload and agree
+            // exactly — except across an upgrade, where a proposal parked by
+            // a build that sized the residual from the *balance* carries a
+            // figure one network fee larger than this one does. Refusing that
+            // would strand a standing settlement over a number nobody
+            // disputes. The reserve is the bound on the fee itself
+            // (`release_acceptable`), so it is the most this can hide.
+            if (actual != null && actual + FEE_RESERVE_PXMR < stated) {
                 DucatLog.w(
                     TAG,
                     "ride $idHex: refusing to sign — the payload pays $actual, not $stated",
@@ -2870,9 +3205,45 @@ object Ceremony {
                 throw ReleaseMisstated(stated, actual)
             }
         }
+        // **The claim beside the payload, held against the payload.**
+        //
+        // `pendingRiderBack` is the proposer's own statement of what goes
+        // home to the payer, and it is what an arbiter — on neither side of
+        // the split, so with no output of its own to size — is shown. It was
+        // never compared with anything (M4): the party asked to *rule* saw
+        // the claim and signed the bytes. The two may differ by the fee,
+        // because whichever side takes the residual pays it, and by nothing
+        // else.
+        val claimed = o.optLong("pendingRiderBack", -1L)
+        val parsedBack = release.payerBackPxmr
+        if (claimed >= 0 && parsedBack != null &&
+            Math.abs(claimed - parsedBack) > FEE_RESERVE_PXMR
+        ) {
+            DucatLog.w(
+                TAG,
+                "escrow $idHex: refusing — claimed $claimed back to the payer, the bytes say $parsedBack",
+            )
+            throw ReleaseRefused(R.string.bond_refuse_claim)
+        }
+
+        // What this device's own scan says the escrow holds, and what its own
+        // node says a release of this shape costs. Both go to the core, which
+        // refuses a release that does not spend the whole escrow and a fee
+        // above what one should cost — see `release_acceptable`. Refreshed
+        // here when the record has never been scanned: unknown is a refusal
+        // down there, and a wait is the wrong answer to give somebody only
+        // because nothing had asked the chain yet.
+        val funded = o.optLong("fundedPxmr").takeIf { it > 0 }
+            ?: runCatching { checkRideFunding(context, idHex) }.getOrDefault(0L)
+        // Two outputs is what every release here builds; the estimate is for
+        // the shape, and the core doubles it before believing it.
+        val estimate = runCatching {
+            Wallet.feeFor(context, release.inputs.coerceAtLeast(1))
+        }.getOrDefault(0L)
 
         val ans = uniffi.ducat_mobile.frostCosign(
             id, i.toUShort(), proposerIdx.toUShort(), keys, payload,
+            funded.toULong(), estimate.toULong(),
         )
         Mailbox.send(
             context, proposer, "fare released — thank you for the ride",
@@ -2884,6 +3255,8 @@ object Ceremony {
         // soldOne and the save re-ran this path and decremented twice.
         o.put("pendingPayload", "")
         o.put("pendingToMe", -1L)
+        o.put("pendingOuts", "")
+        o.put("pendingDigest", "")
         save(context, idHex, o)
         soldOne(context, o)
         ContactStore.bump()

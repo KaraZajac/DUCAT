@@ -62,7 +62,10 @@ fun main(args: Array<String>) {
     // File-based so a human (or a policy process) sits between the request
     // and the signature — the judgment is exactly what must not be automated.
     val rulings = File(dir, "rulings.txt")
-    val actedOn = HashSet<String>()
+    // Which rulings have been printed, and the fingerprint of the proposal
+    // each was printed about — so an approval written in answer to one
+    // listing cannot sign a proposal that replaced it (M11).
+    val actedOn = HashMap<String, String>()
     var lastStages = ""
     while (true) {
         runCatching { Mailbox.collectClaims(context) }
@@ -84,7 +87,12 @@ fun main(args: Array<String>) {
         }
         for (o in all.filter { it.optString("stage") == "release_pending" }) {
             val id = o.optString("id")
-            if (id !in actedOn) {
+            // Printed once per *proposal*, not once per ceremony: a
+            // counter-offer replaces the parked payload, and an arbiter that
+            // had already announced the first one would never be shown the
+            // second. The fingerprint is what changed.
+            val nowDigest = o.optString("pendingDigest")
+            if (actedOn[id] != nowDigest) {
                 // What this node knows for itself, and plainly when that is
                 // nothing. An arbiter does not fund and is not shown the
                 // banner that scans, so `fundedPxmr` is normally absent —
@@ -113,21 +121,46 @@ fun main(args: Array<String>) {
                 if (payload == null) {
                     println("  outputs: the parked payload is gone — do not approve")
                 } else {
-                    runCatching { uniffi.ducat_mobile.frostDestinations(payload) }
-                        .onSuccess { dests ->
-                            for (d in dests) {
-                                val what =
-                                    if (d.residual) "residual (takes the remainder, pays the fee)"
-                                    else "${d.amountPxmr} pXMR"
-                                println("  pays ${d.address.ifEmpty { "<unnamed — refuse this>" }} — $what")
+                    runCatching { Ceremony.readRelease(context, o, payload) }
+                        .onSuccess { r ->
+                            // Every term, not just the addresses. The residual
+                            // output carries no amount on the wire — it takes
+                            // `inputs − fixed − fee` — so the inputs and the
+                            // fee are what make the second line a number at
+                            // all, and a release spending less than the
+                            // escrow holds is the partial sweep of M2.
+                            println(
+                                "  spends ${r.inputsTotalPxmr} pXMR across ${r.inputs} note(s), " +
+                                    "fee ${r.feePxmr} pXMR",
+                            )
+                            for (d in r.outs) {
+                                val whose = when (d.side) {
+                                    Ceremony.Side.PAYER -> "the payer's refund address, as the escrow's own frame names it"
+                                    Ceremony.Side.MINE -> "an address this node controls"
+                                    Ceremony.Side.THEIRS -> "the address that party published to this node"
+                                    Ceremony.Side.UNKNOWN -> "NOT CHECKABLE HERE — read it against what they told you"
+                                }
+                                println(
+                                    "  pays ${d.address} — ${d.amountPxmr} pXMR" +
+                                        (if (d.residual) " (residual; pays the fee)" else "") +
+                                        " — $whose",
+                                )
                             }
+                            r.payerBackPxmr?.let {
+                                println("  back to the payer, as the bytes state it: $it pXMR")
+                            }
+                            println("  fingerprint ${r.digest.take(16)}…")
                         }
-                        .onFailure { println("  outputs: unreadable ($it) — do not approve") }
+                        .onFailure { println("  outputs: refused ($it) — do not approve") }
                 }
                 println(
                     "  (approve with: echo 'approve ${id.take(8)}' >> ${rulings.absolutePath})"
                 )
-                actedOn.add(id)
+                // Even when the payload could not be read: the request has
+                // been announced, and repeating it every two seconds would
+                // bury the console. An unreadable one is refused below —
+                // `readRelease` throwing is what "do not approve" means.
+                actedOn[id] = nowDigest
             }
         }
         if (rulings.isFile) {
@@ -138,7 +171,17 @@ fun main(args: Array<String>) {
                         it.optString("id").startsWith(prefix)
                 } ?: continue
                 val id = target.optString("id")
-                runCatching { Ceremony.approveRideRelease(context, id) }
+                // The fingerprint the console printed, handed back with the
+                // approval. A counter-offer landing between the request and
+                // the line in rulings.txt replaces the parked payload, and a
+                // ruling written about the proposal that was read must not
+                // sign the one that replaced it (M11).
+                val shown = actedOn[id]
+                if (shown.isNullOrEmpty()) {
+                    println("ARBITER_RULING_FAILED ${id.take(8)}: no readable proposal was printed for this")
+                    continue
+                }
+                runCatching { Ceremony.approveRideRelease(context, id, shownDigest = shown) }
                     .onSuccess { println("ARBITER_RULED ${id.take(8)} — co-signed; the proposer completes") }
                     .onFailure { println("ARBITER_RULING_FAILED ${id.take(8)}: ${it.message}") }
             }

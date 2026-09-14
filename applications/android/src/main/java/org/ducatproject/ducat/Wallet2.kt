@@ -656,9 +656,25 @@ object Wallet {
                 "to ${toAddress.take(12)}…",
         )
         val r = try {
-            uniffi.ducat_mobile.moneroSend(
+            // **The quote the confirm step showed, carried into the build.**
+            //
+            // The fee is the one number in a transaction the payer does not
+            // choose: the node quotes a per-byte rate and the builder signs
+            // whatever that produces. A lying public node — or anyone on the
+            // path to one over plain http — therefore chose the fee, and the
+            // note paid it (N1). `plan.feePxmr` is the same estimate the
+            // screen states, so the core refuses to sign a fee more than a
+            // quarter above it, or more than a twentieth of the payment
+            // itself. Zero is "the estimate failed", which the screen also
+            // says out loud, and then only the absolute ceilings hold.
+            //
+            // Every refusal comes back under the "fee rate:" prefix, which
+            // [builtNothing] already reads as "nothing was built, the notes
+            // are free again" — so a refused send costs a retry, not notes
+            // pinned for half an hour.
+            uniffi.ducat_mobile.moneroSendChecked(
                 nodeUrl, spend, plan.notes.map { it.blob }, toAddress,
-                amountPxmr.toULong(), priority.toUInt(),
+                amountPxmr.toULong(), priority.toUInt(), plan.feePxmr.toULong(),
             )
         } catch (e: Throwable) {
             DucatLog.e(TAG, "send failed: ${e.message ?: e}")

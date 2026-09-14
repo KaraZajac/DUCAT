@@ -1335,6 +1335,23 @@ private fun ConfirmSend(
                         ),
                         style = MaterialTheme.typography.bodySmall,
                     )
+                    // **This figure is a ceiling now, not only an estimate.**
+                    //
+                    // The fee is the one number in a transaction the payer
+                    // does not choose: the node quotes a rate and the builder
+                    // signs what that produces, so a lying node named the fee
+                    // and the note paid it (N1). The quote shown here is
+                    // carried into the build and the send is refused if the
+                    // real fee lands more than a quarter above it — which is
+                    // worth saying, because "nothing was sent" is otherwise a
+                    // surprise at the moment somebody expected a payment.
+                    if (q.feeKnown) {
+                        Text(
+                            stringResource(R.string.pay_fee_capped),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
                 Spacer(Modifier.height(10.dp))
                 Text(

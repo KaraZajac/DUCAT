@@ -1699,7 +1699,11 @@ const FEE_NORMAL_PER_BYTE: [u64; 4] = [20_000, 80_000, 320_000, 4_000_000];
 const FEE_CEILING_FACTOR: u64 = 50;
 
 /// The most a tier may charge per byte before the node is disbelieved.
-fn fee_ceiling_per_byte(priority: u32) -> u64 {
+///
+/// `pub(crate)` because the escrow proposer builds its release against the
+/// same rate from the same node, and a ceiling that held only on the wallet's
+/// sends would leave the larger pot — a whole escrow — uncapped (N1).
+pub(crate) fn fee_ceiling_per_byte(priority: u32) -> u64 {
     FEE_NORMAL_PER_BYTE[(priority as usize).min(3)].saturating_mul(FEE_CEILING_FACTOR)
 }
 
@@ -1759,8 +1763,9 @@ fn fee_acceptable(fee: u64, amount_pxmr: u64, max_fee_pxmr: u64, mask: u64) -> R
     Ok(())
 }
 
-/// Twelve places, plain digits, for the fee refusals above.
-fn fmt_xmr(pxmr: u64) -> String {
+/// Twelve places, plain digits, for the fee refusals above — and for the
+/// escrow's, which state the same kind of number for the same reason.
+pub(crate) fn fmt_xmr(pxmr: u64) -> String {
     format!("{}.{:012}", pxmr / 1_000_000_000_000, pxmr % 1_000_000_000_000)
 }
 

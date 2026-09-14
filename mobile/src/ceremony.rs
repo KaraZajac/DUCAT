@@ -417,6 +417,10 @@ pub struct FrostCosign {
     /// Every output of the transaction this answer signs, so the caller can
     /// check that what it put in front of somebody is what they agreed to.
     pub destinations: Vec<TxDestination>,
+    /// What this release spends, so the caller can restate the residual from
+    /// the same three terms this signature was checked against.
+    pub inputs_total_pxmr: u64,
+    pub inputs: u32,
 }
 
 /// One output of a proposed transaction.
@@ -437,7 +441,25 @@ pub struct TxDestination {
 /// malformed payload asking for a huge allocation before it is rejected.
 const MAX_TX_PARTS: usize = 256;
 
-/// Read a transaction's outputs out of its own serialisation.
+/// What a proposed release spends and what it pays, read out of the
+/// transaction itself.
+///
+/// The outputs alone were never enough to consent to (M2). A release that
+/// sweeps only *part* of an escrow pays every fixed slice exactly as named
+/// and quietly shrinks the residual — and the residual is the co-signer's
+/// own stake. The change output carries no amount on the wire, because
+/// the amount it will carry is `inputs − fixed − fee`: two of those three
+/// terms are invisible to anything looking at the outputs alone.
+pub(crate) struct ParsedTx {
+    pub destinations: Vec<TxDestination>,
+    /// What the inputs being spent are worth, together.
+    pub inputs_total_pxmr: u64,
+    /// How many of them, so a partial sweep can be described and not only
+    /// refused.
+    pub inputs: u32,
+}
+
+/// Read a transaction's inputs and outputs out of its own serialisation.
 ///
 /// 0.2.0 keeps `SignableTransaction::payments` private with no accessor, so
 /// this walks the crate's encoding: a header, then the inputs — consumed by
@@ -450,7 +472,7 @@ const MAX_TX_PARTS: usize = 256;
 /// very object that will be signed, and no disagreement between this walk and
 /// `SignableTransaction::read` is possible — which is the whole point, since
 /// a consent screen fed by a second, laxer parser is worse than no screen.
-fn read_destinations(serialized: &[u8]) -> Result<Vec<TxDestination>, ContactError> {
+fn read_tx(serialized: &[u8]) -> Result<ParsedTx, ContactError> {
     use monero_wallet::address::MoneroAddress;
     use monero_wallet::extra::{MAX_ARBITRARY_DATA_SIZE, MAX_EXTRA_SIZE_BY_RELAY_RULE};
     use monero_wallet::interface::FeeRate;
@@ -492,7 +514,19 @@ fn read_destinations(serialized: &[u8]) -> Result<Vec<TxDestination>, ContactErr
     let mut r = serialized;
     let _rct_type = read_byte(&mut r).map_err(reading)?;
     let _outgoing_view_key: [u8; 32] = read_bytes(&mut r).map_err(reading)?;
-    read_vec(OutputWithDecoys::read, Some(MAX_TX_PARTS), &mut r).map_err(reading)?;
+    // The inputs are walked for their own sake now, not only to reach the
+    // payments: each one carries the commitment it is spending, and the sum
+    // of those is the pot this transaction divides. `SignableTransaction`'s
+    // own `validate` — which `read` runs before any of this — has already
+    // insisted the inputs cover the payments and the fee, so these are not
+    // free-floating numbers a proposer invents; what they do not prove is
+    // that they are *all* the escrow holds. That is the caller's check.
+    let inputs = read_vec(OutputWithDecoys::read, Some(MAX_TX_PARTS), &mut r).map_err(reading)?;
+    let inputs_total_pxmr = inputs
+        .iter()
+        .try_fold(0u64, |acc, o| acc.checked_add(o.commitment().amount))
+        .ok_or_else(|| ContactError::Refused("the proposed inputs do not add up".into()))?;
+    let inputs_count = inputs.len() as u32;
     let payments = read_vec(payment, Some(MAX_TX_PARTS), &mut r).map_err(reading)?;
 
     // Keep reading to the end, and insist it lands exactly there.
@@ -516,24 +550,60 @@ fn read_destinations(serialized: &[u8]) -> Result<Vec<TxDestination>, ContactErr
             "the proposed transaction did not read to its end".into(),
         ));
     }
-    Ok(payments)
+    Ok(ParsedTx { destinations: payments, inputs_total_pxmr, inputs: inputs_count })
 }
 
-/// What a proposed release actually pays, and to whom — without keys, so a
-/// client can show it to somebody before they agree to sign it.
+/// Everything a proposed release does, read without keys — so a client can
+/// put it in front of somebody before they agree to sign it.
 ///
-/// §17.5's rule applied to consent: the amount travelling beside a proposal
-/// is written by the party who benefits from being believed, so the screen
-/// has to be drawn from the payload instead.
+/// §17.5's rule applied to consent: every figure travelling *beside* a
+/// proposal is written by the party who benefits from being believed, so the
+/// screen has to be drawn from the payload instead. That means all four
+/// terms, not just the outputs: what is being spent, how many notes it came
+/// from, what the miners take, and where it goes.
+#[derive(uniffi::Record)]
+pub struct TxView {
+    /// Every output, in the transaction's own order.
+    pub destinations: Vec<TxDestination>,
+    /// What the inputs are worth together — the pot this divides. A release
+    /// must sweep the escrow, so the co-signer holds this against what its
+    /// own scan says the escrow holds.
+    pub inputs_total_pxmr: u64,
+    /// How many notes are being spent.
+    pub inputs: u32,
+    /// What the miners take. It comes out of the residual claimant's side,
+    /// whoever that is, so it is part of their figure and not a footnote.
+    pub fee_pxmr: u64,
+    /// What the transaction says it is paying per byte of weight. Held
+    /// against `fee_ceiling_per_byte` — a proposer choosing the fee is a
+    /// proposer choosing how much of the residual claimant's share to burn.
+    pub fee_per_byte: u64,
+}
+
+/// Read a proposal without signing it.
 #[uniffi::export]
-pub fn frost_destinations(payload: Vec<u8>) -> Result<Vec<TxDestination>, ContactError> {
+pub fn frost_view(payload: Vec<u8>) -> Result<TxView, ContactError> {
     use monero_wallet::send::SignableTransaction;
 
     let mut buf = payload.as_slice();
     let tx_bytes = unframe(&mut buf)?;
     let tx = SignableTransaction::read(&mut &tx_bytes[..])
         .map_err(|e| ContactError::Refused(format!("transaction: {e}")))?;
-    read_destinations(&tx.serialize())
+    Ok(view_of(&tx)?)
+}
+
+/// The view, from a transaction already parsed. Read from the parsed
+/// object's own re-encoding, so what a caller is told it signed is what it
+/// signed (see `read_tx`).
+fn view_of(tx: &monero_wallet::send::SignableTransaction) -> Result<TxView, ContactError> {
+    let parsed = read_tx(&tx.serialize())?;
+    Ok(TxView {
+        destinations: parsed.destinations,
+        inputs_total_pxmr: parsed.inputs_total_pxmr,
+        inputs: parsed.inputs,
+        fee_pxmr: tx.necessary_fee(),
+        fee_per_byte: tx.fee_rate().per_weight(),
+    })
 }
 
 /// Reserved from the swept total to cover the network fee; the surplus
@@ -661,8 +731,15 @@ pub fn frost_propose_split(
                     .map_err(|e| ContactError::Refused(format!("decoys: {e:?}")))?,
             );
         }
+        // The same disbelief the wallet's sends apply (N1). `u64::MAX` stood
+        // here, which switches the crate's own sanity ceiling off, and the
+        // pot on this path is a whole escrow rather than one note: a node
+        // quoting a thousand times the going rate — or anyone on the path to
+        // it over plain http — got to name the fee and the residual claimant
+        // paid it. Normal is the tier every release is built at, so the
+        // normal tier's ceiling is the one that applies.
         let fee_rate = rpc
-            .fee_rate(FeePriority::Normal, u64::MAX)
+            .fee_rate(FeePriority::Normal, crate::monero::fee_ceiling_per_byte(1))
             .await
             .map_err(|e| ContactError::Refused(format!("fee: {e:?}")))?;
         let mut outgoing = Zeroizing::new([0u8; 32]);
@@ -697,6 +774,84 @@ pub fn frost_propose_split(
     Ok(FrostProposal { payload, total_pxmr: total, payout_pxmr: payout })
 }
 
+/// However large a local fee estimate comes back, a release may never pay
+/// more than this.
+///
+/// A release of sixteen notes at the normal tier weighs about eleven
+/// kilobytes and costs well under a thousandth of an XMR, so twenty reserves
+/// is far above any honest release and far below anything worth escrowing.
+/// It is here because a local estimate is still a number from *a node*,
+/// however much that node is ours, and it must not be able to raise the
+/// ceiling without limit.
+const FEE_CEILING: u64 = FEE_RESERVE * 20;
+
+/// Whether a proposed release is one a co-signer may put its key to.
+///
+/// Pure, so the rule that decides whether somebody's stake survives is
+/// testable without a node, an escrow or a counterparty.
+///
+/// Three refusals, each one a way a proposer who writes the transaction can
+/// help itself to the other side's money:
+///
+/// 1. **A partial sweep** (M2). The residual claimant receives
+///    `inputs − fixed − fee`, and the outputs alone do not say what `inputs`
+///    is. A proposer that spends one of the escrow's two notes pays every
+///    fixed slice in full and halves the residual — the co-signer's own
+///    stake — while every figure on the screen still adds up. So the inputs
+///    must cover what this device's own scan says the escrow holds.
+///    `funded` of zero is *unknown*, not *empty*, and unknown refuses:
+///    consenting to a division of a pot whose size you do not know is the
+///    whole finding, not a corner of it.
+///
+/// 2. **A fee above the network's rate** (N1/N10). The fee comes out of the
+///    residual side, so a fee is a transfer from the residual claimant to
+///    the miners, chosen by whoever built the transaction.
+///
+/// 3. **A fee out of proportion to the release itself**: at most
+///    `max(FEE_RESERVE, 2 × a fresh local estimate)`, and never more than
+///    `FEE_CEILING` whatever that estimate says. The reserve is what every
+///    DUCAT release is sized against, so it is the floor; twice a local
+///    estimate covers an escrow with several notes in it, where the honest
+///    fee is larger than the reserve. `local_estimate` of zero means this
+///    device could not ask its own node, and then the reserve stands alone.
+pub(crate) fn release_acceptable(
+    inputs_total_pxmr: u64,
+    funded_pxmr: u64,
+    fee_pxmr: u64,
+    fee_per_byte: u64,
+    local_estimate_pxmr: u64,
+) -> Result<(), String> {
+    if funded_pxmr == 0 {
+        return Err(
+            "this device has not scanned what the escrow holds, so it cannot check \
+             that the release spends all of it — refused"
+                .into(),
+        );
+    }
+    if inputs_total_pxmr < funded_pxmr {
+        return Err(format!(
+            "the release spends {} XMR of the {} XMR in the escrow — a release must move all of it",
+            crate::monero::fmt_xmr(inputs_total_pxmr),
+            crate::monero::fmt_xmr(funded_pxmr),
+        ));
+    }
+    let rate_ceiling = crate::monero::fee_ceiling_per_byte(1);
+    if fee_per_byte > rate_ceiling {
+        return Err(format!(
+            "the proposed release pays {fee_per_byte} pXMR per byte, far above the network's rate — refused"
+        ));
+    }
+    let allowed = FEE_RESERVE.max(local_estimate_pxmr.saturating_mul(2)).min(FEE_CEILING);
+    if fee_pxmr > allowed {
+        return Err(format!(
+            "the proposed release pays {} XMR in fees, above the {} XMR this release should cost — refused",
+            crate::monero::fmt_xmr(fee_pxmr),
+            crate::monero::fmt_xmr(allowed),
+        ));
+    }
+    Ok(())
+}
+
 /// Round 1 — co-sign. Reads the proposed transaction and the proposer's
 /// preprocess, preprocesses and signs in one step, and returns
 /// `[preprocess][share]`. Nothing is kept: the co-signer's part is finished.
@@ -704,6 +859,13 @@ pub fn frost_propose_split(
 /// `proposer` names who round 0 came from: in a 2-of-3 the co-signer could
 /// be either other participant, so "3 minus me" stopped being arithmetic
 /// the moment the arbiter existed.
+///
+/// `funded_pxmr` is what **this device's own scan** says the escrow holds,
+/// and `local_estimate_pxmr` what this device's own node says a release of
+/// this shape costs (zero for either means the device could not tell). Both
+/// are checked here rather than only on the screen, because the screen is a
+/// different program on every client and this is the last place before a
+/// signature exists. See `release_acceptable`.
 #[uniffi::export]
 pub fn frost_cosign(
     ceremony_id: Vec<u8>,
@@ -711,6 +873,8 @@ pub fn frost_cosign(
     proposer: u16,
     keys: Vec<u8>,
     payload: Vec<u8>,
+    funded_pxmr: u64,
+    local_estimate_pxmr: u64,
 ) -> Result<FrostCosign, ContactError> {
     use monero_wallet::send::SignableTransaction;
 
@@ -725,10 +889,24 @@ pub fn frost_cosign(
 
     let tx = SignableTransaction::read(&mut &tx_bytes[..])
         .map_err(|e| ContactError::Refused(format!("transaction: {e}")))?;
-    let fee = tx.necessary_fee();
     // Read from the parsed transaction's own re-encoding, so what the caller
     // is told it signed is what it signed.
-    let destinations = read_destinations(&tx.serialize())?;
+    let view = view_of(&tx)?;
+    let fee = view.fee_pxmr;
+    // Before the machine is touched, so a refusal costs nothing and leaves
+    // nothing behind: a co-signature is the only thing standing between this
+    // escrow and the proposer's wallet.
+    release_acceptable(
+        view.inputs_total_pxmr,
+        funded_pxmr,
+        fee,
+        view.fee_per_byte,
+        local_estimate_pxmr,
+    )
+    .map_err(ContactError::Refused)?;
+    let destinations = view.destinations;
+    let inputs_total_pxmr = view.inputs_total_pxmr;
+    let inputs = view.inputs;
 
     let machine = tx
         .multisig(keys)
@@ -744,7 +922,7 @@ pub fn frost_cosign(
     let mut out = Vec::new();
     frame(&mut out, &preprocess.serialize());
     frame(&mut out, &share.serialize());
-    Ok(FrostCosign { payload: out, fee_pxmr: fee, destinations })
+    Ok(FrostCosign { payload: out, fee_pxmr: fee, destinations, inputs_total_pxmr, inputs })
 }
 
 /// Round 2 — complete and broadcast. Consumes the parked machine, folds in
@@ -870,8 +1048,101 @@ mod frame_tests {
 }
 
 #[cfg(test)]
+mod consent_tests {
+    use super::{release_acceptable, FEE_RESERVE};
+
+    /// What an honest release of a funded escrow looks like: every note in
+    /// the escrow spent, a fee inside the reserve, an ordinary rate.
+    const HONEST_RATE: u64 = 80_000;
+
+    #[test]
+    fn an_honest_sweep_is_signed() {
+        assert!(release_acceptable(1_000_000_000, 1_000_000_000, 120_000_000, HONEST_RATE, 0).is_ok());
+        // More in the escrow than this device had scanned is fine — the
+        // other side funded while we were not looking. Less is not.
+        assert!(release_acceptable(2_000_000_000, 1_000_000_000, 120_000_000, HONEST_RATE, 0).is_ok());
+    }
+
+    /// M2, the finding this exists for: a proposer that spends half the
+    /// escrow pays its own fixed slice in full and halves the residual —
+    /// which is the co-signer's stake — and every figure on the screen
+    /// still adds up.
+    #[test]
+    fn a_partial_sweep_is_refused() {
+        let why = release_acceptable(500_000_000, 1_000_000_000, 120_000_000, HONEST_RATE, 0)
+            .expect_err("half the escrow was accepted as a release");
+        assert!(why.contains("must move all of it"), "{why}");
+        // One piconero short is still short: there is no tolerance to spend
+        // here, because the honest proposal sweeps by construction.
+        assert!(release_acceptable(999_999_999, 1_000_000_000, 1, HONEST_RATE, 0).is_err());
+    }
+
+    /// Unknown is not empty. A device that has never scanned the escrow
+    /// cannot tell a sweep from a raid, and signing anyway is the failure.
+    #[test]
+    fn an_unscanned_escrow_refuses_rather_than_skips() {
+        let why = release_acceptable(1_000_000_000, 0, 120_000_000, HONEST_RATE, 0)
+            .expect_err("a release was signed against an escrow nobody had scanned");
+        assert!(why.contains("has not scanned"), "{why}");
+    }
+
+    /// N1/N10 on the escrow path: the fee comes out of the residual side, so
+    /// a proposer choosing it is choosing how much of the other party's
+    /// share to hand the miners.
+    #[test]
+    fn an_inflated_fee_is_refused() {
+        // Inside the reserve, however the rate is spelled: fine.
+        assert!(release_acceptable(10_000_000_000, 1_000_000_000, FEE_RESERVE, HONEST_RATE, 0).is_ok());
+        // A piconero over it, with no local estimate to raise the bar.
+        assert!(release_acceptable(10_000_000_000, 1_000_000_000, FEE_RESERVE + 1, HONEST_RATE, 0).is_err());
+        // A lying node's rate, caught even where the absolute fee would
+        // have squeaked under the reserve.
+        let why = release_acceptable(10_000_000_000, 1_000_000_000, 1_000, 80_000 * 51, 0)
+            .expect_err("a rate fifty times the network's was accepted");
+        assert!(why.contains("per byte"), "{why}");
+        // Fifty times the normal tier is exactly the line, and the fastest
+        // honest tier sits on it.
+        assert!(release_acceptable(10_000_000_000, 1_000_000_000, 1_000, 4_000_000, 0).is_ok());
+    }
+
+    /// An escrow of several notes costs more than the reserve to release,
+    /// honestly. This device's own estimate is what raises the bar — never
+    /// the proposal's word for what the fee should be.
+    #[test]
+    fn a_local_estimate_raises_the_bar_and_nothing_else_does() {
+        let big = FEE_RESERVE * 2;
+        assert!(release_acceptable(10_000_000_000, 1_000_000_000, big, HONEST_RATE, 0).is_err());
+        assert!(
+            release_acceptable(10_000_000_000, 1_000_000_000, big, HONEST_RATE, FEE_RESERVE).is_ok(),
+            "twice a local estimate of one reserve should admit two",
+        );
+        // And not three: doubling is the whole allowance.
+        assert!(
+            release_acceptable(10_000_000_000, 1_000_000_000, FEE_RESERVE * 3, HONEST_RATE, FEE_RESERVE)
+                .is_err(),
+        );
+    }
+
+    /// The refusals do not become a panic on the numbers a hostile proposer
+    /// would actually reach for.
+    #[test]
+    fn the_extremes_refuse_instead_of_overflowing() {
+        assert!(release_acceptable(u64::MAX, u64::MAX, u64::MAX, u64::MAX, u64::MAX).is_err());
+        assert!(release_acceptable(0, 0, 0, 0, 0).is_err());
+        // A local estimate so large it would wrap when doubled must not
+        // become a ceiling of nothing.
+        assert!(release_acceptable(1_000, 1_000, u64::MAX, HONEST_RATE, u64::MAX).is_err());
+    }
+}
+
+#[cfg(test)]
 mod destination_tests {
-    use super::read_destinations;
+    use super::{read_tx, TxDestination};
+
+    /// The outputs alone, which is what most of these fixtures are about.
+    fn read_destinations(serialized: &[u8]) -> Result<Vec<TxDestination>, super::ContactError> {
+        read_tx(serialized).map(|p| p.destinations)
+    }
 
     /// A whole `SignableTransaction` serialisation, minus the inputs — the
     /// walk insists on reaching the end, so the tail has to be there. Counts

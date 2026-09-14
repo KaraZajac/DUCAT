@@ -756,6 +756,15 @@ fun EscrowStep(
     action: String,
     onAction: () -> Unit,
     onClose: () -> Unit,
+    /**
+     * Where the transaction being consented to actually sends the money,
+     * read out of its own bytes.
+     *
+     * Empty for every step that is not a release — funding, waiting,
+     * building — because there is no transaction on the table yet. See
+     * [ParsedOutputs]; the reason it exists is M4.
+     */
+    outputs: List<org.ducatproject.ducat.Ceremony.Payout> = emptyList(),
     busy: Boolean = false,
     error: String? = null,
     /** True when the error is the chain saying "not yet". */
@@ -819,6 +828,11 @@ fun EscrowStep(
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(horizontal = 28.dp),
                     )
+                }
+                if (outputs.isNotEmpty()) {
+                    Column(Modifier.fillMaxWidth().padding(horizontal = 28.dp)) {
+                        ParsedOutputs(outputs)
+                    }
                 }
                 error?.let {
                     Spacer(Modifier.height(12.dp))

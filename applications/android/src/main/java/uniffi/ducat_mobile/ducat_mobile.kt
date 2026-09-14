@@ -1033,6 +1033,14 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1118,13 +1126,13 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_frost_complete(`ceremonyId`: RustBuffer.ByValue,`i`: Short,`cosigner`: Short,`payload`: RustBuffer.ByValue,`nodeUrl`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_frost_cosign(`ceremonyId`: RustBuffer.ByValue,`i`: Short,`proposer`: Short,`keys`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
-    ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_frost_destinations(`payload`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_frost_cosign(`ceremonyId`: RustBuffer.ByValue,`i`: Short,`proposer`: Short,`keys`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`fundedPxmr`: Long,`localEstimatePxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_frost_propose(`ceremonyId`: RustBuffer.ByValue,`i`: Short,`keys`: RustBuffer.ByValue,`dest`: RustBuffer.ByValue,`nodeUrl`: RustBuffer.ByValue,`fromHeight`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_frost_propose_split(`ceremonyId`: RustBuffer.ByValue,`i`: Short,`keys`: RustBuffer.ByValue,`payments`: RustBuffer.ByValue,`residualDest`: RustBuffer.ByValue,`nodeUrl`: RustBuffer.ByValue,`fromHeight`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_frost_view(`payload`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_generate_prekeys(`count`: Int,`validSecs`: Long,`startId`: Int,`reuseSignedSecret`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1182,9 +1190,15 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_block_time(`nodeUrl`: RustBuffer.ByValue,`height`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): Long
+    fun uniffi_ducat_mobile_fn_func_monero_burn_address(`stagenet`: Byte,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_monero_check_out_proof(`txHex`: RustBuffer.ByValue,`txidHex`: RustBuffer.ByValue,`address`: RustBuffer.ByValue,`stagenet`: Byte,`message`: RustBuffer.ByValue,`proof`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Long
     fun uniffi_ducat_mobile_fn_func_monero_default_nodes(`ownUrl`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_fee_estimate(`nodeUrl`: RustBuffer.ByValue,`inputs`: Int,`outputs`: Int,`priority`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_monero_make_out_proof(`txidHex`: RustBuffer.ByValue,`message`: RustBuffer.ByValue,`txKeysHex`: RustBuffer.ByValue,`address`: RustBuffer.ByValue,`stagenet`: Byte,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_output_meta(`blob`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1353,6 +1367,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_stand_watch(`cell`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Byte
     fun uniffi_ducat_mobile_fn_func_swarm_fetch(`shareKey`: RustBuffer.ByValue,`indexDigestHex`: RustBuffer.ByValue,`root`: RustBuffer.ByValue,`staySeeding`: Byte,uniffi_out_err: UniffiRustCallStatus, 
+    ): Long
+    fun uniffi_ducat_mobile_fn_func_swarm_fetch_capped(`shareKey`: RustBuffer.ByValue,`indexDigestHex`: RustBuffer.ByValue,`root`: RustBuffer.ByValue,`staySeeding`: Byte,`maxBytes`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): Long
     fun uniffi_ducat_mobile_fn_func_swarm_fetch_progress(`shareKey`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1554,11 +1570,11 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_frost_cosign(
     ): Short
-    fun uniffi_ducat_mobile_checksum_func_frost_destinations(
-    ): Short
     fun uniffi_ducat_mobile_checksum_func_frost_propose(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_frost_propose_split(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_frost_view(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_generate_prekeys(
     ): Short
@@ -1616,9 +1632,15 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_block_time(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_monero_burn_address(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_monero_check_out_proof(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_default_nodes(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_fee_estimate(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_monero_make_out_proof(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_output_meta(
     ): Short
@@ -1788,6 +1810,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_swarm_fetch(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_swarm_fetch_capped(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_swarm_fetch_progress(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_swarm_seed(
@@ -1926,16 +1950,16 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_frost_complete() != 49699.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_frost_cosign() != 7598.toShort()) {
-        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    }
-    if (lib.uniffi_ducat_mobile_checksum_func_frost_destinations() != 23991.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_frost_cosign() != 1159.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_frost_propose() != 21602.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_frost_propose_split() != 36015.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_frost_view() != 44788.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_generate_prekeys() != 12451.toShort()) {
@@ -2022,10 +2046,19 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_monero_block_time() != 31246.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_burn_address() != 47866.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_check_out_proof() != 10054.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_default_nodes() != 12244.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_fee_estimate() != 30573.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_make_out_proof() != 10617.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_output_meta() != 44178.toShort()) {
@@ -2278,6 +2311,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_swarm_fetch() != 31661.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_swarm_fetch_capped() != 41036.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_swarm_fetch_progress() != 59191.toShort()) {
@@ -3593,7 +3629,13 @@ data class FrostCosign (
      * Every output of the transaction this answer signs, so the caller can
      * check that what it put in front of somebody is what they agreed to.
      */
-    var `destinations`: List<TxDestination>
+    var `destinations`: List<TxDestination>, 
+    /**
+     * What this release spends, so the caller can restate the residual from
+     * the same three terms this signature was checked against.
+     */
+    var `inputsTotalPxmr`: kotlin.ULong, 
+    var `inputs`: kotlin.UInt
 ) {
     
     companion object
@@ -3608,19 +3650,25 @@ public object FfiConverterTypeFrostCosign: FfiConverterRustBuffer<FrostCosign> {
             FfiConverterByteArray.read(buf),
             FfiConverterULong.read(buf),
             FfiConverterSequenceTypeTxDestination.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterUInt.read(buf),
         )
     }
 
     override fun allocationSize(value: FrostCosign) = (
             FfiConverterByteArray.allocationSize(value.`payload`) +
             FfiConverterULong.allocationSize(value.`feePxmr`) +
-            FfiConverterSequenceTypeTxDestination.allocationSize(value.`destinations`)
+            FfiConverterSequenceTypeTxDestination.allocationSize(value.`destinations`) +
+            FfiConverterULong.allocationSize(value.`inputsTotalPxmr`) +
+            FfiConverterUInt.allocationSize(value.`inputs`)
     )
 
     override fun write(value: FrostCosign, buf: ByteBuffer) {
             FfiConverterByteArray.write(value.`payload`, buf)
             FfiConverterULong.write(value.`feePxmr`, buf)
             FfiConverterSequenceTypeTxDestination.write(value.`destinations`, buf)
+            FfiConverterULong.write(value.`inputsTotalPxmr`, buf)
+            FfiConverterUInt.write(value.`inputs`, buf)
     }
 }
 
@@ -6875,6 +6923,80 @@ public object FfiConverterTypeTxDetails: FfiConverterRustBuffer<TxDetails> {
 
 
 
+/**
+ * Everything a proposed release does, read without keys — so a client can
+ * put it in front of somebody before they agree to sign it.
+ *
+ * §17.5's rule applied to consent: every figure travelling *beside* a
+ * proposal is written by the party who benefits from being believed, so the
+ * screen has to be drawn from the payload instead. That means all four
+ * terms, not just the outputs: what is being spent, how many notes it came
+ * from, what the miners take, and where it goes.
+ */
+data class TxView (
+    /**
+     * Every output, in the transaction's own order.
+     */
+    var `destinations`: List<TxDestination>, 
+    /**
+     * What the inputs are worth together — the pot this divides. A release
+     * must sweep the escrow, so the co-signer holds this against what its
+     * own scan says the escrow holds.
+     */
+    var `inputsTotalPxmr`: kotlin.ULong, 
+    /**
+     * How many notes are being spent.
+     */
+    var `inputs`: kotlin.UInt, 
+    /**
+     * What the miners take. It comes out of the residual claimant's side,
+     * whoever that is, so it is part of their figure and not a footnote.
+     */
+    var `feePxmr`: kotlin.ULong, 
+    /**
+     * What the transaction says it is paying per byte of weight. Held
+     * against `fee_ceiling_per_byte` — a proposer choosing the fee is a
+     * proposer choosing how much of the residual claimant's share to burn.
+     */
+    var `feePerByte`: kotlin.ULong
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeTxView: FfiConverterRustBuffer<TxView> {
+    override fun read(buf: ByteBuffer): TxView {
+        return TxView(
+            FfiConverterSequenceTypeTxDestination.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: TxView) = (
+            FfiConverterSequenceTypeTxDestination.allocationSize(value.`destinations`) +
+            FfiConverterULong.allocationSize(value.`inputsTotalPxmr`) +
+            FfiConverterUInt.allocationSize(value.`inputs`) +
+            FfiConverterULong.allocationSize(value.`feePxmr`) +
+            FfiConverterULong.allocationSize(value.`feePerByte`)
+    )
+
+    override fun write(value: TxView, buf: ByteBuffer) {
+            FfiConverterSequenceTypeTxDestination.write(value.`destinations`, buf)
+            FfiConverterULong.write(value.`inputsTotalPxmr`, buf)
+            FfiConverterUInt.write(value.`inputs`, buf)
+            FfiConverterULong.write(value.`feePxmr`, buf)
+            FfiConverterULong.write(value.`feePerByte`, buf)
+    }
+}
+
+
+
 data class VerificationOutcome (
     var `permitted`: kotlin.Boolean, 
     var `required`: Verification, 
@@ -7579,9 +7701,130 @@ public object FfiConverterTypePassphraseStrength: FfiConverterRustBuffer<Passphr
 
 
 
+sealed class ProofException: kotlin.Exception() {
+    
+    class Malformed(
+        
+        val v1: kotlin.String
+        ) : ProofException() {
+        override val message
+            get() = "v1=${ v1 }"
+    }
+    
+    class BadProof(
+        ) : ProofException() {
+        override val message
+            get() = ""
+    }
+    
+    class Unsupported(
+        
+        val v1: kotlin.String
+        ) : ProofException() {
+        override val message
+            get() = "v1=${ v1 }"
+    }
+    
+
+    companion object ErrorHandler : UniffiRustCallStatusErrorHandler<ProofException> {
+        override fun lift(error_buf: RustBuffer.ByValue): ProofException = FfiConverterTypeProofError.lift(error_buf)
+    }
+
+    
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeProofError : FfiConverterRustBuffer<ProofException> {
+    override fun read(buf: ByteBuffer): ProofException {
+        
+
+        return when(buf.getInt()) {
+            1 -> ProofException.Malformed(
+                FfiConverterString.read(buf),
+                )
+            2 -> ProofException.BadProof()
+            3 -> ProofException.Unsupported(
+                FfiConverterString.read(buf),
+                )
+            else -> throw RuntimeException("invalid error enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: ProofException): ULong {
+        return when(value) {
+            is ProofException.Malformed -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+                + FfiConverterString.allocationSize(value.v1)
+            )
+            is ProofException.BadProof -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+            )
+            is ProofException.Unsupported -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+                + FfiConverterString.allocationSize(value.v1)
+            )
+        }
+    }
+
+    override fun write(value: ProofException, buf: ByteBuffer) {
+        when(value) {
+            is ProofException.Malformed -> {
+                buf.putInt(1)
+                FfiConverterString.write(value.v1, buf)
+                Unit
+            }
+            is ProofException.BadProof -> {
+                buf.putInt(2)
+                Unit
+            }
+            is ProofException.Unsupported -> {
+                buf.putInt(3)
+                FfiConverterString.write(value.v1, buf)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+
+}
+
+
+
+
+
 sealed class SwarmException: kotlin.Exception() {
     
     class Failed(
+        
+        val v1: kotlin.String
+        ) : SwarmException() {
+        override val message
+            get() = "v1=${ v1 }"
+    }
+    
+    /**
+     * The share's index declares more bytes than this fetch was allowed
+     * (research/security, N4/D2). Its own variant so a screen can say the
+     * two numbers to the person instead of showing them a failure.
+     */
+    class TooLarge(
+        
+        val v1: kotlin.String
+        ) : SwarmException() {
+        override val message
+            get() = "v1=${ v1 }"
+    }
+    
+    /**
+     * The transfer is alive but delivering nothing (N18). Distinct from
+     * "went quiet", which is silence: this one is a peer answering slowly
+     * enough to hold an unattended fetch open for ever.
+     */
+    class TooSlow(
         
         val v1: kotlin.String
         ) : SwarmException() {
@@ -7608,6 +7851,12 @@ public object FfiConverterTypeSwarmError : FfiConverterRustBuffer<SwarmException
             1 -> SwarmException.Failed(
                 FfiConverterString.read(buf),
                 )
+            2 -> SwarmException.TooLarge(
+                FfiConverterString.read(buf),
+                )
+            3 -> SwarmException.TooSlow(
+                FfiConverterString.read(buf),
+                )
             else -> throw RuntimeException("invalid error enum value, something is very wrong!!")
         }
     }
@@ -7619,6 +7868,16 @@ public object FfiConverterTypeSwarmError : FfiConverterRustBuffer<SwarmException
                 4UL
                 + FfiConverterString.allocationSize(value.v1)
             )
+            is SwarmException.TooLarge -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+                + FfiConverterString.allocationSize(value.v1)
+            )
+            is SwarmException.TooSlow -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+                + FfiConverterString.allocationSize(value.v1)
+            )
         }
     }
 
@@ -7626,6 +7885,16 @@ public object FfiConverterTypeSwarmError : FfiConverterRustBuffer<SwarmException
         when(value) {
             is SwarmException.Failed -> {
                 buf.putInt(1)
+                FfiConverterString.write(value.v1, buf)
+                Unit
+            }
+            is SwarmException.TooLarge -> {
+                buf.putInt(2)
+                FfiConverterString.write(value.v1, buf)
+                Unit
+            }
+            is SwarmException.TooSlow -> {
+                buf.putInt(3)
                 FfiConverterString.write(value.v1, buf)
                 Unit
             }
@@ -9773,30 +10042,19 @@ public object FfiConverterMapStringString: FfiConverterRustBuffer<Map<kotlin.Str
          * `proposer` names who round 0 came from: in a 2-of-3 the co-signer could
          * be either other participant, so "3 minus me" stopped being arithmetic
          * the moment the arbiter existed.
+         *
+         * `funded_pxmr` is what **this device's own scan** says the escrow holds,
+         * and `local_estimate_pxmr` what this device's own node says a release of
+         * this shape costs (zero for either means the device could not tell). Both
+         * are checked here rather than only on the screen, because the screen is a
+         * different program on every client and this is the last place before a
+         * signature exists. See `release_acceptable`.
          */
-    @Throws(ContactException::class) fun `frostCosign`(`ceremonyId`: kotlin.ByteArray, `i`: kotlin.UShort, `proposer`: kotlin.UShort, `keys`: kotlin.ByteArray, `payload`: kotlin.ByteArray): FrostCosign {
+    @Throws(ContactException::class) fun `frostCosign`(`ceremonyId`: kotlin.ByteArray, `i`: kotlin.UShort, `proposer`: kotlin.UShort, `keys`: kotlin.ByteArray, `payload`: kotlin.ByteArray, `fundedPxmr`: kotlin.ULong, `localEstimatePxmr`: kotlin.ULong): FrostCosign {
             return FfiConverterTypeFrostCosign.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_frost_cosign(
-        FfiConverterByteArray.lower(`ceremonyId`),FfiConverterUShort.lower(`i`),FfiConverterUShort.lower(`proposer`),FfiConverterByteArray.lower(`keys`),FfiConverterByteArray.lower(`payload`),_status)
-}
-    )
-    }
-    
-
-        /**
-         * What a proposed release actually pays, and to whom — without keys, so a
-         * client can show it to somebody before they agree to sign it.
-         *
-         * §17.5's rule applied to consent: the amount travelling beside a proposal
-         * is written by the party who benefits from being believed, so the screen
-         * has to be drawn from the payload instead.
-         */
-    @Throws(ContactException::class) fun `frostDestinations`(`payload`: kotlin.ByteArray): List<TxDestination> {
-            return FfiConverterSequenceTypeTxDestination.lift(
-    uniffiRustCallWithError(ContactException) { _status ->
-    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_frost_destinations(
-        FfiConverterByteArray.lower(`payload`),_status)
+        FfiConverterByteArray.lower(`ceremonyId`),FfiConverterUShort.lower(`i`),FfiConverterUShort.lower(`proposer`),FfiConverterByteArray.lower(`keys`),FfiConverterByteArray.lower(`payload`),FfiConverterULong.lower(`fundedPxmr`),FfiConverterULong.lower(`localEstimatePxmr`),_status)
 }
     )
     }
@@ -9836,6 +10094,19 @@ public object FfiConverterMapStringString: FfiConverterRustBuffer<Map<kotlin.Str
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_frost_propose_split(
         FfiConverterByteArray.lower(`ceremonyId`),FfiConverterUShort.lower(`i`),FfiConverterByteArray.lower(`keys`),FfiConverterSequenceTypeSplitOut.lower(`payments`),FfiConverterString.lower(`residualDest`),FfiConverterString.lower(`nodeUrl`),FfiConverterULong.lower(`fromHeight`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Read a proposal without signing it.
+         */
+    @Throws(ContactException::class) fun `frostView`(`payload`: kotlin.ByteArray): TxView {
+            return FfiConverterTypeTxView.lift(
+    uniffiRustCallWithError(ContactException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_frost_view(
+        FfiConverterByteArray.lower(`payload`),_status)
 }
     )
     }
@@ -10193,6 +10464,32 @@ public object FfiConverterMapStringString: FfiConverterRustBuffer<Map<kotlin.Str
     
 
         /**
+         * The burn address as a string, for the wallet screen and the spec.
+         */ fun `moneroBurnAddress`(`stagenet`: kotlin.Boolean): kotlin.String {
+            return FfiConverterString.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_burn_address(
+        FfiConverterBoolean.lower(`stagenet`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Check an out-proof against a transaction the caller fetched (its hex
+         * from the node), returning the amount paid to the address.
+         */
+    @Throws(ProofException::class) fun `moneroCheckOutProof`(`txHex`: kotlin.String, `txidHex`: kotlin.String, `address`: kotlin.String, `stagenet`: kotlin.Boolean, `message`: kotlin.ByteArray, `proof`: kotlin.String): kotlin.ULong {
+            return FfiConverterULong.lift(
+    uniffiRustCallWithError(ProofException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_check_out_proof(
+        FfiConverterString.lower(`txHex`),FfiConverterString.lower(`txidHex`),FfiConverterString.lower(`address`),FfiConverterBoolean.lower(`stagenet`),FfiConverterByteArray.lower(`message`),FfiConverterString.lower(`proof`),_status)
+}
+    )
+    }
+    
+
+        /**
          * The list, in the order it should be tried.
          *
          * Own first, then onion, then clearnet — the order in which they give away
@@ -10223,6 +10520,20 @@ public object FfiConverterMapStringString: FfiConverterRustBuffer<Map<kotlin.Str
     uniffiRustCallWithError(MoneroException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_fee_estimate(
         FfiConverterString.lower(`nodeUrl`),FfiConverterUInt.lower(`inputs`),FfiConverterUInt.lower(`outputs`),FfiConverterUInt.lower(`priority`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Make an out-proof from the bridge: keys as hex scalars (the send path
+         * hands them out), the address as a string, the message as bytes.
+         */
+    @Throws(ProofException::class) fun `moneroMakeOutProof`(`txidHex`: kotlin.String, `message`: kotlin.ByteArray, `txKeysHex`: List<kotlin.String>, `address`: kotlin.String, `stagenet`: kotlin.Boolean): kotlin.String {
+            return FfiConverterString.lift(
+    uniffiRustCallWithError(ProofException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_make_out_proof(
+        FfiConverterString.lower(`txidHex`),FfiConverterByteArray.lower(`message`),FfiConverterSequenceString.lower(`txKeysHex`),FfiConverterString.lower(`address`),FfiConverterBoolean.lower(`stagenet`),_status)
 }
     )
     }
@@ -11590,6 +11901,28 @@ public object FfiConverterMapStringString: FfiConverterRustBuffer<Map<kotlin.Str
     uniffiRustCallWithError(SwarmException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_swarm_fetch(
         FfiConverterString.lower(`shareKey`),FfiConverterString.lower(`indexDigestHex`),FfiConverterString.lower(`root`),FfiConverterBoolean.lower(`staySeeding`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * The same fetch, with a ceiling on how big the share may say it is.
+         *
+         * The index is the publisher's claim and the fetcher used to believe it:
+         * every file it named was created and sized before a byte was verified.
+         * `max_bytes` is what the caller will actually take — 64 MiB for a
+         * listing's pictures, 256 MiB for somebody's home — and a share that
+         * declares more is refused before anything is created, with
+         * [`SwarmError::TooLarge`] so the caller can say both numbers out loud.
+         *
+         * See [`caps`] for the table both clients use.
+         */
+    @Throws(SwarmException::class) fun `swarmFetchCapped`(`shareKey`: kotlin.String, `indexDigestHex`: kotlin.String, `root`: kotlin.String, `staySeeding`: kotlin.Boolean, `maxBytes`: kotlin.ULong): kotlin.ULong {
+            return FfiConverterULong.lift(
+    uniffiRustCallWithError(SwarmException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_swarm_fetch_capped(
+        FfiConverterString.lower(`shareKey`),FfiConverterString.lower(`indexDigestHex`),FfiConverterString.lower(`root`),FfiConverterBoolean.lower(`staySeeding`),FfiConverterULong.lower(`maxBytes`),_status)
 }
     )
     }
