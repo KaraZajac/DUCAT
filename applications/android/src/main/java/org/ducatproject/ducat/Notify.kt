@@ -183,7 +183,9 @@ object Notify {
             // missed-call notification — no second channel to build.
             14 -> context.getString(R.string.notify_call, from)
             15 -> context.getString(R.string.notify_call_answered, from)
-            else -> m.body
+            // §9.5's links: a burn proof, a rating, a record — said as
+            // what they are rather than as a page of hex on a lock screen.
+            else -> Trust.linkWords(context, m.body, outgoing = false) ?: m.body
         }
         // Which compartment this reached, said in the title once a second
         // persona exists: three shops on one phone cannot share an

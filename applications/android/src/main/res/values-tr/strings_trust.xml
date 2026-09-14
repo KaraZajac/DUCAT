@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5 in the thread: the badge in words, the burn proof and its check,
+     the gate over a payment, and §9.2's rated receipts — given, kept on
+     the record, and shown. Wording mirrors the desk's strings_desk.xml so
+     the two clients say the same thing about the same envelope. -->
+<resources>
+    <string name="trust_burned_since">%1$s yaktı, %2$s bloğundan beri</string>
+    <string name="trust_receipts_summary">%1$s makbuz, %2$s yakma yapmış kimliklerden</string>
+    <string name="trust_show_my_burn">Yakmamı göster</string>
+    <string name="trust_show_my_record">Sicilimi göster</string>
+    <string name="trust_rate_them">Değerlendir</string>
+    <string name="trust_burn_proof_msg">Bir yakma kanıtı</string>
+    <string name="trust_check_burn">Denetle</string>
+    <string name="trust_checking">Denetleniyor…</string>
+    <string name="trust_burn_checked">Denetlendi: %2$s bloğunda %1$s yakıldı</string>
+    <string name="trust_burn_check_failed">Denetlenemedi.</string>
+    <string name="trust_rating_sent">Onlara verdiğin değerlendirme</string>
+    <string name="trust_rating_received">Sana bir değerlendirme, siciline eklendi</string>
+    <string name="trust_record_sent">Sicilin, onlara gösterildi</string>
+    <string name="trust_record_received">Onların sicili: %1$s makbuz okundu</string>
+    <string name="trust_record_preview">Onların sicili, sana gösterildi</string>
+    <string name="trust_rating_for">Aranızda ödenen %1$s için</string>
+    <string name="trust_rating_note_hint">Bir cümle, isteğe bağlı</string>
+    <string name="trust_rating_note">Bu adla imzalanır, okunduğu her yerde onun yakmasıyla ağırlıklandırılır</string>
+    <string name="trust_send_rating">Değerlendirmeyi gönder</string>
+    <string name="trust_what_burn">yakma kanıtı</string>
+    <string name="trust_what_record">sicil</string>
+    <string name="trust_what_rating">değerlendirme</string>
+    <string name="trust_gate_over_burn">Yaktıklarından (%1$s) fazla. Ortadan kaybolurlarsa onları tutan bir şey yok.</string>
+    <string name="trust_gate_no_burn">Denetlediğin bir yakma yok. Ortadan kaybolurlarsa onları tutan bir şey yok.</string>
+    <string name="trust_err_rating">Bir değerlendirme bir ile beş yıldız arasıdır.</string>
+    <string name="trust_err_note_long">Bir not tek cümledir.</string>
+    <string name="trust_err_self">Kendi adını değerlendiremezsin.</string>
+    <string name="trust_err_unsigned">Değerlendirme imzalanamadı.</string>
+</resources>

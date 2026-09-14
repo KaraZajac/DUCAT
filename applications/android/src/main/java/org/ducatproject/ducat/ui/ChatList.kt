@@ -29,6 +29,7 @@ import org.ducatproject.ducat.Contact
 import org.ducatproject.ducat.ContactStore
 import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.R
+import org.ducatproject.ducat.Trust
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.draw.clip
 import org.ducatproject.ducat.StoredMessage
@@ -717,6 +718,9 @@ internal fun previewOf(context: Context, m: StoredMessage): String = when {
     m.kind == 13 -> context.getString(
         R.string.chatlist_preview_issue, isolate(m.pubPeriodId ?: ""),
     ).trim()
+    // §9.5's links preview as what they are, never as a line of hex.
+    m.kind == 0 && Trust.linkIn(m.body) != null ->
+        Trust.linkWords(context, m.body, m.outgoing) ?: isolate(m.body)
     m.attHash != null -> when {
         (m.attMime ?: "").startsWith("audio/") ->
             context.getString(R.string.chatlist_preview_voice)

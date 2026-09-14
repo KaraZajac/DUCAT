@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5 in the thread: the badge in words, the burn proof and its check,
+     the gate over a payment, and §9.2's rated receipts — given, kept on
+     the record, and shown. Wording mirrors the desk's strings_desk.xml so
+     the two clients say the same thing about the same envelope. -->
+<resources>
+    <string name="trust_burned_since">Burned %1$s, since block %2$s</string>
+    <string name="trust_receipts_summary">%1$s receipts, %2$s from burned personas</string>
+    <string name="trust_show_my_burn">Show my burn</string>
+    <string name="trust_show_my_record">Show my record</string>
+    <string name="trust_rate_them">Rate them</string>
+    <string name="trust_burn_proof_msg">A burn proof</string>
+    <string name="trust_check_burn">Check it</string>
+    <string name="trust_checking">Checking…</string>
+    <string name="trust_burn_checked">Checked: burned %1$s in block %2$s</string>
+    <string name="trust_burn_check_failed">Could not check it.</string>
+    <string name="trust_rating_sent">Your rating for them</string>
+    <string name="trust_rating_received">A rating for you, kept on your record</string>
+    <string name="trust_record_sent">Your record, shown to them</string>
+    <string name="trust_record_received">Their record: %1$s receipts read</string>
+    <string name="trust_record_preview">Their record, shown to you</string>
+    <string name="trust_rating_for">For the %1$s that settled between you</string>
+    <string name="trust_rating_note_hint">One sentence, optional</string>
+    <string name="trust_rating_note">Signed by this name, weighted by its burn wherever it is read</string>
+    <string name="trust_send_rating">Send the rating</string>
+    <string name="trust_what_burn">burn proof</string>
+    <string name="trust_what_record">record</string>
+    <string name="trust_what_rating">rating</string>
+    <string name="trust_gate_over_burn">More than they have burned (%1$s). If they vanish, nothing holds them.</string>
+    <string name="trust_gate_no_burn">They have burned nothing you have checked. If they vanish, nothing holds them.</string>
+    <string name="trust_err_rating">A rating is one to five stars.</string>
+    <string name="trust_err_note_long">A note is one sentence.</string>
+    <string name="trust_err_self">You cannot rate your own name.</string>
+    <string name="trust_err_unsigned">The rating could not be signed.</string>
+</resources>

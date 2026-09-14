@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5 in the thread: the badge in words, the burn proof and its check,
+     the gate over a payment, and §9.2's rated receipts — given, kept on
+     the record, and shown. Wording mirrors the desk's strings_desk.xml so
+     the two clients say the same thing about the same envelope. -->
+<resources>
+    <string name="trust_burned_since">Đã đốt %1$s, từ khối %2$s</string>
+    <string name="trust_receipts_summary">%1$s biên nhận, %2$s từ các danh tính đã đốt</string>
+    <string name="trust_show_my_burn">Cho xem lần đốt của tôi</string>
+    <string name="trust_show_my_record">Cho xem hồ sơ của tôi</string>
+    <string name="trust_rate_them">Đánh giá</string>
+    <string name="trust_burn_proof_msg">Một bằng chứng đốt</string>
+    <string name="trust_check_burn">Kiểm tra</string>
+    <string name="trust_checking">Đang kiểm tra…</string>
+    <string name="trust_burn_checked">Đã kiểm tra: đốt %1$s trong khối %2$s</string>
+    <string name="trust_burn_check_failed">Không thể kiểm tra.</string>
+    <string name="trust_rating_sent">Đánh giá của bạn dành cho họ</string>
+    <string name="trust_rating_received">Một đánh giá dành cho bạn, được lưu vào hồ sơ</string>
+    <string name="trust_record_sent">Hồ sơ của bạn, đã cho họ xem</string>
+    <string name="trust_record_received">Hồ sơ của họ: đã đọc %1$s biên nhận</string>
+    <string name="trust_record_preview">Hồ sơ của họ, đã cho bạn xem</string>
+    <string name="trust_rating_for">Cho khoản %1$s đã thanh toán giữa hai bạn</string>
+    <string name="trust_rating_note_hint">Một câu, tùy chọn</string>
+    <string name="trust_rating_note">Được ký bởi tên này, có trọng số theo lần đốt của nó ở bất cứ nơi nào được đọc</string>
+    <string name="trust_send_rating">Gửi đánh giá</string>
+    <string name="trust_what_burn">bằng chứng đốt</string>
+    <string name="trust_what_record">hồ sơ</string>
+    <string name="trust_what_rating">đánh giá</string>
+    <string name="trust_gate_over_burn">Nhiều hơn số họ đã đốt (%1$s). Nếu họ biến mất, không gì giữ được họ.</string>
+    <string name="trust_gate_no_burn">Họ chưa đốt gì mà bạn đã kiểm tra. Nếu họ biến mất, không gì giữ được họ.</string>
+    <string name="trust_err_rating">Đánh giá là từ một đến năm sao.</string>
+    <string name="trust_err_note_long">Ghi chú là một câu.</string>
+    <string name="trust_err_self">Bạn không thể đánh giá tên của chính mình.</string>
+    <string name="trust_err_unsigned">Không thể ký đánh giá.</string>
+</resources>

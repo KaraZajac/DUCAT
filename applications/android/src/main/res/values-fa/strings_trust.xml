@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5 in the thread: the badge in words, the burn proof and its check,
+     the gate over a payment, and §9.2's rated receipts — given, kept on
+     the record, and shown. Wording mirrors the desk's strings_desk.xml so
+     the two clients say the same thing about the same envelope. -->
+<resources>
+    <string name="trust_burned_since">%1$s سوزانده، از بلوک %2$s</string>
+    <string name="trust_receipts_summary">%1$s رسید، %2$s از شخصیت‌های سوزانده</string>
+    <string name="trust_show_my_burn">نمایش سوزاندن من</string>
+    <string name="trust_show_my_record">نمایش سابقهٔ من</string>
+    <string name="trust_rate_them">امتیاز دادن</string>
+    <string name="trust_burn_proof_msg">یک مدرک سوزاندن</string>
+    <string name="trust_check_burn">بررسی</string>
+    <string name="trust_checking">در حال بررسی…</string>
+    <string name="trust_burn_checked">بررسی شد: %1$s در بلوک %2$s سوزانده شده</string>
+    <string name="trust_burn_check_failed">بررسی ممکن نشد.</string>
+    <string name="trust_rating_sent">امتیاز شما به آن‌ها</string>
+    <string name="trust_rating_received">امتیازی برای شما، در سابقه‌تان نگه داشته شد</string>
+    <string name="trust_record_sent">سابقهٔ شما، به آن‌ها نشان داده شد</string>
+    <string name="trust_record_received">سابقهٔ آن‌ها: %1$s رسید خوانده شد</string>
+    <string name="trust_record_preview">سابقهٔ آن‌ها، به شما نشان داده شد</string>
+    <string name="trust_rating_for">برای %1$s که میان شما تسویه شد</string>
+    <string name="trust_rating_note_hint">یک جمله، اختیاری</string>
+    <string name="trust_rating_note">با امضای این نام و در هر جا که خوانده شود با سوزاندنش وزن‌دهی می‌شود</string>
+    <string name="trust_send_rating">ارسال امتیاز</string>
+    <string name="trust_what_burn">مدرک سوزاندن</string>
+    <string name="trust_what_record">سابقه</string>
+    <string name="trust_what_rating">امتیاز</string>
+    <string name="trust_gate_over_burn">بیش از آنچه سوزانده‌اند (%1$s). اگر ناپدید شوند چیزی آن‌ها را نگه نمی‌دارد.</string>
+    <string name="trust_gate_no_burn">چیزی که شما بررسی کرده باشید نسوزانده‌اند. اگر ناپدید شوند چیزی آن‌ها را نگه نمی‌دارد.</string>
+    <string name="trust_err_rating">امتیاز از یک تا پنج ستاره است.</string>
+    <string name="trust_err_note_long">یادداشت یک جمله است.</string>
+    <string name="trust_err_self">نمی‌توانید به نام خودتان امتیاز بدهید.</string>
+    <string name="trust_err_unsigned">امتیاز امضا نشد.</string>
+</resources>

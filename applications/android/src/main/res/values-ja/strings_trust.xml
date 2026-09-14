@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5 in the thread: the badge in words, the burn proof and its check,
+     the gate over a payment, and §9.2's rated receipts — given, kept on
+     the record, and shown. Wording mirrors the desk's strings_desk.xml so
+     the two clients say the same thing about the same envelope. -->
+<resources>
+    <string name="trust_burned_since">%1$s をバーン、ブロック %2$s から</string>
+    <string name="trust_receipts_summary">受領 %1$s 件、うちバーン済みのペルソナから %2$s 件</string>
+    <string name="trust_show_my_burn">バーンを見せる</string>
+    <string name="trust_show_my_record">実績を見せる</string>
+    <string name="trust_rate_them">評価する</string>
+    <string name="trust_burn_proof_msg">バーンの証明</string>
+    <string name="trust_check_burn">確認する</string>
+    <string name="trust_checking">確認中…</string>
+    <string name="trust_burn_checked">確認済み: ブロック %2$s で %1$s をバーン</string>
+    <string name="trust_burn_check_failed">確認できませんでした。</string>
+    <string name="trust_rating_sent">あなたからの評価</string>
+    <string name="trust_rating_received">あなたへの評価。実績に保存されました</string>
+    <string name="trust_record_sent">あなたの実績を提示しました</string>
+    <string name="trust_record_received">相手の実績: 受領 %1$s 件を確認</string>
+    <string name="trust_record_preview">相手の実績が提示されました</string>
+    <string name="trust_rating_for">二人の間で決済した %1$s について</string>
+    <string name="trust_rating_note_hint">一文、任意</string>
+    <string name="trust_rating_note">この名前が署名し、読まれる先ではそのバーンで重み付けされます</string>
+    <string name="trust_send_rating">評価を送る</string>
+    <string name="trust_what_burn">バーンの証明</string>
+    <string name="trust_what_record">実績</string>
+    <string name="trust_what_rating">評価</string>
+    <string name="trust_gate_over_burn">相手のバーン額 (%1$s) を超えています。相手が消えても、何も引き留めません。</string>
+    <string name="trust_gate_no_burn">あなたが確認したバーンはありません。相手が消えても、何も引き留めません。</string>
+    <string name="trust_err_rating">評価は星 1 つから 5 つまでです。</string>
+    <string name="trust_err_note_long">メモは一文です。</string>
+    <string name="trust_err_self">自分の名前は評価できません。</string>
+    <string name="trust_err_unsigned">評価に署名できませんでした。</string>
+</resources>

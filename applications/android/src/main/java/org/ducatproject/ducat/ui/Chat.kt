@@ -60,6 +60,11 @@ import androidx.compose.ui.text.font.FontWeight
 import org.ducatproject.ducat.formatXmr
 import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.TabStore
+import org.ducatproject.ducat.Trust
+import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.Verified
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
@@ -355,6 +360,13 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
     var sendProgress by remember { mutableStateOf<Pair<Int, Int>?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     val listState = rememberLazyListState()
+    // §9.5's badge and §9.2's record: what this phone verified about
+    // them, what their record says, and what this persona has to show.
+    // Declared before the effect that fills it, with the thread, on
+    // every store bump — verifying a burn and reading a record both bump
+    // it. The rating sheet's flag rides along.
+    var trust by remember { mutableStateOf(TrustView()) }
+    var rating by remember { mutableStateOf(false) }
 
     // §16.16: viewing the thread is what "read" means, so the watermark is
     // published from exactly here — never from the poller, which reads
@@ -379,6 +391,21 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
         }
         messages = thread
         fresh?.let { c = it }
+        // The persona this thread speaks as is the one whose burn and
+        // record are offered: a send goes out under the contact's owner
+        // (Mailbox.send), and the reader keeps a receipt only when its
+        // signer is the message's sender.
+        val who = fresh ?: c
+        trust = withContext(Dispatchers.IO) {
+            val mine = PersonaStore(context).ownerHexOf(who)
+            TrustView(
+                theirBurn = Trust.burnOf(context, hex),
+                theirRecord = Trust.recordOf(context, hex),
+                myBurnLink = Trust.myBurn(context, mine)?.envelopeHex
+                    ?.let { Trust.BURN_PREFIX + it },
+                myRecordLink = Trust.myRecordLink(context, mine),
+            )
+        }
         // Looking at the thread is what "seen" means; the dot and the badge
         // clear the moment the eyes arrive, not when a reply goes out.
         withContext(Dispatchers.IO) { store.setChatSeen(c) }
@@ -506,7 +533,24 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                 colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = MaterialTheme.colorScheme.background,
             ),
-                            title = { Text(c.displayName()) },
+                title = {
+                    Column {
+                        Text(c.displayName())
+                        // §9.5: worn as words under the name, and not at
+                        // all when nothing is known — a stranger's header
+                        // says nothing rather than "burned nothing".
+                        val badge = trustBadge(trust)
+                        if (badge != null) {
+                            Text(
+                                badge,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.chat_back))
@@ -896,6 +940,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                     }
 
                     androidx.compose.animation.AnimatedVisibility(visible = trayOpen) {
+                      Column {
                         Row(
                             Modifier.fillMaxWidth().padding(bottom = 12.dp),
                             horizontalArrangement = Arrangement.SpaceEvenly,
@@ -958,6 +1003,61 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                 }
                             }
                         }
+                        // §9.5's row: what this name can show, and §9.2's
+                        // rating once there is a settled deal to rate. Each
+                        // is an ordinary text send of a link the other
+                        // side's client draws as what it is (spec §9.5,
+                        // "How a proof travels"). Dark when there is nothing
+                        // to show — a burn still waiting for its block, a
+                        // record nobody has written to — the way the desk's
+                        // buttons are.
+                        Row(
+                            Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                        ) {
+                            val myBurn = trust.myBurnLink
+                            TrayItem(
+                                Icons.Filled.LocalFireDepartment,
+                                stringResource(R.string.trust_show_my_burn),
+                                enabled = !sending && myBurn != null && c.theirBundle != null,
+                            ) {
+                                trayOpen = false
+                                if (myBurn != null) {
+                                    val to = c
+                                    send(context.getString(R.string.trust_what_burn)) {
+                                        sendOne(context, to, myBurn)
+                                    }
+                                }
+                            }
+                            val myRecord = trust.myRecordLink
+                            TrayItem(
+                                Icons.Filled.Verified,
+                                stringResource(R.string.trust_show_my_record),
+                                enabled = !sending && myRecord != null && c.theirBundle != null,
+                            ) {
+                                trayOpen = false
+                                if (myRecord != null) {
+                                    val to = c
+                                    send(context.getString(R.string.trust_what_record)) {
+                                        sendOne(context, to, myRecord)
+                                    }
+                                }
+                            }
+                            // Only once something settled: a rating is a
+                            // receipt's afterword, and the amount it names
+                            // is the latest receipt's.
+                            if (messages.any { it.kind == 3 }) {
+                                TrayItem(
+                                    Icons.Filled.Star,
+                                    stringResource(R.string.trust_rate_them),
+                                    enabled = !sending && c.theirBundle != null,
+                                ) {
+                                    trayOpen = false
+                                    rating = true
+                                }
+                            }
+                        }
+                      }
                     }
 
                     if (contactPick) {
@@ -1247,6 +1347,8 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                             replyLine(messages, m, answers) == null,
                         onLongPress = { confirmDelete = m },
                         onPay = { billView = it },
+                        contactHex = c.personaHex,
+                        recordReceipts = trust.theirRecord.receipts,
                     )
                     val on = reactions[m.seq to m.timestamp]
                     val mine2 = on?.first
@@ -1283,6 +1385,29 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
         ReserveSheet(
             contact = c,
             onDone = { reserveOpen = false },
+        )
+    }
+
+    if (rating) {
+        // The latest receipt is the deal being rated; its amount rides
+        // inside the attestation so a reader can see what the stars are
+        // about. Signed under the persona this thread speaks as, and sent
+        // through the one door every send takes, so a refusal lands the
+        // way any other failed send does.
+        val settled = messages.lastOrNull { it.kind == 3 }
+        val amount = settled?.amountPxmr ?: 0L
+        RatingDialog(
+            amountPxmr = amount,
+            onDismiss = { rating = false },
+            onSend = { stars, note ->
+                rating = false
+                val to = c
+                send(context.getString(R.string.trust_what_rating)) {
+                    val mine = PersonaStore(context).ownerHexOf(to)
+                    val link = Trust.attest(context, mine, to.personaHex, amount, stars, note, null)
+                    sendOne(context, to, link)
+                }
+            },
         )
     }
 
@@ -1694,6 +1819,209 @@ private fun ChatSettingsDialog(
 }
 
 /**
+ * What the thread shows about trust, read together on each store bump:
+ * what this phone verified about them, what their record says, and the
+ * links this persona has to show — null when it has nothing to.
+ */
+private data class TrustView(
+    val theirBurn: Trust.VerifiedBurn? = null,
+    val theirRecord: Trust.RecordSummary = Trust.RecordSummary(),
+    val myBurnLink: String? = null,
+    val myRecordLink: String? = null,
+)
+
+/**
+ * §9.5's badge: "burned 0.01 XMR, since block N", and §9.2's record,
+ * "3 receipts, 1 from burned personas · 4.7 ★" — the star average only
+ * over signers whose burn this phone verified itself, which is the one
+ * number here that means anything. Null when nothing is known, so the
+ * header says nothing rather than "burned nothing".
+ */
+@Composable
+private fun trustBadge(t: TrustView): String? {
+    val context = LocalContext.current
+    val parts = ArrayList<String>(2)
+    val burn = t.theirBurn
+    if (burn != null) {
+        parts += stringResource(
+            R.string.trust_burned_since,
+            Amounts.show(context, burn.amountPxmr).primary,
+            Amounts.count(burn.height),
+        )
+    }
+    val record = t.theirRecord
+    if (record.receipts > 0) {
+        var line = stringResource(
+            R.string.trust_receipts_summary,
+            Amounts.count(record.receipts.toLong()),
+            Amounts.count(record.weighted.toLong()),
+        )
+        if (record.weighted > 0) line += " · " + "%.1f".format(record.ratingX10 / 10.0) + " ★"
+        parts += line
+    }
+    return if (parts.isEmpty()) null else parts.joinToString(" · ")
+}
+
+/**
+ * §9.5's three links as a bubble: a proof with the button that checks it, a
+ * rating, a record. Never the hex — long-press still copies the body
+ * verbatim, which is how a link gets passed on by hand.
+ *
+ * The check runs off the main thread on the application context and keeps
+ * its verdict in Trust, so leaving the thread mid-check costs the sentence
+ * under the button and never the verdict: the header reads it back on the
+ * next store bump.
+ */
+@Composable
+private fun TrustBubble(
+    link: Trust.Link,
+    outgoing: Boolean,
+    contactHex: String,
+    recordReceipts: Int,
+    fg: androidx.compose.ui.graphics.Color,
+) {
+    val context = LocalContext.current
+    when (link) {
+        is Trust.Link.Attest -> Text(
+            stringResource(
+                if (outgoing) R.string.trust_rating_sent else R.string.trust_rating_received,
+            ),
+            color = fg,
+        )
+        is Trust.Link.Record -> Text(
+            if (outgoing) stringResource(R.string.trust_record_sent)
+            else stringResource(
+                R.string.trust_record_received, Amounts.count(recordReceipts.toLong()),
+            ),
+            color = fg,
+        )
+        is Trust.Link.Burn -> Column {
+            Text(stringResource(R.string.trust_burn_proof_msg), color = fg)
+            if (!outgoing) {
+                val scope = rememberCoroutineScope()
+                var checking by remember { mutableStateOf(false) }
+                var verdict by remember { mutableStateOf<String?>(null) }
+                val app = context.applicationContext
+                Spacer(Modifier.height(6.dp))
+                Button(
+                    enabled = !checking,
+                    onClick = {
+                        checking = true
+                        verdict = null
+                        scope.launch {
+                            val r = withContext(Dispatchers.IO) {
+                                runCatching { Trust.verifyBurn(app, contactHex, link.hex) }
+                            }
+                            checking = false
+                            verdict = r.fold(
+                                onSuccess = { v ->
+                                    app.getString(
+                                        R.string.trust_burn_checked,
+                                        Amounts.show(app, v.amountPxmr).primary,
+                                        Amounts.count(v.height),
+                                    )
+                                },
+                                onFailure = { t ->
+                                    // verifyBurn's refusals are sentences in
+                                    // the reader's language, and the
+                                    // difference between them is the
+                                    // difference between a fraud and a wait.
+                                    // Anything else gets the plain one.
+                                    (t as? IllegalStateException)?.message?.ifBlank { null }
+                                        ?: app.getString(R.string.trust_burn_check_failed)
+                                },
+                            )
+                        }
+                    },
+                ) {
+                    Text(
+                        stringResource(
+                            if (checking) R.string.trust_checking else R.string.trust_check_burn,
+                        ),
+                    )
+                }
+                val said = verdict
+                if (said != null) {
+                    Spacer(Modifier.height(4.dp))
+                    Text(said, style = MaterialTheme.typography.bodySmall, color = fg.copy(alpha = 0.85f))
+                }
+            }
+        }
+    }
+}
+
+/**
+ * §9.2's rating: five stars, one optional sentence, and the amount it is
+ * about — the latest receipt in the thread, which is what makes it a
+ * receipt's afterword rather than a review from nowhere. The note is cut at
+ * the wire's own limit as it is typed, counted the way the envelope counts.
+ */
+@Composable
+private fun RatingDialog(
+    amountPxmr: Long,
+    onDismiss: () -> Unit,
+    onSend: (stars: Int, note: String?) -> Unit,
+) {
+    val context = LocalContext.current
+    var stars by rememberSaveable { mutableIntStateOf(Trust.RATING_MAX) }
+    var note by rememberSaveable { mutableStateOf("") }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.trust_rate_them)) },
+        text = {
+            Column {
+                if (amountPxmr > 0) {
+                    Text(
+                        stringResource(
+                            R.string.trust_rating_for,
+                            Amounts.show(context, amountPxmr).primary,
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Spacer(Modifier.height(10.dp))
+                }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                    for (n in Trust.RATING_MIN..Trust.RATING_MAX) {
+                        IconButton(onClick = { stars = n }) {
+                            Icon(
+                                if (n <= stars) Icons.Filled.Star else Icons.Filled.StarBorder,
+                                contentDescription = "$n ★",
+                                tint = if (n <= stars) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = note,
+                    onValueChange = {
+                        if (it.codePointCount(0, it.length) <= Trust.MAX_NOTE_CHARS) note = it
+                    },
+                    placeholder = { Text(stringResource(R.string.trust_rating_note_hint)) },
+                    supportingText = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(stringResource(R.string.trust_rating_note), Modifier.weight(1f))
+                            CharCounter(note.length, Trust.MAX_NOTE_CHARS)
+                        }
+                    },
+                    maxLines = 3,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onSend(stars, note.trim().ifBlank { null }) }) {
+                Text(stringResource(R.string.trust_send_rating))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.chat_cancel)) }
+        },
+    )
+}
+
+/**
  * How close together two messages have to be to read as one run.
  *
  * Five minutes. Long enough that somebody typing three lines in a row gets
@@ -1798,6 +2126,10 @@ private fun Bubble(
     tail: Boolean = true,
     onLongPress: () -> Unit,
     onPay: (StoredMessage) -> Unit,
+    /** §9.5: whose thread this is, for checking a burn proof they show. */
+    contactHex: String = "",
+    /** §9.2: how many of their receipts this phone has read, for the record bubble. */
+    recordReceipts: Int = 0,
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val align = if (m.outgoing) Alignment.End else Alignment.Start
@@ -2096,7 +2428,14 @@ private fun Bubble(
                     val cardUri = remember(m.body) {
                         Regex("ducat:\\S+").find(m.body)?.value
                     }
-                    if (cardUri != null) {
+                    // §9.5/§9.2: a proof, a rating or a record is drawn as
+                    // what it is, never as its hex — and before the card
+                    // branch, whose pattern would take any ducat: link for
+                    // a card and draw a QR of it.
+                    val trustLink = remember(m.body) { Trust.linkIn(m.body) }
+                    if (trustLink != null) {
+                        TrustBubble(trustLink, m.outgoing, contactHex, recordReceipts, fg)
+                    } else if (cardUri != null) {
                         Column {
                             Box(Modifier.clip(MaterialTheme.shapes.medium)) {
                                 QrBlock(cardUri)

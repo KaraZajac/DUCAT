@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5 in the thread: the badge in words, the burn proof and its check,
+     the gate over a payment, and §9.2's rated receipts — given, kept on
+     the record, and shown. Wording mirrors the desk's strings_desk.xml so
+     the two clients say the same thing about the same envelope. -->
+<resources>
+    <string name="trust_burned_since">Queimou %1$s, desde o bloco %2$s</string>
+    <string name="trust_receipts_summary">%1$s recibos, %2$s de personas com queima</string>
+    <string name="trust_show_my_burn">Mostrar a minha queima</string>
+    <string name="trust_show_my_record">Mostrar o meu registo</string>
+    <string name="trust_rate_them">Avaliar</string>
+    <string name="trust_burn_proof_msg">Uma prova de queima</string>
+    <string name="trust_check_burn">Verificar</string>
+    <string name="trust_checking">A verificar…</string>
+    <string name="trust_burn_checked">Verificado: queimou %1$s no bloco %2$s</string>
+    <string name="trust_burn_check_failed">Não foi possível verificar.</string>
+    <string name="trust_rating_sent">A sua avaliação para eles</string>
+    <string name="trust_rating_received">Uma avaliação para si, guardada no seu registo</string>
+    <string name="trust_record_sent">O seu registo, mostrado a eles</string>
+    <string name="trust_record_received">O registo deles: %1$s recibos lidos</string>
+    <string name="trust_record_preview">O registo deles, mostrado a si</string>
+    <string name="trust_rating_for">Pelos %1$s liquidados entre vocês</string>
+    <string name="trust_rating_note_hint">Uma frase, opcional</string>
+    <string name="trust_rating_note">Assinada por este nome, ponderada pela sua queima onde quer que seja lida</string>
+    <string name="trust_send_rating">Enviar a avaliação</string>
+    <string name="trust_what_burn">prova de queima</string>
+    <string name="trust_what_record">registo</string>
+    <string name="trust_what_rating">avaliação</string>
+    <string name="trust_gate_over_burn">Mais do que queimaram (%1$s). Se desaparecerem, nada os segura.</string>
+    <string name="trust_gate_no_burn">Não queimaram nada que tenha verificado. Se desaparecerem, nada os segura.</string>
+    <string name="trust_err_rating">Uma avaliação vai de uma a cinco estrelas.</string>
+    <string name="trust_err_note_long">Uma nota é uma frase.</string>
+    <string name="trust_err_self">Não pode avaliar o seu próprio nome.</string>
+    <string name="trust_err_unsigned">Não foi possível assinar a avaliação.</string>
+</resources>

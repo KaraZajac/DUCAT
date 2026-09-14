@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5 in the thread: the badge in words, the burn proof and its check,
+     the gate over a payment, and §9.2's rated receipts — given, kept on
+     the record, and shown. Wording mirrors the desk's strings_desk.xml so
+     the two clients say the same thing about the same envelope. -->
+<resources>
+    <string name="trust_burned_since">%1$s verbrannt, seit Block %2$s</string>
+    <string name="trust_receipts_summary">%1$s Belege, %2$s von Personas mit Burn</string>
+    <string name="trust_show_my_burn">Meinen Burn zeigen</string>
+    <string name="trust_show_my_record">Meine Belege zeigen</string>
+    <string name="trust_rate_them">Bewerten</string>
+    <string name="trust_burn_proof_msg">Ein Burn-Nachweis</string>
+    <string name="trust_check_burn">Prüfen</string>
+    <string name="trust_checking">Prüfe…</string>
+    <string name="trust_burn_checked">Geprüft: %1$s verbrannt in Block %2$s</string>
+    <string name="trust_burn_check_failed">Konnte nicht geprüft werden.</string>
+    <string name="trust_rating_sent">Deine Bewertung für sie</string>
+    <string name="trust_rating_received">Eine Bewertung für dich, in deinen Belegen aufbewahrt</string>
+    <string name="trust_record_sent">Deine Belege, ihnen gezeigt</string>
+    <string name="trust_record_received">Ihre Belege: %1$s gelesen</string>
+    <string name="trust_record_preview">Ihre Belege, dir gezeigt</string>
+    <string name="trust_rating_for">Für die %1$s, die zwischen euch abgewickelt wurden</string>
+    <string name="trust_rating_note_hint">Ein Satz, optional</string>
+    <string name="trust_rating_note">Von diesem Namen signiert und überall, wo es gelesen wird, nach seinem Burn gewichtet</string>
+    <string name="trust_send_rating">Bewertung senden</string>
+    <string name="trust_what_burn">Burn-Nachweis</string>
+    <string name="trust_what_record">Belege</string>
+    <string name="trust_what_rating">Bewertung</string>
+    <string name="trust_gate_over_burn">Mehr, als sie verbrannt haben (%1$s). Verschwinden sie, hält sie nichts.</string>
+    <string name="trust_gate_no_burn">Sie haben nichts verbrannt, das du geprüft hast. Verschwinden sie, hält sie nichts.</string>
+    <string name="trust_err_rating">Eine Bewertung hat einen bis fünf Sterne.</string>
+    <string name="trust_err_note_long">Eine Notiz ist ein Satz.</string>
+    <string name="trust_err_self">Den eigenen Namen kannst du nicht bewerten.</string>
+    <string name="trust_err_unsigned">Die Bewertung konnte nicht signiert werden.</string>
+</resources>

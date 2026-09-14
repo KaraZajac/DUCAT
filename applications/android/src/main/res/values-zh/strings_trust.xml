@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5 in the thread: the badge in words, the burn proof and its check,
+     the gate over a payment, and §9.2's rated receipts — given, kept on
+     the record, and shown. Wording mirrors the desk's strings_desk.xml so
+     the two clients say the same thing about the same envelope. -->
+<resources>
+    <string name="trust_burned_since">已销毁 %1$s，自区块 %2$s 起</string>
+    <string name="trust_receipts_summary">%1$s 份收据，其中 %2$s 份来自已销毁的身份</string>
+    <string name="trust_show_my_burn">出示我的销毁证明</string>
+    <string name="trust_show_my_record">出示我的记录</string>
+    <string name="trust_rate_them">评价对方</string>
+    <string name="trust_burn_proof_msg">一份销毁证明</string>
+    <string name="trust_check_burn">核验</string>
+    <string name="trust_checking">核验中…</string>
+    <string name="trust_burn_checked">已核验：在区块 %2$s 销毁了 %1$s</string>
+    <string name="trust_burn_check_failed">无法核验。</string>
+    <string name="trust_rating_sent">你给对方的评价</string>
+    <string name="trust_rating_received">给你的一份评价，已记入你的记录</string>
+    <string name="trust_record_sent">你的记录，已出示给对方</string>
+    <string name="trust_record_received">对方的记录：已读取 %1$s 份收据</string>
+    <string name="trust_record_preview">对方的记录，已出示给你</string>
+    <string name="trust_rating_for">针对你们之间结清的 %1$s</string>
+    <string name="trust_rating_note_hint">一句话，可选</string>
+    <string name="trust_rating_note">由此名字签名，在任何读取处都按其销毁额加权</string>
+    <string name="trust_send_rating">发送评价</string>
+    <string name="trust_what_burn">销毁证明</string>
+    <string name="trust_what_record">记录</string>
+    <string name="trust_what_rating">评价</string>
+    <string name="trust_gate_over_burn">超过对方销毁的金额（%1$s）。若对方消失，没有什么能约束他们。</string>
+    <string name="trust_gate_no_burn">对方没有任何你核验过的销毁。若对方消失，没有什么能约束他们。</string>
+    <string name="trust_err_rating">评价为一到五颗星。</string>
+    <string name="trust_err_note_long">备注只能是一句话。</string>
+    <string name="trust_err_self">你不能评价自己的名字。</string>
+    <string name="trust_err_unsigned">无法为评价签名。</string>
+</resources>

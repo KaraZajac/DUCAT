@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5 in the thread: the badge in words, the burn proof and its check,
+     the gate over a payment, and §9.2's rated receipts — given, kept on
+     the record, and shown. Wording mirrors the desk's strings_desk.xml so
+     the two clients say the same thing about the same envelope. -->
+<resources>
+    <string name="trust_burned_since">A brûlé %1$s, depuis le bloc %2$s</string>
+    <string name="trust_receipts_summary">%1$s reçus, dont %2$s de personas ayant brûlé</string>
+    <string name="trust_show_my_burn">Montrer ma preuve</string>
+    <string name="trust_show_my_record">Montrer mon dossier</string>
+    <string name="trust_rate_them">Noter</string>
+    <string name="trust_burn_proof_msg">Une preuve de brûlage</string>
+    <string name="trust_check_burn">Vérifier</string>
+    <string name="trust_checking">Vérification…</string>
+    <string name="trust_burn_checked">Vérifié : %1$s brûlés dans le bloc %2$s</string>
+    <string name="trust_burn_check_failed">Impossible de vérifier.</string>
+    <string name="trust_rating_sent">Votre note pour eux</string>
+    <string name="trust_rating_received">Une note pour vous, gardée dans votre dossier</string>
+    <string name="trust_record_sent">Votre dossier, montré</string>
+    <string name="trust_record_received">Leur dossier : %1$s reçus lus</string>
+    <string name="trust_record_preview">Leur dossier, montré à vous</string>
+    <string name="trust_rating_for">Pour les %1$s réglés entre vous</string>
+    <string name="trust_rating_note_hint">Une phrase, facultatif</string>
+    <string name="trust_rating_note">Signée par ce nom, pondérée par sa preuve partout où elle est lue</string>
+    <string name="trust_send_rating">Envoyer la note</string>
+    <string name="trust_what_burn">preuve de brûlage</string>
+    <string name="trust_what_record">dossier</string>
+    <string name="trust_what_rating">note</string>
+    <string name="trust_gate_over_burn">Plus que ce qu’ils ont brûlé (%1$s). S’ils disparaissent, rien ne les retient.</string>
+    <string name="trust_gate_no_burn">Ils n’ont rien brûlé que vous ayez vérifié. S’ils disparaissent, rien ne les retient.</string>
+    <string name="trust_err_rating">Une note va d’une à cinq étoiles.</string>
+    <string name="trust_err_note_long">Une remarque tient en une phrase.</string>
+    <string name="trust_err_self">Vous ne pouvez pas noter votre propre nom.</string>
+    <string name="trust_err_unsigned">La note n’a pas pu être signée.</string>
+</resources>

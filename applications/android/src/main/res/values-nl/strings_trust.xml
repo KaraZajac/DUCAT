@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5 in the thread: the badge in words, the burn proof and its check,
+     the gate over a payment, and §9.2's rated receipts — given, kept on
+     the record, and shown. Wording mirrors the desk's strings_desk.xml so
+     the two clients say the same thing about the same envelope. -->
+<resources>
+    <string name="trust_burned_since">%1$s verbrand, sinds blok %2$s</string>
+    <string name="trust_receipts_summary">%1$s ontvangsten, %2$s van persona’s met een verbranding</string>
+    <string name="trust_show_my_burn">Mijn verbranding tonen</string>
+    <string name="trust_show_my_record">Mijn staat tonen</string>
+    <string name="trust_rate_them">Beoordelen</string>
+    <string name="trust_burn_proof_msg">Een verbrandingsbewijs</string>
+    <string name="trust_check_burn">Controleren</string>
+    <string name="trust_checking">Controleren…</string>
+    <string name="trust_burn_checked">Gecontroleerd: %1$s verbrand in blok %2$s</string>
+    <string name="trust_burn_check_failed">Kon niet controleren.</string>
+    <string name="trust_rating_sent">Jouw beoordeling voor hen</string>
+    <string name="trust_rating_received">Een beoordeling voor jou, bewaard in je staat</string>
+    <string name="trust_record_sent">Jouw staat, aan hen getoond</string>
+    <string name="trust_record_received">Hun staat: %1$s ontvangsten gelezen</string>
+    <string name="trust_record_preview">Hun staat, aan jou getoond</string>
+    <string name="trust_rating_for">Voor de %1$s die tussen jullie is afgerekend</string>
+    <string name="trust_rating_note_hint">Eén zin, optioneel</string>
+    <string name="trust_rating_note">Ondertekend door deze naam, gewogen naar zijn verbranding waar het ook gelezen wordt</string>
+    <string name="trust_send_rating">Beoordeling versturen</string>
+    <string name="trust_what_burn">verbrandingsbewijs</string>
+    <string name="trust_what_record">staat</string>
+    <string name="trust_what_rating">beoordeling</string>
+    <string name="trust_gate_over_burn">Meer dan zij hebben verbrand (%1$s). Als ze verdwijnen, houdt niets hen tegen.</string>
+    <string name="trust_gate_no_burn">Ze hebben niets verbrand dat je hebt gecontroleerd. Als ze verdwijnen, houdt niets hen tegen.</string>
+    <string name="trust_err_rating">Een beoordeling is één tot vijf sterren.</string>
+    <string name="trust_err_note_long">Een notitie is één zin.</string>
+    <string name="trust_err_self">Je kunt je eigen naam niet beoordelen.</string>
+    <string name="trust_err_unsigned">De beoordeling kon niet worden ondertekend.</string>
+</resources>

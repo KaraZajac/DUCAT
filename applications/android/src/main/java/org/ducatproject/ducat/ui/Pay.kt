@@ -38,6 +38,7 @@ import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.*
 import org.ducatproject.ducat.PersonaStore
 import org.ducatproject.ducat.Amounts
+import org.ducatproject.ducat.Trust
 import org.ducatproject.ducat.DucatLog
 import org.ducatproject.ducat.R
 import org.ducatproject.ducat.saidWhy
@@ -788,6 +789,35 @@ private fun AmountStep(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+        }
+
+        // §9.5's gate, the normative one: when what is about to be paid
+        // exceeds what the counterparty's verified burn covers — or nothing
+        // of theirs was ever checked — say so, in the desk's sentence. Warn,
+        // never refuse: the money is the payer's, and so is the decision.
+        // A send to a contact only; an address has no burn to speak of, and
+        // a request risks nothing of ours. A bill is money about to be paid
+        // as much as a typed amount is, so it is gated too.
+        val theirBurn = remember(target, version) {
+            (target as? PayTarget.ToContact)?.let { Trust.burnOf(context, it.contact.personaHex) }
+        }
+        if (!asking && target is PayTarget.ToContact) pxmr?.let { amt ->
+            val covered = theirBurn?.amountPxmr ?: 0L
+            if (amt > covered) {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    if (theirBurn != null) {
+                        stringResource(
+                            R.string.trust_gate_over_burn,
+                            Amounts.show(context, covered).primary,
+                        )
+                    } else {
+                        stringResource(R.string.trust_gate_no_burn)
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
         }
 
         Spacer(Modifier.height(12.dp))

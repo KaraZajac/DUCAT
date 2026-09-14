@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5 in the thread: the badge in words, the burn proof and its check,
+     the gate over a payment, and §9.2's rated receipts — given, kept on
+     the record, and shown. Wording mirrors the desk's strings_desk.xml so
+     the two clients say the same thing about the same envelope. -->
+<resources>
+    <string name="trust_burned_since">Сожжено %1$s, с блока %2$s</string>
+    <string name="trust_receipts_summary">%1$s квитанций, %2$s от персон со сжиганием</string>
+    <string name="trust_show_my_burn">Показать моё сжигание</string>
+    <string name="trust_show_my_record">Показать мою историю</string>
+    <string name="trust_rate_them">Оценить</string>
+    <string name="trust_burn_proof_msg">Доказательство сжигания</string>
+    <string name="trust_check_burn">Проверить</string>
+    <string name="trust_checking">Проверка…</string>
+    <string name="trust_burn_checked">Проверено: сожжено %1$s в блоке %2$s</string>
+    <string name="trust_burn_check_failed">Не удалось проверить.</string>
+    <string name="trust_rating_sent">Ваша оценка для них</string>
+    <string name="trust_rating_received">Оценка для вас, сохранена в вашей истории</string>
+    <string name="trust_record_sent">Ваша история, показана им</string>
+    <string name="trust_record_received">Их история: прочитано %1$s квитанций</string>
+    <string name="trust_record_preview">Их история, показана вам</string>
+    <string name="trust_rating_for">За %1$s, рассчитанные между вами</string>
+    <string name="trust_rating_note_hint">Одно предложение, необязательно</string>
+    <string name="trust_rating_note">Подписана этим именем и взвешивается его сжиганием везде, где читается</string>
+    <string name="trust_send_rating">Отправить оценку</string>
+    <string name="trust_what_burn">доказательство сжигания</string>
+    <string name="trust_what_record">историю</string>
+    <string name="trust_what_rating">оценку</string>
+    <string name="trust_gate_over_burn">Больше, чем они сожгли (%1$s). Если они исчезнут, их ничто не удержит.</string>
+    <string name="trust_gate_no_burn">Они не сожгли ничего, что вы проверили. Если они исчезнут, их ничто не удержит.</string>
+    <string name="trust_err_rating">Оценка — от одной до пяти звёзд.</string>
+    <string name="trust_err_note_long">Заметка — одно предложение.</string>
+    <string name="trust_err_self">Нельзя оценить собственное имя.</string>
+    <string name="trust_err_unsigned">Не удалось подписать оценку.</string>
+</resources>

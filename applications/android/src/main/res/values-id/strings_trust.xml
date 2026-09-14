@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5 in the thread: the badge in words, the burn proof and its check,
+     the gate over a payment, and §9.2's rated receipts — given, kept on
+     the record, and shown. Wording mirrors the desk's strings_desk.xml so
+     the two clients say the same thing about the same envelope. -->
+<resources>
+    <string name="trust_burned_since">Membakar %1$s, sejak blok %2$s</string>
+    <string name="trust_receipts_summary">%1$s tanda terima, %2$s dari persona yang membakar</string>
+    <string name="trust_show_my_burn">Tunjukkan bakaran saya</string>
+    <string name="trust_show_my_record">Tunjukkan catatan saya</string>
+    <string name="trust_rate_them">Beri nilai</string>
+    <string name="trust_burn_proof_msg">Sebuah bukti bakaran</string>
+    <string name="trust_check_burn">Periksa</string>
+    <string name="trust_checking">Memeriksa…</string>
+    <string name="trust_burn_checked">Terverifikasi: membakar %1$s di blok %2$s</string>
+    <string name="trust_burn_check_failed">Tidak bisa diperiksa.</string>
+    <string name="trust_rating_sent">Nilai Anda untuk mereka</string>
+    <string name="trust_rating_received">Sebuah nilai untuk Anda, disimpan di catatan Anda</string>
+    <string name="trust_record_sent">Catatan Anda, ditunjukkan kepada mereka</string>
+    <string name="trust_record_received">Catatan mereka: %1$s tanda terima dibaca</string>
+    <string name="trust_record_preview">Catatan mereka, ditunjukkan kepada Anda</string>
+    <string name="trust_rating_for">Untuk %1$s yang diselesaikan di antara kalian</string>
+    <string name="trust_rating_note_hint">Satu kalimat, opsional</string>
+    <string name="trust_rating_note">Ditandatangani nama ini, dibobot oleh bakarannya di mana pun dibaca</string>
+    <string name="trust_send_rating">Kirim nilai</string>
+    <string name="trust_what_burn">bukti bakaran</string>
+    <string name="trust_what_record">catatan</string>
+    <string name="trust_what_rating">nilai</string>
+    <string name="trust_gate_over_burn">Lebih dari yang mereka bakar (%1$s). Jika mereka menghilang, tidak ada yang menahan mereka.</string>
+    <string name="trust_gate_no_burn">Mereka belum membakar apa pun yang Anda periksa. Jika mereka menghilang, tidak ada yang menahan mereka.</string>
+    <string name="trust_err_rating">Nilai adalah satu sampai lima bintang.</string>
+    <string name="trust_err_note_long">Catatan adalah satu kalimat.</string>
+    <string name="trust_err_self">Anda tidak bisa menilai nama Anda sendiri.</string>
+    <string name="trust_err_unsigned">Nilai tidak bisa ditandatangani.</string>
+</resources>

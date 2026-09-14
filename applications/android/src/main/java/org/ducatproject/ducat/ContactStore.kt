@@ -677,6 +677,26 @@ class ContactStore(context: Context) {
         m: StoredMessage,
         newInSeq: Long,
         newPrevLink: ByteArray?,
+    ) {
+        appendAndAdvanceLocked(personaHex, m, newInSeq, newPrevLink)
+        // §9.2/§9.5: a receipt about us, or a record shown to us, rides an
+        // ordinary text body. Read once the row is durable and this lock is
+        // released — Trust keeps its own lock and bumps this store — and
+        // never allowed to throw: the message is already taken, and a
+        // receipt that will not open is the sender's problem, not the
+        // thread's. This is the one funnel every inbound row passes
+        // through, the phone's `append_and_advance` (app/src/contacts.rs),
+        // so a new screen cannot forget it.
+        if (!m.outgoing && m.kind == 0) {
+            runCatching { Trust.ingestTrustLinks(appContext, personaHex, m.body) }
+        }
+    }
+
+    private fun appendAndAdvanceLocked(
+        personaHex: String,
+        m: StoredMessage,
+        newInSeq: Long,
+        newPrevLink: ByteArray?,
     ) { synchronized(lock) {
         val e = prefs.edit()
         val arr = JSONArray()
@@ -1164,6 +1184,13 @@ class ContactStore(context: Context) {
         // to prevent. Carried whole, like the publisher's masters above.
         securePrefs(appContext, "ducat_sites").getString("sites", null)
             ?.let { o.put("sites_raw", it) }
+        // §9.5/§9.2's five shelves: this phone's burns and their proofs, the
+        // strangers' burns it verified, and the receipts given, received and
+        // read. A burn is money already destroyed, and its envelope is the
+        // only thing that says so — a restored phone without it has paid for
+        // nothing. Raw JSON under the names both clients write, so a bundle
+        // exported on either restores on the other.
+        Trust.backupEntries(appContext).forEach { (name, json) -> o.put(name, json) }
         return o.toString().toByteArray(Charsets.UTF_8)
     }
 
@@ -1266,6 +1293,13 @@ class ContactStore(context: Context) {
                         enq.keys().forEach { k -> e2.putString(k, enq.getString(k)) }
                         e2.apply()
                     }
+                }
+                // The trust shelves, each a whole-list replace under Trust's
+                // own lock and through its secure prefs; an entry the bundle
+                // lacks leaves that shelf as it is.
+                Trust.BACKUP_KEYS.forEach { name ->
+                    o.optString(name).takeIf { it.isNotEmpty() }
+                        ?.let { Trust.restoreEntry(appContext, name, it) }
                 }
                 appStateKeys.forEach { k ->
                     if (o.has(k)) when (val v = o.get(k)) {

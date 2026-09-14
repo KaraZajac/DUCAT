@@ -533,4 +533,460 @@ object Trust {
             Refusal.PurposeTooLong -> R.string.burn_err_purpose_long
         },
     )
+
+    // ----- §9.2: rated receipts --------------------------------------------------
+    //
+    // A receipt is an `ATTESTATION` envelope: who spoke, who was spoken
+    // about, how much settled between them, one to five stars, a time, and
+    // at most one sentence. The bridge signs and opens it
+    // (`mobile/src/attest.rs`) so that both clients seal the same bytes under
+    // the same refusals; what a reader then concludes from one is this
+    // object's arithmetic, and it is the desk's (`app/src/trust.rs`) rule
+    // for rule.
+    //
+    // Three shelves. "given" is what this phone said about others; "received"
+    // is what others said about this phone's personas, kept only when the
+    // envelope was signed by the persona that sent it; "about" is what
+    // strangers showed this phone about themselves. Only the third is ever
+    // summed, and only here — a record is envelopes, never somebody else's
+    // score, and every reader weighs them again (§9.5, "How a receipt
+    // travels").
+
+    private const val GIVEN = "given"
+    private const val RECEIVED = "received"
+    private const val ABOUT = "about"
+
+    /** The three link forms, exact and shared by both clients (§9.5). */
+    const val BURN_PREFIX = "ducat:burn/"
+    const val ATTEST_PREFIX = "ducat:attest/"
+    const val RECORD_PREFIX = "ducat:record/"
+
+    /** A record is at most this many envelopes; a reader stops there. */
+    const val MAX_RECORD_ENVELOPES = 64
+
+    /**
+     * A record travels as one text message, and the wire caps a text at
+     * `MAX_MESSAGE_CHARS` (core/src/contact.rs). Restated here so the link
+     * is packed to fit before the bridge refuses it — sixty-four envelopes
+     * are tens of kilobytes, and "sixty-four at most" is the reader's
+     * ceiling, not a promise that they all fit one message.
+     */
+    const val MAX_LINK_CHARS = 2000
+
+    const val RATING_MIN = 1
+    const val RATING_MAX = 5
+
+    /** One sentence — `MAX_ATTESTATION_NOTE_CHARS` in core/src/trust.rs. */
+    const val MAX_NOTE_CHARS = 140
+
+    /** §9.2 — a rated receipt, given, received, or read about someone. */
+    data class AttestationRecord(
+        /** Who spoke. */
+        val signerHex: String,
+        /** Who was spoken about. */
+        val subjectHex: String,
+        val amountPxmr: Long,
+        val rating: Int,
+        val ts: Long,
+        val txidHex: String?,
+        val note: String?,
+        /** The signed envelope, hex, so it can be shown again. */
+        val envelopeHex: String,
+    )
+
+    /**
+     * What this phone can say about a persona's record: how many receipts
+     * it has read, and how many distinct signers among them have a burn it
+     * verified itself. One voice per signer — a burned persona that rates
+     * the same subject ten times counts once, by its latest — so a record
+     * cannot be padded by one friend with one burn.
+     */
+    data class RecordSummary(
+        val receipts: Int = 0,
+        val weighted: Int = 0,
+        /** Mean rating over the weighted signers' latest receipts, times ten (47 = 4.7); zero when none. */
+        val ratingX10: Int = 0,
+    )
+
+    /** A trust object riding a text body, recognised by its prefix. */
+    sealed class Link {
+        data class Burn(val hex: String) : Link()
+        data class Attest(val hex: String) : Link()
+        data class Record(val dotted: String) : Link()
+    }
+
+    /**
+     * The link a body carries, or null.
+     *
+     * The trimmed body must be the link and nothing else — the prefix at
+     * the start, the payload to the end, no whitespace inside. That is the
+     * rule the desk ingests by (`ingest_trust_links` strips the prefix from
+     * the trimmed body and reads the rest as hex), kept here for drawing as
+     * well, so the two clients never disagree about which messages were
+     * receipts.
+     */
+    fun linkIn(body: String): Link? {
+        val b = body.trim()
+        val prefix = listOf(BURN_PREFIX, ATTEST_PREFIX, RECORD_PREFIX).firstOrNull { b.startsWith(it) }
+            ?: return null
+        val payload = b.substring(prefix.length)
+        if (payload.isEmpty() || payload.any { it.isWhitespace() }) return null
+        return when (prefix) {
+            BURN_PREFIX -> if (payload.all(::isHexChar)) Link.Burn(payload) else null
+            ATTEST_PREFIX -> if (payload.all(::isHexChar)) Link.Attest(payload) else null
+            else -> if (payload.all { isHexChar(it) || it == '.' }) Link.Record(payload) else null
+        }
+    }
+
+    private fun isHexChar(c: Char) = c in '0'..'9' || c in 'a'..'f' || c in 'A'..'F'
+
+    /** The envelopes of a record, in the order shown, empties skipped, at most 64. */
+    internal fun splitRecord(dotted: String): List<String> =
+        dotted.split('.').filter { it.isNotEmpty() }.take(MAX_RECORD_ENVELOPES)
+
+    /**
+     * §9.2's arithmetic over what was read about one subject, pure so it can
+     * be tested without a store. `receipts` is everything read; `weighted`
+     * is the distinct signers among them that [burned] answers for; the
+     * rating is the mean over those signers' *latest* receipts, times ten,
+     * in integers — the desk's sum, the desk's division.
+     */
+    internal fun summarize(
+        about: List<AttestationRecord>,
+        burned: (signerHex: String) -> Boolean,
+    ): RecordSummary {
+        val latest = LinkedHashMap<String, AttestationRecord>()
+        for (r in about) {
+            val have = latest[r.signerHex]
+            if (have == null || r.ts > have.ts) latest[r.signerHex] = r
+        }
+        var weighted = 0
+        var sum = 0
+        for ((signer, r) in latest) {
+            if (!burned(signer)) continue
+            weighted += 1
+            sum += r.rating * 10
+        }
+        return RecordSummary(
+            receipts = about.size,
+            weighted = weighted,
+            ratingX10 = if (weighted > 0) sum / weighted else 0,
+        )
+    }
+
+    /**
+     * The record a persona shows, packed to travel: the envelopes others
+     * gave it, newest first, as many as fit one message and never more than
+     * sixty-four. Null when there are none — nothing on the record yet.
+     *
+     * Newest first because a reader rates each signer by its latest
+     * receipt, so when not everything fits, the envelopes that would change
+     * the answer are the ones that go.
+     */
+    internal fun recordLinkOf(received: List<AttestationRecord>, personaHex: String): String? {
+        val mine = received
+            .filter { it.subjectHex.equals(personaHex.trim(), ignoreCase = true) }
+            .sortedByDescending { it.ts }
+            .map { it.envelopeHex }
+        if (mine.isEmpty()) return null
+        val out = StringBuilder(RECORD_PREFIX)
+        var n = 0
+        for (env in mine) {
+            if (n >= MAX_RECORD_ENVELOPES) break
+            val add = (if (n == 0) 0 else 1) + env.length
+            if (out.length + add > MAX_LINK_CHARS) break
+            if (n > 0) out.append('.')
+            out.append(env)
+            n += 1
+        }
+        return if (n == 0) null else out.toString()
+    }
+
+    /**
+     * The words a link body reads as in a list or a notification, or null
+     * for an ordinary body. The bubble draws more (a button, a count); this
+     * is the one line, so that a receipt never previews as a page of hex.
+     */
+    fun linkWords(context: Context, body: String, outgoing: Boolean): String? = when (linkIn(body)) {
+        is Link.Burn -> context.getString(R.string.trust_burn_proof_msg)
+        is Link.Attest -> context.getString(
+            if (outgoing) R.string.trust_rating_sent else R.string.trust_rating_received,
+        )
+        is Link.Record -> context.getString(
+            if (outgoing) R.string.trust_record_sent else R.string.trust_record_preview,
+        )
+        null -> null
+    }
+
+    // ----- the shelves -----------------------------------------------------------
+    //
+    // JSON names are the ones both clients write — signer, subject, amount,
+    // rating, ts, txid, note, envelope — so a bundle exported on either
+    // restores on the other. txid and note are omitted rather than null.
+
+    private fun readAttestations(context: Context, key: String): List<AttestationRecord> = runCatching {
+        val arr = JSONArray(prefs(context).getString(key, "[]"))
+        (0 until arr.length()).map {
+            val o = arr.getJSONObject(it)
+            AttestationRecord(
+                signerHex = o.getString("signer"),
+                subjectHex = o.getString("subject"),
+                amountPxmr = o.getLong("amount"),
+                rating = o.getInt("rating"),
+                ts = o.getLong("ts"),
+                txidHex = o.optString("txid", "").ifBlank { null },
+                note = o.optString("note", "").ifBlank { null },
+                envelopeHex = o.getString("envelope"),
+            )
+        }
+    }.onFailure { DucatLog.w(TAG, "the $key receipts did not parse: ${it.message}") }
+        .getOrDefault(emptyList())
+
+    private fun putAttestations(context: Context, key: String, list: List<AttestationRecord>) {
+        val arr = JSONArray()
+        list.forEach { r ->
+            arr.put(
+                JSONObject().apply {
+                    put("signer", r.signerHex)
+                    put("subject", r.subjectHex)
+                    put("amount", r.amountPxmr)
+                    put("rating", r.rating)
+                    put("ts", r.ts)
+                    r.txidHex?.let { put("txid", it) }
+                    r.note?.let { put("note", it) }
+                    put("envelope", r.envelopeHex)
+                },
+            )
+        }
+        prefs(context).edit().putString(key, arr.toString()).apply()
+        ContactStore.bump()
+    }
+
+    /** What others said about this phone's personas, each signed by its sender. */
+    fun received(context: Context): List<AttestationRecord> = readAttestations(context, RECEIVED)
+
+    /** What strangers showed this phone about themselves. */
+    fun about(context: Context): List<AttestationRecord> = readAttestations(context, ABOUT)
+
+    private fun recordFrom(v: uniffi.ducat_mobile.AttestationView, envelopeHex: String) = AttestationRecord(
+        signerHex = v.signerHex.lowercase(),
+        subjectHex = v.subjectHex.lowercase(),
+        amountPxmr = v.amountPxmr.toLong(),
+        rating = v.rating.toInt(),
+        ts = v.ts.toLong(),
+        txidHex = v.txidHex?.lowercase(),
+        note = v.note,
+        envelopeHex = envelopeHex.trim().lowercase(),
+    )
+
+    // ----- rating somebody -------------------------------------------------------
+
+    /**
+     * Rate [subjectHex] after a settled deal: sign an `ATTESTATION` under
+     * [personaHex], keep it on the "given" shelf, and return it as the
+     * `ducat:attest/` link the screen sends as an ordinary text.
+     *
+     * [personaHex] is the persona the thread speaks as — `ownerHexOf` the
+     * contact, which is the worn persona on a phone with one — because the
+     * reader keeps a receipt only when its signer is the message's sender.
+     * Signed under any other name it would arrive, be opened, and be
+     * dropped without a word.
+     *
+     * The refusals a stranger would make are made here first, in the
+     * reader's language; the bridge makes them again before it seals.
+     */
+    fun attest(
+        context: Context,
+        personaHex: String,
+        subjectHex: String,
+        amountPxmr: Long,
+        rating: Int,
+        note: String?,
+        txidHex: String?,
+    ): String {
+        if (rating !in RATING_MIN..RATING_MAX) {
+            throw IllegalStateException(context.getString(R.string.trust_err_rating))
+        }
+        val sentence = note?.trim()?.ifBlank { null }
+        if (sentence != null && sentence.codePointCount(0, sentence.length) > MAX_NOTE_CHARS) {
+            throw IllegalStateException(context.getString(R.string.trust_err_note_long))
+        }
+        val subject = subjectHex.trim().lowercase()
+        if (subject == personaHex.trim().lowercase()) {
+            throw IllegalStateException(context.getString(R.string.trust_err_self))
+        }
+        val secret = PersonaStore(context).secretFor(personaHex)
+            ?: throw IllegalStateException(context.getString(R.string.burn_err_no_persona))
+        val envelope = runCatching {
+            uniffi.ducat_mobile.attestationSign(
+                uniffi.ducat_mobile.AttestationIn(
+                    personaSecret = secret,
+                    subjectHex = subject,
+                    amountPxmr = amountPxmr.coerceAtLeast(0).toULong(),
+                    rating = rating.toUByte(),
+                    ts = (System.currentTimeMillis() / 1000).toULong(),
+                    txidHex = txidHex?.trim()?.ifBlank { null },
+                    note = sentence,
+                ),
+            )
+        }.onFailure { DucatLog.w(TAG, "attestation: ${it.message}") }
+            .getOrElse { throw IllegalStateException(context.getString(R.string.trust_err_unsigned)) }
+        // Read back through the wire's own reader, so the record on the
+        // shelf is what the envelope says and not what this side meant.
+        val opened = runCatching { uniffi.ducat_mobile.attestationOpen(envelope) }
+            .getOrElse { throw IllegalStateException(context.getString(R.string.trust_err_unsigned)) }
+        val envelopeHex = hex(envelope)
+        val rec = recordFrom(opened, envelopeHex)
+        synchronized(lock) { putAttestations(context, GIVEN, readAttestations(context, GIVEN) + rec) }
+        DucatLog.i(
+            TAG,
+            "rated ${subject.take(8)}…: $rating star(s) on ${formatXmr(amountPxmr)} XMR",
+        )
+        return ATTEST_PREFIX + envelopeHex
+    }
+
+    // ----- what arrives ----------------------------------------------------------
+
+    /**
+     * A receipt about one of this phone's personas, from the thread. Kept
+     * only if the envelope opens under the persona that sent it — a receipt
+     * handed on by anyone but its signer is discarded — and only if it is
+     * about one of our own names. Deduped on (signer, ts): the same envelope
+     * twice is one receipt. Null when dropped, with the reason in the log;
+     * nothing on a screen waits for this.
+     */
+    fun receiveAttestation(context: Context, fromHex: String, envelopeHex: String): AttestationRecord? {
+        val bytes = unhex(envelopeHex) ?: return dropped(fromHex, "not hex")
+        val v = runCatching { uniffi.ducat_mobile.attestationOpen(bytes) }
+            .getOrElse { return dropped(fromHex, "does not open: ${it.message}") }
+        if (!v.signerHex.equals(fromHex.trim(), ignoreCase = true)) {
+            return dropped(fromHex, "not signed by the sender")
+        }
+        val mine = PersonaStore(context).allHexes().map { it.lowercase() }
+        if (v.subjectHex.lowercase() !in mine) return dropped(fromHex, "not about us")
+        val rec = recordFrom(v, envelopeHex)
+        synchronized(lock) {
+            putAttestations(
+                context, RECEIVED,
+                readAttestations(context, RECEIVED)
+                    .filterNot { it.signerHex == rec.signerHex && it.ts == rec.ts } + rec,
+            )
+        }
+        DucatLog.i(TAG, "a receipt from ${fromHex.take(8)}…: ${rec.rating} star(s)")
+        return rec
+    }
+
+    private fun dropped(fromHex: String, why: String): AttestationRecord? {
+        DucatLog.w(TAG, "a receipt from ${fromHex.take(8)}… was dropped: $why")
+        return null
+    }
+
+    /**
+     * The receipts others gave [personaHex], as the `ducat:record/` link to
+     * send when somebody asks for the record; null when there are none.
+     */
+    fun myRecordLink(context: Context, personaHex: String): String? =
+        recordLinkOf(received(context), personaHex)
+
+    /**
+     * A record somebody showed us: each envelope that opens and is about the
+     * sender is kept on the "about" shelf, deduped on (signer, subject, ts);
+     * the rest are dropped without comment. Returns what we can now say
+     * about the sender.
+     */
+    fun readRecord(context: Context, fromHex: String, dotted: String): RecordSummary {
+        val from = fromHex.trim()
+        var taken = 0
+        synchronized(lock) {
+            val about = readAttestations(context, ABOUT).toMutableList()
+            for (h in splitRecord(dotted)) {
+                val bytes = unhex(h) ?: continue
+                val v = runCatching { uniffi.ducat_mobile.attestationOpen(bytes) }.getOrNull() ?: continue
+                if (!v.subjectHex.equals(from, ignoreCase = true)) continue
+                val rec = recordFrom(v, h)
+                about.removeAll {
+                    it.signerHex == rec.signerHex && it.subjectHex == rec.subjectHex && it.ts == rec.ts
+                }
+                about.add(rec)
+                taken += 1
+            }
+            if (taken > 0) putAttestations(context, ABOUT, about)
+        }
+        DucatLog.i(TAG, "${from.take(8)}… showed a record: $taken receipt(s) read")
+        return recordOf(context, from)
+    }
+
+    /**
+     * What we hold about a persona's record, weighted by the signers whose
+     * burns we verified ourselves (§9.2). Zero across the board for a
+     * stranger who has shown nothing.
+     */
+    fun recordOf(context: Context, personaHex: String): RecordSummary {
+        val subject = personaHex.trim()
+        val about = about(context).filter { it.subjectHex.equals(subject, ignoreCase = true) }
+        if (about.isEmpty()) return RecordSummary()
+        val burned = verifiedBurns(context).mapTo(HashSet()) { it.personaHex.lowercase() }
+        return summarize(about) { it.lowercase() in burned }
+    }
+
+    /**
+     * Called for every incoming text, from the one place the thread appends
+     * one. A `ducat:attest/` link is a receipt about one of our personas
+     * from the sender; a `ducat:record/` link is the sender showing what
+     * others said about them. A burn proof is not ingested: it is checked
+     * when somebody presses the button, because the check costs two node
+     * round trips. Never throws — the message is already taken, and a
+     * receipt that will not open is the sender's problem, not the thread's.
+     */
+    fun ingestTrustLinks(context: Context, fromHex: String, body: String) {
+        runCatching {
+            when (val link = linkIn(body)) {
+                is Link.Attest -> receiveAttestation(context, fromHex, link.hex)
+                is Link.Record -> readRecord(context, fromHex, link.dotted)
+                else -> null
+            }
+        }.onFailure { DucatLog.w(TAG, "trust link from ${fromHex.take(8)}…: ${it.message}") }
+    }
+
+    // ----- the backup ------------------------------------------------------------
+    //
+    // Five shelves ride the bundle as the JSON text they are kept in, under
+    // names both clients write. A burn is money already destroyed and its
+    // envelope is the only thing that says so; a restored phone without it
+    // has paid for nothing.
+
+    private val BACKUP = linkedMapOf(
+        "burns_raw" to OURS,
+        "verified_burns_raw" to THEIRS,
+        "attestations_given_raw" to GIVEN,
+        "attestations_received_raw" to RECEIVED,
+        "attestations_about_raw" to ABOUT,
+    )
+
+    /** The bundle's names for the shelves, in the order they are written. */
+    val BACKUP_KEYS: List<String> get() = BACKUP.keys.toList()
+
+    /** Each shelf that has anything on it, as (bundle name, JSON text). */
+    fun backupEntries(context: Context): Map<String, String> {
+        val p = prefs(context)
+        return BACKUP.entries.mapNotNull { (name, key) -> p.getString(key, null)?.let { name to it } }.toMap()
+    }
+
+    /**
+     * Restore one shelf from the bundle: the whole list replaced under the
+     * lock. A name this build does not know, or text that is not a JSON
+     * list, leaves the shelf alone — a bundle must never be able to empty
+     * a store it could not fill.
+     */
+    fun restoreEntry(context: Context, name: String, json: String): Boolean {
+        val key = BACKUP[name] ?: return false
+        if (json.isBlank()) return false
+        if (runCatching { JSONArray(json) }.isFailure) {
+            DucatLog.w(TAG, "the bundle's $name is not a list; left alone")
+            return false
+        }
+        synchronized(lock) { prefs(context).edit().putString(key, json).apply() }
+        ContactStore.bump()
+        return true
+    }
 }

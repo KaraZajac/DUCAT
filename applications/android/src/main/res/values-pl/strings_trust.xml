@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5 in the thread: the badge in words, the burn proof and its check,
+     the gate over a payment, and §9.2's rated receipts — given, kept on
+     the record, and shown. Wording mirrors the desk's strings_desk.xml so
+     the two clients say the same thing about the same envelope. -->
+<resources>
+    <string name="trust_burned_since">Spalono %1$s, od bloku %2$s</string>
+    <string name="trust_receipts_summary">%1$s pokwitowań, %2$s od person ze spaleniem</string>
+    <string name="trust_show_my_burn">Pokaż moje spalenie</string>
+    <string name="trust_show_my_record">Pokaż moją historię</string>
+    <string name="trust_rate_them">Oceń</string>
+    <string name="trust_burn_proof_msg">Dowód spalenia</string>
+    <string name="trust_check_burn">Sprawdź</string>
+    <string name="trust_checking">Sprawdzanie…</string>
+    <string name="trust_burn_checked">Sprawdzono: spalono %1$s w bloku %2$s</string>
+    <string name="trust_burn_check_failed">Nie udało się sprawdzić.</string>
+    <string name="trust_rating_sent">Twoja ocena dla nich</string>
+    <string name="trust_rating_received">Ocena dla ciebie, zachowana w twojej historii</string>
+    <string name="trust_record_sent">Twoja historia, pokazana im</string>
+    <string name="trust_record_received">Ich historia: odczytano %1$s pokwitowań</string>
+    <string name="trust_record_preview">Ich historia, pokazana tobie</string>
+    <string name="trust_rating_for">Za %1$s rozliczone między wami</string>
+    <string name="trust_rating_note_hint">Jedno zdanie, opcjonalnie</string>
+    <string name="trust_rating_note">Podpisana tym imieniem, ważona jego spaleniem wszędzie, gdzie jest czytana</string>
+    <string name="trust_send_rating">Wyślij ocenę</string>
+    <string name="trust_what_burn">dowodu spalenia</string>
+    <string name="trust_what_record">historii</string>
+    <string name="trust_what_rating">oceny</string>
+    <string name="trust_gate_over_burn">Więcej, niż spalili (%1$s). Jeśli znikną, nic ich nie trzyma.</string>
+    <string name="trust_gate_no_burn">Nie spalili niczego, co sprawdziłeś. Jeśli znikną, nic ich nie trzyma.</string>
+    <string name="trust_err_rating">Ocena to od jednej do pięciu gwiazdek.</string>
+    <string name="trust_err_note_long">Notatka to jedno zdanie.</string>
+    <string name="trust_err_self">Nie możesz ocenić własnego imienia.</string>
+    <string name="trust_err_unsigned">Nie udało się podpisać oceny.</string>
+</resources>

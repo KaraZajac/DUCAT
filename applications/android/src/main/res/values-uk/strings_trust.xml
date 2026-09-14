@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- §9.5 in the thread: the badge in words, the burn proof and its check,
+     the gate over a payment, and §9.2's rated receipts — given, kept on
+     the record, and shown. Wording mirrors the desk's strings_desk.xml so
+     the two clients say the same thing about the same envelope. -->
+<resources>
+    <string name="trust_burned_since">Спалено %1$s, з блоку %2$s</string>
+    <string name="trust_receipts_summary">%1$s квитанцій, %2$s від персон зі спаленням</string>
+    <string name="trust_show_my_burn">Показати моє спалення</string>
+    <string name="trust_show_my_record">Показати мою історію</string>
+    <string name="trust_rate_them">Оцінити</string>
+    <string name="trust_burn_proof_msg">Доказ спалення</string>
+    <string name="trust_check_burn">Перевірити</string>
+    <string name="trust_checking">Перевірка…</string>
+    <string name="trust_burn_checked">Перевірено: спалено %1$s у блоці %2$s</string>
+    <string name="trust_burn_check_failed">Не вдалося перевірити.</string>
+    <string name="trust_rating_sent">Ваша оцінка для них</string>
+    <string name="trust_rating_received">Оцінка для вас, збережена у вашій історії</string>
+    <string name="trust_record_sent">Ваша історія, показана їм</string>
+    <string name="trust_record_received">Їхня історія: прочитано %1$s квитанцій</string>
+    <string name="trust_record_preview">Їхня історія, показана вам</string>
+    <string name="trust_rating_for">За %1$s, розраховані між вами</string>
+    <string name="trust_rating_note_hint">Одне речення, необов’язково</string>
+    <string name="trust_rating_note">Підписана цим іменем і зважується його спаленням усюди, де читається</string>
+    <string name="trust_send_rating">Надіслати оцінку</string>
+    <string name="trust_what_burn">доказ спалення</string>
+    <string name="trust_what_record">історію</string>
+    <string name="trust_what_rating">оцінку</string>
+    <string name="trust_gate_over_burn">Більше, ніж вони спалили (%1$s). Якщо вони зникнуть, їх ніщо не втримає.</string>
+    <string name="trust_gate_no_burn">Вони не спалили нічого, що ви перевірили. Якщо вони зникнуть, їх ніщо не втримає.</string>
+    <string name="trust_err_rating">Оцінка — від однієї до п’яти зірок.</string>
+    <string name="trust_err_note_long">Нотатка — одне речення.</string>
+    <string name="trust_err_self">Не можна оцінити власне ім’я.</string>
+    <string name="trust_err_unsigned">Не вдалося підписати оцінку.</string>
+</resources>
