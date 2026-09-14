@@ -424,4 +424,15 @@
     <string name="desk_gate_over_burn">Más de lo que han quemado (%1$s). Si desaparecen, nada los retiene.</string>
     <string name="desk_gate_no_burn">No han quemado nada que hayas comprobado. Si desaparecen, nada los retiene.</string>
     <string name="desk_no_burn_known">Ninguna quema suya comprobada aquí</string>
+    <string name="desk_known_by_names">%1$s los conocen</string>
+    <string name="desk_known_by_count">%1$s de tus contactos los conocen</string>
+    <string name="desk_vouch">Los conozco</string>
+    <string name="desk_vouched">Has respondido por ellos</string>
+    <string name="desk_vouch_hint">Firma «conozco a esta persona» y se lo envía; pueden mostrarlo a quienes te conocen. Solo para alguien a quien hayas conocido.</string>
+    <string name="desk_show_my_vouches">Mostrar quién me conoce</string>
+    <string name="desk_show_my_vouches_hint">Envía los avales que otros dieron a esta persona; solo cuentan para quienes tienen a esos firmantes como contactos</string>
+    <string name="desk_vouch_sent">Dijiste que los conoces</string>
+    <string name="desk_vouch_received">Dicen que te conocen; guardado con tus avales</string>
+    <string name="desk_vouches_sent">Quién te conoce, mostrado a ellos</string>
+    <string name="desk_vouches_none_known">Mostraron quién los conoce; ninguno es contacto tuyo</string>
 </resources>

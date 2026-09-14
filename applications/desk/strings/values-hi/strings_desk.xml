@@ -424,4 +424,15 @@
     <string name="desk_gate_over_burn">उन्होंने जितना जलाया (%1$s) उससे अधिक। अगर वे गायब हो जाएँ तो कुछ उन्हें नहीं रोकता।</string>
     <string name="desk_gate_no_burn">उन्होंने ऐसा कुछ नहीं जलाया जिसे आपने जाँचा हो। अगर वे गायब हो जाएँ तो कुछ उन्हें नहीं रोकता।</string>
     <string name="desk_no_burn_known">उनका कोई जलाना यहाँ जाँचा नहीं गया</string>
+    <string name="desk_known_by_names">%1$s उन्हें जानते हैं</string>
+    <string name="desk_known_by_count">आपके %1$s संपर्क उन्हें जानते हैं</string>
+    <string name="desk_vouch">मैं उन्हें जानता/जानती हूँ</string>
+    <string name="desk_vouched">आपने उनकी गवाही दी</string>
+    <string name="desk_vouch_hint">"मैं इस पर्सोना को जानता/जानती हूँ" पर हस्ताक्षर कर उन्हें भेजता है; वे इसे आपको जानने वालों को दिखा सकते हैं। केवल उनके लिए जिनसे आप मिले हों।</string>
+    <string name="desk_show_my_vouches">दिखाएँ कि मुझे कौन जानता है</string>
+    <string name="desk_show_my_vouches_hint">दूसरों द्वारा इस पर्सोना को दी गई गवाहियाँ भेजता है; वे केवल उनके लिए गिनती हैं जिनके संपर्कों में वे हस्ताक्षरकर्ता हों</string>
+    <string name="desk_vouch_sent">आपने कहा कि आप उन्हें जानते हैं</string>
+    <string name="desk_vouch_received">वे कहते हैं कि वे आपको जानते हैं; आपकी गवाहियों के साथ रखा गया</string>
+    <string name="desk_vouches_sent">आपको कौन जानता है, उन्हें दिखाया</string>
+    <string name="desk_vouches_none_known">उन्होंने दिखाया कि उन्हें कौन जानता है; उनमें से कोई आपका संपर्क नहीं है</string>
 </resources>

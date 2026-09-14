@@ -420,4 +420,15 @@
     <string name="desk_gate_over_burn">超过对方销毁的金额（%1$s）。若对方消失，没有什么能约束他们。</string>
     <string name="desk_gate_no_burn">对方没有任何你核验过的销毁。若对方消失，没有什么能约束他们。</string>
     <string name="desk_no_burn_known">此处未核验过对方的任何销毁</string>
+    <string name="desk_known_by_names">%1$s认识对方</string>
+    <string name="desk_known_by_count">你的 %1$s 位联系人认识对方</string>
+    <string name="desk_vouch">我认识对方</string>
+    <string name="desk_vouched">你已为对方担保</string>
+    <string name="desk_vouch_hint">签署“我认识此身份”并发给对方；对方可以出示给认识你的人。仅限你见过的人。</string>
+    <string name="desk_show_my_vouches">出示认识我的人</string>
+    <string name="desk_show_my_vouches_hint">发送他人给此身份的担保；只对把这些签名者列为联系人的人有意义</string>
+    <string name="desk_vouch_sent">你表示认识对方</string>
+    <string name="desk_vouch_received">对方表示认识你；已存入你的担保</string>
+    <string name="desk_vouches_sent">认识你的人，已出示给对方</string>
+    <string name="desk_vouches_none_known">对方出示了认识他们的人；其中没有你的联系人</string>
 </resources>

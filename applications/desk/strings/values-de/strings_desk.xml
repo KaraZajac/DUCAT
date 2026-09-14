@@ -424,4 +424,15 @@
     <string name="desk_gate_over_burn">Mehr, als sie verbrannt haben (%1$s). Verschwinden sie, hält sie nichts.</string>
     <string name="desk_gate_no_burn">Sie haben nichts verbrannt, das du geprüft hast. Verschwinden sie, hält sie nichts.</string>
     <string name="desk_no_burn_known">Kein Burn von ihnen hier geprüft</string>
+    <string name="desk_known_by_names">%1$s kennen sie</string>
+    <string name="desk_known_by_count">%1$s deiner Kontakte kennen sie</string>
+    <string name="desk_vouch">Ich kenne sie</string>
+    <string name="desk_vouched">Du hast für sie gebürgt</string>
+    <string name="desk_vouch_hint">Signiert „Ich kenne diese Persona“ und schickt es ihnen; sie können es Leuten zeigen, die dich kennen. Nur für jemanden, den du getroffen hast.</string>
+    <string name="desk_show_my_vouches">Zeigen, wer mich kennt</string>
+    <string name="desk_show_my_vouches_hint">Schickt die Bürgschaften, die andere dieser Persona gaben; sie zählen nur für Leute, die diese Unterzeichner als Kontakte haben</string>
+    <string name="desk_vouch_sent">Du hast gesagt, dass du sie kennst</string>
+    <string name="desk_vouch_received">Sie sagen, dass sie dich kennen; bei deinen Bürgschaften aufbewahrt</string>
+    <string name="desk_vouches_sent">Wer dich kennt, ihnen gezeigt</string>
+    <string name="desk_vouches_none_known">Sie haben gezeigt, wer sie kennt; keiner davon ist dein Kontakt</string>
 </resources>

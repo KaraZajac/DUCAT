@@ -3162,6 +3162,60 @@
       "kind": "attestation.receipt",
       "name": "attestation_signed_by_the_subject",
       "why": "The subject signing about itself with its own key: the envelope verifies under the signer named in the body, which is not this key."
+    },
+    {
+      "expect": {
+        "ok": true,
+        "reencodes_to_hex": "a600181d0101020119013d5820bc7cbcb5636375fa1d82434d466724d92377f53b980695dd49d26d0ce12205a519013e1a68e7780019013f5820b533d8ad9fcfbdde0b481c1b334ddc3c53412fd614564e7e5afd020368d382c3"
+      },
+      "kind": "vouch.known",
+      "name": "vouch_valid",
+      "vouch_hex": "a201585aa600181d0101020119013d5820bc7cbcb5636375fa1d82434d466724d92377f53b980695dd49d26d0ce12205a519013e1a68e7780019013f5820b533d8ad9fcfbdde0b481c1b334ddc3c53412fd614564e7e5afd020368d382c3025840fb6d0ad656a4ab9455afb15d79137a87609d4a0e1288bd10c66d2c1486874a4907b04c34587f9a53ca5beddf5901219c69d8513805c8666229139273fc52e70c",
+      "why": "I know this persona: who says so, about whom, when — and nothing else, because the less a vouch carries the less it leaks. Signed under the one who says it."
+    },
+    {
+      "expect": {
+        "hint": "a vouch needs a time",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "vouch.known",
+      "name": "vouch_without_a_time",
+      "vouch_hex": "a2015856a600181d0101020119013d5820bc7cbcb5636375fa1d82434d466724d92377f53b980695dd49d26d0ce12205a519013e0019013f5820b533d8ad9fcfbdde0b481c1b334ddc3c53412fd614564e7e5afd020368d382c302584083d82582ac34c9c12a76eaf2aeb5ac9a9f6d6aac7c81ad20b1b03aa8a5ce0e9f07c9d2801930915cc7403402053c1b1eb7ec6828a6e0d2fea5d2dfe79d7e5309",
+      "why": "When it was said is part of what it means; a vouch from nowhen is refused at the shape."
+    },
+    {
+      "expect": {
+        "hint": "a persona cannot vouch for itself",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "vouch.known",
+      "name": "vouch_for_oneself",
+      "vouch_hex": "a201585aa600181d0101020119013d5820b533d8ad9fcfbdde0b481c1b334ddc3c53412fd614564e7e5afd020368d382c319013e1a68e7780019013f5820b533d8ad9fcfbdde0b481c1b334ddc3c53412fd614564e7e5afd020368d382c30258404247f88ebcbe01ce836f77ea0d920c31d74332625897476f226ce9ec75ff392286f5927cdb64cd7bd30dc7f78e85cfd66a1af57b088bab9c7a3e5c754318eb0b",
+      "why": "Knowing oneself is not the claim. Refused at the shape rather than counted for nothing, so no client has to remember to."
+    },
+    {
+      "expect": {
+        "hint": "signature does not verify",
+        "ok": false,
+        "reject": "BADSIG"
+      },
+      "kind": "vouch.known",
+      "name": "vouch_signed_by_the_subject",
+      "vouch_hex": "a201585aa600181d0101020119013d5820bc7cbcb5636375fa1d82434d466724d92377f53b980695dd49d26d0ce12205a519013e1a68e7780019013f5820b533d8ad9fcfbdde0b481c1b334ddc3c53412fd614564e7e5afd020368d382c3025840420601d5d639fa6859d8d5c170abf270d226135de391889ceaf00c171cecbd930357994cd2938673733504d3d327934b47eab6bb5b98eee70a7b32744aa12a00",
+      "why": "The subject sealing a vouch for itself under its own key: the envelope verifies under the signer named in the body, which is not this key."
+    },
+    {
+      "expect": {
+        "hint": "not a signed envelope",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "vouch.known",
+      "name": "vouch_bare_body_not_an_envelope",
+      "vouch_hex": "a600181d0101020119013d5820bc7cbcb5636375fa1d82434d466724d92377f53b980695dd49d26d0ce12205a519013e1a68e7780019013f5820b533d8ad9fcfbdde0b481c1b334ddc3c53412fd614564e7e5afd020368d382c3",
+      "why": "Without the envelope nothing says who vouched; the body names a signer, but a name is not a signature."
     }
   ],
   "category": "contact"

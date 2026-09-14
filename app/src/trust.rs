@@ -15,8 +15,8 @@
 use serde::{Deserialize, Serialize};
 
 use ducat_core::trust::{
-    burn_message, open_attestation, open_burn_proof, sign_attestation, sign_burn_proof, Attestation, BurnProof,
-    ATTESTATION_VERSION, BURN_PROOF_VERSION, MAX_ATTESTATION_NOTE_CHARS, RATING_MAX, RATING_MIN,
+    burn_message, open_attestation, open_burn_proof, open_vouch, sign_attestation, sign_burn_proof, sign_vouch, Attestation, BurnProof,
+    Vouch, ATTESTATION_VERSION, BURN_PROOF_VERSION, MAX_ATTESTATION_NOTE_CHARS, RATING_MAX, RATING_MIN, VOUCH_VERSION,
 };
 use ducat_mobile::contacts::persona_public_hex;
 use ducat_mobile::monero::{monero_second_opinion_nodes, monero_tx_status, TxStatus};
@@ -280,13 +280,19 @@ pub struct RecordSummary {
 
 const ATTEST_PREFIX: &str = "ducat:attest/";
 const RECORD_PREFIX: &str = "ducat:record/";
+const VOUCH_PREFIX: &str = "ducat:vouch/";
+const VOUCHES_PREFIX: &str = "ducat:vouches/";
 /// How many envelopes a record link may carry, and a reader will read.
 const RECORD_MAX: usize = 64;
 
 /// Join envelopes, newest first, into one `ducat:record/` link that fits a
 /// message (`MAX_MESSAGE_CHARS`) — the same packing as the phone's.
 fn pack_record_link<'a>(envelopes: impl Iterator<Item = &'a str>) -> String {
-    let mut out = String::from(RECORD_PREFIX);
+    pack_link(RECORD_PREFIX, envelopes)
+}
+
+fn pack_link<'a>(prefix: &str, envelopes: impl Iterator<Item = &'a str>) -> String {
+    let mut out = String::from(prefix);
     let mut n = 0;
     for env in envelopes.take(RECORD_MAX) {
         let sep = if n == 0 { 0 } else { 1 };
@@ -428,6 +434,10 @@ impl App {
             let _ = self.receive_attestation(from_hex, hex);
         } else if let Some(rest) = body.strip_prefix(RECORD_PREFIX) {
             let _ = self.read_record(from_hex, rest);
+        } else if let Some(hex) = body.strip_prefix(VOUCH_PREFIX) {
+            let _ = self.receive_vouch(from_hex, hex);
+        } else if let Some(rest) = body.strip_prefix(VOUCHES_PREFIX) {
+            let _ = self.read_vouches(from_hex, rest);
         }
     }
 
@@ -470,6 +480,130 @@ impl App {
     }
 }
 
+
+/// §9.2 — a vouch: *I know this persona*, given, received, or read about
+/// someone. The JSON names are the phone's.
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub struct VouchRecord {
+    #[serde(rename = "signer")]
+    pub signer_hex: String,
+    #[serde(rename = "subject")]
+    pub subject_hex: String,
+    pub ts: u64,
+    #[serde(rename = "envelope")]
+    pub envelope_hex: String,
+}
+
+impl App {
+    fn vouches(&self, key: &str) -> Vec<VouchRecord> {
+        self.store(STORE).get(key).unwrap_or_default()
+    }
+
+    fn put_vouches(&self, key: &str, v: &[VouchRecord]) -> Result<(), Error> {
+        self.store(STORE).put(key, &v.to_vec())?;
+        Ok(())
+    }
+
+    fn vouch_record(v: &Vouch, envelope_hex: &str) -> VouchRecord {
+        VouchRecord { signer_hex: hexs(&v.signer), subject_hex: hexs(&v.subject), ts: v.ts, envelope_hex: envelope_hex.to_lowercase() }
+    }
+
+    /// Vouch for a contact — *I know this persona* — under the persona this
+    /// desk speaks as in that thread, and return the `ducat:vouch/` link to
+    /// send there. A vouch says nothing else, so there is nothing to type.
+    pub fn vouch(&self, contact_hex: &str) -> Result<String, Error> {
+        let signer_hex = self.thread_persona(contact_hex)?;
+        if signer_hex == contact_hex.to_lowercase() {
+            return Err(Error::Refused("a persona cannot vouch for itself".into()));
+        }
+        let secret = self.persona_secret(&signer_hex)?.ok_or_else(|| Error::Refused("no such persona".into()))?;
+        let Ok(sk): Result<[u8; 32], _> = secret.as_slice().try_into() else { return Err(Error::Refused("persona key".into())) };
+        let key = ducat_core::sig::SecretKey::ed25519_from_bytes(&sk);
+        let subject = unhex(contact_hex).filter(|b| b.len() == 32).ok_or_else(|| Error::Refused("persona".into()))?;
+        let v = Vouch { version: VOUCH_VERSION, suite: 1, signer: key.public().to_bytes().to_vec(), subject, ts: App::now() };
+        let env = hexs(&sign_vouch(&v, &key));
+        let mut given = self.vouches("vouches_given");
+        given.retain(|g| g.subject_hex != contact_hex.to_lowercase());
+        given.push(Self::vouch_record(&v, &env));
+        self.put_vouches("vouches_given", &given)?;
+        Ok(format!("{VOUCH_PREFIX}{env}"))
+    }
+
+    /// Have we vouched for this persona, from any of ours?
+    pub fn vouched_for(&self, persona_hex: &str) -> bool {
+        self.vouches("vouches_given").iter().any(|g| g.subject_hex == persona_hex.to_lowercase())
+    }
+
+    /// A vouch about one of our personas, from the sender: kept only when the
+    /// sender is the signer — a vouch handed on by anyone else is discarded.
+    pub fn receive_vouch(&self, from_hex: &str, envelope_hex: &str) -> Result<VouchRecord, Error> {
+        let env = unhex(envelope_hex).ok_or_else(|| Error::Refused("not hex".into()))?;
+        let v = open_vouch(&env).map_err(|e| Error::Refused(format!("vouch: {e:?}")))?;
+        if hexs(&v.signer) != from_hex.to_lowercase() {
+            return Err(Error::Refused("the vouch is not signed by the sender".into()));
+        }
+        if !self.persona_hexes().contains(&hexs(&v.subject)) {
+            return Err(Error::Refused("the vouch is not about us".into()));
+        }
+        let rec = Self::vouch_record(&v, envelope_hex);
+        let mut all = self.vouches("vouches_received");
+        all.retain(|r| !(r.signer_hex == rec.signer_hex && r.subject_hex == rec.subject_hex));
+        all.push(rec.clone());
+        self.put_vouches("vouches_received", &all)?;
+        log::info(TAG, format!("{}… vouched for us", &from_hex[..8.min(from_hex.len())]));
+        Ok(rec)
+    }
+
+    /// The vouches others gave the persona this desk speaks as in the thread
+    /// with `contact_hex`, as one `ducat:vouches/` message, newest first.
+    pub fn my_vouches_link(&self, contact_hex: &str) -> Result<String, Error> {
+        let me = self.thread_persona(contact_hex)?;
+        let mut mine: Vec<VouchRecord> = self.vouches("vouches_received").into_iter().filter(|r| r.subject_hex == me).collect();
+        if mine.is_empty() {
+            return Err(Error::Refused("nobody has vouched for this persona yet".into()));
+        }
+        mine.sort_by_key(|r| std::cmp::Reverse(r.ts));
+        Ok(pack_link(VOUCHES_PREFIX, mine.iter().map(|r| r.envelope_hex.as_str())))
+    }
+
+    /// Vouches somebody showed us about themselves: each that opens and is
+    /// about the sender is kept, the rest dropped without comment.
+    pub fn read_vouches(&self, from_hex: &str, dotted: &str) -> Result<Vec<String>, Error> {
+        let mut about = self.vouches("vouches_about");
+        let mut taken = 0u32;
+        for hex in dotted.split('.').filter(|h| !h.is_empty()).take(RECORD_MAX) {
+            let Some(env) = unhex(hex) else { continue };
+            let Ok(v) = open_vouch(&env) else { continue };
+            if hexs(&v.subject) != from_hex.to_lowercase() {
+                continue;
+            }
+            let rec = Self::vouch_record(&v, hex);
+            about.retain(|r| !(r.signer_hex == rec.signer_hex && r.subject_hex == rec.subject_hex));
+            about.push(rec);
+            taken += 1;
+        }
+        self.put_vouches("vouches_about", &about)?;
+        log::info(TAG, format!("{}… showed {taken} vouch(es)", &from_hex[..8.min(from_hex.len())]));
+        Ok(self.known_by(from_hex))
+    }
+
+    /// Who among *our* contacts has vouched for this persona — names, for
+    /// "2 of your contacts know this person". Computed here, from what we
+    /// hold, and never sent anywhere. Our own vouch is not a contact's.
+    pub fn known_by(&self, persona_hex: &str) -> Vec<String> {
+        let subject = persona_hex.to_lowercase();
+        let mine = self.persona_hexes();
+        let mut names: Vec<String> = self
+            .vouches("vouches_about")
+            .into_iter()
+            .filter(|r| r.subject_hex == subject && !mine.contains(&r.signer_hex))
+            .filter_map(|r| self.contact(&r.signer_hex).map(|c| c.display_name()))
+            .collect();
+        names.sort();
+        names.dedup();
+        names
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -584,6 +718,75 @@ mod tests {
         stage_verified_burn(&reader, &rater_hex);
         let summary = reader.read_record(&subject_hex, dotted.strip_prefix(RECORD_PREFIX).unwrap()).unwrap();
         assert_eq!(summary, RecordSummary { receipts: 2, weighted: 1, rating_x10: 30 });
+    }
+
+    /// The reader's own contacts are the only ones that count: two strangers
+    /// vouching for a third say nothing to somebody who knows none of them.
+    #[test]
+    fn a_vouch_counts_only_when_its_signer_is_one_of_the_readers_contacts() {
+        let pat = temp_app("vouch-pat");
+        let sam = temp_app("vouch-sam");
+        let x = temp_app("vouch-x");
+        let reader = temp_app("vouch-reader");
+        let (pat_hex, sam_hex, x_hex) = (pat.worn().unwrap(), sam.worn().unwrap(), x.worn().unwrap());
+        let pats = pat.vouch(&x_hex).unwrap();
+        let sams = sam.vouch(&x_hex).unwrap();
+        assert!(pats.starts_with(VOUCH_PREFIX));
+        assert!(pat.vouched_for(&x_hex));
+        // X keeps both, each sent by its own signer.
+        x.ingest_trust_links(&pat_hex, &pats);
+        x.ingest_trust_links(&sam_hex, &sams);
+        // Handed on by the wrong persona: dropped.
+        assert!(x.receive_vouch(&sam_hex, pats.strip_prefix(VOUCH_PREFIX).unwrap()).is_err());
+        // Vouching for oneself is refused before signing.
+        assert!(pat.vouch(&pat_hex).is_err());
+        let shown = x.my_vouches_link(&pat_hex).unwrap();
+        assert!(shown.starts_with(VOUCHES_PREFIX));
+        assert_eq!(shown.trim_start_matches(VOUCHES_PREFIX).split('.').count(), 2);
+
+        // The reader holds Pat as a contact, not Sam.
+        let contact = |hex: &str, name: &str| crate::contacts::Contact {
+            persona_hex: hex.to_string(),
+            hearted: false,
+            petname: Some(name.into()),
+            asserted_name: None,
+            my_outbox: "VLD0:mine".into(),
+            my_outbox_owner_public: vec![1; 32],
+            my_outbox_owner_secret: vec![2; 32],
+            their_outbox: "VLD0:theirs".into(),
+            their_bundle: None,
+            their_address: None,
+            pending_address: None,
+            avatar: None,
+            email: None,
+            phone: None,
+            signal: None,
+            pronouns: None,
+            my_ring: 32,
+            car_model: None,
+            car_color: None,
+            plate: None,
+            car_photo: None,
+            their_read_up_to: None,
+            card_purpose: None,
+            my_card_purpose: None,
+            my_card_purpose_at: 0,
+            out_seq: 0,
+            out_prev_link: None,
+            in_seq: 0,
+            in_prev_link: None,
+            chat_visible: true,
+            owner: reader.worn().unwrap(),
+        };
+        reader.put_contact(contact(&pat_hex, "Pat")).unwrap();
+        let known = reader.read_vouches(&x_hex, shown.strip_prefix(VOUCHES_PREFIX).unwrap()).unwrap();
+        assert_eq!(known, vec!["Pat".to_string()]);
+        assert_eq!(reader.known_by(&x_hex), vec!["Pat".to_string()]);
+        // Now Sam is a contact too: two of the reader's contacts know X.
+        reader.put_contact(contact(&sam_hex, "Sam")).unwrap();
+        assert_eq!(reader.known_by(&x_hex), vec!["Pat".to_string(), "Sam".to_string()]);
+        // A vouch shown by somebody it is not about is dropped.
+        assert!(reader.read_vouches(&pat_hex, shown.strip_prefix(VOUCHES_PREFIX).unwrap()).unwrap().is_empty());
     }
 
     #[test]

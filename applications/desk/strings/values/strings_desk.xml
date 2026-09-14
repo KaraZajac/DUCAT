@@ -430,4 +430,15 @@
     <string name="desk_gate_over_burn">More than they have burned (%1$s). If they vanish, nothing holds them.</string>
     <string name="desk_gate_no_burn">They have burned nothing you have checked. If they vanish, nothing holds them.</string>
     <string name="desk_no_burn_known">No burn of theirs checked here</string>
+    <string name="desk_known_by_names">%1$s know them</string>
+    <string name="desk_known_by_count">%1$s of your contacts know them</string>
+    <string name="desk_vouch">I know them</string>
+    <string name="desk_vouched">You vouched for them</string>
+    <string name="desk_vouch_hint">Signs "I know this persona" and sends it to them; they may show it to people who know you. Only for someone you have met.</string>
+    <string name="desk_show_my_vouches">Show who knows me</string>
+    <string name="desk_show_my_vouches_hint">Sends the vouches others gave this persona; they count only for people who hold those signers as contacts</string>
+    <string name="desk_vouch_sent">You said you know them</string>
+    <string name="desk_vouch_received">They say they know you; kept with your vouches</string>
+    <string name="desk_vouches_sent">Who knows you, shown to them</string>
+    <string name="desk_vouches_none_known">They showed who knows them; none of them are your contacts</string>
 </resources>

@@ -203,7 +203,8 @@
             "position.frame",
             "group.page",
             "burn.proof",
-            "attestation.receipt"
+            "attestation.receipt",
+            "vouch.known"
           ]
         },
         "name": {

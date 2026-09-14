@@ -420,4 +420,15 @@
     <string name="desk_gate_over_burn">Nhiều hơn số họ đã đốt (%1$s). Nếu họ biến mất, không gì giữ được họ.</string>
     <string name="desk_gate_no_burn">Họ chưa đốt gì mà bạn đã kiểm tra. Nếu họ biến mất, không gì giữ được họ.</string>
     <string name="desk_no_burn_known">Chưa kiểm tra lần đốt nào của họ ở đây</string>
+    <string name="desk_known_by_names">%1$s biết họ</string>
+    <string name="desk_known_by_count">%1$s liên hệ của bạn biết họ</string>
+    <string name="desk_vouch">Tôi biết họ</string>
+    <string name="desk_vouched">Bạn đã bảo đảm cho họ</string>
+    <string name="desk_vouch_hint">Ký "tôi biết danh tính này" và gửi cho họ; họ có thể cho những người biết bạn xem. Chỉ dành cho người bạn đã gặp.</string>
+    <string name="desk_show_my_vouches">Cho xem ai biết tôi</string>
+    <string name="desk_show_my_vouches_hint">Gửi các bảo đảm người khác đã trao cho danh tính này; chỉ có ý nghĩa với người có những người ký đó trong liên hệ</string>
+    <string name="desk_vouch_sent">Bạn đã nói rằng bạn biết họ</string>
+    <string name="desk_vouch_received">Họ nói rằng họ biết bạn; được lưu cùng các bảo đảm của bạn</string>
+    <string name="desk_vouches_sent">Ai biết bạn, đã cho họ xem</string>
+    <string name="desk_vouches_none_known">Họ đã cho xem ai biết họ; không ai trong số đó là liên hệ của bạn</string>
 </resources>

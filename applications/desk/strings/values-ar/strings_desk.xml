@@ -440,4 +440,15 @@
     <string name="desk_gate_over_burn">أكثر مما حرقوه (%1$s). إن اختفوا فلا شيء يلزمهم.</string>
     <string name="desk_gate_no_burn">لم يحرقوا شيئًا تحققت منه. إن اختفوا فلا شيء يلزمهم.</string>
     <string name="desk_no_burn_known">لم يُتحقق هنا من أي حرق لهم</string>
+    <string name="desk_known_by_names">%1$s يعرفونهم</string>
+    <string name="desk_known_by_count">%1$s من جهات اتصالك يعرفونهم</string>
+    <string name="desk_vouch">أنا أعرفهم</string>
+    <string name="desk_vouched">زكّيتهم</string>
+    <string name="desk_vouch_hint">يوقّع «أعرف هذه الشخصية» ويرسله إليهم؛ ويمكنهم عرضه لمن يعرفونك. فقط لمن قابلته.</string>
+    <string name="desk_show_my_vouches">عرض من يعرفني</string>
+    <string name="desk_show_my_vouches_hint">يرسل التزكيات التي منحها الآخرون لهذه الشخصية؛ ولا تُحتسب إلا لمن لديهم أولئك الموقّعين ضمن جهات اتصالهم</string>
+    <string name="desk_vouch_sent">قلتَ إنك تعرفهم</string>
+    <string name="desk_vouch_received">يقولون إنهم يعرفونك؛ حُفظ مع تزكياتك</string>
+    <string name="desk_vouches_sent">من يعرفك، عُرض عليهم</string>
+    <string name="desk_vouches_none_known">عرضوا من يعرفهم؛ لا أحد منهم ضمن جهات اتصالك</string>
 </resources>

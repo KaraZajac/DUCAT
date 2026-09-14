@@ -469,6 +469,30 @@
   }
   const ATTEST_LINK = /ducat:attest\/[0-9a-fA-F]+/;
   const RECORD_LINK = /ducat:record\/[0-9a-fA-F.]+/;
+  const VOUCH_LINK = /^\s*ducat:vouch\/[0-9a-fA-F]+\s*$/;
+  const VOUCHES_LINK = /^\s*ducat:vouches\/[0-9a-fA-F.]+\s*$/;
+  function knownWords(names: string[]): string {
+    if (names.length === 0) return "";
+    if (names.length <= 2) return t("desk_known_by_names", names.join(t("desk_and")));
+    return t("desk_known_by_count", String(names.length));
+  }
+  async function vouchFor() {
+    if (!current) return;
+    err = null;
+    try {
+      await api.vouch(current.persona_hex);
+      await refresh();
+    } catch (e) { err = String(e); }
+  }
+  async function showMyVouches() {
+    if (!current) return;
+    err = null;
+    try {
+      const link = await api.myVouchesLink(current.persona_hex);
+      await api.sendText(current.persona_hex, link);
+      await refresh();
+    } catch (e) { err = String(e); }
+  }
   let rating = $state(false);
   let ratingStars = $state(5);
   let ratingNote = $state("");
@@ -784,6 +808,7 @@
               {#if !current.has_keys}{t("desk_keys_not_arrived")} · {/if}
               {#if current.burn_pxmr}{t("desk_burned_since", fmtXmr(current.burn_pxmr), String(current.burn_height ?? 0))} · {/if}
               {#if current.receipts > 0}{t("desk_receipts_summary", String(current.receipts), String(current.receipts_weighted))}{#if current.receipts_weighted > 0} · {(current.rating_x10 / 10).toFixed(1)} ★{/if} · {/if}
+              {#if current.known_by.length > 0}{knownWords(current.known_by)} · {/if}
               {#if current.pending_address}{t("desk_address_held")} · {/if}
               {#if current.email}{current.email} · {/if}{#if current.phone}{current.phone} · {/if}{#if current.signal}Signal {current.signal} · {/if}
               <button class="linkish mono" title={t("desk_copy_their_key")} onclick={() => copy(current?.persona_hex ?? "")}>{current.persona_hex.slice(0, 12)}…</button>
@@ -803,6 +828,8 @@
           <button class="btn small" onclick={() => { renaming = true; newName = current?.petname ?? ""; }}>{t("profiles_rename")}</button>
           <button class="btn small" title={t("desk_show_my_burn_hint")} disabled={!current.has_keys} onclick={showMyBurn}>{t("desk_show_my_burn")}</button>
           <button class="btn small" title={t("desk_show_my_record_hint")} disabled={!current.has_keys} onclick={showMyRecord}>{t("desk_show_my_record")}</button>
+          <button class="btn small" title={t("desk_vouch_hint")} disabled={!current.has_keys || current.vouched} onclick={vouchFor}>{current.vouched ? t("desk_vouched") : t("desk_vouch")}</button>
+          <button class="btn small" title={t("desk_show_my_vouches_hint")} disabled={!current.has_keys} onclick={showMyVouches}>{t("desk_show_my_vouches")}</button>
           {#if thread.some((m) => m.kind === 3)}<button class="btn small" class:active={rating} disabled={!current.has_keys} onclick={() => (rating = !rating)}>{t("desk_rate_them")}</button>{/if}
           <button class="btn small" class:active={current.hearted} title={current.hearted ? t("desk_unheart") : t("desk_heart")} disabled={!current.has_keys} onclick={toggleHeart}>{@html current.hearted ? icons.heartFull : icons.heart}</button>
           <button class="btn small" class:active={showSettings} title={t("chat_conversation_settings")} onclick={() => (showSettings = !showSettings)}>{@html icons.more} {t("desk_more")}</button>
@@ -918,7 +945,11 @@
                   <button class="btn small" disabled={answering !== null} title={t("desk_take_bill_back")} onclick={() => cancelMine(m)}>{answering === keyOf(m) ? "…" : t("chat_cancel_request")}</button>
                 </div>
               {/if}
-              {#if ATTEST_LINK.test(m.body)}
+              {#if VOUCH_LINK.test(m.body)}
+                <div class="bubble-body">{m.outgoing ? t("desk_vouch_sent") : t("desk_vouch_received")}</div>
+              {:else if VOUCHES_LINK.test(m.body)}
+                <div class="bubble-body">{m.outgoing ? t("desk_vouches_sent") : (current.known_by.length ? knownWords(current.known_by) : t("desk_vouches_none_known"))}</div>
+              {:else if ATTEST_LINK.test(m.body)}
                 <div class="bubble-body">{m.outgoing ? t("desk_rating_sent") : t("desk_rating_received")}</div>
               {:else if RECORD_LINK.test(m.body)}
                 <div class="bubble-body">{m.outgoing ? t("desk_record_sent") : t("desk_record_received", String(current.receipts))}</div>

@@ -1114,6 +1114,8 @@ fn normalize(category: &str, mut c: J) -> (&'static str, J) {
                 ("contact", "contact.details")
             } else if obj.contains_key("burn_proof_hex") {
                 ("contact", "burn.proof")
+            } else if obj.contains_key("vouch_hex") {
+                ("contact", "vouch.known")
             } else if obj.contains_key("attestation_hex") {
                 ("contact", "attestation.receipt")
             } else if obj.contains_key("payment_hex") {
@@ -3399,6 +3401,35 @@ fn contact_cases() -> Vec<J> {
             "why": "The subject signing about itself with its own key: the envelope verifies under the signer named in the body, which is not this key.",
             "attestation_hex": hex(&sign_attestation(&abase, &subject)),
             "expect": { "ok": false, "reject": "BADSIG", "hint": "signature does not verify" } }));
+
+        // §9.2's vouch: the smallest signed thing in the protocol.
+        let vbase = Vouch {
+            version: VOUCH_VERSION, suite: 1,
+            signer: signer.public().to_bytes().to_vec(),
+            subject: subject.public().to_bytes().to_vec(),
+            ts: 1_760_000_000,
+        };
+        let mut vouch = |name: &str, why: &str, vo: &Vouch, bad: Option<(RejectCode, &str)>| {
+            let hex_body = hex(&vo.to_value().encode());
+            let hex_env = hex(&sign_vouch(vo, &signer));
+            v.push(match bad {
+                None => json!({ "name": name, "why": why, "vouch_hex": hex_env,
+                                "expect": { "ok": true, "reencodes_to_hex": hex_body } }),
+                Some((code, hint)) => json!({ "name": name, "why": why, "vouch_hex": hex_env,
+                                "expect": { "ok": false, "reject": format!("{:?}", code).to_uppercase(), "hint": hint } }),
+            });
+        };
+        vouch("vouch_valid", "I know this persona: who says so, about whom, when — and nothing else, because the less a vouch carries the less it leaks. Signed under the one who says it.", &vbase, None);
+        vouch("vouch_without_a_time", "When it was said is part of what it means; a vouch from nowhen is refused at the shape.", &Vouch { ts: 0, ..vbase.clone() }, Some((RejectCode::Malformed, "a vouch needs a time")));
+        vouch("vouch_for_oneself", "Knowing oneself is not the claim. Refused at the shape rather than counted for nothing, so no client has to remember to.", &Vouch { subject: vbase.signer.clone(), ..vbase.clone() }, Some((RejectCode::Malformed, "a persona cannot vouch for itself")));
+        v.push(json!({ "name": "vouch_signed_by_the_subject",
+            "why": "The subject sealing a vouch for itself under its own key: the envelope verifies under the signer named in the body, which is not this key.",
+            "vouch_hex": hex(&sign_vouch(&vbase, &subject)),
+            "expect": { "ok": false, "reject": "BADSIG", "hint": "signature does not verify" } }));
+        v.push(json!({ "name": "vouch_bare_body_not_an_envelope",
+            "why": "Without the envelope nothing says who vouched; the body names a signer, but a name is not a signature.",
+            "vouch_hex": hex(&vbase.to_value().encode()),
+            "expect": { "ok": false, "reject": "MALFORMED", "hint": "not a signed envelope" } }));
     }
 
     v

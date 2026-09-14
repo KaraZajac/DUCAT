@@ -1053,6 +1053,10 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1410,6 +1414,10 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_verify_thread(`messages`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): Long
+    fun uniffi_ducat_mobile_fn_func_vouch_open(`envelope`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_vouch_sign(`input`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun ffi_ducat_mobile_rustbuffer_alloc(`size`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun ffi_ducat_mobile_rustbuffer_from_bytes(`bytes`: ForeignBytes.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -1863,6 +1871,10 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_checksum_func_vault_key(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_verify_thread(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_vouch_open(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_vouch_sign(
     ): Short
     fun ffi_ducat_mobile_uniffi_contract_version(
     ): Int
@@ -2392,6 +2404,12 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_verify_thread() != 14473.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_vouch_open() != 3340.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_vouch_sign() != 9874.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
 }
@@ -7496,6 +7514,82 @@ public object FfiConverterTypeVerifiedProof: FfiConverterRustBuffer<VerifiedProo
     override fun write(value: VerifiedProof, buf: ByteBuffer) {
             FfiConverterULong.write(value.`amountPxmr`, buf)
             FfiConverterULong.write(value.`height`, buf)
+    }
+}
+
+
+
+/**
+ * Everything signing a `VOUCH` needs: the signer's secret, the subject, a
+ * time. Nothing else travels — a vouch says *I know this persona* and no more.
+ */
+data class VouchIn (
+    var `personaSecret`: kotlin.ByteArray, 
+    var `subjectHex`: kotlin.String, 
+    var `ts`: kotlin.ULong
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeVouchIn: FfiConverterRustBuffer<VouchIn> {
+    override fun read(buf: ByteBuffer): VouchIn {
+        return VouchIn(
+            FfiConverterByteArray.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: VouchIn) = (
+            FfiConverterByteArray.allocationSize(value.`personaSecret`) +
+            FfiConverterString.allocationSize(value.`subjectHex`) +
+            FfiConverterULong.allocationSize(value.`ts`)
+    )
+
+    override fun write(value: VouchIn, buf: ByteBuffer) {
+            FfiConverterByteArray.write(value.`personaSecret`, buf)
+            FfiConverterString.write(value.`subjectHex`, buf)
+            FfiConverterULong.write(value.`ts`, buf)
+    }
+}
+
+
+
+data class VouchView (
+    var `signerHex`: kotlin.String, 
+    var `subjectHex`: kotlin.String, 
+    var `ts`: kotlin.ULong
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeVouchView: FfiConverterRustBuffer<VouchView> {
+    override fun read(buf: ByteBuffer): VouchView {
+        return VouchView(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: VouchView) = (
+            FfiConverterString.allocationSize(value.`signerHex`) +
+            FfiConverterString.allocationSize(value.`subjectHex`) +
+            FfiConverterULong.allocationSize(value.`ts`)
+    )
+
+    override fun write(value: VouchView, buf: ByteBuffer) {
+            FfiConverterString.write(value.`signerHex`, buf)
+            FfiConverterString.write(value.`subjectHex`, buf)
+            FfiConverterULong.write(value.`ts`, buf)
     }
 }
 
@@ -12632,6 +12726,34 @@ public object FfiConverterMapStringString: FfiConverterRustBuffer<Map<kotlin.Str
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_verify_thread(
         FfiConverterSequenceByteArray.lower(`messages`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Open a vouch. Whether its signer is anyone the reader knows is the
+         * reader's question.
+         */
+    @Throws(AttestException::class) fun `vouchOpen`(`envelope`: kotlin.ByteArray): VouchView {
+            return FfiConverterTypeVouchView.lift(
+    uniffiRustCallWithError(AttestException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_vouch_open(
+        FfiConverterByteArray.lower(`envelope`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Sign a vouch under the persona whose secret is given; the wire's own
+         * refusals (nowhen, oneself) are made here.
+         */
+    @Throws(AttestException::class) fun `vouchSign`(`input`: VouchIn): kotlin.ByteArray {
+            return FfiConverterByteArray.lift(
+    uniffiRustCallWithError(AttestException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_vouch_sign(
+        FfiConverterTypeVouchIn.lower(`input`),_status)
 }
     )
     }

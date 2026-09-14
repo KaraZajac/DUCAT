@@ -89,6 +89,9 @@ impl App {
             ("attestations_given_raw", "trust", "given"),
             ("attestations_received_raw", "trust", "received"),
             ("attestations_about_raw", "trust", "about"),
+            ("vouches_given_raw", "trust", "vouches_given"),
+            ("vouches_received_raw", "trust", "vouches_received"),
+            ("vouches_about_raw", "trust", "vouches_about"),
         ] {
             if let Some(v) = raw(store, key) {
                 o.insert(name.into(), v);
@@ -295,6 +298,9 @@ impl App {
                     ("attestations_given_raw", "trust", "given"),
                     ("attestations_received_raw", "trust", "received"),
                     ("attestations_about_raw", "trust", "about"),
+                    ("vouches_given_raw", "trust", "vouches_given"),
+                    ("vouches_received_raw", "trust", "vouches_received"),
+                    ("vouches_about_raw", "trust", "vouches_about"),
                 ] {
                     if let Some(v) = o.get(name) {
                         self.store(store).put(key, &from_phone(v.clone()))?;
@@ -451,6 +457,9 @@ mod tests {
                 &vec![crate::trust::AttestationRecord { signer_hex: "ab".repeat(32), subject_hex: "cd".repeat(32), amount_pxmr: 5, rating: 4, ts: 8, txid_hex: None, note: None, envelope_hex: "00".into() }],
             )
             .unwrap();
+        a.store("trust")
+            .put("vouches_about", &vec![crate::trust::VouchRecord { signer_hex: "ab".repeat(32), subject_hex: "cd".repeat(32), ts: 8, envelope_hex: "00".into() }])
+            .unwrap();
         let bytes = a.export_backup_bytes("correct horse battery").unwrap();
         assert!(bytes.len() > 200);
         let path = base.join("bundle.ducat");
@@ -480,6 +489,7 @@ mod tests {
         assert!(b.bundles_need_republish());
         assert_eq!(b.burn_of(&"cd".repeat(32)).map(|v| (v.amount_pxmr, v.height)), Some((20_000_000_000, 2_207_293)));
         assert_eq!(b.record_of(&"cd".repeat(32)).receipts, 1);
+        assert_eq!(b.store("trust").get::<Vec<crate::trust::VouchRecord>>("vouches_about").unwrap().len(), 1);
         assert!(b.import_backup_from(&path, "wrong passphrase").is_err());
     }
 }

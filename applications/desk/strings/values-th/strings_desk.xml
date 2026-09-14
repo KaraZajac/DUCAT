@@ -420,4 +420,15 @@
     <string name="desk_gate_over_burn">มากกว่าที่พวกเขาเผา (%1$s) หากพวกเขาหายไป ไม่มีอะไรยึดพวกเขาไว้</string>
     <string name="desk_gate_no_burn">พวกเขาไม่ได้เผาอะไรที่คุณตรวจสอบแล้ว หากพวกเขาหายไป ไม่มีอะไรยึดพวกเขาไว้</string>
     <string name="desk_no_burn_known">ยังไม่ได้ตรวจสอบการเผาของพวกเขาที่นี่</string>
+    <string name="desk_known_by_names">%1$s รู้จักพวกเขา</string>
+    <string name="desk_known_by_count">ผู้ติดต่อของคุณ %1$s คนรู้จักพวกเขา</string>
+    <string name="desk_vouch">ฉันรู้จักพวกเขา</string>
+    <string name="desk_vouched">คุณรับรองพวกเขาแล้ว</string>
+    <string name="desk_vouch_hint">ลงนาม "ฉันรู้จักตัวตนนี้" และส่งให้พวกเขา พวกเขาสามารถแสดงให้คนที่รู้จักคุณดูได้ เฉพาะคนที่คุณเคยพบ</string>
+    <string name="desk_show_my_vouches">แสดงว่าใครรู้จักฉัน</string>
+    <string name="desk_show_my_vouches_hint">ส่งการรับรองที่คนอื่นให้ตัวตนนี้ มีผลเฉพาะกับคนที่มีผู้ลงนามเหล่านั้นเป็นผู้ติดต่อ</string>
+    <string name="desk_vouch_sent">คุณบอกว่ารู้จักพวกเขา</string>
+    <string name="desk_vouch_received">พวกเขาบอกว่ารู้จักคุณ เก็บไว้กับการรับรองของคุณ</string>
+    <string name="desk_vouches_sent">ใครรู้จักคุณ แสดงให้พวกเขาเห็น</string>
+    <string name="desk_vouches_none_known">พวกเขาแสดงว่าใครรู้จักพวกเขา แต่ไม่มีใครเป็นผู้ติดต่อของคุณ</string>
 </resources>

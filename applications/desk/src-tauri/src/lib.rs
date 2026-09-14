@@ -794,6 +794,9 @@ struct ContactRow {
     receipts: u32,
     receipts_weighted: u32,
     rating_x10: u32,
+    /// §9.2: which of this desk's contacts vouched for this persona — names, computed here.
+    known_by: Vec<String>,
+    vouched: bool,
     name: String,
     named: bool,
     petname: Option<String>,
@@ -847,6 +850,8 @@ fn contact_row(a: &App, c: Contact) -> ContactRow {
         receipts: record.receipts,
         receipts_weighted: record.weighted,
         rating_x10: record.rating_x10,
+        known_by: a.known_by(&c.persona_hex),
+        vouched: a.vouched_for(&c.persona_hex),
         persona_hex: c.persona_hex,
         petname: c.petname,
         asserted_name: c.asserted_name,
@@ -1406,6 +1411,7 @@ struct TrustView {
     receipts: u32,
     receipts_weighted: u32,
     rating_x10: u32,
+    known_by: Vec<String>,
 }
 
 #[tauri::command]
@@ -1419,6 +1425,7 @@ fn trust_of(persona_hex: String) -> Result<TrustView, String> {
         receipts: record.receipts,
         receipts_weighted: record.weighted,
         rating_x10: record.rating_x10,
+        known_by: a.known_by(&persona_hex),
     })
 }
 
@@ -1426,6 +1433,25 @@ fn trust_of(persona_hex: String) -> Result<TrustView, String> {
 #[tauri::command]
 fn my_record_link(persona_hex: String) -> Result<String, String> {
     app()?.my_record_link(&persona_hex).map_err(said)
+}
+
+/// §9.2: vouch for a contact — *I know this persona* — and send it to them.
+#[tauri::command]
+async fn vouch(persona_hex: String) -> Result<(), String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || {
+        let c = a.contact(&persona_hex).ok_or("no such contact")?;
+        let link = a.vouch(&persona_hex).map_err(said)?;
+        a.send(&c, Outgoing::text(&link)).map(|_| ()).map_err(said)
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+/// The vouches others gave the persona speaking in this thread, as a link to send.
+#[tauri::command]
+fn my_vouches_link(persona_hex: String) -> Result<String, String> {
+    app()?.my_vouches_link(&persona_hex).map_err(said)
 }
 
 /// Check a stranger's burn proof (§9.5) and remember the verdict.
@@ -3150,6 +3176,8 @@ pub fn run() {
             attest,
             my_record_link,
             trust_of,
+            vouch,
+            my_vouches_link,
             wallet_max,
             set_own_node,
             wallet_rescan,

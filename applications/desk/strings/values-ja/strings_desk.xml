@@ -420,4 +420,15 @@
     <string name="desk_gate_over_burn">相手のバーン額 (%1$s) を超えています。相手が消えても、何も引き留めません。</string>
     <string name="desk_gate_no_burn">あなたが確認したバーンはありません。相手が消えても、何も引き留めません。</string>
     <string name="desk_no_burn_known">相手のバーンはここでは未確認</string>
+    <string name="desk_known_by_names">%1$sが知っている相手</string>
+    <string name="desk_known_by_count">あなたの連絡先のうち %1$s 人が知っている相手</string>
+    <string name="desk_vouch">知っている</string>
+    <string name="desk_vouched">保証済み</string>
+    <string name="desk_vouch_hint">「このペルソナを知っている」に署名して相手に送ります。相手はあなたを知る人にそれを見せられます。会ったことのある相手にだけ。</string>
+    <string name="desk_show_my_vouches">知人を示す</string>
+    <string name="desk_show_my_vouches_hint">このペルソナが他者から受けた保証を送ります。署名者を連絡先に持つ人にだけ意味があります</string>
+    <string name="desk_vouch_sent">知っていると伝えました</string>
+    <string name="desk_vouch_received">相手はあなたを知っていると言っています。保証として保存しました</string>
+    <string name="desk_vouches_sent">あなたの知人を提示しました</string>
+    <string name="desk_vouches_none_known">相手の知人が示されましたが、あなたの連絡先には誰もいません</string>
 </resources>

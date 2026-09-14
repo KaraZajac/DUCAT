@@ -424,4 +424,15 @@
     <string name="desk_gate_over_burn">Meer dan zij hebben verbrand (%1$s). Als ze verdwijnen, houdt niets hen tegen.</string>
     <string name="desk_gate_no_burn">Ze hebben niets verbrand dat je hebt gecontroleerd. Als ze verdwijnen, houdt niets hen tegen.</string>
     <string name="desk_no_burn_known">Geen verbranding van hen hier gecontroleerd</string>
+    <string name="desk_known_by_names">%1$s kennen hen</string>
+    <string name="desk_known_by_count">%1$s van je contacten kennen hen</string>
+    <string name="desk_vouch">Ik ken hen</string>
+    <string name="desk_vouched">Je hebt voor hen ingestaan</string>
+    <string name="desk_vouch_hint">Ondertekent “ik ken deze persona” en stuurt het naar hen; zij kunnen het tonen aan wie jou kent. Alleen voor iemand die je hebt ontmoet.</string>
+    <string name="desk_show_my_vouches">Tonen wie mij kent</string>
+    <string name="desk_show_my_vouches_hint">Stuurt de borgstellingen die anderen deze persona gaven; ze tellen alleen voor wie die ondertekenaars als contact heeft</string>
+    <string name="desk_vouch_sent">Je zei dat je hen kent</string>
+    <string name="desk_vouch_received">Zij zeggen dat ze jou kennen; bewaard bij je borgstellingen</string>
+    <string name="desk_vouches_sent">Wie jou kent, aan hen getoond</string>
+    <string name="desk_vouches_none_known">Ze toonden wie hen kent; geen van hen is een contact van jou</string>
 </resources>

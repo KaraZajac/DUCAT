@@ -424,4 +424,15 @@
     <string name="desk_gate_over_burn">Yaktıklarından (%1$s) fazla. Ortadan kaybolurlarsa onları tutan bir şey yok.</string>
     <string name="desk_gate_no_burn">Denetlediğin bir yakma yok. Ortadan kaybolurlarsa onları tutan bir şey yok.</string>
     <string name="desk_no_burn_known">Onların hiçbir yakması burada denetlenmedi</string>
+    <string name="desk_known_by_names">%1$s onları tanıyor</string>
+    <string name="desk_known_by_count">Kişilerinden %1$s tanesi onları tanıyor</string>
+    <string name="desk_vouch">Onları tanıyorum</string>
+    <string name="desk_vouched">Onlara kefil oldun</string>
+    <string name="desk_vouch_hint">"Bu kimliği tanıyorum" diye imzalar ve onlara gönderir; seni tanıyanlara gösterebilirler. Yalnızca tanıştığın biri için.</string>
+    <string name="desk_show_my_vouches">Beni kimin tanıdığını göster</string>
+    <string name="desk_show_my_vouches_hint">Başkalarının bu kimliğe verdiği kefaletleri gönderir; yalnızca o imzacıları kişi olarak tutanlar için sayılır</string>
+    <string name="desk_vouch_sent">Onları tanıdığını söyledin</string>
+    <string name="desk_vouch_received">Seni tanıdıklarını söylüyorlar; kefaletlerinle birlikte saklandı</string>
+    <string name="desk_vouches_sent">Seni kimin tanıdığı, onlara gösterildi</string>
+    <string name="desk_vouches_none_known">Onları kimin tanıdığını gösterdiler; hiçbiri senin kişilerinden değil</string>
 </resources>

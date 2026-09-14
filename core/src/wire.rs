@@ -242,6 +242,12 @@ pub mod f {
     pub const AT_NOTE: u64 = 315;
     /// The persona giving the attestation — also the envelope's signer.
     pub const AT_SIGNER: u64 = 316;
+    /// §9.2 `VOUCH`: the persona vouched for.
+    pub const VO_SUBJECT: u64 = 317;
+    /// Seconds since the epoch, when the vouch was given.
+    pub const VO_TS: u64 = 318;
+    /// The persona vouching — also the envelope's signer.
+    pub const VO_SIGNER: u64 = 319;
     // Read watermark and ring size on a log head (§16.16, §16.12).
     pub const HEAD_READ: u64 = 201;
     pub const HEAD_RING: u64 = 202;
@@ -670,6 +676,7 @@ pub(crate) fn type_code(t: ObjectType) -> u64 {
         // type to exist, and an exhaustive match is how that stays true.
         ObjectType::BoardNotice => 27,
         ObjectType::BurnProof => 28,
+        ObjectType::Vouch => 29,
     }
 }
 
@@ -688,6 +695,7 @@ fn type_from_code(c: u64) -> Option<ObjectType> {
         11 => ObjectType::BondProof,
         12 => ObjectType::Attestation,
         28 => ObjectType::BurnProof,
+        29 => ObjectType::Vouch,
         _ => return None,
     })
 }

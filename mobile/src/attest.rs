@@ -6,7 +6,7 @@
 //! voice per signer) is the client's arithmetic, not this module's.
 
 use ducat_core::sig::SecretKey;
-use ducat_core::trust::{open_attestation, sign_attestation, Attestation, ATTESTATION_VERSION};
+use ducat_core::trust::{open_attestation, open_vouch, sign_attestation, sign_vouch, Attestation, Vouch, ATTESTATION_VERSION, VOUCH_VERSION};
 
 pub use ducat_core::trust::{MAX_ATTESTATION_NOTE_CHARS, RATING_MAX, RATING_MIN};
 
@@ -112,9 +112,57 @@ pub fn attestation_open(envelope: Vec<u8>) -> Result<AttestationView, AttestErro
     })
 }
 
+/// Everything signing a `VOUCH` needs: the signer's secret, the subject, a
+/// time. Nothing else travels — a vouch says *I know this persona* and no more.
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct VouchIn {
+    pub persona_secret: Vec<u8>,
+    pub subject_hex: String,
+    pub ts: u64,
+}
+
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct VouchView {
+    pub signer_hex: String,
+    pub subject_hex: String,
+    pub ts: u64,
+}
+
+/// Sign a vouch under the persona whose secret is given; the wire's own
+/// refusals (nowhen, oneself) are made here.
+#[uniffi::export]
+pub fn vouch_sign(input: VouchIn) -> Result<Vec<u8>, AttestError> {
+    let secret: [u8; 32] = input.persona_secret.as_slice().try_into().map_err(|_| malformed("persona secret is not 32 bytes"))?;
+    let key = SecretKey::ed25519_from_bytes(&secret);
+    let subject = unhex(&input.subject_hex).filter(|b| b.len() == 32).ok_or_else(|| malformed("subject is not a persona"))?;
+    let v = Vouch { version: VOUCH_VERSION, suite: 1, signer: key.public().to_bytes().to_vec(), subject, ts: input.ts };
+    Vouch::from_value(v.to_value()).map_err(|e| malformed(format!("{e:?}")))?;
+    Ok(sign_vouch(&v, &key))
+}
+
+/// Open a vouch. Whether its signer is anyone the reader knows is the
+/// reader's question.
+#[uniffi::export]
+pub fn vouch_open(envelope: Vec<u8>) -> Result<VouchView, AttestError> {
+    let v = open_vouch(&envelope).map_err(|e| malformed(format!("{e:?}")))?;
+    Ok(VouchView { signer_hex: hex_of(&v.signer), subject_hex: hex_of(&v.subject), ts: v.ts })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_vouch_round_trips_and_refuses_nowhen_and_oneself() {
+        let me = hex_of(&SecretKey::ed25519_from_bytes(&[0x21; 32]).public().to_bytes());
+        let them = hex_of(&SecretKey::ed25519_from_bytes(&[0x22; 32]).public().to_bytes());
+        let env = vouch_sign(VouchIn { persona_secret: vec![0x21; 32], subject_hex: them.clone(), ts: 1_700_000_000 }).unwrap();
+        let v = vouch_open(env).unwrap();
+        assert_eq!((v.signer_hex, v.subject_hex, v.ts), (me.clone(), them.clone(), 1_700_000_000));
+        assert!(vouch_sign(VouchIn { persona_secret: vec![0x21; 32], subject_hex: them.clone(), ts: 0 }).is_err());
+        assert!(vouch_sign(VouchIn { persona_secret: vec![0x21; 32], subject_hex: me, ts: 1 }).is_err());
+        assert!(vouch_sign(VouchIn { persona_secret: vec![1; 31], subject_hex: them, ts: 1 }).is_err());
+    }
 
     fn input() -> AttestationIn {
         AttestationIn {

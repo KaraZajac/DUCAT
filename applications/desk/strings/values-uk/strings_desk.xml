@@ -432,4 +432,15 @@
     <string name="desk_gate_over_burn">Більше, ніж вони спалили (%1$s). Якщо вони зникнуть, їх ніщо не втримає.</string>
     <string name="desk_gate_no_burn">Вони не спалили нічого, що ви перевірили. Якщо вони зникнуть, їх ніщо не втримає.</string>
     <string name="desk_no_burn_known">Їхнє спалення тут не перевірялося</string>
+    <string name="desk_known_by_names">%1$s їх знають</string>
+    <string name="desk_known_by_count">%1$s ваших контактів їх знають</string>
+    <string name="desk_vouch">Я їх знаю</string>
+    <string name="desk_vouched">Ви за них поручилися</string>
+    <string name="desk_vouch_hint">Підписує «я знаю цю персону» і надсилає їм; вони можуть показати це тим, хто знає вас. Лише для того, кого ви зустрічали.</string>
+    <string name="desk_show_my_vouches">Показати, хто мене знає</string>
+    <string name="desk_show_my_vouches_hint">Надсилає поручительства, які інші дали цій персоні; вони важать лише для тих, у кого ці підписанти є в контактах</string>
+    <string name="desk_vouch_sent">Ви сказали, що знаєте їх</string>
+    <string name="desk_vouch_received">Вони кажуть, що знають вас; збережено з вашими поручительствами</string>
+    <string name="desk_vouches_sent">Хто вас знає, показано їм</string>
+    <string name="desk_vouches_none_known">Вони показали, хто їх знає; нікого з них немає у ваших контактах</string>
 </resources>

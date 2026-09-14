@@ -862,6 +862,7 @@ OBJECT_TYPE_CODES = {
     "SLASH_CLAIM": 22, "MESSAGE": 23, "PREKEY_BUNDLE": 24,
     "SEALED_MESSAGE": 25, "LOG_HEAD": 26, "BOARD_NOTICE": 27,
     "BURN_PROOF": 28,
+    "VOUCH": 29,
 }
 
 
@@ -1167,6 +1168,9 @@ AT_TS = 313
 AT_TXID = 314
 AT_NOTE = 315
 AT_SIGNER = 316
+VO_SUBJECT = 317
+VO_TS = 318
+VO_SIGNER = 319
 MAX_OUT_PROOF_CHARS = 10 + 17 * 132
 MAX_BURN_PURPOSE_CHARS = 32
 MAX_ATTESTATION_NOTE_CHARS = 140
@@ -2620,6 +2624,47 @@ def run_attestation(cases, r):
                   f"{c['expect']['reencodes_to_hex']}")
 
 
+def parse_vouch(buf):
+    b, body_bytes, sig, signer, suite = _open_signed(buf, "VOUCH", VO_SIGNER, "signer")
+    _expect_type(b, "VOUCH", "VOUCH")
+    version = _take(b, 1, "uint", "version")
+    if version != 1:
+        raise Reject("Malformed", "vouch version is not 1")
+    out = {
+        "version": version,
+        "suite": _take(b, 2, "uint", "suite"),
+        "subject": _take(b, VO_SUBJECT, "bytes", "subject"),
+        "ts": _take(b, VO_TS, "uint", "time"),
+        "signer": _take(b, VO_SIGNER, "bytes", "signer"),
+    }
+    _finish(b)
+    if len(out["subject"]) != 32 or len(out["signer"]) != 32:
+        raise Reject("Malformed", "subject and signer are 32 bytes")
+    if out["ts"] == 0:
+        raise Reject("Malformed", "a vouch needs a time")
+    if out["subject"] == out["signer"]:
+        raise Reject("Malformed", "a persona cannot vouch for itself")
+    verify_sig(suite, signer, sig, sig_input("VOUCH", suite, body_bytes))
+    return out
+
+
+def run_vouch(cases, r):
+    for c in cases:
+        def go(c=c):
+            a = parse_vouch(unhex(c["vouch_hex"]))
+            m = [(0, ("uint", OBJECT_TYPE_CODES["VOUCH"])),
+                 (1, ("uint", a["version"])), (2, ("uint", a["suite"])),
+                 (VO_SUBJECT, ("bytes", a["subject"])), (VO_TS, ("uint", a["ts"])),
+                 (VO_SIGNER, ("bytes", a["signer"]))]
+            return _reencode_map(m)
+        out = expect_reject(r, "contact", c, go)
+        if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:
+            r.passed -= 1
+            r.bad("contact", c["name"], c.get("why", ""),
+                  f"re-encoded to {out.hex()}, vector says "
+                  f"{c['expect']['reencodes_to_hex']}")
+
+
 def run_contact_card(cases, r):
     for c in cases:
         def go(c=c):
@@ -2903,6 +2948,7 @@ BY_KIND = {
     "group.page": run_group_page,
     "burn.proof": run_burn_proof,
     "attestation.receipt": run_attestation,
+    "vouch.known": run_vouch,
     "board.sealed": run_board_sealed,
     "board.beacon_window": run_beacon_window,
     "board.beacon_verdict": run_beacon_verdict,

@@ -686,6 +686,132 @@ fn main() {
             }
             println!("MB_FAIL no verdict came back");
         }
-        _ => panic!("MB_FAIL usage: host | guest <card uri> [name] | customer <card uri> | reader <press code> | party <name> [card...] | callee <card> | caller <card> [secs] | rated | rater <card> | checker | burner <card>"),
+        Some("vouched") => {
+            // X: cut a card, wait for vouches from whoever claims it, then
+            // — once a reader asks — show who knows me.
+            let name = args.get(1).cloned().unwrap_or_else(|| "Vouched Desk".into());
+            app.set_my_name(None, &name).expect("MB_FAIL name");
+            let handle = app.profile_code(None).expect("MB_FAIL issue");
+            println!("MB_CARD {}", handle.uri);
+            let t0 = Instant::now();
+            let mut shown = false;
+            let mut seen_vouch: std::collections::HashSet<String> = Default::default();
+            while t0.elapsed() < Duration::from_secs(1800) {
+                app.collect_claims(None);
+                app.poll();
+                for c in app.contacts() {
+                    let thread = app.thread(&c.persona_hex);
+                    if thread.iter().any(|m| !m.outgoing && m.body.trim().starts_with("ducat:vouch/")) && seen_vouch.insert(c.persona_hex.clone()) {
+                        println!("MB_VOUCH_GOT from {}", c.display_name());
+                    }
+                    let asked = thread.iter().any(|m| !m.outgoing && m.body.trim() == "who knows you?");
+                    let answered = thread.iter().any(|m| m.outgoing && m.body.starts_with("ducat:vouches/"));
+                    if asked && !answered {
+                        match app.my_vouches_link(&c.persona_hex) {
+                            Ok(link) => {
+                                let n = link.trim_start_matches("ducat:vouches/").split('.').count();
+                                app.send(&c, Outgoing::text(&link)).expect("MB_FAIL send vouches");
+                                println!("MB_VOUCHES_SHOWN {n} to {}", c.display_name());
+                                shown = true;
+                            }
+                            Err(e) => println!("MB_NOT_YET {e}"),
+                        }
+                    }
+                    if shown && thread.iter().any(|m| !m.outgoing && m.body.starts_with("known by:")) {
+                        println!("MB_OK the reader answered");
+                        return;
+                    }
+                }
+                std::thread::sleep(Duration::from_secs(5));
+            }
+            println!("MB_FAIL vouched desk timed out");
+        }
+        Some("voucher") => {
+            // Pat or Sam: claim X's card and vouch; then cut a card for the
+            // reader to claim, so the reader holds us as a contact.
+            let name = args.get(1).cloned().unwrap_or_else(|| "Voucher".into());
+            let uri = args.get(2).expect("MB_FAIL voucher <name> <x card>");
+            app.set_my_name(None, &name).expect("MB_FAIL name");
+            let c = match app.claim_card(uri, Some("the vouched"), false, None) {
+                Ok(c) => c.contact(),
+                Err(e) => {
+                    println!("MB_FAIL claim: {e}");
+                    return;
+                }
+            };
+            println!("MB_CLAIMED {}", c.display_name());
+            for _ in 0..30 {
+                app.poll();
+                if app.contact(&c.persona_hex).map_or(false, |k| k.their_bundle.is_some()) {
+                    break;
+                }
+                std::thread::sleep(Duration::from_secs(2));
+            }
+            let link = app.vouch(&c.persona_hex).expect("MB_FAIL vouch");
+            let c = app.contact(&c.persona_hex).expect("MB_FAIL contact gone");
+            app.send(&c, Outgoing::text(&link)).expect("MB_FAIL send vouch");
+            println!("MB_VOUCHED {} ({} chars)", c.display_name(), link.len());
+            let handle = app.profile_code(None).expect("MB_FAIL issue");
+            println!("MB_CARD {}", handle.uri);
+            let t0 = Instant::now();
+            while t0.elapsed() < Duration::from_secs(1500) {
+                app.collect_claims(None);
+                app.poll();
+                if app.contacts().len() >= 2 {
+                    println!("MB_OK {name} is held by the reader");
+                    return;
+                }
+                std::thread::sleep(Duration::from_secs(5));
+            }
+            println!("MB_FAIL nobody claimed the voucher's card");
+        }
+        Some("knower") => {
+            // C: claim the vouchers' cards (contacts), claim X's card, ask X
+            // who knows them, and say what this desk concludes.
+            // knower <voucher card>... <x card>
+            let x = args.last().expect("MB_FAIL knower <voucher card>... <x card>").clone();
+            app.set_my_name(None, "Reader Desk").expect("MB_FAIL name");
+            for uri in &args[1..args.len() - 1] {
+                match app.claim_card(uri, None, false, None) {
+                    Ok(c) => println!("MB_CLAIMED contact {}", c.contact().display_name()),
+                    Err(e) => {
+                        println!("MB_FAIL claim: {e}");
+                        return;
+                    }
+                }
+            }
+            let c = match app.claim_card(&x, Some("the stranger"), false, None) {
+                Ok(c) => c.contact(),
+                Err(e) => {
+                    println!("MB_FAIL claim x: {e}");
+                    return;
+                }
+            };
+            println!("MB_CLAIMED stranger {}", c.display_name());
+            for _ in 0..30 {
+                app.poll();
+                if app.contact(&c.persona_hex).map_or(false, |k| k.their_bundle.is_some()) {
+                    break;
+                }
+                std::thread::sleep(Duration::from_secs(2));
+            }
+            println!("MB_BEFORE known_by={:?}", app.known_by(&c.persona_hex));
+            let c = app.contact(&c.persona_hex).expect("MB_FAIL contact gone");
+            app.send(&c, Outgoing::text("who knows you?")).expect("MB_FAIL ask");
+            let t0 = Instant::now();
+            while t0.elapsed() < Duration::from_secs(900) {
+                app.poll();
+                if app.thread(&c.persona_hex).iter().any(|m| !m.outgoing && m.body.starts_with("ducat:vouches/")) {
+                    let known = app.known_by(&c.persona_hex);
+                    println!("MB_KNOWN_BY {:?} — {} of your contacts know this person", known, known.len());
+                    let _ = app.send(&c, Outgoing::text(&format!("known by: {}", known.join(", "))));
+                    println!("MB_OK reader concluded after {:.0}s", t0.elapsed().as_secs_f64());
+                    return;
+                }
+                std::thread::sleep(Duration::from_secs(5));
+            }
+            println!("MB_FAIL no vouches came");
+        }
+        _ => panic!("MB_FAIL usage: host | guest <card uri> [name] | customer <card uri> | reader <press code> | party <name> [card...] | callee <card> | caller <card> [secs] | rated | rater <card> | checker | burner <card> | vouched [name] | voucher <name> <x card> | knower <voucher card>... <x card>"),
     }
 }

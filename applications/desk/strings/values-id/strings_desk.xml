@@ -420,4 +420,15 @@
     <string name="desk_gate_over_burn">Lebih dari yang mereka bakar (%1$s). Jika mereka menghilang, tidak ada yang menahan mereka.</string>
     <string name="desk_gate_no_burn">Mereka belum membakar apa pun yang Anda periksa. Jika mereka menghilang, tidak ada yang menahan mereka.</string>
     <string name="desk_no_burn_known">Tidak ada bakaran mereka yang diperiksa di sini</string>
+    <string name="desk_known_by_names">%1$s mengenal mereka</string>
+    <string name="desk_known_by_count">%1$s kontak Anda mengenal mereka</string>
+    <string name="desk_vouch">Saya mengenal mereka</string>
+    <string name="desk_vouched">Anda telah menjamin mereka</string>
+    <string name="desk_vouch_hint">Menandatangani "saya mengenal persona ini" dan mengirimkannya; mereka dapat menunjukkannya kepada orang yang mengenal Anda. Hanya untuk orang yang pernah Anda temui.</string>
+    <string name="desk_show_my_vouches">Tunjukkan siapa yang mengenal saya</string>
+    <string name="desk_show_my_vouches_hint">Mengirim jaminan yang orang lain berikan untuk persona ini; hanya berarti bagi orang yang memiliki penandatangan itu sebagai kontak</string>
+    <string name="desk_vouch_sent">Anda mengatakan mengenal mereka</string>
+    <string name="desk_vouch_received">Mereka mengatakan mengenal Anda; disimpan bersama jaminan Anda</string>
+    <string name="desk_vouches_sent">Siapa yang mengenal Anda, ditunjukkan kepada mereka</string>
+    <string name="desk_vouches_none_known">Mereka menunjukkan siapa yang mengenal mereka; tidak ada yang menjadi kontak Anda</string>
 </resources>

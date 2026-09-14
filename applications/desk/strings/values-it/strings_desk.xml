@@ -424,4 +424,15 @@
     <string name="desk_gate_over_burn">Più di quanto hanno bruciato (%1$s). Se spariscono, nulla li trattiene.</string>
     <string name="desk_gate_no_burn">Non hanno bruciato nulla che tu abbia verificato. Se spariscono, nulla li trattiene.</string>
     <string name="desk_no_burn_known">Nessuna loro prova verificata qui</string>
+    <string name="desk_known_by_names">%1$s li conoscono</string>
+    <string name="desk_known_by_count">%1$s dei tuoi contatti li conoscono</string>
+    <string name="desk_vouch">Li conosco</string>
+    <string name="desk_vouched">Hai garantito per loro</string>
+    <string name="desk_vouch_hint">Firma «conosco questa persona» e glielo invia; possono mostrarlo a chi ti conosce. Solo per qualcuno che hai incontrato.</string>
+    <string name="desk_show_my_vouches">Mostra chi mi conosce</string>
+    <string name="desk_show_my_vouches_hint">Invia le garanzie che altri hanno dato a questa persona; contano solo per chi ha quei firmatari tra i contatti</string>
+    <string name="desk_vouch_sent">Hai detto di conoscerli</string>
+    <string name="desk_vouch_received">Dicono di conoscerti; conservato con le tue garanzie</string>
+    <string name="desk_vouches_sent">Chi ti conosce, mostrato a loro</string>
+    <string name="desk_vouches_none_known">Hanno mostrato chi li conosce; nessuno è tra i tuoi contatti</string>
 </resources>

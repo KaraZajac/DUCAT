@@ -432,4 +432,15 @@
     <string name="desk_gate_over_burn">Więcej, niż spalili (%1$s). Jeśli znikną, nic ich nie trzyma.</string>
     <string name="desk_gate_no_burn">Nie spalili niczego, co sprawdziłeś. Jeśli znikną, nic ich nie trzyma.</string>
     <string name="desk_no_burn_known">Żadne ich spalenie nie zostało tu sprawdzone</string>
+    <string name="desk_known_by_names">%1$s ich znają</string>
+    <string name="desk_known_by_count">%1$s z twoich kontaktów ich zna</string>
+    <string name="desk_vouch">Znam ich</string>
+    <string name="desk_vouched">Poręczyłeś za nich</string>
+    <string name="desk_vouch_hint">Podpisuje „znam tę personę” i wysyła im; mogą to pokazać osobom, które cię znają. Tylko dla kogoś, kogo spotkałeś.</string>
+    <string name="desk_show_my_vouches">Pokaż, kto mnie zna</string>
+    <string name="desk_show_my_vouches_hint">Wysyła poręczenia, które inni dali tej personie; liczą się tylko dla osób mających tych podpisujących w kontaktach</string>
+    <string name="desk_vouch_sent">Powiedziałeś, że ich znasz</string>
+    <string name="desk_vouch_received">Mówią, że cię znają; zachowane z twoimi poręczeniami</string>
+    <string name="desk_vouches_sent">Kto cię zna, pokazane im</string>
+    <string name="desk_vouches_none_known">Pokazali, kto ich zna; nikt z nich nie jest twoim kontaktem</string>
 </resources>

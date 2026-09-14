@@ -424,4 +424,15 @@
     <string name="desk_gate_over_burn">Plus que ce qu’ils ont brûlé (%1$s). S’ils disparaissent, rien ne les retient.</string>
     <string name="desk_gate_no_burn">Ils n’ont rien brûlé que vous ayez vérifié. S’ils disparaissent, rien ne les retient.</string>
     <string name="desk_no_burn_known">Aucune preuve de leur part vérifiée ici</string>
+    <string name="desk_known_by_names">%1$s les connaissent</string>
+    <string name="desk_known_by_count">%1$s de vos contacts les connaissent</string>
+    <string name="desk_vouch">Je les connais</string>
+    <string name="desk_vouched">Vous vous êtes porté garant</string>
+    <string name="desk_vouch_hint">Signe « je connais ce persona » et le leur envoie ; ils peuvent le montrer à ceux qui vous connaissent. Seulement pour quelqu’un que vous avez rencontré.</string>
+    <string name="desk_show_my_vouches">Montrer qui me connaît</string>
+    <string name="desk_show_my_vouches_hint">Envoie les garanties que d’autres ont données à ce persona ; elles ne comptent que pour ceux qui ont ces signataires parmi leurs contacts</string>
+    <string name="desk_vouch_sent">Vous avez dit les connaître</string>
+    <string name="desk_vouch_received">Ils disent vous connaître ; gardé avec vos garanties</string>
+    <string name="desk_vouches_sent">Qui vous connaît, montré</string>
+    <string name="desk_vouches_none_known">Ils ont montré qui les connaît ; aucun n’est parmi vos contacts</string>
 </resources>

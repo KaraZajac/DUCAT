@@ -279,6 +279,83 @@ pub fn open_attestation(envelope: &[u8]) -> Result<Attestation, Reject> {
     Attestation::from_value(decode(body.bytes())?)
 }
 
+/// The version every `VOUCH` written today carries.
+pub const VOUCH_VERSION: u64 = 1;
+
+/// §9.2's vouch: *I know this persona*, said by a signer who met them, and
+/// nothing else — no rating, no amount, no sentence — because a vouch says
+/// one thing and the less it carries the less it leaks. Sealed under its
+/// signer like a receipt; what a reader makes of it is arithmetic over the
+/// reader's own contacts, never published.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Vouch {
+    pub version: u64,
+    pub suite: u8,
+    /// Who vouches — the envelope's signer.
+    pub signer: Vec<u8>,
+    /// Who is vouched for.
+    pub subject: Vec<u8>,
+    /// Seconds since the epoch.
+    pub ts: u64,
+}
+
+impl Vouch {
+    pub fn to_value(&self) -> Value {
+        let mut m = BTreeMap::new();
+        m.insert(f::TYPE, Value::Uint(type_code(ObjectType::Vouch)));
+        m.insert(f::VERSION, Value::Uint(self.version));
+        m.insert(f::SUITE, Value::Uint(self.suite as u64));
+        m.insert(f::VO_SUBJECT, Value::Bytes(self.subject.clone()));
+        m.insert(f::VO_TS, Value::Uint(self.ts));
+        m.insert(f::VO_SIGNER, Value::Bytes(self.signer.clone()));
+        Value::Map(m)
+    }
+
+    pub fn from_value(v: Value) -> Result<Self, Reject> {
+        let mut r = Reader::new(v)?;
+        if r.uint(f::TYPE)? != type_code(ObjectType::Vouch) {
+            return Err(Reject::with_detail(RejectCode::Malformed, "object type is not VOUCH"));
+        }
+        let version = r.uint(f::VERSION)?;
+        if version != VOUCH_VERSION {
+            return Err(Reject::with_detail(RejectCode::Malformed, "vouch version is not 1"));
+        }
+        let out = Vouch {
+            version,
+            suite: r.uint(f::SUITE)? as u8,
+            subject: r.bytes(f::VO_SUBJECT, Some(32))?,
+            ts: r.uint(f::VO_TS)?,
+            signer: r.bytes(f::VO_SIGNER, Some(32))?,
+        };
+        r.finish()?;
+        if out.ts == 0 {
+            return Err(Reject::with_detail(RejectCode::Malformed, "a vouch needs a time"));
+        }
+        if out.subject == out.signer {
+            return Err(Reject::with_detail(RejectCode::Malformed, "a persona cannot vouch for itself"));
+        }
+        Ok(out)
+    }
+}
+
+/// Sign a vouch under the signer it names (§18.3).
+pub fn sign_vouch(v: &Vouch, key: &SecretKey) -> Vec<u8> {
+    seal(&SignedBytes::from_value(v.to_value()), ObjectType::Vouch, key)
+}
+
+/// Open a vouch: verify the envelope under the signer in the body. Whether
+/// that signer is anyone the reader knows is the reader's question (§9.2).
+pub fn open_vouch(envelope: &[u8]) -> Result<Vouch, Reject> {
+    let peek = Vouch::from_value(decode(&peek_body(envelope)?)?)?;
+    let pk = PublicKey::from_bytes(suite_of(peek.suite)?, &peek.signer)
+        .map_err(|_| Reject::with_detail(RejectCode::Malformed, "signer is not a public key"))?;
+    let (ty, body) = open(envelope, &pk)?;
+    if ty != ObjectType::Vouch {
+        return Err(Reject::with_detail(RejectCode::Malformed, "object type is not VOUCH"));
+    }
+    Vouch::from_value(decode(body.bytes())?)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -366,5 +443,25 @@ mod tests {
         }
         let bare = Attestation { txid: None, note: None, ..a.clone() };
         assert_eq!(Attestation::from_value(bare.to_value()).unwrap(), bare);
+    }
+
+    #[test]
+    fn a_vouch_opens_under_its_signer_and_refuses_what_the_wire_refuses() {
+        let signer = SecretKey::ed25519_from_bytes(&[0x51; 32]);
+        let subject = SecretKey::ed25519_from_bytes(&[0x52; 32]);
+        let v = Vouch { version: VOUCH_VERSION, suite: 1, signer: signer.public().to_bytes().to_vec(), subject: subject.public().to_bytes().to_vec(), ts: 1_760_000_000 };
+        let env = sign_vouch(&v, &signer);
+        assert_eq!(open_vouch(&env).unwrap(), v);
+        // Under any key but the one named inside: refused.
+        assert!(open_vouch(&sign_vouch(&v, &subject)).is_err());
+        // Not an envelope at all.
+        assert!(open_vouch(&v.to_value().encode()).is_err());
+        for (why, bad) in [
+            ("no time", Vouch { ts: 0, ..v.clone() }),
+            ("self", Vouch { subject: v.signer.clone(), ..v.clone() }),
+            ("wrong version", Vouch { version: 2, ..v.clone() }),
+        ] {
+            assert!(Vouch::from_value(bad.to_value()).is_err(), "{why}");
+        }
     }
 }

@@ -424,4 +424,15 @@
     <string name="desk_gate_over_burn">بیش از آنچه سوزانده‌اند (%1$s). اگر ناپدید شوند چیزی آن‌ها را نگه نمی‌دارد.</string>
     <string name="desk_gate_no_burn">چیزی که شما بررسی کرده باشید نسوزانده‌اند. اگر ناپدید شوند چیزی آن‌ها را نگه نمی‌دارد.</string>
     <string name="desk_no_burn_known">هیچ سوزاندنی از آن‌ها اینجا بررسی نشده</string>
+    <string name="desk_known_by_names">%1$s آن‌ها را می‌شناسند</string>
+    <string name="desk_known_by_count">%1$s نفر از مخاطبان شما آن‌ها را می‌شناسند</string>
+    <string name="desk_vouch">آن‌ها را می‌شناسم</string>
+    <string name="desk_vouched">برایشان ضمانت کرده‌اید</string>
+    <string name="desk_vouch_hint">«این شخصیت را می‌شناسم» را امضا کرده و برایشان می‌فرستد؛ می‌توانند آن را به کسانی که شما را می‌شناسند نشان دهند. فقط برای کسی که دیده‌اید.</string>
+    <string name="desk_show_my_vouches">نشان دادن اینکه چه کسی مرا می‌شناسد</string>
+    <string name="desk_show_my_vouches_hint">ضمانت‌هایی را که دیگران به این شخصیت داده‌اند می‌فرستد؛ فقط برای کسانی که آن امضاکنندگان را در مخاطبان خود دارند حساب می‌شود</string>
+    <string name="desk_vouch_sent">گفتید که آن‌ها را می‌شناسید</string>
+    <string name="desk_vouch_received">می‌گویند شما را می‌شناسند؛ همراه ضمانت‌هایتان نگه داشته شد</string>
+    <string name="desk_vouches_sent">چه کسی شما را می‌شناسد، به آن‌ها نشان داده شد</string>
+    <string name="desk_vouches_none_known">نشان دادند چه کسانی آن‌ها را می‌شناسند؛ هیچ‌کدام از مخاطبان شما نیستند</string>
 </resources>

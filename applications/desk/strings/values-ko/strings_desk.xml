@@ -420,4 +420,15 @@
     <string name="desk_gate_over_burn">상대가 소각한 금액(%1$s)보다 많습니다. 사라져도 잡아둘 것이 없습니다.</string>
     <string name="desk_gate_no_burn">당신이 확인한 소각이 없습니다. 사라져도 잡아둘 것이 없습니다.</string>
     <string name="desk_no_burn_known">여기서 확인된 상대의 소각 없음</string>
+    <string name="desk_known_by_names">%1$s가 아는 사람</string>
+    <string name="desk_known_by_count">내 연락처 중 %1$s명이 아는 사람</string>
+    <string name="desk_vouch">아는 사람</string>
+    <string name="desk_vouched">보증함</string>
+    <string name="desk_vouch_hint">"이 페르소나를 안다"에 서명해 상대에게 보냅니다. 상대는 당신을 아는 사람에게 보여줄 수 있습니다. 직접 만난 사람에게만.</string>
+    <string name="desk_show_my_vouches">나를 아는 사람 보이기</string>
+    <string name="desk_show_my_vouches_hint">다른 사람들이 이 페르소나에게 준 보증을 보냅니다. 그 서명자를 연락처에 둔 사람에게만 유효합니다</string>
+    <string name="desk_vouch_sent">아는 사람이라고 밝혔습니다</string>
+    <string name="desk_vouch_received">상대가 당신을 안다고 합니다. 보증에 보관됨</string>
+    <string name="desk_vouches_sent">당신을 아는 사람들, 상대에게 보임</string>
+    <string name="desk_vouches_none_known">상대가 아는 사람들을 보였지만, 당신의 연락처에는 없습니다</string>
 </resources>

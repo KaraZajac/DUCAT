@@ -75,6 +75,8 @@ pub enum ObjectType {
     BoardNotice,
     /// §9.5: a persona's proof that it burned XMR, its message naming it.
     BurnProof,
+    /// §9.2: *I know this persona*, said by someone who met them.
+    Vouch,
 }
 
 impl ObjectType {
@@ -108,6 +110,7 @@ impl ObjectType {
             ObjectType::LogHead => b"LOG_HEAD",
             ObjectType::BoardNotice => b"BOARD_NOTICE",
             ObjectType::BurnProof => b"BURN_PROOF",
+            ObjectType::Vouch => b"VOUCH",
         }
     }
 }
