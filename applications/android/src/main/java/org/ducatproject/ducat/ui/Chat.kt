@@ -63,6 +63,8 @@ import org.ducatproject.ducat.TabStore
 import org.ducatproject.ducat.Trust
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Verified
+import androidx.compose.material.icons.filled.Handshake
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.Image
@@ -404,6 +406,9 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                 myBurnLink = Trust.myBurn(context, mine)?.envelopeHex
                     ?.let { Trust.BURN_PREFIX + it },
                 myRecordLink = Trust.myRecordLink(context, mine),
+                knownBy = Trust.knownBy(context, hex),
+                vouched = Trust.vouchedFor(context, hex),
+                myVouchesLink = Trust.myVouchesLink(context, mine),
             )
         }
         // Looking at the thread is what "seen" means; the dot and the badge
@@ -1057,6 +1062,49 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                                 }
                             }
                         }
+                        // §9.2's vouches: "I know them", signed under the
+                        // persona this thread speaks as and sent to them,
+                        // and "show who knows me", the vouches others gave
+                        // that persona. Each is an ordinary text send of a
+                        // link; what a reader makes of it is arithmetic
+                        // over its own contacts, done there. Dark once this
+                        // phone has vouched for them — a vouch says one
+                        // thing, and it has been said — and while nobody
+                        // has vouched for this persona yet.
+                        Row(
+                            Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                        ) {
+                            TrayItem(
+                                Icons.Filled.Handshake,
+                                stringResource(
+                                    if (trust.vouched) R.string.trust_vouched else R.string.trust_vouch,
+                                ),
+                                enabled = !sending && !trust.vouched && c.theirBundle != null,
+                            ) {
+                                trayOpen = false
+                                val to = c
+                                send(context.getString(R.string.trust_what_vouch)) {
+                                    val mine = PersonaStore(context).ownerHexOf(to)
+                                    val link = Trust.vouch(context, mine, to.personaHex)
+                                    sendOne(context, to, link)
+                                }
+                            }
+                            val myVouches = trust.myVouchesLink
+                            TrayItem(
+                                Icons.Filled.Group,
+                                stringResource(R.string.trust_show_my_vouches),
+                                enabled = !sending && myVouches != null && c.theirBundle != null,
+                            ) {
+                                trayOpen = false
+                                if (myVouches != null) {
+                                    val to = c
+                                    send(context.getString(R.string.trust_what_vouches)) {
+                                        sendOne(context, to, myVouches)
+                                    }
+                                }
+                            }
+                        }
                       }
                     }
 
@@ -1349,6 +1397,7 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                         onPay = { billView = it },
                         contactHex = c.personaHex,
                         recordReceipts = trust.theirRecord.receipts,
+                        knownBy = trust.knownBy,
                     )
                     val on = reactions[m.seq to m.timestamp]
                     val mine2 = on?.first
@@ -1828,6 +1877,12 @@ private data class TrustView(
     val theirRecord: Trust.RecordSummary = Trust.RecordSummary(),
     val myBurnLink: String? = null,
     val myRecordLink: String? = null,
+    /** §9.2: which of this phone's contacts vouched for them, by name. */
+    val knownBy: List<String> = emptyList(),
+    /** Whether this phone already vouched for them, from any persona. */
+    val vouched: Boolean = false,
+    /** The vouches others gave this persona, as one link; null when none. */
+    val myVouchesLink: String? = null,
 )
 
 /**
@@ -1859,7 +1914,28 @@ private fun trustBadge(t: TrustView): String? {
         if (record.weighted > 0) line += " · " + "%.1f".format(record.ratingX10 / 10.0) + " ★"
         parts += line
     }
+    // §9.2: who among this phone's contacts knows them, in words — and
+    // nothing when none do, because "nobody you know knows them" is what
+    // every stranger's header would say.
+    knownWords(t.knownBy)?.let { parts += it }
     return if (parts.isEmpty()) null else parts.joinToString(" · ")
+}
+
+/**
+ * §9.2's answer worn in words: "Pat knows them", "Pat and Sam know them",
+ * "3 of your contacts know them" — over the names [Trust.knownBy] found
+ * among this phone's own contacts. Null when none. Never a score, never
+ * the hex, and never anyone this phone does not already hold.
+ */
+@Composable
+private fun knownWords(names: List<String>): String? = when (names.size) {
+    0 -> null
+    1 -> stringResource(R.string.trust_known_by_one, names[0])
+    2 -> stringResource(
+        R.string.trust_known_by_names,
+        names.joinToString(stringResource(R.string.trust_and)),
+    )
+    else -> stringResource(R.string.trust_known_by_count, Amounts.count(names.size.toLong()))
 }
 
 /**
@@ -1878,10 +1954,27 @@ private fun TrustBubble(
     outgoing: Boolean,
     contactHex: String,
     recordReceipts: Int,
+    knownBy: List<String>,
     fg: androidx.compose.ui.graphics.Color,
 ) {
     val context = LocalContext.current
     when (link) {
+        // §9.2's vouch, said as what it is on either side; the envelope is
+        // kept by Trust on the way in, and the bubble never draws its hex.
+        is Trust.Link.Vouch -> Text(
+            stringResource(
+                if (outgoing) R.string.trust_vouch_sent else R.string.trust_vouch_received,
+            ),
+            color = fg,
+        )
+        // What they showed, read as this phone's own arithmetic: the
+        // contacts of ours among the signers, or the honest sentence when
+        // none of them are — a stranger's friends are strangers.
+        is Trust.Link.Vouches -> Text(
+            if (outgoing) stringResource(R.string.trust_vouches_sent)
+            else knownWords(knownBy) ?: stringResource(R.string.trust_vouches_none_known),
+            color = fg,
+        )
         is Trust.Link.Attest -> Text(
             stringResource(
                 if (outgoing) R.string.trust_rating_sent else R.string.trust_rating_received,
@@ -2130,6 +2223,8 @@ private fun Bubble(
     contactHex: String = "",
     /** §9.2: how many of their receipts this phone has read, for the record bubble. */
     recordReceipts: Int = 0,
+    /** §9.2: which of this phone's contacts vouched for them, for the vouches bubble. */
+    knownBy: List<String> = emptyList(),
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val align = if (m.outgoing) Alignment.End else Alignment.Start
@@ -2434,7 +2529,7 @@ private fun Bubble(
                     // a card and draw a QR of it.
                     val trustLink = remember(m.body) { Trust.linkIn(m.body) }
                     if (trustLink != null) {
-                        TrustBubble(trustLink, m.outgoing, contactHex, recordReceipts, fg)
+                        TrustBubble(trustLink, m.outgoing, contactHex, recordReceipts, knownBy, fg)
                     } else if (cardUri != null) {
                         Column {
                             Box(Modifier.clip(MaterialTheme.shapes.medium)) {

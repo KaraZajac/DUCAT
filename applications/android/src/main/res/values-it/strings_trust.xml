@@ -32,4 +32,20 @@
     <string name="trust_err_note_long">Una nota è una frase.</string>
     <string name="trust_err_self">Non puoi valutare il tuo stesso nome.</string>
     <string name="trust_err_unsigned">Impossibile firmare la valutazione.</string>
+    <string name="trust_and">" e "</string>
+    <string name="trust_known_by_one">%1$s li conosce</string>
+    <string name="trust_known_by_names">%1$s li conoscono</string>
+    <string name="trust_known_by_count">%1$s dei tuoi contatti li conoscono</string>
+    <string name="trust_vouch">Li conosco</string>
+    <string name="trust_vouched">Hai garantito per loro</string>
+    <string name="trust_show_my_vouches">Mostra chi mi conosce</string>
+    <string name="trust_vouch_sent">Hai detto di conoscerli</string>
+    <string name="trust_vouch_received">Dicono di conoscerti; conservato con le tue garanzie</string>
+    <string name="trust_vouches_sent">Chi ti conosce, mostrato a loro</string>
+    <string name="trust_vouches_none_known">Hanno mostrato chi li conosce; nessuno è tra i tuoi contatti</string>
+    <string name="trust_vouches_preview">Chi li conosce, mostrato a te</string>
+    <string name="trust_what_vouch">garanzia</string>
+    <string name="trust_what_vouches">garanzie</string>
+    <string name="trust_err_vouch_self">Non puoi garantire per il tuo stesso nome.</string>
+    <string name="trust_err_vouch_unsigned">Impossibile firmare la garanzia.</string>
 </resources>

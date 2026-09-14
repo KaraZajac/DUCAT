@@ -32,4 +32,20 @@
     <string name="trust_err_note_long">یادداشت یک جمله است.</string>
     <string name="trust_err_self">نمی‌توانید به نام خودتان امتیاز بدهید.</string>
     <string name="trust_err_unsigned">امتیاز امضا نشد.</string>
+    <string name="trust_and">" و "</string>
+    <string name="trust_known_by_one">%1$s آن‌ها را می‌شناسد</string>
+    <string name="trust_known_by_names">%1$s آن‌ها را می‌شناسند</string>
+    <string name="trust_known_by_count">%1$s نفر از مخاطبان شما آن‌ها را می‌شناسند</string>
+    <string name="trust_vouch">آن‌ها را می‌شناسم</string>
+    <string name="trust_vouched">برایشان ضمانت کرده‌اید</string>
+    <string name="trust_show_my_vouches">نشان دادن اینکه چه کسی مرا می‌شناسد</string>
+    <string name="trust_vouch_sent">گفتید که آن‌ها را می‌شناسید</string>
+    <string name="trust_vouch_received">می‌گویند شما را می‌شناسند؛ همراه ضمانت‌هایتان نگه داشته شد</string>
+    <string name="trust_vouches_sent">چه کسی شما را می‌شناسد، به آن‌ها نشان داده شد</string>
+    <string name="trust_vouches_none_known">نشان دادند چه کسانی آن‌ها را می‌شناسند؛ هیچ‌کدام از مخاطبان شما نیستند</string>
+    <string name="trust_vouches_preview">چه کسی آن‌ها را می‌شناسد، به شما نشان داده شد</string>
+    <string name="trust_what_vouch">ضمانت</string>
+    <string name="trust_what_vouches">ضمانت‌ها</string>
+    <string name="trust_err_vouch_self">نمی‌توانید برای نام خودتان ضمانت کنید.</string>
+    <string name="trust_err_vouch_unsigned">ضمانت امضا نشد.</string>
 </resources>

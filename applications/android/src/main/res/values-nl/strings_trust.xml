@@ -32,4 +32,20 @@
     <string name="trust_err_note_long">Een notitie is één zin.</string>
     <string name="trust_err_self">Je kunt je eigen naam niet beoordelen.</string>
     <string name="trust_err_unsigned">De beoordeling kon niet worden ondertekend.</string>
+    <string name="trust_and">" en "</string>
+    <string name="trust_known_by_one">%1$s kent hen</string>
+    <string name="trust_known_by_names">%1$s kennen hen</string>
+    <string name="trust_known_by_count">%1$s van je contacten kennen hen</string>
+    <string name="trust_vouch">Ik ken hen</string>
+    <string name="trust_vouched">Je hebt voor hen ingestaan</string>
+    <string name="trust_show_my_vouches">Tonen wie mij kent</string>
+    <string name="trust_vouch_sent">Je zei dat je hen kent</string>
+    <string name="trust_vouch_received">Zij zeggen dat ze jou kennen; bewaard bij je borgstellingen</string>
+    <string name="trust_vouches_sent">Wie jou kent, aan hen getoond</string>
+    <string name="trust_vouches_none_known">Ze toonden wie hen kent; geen van hen is een contact van jou</string>
+    <string name="trust_vouches_preview">Wie hen kent, aan jou getoond</string>
+    <string name="trust_what_vouch">borgstelling</string>
+    <string name="trust_what_vouches">borgstellingen</string>
+    <string name="trust_err_vouch_self">Je kunt niet voor je eigen naam instaan.</string>
+    <string name="trust_err_vouch_unsigned">De borgstelling kon niet worden ondertekend.</string>
 </resources>

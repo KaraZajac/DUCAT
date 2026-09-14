@@ -32,4 +32,20 @@
     <string name="trust_err_note_long">Нотатка — одне речення.</string>
     <string name="trust_err_self">Не можна оцінити власне ім’я.</string>
     <string name="trust_err_unsigned">Не вдалося підписати оцінку.</string>
+    <string name="trust_and">" і "</string>
+    <string name="trust_known_by_one">%1$s їх знає</string>
+    <string name="trust_known_by_names">%1$s їх знають</string>
+    <string name="trust_known_by_count">%1$s ваших контактів їх знають</string>
+    <string name="trust_vouch">Я їх знаю</string>
+    <string name="trust_vouched">Ви за них поручилися</string>
+    <string name="trust_show_my_vouches">Показати, хто мене знає</string>
+    <string name="trust_vouch_sent">Ви сказали, що знаєте їх</string>
+    <string name="trust_vouch_received">Вони кажуть, що знають вас; збережено з вашими поручительствами</string>
+    <string name="trust_vouches_sent">Хто вас знає, показано їм</string>
+    <string name="trust_vouches_none_known">Вони показали, хто їх знає; нікого з них немає у ваших контактах</string>
+    <string name="trust_vouches_preview">Хто їх знає, показано вам</string>
+    <string name="trust_what_vouch">поручительство</string>
+    <string name="trust_what_vouches">поручительства</string>
+    <string name="trust_err_vouch_self">Не можна поручитися за власне ім’я.</string>
+    <string name="trust_err_vouch_unsigned">Не вдалося підписати поручительство.</string>
 </resources>

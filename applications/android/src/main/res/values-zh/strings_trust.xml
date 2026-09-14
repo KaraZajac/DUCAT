@@ -32,4 +32,20 @@
     <string name="trust_err_note_long">备注只能是一句话。</string>
     <string name="trust_err_self">你不能评价自己的名字。</string>
     <string name="trust_err_unsigned">无法为评价签名。</string>
+    <string name="trust_and">"和"</string>
+    <string name="trust_known_by_one">%1$s认识对方</string>
+    <string name="trust_known_by_names">%1$s认识对方</string>
+    <string name="trust_known_by_count">你的 %1$s 位联系人认识对方</string>
+    <string name="trust_vouch">我认识对方</string>
+    <string name="trust_vouched">你已为对方担保</string>
+    <string name="trust_show_my_vouches">出示认识我的人</string>
+    <string name="trust_vouch_sent">你表示认识对方</string>
+    <string name="trust_vouch_received">对方表示认识你；已存入你的担保</string>
+    <string name="trust_vouches_sent">认识你的人，已出示给对方</string>
+    <string name="trust_vouches_none_known">对方出示了认识他们的人；其中没有你的联系人</string>
+    <string name="trust_vouches_preview">认识对方的人，已出示给你</string>
+    <string name="trust_what_vouch">担保</string>
+    <string name="trust_what_vouches">担保</string>
+    <string name="trust_err_vouch_self">你不能为自己的名字担保。</string>
+    <string name="trust_err_vouch_unsigned">无法为担保签名。</string>
 </resources>

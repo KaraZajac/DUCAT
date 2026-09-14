@@ -32,4 +32,20 @@
     <string name="trust_err_note_long">Eine Notiz ist ein Satz.</string>
     <string name="trust_err_self">Den eigenen Namen kannst du nicht bewerten.</string>
     <string name="trust_err_unsigned">Die Bewertung konnte nicht signiert werden.</string>
+    <string name="trust_and">" und "</string>
+    <string name="trust_known_by_one">%1$s kennt sie</string>
+    <string name="trust_known_by_names">%1$s kennen sie</string>
+    <string name="trust_known_by_count">%1$s deiner Kontakte kennen sie</string>
+    <string name="trust_vouch">Ich kenne sie</string>
+    <string name="trust_vouched">Du hast für sie gebürgt</string>
+    <string name="trust_show_my_vouches">Zeigen, wer mich kennt</string>
+    <string name="trust_vouch_sent">Du hast gesagt, dass du sie kennst</string>
+    <string name="trust_vouch_received">Sie sagen, dass sie dich kennen; bei deinen Bürgschaften aufbewahrt</string>
+    <string name="trust_vouches_sent">Wer dich kennt, ihnen gezeigt</string>
+    <string name="trust_vouches_none_known">Sie haben gezeigt, wer sie kennt; keiner davon ist dein Kontakt</string>
+    <string name="trust_vouches_preview">Wer sie kennt, dir gezeigt</string>
+    <string name="trust_what_vouch">Bürgschaft</string>
+    <string name="trust_what_vouches">Bürgschaften</string>
+    <string name="trust_err_vouch_self">Für den eigenen Namen kannst du nicht bürgen.</string>
+    <string name="trust_err_vouch_unsigned">Die Bürgschaft konnte nicht signiert werden.</string>
 </resources>

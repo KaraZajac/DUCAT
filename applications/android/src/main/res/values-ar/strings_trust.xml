@@ -32,4 +32,20 @@
     <string name="trust_err_note_long">الملاحظة جملة واحدة.</string>
     <string name="trust_err_self">لا يمكنك تقييم اسمك أنت.</string>
     <string name="trust_err_unsigned">تعذر توقيع التقييم.</string>
+    <string name="trust_and">" و"</string>
+    <string name="trust_known_by_one">%1$s يعرفهم</string>
+    <string name="trust_known_by_names">%1$s يعرفونهم</string>
+    <string name="trust_known_by_count">%1$s من جهات اتصالك يعرفونهم</string>
+    <string name="trust_vouch">أنا أعرفهم</string>
+    <string name="trust_vouched">زكّيتهم</string>
+    <string name="trust_show_my_vouches">عرض من يعرفني</string>
+    <string name="trust_vouch_sent">قلتَ إنك تعرفهم</string>
+    <string name="trust_vouch_received">يقولون إنهم يعرفونك؛ حُفظ مع تزكياتك</string>
+    <string name="trust_vouches_sent">من يعرفك، عُرض عليهم</string>
+    <string name="trust_vouches_none_known">عرضوا من يعرفهم؛ لا أحد منهم ضمن جهات اتصالك</string>
+    <string name="trust_vouches_preview">من يعرفهم، عُرض عليك</string>
+    <string name="trust_what_vouch">التزكية</string>
+    <string name="trust_what_vouches">التزكيات</string>
+    <string name="trust_err_vouch_self">لا يمكنك التزكية لاسمك أنت.</string>
+    <string name="trust_err_vouch_unsigned">تعذر توقيع التزكية.</string>
 </resources>

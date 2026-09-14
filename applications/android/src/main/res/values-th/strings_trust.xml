@@ -32,4 +32,20 @@
     <string name="trust_err_note_long">หมายเหตุคือหนึ่งประโยค</string>
     <string name="trust_err_self">คุณให้คะแนนชื่อของตัวเองไม่ได้</string>
     <string name="trust_err_unsigned">ลงนามคะแนนไม่ได้</string>
+    <string name="trust_and">" และ "</string>
+    <string name="trust_known_by_one">%1$s รู้จักพวกเขา</string>
+    <string name="trust_known_by_names">%1$s รู้จักพวกเขา</string>
+    <string name="trust_known_by_count">ผู้ติดต่อของคุณ %1$s คนรู้จักพวกเขา</string>
+    <string name="trust_vouch">ฉันรู้จักพวกเขา</string>
+    <string name="trust_vouched">คุณรับรองพวกเขาแล้ว</string>
+    <string name="trust_show_my_vouches">แสดงว่าใครรู้จักฉัน</string>
+    <string name="trust_vouch_sent">คุณบอกว่ารู้จักพวกเขา</string>
+    <string name="trust_vouch_received">พวกเขาบอกว่ารู้จักคุณ เก็บไว้กับการรับรองของคุณ</string>
+    <string name="trust_vouches_sent">ใครรู้จักคุณ แสดงให้พวกเขาเห็น</string>
+    <string name="trust_vouches_none_known">พวกเขาแสดงว่าใครรู้จักพวกเขา แต่ไม่มีใครเป็นผู้ติดต่อของคุณ</string>
+    <string name="trust_vouches_preview">ใครรู้จักพวกเขา แสดงให้คุณเห็น</string>
+    <string name="trust_what_vouch">การรับรอง</string>
+    <string name="trust_what_vouches">การรับรอง</string>
+    <string name="trust_err_vouch_self">คุณรับรองชื่อของตัวเองไม่ได้</string>
+    <string name="trust_err_vouch_unsigned">ลงนามการรับรองไม่ได้</string>
 </resources>

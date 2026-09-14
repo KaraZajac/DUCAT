@@ -32,4 +32,20 @@
     <string name="trust_err_note_long">टिप्पणी एक वाक्य होती है।</string>
     <string name="trust_err_self">आप अपने ही नाम को रेट नहीं कर सकते।</string>
     <string name="trust_err_unsigned">रेटिंग पर हस्ताक्षर नहीं हो सके।</string>
+    <string name="trust_and">" और "</string>
+    <string name="trust_known_by_one">%1$s उन्हें जानते हैं</string>
+    <string name="trust_known_by_names">%1$s उन्हें जानते हैं</string>
+    <string name="trust_known_by_count">आपके %1$s संपर्क उन्हें जानते हैं</string>
+    <string name="trust_vouch">मैं उन्हें जानता/जानती हूँ</string>
+    <string name="trust_vouched">आपने उनकी गवाही दी</string>
+    <string name="trust_show_my_vouches">दिखाएँ कि मुझे कौन जानता है</string>
+    <string name="trust_vouch_sent">आपने कहा कि आप उन्हें जानते हैं</string>
+    <string name="trust_vouch_received">वे कहते हैं कि वे आपको जानते हैं; आपकी गवाहियों के साथ रखा गया</string>
+    <string name="trust_vouches_sent">आपको कौन जानता है, उन्हें दिखाया</string>
+    <string name="trust_vouches_none_known">उन्होंने दिखाया कि उन्हें कौन जानता है; उनमें से कोई आपका संपर्क नहीं है</string>
+    <string name="trust_vouches_preview">उन्हें कौन जानता है, आपको दिखाया</string>
+    <string name="trust_what_vouch">गवाही</string>
+    <string name="trust_what_vouches">गवाहियाँ</string>
+    <string name="trust_err_vouch_self">आप अपने ही नाम की गवाही नहीं दे सकते।</string>
+    <string name="trust_err_vouch_unsigned">गवाही पर हस्ताक्षर नहीं हो सके।</string>
 </resources>

@@ -32,4 +32,20 @@
     <string name="trust_err_note_long">Notatka to jedno zdanie.</string>
     <string name="trust_err_self">Nie możesz ocenić własnego imienia.</string>
     <string name="trust_err_unsigned">Nie udało się podpisać oceny.</string>
+    <string name="trust_and">" i "</string>
+    <string name="trust_known_by_one">%1$s ich zna</string>
+    <string name="trust_known_by_names">%1$s ich znają</string>
+    <string name="trust_known_by_count">%1$s z twoich kontaktów ich zna</string>
+    <string name="trust_vouch">Znam ich</string>
+    <string name="trust_vouched">Poręczyłeś za nich</string>
+    <string name="trust_show_my_vouches">Pokaż, kto mnie zna</string>
+    <string name="trust_vouch_sent">Powiedziałeś, że ich znasz</string>
+    <string name="trust_vouch_received">Mówią, że cię znają; zachowane z twoimi poręczeniami</string>
+    <string name="trust_vouches_sent">Kto cię zna, pokazane im</string>
+    <string name="trust_vouches_none_known">Pokazali, kto ich zna; nikt z nich nie jest twoim kontaktem</string>
+    <string name="trust_vouches_preview">Kto ich zna, pokazane tobie</string>
+    <string name="trust_what_vouch">poręczenia</string>
+    <string name="trust_what_vouches">poręczeń</string>
+    <string name="trust_err_vouch_self">Nie możesz poręczyć za własne imię.</string>
+    <string name="trust_err_vouch_unsigned">Nie udało się podpisać poręczenia.</string>
 </resources>

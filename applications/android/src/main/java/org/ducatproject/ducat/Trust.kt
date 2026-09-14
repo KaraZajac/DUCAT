@@ -556,10 +556,12 @@ object Trust {
     private const val RECEIVED = "received"
     private const val ABOUT = "about"
 
-    /** The three link forms, exact and shared by both clients (§9.5). */
+    /** The link forms, exact and shared by both clients (§9.5, §9.2). */
     const val BURN_PREFIX = "ducat:burn/"
     const val ATTEST_PREFIX = "ducat:attest/"
     const val RECORD_PREFIX = "ducat:record/"
+    const val VOUCH_PREFIX = "ducat:vouch/"
+    const val VOUCHES_PREFIX = "ducat:vouches/"
 
     /** A record is at most this many envelopes; a reader stops there. */
     const val MAX_RECORD_ENVELOPES = 64
@@ -613,6 +615,10 @@ object Trust {
         data class Burn(val hex: String) : Link()
         data class Attest(val hex: String) : Link()
         data class Record(val dotted: String) : Link()
+        /** §9.2: one `VOUCH` envelope, sent by its signer to its subject. */
+        data class Vouch(val hex: String) : Link()
+        /** §9.2: the vouches a persona holds about itself, dotted, newest first. */
+        data class Vouches(val dotted: String) : Link()
     }
 
     /**
@@ -627,14 +633,18 @@ object Trust {
      */
     fun linkIn(body: String): Link? {
         val b = body.trim()
-        val prefix = listOf(BURN_PREFIX, ATTEST_PREFIX, RECORD_PREFIX).firstOrNull { b.startsWith(it) }
-            ?: return null
+        val prefix = listOf(BURN_PREFIX, ATTEST_PREFIX, RECORD_PREFIX, VOUCH_PREFIX, VOUCHES_PREFIX)
+            .firstOrNull { b.startsWith(it) } ?: return null
         val payload = b.substring(prefix.length)
         if (payload.isEmpty() || payload.any { it.isWhitespace() }) return null
+        val hex = payload.all(::isHexChar)
+        val dotted = payload.all { isHexChar(it) || it == '.' }
         return when (prefix) {
-            BURN_PREFIX -> if (payload.all(::isHexChar)) Link.Burn(payload) else null
-            ATTEST_PREFIX -> if (payload.all(::isHexChar)) Link.Attest(payload) else null
-            else -> if (payload.all { isHexChar(it) || it == '.' }) Link.Record(payload) else null
+            BURN_PREFIX -> if (hex) Link.Burn(payload) else null
+            ATTEST_PREFIX -> if (hex) Link.Attest(payload) else null
+            VOUCH_PREFIX -> if (hex) Link.Vouch(payload) else null
+            VOUCHES_PREFIX -> if (dotted) Link.Vouches(payload) else null
+            else -> if (dotted) Link.Record(payload) else null
         }
     }
 
@@ -683,15 +693,25 @@ object Trust {
      * receipt, so when not everything fits, the envelopes that would change
      * the answer are the ones that go.
      */
-    internal fun recordLinkOf(received: List<AttestationRecord>, personaHex: String): String? {
-        val mine = received
-            .filter { it.subjectHex.equals(personaHex.trim(), ignoreCase = true) }
-            .sortedByDescending { it.ts }
-            .map { it.envelopeHex }
-        if (mine.isEmpty()) return null
-        val out = StringBuilder(RECORD_PREFIX)
+    internal fun recordLinkOf(received: List<AttestationRecord>, personaHex: String): String? =
+        packLink(
+            RECORD_PREFIX,
+            received
+                .filter { it.subjectHex.equals(personaHex.trim(), ignoreCase = true) }
+                .sortedByDescending { it.ts }
+                .map { it.envelopeHex },
+        )
+
+    /**
+     * Join envelopes, in the order given, into one link under [prefix]
+     * that fits a message: as many as fit [MAX_LINK_CHARS], never more
+     * than [MAX_RECORD_ENVELOPES]. Null when nothing was given. The desk's
+     * `pack_link`, so a record and a set of vouches travel the same way.
+     */
+    internal fun packLink(prefix: String, envelopes: List<String>): String? {
+        val out = StringBuilder(prefix)
         var n = 0
-        for (env in mine) {
+        for (env in envelopes) {
             if (n >= MAX_RECORD_ENVELOPES) break
             val add = (if (n == 0) 0 else 1) + env.length
             if (out.length + add > MAX_LINK_CHARS) break
@@ -714,6 +734,12 @@ object Trust {
         )
         is Link.Record -> context.getString(
             if (outgoing) R.string.trust_record_sent else R.string.trust_record_preview,
+        )
+        is Link.Vouch -> context.getString(
+            if (outgoing) R.string.trust_vouch_sent else R.string.trust_vouch_received,
+        )
+        is Link.Vouches -> context.getString(
+            if (outgoing) R.string.trust_vouches_sent else R.string.trust_vouches_preview,
         )
         null -> null
     }
@@ -933,24 +959,296 @@ object Trust {
      * Called for every incoming text, from the one place the thread appends
      * one. A `ducat:attest/` link is a receipt about one of our personas
      * from the sender; a `ducat:record/` link is the sender showing what
-     * others said about them. A burn proof is not ingested: it is checked
-     * when somebody presses the button, because the check costs two node
-     * round trips. Never throws — the message is already taken, and a
-     * receipt that will not open is the sender's problem, not the thread's.
+     * others said about them; a `ducat:vouch/` link is the sender saying
+     * they know one of our personas; a `ducat:vouches/` link is the sender
+     * showing who knows them. Each is opened under the signer it names and
+     * refused unless the sender is who the object says it is. A burn proof
+     * is not ingested: it is checked when somebody presses the button,
+     * because the check costs two node round trips. Never throws — the
+     * message is already taken, and an envelope that will not open is the
+     * sender's problem, not the thread's.
      */
     fun ingestTrustLinks(context: Context, fromHex: String, body: String) {
         runCatching {
             when (val link = linkIn(body)) {
                 is Link.Attest -> receiveAttestation(context, fromHex, link.hex)
                 is Link.Record -> readRecord(context, fromHex, link.dotted)
+                is Link.Vouch -> receiveVouch(context, fromHex, link.hex)
+                is Link.Vouches -> readVouches(context, fromHex, link.dotted)
                 else -> null
             }
         }.onFailure { DucatLog.w(TAG, "trust link from ${fromHex.take(8)}…: ${it.message}") }
     }
 
+    // ----- §9.2: vouching --------------------------------------------------------
+    //
+    // A vouch is the smallest signed thing in the protocol: signer, subject,
+    // a time — *I know this persona*, said by someone who met them, and
+    // nothing else, because the less it carries the less it leaks. The
+    // bridge seals and opens it (`mobile/src/attest.rs`) under the wire's
+    // refusals — nowhen, oneself, a signature under any key but the one
+    // named inside — so both clients agree about what a vouch is.
+    //
+    // It travels as a receipt does. The signer sends it to its subject as a
+    // `ducat:vouch/` link, kept only when sent by its signer and about one
+    // of this phone's personas; a persona shows what it holds as
+    // `ducat:vouches/`, newest first, as many as fit one message. What a
+    // reader then does with it is arithmetic over its *own* contacts: a
+    // vouch counts only when its signer is a contact this phone already
+    // holds, and the answer is worn in words — never a score, never
+    // published, never forwarded. A friend of a friend is a stranger with a
+    // story: nothing past one hop is computed.
+    //
+    // Three shelves, as for receipts. The desk's `app/src/trust.rs`, rule
+    // for rule.
+
+    private const val VOUCHES_GIVEN = "vouches_given"
+    private const val VOUCHES_RECEIVED = "vouches_received"
+    private const val VOUCHES_ABOUT = "vouches_about"
+
+    /** §9.2 — a vouch, given, received, or read about someone. */
+    data class VouchRecord(
+        /** Who says they know the subject; the envelope's signer. */
+        val signerHex: String,
+        /** Who is known. */
+        val subjectHex: String,
+        val ts: Long,
+        /** The signed envelope, hex, so it can be shown again. */
+        val envelopeHex: String,
+    )
+
+    // JSON names are the ones both clients write — signer, subject, ts,
+    // envelope — so a bundle exported on either restores on the other.
+
+    private fun vouchShelf(context: Context, key: String): List<VouchRecord> = runCatching {
+        val arr = JSONArray(prefs(context).getString(key, "[]"))
+        (0 until arr.length()).map {
+            val o = arr.getJSONObject(it)
+            VouchRecord(
+                signerHex = o.getString("signer"),
+                subjectHex = o.getString("subject"),
+                ts = o.getLong("ts"),
+                envelopeHex = o.getString("envelope"),
+            )
+        }
+    }.onFailure { DucatLog.w(TAG, "the $key shelf did not parse: ${it.message}") }
+        .getOrDefault(emptyList())
+
+    private fun putVouchShelf(context: Context, key: String, list: List<VouchRecord>) {
+        val arr = JSONArray()
+        list.forEach { r ->
+            arr.put(
+                JSONObject().apply {
+                    put("signer", r.signerHex)
+                    put("subject", r.subjectHex)
+                    put("ts", r.ts)
+                    put("envelope", r.envelopeHex)
+                },
+            )
+        }
+        prefs(context).edit().putString(key, arr.toString()).apply()
+        ContactStore.bump()
+    }
+
+    private fun vouchFrom(v: uniffi.ducat_mobile.VouchView, envelopeHex: String) = VouchRecord(
+        signerHex = v.signerHex.lowercase(),
+        subjectHex = v.subjectHex.lowercase(),
+        ts = v.ts.toLong(),
+        envelopeHex = envelopeHex.trim().lowercase(),
+    )
+
+    // The rules, over lists, testable without a store.
+
+    /** A persona vouching for itself — refused before anything is signed. */
+    internal fun selfVouch(signerHex: String, subjectHex: String): Boolean =
+        signerHex.trim().equals(subjectHex.trim(), ignoreCase = true)
+
+    /**
+     * One vouch per (signer, subject): [rec] replaces whatever the same
+     * signer said about the same subject before. A vouch says one thing,
+     * so a second from the same mouth is the same thing said again, and
+     * its newer time is all that changes.
+     */
+    internal fun withVouch(list: List<VouchRecord>, rec: VouchRecord): List<VouchRecord> =
+        list.filterNot {
+            it.signerHex.equals(rec.signerHex, ignoreCase = true) &&
+                it.subjectHex.equals(rec.subjectHex, ignoreCase = true)
+        } + rec
+
+    /**
+     * One vouch per subject on the "given" shelf, whichever of this phone's
+     * personas signed it: vouching again for the same person is the same
+     * vouch, re-signed.
+     */
+    internal fun givenWith(given: List<VouchRecord>, rec: VouchRecord): List<VouchRecord> =
+        given.filterNot { it.subjectHex.equals(rec.subjectHex, ignoreCase = true) } + rec
+
+    /**
+     * The vouches a persona shows, packed to travel: the ones others gave
+     * it, newest first, as many as fit one message and never more than
+     * sixty-four. Null when there are none — nobody has vouched yet.
+     */
+    internal fun vouchesLinkOf(received: List<VouchRecord>, personaHex: String): String? =
+        packLink(
+            VOUCHES_PREFIX,
+            received
+                .filter { it.subjectHex.equals(personaHex.trim(), ignoreCase = true) }
+                .sortedByDescending { it.ts }
+                .map { it.envelopeHex },
+        )
+
+    /**
+     * §9.2's arithmetic: who among the reader's own contacts vouched for
+     * [personaHex], as names, from what was read about them. [mine] is
+     * this phone's own personas — our own vouch is not a contact's — and
+     * [nameOf] answers for a signer only when it is a contact this phone
+     * holds. Sorted and distinct, so two rows from one signer are one name.
+     */
+    internal fun knownByOf(
+        about: List<VouchRecord>,
+        personaHex: String,
+        mine: Set<String>,
+        nameOf: (signerHex: String) -> String?,
+    ): List<String> {
+        val subject = personaHex.trim().lowercase()
+        val ours = mine.mapTo(HashSet()) { it.lowercase() }
+        return about.asSequence()
+            .filter { it.subjectHex.lowercase() == subject }
+            .map { it.signerHex.lowercase() }
+            .filter { it !in ours }
+            .mapNotNull(nameOf)
+            .distinct()
+            .sorted()
+            .toList()
+    }
+
+    /** Whether any of this phone's personas vouched for [subjectHex]. */
+    fun vouchedFor(context: Context, subjectHex: String): Boolean {
+        val subject = subjectHex.trim()
+        return vouchShelf(context, VOUCHES_GIVEN).any { it.subjectHex.equals(subject, ignoreCase = true) }
+    }
+
+    /**
+     * Vouch for [subjectHex] — *I know this persona* — under [personaHex],
+     * keep it on the "given" shelf, and return it as the `ducat:vouch/`
+     * link the screen sends as an ordinary text. There is nothing to type:
+     * a vouch says one thing.
+     *
+     * [personaHex] is the persona the thread speaks as (`ownerHexOf` the
+     * contact), because the reader keeps a vouch only when its signer is
+     * the message's sender. One's own name is refused before signing; the
+     * bridge refuses it again before it seals.
+     */
+    fun vouch(context: Context, personaHex: String, subjectHex: String): String {
+        val subject = subjectHex.trim().lowercase()
+        if (selfVouch(personaHex, subject)) {
+            throw IllegalStateException(context.getString(R.string.trust_err_vouch_self))
+        }
+        val secret = PersonaStore(context).secretFor(personaHex)
+            ?: throw IllegalStateException(context.getString(R.string.burn_err_no_persona))
+        val envelope = runCatching {
+            uniffi.ducat_mobile.vouchSign(
+                uniffi.ducat_mobile.VouchIn(
+                    personaSecret = secret,
+                    subjectHex = subject,
+                    ts = (System.currentTimeMillis() / 1000).toULong(),
+                ),
+            )
+        }.onFailure { DucatLog.w(TAG, "vouch: ${it.message}") }
+            .getOrElse { throw IllegalStateException(context.getString(R.string.trust_err_vouch_unsigned)) }
+        // Read back through the wire's own reader, so the shelf holds what
+        // the envelope says and not what this side meant.
+        val opened = runCatching { uniffi.ducat_mobile.vouchOpen(envelope) }
+            .getOrElse { throw IllegalStateException(context.getString(R.string.trust_err_vouch_unsigned)) }
+        val envelopeHex = hex(envelope)
+        val rec = vouchFrom(opened, envelopeHex)
+        synchronized(lock) {
+            putVouchShelf(context, VOUCHES_GIVEN, givenWith(vouchShelf(context, VOUCHES_GIVEN), rec))
+        }
+        DucatLog.i(TAG, "vouched for ${subject.take(8)}…")
+        return VOUCH_PREFIX + envelopeHex
+    }
+
+    /**
+     * A vouch about one of this phone's personas, from the thread. Kept
+     * only if the envelope opens under the persona that sent it — a vouch
+     * handed on by anyone but its signer is discarded — and only if it is
+     * about one of our own names. One per (signer, subject). Null when
+     * dropped, with the reason in the log; nothing on a screen waits for
+     * this.
+     */
+    fun receiveVouch(context: Context, fromHex: String, envelopeHex: String): VouchRecord? {
+        val bytes = unhex(envelopeHex) ?: return droppedVouch(fromHex, "not hex")
+        val v = runCatching { uniffi.ducat_mobile.vouchOpen(bytes) }
+            .getOrElse { return droppedVouch(fromHex, "does not open: ${it.message}") }
+        if (!v.signerHex.equals(fromHex.trim(), ignoreCase = true)) {
+            return droppedVouch(fromHex, "not signed by the sender")
+        }
+        val mine = PersonaStore(context).allHexes().map { it.lowercase() }
+        if (v.subjectHex.lowercase() !in mine) return droppedVouch(fromHex, "not about us")
+        val rec = vouchFrom(v, envelopeHex)
+        synchronized(lock) {
+            putVouchShelf(context, VOUCHES_RECEIVED, withVouch(vouchShelf(context, VOUCHES_RECEIVED), rec))
+        }
+        DucatLog.i(TAG, "${fromHex.take(8)}… vouched for us")
+        return rec
+    }
+
+    private fun droppedVouch(fromHex: String, why: String): VouchRecord? {
+        DucatLog.w(TAG, "a vouch from ${fromHex.take(8)}… was dropped: $why")
+        return null
+    }
+
+    /**
+     * The vouches others gave [personaHex], as the one `ducat:vouches/`
+     * message to send when somebody should see who knows us; null when
+     * nobody has vouched for this persona yet.
+     */
+    fun myVouchesLink(context: Context, personaHex: String): String? =
+        vouchesLinkOf(vouchShelf(context, VOUCHES_RECEIVED), personaHex)
+
+    /**
+     * Vouches somebody showed us about themselves: each envelope that
+     * opens and is about the sender is kept on the "about" shelf, one per
+     * (signer, subject); the rest are dropped without comment. Returns who
+     * among our contacts now vouches for the sender.
+     */
+    fun readVouches(context: Context, fromHex: String, dotted: String): List<String> {
+        val from = fromHex.trim()
+        var taken = 0
+        synchronized(lock) {
+            var about = vouchShelf(context, VOUCHES_ABOUT)
+            for (h in splitRecord(dotted)) {
+                val bytes = unhex(h) ?: continue
+                val v = runCatching { uniffi.ducat_mobile.vouchOpen(bytes) }.getOrNull() ?: continue
+                if (!v.subjectHex.equals(from, ignoreCase = true)) continue
+                about = withVouch(about, vouchFrom(v, h))
+                taken += 1
+            }
+            if (taken > 0) putVouchShelf(context, VOUCHES_ABOUT, about)
+        }
+        DucatLog.i(TAG, "${from.take(8)}… showed $taken vouch(es)")
+        return knownBy(context, from)
+    }
+
+    /**
+     * Who among *this phone's* contacts vouched for [personaHex] — display
+     * names, for "Pat and Sam know them". Computed here, from what this
+     * phone holds, and never sent anywhere; our own vouch is not a
+     * contact's, and nothing past one hop is asked.
+     */
+    fun knownBy(context: Context, personaHex: String): List<String> {
+        val about = vouchShelf(context, VOUCHES_ABOUT)
+        if (about.none { it.subjectHex.equals(personaHex.trim(), ignoreCase = true) }) return emptyList()
+        val mine = PersonaStore(context).allHexes().mapTo(HashSet()) { it.lowercase() }
+        val names = HashMap<String, String>()
+        for (c in ContactStore(context).all()) names[c.personaHex.lowercase()] = c.displayName()
+        return knownByOf(about, personaHex, mine) { names[it] }
+    }
+
     // ----- the backup ------------------------------------------------------------
     //
-    // Five shelves ride the bundle as the JSON text they are kept in, under
+    // Eight shelves ride the bundle as the JSON text they are kept in, under
     // names both clients write. A burn is money already destroyed and its
     // envelope is the only thing that says so; a restored phone without it
     // has paid for nothing.
@@ -961,6 +1259,9 @@ object Trust {
         "attestations_given_raw" to GIVEN,
         "attestations_received_raw" to RECEIVED,
         "attestations_about_raw" to ABOUT,
+        "vouches_given_raw" to VOUCHES_GIVEN,
+        "vouches_received_raw" to VOUCHES_RECEIVED,
+        "vouches_about_raw" to VOUCHES_ABOUT,
     )
 
     /** The bundle's names for the shelves, in the order they are written. */

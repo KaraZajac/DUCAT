@@ -32,4 +32,20 @@
     <string name="trust_err_note_long">Uma nota é uma frase.</string>
     <string name="trust_err_self">Não pode avaliar o seu próprio nome.</string>
     <string name="trust_err_unsigned">Não foi possível assinar a avaliação.</string>
+    <string name="trust_and">" e "</string>
+    <string name="trust_known_by_one">%1$s conhece-os</string>
+    <string name="trust_known_by_names">%1$s conhecem-nos</string>
+    <string name="trust_known_by_count">%1$s dos seus contactos conhecem-nos</string>
+    <string name="trust_vouch">Conheço-os</string>
+    <string name="trust_vouched">Já respondeu por eles</string>
+    <string name="trust_show_my_vouches">Mostrar quem me conhece</string>
+    <string name="trust_vouch_sent">Disse que os conhece</string>
+    <string name="trust_vouch_received">Dizem que o conhecem; guardado com os seus avales</string>
+    <string name="trust_vouches_sent">Quem o conhece, mostrado a eles</string>
+    <string name="trust_vouches_none_known">Mostraram quem os conhece; nenhum é seu contacto</string>
+    <string name="trust_vouches_preview">Quem os conhece, mostrado a si</string>
+    <string name="trust_what_vouch">aval</string>
+    <string name="trust_what_vouches">avales</string>
+    <string name="trust_err_vouch_self">Não pode responder pelo seu próprio nome.</string>
+    <string name="trust_err_vouch_unsigned">Não foi possível assinar o aval.</string>
 </resources>

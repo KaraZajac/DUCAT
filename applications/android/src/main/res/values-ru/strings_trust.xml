@@ -32,4 +32,20 @@
     <string name="trust_err_note_long">Заметка — одно предложение.</string>
     <string name="trust_err_self">Нельзя оценить собственное имя.</string>
     <string name="trust_err_unsigned">Не удалось подписать оценку.</string>
+    <string name="trust_and">" и "</string>
+    <string name="trust_known_by_one">%1$s их знает</string>
+    <string name="trust_known_by_names">%1$s их знают</string>
+    <string name="trust_known_by_count">%1$s ваших контактов их знают</string>
+    <string name="trust_vouch">Я их знаю</string>
+    <string name="trust_vouched">Вы за них поручились</string>
+    <string name="trust_show_my_vouches">Показать, кто меня знает</string>
+    <string name="trust_vouch_sent">Вы сказали, что знаете их</string>
+    <string name="trust_vouch_received">Они говорят, что знают вас; сохранено с вашими поручительствами</string>
+    <string name="trust_vouches_sent">Кто вас знает, показано им</string>
+    <string name="trust_vouches_none_known">Они показали, кто их знает; никого из них нет в ваших контактах</string>
+    <string name="trust_vouches_preview">Кто их знает, показано вам</string>
+    <string name="trust_what_vouch">поручительство</string>
+    <string name="trust_what_vouches">поручительства</string>
+    <string name="trust_err_vouch_self">Нельзя поручиться за собственное имя.</string>
+    <string name="trust_err_vouch_unsigned">Не удалось подписать поручительство.</string>
 </resources>

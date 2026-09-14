@@ -32,4 +32,20 @@
     <string name="trust_err_note_long">Bir not tek cümledir.</string>
     <string name="trust_err_self">Kendi adını değerlendiremezsin.</string>
     <string name="trust_err_unsigned">Değerlendirme imzalanamadı.</string>
+    <string name="trust_and">" ve "</string>
+    <string name="trust_known_by_one">%1$s onları tanıyor</string>
+    <string name="trust_known_by_names">%1$s onları tanıyor</string>
+    <string name="trust_known_by_count">Kişilerinden %1$s tanesi onları tanıyor</string>
+    <string name="trust_vouch">Onları tanıyorum</string>
+    <string name="trust_vouched">Onlara kefil oldun</string>
+    <string name="trust_show_my_vouches">Beni kimin tanıdığını göster</string>
+    <string name="trust_vouch_sent">Onları tanıdığını söyledin</string>
+    <string name="trust_vouch_received">Seni tanıdıklarını söylüyorlar; kefaletlerinle birlikte saklandı</string>
+    <string name="trust_vouches_sent">Seni kimin tanıdığı, onlara gösterildi</string>
+    <string name="trust_vouches_none_known">Onları kimin tanıdığını gösterdiler; hiçbiri senin kişilerinden değil</string>
+    <string name="trust_vouches_preview">Onları kimin tanıdığı, sana gösterildi</string>
+    <string name="trust_what_vouch">kefalet</string>
+    <string name="trust_what_vouches">kefaletler</string>
+    <string name="trust_err_vouch_self">Kendi adına kefil olamazsın.</string>
+    <string name="trust_err_vouch_unsigned">Kefalet imzalanamadı.</string>
 </resources>

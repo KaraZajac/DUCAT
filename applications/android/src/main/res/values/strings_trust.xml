@@ -32,4 +32,23 @@
     <string name="trust_err_note_long">A note is one sentence.</string>
     <string name="trust_err_self">You cannot rate your own name.</string>
     <string name="trust_err_unsigned">The rating could not be signed.</string>
+    <!-- §9.2's vouches: "I know them", given and shown, and the answer in
+         words over this phone's own contacts. The joiner carries its own
+         spaces (quoted, so aapt keeps them). -->
+    <string name="trust_and">" and "</string>
+    <string name="trust_known_by_one">%1$s knows them</string>
+    <string name="trust_known_by_names">%1$s know them</string>
+    <string name="trust_known_by_count">%1$s of your contacts know them</string>
+    <string name="trust_vouch">I know them</string>
+    <string name="trust_vouched">You vouched for them</string>
+    <string name="trust_show_my_vouches">Show who knows me</string>
+    <string name="trust_vouch_sent">You said you know them</string>
+    <string name="trust_vouch_received">They say they know you; kept with your vouches</string>
+    <string name="trust_vouches_sent">Who knows you, shown to them</string>
+    <string name="trust_vouches_none_known">They showed who knows them; none of them are your contacts</string>
+    <string name="trust_vouches_preview">Who knows them, shown to you</string>
+    <string name="trust_what_vouch">vouch</string>
+    <string name="trust_what_vouches">vouches</string>
+    <string name="trust_err_vouch_self">You cannot vouch for your own name.</string>
+    <string name="trust_err_vouch_unsigned">The vouch could not be signed.</string>
 </resources>

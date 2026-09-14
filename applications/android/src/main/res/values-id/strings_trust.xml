@@ -32,4 +32,20 @@
     <string name="trust_err_note_long">Catatan adalah satu kalimat.</string>
     <string name="trust_err_self">Anda tidak bisa menilai nama Anda sendiri.</string>
     <string name="trust_err_unsigned">Nilai tidak bisa ditandatangani.</string>
+    <string name="trust_and">" dan "</string>
+    <string name="trust_known_by_one">%1$s mengenal mereka</string>
+    <string name="trust_known_by_names">%1$s mengenal mereka</string>
+    <string name="trust_known_by_count">%1$s kontak Anda mengenal mereka</string>
+    <string name="trust_vouch">Saya mengenal mereka</string>
+    <string name="trust_vouched">Anda telah menjamin mereka</string>
+    <string name="trust_show_my_vouches">Tunjukkan siapa yang mengenal saya</string>
+    <string name="trust_vouch_sent">Anda mengatakan mengenal mereka</string>
+    <string name="trust_vouch_received">Mereka mengatakan mengenal Anda; disimpan bersama jaminan Anda</string>
+    <string name="trust_vouches_sent">Siapa yang mengenal Anda, ditunjukkan kepada mereka</string>
+    <string name="trust_vouches_none_known">Mereka menunjukkan siapa yang mengenal mereka; tidak ada yang menjadi kontak Anda</string>
+    <string name="trust_vouches_preview">Siapa yang mengenal mereka, ditunjukkan kepada Anda</string>
+    <string name="trust_what_vouch">jaminan</string>
+    <string name="trust_what_vouches">jaminan</string>
+    <string name="trust_err_vouch_self">Anda tidak bisa menjamin nama Anda sendiri.</string>
+    <string name="trust_err_vouch_unsigned">Jaminan tidak bisa ditandatangani.</string>
 </resources>

@@ -32,4 +32,20 @@
     <string name="trust_err_note_long">Ghi chú là một câu.</string>
     <string name="trust_err_self">Bạn không thể đánh giá tên của chính mình.</string>
     <string name="trust_err_unsigned">Không thể ký đánh giá.</string>
+    <string name="trust_and">" và "</string>
+    <string name="trust_known_by_one">%1$s biết họ</string>
+    <string name="trust_known_by_names">%1$s biết họ</string>
+    <string name="trust_known_by_count">%1$s liên hệ của bạn biết họ</string>
+    <string name="trust_vouch">Tôi biết họ</string>
+    <string name="trust_vouched">Bạn đã bảo đảm cho họ</string>
+    <string name="trust_show_my_vouches">Cho xem ai biết tôi</string>
+    <string name="trust_vouch_sent">Bạn đã nói rằng bạn biết họ</string>
+    <string name="trust_vouch_received">Họ nói rằng họ biết bạn; được lưu cùng các bảo đảm của bạn</string>
+    <string name="trust_vouches_sent">Ai biết bạn, đã cho họ xem</string>
+    <string name="trust_vouches_none_known">Họ đã cho xem ai biết họ; không ai trong số đó là liên hệ của bạn</string>
+    <string name="trust_vouches_preview">Ai biết họ, đã cho bạn xem</string>
+    <string name="trust_what_vouch">bảo đảm</string>
+    <string name="trust_what_vouches">các bảo đảm</string>
+    <string name="trust_err_vouch_self">Bạn không thể bảo đảm cho tên của chính mình.</string>
+    <string name="trust_err_vouch_unsigned">Không thể ký bảo đảm.</string>
 </resources>
