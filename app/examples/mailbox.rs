@@ -5,6 +5,14 @@
 //!   DUCAT_DESK_STATE=<dir B> cargo run -p ducat-app --example mailbox -- guest <card uri> [name]
 //!
 //! Markers: MB_CARD, MB_CLAIMED, MB_SENT, MB_GOT, MB_REPLY, MB_OK, MB_FAIL.
+//!
+//! §9.2 over the live network — `rated` cuts a card and waits to be rated;
+//! `rater <card>` claims it, sends a five-star receipt, and asks nothing:
+//! the rated side answers with its record on its own, and the rater's
+//! summary of that record is the proof.
+//!
+//!   DUCAT_DESK_STATE=<dir A> cargo run -p ducat-app --example mailbox -- rated
+//!   DUCAT_DESK_STATE=<dir B> cargo run -p ducat-app --example mailbox -- rater <card uri>
 
 use std::time::{Duration, Instant};
 
@@ -487,6 +495,71 @@ fn main() {
                 std::thread::sleep(Duration::from_millis(500));
             }
         }
-        _ => panic!("MB_FAIL usage: host | guest <card uri> [name] | customer <card uri> | reader <press code> | party <name> [card...] | callee <card> | caller <card> [secs]"),
+        Some("rated") => {
+            // Cut a card, wait for a receipt about us to land in a thread
+            // (the inbox keeps it on its own), then show the record back.
+            app.set_my_name(None, "Rated Desk").expect("MB_FAIL name");
+            let handle = app.profile_code(None).expect("MB_FAIL issue");
+            println!("MB_CARD {}", handle.uri);
+            let t0 = Instant::now();
+            while t0.elapsed() < Duration::from_secs(900) {
+                app.collect_claims(None);
+                app.poll();
+                if let Ok(link) = app.my_record_link() {
+                    let hexes = link.trim_start_matches("ducat:record/").split('.').count();
+                    println!("MB_RECEIPT on the record: {hexes} receipt(s)");
+                    let who = app
+                        .contacts()
+                        .into_iter()
+                        .find(|c| app.thread(&c.persona_hex).iter().any(|m| !m.outgoing && m.body.starts_with("ducat:attest/")))
+                        .expect("MB_FAIL a receipt with no thread");
+                    match app.send(&who, Outgoing::text(&link)) {
+                        Ok(_) => println!("MB_RECORD_SENT to {} ({} chars)", who.display_name(), link.len()),
+                        Err(e) => println!("MB_FAIL record: {e}"),
+                    }
+                    println!("MB_OK rated desk showed its record after {:.0}s", t0.elapsed().as_secs_f64());
+                    return;
+                }
+                std::thread::sleep(Duration::from_secs(5));
+            }
+            println!("MB_FAIL no receipt arrived");
+        }
+        Some("rater") => {
+            let uri = args.get(1).expect("MB_FAIL rater <card uri>");
+            app.set_my_name(None, "Rater Desk").expect("MB_FAIL name");
+            let c = match app.claim_card(uri, Some("the rated"), false, None) {
+                Ok(c) => c.contact(),
+                Err(e) => {
+                    println!("MB_FAIL claim: {e}");
+                    return;
+                }
+            };
+            println!("MB_CLAIMED {}", c.display_name());
+            for _ in 0..30 {
+                app.poll();
+                if app.contact(&c.persona_hex).map_or(false, |k| k.their_bundle.is_some()) {
+                    break;
+                }
+                std::thread::sleep(Duration::from_secs(2));
+            }
+            let link = app.attest(&c.persona_hex, 5_000_000_000, 5, Some("prompt, as described"), None).expect("MB_FAIL attest");
+            let c = app.contact(&c.persona_hex).expect("MB_FAIL contact gone");
+            app.send(&c, Outgoing::text(&link)).expect("MB_FAIL send receipt");
+            println!("MB_ATTEST_SENT {} chars", link.len());
+            let t0 = Instant::now();
+            while t0.elapsed() < Duration::from_secs(600) {
+                app.poll();
+                let r = app.record_of(&c.persona_hex);
+                if r.receipts > 0 {
+                    let shown = app.thread(&c.persona_hex).into_iter().filter(|m| !m.outgoing && m.body.starts_with("ducat:record/")).count();
+                    println!("MB_RECORD receipts={} weighted={} rating_x10={} record_messages={shown}", r.receipts, r.weighted, r.rating_x10);
+                    println!("MB_OK rater read the record after {:.0}s", t0.elapsed().as_secs_f64());
+                    return;
+                }
+                std::thread::sleep(Duration::from_secs(5));
+            }
+            println!("MB_FAIL no record came back");
+        }
+        _ => panic!("MB_FAIL usage: host | guest <card uri> [name] | customer <card uri> | reader <press code> | party <name> [card...] | callee <card> | caller <card> [secs] | rated | rater <card>"),
     }
 }
