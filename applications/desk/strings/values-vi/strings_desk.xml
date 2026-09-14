@@ -419,4 +419,5 @@
     <string name="desk_record_received">Hồ sơ của họ: đã đọc %1$s biên nhận</string>
     <string name="desk_gate_over_burn">Nhiều hơn số họ đã đốt (%1$s). Nếu họ biến mất, không gì giữ được họ.</string>
     <string name="desk_gate_no_burn">Họ chưa đốt gì mà bạn đã kiểm tra. Nếu họ biến mất, không gì giữ được họ.</string>
+    <string name="desk_no_burn_known">Chưa kiểm tra lần đốt nào của họ ở đây</string>
 </resources>

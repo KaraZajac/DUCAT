@@ -423,4 +423,5 @@
     <string name="desk_record_received">Onların sicili: %1$s makbuz okundu</string>
     <string name="desk_gate_over_burn">Yaktıklarından (%1$s) fazla. Ortadan kaybolurlarsa onları tutan bir şey yok.</string>
     <string name="desk_gate_no_burn">Denetlediğin bir yakma yok. Ortadan kaybolurlarsa onları tutan bir şey yok.</string>
+    <string name="desk_no_burn_known">Onların hiçbir yakması burada denetlenmedi</string>
 </resources>

@@ -423,4 +423,5 @@
     <string name="desk_record_received">उनका रिकॉर्ड: %1$s रसीदें पढ़ी गईं</string>
     <string name="desk_gate_over_burn">उन्होंने जितना जलाया (%1$s) उससे अधिक। अगर वे गायब हो जाएँ तो कुछ उन्हें नहीं रोकता।</string>
     <string name="desk_gate_no_burn">उन्होंने ऐसा कुछ नहीं जलाया जिसे आपने जाँचा हो। अगर वे गायब हो जाएँ तो कुछ उन्हें नहीं रोकता।</string>
+    <string name="desk_no_burn_known">उनका कोई जलाना यहाँ जाँचा नहीं गया</string>
 </resources>

@@ -5,7 +5,7 @@
   // takes the place as a geohash cell.
   import { onMount } from "svelte";
   import { t, i18n, LANGS, lc } from "./i18n.svelte";
-  import { api, copy, fmtXmr, fmtTime, fmtBytes, type FoundRow, type ListingAttachment, type ListingBundle, type ListingDraft, type ListingRow, type MarketRow, LISTING_DESCRIPTION_MAX, MARKET_CATEGORIES, confirmDanger } from "./api";
+  import { api, copy, fmtXmr, fmtTime, fmtBytes, type FoundRow, type ListingAttachment, type ListingBundle, type ListingDraft, type ListingRow, type MarketRow, LISTING_DESCRIPTION_MAX, MARKET_CATEGORIES, confirmDanger, type TrustView } from "./api";
   import { gen, drive } from "./state.svelte";
   import Busy from "./Busy.svelte";
 
@@ -16,6 +16,13 @@
   let found = $state<FoundRow[]>([]);
   let searching = $state(false);
   let openFound = $state<FoundRow | null>(null);
+  // §9.5: what this desk knows about the poster, said where the decision is.
+  let trust = $state<TrustView | null>(null);
+  $effect(() => {
+    const f = openFound;
+    trust = null;
+    if (f && !f.mine) api.trustOf(f.poster).then((v) => { if (openFound === f) trust = v; }).catch(() => {});
+  });
   // The bundle behind the open notice (§16.18.3): fetched for the listing
   // somebody opened, one at a time, never while browsing.
   let bundle = $state<ListingBundle | null>(null);
@@ -387,6 +394,9 @@
   {#if openFound}
     <div class="card">
       <div class="page-head" style="margin-bottom: 8px"><h3 style="margin: 0">{openFound.title}</h3><button class="btn small" onclick={closeListing}>{t("main_back")}</button></div>
+      {#if !openFound.mine && trust}
+        <p class="note">{#if trust.burn_pxmr}{t("desk_burned_since", fmtXmr(trust.burn_pxmr), String(trust.burn_height ?? 0))}{:else}{t("desk_no_burn_known")}{/if}{#if trust.receipts > 0} · {t("desk_receipts_summary", String(trust.receipts), String(trust.receipts_weighted))}{#if trust.receipts_weighted > 0} · {(trust.rating_x10 / 10).toFixed(1)} ★{/if}{/if}</p>
+      {/if}
       <div class="found-detail">
         {#if coverShown}
           <div class="cover-wait">

@@ -429,4 +429,5 @@
     <string name="desk_record_received">Their record: %1$s receipts read</string>
     <string name="desk_gate_over_burn">More than they have burned (%1$s). If they vanish, nothing holds them.</string>
     <string name="desk_gate_no_burn">They have burned nothing you have checked. If they vanish, nothing holds them.</string>
+    <string name="desk_no_burn_known">No burn of theirs checked here</string>
 </resources>

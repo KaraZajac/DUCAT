@@ -220,6 +220,7 @@ export interface NoteRow {
 
 export type BurnRow = { txid_hex: string; amount_pxmr: number; purpose: string; height: number; ready: boolean; envelope_hex: string | null; made_at: number };
 export type BurnView = { address: string; floor_pxmr: number; persona_hex: string; persona_name: string; rows: BurnRow[] };
+export type TrustView = { burn_pxmr: number | null; burn_height: number | null; receipts: number; receipts_weighted: number; rating_x10: number };
 export type VerifiedBurnRow = { persona_hex: string; amount_pxmr: number; height: number; purpose: string };
 export interface SentRow {
   txid_hex: string;
@@ -641,6 +642,7 @@ export const api = {
   myBurnLink: () => invoke<string>("my_burn_link"),
   attest: (personaHex: string, rating: number, note: string | null) => invoke<void>("attest", { personaHex, rating, note }),
   myRecordLink: () => invoke<string>("my_record_link"),
+  trustOf: (personaHex: string) => invoke<TrustView>("trust_of", { personaHex }),
   burn: (amountXmr: string, purpose: string) => invoke<BurnRow>("burn", { amountXmr, purpose }),
   verifyBurn: (personaHex: string, envelopeHex: string) => invoke<VerifiedBurnRow>("verify_burn", { personaHex, envelopeHex }),
   walletQuote: (amountXmr: string, priority = 1) => invoke<Quote>("wallet_quote", { amountXmr, priority }),

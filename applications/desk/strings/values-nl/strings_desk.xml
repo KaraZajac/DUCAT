@@ -423,4 +423,5 @@
     <string name="desk_record_received">Hun staat: %1$s ontvangsten gelezen</string>
     <string name="desk_gate_over_burn">Meer dan zij hebben verbrand (%1$s). Als ze verdwijnen, houdt niets hen tegen.</string>
     <string name="desk_gate_no_burn">Ze hebben niets verbrand dat je hebt gecontroleerd. Als ze verdwijnen, houdt niets hen tegen.</string>
+    <string name="desk_no_burn_known">Geen verbranding van hen hier gecontroleerd</string>
 </resources>

@@ -423,4 +423,5 @@
     <string name="desk_record_received">Leur dossier : %1$s reçus lus</string>
     <string name="desk_gate_over_burn">Plus que ce qu’ils ont brûlé (%1$s). S’ils disparaissent, rien ne les retient.</string>
     <string name="desk_gate_no_burn">Ils n’ont rien brûlé que vous ayez vérifié. S’ils disparaissent, rien ne les retient.</string>
+    <string name="desk_no_burn_known">Aucune preuve de leur part vérifiée ici</string>
 </resources>

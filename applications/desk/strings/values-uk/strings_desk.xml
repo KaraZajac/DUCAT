@@ -431,4 +431,5 @@
     <string name="desk_record_received">Їхня історія: прочитано %1$s квитанцій</string>
     <string name="desk_gate_over_burn">Більше, ніж вони спалили (%1$s). Якщо вони зникнуть, їх ніщо не втримає.</string>
     <string name="desk_gate_no_burn">Вони не спалили нічого, що ви перевірили. Якщо вони зникнуть, їх ніщо не втримає.</string>
+    <string name="desk_no_burn_known">Їхнє спалення тут не перевірялося</string>
 </resources>

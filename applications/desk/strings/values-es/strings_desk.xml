@@ -423,4 +423,5 @@
     <string name="desk_record_received">Su historial: %1$s recibos leídos</string>
     <string name="desk_gate_over_burn">Más de lo que han quemado (%1$s). Si desaparecen, nada los retiene.</string>
     <string name="desk_gate_no_burn">No han quemado nada que hayas comprobado. Si desaparecen, nada los retiene.</string>
+    <string name="desk_no_burn_known">Ninguna quema suya comprobada aquí</string>
 </resources>

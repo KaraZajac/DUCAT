@@ -315,7 +315,7 @@
       {#if pickingContact}
         <p class="note">{t("desk_whose_tab")}</p>
         {#each contacts as c (c.persona_hex)}
-          <button class="thread-row" onclick={() => startTab(c)}>{#if c.avatar_data_url}<img class="avatar pic" src={c.avatar_data_url} alt="" />{:else}<div class="avatar">{c.name.slice(0, 1).toUpperCase()}</div>{/if}<div class="thread-text"><div class="thread-name">{c.name}</div></div></button>
+          <button class="thread-row" onclick={() => startTab(c)}>{#if c.avatar_data_url}<img class="avatar pic" src={c.avatar_data_url} alt="" />{:else}<div class="avatar">{c.name.slice(0, 1).toUpperCase()}</div>{/if}<div class="thread-text"><div class="thread-name">{c.name}</div>{#if c.burn_pxmr || c.receipts > 0}<div class="thread-last">{#if c.burn_pxmr}{t("desk_burned_since", fmtXmr(c.burn_pxmr), String(c.burn_height ?? 0))}{/if}{#if c.burn_pxmr && c.receipts > 0} · {/if}{#if c.receipts > 0}{t("desk_receipts_summary", String(c.receipts), String(c.receipts_weighted))}{/if}</div>{/if}</div></button>
         {/each}
         {#if loaded && contacts.length === 0}<p class="empty">{t("desk_no_contacts")}</p>{/if}
       {/if}

@@ -419,4 +419,5 @@
     <string name="desk_record_received">Catatan mereka: %1$s tanda terima dibaca</string>
     <string name="desk_gate_over_burn">Lebih dari yang mereka bakar (%1$s). Jika mereka menghilang, tidak ada yang menahan mereka.</string>
     <string name="desk_gate_no_burn">Mereka belum membakar apa pun yang Anda periksa. Jika mereka menghilang, tidak ada yang menahan mereka.</string>
+    <string name="desk_no_burn_known">Tidak ada bakaran mereka yang diperiksa di sini</string>
 </resources>

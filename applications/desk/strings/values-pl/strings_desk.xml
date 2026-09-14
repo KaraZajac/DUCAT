@@ -431,4 +431,5 @@
     <string name="desk_record_received">Ich historia: odczytano %1$s pokwitowań</string>
     <string name="desk_gate_over_burn">Więcej, niż spalili (%1$s). Jeśli znikną, nic ich nie trzyma.</string>
     <string name="desk_gate_no_burn">Nie spalili niczego, co sprawdziłeś. Jeśli znikną, nic ich nie trzyma.</string>
+    <string name="desk_no_burn_known">Żadne ich spalenie nie zostało tu sprawdzone</string>
 </resources>

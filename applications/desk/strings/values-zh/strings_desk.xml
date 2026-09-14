@@ -419,4 +419,5 @@
     <string name="desk_record_received">对方的记录：已读取 %1$s 份收据</string>
     <string name="desk_gate_over_burn">超过对方销毁的金额（%1$s）。若对方消失，没有什么能约束他们。</string>
     <string name="desk_gate_no_burn">对方没有任何你核验过的销毁。若对方消失，没有什么能约束他们。</string>
+    <string name="desk_no_burn_known">此处未核验过对方的任何销毁</string>
 </resources>

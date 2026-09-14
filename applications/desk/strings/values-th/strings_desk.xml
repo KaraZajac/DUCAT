@@ -419,4 +419,5 @@
     <string name="desk_record_received">ประวัติของพวกเขา: อ่านใบเสร็จ %1$s ใบ</string>
     <string name="desk_gate_over_burn">มากกว่าที่พวกเขาเผา (%1$s) หากพวกเขาหายไป ไม่มีอะไรยึดพวกเขาไว้</string>
     <string name="desk_gate_no_burn">พวกเขาไม่ได้เผาอะไรที่คุณตรวจสอบแล้ว หากพวกเขาหายไป ไม่มีอะไรยึดพวกเขาไว้</string>
+    <string name="desk_no_burn_known">ยังไม่ได้ตรวจสอบการเผาของพวกเขาที่นี่</string>
 </resources>

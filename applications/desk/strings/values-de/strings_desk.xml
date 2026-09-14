@@ -423,4 +423,5 @@
     <string name="desk_record_received">Ihre Belege: %1$s gelesen</string>
     <string name="desk_gate_over_burn">Mehr, als sie verbrannt haben (%1$s). Verschwinden sie, hält sie nichts.</string>
     <string name="desk_gate_no_burn">Sie haben nichts verbrannt, das du geprüft hast. Verschwinden sie, hält sie nichts.</string>
+    <string name="desk_no_burn_known">Kein Burn von ihnen hier geprüft</string>
 </resources>

@@ -423,4 +423,5 @@
     <string name="desk_record_received">Il loro storico: %1$s ricevute lette</string>
     <string name="desk_gate_over_burn">Più di quanto hanno bruciato (%1$s). Se spariscono, nulla li trattiene.</string>
     <string name="desk_gate_no_burn">Non hanno bruciato nulla che tu abbia verificato. Se spariscono, nulla li trattiene.</string>
+    <string name="desk_no_burn_known">Nessuna loro prova verificata qui</string>
 </resources>

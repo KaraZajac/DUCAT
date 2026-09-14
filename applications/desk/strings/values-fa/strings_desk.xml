@@ -423,4 +423,5 @@
     <string name="desk_record_received">سابقهٔ آن‌ها: %1$s رسید خوانده شد</string>
     <string name="desk_gate_over_burn">بیش از آنچه سوزانده‌اند (%1$s). اگر ناپدید شوند چیزی آن‌ها را نگه نمی‌دارد.</string>
     <string name="desk_gate_no_burn">چیزی که شما بررسی کرده باشید نسوزانده‌اند. اگر ناپدید شوند چیزی آن‌ها را نگه نمی‌دارد.</string>
+    <string name="desk_no_burn_known">هیچ سوزاندنی از آن‌ها اینجا بررسی نشده</string>
 </resources>

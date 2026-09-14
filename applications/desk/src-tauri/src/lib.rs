@@ -1395,6 +1395,31 @@ async fn attest(persona_hex: String, rating: u8, note: Option<String>) -> Result
     .map_err(|e| e.to_string())?
 }
 
+/// §9.5: what this desk knows about any persona at a decision — a listing's
+/// poster, a customer at the till — in the same words the thread uses.
+#[derive(Clone, Debug, serde::Serialize)]
+struct TrustView {
+    burn_pxmr: Option<u64>,
+    burn_height: Option<u64>,
+    receipts: u32,
+    receipts_weighted: u32,
+    rating_x10: u32,
+}
+
+#[tauri::command]
+fn trust_of(persona_hex: String) -> Result<TrustView, String> {
+    let a = app()?;
+    let burn = a.burn_of(&persona_hex);
+    let record = a.record_of(&persona_hex);
+    Ok(TrustView {
+        burn_pxmr: burn.as_ref().map(|b| b.amount_pxmr),
+        burn_height: burn.as_ref().map(|b| b.height),
+        receipts: record.receipts,
+        receipts_weighted: record.weighted,
+        rating_x10: record.rating_x10,
+    })
+}
+
 /// The worn persona's record — the receipts others gave it — as a link to send.
 #[tauri::command]
 fn my_record_link() -> Result<String, String> {
@@ -3122,6 +3147,7 @@ pub fn run() {
             my_burn_link,
             attest,
             my_record_link,
+            trust_of,
             wallet_max,
             set_own_node,
             wallet_rescan,

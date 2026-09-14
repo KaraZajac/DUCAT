@@ -419,4 +419,5 @@
     <string name="desk_record_received">상대의 기록: 영수증 %1$s개 읽음</string>
     <string name="desk_gate_over_burn">상대가 소각한 금액(%1$s)보다 많습니다. 사라져도 잡아둘 것이 없습니다.</string>
     <string name="desk_gate_no_burn">당신이 확인한 소각이 없습니다. 사라져도 잡아둘 것이 없습니다.</string>
+    <string name="desk_no_burn_known">여기서 확인된 상대의 소각 없음</string>
 </resources>

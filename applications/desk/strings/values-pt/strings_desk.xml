@@ -423,4 +423,5 @@
     <string name="desk_record_received">O registo deles: %1$s recibos lidos</string>
     <string name="desk_gate_over_burn">Mais do que queimaram (%1$s). Se desaparecerem, nada os segura.</string>
     <string name="desk_gate_no_burn">Não queimaram nada que tenha verificado. Se desaparecerem, nada os segura.</string>
+    <string name="desk_no_burn_known">Nenhuma queima deles verificada aqui</string>
 </resources>

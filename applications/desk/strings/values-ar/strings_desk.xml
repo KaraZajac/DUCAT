@@ -439,4 +439,5 @@
     <string name="desk_record_received">سجلهم: قُرئ %1$s إيصالات</string>
     <string name="desk_gate_over_burn">أكثر مما حرقوه (%1$s). إن اختفوا فلا شيء يلزمهم.</string>
     <string name="desk_gate_no_burn">لم يحرقوا شيئًا تحققت منه. إن اختفوا فلا شيء يلزمهم.</string>
+    <string name="desk_no_burn_known">لم يُتحقق هنا من أي حرق لهم</string>
 </resources>
