@@ -2968,7 +2968,7 @@ class WalletStore(context: Context) {
      * going through [mutateEntries], which would split the record from
      * the spent marks it must not be separated from.
      */
-    fun resolveSendIntent(id: String, txidHex: String, feePxmr: Long) = synchronized(walletLock) {
+    fun resolveSendIntent(id: String, txidHex: String, feePxmr: Long, txKey: String? = null) = synchronized(walletLock) {
         val intents = JSONArray(prefs.getString("send_intents", "[]"))
         var found: JSONObject? = null
         val keep = JSONArray()
@@ -2987,6 +2987,10 @@ class WalletStore(context: Context) {
             put("contact", it0.opt("contact") ?: JSONObject.NULL)
             put("note", it0.opt("note") ?: JSONObject.NULL)
             put("ts", System.currentTimeMillis() / 1000)
+            // The transaction's secret key, for payment proofs (§9.5, §17):
+            // it reveals this transaction's destinations and amounts to
+            // whoever holds it, nothing else, and the store is encrypted.
+            if (!txKey.isNullOrBlank()) put("txKey", txKey)
             if (it0.optBoolean("donate", false)) put("donate", true)
             if (txidHex.isEmpty()) {
                 put("recovered", true)

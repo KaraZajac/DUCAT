@@ -111,6 +111,9 @@ pub struct SentPayment {
     pub contact: Option<String>,
     #[serde(default)]
     pub note: Option<String>,
+    /// The transaction's secret key, kept for payment proofs (§9.5, §17).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tx_key: Option<String>,
     #[serde(default)]
     pub ts: u64,
     #[serde(default)]
@@ -355,7 +358,7 @@ impl App {
     /// The only writer of `wallet_sends`: an intent becomes history when
     /// the chain says so or a node took the transaction. A blank txid is a
     /// send recovered from its notes turning up spent.
-    pub fn resolve_send_intent(&self, id: &str, txid_hex: &str, fee_pxmr: u64) -> Result<(), Error> {
+    pub fn resolve_send_intent(&self, id: &str, txid_hex: &str, fee_pxmr: u64, tx_key: Option<&str>) -> Result<(), Error> {
         let _g = WALLET.lock().unwrap_or_else(|e| e.into_inner());
         self.w().update(|m| {
             let mut intents: Vec<SendIntent> = take(m, "send_intents").unwrap_or_default();
@@ -370,6 +373,7 @@ impl App {
                 to_address: it.to_address,
                 contact: it.contact,
                 note: it.note,
+                tx_key: tx_key.map(str::to_string),
                 ts: App::now(),
                 donate: it.donate,
                 recovered: txid_hex.is_empty(),
@@ -564,7 +568,7 @@ impl App {
                     let mine: HashSet<String> = intent.key_images.iter().cloned().collect();
                     if mine.iter().any(|k| chain_spent.contains(k)) {
                         log::warn(TAG, format!("send intent {} resolved by chain — recording without txid", intent.id));
-                        let _ = self.resolve_send_intent(&intent.id, "", 0);
+                        let _ = self.resolve_send_intent(&intent.id, "", 0, None);
                     } else if now.saturating_sub(intent.ts) >= INTENT_GIVE_UP_SECS
                         && !mine.is_empty()
                         && mine.iter().all(|k| answered.contains(k) && !chain_spent.contains(k))
@@ -750,7 +754,7 @@ impl App {
         match monero_send_checked(node, spend, plan.notes.iter().map(|n| n.blob.clone()).collect(), to_address.to_string(), amount_pxmr, priority, plan.fee_pxmr) {
             Ok(r) => {
                 log::info(TAG, format!("sent {}… fee {} XMR, accepted by {} node(s)", &r.txid_hex[..16.min(r.txid_hex.len())], format_xmr(r.fee_pxmr), r.accepted_by));
-                self.resolve_send_intent(&intent, &r.txid_hex, r.fee_pxmr)?;
+                self.resolve_send_intent(&intent, &r.txid_hex, r.fee_pxmr, Some(&r.tx_key_hex))?;
                 Ok(r)
             }
             Err(e) => {
@@ -1047,7 +1051,7 @@ mod tests {
         let id = app.record_send_intent("4addr", 5, vec!["a".into()], None, Some("lunch"), false).unwrap();
         // Claimed: the note is out of the float while the intent stands.
         assert_eq!(app.balances().spendable_pxmr, 7);
-        app.resolve_send_intent(&id, "deadbeef", 1).unwrap();
+        app.resolve_send_intent(&id, "deadbeef", 1, None).unwrap();
         assert!(app.send_intents().is_empty());
         let sent = app.sends();
         assert_eq!(sent.len(), 1);

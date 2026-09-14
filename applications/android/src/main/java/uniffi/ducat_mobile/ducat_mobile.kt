@@ -1041,6 +1041,10 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1198,6 +1202,8 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_fee_estimate(`nodeUrl`: RustBuffer.ByValue,`inputs`: Int,`outputs`: Int,`priority`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_monero_fetch_tx(`nodeUrl`: RustBuffer.ByValue,`txidHex`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_make_out_proof(`txidHex`: RustBuffer.ByValue,`message`: RustBuffer.ByValue,`txKeysHex`: RustBuffer.ByValue,`address`: RustBuffer.ByValue,`stagenet`: Byte,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_output_meta(`blob`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -1229,6 +1235,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_monero_tx_known(`nodeUrl`: RustBuffer.ByValue,`txHashHex`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_tx_status(`nodeUrl`: RustBuffer.ByValue,`txHashHex`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_monero_verify_out_proof(`nodeUrl`: RustBuffer.ByValue,`txidHex`: RustBuffer.ByValue,`address`: RustBuffer.ByValue,`stagenet`: Byte,`message`: RustBuffer.ByValue,`proof`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_app_call(`routeBlob`: RustBuffer.ByValue,`message`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1640,6 +1648,8 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_fee_estimate(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_monero_fetch_tx(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_make_out_proof(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_output_meta(
@@ -1671,6 +1681,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_checksum_func_monero_tx_known(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_tx_status(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_monero_verify_out_proof(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_app_call(
     ): Short
@@ -2058,6 +2070,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_monero_fee_estimate() != 30573.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_fetch_tx() != 44324.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_make_out_proof() != 10617.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -2104,6 +2119,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_tx_status() != 37530.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_verify_out_proof() != 63853.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_app_call() != 36150.toShort()) {
@@ -3536,6 +3554,45 @@ public object FfiConverterTypeFeedSpan: FfiConverterRustBuffer<FeedSpan> {
             FfiConverterBoolean.write(value.`bold`, buf)
             FfiConverterBoolean.write(value.`italic`, buf)
             FfiConverterOptionalString.write(value.`link`, buf)
+    }
+}
+
+
+
+/**
+ * What a node says about a transaction, as a proof check needs it: its
+ * bytes, and whether it is in a block yet.
+ */
+data class FetchedTx (
+    var `txHex`: kotlin.String, 
+    /**
+     * Zero while the transaction is still in the pool.
+     */
+    var `height`: kotlin.ULong
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeFetchedTx: FfiConverterRustBuffer<FetchedTx> {
+    override fun read(buf: ByteBuffer): FetchedTx {
+        return FetchedTx(
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: FetchedTx) = (
+            FfiConverterString.allocationSize(value.`txHex`) +
+            FfiConverterULong.allocationSize(value.`height`)
+    )
+
+    override fun write(value: FetchedTx, buf: ByteBuffer) {
+            FfiConverterString.write(value.`txHex`, buf)
+            FfiConverterULong.write(value.`height`, buf)
     }
 }
 
@@ -6492,6 +6549,16 @@ data class SendResult (
     var `txidHex`: kotlin.String, 
     var `feePxmr`: kotlin.ULong, 
     /**
+     * The transaction's secret key, hex. What a payment proof is made from
+     * (§9.5's burn proof, §17's TXPROOF): it reveals this transaction's
+     * destinations and amounts to whoever holds it, and nothing else, which
+     * is what Monero's own wallets keep per send too. DUCAT's two-output
+     * sends never use additional keys (a subaddress destination with a
+     * standard change output scans under the one key), so one key is the
+     * whole set.
+     */
+    var `txKeyHex`: kotlin.String, 
+    /**
      * How many nodes took it. **One is not the network.** §8.7.2 was learned
      * twice in this project: a relay returned success and propagated nothing.
      */
@@ -6509,6 +6576,7 @@ public object FfiConverterTypeSendResult: FfiConverterRustBuffer<SendResult> {
         return SendResult(
             FfiConverterString.read(buf),
             FfiConverterULong.read(buf),
+            FfiConverterString.read(buf),
             FfiConverterUInt.read(buf),
         )
     }
@@ -6516,12 +6584,14 @@ public object FfiConverterTypeSendResult: FfiConverterRustBuffer<SendResult> {
     override fun allocationSize(value: SendResult) = (
             FfiConverterString.allocationSize(value.`txidHex`) +
             FfiConverterULong.allocationSize(value.`feePxmr`) +
+            FfiConverterString.allocationSize(value.`txKeyHex`) +
             FfiConverterUInt.allocationSize(value.`acceptedBy`)
     )
 
     override fun write(value: SendResult, buf: ByteBuffer) {
             FfiConverterString.write(value.`txidHex`, buf)
             FfiConverterULong.write(value.`feePxmr`, buf)
+            FfiConverterString.write(value.`txKeyHex`, buf)
             FfiConverterUInt.write(value.`acceptedBy`, buf)
     }
 }
@@ -7078,6 +7148,42 @@ public object FfiConverterTypeVerificationPolicy: FfiConverterRustBuffer<Verific
             FfiConverterULong.write(value.`appSecretValidityS`, buf)
             FfiConverterULong.write(value.`cumulativeAt`, buf)
             FfiConverterULong.write(value.`cumulativeWindowS`, buf)
+    }
+}
+
+
+
+/**
+ * A proof checked against a node: the amount it proves and the block the
+ * transaction is in (zero while still in the pool).
+ */
+data class VerifiedProof (
+    var `amountPxmr`: kotlin.ULong, 
+    var `height`: kotlin.ULong
+) {
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeVerifiedProof: FfiConverterRustBuffer<VerifiedProof> {
+    override fun read(buf: ByteBuffer): VerifiedProof {
+        return VerifiedProof(
+            FfiConverterULong.read(buf),
+            FfiConverterULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: VerifiedProof) = (
+            FfiConverterULong.allocationSize(value.`amountPxmr`) +
+            FfiConverterULong.allocationSize(value.`height`)
+    )
+
+    override fun write(value: VerifiedProof, buf: ByteBuffer) {
+            FfiConverterULong.write(value.`amountPxmr`, buf)
+            FfiConverterULong.write(value.`height`, buf)
     }
 }
 
@@ -8429,6 +8535,38 @@ public object FfiConverterOptionalTypeFeedRef: FfiConverterRustBuffer<FeedRef?> 
         } else {
             buf.put(1)
             FfiConverterTypeFeedRef.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalTypeFetchedTx: FfiConverterRustBuffer<FetchedTx?> {
+    override fun read(buf: ByteBuffer): FetchedTx? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeFetchedTx.read(buf)
+    }
+
+    override fun allocationSize(value: FetchedTx?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeFetchedTx.allocationSize(value)
+        }
+    }
+
+    override fun write(value: FetchedTx?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeFetchedTx.write(value, buf)
         }
     }
 }
@@ -10526,6 +10664,19 @@ public object FfiConverterMapStringString: FfiConverterRustBuffer<Map<kotlin.Str
     
 
         /**
+         * Ask one node for a transaction by id. `None` when the node cannot be
+         * reached or does not have it; a proof cannot be checked without the bytes.
+         */ fun `moneroFetchTx`(`nodeUrl`: kotlin.String, `txidHex`: kotlin.String, `timeoutMs`: kotlin.UInt): FetchedTx? {
+            return FfiConverterOptionalTypeFetchedTx.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_fetch_tx(
+        FfiConverterString.lower(`nodeUrl`),FfiConverterString.lower(`txidHex`),FfiConverterUInt.lower(`timeoutMs`),_status)
+}
+    )
+    }
+    
+
+        /**
          * Make an out-proof from the bridge: keys as hex scalars (the send path
          * hands them out), the address as a string, the message as bytes.
          */
@@ -10828,6 +10979,21 @@ public object FfiConverterMapStringString: FfiConverterRustBuffer<Map<kotlin.Str
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_tx_status(
         FfiConverterString.lower(`nodeUrl`),FfiConverterString.lower(`txHashHex`),FfiConverterUInt.lower(`timeoutMs`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Fetch the transaction from `node_url` and check `proof` against it. The
+         * caller still asks the second-opinion node whether the transaction is in
+         * a block (§9.5's third check); this answers the first two.
+         */
+    @Throws(ProofException::class) fun `moneroVerifyOutProof`(`nodeUrl`: kotlin.String, `txidHex`: kotlin.String, `address`: kotlin.String, `stagenet`: kotlin.Boolean, `message`: kotlin.ByteArray, `proof`: kotlin.String, `timeoutMs`: kotlin.UInt): VerifiedProof {
+            return FfiConverterTypeVerifiedProof.lift(
+    uniffiRustCallWithError(ProofException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_verify_out_proof(
+        FfiConverterString.lower(`nodeUrl`),FfiConverterString.lower(`txidHex`),FfiConverterString.lower(`address`),FfiConverterBoolean.lower(`stagenet`),FfiConverterByteArray.lower(`message`),FfiConverterString.lower(`proof`),FfiConverterUInt.lower(`timeoutMs`),_status)
 }
     )
     }

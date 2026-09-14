@@ -711,7 +711,7 @@ object Wallet {
         // recorded here rather than on the next scan, because the outputs a
         // payment creates belong to the recipient and nothing this wallet
         // scans will ever show it happened.
-        store.resolveSendIntent(intent, r.txidHex, r.feePxmr.toLong())
+        store.resolveSendIntent(intent, r.txidHex, r.feePxmr.toLong(), r.txKeyHex)
         return r
     }
 }

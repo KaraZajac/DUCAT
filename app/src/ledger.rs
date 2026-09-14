@@ -683,7 +683,7 @@ mod tests {
     fn a_send_pairs_its_consumed_notes_with_its_change_and_the_balance_runs() {
         let entries = vec![note("a", 100, 10, "tx1", true), note("b", 30, 20, "tx2", false)];
         let chain = |t: &str| (t == "tx2").then(|| ChainTx { txid: "tx2".into(), version: 2, fee_pxmr: 5, key_images: vec!["a".into()], input_count: 1, output_count: 2, ring_size: 16, additional_timelock: 0, extra_len: 0, coinbase: false });
-        let sends = vec![SentPayment { txid_hex: "tx2".into(), amount_pxmr: 65, fee: 5, to_address: "4x".into(), contact: Some("pat".into()), note: Some("lunch".into()), ts: 2000, donate: false, recovered: false, key_images: vec![] }];
+        let sends = vec![SentPayment { txid_hex: "tx2".into(), amount_pxmr: 65, fee: 5, to_address: "4x".into(), contact: Some("pat".into()), note: Some("lunch".into()), tx_key: None, ts: 2000, donate: false, recovered: false, key_images: vec![] }];
         let name = |h: Option<&str>| h.map(|_| "Pat".to_string());
         let ev = assemble(&entries, 100, &chain, &sends, &name, &HashMap::new());
         assert_eq!(ev.len(), 2);
@@ -706,7 +706,7 @@ mod tests {
     fn a_locked_note_and_a_pending_send_are_marked_not_counted() {
         let entries = vec![note("a", 100, 95, "tx1", false)];
         let chain = |_: &str| None;
-        let sends = vec![SentPayment { txid_hex: "txp".into(), amount_pxmr: 10, fee: 1, to_address: "4y".into(), contact: None, note: None, ts: 3000, donate: true, recovered: false, key_images: vec![] }];
+        let sends = vec![SentPayment { txid_hex: "txp".into(), amount_pxmr: 10, fee: 1, to_address: "4y".into(), contact: None, note: None, tx_key: None, ts: 3000, donate: true, recovered: false, key_images: vec![] }];
         let name = |_: Option<&str>| None;
         let ev = assemble(&entries, 100, &chain, &sends, &name, &HashMap::new());
         let recv = ev.iter().find(|e| e.direction == Direction::Received).unwrap();

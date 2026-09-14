@@ -1643,6 +1643,14 @@ mod rate_tests {
 pub struct SendResult {
     pub txid_hex: String,
     pub fee_pxmr: u64,
+    /// The transaction's secret key, hex. What a payment proof is made from
+    /// (§9.5's burn proof, §17's TXPROOF): it reveals this transaction's
+    /// destinations and amounts to whoever holds it, and nothing else, which
+    /// is what Monero's own wallets keep per send too. DUCAT's two-output
+    /// sends never use additional keys (a subaddress destination with a
+    /// standard change output scans under the one key), so one key is the
+    /// whole set.
+    pub tx_key_hex: String,
     /// How many nodes took it. **One is not the network.** §8.7.2 was learned
     /// twice in this project: a relay returned success and propagated nothing.
     pub accepted_by: u32,
@@ -1858,6 +1866,19 @@ fn send_inner(
         let mut outgoing = Zeroizing::new([0u8; 32]);
         OsRng.fill_bytes(outgoing.as_mut());
 
+        // The transaction key is derived from the outgoing seed and the
+        // inputs, exactly as the crate derives it inside `new`; taken here,
+        // before both move, so the send can hand it back for proofs.
+        let tx_key_hex = {
+            use monero_wallet::send::TransactionKeys;
+            let inputs: Vec<(monero_wallet::ed25519::Point, monero_wallet::ed25519::Point)> =
+                decoyed.iter().map(|o| (o.key(), o.commitment().commit())).collect();
+            let mut keys = TransactionKeys::new(&outgoing, inputs);
+            let r = keys.next().expect("TransactionKeys is never-ending");
+            let bytes = <[u8; 32]>::from((*r).clone());
+            hex_of(&bytes)
+        };
+
         let tx = SignableTransaction::new(
             RctType::ClsagBulletproofPlus,
             outgoing,
@@ -1896,7 +1917,7 @@ fn send_inner(
             )));
         }
 
-        Ok(SendResult { txid_hex: txid, fee_pxmr: fee, accepted_by: accepted })
+        Ok(SendResult { txid_hex: txid, fee_pxmr: fee, accepted_by: accepted, tx_key_hex })
     })
 }
 
