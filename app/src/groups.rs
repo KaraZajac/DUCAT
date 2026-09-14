@@ -332,6 +332,12 @@ impl App {
                     log::warn(TAG, format!("roster for {} from a non-member — ignored", known.name));
                     return;
                 }
+                // §16.24: a generation is followed only from its owner, and
+                // only if it names everyone we already hold — a foreign
+                // owner is a forgery, a subset is an exclusion. The names
+                // still merge either way: the set only grows.
+                let names_everyone = known.members.iter().all(|m| members.contains(m));
+                let owner_is_sender = incoming.as_ref().map_or(true, |b| b.owner == sender_hex);
                 let mut merged = known.members.clone();
                 for m in members {
                     if !merged.contains(&m) {
@@ -343,6 +349,17 @@ impl App {
                 // lower owner key, and the loser re-forms with the union.
                 let mut board = known.board.clone();
                 let mut lost = false;
+                let incoming = match incoming {
+                    Some(b) if !owner_is_sender => {
+                        log::warn(TAG, format!("{}: generation {} from {short}… names another owner — not followed", known.name, b.generation));
+                        None
+                    }
+                    Some(b) if !names_everyone => {
+                        log::warn(TAG, format!("{}: generation {} from {short}… leaves a member out — not followed", known.name, b.generation));
+                        None
+                    }
+                    other => other,
+                };
                 if let Some(b) = incoming {
                     match &known.board {
                         None => board = Some(b),
@@ -1071,6 +1088,47 @@ mod tests {
         let payload = group_roster_encode("Crew".into(), vec![vec![1; 32], vec![2; 32]], None).unwrap();
         app.absorb_roster("zz", Some(&hex_to_bytes(&g.id_hex).unwrap()), Some(&payload));
         assert_eq!(app.group(&g.id_hex).unwrap().members.len(), 3);
+    }
+
+    /// §16.24 (W2): a generation is followed only from its owner and only
+    /// if it names everyone already held — a subset would exclude someone,
+    /// a foreign owner would be a forgery. The names still merge.
+    #[test]
+    fn a_generation_that_leaves_someone_out_or_names_another_owner_is_not_followed() {
+        use ducat_mobile::contacts::GroupBoardOut;
+        let dir = std::env::temp_dir().join(format!("ducat-groups-gen-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        let app = App::open(&dir).unwrap();
+        let me = app.primary_hex().unwrap();
+        let (a, b, c) = (vec![1u8; 32], vec![2u8; 32], vec![3u8; 32]);
+        let hx = |v: &Vec<u8>| v.iter().map(|x| format!("{x:02x}")).collect::<String>();
+        let gid = "bb".repeat(16);
+        let known_board = Board { generation: 1, owner: hx(&a), key: String::new(), group_key_hex: "11".repeat(32), pages: 4, page: 0, dirty: false, seen: HashMap::new() };
+        app.upsert_group(Group { id_hex: gid.clone(), name: "Crew".into(), members: vec![me.clone(), hx(&a), hx(&b)], my_group_seq: 0, disclosed: false, board: Some(known_board), left: false }).unwrap();
+        let board = |gen: u64, owner: &Vec<u8>| Some(GroupBoardOut { generation: gen, owner: owner.clone(), group_key: vec![0x22; 32], pages: 4 });
+        let me_bytes = hex_to_bytes(&me).unwrap();
+
+        // A leaves B out of generation 2: not followed, nobody lost.
+        let subset = group_roster_encode("Crew".into(), vec![me_bytes.clone(), a.clone()], board(2, &a)).unwrap();
+        app.absorb_roster(&hx(&a), Some(&hex_to_bytes(&gid).unwrap()), Some(&subset));
+        let g = app.group(&gid).unwrap();
+        assert_eq!(g.board.as_ref().unwrap().generation, 1);
+        assert_eq!(g.members.len(), 3);
+
+        // A sends a generation 2 whose owner is B: a forgery, not followed;
+        // the new name C is still merged.
+        let forged = group_roster_encode("Crew".into(), vec![me_bytes.clone(), a.clone(), b.clone(), c.clone()], board(2, &b)).unwrap();
+        app.absorb_roster(&hx(&a), Some(&hex_to_bytes(&gid).unwrap()), Some(&forged));
+        let g = app.group(&gid).unwrap();
+        assert_eq!(g.board.as_ref().unwrap().generation, 1);
+        assert_eq!(g.members.len(), 4);
+
+        // A's own generation 2 naming everyone: followed.
+        let proper = group_roster_encode("Crew".into(), vec![me_bytes, a.clone(), b, c], board(2, &a)).unwrap();
+        app.absorb_roster(&hx(&a), Some(&hex_to_bytes(&gid).unwrap()), Some(&proper));
+        let g = app.group(&gid).unwrap();
+        assert_eq!(g.board.as_ref().unwrap().generation, 2);
+        assert_eq!(g.board.as_ref().unwrap().owner, hx(&a));
     }
 }
 

@@ -3013,6 +3013,13 @@ record. A **generation** is one record with one group key.
   other MUST form `g+2` with the union of both rosters.
 - **Nobody is removed**, for §16.19's reason; a generation could exclude
   someone, and a rule for who may do that is a later revision's.
+- **A generation is followed only from its owner, and only if it names
+  everyone the reader already holds.** A roster whose board names an owner
+  other than the persona that sent it, or whose member list omits a member
+  the reader has, MUST NOT move the reader to that generation — a foreign
+  owner is a forgery and a subset is an exclusion — though its names are
+  still merged, since the set only grows. Whoever formed a generation
+  nobody can follow has formed one alone.
 
 The roster message stays what §16.19 says — `GROUP_ROSTER`, kind 12,
 sealed pairwise — and its payload gains four keys after the name (1) and

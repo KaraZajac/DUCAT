@@ -349,12 +349,23 @@ object Groups {
         // from a member who has not yet heard of the newest addition cannot
         // shrink anybody's view. The name stays as first learned.
         val merged = (known.members + members).distinct()
+        // §16.24: a generation is followed only from its owner, and only if
+        // it names everyone we already hold — a foreign owner is a forgery,
+        // a subset is an exclusion. The names still merge either way.
+        val followable = incoming?.let { b ->
+            val ownerIsSender = b.owner.equals(senderHex, ignoreCase = true)
+            val namesEveryone = known.members.all { m -> members.any { it.equals(m, ignoreCase = true) } }
+            if (!ownerIsSender) DucatLog.w(TAG, "${known.name}: generation ${b.generation} from $short names another owner — not followed")
+            else if (!namesEveryone) DucatLog.w(TAG, "${known.name}: generation ${b.generation} from $short leaves a member out — not followed")
+            if (ownerIsSender && namesEveryone) b else null
+        }
         // The board: a higher generation moves us; an equal one from a
         // different owner is the tie §16.24 breaks by the lower owner key,
         // and the loser re-forms with the union.
         var board = known.board
         var lost = false
-        if (incoming != null) {
+        if (followable != null) {
+            val incoming = followable
             val k = known.board
             when {
                 k == null -> board = incoming
