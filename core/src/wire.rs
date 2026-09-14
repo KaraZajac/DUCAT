@@ -209,6 +209,12 @@ pub mod f {
     // listing-thumbnail rules.
     pub const PN_THUMB: u64 = 300;
     pub const DET_CAR_PHOTO: u64 = 301;
+    /// The inbox record the details are written into (§16.9). Inside the
+    /// signature, so a signed half of one inbox cannot be lifted into another.
+    pub const DET_INBOX: u64 = 302;
+    /// Which half this is: 0 the issuer's (subkey 0), 1 the claimant's
+    /// (subkey 1). Inside the signature for the same reason.
+    pub const DET_ROLE: u64 = 303;
     // Read watermark and ring size on a log head (§16.16, §16.12).
     pub const HEAD_READ: u64 = 201;
     pub const HEAD_RING: u64 = 202;

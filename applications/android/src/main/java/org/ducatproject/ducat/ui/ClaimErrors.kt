@@ -36,6 +36,7 @@ fun claimFailureRes(
     Mailbox.isOffline(t) -> R.string.main_card_link_offline
     t is Mailbox.CardAlreadyUsed -> alreadyUsed
     t is Mailbox.DetailsNotPublished -> R.string.main_card_link_not_ready
+    t is Mailbox.CardMismatch -> R.string.main_card_link_failed_body
     // Its own sentence, because the fallback below is a list of guesses
     // ("broken, already claimed, or no longer valid") and none of them is
     // true here — the card is fine, it is simply this device's.

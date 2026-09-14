@@ -242,16 +242,22 @@ pub fn build_contact_details(
     // the party answering can scope their own reply to the moment; the caller
     // is expected to have already trimmed `profile` to match.
     purpose: Option<String>,
+    // §16.9: the record this half is written into, and which half it is —
+    // both inside the signature, so the bytes fit one inbox and one subkey.
+    inbox_key: String,
+    claimant: bool,
 ) -> Result<Vec<u8>, ContactError> {
     let sk = persona_key(&persona_secret)?;
     let pronouns = profile.pronouns_enum()?;
     // Round-tripped through the decoder before it goes out, so a malformed
     // profile is caught on the device that composed it rather than refused on
     // the device that receives it — where the person who could fix it is not.
-    let encoded = ContactDetails {
-        version: 1,
+    let details = ContactDetails {
+        version: ducat_core::contact::DETAILS_VERSION,
         suite: 1,
         persona: sk.public().to_bytes().to_vec(),
+        inbox_key,
+        role: if claimant { ducat_core::contact::ROLE_CLAIMANT } else { ducat_core::contact::ROLE_ISSUER },
         outbox_key,
         prekey_bundle,
         display_name,
@@ -266,11 +272,11 @@ pub fn build_contact_details(
         plate: profile.plate,
         car_photo: profile.car_photo,
         purpose,
-    }
-    .to_value()
-    .encode();
-    ContactDetails::from_value(decode(&encoded).map_err(refuse)?).map_err(refuse)?;
-    Ok(encoded)
+    };
+    ContactDetails::from_value(decode(&details.to_value().encode()).map_err(refuse)?).map_err(refuse)?;
+    // Signed under the persona it names (§16.9): the reader learns the key
+    // from the body and checks the envelope with it.
+    Ok(ducat_core::contact::sign_details(&details, &sk))
 }
 
 /// The other side of that, for a subkey we just read.
@@ -290,9 +296,15 @@ pub struct PeerDetails {
     pub purpose: Option<String>,
 }
 
+/// Open one half of a contact inbox: verify the envelope under the persona
+/// it names (§16.9) and check it was written for this `inbox_key` in this
+/// role. A half signed by any other key, written for another inbox, or the
+/// other subkey's half, is refused — so the persona a caller keys trust by
+/// is the writer's own.
 #[uniffi::export]
-pub fn parse_contact_details(bytes: Vec<u8>) -> Result<PeerDetails, ContactError> {
-    let d = ContactDetails::from_value(decode(&bytes).map_err(refuse)?).map_err(refuse)?;
+pub fn parse_contact_details(bytes: Vec<u8>, inbox_key: String, claimant: bool) -> Result<PeerDetails, ContactError> {
+    let role = if claimant { ducat_core::contact::ROLE_CLAIMANT } else { ducat_core::contact::ROLE_ISSUER };
+    let d = ducat_core::contact::open_details(&bytes, &inbox_key, role).map_err(refuse)?;
     Ok(PeerDetails {
         persona: d.persona,
         outbox_key: d.outbox_key,

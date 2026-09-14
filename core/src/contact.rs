@@ -33,8 +33,9 @@ use std::collections::BTreeMap;
 use crate::cbor::Value;
 use crate::commit::{commit, commit_eq, Purpose};
 use crate::reject::{Reject, RejectCode};
-use crate::sig::ObjectType;
-use crate::wire::{f, type_code, Reader};
+use crate::cbor::decode;
+use crate::sig::{ObjectType, PublicKey, SecretKey, SignedBytes, Suite};
+use crate::wire::{f, open, peek_body, seal, type_code, Reader};
 
 /// The longest a display name may be.
 ///
@@ -181,6 +182,58 @@ pub struct ContactDetails {
     /// None (an older record, or a card that did not say) is treated as the
     /// most private case — reveal nothing optional beyond a name.
     pub purpose: Option<String>,
+    /// The inbox record this half is written into — bound into the signature
+    /// (§16.9), so a claimant's reply to one card cannot be copied into
+    /// another card's inbox, nor an issuer's half into a stranger's record.
+    pub inbox_key: String,
+    /// `ROLE_ISSUER` in subkey 0, `ROLE_CLAIMANT` in subkey 1. Bound for the
+    /// same reason: the two halves are the same object, and a reader must
+    /// not be able to take one for the other.
+    pub role: u8,
+}
+
+/// The version every `ContactDetails` written today carries. Version 1 was
+/// an unsigned map whose persona was taken on faith; a reader refuses it.
+pub const DETAILS_VERSION: u64 = 2;
+/// Subkey 0: the card's issuer.
+pub const ROLE_ISSUER: u8 = 0;
+/// Subkey 1: whoever claimed the card.
+pub const ROLE_CLAIMANT: u8 = 1;
+
+/// Sign a `ContactDetails` under the persona it names: the signed envelope
+/// (§18.3) both inbox subkeys carry. The persona is inside the signed body,
+/// so a reader learns the key to check from the object itself and then
+/// checks it — a half that verifies under any other key is somebody claiming
+/// a persona that is not theirs.
+pub fn sign_details(d: &ContactDetails, key: &SecretKey) -> Vec<u8> {
+    let body = SignedBytes::from_value(d.to_value());
+    seal(&body, ObjectType::ContactAccept, key)
+}
+
+/// Open a signed half of a contact inbox: verify the envelope under the
+/// persona named in it and check that it was written for `inbox_key` in the
+/// given role. Every reader of subkey 0 or 1 goes through here.
+pub fn open_details(envelope: &[u8], inbox_key: &str, role: u8) -> Result<ContactDetails, Reject> {
+    let peek = ContactDetails::from_value(decode(&peek_body(envelope)?)?)?;
+    let suite = match peek.suite {
+        1 => Suite::Ed25519X25519,
+        2 => Suite::P256,
+        _ => return Err(Reject::with_detail(RejectCode::UnsupportedSuite, "unknown suite")),
+    };
+    let pk = PublicKey::from_bytes(suite, &peek.persona)
+        .map_err(|_| Reject::with_detail(RejectCode::Malformed, "persona is not a public key"))?;
+    let (ty, body) = open(envelope, &pk)?;
+    if ty != ObjectType::ContactAccept {
+        return Err(Reject::with_detail(RejectCode::Malformed, "object type is not CONTACT_ACCEPT"));
+    }
+    let d = ContactDetails::from_value(decode(body.bytes())?)?;
+    if d.inbox_key != inbox_key {
+        return Err(Reject::with_detail(RejectCode::Malformed, "details were written for another inbox"));
+    }
+    if d.role != role {
+        return Err(Reject::with_detail(RejectCode::Malformed, "details are the other half of the inbox"));
+    }
+    Ok(d)
 }
 
 /// How to refer to someone.
@@ -404,6 +457,8 @@ impl ContactDetails {
         if let Some(v) = &self.purpose {
             m.insert(f::DET_PURPOSE, Value::Text(v.clone()));
         }
+        m.insert(f::DET_INBOX, Value::Text(self.inbox_key.clone()));
+        m.insert(f::DET_ROLE, Value::Uint(self.role as u64));
         Value::Map(m)
     }
 
@@ -415,8 +470,19 @@ impl ContactDetails {
                 "object type is not CONTACT_ACCEPT",
             ));
         }
+        let version = r.uint(f::VERSION)?;
+        if version != DETAILS_VERSION {
+            // Version 1 was the unsigned map. It is not "older but fine": a
+            // reader that accepted it would be back to taking the persona
+            // on faith, which is the hole version 2 closes.
+            return Err(Reject::with_detail(RejectCode::Malformed, "details version is not 2"));
+        }
+        let role = r.uint(f::DET_ROLE)?;
+        if role > ROLE_CLAIMANT as u64 {
+            return Err(Reject::with_detail(RejectCode::Malformed, "role is 0 or 1"));
+        }
         let out = ContactDetails {
-            version: r.uint(f::VERSION)?,
+            version,
             suite: r.uint(f::SUITE)? as u8,
             persona: r.bytes(f::DET_PERSONA, None)?,
             outbox_key: r
@@ -440,6 +506,10 @@ impl ContactDetails {
             plate: r.opt_text(f::DET_PLATE, MAX_PLATE_CHARS)?,
             car_photo: r.opt_bytes(f::DET_CAR_PHOTO, None)?,
             purpose: r.opt_text(f::DET_PURPOSE, MAX_PURPOSE_CHARS)?,
+            inbox_key: r
+                .opt_text(f::DET_INBOX, MAX_RECORD_KEY_CHARS)?
+                .ok_or_else(|| Reject::with_detail(RejectCode::Malformed, "no inbox"))?,
+            role: role as u8,
         };
         r.finish()?;
         for (v, what) in [

@@ -1383,9 +1383,15 @@ fn contact_cases() -> Vec<J> {
         &ContactCard { inbox_key: String::new(), ..base.clone() },
         Some((RejectCode::Malformed, "empty text field")));
 
+    // Signed under the persona it names (§16.9): the vector carries the
+    // envelope, and a reader that does not check the signature against the
+    // key inside the body is taking a stranger's word for who they are.
+    let det_signer = SecretKey::ed25519_from_bytes(&[0xCC; 32]);
     let det = ContactDetails {
-        version: 1, suite: 1,
-        persona: vec![0xCC; 32],
+        version: 2, suite: 1,
+        persona: det_signer.public().to_bytes().to_vec(),
+        inbox_key: KEY.into(),
+        role: 1,
         outbox_key: KEY.into(),
         prekey_bundle: vec![0xDD; 48],
         display_name: Some("sam".into()),
@@ -1399,10 +1405,11 @@ fn contact_cases() -> Vec<J> {
     };
     let mut detail = |name: &str, why: &str, d: &ContactDetails, bad: Option<(RejectCode, &str)>| {
         let hex_body = hex(&d.to_value().encode());
+        let hex_env = hex(&sign_details(d, &det_signer));
         v.push(match bad {
-            None => json!({ "name": name, "why": why, "details_hex": hex_body,
+            None => json!({ "name": name, "why": why, "details_hex": hex_env,
                             "expect": { "ok": true, "reencodes_to_hex": hex_body } }),
-            Some((code, hint)) => json!({ "name": name, "why": why, "details_hex": hex_body,
+            Some((code, hint)) => json!({ "name": name, "why": why, "details_hex": hex_env,
                             "expect": { "ok": false, "reject": format!("{:?}", code).to_uppercase(), "hint": hint } }),
         });
     };
@@ -1462,6 +1469,18 @@ fn contact_cases() -> Vec<J> {
         plate: None, ..profiled.clone() },
         None);
     detail("details_valid", "What each side writes into the contact inbox: who they are, where to leave things, and the keys to seal with.", &det, None);
+    detail("details_version_1",
+        "Version 1 was an unsigned map whose persona was taken on faith. A reader that still accepts it lets anyone who can write a reply name any persona — a friend's, the arbiter's — and rebind that contact to the writer's keys. Older is not fine here; it is the hole.",
+        &ContactDetails { version: 1, ..det.clone() },
+        Some((RejectCode::Malformed, "details version is not 2")));
+    detail("details_role_out_of_range",
+        "The two halves of an inbox are the same object; the role says which half this is, and it is a closed set of two.",
+        &ContactDetails { role: 2, ..det.clone() },
+        Some((RejectCode::Malformed, "role is 0 or 1")));
+    detail("details_inbox_empty",
+        "The inbox key is what binds the signature to one record. Empty names nothing, and absent and empty must not both mean it.",
+        &ContactDetails { inbox_key: String::new(), ..det.clone() },
+        Some((RejectCode::Malformed, "empty text field")));
     detail("details_no_name", "The name is optional here for the same reason it is on the card.",
         &ContactDetails { display_name: None, ..det.clone() }, None);
     detail("details_with_payto",
@@ -1546,6 +1565,20 @@ fn contact_cases() -> Vec<J> {
         "An empty outbox key would leave the other side with a contact it can never write to, reported as success.",
         &ContactDetails { outbox_key: String::new(), ..det.clone() },
         Some((RejectCode::Malformed, "empty text field")));
+    // The envelope's own two failures, outside the closure because they
+    // are not a body that fails but a signature that does.
+    {
+        let other = SecretKey::ed25519_from_bytes(&[0xCD; 32]);
+        let hex_body = hex(&det.to_value().encode());
+        v.push(json!({ "name": "details_signed_by_another_key",
+            "why": "The body names one persona and the signature is somebody else's. This is the exact shape of the hijack: a reply that says 'I am your arbiter' written by whoever held the card. The key to check with is read from the body, and then it is checked.",
+            "details_hex": hex(&sign_details(&det, &other)),
+            "expect": { "ok": false, "reject": "BADSIG", "hint": "signature does not verify" } }));
+        v.push(json!({ "name": "details_bare_body_not_an_envelope",
+            "why": "A bare map is what version 1 wrote. Without the envelope there is no signature to check, and a reader that quietly accepted the map would be the old reader again.",
+            "details_hex": hex_body,
+            "expect": { "ok": false, "reject": "MALFORMED", "hint": "not a signed envelope" } }));
+    }
 
     // A pronouns code nobody has a word for.
     //

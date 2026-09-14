@@ -1027,6 +1027,12 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
 
 
 
+
+
+
+
+
+
 // A JNA Library to expose the extern-C FFI definitions.
 // This is an implementation detail which will be called internally by the public API.
 
@@ -1052,7 +1058,7 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_attachment_seal(`key`: RustBuffer.ByValue,`nonce`: RustBuffer.ByValue,`plaintext`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_build_contact_details(`personaSecret`: RustBuffer.ByValue,`outboxKey`: RustBuffer.ByValue,`prekeyBundle`: RustBuffer.ByValue,`displayName`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,`profile`: RustBuffer.ByValue,`purpose`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_build_contact_details(`personaSecret`: RustBuffer.ByValue,`outboxKey`: RustBuffer.ByValue,`prekeyBundle`: RustBuffer.ByValue,`displayName`: RustBuffer.ByValue,`payto`: RustBuffer.ByValue,`profile`: RustBuffer.ByValue,`purpose`: RustBuffer.ByValue,`inboxKey`: RustBuffer.ByValue,`claimant`: Byte,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_build_log_head(`nextSeq`: Long,`prekeyBundle`: RustBuffer.ByValue,`readUpTo`: RustBuffer.ByValue,`ring`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1194,7 +1200,11 @@ internal interface UniffiLib : Library {
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_scan_view_only(`nodeUrl`: RustBuffer.ByValue,`address`: RustBuffer.ByValue,`viewKeyHex`: RustBuffer.ByValue,`fromHeight`: Long,`maxBlocks`: Int,`subaddressMinors`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_monero_second_opinion_nodes(`inUse`: RustBuffer.ByValue,`ownNode`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_send(`nodeUrl`: RustBuffer.ByValue,`spendKeyHex`: RustBuffer.ByValue,`inputBlobs`: RustBuffer.ByValue,`toAddress`: RustBuffer.ByValue,`amountPxmr`: Long,`priority`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_monero_send_checked(`nodeUrl`: RustBuffer.ByValue,`spendKeyHex`: RustBuffer.ByValue,`inputBlobs`: RustBuffer.ByValue,`toAddress`: RustBuffer.ByValue,`amountPxmr`: Long,`priority`: Int,`maxFeePxmr`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_spent(`nodeUrl`: RustBuffer.ByValue,`keyImagesHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1203,6 +1213,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_fn_func_monero_tx_details(`nodeUrl`: RustBuffer.ByValue,`txHashHex`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_monero_tx_known(`nodeUrl`: RustBuffer.ByValue,`txHashHex`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_ducat_mobile_fn_func_monero_tx_status(`nodeUrl`: RustBuffer.ByValue,`txHashHex`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_node_app_call(`routeBlob`: RustBuffer.ByValue,`message`: RustBuffer.ByValue,`timeoutMs`: Int,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1274,7 +1286,7 @@ internal interface UniffiLib : Library {
     ): Byte
     fun uniffi_ducat_mobile_fn_func_open_message(`sealedBytes`: RustBuffer.ByValue,`prekeySecret`: RustBuffer.ByValue,`isOneTime`: Byte,`expectedSeq`: Long,`prevLink`: RustBuffer.ByValue,`threadAad`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_ducat_mobile_fn_func_parse_contact_details(`bytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_ducat_mobile_fn_func_parse_contact_details(`bytes`: RustBuffer.ByValue,`inboxKey`: RustBuffer.ByValue,`claimant`: Byte,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_ducat_mobile_fn_func_parse_log_head(`bytes`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -1622,7 +1634,11 @@ internal interface UniffiLib : Library {
     ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_scan_view_only(
     ): Short
+    fun uniffi_ducat_mobile_checksum_func_monero_second_opinion_nodes(
+    ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_send(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_monero_send_checked(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_spent(
     ): Short
@@ -1631,6 +1647,8 @@ internal interface UniffiLib : Library {
     fun uniffi_ducat_mobile_checksum_func_monero_tx_details(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_monero_tx_known(
+    ): Short
+    fun uniffi_ducat_mobile_checksum_func_monero_tx_status(
     ): Short
     fun uniffi_ducat_mobile_checksum_func_node_app_call(
     ): Short
@@ -1818,7 +1836,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_attachment_seal() != 27745.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_build_contact_details() != 60559.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_build_contact_details() != 48125.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_build_log_head() != 471.toShort()) {
@@ -2031,7 +2049,13 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_monero_scan_view_only() != 42386.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_second_opinion_nodes() != 44635.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_send() != 56657.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_send_checked() != 40980.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_spent() != 3803.toShort()) {
@@ -2044,6 +2068,9 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_monero_tx_known() != 9535.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_ducat_mobile_checksum_func_monero_tx_status() != 37530.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_node_app_call() != 36150.toShort()) {
@@ -2151,7 +2178,7 @@ private fun uniffiCheckApiChecksums(lib: UniffiLib) {
     if (lib.uniffi_ducat_mobile_checksum_func_open_message() != 55240.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_ducat_mobile_checksum_func_parse_contact_details() != 50912.toShort()) {
+    if (lib.uniffi_ducat_mobile_checksum_func_parse_contact_details() != 64932.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_ducat_mobile_checksum_func_parse_log_head() != 56522.toShort()) {
@@ -7659,6 +7686,122 @@ public object FfiConverterTypeTxKnown: FfiConverterRustBuffer<TxKnown> {
 
 
 /**
+ * Where a second node places a transaction — the answer `monero_tx_known`
+ * could not give.
+ *
+ * `get_transactions` returns pool transactions too, so "the node has it"
+ * covered a payment that was still replaceable, and a merchant's second
+ * opinion said yes to a mempool sighting. This asks the daemon's own
+ * `in_pool` and `block_height` fields instead, and checks that the
+ * transaction handed back is the one asked about — the RPC crate never
+ * does, and a node (or a proxy in front of one) that answers a different
+ * hash would otherwise pass as corroboration.
+ */
+sealed class TxStatus {
+    
+    /**
+     * Mined, at this height. The only answer that settles a sale.
+     */
+    data class InBlock(
+        val `height`: kotlin.ULong) : TxStatus() {
+        companion object
+    }
+    
+    /**
+     * Relayed and waiting. Real bytes, replaceable until a block takes them.
+     */
+    object InPool : TxStatus()
+    
+    
+    /**
+     * The node answered, and has never heard of it.
+     */
+    object Unknown : TxStatus()
+    
+    
+    /**
+     * No answer at all — nothing either way.
+     */
+    object Unreachable : TxStatus()
+    
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeTxStatus : FfiConverterRustBuffer<TxStatus>{
+    override fun read(buf: ByteBuffer): TxStatus {
+        return when(buf.getInt()) {
+            1 -> TxStatus.InBlock(
+                FfiConverterULong.read(buf),
+                )
+            2 -> TxStatus.InPool
+            3 -> TxStatus.Unknown
+            4 -> TxStatus.Unreachable
+            else -> throw RuntimeException("invalid enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: TxStatus) = when(value) {
+        is TxStatus.InBlock -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+                + FfiConverterULong.allocationSize(value.`height`)
+            )
+        }
+        is TxStatus.InPool -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is TxStatus.Unknown -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+        is TxStatus.Unreachable -> {
+            // Add the size for the Int that specifies the variant plus the size needed for all fields
+            (
+                4UL
+            )
+        }
+    }
+
+    override fun write(value: TxStatus, buf: ByteBuffer) {
+        when(value) {
+            is TxStatus.InBlock -> {
+                buf.putInt(1)
+                FfiConverterULong.write(value.`height`, buf)
+                Unit
+            }
+            is TxStatus.InPool -> {
+                buf.putInt(2)
+                Unit
+            }
+            is TxStatus.Unknown -> {
+                buf.putInt(3)
+                Unit
+            }
+            is TxStatus.Unreachable -> {
+                buf.putInt(4)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+}
+
+
+
+
+
+/**
  * Assurance that the person present may spend, weakest first.
  */
 
@@ -9172,11 +9315,11 @@ public object FfiConverterMapStringString: FfiConverterRustBuffer<Map<kotlin.Str
         /**
          * the keys to seal with.
          */
-    @Throws(ContactException::class) fun `buildContactDetails`(`personaSecret`: kotlin.ByteArray, `outboxKey`: kotlin.String, `prekeyBundle`: kotlin.ByteArray, `displayName`: kotlin.String?, `payto`: kotlin.String?, `profile`: Profile, `purpose`: kotlin.String?): kotlin.ByteArray {
+    @Throws(ContactException::class) fun `buildContactDetails`(`personaSecret`: kotlin.ByteArray, `outboxKey`: kotlin.String, `prekeyBundle`: kotlin.ByteArray, `displayName`: kotlin.String?, `payto`: kotlin.String?, `profile`: Profile, `purpose`: kotlin.String?, `inboxKey`: kotlin.String, `claimant`: kotlin.Boolean): kotlin.ByteArray {
             return FfiConverterByteArray.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_build_contact_details(
-        FfiConverterByteArray.lower(`personaSecret`),FfiConverterString.lower(`outboxKey`),FfiConverterByteArray.lower(`prekeyBundle`),FfiConverterOptionalString.lower(`displayName`),FfiConverterOptionalString.lower(`payto`),FfiConverterTypeProfile.lower(`profile`),FfiConverterOptionalString.lower(`purpose`),_status)
+        FfiConverterByteArray.lower(`personaSecret`),FfiConverterString.lower(`outboxKey`),FfiConverterByteArray.lower(`prekeyBundle`),FfiConverterOptionalString.lower(`displayName`),FfiConverterOptionalString.lower(`payto`),FfiConverterTypeProfile.lower(`profile`),FfiConverterOptionalString.lower(`purpose`),FfiConverterString.lower(`inboxKey`),FfiConverterBoolean.lower(`claimant`),_status)
 }
     )
     }
@@ -10220,6 +10363,26 @@ public object FfiConverterMapStringString: FfiConverterRustBuffer<Map<kotlin.Str
     
 
         /**
+         * The nodes a second opinion may ask about a transaction.
+         *
+         * Never the node in use and never the person's own node — asking the same
+         * machine twice corroborates nothing — and https before http, so that
+         * whenever a shipped node gains a real certificate the question rides it
+         * first. With an own node configured, **one** other node: the primary is
+         * already the person's own and every extra question hands a public
+         * stranger a transaction id this wallet cares about. Without one, two,
+         * so a single node stuck a few blocks back cannot stall every sale.
+         */ fun `moneroSecondOpinionNodes`(`inUse`: kotlin.String?, `ownNode`: kotlin.String?): List<NodeCandidate> {
+            return FfiConverterSequenceTypeNodeCandidate.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_second_opinion_nodes(
+        FfiConverterOptionalString.lower(`inUse`),FfiConverterOptionalString.lower(`ownNode`),_status)
+}
+    )
+    }
+    
+
+        /**
          * Build, sign and broadcast a transaction.
          *
          * `input_blobs` are outputs from a previous scan. The caller chooses which to
@@ -10248,6 +10411,27 @@ public object FfiConverterMapStringString: FfiConverterRustBuffer<Map<kotlin.Str
     uniffiRustCallWithError(MoneroException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_send(
         FfiConverterString.lower(`nodeUrl`),FfiConverterString.lower(`spendKeyHex`),FfiConverterSequenceByteArray.lower(`inputBlobs`),FfiConverterString.lower(`toAddress`),FfiConverterULong.lower(`amountPxmr`),FfiConverterUInt.lower(`priority`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * `monero_send` with the quote the person agreed to.
+         *
+         * The transaction is built against `max_fee_pxmr` — the estimate the
+         * screen showed — and refused **before signing** when the fee the
+         * builder arrives at is more than a quarter above it, or more than a
+         * twentieth of the amount (see `FEE_SHARE_FLOOR_PXMR`). Zero means no
+         * quote was available (the estimate failed), and only the ceilings hold.
+         * Every refusal here is raised under the "fee rate:" prefix both clients
+         * read as "nothing was built, the notes are free again".
+         */
+    @Throws(MoneroException::class) fun `moneroSendChecked`(`nodeUrl`: kotlin.String, `spendKeyHex`: kotlin.String, `inputBlobs`: List<kotlin.ByteArray>, `toAddress`: kotlin.String, `amountPxmr`: kotlin.ULong, `priority`: kotlin.UInt, `maxFeePxmr`: kotlin.ULong): SendResult {
+            return FfiConverterTypeSendResult.lift(
+    uniffiRustCallWithError(MoneroException) { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_send_checked(
+        FfiConverterString.lower(`nodeUrl`),FfiConverterString.lower(`spendKeyHex`),FfiConverterSequenceByteArray.lower(`inputBlobs`),FfiConverterString.lower(`toAddress`),FfiConverterULong.lower(`amountPxmr`),FfiConverterUInt.lower(`priority`),FfiConverterULong.lower(`maxFeePxmr`),_status)
 }
     )
     }
@@ -10319,6 +10503,19 @@ public object FfiConverterMapStringString: FfiConverterRustBuffer<Map<kotlin.Str
             return FfiConverterTypeTxKnown.lift(
     uniffiRustCall() { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_tx_known(
+        FfiConverterString.lower(`nodeUrl`),FfiConverterString.lower(`txHashHex`),FfiConverterUInt.lower(`timeoutMs`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Ask one node where a transaction stands. Blocking; call it off the
+         * main thread.
+         */ fun `moneroTxStatus`(`nodeUrl`: kotlin.String, `txHashHex`: kotlin.String, `timeoutMs`: kotlin.UInt): TxStatus {
+            return FfiConverterTypeTxStatus.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_monero_tx_status(
         FfiConverterString.lower(`nodeUrl`),FfiConverterString.lower(`txHashHex`),FfiConverterUInt.lower(`timeoutMs`),_status)
 }
     )
@@ -10877,11 +11074,18 @@ public object FfiConverterMapStringString: FfiConverterRustBuffer<Map<kotlin.Str
     }
     
 
-    @Throws(ContactException::class) fun `parseContactDetails`(`bytes`: kotlin.ByteArray): PeerDetails {
+        /**
+         * Open one half of a contact inbox: verify the envelope under the persona
+         * it names (§16.9) and check it was written for this `inbox_key` in this
+         * role. A half signed by any other key, written for another inbox, or the
+         * other subkey's half, is refused — so the persona a caller keys trust by
+         * is the writer's own.
+         */
+    @Throws(ContactException::class) fun `parseContactDetails`(`bytes`: kotlin.ByteArray, `inboxKey`: kotlin.String, `claimant`: kotlin.Boolean): PeerDetails {
             return FfiConverterTypePeerDetails.lift(
     uniffiRustCallWithError(ContactException) { _status ->
     UniffiLib.INSTANCE.uniffi_ducat_mobile_fn_func_parse_contact_details(
-        FfiConverterByteArray.lower(`bytes`),_status)
+        FfiConverterByteArray.lower(`bytes`),FfiConverterString.lower(`inboxKey`),FfiConverterBoolean.lower(`claimant`),_status)
 }
     )
     }

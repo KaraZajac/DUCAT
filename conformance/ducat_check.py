@@ -1146,6 +1146,10 @@ MAX_PURPOSE_CHARS = 16
 # §16.9: the car's picture, under the listing thumbnail's rules (10 KiB), not
 # the avatar's — it rides a record that may already carry an avatar.
 DET_CAR_PHOTO = 301
+# §16.9: the inbox the half is written into, and which half it is — both
+# inside the signature.
+DET_INBOX = 302
+DET_ROLE = 303
 MAX_CAR_MODEL_CHARS, MAX_CAR_COLOR_CHARS, MAX_PLATE_CHARS = 24, 16, 12
 MAX_AVATAR_BYTES = 12 * 1024
 MAX_EMAIL_CHARS, MAX_PHONE_DIGITS, MAX_SIGNAL_CHARS = 254, 15, 48
@@ -1294,12 +1298,33 @@ def parse_card(buf):
 
 
 def parse_details(buf):
-    b = _body(buf)
+    # §16.9: both halves of a contact inbox are signed envelopes, and the key
+    # to check with is the persona named inside the body. A bare map is
+    # version 1 — the unsigned shape — and is refused as such.
+    env = _body(buf)
+    if 1 not in env or 2 not in env:
+        raise Reject("Malformed", "not a signed envelope")
+    body_bytes = _take(env, 1, "bytes", "envelope body")
+    sig = _take(env, 2, "bytes", "envelope signature")
+    _finish(env)
+    if len(sig) != 64:
+        raise Reject("Malformed", "signature is 64 bytes")
+    b = _body(body_bytes)
     _expect_type(b, "CONTACT_ACCEPT", "CONTACT_ACCEPT")
+    version = _take(b, 1, "uint", "version")
+    if version != 2:
+        raise Reject("Malformed", "details version is not 2")
+    suite = _take(b, 2, "uint", "suite")
+    persona = _take(b, DET_PERSONA, "bytes", "persona")
+    role = _take(b, DET_ROLE, "uint", "role")
+    if role > 1:
+        raise Reject("Malformed", "role is 0 or 1")
     out = {
-        "version": _take(b, 1, "uint", "version"),
-        "suite": _take(b, 2, "uint", "suite"),
-        "persona": _take(b, DET_PERSONA, "bytes", "persona"),
+        "version": version,
+        "suite": suite,
+        "persona": persona,
+        "role": role,
+        "inbox_key": _take_text(b, DET_INBOX, MAX_RECORD_KEY_CHARS, "inbox key", True),
         "outbox_key": _take_text(b, DET_OUTBOX, MAX_RECORD_KEY_CHARS, "outbox key", True),
         "prekey_bundle": _take(b, DET_BUNDLE, "bytes", "prekey bundle"),
         "display_name": _take_text(b, DET_NAME, MAX_DISPLAY_NAME_CHARS,
@@ -1331,6 +1356,8 @@ def parse_details(buf):
         "purpose": _take_text(b, DET_PURPOSE, MAX_PURPOSE_CHARS, "purpose", False),
     }
     _finish(b)
+    # The body parsed; now the signature, under the persona the body names.
+    verify_sig(suite, persona, sig, sig_input("CONTACT_ACCEPT", suite, body_bytes))
     if out["avatar"] is not None:
         a = out["avatar"]
         if not a:
@@ -2485,6 +2512,8 @@ def run_contact_details(cases, r):
                 m.append((DET_PURPOSE, ("text", d["purpose"])))
             if d["car_photo"] is not None:
                 m.append((DET_CAR_PHOTO, ("bytes", d["car_photo"])))
+            m.append((DET_INBOX, ("text", d["inbox_key"])))
+            m.append((DET_ROLE, ("uint", d["role"])))
             return _reencode_map(m)
         out = expect_reject(r, "contact", c, go)
         if out is not None and out.hex() != c["expect"]["reencodes_to_hex"]:

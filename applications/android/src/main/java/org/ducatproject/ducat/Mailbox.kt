@@ -275,6 +275,8 @@ object Mailbox {
                         if (store.publishAddress()) WalletStore(context).addressFor("card_${c.inboxKey}") else null,
                         MyProfile(context, ownerHex).toWire(purpose = c.purpose),
                         c.purpose,
+                        // §16.9: the inbox this half is written into, and which half it is.
+                        c.inboxKey, false,
                     ),
                 )
             }.onSuccess { n += 1 }
@@ -339,6 +341,8 @@ object Mailbox {
                 MyProfile(context, ownerHex).toWire(purpose = purpose),
                 // Stamped so the claimant can scope their reply to match.
                 purpose,
+                // §16.9: the inbox this half is written into, and which half it is.
+                inbox.key, false,
             ),
         )
 
@@ -416,12 +420,12 @@ object Mailbox {
             // a newer card from the same person has been claimed since, the
             // persona in the card's details is the same and finds the same
             // thread.
-            val mine = runCatching { parseContactDetails(already) }.getOrNull()
+            val mine = runCatching { parseContactDetails(already, scanned.inboxKey, true) }.getOrNull()
                 ?.takeIf { personas.allHexes().contains(it.persona.toHexString()) }
             if (mine != null) {
                 val known = store.all().firstOrNull { it.myOutbox == mine.outboxKey }
                     ?: runCatching { nodeDhtGet(scanned.inboxKey, 0u, true) }.getOrNull()
-                        ?.let { raw -> runCatching { parseContactDetails(raw) }.getOrNull() }
+                        ?.let { raw -> runCatching { parseContactDetails(raw, scanned.inboxKey, false) }.getOrNull() }
                         ?.let { theirs ->
                             store.all().firstOrNull { it.personaHex == theirs.persona.toHexString() }
                         }
@@ -435,7 +439,14 @@ object Mailbox {
 
         val raw = nodeDhtGet(scanned.inboxKey, 0u, true)
             ?: throw DetailsNotPublished()
-        val theirs = parseContactDetails(raw)
+        val theirs = parseContactDetails(raw, scanned.inboxKey, false)
+        // §16.9: the signed card names a persona and the inbox's own half is
+        // signed by one; they must be the same. A record that disagrees with
+        // the card is not the card's issuer talking.
+        if (!theirs.persona.contentEquals(scanned.persona)) {
+            DucatLog.w(TAG, "card and its record name different personas — refusing the claim")
+            throw CardMismatch()
+        }
 
         // **Not yourself.** Checked here rather than on any one screen,
         // because a card reaches this from four directions — a scan, a
@@ -499,6 +510,8 @@ object Mailbox {
                 // sends the car, which is what a rider is scanning the curb for.
                 MyProfile(context).toWire(purpose = theirs.purpose, driving = asDriver),
                 theirs.purpose,
+                // §16.9: the inbox this half is written into, and which half it is.
+                scanned.inboxKey, true,
             ),
         )
 
@@ -806,7 +819,26 @@ object Mailbox {
                     )
                     continue
                 }
-                val theirs = parseContactDetails(raw)
+                // Verified under the persona it names (§16.9), so the persona
+                // below is the claimant's own and not a name typed into a bare
+                // map. A reply that does not open is a stranger writing into
+                // the slot: the card is contested, not merely unread.
+                val opened = runCatching { parseContactDetails(raw, issued.inboxKey, true) }
+                val theirs = opened.getOrNull()
+                if (theirs == null) {
+                    DucatLog.w(
+                        TAG,
+                        "card (${issued.purpose}) was answered with something that " +
+                            "does not open (${opened.exceptionOrNull()?.message}) — discarding it unclaimed",
+                    )
+                    store.forgetIssuedCard(issued.inboxKey)
+                    Notify.post(
+                        context,
+                        context.getString(R.string.notify_card_contested_title),
+                        context.getString(R.string.notify_card_contested_body),
+                    )
+                    continue
+                }
                 val personaHex = theirs.persona.toHexString()
                 val prior = store.all().firstOrNull { it.personaHex == personaHex }
                 // Prior relationship keeps its persona; a new one belongs to
@@ -2203,6 +2235,8 @@ object Mailbox {
      * not be reported as one.
      */
     class DetailsNotPublished : IllegalStateException("card details not published yet")
+    /** The card and the record it names disagree about who issued it (§16.9). */
+    class CardMismatch : IllegalStateException("card and record name different personas")
 
     /**
      * Veilid's TryAgain surfacing through the bridge as message text.

@@ -368,6 +368,8 @@ impl App {
                 // §16.9: the profile rides the record, scoped to the purpose.
                 self.profile_wire(&owner_hex, Some(purpose), false),
                 Some(purpose.to_string()),
+                inbox.key.clone(),
+                false,
             )?,
         )?;
         let card = create_contact_card(
@@ -431,13 +433,13 @@ impl App {
             // Whose reply? If it is this desk's, the card was claimed here
             // and the thread it opened still exists — the right answer is
             // that thread, not "somebody got there first".
-            let mine = parse_contact_details(already).ok().filter(|d| self.persona_hexes().contains(&hex(&d.persona)));
+            let mine = parse_contact_details(already, inbox.clone(), true).ok().filter(|d| self.persona_hexes().contains(&hex(&d.persona)));
             if let Some(mine) = mine {
                 let known = self.contacts().into_iter().find(|c| c.my_outbox == mine.outbox_key).or_else(|| {
                     node_dht_get(inbox.clone(), 0, true)
                         .ok()
                         .flatten()
-                        .and_then(|raw| parse_contact_details(raw).ok())
+                        .and_then(|raw| parse_contact_details(raw, inbox.clone(), false).ok())
                         .and_then(|theirs| self.contact(&hex(&theirs.persona)))
                 });
                 if let Some(k) = known {
@@ -449,8 +451,14 @@ impl App {
         let raw = node_dht_get(inbox.clone(), 0, true)?
             .filter(|r| !r.is_empty())
             .ok_or(Error::Card(CardProblem::NotPublished))?;
-        let theirs = parse_contact_details(raw)?;
+        let theirs = parse_contact_details(raw, inbox.clone(), false)?;
         let theirs_hex = hex(&theirs.persona);
+        // §16.9: the signed card names a persona, and the inbox's own half
+        // is signed by one too; they must be the same. A record that
+        // disagrees with the card is not the card's issuer talking.
+        if theirs.persona != scanned.persona {
+            return Err(Error::Card(CardProblem::NotPublished));
+        }
         // **Not yourself.** Your own listings are on the board you read,
         // and claiming your own card burns its one reply slot.
         if self.persona_hexes().contains(&theirs_hex) {
@@ -497,6 +505,8 @@ impl App {
                 // contact exchange, the private default.
                 self.profile_wire(&owner_hex, theirs.purpose.as_deref(), as_driver),
                 theirs.purpose.clone(),
+                inbox.clone(),
+                true,
             )?,
         )?;
         // What this thread already had, if we have met before: their log is
@@ -713,7 +723,18 @@ impl App {
             self.forget_issued_card(&issued.inbox_key)?;
             return Ok(false);
         }
-        let theirs = parse_contact_details(read.data)?;
+        // Verified under the persona it names (§16.9), so the persona below
+        // is the claimant's own and not a name typed into a bare map. A reply
+        // that does not open is a stranger writing into the slot: the card
+        // is contested, not merely unread.
+        let theirs = match parse_contact_details(read.data, issued.inbox_key.clone(), true) {
+            Ok(t) => t,
+            Err(e) => {
+                log::warn(TAG, format!("card ({}) was answered with something that does not open ({e}) — discarding it unclaimed", issued.purpose));
+                self.forget_issued_card(&issued.inbox_key)?;
+                return Ok(false);
+            }
+        };
         let persona_hex = hex(&theirs.persona);
         let prior = self.contact(&persona_hex);
         // Prior relationship keeps its persona; a new one belongs to
@@ -866,6 +887,8 @@ impl App {
                 None,
                 self.profile_wire(&c.owner, Some(&c.purpose), false),
                 Some(c.purpose.clone()),
+                c.inbox_key.clone(),
+                false,
             )?,
         )?;
         Ok(())

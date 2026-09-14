@@ -95,6 +95,8 @@ fn details() -> ContactDetails {
         car_color: None,
         plate: None,
         purpose: Some("sale".into()),
+        inbox_key: "VLD0:test-inbox".into(),
+        role: 1,
         car_photo: None,
     }
 }

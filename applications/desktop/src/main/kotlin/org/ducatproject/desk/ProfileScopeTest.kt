@@ -63,15 +63,17 @@ fun main() {
 
     // 5) The purpose survives the wire, and the scoped profile travels with it.
     val persona = PersonaStore(ctx).secret()
-    val saleBytes = buildContactDetails(persona, "VLD0:outbox", ByteArray(1) { 1 }, "Sam", null, sale, "sale")
-    val salePeer = parseContactDetails(saleBytes)
+    // §16.9: each half is signed for one inbox and one role; the test
+    // plays the issuer's half of an inbox it names itself.
+    val saleBytes = buildContactDetails(persona, "VLD0:outbox", ByteArray(1) { 1 }, "Sam", null, sale, "sale", "VLD0:inbox", false)
+    val salePeer = parseContactDetails(saleBytes, "VLD0:inbox", false)
     check(salePeer.purpose == "sale") { "PROFILESCOPE_FAIL purpose lost on the wire: ${salePeer.purpose}" }
     check(salePeer.profile.email == null && salePeer.profile.phone == null && salePeer.profile.signal == null) {
         "PROFILESCOPE_FAIL a sale record carried a contact method"
     }
 
-    val profBytes = buildContactDetails(persona, "VLD0:outbox", ByteArray(1) { 1 }, "Sam", null, prof, "profile")
-    val profPeer = parseContactDetails(profBytes)
+    val profBytes = buildContactDetails(persona, "VLD0:outbox", ByteArray(1) { 1 }, "Sam", null, prof, "profile", "VLD0:inbox", false)
+    val profPeer = parseContactDetails(profBytes, "VLD0:inbox", false)
     check(profPeer.purpose == "profile") { "PROFILESCOPE_FAIL profile purpose lost on the wire: ${profPeer.purpose}" }
     check(profPeer.profile.email == "sam@example.com") { "PROFILESCOPE_FAIL profile record dropped email" }
 
