@@ -1,0 +1,135 @@
+# Adversarial security review — 2026-09-07
+
+Five read-only reviews of the tree at ffd6c7d0 (draft 1.1.0-dev9), one per attack
+surface: wire format and spec, desk (Tauri), Android, network layer (Veilid, swarm,
+Monero RPC), money flows. Each reviewer traced findings to lines; CONFIRMED means
+the path was followed end to end, SUSPECTED means plausible but not executed.
+The original reports were lost with the session's scratch directory; this file is
+the durable record of what they found and what has been done about it. Line
+numbers refer to ffd6c7d0.
+
+Status legend: **fixed** (in the tree or in a named commit), **partial** (some of
+the fix landed), **open**, **deferred** (design decision recorded, not scheduled),
+**accepted** (by design, stated in the spec).
+
+## Wire format and spec
+
+| # | Sev | Where | Finding | Status |
+|---|---|---|---|---|
+| W1 | Critical | core/src/contact.rs, mobile/src/contacts.rs, app/src/mailbox.rs, Mailbox.kt | The claimant's reply in a card's inbox was an unsigned map; any card holder could name someone else's persona (the arbiter, a friend) and have that contact rebound to the writer's outbox and prekeys | **fixed**: `CONTACT_ACCEPT` v2 as a §18.3 envelope under the persona named inside, bound to the inbox (302) and the half (303); version 1 refused; claimant checks subkey 0's persona against the card's; five vectors; draft dev10 |
+| W2 | Medium | app/src/groups.rs, Groups.kt, §16.24 | One member can silently exclude another or brick the board by forming a generation with a subset or a bogus owner; the union rule only applies to ties | **open** — spec now states the MUST (superset, owner = sender, successor generation); clients not yet enforcing |
+| W3 | Medium | mobile/src/node.rs, §16.24 | A group board's DHT descriptor publishes the full roster as persona keys to every storing node | **deferred**: derive per-group member keys; state the exposure in §16.24 |
+| W4 | Medium | §16.9, §15.12 | A public card carries the inbox's decryption key, so every board reader can read the claimant's reply (persona, plate, car photo) | **open** — seal subkey 1 to the issuer's prekey bundle (planned on top of W1) |
+| W5 | Medium | mobile/src/feed.rs, app/src/home.rs, Home.kt | `feed.json`'s `persona` never compared with the home it was fetched from; a hearted persona can attribute posts to anyone, including the reader | **open** — spec states the MUST; clients not yet |
+| W6 | Medium | §16.9 | First-writer denial: any board reader burns every card on a cell with one free DHT write | **deferred**: stamp on replies to board cards, or K reply slots; stated cost in the spec pending |
+| W7 | Medium (S) | SafeImage.kt, §16.18.3 | Board thumbnails are decoded by the platform decoder automatically | **deferred**: decode board images in Rust and hand RGBA to the UI |
+| W8 | Low | core/src/board.rs | A card can be lifted into a foreign notice: the poster key is unrelated to the card inside | **deferred** |
+| W9 | Low | core/src/hpke.rs | Sealed-message ceiling (8 KiB) unspecified and below what a legal message may carry (255-member roster) | **open** |
+| W10 | Low | core/src/board.rs, Beacons.kt | Beacon freshness trusts one Monero node | **open** |
+| W11 | Low | core/src/backup.rs, BackupSettings.kt | Export accepts an 8-character passphrase such as "password" | **open** — refuse `Weak` |
+| W12 | Low | §16.18 | HAIL_NOTICE version drift: spec says 1, code and vectors require 2 | **open** (one line) |
+| W13 | Low | core/src/contact.rs | `RentalNotice.features` bypasses the display-hazard filter | **open** |
+| W14 | Low | core/src/wire.rs | `wire::open` verifies only object types 1–12 | **open** |
+| W15 | Low | core/src/state.rs | The 120 s contact window is not held by the state machine | **open** |
+| W16 | Low | §15.3.2 | "offer_commit is necessarily empty" has no wire meaning | **open** |
+| W17 | Low (S) | core/src/escrow.rs | `SLASH_CLAIM` does not name the claimant | **open** |
+| W18 | Low | app/src/publications.rs | Shelf index may promise any number of chunks; issue assembled in memory | **open** |
+| W19 | Info | core/src/contact.rs | Two encodings of "no deposit" | **open** |
+| W20 | Info | core/src/board.rs | `beacon_verdict` is dead code; both clients re-implement it | **open** |
+
+## Desk (Tauri)
+
+| # | Sev | Where | Finding | Status |
+|---|---|---|---|---|
+| D1 | High | app/src/store.rs, wallet.rs, identity.rs | Spend key and persona secrets in plain JSON with umask permissions | **fixed** (owner-only dir 0700 and files 0600); encryption at rest still open |
+| D2 | Medium | mobile/src/swarm.rs, home.rs, sites.rs | No size ceiling on fetched bundles; hearted homes fetched unattended | **open** — `max_bytes` on the fetch plus index validation at decode |
+| D3 | Low | src-tauri/src/lib.rs | Sealed room relies on the per-response CSP alone; `.disable_javascript()` not set | **open** (one call) |
+| D4 | Low | mobile/src/monero.rs | Monero RPC over plain http | **accepted for now** — every public stagenet node's TLS is self-signed or CAcert; documented in the node list |
+| D5 | Low | lib.rs | Broad main-window command surface (`picture_data_url`, `node_debug`, `log_tail`) | **open** |
+| D6 | Low | app/src/log.rs | ducat.log carries names and amounts beside plaintext state | mitigated by D1 |
+| D7 | Low (S) | app/src/attachments.rs | Record-road attachment trusts `att_len` up to 512 MB | **open** |
+| D8–D10 | Info | | `shrink_picture` without the 24 MP guard; main-window CSP omissions; passphrase floor | **open** |
+
+## Android
+
+| # | Sev | Where | Finding | Status |
+|---|---|---|---|---|
+| A1 | High | ui/Drawer.kt, ui/BackupSettings.kt | Backup export and import not behind the PIN | **fixed** in tree (PinGate on both) |
+| A2 | High | build.gradle.kts | Shipped builds are debuggable and debug-signed | **before mainnet**: release build type, real keystore, R8 |
+| A3 | Medium | res/xml/apduservice.xml, nfc/ | Standing card served over NFC from the lock screen; claims adopted automatically | **open** |
+| A4 | Medium | ui/Hail.kt, Hailing.kt | A hail publishes name, ~1 km cell and a street-level destination unsealed | **open** — destination text moves into the sealed reply |
+| A5 | Medium | DucatLog.kt | Native-crash tombstones written to public Downloads | **fixed** in tree (app-private) |
+| A6 | Medium | (none) | No FLAG_SECURE; passphrase in cleartext and saved state | **fixed** in tree (`SecureScreen`, password fields, `remember`) |
+| A7 | Medium | mobile/src/monero.rs | Plain-http nodes; the Rust stack ignores Android's cleartext policy | see D4 |
+| A8 | Medium | Geo.kt, HailMap.kt | Exact coordinates to OSRM and Nominatim; tile cache | **accepted** (stated in UI); project-run front later |
+| A9 | Medium (S) | SiteViewerActivity.kt, Galleries.kt, Home.kt | NUL byte in a bundle path throws outside any catch | **fixed** in tree (`Sites.insideRoot`) |
+| A10 | Medium | MainActivity.kt, ui/Library.kt | `ducat:file/` links filed without confirmation | **fixed** in tree |
+| A11 | Low/Med | Home.kt, Publications.kt | Unbounded work on the sweep (home bundles, shelf record lists) | **open** (with D2) |
+| A12 | Low | RideStore.kt | Hail state in plain prefs | **fixed** in tree |
+| A13 | Low | Pin.kt, ui/PinGate.kt | Missing PIN file reads as "no PIN yet" | **fixed** in tree (wallet present + no verifier = tampered, device credential required) |
+| A14 | Low | ui/QrHub.kt, ui/NfcReader.kt | NFC card on a scan screen claimed with no name shown | **fixed** in tree (confirm with the name) |
+| A15 | Low | ui/Chat.kt | Bubbles open any URL on tap; attachments open with sender-chosen MIME | **fixed** in tree (confirm with the full URL; MIME allow-list, share sheet otherwise) |
+| A16 | Low | AndroidManifest.xml, MainActivity.kt | Unused BLUETOOTH permissions; `open_chat`/`open_group` extras from any app | **fixed** in tree (permissions removed; per-process token on notification intents) |
+| A17 | Low | AndroidManifest.xml | `singleTask` with default task affinity | **fixed** in tree (`taskAffinity=""`) |
+| A18 | Low | Poller.kt | Rate fetches fingerprint the phone every ~30 min | **accepted** (off switch exists) |
+| A19–A20 | Info | | Device credential as spend gate; hearting silently mirrors | **open** |
+
+## Network layer
+
+| # | Sev | Where | Finding | Status |
+|---|---|---|---|---|
+| N1 | High | mobile/src/monero.rs, ceremony.rs | Fee rate taken from the node with no cap (`max_per_weight = u64::MAX`) | **open** — ceiling and post-build refusal on both clients |
+| N2 | High | monero.rs, opinion.rs, SecondOpinion.kt | Second opinion defeated: returned tx hash unchecked, plain http, "unreachable" settles, pool presence counts as known | **partial**: desk policy rewritten (`InBlock` settles, pool/unknown/unreachable defer, small-sale floor, confirmations by amount, own-node honoured, node identity by host:port); phone `SecondOpinion.kt` and its callers still on the old rule |
+| N3 | High | contacts.rs, mailbox.rs, Hailing.kt | Public cards reveal the poster's persona and the claimant's identity to every board reader | **open** — per-listing pseudonymous personas and W4 |
+| N4 | High | stigmerge index.rs, fileindex, swarm.rs, Mailbox.kt | A share's index declares any size and the fetcher believes it | **open** (with D2) |
+| N5 | High (S) | stigmerge seeder.rs | Seeder spawns an unbounded task per block request behind a lock | **open** |
+| N6 | Medium | groups.rs, Groups.kt | Any member can wedge or partition a group with one roster | see W2 |
+| N7 | Medium | mailbox.rs, Mailbox.kt, contacts.rs | A stale record holder makes the reader dead-letter the current message | **open** — distinct `Stale` error, wait instead of advance |
+| N8 | Medium | mailbox.rs, Mailbox.kt, node.rs | Public cards claimed, burned or silently killed by anyone | **partial**: an unparsable reply is now treated as contested on both clients; K slots / stamped replies deferred |
+| N9 | Medium | Mailbox.kt, ContactStore.kt, mailbox.rs | A hostile contact forces 1024 reads and thread rewrites per lap | **open** |
+| N10 | Medium | Ceremony.kt, ceremony.rs | Escrow co-signer never bounds the fee in the proposed transaction | **open** (with M2) |
+| N11 | Medium | stigmerge block_fetcher.rs, piece_verifier.rs | One hostile mirror poisons a tail piece and is scored a success | **open** |
+| N12 | Medium | stigmerge header.rs, node.rs | A share key with a secret re-opens our own records with writer None | **open** |
+| N13 | Medium | stigmerge peer_gossip.rs | Gossip amplification; unbounded peer tables | **open** |
+| N14 | Medium | stigmerge share.rs, piece_verifier.rs | Two panics reachable from a publisher's bytes | **open** |
+| N15 | Medium | node.rs, geo.rs | Cell boards brickable for a week with writes at seq u32::MAX; future weeks computable | **deferred** |
+| N16 | Medium | monero.rs, opinion.rs, SecondOpinion.kt | Sends broadcast to five clearnet nodes even with an own node | **partial** (desk honours the own node; relay list still fans out) |
+| N17 | Medium | app/src/publications.rs | Shelf index drives unbounded reads and memory | see W18 |
+| N18 | Medium | stigmerge fetcher.rs, swarm.rs | No strike cap; a moving attempt resets the stall budget | **open** |
+| N19 | Low/Med | Wallet2.kt, wallet.rs | One node's `is_key_image_spent` is final | **open** |
+| N20–N27 | Low/Info | | Beacon over one node; one-hop safety route; settlement at one confirmation (desk now scales confirmations); sender-named record deletion; group timestamps; stigmerge block bounds; bundle budgets; open-once registry ignores the writer | **open** |
+
+## Money flows
+
+| # | Sev | Where | Finding | Status |
+|---|---|---|---|---|
+| M1 | High | ui/Kiosk.kt, Orders.kt, orders.rs | Kiosk hands over goods on a mempool sighting with no bond (§15.11 says MUST NOT) | **open** — `Seen` renders as settling; operator-set "hand over on sight up to X" |
+| M2 | High | Ceremony.kt, ceremony.rs | Release consent sized from the scanned balance, not the transaction's inputs; a partial sweep takes the co-signer's stake | **open** |
+| M3 | High | SecondOpinion.kt, opinion.rs, monero.rs | Second opinion defeated by an on-path attacker and by mempool presence | see N2 |
+| M4 | High | ui/Chat.kt, Ceremony.kt | The arbiter signs the proposer's payload while shown only the proposer's claim | **open** |
+| M5 | Medium | Ceremony.kt | The joining party adopts the inviter's fare, stakes and funder index unchecked | **open** |
+| M6 | Medium | Ledger.kt, ContactStore.kt, ledger.rs | Any contact can relabel, itemise and "tax" a row of the merchant's statement | **open** |
+| M7 | Medium | Donations.kt, donations.rs | A donation receipt is issued for any transaction the wallet received | **open** |
+| M8 | Medium | ContactStore.kt, backup.rs, Ledger.kt | Restore loses send records; spends become epoch-dated "unexplained" rows | **open** |
+| M9 | Medium | ui/Pay.kt, Pin.kt | Stale-rate rule and payer verification policy not applied | **open** |
+| M10 | Low | Orders.kt, orders.rs | Pool-sighted orders promoted without the second opinion | **open** |
+| M11 | Low | Ceremony.kt | Consent TOCTOU on a superseding proposal | **open** |
+| M12 | Low | Publications.kt | An ask can be billed twice by two polls | **open** |
+| M13 | Low | Orders.kt | A code paid after expiry lands unmatched | **open** |
+| M14 | Info | core/ | Part IV (`fast/1`, bonds, slash claims, market arbiter set) exists only in core | **open** — see research/post-1.0/TRUST.md |
+| M15 | Info | pay.rs vs ui/Pay.kt; contacts.rs vs ContactStore.kt | Client divergences: bill payto vs contact address; receipt dedupe order | **open** |
+| M16 | Info | catalogue.rs | Unchecked multiply in `parse_money` | **fixed** in tree |
+
+## Checked and found sound (across the five reviews)
+
+CBOR decoder bounds and canonical form; domain-separated signing over received
+bytes; strict readers with every pairing rule; board seal, stamp and beacon
+window; group page AAD and probe field; position frames; publication chunk
+sealing; escrow round ordering, arbiter-set argument, destination confinement;
+send-intent ledger contract; bills-to-receipts arithmetic and short-payment
+refusal; DHT value validation in Veilid before use; safety routes by default;
+bounded inbound queues; uniffi panic containment; swarm path containment at
+decode and before every write; attachment hashing before decrypting; SafeImage
+bounds; notification visibility; log redaction; PIN KDF and lockout; site viewer
+walls on both clients; sealed-room IPC isolation and CSP on the desk; no XSS
+sinks in the desk pages; backup AEAD and KDF; rate oracle agreement rule.
