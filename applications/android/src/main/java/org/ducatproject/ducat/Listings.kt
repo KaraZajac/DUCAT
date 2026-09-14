@@ -104,6 +104,8 @@ object Listings {
         put("kind", r.kind.toLong()); put("title", r.title); put("area", r.area)
         r.cell?.let { put("cell", it) }
         put("price", r.pricePxmr.toString()); put("deposit", r.depositPxmr.toString())
+        // §9.5's seller's minimum, under the desk's name for a found row.
+        put("min_burn", r.minBurnPxmr.toString())
         put("expiry", r.expiry.toLong())
         r.make?.let { put("make", it) }; r.model?.let { put("model", it) }
         r.year?.let { put("year", it.toLong()) }
@@ -137,6 +139,7 @@ object Listings {
             cell = if (o.has("cell")) o.getString("cell") else null,
             pricePxmr = o.getString("price").toULong(),
             depositPxmr = o.getString("deposit").toULong(),
+            minBurnPxmr = o.optString("min_burn", "0").toULongOrNull() ?: 0uL,
             expiry = o.getLong("expiry").toULong(),
             make = if (o.has("make")) o.getString("make") else null,
             model = if (o.has("model")) o.getString("model") else null,
@@ -795,6 +798,10 @@ object Listings {
          *  core parses it — save for the display hazards no listing may
          *  carry, stripped line by line so the paragraphs survive. */
         description: String = "",
+        /** §9.5: the least a buyer's persona must have burned for this
+         *  poster to deal, in piconero; zero asks nothing and writes no
+         *  field. The desk's `minBurnPxmr`. */
+        minBurnPxmr: Long = 0L,
     ): JSONObject {
         val cell = runCatching {
             uniffi.ducat_mobile.geohashEncode(latE7, lonE7, CELL_PRECISION)
@@ -821,6 +828,7 @@ object Listings {
             // Stored even when it is one, so the owner's counter has something
             // to count down from without a migration the first time they sell.
             put("quantity", quantity.coerceIn(1L, MAX_QUANTITY))
+            put("minBurnPxmr", minBurnPxmr.coerceAtLeast(0L))
             thumb?.let {
                 put("thumb", android.util.Base64.encodeToString(it, android.util.Base64.NO_WRAP))
             }
@@ -862,6 +870,51 @@ object Listings {
     const val MAX_QUANTITY = 999L
 
     /**
+     * §9.5's seller's minimum on a stored listing, in piconero; zero when
+     * none was set, including on a listing written before the field
+     * existed. Never negative, because the wire has no such number.
+     */
+    fun minBurnOf(o: JSONObject): Long = o.optLong("minBurnPxmr", 0L).coerceAtLeast(0L)
+
+    /**
+     * What the poster typed into "Minimum burn for buyers (XMR)", as
+     * piconero.
+     *
+     * Empty asks nothing and is zero — the field is optional, and an owner
+     * who never touched it has not set a minimum. A figure is read the way
+     * every money field here is read ([Amounts.parse]: any script's digits,
+     * either decimal mark), and refused as null when it is not a number,
+     * is negative — there is no such burn — or does not fit the wire's
+     * integer. A zero typed on purpose is the same as nothing typed: the
+     * wire refuses a written zero, so it is simply not written.
+     *
+     * Pure, so the rule can be tested without a screen.
+     */
+    fun minBurnPxmrOf(text: String): Long? {
+        if (text.isBlank()) return 0L
+        val v = Amounts.parse(text) ?: return null
+        if (v.signum() < 0) return null
+        return Amounts.toPxmr(v)
+    }
+
+    /**
+     * Whether a found notice is one of this phone's own: its card is one a
+     * listing here minted (see [post]). The card is the one fact both sides
+     * hold — the poster key is per listing and says nothing about who — so
+     * a seeker is not warned against their own minimum, nor invited to ask
+     * themselves about their own kayak.
+     */
+    fun isMine(context: Context, card: String): Boolean {
+        if (card.isBlank()) return false
+        return all(context).any { o ->
+            o.optString("card") == card ||
+                o.optJSONArray("cards")?.let { arr ->
+                    (0 until arr.length()).any { arr.optString(it) == card }
+                } == true
+        }
+    }
+
+    /**
      * The public half, as the wire object (§16.18).
      *
      * The only path from a listing to a board. `private` is not read here and
@@ -892,6 +945,10 @@ object Listings {
             cell = o.optString("cell").takeIf { it.isNotBlank() },
             pricePxmr = o.optLong("pricePxmr").toULong(),
             depositPxmr = o.optLong("depositPxmr").toULong(),
+            // §9.5: the least a buyer must have burned. Zero asks nothing
+            // and the bridge writes no field for it; a buyer's client MUST
+            // show a non-zero one before the buyer commits.
+            minBurnPxmr = minBurnOf(o).toULong(),
             expiry = (System.currentTimeMillis() / 1000 + TTL_SECONDS).toULong(),
             // A place has no gearbox and a car has no bedrooms — core refuses
             // the mismatch, so the split is enforced here rather than hoped for.

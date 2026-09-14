@@ -48,4 +48,5 @@
     <string name="trust_what_vouches">các bảo đảm</string>
     <string name="trust_err_vouch_self">Bạn không thể bảo đảm cho tên của chính mình.</string>
     <string name="trust_err_vouch_unsigned">Không thể ký bảo đảm.</string>
+    <string name="trust_no_burn_known">Chưa kiểm tra lần đốt nào của họ ở đây</string>
 </resources>

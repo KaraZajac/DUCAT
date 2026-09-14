@@ -170,4 +170,9 @@
     <string name="busy_pictures_swarm">De foto’s gaan de zwerm op…</string>
     <string name="busy_files_swarm">De bestanden gaan de zwerm op…</string>
     <string name="rent_price_at_rate">%1$s · ongeveer %2$s tegen de koers van vandaag</string>
+    <string name="rent_min_burn_label">Minimale verbranding voor kopers (XMR)</string>
+    <string name="rent_min_burn_hint">Laat leeg om niets te vragen. Kopers zien het voordat ze toezeggen; hun client waarschuwt als hun naam minder heeft verbrand.</string>
+    <string name="rent_min_burn_x">De verkoper vraagt dat kopers ten minste %1$s hebben verbrand</string>
+    <string name="rent_min_burn_short">Deze persona heeft %1$s verbrand, minder dan gevraagd. Ze handelen misschien niet met je.</string>
+    <string name="rent_min_burn_none">Deze persona heeft nog niets verbrand. Ze handelen misschien niet met je.</string>
 </resources>

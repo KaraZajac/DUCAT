@@ -168,4 +168,9 @@
     <string name="busy_pictures_swarm">写真をスウォームに載せています…</string>
     <string name="busy_files_swarm">ファイルをスウォームに載せています…</string>
     <string name="rent_price_at_rate">%1$s · 本日のレートで約 %2$s</string>
+    <string name="rent_min_burn_label">買い手に求めるバーンの下限 (XMR)</string>
+    <string name="rent_min_burn_hint">空欄なら何も求めません。買い手は約束する前にこれを見ます。買い手の名前のバーンが下回れば、買い手側で警告が出ます。</string>
+    <string name="rent_min_burn_x">売り手は買い手に少なくとも %1$s のバーンを求めています</string>
+    <string name="rent_min_burn_short">このペルソナのバーンは %1$s で、求められた額に届きません。取引を断られるかもしれません。</string>
+    <string name="rent_min_burn_none">このペルソナはまだ何もバーンしていません。取引を断られるかもしれません。</string>
 </resources>

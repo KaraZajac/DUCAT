@@ -48,4 +48,5 @@
     <string name="trust_what_vouches">保証</string>
     <string name="trust_err_vouch_self">自分の名前は保証できません。</string>
     <string name="trust_err_vouch_unsigned">保証に署名できませんでした。</string>
+    <string name="trust_no_burn_known">相手のバーンはここでは未確認</string>
 </resources>

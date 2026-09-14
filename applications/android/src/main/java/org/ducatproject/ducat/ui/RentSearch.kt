@@ -44,6 +44,7 @@ import org.ducatproject.ducat.Listings
 import org.ducatproject.ducat.Publications
 import org.ducatproject.ducat.Mailbox
 import org.ducatproject.ducat.R
+import org.ducatproject.ducat.Trust
 import org.ducatproject.ducat.formatXmr
 import uniffi.ducat_mobile.RentalInfo
 
@@ -1271,6 +1272,19 @@ private fun PictureViewer(
 }
 
 /**
+ * §9.5 on an opened listing, read together off the main thread: whether the
+ * notice is one of ours (its card is one this phone minted), what this
+ * phone knows about its poster, and the worn persona's own largest burn —
+ * what the seller's minimum is measured against. Null until read, so the
+ * sheet says nothing rather than warning for a frame and taking it back.
+ */
+private data class ListingSeen(
+    val mine: Boolean,
+    val poster: Trust.Badge,
+    val myBurnPxmr: Long?,
+)
+
+/**
  * One listing, opened.
  *
  * Local and free, except for the one thing that is neither and says so:
@@ -1290,6 +1304,26 @@ private fun ListingSheet(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    // Re-read on every store bump: checking a burn or reading a record in
+    // a thread bumps it, and the poster's words here should follow.
+    val version by org.ducatproject.ducat.ContactStore.changes.collectAsState()
+    var seen by remember(info.card) { mutableStateOf<ListingSeen?>(null) }
+    LaunchedEffect(info.card, version) {
+        seen = withContext(Dispatchers.IO) {
+            ListingSeen(
+                mine = Listings.isMine(context, info.card),
+                // The notice's author is a per-listing key (§16.18.1), not
+                // a persona: nothing this phone verified is filed under it,
+                // so until the card is claimed this reads as the fact it is
+                // — no burn of theirs checked here — and the thread's
+                // header carries the rest once it speaks as a persona.
+                poster = Trust.badgeOf(context, info.poster),
+                myBurnPxmr = Trust.myBurn(
+                    context, org.ducatproject.ducat.PersonaStore(context).worn(),
+                )?.amountPxmr,
+            )
+        }
+    }
     androidx.compose.material3.ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(
             Modifier
@@ -1433,6 +1467,20 @@ private fun ListingSheet(
                 )
             }
             Spacer(Modifier.height(6.dp))
+            // §9.5: the poster, in words, under the title — as the desk
+            // draws it — and on a poster the silence is said: "No burn of
+            // theirs checked here". Not on our own listing.
+            val theirs = seen?.takeIf { !it.mine }?.poster
+            if (theirs != null) {
+                trustBadge(theirs, sayNone = true)?.let {
+                    Text(
+                        it,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.height(6.dp))
+                }
+            }
             // The seller's own figure first, once the bundle carries it
             // (§16.18.3's priceText): "USD 12" is what they meant, and the
             // notice's piconero — converted at this reader's rate — is what
@@ -1473,6 +1521,40 @@ private fun ListingSheet(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+            }
+            // §9.5's gate, the seller's half: what they ask of a buyer's
+            // name, said here before anything is committed — the client
+            // MUST show it — and, for a listing that is not ours, how the
+            // worn persona stands against it. A warning and never a
+            // refusal: whether to deal is the seller's to decide, and the
+            // Ask button below stays where it is.
+            if (info.minBurnPxmr > 0uL) {
+                Text(
+                    stringResource(
+                        R.string.rent_min_burn_x,
+                        Amounts.show(context, info.minBurnPxmr.toLong()).primary,
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                val me = seen?.takeIf { !it.mine }
+                if (me != null) {
+                    val short = when (Trust.againstMinimum(me.myBurnPxmr, info.minBurnPxmr.toLong())) {
+                        Trust.Minimum.MET -> null
+                        Trust.Minimum.SHORT -> stringResource(
+                            R.string.rent_min_burn_short,
+                            Amounts.show(context, me.myBurnPxmr ?: 0L).primary,
+                        )
+                        Trust.Minimum.NOTHING -> stringResource(R.string.rent_min_burn_none)
+                    }
+                    if (short != null) {
+                        Text(
+                            short,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                }
             }
             // The seller's own words, when the bundle carries them: drawn
             // exactly as a post is — §16.23's subset, the same parser — with

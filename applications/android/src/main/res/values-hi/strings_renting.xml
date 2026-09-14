@@ -170,4 +170,9 @@
     <string name="busy_pictures_swarm">तस्वीरें झुंड पर रखी जा रही हैं…</string>
     <string name="busy_files_swarm">फ़ाइलें झुंड पर रखी जा रही हैं…</string>
     <string name="rent_price_at_rate">%1$s · आज की दर पर लगभग %2$s</string>
+    <string name="rent_min_burn_label">खरीदारों के लिए न्यूनतम जलाना (XMR)</string>
+    <string name="rent_min_burn_hint">कुछ न माँगने के लिए खाली छोड़ें। खरीदार प्रतिबद्ध होने से पहले इसे देखते हैं; यदि उनके नाम ने कम जलाया हो तो उनका ऐप उन्हें चेतावनी देता है।</string>
+    <string name="rent_min_burn_x">विक्रेता चाहता है कि खरीदारों ने कम से कम %1$s जलाया हो</string>
+    <string name="rent_min_burn_short">इस पर्सोना ने %1$s जलाया है, जो उनकी माँग से कम है। शायद वे आपसे सौदा न करें।</string>
+    <string name="rent_min_burn_none">इस पर्सोना ने अभी तक कुछ नहीं जलाया। शायद वे आपसे सौदा न करें।</string>
 </resources>

@@ -170,4 +170,9 @@
     <string name="busy_pictures_swarm">Отдаём фотографии в рой…</string>
     <string name="busy_files_swarm">Отдаём файлы в рой…</string>
     <string name="rent_price_at_rate">%1$s · около %2$s по сегодняшнему курсу</string>
+    <string name="rent_min_burn_label">Минимальное сжигание для покупателей (XMR)</string>
+    <string name="rent_min_burn_hint">Оставьте пустым, чтобы ничего не требовать. Покупатели видят это до того, как обязуются; их клиент предупредит, если их имя сожгло меньше.</string>
+    <string name="rent_min_burn_x">Продавец просит, чтобы покупатели сожгли не меньше %1$s</string>
+    <string name="rent_min_burn_short">Эта персона сожгла %1$s, меньше, чем требуется. С вами могут не иметь дела.</string>
+    <string name="rent_min_burn_none">Эта персона ещё ничего не сожгла. С вами могут не иметь дела.</string>
 </resources>

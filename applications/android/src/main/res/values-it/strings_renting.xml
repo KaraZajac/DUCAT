@@ -170,4 +170,9 @@
     <string name="busy_pictures_swarm">Le foto vanno sullo sciame…</string>
     <string name="busy_files_swarm">I file vanno sullo sciame…</string>
     <string name="rent_price_at_rate">%1$s · circa %2$s al cambio di oggi</string>
+    <string name="rent_min_burn_label">Prova minima richiesta agli acquirenti (XMR)</string>
+    <string name="rent_min_burn_hint">Lascia vuoto per non chiedere nulla. Gli acquirenti lo vedono prima di impegnarsi; il loro client li avvisa se il loro nome ha bruciato meno.</string>
+    <string name="rent_min_burn_x">Il venditore chiede che gli acquirenti abbiano bruciato almeno %1$s</string>
+    <string name="rent_min_burn_short">Questa persona ha bruciato %1$s, meno di quanto chiedono. Potrebbero non trattare con te.</string>
+    <string name="rent_min_burn_none">Questa persona non ha ancora bruciato nulla. Potrebbero non trattare con te.</string>
 </resources>

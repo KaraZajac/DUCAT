@@ -422,13 +422,22 @@ private fun OpenTab(onOpened: (RunningTab) -> Unit, onBack: () -> Unit) {
     // Pay's picker has shown the key on ambiguous rows since it was written;
     // this one is the same question asked at the same moment.
     var ambiguous by remember { mutableStateOf<Set<String>>(emptySet()) }
+    // §9.5: what this till knows about each regular — a burn it verified,
+    // a record it read, which of its contacts vouched — worn in words on
+    // the row, before a tab is opened in their name. Read in one pass with
+    // the rows, off the main thread.
+    var known by remember { mutableStateOf<Map<String, org.ducatproject.ducat.Trust.Badge>>(emptyMap()) }
     LaunchedEffect(contactsV) {
-        val (r, a) = withContext(Dispatchers.IO) {
+        val (r, a, k) = withContext(Dispatchers.IO) {
             val contacts = ContactStore(context)
-            contacts.all().filter { it.theirBundle != null }
-                .sortedBy { it.displayName().lowercase() } to contacts.ambiguous()
+            val rows = contacts.all().filter { it.theirBundle != null }
+                .sortedBy { it.displayName().lowercase() }
+            Triple(
+                rows, contacts.ambiguous(),
+                org.ducatproject.ducat.Trust.badgesOf(context, rows.map { it.personaHex }),
+            )
         }
-        regulars = r; ambiguous = a
+        regulars = r; ambiguous = a; known = k
     }
 
     Column(
@@ -469,6 +478,15 @@ private fun OpenTab(onOpened: (RunningTab) -> Unit, onBack: () -> Unit) {
                             Spacer(Modifier.width(12.dp))
                             Column {
                                 Text(c.displayName(), style = MaterialTheme.typography.bodyLarge)
+                                // The desk's Till row, wording for wording;
+                                // nothing when nothing is known.
+                                known[c.personaHex]?.let { b -> trustBadge(b) }?.let {
+                                    Text(
+                                        it,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
                                 if (c.personaHex in ambiguous) {
                                     Text(
                                         stringResource(

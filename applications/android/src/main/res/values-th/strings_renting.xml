@@ -168,4 +168,9 @@
     <string name="busy_pictures_swarm">กำลังนำรูปขึ้นฝูง…</string>
     <string name="busy_files_swarm">กำลังนำไฟล์ขึ้นฝูง…</string>
     <string name="rent_price_at_rate">%1$s · ราว %2$s ตามอัตราวันนี้</string>
+    <string name="rent_min_burn_label">การเผาขั้นต่ำสำหรับผู้ซื้อ (XMR)</string>
+    <string name="rent_min_burn_hint">เว้นว่างไว้เพื่อไม่ขออะไร ผู้ซื้อจะเห็นก่อนตัดสินใจ และแอปของพวกเขาจะเตือนหากชื่อของพวกเขาเผาน้อยกว่านี้</string>
+    <string name="rent_min_burn_x">ผู้ขายขอให้ผู้ซื้อเผาอย่างน้อย %1$s</string>
+    <string name="rent_min_burn_short">ตัวตนนี้เผาไป %1$s น้อยกว่าที่ขอ พวกเขาอาจไม่ทำธุรกรรมกับคุณ</string>
+    <string name="rent_min_burn_none">ตัวตนนี้ยังไม่ได้เผาอะไรเลย พวกเขาอาจไม่ทำธุรกรรมกับคุณ</string>
 </resources>

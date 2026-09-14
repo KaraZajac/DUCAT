@@ -48,4 +48,5 @@
     <string name="trust_what_vouches">avales</string>
     <string name="trust_err_vouch_self">No puedes responder por tu propio nombre.</string>
     <string name="trust_err_vouch_unsigned">No se pudo firmar el aval.</string>
+    <string name="trust_no_burn_known">Ninguna quema suya comprobada aquí</string>
 </resources>

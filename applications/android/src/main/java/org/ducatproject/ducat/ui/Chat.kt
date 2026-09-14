@@ -1886,57 +1886,12 @@ private data class TrustView(
 )
 
 /**
- * §9.5's badge: "burned 0.01 XMR, since block N", and §9.2's record,
- * "3 receipts, 1 from burned personas · 4.7 ★" — the star average only
- * over signers whose burn this phone verified itself, which is the one
- * number here that means anything. Null when nothing is known, so the
- * header says nothing rather than "burned nothing".
+ * §9.5's badge under the name — the one builder every screen uses
+ * (TrustBadge.kt), over what this thread read. Null when nothing is known,
+ * so the header says nothing rather than "burned nothing".
  */
 @Composable
-private fun trustBadge(t: TrustView): String? {
-    val context = LocalContext.current
-    val parts = ArrayList<String>(2)
-    val burn = t.theirBurn
-    if (burn != null) {
-        parts += stringResource(
-            R.string.trust_burned_since,
-            Amounts.show(context, burn.amountPxmr).primary,
-            Amounts.count(burn.height),
-        )
-    }
-    val record = t.theirRecord
-    if (record.receipts > 0) {
-        var line = stringResource(
-            R.string.trust_receipts_summary,
-            Amounts.count(record.receipts.toLong()),
-            Amounts.count(record.weighted.toLong()),
-        )
-        if (record.weighted > 0) line += " · " + "%.1f".format(record.ratingX10 / 10.0) + " ★"
-        parts += line
-    }
-    // §9.2: who among this phone's contacts knows them, in words — and
-    // nothing when none do, because "nobody you know knows them" is what
-    // every stranger's header would say.
-    knownWords(t.knownBy)?.let { parts += it }
-    return if (parts.isEmpty()) null else parts.joinToString(" · ")
-}
-
-/**
- * §9.2's answer worn in words: "Pat knows them", "Pat and Sam know them",
- * "3 of your contacts know them" — over the names [Trust.knownBy] found
- * among this phone's own contacts. Null when none. Never a score, never
- * the hex, and never anyone this phone does not already hold.
- */
-@Composable
-private fun knownWords(names: List<String>): String? = when (names.size) {
-    0 -> null
-    1 -> stringResource(R.string.trust_known_by_one, names[0])
-    2 -> stringResource(
-        R.string.trust_known_by_names,
-        names.joinToString(stringResource(R.string.trust_and)),
-    )
-    else -> stringResource(R.string.trust_known_by_count, Amounts.count(names.size.toLong()))
-}
+private fun trustBadge(t: TrustView): String? = trustBadge(t.theirBurn, t.theirRecord, t.knownBy)
 
 /**
  * §9.5's three links as a bubble: a proof with the button that checks it, a

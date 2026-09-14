@@ -48,4 +48,5 @@
     <string name="trust_what_vouches">jaminan</string>
     <string name="trust_err_vouch_self">Anda tidak bisa menjamin nama Anda sendiri.</string>
     <string name="trust_err_vouch_unsigned">Jaminan tidak bisa ditandatangani.</string>
+    <string name="trust_no_burn_known">Tidak ada bakaran mereka yang diperiksa di sini</string>
 </resources>

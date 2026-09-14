@@ -48,4 +48,5 @@
     <string name="trust_what_vouches">보증</string>
     <string name="trust_err_vouch_self">자기 이름은 보증할 수 없습니다.</string>
     <string name="trust_err_vouch_unsigned">보증에 서명할 수 없었습니다.</string>
+    <string name="trust_no_burn_known">여기서 확인된 상대의 소각 없음</string>
 </resources>

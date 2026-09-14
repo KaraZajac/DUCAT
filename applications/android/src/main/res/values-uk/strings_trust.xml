@@ -48,4 +48,5 @@
     <string name="trust_what_vouches">поручительства</string>
     <string name="trust_err_vouch_self">Не можна поручитися за власне ім’я.</string>
     <string name="trust_err_vouch_unsigned">Не вдалося підписати поручительство.</string>
+    <string name="trust_no_burn_known">Їхнє спалення тут не перевірялося</string>
 </resources>

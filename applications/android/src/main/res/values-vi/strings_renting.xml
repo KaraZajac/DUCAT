@@ -168,4 +168,9 @@
     <string name="busy_pictures_swarm">Đang đưa ảnh lên bầy…</string>
     <string name="busy_files_swarm">Đang đưa tệp lên bầy…</string>
     <string name="rent_price_at_rate">%1$s · khoảng %2$s theo tỷ giá hôm nay</string>
+    <string name="rent_min_burn_label">Mức đốt tối thiểu cho người mua (XMR)</string>
+    <string name="rent_min_burn_hint">Để trống nếu không yêu cầu gì. Người mua thấy nó trước khi cam kết; ứng dụng của họ sẽ cảnh báo nếu danh tính của họ đốt ít hơn.</string>
+    <string name="rent_min_burn_x">Người bán yêu cầu người mua đã đốt ít nhất %1$s</string>
+    <string name="rent_min_burn_short">Danh tính này đã đốt %1$s, ít hơn yêu cầu. Họ có thể không giao dịch với bạn.</string>
+    <string name="rent_min_burn_none">Danh tính này chưa đốt gì. Họ có thể không giao dịch với bạn.</string>
 </resources>

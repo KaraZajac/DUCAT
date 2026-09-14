@@ -52,6 +52,9 @@ val sharedLogic = listOf(
     // proof is a wire object neither client may spell its own way.
     "org/ducatproject/ducat/Trust.kt",
     "org/ducatproject/ducat/ui/Burn.kt",
+    // The badge in words, which the thread, the listing, the ride offer
+    // and the tab's picker all draw from — one builder or four wordings.
+    "org/ducatproject/ducat/ui/TrustBadge.kt",
     "org/ducatproject/ducat/ui/Network.kt",
     "org/ducatproject/ducat/ui/Logs.kt",
     "org/ducatproject/ducat/ui/Diagnostics.kt",

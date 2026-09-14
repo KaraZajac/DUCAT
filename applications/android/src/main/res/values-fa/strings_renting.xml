@@ -168,4 +168,9 @@
     <string name="busy_pictures_swarm">در حال گذاشتن عکس‌ها روی ازدحام…</string>
     <string name="busy_files_swarm">در حال گذاشتن فایل‌ها روی ازدحام…</string>
     <string name="rent_price_at_rate">%1$s · حدود %2$s به نرخ امروز</string>
+    <string name="rent_min_burn_label">حداقل سوزاندن برای خریداران (XMR)</string>
+    <string name="rent_min_burn_hint">برای نخواستن چیزی خالی بگذارید. خریداران پیش از تعهد آن را می‌بینند؛ اگر نامشان کمتر سوزانده باشد برنامه‌شان هشدار می‌دهد.</string>
+    <string name="rent_min_burn_x">فروشنده می‌خواهد خریداران دست‌کم %1$s سوزانده باشند</string>
+    <string name="rent_min_burn_short">این شخصیت %1$s سوزانده، کمتر از خواستهٔ آن‌ها. شاید با شما معامله نکنند.</string>
+    <string name="rent_min_burn_none">این شخصیت هنوز چیزی نسوزانده. شاید با شما معامله نکنند.</string>
 </resources>

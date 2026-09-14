@@ -51,4 +51,6 @@
     <string name="trust_what_vouches">vouches</string>
     <string name="trust_err_vouch_self">You cannot vouch for your own name.</string>
     <string name="trust_err_vouch_unsigned">The vouch could not be signed.</string>
+    <!-- §9.5's badge on a listing's poster, where the silence is said. -->
+    <string name="trust_no_burn_known">No burn of theirs checked here</string>
 </resources>

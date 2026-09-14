@@ -2516,11 +2516,14 @@ struct FoundRow {
 }
 
 fn found_row(a: &App, f: ducat_app::listings::Found) -> FoundRow {
-    let ours = a.persona_hexes();
+    // The poster key on a notice is per-listing (board::listing_seed), never
+    // a persona, so it can never be one of ours; a listing is ours when its
+    // card is one this desk minted — the phone's rule.
+    let ours: std::collections::HashSet<String> = a.listings().into_iter().filter_map(|l| l.card).collect();
     FoundRow {
         kind_name: ducat_app::listings::kind_name(f.kind as u32).into(),
         thumb_data_url: f.thumb.as_deref().map(|t| data_url(t, "image/jpeg")),
-        mine: ours.contains(&f.poster),
+        mine: ours.contains(&f.card),
         shown: a.show_amount(f.price),
         price_text: f.gallery.as_deref().zip(f.gallery_dig.as_deref()).and_then(|(s, d)| a.cached_bundle_doc(s, d)).and_then(|d| d.price_text),
         card: f.card,

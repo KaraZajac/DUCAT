@@ -48,4 +48,5 @@
     <string name="trust_what_vouches">garanties</string>
     <string name="trust_err_vouch_self">Vous ne pouvez pas vous porter garant de votre propre nom.</string>
     <string name="trust_err_vouch_unsigned">La garantie n’a pas pu être signée.</string>
+    <string name="trust_no_burn_known">Aucune preuve de leur part vérifiée ici</string>
 </resources>

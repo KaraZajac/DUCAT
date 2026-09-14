@@ -168,4 +168,9 @@
     <string name="busy_pictures_swarm">正在把图片放上蜂群…</string>
     <string name="busy_files_swarm">正在把文件放上蜂群…</string>
     <string name="rent_price_at_rate">%1$s · 按今日汇率约 %2$s</string>
+    <string name="rent_min_burn_label">买家的最低销毁额（XMR）</string>
+    <string name="rent_min_burn_hint">留空表示不作要求。买家在承诺前会看到它；若其身份销毁得更少，买家的客户端会发出警告。</string>
+    <string name="rent_min_burn_x">卖家要求买家至少已销毁 %1$s</string>
+    <string name="rent_min_burn_short">此身份已销毁 %1$s，低于对方要求。对方可能不与你交易。</string>
+    <string name="rent_min_burn_none">此身份尚未销毁任何金额。对方可能不与你交易。</string>
 </resources>

@@ -48,4 +48,5 @@
     <string name="trust_what_vouches">担保</string>
     <string name="trust_err_vouch_self">你不能为自己的名字担保。</string>
     <string name="trust_err_vouch_unsigned">无法为担保签名。</string>
+    <string name="trust_no_burn_known">此处未核验过对方的任何销毁</string>
 </resources>

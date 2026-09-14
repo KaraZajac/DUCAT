@@ -445,6 +445,29 @@ fun RideOfferScreen(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                // §9.5: the driver, in words, at the moment of the yes —
+                // the burn this phone verified, the record it read, who
+                // among its contacts knows them. Nothing when nothing is
+                // known. Off the main thread: the shelves are encrypted
+                // prefs, and the vouch names open the contact book.
+                var badge by remember(contact.personaHex) {
+                    mutableStateOf<org.ducatproject.ducat.Trust.Badge?>(null)
+                }
+                LaunchedEffect(contact.personaHex) {
+                    badge = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                        org.ducatproject.ducat.Trust.badgeOf(context, contact.personaHex)
+                    }
+                }
+                badge?.let { b -> trustBadge(b) }?.let {
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        it,
+                        modifier = Modifier.padding(horizontal = 24.dp),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
+                }
                 Spacer(Modifier.height(8.dp))
                 val shown = Amounts.show(context, m.amountPxmr)
                 Text(shown.primary, style = MaterialTheme.typography.displayLarge)

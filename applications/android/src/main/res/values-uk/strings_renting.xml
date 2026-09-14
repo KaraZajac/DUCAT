@@ -170,4 +170,9 @@
     <string name="busy_pictures_swarm">Віддаємо фотографії в рій…</string>
     <string name="busy_files_swarm">Віддаємо файли в рій…</string>
     <string name="rent_price_at_rate">%1$s · близько %2$s за сьогоднішнім курсом</string>
+    <string name="rent_min_burn_label">Мінімальне спалення для покупців (XMR)</string>
+    <string name="rent_min_burn_hint">Залиште порожнім, щоб нічого не вимагати. Покупці бачать це до того, як зобов’яжуться; їхній клієнт попередить, якщо їхнє ім’я спалило менше.</string>
+    <string name="rent_min_burn_x">Продавець просить, щоб покупці спалили щонайменше %1$s</string>
+    <string name="rent_min_burn_short">Ця персона спалила %1$s, менше, ніж вимагають. З вами можуть не мати справи.</string>
+    <string name="rent_min_burn_none">Ця персона ще нічого не спалила. З вами можуть не мати справи.</string>
 </resources>

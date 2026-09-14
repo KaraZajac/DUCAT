@@ -170,4 +170,9 @@
     <string name="busy_pictures_swarm">Die Bilder gehen in den Schwarm…</string>
     <string name="busy_files_swarm">Die Dateien gehen in den Schwarm…</string>
     <string name="rent_price_at_rate">%1$s · etwa %2$s zum heutigen Kurs</string>
+    <string name="rent_min_burn_label">Mindest-Burn für Käufer (XMR)</string>
+    <string name="rent_min_burn_hint">Leer lassen, um nichts zu verlangen. Käufer sehen es, bevor sie sich festlegen; ihr Client warnt sie, wenn ihr Name weniger verbrannt hat.</string>
+    <string name="rent_min_burn_x">Der Verkäufer verlangt, dass Käufer mindestens %1$s verbrannt haben</string>
+    <string name="rent_min_burn_short">Diese Persona hat %1$s verbrannt, weniger als verlangt. Sie handeln vielleicht nicht mit dir.</string>
+    <string name="rent_min_burn_none">Diese Persona hat noch nichts verbrannt. Sie handeln vielleicht nicht mit dir.</string>
 </resources>

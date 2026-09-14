@@ -170,4 +170,9 @@
     <string name="busy_pictures_swarm">جارٍ وضع الصور على السرب…</string>
     <string name="busy_files_swarm">جارٍ وضع الملفات على السرب…</string>
     <string name="rent_price_at_rate">%1$s · نحو %2$s بسعر اليوم</string>
+    <string name="rent_min_burn_label">الحد الأدنى للحرق للمشترين (XMR)</string>
+    <string name="rent_min_burn_hint">اتركه فارغًا لعدم طلب شيء. يراه المشترون قبل الالتزام؛ ويحذرهم تطبيقهم إن كان اسمهم قد حرق أقل.</string>
+    <string name="rent_min_burn_x">يطلب البائع أن يكون المشترون قد حرقوا %1$s على الأقل</string>
+    <string name="rent_min_burn_short">حرقت هذه الشخصية %1$s، أقل مما يطلبون. قد لا يتعاملون معك.</string>
+    <string name="rent_min_burn_none">لم تحرق هذه الشخصية شيئًا بعد. قد لا يتعاملون معك.</string>
 </resources>

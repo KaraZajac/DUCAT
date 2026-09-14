@@ -170,4 +170,9 @@
     <string name="busy_pictures_swarm">Wysyłanie zdjęć do roju…</string>
     <string name="busy_files_swarm">Wysyłanie plików do roju…</string>
     <string name="rent_price_at_rate">%1$s · około %2$s po dzisiejszym kursie</string>
+    <string name="rent_min_burn_label">Minimalne spalenie dla kupujących (XMR)</string>
+    <string name="rent_min_burn_hint">Zostaw puste, by nie wymagać niczego. Kupujący widzą to, zanim się zobowiążą; ich klient ostrzega, jeśli ich nazwa spaliła mniej.</string>
+    <string name="rent_min_burn_x">Sprzedający wymaga, by kupujący spalili co najmniej %1$s</string>
+    <string name="rent_min_burn_short">Ta persona spaliła %1$s, mniej niż wymagają. Mogą nie chcieć z tobą handlować.</string>
+    <string name="rent_min_burn_none">Ta persona nie spaliła jeszcze niczego. Mogą nie chcieć z tobą handlować.</string>
 </resources>

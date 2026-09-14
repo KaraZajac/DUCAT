@@ -48,4 +48,5 @@
     <string name="trust_what_vouches">borgstellingen</string>
     <string name="trust_err_vouch_self">Je kunt niet voor je eigen naam instaan.</string>
     <string name="trust_err_vouch_unsigned">De borgstelling kon niet worden ondertekend.</string>
+    <string name="trust_no_burn_known">Geen verbranding van hen hier gecontroleerd</string>
 </resources>

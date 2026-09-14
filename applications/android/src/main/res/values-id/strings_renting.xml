@@ -168,4 +168,9 @@
     <string name="busy_pictures_swarm">Menaruh foto ke kawanan…</string>
     <string name="busy_files_swarm">Menaruh berkas ke kawanan…</string>
     <string name="rent_price_at_rate">%1$s · sekitar %2$s dengan kurs hari ini</string>
+    <string name="rent_min_burn_label">Bakaran minimum untuk pembeli (XMR)</string>
+    <string name="rent_min_burn_hint">Kosongkan untuk tidak meminta apa pun. Pembeli melihatnya sebelum berkomitmen; klien mereka memperingatkan jika nama mereka membakar lebih sedikit.</string>
+    <string name="rent_min_burn_x">Penjual meminta pembeli telah membakar setidaknya %1$s</string>
+    <string name="rent_min_burn_short">Persona ini telah membakar %1$s, kurang dari yang diminta. Mereka mungkin tidak berurusan dengan Anda.</string>
+    <string name="rent_min_burn_none">Persona ini belum membakar apa pun. Mereka mungkin tidak berurusan dengan Anda.</string>
 </resources>

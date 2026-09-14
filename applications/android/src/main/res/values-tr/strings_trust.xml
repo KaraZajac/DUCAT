@@ -48,4 +48,5 @@
     <string name="trust_what_vouches">kefaletler</string>
     <string name="trust_err_vouch_self">Kendi adına kefil olamazsın.</string>
     <string name="trust_err_vouch_unsigned">Kefalet imzalanamadı.</string>
+    <string name="trust_no_burn_known">Onların hiçbir yakması burada denetlenmedi</string>
 </resources>

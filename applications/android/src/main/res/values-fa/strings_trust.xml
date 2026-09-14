@@ -48,4 +48,5 @@
     <string name="trust_what_vouches">ضمانت‌ها</string>
     <string name="trust_err_vouch_self">نمی‌توانید برای نام خودتان ضمانت کنید.</string>
     <string name="trust_err_vouch_unsigned">ضمانت امضا نشد.</string>
+    <string name="trust_no_burn_known">هیچ سوزاندنی از آن‌ها اینجا بررسی نشده</string>
 </resources>

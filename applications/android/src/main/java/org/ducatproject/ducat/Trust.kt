@@ -145,6 +145,35 @@ object Trust {
     }
 
     /**
+     * §9.5's seller's minimum, weighed: how [myBurnPxmr] — the worn
+     * persona's largest finished burn, or null when it has none — stands
+     * against a listing's `min_burn` (field 320).
+     *
+     * The desk's rule (`Market.svelte`), in one place so it can be tested
+     * without a store: nothing asked is met; a burn at or over the line is
+     * met; under it the sentence differs by whether anything was burned at
+     * all. A verdict, never a refusal — the client MUST show the minimum
+     * before the buyer commits and MAY not stop them (§9.5).
+     */
+    enum class Minimum {
+        /** Nothing asked, or the burn covers it. */
+        MET,
+        /** Burned something, but less than the seller asks. */
+        SHORT,
+        /** The seller asks and this persona has burned nothing yet. */
+        NOTHING,
+    }
+
+    fun againstMinimum(myBurnPxmr: Long?, minBurnPxmr: Long): Minimum {
+        val mine = (myBurnPxmr ?: 0L).coerceAtLeast(0L)
+        return when {
+            minBurnPxmr <= 0L || mine >= minBurnPxmr -> Minimum.MET
+            mine > 0L -> Minimum.SHORT
+            else -> Minimum.NOTHING
+        }
+    }
+
+    /**
      * The message the `OutProofV2` signs: the domain, the persona, the
      * purpose, separated by zero bytes — `burn_message` in
      * `core/src/trust.rs`, byte for byte.
@@ -1244,6 +1273,63 @@ object Trust {
         val names = HashMap<String, String>()
         for (c in ContactStore(context).all()) names[c.personaHex.lowercase()] = c.displayName()
         return knownByOf(about, personaHex, mine) { names[it] }
+    }
+
+    // ----- the badge ---------------------------------------------------------------
+    //
+    // §9.5: what this phone knows about a persona, worn in words wherever a
+    // decision is made — a listing, a hail, a till, a thread. The desk's
+    // `trust_of`, minus the links (those belong to the thread that sends
+    // them): the burn this phone verified, the record it read, and which of
+    // its own contacts vouched. Never a score, never sent anywhere.
+
+    /** What the badge says about one persona. Empty when nothing is known. */
+    data class Badge(
+        val burn: VerifiedBurn? = null,
+        val record: RecordSummary = RecordSummary(),
+        val knownBy: List<String> = emptyList(),
+    ) {
+        val empty: Boolean get() = burn == null && record.receipts == 0 && knownBy.isEmpty()
+    }
+
+    /** The badge for one persona: [burnOf], [recordOf] and [knownBy] together. */
+    fun badgeOf(context: Context, personaHex: String): Badge = Badge(
+        burn = burnOf(context, personaHex),
+        record = recordOf(context, personaHex),
+        knownBy = knownBy(context, personaHex),
+    )
+
+    /**
+     * The badge for many personas at once — a picker's rows — with every
+     * shelf read once rather than once per row, and the contact book (which
+     * [knownBy] decrypts whole) opened only when a vouch is about one of
+     * them at all.
+     */
+    fun badgesOf(context: Context, personaHexes: Collection<String>): Map<String, Badge> {
+        if (personaHexes.isEmpty()) return emptyMap()
+        val verified = verifiedBurns(context)
+        val burned = verified.mapTo(HashSet()) { it.personaHex.lowercase() }
+        val about = about(context)
+        val vouches = vouchShelf(context, VOUCHES_ABOUT)
+        val wanted = personaHexes.mapTo(HashSet()) { it.trim().lowercase() }
+        val vouched = vouches.any { it.subjectHex.trim().lowercase() in wanted }
+        val mine = if (vouched) {
+            PersonaStore(context).allHexes().mapTo(HashSet()) { it.lowercase() }
+        } else {
+            emptySet()
+        }
+        val names = HashMap<String, String>()
+        if (vouched) for (c in ContactStore(context).all()) names[c.personaHex.lowercase()] = c.displayName()
+        return personaHexes.associateWith { hex ->
+            val h = hex.trim()
+            val theirs = about.filter { it.subjectHex.equals(h, ignoreCase = true) }
+            Badge(
+                burn = verified.filter { it.personaHex.equals(h, ignoreCase = true) }
+                    .maxByOrNull { it.amountPxmr },
+                record = if (theirs.isEmpty()) RecordSummary() else summarize(theirs) { it.lowercase() in burned },
+                knownBy = if (vouched) knownByOf(vouches, h, mine) { names[it] } else emptyList(),
+            )
+        }
     }
 
     // ----- the backup ------------------------------------------------------------

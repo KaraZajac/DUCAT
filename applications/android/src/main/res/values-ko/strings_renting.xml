@@ -168,4 +168,9 @@
     <string name="busy_pictures_swarm">사진을 스웜에 올리는 중…</string>
     <string name="busy_files_swarm">파일을 스웜에 올리는 중…</string>
     <string name="rent_price_at_rate">%1$s · 오늘 환율로 약 %2$s</string>
+    <string name="rent_min_burn_label">구매자에게 요구하는 최소 소각 (XMR)</string>
+    <string name="rent_min_burn_hint">비워 두면 아무것도 요구하지 않습니다. 구매자는 약속하기 전에 이를 보며, 이름의 소각이 더 적으면 구매자 측 앱이 경고합니다.</string>
+    <string name="rent_min_burn_x">판매자는 구매자가 최소 %1$s를 소각했기를 요구합니다</string>
+    <string name="rent_min_burn_short">이 페르소나는 %1$s를 소각했으며 요구액에 못 미칩니다. 거래를 거절당할 수 있습니다.</string>
+    <string name="rent_min_burn_none">이 페르소나는 아직 아무것도 소각하지 않았습니다. 거래를 거절당할 수 있습니다.</string>
 </resources>

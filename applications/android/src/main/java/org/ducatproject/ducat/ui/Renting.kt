@@ -555,6 +555,9 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
     // thing and the number should be answered before it is asked. Cleared to
     // nothing it still means one — an empty box is not a listing of nothing.
     var howMany by rememberSaveable { mutableStateOf("1") }
+    // §9.5: what this listing asks of a buyer's name, in XMR as typed.
+    // Optional; empty asks nothing.
+    var minBurn by rememberSaveable { mutableStateOf("") }
     var tags by rememberSaveable { mutableStateOf("") }
     // Private
     var details by rememberSaveable { mutableStateOf("") }
@@ -842,6 +845,9 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
         Amounts.toPxmr(xmr) ?: 0L
     }
     val stake = Stakes.stakeFor(Listings.dealFor(kind), pricePxmr)
+    // Null is a refusal — not a number, or a negative one — and holds the
+    // Post button; empty is zero, which asks nothing and writes no field.
+    val minBurnPxmr = remember(minBurn) { Listings.minBurnPxmrOf(minBurn) }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
         Text(
@@ -1150,6 +1156,24 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
                 singleLine = true, modifier = Modifier.fillMaxWidth(),
             )
         }
+        // §9.5's seller's minimum (`min_burn`, field 320): the least a
+        // buyer's persona must have burned for this poster to deal. Their
+        // client shows it before they commit and warns them when their
+        // name has burned less — it never refuses for them. In XMR whatever
+        // the price was typed in, because a burn is an XMR quantity (its
+        // floor is 0.01 XMR) and a rate would move the line the seller
+        // drew. The same characters every money field takes, so a comma
+        // decimal or another script's digits read as meant.
+        Spacer(Modifier.height(8.dp))
+        OutlinedTextField(
+            value = minBurn,
+            onValueChange = { minBurn = it.filter { c -> Amounts.isNumberChar(c) }.take(20) },
+            label = { Text(stringResource(R.string.rent_min_burn_label)) },
+            supportingText = { Text(stringResource(R.string.rent_min_burn_hint)) },
+            isError = minBurnPxmr == null,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            singleLine = true, modifier = Modifier.fillMaxWidth(),
+        )
 
         Spacer(Modifier.height(16.dp))
         if (plain) {
@@ -1331,7 +1355,8 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
         Spacer(Modifier.height(16.dp))
         Row {
             Button(
-                enabled = !posting && title.isNotBlank() && pricePxmr > 0 && fix != null,
+                enabled = !posting && title.isNotBlank() && pricePxmr > 0 && fix != null &&
+                    minBurnPxmr != null,
                 onClick = {
                     val here = fix ?: return@Button
                     val specs = JSONObject().apply {
@@ -1371,6 +1396,7 @@ internal fun ListingForm(kind: Int, onDone: () -> Unit) {
                         quantity = howMany.toLongOrNull() ?: 1L,
                         thumb = thumb,
                         description = description,
+                        minBurnPxmr = minBurnPxmr ?: 0L,
                     )
                     draftId?.let { draft.put("id", it) } ?: run { draftId = draft.optString("id") }
                     error = null

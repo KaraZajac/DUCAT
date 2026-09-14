@@ -48,4 +48,5 @@
     <string name="trust_what_vouches">garanzie</string>
     <string name="trust_err_vouch_self">Non puoi garantire per il tuo stesso nome.</string>
     <string name="trust_err_vouch_unsigned">Impossibile firmare la garanzia.</string>
+    <string name="trust_no_burn_known">Nessuna loro prova verificata qui</string>
 </resources>

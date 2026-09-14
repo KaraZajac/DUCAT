@@ -48,4 +48,5 @@
     <string name="trust_what_vouches">التزكيات</string>
     <string name="trust_err_vouch_self">لا يمكنك التزكية لاسمك أنت.</string>
     <string name="trust_err_vouch_unsigned">تعذر توقيع التزكية.</string>
+    <string name="trust_no_burn_known">لم يُتحقق هنا من أي حرق لهم</string>
 </resources>

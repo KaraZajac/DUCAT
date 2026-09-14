@@ -168,4 +168,9 @@
     <string name="busy_pictures_swarm">Fotoğraflar sürüye konuyor…</string>
     <string name="busy_files_swarm">Dosyalar sürüye konuyor…</string>
     <string name="rent_price_at_rate">%1$s · bugünkü kurla yaklaşık %2$s</string>
+    <string name="rent_min_burn_label">Alıcılar için en az yakma (XMR)</string>
+    <string name="rent_min_burn_hint">Hiçbir şey istememek için boş bırak. Alıcılar taahhütten önce görür; adları daha az yakmışsa istemcileri uyarır.</string>
+    <string name="rent_min_burn_x">Satıcı, alıcıların en az %1$s yakmış olmasını istiyor</string>
+    <string name="rent_min_burn_short">Bu kimlik %1$s yaktı, istenenden az. Seninle iş yapmayabilirler.</string>
+    <string name="rent_min_burn_none">Bu kimlik henüz hiçbir şey yakmadı. Seninle iş yapmayabilirler.</string>
 </resources>

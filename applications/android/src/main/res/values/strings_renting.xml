@@ -185,4 +185,12 @@
     <string name="busy_pictures_swarm">Putting the pictures on the swarm…</string>
     <string name="busy_files_swarm">Putting the files on the swarm…</string>
     <string name="rent_price_at_rate">%1$s · about %2$s at today’s rate</string>
+    <!-- §9.5's seller's minimum (RENTAL_NOTICE field 320): the poster's
+         field, the found listing's line, and the buyer's warning when the
+         worn persona has burned less. Wording mirrors the desk's. -->
+    <string name="rent_min_burn_label">Minimum burn for buyers (XMR)</string>
+    <string name="rent_min_burn_hint">Leave empty to ask nothing. Buyers see it before they commit; their client warns them if their name has burned less.</string>
+    <string name="rent_min_burn_x">The seller asks that buyers have burned at least %1$s</string>
+    <string name="rent_min_burn_short">This persona has burned %1$s, less than they ask. They may not deal with you.</string>
+    <string name="rent_min_burn_none">This persona has burned nothing yet. They may not deal with you.</string>
 </resources>

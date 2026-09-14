@@ -170,4 +170,9 @@
     <string name="busy_pictures_swarm">Colocando as fotos no enxame…</string>
     <string name="busy_files_swarm">Colocando os arquivos no enxame…</string>
     <string name="rent_price_at_rate">%1$s · cerca de %2$s ao câmbio de hoje</string>
+    <string name="rent_min_burn_label">Queima mínima para compradores (XMR)</string>
+    <string name="rent_min_burn_hint">Deixe vazio para não pedir nada. Os compradores veem-no antes de se comprometerem; o cliente deles avisa se o nome deles queimou menos.</string>
+    <string name="rent_min_burn_x">O vendedor pede que os compradores tenham queimado pelo menos %1$s</string>
+    <string name="rent_min_burn_short">Esta persona queimou %1$s, menos do que pedem. Podem não negociar consigo.</string>
+    <string name="rent_min_burn_none">Esta persona ainda não queimou nada. Podem não negociar consigo.</string>
 </resources>
