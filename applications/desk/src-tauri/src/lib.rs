@@ -1373,10 +1373,12 @@ struct VerifiedBurnRow {
 /// carrying the envelope is how a burn is shown today, and the reader's
 /// client recognises the prefix.
 #[tauri::command]
-fn my_burn_link() -> Result<String, String> {
+fn my_burn_link(persona_hex: String) -> Result<String, String> {
     let a = app()?;
-    let worn = a.worn().map_err(said)?;
-    let b = a.my_burn(&worn).ok_or("no finished burn to show yet")?;
+    // The burn of the persona that speaks in this thread — the contact's
+    // owner — since the link is sealed under it and must name it.
+    let me = a.contact(&persona_hex).map(|c| c.owner).filter(|o| !o.is_empty()).map(Ok).unwrap_or_else(|| a.worn().map_err(said))?;
+    let b = a.my_burn(&me).ok_or("no finished burn to show yet")?;
     Ok(format!("ducat:burn/{}", b.envelope_hex.unwrap_or_default()))
 }
 
@@ -1422,8 +1424,8 @@ fn trust_of(persona_hex: String) -> Result<TrustView, String> {
 
 /// The worn persona's record — the receipts others gave it — as a link to send.
 #[tauri::command]
-fn my_record_link() -> Result<String, String> {
-    app()?.my_record_link().map_err(said)
+fn my_record_link(persona_hex: String) -> Result<String, String> {
+    app()?.my_record_link(&persona_hex).map_err(said)
 }
 
 /// Check a stranger's burn proof (§9.5) and remember the verdict.

@@ -277,6 +277,27 @@ pub struct RecordSummary {
 
 const ATTEST_PREFIX: &str = "ducat:attest/";
 const RECORD_PREFIX: &str = "ducat:record/";
+/// How many envelopes a record link may carry, and a reader will read.
+const RECORD_MAX: usize = 64;
+
+/// Join envelopes, newest first, into one `ducat:record/` link that fits a
+/// message (`MAX_MESSAGE_CHARS`) — the same packing as the phone's.
+fn pack_record_link<'a>(envelopes: impl Iterator<Item = &'a str>) -> String {
+    let mut out = String::from(RECORD_PREFIX);
+    let mut n = 0;
+    for env in envelopes.take(RECORD_MAX) {
+        let sep = if n == 0 { 0 } else { 1 };
+        if out.len() + sep + env.len() > ducat_core::contact::MAX_MESSAGE_CHARS {
+            break;
+        }
+        if n > 0 {
+            out.push('.');
+        }
+        out.push_str(env);
+        n += 1;
+    }
+    out
+}
 
 impl App {
     fn attestations(&self, key: &str) -> Vec<AttestationRecord> {
@@ -311,11 +332,14 @@ impl App {
         if note.as_ref().map_or(false, |n| n.chars().count() > MAX_ATTESTATION_NOTE_CHARS) {
             return Err(Error::Refused("a note is one sentence".into()));
         }
-        let worn = self.worn()?;
-        if worn == subject_hex.to_lowercase() {
+        // Signed by the persona that owns the thread, not the worn hat: the
+        // link travels in that thread, sealed under its owner, and the
+        // subject keeps a receipt only when signer and sender agree.
+        let signer_hex = self.thread_persona(subject_hex)?;
+        if signer_hex == subject_hex.to_lowercase() {
             return Err(Error::Refused("a persona cannot attest to itself".into()));
         }
-        let secret = self.persona_secret(&worn)?.ok_or_else(|| Error::Refused("no such persona".into()))?;
+        let secret = self.persona_secret(&signer_hex)?.ok_or_else(|| Error::Refused("no such persona".into()))?;
         let Ok(sk): Result<[u8; 32], _> = secret.as_slice().try_into() else { return Err(Error::Refused("persona key".into())) };
         let key = ducat_core::sig::SecretKey::ed25519_from_bytes(&sk);
         let subject = unhex(subject_hex).filter(|b| b.len() == 32).ok_or_else(|| Error::Refused("persona".into()))?;
@@ -341,20 +365,27 @@ impl App {
         Ok(format!("{ATTEST_PREFIX}{env}"))
     }
 
-    /// The receipts others gave this desk's personas, as a `ducat:record/`
-    /// link to send when somebody asks for the record.
-    pub fn my_record_link(&self) -> Result<String, Error> {
-        let worn = self.worn()?;
-        let mine: Vec<String> = self
-            .attestations("received")
-            .into_iter()
-            .filter(|r| r.subject_hex == worn)
-            .map(|r| r.envelope_hex)
-            .collect();
+    /// The persona this desk speaks as in the thread with `contact_hex`:
+    /// the relationship's owner, or the worn hat for a stranger.
+    fn thread_persona(&self, contact_hex: &str) -> Result<String, Error> {
+        match self.contact(contact_hex).map(|c| c.owner).filter(|o| !o.is_empty()) {
+            Some(owner) => Ok(owner.to_lowercase()),
+            None => Ok(self.worn()?.to_lowercase()),
+        }
+    }
+
+    /// The receipts others gave the persona this desk speaks as in the
+    /// thread with `contact_hex`, as a `ducat:record/` link to send there.
+    /// One message carries it, so the newest that fit are sent, sixty-four
+    /// at most (§9.5 "How a receipt travels").
+    pub fn my_record_link(&self, contact_hex: &str) -> Result<String, Error> {
+        let me = self.thread_persona(contact_hex)?;
+        let mut mine: Vec<AttestationRecord> = self.attestations("received").into_iter().filter(|r| r.subject_hex == me).collect();
         if mine.is_empty() {
             return Err(Error::Refused("nothing on the record yet".into()));
         }
-        Ok(format!("{RECORD_PREFIX}{}", mine.join(".")))
+        mine.sort_by_key(|r| std::cmp::Reverse(r.ts));
+        Ok(pack_record_link(mine.iter().map(|r| r.envelope_hex.as_str())))
     }
 
     /// What we hold about a persona's record, weighted by the signers whose
@@ -419,7 +450,7 @@ impl App {
     pub fn read_record(&self, from_hex: &str, dotted: &str) -> Result<RecordSummary, Error> {
         let mut about = self.attestations("about");
         let mut taken = 0u32;
-        for hex in dotted.split('.').filter(|h| !h.is_empty()).take(64) {
+        for hex in dotted.split('.').filter(|h| !h.is_empty()).take(RECORD_MAX) {
             let Some(env) = unhex(hex) else { continue };
             let Ok(a) = open_attestation(&env) else { continue };
             if hexs(&a.subject) != from_hex.to_lowercase() {
@@ -516,10 +547,10 @@ mod tests {
         assert_eq!(rater.attestations("given")[0].note.as_deref(), Some("prompt, as described"));
 
         // Nothing on the record until a receipt arrives.
-        assert!(subject.my_record_link().is_err());
+        assert!(subject.my_record_link(&rater_hex).is_err());
         // Ingested from the thread as the subject sees it: sender = signer.
         subject.ingest_trust_links(&rater_hex, &format!("  {link}\n"));
-        let record = subject.my_record_link().unwrap();
+        let record = subject.my_record_link(&rater_hex).unwrap();
         assert!(record.starts_with(RECORD_PREFIX));
 
         // A third party reads the record the subject shows it.
@@ -546,10 +577,25 @@ mod tests {
         subject.receive_attestation(&rater_hex, &second).unwrap();
         assert_eq!(subject.attestations("received").len(), 2);
 
-        let dotted = subject.my_record_link().unwrap();
+        let dotted = subject.my_record_link(&rater_hex).unwrap();
         stage_verified_burn(&reader, &rater_hex);
         let summary = reader.read_record(&subject_hex, dotted.strip_prefix(RECORD_PREFIX).unwrap()).unwrap();
         assert_eq!(summary, RecordSummary { receipts: 2, weighted: 1, rating_x10: 30 });
+    }
+
+    #[test]
+    fn a_record_link_is_one_message_of_the_newest_receipts() {
+        let env = "ab".repeat(300); // 600 chars, an envelope's size
+        let many: Vec<String> = (0..10).map(|i| format!("{:02x}{}", i, &env[2..])).collect();
+        let link = pack_record_link(many.iter().map(String::as_str));
+        assert!(link.len() <= ducat_core::contact::MAX_MESSAGE_CHARS);
+        let got: Vec<&str> = link.trim_start_matches(RECORD_PREFIX).split('.').collect();
+        assert_eq!(got.len(), 3, "three of 600 chars fit under 2000 with the prefix");
+        assert_eq!(got[0], many[0], "newest first, as given");
+        // Never more than the reader will read.
+        let short: Vec<String> = (0..100).map(|i| format!("{i:04x}")).collect();
+        let link = pack_record_link(short.iter().map(String::as_str));
+        assert_eq!(link.trim_start_matches(RECORD_PREFIX).split('.').count(), RECORD_MAX);
     }
 
     #[test]

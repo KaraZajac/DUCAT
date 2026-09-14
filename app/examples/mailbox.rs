@@ -13,6 +13,16 @@
 //!
 //!   DUCAT_DESK_STATE=<dir A> cargo run -p ducat-app --example mailbox -- rated
 //!   DUCAT_DESK_STATE=<dir B> cargo run -p ducat-app --example mailbox -- rater <card uri>
+//!
+//! §9.5 over the live network and the live chain — `checker` cuts a card and
+//! waits for a burn proof to arrive in a thread; `burner <card>` claims it,
+//! burns 0.01 XMR under its worn persona (a funded state: the stagenet
+//! bank), waits for the block, and shows the proof. The checker's verdict —
+//! its own node for the proven amount, a second node with it in a block — is
+//! the proof.
+//!
+//!   DUCAT_DESK_STATE=<dir A> cargo run -p ducat-app --example mailbox -- checker
+//!   DUCAT_DESK_STATE=~/.ducat-stagenet-bank cargo run -p ducat-app --example mailbox -- burner <card uri>
 
 use std::time::{Duration, Instant};
 
@@ -505,14 +515,14 @@ fn main() {
             while t0.elapsed() < Duration::from_secs(900) {
                 app.collect_claims(None);
                 app.poll();
-                if let Ok(link) = app.my_record_link() {
+                let who = app
+                    .contacts()
+                    .into_iter()
+                    .find(|c| app.thread(&c.persona_hex).iter().any(|m| !m.outgoing && m.body.starts_with("ducat:attest/")));
+                if let Some(link) = who.as_ref().and_then(|w| app.my_record_link(&w.persona_hex).ok()) {
+                    let who = who.expect("a link without a thread");
                     let hexes = link.trim_start_matches("ducat:record/").split('.').count();
                     println!("MB_RECEIPT on the record: {hexes} receipt(s)");
-                    let who = app
-                        .contacts()
-                        .into_iter()
-                        .find(|c| app.thread(&c.persona_hex).iter().any(|m| !m.outgoing && m.body.starts_with("ducat:attest/")))
-                        .expect("MB_FAIL a receipt with no thread");
                     match app.send(&who, Outgoing::text(&link)) {
                         Ok(_) => println!("MB_RECORD_SENT to {} ({} chars)", who.display_name(), link.len()),
                         Err(e) => println!("MB_FAIL record: {e}"),
@@ -560,6 +570,114 @@ fn main() {
             }
             println!("MB_FAIL no record came back");
         }
-        _ => panic!("MB_FAIL usage: host | guest <card uri> [name] | customer <card uri> | reader <press code> | party <name> [card...] | callee <card> | caller <card> [secs] | rated | rater <card>"),
+        Some("checker") => {
+            app.set_my_name(None, "Checker Desk").expect("MB_FAIL name");
+            let handle = app.profile_code(None).expect("MB_FAIL issue");
+            println!("MB_CARD {}", handle.uri);
+            let t0 = Instant::now();
+            let mut tried = 0u32;
+            while t0.elapsed() < Duration::from_secs(2400) {
+                app.collect_claims(None);
+                app.poll();
+                let found = app.contacts().into_iter().find_map(|c| {
+                    app.thread(&c.persona_hex)
+                        .into_iter()
+                        .find(|m| !m.outgoing && m.body.trim().starts_with("ducat:burn/"))
+                        .map(|m| (c, m.body.trim().trim_start_matches("ducat:burn/").to_string()))
+                });
+                if let Some((c, hex)) = found {
+                    if tried == 0 {
+                        println!("MB_PROOF_SEEN from {} ({} chars)", c.display_name(), hex.len());
+                    }
+                    tried += 1;
+                    match app.verify_burn(&c.persona_hex, &hex) {
+                        Ok(v) => {
+                            println!("MB_VERIFIED {} XMR by {}… at block {} purpose={} after {} tries", ducat_app::wallet::format_xmr(v.amount_pxmr), &c.persona_hex[..8], v.height, v.purpose, tried);
+                            let words = app.burn_of(&c.persona_hex).map(|b| format!("burned {} XMR, since block {}", ducat_app::wallet::format_xmr(b.amount_pxmr), b.height)).unwrap_or_default();
+                            println!("MB_BADGE {words}");
+                            let _ = app.send(&c, Outgoing::text(&format!("checked: {words}")));
+                            println!("MB_OK checker verified the burn after {:.0}s", t0.elapsed().as_secs_f64());
+                            return;
+                        }
+                        Err(e) => {
+                            println!("MB_NOT_YET try {tried}: {e}");
+                            std::thread::sleep(Duration::from_secs(30));
+                            continue;
+                        }
+                    }
+                }
+                std::thread::sleep(Duration::from_secs(5));
+            }
+            println!("MB_FAIL no proof verified in time");
+        }
+        Some("burner") => {
+            let uri = args.get(1).expect("MB_FAIL burner <card uri>");
+            app.set_my_name(None, "Burner Desk").expect("MB_FAIL name");
+            let node = app.last_good_node().or_else(|| app.pick_node()).expect("MB_FAIL no monero node");
+            app.ensure_wallet().expect("MB_FAIL wallet");
+            for _ in 0..400 {
+                if !app.scan_step(&node) {
+                    break;
+                }
+            }
+            app.refresh_spent(&node);
+            let b = app.balances();
+            println!("MB_BAL spendable {} XMR", ducat_app::wallet::format_xmr(b.spendable_pxmr));
+            let c = match app.claim_card(uri, Some("the checker"), false, None) {
+                Ok(c) => c.contact(),
+                Err(e) => {
+                    println!("MB_FAIL claim: {e}");
+                    return;
+                }
+            };
+            println!("MB_CLAIMED {}", c.display_name());
+            let worn = app.worn().expect("MB_FAIL worn");
+            let rec = match app.burn(&worn, ducat_app::trust::BURN_FLOOR_PXMR, "identity") {
+                Ok(r) => r,
+                Err(e) => {
+                    println!("MB_FAIL burn: {e}");
+                    return;
+                }
+            };
+            println!("MB_BURNED txid={} {} XMR proof={} chars", rec.txid_hex, ducat_app::wallet::format_xmr(rec.amount_pxmr), rec.proof.len());
+            let t0 = Instant::now();
+            let env = loop {
+                app.burn_lap();
+                if let Some(b) = app.my_burn(&worn) {
+                    if let Some(env) = b.envelope_hex.clone() {
+                        println!("MB_PROOF block {} after {:.0}s ({} chars)", b.height, t0.elapsed().as_secs_f64(), env.len());
+                        break env;
+                    }
+                }
+                if t0.elapsed() > Duration::from_secs(1800) {
+                    println!("MB_FAIL the burn never reached a block");
+                    return;
+                }
+                app.poll();
+                std::thread::sleep(Duration::from_secs(20));
+            };
+            for _ in 0..30 {
+                app.poll();
+                if app.contact(&c.persona_hex).map_or(false, |k| k.their_bundle.is_some()) {
+                    break;
+                }
+                std::thread::sleep(Duration::from_secs(2));
+            }
+            let c = app.contact(&c.persona_hex).expect("MB_FAIL contact gone");
+            app.send(&c, Outgoing::text(&format!("ducat:burn/{env}"))).expect("MB_FAIL send proof");
+            println!("MB_SENT the proof");
+            let t1 = Instant::now();
+            while t1.elapsed() < Duration::from_secs(1500) {
+                app.poll();
+                if let Some(m) = app.thread(&c.persona_hex).into_iter().find(|m| !m.outgoing && m.body.starts_with("checked:")) {
+                    println!("MB_REPLY '{}'", m.body);
+                    println!("MB_OK burner was checked after {:.0}s", t1.elapsed().as_secs_f64());
+                    return;
+                }
+                std::thread::sleep(Duration::from_secs(10));
+            }
+            println!("MB_FAIL no verdict came back");
+        }
+        _ => panic!("MB_FAIL usage: host | guest <card uri> [name] | customer <card uri> | reader <press code> | party <name> [card...] | callee <card> | caller <card> [secs] | rated | rater <card> | checker | burner <card>"),
     }
 }

@@ -485,7 +485,7 @@
     if (!current) return;
     err = null;
     try {
-      const link = await api.myRecordLink();
+      const link = await api.myRecordLink(current.persona_hex);
       await api.sendText(current.persona_hex, link);
       await refresh();
     } catch (e) { err = String(e); }
@@ -498,7 +498,7 @@
     if (!current) return;
     err = null;
     try {
-      const link = await api.myBurnLink();
+      const link = await api.myBurnLink(current.persona_hex);
       await api.sendText(current.persona_hex, link);
       await refresh();
     } catch (e) { err = String(e); }
