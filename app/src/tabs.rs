@@ -577,7 +577,7 @@ impl App {
                 .find(|e| tab.seen_tx.as_deref().map_or(false, |s| e.tx_hash_hex.eq_ignore_ascii_case(s)) && matches(e))
                 .or_else(|| entries.iter().find(|e| matches(e)));
             let Some(hit) = hit else { continue };
-            if !self.settles(&hit.tx_hash_hex) {
+            if !self.settles(&hit.tx_hash_hex, hit.amount_pxmr) {
                 continue;
             }
             claimed.push(hit.key_image.clone());

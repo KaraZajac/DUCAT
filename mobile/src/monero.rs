@@ -65,31 +65,57 @@ pub fn monero_default_nodes(own_url: Option<String>) -> Vec<NodeCandidate> {
             label: "your node".into(),
         }];
     }
+    // **Every entry is plain http, and each one was checked.** Probed
+    // 2026-09-07 with curl against every stagenet node the public lists
+    // carry: the monerodevs trio and sethforprivacy answer TLS on 38089 with
+    // monerod's own self-signed certificate (no subject, no CA), boldsuck's
+    // is signed by CAcert, and xmr-tw has none. None of those chains to a
+    // root the TLS stack here ships (ureq's webpki bundle), so an `https://`
+    // entry would simply read as unreachable — which is worse than plain
+    // http, because it silently removes the node from every list below.
+    // The day one of them presents a publicly-trusted certificate, its URL
+    // here flips to https and `monero_second_opinion_nodes` prefers it
+    // without another change. A typed node defaults to https (the screens
+    // add the scheme), and an own node is trusted whatever carries it.
     let mut nodes = vec![
         NodeCandidate {
+            // Plain http: TLS answers, but with a self-signed certificate.
             url: "http://node.monerodevs.org:38089".into(),
             trust: NodeTrust::PublicClearnet,
             label: "monerodevs (stagenet)".into(),
         },
         NodeCandidate {
+            // Plain http: self-signed on TLS.
             url: "http://node2.monerodevs.org:38089".into(),
             trust: NodeTrust::PublicClearnet,
             label: "monerodevs 2 (stagenet)".into(),
         },
         NodeCandidate {
+            // Plain http: self-signed on TLS.
             url: "http://node3.monerodevs.org:38089".into(),
             trust: NodeTrust::PublicClearnet,
             label: "monerodevs 3 (stagenet)".into(),
         },
         NodeCandidate {
+            // Plain http: its TLS certificate is CAcert-signed, which no
+            // stock trust store accepts.
             url: "http://xmr-lux.boldsuck.org:38081".into(),
             trust: NodeTrust::PublicClearnet,
             label: "boldsuck (stagenet)".into(),
         },
         NodeCandidate {
+            // Plain http: no TLS on this port at all.
             url: "http://stagenet.xmr-tw.org:38081".into(),
             trust: NodeTrust::PublicClearnet,
             label: "xmr-tw (stagenet)".into(),
+        },
+        NodeCandidate {
+            // Plain http: self-signed on TLS. A sixth operator, so the
+            // second opinion has somebody to ask that is not the node in
+            // use even when two of the others are down.
+            url: "http://node.sethforprivacy.com:38089".into(),
+            trust: NodeTrust::PublicClearnet,
+            label: "sethforprivacy (stagenet)".into(),
         },
     ];
     // A random starting point, so every phone does not probe — and then
@@ -101,6 +127,54 @@ pub fn monero_default_nodes(own_url: Option<String>) -> Vec<NodeCandidate> {
     rand_core::RngCore::fill_bytes(&mut rand_core::OsRng, &mut b);
     let n = nodes.len();
     nodes.rotate_left((b[0] as usize) % n);
+    nodes
+}
+
+/// A node's identity for "is this the same node": host and port, scheme
+/// and trailing slash dropped, lowercased. `http://x:38089` and
+/// `https://x:38089/` are one machine, and a second opinion asked of the
+/// same machine over a different scheme is not a second opinion.
+pub fn node_host_port(url: &str) -> String {
+    let t = url.trim();
+    let t = t.split("://").nth(1).unwrap_or(t);
+    let t = t.split('/').next().unwrap_or(t);
+    t.trim_end_matches('/').to_lowercase()
+}
+
+/// Whether a URL names one of the shipped public nodes. A node that is
+/// not on the list is one the person configured — theirs to trust, and
+/// theirs to keep private.
+pub fn is_default_node(url: &str) -> bool {
+    let want = node_host_port(url);
+    monero_default_nodes(None).iter().any(|n| node_host_port(&n.url) == want)
+}
+
+/// The nodes a second opinion may ask about a transaction.
+///
+/// Never the node in use and never the person's own node — asking the same
+/// machine twice corroborates nothing — and https before http, so that
+/// whenever a shipped node gains a real certificate the question rides it
+/// first. With an own node configured, **one** other node: the primary is
+/// already the person's own and every extra question hands a public
+/// stranger a transaction id this wallet cares about. Without one, two,
+/// so a single node stuck a few blocks back cannot stall every sale.
+#[uniffi::export]
+pub fn monero_second_opinion_nodes(in_use: Option<String>, own_node: Option<String>) -> Vec<NodeCandidate> {
+    let skip: Vec<String> = [in_use, own_node.clone()]
+        .into_iter()
+        .flatten()
+        .filter(|u| !u.trim().is_empty())
+        .map(|u| node_host_port(&u))
+        .collect();
+    let mut nodes: Vec<NodeCandidate> = monero_default_nodes(None)
+        .into_iter()
+        .filter(|n| !skip.contains(&node_host_port(&n.url)))
+        .collect();
+    // Stable, so the random rotation above still spreads the load among
+    // nodes of the same scheme.
+    nodes.sort_by_key(|n| !n.url.trim().to_lowercase().starts_with("https://"));
+    let keep = if own_node.map_or(false, |o| !o.trim().is_empty()) { 1 } else { 2 };
+    nodes.truncate(keep);
     nodes
 }
 
@@ -719,6 +793,120 @@ pub fn monero_tx_known(node_url: String, tx_hash_hex: String, timeout_ms: u32) -
             Err(_) => TxKnown::Unreachable,
         }
     })
+}
+
+/// Where a second node places a transaction — the answer `monero_tx_known`
+/// could not give.
+///
+/// `get_transactions` returns pool transactions too, so "the node has it"
+/// covered a payment that was still replaceable, and a merchant's second
+/// opinion said yes to a mempool sighting. This asks the daemon's own
+/// `in_pool` and `block_height` fields instead, and checks that the
+/// transaction handed back is the one asked about — the RPC crate never
+/// does, and a node (or a proxy in front of one) that answers a different
+/// hash would otherwise pass as corroboration.
+#[derive(uniffi::Enum, Clone, Copy, PartialEq, Eq, Debug)]
+pub enum TxStatus {
+    /// Mined, at this height. The only answer that settles a sale.
+    InBlock { height: u64 },
+    /// Relayed and waiting. Real bytes, replaceable until a block takes them.
+    InPool,
+    /// The node answered, and has never heard of it.
+    Unknown,
+    /// No answer at all — nothing either way.
+    Unreachable,
+}
+
+/// Ask one node where a transaction stands. Blocking; call it off the
+/// main thread.
+#[uniffi::export]
+pub fn monero_tx_status(node_url: String, tx_hash_hex: String, timeout_ms: u32) -> TxStatus {
+    use monero_wallet::transaction::Transaction;
+
+    let want = tx_hash_hex.trim().to_lowercase();
+    let Some(raw) = hex_to_bytes(&want).filter(|b| b.len() == 32) else {
+        // Not a transaction id at all: nothing any node could have.
+        return TxStatus::Unknown;
+    };
+    let agent = ureq::AgentBuilder::new()
+        .timeout_connect(Duration::from_millis(timeout_ms.max(1_000) as u64))
+        .timeout_read(Duration::from_millis(timeout_ms.max(1_000) as u64))
+        .build();
+    let body = serde_json::json!({ "txs_hashes": [want.clone()] });
+    let resp = match agent
+        .post(&format!("{}/get_transactions", node_url.trim_end_matches('/')))
+        .set("Content-Type", "application/json")
+        .send_string(&body.to_string())
+    {
+        Ok(r) => r,
+        Err(_) => return TxStatus::Unreachable,
+    };
+    // Bounded: one transaction is kilobytes, and a stranger's node chooses
+    // how much to send otherwise.
+    let mut text = String::new();
+    if resp.into_reader().take(4 * 1024 * 1024).read_to_string(&mut text).is_err() {
+        return TxStatus::Unreachable;
+    }
+    let Ok(v) = serde_json::from_str::<serde_json::Value>(&text) else {
+        return TxStatus::Unreachable;
+    };
+    if v["status"].as_str() != Some("OK") {
+        return TxStatus::Unreachable;
+    }
+    let missed = v["missed_tx"]
+        .as_array()
+        .map(|a| a.iter().any(|m| m.as_str().map_or(false, |h| h.eq_ignore_ascii_case(&want))))
+        .unwrap_or(false);
+    if missed {
+        return TxStatus::Unknown;
+    }
+    let Some(tx) = v["txs"].as_array().and_then(|a| a.first()) else {
+        // Neither missed nor returned: the node said nothing usable.
+        return TxStatus::Unreachable;
+    };
+    // The hash the node labels it with must be the one asked for…
+    if !tx["tx_hash"].as_str().map_or(false, |h| h.eq_ignore_ascii_case(&want)) {
+        return TxStatus::Unreachable;
+    }
+    // …and so must the bytes, hashed by Monero's own rule, whenever the
+    // full transaction came back. A pruned answer carries only the prefix
+    // and the prunable hash; `hash_with_prunable_hash` covers that shape.
+    let blob_hex = tx["as_hex"].as_str().unwrap_or("");
+    let pruned_hex = tx["pruned_as_hex"].as_str().unwrap_or("");
+    let hashed: Option<[u8; 32]> = if !blob_hex.is_empty() {
+        hex_to_bytes(blob_hex).and_then(|b| Transaction::read(&mut b.as_slice()).ok()).map(|t| t.hash())
+    } else if !pruned_hex.is_empty() {
+        let prunable = tx["prunable_hash"].as_str().and_then(hex_to_bytes).filter(|b| b.len() == 32).map(|b| {
+            let mut h = [0u8; 32];
+            h.copy_from_slice(&b);
+            h
+        });
+        match (hex_to_bytes(pruned_hex), prunable) {
+            (Some(b), Some(ph)) => Transaction::<monero_wallet::transaction::Pruned>::read(&mut b.as_slice())
+                .ok()
+                .and_then(|t| t.hash_with_prunable_hash(ph)),
+            _ => None,
+        }
+    } else {
+        None
+    };
+    let mut want_bytes = [0u8; 32];
+    want_bytes.copy_from_slice(&raw);
+    if let Some(h) = hashed {
+        if h != want_bytes {
+            // The node returned bytes that are not this transaction. Not a
+            // "no" — a node that cannot be trusted to answer the question.
+            return TxStatus::Unreachable;
+        }
+    }
+    if tx["in_pool"].as_bool().unwrap_or(false) {
+        return TxStatus::InPool;
+    }
+    match tx["block_height"].as_u64() {
+        // monerod writes u64::MAX for "not in a block".
+        Some(h) if h > 0 && h != u64::MAX => TxStatus::InBlock { height: h },
+        _ => TxStatus::InPool,
+    }
 }
 
 /// Fetch one transaction from the daemon.
@@ -1494,6 +1682,97 @@ pub fn monero_send(
     // the number they were shown and nothing about the transaction.
     priority: u32,
 ) -> Result<SendResult, MoneroError> {
+    // No quote to hold the fee against; the ceilings still apply.
+    send_inner(node_url, spend_key_hex, input_blobs, to_address, amount_pxmr, priority, 0)
+}
+
+/// What the network charges per byte, tier by tier, on the day this was
+/// written (stagenet and mainnet agree: 20 000 / 80 000 / 320 000 /
+/// 4 000 000 pXMR). A node reports these; nothing here believed it. A
+/// fee is the one number in a transaction the payer does not choose, so
+/// a node that quoted a thousand times the going rate — a lying public
+/// node, or anyone on the path to it over plain http — was handed the
+/// note as the fee and the builder signed it. Fifty times the honest tier
+/// is far above anything the dynamic fee has ever reached and far below
+/// "the whole note".
+const FEE_NORMAL_PER_BYTE: [u64; 4] = [20_000, 80_000, 320_000, 4_000_000];
+const FEE_CEILING_FACTOR: u64 = 50;
+
+/// The most a tier may charge per byte before the node is disbelieved.
+fn fee_ceiling_per_byte(priority: u32) -> u64 {
+    FEE_NORMAL_PER_BYTE[(priority as usize).min(3)].saturating_mul(FEE_CEILING_FACTOR)
+}
+
+/// A built fee above this share of the payment is refused — unless the
+/// fee is small in absolute terms, because the fastest tier honestly
+/// costs more than five percent of a coffee and refusing that would turn
+/// "fastest" off for small payments. 0.01 XMR is above any honest fee at
+/// any tier and far below what a drained note looks like.
+const FEE_SHARE_DENOMINATOR: u64 = 20;
+const FEE_SHARE_FLOOR_PXMR: u64 = 10_000_000_000;
+
+/// `monero_send` with the quote the person agreed to.
+///
+/// The transaction is built against `max_fee_pxmr` — the estimate the
+/// screen showed — and refused **before signing** when the fee the
+/// builder arrives at is more than a quarter above it, or more than a
+/// twentieth of the amount (see `FEE_SHARE_FLOOR_PXMR`). Zero means no
+/// quote was available (the estimate failed), and only the ceilings hold.
+/// Every refusal here is raised under the "fee rate:" prefix both clients
+/// read as "nothing was built, the notes are free again".
+#[uniffi::export]
+pub fn monero_send_checked(
+    node_url: String,
+    spend_key_hex: String,
+    input_blobs: Vec<Vec<u8>>,
+    to_address: String,
+    amount_pxmr: u64,
+    priority: u32,
+    max_fee_pxmr: u64,
+) -> Result<SendResult, MoneroError> {
+    send_inner(node_url, spend_key_hex, input_blobs, to_address, amount_pxmr, priority, max_fee_pxmr)
+}
+
+/// Whether a built fee is one the payer would have agreed to. Pure, so
+/// the rule is testable without a node.
+fn fee_acceptable(fee: u64, amount_pxmr: u64, max_fee_pxmr: u64, mask: u64) -> Result<(), String> {
+    if max_fee_pxmr > 0 {
+        // A quarter over the quote, plus one quantisation step: the
+        // estimate rounds the way the builder does, but a byte or two of
+        // difference in the weight can cross a step.
+        let allowed = max_fee_pxmr.saturating_add(max_fee_pxmr / 4).saturating_add(mask);
+        if fee > allowed {
+            return Err(format!(
+                "fee rate: the transaction would cost {} XMR in fees against the {} XMR quoted — refused, nothing was built",
+                fmt_xmr(fee),
+                fmt_xmr(max_fee_pxmr)
+            ));
+        }
+    }
+    if fee > FEE_SHARE_FLOOR_PXMR && fee > amount_pxmr / FEE_SHARE_DENOMINATOR {
+        return Err(format!(
+            "fee rate: the node asks {} XMR in fees on a {} XMR payment — refused, nothing was built",
+            fmt_xmr(fee),
+            fmt_xmr(amount_pxmr)
+        ));
+    }
+    Ok(())
+}
+
+/// Twelve places, plain digits, for the fee refusals above.
+fn fmt_xmr(pxmr: u64) -> String {
+    format!("{}.{:012}", pxmr / 1_000_000_000_000, pxmr % 1_000_000_000_000)
+}
+
+fn send_inner(
+    node_url: String,
+    spend_key_hex: String,
+    input_blobs: Vec<Vec<u8>>,
+    to_address: String,
+    amount_pxmr: u64,
+    priority: u32,
+    max_fee_pxmr: u64,
+) -> Result<SendResult, MoneroError> {
     use monero_daemon_rpc::prelude::*;
     use monero_wallet::address::MoneroAddress;
     use monero_wallet::ed25519::Scalar;
@@ -1555,6 +1834,9 @@ pub fn monero_send(
             );
         }
 
+        // The second argument is the crate's own sanity ceiling on the
+        // per-weight rate; `u64::MAX` switched it off. See
+        // `fee_ceiling_per_byte` for why a lying node is the threat here.
         let fee_rate = rpc
             .fee_rate(
                 match priority {
@@ -1563,7 +1845,7 @@ pub fn monero_send(
                     2 => FeePriority::Elevated,
                     _ => FeePriority::Priority,
                 },
-                u64::MAX,
+                fee_ceiling_per_byte(priority),
             )
             .await
             .map_err(|e| MoneroError::Failed(format!("fee rate: {e:?}")))?;
@@ -1585,6 +1867,9 @@ pub fn monero_send(
         .map_err(|e| MoneroError::Failed(describe_send_error(&format!("{e:?}"))))?;
 
         let fee = tx.necessary_fee();
+        // Before the signature exists, not after: an unsigned transaction
+        // is nothing, a signed one is bytes a retry could still relay.
+        fee_acceptable(fee, amount_pxmr, max_fee_pxmr, fee_mask(&fee_rate)).map_err(MoneroError::Failed)?;
         let signed = tx
             .sign(&mut OsRng, &spend)
             .map_err(|e| MoneroError::Failed(format!("signing: {e:?}")))?;
@@ -1610,18 +1895,43 @@ pub fn monero_send(
     })
 }
 
-/// Where a signed transaction goes: the node it was built against and then
-/// every default relay, deduplicated. Nodes deduplicate transactions, so
-/// submitting everywhere is free — and §8.7.2 says one node's "OK" means
-/// that node took it, not that the network has it.
+/// Where a signed transaction goes.
+///
+/// The node it was built against, and then — only when that node is one of
+/// the shipped public ones — at most two other defaults, https first.
+/// §8.7.2 says one node's "OK" means that node took it, not that the
+/// network has it, and nodes deduplicate, so a second relay is cheap
+/// insurance. It used to be *every* default: a person who had pointed the
+/// wallet at their own node, precisely so that no stranger would see their
+/// transactions, had each one handed to five public nodes over plain http
+/// the moment it was signed. A node that is not on the shipped list is the
+/// person's own, and theirs relays alone.
 pub(crate) fn relay_urls(first: &str) -> Vec<String> {
     let mut urls = vec![first.to_string()];
-    for n in monero_default_nodes(None) {
-        if !urls.contains(&n.url) {
-            urls.push(n.url);
-        }
+    if !is_default_node(first) {
+        return urls;
     }
+    let mut others: Vec<String> = monero_default_nodes(None)
+        .into_iter()
+        .map(|n| n.url)
+        .filter(|u| node_host_port(u) != node_host_port(first))
+        .collect();
+    others.sort_by_key(|u| !u.to_lowercase().starts_with("https://"));
+    urls.extend(others.into_iter().take(2));
     urls
+}
+
+/// The quantisation step a fee rate rounds to, read back from the rate's
+/// own serialisation: the type keeps its fields private.
+fn fee_mask(rate: &monero_daemon_rpc::prelude::FeeRate) -> u64 {
+    let mut b = Vec::new();
+    if rate.write(&mut b).is_ok() && b.len() >= 16 {
+        let mut m = [0u8; 8];
+        m.copy_from_slice(&b[8..16]);
+        u64::from_le_bytes(m)
+    } else {
+        10_000
+    }
 }
 
 /// Publish to every relay; how many confirmed and the last refusal. The
@@ -1715,6 +2025,15 @@ pub fn monero_fee_estimate(
         .map(|a| a.iter().filter_map(|x| x.as_u64()).collect())
         .filter(|v: &Vec<u64>| !v.is_empty())
         .unwrap_or_else(|| vec![r["fee"].as_u64().unwrap_or(20_000)]);
+    // The same disbelief the send applies (`fee_ceiling_per_byte`). An
+    // estimate is what the person agrees to and what the built fee is
+    // later held against, so a node inflating it here would have both
+    // halves of that check agreeing with its lie.
+    if let Some((i, t)) = tiers.iter().enumerate().find(|(i, t)| **t > fee_ceiling_per_byte(*i as u32)) {
+        return Err(MoneroError::Failed(format!(
+            "fee estimate: this node quotes {t} pXMR per byte at tier {i}, far above the network's rate — not believed"
+        )));
+    }
     let mask = r["quantization_mask"].as_u64().unwrap_or(10_000).max(1);
 
     let bytes = estimated_weight(inputs.max(1), outputs.max(2));
@@ -1759,6 +2078,58 @@ fn estimated_weight(inputs: u32, outputs: u32) -> u64 {
     let padded = outputs.next_power_of_two().max(2);
     let range_proof = 576 + 32 * (padded.trailing_zeros() as u64).saturating_sub(1) * 2;
     100 + (inputs as u64) * 650 + (outputs as u64) * 72 + range_proof
+}
+
+#[cfg(test)]
+mod policy {
+    use super::*;
+
+    #[test]
+    fn a_node_is_the_same_machine_whatever_the_scheme() {
+        assert_eq!(node_host_port("http://node.monerodevs.org:38089"), "node.monerodevs.org:38089");
+        assert_eq!(node_host_port("https://Node.MoneroDevs.org:38089/"), "node.monerodevs.org:38089");
+        assert_eq!(node_host_port("192.168.1.10:38081"), "192.168.1.10:38081");
+        assert!(is_default_node("https://node2.monerodevs.org:38089/"));
+        assert!(!is_default_node("http://192.168.1.10:38081"));
+    }
+
+    #[test]
+    fn an_own_node_relays_alone_and_a_public_one_gets_two_helpers() {
+        assert_eq!(relay_urls("http://192.168.1.10:38081"), vec!["http://192.168.1.10:38081".to_string()]);
+        let public = relay_urls("http://node.monerodevs.org:38089");
+        assert_eq!(public.len(), 3);
+        assert_eq!(public[0], "http://node.monerodevs.org:38089");
+        assert!(!public[1..].iter().any(|u| node_host_port(u) == "node.monerodevs.org:38089"));
+    }
+
+    #[test]
+    fn a_second_opinion_never_asks_the_node_in_use_or_the_own_node() {
+        let none = monero_second_opinion_nodes(Some("http://node.monerodevs.org:38089".into()), None);
+        assert_eq!(none.len(), 2);
+        assert!(none.iter().all(|n| node_host_port(&n.url) != "node.monerodevs.org:38089"));
+        let own = monero_second_opinion_nodes(Some("http://10.0.0.2:38081".into()), Some("http://10.0.0.2:38081".into()));
+        assert_eq!(own.len(), 1, "with an own node, one stranger at most");
+        // An own node that happens to be a shipped one is still excluded.
+        let same = monero_second_opinion_nodes(Some("https://node3.monerodevs.org:38089".into()), Some("http://node3.monerodevs.org:38089".into()));
+        assert!(same.iter().all(|n| node_host_port(&n.url) != "node3.monerodevs.org:38089"));
+    }
+
+    #[test]
+    fn a_fee_is_held_to_the_quote_and_to_the_amount() {
+        // Within a quarter of the quote: fine.
+        assert!(fee_acceptable(120, 100_000, 100, 10).is_ok());
+        // A quarter over, plus one mask step, is the line.
+        assert!(fee_acceptable(135, 100_000, 100, 10).is_ok());
+        assert!(fee_acceptable(136, 100_000, 100, 10).is_err());
+        // No quote: only the share rule.
+        assert!(fee_acceptable(1_000, 10_000, 0, 10).is_ok(), "a large share of a tiny amount is an honest fastest-tier fee");
+        let big = FEE_SHARE_FLOOR_PXMR + 1;
+        assert!(fee_acceptable(big, big * 19, 0, 10).is_err());
+        assert!(fee_acceptable(big, big * 21, 0, 10).is_ok());
+        assert_eq!(fee_ceiling_per_byte(0), 1_000_000);
+        assert_eq!(fee_ceiling_per_byte(3), 200_000_000);
+        assert_eq!(fee_ceiling_per_byte(9), 200_000_000);
+    }
 }
 
 #[cfg(test)]
@@ -1807,5 +2178,11 @@ mod tx_known_live {
             monero_tx_known(NODE.into(), "zzzz".into(), 8_000),
             TxKnown::No,
         );
+
+        // The four-way answer: mined at a height, absent, dead node.
+        assert!(matches!(monero_tx_status(NODE.into(), real.into(), 8_000), TxStatus::InBlock { height } if height > 2_000_000));
+        assert_eq!(monero_tx_status(NODE.into(), "0".repeat(64), 8_000), TxStatus::Unknown);
+        assert_eq!(monero_tx_status("http://127.0.0.1:1".into(), "0".repeat(64), 8_000), TxStatus::Unreachable);
+        assert_eq!(monero_tx_status(NODE.into(), "zzzz".into(), 8_000), TxStatus::Unknown);
     }
 }

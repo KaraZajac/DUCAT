@@ -288,7 +288,7 @@ impl App {
         let mut claimed: Vec<String> = all.iter().filter_map(|o| o.seen_tx.clone()).collect();
         for o in waiting {
             let Some(hit) = entries.iter().find(|e| e.amount_pxmr == o.total_pxmr && !e.tx_hash_hex.is_empty() && !claimed.contains(&e.tx_hash_hex) && !ours.contains(&e.tx_hash_hex.to_lowercase()) && o.billed_minor.map_or(true, |m| e.minor == m)) else { continue };
-            if !self.settles(&hit.tx_hash_hex) {
+            if !self.settles(&hit.tx_hash_hex, o.total_pxmr) {
                 continue;
             }
             claimed.push(hit.tx_hash_hex.clone());

@@ -54,7 +54,7 @@ impl App {
                     continue;
                 }
                 let Some(&amount) = received.get(&txid) else { continue };
-                if amount == 0 || !self.settles(&txid) {
+                if amount == 0 || !self.settles(&txid, amount) {
                     continue;
                 }
                 self.mark_donation_receipted(&txid);

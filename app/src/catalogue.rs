@@ -54,7 +54,10 @@ pub fn parse_money(s: &str) -> Option<(u64, u32)> {
     let w: u64 = if whole.is_empty() { 0 } else { whole.parse().ok()? };
     let f: u64 = if frac.is_empty() { 0 } else { frac.parse().ok()? };
     let exp = frac.len() as u32;
-    Some((w * 10u64.pow(exp) + f, exp))
+    // Checked, as parse_xmr is: a price with enough digits to wrap a u64
+    // is not a price, and in debug it was a panic on a typed string.
+    let minor = w.checked_mul(10u64.checked_pow(exp)?)?.checked_add(f)?;
+    Some((minor, exp))
 }
 
 impl App {
@@ -133,6 +136,9 @@ mod tests {
         assert_eq!(parse_money("4.50"), Some((450, 2)));
         assert_eq!(parse_money("4"), Some((4, 0)));
         assert_eq!(parse_money("1,25"), Some((125, 2)));
+        // Overflow is a refusal, never a wrapped number.
+        assert_eq!(parse_money("99999999999999999999.99"), None);
+        assert_eq!(parse_money("18446744073709551615.9"), None);
         assert_eq!(parse_money(""), None);
         assert_eq!(parse_money("x"), None);
     }
