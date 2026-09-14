@@ -101,6 +101,19 @@ fun BillScreen(
                 Avatar(contact.displayName(), contact.avatar, size = 72)
                 Spacer(Modifier.height(10.dp))
                 Text(contact.displayName(), style = MaterialTheme.typography.titleLarge)
+                // §9.5: a bill is a decision, so the badge belongs here too —
+                // in words, and nothing when nothing is known.
+                trustBadge(
+                    org.ducatproject.ducat.Trust.badgeOf(context, contact.personaHex),
+                )?.let {
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
+                }
                 // Past tense once the decision is over: "asks you for" above
                 // a bill the bar has withdrawn is a request still standing,
                 // and the verdict at the bottom says the opposite.

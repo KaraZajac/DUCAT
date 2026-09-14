@@ -1264,6 +1264,16 @@ private fun AmountStep(
             quote = quote,
             destination = dest,
             contactName = (target as? PayTarget.ToContact)?.contact?.displayName(),
+            // §9.5: the badge belongs at every decision, and the last screen
+            // before the money leaves is the last decision there is.
+            gate = (target as? PayTarget.ToContact)?.let { t ->
+                val burn = Trust.burnOf(context, t.contact.personaHex)
+                when {
+                    pxmr <= (burn?.amountPxmr ?: 0L) -> null
+                    burn != null -> stringResource(R.string.trust_gate_over_burn, Amounts.show(context, burn.amountPxmr).primary)
+                    else -> stringResource(R.string.trust_gate_no_burn)
+                }
+            },
             busy = busy,
             onCancel = { confirming = false },
             onConfirm = latch@{
@@ -1326,6 +1336,8 @@ private fun ConfirmSend(
     quote: Quote?,
     destination: String?,
     contactName: String?,
+    /// §9.5's warning, or null when what is at risk is covered.
+    gate: String?,
     busy: Boolean,
     onCancel: () -> Unit,
     onConfirm: () -> Unit,
@@ -1345,6 +1357,10 @@ private fun ConfirmSend(
         },
         text = {
             Column {
+                gate?.let {
+                    Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                    Spacer(Modifier.height(8.dp))
+                }
                 contactName?.let { Text(stringResource(R.string.pay_to, isolate(it)), style = MaterialTheme.typography.bodyMedium) }
                 destination?.let {
                     Spacer(Modifier.height(6.dp))
