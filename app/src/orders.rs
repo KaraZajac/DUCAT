@@ -22,6 +22,13 @@ const ADDRESS_SLOTS: u32 = 64;
 /// this much. Zero — the default — means never.
 const SIGHT_CAP_KEY: &str = "sight_cap";
 const ABANDON_AFTER_SECS: u64 = 30 * 60;
+/// How long after a kiosk order is abandoned its money can still find it
+/// (M13). Somebody who queued, walked off and paid an hour later has paid;
+/// the money arrives either way, and the choice is only whether it arrives
+/// attached to what they ordered or as a stranger's payment nobody can
+/// explain. The match is exact — the order's own amount, on the order's own
+/// subaddress — so reviving one says nothing a fresh sighting would not.
+const REVIVE_WITHIN_SECS: u64 = 24 * 60 * 60;
 const KEEP: usize = 500;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -281,7 +288,8 @@ impl App {
     /// The mempool, for orders paid by address.
     pub fn orders_pool_sight(&self, node: &str) {
         let all = self.orders();
-        let waiting: Vec<&Order> = all.iter().filter(|o| o.state == OrderState::Awaiting && o.tab_id.is_none() && !o.address.is_empty()).collect();
+        let revive_from = App::now().saturating_sub(REVIVE_WITHIN_SECS);
+        let waiting: Vec<&Order> = all.iter().filter(|o| Self::still_payable(o, revive_from)).collect();
         if waiting.is_empty() {
             return;
         }
@@ -299,6 +307,19 @@ impl App {
             crate::notify::post(format!("Order #{}", o.number), format!("{} XMR seen — settling", format_xmr(o.total_pxmr)), None);
             log::info(TAG, format!("order #{} seen — {}…", o.number, &hit.tx_hash_hex[..16.min(hit.tx_hash_hex.len())]));
         }
+    }
+
+    /// An order whose money would still find it: waiting, or abandoned
+    /// recently enough that a late payer is a payer rather than a puzzle
+    /// (M13). Never one already on a tab — that money has its own home.
+    fn still_payable(o: &Order, revive_from: u64) -> bool {
+        o.tab_id.is_none()
+            && !o.address.is_empty()
+            && match o.state {
+                OrderState::Awaiting => true,
+                OrderState::Abandoned => o.placed_at >= revive_from,
+                _ => false,
+            }
     }
 
     /// Half an hour unpaid and unpaired is abandoned.
@@ -341,7 +362,8 @@ impl App {
             let _ = self.update_order(Order { state: OrderState::Confirmed, ..o.clone() });
             log::info(TAG, format!("order #{} confirmed on chain", o.number));
         }
-        let mut waiting: Vec<&Order> = all.iter().filter(|o| o.state == OrderState::Awaiting && o.tab_id.is_none() && !o.address.is_empty()).collect();
+        let revive_from = App::now().saturating_sub(REVIVE_WITHIN_SECS);
+        let mut waiting: Vec<&Order> = all.iter().filter(|o| Self::still_payable(o, revive_from)).collect();
         if waiting.is_empty() {
             return;
         }
@@ -392,7 +414,16 @@ mod tests {
         assert_ne!(p.address, o.address);
         assert_eq!(app.order_state(&o), OrderState::Awaiting);
         app.abandon_order(&o.id).unwrap();
-        assert_eq!(app.order(&o.id).unwrap().state, OrderState::Abandoned);
+        let gone = app.order(&o.id).unwrap();
+        assert_eq!(gone.state, OrderState::Abandoned);
+        // M13: abandoned is not unpayable. Somebody who walked off and paid
+        // an hour later has paid, and the money should find what they
+        // ordered rather than arrive as a stranger's.
+        let now = App::now();
+        assert!(App::still_payable(&gone, now.saturating_sub(REVIVE_WITHIN_SECS)), "a fresh abandonment is still payable");
+        assert!(!App::still_payable(&gone, now + 1), "a day later it is not");
+        assert!(!App::still_payable(&Order { tab_id: Some("t".into()), ..gone.clone() }, now.saturating_sub(REVIVE_WITHIN_SECS)), "money on a tab has its own home");
+        assert!(!App::still_payable(&Order { state: OrderState::Confirmed, ..gone }, now.saturating_sub(REVIVE_WITHIN_SECS)), "a confirmed order is done");
     }
 
     #[test]

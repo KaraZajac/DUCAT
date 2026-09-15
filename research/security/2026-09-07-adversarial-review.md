@@ -115,7 +115,7 @@ the fix landed), **open**, **deferred** (design decision recorded, not scheduled
 | M10 | Low | Orders.kt, orders.rs | Pool-sighted orders promoted without the second opinion | **fixed** (6f3d4e9c) |
 | M11 | Low | Ceremony.kt | Consent TOCTOU on a superseding proposal | **fixed** (e2ab23c6): the tap carries the displayed figure and a digest |
 | M12 | Low | Publications.kt | An ask can be billed twice by two polls | **fixed 2026-09-14** — a subscriber's bill is claimed inside one edit before it goes and released if it does not, and the desk holds a lock per publication and period; the send-intent contract, applied to a bill |
-| M13 | Low | Orders.kt | A code paid after expiry lands unmatched | **open** |
+| M13 | Low | Orders.kt | A code paid after expiry lands unmatched | **fixed 2026-09-14** — an abandoned order stays matchable for a day, so a late payer's money finds what they ordered; the match is still the exact amount on the order's own subaddress |
 | M14 | Info | core/ | Part IV (`fast/1`, bonds, slash claims, market arbiter set) exists only in core | **open** — see research/post-1.0/TRUST.md |
 | M15 | Info | pay.rs vs ui/Pay.kt; contacts.rs vs ContactStore.kt | Client divergences: bill payto vs contact address; receipt dedupe order | **open** |
 | M16 | Info | catalogue.rs | Unchecked multiply in `parse_money` | **fixed** in tree |

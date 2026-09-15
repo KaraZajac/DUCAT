@@ -502,7 +502,7 @@ object Orders {
         // notice names, which is exact, rather than by an amount that has to
         // be tagged with noise to be told apart at all.
         val waiting = everything.filter {
-            it.state == State.Awaiting && it.tabId == null && it.address.isNotEmpty()
+            stillPayable(it, System.currentTimeMillis() / 1000 - REVIVE_WITHIN_SECS)
         }
         if (waiting.isEmpty()) return
         val spend = WalletStore(context).spendKeyHex() ?: return
@@ -563,6 +563,25 @@ object Orders {
      * that walked away until somebody force-stopped the app.
      */
     private const val ABANDON_AFTER_SECS = 30L * 60
+
+    /**
+     * How long after a kiosk order is abandoned its money can still find it
+     * (M13). Somebody who queued, walked off and paid an hour later has paid;
+     * the money arrives either way, and the choice is only whether it arrives
+     * attached to what they ordered or as a stranger's payment nobody can
+     * explain. The match is exact — the order's own amount, on the order's
+     * own subaddress — so reviving one says nothing a fresh sighting would.
+     */
+    private const val REVIVE_WITHIN_SECS = 24L * 60 * 60
+
+    /** An order whose money would still find it. Never one already on a tab:
+     *  that money has its own home. */
+    private fun stillPayable(o: Order, reviveFrom: Long): Boolean =
+        o.tabId == null && o.address.isNotEmpty() && when (o.state) {
+            State.Awaiting -> true
+            State.Abandoned -> o.placedAt >= reviveFrom
+            else -> false
+        }
 
     /** Give up on the ones nobody paid, so the till stops looking for them. */
     fun expire(context: Context) {
@@ -641,7 +660,7 @@ object Orders {
         // subaddress — another customer's bar bill confirmed kiosk order #7
         // and the goods left the counter.
         val waiting = everything.filter {
-            it.state == State.Awaiting && it.tabId == null && it.address.isNotEmpty()
+            stillPayable(it, System.currentTimeMillis() / 1000 - REVIVE_WITHIN_SECS)
         }
         if (waiting.isEmpty()) return
         val ours = wallet.ourTxids()
