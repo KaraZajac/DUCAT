@@ -32,16 +32,33 @@ impl App {
             return;
         }
         let ours = self.our_txids();
-        let mut received: HashMap<String, u64> = HashMap::new();
-        for e in self.entries().into_iter().filter(|e| !e.tx_hash_hex.is_empty()) {
-            let id = e.tx_hash_hex.to_lowercase();
-            if ours.contains(&id) {
-                continue;
-            }
-            *received.entry(id).or_insert(0) += e.amount_pxmr;
-        }
         let done = self.donations_receipted();
         for donor in donors {
+            // Whose money was it? (M7.) A notice names a transaction, and a
+            // notice is the donor's word — so until now a "donor" could point
+            // at any transaction this wallet had ever received, including
+            // somebody else's, and be given the tax receipt for it. A donate
+            // card allocates its own subaddress, so when it has one the money
+            // must have landed *there*. A card issued before addresses were
+            // published has none, and that case is left as it was rather than
+            // silently stopping a charity that already works.
+            let minor = self
+                .issued_cards()
+                .into_iter()
+                .find(|c| c.answered_by.as_deref() == Some(donor.persona_hex.as_str()) && c.purpose == "donate")
+                .and_then(|c| self.store(CONTACTS).get::<u64>(&format!("sub_minor_card_{}", c.inbox_key)))
+                .filter(|m| *m != 0);
+            let mut received: HashMap<String, u64> = HashMap::new();
+            for e in self.entries().into_iter().filter(|e| !e.tx_hash_hex.is_empty()) {
+                let id = e.tx_hash_hex.to_lowercase();
+                if ours.contains(&id) {
+                    continue;
+                }
+                if minor.map_or(false, |m| e.minor as u64 != m) {
+                    continue;
+                }
+                *received.entry(id).or_insert(0) += e.amount_pxmr;
+            }
             for m in self.thread(&donor.persona_hex) {
                 if m.outgoing || m.kind != 2 || m.re_seq.is_some() {
                     continue;

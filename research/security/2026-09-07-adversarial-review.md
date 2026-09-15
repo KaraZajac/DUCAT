@@ -109,7 +109,7 @@ the fix landed), **open**, **deferred** (design decision recorded, not scheduled
 | M4 | High | ui/Chat.kt, Ceremony.kt | The arbiter signs the proposer's payload while shown only the proposer's claim | **fixed** (e2ab23c6): every parsed output listed with its attribution, approval bound to what was printed; an unplaceable payout warns rather than refuses until the payee's address rides the round-0 frame |
 | M5 | Medium | Ceremony.kt | The joining party adopts the inviter's fare, stakes and funder index unchecked | **fixed** (e2ab23c6) |
 | M6 | Medium | Ledger.kt, ContactStore.kt, ledger.rs | Any contact can relabel, itemise and "tax" a row of the merchant's statement | **open** |
-| M7 | Medium | Donations.kt, donations.rs | A donation receipt is issued for any transaction the wallet received | **open** |
+| M7 | Medium | Donations.kt, donations.rs | A donation receipt is issued for any transaction the wallet received | **fixed 2026-09-14** — a donation is receipted only when the money landed on the subaddress that donate card allocated; a card with none (issued before addresses were published) is left as it was rather than silently breaking a working charity |
 | M8 | Medium | ContactStore.kt, backup.rs, Ledger.kt | Restore loses send records; spends become epoch-dated "unexplained" rows | **fixed 2026-09-14** — `wallet_sends` rides the bundle on both clients; round-tripped by the desk test and the shim's backuptest |
 | M9 | Medium | ui/Pay.kt, Pin.kt | Stale-rate rule and payer verification policy not applied | **open** |
 | M10 | Low | Orders.kt, orders.rs | Pool-sighted orders promoted without the second opinion | **fixed** (6f3d4e9c) |

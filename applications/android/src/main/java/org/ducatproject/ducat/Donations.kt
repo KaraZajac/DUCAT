@@ -69,12 +69,26 @@ object Donations {
         if (donors.isEmpty()) return
         // What the wallet actually holds, by the transaction that brought it.
         val ownTxids = WalletStore(context).ourTxids()
-        val received = WalletStore(context).entries()
+        val all = WalletStore(context).entries()
             .filter { it.txHashHex.isNotEmpty() }
             .filterNot { it.txHashHex.lowercase() in ownTxids }
-            .groupBy { it.txHashHex.lowercase() }
         val done = receipted(context)
         for (donor in donors) {
+            // Whose money was it? (M7.) A notice names a transaction, and a
+            // notice is the donor's word — so until now a "donor" could point
+            // at any transaction this wallet had ever received, including
+            // somebody else's, and be given the tax receipt for it. A donate
+            // card allocates its own subaddress, so when it has one the money
+            // must have landed *there*. A card issued before addresses were
+            // published has none, and that case is left as it was rather than
+            // silently stopping a charity that already works.
+            val minor = store.issuedCards()
+                .firstOrNull { it.answeredBy == donor.personaHex && it.purpose == "donate" }
+                ?.let { WalletStore(context).minorOf("card_${it.inboxKey}") }
+                ?.takeIf { it != 0 }
+            val received = all
+                .filter { minor == null || it.minor == minor }
+                .groupBy { it.txHashHex.lowercase() }
             for (m in store.thread(donor.personaHex)) {
                 // Their payment notice (§16.13, kind 2): advisory, verified
                 // by finding the output it names. Unprompted only — a notice
