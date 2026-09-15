@@ -276,7 +276,43 @@ object Wallet {
             // recordSpent leaves out whatever it is not told about, so telling
             // it only about the ones the chain confirms is the whole fix.
             val chainSpent = entries.map { it.keyImage }.zip(spent)
-                .filter { (_, gone) -> gone }.map { (ki, _) -> ki }.toSet()
+                .filter { (_, gone) -> gone }.map { (ki, _) -> ki }.toMutableSet()
+            // One node's word writes a note off for good, and a note written
+            // off is money this wallet stops being able to see (N19). Our own
+            // sends explain most spends and need no second node; an
+            // *unexplained* new one — somebody else spending our output — is
+            // either a lost send record or a lying node, and a second node
+            // decides which. If none answers, the first node's word stands,
+            // because a note held unspent forever is its own kind of wrong;
+            // the log says it happened.
+            val known = entries.filter { it.spent }.map { it.keyImage }.toSet()
+            val ours = store.ourSpentKeyImages()
+            val unexplained = chainSpent.filter { it !in known && it !in ours }
+            if (unexplained.isNotEmpty()) {
+                var asked = false
+                val store2 = NodeStore(context)
+                val others = runCatching {
+                    uniffi.ducat_mobile.moneroSecondOpinionNodes(
+                        store2.lastGood()?.trim()?.ifBlank { null },
+                        store2.ownUrl()?.trim()?.ifBlank { null },
+                    ).map { it.url }
+                }.getOrDefault(emptyList())
+                for (other in others) {
+                    val second = runCatching { moneroSpent(other, unexplained) }.getOrNull() ?: continue
+                    if (second.size != unexplained.size) continue
+                    asked = true
+                    unexplained.zip(second).forEach { (ki, agrees) ->
+                        if (!agrees) {
+                            DucatLog.w(TAG, "$nodeUrl calls a note spent that $other does not — held")
+                            chainSpent.remove(ki)
+                        }
+                    }
+                    break
+                }
+                if (!asked) {
+                    DucatLog.w(TAG, "${unexplained.size} note(s) written off on one node's word — no second node answered")
+                }
+            }
             store.recordSpent(chainSpent.associateWith { true })
             val chainAnswered = entries.map { it.keyImage }.toSet()
             // Dangling send intents get their verdict here, from the chain,

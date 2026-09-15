@@ -3081,6 +3081,11 @@ class WalletStore(context: Context) {
      */
     fun ourTxids(): Set<String> = sends().map { it.txidHex.lowercase() }.toSet()
 
+    /** Key images this wallet itself committed — spends that need no second
+     *  node to explain them (N19). */
+    fun ourSpentKeyImages(): Set<String> =
+        (sends().flatMap { it.keyImages } + sendIntents().flatMap { it.keyImages }).toSet()
+
     fun sends(): List<SentPayment> {
         val arr = JSONArray(prefs.getString("wallet_sends", "[]"))
         return (0 until arr.length()).map {

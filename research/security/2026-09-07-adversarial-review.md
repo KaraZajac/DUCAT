@@ -96,7 +96,7 @@ the fix landed), **open**, **deferred** (design decision recorded, not scheduled
 | N16 | Medium | monero.rs, opinion.rs, SecondOpinion.kt | Sends broadcast to five clearnet nodes even with an own node | **partial** (desk honours the own node; relay list still fans out) |
 | N17 | Medium | app/src/publications.rs | Shelf index drives unbounded reads and memory | see W18 |
 | N18 | Medium | stigmerge fetcher.rs, swarm.rs | No strike cap; a moving attempt resets the stall budget | **fixed** (ab3aba7d): strikes, and a minimum-throughput rule instead of the reset |
-| N19 | Low/Med | Wallet2.kt, wallet.rs | One node's `is_key_image_spent` is final | **open** |
+| N19 | Low/Med | Wallet2.kt, wallet.rs | One node's `is_key_image_spent` is final | **fixed 2026-09-14** — our own sends explain their own spends; an unexplained one needs a second node before the note is written off, and when none answers the first node stands with a line in the log |
 | N20–N27 | Low/Info | | Beacon over one node; one-hop safety route; settlement at one confirmation (desk now scales confirmations); sender-named record deletion; group timestamps; stigmerge block bounds; bundle budgets; open-once registry ignores the writer | **open** |
 
 ## Money flows

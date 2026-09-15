@@ -14,7 +14,7 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Mutex;
 
 use ducat_mobile::monero::{
-    monero_default_nodes, monero_fee_estimate, monero_pick_node, monero_rate, monero_scan, monero_send_checked, monero_spent,
+    monero_default_nodes, monero_fee_estimate, monero_pick_node, monero_rate, monero_scan, monero_second_opinion_nodes, monero_send_checked, monero_spent,
     monero_subaddress, MoneroError, OwnedOutput, SendResult,
 };
 use serde::{Deserialize, Serialize};
@@ -560,7 +560,43 @@ impl App {
         let kis: Vec<String> = entries.iter().map(|e| e.key_image.clone()).collect();
         match monero_spent(node_url.to_string(), kis.clone()) {
             Ok(spent) => {
-                let chain_spent: HashSet<String> = kis.iter().zip(spent.iter()).filter(|(_, s)| **s).map(|(k, _)| k.clone()).collect();
+                let mut chain_spent: HashSet<String> = kis.iter().zip(spent.iter()).filter(|(_, s)| **s).map(|(k, _)| k.clone()).collect();
+                // One node's word writes a note off for good, and a note
+                // written off is money this wallet stops being able to see
+                // (N19). Our own sends explain most spends and need no second
+                // node; an *unexplained* new one — somebody else spending our
+                // output — is either a lost send record or a lying node, and
+                // a second node decides which. If none answers, the first
+                // node's word stands, because a note held unspent forever is
+                // its own kind of wrong; the log says it happened.
+                let known: HashSet<String> = entries.iter().filter(|e| e.spent).map(|e| e.key_image.clone()).collect();
+                let ours: HashSet<String> = self
+                    .sends()
+                    .into_iter()
+                    .flat_map(|s| s.key_images)
+                    .chain(self.send_intents().into_iter().flat_map(|i| i.key_images))
+                    .collect();
+                let unexplained: Vec<String> = chain_spent.iter().filter(|k| !known.contains(*k) && !ours.contains(*k)).cloned().collect();
+                if !unexplained.is_empty() {
+                    let mut asked = false;
+                    for n in monero_second_opinion_nodes(self.last_good_node(), self.monero_own_url()) {
+                        let Ok(second) = monero_spent(n.url.clone(), unexplained.clone()) else { continue };
+                        if second.len() != unexplained.len() {
+                            continue;
+                        }
+                        asked = true;
+                        for (k, agrees) in unexplained.iter().zip(second.iter()) {
+                            if !agrees {
+                                log::warn(TAG, format!("{} calls a note spent that {} does not — held", node_url, n.url));
+                                chain_spent.remove(k);
+                            }
+                        }
+                        break;
+                    }
+                    if !asked {
+                        log::warn(TAG, format!("{} note(s) written off on one node's word — no second node answered", unexplained.len()));
+                    }
+                }
                 let _ = self.record_spent(&chain_spent);
                 let answered: HashSet<String> = kis.into_iter().collect();
                 let now = App::now();
