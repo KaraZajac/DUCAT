@@ -28,6 +28,13 @@ const THUMB_BUDGET: usize = 160 * 1024;
 const FEEDS_EVERY_SECS: u64 = 10 * 60;
 /// Heads read side by side on a feeds lap.
 const FEED_WIDTH: usize = 8;
+/// The most homes one sweep refreshes (A11).
+///
+/// Hearting is free and a timeline can hold hundreds; every one of them is a
+/// DHT head read, and a sweep that reads them all spends its whole turn on
+/// reads before anything else on the lap gets a look in. The cursor rotates,
+/// so a home skipped this time is first next time and nobody starves.
+const FEEDS_PER_SWEEP: usize = 24;
 /// Posts kept in `feed.json` before the oldest move to an older page.
 const PAGE_KEEP: usize = 120;
 
@@ -337,7 +344,17 @@ impl App {
     /// a timeline of a few hundred homes must not take the whole of its
     /// ten-minute turn on reads alone.
     pub fn refresh_feeds(&self) -> usize {
-        let hearted = self.hearted();
+        let all = self.hearted();
+        // A rotating window rather than the whole timeline (A11). Kept in the
+        // store so it survives a restart: a cursor that resets to zero every
+        // launch refreshes the first two dozen for ever and nobody else.
+        let hearted: Vec<crate::contacts::Contact> = if all.len() <= FEEDS_PER_SWEEP {
+            all
+        } else {
+            let from = (self.store(crate::contacts::CONTACTS).get::<usize>("feed_cursor").unwrap_or(0)) % all.len();
+            let _ = self.store(crate::contacts::CONTACTS).put("feed_cursor", &((from + FEEDS_PER_SWEEP) % all.len()));
+            all.iter().cycle().skip(from).take(FEEDS_PER_SWEEP).cloned().collect()
+        };
         let mut fresh = 0;
         for chunk in hearted.chunks(FEED_WIDTH) {
             let moved: Vec<bool> = std::thread::scope(|s| {

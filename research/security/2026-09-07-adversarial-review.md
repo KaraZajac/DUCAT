@@ -64,7 +64,7 @@ the fix landed), **open**, **deferred** (design decision recorded, not scheduled
 | A8 | Medium | Geo.kt, HailMap.kt | Exact coordinates to OSRM and Nominatim; tile cache | **accepted** (stated in UI); project-run front later |
 | A9 | Medium (S) | SiteViewerActivity.kt, Galleries.kt, Home.kt | NUL byte in a bundle path throws outside any catch | **fixed** in tree (`Sites.insideRoot`) |
 | A10 | Medium | MainActivity.kt, ui/Library.kt | `ducat:file/` links filed without confirmation | **fixed** in tree |
-| A11 | Low/Med | Home.kt, Publications.kt | Unbounded work on the sweep (home bundles, shelf record lists) | **open** (with D2) |
+| A11 | Low/Med | Home.kt, Publications.kt | Unbounded work on the sweep (home bundles, shelf record lists) | **fixed 2026-09-14** — a sweep refreshes at most 24 homes through a rotating cursor kept in the store, so a timeline of hundreds costs one turn and nobody starves; the shelf half is W18, and the byte caps are D2 |
 | A12 | Low | RideStore.kt | Hail state in plain prefs | **fixed** in tree |
 | A13 | Low | Pin.kt, ui/PinGate.kt | Missing PIN file reads as "no PIN yet" | **fixed** in tree (wallet present + no verifier = tampered, device credential required) |
 | A14 | Low | ui/QrHub.kt, ui/NfcReader.kt | NFC card on a scan screen claimed with no name shown | **fixed** in tree (confirm with the name) |

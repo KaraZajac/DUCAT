@@ -249,7 +249,21 @@ object Home {
         // depending on the network, and a timeline of a few hundred homes
         // must not take the whole of its ten-minute turn on reads alone.
         var fresh = 0
-        for (chunk in hearted(context).chunked(FEED_WIDTH)) {
+        // A rotating window rather than the whole timeline (A11). Hearting is
+        // free and a timeline can hold hundreds; every one is a DHT head read,
+        // and a sweep that reads them all spends its whole turn on reads. The
+        // cursor is kept in prefs so it survives a restart: one that reset to
+        // zero every launch would refresh the first two dozen for ever.
+        val all = hearted(context)
+        val window = if (all.size <= FEEDS_PER_SWEEP) {
+            all
+        } else {
+            val prefs = securePrefs(context, "ducat_contacts")
+            val from = Math.floorMod(prefs.getInt("feed_cursor", 0), all.size)
+            prefs.edit().putInt("feed_cursor", (from + FEEDS_PER_SWEEP) % all.size).apply()
+            List(FEEDS_PER_SWEEP) { all[(from + it) % all.size] }
+        }
+        for (chunk in window.chunked(FEED_WIDTH)) {
             val tasks = chunk.map { c -> java.util.concurrent.Callable<Boolean> { refreshOneFeed(context, c) } }
             for (f in feedPool.invokeAll(tasks)) if (runCatching { f.get() }.getOrDefault(false)) fresh++
         }
@@ -269,6 +283,10 @@ object Home {
     }
 
     private const val FEED_WIDTH = 4
+
+    /** The most homes one sweep refreshes (A11). A home skipped this time is
+     *  first next time, so nobody starves. */
+    private const val FEEDS_PER_SWEEP = 24
     private val feedPool: java.util.concurrent.ExecutorService by lazy {
         java.util.concurrent.Executors.newFixedThreadPool(FEED_WIDTH) { r ->
             Thread(r, "feed-heads").apply { isDaemon = true }
