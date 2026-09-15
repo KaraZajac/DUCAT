@@ -890,10 +890,15 @@ private fun SpendLimitSetting() {
                 // button on a drawer section, and a limit that is only saved
                 // when the user happens to leave by the right door is a
                 // setting they will believe they changed.
-                org.ducatproject.ducat.SpendGate.setPinAbove(
-                    context,
-                    (cleaned.toLongOrNull() ?: 0L) * 100,
-                )
+                //
+                // An **empty** box saves nothing, though. Clearing it to
+                // retype would otherwise pass through zero, and zero here
+                // means "ask for the PIN on everything" — a stricter phone
+                // than the user chose, arrived at by a keystroke they were
+                // in the middle of, with nothing on screen saying so.
+                cleaned.toLongOrNull()?.let {
+                    org.ducatproject.ducat.SpendGate.setPinAbove(context, it * 100)
+                }
             },
             label = { Text(stringResource(R.string.drawer_spend_limit_label, currency)) },
             singleLine = true,

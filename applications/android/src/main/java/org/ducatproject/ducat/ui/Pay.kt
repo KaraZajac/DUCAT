@@ -1324,7 +1324,15 @@ private fun AmountStep(
                 // the frame that has to draw the dialog closing.
                 busy = true
                 gateScope.launch {
-                    val d = withContext(Dispatchers.IO) { SpendGate.decide(context, pxmr) }
+                    // A gate that throws must fall to the *strict* side and
+                    // say so. Leaving `busy` true would wedge the sheet with
+                    // no error and no payment, which reads as the app having
+                    // quietly eaten a tap — the exact failure the latch above
+                    // was written for, one layer up.
+                    val d = withContext(Dispatchers.IO) {
+                        runCatching { SpendGate.decide(context, pxmr) }
+                            .getOrElse { SpendGate.Decision.AskPin(R.string.pin_ask_body) }
+                    }
                     busy = false
                     when (d) {
                         is SpendGate.Decision.Allow -> doSend()
