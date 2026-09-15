@@ -1,10 +1,14 @@
 # Adversarial review: what to attack, and what it is worth
 
-DUCAT's own specification says, in §2.5, that it has had **no adversarial
-review whatsoever**. That sentence has been true since draft 0.82 and it is
-the last honest blocker to calling anything 1.0. This document is what a
-reviewer needs so that their time goes into the protocol rather than into
-orientation.
+DUCAT's own specification says, in §2.5, that it has had **no review by
+anyone outside the project**. That is still true and it is the last honest
+blocker to calling anything 1.0. What has happened since is an *internal*
+adversarial pass over five surfaces
+([`research/security/2026-09-07-adversarial-review.md`](../research/security/2026-09-07-adversarial-review.md)),
+which found forty-odd things and closed most of them. A review by the people
+who wrote it tells you what they thought to look at; that ledger is in the
+repository so your time goes somewhere else. This document is the rest of
+the orientation.
 
 It is written to be handed over. If you are that reviewer: everything below
 is a claim we are asking you to break, not a description we are asking you to
@@ -28,7 +32,8 @@ threshold escrow (FROST) for bonded rides and reservations.
 | The specification | [`ducat-protocol.md`](../ducat-protocol.md) | The normative document. 1.0.0-rc1, feature-frozen. Changelog first. |
 | Reference implementation | [`core/`](../core) | Rust. The vectors are generated from it. |
 | Conformance vectors | [`vectors/v1/`](../vectors/v1) | 442 cases + schema — the published artifact. |
-| Second implementation | [`conformance/ducat_check.py`](../conformance/ducat_check.py) | An independent reading of the spec, in Python. It agrees on all 345. |
+| Second implementation | [`conformance/ducat_check.py`](../conformance/ducat_check.py) | An independent reading of the spec, in Python. It agrees on all 442. |
+| Internal review ledger | [`research/security/`](../research/security) | What we already attacked, what we fixed, and what is still open. Start here to avoid repeating it. |
 | Spec audit | [`conformance/audit_spec.py`](../conformance/audit_spec.py) | Catches prose that stopped describing the code. |
 | Clients | [`applications/`](../applications) | Android + desktop, one shared implementation. |
 | Wire bridge | [`mobile/`](../mobile) | UniFFI wrapper. Adds no logic, by rule. |
@@ -78,7 +83,30 @@ confusion (an output credited to the wrong person), a bill whose lines do not
 sum to its total, a receipt that acknowledges a transaction that did not
 happen, change shown as income.
 
-**5. The stewardship claims (§18.7).** No protocol fees, no node payment,
+**5. Costly identity (§9.5, §9.2).** The answer to "a persona is free to
+mint" is a **proof of burn**: XMR sent to an unspendable address, proved to a
+reader with a Monero out-proof and carried as a signed `BURN_PROOF` under the
+persona. On top of it sit rated receipts (`ATTESTATION`) and vouches
+(`VOUCH`), all weighed by the *reader* alone — one voice per signer, weighted
+only by signers whose burn that reader verified itself, and a vouch counted
+only when its signer is already one of the reader's own contacts. Nothing is
+published and nothing is aggregated. Attack: a burn proof that does not
+prove what it claims, a proof replayed under a second persona, an attestation
+lifted out of one thread into another, a reader that can be made to count a
+stranger's vouch or its own, and the economics — what does it actually cost
+to farm a plausible history, and is the seller's minimum (`min_burn`, field
+320) a wall or a speed bump?
+
+**6. Payer verification (§15.5.1).** Whether the person holding the phone is
+entitled to spend at all — the question WYSIWYS never asks. Every payment
+wants a device unlocked inside a two-minute window; above a user-set
+threshold the app's own PIN, every time. None of it touches the wire.
+Attack: any path to a spend that skips the gate, the Android keystore binding
+behind the unlock window, the rolling-hour counter, and the escalation rule
+for a stale exchange rate (§17.7) — an attacker who can stall a rate feed
+must not be able to *lower* the requirement.
+
+**7. The stewardship claims (§18.7).** No protocol fees, no node payment,
 every client a full participant. These are conformance requirements, not
 license terms. Tell us if the protocol as written permits a client to defect
 profitably.
@@ -113,10 +141,20 @@ Reviewing this list back to us is not useful; breaking something *not* on it is.
   write with no valid stamp still occupies a DHT subkey; the stamp prices
   readable spam, not availability. Weekly board-generation rotation is the
   only answer, and it costs an attacker only 128 writes a week to defeat.
-- **No sybil cost on identities.** A persona and a per-listing key are both
-  free to mint from a hash, so every board defence is a throughput speed
-  bump, never a wall. The §9.2 reputation weight that would anchor this to
-  proximity is designed but unbuilt.
+- **Sybil cost is now optional, not structural.** §9.5's proof of burn makes
+  an identity cost real money and §9.2's vouches anchor it to people the
+  reader already met — both built and walked on stagenet — but neither is
+  *required* to post. A persona and a per-listing key are still free to mint
+  from a hash, so a board defence is still a throughput speed bump; what
+  changed is that a reader can now price the difference. Tell us whether
+  "burn to be taken seriously" survives contact with somebody who wants to
+  farm it.
+- **The desk has no second factor.** §15.5.1's spend gate runs on the phone
+  and cannot run on the desk, which has no device credential and no secret of
+  its own — so anyone at an unlocked laptop can spend the desk's wallet. It
+  is stated in the spec and tracked as D11 rather than quietly absent.
+- **The trust layer has no adversarial pass of its own.** The five-surface
+  review predates it.
 - One stated privacy trade: address search, routing and map tiles query
   OpenStreetMap's servers — the single place location leaves the device.
 

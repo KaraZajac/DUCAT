@@ -242,7 +242,7 @@ Four rules in this document are the direct countermeasures, and this is the evid
 Two lessons that outlive the patch:
 
 - **Peer addresses must never be learned from unauthenticated messages.** Any party whose identity matters is pinned by key, in a signed object, before the exchange begins. If a message can change who you are talking to, it can change who you are paying.
-- **Maturity is not protection.** Haveno had years of development, a live user base, and a prior exploit to learn from, and was breached again. This document's arbitration and multisig surface is comparable in complexity and has had **no adversarial review whatsoever**. Nothing here should hold anyone's money until that changes.
+- **Maturity is not protection.** Haveno had years of development, a live user base, and a prior exploit to learn from, and was breached again. This document's arbitration and multisig surface is comparable in complexity and has had **no review by anyone outside the project**. An internal adversarial pass over five surfaces was run on 2026-09-07 (`research/security/2026-09-07-adversarial-review.md`) and most of what it found has been fixed; that is worth something and is not the thing this paragraph is asking for. A review by the people who wrote it tells you what they thought to look at. Nothing here should hold anyone's money until an outsider has tried.
 
 ---
 

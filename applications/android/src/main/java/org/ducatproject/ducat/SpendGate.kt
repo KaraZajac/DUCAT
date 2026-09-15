@@ -94,12 +94,19 @@ object SpendGate {
         val p = policy(context)
         val now = System.currentTimeMillis() / 1000
         val kept = spends(context, now, p.cumulativeWindowS.toLong()) + (now to minorUnits)
-        val arr = org.json.JSONArray()
-        kept.takeLast(200).forEach { (at, amt) ->
-            arr.put(org.json.JSONObject().put("at", at).put("m", amt))
-        }
-        prefs(context).edit().putString("spend_window", arr.toString()).apply()
+        prefs(context).edit().putString("spend_window", encode(kept.takeLast(200))).apply()
     }
+
+    /**
+     * `when:howmuch` pairs, comma separated.
+     *
+     * Not JSON, though it was: `org.json` on a plain JVM is the stub in
+     * `android.jar`, whose every method throws "not mocked", so a store
+     * format built on it cannot be tested without a device. This one is two
+     * integers and a punctuation mark, which is all the window ever held.
+     */
+    internal fun encode(rows: List<Pair<Long, Long>>): String =
+        rows.joinToString(",") { (at, m) -> "$at:$m" }
 
     /** What has been spent inside the window, in minor units. */
     fun spentInWindow(context: Context): Long {
@@ -108,21 +115,31 @@ object SpendGate {
         return spends(context, now, p.cumulativeWindowS.toLong()).sumOf { it.second }
     }
 
-    private fun spends(context: Context, now: Long, windowS: Long): List<Pair<Long, Long>> {
-        val raw = prefs(context).getString("spend_window", null) ?: return emptyList()
-        val arr = runCatching { org.json.JSONArray(raw) }.getOrNull() ?: return emptyList()
-        val out = ArrayList<Pair<Long, Long>>(arr.length())
-        for (i in 0 until arr.length()) {
-            val o = arr.optJSONObject(i) ?: continue
-            val at = o.optLong("at")
-            // A stamp from the future is a phone whose clock moved, and
-            // counting it would hold the window open indefinitely. Dropped,
-            // the same way a stale rate stamp is disbelieved.
-            if (at > now + 60 || now - at > windowS) continue
-            out.add(at to o.optLong("m"))
+    private fun spends(context: Context, now: Long, windowS: Long): List<Pair<Long, Long>> =
+        inWindow(prefs(context).getString("spend_window", null), now, windowS)
+
+    /**
+     * The window's arithmetic, with no `Context` in it so it can be tested.
+     *
+     * Two things are dropped. A stamp older than the window, obviously — the
+     * window slides or it is not a window. And a stamp from the **future**,
+     * which is a phone whose clock was moved: counting one would hold the
+     * hour open indefinitely and lock every later payment behind a PIN with
+     * nothing on screen to explain why. The same disbelief `RateStore.isStale`
+     * already applies to a rate stamped ahead of now, and the same minute of
+     * slack, because clocks disagree by seconds all the time.
+     */
+    internal fun inWindow(raw: String?, now: Long, windowS: Long): List<Pair<Long, Long>> {
+        if (raw.isNullOrBlank()) return emptyList()
+        return raw.split(',').mapNotNull { row ->
+            val at = row.substringBefore(':', "").toLongOrNull() ?: return@mapNotNull null
+            val m = row.substringAfter(':', "").toLongOrNull() ?: return@mapNotNull null
+            if (at > now + FUTURE_SLACK_SECS || now - at > windowS) null else at to m
         }
-        return out
     }
+
+    /** How far ahead of now a stamp may sit before it is disbelieved. */
+    private const val FUTURE_SLACK_SECS = 60L
 
     /**
      * Piconero as the user's own money, in minor units, or zero when there is

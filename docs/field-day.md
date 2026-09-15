@@ -12,9 +12,13 @@ network and stagenet; there is no lab setup to carry.
 ## Before leaving the desk
 
 1. **Cut a fresh release first** (`./release.sh` from master) — the latest
-   tag predates draft 0.89, and a 0.88 phone cannot read a 0.89 board at
-   all (the stamp fields are unknown to its strict reader; both directions
-   refuse by design). Then install on both phones — phone browser:
+   tag predates the draft this document describes, and a phone one draft
+   behind cannot read the newer boards at all (the stamp fields are unknown
+   to its strict reader; both directions refuse by design). Note that A2 is
+   still open: what `release.sh` publishes is the **debug** build, signed
+   with a debug key, and the signing question is unsettled — so do not
+   re-tag on the strength of this list alone. Then install on both phones
+   — phone browser:
    `https://github.com/KaraZajac/DUCAT/releases/latest/download/app-arm64-v8a-debug.apk`
 2. Onboard both; **name them differently** (two contacts with the same
    display name has burned us — threads get opened on the wrong person).
@@ -77,6 +81,23 @@ The §15 core gesture. Compile-verified only; assume nothing.
   confirm screen MUST appear — a tap must never move money by itself. If
   it pays without the confirm, that is a release-blocking bug; stop and
   write down everything.
+- **The card is served only while unlocked** (A3, since 2026-09-14). With
+  phone 1's screen locked, bring phone 2's reader to it: nothing should
+  cross. Unlock and retry. A pocketed phone that still hands over its
+  standing card is a release-blocking bug.
+- **The spend gate** (§15.5.1, since 2026-09-15). Three things to try, in
+  this order, because each is a different rung:
+  1. A small payment on a phone unlocked seconds ago — **no PIN**. That is
+     the whole point of the rung; a gate on every coffee is a gate people
+     learn to tap through.
+  2. Lock the phone, wait past two minutes, unlock, wait again *without*
+     unlocking, then pay — the PIN should be asked. The window is a
+     keystore key bound to a recent authentication, so this is the one
+     rung that cannot be checked on an emulator with a swipe lock.
+  3. A payment over the limit in drawer → Profile → Spending — the PIN,
+     **every time**, including twice in a row. Set the limit low (say 1)
+     so this does not need real money.
+  A phone with no secure lock screen should ask for the PIN on all three.
 - **NDEF sticker** (if one was written): tap it, expect the `ducat:` link
   to open the claim flow.
 - Record tap-to-read latency by feel (instant / a beat / retries). §8.7.2's
@@ -94,14 +115,26 @@ Real GPS at last (the emulator's `geo fix` lied to us; a real phone won't).
    a pause here is the search, not a hang.
 2. Phone 2 (driver): Drive mode, watch the live map, find the notice,
    read the job card (pickup distance, trip, payout), claim it.
-3. Rider sees the acceptance with the driver's face/car/plate; driver
+   **The notice must carry no name** (§16.17, since 2026-09-15) — the
+   board says an area, two cells, a fare and a persona, and nothing else.
+   A rider's name visible to a driver who has not claimed is a
+   release-blocking bug; so is one visible on the *board* to a third phone
+   reading the same cell, which is worth a look if a third handset is
+   about.
+3. On the claim, three things should arrive in the rider's thread, in
+   order: an **introduction** (the rider's name and picture — the driver's
+   contact reads "Unnamed contact" until it lands, which is correct, not a
+   fault), then the precise pickup, then the precise destination. Proven
+   desk to desk on 2026-09-15; this is its first run on handsets. Check
+   the driver's contact list afterwards: the rider should be named there.
+4. Rider sees the acceptance with the driver's face/car/plate; driver
    drives (walk it), meter runs, geofenced bill fires on arrival.
    **Tap "Share my position" on both** once the ride is accepted — it
    only appears after the accept, by design, and it runs while the chat
    screen is open. Leave one phone's screen on and pocket the other; the
    watching side should say "last seen N seconds ago" rather than draw a
    dot that keeps moving.
-4. Pay with tip. Receipt lands on both. Record every message that needed
+5. Pay with tip. Receipt lands on both. Record every message that needed
    a retry — on emulators the boards were slow; real-network numbers are
    wanted here.
 
@@ -251,3 +284,12 @@ Screen-on time will dominate — note it so the number is honest.
 - If read receipts are wanted for the day, flip **Send read receipts** on
   both phones at setup — ✓ is delivered, ✓✓ is read, and the second tick
   is the §16.16 watermark doing its job across the DHT.
+- **A card cut for a board carries no name** (§16.17, 2026-09-15). That is
+  a hail's card today. It means a newly claimed hail thread shows
+  "Unnamed contact" on the driver's phone for a few seconds until the
+  rider's introduction lands — which looks exactly like a bug and is the
+  feature. If it never becomes a name, *that* is the bug.
+- **The spend gate can look like a regression.** Payments under the
+  limit no longer ask for the PIN (§15.5.1, 2026-09-15); that is the
+  intended shape, not a gate that stopped working. Above the limit it
+  asks every time, including twice in a row for the same amount.
