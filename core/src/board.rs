@@ -506,6 +506,18 @@ pub enum BeaconVerdict {
 /// honest one from a node slightly ahead, and writing over it would do the
 /// damage this exists to prevent.
 #[must_use]
+/// **Why no client calls this** (W20, answered 2026-09-14). The rule it
+/// states is shared — `beacon_in_window` is called by the bridge at decode
+/// time, on both clients' behalf, which is where the window half belongs.
+/// What a client cannot do is call *this*: between "is it in the window" and
+/// "does that height carry that hash" sits a network round trip to a Monero
+/// node, and since the second review a second node's agreement before a
+/// notice is discarded. A pure function cannot hold a round trip in its
+/// middle, so each client wraps the window check with its own asking and
+/// names the three answers its own way — `Show`/`Hold`/`Refuse` here,
+/// `Confirmed`/`Unknown`/`Wrong` on the desk. This stays as the statement of
+/// the rule in one piece, and as what a third implementation should read
+/// first.
 pub fn beacon_verdict(
     beacon: &Beacon,
     tip_height: u64,
