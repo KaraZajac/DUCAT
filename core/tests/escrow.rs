@@ -151,6 +151,7 @@ fn claim(reason: SlashReason, key_image: Option<[u8; 32]>, ab: &[u8], rb: &[u8])
         key_image,
         claim_pxmr: FARE,
         timestamp: T0 + 100,
+        claimant: vec![0x5C; 32],
     }
 }
 
@@ -532,4 +533,21 @@ fn a_bond_smaller_than_the_fare_is_no_protection() {
         check_bond_proof(&b, 50_000_000_000, T0, 300, &sets()).unwrap_err().code,
         RejectCode::InsufficientCapacity
     );
+}
+
+/// §17.5 (W17): an arbiter reads a claim out of a transport that may not say
+/// who sent it, and a payout goes to somebody. The claim names them.
+#[test]
+fn a_claim_names_who_is_claiming() {
+    let (_, ab) = accept_pair();
+    let (_, rb) = receipt_pair(&ab);
+    let c = claim(SlashReason::CureWindowExpired, None, &ab, &rb);
+    assert_eq!(SlashClaim::from_value(c.to_value()).unwrap(), c);
+    let nobody = SlashClaim { claimant: vec![0u8; 32], ..c.clone() };
+    assert!(SlashClaim::from_value(nobody.to_value()).is_err(), "all zeroes is nobody");
+    let mut bare = c.to_value();
+    if let ducat_core::cbor::Value::Map(m) = &mut bare {
+        m.remove(&ducat_core::wire::f::SLC_CLAIMANT);
+    }
+    assert!(SlashClaim::from_value(bare).is_err(), "a claim with no claimant at all");
 }

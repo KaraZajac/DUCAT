@@ -1259,6 +1259,7 @@ fn object_cases() -> Vec<J> {
         txid: [0x77; 32], reason: SlashReason::ConflictingKeyImage,
         key_image: Some([0x5A; 32]),
         claim_pxmr: 21_000_000_000, timestamp: 1_800_000_100,
+        claimant: vec![0x5C; 32],
     };
     let claim_cure = SlashClaim { reason: SlashReason::CureWindowExpired, key_image: None, ..claim.clone() };
     let setup = EscrowSetup {

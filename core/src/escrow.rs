@@ -257,6 +257,11 @@ pub struct SlashClaim {
     pub key_image: Option<[u8; 32]>,
     pub claim_pxmr: u64,
     pub timestamp: u64,
+    /// Who is claiming (§17.5). An arbiter reads a claim out of a transport
+    /// that may not say who sent it, and a payout goes to somebody: the
+    /// claim names them inside the bytes it is judged on, so a claim lifted
+    /// out of one thread and filed in another still says whose it is.
+    pub claimant: Vec<u8>,
 }
 
 impl SlashClaim {
@@ -274,6 +279,7 @@ impl SlashClaim {
         }
         m.insert(f::SLC_AMOUNT, Value::Uint(self.claim_pxmr));
         m.insert(f::SLC_TS, Value::Uint(self.timestamp));
+        m.insert(f::SLC_CLAIMANT, Value::Bytes(self.claimant.clone()));
         Value::Map(m)
     }
 
@@ -313,8 +319,12 @@ impl SlashClaim {
             key_image,
             claim_pxmr: r.uint(f::SLC_AMOUNT)?,
             timestamp: r.uint(f::SLC_TS)?,
+            claimant: r.bytes(f::SLC_CLAIMANT, Some(32))?,
         };
         r.finish()?;
+        if out.claimant.iter().all(|b| *b == 0) {
+            return Err(Reject::with_detail(RejectCode::Malformed, "a claim names who is claiming"));
+        }
         Ok(out)
     }
 }

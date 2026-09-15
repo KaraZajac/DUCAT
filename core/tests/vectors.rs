@@ -1105,6 +1105,7 @@ fn contract_vectors_pass() {
                         .map(|k| unhex(k).try_into().unwrap()),
                     claim_pxmr: c["claim_pxmr"].as_u64().unwrap(),
                     timestamp: 1_800_000_100,
+                    claimant: vec![0x5C; 32],
                 };
                 let got = check_slash_claim(
                     &claim, &accept, &accept_bytes, &receipt, &receipt_bytes,

@@ -32,7 +32,7 @@ the fix landed), **open**, **deferred** (design decision recorded, not scheduled
 | W14 | Low | core/src/wire.rs | `wire::open` verifies only object types 1–12 | **fixed 2026-09-14** — `type_from_code` decodes every registered code |
 | W15 | Low | core/src/state.rs | The 120 s contact window is not held by the state machine | **open** |
 | W16 | Low | §15.3.2 | "offer_commit is necessarily empty" has no wire meaning | **open** |
-| W17 | Low (S) | core/src/escrow.rs | `SLASH_CLAIM` does not name the claimant | **open** |
+| W17 | Low (S) | core/src/escrow.rs | `SLASH_CLAIM` does not name the claimant | **fixed 2026-09-14** — `SLASH_CLAIM` carries `claimant` (321), required, thirty-two bytes, all zeroes refused; §17.5 and the registry say so, with a test |
 | W18 | Low | app/src/publications.rs | Shelf index may promise any number of chunks; issue assembled in memory | **fixed 2026-09-14** — a shelf index is refused before a byte is fetched when it names more records or promises more chunks than a shelf can have; the writer's own limits are the reader's |
 | W19 | Info | core/src/contact.rs | Two encodings of "no deposit" | **fixed 2026-09-14** — the deposit is always written, zero included; an absent field is MALFORMED, with a vector |
 | W20 | Info | core/src/board.rs | `beacon_verdict` is dead code; both clients re-implement it | **open** |

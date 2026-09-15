@@ -483,6 +483,10 @@ pub mod f {
     pub const SLC_KEY_IMAGE: u64 = 136;
     pub const SLC_AMOUNT: u64 = 137;
     pub const SLC_TS: u64 = 138;
+    /// §17.5: the persona filing the claim. An arbiter reads a claim out of
+    /// a transport that may not say who sent it, and a payout goes to
+    /// somebody — so the claim names them, inside the bytes it is judged on.
+    pub const SLC_CLAIMANT: u64 = 321;
 
     /// Nested terms map (§7.3, §15.7, §8.8). Its inner keys are their own
     /// namespace, defined in `terms`.
