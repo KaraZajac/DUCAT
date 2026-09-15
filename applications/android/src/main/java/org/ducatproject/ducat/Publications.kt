@@ -1350,6 +1350,39 @@ object Publications {
         return o.keys().asSequence().associateWith { o.getString(it) }
     }
 
+    /**
+     * Claim a subscriber's bill for this period, or say somebody already has.
+     *
+     * Read-then-write inside one edit (M12). Two polls used to read the same
+     * "already billed" list and both send, so a subscriber was billed twice
+     * for one issue — and a bill is money. The claim goes in before the bill
+     * leaves; [releaseBilled] takes it back when the bill does not.
+     */
+    private fun claimBilled(context: Context, pubId: String, periodId: String, personaHex: String): Boolean {
+        var first = false
+        editPub(context, pubId) { pub ->
+            val iss = pub.optJSONObject("issues") ?: JSONObject()
+            val o = iss.optJSONObject(periodId) ?: JSONObject()
+            val billed = o.optJSONObject("billed") ?: JSONObject()
+            if (!billed.has(personaHex)) {
+                billed.put(personaHex, "")
+                first = true
+            }
+            o.put("billed", billed)
+            iss.put(periodId, o)
+            pub.put("issues", iss)
+        }
+        return first
+    }
+
+    private fun releaseBilled(context: Context, pubId: String, periodId: String, personaHex: String) {
+        editPub(context, pubId) { pub ->
+            val iss = pub.optJSONObject("issues") ?: return@editPub
+            val o = iss.optJSONObject(periodId) ?: return@editPub
+            o.optJSONObject("billed")?.remove(personaHex)
+        }
+    }
+
     fun recordBilled(context: Context, pubId: String, periodId: String, personaHex: String, tabId: String) {
         editPub(context, pubId) { pub ->
             val iss = pub.optJSONObject("issues") ?: JSONObject()
@@ -1379,17 +1412,24 @@ object Publications {
         val price = priceOf(context, pubId)
         if (price <= 0L) return 0
         val title = publications(context).firstOrNull { it.first == pubId }?.second ?: return 0
-        val already = billedFor(context, pubId, periodId).keys
         val store = TabStore(context)
         val contacts = ContactStore(context).all().associateBy { it.personaHex }
         var sent = 0
         for (hex in subscribers(context, pubId)) {
             if (only != null && hex != only) continue
-            if (hex in already || contacts[hex] == null) continue
+            if (contacts[hex] == null) continue
+            // Claimed before the bill goes, released if it does not — the
+            // send-intent contract, applied to a bill.
+            if (!claimBilled(context, pubId, periodId, hex)) continue
             val opened = store.open(hex, ORIGIN)
             val lined = store.mutate(opened.id) {
                 it.copy(lines = listOf(BillItem("$title — $periodId", price)))
-            } ?: continue
+            }
+            if (lined == null) {
+                store.delete(opened.id)
+                releaseBilled(context, pubId, periodId, hex)
+                continue
+            }
             runCatching { store.settle(lined) }
                 .onSuccess {
                     recordBilled(context, pubId, periodId, hex, opened.id)
@@ -1399,6 +1439,7 @@ object Publications {
                     // The bill never left; the open tab must not lie in wait
                     // for an unrelated payment of the same figure.
                     store.delete(opened.id)
+                    releaseBilled(context, pubId, periodId, hex)
                     DucatLog.w("Publications", "bill to ${hex.take(8)}… failed: ${it.message}")
                 }
         }

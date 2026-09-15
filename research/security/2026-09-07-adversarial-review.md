@@ -84,7 +84,7 @@ the fix landed), **open**, **deferred** (design decision recorded, not scheduled
 | N4 | High | stigmerge index.rs, fileindex, swarm.rs, Mailbox.kt | A share's index declares any size and the fetcher believes it | **fixed** (ab3aba7d): index shape checked at decode, byte ceiling per kind before any file is created |
 | N5 | High (S) | stigmerge seeder.rs | Seeder spawns an unbounded task per block request behind a lock | **fixed** (ab3aba7d): bounded queue, eight in flight, reply outside the lock, per-route pacing |
 | N6 | Medium | groups.rs, Groups.kt | Any member can wedge or partition a group with one roster | see W2 |
-| N7 | Medium | mailbox.rs, Mailbox.kt, contacts.rs | A stale record holder makes the reader dead-letter the current message | **open** — distinct `Stale` error, wait instead of advance |
+| N7 | Medium | mailbox.rs, Mailbox.kt, contacts.rs | A stale record holder makes the reader dead-letter the current message | **mostly in place, reviewed 2026-09-14** — both clients already hold a patience window per sequence (`STUCK_PATIENCE_MS`), recognise a slot still holding its previous tenant by content hash, and break rather than advance; an empty read waits. What is left is the narrow case the bridge cannot yet name: a read that failed for a transient reason reaches the catch-all and is dead-lettered at once. That wants a distinct `Stale` from `node_dht_get`, and it wants a way to reproduce a stale holder before anybody edits the delivery path. |
 | N8 | Medium | mailbox.rs, Mailbox.kt, node.rs | Public cards claimed, burned or silently killed by anyone | **partial**: an unparsable reply is now treated as contested on both clients; K slots / stamped replies deferred |
 | N9 | Medium | Mailbox.kt, ContactStore.kt, mailbox.rs | A hostile contact forces 1024 reads and thread rewrites per lap | **open** |
 | N10 | Medium | Ceremony.kt, ceremony.rs | Escrow co-signer never bounds the fee in the proposed transaction | **fixed** (e2ab23c6) |
@@ -114,7 +114,7 @@ the fix landed), **open**, **deferred** (design decision recorded, not scheduled
 | M9 | Medium | ui/Pay.kt, Pin.kt | Stale-rate rule and payer verification policy not applied | **open** |
 | M10 | Low | Orders.kt, orders.rs | Pool-sighted orders promoted without the second opinion | **fixed** (6f3d4e9c) |
 | M11 | Low | Ceremony.kt | Consent TOCTOU on a superseding proposal | **fixed** (e2ab23c6): the tap carries the displayed figure and a digest |
-| M12 | Low | Publications.kt | An ask can be billed twice by two polls | **open** |
+| M12 | Low | Publications.kt | An ask can be billed twice by two polls | **fixed 2026-09-14** — a subscriber's bill is claimed inside one edit before it goes and released if it does not, and the desk holds a lock per publication and period; the send-intent contract, applied to a bill |
 | M13 | Low | Orders.kt | A code paid after expiry lands unmatched | **open** |
 | M14 | Info | core/ | Part IV (`fast/1`, bonds, slash claims, market arbiter set) exists only in core | **open** — see research/post-1.0/TRUST.md |
 | M15 | Info | pay.rs vs ui/Pay.kt; contacts.rs vs ContactStore.kt | Client divergences: bill payto vs contact address; receipt dedupe order | **open** |

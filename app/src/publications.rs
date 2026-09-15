@@ -293,6 +293,9 @@ struct CachedShelf {
 }
 
 static MARKET_POSTING: Mutex<Option<HashSet<String>>> = Mutex::new(None);
+/// One billing run at a time per publication and period: the lap and a
+/// button can both ask, and a bill is money (M12).
+static BILLING: Mutex<Option<HashSet<String>>> = Mutex::new(None);
 
 #[derive(Clone, Debug, Serialize)]
 pub struct Due {
@@ -717,23 +720,70 @@ impl App {
     /// Bill every subscriber (or `only` one) for a period, one tab each.
     /// Returns how many bills went out.
     pub fn bill_period(&self, pub_id: &str, period: &str, only: Option<&str>) -> usize {
+        // One run at a time for this publication and period. Two polls used
+        // to read the same "already billed" list and both send (M12): a
+        // subscriber was billed twice for one issue, and a bill is money.
+        let run = format!("{pub_id}\u{0}{period}");
+        {
+            let mut g = BILLING.lock().unwrap_or_else(|e| e.into_inner());
+            if !g.get_or_insert_with(HashSet::new).insert(run.clone()) {
+                return 0;
+            }
+        }
+        let sent = self.bill_period_locked(pub_id, period, only);
+        if let Some(set) = BILLING.lock().unwrap_or_else(|e| e.into_inner()).as_mut() {
+            set.remove(&run);
+        }
+        sent
+    }
+
+    fn bill_period_locked(&self, pub_id: &str, period: &str, only: Option<&str>) -> usize {
         let Some(p) = self.publication(pub_id) else { return 0 };
         if p.price == 0 {
             return 0;
         }
-        let already: Vec<String> = p.issues.get(period).map(|i| i.billed.keys().cloned().collect()).unwrap_or_default();
         let mut sent = 0;
         for hex in p.subs.clone() {
-            if only.map_or(false, |o| o != hex) || already.contains(&hex) || self.contact(&hex).is_none() {
+            if only.map_or(false, |o| o != hex) || self.contact(&hex).is_none() {
                 continue;
             }
-            let Ok(opened) = self.open_tab(&hex, ORIGIN_PUB) else { continue };
+            // Claimed before the bill goes, released if it does not — the
+            // send-intent contract, applied to a bill. Re-read inside the
+            // edit so a run that started with a stale list cannot bill twice.
+            let mut first = false;
+            let _ = self.edit_pub(pub_id, |p| {
+                let issue = p.issues.entry(period.to_string()).or_default();
+                if !issue.billed.contains_key(&hex) {
+                    issue.billed.insert(hex.clone(), String::new());
+                    first = true;
+                }
+            });
+            if !first {
+                continue;
+            }
+            let Ok(opened) = self.open_tab(&hex, ORIGIN_PUB) else {
+                let _ = self.edit_pub(pub_id, |p| {
+                    if let Some(i) = p.issues.get_mut(period) {
+                        i.billed.remove(&hex);
+                    }
+                });
+                continue;
+            };
             let title = p.title.clone();
             let price = p.price;
+            let unclaim = |app: &App| {
+                let _ = app.edit_pub(pub_id, |p| {
+                    if let Some(i) = p.issues.get_mut(period) {
+                        i.billed.remove(&hex);
+                    }
+                });
+            };
             let Ok(Some(lined)) = self.mutate_tab(&opened.id, move |mut t| {
                 t.lines = vec![BillItem { description: format!("{title} — {period}"), amount_pxmr: price }];
                 t
             }) else {
+                let _ = self.delete_tab(&opened.id);
+                unclaim(self);
                 continue;
             };
             match self.settle_tab(&lined) {
@@ -745,6 +795,7 @@ impl App {
                 }
                 Err(e) => {
                     let _ = self.delete_tab(&opened.id);
+                    unclaim(self);
                     log::warn(TAG, format!("bill to {}… failed: {e}", &hex[..8.min(hex.len())]));
                 }
             }
