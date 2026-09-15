@@ -269,3 +269,25 @@ largest standing cost of a parked share: one seeded listing on a phone was
 30 KB/s all day. A peer whose route the resolver already holds is now
 advertised over that route (the resolver's watch keeps it current); a peer
 with no route yet is resolved as before.
+
+## A roster has a ceiling and the advertisement memo is swept (2026-09-14)
+
+`peer_gossip.rs` grew two tables without bound, and the second review
+(N13) named both. Every peer learned brings its own roster, and each of
+those brings theirs, so a swarm somebody seeded with a thousand invented
+keys grew `peers_record` for ever — and every entry costs a resolve, a
+dial and a row that never leaves. A roster now stops at 256, which is far
+past what a piece lottery can use. The `advertisements` map is only a memo
+of "we told them recently", guarding a thirty-second window, and it kept
+one entry per pair for the life of the process; it is swept of anything
+older than five minutes once it passes four thousand entries, and dropped
+wholesale if it is still full after that.
+
+## A share we are seeding is never fetched as a stranger's (2026-09-14)
+
+Not a change to this crate, but to the caller: `record.rs` `new_remote`
+opens a record with no writer, which is right for somebody else's share
+and wrong for our own — veilid then refuses our own writes to it. A share
+key arrives inside a message somebody else wrote, so `mobile/src/swarm.rs`
+now refuses to fetch a key this node is already seeding. Nothing
+legitimate asks a node to fetch what it is already serving (N12).

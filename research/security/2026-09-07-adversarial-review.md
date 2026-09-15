@@ -89,8 +89,8 @@ the fix landed), **open**, **deferred** (design decision recorded, not scheduled
 | N9 | Medium | Mailbox.kt, ContactStore.kt, mailbox.rs | A hostile contact forces 1024 reads and thread rewrites per lap | **fixed 2026-09-14** — one contact may cost a lap at most 64 reads and rows; the cursor is persisted as each lands, so the rest simply arrive on the next lap |
 | N10 | Medium | Ceremony.kt, ceremony.rs | Escrow co-signer never bounds the fee in the proposed transaction | **fixed** (e2ab23c6) |
 | N11 | Medium | stigmerge block_fetcher.rs, piece_verifier.rs | One hostile mirror poisons a tail piece and is scored a success | **fixed** (ab3aba7d): exact block length, file sized on open, credit on verification, three strikes |
-| N12 | Medium | stigmerge header.rs, node.rs | A share key with a secret re-opens our own records with writer None | **open** |
-| N13 | Medium | stigmerge peer_gossip.rs | Gossip amplification; unbounded peer tables | **open** |
+| N12 | Medium | stigmerge header.rs, node.rs | A share key with a secret re-opens our own records with writer None | **fixed 2026-09-14** — a node refuses to fetch a share key it is already seeding, so a key handed back to a seeder cannot re-open its own record with no writer |
+| N13 | Medium | stigmerge peer_gossip.rs | Gossip amplification; unbounded peer tables | **fixed 2026-09-14** — a roster stops at 256 peers and the advertisement memo is swept of anything older than five minutes once it passes four thousand; both noted in STIGMERGE-NOTICE.md |
 | N14 | Medium | stigmerge share.rs, piece_verifier.rs | Two panics reachable from a publisher's bytes | **fixed** (ab3aba7d) |
 | N15 | Medium | node.rs, geo.rs | Cell boards brickable for a week with writes at seq u32::MAX; future weeks computable | **deferred** |
 | N16 | Medium | monero.rs, opinion.rs, SecondOpinion.kt | Sends broadcast to five clearnet nodes even with an own node | **partial** (desk honours the own node; relay list still fans out) |

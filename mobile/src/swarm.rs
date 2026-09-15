@@ -367,6 +367,15 @@ pub fn swarm_fetch_capped(
         v.try_into()
             .map_err(|_| SwarmError::Failed("digest is 32 bytes".into()))?
     };
+    // Never our own (N12). A share key arrives in a message somebody else
+    // wrote, and this one names a record *we* announce: opening it as a
+    // stranger's re-opens our own record with no writer, and veilid then
+    // refuses our own writes to it — a seeder silenced by a share key
+    // handed back to it. Nothing legitimate asks a node to fetch what it
+    // is already serving.
+    if crate::lock(seeding_slot()).contains_key(&share_key) {
+        return Err(SwarmError::Failed("that share is one of ours — fetching it would disarm the seed".into()));
+    }
     let key: veilid_core::RecordKey = share_key
         .parse()
         .map_err(|_| SwarmError::Failed("that is not a share key".into()))?;

@@ -1,5 +1,14 @@
 use std::{collections::HashMap, sync::Arc, time::Duration};
 
+/// DUCAT modification (N13): the most peers one share's roster holds. A
+/// piece lottery cannot use more, and every extra entry is a resolve, a
+/// dial and a row that never leaves.
+const MAX_KNOWN_PEERS: usize = 256;
+/// The most "we told them recently" memos held at once, and how long one
+/// is worth keeping — the window it guards is thirty seconds.
+const MAX_ADVERTISEMENTS: usize = 4096;
+const ADVERTISEMENT_MEMORY_SECS: u32 = 300;
+
 use tokio::{select, sync::Mutex, time::interval};
 use tokio_util::sync::CancellationToken;
 use tracing::{error, instrument, trace, warn};
@@ -103,6 +112,10 @@ struct PeerGossipInner<C: Connection> {
     share_resolver: ShareResolver<C>,
 
     peers_record: StablePeersRecord,
+    /// Who we last told about whom, so the same pair is not re-advertised
+    /// every turn. DUCAT modification (N13): pruned, because this is a
+    /// rate-limit memo with a thirty-second window and it was growing one
+    /// entry per pair for the life of the process.
     advertisements: HashMap<(RecordKey, RecordKey), Timestamp>,
 }
 
@@ -173,6 +186,7 @@ impl<C: Connection + Send + Sync + 'static> PeerGossipInner<C> {
                     trace!("advertised {key} (self) to {known_peer}");
                     self.advertisements
                         .insert((known_peer.to_owned(), key.to_owned()), Timestamp::now());
+                    self.forget_old_advertisements();
                 }
                 Err(err) => warn!(?err, ?known_peer, ?key, "advertise peer"),
             }
@@ -211,6 +225,7 @@ impl<C: Connection + Send + Sync + 'static> PeerGossipInner<C> {
                     trace!("advertised {known_peer} to {key}");
                     self.advertisements
                         .insert((known_peer.to_owned(), key.to_owned()), Timestamp::now());
+                    self.forget_old_advertisements();
                 }
                 Err(err) => warn!(?err, ?known_peer, ?key, "advertise peer"),
             }
@@ -220,6 +235,16 @@ impl<C: Connection + Send + Sync + 'static> PeerGossipInner<C> {
 
     async fn add_known_peer(&mut self, key: &RecordKey) -> Result<()> {
         if key == &self.share.key {
+            return Ok(());
+        }
+        // DUCAT modification (see ../STIGMERGE-NOTICE.md): a roster has a
+        // ceiling (N13). Every peer learned brings its own roster, and each
+        // of those brings theirs — so a swarm somebody seeded with a
+        // thousand invented keys grew this table without bound, and every
+        // entry costs a resolve, a dial and a row for ever. A few hundred
+        // peers is far past what a piece lottery can use.
+        if !self.peers_record.has_peer(key) && self.peers_record.known_peers().count() >= MAX_KNOWN_PEERS {
+            trace!("roster is full; not adding {key}");
             return Ok(());
         }
         if !self.peers_record.has_peer(key) {
@@ -279,6 +304,24 @@ impl<C: Connection + Send + Sync + 'static> PeerGossipInner<C> {
         }
         trace!("added known peer {key}");
         Ok(())
+    }
+
+    /// DUCAT modification (N13): an advertisement older than the window it
+    /// guards says nothing, and this map is only a memo of "told them
+    /// recently". Swept when it grows rather than on a timer, so an idle
+    /// node pays nothing.
+    fn forget_old_advertisements(&mut self) {
+        if self.advertisements.len() <= MAX_ADVERTISEMENTS {
+            return;
+        }
+        let now = Timestamp::now();
+        self.advertisements
+            .retain(|_, at| now.duration_since(*at) < TimestampDuration::new_secs(ADVERTISEMENT_MEMORY_SECS));
+        // Still full of fresh entries: this is a roster far larger than the
+        // ceiling above allows, so drop the memo wholesale rather than grow.
+        if self.advertisements.len() > MAX_ADVERTISEMENTS {
+            self.advertisements.clear();
+        }
     }
 
     async fn request_advertise_peer(&mut self, route_id: &RouteId, key: &RecordKey) -> Result<()> {
