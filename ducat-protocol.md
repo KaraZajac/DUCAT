@@ -3456,7 +3456,7 @@ The last row looks like a no-op and is not one. It changes no state, which is wh
 
 ### 18.4.1 Rules the table does not show
 
-Implementing §18.4 surfaced six decisions the transition table leaves open. Each is now normative, because an implementer who guesses differently produces a client that interoperates until it suddenly doesn't.
+Implementing §18.4 surfaced nine decisions the transition table leaves open. Each is now normative, because an implementer who guesses differently produces a client that interoperates until it suddenly doesn't.
 
 1. **Direction constrains the originator, never the evaluator.** The table is role-agnostic, but not every message is legal from every side: **only the payer may *emit* `ACCEPT`**, since a payee able to accept its own offer could drive the entire flow with no human checkpoint, defeating §15.5. Likewise only the payee may emit `REFUND` (§7.3).
 
@@ -3468,6 +3468,8 @@ Implementing §18.4 surfaced six decisions the transition table leaves open. Eac
 6. **Elapsed time in an unbounded state is a no-op, not an error.** Clients poll on their own schedule, and a client that polls more often than another must not thereby reach a different state.
 7. **`ABORT` is directional once a meter is running.** §6 lists `ABORT` as available to either party with no penalty, which is right before value accrues and wrong afterwards: a payer able to abort a live meter would start a tab, consume, abort, and owe nothing. From `METERING` only the **operator** may void cleanly — comping a drink is ordinary commerce — while a payer leaving is **abandonment**, which routes through `MeterExpired` and leaves a single-sided receipt as evidence rather than a clean exit with no record. `CANCEL` likewise does not apply to a running meter: §7.3's fixed cancellation schedule is the wrong instrument when the correct one already exists, which is stopping the meter and paying what accrued.
 8. **A metered session needs its own state, and this was found the hard way.** §15.7's two-tap flow and §6.2's deadlines were written independently and disagreed: a `start` leg landed in `ACCEPTED`, whose 60-second deadline aborted a bar tab after one minute. `METERING` is therefore **not wall-clock bounded** — its limit lives in `terms.meter_max_s`, which the machine does not hold, so expiry arrives as an explicit `MeterExpired` event from the caller. That is the same pattern as `ConfirmationsReached` and `CureWindowExpired`: the caller establishes the condition, the machine decides the consequence.
+
+9. **The contact window belongs to the caller, because the machine holds no clock.** `CLOSED` admits `CONTACT_OFFER`/`CONTACT_ACCEPT` "within the 120 s contact window", and the table cannot express that: the window closing leaves the state exactly where it was, so a pure transition function given only a state and an event cannot tell an open window from a shut one. It is deliberately pure — it never reads a clock, which is why elapsed time arrives as an event — so the rule is the caller's: **a client MUST refuse a `CONTACT_OFFER` or `CONTACT_ACCEPT` more than the contact window after the `RECEIPT`**, and MUST destroy the session keys at the window's end, which is what makes the refusal true rather than polite. An implementation that feeds a late coda to the machine will be told it is legal, and will be wrong.
 
 ---
 

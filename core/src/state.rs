@@ -353,6 +353,14 @@ pub fn transition(
         // -- optional identity coda (§16.3) ------------------------------
         // Contact is a side effect, not a state change: the transaction is
         // already complete and must not be reopened by it.
+        //
+        // **The 120 s window is not held here** (§18.4.1 rule 9, W15). The
+        // window closing leaves the state exactly where it was, so a pure
+        // function given a state and an event cannot tell an open window
+        // from a shut one — and this function is deliberately pure, which is
+        // why elapsed time arrives as an event rather than from a clock. The
+        // caller refuses a late coda and destroys the session keys at the
+        // window's end; feed one here and you will be told it is legal.
         (S::Closed, E::ContactOffer) | (S::Closed, E::ContactAccept) => go(S::Closed),
         // Contact window elapsed with no exchange: tear down, keys destroyed,
         // zero persistent trace. Declining requires doing nothing (§16.3).
