@@ -509,6 +509,16 @@ impl App {
             Some(a) => a.iter().filter_map(|v| v.as_str().map(String::from)).collect(),
             None => vec![entry.get("rec").and_then(Value::as_str).map(String::from).ok_or_else(|| Error::Refused("the index names no shelf".into()))?],
         };
+        // The index is the publisher's word, and this reader was about to
+        // believe any number in it (W18): a shelf naming a thousand records
+        // of thirty-two chunks each would have been fetched, and held, before
+        // anything noticed. The writer's own limits are the reader's.
+        if recs.is_empty() || recs.len() > SHELF_MAX_RECORDS {
+            return Err(Error::Refused("the shelf's index names more records than a shelf can have".into()));
+        }
+        if chunks == 0 || chunks > SHELF_MAX_RECORDS * SHELF_MAX_CHUNKS {
+            return Err(Error::Refused("the shelf's index promises more than a shelf can hold".into()));
+        }
         std::fs::create_dir_all(out_dir)?;
         let out = out_dir.join(&name);
         let mut bytes: Vec<u8> = Vec::new();

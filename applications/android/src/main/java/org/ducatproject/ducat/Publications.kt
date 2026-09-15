@@ -1678,6 +1678,16 @@ object Publications {
         val recs = entry.optJSONArray("recs")
             ?.let { arr -> List(arr.length()) { arr.getString(it) } }
             ?: listOf(entry.getString("rec"))
+        // The index is the publisher's word, and this reader was about to
+        // believe any number in it (W18): a shelf naming a thousand records
+        // of thirty-two chunks each would have been fetched before anything
+        // noticed. The writer's own limits are the reader's.
+        check(recs.isNotEmpty() && recs.size <= SHELF_MAX_RECORDS) {
+            "the shelf's index names more records than a shelf can have"
+        }
+        check(chunks > 0 && chunks <= SHELF_MAX_RECORDS * SHELF_MAX_CHUNKS) {
+            "the shelf's index promises more than a shelf can hold"
+        }
 
         outDir.mkdirs()
         val out = java.io.File(outDir, name)
