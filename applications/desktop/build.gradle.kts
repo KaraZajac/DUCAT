@@ -79,9 +79,12 @@ val sharedLogic = listOf(
     "org/ducatproject/ducat/Pin.kt",
     // §15.5.1's gate. It crosses because Pay.kt does — the pay screen asks
     // it before every send — and because "how much before a PIN" is a rule
-    // the two clients must not word differently. On the desk the device
-    // half always answers "cannot say" (DeviceLockDesk has no credential to
-    // ask about), so the desk's own secret is what a spend rests on.
+    // the two clients must not word differently. Here the device half
+    // always answers "cannot say": `DeviceLock.backend` is null on the desk
+    // unless a test stands one up, so every payment rests on the app's own
+    // PIN, which is the correct reading of a machine with no credential of
+    // its own and not a hole (ledger D11 is the *Tauri* desk, which has
+    // neither).
     "org/ducatproject/ducat/SpendGate.kt",
     // The tap on the wire. The phone's Tap.kt, which holds the antenna, is
     // replaced by TapDesk.kt below.

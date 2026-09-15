@@ -1452,10 +1452,10 @@ EMV's answer is proportionality — no verification below a floor, stronger veri
 | Tier | Meaning |
 |---|---|
 | `None` | Tap and go, as contactless does below its floor limit |
-| `DeviceUnlocked` | The OS reports the device unlocked — biometric or passcode, satisfied **passively** and possibly some time ago |
+| `DeviceUnlocked` | The OS reports the device unlocked within `device_unlock_validity_s` — biometric or passcode, satisfied **passively** by whoever is holding it |
 | `AppSecret` | A secret entered **into this application, deliberately, recently** |
 
-**The gap between the last two is the load-bearing one and is easy to collapse by accident.** A device unlocked twenty minutes ago is a passive fact that a thief holding the phone already satisfies. A secret entered into this app just now is an active knowledge factor they do not have. A client that treats "unlocked" as sufficient at every value has built a bearer instrument with extra steps.
+**The gap between the last two is the load-bearing one and is easy to collapse by accident.** An unlocked device is a passive fact that whoever is holding the phone already satisfies — the window narrows how long that fact stays useful, and narrows nothing else. A secret entered into this app just now is an active knowledge factor a thief does not have. A client that treats "unlocked" as sufficient at every value has built a bearer instrument with extra steps.
 
 #### Policy
 
