@@ -38,4 +38,5 @@
     <string name="notify_unbonded_body">Umówiłeś kurs z %1$s, ale opłaty nie udało się złożyć w depozycie. Opiera się na waszym słowie — dogadajcie to na czacie.</string>
     <string name="notify_card_answered_title">Ktoś odpowiedział na twój kod</string>
     <string name="notify_card_answered_body">%1$s jest teraz kontaktem. Jeśli nie pokazałeś im kodu, zapomnij ich z rozmowy.</string>
+    <string name="notify_renamed_body">Nazywa się teraz %1$s. Zachowano nazwę, którą otrzymałeś.</string>
 </resources>

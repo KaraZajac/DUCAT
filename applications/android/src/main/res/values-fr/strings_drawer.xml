@@ -11,6 +11,10 @@
 
     <!-- Being paid -->
     <string name="drawer_being_paid_title">Être payé</string>
+    <string name="drawer_spend_limit_title">Dépenses</string>
+    <string name="drawer_spend_limit_body">En dessous, un téléphone déverrouillé dans les deux dernières minutes paie. À partir de ce montant, votre code est demandé à chaque fois.</string>
+    <string name="drawer_spend_limit_label">Demander le code au-dessus de (%1$s)</string>
+    <string name="drawer_spend_limit_note">Rien de tout cela n\'est envoyé nulle part. Celui que vous payez ne peut pas en demander moins.</string>
     <string name="drawer_publish_switch">Laisser mes contacts me payer directement</string>
     <string name="drawer_publish_off_note">Sans ça, quelqu\'un qui veut te payer doit attendre une demande.</string>
     <string name="drawer_publish_on_warning">Ton adresse part une fois chez chaque contact, puis est réutilisée. Quiconque peut voir la chaîne peut dire que la même personne a été payée à chaque fois — y compris des gens qui ne t\'ont payé qu\'une seule fois. Les demandes évitent ça en portant chacune une adresse neuve.</string>

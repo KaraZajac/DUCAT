@@ -41,6 +41,10 @@ class RideStore(context: Context) {
         /** The precise destination, kept on this phone and never published
          *  (§16.17). Sent to the driver who claims, in the sealed thread. */
         val destExact: String = "",
+        /** The precise pickup, under the same rule. The board carries the
+         *  cell a rider is standing in; the doorway they are standing at
+         *  goes to the one driver who claimed, and to nobody else. */
+        val originExact: String = "",
     )
 
     fun save(r: PostedRide) {
@@ -56,6 +60,7 @@ class RideStore(context: Context) {
             .putInt("subkey2", r.subkey2.toInt())
             .putString("ride_owner", r.owner)
             .putString("dest_exact", r.destExact)
+            .putString("origin_exact", r.originExact)
             .apply()
     }
 
@@ -70,6 +75,7 @@ class RideStore(context: Context) {
                 ?.let { android.util.Base64.decode(it, android.util.Base64.NO_WRAP) }
                 ?: ByteArray(0),
             destExact = prefs.getString("dest_exact", null) ?: "",
+            originExact = prefs.getString("origin_exact", null) ?: "",
             board2 = prefs.getString("board2", null),
             subkey2 = prefs.getInt("subkey2", 0).toUInt(),
             owner = prefs.getString("ride_owner", "") ?: "",
@@ -79,7 +85,8 @@ class RideStore(context: Context) {
     fun clear() = prefs.edit()
         .remove("board").remove("subkey").remove("inbox")
         .remove("card").remove("expiry").remove("notice")
-        .remove("board2").remove("subkey2").remove("ride_owner").remove("dest_exact")
+        .remove("board2").remove("subkey2").remove("ride_owner")
+        .remove("dest_exact").remove("origin_exact")
         .apply()
 
     // --- tombstones -------------------------------------------------------

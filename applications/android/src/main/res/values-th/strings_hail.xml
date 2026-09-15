@@ -111,4 +111,5 @@
     <string name="hail_accept_failed">คำตอบตกลงถึง %1$s ส่งไม่สำเร็จ ตรวจสอบเครือข่ายแล้วเปิดข้อเสนออีกครั้ง</string>
     <string name="hail_escrow_failed">ไม่สามารถวางค่าโดยสารไว้ในเอสโครว์ได้ ตกลงกับคนขับในแชท</string>
     <string name="hail_dest_exact">ปลายทาง: %1$s</string>
+    <string name="hail_pickup_exact">จุดรับ: %1$s</string>
 </resources>

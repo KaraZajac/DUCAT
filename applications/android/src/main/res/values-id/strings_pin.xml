@@ -5,6 +5,10 @@
     <string name="pin_ask_title">Masukkan PIN</string>
     <string name="pin_ask_body">Uang sebentar lagi keluar dari ponsel ini.</string>
     <string name="pin_ask_body_staff">Di balik ini ada sisi staf dari kasir ini.</string>
+    <string name="spend_gate_over_threshold">Ini melebihi batas Anda, jadi selalu ditanyakan.</string>
+    <string name="spend_gate_hour">Anda sudah banyak membelanjakan dalam satu jam terakhir.</string>
+    <string name="spend_gate_no_rate">Tidak ada harga untuk memeriksanya saat ini.</string>
+    <string name="spend_gate_locked">Buka kunci ponsel, atau masukkan PIN Anda.</string>
     <string name="pin_label">PIN</string>
     <string name="pin_again">Ketik lagi</string>
     <string name="pin_save">Simpan PIN</string>

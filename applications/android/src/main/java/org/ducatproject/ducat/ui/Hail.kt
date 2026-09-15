@@ -865,13 +865,20 @@ private data class PostedHail(
     val subkey2: UInt = 0u,
     /** The persona that posted — a migration re-signs as the same one. */
     val owner: String = "",
+    /** The two precise places (§16.17), carried so a screen that re-saves a
+     *  moved notice does not forget where the rider actually is and is
+     *  actually going. They are never published; they go to the driver who
+     *  claims, and a round trip through here that dropped them silently
+     *  turned a hail that had somewhere to go into one that did not. */
+    val destExact: String = "",
+    val originExact: String = "",
 )
 
 private fun RideStore.PostedRide.asPosted() =
-    PostedHail(board, subkey, inboxKey, cardUri, expiry, notice, board2, subkey2, owner)
+    PostedHail(board, subkey, inboxKey, cardUri, expiry, notice, board2, subkey2, owner, destExact, originExact)
 
 private fun PostedHail.asStored() =
-    RideStore.PostedRide(cell, subkey, inboxKey, card, expiry, notice, cell2, subkey2, owner)
+    RideStore.PostedRide(cell, subkey, inboxKey, card, expiry, notice, cell2, subkey2, owner, destExact, originExact)
 
 /**
  * The driver's offer in flight: persona, our seq, the fare.
@@ -2608,6 +2615,11 @@ fun HailSheet(
                                 // in the sealed thread, and to nobody else.
                                 val destText = t.coarse.ifBlank { t.label }.take(64)
                                 val destExact = t.label.take(120)
+                                // Same rule for the near end. The board has
+                                // always carried the origin *cell*; the
+                                // doorway is the driver's business only once
+                                // they have claimed.
+                                val originExact = f.label.take(120)
                                 // The post outlives the sheet on purpose: a
                                 // dismissal mid-write must not orphan a live
                                 // notice on the board.
@@ -2618,6 +2630,7 @@ fun HailSheet(
                                         val standing = org.ducatproject.ducat.Hailing.post(
                                             context, oCell, dCell, destText, fare,
                                             destExact = destExact,
+                                            originExact = originExact,
                                         ) { s -> step = s }
                                         // The wide copy goes on its own coroutine, **after** the rider
                                         // has been told they are standing: it is two more round trips

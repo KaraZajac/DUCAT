@@ -29,11 +29,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.ducatproject.ducat.*
 import org.ducatproject.ducat.PersonaStore
@@ -498,6 +500,16 @@ private fun AmountStep(
     var confirming by remember { mutableStateOf(false) }
     // Between agreeing and spending: see the gate below.
     var askPin by remember { mutableStateOf(false) }
+    // Which sentence the gate shows when it opens — §15.5.1's ladder gives a
+    // different reason for each rung, and "Money is about to leave this
+    // phone" was being shown for all of them.
+    var pinWhy by remember { mutableStateOf(R.string.pin_ask_body) }
+    // For the gate's own decision only — a few milliseconds of keystore and
+    // encrypted-prefs work that must not run on the frame drawing the
+    // confirmation away. The *send* keeps PaySends, which outlives the
+    // screen; this scope dying with the sheet is correct, because a sheet
+    // that is gone has nobody to show a PIN to.
+    val gateScope = rememberCoroutineScope()
     val amountFocus = remember { FocusRequester() }
 
     LaunchedEffect(Unit) {
@@ -1254,6 +1266,11 @@ private fun AmountStep(
                         )
                     }
                 }
+                // §15.5.1's rolling window counts what actually left,
+                // not what was attempted: a payment that failed to build
+                // is not money spent, and counting it would lock the next
+                // real one behind a PIN for an hour for nothing.
+                runCatching { SpendGate.record(app, SpendGate.minorUnits(app, amount)) }
                 amount
             }
             sendId = id
@@ -1271,6 +1288,7 @@ private fun AmountStep(
         open = askPin,
         onDismiss = { askPin = false },
         onPassed = { askPin = false; doSend() },
+        why = pinWhy,
     )
     if (confirming && pxmr != null) {
         ConfirmSend(
@@ -1297,7 +1315,22 @@ private fun AmountStep(
                 // back.
                 if (busy) return@latch
                 confirming = false
-                askPin = true
+                // §15.5.1: this used to be an unconditional PIN, which is
+                // stricter than the rule and worse than it — a gate asked
+                // for on every coffee is a gate people learn to tap
+                // through. Unlock the phone, open the app, tap; above the
+                // threshold the PIN, every time. The decision reads the
+                // keystore and the encrypted prefs, so it is not done on
+                // the frame that has to draw the dialog closing.
+                busy = true
+                gateScope.launch {
+                    val d = withContext(Dispatchers.IO) { SpendGate.decide(context, pxmr) }
+                    busy = false
+                    when (d) {
+                        is SpendGate.Decision.Allow -> doSend()
+                        is SpendGate.Decision.AskPin -> { pinWhy = d.why; askPin = true }
+                    }
+                }
             },
         )
     }

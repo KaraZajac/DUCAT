@@ -11,6 +11,10 @@
 
     <!-- Being paid -->
     <string name="drawer_being_paid_title">पैसे पाना</string>
+    <string name="drawer_spend_limit_title">खर्च</string>
+    <string name="drawer_spend_limit_body">इससे कम पर, पिछले दो मिनट में अनलॉक किया फ़ोन भुगतान कर देता है। इससे ऊपर हर बार पिन मांगा जाता है।</string>
+    <string name="drawer_spend_limit_label">इससे ऊपर पिन पूछें (%1$s)</string>
+    <string name="drawer_spend_limit_note">यह सब कहीं नहीं भेजा जाता। जिसे आप भुगतान करते हैं वह इससे कम नहीं मांग सकता।</string>
     <string name="drawer_publish_switch">कॉन्टैक्ट मुझे सीधे भुगतान कर सकें</string>
     <string name="drawer_publish_off_note">इसके बिना, आपको भुगतान करने वाले को किसी अनुरोध का इंतज़ार करना होगा।</string>
     <string name="drawer_publish_on_warning">आपका पता हर कॉन्टैक्ट के पास एक बार जाता है, और दोहराया जाता है। चेन देख सकने वाला कोई भी बता सकता है कि हर बार उसी व्यक्ति को भुगतान हुआ — वे भी जिन्होंने आपको बस एक बार भुगतान किया। अनुरोध हर बार नया पता साथ ले जाकर इससे बचते हैं।</string>

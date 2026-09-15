@@ -5,6 +5,10 @@
     <string name="pin_ask_title">Voer je pincode in</string>
     <string name="pin_ask_body">Er gaat zo geld van deze telefoon af.</string>
     <string name="pin_ask_body_staff">Hierachter zit de personeelskant van deze kassa.</string>
+    <string name="spend_gate_over_threshold">Dit gaat over je limiet, dus er wordt altijd gevraagd.</string>
+    <string name="spend_gate_hour">Je hebt het afgelopen uur veel uitgegeven.</string>
+    <string name="spend_gate_no_rate">Er is nu geen koers om dit tegen te controleren.</string>
+    <string name="spend_gate_locked">Ontgrendel de telefoon of voer je pincode in.</string>
     <string name="pin_label">Pincode</string>
     <string name="pin_again">Typ hem nog eens</string>
     <string name="pin_save">Pincode instellen</string>

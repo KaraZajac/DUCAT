@@ -172,6 +172,9 @@ object Hailing {
          *  to the driver who claims, in the sealed thread, and to nobody
          *  else. Empty keeps the old behaviour of saying nothing. */
         destExact: String = "",
+        /** The precise pickup, under the same rule: the board carries the
+         *  cell, the doorway goes to the driver who claims. */
+        originExact: String = "",
         /** Called on the calling thread as each step begins. */
         onStep: (Step) -> Unit = {},
     ): Standing {
@@ -181,8 +184,13 @@ object Hailing {
         val personas = PersonaStore(context)
         val ownerHex = personas.worn()
         val card = Mailbox.issueCard(
-            context, MyProfile(context).name(), (ttlSecs * 2).toULong(), purpose = "hail",
-            asPersonaHex = ownerHex,
+            // §16.3.1: no name, no profile. This card is pinned to a board
+            // every phone in the neighbourhood reads, and its inbox half is
+            // written before anybody has claimed it, so anything it carries
+            // is published. The rider's name and picture travel afterwards,
+            // to the one driver who claimed, as an INTRODUCTION.
+            context, null, (ttlSecs * 2).toULong(), purpose = "hail",
+            asPersonaHex = ownerHex, publicBoard = true,
         )
         val expiry = System.currentTimeMillis() / 1000 + ttlSecs
         val info = uniffi.ducat_mobile.HailInfo(
@@ -273,6 +281,7 @@ object Hailing {
                 expiry = expiry, notice = bytes,
                 owner = ownerHex,
                 destExact = destExact,
+                originExact = originExact,
             ),
         )
         DucatLog.i(TAG, "hail posted at $board subkey $sub")

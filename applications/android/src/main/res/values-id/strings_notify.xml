@@ -38,4 +38,5 @@
     <string name="notify_unbonded_body">Anda menyepakati perjalanan dengan %1$s, tetapi tarifnya tidak bisa dititipkan. Ini bersandar pada kata kalian berdua — bereskan di obrolan.</string>
     <string name="notify_card_answered_title">Seseorang menjawab kode Anda</string>
     <string name="notify_card_answered_body">%1$s kini menjadi kontak. Jika Anda tidak menunjukkan kode kepada mereka, lupakan mereka dari percakapan.</string>
+    <string name="notify_renamed_body">Kini menyebut dirinya %1$s. Nama yang diberikan kepada Anda tetap dipakai.</string>
 </resources>

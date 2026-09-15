@@ -111,4 +111,5 @@
     <string name="hail_accept_failed">Tu sí a %1$s no se envió. Revisa la red y vuelve a ver la oferta.</string>
     <string name="hail_escrow_failed">La tarifa no se pudo poner en custodia. Arréglalo con el conductor en el chat.</string>
     <string name="hail_dest_exact">Destino: %1$s</string>
+    <string name="hail_pickup_exact">Recogida en: %1$s</string>
 </resources>

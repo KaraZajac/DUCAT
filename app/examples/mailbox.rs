@@ -817,6 +817,96 @@ fn main() {
             }
             println!("MB_FAIL no vouches came");
         }
+        Some("rider") => {
+            // §16.17 + §16.3.1: cut a card the way a hail does — no name at
+            // all — wait for somebody to claim it, and only then hand over
+            // who we are and where we actually are.
+            //   rider
+            app.set_my_name(None, "Rider Desk").expect("MB_FAIL name");
+            app.set_profile_field(&app.primary_hex().expect("MB_FAIL hex"), "email", Some("rider@example.org"))
+                .expect("MB_FAIL email");
+            app.set_share_profile(&app.primary_hex().expect("MB_FAIL hex"), true).expect("MB_FAIL share");
+            let handle = app.issue_card(None, 60 * 60, "hail", None).expect("MB_FAIL card");
+            println!("MB_CARD {}", handle.uri);
+            let t0 = Instant::now();
+            while t0.elapsed() < Duration::from_secs(900) {
+                if app.collect_claims(None) > 0 {
+                    let Some(c) = app.contacts().into_iter().find(|c| c.card_inbox.as_deref() == Some(handle.inbox_key.as_str())) else {
+                        println!("MB_FAIL claimed but no contact");
+                        return;
+                    };
+                    println!("MB_CLAIMED by {} plate={:?}", c.display_name(), c.plate);
+                    match app.introduce(&c.persona_hex) {
+                        Ok(_) => println!("MB_INTRODUCED"),
+                        Err(e) => {
+                            println!("MB_FAIL introduce: {e}");
+                            return;
+                        }
+                    }
+                    let c = app.contact(&c.persona_hex).expect("MB_FAIL contact gone");
+                    app.send(&c, Outgoing::text("Picking up at: 12 Bellwether Lane, by the blue door"))
+                        .expect("MB_FAIL pickup");
+                    println!("MB_OK rider handed over in {:.0}s", t0.elapsed().as_secs_f64());
+                    return;
+                }
+                std::thread::sleep(Duration::from_secs(3));
+            }
+            println!("MB_FAIL nobody claimed the hail");
+        }
+        Some("driver") => {
+            // The other half: claim the nameless card as a driver — which is
+            // the one claim whose sealed half carries a plate — and say what
+            // this desk knows about the rider before and after they
+            // introduce themselves.
+            //   driver <card uri>
+            let uri = args.get(1).expect("MB_FAIL driver <card uri>");
+            app.set_my_name(None, "Driver Desk").expect("MB_FAIL name");
+            let me = app.primary_hex().expect("MB_FAIL hex");
+            app.set_share_profile(&me, true).expect("MB_FAIL share");
+            for (k, v) in [("car_model", "Volvo 240"), ("car_color", "beige"), ("plate", "KDX 918")] {
+                app.set_profile_field(&me, k, Some(v)).expect("MB_FAIL profile");
+            }
+            let c = match app.claim_card(uri, None, true, None) {
+                Ok(c) => c.contact(),
+                Err(e) => {
+                    println!("MB_FAIL claim: {e}");
+                    return;
+                }
+            };
+            println!(
+                "MB_BEFORE name={:?} named={} email={:?} avatar={}",
+                c.asserted_name,
+                c.named(),
+                c.email,
+                c.avatar.is_some()
+            );
+            let t0 = Instant::now();
+            while t0.elapsed() < Duration::from_secs(900) {
+                app.poll();
+                let thread = app.thread(&c.persona_hex);
+                if thread.iter().any(|m| !m.outgoing && m.kind == 17) {
+                    let k = app.contact(&c.persona_hex).expect("MB_FAIL contact gone");
+                    println!(
+                        "MB_AFTER name={:?} named={} email={:?} avatar={}",
+                        k.asserted_name,
+                        k.named(),
+                        k.email,
+                        k.avatar.is_some()
+                    );
+                    for m in thread.iter().filter(|m| !m.outgoing) {
+                        println!("MB_GOT kind {} '{}'", m.kind, m.body);
+                    }
+                    if k.asserted_name.is_none() {
+                        println!("MB_FAIL the introduction arrived and named nobody");
+                        return;
+                    }
+                    println!("MB_OK driver learned who in {:.0}s", t0.elapsed().as_secs_f64());
+                    return;
+                }
+                std::thread::sleep(Duration::from_secs(3));
+            }
+            println!("MB_FAIL no introduction came");
+        }
         Some("lister") => {
             // A seller: post a room in a cell with a minimum burn for buyers,
             // then stay up — answer the claim its card gets, say hello in the

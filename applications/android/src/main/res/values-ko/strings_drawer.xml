@@ -11,6 +11,10 @@
 
     <!-- Being paid -->
     <string name="drawer_being_paid_title">돈 받기</string>
+    <string name="drawer_spend_limit_title">지출</string>
+    <string name="drawer_spend_limit_body">이 금액 미만은 최근 2분 안에 잠금을 푸른 휴대폰으로 결제됩니다. 이상은 매번 PIN을 물어봅니다.</string>
+    <string name="drawer_spend_limit_label">PIN을 물을 금액 (%1$s)</string>
+    <string name="drawer_spend_limit_note">이 설정은 어디로도 전송되지 않습니다. 결제 상대가 더 느슨하게 요구할 수 없습니다.</string>
     <string name="drawer_publish_switch">연락처가 나에게 바로 결제하도록 허용</string>
     <string name="drawer_publish_off_note">이게 없으면, 나에게 돈을 보내려는 사람은 요청을 기다려야 해요.</string>
     <string name="drawer_publish_on_warning">내 주소가 각 연락처에 한 번씩 전달되고 재사용돼요. 체인을 볼 수 있는 사람은 매번 같은 사람이 받았다는 걸 알 수 있어요 — 딱 한 번 보낸 사람까지도요. 요청은 매번 새 주소를 담아서 그 문제를 피해요.</string>

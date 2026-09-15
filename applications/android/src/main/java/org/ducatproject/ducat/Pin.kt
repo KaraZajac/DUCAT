@@ -142,6 +142,12 @@ object Pin {
                 .putLong("locked_until", 0L)
                 .putLong("locked_until_elapsed", 0L)
                 .apply()
+            // §15.5.1 wants to know how long ago a *deliberate* entry
+            // happened, not whether one ever has. Elapsed realtime, not the
+            // wall clock: a wall-clock stamp is one the holder of the phone
+            // can move, and moving it backwards would make a PIN from this
+            // morning look like one from a second ago.
+            p.edit().putLong("passed_at_elapsed", android.os.SystemClock.elapsedRealtime()).apply()
             return Verdict.Ok
         }
         val failures = p.getInt("failures", 0) + 1
@@ -163,6 +169,25 @@ object Pin {
         }
         e.apply()
         return Verdict.Wrong(FREE_TRIES - failures)
+    }
+
+    /**
+     * Seconds since the PIN was last entered correctly, or null if it never
+     * has been on this boot.
+     *
+     * Null rather than a large number, because "never" and "a long time ago"
+     * are the same answer to the only question asked of it and a caller that
+     * treated an unset value as zero would be handed a knowledge factor
+     * nobody supplied. Reset by a reboot, which is the honest reading: the
+     * clock it counts against restarts too.
+     */
+    fun secretAgeSecs(context: Context): Long? {
+        val at = prefs(context).getLong("passed_at_elapsed", 0L)
+        if (at <= 0L) return null
+        val now = android.os.SystemClock.elapsedRealtime()
+        // A stamp from after now is a reboot the stamp survived; unusable.
+        if (at > now) return null
+        return (now - at) / 1000
     }
 
     private fun derive(pin: String, salt: ByteArray): ByteArray {

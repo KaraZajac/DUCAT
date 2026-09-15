@@ -5,6 +5,10 @@
     <string name="pin_ask_title">输入你的 PIN</string>
     <string name="pin_ask_body">马上就有钱要离开这台手机。</string>
     <string name="pin_ask_body_staff">这后面是这台收银机的员工端。</string>
+    <string name="spend_gate_over_threshold">超过你设的上限，所以每次都会询问。</string>
+    <string name="spend_gate_hour">你在过去一小时内花了不少。</string>
+    <string name="spend_gate_no_rate">现在没有可供核对的价格。</string>
+    <string name="spend_gate_locked">解锁手机，或输入 PIN。</string>
     <string name="pin_label">PIN</string>
     <string name="pin_again">再输入一次</string>
     <string name="pin_save">保存 PIN</string>

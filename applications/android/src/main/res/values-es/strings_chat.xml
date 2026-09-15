@@ -99,6 +99,9 @@
     <string name="chat_asked_you_for">Te pidió</string>
     <string name="chat_receipt_you_issued">Recibo que emitiste</string>
     <string name="chat_receipt">Recibo</string>
+    <string name="chat_introduced_you">Compartió sus datos</string>
+    <string name="chat_you_introduced">Compartiste tus datos</string>
+    <string name="chat_introduce">Compartir mis datos</string>
     <string name="chat_you_offered_to_drive">Ofreciste el viaje</string>
     <string name="chat_offers_to_drive_you">Ofrece llevarte</string>
     <string name="chat_you_accepted_ride">Aceptaste el viaje</string>

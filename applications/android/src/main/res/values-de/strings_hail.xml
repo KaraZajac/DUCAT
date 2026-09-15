@@ -111,4 +111,5 @@
     <string name="hail_accept_failed">Deine Zusage an %1$s wurde nicht gesendet. Prüfe das Netz und öffne das Angebot noch einmal.</string>
     <string name="hail_escrow_failed">Der Fahrpreis konnte nicht hinterlegt werden. Klär das mit dem Fahrer im Chat.</string>
     <string name="hail_dest_exact">Ziel: %1$s</string>
+    <string name="hail_pickup_exact">Abholung: %1$s</string>
 </resources>

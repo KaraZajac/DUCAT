@@ -5,6 +5,10 @@
     <string name="pin_ask_title">رمزتان را وارد کنید</string>
     <string name="pin_ask_body">همین حالا پول از این گوشی خارج می‌شود.</string>
     <string name="pin_ask_body_staff">بخش کارکنانِ این صندوق پشت این است.</string>
+    <string name="spend_gate_over_threshold">این بالاتر از سقف شماست، پس همیشه پرسیده می‌شود.</string>
+    <string name="spend_gate_hour">در یک ساعت گذشته زیاد خرج کرده‌اید.</string>
+    <string name="spend_gate_no_rate">اکنون قیمتی برای سنجیدن آن نیست.</string>
+    <string name="spend_gate_locked">گوشی را باز کنید یا پین خود را وارد کنید.</string>
     <string name="pin_label">رمز</string>
     <string name="pin_again">دوباره بنویسید</string>
     <string name="pin_save">ذخیرهٔ رمز</string>

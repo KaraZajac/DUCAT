@@ -11,6 +11,10 @@
 
     <!-- Being paid -->
     <string name="drawer_being_paid_title">Nhận tiền</string>
+    <string name="drawer_spend_limit_title">Chi tiêu</string>
+    <string name="drawer_spend_limit_body">Dưới mức này, điện thoại bạn mở khóa trong hai phút qua là trả được. Từ mức này trở lên, mã PIN luôn được hỏi.</string>
+    <string name="drawer_spend_limit_label">Hỏi PIN trên (%1$s)</string>
+    <string name="drawer_spend_limit_note">Không điều nào được gửi đi đâu. Bên nhận tiền không thể đòi mức thấp hơn.</string>
     <string name="drawer_publish_switch">Cho liên hệ trả tiền tôi trực tiếp</string>
     <string name="drawer_publish_off_note">Không bật thì ai muốn trả tiền bạn phải chờ một yêu cầu.</string>
     <string name="drawer_publish_on_warning">Địa chỉ của bạn được gửi tới từng liên hệ một lần, rồi dùng lại. Ai nhìn được chuỗi đều thấy cùng một người được trả mỗi lần — kể cả những người chỉ trả bạn đúng một lần. Yêu cầu tránh được điều đó vì mỗi lần mang một địa chỉ mới.</string>

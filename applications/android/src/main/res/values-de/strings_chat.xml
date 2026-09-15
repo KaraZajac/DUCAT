@@ -99,6 +99,9 @@
     <string name="chat_asked_you_for">Hat dich gebeten um</string>
     <string name="chat_receipt_you_issued">Von dir ausgestellte Quittung</string>
     <string name="chat_receipt">Quittung</string>
+    <string name="chat_introduced_you">Hat die eigenen Angaben geteilt</string>
+    <string name="chat_you_introduced">Du hast deine Angaben geteilt</string>
+    <string name="chat_introduce">Meine Angaben teilen</string>
     <string name="chat_you_offered_to_drive">Du hast angeboten zu fahren</string>
     <string name="chat_offers_to_drive_you">Bietet an, dich zu fahren</string>
     <string name="chat_you_accepted_ride">Du hast die Fahrt angenommen</string>

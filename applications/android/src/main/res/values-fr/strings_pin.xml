@@ -5,6 +5,10 @@
     <string name="pin_ask_title">Entrez votre code</string>
     <string name="pin_ask_body">De l\'argent est sur le point de quitter ce téléphone.</string>
     <string name="pin_ask_body_staff">Derrière, c’est le côté personnel de cette caisse.</string>
+    <string name="spend_gate_over_threshold">C\'est au-dessus de votre limite, la question est donc toujours posée.</string>
+    <string name="spend_gate_hour">Vous avez beaucoup dépensé dans la dernière heure.</string>
+    <string name="spend_gate_no_rate">Aucun cours disponible pour vérifier cela maintenant.</string>
+    <string name="spend_gate_locked">Déverrouillez le téléphone ou saisissez votre code.</string>
     <string name="pin_label">Code</string>
     <string name="pin_again">Retapez-le</string>
     <string name="pin_save">Enregistrer</string>

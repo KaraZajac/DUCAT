@@ -5,6 +5,10 @@
     <string name="pin_ask_title">أدخل رمزك</string>
     <string name="pin_ask_body">المال على وشك أن يغادر هذا الهاتف.</string>
     <string name="pin_ask_body_staff">الجانب الخاص بالموظفين من نقطة البيع هذه خلف هذا.</string>
+    <string name="spend_gate_over_threshold">هذا فوق حدّك، لذلك يُسأل دائمًا.</string>
+    <string name="spend_gate_hour">لقد أنفقت كثيرًا خلال الساعة الماضية.</string>
+    <string name="spend_gate_no_rate">لا يوجد سعر للمقارنة الآن.</string>
+    <string name="spend_gate_locked">افتح قفل الهاتف أو أدخل رمزك.</string>
     <string name="pin_label">الرمز</string>
     <string name="pin_again">اكتبه مرة أخرى</string>
     <string name="pin_save">حفظ الرمز</string>

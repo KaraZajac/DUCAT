@@ -38,4 +38,5 @@
     <string name="notify_unbonded_body">%1$s ile yolculukta anlaştın ama ücret emanete konulamadı. Karşılıklı sözünüze dayanıyor — sohbette halledin.</string>
     <string name="notify_card_answered_title">Biri kodunu yanıtladı</string>
     <string name="notify_card_answered_body">%1$s artık bir kişi. Onlara bir kod göstermediysen, sohbetten unut.</string>
+    <string name="notify_renamed_body">Artık kendine %1$s diyor. Sana verilen ad korunuyor.</string>
 </resources>

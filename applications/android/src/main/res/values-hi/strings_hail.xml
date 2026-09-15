@@ -111,4 +111,5 @@
     <string name="hail_accept_failed">%1$s को आपकी हाँ नहीं भेजी जा सकी। नेटवर्क जाँचें और पेशकश फिर से देखें।</string>
     <string name="hail_escrow_failed">किराया एस्क्रो में नहीं रखा जा सका। ड्राइवर के साथ चैट में तय कर लें।</string>
     <string name="hail_dest_exact">गंतव्य: %1$s</string>
+    <string name="hail_pickup_exact">पिकअप: %1$s</string>
 </resources>

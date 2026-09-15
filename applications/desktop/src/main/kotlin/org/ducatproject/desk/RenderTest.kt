@@ -551,6 +551,13 @@ fun main() {
                 subtitle: String,
                 onResult: (Boolean) -> Unit,
             ) = Unit
+            // The desk has no device credential at all, so the window a
+            // spend gate asks about is a question it cannot answer: null,
+            // which sends every caller to the app's own PIN.
+            override fun authenticatedWithin(
+                context: android.content.Context,
+                withinSecs: Int,
+            ): Boolean? = null
         }
     render("pin-ask-device", w = 700, h = 700) {
         org.ducatproject.ducat.ui.PinGate(open = true, onDismiss = {}, onPassed = {})

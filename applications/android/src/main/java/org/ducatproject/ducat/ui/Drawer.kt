@@ -819,6 +819,9 @@ private fun ProfileSection() {
             PublishAddressSetting()
 
             Spacer(Modifier.height(28.dp))
+            SpendLimitSetting()
+
+            Spacer(Modifier.height(28.dp))
             Text(stringResource(R.string.drawer_persona_title),
                 style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(4.dp))
@@ -837,6 +840,74 @@ private fun ProfileSection() {
             adding = false
             if (created != null) picked = created
         })
+    }
+}
+
+/**
+ * The one number §15.5.1 asks the user for.
+ *
+ * Below it, a phone unlocked in the last two minutes pays — which is the
+ * shape their own payment app already has, and the shape that stops a gate on
+ * every coffee from becoming a gate people tap through. At or above it the
+ * PIN is asked, every time.
+ *
+ * Denominated in the currency they price in, never piconero: a limit stored
+ * in piconero quietly becomes a different limit the next time the price
+ * moves, and a "hundred" that silently became seventy is worse than no limit
+ * at all, because it looks like it is working.
+ */
+@Composable
+private fun SpendLimitSetting() {
+    val context = LocalContext.current
+    val currency = remember { org.ducatproject.ducat.Amounts.currency(context) }
+    // Minor units on the wire, whole units on the screen: nobody sets a
+    // spending limit in cents.
+    var text by remember {
+        mutableStateOf((org.ducatproject.ducat.SpendGate.pinAbove(context) / 100).toString())
+    }
+    Column {
+        Text(
+            stringResource(R.string.drawer_spend_limit_title),
+            style = MaterialTheme.typography.titleMedium,
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            stringResource(R.string.drawer_spend_limit_body),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(8.dp))
+        OutlinedTextField(
+            value = text,
+            onValueChange = { v ->
+                // Digits only, and short: this is a limit, not an amount, and
+                // a field that accepted a decimal separator would have to
+                // agree with the locale's — see Amounts.typedNumber for why
+                // that is its own problem.
+                val cleaned = v.filter { it.isDigit() }.take(9)
+                text = cleaned
+                // Committed per keystroke, deliberately: there is no OK
+                // button on a drawer section, and a limit that is only saved
+                // when the user happens to leave by the right door is a
+                // setting they will believe they changed.
+                org.ducatproject.ducat.SpendGate.setPinAbove(
+                    context,
+                    (cleaned.toLongOrNull() ?: 0L) * 100,
+                )
+            },
+            label = { Text(stringResource(R.string.drawer_spend_limit_label, currency)) },
+            singleLine = true,
+            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                keyboardType = androidx.compose.ui.text.input.KeyboardType.Number,
+            ),
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            stringResource(R.string.drawer_spend_limit_note),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.outline,
+        )
     }
 }
 

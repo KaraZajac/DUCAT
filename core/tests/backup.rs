@@ -150,16 +150,52 @@ fn an_unknown_version_is_refused_rather_than_guessed() {
 #[test]
 fn the_format_is_frozen() {
     // The passphrase changed once, on 2026-09-14, when export began refusing
-    // a Weak one ("a fixed passphrase" is three words); the digest below is
-    // the same format under the new input. Import still opens the old files.
+    // a Weak one ("a fixed passphrase" is three words). The digest changed
+    // again on 2026-09-15, when §15.5.1's policy grew two thresholds and the
+    // *writer* began emitting two more keys — a new output for the same
+    // format, not a new format. What that claim rests on is the test below,
+    // which opens a real bundle written before either key existed.
     let blob = export(&sample(), b"a fixed passphrase for the tests", [0x42; 16], [0x37; 24]).unwrap();
     use sha2::{Digest, Sha256};
     let digest = Sha256::digest(&blob);
     assert_eq!(
         hex(&digest),
-        "69bcd36b3bb264578cc690fce177267b729591acefb719eff5dd4532d3dc2cc9",
+        "f15cc857b66569aa8a45b9671fac9dc87d092b218b3121945146a977888dc1cb",
         "the backup format changed — every existing backup would fail to import"
     );
+}
+
+/// The claim the test above makes in passing, made properly: **a bundle
+/// exported by yesterday's build still opens.**
+///
+/// These are real bytes, produced by the commit before the two new
+/// verification thresholds existed, kept verbatim. Every other "older bundle"
+/// test in this file exports from today's writer with a field unset, which
+/// proves the reader tolerates an absent *value* and nothing about an absent
+/// *key* — and the two thresholds are written unconditionally, so only a file
+/// from before them can show it. It restores with the strict defaults, which
+/// is the only safe direction: a restore is when somebody is least likely to
+/// go looking at their settings.
+#[test]
+fn a_bundle_from_before_the_new_thresholds_still_opens() {
+    let blob = unhex(include_str!("data/backup-five-thresholds.hex").trim());
+    let back = import(&blob, b"a fixed passphrase for the tests").expect("an old bundle must import");
+    assert_eq!(back.verification.device_unlock_validity_s, 120);
+    assert!(back.verification.app_secret_every_time);
+    // And the five that were there come back as they were written, not as
+    // today's defaults. That bundle's floor was $20, from the era when there
+    // was a tier below the unlock; a restore that quietly moved it to zero
+    // would be the "silently reverting a deliberate setting" this key group
+    // exists to prevent, pointed the other way.
+    assert_eq!(back.verification.device_unlock_at, 2_000);
+    assert_eq!(back.verification.app_secret_at, 10_000);
+    assert_eq!(back.verification.app_secret_validity_s, 120);
+    assert_eq!(back.verification.cumulative_at, 20_000);
+    assert_eq!(back.verification.cumulative_window_s, 3_600);
+}
+
+fn unhex(s: &str) -> Vec<u8> {
+    (0..s.len()).step_by(2).map(|i| u8::from_str_radix(&s[i..i + 2], 16).unwrap()).collect()
 }
 
 fn hex(b: &[u8]) -> String {
@@ -174,8 +210,13 @@ fn verification_thresholds_survive() {
     let mut b = sample();
     b.verification = VerificationPolicy {
         device_unlock_at: 15_000,
+        device_unlock_validity_s: 45,
         app_secret_at: 50_000,
         app_secret_validity_s: 300,
+        // Off on purpose: this is the one setting where the default is the
+        // strict reading, so a round trip that quietly *restored* the default
+        // would look like a pass.
+        app_secret_every_time: false,
         cumulative_at: 100_000,
         cumulative_window_s: 7_200,
     };

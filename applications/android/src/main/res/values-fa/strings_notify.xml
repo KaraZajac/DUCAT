@@ -38,4 +38,5 @@
     <string name="notify_unbonded_body">سفر را با %1$s توافق کردید، اما کرایه در امانت گذاشته نشد. بر پایهٔ قول شما دو نفر است — در گفتگو حلش کنید.</string>
     <string name="notify_card_answered_title">کسی به کد شما پاسخ داد</string>
     <string name="notify_card_answered_body">%1$s اکنون یک مخاطب است. اگر کدی به آن‌ها نشان نداده‌اید، از داخل گفتگو فراموششان کنید.</string>
+    <string name="notify_renamed_body">اکنون خود را %1$s می‌نامد. نامی که به شما داده شد حفظ می‌شود.</string>
 </resources>

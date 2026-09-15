@@ -99,6 +99,9 @@
     <string name="chat_asked_you_for">Meminta darimu</string>
     <string name="chat_receipt_you_issued">Struk yang kamu terbitkan</string>
     <string name="chat_receipt">Struk</string>
+    <string name="chat_introduced_you">Membagikan datanya</string>
+    <string name="chat_you_introduced">Anda membagikan data Anda</string>
+    <string name="chat_introduce">Bagikan data saya</string>
     <string name="chat_you_offered_to_drive">Kamu menawarkan mengantar</string>
     <string name="chat_offers_to_drive_you">Menawarkan mengantarmu</string>
     <string name="chat_you_accepted_ride">Kamu menerima tumpangan</string>

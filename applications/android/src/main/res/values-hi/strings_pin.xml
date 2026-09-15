@@ -5,6 +5,10 @@
     <string name="pin_ask_title">अपना PIN डालें</string>
     <string name="pin_ask_body">इस फ़ोन से अभी पैसा जाने वाला है।</string>
     <string name="pin_ask_body_staff">इसके पीछे इस टिल का स्टाफ़ वाला हिस्सा है।</string>
+    <string name="spend_gate_over_threshold">यह आपकी सीमा से ऊपर है, इसलिए हर बार पूछा जाता है।</string>
+    <string name="spend_gate_hour">पिछले एक घंटे में आपने काफ़ी खर्च किया है।</string>
+    <string name="spend_gate_no_rate">अभी इसे परखने के लिए कोई भाव नहीं है।</string>
+    <string name="spend_gate_locked">फ़ोन अनलॉक करें या अपना पिन डालें।</string>
     <string name="pin_label">PIN</string>
     <string name="pin_again">फिर से लिखें</string>
     <string name="pin_save">PIN सहेजें</string>

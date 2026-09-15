@@ -77,6 +77,12 @@ val sharedLogic = listOf(
     "org/ducatproject/ducat/Orders.kt",
     "org/ducatproject/ducat/ui/Kiosk.kt",
     "org/ducatproject/ducat/Pin.kt",
+    // §15.5.1's gate. It crosses because Pay.kt does — the pay screen asks
+    // it before every send — and because "how much before a PIN" is a rule
+    // the two clients must not word differently. On the desk the device
+    // half always answers "cannot say" (DeviceLockDesk has no credential to
+    // ask about), so the desk's own secret is what a spend rests on.
+    "org/ducatproject/ducat/SpendGate.kt",
     // The tap on the wire. The phone's Tap.kt, which holds the antenna, is
     // replaced by TapDesk.kt below.
     "org/ducatproject/ducat/nfc/TapWire.kt",

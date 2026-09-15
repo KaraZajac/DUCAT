@@ -5,6 +5,10 @@
     <string name="pin_ask_title">ใส่ PIN ของคุณ</string>
     <string name="pin_ask_body">เงินกำลังจะออกจากเครื่องนี้</string>
     <string name="pin_ask_body_staff">ด้านหลังนี้คือฝั่งพนักงานของเครื่องคิดเงินนี้</string>
+    <string name="spend_gate_over_threshold">นี่เกินวงเงินของคุณ จึงถามทุกครั้ง</string>
+    <string name="spend_gate_hour">ชั่วโมงที่ผ่านมาคุณใช้จ่ายไปมาก</string>
+    <string name="spend_gate_no_rate">ตอนนี้ไม่มีราคาให้เทียบ</string>
+    <string name="spend_gate_locked">ปลดล็อกโทรศัพท์ หรือใส่ PIN</string>
     <string name="pin_label">PIN</string>
     <string name="pin_again">พิมพ์อีกครั้ง</string>
     <string name="pin_save">บันทึก PIN</string>

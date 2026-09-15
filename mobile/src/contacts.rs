@@ -227,6 +227,53 @@ pub fn pronoun_options() -> Vec<String> {
     .collect()
 }
 
+/// The wire's message kind for one of the numbers a client passes across the
+/// bridge (§16.13).
+///
+/// Its own function so it can be tested at the edge. It was an inline `match`
+/// with `_ => Text`, and an unknown number therefore became a *text message*
+/// with the other fields still attached — which core then refused for
+/// carrying fields a text message may not carry, naming the fields and not
+/// the kind. A new kind cost a live walk to diagnose; removing the default
+/// then cost plain text, which had been arriving through it. Both are pinned
+/// by `every_kind_a_client_can_name_round_trips`.
+fn kind_of(kind: u8) -> Result<MessageKind, ContactError> {
+    Ok(match kind {
+        // Spelled out, because the arm below refuses what it does not
+        // know and kind 0 used to arrive here by falling through it.
+        0 => MessageKind::Text,
+        1 => MessageKind::PaymentRequest,
+        2 => MessageKind::PaymentSent,
+        3 => MessageKind::Receipt,
+        4 => MessageKind::Reaction,
+        5 => MessageKind::Retract,
+        6 => MessageKind::RideOffer,
+        7 => MessageKind::RideAccept,
+        8 => MessageKind::DkgRound,
+        9 => MessageKind::FrostRound,
+        10 => MessageKind::CeremonyAbort,
+        11 => MessageKind::PositionRef,
+        12 => MessageKind::GroupRoster,
+        13 => MessageKind::PublicationKey,
+        14 => MessageKind::CallOffer,
+        15 => MessageKind::CallAnswer,
+        16 => MessageKind::PublicationWanted,
+        17 => MessageKind::Introduction,
+        // **Not a default.** This was `_ => Text`, and a caller asking
+        // for a kind this build did not know got a *text message* with
+        // the other fields still attached — which core then refused for
+        // carrying fields a text message may not carry, naming the
+        // fields and not the kind. The first caller of kind 17 spent a
+        // live walk on it. A kind nobody here can encode is a caller
+        // bug, and it says so.
+        other => {
+            return Err(ContactError::Refused(format!(
+                "kind {other} is not a message kind this build can send"
+            )))
+        }
+    })
+}
+
 /// the keys to seal with.
 #[uniffi::export]
 pub fn build_contact_details(
@@ -953,25 +1000,7 @@ pub fn seal_message(input: SealIn) -> Result<SealedOut, ContactError> {
         version: 1, suite: 1, seq, prev, body, timestamp: now(),
         // §16.20's ask travels as a bare label on kind 16 and nothing else.
         wanted_period: if kind == 16 { wanted_period } else { None },
-        kind: match kind {
-            1 => MessageKind::PaymentRequest,
-            2 => MessageKind::PaymentSent,
-            3 => MessageKind::Receipt,
-            4 => MessageKind::Reaction,
-            5 => MessageKind::Retract,
-            6 => MessageKind::RideOffer,
-            7 => MessageKind::RideAccept,
-            8 => MessageKind::DkgRound,
-            9 => MessageKind::FrostRound,
-            10 => MessageKind::CeremonyAbort,
-            11 => MessageKind::PositionRef,
-            12 => MessageKind::GroupRoster,
-            13 => MessageKind::PublicationKey,
-            14 => MessageKind::CallOffer,
-            15 => MessageKind::CallAnswer,
-            16 => MessageKind::PublicationWanted,
-            _ => MessageKind::Text,
-        },
+        kind: kind_of(kind)?,
         amount_pxmr,
         txid,
         payto,
@@ -2175,4 +2204,33 @@ pub fn haversineM(lat1_e7: i64, lon1_e7: i64, lat2_e7: i64, lon2_e7: i64) -> u64
 #[uniffi::export]
 pub fn clean_display_text(text: String) -> String {
     ducat_core::wire::without_display_hazards(&text)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// The bridge's kind table against core's, pinned at both edges.
+    ///
+    /// Every number a client may pass must arrive at the message kind core
+    /// gives that number, and a number core does not know must be refused
+    /// rather than quietly becoming something else. Both halves have been
+    /// wrong in production: `_ => Text` turned an unrecognised kind into a
+    /// text message carrying fields text may not carry, and removing that
+    /// default without spelling out kind 0 turned every plain message into a
+    /// refusal. Neither was caught by a unit test; both were caught by
+    /// somebody trying to send something.
+    #[test]
+    fn every_kind_a_client_can_name_round_trips() {
+        for n in 0..=17u8 {
+            let k = kind_of(n).unwrap_or_else(|e| panic!("kind {n} must encode: {e:?}"));
+            assert_eq!(
+                k as u64, n as u64,
+                "the bridge maps kind {n} to a different kind than core does"
+            );
+        }
+        for n in [18u8, 19, 100, 255] {
+            assert!(kind_of(n).is_err(), "kind {n} is not a kind and must be refused");
+        }
+    }
 }

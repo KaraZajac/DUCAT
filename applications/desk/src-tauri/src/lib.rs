@@ -814,6 +814,10 @@ struct ContactRow {
     their_address: Option<String>,
     pending_address: Option<String>,
     card_purpose: Option<String>,
+    /// §16.3.1: whether this thread has a card an introduction could name.
+    /// False on a contact made before the binding existed, where one could
+    /// be neither sent nor checked.
+    can_introduce: bool,
     email: Option<String>,
     phone: Option<String>,
     signal: Option<String>,
@@ -862,6 +866,7 @@ fn contact_row(a: &App, c: Contact) -> ContactRow {
         their_address: c.their_address,
         pending_address: c.pending_address,
         card_purpose: c.card_purpose,
+        can_introduce: c.card_inbox.is_some(),
         email: c.email,
         phone: c.phone,
         signal: c.signal,
@@ -1138,6 +1143,19 @@ async fn send_text(persona_hex: String, body: String) -> Result<(), String> {
     })
     .await
     .map_err(s)?
+}
+
+/// §16.3.1: hand over the rest of who we are, in the thread.
+///
+/// The card that started this thread may have published nothing but a
+/// persona — a hail deliberately does. This sends the identical signed half
+/// the card's inbox carries, sealed to one person instead of a board.
+#[tauri::command]
+async fn introduce(persona_hex: String) -> Result<(), String> {
+    let a = app()?;
+    tauri::async_runtime::spawn_blocking(move || a.introduce(&persona_hex).map(|_| ()).map_err(said))
+        .await
+        .map_err(s)?
 }
 
 #[tauri::command]
@@ -3186,6 +3204,7 @@ pub fn run() {
             claim_card,
             thread,
             send_text,
+            introduce,
             mark_seen,
             set_petname,
             remove_contact,

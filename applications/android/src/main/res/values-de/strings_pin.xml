@@ -5,6 +5,10 @@
     <string name="pin_ask_title">PIN eingeben</string>
     <string name="pin_ask_body">Gleich verlässt Geld dieses Telefon.</string>
     <string name="pin_ask_body_staff">Dahinter liegt die Personalseite dieser Kasse.</string>
+    <string name="spend_gate_over_threshold">Das liegt über deinem Limit, deshalb wird immer gefragt.</string>
+    <string name="spend_gate_hour">Du hast in der letzten Stunde viel ausgegeben.</string>
+    <string name="spend_gate_no_rate">Gerade gibt es keinen Kurs, an dem sich das prüfen lässt.</string>
+    <string name="spend_gate_locked">Entsperre das Telefon oder gib deine PIN ein.</string>
     <string name="pin_label">PIN</string>
     <string name="pin_again">Noch einmal eingeben</string>
     <string name="pin_save">PIN setzen</string>

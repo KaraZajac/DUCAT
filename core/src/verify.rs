@@ -39,6 +39,19 @@ pub enum Verification {
 /// What the payer's client can currently attest to.
 #[derive(Debug, Clone, Copy)]
 pub struct VerificationState {
+    /// The operating system says the device was unlocked **within
+    /// `device_unlock_validity_s`** — not "has a lock screen", and not
+    /// "was unlocked at some point today".
+    ///
+    /// The caller must have asked about exactly that window, because the
+    /// platforms answer a yes/no question rather than reporting an age:
+    /// Android's keystore will use a key bound to a recent authentication
+    /// and throw when the window has lapsed. So the number lives in the
+    /// policy, the caller reads it from there, and this is the answer.
+    ///
+    /// False also covers "this device has no secure lock screen at all",
+    /// which is the honest reading: nothing has been established, and the
+    /// caller falls back to the app's own secret.
     pub device_unlocked: bool,
     /// Seconds since a secret was last entered in-app; `None` if never.
     pub app_secret_age_s: Option<u64>,
@@ -65,13 +78,33 @@ impl VerificationState {
 /// limit" quietly becoming a $70 one after a price rise.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct VerificationPolicy {
-    /// At or above this, the device must be unlocked.
+    /// At or above this, the device must have been unlocked recently.
+    ///
+    /// **Zero by default**, which means every payment. This is the shape a
+    /// phone's own payment app already has and the one people already know:
+    /// unlock the phone, open the app, tap. There is no tap-and-go tier
+    /// below it, because the thing being handed over is money in a wallet
+    /// nobody can reverse, not a transit fare.
     pub device_unlock_at: u64,
-    /// At or above this, a secret must be entered in-app.
+    /// How long ago that unlock may have been. Two minutes: long enough that
+    /// unlocking the phone and walking to the terminal is one gesture, short
+    /// enough that a phone lifted off a table is not a payment instrument.
+    pub device_unlock_validity_s: u64,
+    /// At or above this, a secret must be entered in-app. The one number a
+    /// user is expected to set.
     pub app_secret_at: u64,
     /// How long an in-app entry stays good. Short, or "deliberate" decays into
     /// "happened at some point today".
     pub app_secret_validity_s: u64,
+    /// Whether a payment that crosses `app_secret_at` gets its **own** entry
+    /// rather than resting on one from a minute ago.
+    ///
+    /// True by default, and this is the difference between "a PIN is required
+    /// above a hundred dollars" and "a PIN is required above a hundred
+    /// dollars, once". Somebody who reads a PIN over a shoulder and then
+    /// takes the phone gets one large payment out of it instead of as many
+    /// as they can tap in the validity window.
+    pub app_secret_every_time: bool,
     /// Cumulative spend in a rolling window that also demands the top tier.
     /// A per-transaction limit alone does not stop twenty payments just under
     /// it, which is how a lifted phone is actually drained.
@@ -85,9 +118,11 @@ impl Default for VerificationPolicy {
     /// unlock rather than an emptied wallet.
     fn default() -> Self {
         VerificationPolicy {
-            device_unlock_at: 2_000,       // $20.00
+            device_unlock_at: 0,           // every payment
+            device_unlock_validity_s: 120,
             app_secret_at: 10_000,         // $100.00
             app_secret_validity_s: 120,
+            app_secret_every_time: true,
             cumulative_at: 20_000,         // $200.00 in a rolling window
             cumulative_window_s: 3_600,
         }
@@ -109,6 +144,12 @@ impl VerificationPolicy {
             return Err(Reject::with_detail(
                 RejectCode::PolicyRefused,
                 "an in-app secret with zero validity can never be satisfied",
+            ));
+        }
+        if self.device_unlock_validity_s == 0 {
+            return Err(Reject::with_detail(
+                RejectCode::PolicyRefused,
+                "a device unlock with zero validity can never be satisfied",
             ));
         }
         Ok(())
@@ -157,6 +198,16 @@ pub fn check_verification(
     } else {
         Verification::AppSecret
     };
+    // A payment over the threshold gets its own entry. Returning `Err` *is*
+    // the instruction to ask — a client that has just asked and been
+    // answered proceeds, rather than calling back in and being told to ask
+    // again, so this is one rule in one place and no second round trip.
+    if policy.app_secret_every_time && rate_is_fresh && amount_minor >= policy.app_secret_at {
+        return Err(VerificationNeeded {
+            required: Verification::AppSecret,
+            satisfied: if state.device_unlocked { Verification::DeviceUnlocked } else { Verification::None },
+        });
+    }
     let satisfied = state.satisfied(policy.app_secret_validity_s);
     if satisfied >= required {
         Ok(required)

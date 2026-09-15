@@ -11,6 +11,10 @@
 
     <!-- Receber pagamentos -->
     <string name="drawer_being_paid_title">Receber pagamentos</string>
+    <string name="drawer_spend_limit_title">Despesas</string>
+    <string name="drawer_spend_limit_body">Abaixo disto, paga um telemóvel que desbloqueou nos últimos dois minutos. A partir daí, o PIN é pedido sempre.</string>
+    <string name="drawer_spend_limit_label">Pedir PIN acima de (%1$s)</string>
+    <string name="drawer_spend_limit_note">Nada disto é enviado para lado nenhum. Quem recebe não pode pedir menos.</string>
     <string name="drawer_publish_switch">Deixar contatos me pagarem diretamente</string>
     <string name="drawer_publish_off_note">Sem isto, quem quer pagar você precisa esperar um pedido.</string>
     <string name="drawer_publish_on_warning">Seu endereço vai uma vez para cada contato e é reutilizado. Qualquer um que consiga ver a cadeia pode perceber que a mesma pessoa foi paga todas as vezes — inclusive quem pagou você uma única vez. Pedidos evitam isso levando um endereço novo a cada vez.</string>

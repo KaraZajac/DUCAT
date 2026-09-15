@@ -771,6 +771,8 @@ mod tests {
             card_purpose: None,
             my_card_purpose: None,
             my_card_purpose_at: 0,
+            card_inbox: None,
+            card_mine: false,
             out_seq: 0,
             out_prev_link: None,
             in_seq: 0,

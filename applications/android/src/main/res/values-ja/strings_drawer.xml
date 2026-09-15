@@ -11,6 +11,10 @@
 
     <!-- Being paid -->
     <string name="drawer_being_paid_title">受け取り</string>
+    <string name="drawer_spend_limit_title">支払い</string>
+    <string name="drawer_spend_limit_body">これ未満なら、2分以内にロックを解除した端末で支払えます。以上なら毎回 PIN を尋ねます。</string>
+    <string name="drawer_spend_limit_label">PIN を尋ねる金額 (%1$s)</string>
+    <string name="drawer_spend_limit_note">これらはどこにも送られません。支払う相手がこれを緩めさせることはできません。</string>
     <string name="drawer_publish_switch">連絡先からの直接支払いを許可</string>
     <string name="drawer_publish_off_note">オフの場合、あなたに支払う人はあなたからの請求を待つ必要があります。</string>
     <string name="drawer_publish_on_warning">アドレスは各連絡先に一度渡され、使い回されます。チェーンを見られる人には、毎回同じ人物が支払いを受けたと分かります — 一度しか支払っていない相手にもです。請求なら毎回新しいアドレスを載せるため、これを避けられます。</string>

@@ -1912,6 +1912,22 @@ data class Contact(
     /** When [myCardPurpose] was last established — the fence that keeps the
      *  receipt loop off traffic that predates the donate relationship. */
     val myCardPurposeAt: Long = 0,
+    /**
+     * The inbox record of the card this relationship began with (§16.9).
+     *
+     * Kept because §16.3.1's introduction is bound to it: an `INTRODUCTION`
+     * carries the same signed object a card's inbox half carries, and a
+     * reader must be able to tie one to *this* thread's card or refuse it.
+     * Null on a contact made before the field existed, which means an
+     * introduction into that thread cannot be checked — and so is refused.
+     */
+    val cardInbox: String? = null,
+    /**
+     * True when we cut that card. It decides which half each side signs: the
+     * issuer writes subkey 0 and whoever claimed writes subkey 1, and an
+     * introduction keeps the roles the handshake established.
+     */
+    val cardMine: Boolean = false,
     /** Our next outgoing sequence number, and the link it must carry (§16.10). */
     val outSeq: Long = 0,
     val outPrevLink: ByteArray? = null,
@@ -1984,6 +2000,8 @@ data class Contact(
         put("card_purpose", cardPurpose ?: JSONObject.NULL)
         put("my_card_purpose", myCardPurpose ?: JSONObject.NULL)
         put("my_card_purpose_at", myCardPurposeAt)
+        put("card_inbox", cardInbox ?: JSONObject.NULL)
+        put("card_mine", cardMine)
         put("out_seq", outSeq)
         put("out_prev", outPrevLink?.let { b64(it) } ?: JSONObject.NULL)
         put("in_seq", inSeq)
@@ -2012,6 +2030,8 @@ data class Contact(
             cardPurpose = o.optStringOrNull("card_purpose"),
             myCardPurpose = o.optStringOrNull("my_card_purpose"),
             myCardPurposeAt = o.optLong("my_card_purpose_at", 0L),
+            cardInbox = o.optStringOrNull("card_inbox"),
+            cardMine = o.optBoolean("card_mine", false),
             myOutbox = o.optString("my_outbox", ""),
             myOutboxOwnerPublic = unb64(o.optString("my_outbox_pub", "")),
             myOutboxOwnerSecret = unb64(o.optString("my_outbox_sec", "")),

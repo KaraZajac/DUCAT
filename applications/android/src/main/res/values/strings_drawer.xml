@@ -11,6 +11,10 @@
 
     <!-- Being paid -->
     <string name="drawer_being_paid_title">Being paid</string>
+    <string name="drawer_spend_limit_title">Spending</string>
+    <string name="drawer_spend_limit_body">Below this, a phone you unlocked in the last two minutes pays. At or above it, your PIN is asked every time.</string>
+    <string name="drawer_spend_limit_label">Ask for a PIN above (%1$s)</string>
+    <string name="drawer_spend_limit_note">None of this is sent anywhere. Nobody you pay can ask for less.</string>
     <string name="drawer_publish_switch">Let contacts pay me directly</string>
     <string name="drawer_publish_off_note">Without this, someone paying you has to wait for a request.</string>
     <string name="drawer_publish_on_warning">Your address goes to each contact once, and gets reused. Anyone who can see the chain can tell that the same person was paid each time — including people who only ever paid you once. Requests avoid that by carrying a fresh address each time.</string>

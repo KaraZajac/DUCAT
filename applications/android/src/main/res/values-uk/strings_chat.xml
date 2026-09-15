@@ -99,6 +99,9 @@
     <string name="chat_asked_you_for">У тебе просять</string>
     <string name="chat_receipt_you_issued">Чек, виданий тобою</string>
     <string name="chat_receipt">Чек</string>
+    <string name="chat_introduced_you">Поділився своїми даними</string>
+    <string name="chat_you_introduced">Ви поділилися своїми даними</string>
+    <string name="chat_introduce">Поділитися своїми даними</string>
     <string name="chat_you_offered_to_drive">Ти пропонуєш підвезти</string>
     <string name="chat_offers_to_drive_you">Пропонує підвезти тебе</string>
     <string name="chat_you_accepted_ride">Поїздку прийнято тобою</string>

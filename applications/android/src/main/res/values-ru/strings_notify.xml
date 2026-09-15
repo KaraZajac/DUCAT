@@ -38,4 +38,5 @@
     <string name="notify_unbonded_body">Вы договорились о поездке с %1$s, но плату не удалось поместить в эскроу. Всё держится на слове — обсудите это в переписке.</string>
     <string name="notify_card_answered_title">Кто-то ответил на ваш код</string>
     <string name="notify_card_answered_body">%1$s теперь контакт. Если вы не показывали им код, забудьте их из разговора.</string>
+    <string name="notify_renamed_body">Теперь называет себя %1$s. Имя, которое вам дали, сохранено.</string>
 </resources>

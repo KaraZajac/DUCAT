@@ -38,4 +38,5 @@
     <string name="notify_unbonded_body">Du hast die Fahrt mit %1$s vereinbart, aber der Fahrpreis konnte nicht hinterlegt werden. Sie steht auf eurem Wort — klärt es im Chat.</string>
     <string name="notify_card_answered_title">Jemand hat deinen Code beantwortet</string>
     <string name="notify_card_answered_body">%1$s ist jetzt ein Kontakt. Wenn du ihnen keinen Code gezeigt hast, vergiss sie aus der Unterhaltung.</string>
+    <string name="notify_renamed_body">Nennt sich jetzt %1$s. Der Name, den du bekommen hast, bleibt.</string>
 </resources>

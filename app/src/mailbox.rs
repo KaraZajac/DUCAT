@@ -573,6 +573,11 @@ impl App {
             // `donate` card is the thread whose unprompted payments are
             // donations. The other direction's memory rides through.
             card_purpose: theirs.purpose.clone().or_else(|| prior.as_ref().and_then(|p| p.card_purpose.clone())),
+            // §16.3.1: the card this thread was born from, so an
+            // introduction arriving later can be tied to it. Their card,
+            // so their half is the issuer's and ours is the claimant's.
+            card_inbox: Some(inbox.clone()),
+            card_mine: false,
             my_card_purpose: prior.as_ref().and_then(|p| p.my_card_purpose.clone()),
             my_card_purpose_at: prior.as_ref().map_or(0, |p| p.my_card_purpose_at),
             out_seq: 0,
@@ -819,6 +824,10 @@ impl App {
             // from the prior record; what OUR card said goes in its own
             // field, with the moment it was established.
             card_purpose: prior.as_ref().and_then(|p| p.card_purpose.clone()),
+            // §16.3.1: our card, so our half is the issuer's half and
+            // theirs is the claimant's.
+            card_inbox: Some(issued.inbox_key.clone()),
+            card_mine: true,
             my_card_purpose: Some(issued.purpose.clone()).filter(|p| !p.is_empty()).or_else(|| prior.as_ref().and_then(|p| p.my_card_purpose.clone())),
             my_card_purpose_at: if purpose_changed { App::now() } else { prior.as_ref().map_or(0, |p| p.my_card_purpose_at) },
             out_seq: 0,
@@ -855,6 +864,123 @@ impl App {
             self.reissue_profile_code(issued);
         }
         Ok(true)
+    }
+
+    /// §16.3.1: hand over the rest of who we are, inside the thread.
+    ///
+    /// A card on a public board publishes only what a stranger needs in order
+    /// to **decide** — a hail carries an area, two cells, a fare and a
+    /// persona, and no name at all. Everything else travels here, once there
+    /// is somebody to seal it to. What goes out is the identical signed
+    /// object the card's inbox half carries, bound to the same inbox and the
+    /// same half, so the other side can check it against the card this thread
+    /// was born from and refuse anything it cannot tie to both.
+    pub fn introduce(&self, persona_hex: &str) -> Result<Contact, Error> {
+        let c = self.contact(persona_hex).ok_or_else(|| Error::Refused("no such contact".into()))?;
+        let inbox = c.card_inbox.clone().ok_or_else(|| {
+            Error::Refused("this thread predates the card binding, so an introduction has nothing to name".into())
+        })?;
+        // The doorway persona, never the worn hat: the card was cut or
+        // claimed as this one, and a half naming another persona would not
+        // match the half the other side already holds.
+        let owner_hex = if c.owner.is_empty() { self.primary_hex()? } else { c.owner.clone() };
+        let persona = match self.persona_secret(&owner_hex)? {
+            Some(s) => s,
+            None => self.primary_secret()?,
+        };
+        let bundle = self
+            .prekey_bundle()
+            .ok_or_else(|| Error::Refused("no prekeys published yet".into()))?;
+        // The purpose the handshake was stamped with, from whichever side
+        // stamped it — it is what scopes the profile, exactly as it did on
+        // the card, so an introduction never reveals more than the card's
+        // own half would have.
+        let purpose = if c.card_mine { c.my_card_purpose.clone() } else { c.card_purpose.clone() };
+        // A hail card we *claimed* is one we are driving: §15.12's plate,
+        // car and photograph belong in that half and nowhere else.
+        let driving = !c.card_mine && purpose.as_deref() == Some("hail");
+        let signed = build_contact_details(
+            persona,
+            c.my_outbox.clone(),
+            bundle,
+            self.my_name(Some(&owner_hex))?,
+            // Deliberately no address. §16.12 lets a *message* rotate where
+            // we are paid, and that path holds a changed address for the
+            // person to accept; an introduction that quietly carried one
+            // would be the same redirect with the question skipped.
+            None,
+            self.profile_wire(&owner_hex, purpose.as_deref(), driving),
+            purpose,
+            inbox,
+            // Our half is the one we wrote at the handshake: the issuer's
+            // if we cut the card, the claimant's if we answered one.
+            !c.card_mine,
+        )?;
+        self.send(
+            &c,
+            Outgoing { body: "introduction".into(), kind: 17, payload: Some(signed), ..Default::default() },
+        )
+    }
+
+    /// §16.3.1: somebody's own account of themselves, arriving in the thread.
+    ///
+    /// Two ties, both required. The envelope opens under the persona named
+    /// inside it, so this is their account and not a third party's; and the
+    /// object names the inbox this thread was born from, so one cannot be
+    /// lifted out of another relationship and replayed into this one.
+    fn absorb_introduction(&self, c: &Contact, opened: &OpenedMessage) {
+        let Some(payload) = opened.payload.as_deref() else { return };
+        let Some(inbox) = c.card_inbox.clone() else {
+            log::warn(TAG, format!("{} introduced themselves, but this thread predates the card binding — nothing to check it against", c.display_name()));
+            return;
+        };
+        // Their half is the one they wrote: the claimant's if we cut the
+        // card, the issuer's if we answered theirs.
+        let theirs = match parse_contact_details(payload.to_vec(), inbox, c.card_mine) {
+            Ok(t) => t,
+            Err(e) => {
+                log::warn(TAG, format!("an introduction from {} does not check out ({e}) — ignored", c.display_name()));
+                return;
+            }
+        };
+        if hex(&theirs.persona) != c.persona_hex {
+            log::warn(TAG, format!("an introduction in {}'s thread names another persona — ignored", c.display_name()));
+            return;
+        }
+        // §16.3.1: the first name you were given is the one you decided on.
+        // A later one is shown, not adopted — a thread that renames itself
+        // silently is how somebody becomes a person you already trusted.
+        let renamed = match (&c.asserted_name, &theirs.asserted_name) {
+            (Some(had), Some(now)) if had != now => Some(now.clone()),
+            _ => None,
+        };
+        let p = theirs.profile.clone();
+        let updated = self.merge_contact(&c.persona_hex, |cur| {
+            let base = cur.cloned().unwrap_or_else(|| c.clone());
+            Contact {
+                asserted_name: base.asserted_name.clone().or_else(|| theirs.asserted_name.clone()),
+                avatar: p.avatar.clone().or_else(|| base.avatar.clone()),
+                email: p.email.clone().or_else(|| base.email.clone()),
+                phone: p.phone.clone().or_else(|| base.phone.clone()),
+                signal: p.signal.clone().or_else(|| base.signal.clone()),
+                pronouns: p.pronouns.or(base.pronouns),
+                car_model: p.car_model.clone().or_else(|| base.car_model.clone()),
+                car_color: p.car_color.clone().or_else(|| base.car_color.clone()),
+                plate: p.plate.clone().or_else(|| base.plate.clone()),
+                car_photo: p.car_photo.clone().or_else(|| base.car_photo.clone()),
+                ..base
+            }
+        });
+        match updated {
+            Ok(u) => {
+                log::info(TAG, format!("{} shared their details", u.display_name()));
+                if let Some(now) = renamed {
+                    log::warn(TAG, format!("{} now calls themselves {now} — the name you were given is kept", u.display_name()));
+                    crate::notify::post(u.display_name(), format!("now calls themselves {now}"), Some(c.persona_hex.clone()));
+                }
+            }
+            Err(e) => log::warn(TAG, format!("could not keep an introduction: {e}")),
+        }
     }
 
     /// The replacement code belongs to the persona whose code was taken,
@@ -1855,6 +1981,7 @@ impl App {
                     self.on_wanted(&c.persona_hex, want);
                 }
             }
+            17 => self.absorb_introduction(c, opened),
             _ => {}
         }
     }

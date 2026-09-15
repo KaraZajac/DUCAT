@@ -118,9 +118,17 @@ pub enum Verification {
 /// moves, quietly turning a "$100 limit" into a $70 one after a price rise.
 #[derive(uniffi::Record)]
 pub struct VerificationPolicy {
+    /// Zero by default: every payment wants a recent unlock.
     pub device_unlock_at: u64,
+    /// How recent. The caller MUST ask the platform about **this** window —
+    /// `DeviceLock.authenticatedWithin(context, deviceUnlockValidityS)` on
+    /// Android — because the answer is a yes/no about a window, not an age.
+    pub device_unlock_validity_s: u64,
     pub app_secret_at: u64,
     pub app_secret_validity_s: u64,
+    /// A payment over `app_secret_at` gets its own entry rather than resting
+    /// on one from a minute ago.
+    pub app_secret_every_time: bool,
     pub cumulative_at: u64,
     pub cumulative_window_s: u64,
 }
@@ -130,8 +138,10 @@ pub fn default_verification_policy() -> VerificationPolicy {
     let d = verify::VerificationPolicy::default();
     VerificationPolicy {
         device_unlock_at: d.device_unlock_at,
+        device_unlock_validity_s: d.device_unlock_validity_s,
         app_secret_at: d.app_secret_at,
         app_secret_validity_s: d.app_secret_validity_s,
+        app_secret_every_time: d.app_secret_every_time,
         cumulative_at: d.cumulative_at,
         cumulative_window_s: d.cumulative_window_s,
     }
@@ -162,8 +172,10 @@ pub fn check_verification(
 ) -> VerificationOutcome {
     let p = verify::VerificationPolicy {
         device_unlock_at: policy.device_unlock_at,
+        device_unlock_validity_s: policy.device_unlock_validity_s,
         app_secret_at: policy.app_secret_at,
         app_secret_validity_s: policy.app_secret_validity_s,
+        app_secret_every_time: policy.app_secret_every_time,
         cumulative_at: policy.cumulative_at,
         cumulative_window_s: policy.cumulative_window_s,
     };
@@ -272,7 +284,12 @@ mod tests {
             0,
             true,
         );
-        assert_eq!(fresh.required, Verification::None);
+        assert_eq!(
+            fresh.required,
+            Verification::DeviceUnlocked,
+            "there is no tap-and-go tier: the floor is zero"
+        );
+        assert!(fresh.permitted, "a phone unlocked a moment ago pays");
 
         let stale = check_verification(p, true, None, small, 0, false);
         assert_eq!(

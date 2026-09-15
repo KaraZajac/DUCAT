@@ -38,4 +38,5 @@
     <string name="notify_unbonded_body">%1$s님과 운행에 합의했지만 요금을 에스크로에 넣지 못했어요. 서로의 약속에만 기대고 있어요. 채팅에서 정리하세요.</string>
     <string name="notify_card_answered_title">누군가 당신의 코드에 응답했습니다</string>
     <string name="notify_card_answered_body">%1$s이(가) 이제 연락처입니다. 코드를 보여준 적이 없다면 대화에서 잊어버리세요.</string>
+    <string name="notify_renamed_body">이제 스스로를 %1$s(으)로 부릅니다. 처음 받은 이름을 그대로 둡니다.</string>
 </resources>

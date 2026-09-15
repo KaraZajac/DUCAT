@@ -51,6 +51,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import androidx.compose.material.icons.filled.Receipt
+import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.House
 import androidx.compose.ui.platform.LocalContext
@@ -1576,6 +1577,16 @@ fun ChatScreen(contact: Contact, onBack: () -> Unit) {
                 }
                 settingsOpen = false
             },
+            onIntroduce = if (c.cardInbox == null) null else ({
+                settingsOpen = false
+                scope.launch(Dispatchers.IO) {
+                    runCatching { org.ducatproject.ducat.Mailbox.introduce(context, c) }
+                        .onFailure { e ->
+                            withContext(Dispatchers.Main) { error = moneyFailure(context, e) }
+                        }
+                }
+                Unit
+            }),
             onDismiss = { settingsOpen = false },
         )
     }
@@ -1765,6 +1776,9 @@ private fun ChatSettingsDialog(
     onRename: (String?) -> Unit,
     onPick: (Long) -> Unit,
     onClearAll: () -> Unit,
+    /** §16.3.1, by hand. Null when this thread predates the card binding
+     *  and there is therefore nothing an introduction could name. */
+    onIntroduce: (() -> Unit)?,
     onDismiss: () -> Unit,
 ) {
     val options = listOf(
@@ -1841,6 +1855,16 @@ private fun ChatSettingsDialog(
                         RadioButton(selected = current == secs, onClick = { pick() })
                         Spacer(Modifier.width(8.dp))
                         Text(label)
+                    }
+                }
+                if (onIntroduce != null) {
+                    Spacer(Modifier.height(10.dp))
+                    // §16.3.1: what a card did not publish, handed over now.
+                    // A hail's card carries no name at all, so for a thread
+                    // born from one this is the only way the other side
+                    // learns who they are talking to.
+                    TextButton(onClick = { commitName(); onIntroduce() }) {
+                        Text(stringResource(R.string.chat_introduce))
                     }
                 }
                 Spacer(Modifier.height(10.dp))
@@ -2570,6 +2594,28 @@ private fun Bubble(
                             style = MaterialTheme.typography.bodySmall,
                         )
                     }
+                }
+            } else if (m.kind == 17) {
+                // §16.3.1's introduction. A paper trail, like the handover
+                // above: the fields it carried were filed into the contact
+                // the moment it arrived, and the body is a fixed label the
+                // sender wrote, so it is never drawn.
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Filled.Badge,
+                        null,
+                        Modifier.size(14.dp),
+                        tint = fg.copy(alpha = 0.8f),
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        stringResource(
+                            if (m.outgoing) R.string.chat_you_introduced
+                            else R.string.chat_introduced_you,
+                        ),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = fg.copy(alpha = 0.8f),
+                    )
                 }
             } else if (m.kind == 16) {
                 // §16.20's ask. Its own bubble because the trailing branch

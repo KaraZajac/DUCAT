@@ -111,4 +111,5 @@
     <string name="hail_accept_failed">Ton oui à %1$s n\'est pas parti. Vérifie le réseau et rouvre l\'offre.</string>
     <string name="hail_escrow_failed">La course n\'a pas pu être mise sous séquestre. Règle ça avec le chauffeur dans la discussion.</string>
     <string name="hail_dest_exact">Destination : %1$s</string>
+    <string name="hail_pickup_exact">Prise en charge : %1$s</string>
 </resources>

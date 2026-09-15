@@ -11,6 +11,10 @@
 
     <!-- Being paid -->
     <string name="drawer_being_paid_title">Menerima pembayaran</string>
+    <string name="drawer_spend_limit_title">Pengeluaran</string>
+    <string name="drawer_spend_limit_body">Di bawah ini, ponsel yang Anda buka dalam dua menit terakhir cukup untuk membayar. Pada atau di atasnya, PIN diminta setiap kali.</string>
+    <string name="drawer_spend_limit_label">Minta PIN di atas (%1$s)</string>
+    <string name="drawer_spend_limit_note">Tidak ada yang dikirim ke mana pun. Pihak yang Anda bayar tidak bisa meminta lebih longgar.</string>
     <string name="drawer_publish_switch">Izinkan kontak membayarku langsung</string>
     <string name="drawer_publish_off_note">Tanpa ini, orang yang mau membayarmu harus menunggu permintaan.</string>
     <string name="drawer_publish_on_warning">Alamatmu dikirim sekali ke tiap kontak, lalu dipakai ulang. Siapa pun yang bisa melihat blockchain bisa tahu orang yang sama dibayar tiap kali — termasuk orang yang cuma pernah membayarmu sekali. Permintaan menghindari itu dengan membawa alamat baru setiap kali.</string>

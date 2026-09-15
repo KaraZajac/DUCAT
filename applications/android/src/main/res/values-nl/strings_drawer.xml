@@ -11,6 +11,10 @@
 
     <!-- Being paid -->
     <string name="drawer_being_paid_title">Betaald worden</string>
+    <string name="drawer_spend_limit_title">Uitgaven</string>
+    <string name="drawer_spend_limit_body">Daaronder betaalt een telefoon die je in de laatste twee minuten hebt ontgrendeld. Vanaf dit bedrag wordt je pincode elke keer gevraagd.</string>
+    <string name="drawer_spend_limit_label">Pincode vragen boven (%1$s)</string>
+    <string name="drawer_spend_limit_note">Hier wordt niets van verstuurd. Wie je betaalt kan niet om minder vragen.</string>
     <string name="drawer_publish_switch">Laat contacten mij direct betalen</string>
     <string name="drawer_publish_off_note">Zonder dit moet iemand die jou wil betalen op een verzoek wachten.</string>
     <string name="drawer_publish_on_warning">Je adres gaat één keer naar elk contact en wordt hergebruikt. Iedereen die de keten kan zien, kan zien dat telkens dezelfde persoon werd betaald — ook mensen die je maar één keer hebben betaald. Verzoeken vermijden dat doordat ze elke keer een vers adres meesturen.</string>

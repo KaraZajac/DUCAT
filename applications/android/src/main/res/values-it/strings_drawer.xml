@@ -11,6 +11,10 @@
 
     <!-- Ricevere pagamenti -->
     <string name="drawer_being_paid_title">Ricevere pagamenti</string>
+    <string name="drawer_spend_limit_title">Spese</string>
+    <string name="drawer_spend_limit_body">Sotto questa cifra paga un telefono sbloccato negli ultimi due minuti. Da qui in su il PIN viene chiesto ogni volta.</string>
+    <string name="drawer_spend_limit_label">Chiedi il PIN sopra (%1$s)</string>
+    <string name="drawer_spend_limit_note">Niente di questo viene inviato da nessuna parte. Chi ricevi il pagamento non può chiedere di meno.</string>
     <string name="drawer_publish_switch">Lascia che i contatti mi paghino direttamente</string>
     <string name="drawer_publish_off_note">Senza questo, chi vuole pagarti deve aspettare una richiesta.</string>
     <string name="drawer_publish_on_warning">Il tuo indirizzo va a ogni contatto una volta e viene riusato. Chiunque veda la catena può capire che è stata pagata sempre la stessa persona — comprese le persone che ti hanno pagato una volta sola. Le richieste lo evitano portando ogni volta un indirizzo nuovo.</string>

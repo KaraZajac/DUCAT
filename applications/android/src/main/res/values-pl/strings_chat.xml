@@ -99,6 +99,9 @@
     <string name="chat_asked_you_for">Prośba do ciebie o</string>
     <string name="chat_receipt_you_issued">Paragon wystawiony przez ciebie</string>
     <string name="chat_receipt">Paragon</string>
+    <string name="chat_introduced_you">Udostępnił swoje dane</string>
+    <string name="chat_you_introduced">Udostępniłeś swoje dane</string>
+    <string name="chat_introduce">Udostępnij moje dane</string>
     <string name="chat_you_offered_to_drive">Twoja oferta przejazdu</string>
     <string name="chat_offers_to_drive_you">Oferta przejazdu dla ciebie</string>
     <string name="chat_you_accepted_ride">Przejazd przyjęty przez ciebie</string>

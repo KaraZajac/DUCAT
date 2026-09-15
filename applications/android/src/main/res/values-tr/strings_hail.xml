@@ -111,4 +111,5 @@
     <string name="hail_accept_failed">%1$s kişisine evet cevabın gönderilemedi. Ağı kontrol et ve teklifi yeniden aç.</string>
     <string name="hail_escrow_failed">Ücret emanete konulamadı. Sürücüyle sohbette hallet.</string>
     <string name="hail_dest_exact">Varış: %1$s</string>
+    <string name="hail_pickup_exact">Alış yeri: %1$s</string>
 </resources>

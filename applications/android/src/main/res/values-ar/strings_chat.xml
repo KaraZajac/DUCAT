@@ -99,6 +99,9 @@
     <string name="chat_asked_you_for">طلب منك</string>
     <string name="chat_receipt_you_issued">إيصال أصدرته</string>
     <string name="chat_receipt">إيصال</string>
+    <string name="chat_introduced_you">شاركوا بياناتهم</string>
+    <string name="chat_you_introduced">شاركت بياناتك</string>
+    <string name="chat_introduce">شارك بياناتي</string>
     <string name="chat_you_offered_to_drive">عرضت أن توصّل</string>
     <string name="chat_offers_to_drive_you">يعرض أن يوصّلك</string>
     <string name="chat_you_accepted_ride">قبلت المشوار</string>

@@ -91,6 +91,13 @@ mod k {
     // primary — an old client restoring a new bundle gets that persona and
     // ignores this key, which is the graceful half of the failure.
     pub const PERSONAS: u64 = 27;
+    // The two thresholds §15.5.1 grew after the first five. Optional, and
+    // both default to the *stricter* reading when a bundle predates them:
+    // a two-minute unlock window and a PIN per large payment. A restore that
+    // silently loosened a gate would be the one failure direction this whole
+    // key group exists to avoid.
+    pub const CVM_DEVICE_UNLOCK_VALIDITY_S: u64 = 28;
+    pub const CVM_APP_SECRET_EVERY_TIME: u64 = 29;
     pub const ESCROW_ID: u64 = 0;
     // Sub-keys of one CONTACTS entry.
     pub const C_PERSONA: u64 = 0;
@@ -585,6 +592,14 @@ impl Backup {
             k::CVM_APP_SECRET_VALIDITY_S,
             Value::Uint(self.verification.app_secret_validity_s),
         );
+        m.insert(
+            k::CVM_DEVICE_UNLOCK_VALIDITY_S,
+            Value::Uint(self.verification.device_unlock_validity_s),
+        );
+        m.insert(
+            k::CVM_APP_SECRET_EVERY_TIME,
+            Value::Uint(u64::from(self.verification.app_secret_every_time)),
+        );
         m.insert(k::CVM_CUMULATIVE_AT, Value::Uint(self.verification.cumulative_at));
         m.insert(
             k::CVM_CUMULATIVE_WINDOW_S,
@@ -641,6 +656,19 @@ impl Backup {
             device_unlock_at: get(k::CVM_DEVICE_UNLOCK_AT)?.as_uint().unwrap_or(0),
             app_secret_at: get(k::CVM_APP_SECRET_AT)?.as_uint().unwrap_or(0),
             app_secret_validity_s: get(k::CVM_APP_SECRET_VALIDITY_S)?.as_uint().unwrap_or(0),
+            // Absent on a bundle written before these existed. The default
+            // is the strict one, never zero: a zero window would fail
+            // validate() and strand the restore, and a false `every time`
+            // would quietly turn a gate off during a restore — which is when
+            // somebody is least likely to go looking at settings.
+            device_unlock_validity_s: m
+                .get(&k::CVM_DEVICE_UNLOCK_VALIDITY_S)
+                .and_then(|v| v.as_uint())
+                .unwrap_or(120),
+            app_secret_every_time: m
+                .get(&k::CVM_APP_SECRET_EVERY_TIME)
+                .and_then(|v| v.as_uint())
+                .map_or(true, |v| v == 1),
             cumulative_at: get(k::CVM_CUMULATIVE_AT)?.as_uint().unwrap_or(0),
             cumulative_window_s: get(k::CVM_CUMULATIVE_WINDOW_S)?.as_uint().unwrap_or(0),
         };

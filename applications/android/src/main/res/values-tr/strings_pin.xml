@@ -5,6 +5,10 @@
     <string name="pin_ask_title">PIN\'ini gir</string>
     <string name="pin_ask_body">Bu telefondan az sonra para çıkacak.</string>
     <string name="pin_ask_body_staff">Bunun ardında bu kasanın personel tarafı var.</string>
+    <string name="spend_gate_over_threshold">Bu limitinin üzerinde, bu yüzden her seferinde sorulur.</string>
+    <string name="spend_gate_hour">Son bir saatte epey harcadın.</string>
+    <string name="spend_gate_no_rate">Şu anda bunu karşılaştıracak bir fiyat yok.</string>
+    <string name="spend_gate_locked">Telefonun kilidini aç ya da PIN\'ini gir.</string>
     <string name="pin_label">PIN</string>
     <string name="pin_again">Bir daha yaz</string>
     <string name="pin_save">PIN\'i kaydet</string>

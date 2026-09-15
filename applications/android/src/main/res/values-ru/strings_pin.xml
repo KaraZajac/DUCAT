@@ -5,6 +5,10 @@
     <string name="pin_ask_title">Введите PIN</string>
     <string name="pin_ask_body">Сейчас с этого телефона уйдут деньги.</string>
     <string name="pin_ask_body_staff">За этим — служебная сторона этой кассы.</string>
+    <string name="spend_gate_over_threshold">Это выше вашего лимита, поэтому спрашивается всегда.</string>
+    <string name="spend_gate_hour">За последний час потрачено много.</string>
+    <string name="spend_gate_no_rate">Сейчас нет курса, чтобы это сверить.</string>
+    <string name="spend_gate_locked">Разблокируйте телефон или введите PIN.</string>
     <string name="pin_label">PIN</string>
     <string name="pin_again">Введите ещё раз</string>
     <string name="pin_save">Сохранить PIN</string>

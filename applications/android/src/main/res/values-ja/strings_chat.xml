@@ -99,6 +99,9 @@
     <string name="chat_asked_you_for">あなたへの請求</string>
     <string name="chat_receipt_you_issued">発行したレシート</string>
     <string name="chat_receipt">レシート</string>
+    <string name="chat_introduced_you">自分の情報を渡しました</string>
+    <string name="chat_you_introduced">自分の情報を渡しました（あなた）</string>
+    <string name="chat_introduce">自分の情報を渡す</string>
     <string name="chat_you_offered_to_drive">送迎を申し出ました</string>
     <string name="chat_offers_to_drive_you">送迎の申し出</string>
     <string name="chat_you_accepted_ride">配車を承認しました</string>

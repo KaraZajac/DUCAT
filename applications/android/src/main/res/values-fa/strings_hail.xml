@@ -111,4 +111,5 @@
     <string name="hail_accept_failed">موافقتت به %1$s فرستاده نشد. شبکه را بررسی کن و پیشنهاد را دوباره ببین.</string>
     <string name="hail_escrow_failed">کرایه به امانت گذاشته نشد. با راننده در گفتگو حلش کن.</string>
     <string name="hail_dest_exact">مقصد: %1$s</string>
+    <string name="hail_pickup_exact">محل سوار شدن: %1$s</string>
 </resources>

@@ -11,6 +11,10 @@
 
     <!-- Being paid -->
     <string name="drawer_being_paid_title">Отримання платежів</string>
+    <string name="drawer_spend_limit_title">Витрати</string>
+    <string name="drawer_spend_limit_body">Нижче цієї суми платить телефон, розблокований за останні дві хвилини. Від неї й вище PIN запитується щоразу.</string>
+    <string name="drawer_spend_limit_label">Запитувати PIN понад (%1$s)</string>
+    <string name="drawer_spend_limit_note">Нічого з цього нікуди не надсилається. Той, кому ви платите, не може вимагати меншого.</string>
     <string name="drawer_publish_switch">Дозволити контактам платити мені напряму</string>
     <string name="drawer_publish_off_note">Без цього тому, хто хоче тобі заплатити, доведеться чекати на запит.</string>
     <string name="drawer_publish_on_warning">Твоя адреса надсилається кожному контакту один раз і використовується повторно. Будь-хто, хто бачить ланцюг, зможе зрозуміти, що щоразу платили тій самій людині — включно з тими, хто заплатив тобі лише раз. Запити уникають цього: кожен несе свіжу адресу.</string>

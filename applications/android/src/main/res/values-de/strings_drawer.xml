@@ -11,6 +11,10 @@
 
     <!-- Being paid -->
     <string name="drawer_being_paid_title">Bezahlt werden</string>
+    <string name="drawer_spend_limit_title">Ausgaben</string>
+    <string name="drawer_spend_limit_body">Darunter zahlt ein Telefon, das du in den letzten zwei Minuten entsperrt hast. Ab diesem Betrag wird jedes Mal deine PIN verlangt.</string>
+    <string name="drawer_spend_limit_label">PIN verlangen ab (%1$s)</string>
+    <string name="drawer_spend_limit_note">Nichts davon wird irgendwohin gesendet. Wem du zahlst, kann nicht weniger verlangen.</string>
     <string name="drawer_publish_switch">Kontakte dürfen mich direkt bezahlen</string>
     <string name="drawer_publish_off_note">Ohne das muss jemand, der dich bezahlen will, auf eine Anfrage warten.</string>
     <string name="drawer_publish_on_warning">Deine Adresse geht einmal an jeden Kontakt und wird wiederverwendet. Wer die Blockchain einsehen kann, erkennt, dass jedes Mal dieselbe Person bezahlt wurde — auch Leute, die dich nur ein einziges Mal bezahlt haben. Anfragen vermeiden das, weil jede eine frische Adresse trägt.</string>

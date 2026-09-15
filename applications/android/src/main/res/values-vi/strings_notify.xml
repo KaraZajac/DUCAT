@@ -38,4 +38,5 @@
     <string name="notify_unbonded_body">Bạn đã thỏa thuận chuyến đi với %1$s, nhưng tiền cước không vào được ký quỹ. Nó dựa trên lời hứa của hai bên — hãy trao đổi trong cuộc trò chuyện.</string>
     <string name="notify_card_answered_title">Ai đó đã trả lời mã của bạn</string>
     <string name="notify_card_answered_body">%1$s giờ là một liên hệ. Nếu bạn chưa cho họ xem mã nào, hãy quên họ từ cuộc trò chuyện.</string>
+    <string name="notify_renamed_body">Giờ tự gọi là %1$s. Tên bạn được cho biết vẫn được giữ.</string>
 </resources>

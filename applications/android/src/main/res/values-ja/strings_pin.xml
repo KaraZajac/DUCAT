@@ -5,6 +5,10 @@
     <string name="pin_ask_title">PIN を入力</string>
     <string name="pin_ask_body">この端末からお金が出ていきます。</string>
     <string name="pin_ask_body_staff">この先はレジのスタッフ側です。</string>
+    <string name="spend_gate_over_threshold">上限を超えているので、毎回尋ねます。</string>
+    <string name="spend_gate_hour">この1時間でかなり使っています。</string>
+    <string name="spend_gate_no_rate">今は照らし合わせる価格がありません。</string>
+    <string name="spend_gate_locked">端末のロックを解除するか、PIN を入力してください。</string>
     <string name="pin_label">PIN</string>
     <string name="pin_again">もう一度入力</string>
     <string name="pin_save">PIN を保存</string>

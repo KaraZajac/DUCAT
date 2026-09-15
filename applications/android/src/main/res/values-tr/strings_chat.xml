@@ -99,6 +99,9 @@
     <string name="chat_asked_you_for">Senden istedi</string>
     <string name="chat_receipt_you_issued">Kestiğin makbuz</string>
     <string name="chat_receipt">Makbuz</string>
+    <string name="chat_introduced_you">Kendi bilgilerini paylaştı</string>
+    <string name="chat_you_introduced">Bilgilerini paylaştın</string>
+    <string name="chat_introduce">Bilgilerimi paylaş</string>
     <string name="chat_you_offered_to_drive">Götürmeyi teklif ettin</string>
     <string name="chat_offers_to_drive_you">Seni götürmeyi teklif ediyor</string>
     <string name="chat_you_accepted_ride">Yolculuğu kabul ettin</string>

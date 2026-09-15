@@ -18,6 +18,10 @@ const val LOG_SUBKEYS: UInt = 8u
 const val NEW_RING: UInt = 32u
 private const val ONE_TIME_KEYS: UInt = 32u
 
+/** A profile that says nothing — what a card bound for a public board
+ *  publishes about the person who cut it (§16.3.1). */
+private val EMPTY_PROFILE = Profile(null, null, null, null, null, null, null, null, null)
+
 /**
  * Everything that touches DHT records (§16.12).
  *
@@ -99,6 +103,7 @@ object Mailbox {
         7 -> "ride accept"
         8, 9 -> "ceremony round"
         10 -> "ceremony abort"
+        17 -> "introduction"
         else -> "kind $kind"
     }
 
@@ -307,6 +312,18 @@ object Mailbox {
         /** Which of our personas cuts this card — the doorway choice. Null
          *  means the worn one, which is what every existing caller meant. */
         asPersonaHex: String? = null,
+        /**
+         * This card is going somewhere everyone can read (§16.3.1).
+         *
+         * A card's own inbox half is written before anybody has claimed it,
+         * so there is nobody to seal it to and it is published in the clear
+         * — and a card pinned to a public board hands that record's key to
+         * every reader of the board. So a card bound for a board publishes
+         * only what a stranger needs in order to *decide*: a persona, and
+         * nothing else. The name and the profile travel afterwards, to the
+         * one person who claimed, as an `INTRODUCTION`.
+         */
+        publicBoard: Boolean = false,
     ): IssuedHandle {
         val store = ContactStore(context)
         val personas = PersonaStore(context)
@@ -337,7 +354,8 @@ object Mailbox {
         nodeDhtSet(
             inbox.key, 0u,
             buildContactDetails(
-                persona, outbox.key, prekeys.bundle, displayName,
+                persona, outbox.key, prekeys.bundle,
+                if (publicBoard) null else displayName,
                 // Only if the user has opted in. §16.12 makes this a choice,
                 // and defaulting it on would be choosing for them.
                 // The claimant is not known yet, so the minor allocates to the
@@ -350,7 +368,8 @@ object Mailbox {
                 // carrying a picture is a QR code nobody can scan. Scoped to
                 // the purpose — a "sale" card does not carry the till owner's
                 // phone number to every customer who claims it.
-                MyProfile(context, ownerHex).toWire(purpose = purpose),
+                if (publicBoard) EMPTY_PROFILE
+                else MyProfile(context, ownerHex).toWire(purpose = purpose),
                 // Stamped so the claimant can scope their reply to match.
                 purpose,
                 // §16.9: the inbox this half is written into, and which half it is.
@@ -359,7 +378,12 @@ object Mailbox {
         )
 
         val card = createContactCard(
-            persona, inbox.key, writer.public, displayName, writer.secret, validSecs,
+            persona, inbox.key, writer.public,
+            // The URI carries a name too, and a board notice carries the
+            // URI: a hail that published a name only in the record would
+            // still have published it (A4).
+            if (publicBoard) null else displayName,
+            writer.secret, validSecs,
         )
         store.saveIssuedCard(
             inbox.key, writer.public, writer.secret,
@@ -374,6 +398,115 @@ object Mailbox {
         // that shows this code must wait for *this card's* claimant, not for
         // whichever contact appears next.
         return IssuedHandle(card.uri, inbox.key)
+    }
+
+    /**
+     * §16.3.1: hand over the rest of who we are, inside the thread.
+     *
+     * A card on a public board publishes only what a stranger needs in order
+     * to **decide** — a hail carries an area, two cells, a fare and a
+     * persona, and no name at all. Everything else travels here, once there
+     * is somebody to seal it to. What goes out is the identical signed
+     * object the card's inbox half carries, bound to the same inbox and the
+     * same half, so the other side can check it against the card this thread
+     * was born from and refuse anything it cannot tie to both.
+     */
+    fun introduce(context: Context, c: Contact): Contact {
+        val inbox = c.cardInbox
+            ?: throw IllegalStateException(
+                "this thread predates the card binding, so an introduction has nothing to name")
+        val store = ContactStore(context)
+        val personas = PersonaStore(context)
+        // The doorway persona, never the worn hat: the card was cut or
+        // claimed as this one, and a half naming another persona would not
+        // match the half the other side already holds.
+        val ownerHex = personas.ownerHexOf(c)
+        val persona = personas.secretFor(ownerHex) ?: personas.secret()
+        val bundle = store.prekeyBundle()
+            ?: throw IllegalStateException("no prekeys published yet")
+        // The purpose the handshake was stamped with, from whichever side
+        // stamped it — it is what scopes the profile, exactly as it did on
+        // the card, so an introduction never reveals more than the card's
+        // own half would have.
+        val purpose = if (c.cardMine) c.myCardPurpose else c.cardPurpose
+        // A hail card we *claimed* is one we are driving: §15.12's plate,
+        // car and photograph belong in that half and nowhere else.
+        val driving = !c.cardMine && purpose == "hail"
+        val signed = buildContactDetails(
+            persona, c.myOutbox, bundle,
+            NameStore(context, ownerHex).get(),
+            // Deliberately no address. §16.12 lets a *message* rotate where
+            // we are paid, and that path holds a changed address for the
+            // person to accept; an introduction that quietly carried one
+            // would be the same redirect with the question skipped.
+            null,
+            MyProfile(context, ownerHex).toWire(purpose = purpose, driving = driving),
+            purpose,
+            inbox,
+            // Our half is the one we wrote at the handshake: the issuer's if
+            // we cut the card, the claimant's if we answered one.
+            !c.cardMine,
+        )
+        return send(context, c, "introduction", kind = 17, payload = signed)
+    }
+
+    /**
+     * §16.3.1: somebody's own account of themselves, arriving in the thread.
+     *
+     * Two ties, both required. The envelope opens under the persona named
+     * inside it, so this is their account and not a third party's; and the
+     * object names the inbox this thread was born from, so one cannot be
+     * lifted out of another relationship and replayed into this one.
+     */
+    private fun absorbIntroduction(context: Context, c: Contact, payload: ByteArray?) {
+        if (payload == null) return
+        val inbox = c.cardInbox
+        if (inbox == null) {
+            DucatLog.w(TAG, "an introduction from ${c.personaHex.take(12)}… has no card to check it against")
+            return
+        }
+        // Their half is the one they wrote: the claimant's if we cut the
+        // card, the issuer's if we answered theirs.
+        val theirs = runCatching { parseContactDetails(payload, inbox, c.cardMine) }
+            .getOrElse {
+                DucatLog.w(TAG, "an introduction from ${c.personaHex.take(12)}… does not check out: ${it.message}")
+                return
+            }
+        if (theirs.persona.toHexString() != c.personaHex) {
+            DucatLog.w(TAG, "an introduction in ${c.personaHex.take(12)}…'s thread names another persona — ignored")
+            return
+        }
+        // §16.3.1: the first name you were given is the one you decided on.
+        // A later one is shown, not adopted — a thread that renames itself
+        // silently is how somebody becomes a person you already trusted.
+        val renamed = theirs.assertedName?.takeIf { c.assertedName != null && c.assertedName != it }
+        val store = ContactStore(context)
+        val p = theirs.profile
+        store.merge(c.personaHex) { cur0 ->
+            val cur = cur0 ?: c
+            cur.copy(
+                assertedName = cur.assertedName ?: theirs.assertedName,
+                avatar = p.avatar ?: cur.avatar,
+                email = p.email ?: cur.email,
+                phone = p.phone ?: cur.phone,
+                signal = p.signal ?: cur.signal,
+                pronouns = p.pronouns?.toInt() ?: cur.pronouns,
+                carModel = p.carModel ?: cur.carModel,
+                carColor = p.carColor ?: cur.carColor,
+                plate = p.plate ?: cur.plate,
+                carPhoto = p.carPhoto ?: cur.carPhoto,
+            )
+        }
+        DucatLog.i(TAG, "${c.personaHex.take(12)}… shared their details")
+        if (renamed != null) {
+            DucatLog.w(TAG, "${c.personaHex.take(12)}… now calls themselves $renamed — the name you were given is kept")
+            Notify.post(
+                context,
+                c.displayName(),
+                context.getString(R.string.notify_renamed_body, renamed),
+                openChat = c.personaHex,
+            )
+        }
     }
 
     /** A fresh append-only log with its head initialised. */
@@ -592,6 +725,11 @@ object Mailbox {
             cardPurpose = theirs.purpose ?: prior?.cardPurpose,
             myCardPurpose = prior?.myCardPurpose,
             myCardPurposeAt = prior?.myCardPurposeAt ?: 0L,
+            // §16.3.1: the card this thread was born from, so an
+            // introduction arriving later can be tied to it. Their card,
+            // so their half is the issuer's and ours is the claimant's.
+            cardInbox = scanned.inboxKey,
+            cardMine = false,
             myRing = NEW_RING.toInt(),
             owner = ownerHex,
         )
@@ -929,6 +1067,10 @@ object Mailbox {
                             issued.purpose != prior?.myCardPurpose
                         ) System.currentTimeMillis() / 1000
                         else prior?.myCardPurposeAt ?: 0L,
+                    // §16.3.1: our card, so our half is the issuer's half
+                    // and theirs is the claimant's.
+                    cardInbox = issued.inboxKey,
+                    cardMine = true,
                     myRing = NEW_RING.toInt(),
                     owner = ownerHex,
                 )
@@ -962,11 +1104,30 @@ object Mailbox {
                 // gets the place. In the sealed thread, to them alone, the
                 // moment there is a thread to put it in.
                 if (issued.purpose == "hail") {
-                    RideStore(context).load()?.destExact?.takeIf { it.isNotBlank() }?.let { where ->
-                        runCatching {
-                            val them = store.all().firstOrNull { it.personaHex == personaHex }
-                            if (them != null) send(context, them, context.getString(R.string.hail_dest_exact, where))
-                        }.onFailure { DucatLog.w(TAG, "could not send the destination: ${it.message}") }
+                    // Three messages, in the order a driver needs them: who
+                    // is standing there, where they are standing, and where
+                    // they are going. The first is §16.3.1's introduction —
+                    // the board carried no name, so this is the only place
+                    // the rider's name and picture travel. The driver's own
+                    // name, plate, car and photograph already arrived, in
+                    // the sealed half of the claim.
+                    val them = store.all().firstOrNull { it.personaHex == personaHex }
+                    val ride = RideStore(context).load()
+                    if (them != null) {
+                        runCatching { introduce(context, them) }
+                            .onFailure { DucatLog.w(TAG, "could not introduce: ${it.message}") }
+                        ride?.originExact?.takeIf { it.isNotBlank() }?.let { where ->
+                            runCatching {
+                                val fresh = store.all().firstOrNull { it.personaHex == personaHex } ?: them
+                                send(context, fresh, context.getString(R.string.hail_pickup_exact, where))
+                            }.onFailure { DucatLog.w(TAG, "could not send the pickup: ${it.message}") }
+                        }
+                        ride?.destExact?.takeIf { it.isNotBlank() }?.let { where ->
+                            runCatching {
+                                val fresh = store.all().firstOrNull { it.personaHex == personaHex } ?: them
+                                send(context, fresh, context.getString(R.string.hail_dest_exact, where))
+                            }.onFailure { DucatLog.w(TAG, "could not send the destination: ${it.message}") }
+                        }
                     }
                 }
                 Notify.post(
@@ -2896,6 +3057,14 @@ object Mailbox {
             // goes straight back as a key, priced raises one bill against
             // this one reader. Resolving *which* publication is onWanted's
             // job, and it declines to guess.
+            // §16.3.1: the coda as a message. A card that published
+            // nothing but a persona — a hail always does — hands over the
+            // rest here, once there is one person to hand it to.
+            if (arrived.kind == 17) {
+                runCatching {
+                    absorbIntroduction(context, c, opened.payload)
+                }.onFailure { DucatLog.w(TAG, "introduction: ${it.message}") }
+            }
             if (arrived.kind == 16) {
                 opened.wantedPeriod?.let { want ->
                     runCatching {

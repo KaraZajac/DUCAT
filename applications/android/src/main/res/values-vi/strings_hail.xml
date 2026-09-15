@@ -111,4 +111,5 @@
     <string name="hail_accept_failed">Lời đồng ý gửi %1$s chưa đi được. Kiểm tra mạng rồi mở lại báo giá.</string>
     <string name="hail_escrow_failed">Không thể đưa tiền cước vào ký quỹ. Hãy trao đổi với tài xế trong chat.</string>
     <string name="hail_dest_exact">Điểm đến: %1$s</string>
+    <string name="hail_pickup_exact">Đón tại: %1$s</string>
 </resources>

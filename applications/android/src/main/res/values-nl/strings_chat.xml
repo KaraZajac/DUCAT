@@ -99,6 +99,9 @@
     <string name="chat_asked_you_for">Vroeg jou om</string>
     <string name="chat_receipt_you_issued">Bon die jij hebt uitgegeven</string>
     <string name="chat_receipt">Bon</string>
+    <string name="chat_introduced_you">Heeft de eigen gegevens gedeeld</string>
+    <string name="chat_you_introduced">Je hebt je gegevens gedeeld</string>
+    <string name="chat_introduce">Mijn gegevens delen</string>
     <string name="chat_you_offered_to_drive">Jij bood aan te rijden</string>
     <string name="chat_offers_to_drive_you">Biedt aan je te rijden</string>
     <string name="chat_you_accepted_ride">Je hebt de rit geaccepteerd</string>

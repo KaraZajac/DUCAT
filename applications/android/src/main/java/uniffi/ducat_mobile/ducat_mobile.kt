@@ -7642,9 +7642,23 @@ public object FfiConverterTypeVerificationOutcome: FfiConverterRustBuffer<Verifi
  * moves, quietly turning a "$100 limit" into a $70 one after a price rise.
  */
 data class VerificationPolicy (
+    /**
+     * Zero by default: every payment wants a recent unlock.
+     */
     var `deviceUnlockAt`: kotlin.ULong, 
+    /**
+     * How recent. The caller MUST ask the platform about **this** window —
+     * `DeviceLock.authenticatedWithin(context, deviceUnlockValidityS)` on
+     * Android — because the answer is a yes/no about a window, not an age.
+     */
+    var `deviceUnlockValidityS`: kotlin.ULong, 
     var `appSecretAt`: kotlin.ULong, 
     var `appSecretValidityS`: kotlin.ULong, 
+    /**
+     * A payment over `app_secret_at` gets its own entry rather than resting
+     * on one from a minute ago.
+     */
+    var `appSecretEveryTime`: kotlin.Boolean, 
     var `cumulativeAt`: kotlin.ULong, 
     var `cumulativeWindowS`: kotlin.ULong
 ) {
@@ -7662,22 +7676,28 @@ public object FfiConverterTypeVerificationPolicy: FfiConverterRustBuffer<Verific
             FfiConverterULong.read(buf),
             FfiConverterULong.read(buf),
             FfiConverterULong.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterULong.read(buf),
             FfiConverterULong.read(buf),
         )
     }
 
     override fun allocationSize(value: VerificationPolicy) = (
             FfiConverterULong.allocationSize(value.`deviceUnlockAt`) +
+            FfiConverterULong.allocationSize(value.`deviceUnlockValidityS`) +
             FfiConverterULong.allocationSize(value.`appSecretAt`) +
             FfiConverterULong.allocationSize(value.`appSecretValidityS`) +
+            FfiConverterBoolean.allocationSize(value.`appSecretEveryTime`) +
             FfiConverterULong.allocationSize(value.`cumulativeAt`) +
             FfiConverterULong.allocationSize(value.`cumulativeWindowS`)
     )
 
     override fun write(value: VerificationPolicy, buf: ByteBuffer) {
             FfiConverterULong.write(value.`deviceUnlockAt`, buf)
+            FfiConverterULong.write(value.`deviceUnlockValidityS`, buf)
             FfiConverterULong.write(value.`appSecretAt`, buf)
             FfiConverterULong.write(value.`appSecretValidityS`, buf)
+            FfiConverterBoolean.write(value.`appSecretEveryTime`, buf)
             FfiConverterULong.write(value.`cumulativeAt`, buf)
             FfiConverterULong.write(value.`cumulativeWindowS`, buf)
     }

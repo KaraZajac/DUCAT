@@ -175,6 +175,21 @@ pub struct Contact {
     pub my_card_purpose: Option<String>,
     #[serde(rename = "my_card_purpose_at", default)]
     pub my_card_purpose_at: u64,
+    /// The inbox record of the card this relationship began with (§16.9),
+    /// and which half of it we wrote.
+    ///
+    /// Kept because §16.3.1's introduction is bound to it: an `INTRODUCTION`
+    /// carries the same signed object a card's inbox half carries, and a
+    /// reader must be able to tie one to *this* thread's card or refuse it.
+    /// None on a contact made before the field existed, which means an
+    /// introduction into that thread cannot be checked — and so is refused.
+    #[serde(rename = "card_inbox", default)]
+    pub card_inbox: Option<String>,
+    /// True when we cut that card. It decides which half each side signs:
+    /// the issuer writes subkey 0 and whoever claimed writes subkey 1, and
+    /// an introduction keeps the roles the handshake established.
+    #[serde(rename = "card_mine", default)]
+    pub card_mine: bool,
     #[serde(rename = "out_seq", default)]
     pub out_seq: u64,
     #[serde(rename = "out_prev", with = "opt_bytes_b64", default)]
@@ -1437,6 +1452,8 @@ mod tests {
             card_purpose: None,
             my_card_purpose: None,
             my_card_purpose_at: 0,
+            card_inbox: None,
+            card_mine: false,
             out_seq: 0,
             out_prev_link: None,
             in_seq: 0,

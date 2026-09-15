@@ -99,6 +99,9 @@
     <string name="chat_asked_you_for">ขอจากคุณ</string>
     <string name="chat_receipt_you_issued">ใบเสร็จที่คุณออก</string>
     <string name="chat_receipt">ใบเสร็จ</string>
+    <string name="chat_introduced_you">แชร์ข้อมูลของตนแล้ว</string>
+    <string name="chat_you_introduced">คุณแชร์ข้อมูลของคุณแล้ว</string>
+    <string name="chat_introduce">แชร์ข้อมูลของฉัน</string>
     <string name="chat_you_offered_to_drive">คุณเสนอขับรถให้</string>
     <string name="chat_offers_to_drive_you">เสนอขับรถให้คุณ</string>
     <string name="chat_you_accepted_ride">คุณตอบรับการเดินทาง</string>

@@ -99,6 +99,9 @@
     <string name="chat_asked_you_for">Yêu cầu bạn trả</string>
     <string name="chat_receipt_you_issued">Biên nhận bạn đã phát</string>
     <string name="chat_receipt">Biên nhận</string>
+    <string name="chat_introduced_you">Đã chia sẻ thông tin của họ</string>
+    <string name="chat_you_introduced">Bạn đã chia sẻ thông tin của mình</string>
+    <string name="chat_introduce">Chia sẻ thông tin của tôi</string>
     <string name="chat_you_offered_to_drive">Bạn đề nghị chở</string>
     <string name="chat_offers_to_drive_you">Đề nghị chở bạn</string>
     <string name="chat_you_accepted_ride">Bạn đã nhận chuyến</string>

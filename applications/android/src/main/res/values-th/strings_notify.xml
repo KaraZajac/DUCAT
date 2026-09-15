@@ -38,4 +38,5 @@
     <string name="notify_unbonded_body">คุณตกลงการเดินทางกับ %1$s แล้ว แต่ไม่สามารถนำค่าโดยสารเข้าเอสโครว์ได้ ตอนนี้ขึ้นอยู่กับคำพูดของทั้งสองฝ่าย — คุยกันในแชท</string>
     <string name="notify_card_answered_title">มีคนตอบรหัสของคุณ</string>
     <string name="notify_card_answered_body">%1$s เป็นผู้ติดต่อแล้ว หากคุณไม่ได้แสดงรหัสให้พวกเขา ให้ลืมพวกเขาจากบทสนทนา</string>
+    <string name="notify_renamed_body">ตอนนี้เรียกตัวเองว่า %1$s ชื่อที่คุณได้รับมายังคงอยู่</string>
 </resources>

@@ -111,4 +111,5 @@
     <string name="hail_accept_failed">Twoja zgoda do %1$s nie została wysłana. Sprawdź sieć i otwórz ofertę ponownie.</string>
     <string name="hail_escrow_failed">Nie udało się złożyć opłaty w depozycie. Dogadaj się z kierowcą na czacie.</string>
     <string name="hail_dest_exact">Cel: %1$s</string>
+    <string name="hail_pickup_exact">Odbiór: %1$s</string>
 </resources>

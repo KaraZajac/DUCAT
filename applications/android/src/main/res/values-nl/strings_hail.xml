@@ -111,4 +111,5 @@
     <string name="hail_accept_failed">Je ja aan %1$s is niet verzonden. Controleer het netwerk en bekijk het bod opnieuw.</string>
     <string name="hail_escrow_failed">De ritprijs kon niet in bewaring worden gezet. Regel het met de chauffeur in de chat.</string>
     <string name="hail_dest_exact">Bestemming: %1$s</string>
+    <string name="hail_pickup_exact">Ophalen bij: %1$s</string>
 </resources>

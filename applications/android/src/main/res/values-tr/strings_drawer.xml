@@ -11,6 +11,10 @@
 
     <!-- Being paid -->
     <string name="drawer_being_paid_title">Ödeme almak</string>
+    <string name="drawer_spend_limit_title">Harcama</string>
+    <string name="drawer_spend_limit_body">Bunun altında, son iki dakika içinde kilidini açtığın telefon öder. Bu tutar ve üzerinde PIN her seferinde sorulur.</string>
+    <string name="drawer_spend_limit_label">Şu tutarın üstünde PIN sor (%1$s)</string>
+    <string name="drawer_spend_limit_note">Bunların hiçbiri hiçbir yere gönderilmez. Ödeme yaptığın taraf daha azını isteyemez.</string>
     <string name="drawer_publish_switch">Kişiler bana doğrudan ödeme yapabilsin</string>
     <string name="drawer_publish_off_note">Bu kapalıyken, sana ödeme yapacak biri bir istek beklemek zorunda.</string>
     <string name="drawer_publish_on_warning">Adresin her kişiye bir kez gider ve yeniden kullanılır. Zinciri görebilen herkes her seferinde aynı kişiye ödendiğini anlayabilir — sana yalnızca bir kez ödeme yapmış olanlar dahil. İstekler her seferinde taze bir adres taşıyarak bundan kaçınır.</string>

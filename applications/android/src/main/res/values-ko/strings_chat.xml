@@ -99,6 +99,9 @@
     <string name="chat_asked_you_for">나에게 요청한 금액</string>
     <string name="chat_receipt_you_issued">내가 발행한 영수증</string>
     <string name="chat_receipt">영수증</string>
+    <string name="chat_introduced_you">자신의 정보를 공유했습니다</string>
+    <string name="chat_you_introduced">내 정보를 공유했습니다</string>
+    <string name="chat_introduce">내 정보 공유</string>
     <string name="chat_you_offered_to_drive">운행을 제안했어요</string>
     <string name="chat_offers_to_drive_you">운행 제안이 왔어요</string>
     <string name="chat_you_accepted_ride">탑승을 수락했어요</string>

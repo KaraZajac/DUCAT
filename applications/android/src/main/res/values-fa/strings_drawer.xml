@@ -11,6 +11,10 @@
 
     <!-- Being paid -->
     <string name="drawer_being_paid_title">دریافت پول</string>
+    <string name="drawer_spend_limit_title">خرج کردن</string>
+    <string name="drawer_spend_limit_body">زیر این مبلغ، گوشی‌ای که در دو دقیقهٔ گذشته باز کرده‌اید پرداخت می‌کند. از این مقدار به بالا، هر بار پین خواسته می‌شود.</string>
+    <string name="drawer_spend_limit_label">پین را بالاتر از (%1$s) بپرس</string>
+    <string name="drawer_spend_limit_note">هیچ‌یک از این‌ها جایی فرستاده نمی‌شود. کسی که به او می‌پردازید نمی‌تواند کمتر بخواهد.</string>
     <string name="drawer_publish_switch">مخاطبین بتوانند مستقیم به من پول بدهند</string>
     <string name="drawer_publish_off_note">بدون این، کسی که می‌خواهد به تو پول بدهد باید منتظر یک درخواست بماند.</string>
     <string name="drawer_publish_on_warning">نشانی‌ات یک بار برای هر مخاطب می‌رود و بارها استفاده می‌شود. هر کسی که زنجیره را ببیند می‌فهمد هر بار به همان یک نفر پول داده شده — حتی کسانی که فقط یک بار به تو پول داده‌اند. درخواست‌ها با نشانیِ هر بار تازه، جلوی این را می‌گیرند.</string>

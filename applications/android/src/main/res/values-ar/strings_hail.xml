@@ -111,4 +111,5 @@
     <string name="hail_accept_failed">لم تُرسَل موافقتك إلى %1$s. تحقّق من الشبكة وافتح العرض من جديد.</string>
     <string name="hail_escrow_failed">تعذّر إيداع الأجرة في الضمان. تدبّر الأمر مع السائق في الدردشة.</string>
     <string name="hail_dest_exact">الوجهة: %1$s</string>
+    <string name="hail_pickup_exact">مكان الاستلام: %1$s</string>
 </resources>

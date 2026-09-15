@@ -5,6 +5,10 @@
     <string name="pin_ask_title">Nhập mã PIN</string>
     <string name="pin_ask_body">Tiền sắp rời khỏi máy này.</string>
     <string name="pin_ask_body_staff">Phía sau đây là phần dành cho nhân viên của quầy này.</string>
+    <string name="spend_gate_over_threshold">Khoản này vượt hạn mức của bạn nên luôn hỏi.</string>
+    <string name="spend_gate_hour">Bạn đã chi khá nhiều trong một giờ qua.</string>
+    <string name="spend_gate_no_rate">Hiện không có giá để đối chiếu.</string>
+    <string name="spend_gate_locked">Mở khóa điện thoại hoặc nhập mã PIN.</string>
     <string name="pin_label">PIN</string>
     <string name="pin_again">Gõ lại lần nữa</string>
     <string name="pin_save">Lưu PIN</string>

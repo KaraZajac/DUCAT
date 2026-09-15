@@ -128,6 +128,7 @@ export interface ContactRow {
   their_address: string | null;
   pending_address: string | null;
   card_purpose: string | null;
+  can_introduce: boolean;
   email: string | null;
   phone: string | null;
   signal: string | null;
@@ -631,6 +632,7 @@ export const api = {
   claimCard: (uri: string, petname: string | null) => invoke<{ contact: ContactRow; known: boolean }>("claim_card", { uri, petname }),
   thread: (personaHex: string) => invoke<MessageRow[]>("thread", { personaHex }),
   sendText: (personaHex: string, body: string) => invoke<void>("send_text", { personaHex, body }),
+  introduce: (personaHex: string) => invoke<void>("introduce", { personaHex }),
   markSeen: (personaHex: string) => invoke<void>("mark_seen", { personaHex }),
   setPetname: (personaHex: string, name: string | null) => invoke<void>("set_petname", { personaHex, name }),
   removeContact: (personaHex: string) => invoke<void>("remove_contact", { personaHex }),

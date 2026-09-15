@@ -11,6 +11,10 @@
 
     <!-- Being paid -->
     <string name="drawer_being_paid_title">استلام المدفوعات</string>
+    <string name="drawer_spend_limit_title">الإنفاق</string>
+    <string name="drawer_spend_limit_body">دون هذا المبلغ، يدفع هاتف فتحت قفله خلال الدقيقتين الماضيتين. عنده أو فوقه، يُطلب رمزك في كل مرة.</string>
+    <string name="drawer_spend_limit_label">اطلب الرمز فوق (%1$s)</string>
+    <string name="drawer_spend_limit_note">لا يُرسل أي من هذا إلى أي مكان. لا يستطيع من تدفع له طلب أقل من ذلك.</string>
     <string name="drawer_publish_switch">السماح لجهات الاتصال بالدفع لي مباشرة</string>
     <string name="drawer_publish_off_note">من دون هذا، على من يريد الدفع لك انتظار طلب منك.</string>
     <string name="drawer_publish_on_warning">يذهب عنوانك إلى كل جهة اتصال مرة واحدة، ويُعاد استخدامه. كل من يستطيع رؤية السلسلة يمكنه معرفة أن الشخص نفسه هو من تلقّى الدفعات كل مرة — بمن فيهم من لم يدفعوا لك إلا مرة واحدة. الطلبات تتجنب ذلك بحمل عنوان جديد كل مرة.</string>

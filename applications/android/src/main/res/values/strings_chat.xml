@@ -107,6 +107,9 @@
     <string name="chat_asked_you_for">Asked you for</string>
     <string name="chat_receipt_you_issued">Receipt you issued</string>
     <string name="chat_receipt">Receipt</string>
+    <string name="chat_introduced_you">Shared their details</string>
+    <string name="chat_you_introduced">You shared your details</string>
+    <string name="chat_introduce">Share my details</string>
     <string name="chat_you_offered_to_drive">You offered to drive</string>
     <string name="chat_offers_to_drive_you">Offers to drive you</string>
     <string name="chat_you_accepted_ride">You accepted the ride</string>

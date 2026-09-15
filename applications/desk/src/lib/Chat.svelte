@@ -472,6 +472,16 @@
   const RECORD_LINK = /ducat:record\/[0-9a-fA-F.]+/;
   const VOUCH_LINK = /^\s*ducat:vouch\/[0-9a-fA-F]+\s*$/;
   const VOUCHES_LINK = /^\s*ducat:vouches\/[0-9a-fA-F.]+\s*$/;
+  // §16.3.1: what the card did not publish, handed over now. A thread born
+  // from a hail's card has no name on either side until somebody does this.
+  async function introduce() {
+    if (!current) return;
+    err = null;
+    try {
+      await api.introduce(current.persona_hex);
+      await refresh();
+    } catch (e) { err = String(e); }
+  }
   async function vouchFor() {
     if (!current) return;
     err = null;
@@ -660,6 +670,7 @@
       case 14: return t("call_button");
       case 15: return t("chatlist_preview_call_answered");
       case 16: return `${t("desk_kind_asked_issue")}${m.pub_wanted ? ` · ${m.pub_wanted}` : ""}`;
+      case 17: return m.outgoing ? t("chat_you_introduced") : t("chat_introduced_you");
       default: return null;
     }
   }
@@ -822,6 +833,7 @@
           <button class="btn small" class:active={payingOut} disabled={!current.their_address} title={current.their_address ? t("desk_send_them_money") : t("pay_no_address_hint", current.name)} onclick={() => { payingOut = !payingOut; requesting = false; }}>{t("desk_pay")}</button>
           <button class="btn small" class:active={requesting} onclick={() => { requesting = !requesting; payingOut = false; }}>{t("pay_request")}</button>
           <button class="btn small" onclick={() => { renaming = true; newName = current?.petname ?? ""; }}>{t("profiles_rename")}</button>
+          <button class="btn small" title={t("chat_introduce")} disabled={!current.has_keys || !current.can_introduce} onclick={introduce}>{t("chat_introduce")}</button>
           <button class="btn small" title={t("desk_show_my_burn_hint")} disabled={!current.has_keys} onclick={showMyBurn}>{t("desk_show_my_burn")}</button>
           <button class="btn small" title={t("desk_show_my_record_hint")} disabled={!current.has_keys} onclick={showMyRecord}>{t("desk_show_my_record")}</button>
           <button class="btn small" title={t("desk_vouch_hint")} disabled={!current.has_keys || current.vouched} onclick={vouchFor}>{current.vouched ? t("desk_vouched") : t("desk_vouch")}</button>
@@ -958,7 +970,7 @@
               {:else if cardIn(m.body)}
                 <div class="bubble-body">{m.body.replace(CARD_LINK, "").trim()}</div>
                 <div class="card-link"><code>{cardIn(m.body)}</code><button class="linkish" title={t("chat_copy")} onclick={() => copy(cardIn(m.body)!)}>{@html icons.copy}</button></div>
-              {:else if m.body && !(m.att_hash && (m.body === "📷" || m.body === "🎤" || m.body.startsWith("📎 ")))}<div class="bubble-body">{m.body}</div>{/if}
+              {:else if m.kind !== 17 && m.body && !(m.att_hash && (m.body === "📷" || m.body === "🎤" || m.body.startsWith("📎 ")))}<div class="bubble-body">{m.body}</div>{/if}
               {#if m.kind === 0 && siteIn(m.body)}
                 <div class="actions" style="margin: 6px 0 2px"><button class="btn small" disabled={openingSite} onclick={() => openSite(siteIn(m.body)!)}>{openingSite ? t("releases_fetching") : t("sites_open")}</button></div>
               {/if}

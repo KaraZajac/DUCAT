@@ -99,6 +99,9 @@
     <string name="chat_asked_you_for">आपसे माँगे</string>
     <string name="chat_receipt_you_issued">आपकी जारी की रसीद</string>
     <string name="chat_receipt">रसीद</string>
+    <string name="chat_introduced_you">अपना विवरण साझा किया</string>
+    <string name="chat_you_introduced">आपने अपना विवरण साझा किया</string>
+    <string name="chat_introduce">मेरा विवरण साझा करें</string>
     <string name="chat_you_offered_to_drive">आपने राइड की पेशकश की</string>
     <string name="chat_offers_to_drive_you">आपको राइड की पेशकश</string>
     <string name="chat_you_accepted_ride">आपने राइड स्वीकारी</string>

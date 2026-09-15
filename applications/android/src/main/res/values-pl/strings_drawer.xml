@@ -11,6 +11,10 @@
 
     <!-- Being paid -->
     <string name="drawer_being_paid_title">Otrzymywanie pieniędzy</string>
+    <string name="drawer_spend_limit_title">Wydatki</string>
+    <string name="drawer_spend_limit_body">Poniżej tej kwoty płaci telefon odblokowany w ciągu ostatnich dwóch minut. Od niej w górę PIN jest pytany za każdym razem.</string>
+    <string name="drawer_spend_limit_label">Pytaj o PIN powyżej (%1$s)</string>
+    <string name="drawer_spend_limit_note">Nic z tego nigdzie nie jest wysyłane. Odbiorca płatności nie może zażądać mniej.</string>
     <string name="drawer_publish_switch">Pozwól kontaktom płacić mi bezpośrednio</string>
     <string name="drawer_publish_off_note">Bez tego ktoś, kto chce ci zapłacić, musi poczekać na prośbę.</string>
     <string name="drawer_publish_on_warning">Twój adres trafia do każdego kontaktu raz i jest używany wielokrotnie. Każdy, kto widzi łańcuch, pozna, że za każdym razem płacono tej samej osobie — także ci, którzy zapłacili ci tylko raz. Prośby tego unikają, bo za każdym razem niosą świeży adres.</string>

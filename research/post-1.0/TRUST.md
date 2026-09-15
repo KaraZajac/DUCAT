@@ -341,8 +341,14 @@ working days for one person; "proof" is what closes the step.
 
 Bonds through §17.2's float once §9.3's arbiter market exists; private
 receipt tokens (blind or linkable-ring signatures); zero-knowledge "one of
-the bonded set vouches" proofs; per-listing pseudonymous personas for public
-cards (W4/N3).
+the bonded set vouches" proofs.
+
+**Per-listing pseudonymous personas are not on this list** (decided
+2026-09-15, kara): trust comes from a persona, and a fresh persona per
+listing is a persona with no trust. DUCAT is privacy-focused, not
+anonymity-focused. What the review actually wanted from W4/N3 is a card
+that publishes less than it hands over, and that landed instead — §16.3.1's
+`INTRODUCTION` and §16.17's nameless hail card.
 
 ### Decisions taken
 

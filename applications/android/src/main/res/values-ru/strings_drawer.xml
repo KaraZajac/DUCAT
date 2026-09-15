@@ -11,6 +11,10 @@
 
     <!-- Being paid -->
     <string name="drawer_being_paid_title">Приём платежей</string>
+    <string name="drawer_spend_limit_title">Расходы</string>
+    <string name="drawer_spend_limit_body">Ниже этой суммы платит телефон, разблокированный за последние две минуты. От неё и выше PIN спрашивается каждый раз.</string>
+    <string name="drawer_spend_limit_label">Спрашивать PIN свыше (%1$s)</string>
+    <string name="drawer_spend_limit_note">Ничего из этого никуда не отправляется. Тот, кому вы платите, не может потребовать меньшего.</string>
     <string name="drawer_publish_switch">Разрешить контактам платить мне напрямую</string>
     <string name="drawer_publish_off_note">Без этого тому, кто хочет заплатить, придётся ждать запроса.</string>
     <string name="drawer_publish_on_warning">Твой адрес уходит каждому контакту один раз и потом переиспользуется. Любой, кто видит цепочку, поймёт, что платили одному и тому же человеку, — включая тех, кто заплатил тебе лишь однажды. Запросы избегают этого: каждый несёт свежий адрес.</string>
