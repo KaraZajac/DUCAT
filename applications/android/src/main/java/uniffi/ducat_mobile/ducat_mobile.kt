@@ -2978,7 +2978,19 @@ data class BackupInput (
      * Empty from a single-persona client; the primary always also travels
      * as the top-level persona secret, so old readers lose nothing.
      */
-    var `personas`: List<PersonaBackup>
+    var `personas`: List<PersonaBackup>, 
+    /**
+     * §15.5.1's thresholds, as this device is set up.
+     *
+     * None means "this client has no gate" — the desk's case — and the
+     * defaults are written, which is what a bundle from before the gate
+     * existed also restores as. A client that *does* have a gate must send
+     * its own policy: the defaults are stricter than most settings, so a
+     * restore that dropped it would silently revert a deliberate choice,
+     * and the user would meet it as a PIN prompt on a payment that never
+     * used to ask.
+     */
+    var `verification`: VerificationPolicy?
 ) {
     
     companion object
@@ -3002,6 +3014,7 @@ public object FfiConverterTypeBackupInput: FfiConverterRustBuffer<BackupInput> {
             FfiConverterOptionalByteArray.read(buf),
             FfiConverterSequenceTypeEscrowShareEntry.read(buf),
             FfiConverterSequenceTypePersonaBackup.read(buf),
+            FfiConverterOptionalTypeVerificationPolicy.read(buf),
         )
     }
 
@@ -3017,7 +3030,8 @@ public object FfiConverterTypeBackupInput: FfiConverterRustBuffer<BackupInput> {
             FfiConverterULong.allocationSize(value.`prekeyNextId`) +
             FfiConverterOptionalByteArray.allocationSize(value.`appState`) +
             FfiConverterSequenceTypeEscrowShareEntry.allocationSize(value.`escrowShares`) +
-            FfiConverterSequenceTypePersonaBackup.allocationSize(value.`personas`)
+            FfiConverterSequenceTypePersonaBackup.allocationSize(value.`personas`) +
+            FfiConverterOptionalTypeVerificationPolicy.allocationSize(value.`verification`)
     )
 
     override fun write(value: BackupInput, buf: ByteBuffer) {
@@ -3033,6 +3047,7 @@ public object FfiConverterTypeBackupInput: FfiConverterRustBuffer<BackupInput> {
             FfiConverterOptionalByteArray.write(value.`appState`, buf)
             FfiConverterSequenceTypeEscrowShareEntry.write(value.`escrowShares`, buf)
             FfiConverterSequenceTypePersonaBackup.write(value.`personas`, buf)
+            FfiConverterOptionalTypeVerificationPolicy.write(value.`verification`, buf)
     }
 }
 
@@ -6503,6 +6518,13 @@ data class RestoredBackup (
      */
     var `personas`: List<PersonaBackup>, 
     /**
+     * §15.5.1's thresholds as the bundle carries them. A bundle written
+     * before the two newest fields existed comes back with the *stricter*
+     * reading of those two and its own values for the other five, so a
+     * caller can apply this whole record without checking its age.
+     */
+    var `verification`: VerificationPolicy, 
+    /**
      * When the bundle was written, in seconds since the epoch — the thing that
      * makes "how old is this backup" answerable.
      *
@@ -6540,6 +6562,7 @@ public object FfiConverterTypeRestoredBackup: FfiConverterRustBuffer<RestoredBac
             FfiConverterUInt.read(buf),
             FfiConverterSequenceTypeEscrowShareEntry.read(buf),
             FfiConverterSequenceTypePersonaBackup.read(buf),
+            FfiConverterTypeVerificationPolicy.read(buf),
             FfiConverterULong.read(buf),
         )
     }
@@ -6559,6 +6582,7 @@ public object FfiConverterTypeRestoredBackup: FfiConverterRustBuffer<RestoredBac
             FfiConverterUInt.allocationSize(value.`escrowCount`) +
             FfiConverterSequenceTypeEscrowShareEntry.allocationSize(value.`escrowShares`) +
             FfiConverterSequenceTypePersonaBackup.allocationSize(value.`personas`) +
+            FfiConverterTypeVerificationPolicy.allocationSize(value.`verification`) +
             FfiConverterULong.allocationSize(value.`created`)
     )
 
@@ -6577,6 +6601,7 @@ public object FfiConverterTypeRestoredBackup: FfiConverterRustBuffer<RestoredBac
             FfiConverterUInt.write(value.`escrowCount`, buf)
             FfiConverterSequenceTypeEscrowShareEntry.write(value.`escrowShares`, buf)
             FfiConverterSequenceTypePersonaBackup.write(value.`personas`, buf)
+            FfiConverterTypeVerificationPolicy.write(value.`verification`, buf)
             FfiConverterULong.write(value.`created`, buf)
     }
 }
@@ -9478,6 +9503,38 @@ public object FfiConverterOptionalTypePublicationSend: FfiConverterRustBuffer<Pu
         } else {
             buf.put(1)
             FfiConverterTypePublicationSend.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalTypeVerificationPolicy: FfiConverterRustBuffer<VerificationPolicy?> {
+    override fun read(buf: ByteBuffer): VerificationPolicy? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeVerificationPolicy.read(buf)
+    }
+
+    override fun allocationSize(value: VerificationPolicy?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeVerificationPolicy.allocationSize(value)
+        }
+    }
+
+    override fun write(value: VerificationPolicy?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeVerificationPolicy.write(value, buf)
         }
     }
 }

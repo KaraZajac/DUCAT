@@ -213,7 +213,30 @@ are unchanged; what hardware adds is two independent clocks and two radios.
    deposits. Checkout: guest deposit comes home, rent + host deposit −
    fee to the host. Verify all three numbers on chain.
 
-## Pass 8 — the phone swap (restore on real hardware; run LAST, it wipes)
+## Pass 8 — costly identity on a handset (§9.5)
+
+The trust layer has been walked desk-to-desk and once on a phone; what no
+emulator gives it is a handset's own view of the chain. It needs a reachable
+Monero node for the burn and a *second* one for the block, which is exactly
+the field condition this sheet exists for.
+
+1. Phone 1: drawer → money screen → **Burn**. Spend the floor (0.01 XMR).
+   The proof is made at send time and the envelope is signed later, on the
+   sweep that first sees the block — so expect a gap of minutes, and expect
+   the screen to say which of the two it is waiting on.
+2. Phone 1 → phone 2: **Show my burn** in the thread. Phone 2 taps **Check**.
+   It must check the proof against its *own* node for exactly the proven
+   amount, and get the block from a different node. Record how long, and
+   what it says when the second node cannot be reached — "not yet" is the
+   only correct answer there, never "yes".
+3. After any settled deal on the day: **Rate them**, then **Show my record**
+   the other way. A record from somebody whose burn phone 2 has not checked
+   must read as *0 weighted*, not as a number.
+4. **I know them** on both phones, then a third party asks: the answer is
+   words ("Pat knows them"), counted only from contacts that phone already
+   holds. If it ever draws a score, stop and write it down.
+
+## Pass 9 — the phone swap (restore on real hardware; run LAST, it wipes)
 
 Proven twice on emulators (2026-08-26), shop and till included — what
 hardware adds is the OEM's own file picker and share sheet, which is where
@@ -228,12 +251,19 @@ a phone, and every pass after it would pay the fresh node's attach.
 4. Expect back: name, contacts, threads (attachments re-fetch), **your
    listings and till items** (new in 0.89), and the balance after a
    rescan (~20 min stagenet; the note says it is partial until done).
+   Also **your spending limit** (drawer → Profile → Spending, new
+   2026-09-15): set it to something unusual before the export and check
+   the number that comes back is yours and not the default. This is the
+   failure that hides — the default is *stricter*, so a restore that
+   dropped it would look like nothing until a payment that never used to
+   ask for a PIN asks for one, days later, with nothing on any screen
+   connecting the two.
 5. Messaging resumes when the fresh Veilid identity attaches. If it sits
    at "Attaching" for more than ~10 min, **cycle airplane mode** — that
    re-runs network detection, which an app restart does not, and took an
    emulator from zero to 55 peers in a minute.
 
-## Pass 9 — battery (runs all afternoon by itself)
+## Pass 10 — battery (runs all afternoon by itself)
 
 Note both phones' battery % when you leave the desk and each hour after.
 The poller backgrounds to ~20 sweeps/hour; the claim to verify is that an

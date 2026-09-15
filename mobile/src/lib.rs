@@ -466,6 +466,16 @@ pub struct BackupInput {
     /// Empty from a single-persona client; the primary always also travels
     /// as the top-level persona secret, so old readers lose nothing.
     pub personas: Vec<PersonaBackup>,
+    /// §15.5.1's thresholds, as this device is set up.
+    ///
+    /// None means "this client has no gate" — the desk's case — and the
+    /// defaults are written, which is what a bundle from before the gate
+    /// existed also restores as. A client that *does* have a gate must send
+    /// its own policy: the defaults are stricter than most settings, so a
+    /// restore that dropped it would silently revert a deliberate choice,
+    /// and the user would meet it as a PIN prompt on a payment that never
+    /// used to ask.
+    pub verification: Option<VerificationPolicy>,
 }
 
 /// One relationship, across the bridge.
@@ -660,17 +670,31 @@ pub fn export_backup(
         // readable and can never be added to again, which nobody would think to
         // blame on a backup.
         //
-        // **verification** (§15.5.1) exists in core and is wired to nothing —
-        // `check_verification` is called only from the diagnostics self-test,
-        // so every real flow uses the default and there is no setting of the
-        // user's to lose. The moment a screen lets somebody raise their floor
-        // limit, this must carry it: the policy is stricter by default, so a
-        // restore fails safe and silently reverts a deliberate choice, which
-        // the core field's own comment names as its own kind of data loss.
+        // **verification** (§15.5.1) is carried now, from `input`. It used to
+        // say "exists in core and is wired to nothing", and named the moment
+        // that would stop being true: the screen that lets somebody raise
+        // their limit. That screen shipped on 2026-09-15 (the phone's
+        // Spending control) and this went on writing the default for a day —
+        // so a restore silently handed a stricter policy back to somebody who
+        // had chosen a looser one, which is the failure the core field's own
+        // comment names. It is the client's policy or, for a client with no
+        // gate at all, the default.
         rendezvous: vec![],
         attestation_records: vec![],
         mandates: vec![],
-        verification: ducat_core::verify::VerificationPolicy::default(),
+        verification: input
+            .verification
+            .as_ref()
+            .map(|p| ducat_core::verify::VerificationPolicy {
+                device_unlock_at: p.device_unlock_at,
+                device_unlock_validity_s: p.device_unlock_validity_s,
+                app_secret_at: p.app_secret_at,
+                app_secret_validity_s: p.app_secret_validity_s,
+                app_secret_every_time: p.app_secret_every_time,
+                cumulative_at: p.cumulative_at,
+                cumulative_window_s: p.cumulative_window_s,
+            })
+            .unwrap_or_default(),
         // §4.3.3, and the reason the backup screen talks about freshness at
         // all. This was `vec![]` while the screen said an escrow needs a newer
         // bundle — so the screen was asking people to re-export for something
@@ -837,7 +861,7 @@ mod backup_tests {
         let w = create_wallet(2_190_000, true);
         let persona = create_persona_secret();
         let blob = export_backup(
-            BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: w.restore_height, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![] },
+            BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: w.restore_height, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![], verification: None },
             "a real passphrase nobody guesses".into(),
             persona.clone(),
         )
@@ -857,7 +881,7 @@ mod backup_tests {
         let w = create_wallet(1, true);
         assert!(matches!(
             export_backup(
-                BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 1, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![] },
+                BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 1, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![], verification: None },
                 "short".into(),
                 create_persona_secret(),
             ),
@@ -871,7 +895,7 @@ mod backup_tests {
     fn a_malformed_key_is_refused() {
         assert!(matches!(
             export_backup(
-                BackupInput { spend_key_hex: "nothex".into(), restore_height: 1, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![] },
+                BackupInput { spend_key_hex: "nothex".into(), restore_height: 1, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![], verification: None },
                 "a real passphrase nobody guesses".into(),
                 create_persona_secret(),
             ),
@@ -890,7 +914,7 @@ mod restore_height_tests {
         let w = create_wallet(1, true);
         assert!(matches!(
             export_backup(
-                BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: u64::MAX, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![] },
+                BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: u64::MAX, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![], verification: None },
                 "a real passphrase nobody guesses".into(),
                 create_persona_secret(),
             ),
@@ -905,7 +929,7 @@ mod restore_height_tests {
     fn genesis_is_slow_but_permitted() {
         let w = create_wallet(0, true);
         assert!(export_backup(
-            BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 0, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![] },
+            BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 0, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![], verification: None },
             "a real passphrase nobody guesses".into(),
             create_persona_secret(),
         )
@@ -943,6 +967,11 @@ pub struct RestoredBackup {
     /// compartments). Empty for older bundles: the top-level persona secret
     /// is the only identity, exactly as it always was.
     pub personas: Vec<PersonaBackup>,
+    /// §15.5.1's thresholds as the bundle carries them. A bundle written
+    /// before the two newest fields existed comes back with the *stricter*
+    /// reading of those two and its own values for the other five, so a
+    /// caller can apply this whole record without checking its age.
+    pub verification: VerificationPolicy,
     /// When the bundle was written, in seconds since the epoch — the thing that
     /// makes "how old is this backup" answerable.
     ///
@@ -1034,6 +1063,15 @@ pub fn import_backup(blob: Vec<u8>, passphrase: String) -> Result<RestoredBackup
         spend_key_hex: b.monero_seed,
         restore_height: b.monero_restore_height,
         persona_secret: b.persona_secret,
+        verification: VerificationPolicy {
+            device_unlock_at: b.verification.device_unlock_at,
+            device_unlock_validity_s: b.verification.device_unlock_validity_s,
+            app_secret_at: b.verification.app_secret_at,
+            app_secret_validity_s: b.verification.app_secret_validity_s,
+            app_secret_every_time: b.verification.app_secret_every_time,
+            cumulative_at: b.verification.cumulative_at,
+            cumulative_window_s: b.verification.cumulative_window_s,
+        },
         escrow_count: b.escrow_shares.len() as u32,
         escrow_shares: b
             .escrow_shares
@@ -1084,7 +1122,7 @@ mod import_tests {
     fn a_restored_key_controls_the_same_address() {
         let w = create_wallet(1000, true);
         let blob = export_backup(
-            BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: 1000, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![] },
+            BackupInput { spend_key_hex: w.spend_key_hex.clone(), restore_height: 1000, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![], verification: None },
             "a real passphrase nobody guesses".into(),
             create_persona_secret(),
         )
@@ -1102,7 +1140,7 @@ mod import_tests {
     fn a_wrong_passphrase_is_indistinguishable_from_tampering() {
         let w = create_wallet(1, true);
         let blob = export_backup(
-            BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 1, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![] },
+            BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 1, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![], verification: None },
             "a real passphrase nobody guesses".into(),
             create_persona_secret(),
         )
@@ -1184,7 +1222,7 @@ mod import_tests {
         let w = create_wallet(1000, true);
         let before = now();
         let blob = export_backup(
-            BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 1000, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![] },
+            BackupInput { spend_key_hex: w.spend_key_hex, restore_height: 1000, display_name: None, publish_payto: false, profile: Default::default(), contacts: vec![], prekey_signed_secret: None, prekey_one_time: vec![], prekey_next_id: 0, app_state: None, escrow_shares: vec![], personas: vec![], verification: None },
             "a real passphrase nobody guesses".into(),
             create_persona_secret(),
         )

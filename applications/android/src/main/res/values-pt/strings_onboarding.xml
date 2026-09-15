@@ -65,8 +65,8 @@ Quando termina, as duas cauções voltam inteiras e o valor vai para o condutor.
     <string name="onb_restore_continue">Continuar</string>
     <!-- PIN step -->
     <string name="onb_pin_title">Escolha um PIN</string>
-    <string name="onb_pin_body">Um número, pedido toda vez que sai dinheiro deste telefone. É o que fica entre a sua carteira e qualquer um que pegue o seu telefone desbloqueado.</string>
-    <string name="onb_pin_done">Seu PIN está pronto. Será pedido antes de qualquer pagamento.</string>
+    <string name="onb_pin_body">Um número, pedido em tudo acima do seu limite de despesa — e em cada pagamento se este telemóvel não tiver bloqueio de ecrã. É o que está entre a sua carteira e quem apanhar o seu telemóvel desbloqueado.</string>
+    <string name="onb_pin_done">O seu PIN está definido. Será pedido acima do seu limite de despesa, que pode alterar mais tarde.</string>
     <string name="onb_pin_action">Escolher um PIN</string>
     <string name="onb_pin_next">Avançar</string>
     <string name="onb_wallet_error">Não foi possível criar a carteira. Tente de novo.</string>

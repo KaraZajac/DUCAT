@@ -838,6 +838,15 @@ private fun BackupStep(onDone: () -> Unit) {
                                     ContactStore(context).backupAppState(),
                                     Ceremony.backupShares(context),
                                     PersonaStore(context).backupPersonas(context),
+
+                                    // §15.5.1's thresholds. Carried, and it
+                                    // was not for a day: the Spending control
+                                    // shipped and this went on writing the
+                                    // default, so a restore silently handed
+                                    // back a stricter policy than the one the
+                                    // user chose — met later as a PIN prompt
+                                    // on a payment that never used to ask.
+                                    org.ducatproject.ducat.SpendGate.policy(context),
                                 ),
                                 passphrase,
                                 persona,

@@ -65,8 +65,8 @@
     <string name="onb_restore_continue">계속</string>
     <!-- PIN step -->
     <string name="onb_pin_title">PIN 정하기</string>
-    <string name="onb_pin_body">이 기기에서 돈이 나갈 때마다 묻는 번호입니다. 잠금이 풀린 기기를 집어 든 사람과 당신의 지갑 사이에 서는 것이 이것입니다.</string>
-    <string name="onb_pin_done">PIN이 설정되었습니다. 결제 전에 항상 묻습니다.</string>
+    <string name="onb_pin_body">숫자 하나입니다. 지출 한도를 넘는 금액에서는 항상 물어보고, 이 휴대폰에 화면 잠금이 없으면 모든 결제에서 물어봅니다. 잠금이 풀린 휴대폰을 집어든 사람과 지갑 사이에 서 있는 것이 이겁니다.</string>
+    <string name="onb_pin_done">PIN이 설정되었습니다. 지출 한도를 넘는 금액에서 물어보며, 한도는 나중에 바꿀 수 있습니다.</string>
     <string name="onb_pin_action">PIN 정하기</string>
     <string name="onb_pin_next">다음</string>
     <string name="onb_wallet_error">지갑을 만들 수 없습니다. 다시 시도해 주세요.</string>

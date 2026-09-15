@@ -129,9 +129,16 @@ fall back to the signed prekey it shows you an open lock rather than hiding it.
 
 Type where you are going. Your phone turns a GPS fix into a geocell — a public
 bulletin board *whose address is the place itself* — and posts a hail: a
-claim-once card, a destination, and an offer priced from the real driving route.
+claim-once card, a coarse area, and an offer priced from the real driving route.
 Drivers watch their cell and its neighbours and claim it; the DHT referees the
 race, and no matchmaker exists.
+
+**The board learns almost nothing.** A bulletin board is read by everyone
+reading that board, so a hail publishes only what a stranger needs in order to
+*decide*: two ~1.2 km cells, a fare, and a persona whose burn and receipts a
+driver can weigh. **No name at all** — not on the card, not in the record
+behind it. Your name, your picture and the actual doorway you are standing at
+go to the one driver who claims, sealed in the thread that claim opens.
 
 The green line is the point. DUCAT's rates sit about 15% under a rideshare's
 rider-side rates — on this short trip its fare floor puts it further under still,
@@ -140,7 +147,9 @@ would have paid them roughly 71% of what the rider handed over. Pricing inside
 that gap is what lets the rider pay less *and* the driver earn more at the same
 time; it is the absent platform cut, handed to both of them. Acceptance arrives
 with a face on it: name, car, colour, plate, ETA — and, when the driver has set
-them, a small picture of the car and of the driver, carried on the card itself.
+them, a small picture of the car and of the driver. Those ride the driver's half
+of the card's inbox, **sealed to the rider** rather than signed in the open, so
+the curb full of strangers reading the same board learns none of it either.
 
 One trade, stated plainly on the screen: address search, routing and map tiles
 query OpenStreetMap's servers — the single place DUCAT sends location
@@ -259,10 +268,12 @@ it is the fourth screen you ever see.
 
 Those numbers are argued rather than guessed. Bisq is the closest working
 precedent — 2-of-2 with no custodian, deposits from both sides, a 15% floor and
-a 50% ceiling, chosen expressly so cooperation is likely *without* a reputation
-system, which is a privacy cost DUCAT also declines. The dual-deposit literature
-proves the arrangement cheat-proof at equilibrium but derives no optimum, so the
-ceiling comes from practice, where large deposits are known to price people out.
+a 50% ceiling, chosen expressly so cooperation is likely *without* a published
+reputation system — a privacy cost DUCAT declines too, which is why the
+reputation it does have (below) is weighed by the reader and published nowhere.
+The dual-deposit literature proves the arrangement cheat-proof at equilibrium
+but derives no optimum, so the ceiling comes from practice, where large deposits
+are known to price people out.
 Two bounds fall out: a stake worth less than the fee to return it becomes zero
 rather than decoration, and none exceeds half the price. The exposed side funds
 second — the payer carries the price *and* a stake, so their money never sits
@@ -289,12 +300,44 @@ transaction is in a block, and from then on the persona wears it in words
 wherever a decision is made — *burned 0.01 XMR, since block N* — never as a
 score. The gate is the rule that matters: the client warns whenever what you are
 about to put at risk exceeds what the other side has burned, because a name that
-cost nothing has nothing to lose by vanishing. After a settled deal either side
-may sign a **rated receipt (§9.2)** to the other — one to five, one sentence —
-and a persona shows its record on request; every reader weighs those receipts
-itself, one voice per signer, counting only signers whose own burn it has
-verified, so a record is envelopes, never a number somebody else computed.
-Nothing about any of this is published anywhere.
+cost nothing has nothing to lose by vanishing. A seller can ask the other way
+round — a listing may name **the least a buyer's persona must have burned**, and
+a buyer whose own burn falls short is told before they commit rather than after
+they are ignored.
+
+After a settled deal either side may sign a **rated receipt (§9.2)** to the
+other — one to five, one sentence — and a persona shows its record on request;
+every reader weighs those receipts itself, one voice per signer, counting only
+signers whose own burn it has verified, so a record is envelopes, never a number
+somebody else computed. And where money has never changed hands there is the
+oldest signal of all: **I know them.** Anybody you have met in person can sign a
+vouch for your persona, and a reader counts only the vouches signed by people
+*already in their own contacts* — "Pat and Sam know them", one hop, never a
+score, never a graph anybody walks. Nothing about any of this is published
+anywhere: every piece of it travels in a sealed thread, weighed by the one
+person reading it.
+
+## And a stolen phone is not a wallet
+
+An unlocked phone in somebody else's hand is a bearer instrument — that is the
+question "you see exactly what you sign" never asks. DUCAT asks it the way the
+payment app already on your phone does, because that is the shape people
+already know: **unlock the phone, open the app, tap.** A device you unlocked in
+the last two minutes carries a payment; there is deliberately no tier below
+that, because what leaves is money nobody can reverse, not a transit fare.
+
+Above one number you set — a hundred of whatever you price in, by default — the
+app asks for its own PIN, **every time**, not once per window. That difference
+is the whole point: somebody who reads a PIN over your shoulder and then takes
+the phone gets one large payment out of it rather than as many as they can tap.
+A rolling hour counts too, because a per-payment limit alone never stopped
+twenty payments just under it. A phone with no lock screen establishes nothing
+and asks for the PIN on all of it.
+
+None of this touches the wire (§15.5.1). The person you are paying never learns
+which rung you cleared and cannot ask for an easier one — a counterparty able
+to influence verification would always ask for the weakest, which is a
+downgrade attack the card networks spent years patching out.
 
 ## It tells you what things cost you
 
@@ -366,14 +409,16 @@ The desktop client is a native window over the same Rust the phone runs —
 `app/` holds the logic, `applications/desk/` the window — so a shopkeeper's
 till, a kiosk, the library's press room, the market and the feed are one
 implementation on every screen. It speaks the phone's twenty languages from
-the same resources. Proven against the phone across every rite: chat, groups
-on boards, bills and receipts, a kiosk order paid from a phone that had never
-met the desk, files and sites served and fetched, calls with real sound.
+the same resources. It carries the trust surface too — burning, checking
+somebody's proof, rating them after a deal, vouching for them, and a listing's
+minimum. Proven against the phone across every rite: chat, groups on boards,
+bills and receipts, a kiosk order paid from a phone that had never met the
+desk, files and sites served and fetched, calls with real sound.
 
 ## The repository
 
 ```
-ducat-protocol.md   the spec — 1.1.0-dev9 on this branch (1.0.0-rc1 is the frozen line), changelog first
+ducat-protocol.md   the spec — 1.1.0-dev13 on this branch (1.0.0-rc1 is the frozen line), changelog first
 core/               reference implementation (Rust)
 vectors/            442 conformance cases + schema — the published artifact
 conformance/        four checkers: schema, second implementation, spec audit,
@@ -463,9 +508,14 @@ node timed out mid-run, which is the behaviour a phone that loses signal
 halfway through a booking needs.
 
 Not proven, and stated here rather than buried: **no external adversarial
-review** (§2.5 is the project's own argument for why that matters), no
-implementer who has never read `core/` (O21), NFC compile-verified but never
-field-tested between two phones, and no measurement of the tap on a handset.
+review** (§2.5 is the project's own argument for why that matters — an
+*internal* five-surface pass ran on 2026-09-07 and most of what it found is
+fixed, which is a different and lesser thing: a review by the people who wrote
+it tells you what they thought to look at), no implementer who has never read
+`core/` (O21), NFC compile-verified but never field-tested between two phones,
+and no measurement of the tap on a handset. The desk has **no second factor at
+all** — no device credential and no secret of its own — so the spend gate above
+runs on the phone and cannot run there.
 The latency figures in §8.7.2 are a desktop with an attached node. The
 booking arc above ran between two headless clients; **its screens have since
 carried one** — on 2026-08-25 two emulators on the live network and live
@@ -484,9 +534,11 @@ accept and nowhere else, read, rendered, aged into "last seen N seconds
 ago" when the sender left the screen, released when the sender stopped,
 and swept off both phones by the poller when the ride settled — with the
 one thing an emulator cannot judge, a dot that actually moves, left to
-the field day, because `adb emu geo fix` reports OK and changes nothing. A co-signer today
-consents to a stated fee, not an itemised destination list — honest consent
-waits on an upstream wallet API making payments readable. **On 2026-08-27/28
+the field day, because `adb emu geo fix` reports OK and changes nothing. A co-signer used to consent
+to a stated fee and not an itemised destination list; since 2026-09-14 the
+proposal is read back out of the transaction's own re-encoding, so the
+destinations, the inputs total and the fee are all on the screen, and a
+client refuses a proposal it cannot describe. **On 2026-08-27/28
 every escrow rail ran end-to-end through the UI in one day** — a marketplace
 sale (release `f38e2f89`, the listing selling out and taking itself down), a
 street hail driven rider-to-driver with the live position stream crossing
@@ -533,6 +585,28 @@ reads your own cell first and then the ring of eight around it, drawing each
 as it lands, so a car parked near you is on screen in under six seconds while
 "nothing listed around here" takes about forty and counts the areas off as it
 goes.
+
+**2026-09-14/15 — the trust layer, walked rather than argued.** A desk burned
+0.01 XMR to the unspendable address, made Monero's own payment proof at send
+time, signed the `BURN_PROOF` once the block landed, and showed it as a link;
+a second desk that had never met it opened the link, checked the proof against
+its own node for exactly the proven amount, got the block from a *different*
+node, and wore the result in words — 12 seconds from proof to verdict. The same
+walk on a handset, including a wipe and a restore that brought the envelope back
+byte for byte. A rated receipt travelled desk to desk in 47 s and was weighed
+correctly at zero, because the reader had verified no burn of the signer's.
+Four desks proved the vouch rule: two people who had met a stranger each signed
+one, and a reader holding both of them as contacts — and the stranger as
+nobody — concluded "2 of your contacts know this person" 18 s after asking. A
+marketplace walk paid through the gate with the warning standing, on-chain.
+
+**2026-09-15 — a hail that says where, not who.** The rider's name used to go
+out twice, on the card and in the record behind it, because a card's own half
+is written before there is anybody to seal it to. It goes nowhere now. Walked
+desk to desk: a nameless card claimed, the driver's contact reading *unnamed*,
+then the introduction naming the rider, then the doorway — 52 seconds from
+claim to a driver who knew who and where. The two-phone version is still owed,
+and is on the field-day list.
 
 ## License
 

@@ -28,18 +28,29 @@ code *is* the answer to the question.
 
 ## Result
 
+`ducat_check.py` runs **every** case in `vectors/v1/`: `main` globs the
+directory and skips only `manifest.json` and `schema.json`, so the count it
+prints is whatever the suite currently holds rather than a number written down
+here. Run it; what it prints is the answer. Today:
+
+    DUCAT second implementation — 442 vector cases
+
+      agreed:        442
+      disagreements: 0
+
+### The first run, and the three defects it found
+
+The suite was 104 cases then. Those numbers are kept because the findings are,
+not because they describe the suite now:
+
     104 vector cases
     agreed:        101
     disagreements: 3          <- all three were defects in the spec
 
-After the spec was corrected and one reference behaviour changed:
-
-    agreed:        104
-    disagreements: 0
-
-Two disagreements were **omissions** — the Rust was right and the document had not
-said so. The third was neither implementation being wrong, which is the one worth
-the whole exercise.
+Two of the three were **omissions** — the Rust was right and the document had
+not said so. The third was neither implementation being wrong, which is the one
+worth the whole exercise. Each was fixed in the spec, one reference behaviour
+changed with them, and the suite has grown past them since.
 
 ### 1. §18.1 had no nesting bound
 
@@ -103,11 +114,13 @@ produced". For those cases **any refusal counted as agreement** — a reader tha
 refused a valid field as unknown passed the gate written to catch it. This one
 did: `purpose` (§16.9, field 217) was absent from `parse_details`, and no
 vector carried the field, so `UNKNOWN_FIELD` on every handshake that said what
-it was for went unnoticed through 401/401. The runner now checks the name in
+it was for went unnoticed through a clean 401/401 — a run of the suite as it
+then stood, agreeing with every case and proving nothing. The runner now checks
+the name in
 whichever spelling a case uses, reports a case that wants a refusal without
 naming one instead of guessing, and four cases pin field 217 at both edges.
 
-### 4. A lifted notice is `BAD_SIG`, and the reference says `MALFORMED`
+### 4. A lifted notice is `BAD_SIG`, and the reference said `MALFORMED`
 
 Comparing names surfaced four disagreements the code comparison had hidden:
 `listing_sealed_wrong_slot`, `listing_sealed_beacon_hash_swapped`,
@@ -120,16 +133,17 @@ another slot, or restamped against another block, is a signature that does not
 verify. §18.5 names that `BAD_SIG` (1) and reserves `MALFORMED` (10) for
 "non-canonical encoding"; §18.9(2) lists *bad signature* and *non-canonical
 encoding* as distinct mutations with distinct specified codes. **The reference
-is the side that is wrong**: `board::open` in `core/src/board.rs` maps a failed
-`verify_raw` to `Malformed` ("this notice was not signed for this slot"), where
-the reference's own `position::open` says `BadSig` for the same failure.
+was the side that was wrong**: `board::open` in `core/src/board.rs` mapped a
+failed `verify_raw` to `Malformed` ("this notice was not signed for this slot"),
+where the reference's own `position::open` said `BadSig` for the same failure.
 
-The generator now reads the code off `board::open` instead of writing it down,
-so the vectors record what the reference does and this runner holds it to the
-document: those four stay disagreements until `board::open` says `BadSig`, and
-one regeneration then turns them into `BADSIG`. Not silenced on purpose — an
-expected-failure list would be the blind spot this section is about, with a
-name.
+The generator reads the code off `board::open` instead of writing it down, so
+the vectors record what the reference does and this runner holds it to the
+document. That left the four as standing disagreements — deliberately, because
+an expected-failure list would be the blind spot this section is about, with a
+name — until `board::open` was changed to say `BadSig` ("a signature that does
+not verify is BAD_SIG (§18.5), not a shape fault"). One regeneration turned all
+four into `BADSIG`, which is why the run above has none left.
 
 One thing this did *not* settle: §18.5 names no code for a stamp that does not
 show its work. Both implementations say `MALFORMED`, and no vector pins it.

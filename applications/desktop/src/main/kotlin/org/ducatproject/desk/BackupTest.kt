@@ -90,6 +90,12 @@ private fun personaRound() {
     // A real key: applyBackup derives an address from it, and an arbitrary
     // 32 bytes is not a scalar.
     val wallet = uniffi.ducat_mobile.createWallet(tipHeight = 0uL, stagenet = true)
+    // §15.5.1: a limit the user actually chose, not the default — the whole
+    // point of carrying it is that the default is *stricter*, so a bundle
+    // that dropped it would restore as a phone asking for a PIN on payments
+    // that never used to ask, and a test written against the default would
+    // pass while that happened.
+    org.ducatproject.ducat.SpendGate.setPinAbove(src, 45_000L)
     val blob = exportBackup(
         BackupInput(
             spendKeyHex = wallet.spendKeyHex,
@@ -104,12 +110,20 @@ private fun personaRound() {
             appState = store.backupAppState(),
             escrowShares = emptyList(),
             personas = pSrc.backupPersonas(src),
+            verification = org.ducatproject.ducat.SpendGate.policy(src),
         ),
         "correcthorsebattery",
         pSrc.secret(),
     )
 
     org.ducatproject.ducat.ui.applyBackup(dst, blob, "correcthorsebattery")
+
+    // §15.5.1's threshold came back as the user set it, not as the default.
+    // The default is *stricter*, so a bundle that dropped this restores a
+    // phone that asks for a PIN on payments that never used to ask — which
+    // is what it did for a day after the Spending control shipped.
+    val limit = org.ducatproject.ducat.SpendGate.pinAbove(dst)
+    check(limit == 45_000L) { "BACKUPTEST_FAIL spend limit: expected 45000 got $limit" }
 
     val pDst = org.ducatproject.ducat.PersonaStore(dst)
     val roster = pDst.all()
@@ -284,6 +298,7 @@ private fun appState() {
         escrowCount = 0u,
         escrowShares = emptyList(),
             personas = emptyList(),
+            verification = uniffi.ducat_mobile.defaultVerificationPolicy(),
         created = 0uL,
     )
     ContactStore(dst).restoreFromBackup(restored)
@@ -304,6 +319,7 @@ private fun appState() {
     check(crd == cards) { "BACKUPTEST_FAIL issued_cards: got $crd" }
     val snd = dst.getSharedPreferences("ducat_contacts", 0).getString("wallet_sends", null)
     check(snd == sends) { "BACKUPTEST_FAIL wallet_sends: got $snd" }
+
     val used = dst.getSharedPreferences("ducat_contacts", 0)
         .getString("usedtheirs_ab12", null)
     check(used == "3,7,11") { "BACKUPTEST_FAIL usedtheirs: got $used" }
@@ -392,6 +408,7 @@ private fun appState() {
             escrowCount = 0u,
             escrowShares = emptyList(),
             personas = emptyList(),
+            verification = uniffi.ducat_mobile.defaultVerificationPolicy(),
             created = 0uL,
         ),
     )
@@ -452,6 +469,7 @@ private fun escrowShares() {
             appState = null,
             escrowShares = shares,
             personas = emptyList(),
+            verification = null,
         ),
         "correcthorsebattery",
         persona,
@@ -493,6 +511,7 @@ private fun escrowShares() {
                 appState = null,
                 escrowShares = emptyList(),
             personas = emptyList(),
+            verification = null,
             ),
             "correcthorsebattery",
             persona,

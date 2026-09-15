@@ -1,34 +1,97 @@
 # Road to 1.0
 
-What stands between draft 0.85 and a release that strangers can trust with
-money. Ordered by what blocks 1.0, not by effort.
+What stands between the specification and a release that strangers can trust
+with money. Ordered by what blocks 1.0, not by effort. The frozen line is
+**1.0.0-rc1**; master is the 1.1.0 branch and reads draft **1.1.0-dev13**
+today, which is why several things below landed after a freeze that still
+holds.
 
 ## The freeze (2026-08-30, spec 1.0.0-rc1)
 
-The feature line is closed. Everything below this section is either done or
-deliberately deferred; nothing new lands on the wire before 1.0.0. What
-remains between rc1 and the number is validation, not construction, and two
-of the three gates are calendar-shaped — start them first:
+**What is frozen is the 1.0.0-rc1 line, and it is still frozen**: nothing
+1.0.0 will carry has changed on the wire since. Master is not that line.
+Master is the **1.1.0 branch**, where the post-1.0 track is built, so the
+wire *on this branch* has grown — and the two must not be read as one.
+`README.md` says it the same way, in its header and in the repository table:
+"1.1.0-dev13 on this branch (1.0.0-rc1 is the frozen line)".
+
+What the branch has added since the freeze, per the changelog at the top of
+`ducat-protocol.md`: `BURN_PROOF` (object type 28) and `ATTESTATION` (type
+12, registered since 0.47 and finally given a shape) in dev11; `VOUCH` (type
+29), `RENTAL_NOTICE.min_burn` (field 320), `SLASH_CLAIM.claimant` (321) and
+`INTRODUCTION` (message kind 17) in dev12; §15.5.1's two policy fields on a
+backup (keys 28–29, optional on the way in and defaulting to the stricter
+reading) in dev13. Every one is an addition rather than a change — a new
+object type, a new optional field, a new message kind — which is minor-version
+territory for the reason `research/post-1.0/REPORT.md` gives, and is why the
+frozen line is untouched by any of it. One thing on the branch is *not*
+additive and should be read as what it is: dev13 rewrote §15.5.1 — the tiers
+and the four non-relaxable rules stand, but the shape a client SHOULD ship
+is inverted, and a terminal with no credential of its own now **MUST NOT**
+treat that absence as satisfaction. It touches no wire object, by design
+(§15.5.1's last subsection is titled "This never touches the wire"), so the
+freeze is intact; but a phone built to rc1's §15.5.1 and one built to
+dev13's do not ask the same thing in front of a payment. See the counter
+section below.
+
+What remains between rc1 and the number is validation, not construction, and
+two of the three gates are calendar-shaped — start them first:
 
 1. **The adversarial review** (the long pole — commission now). Scope as
    §2.5 has always implied: the §17.9 ceremonies, the §16.12 mailbox and
-   card surfaces, the boards and the §16.18.1 beacon (newest, least
-   reviewed). `docs/review-brief.md` is the package to hand over.
+   card surfaces, the boards and the §16.18.1 beacon ~~(newest, least
+   reviewed)~~. **Newest and least reviewed is now the trust layer (§9.5,
+   §9.2), which has had no pass at all**: the internal five-surface review
+   of 2026-09-07 (`research/security/2026-09-07-adversarial-review.md`) was
+   read against draft dev9 and predates every line of it. The boards and
+   the beacon did get that pass; what it found there is either fixed or
+   recorded as a deferral in the ledger.
+   `docs/review-brief.md` says all of this itself, scopes the trust layer
+   as its section 5, and is the package to hand over.
 2. **The field day** (needs two NFC handsets). `docs/field-day.md` is the
-   run sheet; the tap, real GPS, and the OEM restore picker are the only
-   parts of the system no emulator has exercised.
+   run sheet; the tap, real GPS, a position that actually moves, §15.5.1's
+   keystore-backed unlock window, a burn checked against two reachable
+   Monero nodes, and the OEM restore picker are the parts of the system no
+   emulator has exercised.
 3. **O21's reader** — an implementer who builds from the document alone.
    Recruit alongside the reviewer; the same kind of person often fits both.
 
 Decided at the freeze, recorded in the rc1 changelog entry: **refunds** are
 a documented limitation for 1.0 (the design question — what the payer's
 Activity should show when money comes back — stays open, deliberately
-unanswered rather than answered badly), and the **co-signer's blind
-payment list** waits on monero-wallet 0.2.0's accessor rather than a fork.
+unanswered rather than answered badly). The other limitation recorded there,
+the **co-signer's blind payment list**, ~~waits on monero-wallet 0.2.0's
+accessor rather than a fork~~ **closed, 2026-09-14** — without the accessor
+and without a fork. `read_tx` in `mobile/src/ceremony.rs` walks the crate's
+own re-encoding of the very transaction that is about to be signed, so no
+second, laxer parser can disagree with `SignableTransaction::read`; a
+co-signer now sees each destination, what it is worth, the inputs' total and
+count, and the fee. `Ceremony.readRelease` refuses outright any proposal it
+could not honestly describe — a third output, a nameless one, the same
+address paid twice, arithmetic that does not close. The same pass sized
+consent from the transaction rather than from the scanned balance, which is
+the defect that mattered (commit `e2ab23c6`). `docs/review-brief.md` still
+lists the old state under "what we already know is wrong" and wants the
+correction before it is handed to anyone.
 
-The post-1.0 track (personas, the sign-in doorway, publications with
-period keys, the swarm engine) is sketched in `research/post-1.0/` and
-stays off master until rc1 ships.
+~~The post-1.0 track (personas, the sign-in doorway, publications with
+period keys, the swarm engine) is sketched in `research/post-1.0/` and stays
+off master until rc1 ships.~~ **It landed on master instead**, as the 1.1
+branch rather than as a wait: personas (`PersonaStore`, the drawer's
+switcher, the desk's Me page; `MAX_PERSONAS` is 4, because few, named and
+visible was the whole design),
+publications whose period keys are *derived* from one master secret rather
+than accumulated in a keyring (`core/src/publish.rs`,
+`app/src/publications.rs`), sites and homes (`app/src/sites.rs`, §16.22 and
+§16.23), and the swarm engine (`mobile/src/swarm.rs`), which now carries a
+listing's gallery bundle (`app/src/listings.rs`) as well as a heavy
+publication period. **The one piece still unbuilt is the sign-in doorway**
+(`research/post-1.0/REPORT.md` §1.1b): no `login` handshake purpose exists
+anywhere in the tree, and nothing serves the HTTP face a site would mint
+cards from. What would close it is that server piece — a standing watch that
+mints from a pre-minted pool and maps card to session — plus a claim confirm
+that names the purpose and the site out loud, which is also the only honest
+mitigation for QR relay phishing.
 
 ## Protocol correctness — must fix before 1.0
 
@@ -57,6 +120,71 @@ stays off master until rc1 ships.
   speaks all three.
 
 ## Trust — the stranger problem, named since 0.82
+
+There are two answers and for most of this file's life it recorded only one.
+Escrow makes cheating unprofitable *inside* a deal; it says nothing about
+whether to enter one, and a persona is free to mint from a hash. The second
+answer is §9's own and it is built now: make an identity cost real money, and
+let the reader weigh what it is shown — never a server, never a score.
+
+- **Costly identity — proof of burn, rated receipts, vouches (§9.5, §9.2).**
+  **Built on both clients and walked on the live chain, 2026-09-14.** A
+  persona sacrifices XMR and proves it: `BURN_PROOF` (object type 28, fields
+  304–309) carries the transaction, the amount, the block and Monero's
+  `OutProofV2`, whose **message** binds `"DUCAT-BURN-v1"`, the persona key
+  and a purpose — so a proof lifted onto a second persona verifies only if
+  the message is rewritten, which breaks the signature. The burn address is
+  a constant of the protocol that nobody holds a key for: each half is
+  Monero's `hash_to_ec` of a keccak of a fixed label, so anyone can recompute
+  it and see that no discrete logarithm was ever chosen. Proofs are made and
+  checked in `mobile/src/txproof.rs`, proven both directions against
+  `monero-wallet-rpc` on a real stagenet burn, and a wrong message fails both
+  ways. The reader's rule is §9.5's three questions in order, each cheaper
+  than the next: the message must name the persona presenting it; our own
+  node must bear the proof out **for exactly the amount the proof proves**,
+  never the amount claimed beside it; a second node must have that
+  transaction in a block, where *unknown*, *in the pool* and *unreachable*
+  all mean "not yet" and never "yes".
+
+  On top of the burn sit the other two legs. §9.2's `ATTESTATION` is a rated
+  receipt after a settled deal — signer, subject, the settled amount, a
+  rating from a closed set, the transaction it stands on — and `VOUCH` (type
+  29, fields 317–319) is the smallest signed thing in the protocol: *I know
+  this persona*, and nothing else, because the less it carries the less it
+  leaks. A seller may publish a minimum (`RENTAL_NOTICE.min_burn`, field
+  320) and a buyer's client MUST show it before the buyer commits to
+  anything. The wire objects and their refusals are `core/src/trust.rs`;
+  the bridge signs and opens them in `mobile/src/attest.rs` beside
+  `txproof.rs`, so both clients produce the same bytes; the clients are
+  `app/src/trust.rs` (desk) and `Trust.kt` with `ui/Burn.kt` and
+  `ui/TrustBadge.kt` (phone) — one badge builder, so the thread header, a
+  listing's poster, a driver's offer and the till's customer row cannot
+  drift apart. The plan all of this closes is `research/post-1.0/TRUST.md`
+  §8, whose Phase 3 and 4 rows record each walk; the memos are
+  `research/security/phase4-phone-*.md`.
+
+  **Nothing is published and nothing is aggregated**, which is the property
+  the whole design turns on. What a reader shows is its own arithmetic over
+  envelopes handed to it in a sealed thread: one voice per signer however
+  many receipts that signer wrote, counted only where that reader verified
+  the signer's burn itself, and a vouch counted only when its signer is
+  already a contact the reader holds. One hop, never two — a friend of a
+  friend is a stranger with a story — and the answer is worn in words ("2 of
+  your contacts know this person", "burned 0.05 XMR, since block N"), never
+  as a number out of context. A burn is scored from the largest single burn
+  rather than the sum, so many small identities cannot add up to one large
+  one, and from the age of its first block, which is a birth certificate
+  nobody can backdate.
+
+  **Left:** the adversarial pass (above — this is the newest surface in the
+  tree and has had none); the handset walk, which needs two reachable Monero
+  nodes and is Pass 8 of the field day; and the forward direction of a rated
+  receipt, which waits on a deal that produces a kind-3 receipt. Stated
+  plainly rather than glossed: neither a burn nor a vouch is *required* to
+  post anything, so a board defence is still a throughput speed bump. What
+  changed is that a reader can now price the difference, and the open
+  question for the reviewer is the economic one — what does it cost to farm
+  a plausible history, and is a seller's minimum a wall or a kerb?
 
 - ~~**Driver bonds through Part IV escrow.**~~ **Built + proven, 0.88** —
   §17.9 ceremony (DKG then FROST over the sealed thread, kinds 8/9/10).
@@ -105,10 +233,16 @@ stays off master until rc1 ships.
   driver + arbiter released a funded 2-of-3 with the rider absent (txid
   ec401a91…). Phone: one "Ask the arbiter to rule" button for the
   stranded; desk: a ruling console — requests print, approval is a
-  human-written line, the judgment deliberately unautomated. **Left:**
-  the rest of the bond UI — co-signer consent needs a payments accessor on
-  monero-wallet's SignableTransaction (0.2.0 keeps them private; until then
-  the co-signer sees only the fee), plus bond amount and funding flow.
+  human-written line, the judgment deliberately unautomated.
+  ~~**Left:** the rest of the bond UI — co-signer consent needs a payments
+  accessor on monero-wallet's SignableTransaction (0.2.0 keeps them private;
+  until then the co-signer sees only the fee)~~ **Done, 2026-09-14** — the
+  accessor never arrived and was not needed: `read_tx` walks the crate's own
+  serialisation of the object about to be signed, so a co-signer is shown
+  every destination, what each is worth, the inputs' total and the fee, and
+  sizes the residual from the inputs rather than from a scanned balance. A
+  proposal this device could not honestly describe is refused instead of
+  narrated. **Left:** bond amount and funding flow.
 - **The bonded hail (0.88, 2026-08-16): every accepted ride can escrow its
   fare.** With an arbiter contact configured (the Escrow-arbiter switch on
   a contact's profile), the rider's accept starts a 2-of-3 DKG with driver
@@ -165,8 +299,21 @@ stays off master until rc1 ships.
   with no past — sealed under a fresh stream key with the record key as
   AAD, monotonic counter, fixed padding and cadence; bounded by client
   stop rules (receipt / RETRACT re_own / expiry) and record TTL; receiver
-  MUST NOT retain the track. Position stays display-only. **Left:** the
-  build, once a ride to point it at exists on real hardware (field day).
+  MUST NOT retain the track. Position stays display-only. ~~**Left:** the
+  build, once a ride to point it at exists on real hardware (field day).~~
+  **Built, 2026-08-26** — `core/src/position.rs` seals the frame,
+  `position_seal`/`position_open` carry it across the bridge, and
+  `ui/PositionCard.kt` exists only once a `RIDE_ACCEPT` is in the thread,
+  which is §5.2.3's gate: there is deliberately no standing setting for this
+  anywhere in the app, because before the accept the same stream is a
+  stranger-tracking primitive. Proven between two emulators — offered, read,
+  rendered, aged honestly when the sender left the screen, released when the
+  sender stopped, swept off both phones by the poller when the ride settled.
+  **Left:** a dot that actually moves. `adb emu geo fix` reports OK and
+  changes nothing, so both emulators shared one frozen fix all afternoon;
+  whether four seconds is the right cadence on a real radio, whether the
+  other phone's dot tracks a walk, and how long a fix takes indoors are Pass
+  2 of the field day.
 
 ## Privacy — spend it only where it buys something
 
@@ -258,14 +405,17 @@ stays off master until rc1 ships.
   locale default), currency picker revived; Settings proven in Spanish on
   the emulator, choice survives restarts.
 - ~~**Extraction.**~~ **Done, 0.88** — ~848 entries across 31 per-screen
-  resource files; plurals used where count-driven; wire sentinels, state
+  resource files at the time; **1 893 strings and 30 plurals across 48 files
+  today**, because every screen since has been born localized rather than
+  retrofitted. Plurals used where count-driven; wire sentinels, state
   strings, and Locale.US parse formats deliberately left in code.
 - ~~**Translations.**~~ **Done, 0.88** — nineteen languages: es fr de pt
   it nl ru uk pl tr zh ja ko ar fa hi id vi th. One values-<tag>/ mirror
-  per screen file, 845 strings + 15 plurals each, all mechanically
-  validated (placeholder multisets, key sets, sentinel dashes, plural
-  quantities per CLDR). RTL proven twice (ar, fa) with mirrored layout
-  and native digits. Untranslated keys fall back per-string, so a new
+  per screen file, and each mirror currently carries the full 1 893 strings
+  and 30 plurals, all mechanically validated (placeholder multisets, key
+  sets, sentinel dashes, plural quantities per CLDR) by
+  `applications/check_strings.py`. RTL proven twice (ar, fa) with mirrored
+  layout and native digits. Untranslated keys fall back per-string, so a new
   language can land partially and still ship.
 - **Known gaps.** ~~Pronoun labels come from the bridge's
   pronounOptions() and need a mapping layer~~ **done, 0.88** — a
@@ -277,7 +427,7 @@ stays off master until rc1 ships.
   bodies ("Meter started…") localize to the *sender's* language by design
   — the receiver sees the sender's words, like any message.
 
-## Small bugs spotted, not yet fixed
+## Small bugs spotted, ~~not yet fixed~~ all cleared
 
 - ~~**"Break a note" card shows on a zero-balance wallet**~~ **Fixed,
   0.88** — the card now fires only when money exists (hasMoney/allLocked
@@ -305,8 +455,32 @@ payment paths with money in them.
   receipt lands beside it in their Activity. Leaving needs the PIN.
   Proven end to end over live Veilid and stagenet (`:desktop:kiosktest`).
   Tips, and calling an order ready, ride the conversation the card opened.
-- **A PIN** in front of every spend, set during onboarding, with the
-  phone's own lock offered where one is enrolled.
+- **The spend gate** (§15.5.1). ~~A PIN in front of every spend, set during
+  onboarding, with the phone's own lock offered where one is enrolled.~~
+  **Corrected in 1.1.0-dev13 (2026-09-15)**, because the ladder could express
+  the right policy and was set to the wrong one: it asked nothing below
+  twenty dollars — a tier an attacker never has to clear — and asked for a
+  secret above a hundred *once*, which a shoulder-surfer clears once and then
+  spends through. The shipped shape is the one a phone's own payment app
+  already has. The floor is **zero**: every payment wants the device unlocked
+  inside a two-minute window, asked of Android as a window and not as an age
+  (`DeviceLock.authenticatedWithin` — a keystore key bound to a recent
+  authentication, which throws once the window lapses), and a device with no
+  secure lock screen establishes nothing and falls back to the secret on
+  every payment. At or above one threshold the app's PIN is asked **every
+  time**, not once. That threshold is the single number a user sets, and it
+  lives in drawer → Profile → Spending (`SpendLimitSetting` in `Drawer.kt`),
+  denominated in the currency they price in — never piconero, which would
+  quietly turn a "$100 limit" into a $70 one the next time the price moved.
+  Onboarding still *chooses the PIN*, which is the one thing in setup a
+  backup cannot carry; it no longer sets the limit. A rolling hour counts
+  too, since a per-payment limit alone does not stop twenty payments just
+  under it, and a stale exchange rate escalates to the top tier rather than
+  relaxing anything — failing the other way would let anyone able to stall a
+  rate feed *lower* the requirement. The arithmetic is `core/src/verify.rs`;
+  `SpendGate.kt` supplies only the three things core cannot know. None of it
+  touches the wire: a payee never learns which tier was satisfied and cannot
+  ask for one, which is the downgrade attack EMV spent years patching.
 
 **Left:** refunds. There is no path to give money back after settlement —
 `cancel` withdraws a bill before payment, `markPaidOutside` records
@@ -327,9 +501,14 @@ Marketplace sale `284eb311` and gear hire `709f4d38` ran two-client on
 2026-08-25; a full sell→enquire→reserve→settle purchase ran again on
 2026-08-26 (release `34ffbcfd`) as part of the pre-1.0 sweep. A listing
 carries a per-listing quantity (0.88), an Argon2id + Monero-beacon stamp
-(0.89), and survives backup/restore (0.89). What is left for the board is
-the field day (real GPS, real boards) and the adversarial review — the
-beacon surface is the newest and least-reviewed part of it.
+(0.89), pictures (dev8/dev9, above), a seller's minimum burn (dev12,
+field 320), and survives backup/restore (0.89). What is left for the board
+is the field day (real GPS, real boards) and the adversarial review.
+~~The beacon surface is the newest and least-reviewed part of it.~~ The
+beacon has since had the internal pass and one fix out of it (a beacon
+mismatch is `Unknown` until a second node seconds it — W10, 2026-09-14);
+the newest and least-reviewed surface in the repository is now the trust
+layer above, which has had none.
 
 The design constraints below held; they are kept as the record of what the
 shape forbids, not as open questions.
@@ -349,12 +528,20 @@ taste:
 - The transaction ends in a meeting. In-person handover is the design,
   not a fallback for when shipping fails.
 
-The read costs happen to enforce this. A populated board read is ~1.1 s,
-an empty one a flat 21 s (Veilid giving up rather than searching), and
-boards do not parallelise. A 3×3 neighbourhood is ten seconds at best and
-minutes at worst, so an endless feed is not available even if somebody
-wanted one. What is available is "what is near me, one board, cached,
-refreshed behind the screen" — which is the thing being aimed at anyway.
+The read costs happen to enforce this. A populated board read is ~1.1 s and
+an empty one a flat 21 s — Veilid giving up rather than searching, two
+chained internal timeouts. ~~Boards do not parallelise.~~ **They do, since
+2026-09-01**: `mobile/src/node.rs` raises veilid's
+`network.dht.max_concurrent_operations` off its default of 16 (`DUCAT_DHT_OPS`,
+24 today, measured as high as 72), which took a nine-board empty ring from
+66 s to 42 s, dead-repeatable. What is left is a floor of two chained 21 s
+verdicts inside veilid's own get, reachable only by patching veilid-core —
+which is now vendored (`mobile/vendor/veilid-core`, carried for the fanout
+crash) and therefore possible rather than hypothetical. The conclusion is
+unchanged and is the point: a neighbourhood sweep is tens of seconds, so an
+endless feed is not available even if somebody wanted one. What is available
+is "what is near me, one board, cached, refreshed behind the screen" — which
+is the thing being aimed at anyway.
 
 - ~~**Any rental — gear (`KIND_GEAR`).**~~ **Shipped.** Reused
   `Stakes.Deal.Vehicle` (its docstring already read "a vehicle **or
@@ -420,12 +607,35 @@ rather than during it.
   contacts, threads, listings, till, wallet address and post-rescan
   balance all returned, and the restored phone sent and received once its
   fresh Veilid identity attached. The hardware re-run is folded into the
-  field day (Pass 8) because the OEM file picker and share sheet are the
-  only untested part.
+  field day (**Pass 9** — it is run last because it wipes a phone) because
+  the OEM file picker and share sheet are the only untested part. One thing
+  to set before the export and check after the import: the §15.5.1 spending
+  limit, carried in a backup since dev13. It is the failure that hides — the
+  default is *stricter*, so a restore that dropped it looks like nothing
+  until a payment that never used to ask for a PIN asks for one, days later,
+  with nothing on screen connecting the two.
+- **The §15.5.1 spend gate on hardware.** The two-minute rung is a keystore
+  key bound to a recent authentication, so it cannot be exercised on an
+  emulator with a swipe lock — the one rung of the ladder no test here has
+  ever really run. `docs/field-day.md` carries the three rungs as part of
+  **Pass 1**: a small payment on a phone unlocked seconds ago must ask for
+  nothing, a payment after the window lapses must ask, and a payment over
+  the limit must ask every time including twice in a row.
+- **The trust layer's own adversarial pass.** §9.5's burns and §9.2's rated
+  receipts and vouches are the newest surface in the tree and the only one
+  with no review of any kind: the internal five-surface pass was read
+  against draft dev9 and predates all of it, which
+  `docs/review-brief.md` records under what is already known to be unproven.
+  The handset half is **Pass 8** of the field day — a burn, a stranger's
+  check against two nodes, a rated receipt, a vouch. The half that needs a
+  person rather than a day out is the economics: what it costs to farm a
+  plausible history, and whether a seller's `min_burn` is a wall or a kerb.
 - **External adversarial review.** §2.5 still says "no adversarial review
-  whatsoever," deliberately. 1.0 is the moment that stops being a
-  deferral and becomes a gap. Scope: the spec's crypto ceremonies and the
-  board/mailbox surfaces.
+  whatsoever," deliberately, and that is still literally true — the
+  2026-09-07 pass was internal, by the people who wrote the thing, which
+  tells you what they thought to look at and nothing more. 1.0 is the moment
+  the deferral becomes a gap. Scope: the spec's crypto ceremonies, the
+  board/mailbox surfaces, and the trust layer above.
 - **O21's last gap.** An implementer who has never read `core/` builds
   from the document alone. Everything accidental is cleared; what remains
   is finding that person.
@@ -433,14 +643,54 @@ rather than during it.
 ## The desktop client (parallel track, kara 2026-08-15)
 
 An Electrum-shaped DUCAT client for Linux/Windows/Mac. The protocol stack
-is already cross-platform Rust; the path, cheapest first:
+is already cross-platform Rust. ~~The path, cheapest first:~~ **It arrived
+on 2026-09-05, and it is not the module this section was written about.**
+
+**The desk is `applications/desk/`: a Tauri window over `app/`.** The logic
+is `ducat-app` — identity, contacts and the mailbox, wallet, till, kiosk,
+library, groups, boards, listings, the ledger, backup, sites — ordinary Rust
+tested with `cargo test -p ducat-app`, with the window a thin set of
+commands over it (one call each, `src-tauri/src/lib.rs`). Chat, Wallet,
+Till, Kiosk, Activity, Library, Market, Files, Sites, Feed, Status and Me
+are the pages.
+It speaks the phone's nineteen languages out of the phone's own resources,
+plus `desk_` keys of its own that can never shadow a phone key. It carries
+the trust surface: burning, checking somebody's proof, rating them after a
+deal, vouching, and a listing's minimum. Calls use the machine's real
+microphone and speaker through the sound server's own tools. A site opens
+in a sealed room — `script-src 'none'`, no IPC, every request answered from
+the fetched bundle. `release.yml` packages it on four targets (linux-x64,
+windows-x64, macos-arm64, macos-x64) beside the phone's APKs, which is the
+packaging item 1 below wanted and never got on its own terms.
+`src-tauri` is deliberately its own Cargo workspace, because
+it needs webkit to compile and a machine without webkit must still be able
+to `cargo test --workspace` on everything else. The live-network exercises
+ship as examples of the crate (`app/examples/`), and `DUCAT_DESK_DRIVE`
+evaluates JS inside the page — which exists because a Wayland session
+ignores pointer warps, so nothing outside the window can click it. Not on
+the desk: rides in any seat, which need a phone's position. The path that
+got here is kept below as the record.
 
 1. **Harness → CLI client.** Multi-contact state landed (--contacts,
    --contact-save, DUCAT_CONTACT selects the thread; --geo for board
-   names). Still wanted: a card-issue flow with a QR on the terminal,
-   a persistent watch daemon (one process, all threads), and packaging
-   (static binaries for the three OSes).
-2. **GUI — building, `:desktop` module ("DUCAT Desk").** v2 compiles the
+   names), and `--card-watch` / `--hail-watch` are the standing watches.
+   ~~Still wanted: a card-issue flow with a QR on the terminal, a
+   persistent watch daemon (one process, all threads), and packaging
+   (static binaries for the three OSes).~~ **Overtaken by the desk** — the
+   harness stayed what it is best at, an end-to-end check between two real
+   nodes over real routes ending in real settlement, and the client work
+   went where somebody would actually use it. Packaging is the desk's now.
+   The watch daemon survives as a want, but as the sign-in doorway's server
+   piece rather than as a CLI.
+2. **GUI — the Compose `:desktop` module ("DUCAT Desk" as it then was).**
+   ~~Building.~~ **Superseded as the client, 2026-09-05, and kept as the
+   harness-and-field-day runner** — seventy-six runnable `:desktop:*` tasks
+   are how this repository proves things against the live network and a
+   real phone (`taptest`, `kiosktest`, `ridetest`, `tilltest`,
+   `backuptest`, `boardbench`, `arbiter`, `rendertest`, `shimtest`,
+   `exiftest` …), and they are cited all over this file. The history below
+   is why they can be: it is the same protocol sources the phone runs. v2
+   compiles the
    phone's protocol sources verbatim against a four-class Android shim:
    one implementation of Mailbox/ContactStore on every screen. Window:
    contacts, chat, claimable card QR, the phone's poll loop; headless
@@ -493,32 +743,43 @@ is already cross-platform Rust; the path, cheapest first:
    the Rust stack compiles for iOS — the protocol layer is free; the UI
    and App Store review are the cost. Nothing now forecloses it.
 
-## What else this shape is for (after 1.0)
+## What else this shape is for
 
-Two more the machinery already mostly supports. The marketplace, hire and
-gear rental that were here have moved above: they are pre-1.0 by decision.
+Filed ~~(after 1.0)~~ when the machinery only mostly supported these, and
+all three have since been built. The reasoning below is kept because it is
+what the shapes must not become, not because the work is outstanding. The
+marketplace, hire and gear rental that were also here moved above: they are
+pre-1.0 by decision.
 
-- **Subscriptions with no card on file.** A weekly box, a monthly dues:
-  the seller bills the thread on a schedule, the buyer taps approve, money
-  moves. What is *absent* is the point — there is no stored payment
+- ~~**Subscriptions with no card on file.**~~ **Done** — recurring bills
+  2026-08-27, publication subscribers 2026-09-05. A weekly box, a monthly
+  dues: the seller bills the thread on a schedule, the buyer taps approve,
+  money moves. What is *absent* is the point — there is no stored payment
   credential, so nothing to leak in a breach, nothing to charge after a
   cancellation, and nothing that makes cancelling harder than subscribing.
   Every recurring relationship today rests on the merchant holding a key
   to the customer's money; this is recurring billing with no recurring
-  authority, which has no equivalent anywhere. Needs a schedule on a tab
-  and a standing thread; it needs no new protocol.
+  authority, which has no equivalent anywhere. ~~Needs a schedule on a tab
+  and a standing thread; it needs no new protocol.~~ It needed no new
+  protocol and got none: each due date the poller re-mints the same
+  powerless §16.13 bill and the payer approves that one
+  (`app/src/recurring.rs`, `Recurring.kt`, cadence advancing from the old
+  due date and monthly by calendar), and a publication bills every
+  subscriber one tab each per period (`app/src/publications.rs`), the
+  period's key riding the reconcile loop when the tab settles.
 
 - **Group messaging.** See below; the mechanism is already proven here.
 
-- **Pictures on a listing — the Uber/Airbnb/eBay shape.** The thing every
-  comparable marketplace has and this one does not, and the last big gap
-  between "a board that works" and a flow a stranger recognises. The
-  transport is already built: §16.15's second road carries an attachment
+- ~~**Pictures on a listing — the Uber/Airbnb/eBay shape.**~~ **Shipped —
+  §16.18.3, draft dev8 and dev9 (2026-09-06).** The thing every comparable
+  marketplace has and this one did not, and the last big gap between "a
+  board that works" and a flow a stranger recognises. The transport was
+  already built: §16.15's second road carries an attachment
   over a swarm share, which is how a photograph outgrows a record without
-  outgrowing the thread, and `Enquiries.About` already keeps `listingId`
+  outgrowing the thread, and `Enquiries.About` already kept `listingId`
   for exactly this class of thing — "the address and the key handover,
   which live on the listing and never on a board, offered once there is a
-  booking to give them to". Photographs belong in that same slot.
+  booking to give them to". Photographs went in that same slot.
 
   **The prerequisite is done (2026-09-02).** Images now leave as pixels:
   `SafeImage.stripped` decodes and re-encodes so no EXIF survives, with
@@ -527,15 +788,39 @@ gear rental that were here have moved above: they are pre-1.0 by decision.
   within a few metres and §16.18 spends its whole design putting a listing
   on a board at about five kilometres.
 
-  **What is decided and what is not.** Sending photographs *in the thread*
-  after contact is spec-compliant today and is the piece to build first:
-  the seller attaches them to the listing once, and the phone offers them
-  when somebody enquires, instead of the seller digging through a camera
-  roll every time. Putting them *on the board* is a §16.18 change and a
-  real decision, deliberately left open — today's rule is an unqualified
-  "A client MUST NOT put an exact location, a registration plate, or a
-  photograph on a board", while the reasoning given is about photographs
-  of someone's living room.
+  **What was decided.** Both, split by who pays for them. **The thumbnail
+  rides the notice** (field 287, at most 10 KiB, PNG/JPEG/WebP, checked the
+  way an avatar is because a decoder handed bytes whose format it must guess
+  is how a picture becomes an exploit): it arrives with the read the browser
+  was already doing, costs no second network operation, and still shows when
+  the seller's phone is off. The cap is sized against the *sweep* and not the
+  picture — eighteen boards of eight slots is 144 notices, so 10 KiB apiece
+  is ~1.4 MB a lap against 45 kB of words — and it is refused rather than
+  trimmed at both edges, because a slot is signed over its bytes and a reader
+  that quietly accepted an oversized one would be verifying something no
+  other reader would. **The full-size gallery rides a swarm share** (288–289,
+  share key and index digest, both halves or neither), fetched only when
+  somebody opens the listing; since dev9 that share is a bundle, and
+  `listing.json` carries a description of at most 8 000 characters in
+  §16.23's text subset, **at most 24 pictures**, 8 files and 32 spec pairs,
+  and the price as the seller typed it. Nothing in the bundle can change the
+  price, the area or the card, which stay on the signed notice. Two
+  consequences a client must say out loud, and both do: a swarm serves only
+  while somebody seeds it, so a seller whose device is off has a gallery that
+  does not load — the thumbnail still does, which is why it is on the board;
+  and fetching a gallery is a peer connection to the seller's node, so
+  **opening a listing's pictures tells them somebody is looking** where
+  reading the board tells them nothing. A client MUST NOT fetch galleries
+  while browsing, and SHOULD NOT prefetch on the reader's behalf.
+
+  **One loose end, in the document rather than the code.** §16.18 still
+  carries the unqualified sentence "A client MUST NOT put an exact location,
+  a registration plate, or a photograph on a board", which §16.18.3 now
+  contradicts by design. The rule that was meant is the one the research
+  below argues for — the *object*, never the interior and never the face —
+  and §16.18's sentence wants rewriting to say that, with the plate and the
+  exact location left exactly as absolute as they are. `audit_spec.py` cannot
+  catch this one: it holds tables against code, not prose against prose.
 
   The research behind that, so it does not have to be done twice
   (2026-09-02): **Airbnb** shows listing photographs publicly and hides
@@ -556,10 +841,13 @@ gear rental that were here have moved above: they are pre-1.0 by decision.
   seller is often unknown"*, which is this app's permanent condition,
   with no reviews and no operator to fall back on.
 
-  If it is ever opened up, the shape that matches what people actually
-  expect is by kind rather than one rule: the *object* on the board for
-  goods, gear and vehicles (plate obscured), interiors and faces only
-  after contact, person photographs expiring the way Uber's do.
+  It was opened up, and in the shape that paragraph pointed at: the *object*
+  goes on the board at thumbnail size for goods, gear and vehicles, the rest
+  of the pictures sit behind a fetch the reader chooses, and interiors, faces
+  and plates still travel in the thread — fields 210–212 on `CONTACT_ACCEPT`
+  for the driver's plate, car and photograph, which is Uber's own answer
+  arrived at independently. Person photographs do not yet expire the way
+  Uber's do; that remains the one part of the recommendation unbuilt.
 
 ## The everyday-money tail — five features one Ask surfaced (built 2026-08-27)
 
@@ -583,11 +871,11 @@ bills** — a schedule, not a mandate: each due date the poller re-mints the
 same powerless kind-1 (§16.13), payer approves every one; cadence advances
 from the old due date, monthly by calendar; store in securePrefs.
 
-## Group messaging — the roster pattern, generalised (after 1.0)
+## Group messaging — the roster pattern, generalised
 
 **Built, 0.90 (2026-08-27) — pulled forward once replies existed.** §16.19:
-fan-out exactly as sketched below, four wire fields (253–256), kind 12 for
-the roster. The two decisions that made it buildable without an operator:
+fan-out as sketched below, four wire fields (253–256), kind 12 for the
+roster. The two decisions that made it buildable without an operator:
 the roster is a **grow-only set** (anyone adds, nobody is ever removed —
 removal needs a consensus a p2p group cannot have; a grow-only set
 converges by union in any order), and the **mesh is checked edge by edge**
@@ -597,9 +885,43 @@ sending refuses while your own mesh has a hole, and partial delivery is
 structurally impossible). Reactions, replies and unsend work in-group via
 the group reference; money stays pairwise; the disclosure states the
 shape plainly once per group per phone. Proven live between the two
-emulators and the desk's shared poll loop. The paragraphs below are the
-original sketch, kept because the reasoning still governs what a group
-must not become.
+emulators and the desk's shared poll loop.
+
+**And then the shared record after all — §16.24 (2026-09-06). Fan-out is
+the fallback now.** A group's words live on one DHT record per generation
+with the SMPL schema: every member writes only their own ring of pages,
+each write signed by their own key. So a message is one write instead of
+N−1, a lap is one inspection instead of N−1 reads, a newcomer reads the
+recent pages instead of nothing, and a sender can no longer say different
+things to different members. `PAGES` is 4, a board holds at most 255
+members, a page is bounded by the lesser of 32 KiB and 1 MiB ÷ subkeys
+(`core/src/group.rs`), and the first member entry is a **nameplate** — the
+SHA-256 of `"ducat group board"`, the group id and the generation — that
+nobody holds a key for, so two groups of the same people are two records
+and one group's two generations are two records even when the list did not
+change. Readers merge by `(sender, GB_SEQ)` and order by `GB_TS` then
+sender key, so two phones show one order and §16.19's arrival-order caveat
+is gone.
+
+The objections below were not wrong. They were **paid** rather than dodged,
+and §16.24 writes down the price: there *is* a group key, so forward secrecy
+becomes per-generation, and deniability goes, because the record signs each
+page with the persona key a card already binds. What is bought is
+consistency and history. Membership change is a new generation — a fresh
+record, a fresh key — and the roster gains the generation, the owner, the
+key and `PAGES` as payload keys 3–6; a roster without them describes a
+§16.19 group with no board, and those keep working exactly as sketched
+below, which is why the fan-out paragraphs stay rather than being deleted.
+Money stays pairwise either way. Nobody is removed and leaving is still
+local. One rule the security pass added afterwards: a reader MUST refuse a
+generation whose member list is not a superset of the one it holds, whose
+owner is not the sender, or whose number is not the successor of the one it
+holds — otherwise one member can silently exclude another or brick the
+board, which the union rule alone did not prevent.
+
+The paragraphs below are the original sketch, kept because the reasoning
+still governs what a group must not become — and, in the shared-record
+case, because it is the list of what that choice cost.
 
 - **Small groups over pairwise threads.** A ceremony is already a group:
   §17.9's roster of two or three personas, coordinated entirely over
@@ -610,7 +932,9 @@ must not become.
   fan-out: the sender writes the same body into each member's existing
   thread.
 
-  **Why fan-out rather than a shared record.** A shared DHT record is one
+  **Why fan-out rather than a shared record** (*answered by §16.24 above:
+  the record was built, and each cost below was accepted and written down
+  rather than disproved*). A shared DHT record is one
   write instead of N and is the obvious design, and it costs three things
   that matter more. It needs a group key, which means key rotation on
   every membership change and no good answer for removal — the removed
@@ -660,15 +984,29 @@ must not become.
   stronger copyleft than this repo currently carries — this may force the
   app's own licence, and that is a decision, not a detail); offline
   routing is on the not-for-1.0 list below and this would supply it, so
-  the two should be read together; §15.12's live position (specified, not
+  the two should be read together; ~~§15.12's live position (specified, not
   built) is the piece that makes a driver's screen worth looking at, and
-  belongs first.
+  belongs first~~ — **live position is built** (2026-08-26, above), so the
+  piece that makes a driver's screen worth looking at is already there and
+  this is additive rather than a prerequisite.
 
 ## Explicitly not for 1.0
 
 - Offline OSM routing (fare estimates without the one stated leak).
 - Multi-hail per rider; fleets; anything dispatcher-shaped.
-- Reputation systems beyond the receipts a relationship accretes.
+- Reputation *systems* — a published score, an aggregate anybody else
+  computed, a ranking, a reader who is handed the answer instead of working
+  it out. §9.2's rated receipts and §9.5's burns arrived after this line was
+  written and do not contradict it; what keeps it true is worth stating,
+  because otherwise it reads as contradicted. Nothing is published and
+  nothing is aggregated: a burn proof, an attestation and a vouch are
+  envelopes handed to one reader in a sealed thread, and every verdict is
+  that reader's own arithmetic — one voice per signer however many receipts
+  they wrote, weighted only by signers whose burn that reader verified
+  itself, a vouch counted only from contacts it already holds, one hop and
+  never two, and the answer worn in words rather than as a number. A record
+  is therefore never a score somebody else computed; it is envelopes, and
+  every reader weighs them again.
 - **A second settlement chain. Considered and declined, 2026-08-19.**
   Bitcoin and Ethereum alongside Monero, three wallets from first launch —
   weighed for reach and turned down. The engineering was the small part:

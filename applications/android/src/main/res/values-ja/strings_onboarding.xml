@@ -63,8 +63,8 @@
     <string name="onb_restore_continue">続ける</string>
     <!-- PIN step -->
     <string name="onb_pin_title">PINを決める</string>
-    <string name="onb_pin_body">この端末からお金が出るたびに聞かれる番号です。ロックの外れた端末を手にした人と、あなたのウォレットとの間に立つのはこれだけです。</string>
-    <string name="onb_pin_done">PINを設定しました。支払いの前に必ず聞かれます。</string>
+    <string name="onb_pin_body">一つの番号です。支出上限を超える金額には必ず尋ねられ、端末に画面ロックがなければすべての支払いで尋ねられます。ロックの外れた端末を手にした人と、あなたのウォレットとの間に立つのはこれだけです。</string>
+    <string name="onb_pin_done">PINを設定しました。支出上限を超える金額で尋ねられます。上限はあとで変更できます。</string>
     <string name="onb_pin_action">PINを決める</string>
     <string name="onb_pin_next">次へ</string>
     <string name="onb_wallet_error">ウォレットを作成できませんでした。もう一度お試しください。</string>

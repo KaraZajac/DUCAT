@@ -65,8 +65,8 @@
     <string name="onb_restore_continue">ادامه</string>
     <!-- PIN step -->
     <string name="onb_pin_title">یک پین انتخاب کن</string>
-    <string name="onb_pin_body">یک عدد، که هر بار پول از این گوشی بیرون می‌رود پرسیده می‌شود. همان چیزی است که میان کیف پول تو و کسی می‌ایستد که گوشی قفل‌نشده‌ات را بردارد.</string>
-    <string name="onb_pin_done">پین تو تنظیم شد. پیش از هر پرداخت پرسیده می‌شود.</string>
+    <string name="onb_pin_body">یک عدد، که برای هر مبلغ بالاتر از سقف خرج شما پرسیده می‌شود — و اگر این گوشی قفل صفحه نداشته باشد، در هر پرداخت. همین میان کیف پول شما و کسی که گوشی باز شما را برمی‌دارد می‌ایستد.</string>
+    <string name="onb_pin_done">پین شما تنظیم شد. بالاتر از سقف خرج شما پرسیده می‌شود و بعداً قابل تغییر است.</string>
     <string name="onb_pin_action">انتخاب پین</string>
     <string name="onb_pin_next">بعدی</string>
     <string name="onb_wallet_error">کیف پول ساخته نشد. دوباره تلاش کن.</string>

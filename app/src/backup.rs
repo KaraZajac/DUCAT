@@ -173,6 +173,12 @@ impl App {
             prekey_one_time: prekeys.1,
             prekey_next_id: prekeys.2,
             app_state: Some(self.app_state_blob()),
+            // §15.5.1: None, and not an oversight. This desk has no device
+            // credential and no secret of its own, so it runs no spend gate
+            // at all (ledger D11) and has no policy of the user's to carry.
+            // The defaults go into the bundle, which is what a client that
+            // *does* have a gate reads as "nothing was set here".
+            verification: None,
             escrow_shares: Vec::new(),
             personas: self.personas_backup()?,
         };

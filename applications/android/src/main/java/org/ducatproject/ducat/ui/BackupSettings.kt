@@ -225,6 +225,14 @@ fun BackupSettings(spendKeyHex: String?, restoreHeight: ULong, personaSecret: By
                                 // a restore is becoming this phone,
                                 // every hat included.
                                 PersonaStore(context).backupPersonas(context),
+                                // §15.5.1's thresholds. Carried, and it
+                                // was not for a day: the Spending control
+                                // shipped and this went on writing the
+                                // default, so a restore silently handed
+                                // back a stricter policy than the one the
+                                // user chose — met later as a PIN prompt
+                                // on a payment that never used to ask.
+                                org.ducatproject.ducat.SpendGate.policy(context),
                             ),
                             phrase,
                             personaSecret!!,
@@ -368,6 +376,14 @@ internal fun applyBackup(
     // persona the roster replacement then erased.
     r.displayName?.let { NameStore(context, PersonaStore(context).personaHex()).put(it) }
     ContactStore(context).setPublishAddress(r.publishPayto)
+    // §15.5.1's threshold, for the same reason and with a sharper edge: the
+    // defaults are *stricter* than most people's setting, so a restore that
+    // dropped this would hand somebody a phone that asks for a PIN on
+    // payments that never used to ask — and nothing on any screen would say
+    // why. Only the number the user sets; the rest of the policy is this
+    // build's, because a bundle from another client should not be able to
+    // widen a window or turn off the re-ask.
+    org.ducatproject.ducat.SpendGate.setPinAbove(context, r.verification.appSecretAt.toLong())
     // §16.9's profile with it. A persona that comes back with the right money
     // and no face is not the same person to anyone who knew them, and nothing
     // else in the app would report the loss.

@@ -3772,7 +3772,7 @@ fn main() -> std::io::Result<()> {
         "does_not_yet_cover": {
             "escrow and fast/1 end-to-end transcripts": "no *vector* drives these, so they remain outside the language-neutral suite. Both now run end to end in harness/ against real Veilid routes and real stagenet settlement — fast/1 including a bond_proof and mempool-visibility acceptance, escrow including an ordered three-party ceremony, a refused replay, address agreement, and a destination-constrained release. Contract logic is in core/tests/escrow.rs.",
             "suite 2 key agreement": "only signatures are covered; X25519/ECDH is unimplemented",
-            "O21 caveat": "a vector set validated by one implementation encodes that implementation's bugs. A second implementation (conformance/ducat_check.py) now runs these and agrees at 104/104, having found three spec defects on its first pass — but it shares an author with the reference, so O21 stays open until someone who has never read core/ runs them.",
+            "O21 caveat": "a vector set validated by one implementation encodes that implementation's bugs. A second implementation (conformance/ducat_check.py) now runs every one of them and agrees, having found three spec defects on its first pass — but it shares an author with the reference, so O21 stays open until someone who has never read core/ runs them.",
             "multisig backup": "§4.3.3 — escrow shares are carried in the bundle as opaque key-file bytes, but no vector exercises one: a share is a Monero wallet key file, not a DUCAT object, so there is nothing language-neutral to assert. Verified against stagenet instead (monero-spike/REPORT.md)."
         }
     });

@@ -187,9 +187,13 @@ The presenter supplies *reachability*, so the reader drives — and here that me
   paid inline, blocking up to forty seconds on propagation retries, so the polls
   went unanswered and the till abandoned a sale for a transaction that had
   already been broadcast. Settlement now runs off the loop.
-- **`amount_authority` must be `open`**, and `offer_commit` is necessarily empty:
-  the offer does not exist until the till makes one. The till refuses a
-  payer-presented tap claiming otherwise.
+- **`amount_authority` must be `open`**, and `offer_commit` is **thirty-two
+  bytes of zero**: the offer does not exist until the till makes one, and the
+  field is fixed-width and always present, so "no commitment" needs a *value*
+  rather than an absence. §15.3.2 said "necessarily empty" through
+  1.1.0-dev11 — a rule the wire could not express, so nothing could check it.
+  The till refuses a payer-presented tap carrying anything else, and so does
+  `TapPresent::from_value` in `core/src/wire.rs`.
 - **The confirm screen does not move.** `ACCEPT` is still the payer's alone.
   Whoever held out a phone, the party whose money is at risk decides.
 

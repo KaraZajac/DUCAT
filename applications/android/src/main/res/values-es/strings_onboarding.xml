@@ -65,8 +65,8 @@ Al terminar, las dos garantías vuelven enteras y la tarifa va al conductor. Nad
     <string name="onb_restore_continue">Continuar</string>
     <!-- PIN step -->
     <string name="onb_pin_title">Elige un PIN</string>
-    <string name="onb_pin_body">Un número, que se pide cada vez que sale dinero de este teléfono. Es lo que separa tu monedero de quien coja tu teléfono desbloqueado.</string>
-    <string name="onb_pin_done">Tu PIN ya está. Se pedirá antes de cualquier pago.</string>
+    <string name="onb_pin_body">Un número, que se pide en todo lo que supere tu límite de gasto — y en cada pago si este teléfono no tiene bloqueo de pantalla. Es lo que se interpone entre tu monedero y quien recoja tu teléfono desbloqueado.</string>
+    <string name="onb_pin_done">Tu PIN está listo. Se pedirá por encima de tu límite de gasto, que puedes cambiar después.</string>
     <string name="onb_pin_action">Elegir un PIN</string>
     <string name="onb_pin_next">Siguiente</string>
     <string name="onb_wallet_error">No se pudo crear el monedero. Inténtalo de nuevo.</string>

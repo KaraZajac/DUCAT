@@ -29,18 +29,18 @@ threshold escrow (FROST) for bonded rides and reservations.
 
 | What | Where | Why you would read it |
 |---|---|---|
-| The specification | [`ducat-protocol.md`](../ducat-protocol.md) | The normative document. 1.0.0-rc1, feature-frozen. Changelog first. |
+| The specification | [`ducat-protocol.md`](../ducat-protocol.md) | The normative document. **Draft 1.1.0-dev13** on this branch; 1.0.0-rc1 is the frozen line, and the trust and verification surfaces below are newer than it. Changelog first. |
 | Reference implementation | [`core/`](../core) | Rust. The vectors are generated from it. |
 | Conformance vectors | [`vectors/v1/`](../vectors/v1) | 442 cases + schema — the published artifact. |
 | Second implementation | [`conformance/ducat_check.py`](../conformance/ducat_check.py) | An independent reading of the spec, in Python. It agrees on all 442. |
 | Internal review ledger | [`research/security/`](../research/security) | What we already attacked, what we fixed, and what is still open. Start here to avoid repeating it. |
 | Spec audit | [`conformance/audit_spec.py`](../conformance/audit_spec.py) | Catches prose that stopped describing the code. |
-| Clients | [`applications/`](../applications) | Android + desktop, one shared implementation. |
+| Clients | [`applications/`](../applications) | `android/` the phone, `desk/` the Tauri desktop client over the Rust in `app/`, `desktop/` the earlier Compose desk that compiles the phone's own sources against a shim. Two implementations of the protocol rather than one — which is itself a place to look for divergence. |
 | Wire bridge | [`mobile/`](../mobile) | UniFFI wrapper. Adds no logic, by rule. |
 
 Everything runs on every commit (`.github/workflows/checks.yml`). To run it
 yourself: `python3 -m pip install -r conformance/requirements.txt`, then
-`cargo test --workspace` and the three checkers.
+`cargo test --workspace` and the four checkers.
 
 ## Scope, in the order we think it matters
 
@@ -52,15 +52,30 @@ someone it was not sealed for, forward-secrecy claims that the signed-prekey
 fallback quietly breaks. Note that the fallback is *shown* to the user (an
 open lock) — tell us if showing it is doing less work than we think.
 
+Two pieces of this are days old and worth your attention first. A card's
+**claimant half is now HPKE-sealed**, not merely signed, because a card on a
+public board hands its inbox record key to every reader of that board; attack
+what a board reader can still learn from subkey 1, and what happens to an
+issuer handed a reply it cannot open. And `INTRODUCTION` (**message kind
+17**) carries a signed `CONTACT_ACCEPT` *inside* a thread, so a card can
+publish less than it hands over. Its two ties are the whole of its security:
+it must open under the persona it names, and it must name the inbox the
+thread was born from. Attack both — an introduction replayed from another
+relationship, one naming a third party, one into a thread with no card
+binding to check it against — and attack the rule that a later, different
+name is shown rather than adopted.
+
 **2. The escrow ceremonies (§17.9).** PedPoP distributed key generation, then
 FROST signing, both carried as opaque payloads over the sealed thread. Two or
 three parties; threshold two. The round-0 frame is rebuilt independently by
 every participant and the ceremony id is a hash of the roster. Attack: a
 participant who lies about the roster, a rejoin that re-derives a different
-key, a proposal whose stated split differs from the transaction it signs (the
-co-signer today sees a fee, **not** an itemised destination list — this is a
-known, stated weakness, see "what we already know" below), a captured arbiter,
-a party who can strand funds rather than merely refuse.
+key, a proposal whose stated split differs from the transaction it signs — the
+co-signer is now shown the destinations, the inputs total and the fee, read
+back out of the transaction's own re-encoding, so **attack the reader**: a
+second decoder for a structure the wallet already parses is exactly where a
+disagreement between the two would hide — a captured arbiter, and a party who
+can strand funds rather than merely refuse.
 
 **3. The public boards (§15.12, §16.18.1).** A geocell is a DHT record whose
 address is derived from the place itself — anyone can read or write one. Hails
@@ -100,11 +115,14 @@ to farm a plausible history, and is the seller's minimum (`min_burn`, field
 **6. Payer verification (§15.5.1).** Whether the person holding the phone is
 entitled to spend at all — the question WYSIWYS never asks. Every payment
 wants a device unlocked inside a two-minute window; above a user-set
-threshold the app's own PIN, every time. None of it touches the wire.
-Attack: any path to a spend that skips the gate, the Android keystore binding
-behind the unlock window, the rolling-hour counter, and the escalation rule
-for a stale exchange rate (§17.7) — an attacker who can stall a rate feed
-must not be able to *lower* the requirement.
+threshold the app's own PIN, and `app_secret_every_time` means *every* time
+rather than once per window. The policy rides a backup as keys 9–13 and
+28–29, the last two optional and defaulting to the stricter reading. None of
+it touches the wire. Attack: any path to a spend that skips the gate, the
+Android keystore binding behind the unlock window, the rolling-hour counter,
+what a restore does to somebody's threshold, and the escalation rule for a
+stale exchange rate (§17.7) — an attacker who can stall a rate feed must not
+be able to *lower* the requirement.
 
 **7. The stewardship claims (§18.7).** No protocol fees, no node payment,
 every client a full participant. These are conformance requirements, not
@@ -115,11 +133,13 @@ profitably.
 
 Reviewing this list back to us is not useful; breaking something *not* on it is.
 
-- **Co-signer consent is partial.** A FROST co-signer is shown the fee, not the
-  destinations, because `monero-wallet` 0.2.0 keeps a `SignableTransaction`'s
-  payments private. A malicious proposer can therefore ask someone to sign a
-  transaction they cannot fully inspect. Mitigated only by the payee usually
-  being the proposer.
+- ~~**Co-signer consent is partial.**~~ **Closed 2026-09-14.** A co-signer used
+  to be shown the fee and not the destinations, because `monero-wallet` kept a
+  `SignableTransaction`'s payments private. `read_tx` now walks the crate's own
+  re-encoding and returns the destinations, the inputs total and the fee, and a
+  client refuses a proposal it cannot describe. Worth attacking rather than
+  taking on trust: it is a second decoder for a structure the wallet already
+  parses, which is exactly where a disagreement between the two would hide.
 - **NFC has never run on hardware.** Compile-verified, never field-tested.
 - **Everything is stagenet.** No mainnet transaction has ever been made.
 - **A desk's vault key is only as good as its passphrase**, and unlike a

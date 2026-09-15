@@ -17,8 +17,8 @@
 
     <!-- Limits step -->
     <string name="onb_pin_title">Choose a PIN</string>
-    <string name="onb_pin_body">One number, asked for every time money leaves this phone. It is what stands between someone who picks up your unlocked phone and your wallet.</string>
-    <string name="onb_pin_done">Your PIN is set. It will be asked for before any payment.</string>
+    <string name="onb_pin_body">One number, asked for on anything over your spending limit — and on every payment if this phone has no lock screen. It is what stands between someone who picks up your unlocked phone and your wallet.</string>
+    <string name="onb_pin_done">Your PIN is set. It will be asked for above your spending limit, which you can change later.</string>
     <string name="onb_pin_action">Choose a PIN</string>
     <string name="onb_pin_next">Next</string>
 

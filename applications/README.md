@@ -1,30 +1,75 @@
 # The DUCAT clients
 
-Every user-facing build lives here. One Gradle project, two modules, and the
-platforms each of them reaches:
+Every user-facing build lives here. Three of them, and the middle one is easy
+to confuse with the third:
 
 ```
 applications/
   android/      the phone (Kotlin/Compose) — Android APKs, three ABIs
-  desktop/      DUCAT Desk (Compose Desktop) — Linux, Windows, macOS
+  desk/         DUCAT desk — the shipped desktop client: a Tauri window over
+                `ducat-app`, the crate in `app/` at the repo root, which sits
+                on the same `mobile`/`core` the phone does. Linux, Windows,
+                macOS
+  desktop/      the earlier desk (Compose Desktop) — compiles the phone's own
+                Kotlin against an Android shim. Still packages locally, but no
+                release builds its installers any more; it is where the render
+                test, the shim gates and the live field exercises run
   ios/          not yet; see below
 ```
+
+`android/` and `desktop/` are the two modules of one Gradle project —
+`settings.gradle.kts` includes exactly those two. **`desk/` is not a Gradle
+module at all**: it is pnpm plus its own Cargo workspace (deliberately its own,
+so a machine without webkit can still `cargo test --workspace` on everything
+else), and it builds from its own directory.
 
 ```sh
 cd applications
 ./gradlew :android:assembleDebug          # the phone
-./gradlew :desktop:run                    # the desk, from source
-./gradlew :desktop:packageDistributionForCurrentOS   # an installer, for this OS
+./gradlew :desktop:run                    # the Compose desk, from source
+./gradlew :desktop:packageDistributionForCurrentOS   # a jpackage installer, for this OS
+
+cd desk && pnpm install
+pnpm tauri dev                            # the shipped desk, with hot reload
+pnpm tauri build                          # its installers, for this OS
 ```
 
-There is no `windows/`, `macos/` or `linux/` directory, and that absence is
-the design: **the desk is one codebase**. jpackage can only build a `.deb`
-or `.rpm` on Linux, an `.msi` on Windows, a `.dmg` on macOS — so the split
+Read [`desk/README.md`](desk/README.md) for what the shipped desk does, what it
+needs installed per platform, and how it is driven headlessly.
+
+There is no `windows/`, `macos/` or `linux/` directory, and that absence is the
+design: **a desk is one codebase, packaged per machine.** No packager crosses —
+jpackage builds a `.deb` or `.rpm` only on Linux, an `.msi` only on Windows, a
+`.dmg` only on a Mac, and `tauri build` is bound the same way — so the split
 that matters is which *machine* runs the build, not which folder holds the
-source. `.github/workflows/desk.yml` does exactly that: a tag push fans the
-same module out to four runners and attaches every installer to the release.
-Three copies of one source tree would be three places for the same bug to
-diverge.
+source. Three copies of one source tree would be three places for the same bug
+to diverge.
+
+`.github/workflows/release.yml` is where that happens. A tag push (or a manual
+dispatch, which keeps the bundles as run artifacts instead of cutting a
+release) starts two jobs: `apk` builds the phone's native library for all three
+ABIs on the runner that has the NDK and assembles the APKs, and `desk` fans
+`applications/desk` out over a four-way matrix — `ubuntu-22.04` (an older base
+so the binary links against a glibc and webkit more desks have),
+`windows-latest`, and `macos-latest` twice, the second cross-compiled to
+`x86_64-apple-darwin` for Intel Macs. Every bundle is copied to a stable name
+(`ducat-<slug>.deb`, `.rpm`, `.AppImage`, `.msi`, `-setup.exe`, `.dmg`) and
+uploaded to the release the tag names.
+
+There is **no** `desk.yml`. There was: from 2026-08-17 it jpackaged the
+*Compose* module across four runners, which is the arrangement the paragraph
+above used to describe. On 2026-09-05 it was replaced by `release.yml` and
+`checks.yml`, in the same commit that made the Tauri desk the one that ships.
+
+`.github/workflows/checks.yml` is the other half, on every push to master and
+every pull request. Three jobs: `protocol` (the vectors, the second
+implementation, the spec audit, `cargo test --workspace`), `clients` (the phone
+builds and unit-tests, the Compose desk builds, every screen draws), and `desk`
+(the Tauri client — its dictionaries re-generated from the phone's resources
+with `--check`, `pnpm check` over the pages, and `cargo build --features
+sound`). The `clients` job exists because the two Kotlin clients are not
+independent: the Compose desk compiles the phone's own screens, so a phone-side
+edit can break it silently.
 
 **iOS** gets a folder when there is something to put in it. Nothing
 forecloses it — uniffi generates Swift bindings natively and the Rust stack
@@ -42,6 +87,9 @@ actually means).
   runner. Set `JAVA_HOME`, or pin it in your own `~/.gradle/gradle.properties`.
 - **SDK 35**, build-tools 35, **NDK 27.2** for the Rust core.
 - Gradle 8.11.1 via the wrapper — no system Gradle needed.
+- For `desk/` only, and none of it for the Gradle side: **Rust (stable), Node
+  20+, pnpm**, plus the platform's webview development packages. CI pins pnpm
+  10 and Node 22; `desk/README.md` lists the system packages per OS.
 
 ## Permanent facts about the Android build
 
@@ -91,7 +139,12 @@ load a stale one and behave like an older protocol, which is §18.12's drift
 wearing different clothes. `jniLibs/` is gitignored for the same reason — a
 committed binary is a binary nobody rebuilds.
 
-## How the desk borrows the phone's brain — and its screens
+## How the Compose desk borrows the phone's brain — and its screens
+
+**This section is about `desktop/`, not `desk/`.** The shipped Tauri desk
+shares code with the phone one level lower down — through `ducat-app` and
+`core`, in Rust — and has its own screens written in Svelte. What follows is
+the other arrangement: a desk built out of the phone's own Kotlin.
 
 `desktop/build.gradle.kts` compiles a named list of the phone's own source
 files (`android/src/main/java/org/ducatproject/ducat/...`) against a small
@@ -124,7 +177,7 @@ a screen needs a platform's own behaviour, split it the way `PlatformWindow`
 and `Locales`/`Localization` are split — a shared half and a named per-platform
 half — rather than forking the screen.
 
-Headless gates, all runnable without a window:
+Headless gates, all `desktop/`'s and all runnable without a window:
 
 ```sh
 cd applications
@@ -148,7 +201,12 @@ a blank rectangle. Compiling is not drawing — it caught two rooms that crashed
 on first composition.
 
 
-## The desk's keys at rest
+## The Compose desk's keys at rest
+
+Also `desktop/`'s: the vault is `VaultSet.kt` and `VaultTest.kt` under
+`desktop/src/main/kotlin/org/ducatproject/desk/`, and nothing in `desk/` or
+`app/` reads `DUCAT_DESK_PASSPHRASE`. It matters because the standing headless
+roles — arbiters, tills — are `desktop/` processes.
 
 The phone keeps its spend key, persona secret and prekeys in
 EncryptedSharedPreferences, whose master key lives in the Android Keystore and
