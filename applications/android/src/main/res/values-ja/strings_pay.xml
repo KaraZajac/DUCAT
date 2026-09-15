@@ -84,4 +84,5 @@
     <string name="pay_relay_unconfirmed">どの Monero ノードも支払いの受け取りを確認しませんでした。それでも通る可能性があります。使ったノートはチェーンが決着をつけるまで確保されたままです。もう一度支払う前に取引明細を確認してください。</string>
     <string name="pay_request_kept">請求を保存しました。ネットワークが戻り次第、自動的に送信されます。</string>
     <string name="pay_fee_capped">実際の手数料がこれを 4 分の 1 以上上回った場合、送金しません。</string>
+    <string name="pay_rate_stale">この換算は %1$s 前の為替レートです。</string>
 </resources>

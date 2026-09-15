@@ -84,4 +84,5 @@
     <string name="pay_relay_unconfirmed">Tidak ada node Monero yang mengonfirmasi menerima pembayaran ini. Bisa jadi tetap sampai — catatan yang dipakai tetap dicadangkan sampai rantai memutuskannya. Periksa laporan sebelum membayar lagi.</string>
     <string name="pay_request_kept">Permintaan disimpan — akan terkirim dengan sendirinya begitu jaringan kembali.</string>
     <string name="pay_fee_capped">Jika biaya sebenarnya lebih dari seperempat di atas ini, tidak ada yang dikirim.</string>
+    <string name="pay_rate_stale">Konversi memakai kurs dari %1$s yang lalu.</string>
 </resources>

@@ -84,4 +84,5 @@
     <string name="pay_relay_unconfirmed">Không nút Monero nào xác nhận đã nhận khoản thanh toán. Nó vẫn có thể đi qua — các tờ đã dùng vẫn được giữ lại cho đến khi chuỗi quyết định. Hãy kiểm tra sao kê trước khi trả lại lần nữa.</string>
     <string name="pay_request_kept">Đã giữ yêu cầu — sẽ tự gửi đi ngay khi có mạng trở lại.</string>
     <string name="pay_fee_capped">Nếu phí thực tế cao hơn mức này quá một phần tư, sẽ không gửi gì cả.</string>
+    <string name="pay_rate_stale">Quy đổi dùng tỷ giá từ %1$s trước.</string>
 </resources>

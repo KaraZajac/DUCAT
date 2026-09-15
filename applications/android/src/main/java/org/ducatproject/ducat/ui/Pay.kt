@@ -798,6 +798,20 @@ private fun AmountStep(
         // A send to a contact only; an address has no burn to speak of, and
         // a request risks nothing of ours. A bill is money about to be paid
         // as much as a typed amount is, so it is gated too.
+        // A figure typed in dollars and sent in XMR is only as good as the
+        // rate behind it, and the rate has an age (M9). Said where the amount
+        // is, not in a caveat further down, and only once it is old enough to
+        // be a fact about this phone rather than about the half-hour refresh.
+        val rateAge = remember(version, fiatLive) { if (fiatLive) Amounts.rateAgeSecs(context) else null }
+        if (rateAge != null && rateAge > STALE_PAY_RATE_SECS) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                stringResource(R.string.pay_rate_stale, humanDuration(context, rateAge)),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
         val theirBurn = remember(target, version) {
             (target as? PayTarget.ToContact)?.let { Trust.burnOf(context, it.contact.personaHex) }
         }
@@ -1481,3 +1495,11 @@ private object PaySends {
 /** A rate as a person reads it: two decimals, no exponent, whatever the size. */
 private fun fmtRate(r: Double): String =
     java.math.BigDecimal(r).setScale(2, java.math.RoundingMode.HALF_UP).toPlainString()
+
+/**
+ * When a conversion behind a payment stops being about the refresh cycle and
+ * starts being a fact about this phone (M9). Half an hour is the desk's own
+ * `rate_stale`; money leaving is a sharper moment than a balance on a
+ * home screen, so it is said sooner here than there.
+ */
+private const val STALE_PAY_RATE_SECS = 30L * 60

@@ -84,4 +84,5 @@
     <string name="pay_relay_unconfirmed">Geen enkele Monero-node heeft bevestigd de betaling te hebben aangenomen. Hij kan alsnog doorgaan — de gebruikte biljetten blijven gereserveerd tot de chain het beslist. Controleer het overzicht voordat je opnieuw betaalt.</string>
     <string name="pay_request_kept">Verzoek bewaard — het gaat vanzelf weg zodra het netwerk er weer is.</string>
     <string name="pay_fee_capped">Ligt de werkelijke fee meer dan een kwart hierboven, dan wordt er niets verstuurd.</string>
+    <string name="pay_rate_stale">De omrekening gebruikt een wisselkoers van %1$s geleden.</string>
 </resources>

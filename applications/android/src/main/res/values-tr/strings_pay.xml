@@ -84,4 +84,5 @@
     <string name="pay_relay_unconfirmed">Hiçbir Monero düğümü ödemeyi aldığını onaylamadı. Yine de geçebilir — kullanılan banknotlar zincir karar verene kadar ayrılmış kalır. Yeniden ödemeden önce hesap özetini kontrol et.</string>
     <string name="pay_request_kept">İstek saklandı — ağ gelir gelmez kendiliğinden gidecek.</string>
     <string name="pay_fee_capped">Gerçek ücret bunun dörtte birinden fazla üzerine çıkarsa hiçbir şey gönderilmez.</string>
+    <string name="pay_rate_stale">Bu çeviri %1$s önceki kuru kullanıyor.</string>
 </resources>
