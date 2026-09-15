@@ -3053,10 +3053,6 @@ object Mailbox {
                     Publications.absorbKey(context, c.personaHex, arrived)
                 }.onFailure { DucatLog.w(TAG, "publication key: ${it.message}") }
             }
-            // §16.20's ask, answered from the publisher's own shelf: free
-            // goes straight back as a key, priced raises one bill against
-            // this one reader. Resolving *which* publication is onWanted's
-            // job, and it declines to guess.
             // §16.3.1: the coda as a message. A card that published
             // nothing but a persona — a hail always does — hands over the
             // rest here, once there is one person to hand it to.
@@ -3065,6 +3061,10 @@ object Mailbox {
                     absorbIntroduction(context, c, opened.payload)
                 }.onFailure { DucatLog.w(TAG, "introduction: ${it.message}") }
             }
+            // §16.20's ask, answered from the publisher's own shelf: free
+            // goes straight back as a key, priced raises one bill against
+            // this one reader. Resolving *which* publication is onWanted's
+            // job, and it declines to guess.
             if (arrived.kind == 16) {
                 opened.wantedPeriod?.let { want ->
                     runCatching {

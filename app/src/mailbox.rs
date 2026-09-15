@@ -928,8 +928,8 @@ impl App {
     /// inside it, so this is their account and not a third party's; and the
     /// object names the inbox this thread was born from, so one cannot be
     /// lifted out of another relationship and replayed into this one.
-    fn absorb_introduction(&self, c: &Contact, opened: &OpenedMessage) {
-        let Some(payload) = opened.payload.as_deref() else { return };
+    fn absorb_introduction(&self, c: &Contact, payload: Option<&[u8]>) {
+        let Some(payload) = payload else { return };
         let Some(inbox) = c.card_inbox.clone() else {
             log::warn(TAG, format!("{} introduced themselves, but this thread predates the card binding — nothing to check it against", c.display_name()));
             return;
@@ -1981,7 +1981,7 @@ impl App {
                     self.on_wanted(&c.persona_hex, want);
                 }
             }
-            17 => self.absorb_introduction(c, opened),
+            17 => self.absorb_introduction(c, opened.payload.as_deref()),
             _ => {}
         }
     }
@@ -2067,4 +2067,195 @@ fn row_of(o: &OpenedMessage, forward_secret: bool) -> StoredMessage {
 /// The outbox a card URI does not carry — only for the log line.
 fn self_outbox_of(_uri: &str) -> String {
     String::from("(new)")
+}
+
+#[cfg(test)]
+mod introduction_tests {
+    use super::*;
+    use ducat_mobile::contacts::{build_contact_details, Profile};
+
+    fn temp_app(tag: &str) -> App {
+        let dir = std::env::temp_dir().join(format!("ducat-intro-{}-{tag}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        App::open(&dir).unwrap()
+    }
+
+    fn blank_profile() -> Profile {
+        Profile {
+            avatar: None,
+            email: None,
+            phone: None,
+            signal: None,
+            pronouns: None,
+            car_model: None,
+            car_color: None,
+            plate: None,
+            car_photo: None,
+        }
+    }
+
+    /// One persona's secret and the hex of its public half.
+    fn persona() -> (Vec<u8>, String) {
+        let mut seed = [0u8; 32];
+        // Deterministic and not all one byte, so two calls with different
+        // tags are different personas.
+        for (i, b) in seed.iter_mut().enumerate() {
+            *b = (i as u8).wrapping_mul(7).wrapping_add(3);
+        }
+        let key = ducat_core::sig::SecretKey::ed25519_from_bytes(&seed);
+        (seed.to_vec(), hex(&key.public().to_bytes()))
+    }
+
+    fn other_persona() -> (Vec<u8>, String) {
+        let seed = [0x5au8; 32];
+        let key = ducat_core::sig::SecretKey::ed25519_from_bytes(&seed);
+        (seed.to_vec(), hex(&key.public().to_bytes()))
+    }
+
+    /// A signed half as `theirs` would write it — the issuer's half, since
+    /// in these tests our side cut the card.
+    fn half(secret: &[u8], inbox: &str, name: Option<&str>) -> Vec<u8> {
+        build_contact_details(
+            secret.to_vec(),
+            "VLD0:theirs".into(),
+            vec![0xAB; 40],
+            name.map(str::to_string),
+            None,
+            blank_profile(),
+            Some("hail".into()),
+            inbox.to_string(),
+            // We cut the card, so their half is the claimant's.
+            true,
+        )
+        .unwrap()
+    }
+
+    fn contact_with(persona_hex: &str, card_inbox: Option<&str>) -> Contact {
+        Contact {
+            persona_hex: persona_hex.into(),
+            hearted: false,
+            petname: None,
+            asserted_name: None,
+            my_outbox: "VLD0:mine".into(),
+            my_outbox_owner_public: vec![1; 32],
+            my_outbox_owner_secret: vec![2; 32],
+            their_outbox: "VLD0:theirs".into(),
+            their_bundle: None,
+            their_address: None,
+            pending_address: None,
+            avatar: None,
+            email: None,
+            phone: None,
+            signal: None,
+            pronouns: None,
+            my_ring: 32,
+            car_model: None,
+            car_color: None,
+            plate: None,
+            car_photo: None,
+            their_read_up_to: None,
+            card_purpose: None,
+            my_card_purpose: Some("hail".into()),
+            my_card_purpose_at: 0,
+            card_inbox: card_inbox.map(str::to_string),
+            card_mine: true,
+            out_seq: 0,
+            out_prev_link: None,
+            in_seq: 0,
+            in_prev_link: None,
+            chat_visible: true,
+            owner: String::new(),
+        }
+    }
+
+    /// The whole point of §16.3.1: a card that published no name is named by
+    /// the introduction that follows it.
+    #[test]
+    fn an_introduction_names_a_contact_the_card_left_unnamed() {
+        let app = temp_app("names");
+        let (secret, theirs) = persona();
+        let c = contact_with(&theirs, Some("VLD0:inbox"));
+        app.put_contact(c.clone()).unwrap();
+        assert!(!c.named(), "the card published no name");
+
+        app.absorb_introduction(&c, Some(&half(&secret, "VLD0:inbox", Some("Robin"))));
+        assert_eq!(app.contact(&theirs).unwrap().asserted_name.as_deref(), Some("Robin"));
+    }
+
+    /// §16.3.1: an introduction names the inbox the thread was born from, so
+    /// one cannot be lifted out of another relationship and replayed here.
+    #[test]
+    fn an_introduction_for_another_inbox_is_refused() {
+        let app = temp_app("other_inbox");
+        let (secret, theirs) = persona();
+        let c = contact_with(&theirs, Some("VLD0:inbox"));
+        app.put_contact(c.clone()).unwrap();
+
+        app.absorb_introduction(&c, Some(&half(&secret, "VLD0:somebody-elses", Some("Robin"))));
+        assert!(app.contact(&theirs).unwrap().asserted_name.is_none());
+    }
+
+    /// It opens under the persona it names, and that persona must be the one
+    /// whose thread this is — otherwise a contact could hand over somebody
+    /// else's account of themselves.
+    #[test]
+    fn an_introduction_naming_another_persona_is_refused() {
+        let app = temp_app("other_persona");
+        let (_, theirs) = persona();
+        let (stranger_secret, _) = other_persona();
+        let c = contact_with(&theirs, Some("VLD0:inbox"));
+        app.put_contact(c.clone()).unwrap();
+
+        app.absorb_introduction(&c, Some(&half(&stranger_secret, "VLD0:inbox", Some("Robin"))));
+        assert!(app.contact(&theirs).unwrap().asserted_name.is_none());
+    }
+
+    /// A thread from before the card binding existed has nothing to check an
+    /// introduction against, and refuses rather than taking it on faith.
+    #[test]
+    fn a_thread_with_no_card_binding_refuses_one() {
+        let app = temp_app("no_binding");
+        let (secret, theirs) = persona();
+        let c = contact_with(&theirs, None);
+        app.put_contact(c.clone()).unwrap();
+
+        app.absorb_introduction(&c, Some(&half(&secret, "VLD0:inbox", Some("Robin"))));
+        assert!(app.contact(&theirs).unwrap().asserted_name.is_none());
+    }
+
+    /// §16.3.1: the first name you were given is the one you decided on. A
+    /// later, different one is shown, not adopted — a thread that renames
+    /// itself silently is how somebody becomes a person you already trusted.
+    #[test]
+    fn a_second_introduction_does_not_rename_a_named_contact() {
+        let app = temp_app("rename");
+        let (secret, theirs) = persona();
+        let c = contact_with(&theirs, Some("VLD0:inbox"));
+        app.put_contact(c.clone()).unwrap();
+
+        app.absorb_introduction(&c, Some(&half(&secret, "VLD0:inbox", Some("Robin"))));
+        let named = app.contact(&theirs).unwrap();
+        assert_eq!(named.asserted_name.as_deref(), Some("Robin"));
+
+        app.absorb_introduction(&named, Some(&half(&secret, "VLD0:inbox", Some("Your Bank"))));
+        assert_eq!(
+            app.contact(&theirs).unwrap().asserted_name.as_deref(),
+            Some("Robin"),
+            "a rename must be shown, never adopted"
+        );
+    }
+
+    /// An introduction with nothing in it changes nothing, rather than
+    /// clearing what the card had already established.
+    #[test]
+    fn an_empty_introduction_clears_nothing() {
+        let app = temp_app("empty");
+        let (_, theirs) = persona();
+        let mut c = contact_with(&theirs, Some("VLD0:inbox"));
+        c.asserted_name = Some("Robin".into());
+        app.put_contact(c.clone()).unwrap();
+
+        app.absorb_introduction(&c, None);
+        assert_eq!(app.contact(&theirs).unwrap().asserted_name.as_deref(), Some("Robin"));
+    }
 }
