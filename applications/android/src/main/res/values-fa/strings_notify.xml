@@ -36,4 +36,6 @@
     <string name="notify_ride_accepted_body">%1$s پیشنهاد شما را پذیرفت و منتظر شماست.</string>
     <string name="notify_unbonded_title">سفر بدون ضمانت</string>
     <string name="notify_unbonded_body">سفر را با %1$s توافق کردید، اما کرایه در امانت گذاشته نشد. بر پایهٔ قول شما دو نفر است — در گفتگو حلش کنید.</string>
+    <string name="notify_card_answered_title">کسی به کد شما پاسخ داد</string>
+    <string name="notify_card_answered_body">%1$s اکنون یک مخاطب است. اگر کدی به آن‌ها نشان نداده‌اید، از داخل گفتگو فراموششان کنید.</string>
 </resources>

@@ -36,4 +36,6 @@
     <string name="notify_ride_accepted_body">%1$s님이 제안을 수락했어요. 기다리고 있어요.</string>
     <string name="notify_unbonded_title">보증금 없는 운행</string>
     <string name="notify_unbonded_body">%1$s님과 운행에 합의했지만 요금을 에스크로에 넣지 못했어요. 서로의 약속에만 기대고 있어요. 채팅에서 정리하세요.</string>
+    <string name="notify_card_answered_title">누군가 당신의 코드에 응답했습니다</string>
+    <string name="notify_card_answered_body">%1$s이(가) 이제 연락처입니다. 코드를 보여준 적이 없다면 대화에서 잊어버리세요.</string>
 </resources>

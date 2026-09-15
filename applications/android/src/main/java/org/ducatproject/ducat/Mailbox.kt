@@ -942,6 +942,19 @@ object Mailbox {
                 collected++
                 spoke = true
                 DucatLog.i(TAG, "card (${issued.purpose}) answered by ${theirs.assertedName}")
+                // Somebody is now a contact, and until this the owner learned
+                // it only by opening the app (A3). A claim is not an intrusion
+                // — they were handed a card — but it is a thing that happened
+                // to this phone, and the phone should say so.
+                Notify.post(
+                    context,
+                    context.getString(R.string.notify_card_answered_title),
+                    context.getString(
+                        R.string.notify_card_answered_body,
+                        theirs.assertedName?.takeIf { it.isNotBlank() } ?: "${personaHex.take(8)}…",
+                    ),
+                    openChat = personaHex,
+                )
                 // Only the standing profile code replaces itself — a sale's
                 // handshake was for that sale, and pre-issuing another would
                 // mint records nobody will ever scan.

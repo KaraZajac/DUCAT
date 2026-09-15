@@ -36,4 +36,6 @@
     <string name="notify_ride_accepted_body">%1$s aceptó tu oferta y te está esperando.</string>
     <string name="notify_unbonded_title">El viaje no tiene depósito</string>
     <string name="notify_unbonded_body">Acordaste el viaje con %1$s, pero la tarifa no pudo depositarse. Queda en la palabra de ambos: acláralo en el chat.</string>
+    <string name="notify_card_answered_title">Alguien respondió a tu código</string>
+    <string name="notify_card_answered_body">%1$s ya es un contacto. Si no le mostraste un código, olvídalo desde la conversación.</string>
 </resources>

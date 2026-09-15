@@ -5,10 +5,17 @@
   Android requires AIDs here as an even-length hex string with no separators.
   This value is immutable: iOS readers declare selectable AIDs at build time, so
   a change is a simultaneous update of every client that exists.
+
+  requireDeviceUnlock is true (A3): unlocked, not merely awake. Android routes
+  the AID to this service whenever it may, and with false a phone in a pocket
+  handed its standing profile card to any reader brought near it — the name,
+  the avatar and whatever reach-me identifiers a profile handshake admits, to
+  somebody who never had to ask. A tap is a deliberate act everywhere else in
+  this app, and it is one here now.
 -->
 <host-apdu-service xmlns:android="http://schemas.android.com/apk/res/android"
     android:description="@string/nfc_service_description"
-    android:requireDeviceUnlock="false">
+    android:requireDeviceUnlock="true">
     <aid-group
         android:description="@string/nfc_aid_group_description"
         android:category="other">

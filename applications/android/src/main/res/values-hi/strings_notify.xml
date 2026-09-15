@@ -36,4 +36,6 @@
     <string name="notify_ride_accepted_body">%1$s ने आपका प्रस्ताव स्वीकार कर लिया। वे आपका इंतज़ार कर रहे हैं।</string>
     <string name="notify_unbonded_title">सवारी बिना जमा के है</string>
     <string name="notify_unbonded_body">आपने %1$s के साथ सवारी तय की, लेकिन किराया एस्क्रो में नहीं रखा जा सका। यह आप दोनों के भरोसे पर है — चैट में तय कर लें।</string>
+    <string name="notify_card_answered_title">किसी ने आपके कोड का उत्तर दिया</string>
+    <string name="notify_card_answered_body">%1$s अब एक संपर्क है। यदि आपने उन्हें कोड नहीं दिखाया, तो बातचीत से उन्हें भुला दें।</string>
 </resources>

@@ -36,4 +36,6 @@
     <string name="notify_ride_accepted_body">%1$s teklifini kabul etti ve seni bekliyor.</string>
     <string name="notify_unbonded_title">Yolculuk teminatsız</string>
     <string name="notify_unbonded_body">%1$s ile yolculukta anlaştın ama ücret emanete konulamadı. Karşılıklı sözünüze dayanıyor — sohbette halledin.</string>
+    <string name="notify_card_answered_title">Biri kodunu yanıtladı</string>
+    <string name="notify_card_answered_body">%1$s artık bir kişi. Onlara bir kod göstermediysen, sohbetten unut.</string>
 </resources>

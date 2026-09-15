@@ -36,4 +36,6 @@
     <string name="notify_ride_accepted_body">%1$s aceitou a tua oferta e está à tua espera.</string>
     <string name="notify_unbonded_title">Viagem sem depósito</string>
     <string name="notify_unbonded_body">Combinaste a viagem com %1$s, mas o preço não pôde ficar em depósito. Fica na palavra de ambos — resolvam no chat.</string>
+    <string name="notify_card_answered_title">Alguém respondeu ao seu código</string>
+    <string name="notify_card_answered_body">%1$s é agora um contacto. Se não lhes mostrou um código, esqueça-os a partir da conversa.</string>
 </resources>

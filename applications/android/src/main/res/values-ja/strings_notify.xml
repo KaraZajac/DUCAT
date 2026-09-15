@@ -36,4 +36,6 @@
     <string name="notify_ride_accepted_body">%1$sがあなたの提案を受け入れました。待っています。</string>
     <string name="notify_unbonded_title">保証金なしの乗車です</string>
     <string name="notify_unbonded_body">%1$sと乗車の合意はできましたが、運賃をエスクローに入れられませんでした。互いの約束だけが頼りです。チャットで話し合ってください。</string>
+    <string name="notify_card_answered_title">あなたのコードに応答がありました</string>
+    <string name="notify_card_answered_body">%1$s が連絡先になりました。コードを見せていないなら、会話から削除してください。</string>
 </resources>

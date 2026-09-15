@@ -36,4 +36,6 @@
     <string name="notify_ride_accepted_body">%1$s прийняв вашу пропозицію й чекає на вас.</string>
     <string name="notify_unbonded_title">Поїздка без застави</string>
     <string name="notify_unbonded_body">Ви домовилися про поїздку з %1$s, але плату не вдалося помістити в ескроу. Тримається на вашому слові — залагодьте це в чаті.</string>
+    <string name="notify_card_answered_title">Хтось відповів на ваш код</string>
+    <string name="notify_card_answered_body">%1$s тепер контакт. Якщо ви не показували їм код, забудьте їх із розмови.</string>
 </resources>

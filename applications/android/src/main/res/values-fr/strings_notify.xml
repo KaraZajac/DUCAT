@@ -36,4 +36,6 @@
     <string name="notify_ride_accepted_body">%1$s a accepté votre offre et vous attend.</string>
     <string name="notify_unbonded_title">Course sans dépôt</string>
     <string name="notify_unbonded_body">Vous avez convenu de la course avec %1$s, mais le prix n\'a pas pu être mis sous séquestre. Elle repose sur votre parole — réglez cela dans la discussion.</string>
+    <string name="notify_card_answered_title">Quelqu’un a répondu à votre code</string>
+    <string name="notify_card_answered_body">%1$s est désormais un contact. Si vous ne leur avez pas montré de code, oubliez-les depuis la conversation.</string>
 </resources>

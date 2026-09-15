@@ -36,4 +36,6 @@
     <string name="notify_ride_accepted_body">%1$s heeft je aanbod aangenomen en wacht op je.</string>
     <string name="notify_unbonded_title">Rit zonder borg</string>
     <string name="notify_unbonded_body">Je hebt de rit met %1$s afgesproken, maar de ritprijs kon niet in escrow. Het staat op jullie woord — regel het in de chat.</string>
+    <string name="notify_card_answered_title">Iemand heeft je code beantwoord</string>
+    <string name="notify_card_answered_body">%1$s is nu een contact. Als je hen geen code hebt getoond, vergeet ze dan vanuit het gesprek.</string>
 </resources>

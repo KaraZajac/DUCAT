@@ -36,4 +36,6 @@
     <string name="notify_ride_accepted_body">%1$s hat dein Angebot angenommen und wartet auf dich.</string>
     <string name="notify_unbonded_title">Fahrt ohne Kaution</string>
     <string name="notify_unbonded_body">Du hast die Fahrt mit %1$s vereinbart, aber der Fahrpreis konnte nicht hinterlegt werden. Sie steht auf eurem Wort — klärt es im Chat.</string>
+    <string name="notify_card_answered_title">Jemand hat deinen Code beantwortet</string>
+    <string name="notify_card_answered_body">%1$s ist jetzt ein Kontakt. Wenn du ihnen keinen Code gezeigt hast, vergiss sie aus der Unterhaltung.</string>
 </resources>

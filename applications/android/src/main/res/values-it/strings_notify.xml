@@ -36,4 +36,6 @@
     <string name="notify_ride_accepted_body">%1$s ha accettato la tua offerta e ti sta aspettando.</string>
     <string name="notify_unbonded_title">Corsa senza deposito</string>
     <string name="notify_unbonded_body">Hai concordato la corsa con %1$s, ma la tariffa non è stata messa in deposito. Regge sulla parola di entrambi: chiaritelo in chat.</string>
+    <string name="notify_card_answered_title">Qualcuno ha risposto al tuo codice</string>
+    <string name="notify_card_answered_body">%1$s ora è un contatto. Se non gli hai mostrato un codice, dimenticalo dalla conversazione.</string>
 </resources>
