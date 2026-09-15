@@ -39,6 +39,15 @@ const TAG: &str = "Mailbox";
 pub const LOG_SUBKEYS: u32 = 8;
 /// The ring every new log is minted with — and its head says so.
 pub const NEW_RING: u32 = 32;
+/// The most one contact may cost a single lap (N9).
+///
+/// A ring may legally be 1024, and a head is the counterparty's own word: a
+/// hostile contact advertising a full one made every lap do a thousand DHT
+/// reads and a thousand thread rewrites for them alone, and everybody else
+/// waited. The cursor is persisted as each row lands, so stopping early
+/// costs nothing but another lap — an honest ring of eight always finishes
+/// in one, and a ring of a thousand drains over a dozen.
+const PER_LAP_PER_CONTACT: usize = 64;
 const ONE_TIME_KEYS: u32 = 32;
 const ONE_TIME_VALID_SECS: u64 = 60 * 60 * 24 * 30;
 /// How long an unreadable slot is waited on before it is declared lost.
@@ -1643,6 +1652,10 @@ impl App {
             prev = None;
         }
         while seq < next {
+            if count >= PER_LAP_PER_CONTACT {
+                log::info(TAG, format!("{who} has more waiting than one lap carries — {} taken, the rest next lap", count));
+                break;
+            }
             if !log_still_readable(seq, next, ring) {
                 // The ring passed us. Placeholder and cursor in one commit.
                 log::warn(TAG, format!("lost message {seq} from {who} — ring wrapped"));
@@ -1650,6 +1663,7 @@ impl App {
                 self.append_and_advance(&c.persona_hex, row, seq + 1, None)?;
                 self.clear_stuck(&format!("{}:{seq}", c.persona_hex));
                 seq += 1;
+                count += 1;
                 prev = None;
                 continue;
             }
@@ -1667,6 +1681,7 @@ impl App {
                     self.append_and_advance(&c.persona_hex, row, seq + 1, None)?;
                     self.record_slot_seen(&slot_key, raw_hash, seq);
                     seq += 1;
+                    count += 1;
                     prev = None;
                     continue;
                 }
@@ -1724,6 +1739,7 @@ impl App {
                 // After the append, never before.
                 self.record_slot_seen(&slot_key, raw_hash, seq);
                 seq += 1;
+                count += 1;
                 prev = None;
                 continue;
             }
@@ -1779,6 +1795,7 @@ impl App {
                     self.append_and_advance(&c.persona_hex, row, seq + 1, None)?;
                     self.record_slot_seen(&slot_key, raw_hash, seq);
                     seq += 1;
+                    count += 1;
                     prev = None;
                     continue;
                 }

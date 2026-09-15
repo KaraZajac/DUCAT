@@ -34,6 +34,18 @@ object Mailbox {
      *  covering slow ring-slot propagation, which force-refresh does not. */
     private const val STUCK_PATIENCE_MS = 10L * 60 * 1000
 
+    /**
+     * The most one contact may cost a single lap (N9).
+     *
+     * A ring may legally be 1024, and a head is the counterparty's own word:
+     * a hostile contact advertising a full one made every lap do a thousand
+     * DHT reads and a thousand thread rewrites for them alone, and everybody
+     * else waited. The cursor is persisted as each row lands, so stopping
+     * early costs nothing but another lap — an honest ring of eight always
+     * finishes in one, and a ring of a thousand drains over a dozen.
+     */
+    private const val PER_LAP_PER_CONTACT = 64
+
     /** Failed re-push rounds before [verifyLastWrites] moves on from a
      *  window the node will not take. */
     private const val SLOT_FIX_GIVE_UP = 3
@@ -2373,6 +2385,10 @@ object Mailbox {
         }
 
         while (seq < next) {
+            if (count >= PER_LAP_PER_CONTACT) {
+                DucatLog.i(TAG, "${c.displayName()} has more waiting than one lap carries — $count taken, the rest next lap")
+                break
+            }
             if (!logStillReadable(seq, next, ring)) {
                 // The ring passed us. Saying so beats rendering a thread with a
                 // hole in it (§16.10's conversation that did not happen).
@@ -2397,6 +2413,7 @@ object Mailbox {
                 // it would otherwise sit in prefs forever.
                 clearStuck(context, "${c.personaHex}:$seq")
                 seq += 1uL
+                count += 1
                 prev = null
                 continue
             }
@@ -2439,6 +2456,7 @@ object Mailbox {
                     raw.contentHashCode(), seq,
                 )
                 seq += 1uL
+                count += 1
                 prev = null
                 continue
             }
@@ -2486,6 +2504,7 @@ object Mailbox {
                         )
                         recordSlotSeen(context, slotKey, rawHash, seq)
                         seq += 1uL
+                count += 1
                         prev = null
                         continue
                     }
@@ -2557,6 +2576,7 @@ object Mailbox {
                 // loss.
                 recordSlotSeen(context, slotKey, rawHash, seq)
                 seq += 1uL
+                count += 1
                 prev = null
                 continue
             }
@@ -2588,6 +2608,7 @@ object Mailbox {
                     clearStuck(context, "${c.personaHex}:$seq")
                     recordSlotSeen(context, "${c.personaHex}:${logSubkey(seq, ring)}", raw.contentHashCode(), seq)
                     seq += 1uL
+                count += 1
                     prev = null
                     continue
                 }
@@ -2656,6 +2677,7 @@ object Mailbox {
                     )
                     recordSlotSeen(context, "${c.personaHex}:${logSubkey(seq, ring)}", raw.contentHashCode(), seq)
                     seq += 1uL
+                count += 1
                     prev = null
                     continue
                 }
@@ -2693,6 +2715,7 @@ object Mailbox {
                     raw.contentHashCode(), seq,
                 )
                 seq += 1uL
+                count += 1
                 prev = null
                 continue
             }
@@ -2895,6 +2918,7 @@ object Mailbox {
             if (opened.consumedOneTime) store.burnOneTime(opened.prekeyId.toInt())
             prev = opened.link
             seq += 1uL
+                count += 1
             count++
         }
         return count
