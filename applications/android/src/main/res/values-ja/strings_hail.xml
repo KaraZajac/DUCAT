@@ -110,4 +110,5 @@
     <string name="hail_accept_sending">%1$sに承諾を伝えています…</string>
     <string name="hail_accept_failed">%1$sへの承諾を送れませんでした。ネットワークを確認して、オファーをもう一度開いてください。</string>
     <string name="hail_escrow_failed">運賃をエスクローに預けられませんでした。チャットでドライバーと相談してください。</string>
+    <string name="hail_dest_exact">行き先: %1$s</string>
 </resources>

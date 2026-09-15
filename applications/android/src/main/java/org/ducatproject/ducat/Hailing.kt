@@ -168,6 +168,10 @@ object Hailing {
         destText: String,
         farePxmr: ULong?,
         ttlSecs: Long = TTL_SECS,
+        /** The precise place, kept here and never published (§16.17): it goes
+         *  to the driver who claims, in the sealed thread, and to nobody
+         *  else. Empty keeps the old behaviour of saying nothing. */
+        destExact: String = "",
         /** Called on the calling thread as each step begins. */
         onStep: (Step) -> Unit = {},
     ): Standing {
@@ -268,6 +272,7 @@ object Hailing {
                 inboxKey = card.inboxKey, cardUri = card.uri,
                 expiry = expiry, notice = bytes,
                 owner = ownerHex,
+                destExact = destExact,
             ),
         )
         DucatLog.i(TAG, "hail posted at $board subkey $sub")

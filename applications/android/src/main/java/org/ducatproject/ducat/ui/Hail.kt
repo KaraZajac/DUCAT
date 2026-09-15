@@ -241,10 +241,10 @@ private fun migrateDown(context: android.content.Context, p: PostedHail): Posted
  */
 private val HitSaver = androidx.compose.runtime.saveable.listSaver<
     org.ducatproject.ducat.Geo.Hit?, Any>(
-    save = { h -> h?.let { listOf(it.label, it.latE7, it.lonE7) } ?: emptyList() },
+    save = { h -> h?.let { listOf(it.label, it.coarse, it.latE7, it.lonE7) } ?: emptyList() },
     restore = { f ->
         if (f.isEmpty()) null
-        else org.ducatproject.ducat.Geo.Hit(f[0] as String, f[1] as Long, f[2] as Long)
+        else org.ducatproject.ducat.Geo.Hit(f[0] as String, f[1] as String, f[2] as Long, f[3] as Long)
     },
 )
 
@@ -2414,7 +2414,10 @@ fun HailSheet(
                 locating = false
                 from = f?.let {
                     org.ducatproject.ducat.Geo.Hit(
-                        context.getString(R.string.hail_my_location), it.first, it.second)
+                        context.getString(R.string.hail_my_location),
+                        context.getString(R.string.hail_my_location),
+                        it.first, it.second,
+                    )
                 }
                 if (f == null) error = context.getString(R.string.hail_location_fix_failed)
             }
@@ -2598,7 +2601,13 @@ fun HailSheet(
                                 step = org.ducatproject.ducat.Hailing.Step.CARD
                                 val f = from!!
                                 val t = to!!
-                                val destText = t.label.take(64)
+                                // §16.17: the board carries what a stranger
+                                // needs to *decide* — the area and the cell —
+                                // never what they need to *arrive*. The
+                                // precise place goes to the driver who claims,
+                                // in the sealed thread, and to nobody else.
+                                val destText = t.coarse.ifBlank { t.label }.take(64)
+                                val destExact = t.label.take(120)
                                 // The post outlives the sheet on purpose: a
                                 // dismissal mid-write must not orphan a live
                                 // notice on the board.
@@ -2608,6 +2617,7 @@ fun HailSheet(
                                         val dCell = uniffi.ducat_mobile.geohashEncode(t.latE7, t.lonE7, 6u)
                                         val standing = org.ducatproject.ducat.Hailing.post(
                                             context, oCell, dCell, destText, fare,
+                                            destExact = destExact,
                                         ) { s -> step = s }
                                         // The wide copy goes on its own coroutine, **after** the rider
                                         // has been told they are standing: it is two more round trips

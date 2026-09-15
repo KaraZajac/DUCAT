@@ -110,4 +110,5 @@
     <string name="hail_accept_sending">Dizendo sim para %1$s…</string>
     <string name="hail_accept_failed">Seu sim para %1$s não foi enviado. Verifique a rede e veja a oferta de novo.</string>
     <string name="hail_escrow_failed">O valor da corrida não pôde ser colocado em custódia. Resolva com o motorista na conversa.</string>
+    <string name="hail_dest_exact">Destino: %1$s</string>
 </resources>

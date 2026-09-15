@@ -38,6 +38,9 @@ class RideStore(context: Context) {
          *  copy) must speak as the same one the embedded card belongs to.
          *  Empty = the primary, the single-persona era's value. */
         val owner: String = "",
+        /** The precise destination, kept on this phone and never published
+         *  (§16.17). Sent to the driver who claims, in the sealed thread. */
+        val destExact: String = "",
     )
 
     fun save(r: PostedRide) {
@@ -52,6 +55,7 @@ class RideStore(context: Context) {
             .putString("board2", r.board2)
             .putInt("subkey2", r.subkey2.toInt())
             .putString("ride_owner", r.owner)
+            .putString("dest_exact", r.destExact)
             .apply()
     }
 
@@ -65,6 +69,7 @@ class RideStore(context: Context) {
             notice = prefs.getString("notice", null)
                 ?.let { android.util.Base64.decode(it, android.util.Base64.NO_WRAP) }
                 ?: ByteArray(0),
+            destExact = prefs.getString("dest_exact", null) ?: "",
             board2 = prefs.getString("board2", null),
             subkey2 = prefs.getInt("subkey2", 0).toUInt(),
             owner = prefs.getString("ride_owner", "") ?: "",
@@ -74,7 +79,7 @@ class RideStore(context: Context) {
     fun clear() = prefs.edit()
         .remove("board").remove("subkey").remove("inbox")
         .remove("card").remove("expiry").remove("notice")
-        .remove("board2").remove("subkey2").remove("ride_owner")
+        .remove("board2").remove("subkey2").remove("ride_owner").remove("dest_exact")
         .apply()
 
     // --- tombstones -------------------------------------------------------

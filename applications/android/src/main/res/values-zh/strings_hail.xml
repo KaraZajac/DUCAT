@@ -110,4 +110,5 @@
     <string name="hail_accept_sending">正在答应 %1$s…</string>
     <string name="hail_accept_failed">给 %1$s 的答应没有发出。检查网络后再看一次报价。</string>
     <string name="hail_escrow_failed">车费未能放入托管。请在聊天里和司机商量。</string>
+    <string name="hail_dest_exact">目的地：%1$s</string>
 </resources>

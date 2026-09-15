@@ -110,4 +110,5 @@
     <string name="hail_accept_sending">Надсилаємо згоду %1$s…</string>
     <string name="hail_accept_failed">Твоя згода для %1$s не надіслалася. Перевір мережу й відкрий пропозицію знову.</string>
     <string name="hail_escrow_failed">Не вдалося внести плату в депозит. Домовся з водієм у чаті.</string>
+    <string name="hail_dest_exact">Пункт призначення: %1$s</string>
 </resources>

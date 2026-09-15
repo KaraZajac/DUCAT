@@ -958,6 +958,17 @@ object Mailbox {
                 // it only by opening the app (A3). A claim is not an intrusion
                 // — they were handed a card — but it is a thing that happened
                 // to this phone, and the phone should say so.
+                // §16.17: the board carried the area; the driver who claimed
+                // gets the place. In the sealed thread, to them alone, the
+                // moment there is a thread to put it in.
+                if (issued.purpose == "hail") {
+                    RideStore(context).load()?.destExact?.takeIf { it.isNotBlank() }?.let { where ->
+                        runCatching {
+                            val them = store.all().firstOrNull { it.personaHex == personaHex }
+                            if (them != null) send(context, them, context.getString(R.string.hail_dest_exact, where))
+                        }.onFailure { DucatLog.w(TAG, "could not send the destination: ${it.message}") }
+                    }
+                }
                 Notify.post(
                     context,
                     context.getString(R.string.notify_card_answered_title),

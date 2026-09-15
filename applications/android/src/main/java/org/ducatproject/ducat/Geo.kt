@@ -23,7 +23,15 @@ import java.net.URLEncoder
 object Geo {
     private const val UA = "DUCAT/0.8 (github.com/KaraZajac/DUCAT)"
 
-    data class Hit(val label: String, val latE7: Long, val lonE7: Long)
+    /**
+     * A place a person picked.
+     *
+     * [label] is what they see and what they are going to: "Blue Café — Main
+     * Street, Springfield". [coarse] is the same place with the name and the
+     * street taken off — "Springfield, Illinois" — because §16.17 puts a
+     * coarse area on a public board and nothing a stranger needs to *arrive*.
+     */
+    data class Hit(val label: String, val coarse: String, val latE7: Long, val lonE7: Long)
     data class Route(
         val meters: Long,
         val seconds: Long,
@@ -82,14 +90,23 @@ object Geo {
                 val display = o.optString("display_name")
                 // "Name — street, town" beats a nine-part administrative
                 // genealogy. Three parts of context is what a person scans.
-                val context = display.split(", ")
-                    .filterNot { it == name }.take(3).joinToString(", ")
+                val parts = display.split(", ").filterNot { it == name }
+                val context = parts.take(3).joinToString(", ")
+                // The same place with the specific half taken off: no name, no
+                // street number, no street. What is left is the area, which is
+                // what a public board may carry (§16.17). Falls back to the
+                // context and then to the town-shaped tail rather than to
+                // nothing — a board entry with no words is no use to anybody.
+                val area = parts.drop(1).take(2).joinToString(", ")
+                    .ifBlank { parts.take(2).joinToString(", ") }
+                    .ifBlank { display }
                 Hit(
                     label = when {
                         name.isNotBlank() && context.isNotBlank() -> "$name — $context"
                         name.isNotBlank() -> name
                         else -> display
                     }.take(90),
+                    coarse = area.take(64),
                     latE7 = (o.getString("lat").toDouble() * 1e7).toLong(),
                     lonE7 = (o.getString("lon").toDouble() * 1e7).toLong(),
                 )
