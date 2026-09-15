@@ -1126,6 +1126,20 @@ impl TapPresent {
             ));
         }
 
+        // §15.3.2 (W16): a payer-presented tap has no offer to commit to —
+        // the customer's phone does not know the price and the till has not
+        // made one yet — and the document said `offer_commit` was
+        // "necessarily empty", which the field could not express: it is
+        // thirty-two bytes, always present, and empty was not a value. All
+        // zeroes *is* the value, and a reader refuses a payer-presented tap
+        // that claims a commitment it cannot have.
+        if presenter_role == PresenterRole::Payer && offer_commit != [0u8; 32] {
+            return Err(Reject::with_detail(
+                RejectCode::Malformed,
+                "a payer-presented tap commits to no offer",
+            ));
+        }
+
         Ok(TapPresent {
             version,
             suite,
