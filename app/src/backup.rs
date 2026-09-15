@@ -25,7 +25,16 @@ fn backup_key(k: &str) -> bool {
     k.starts_with("thread_") || k.starts_with("disappear_") || k.starts_with("usedtheirs_") || k.starts_with("sub_") || k.starts_with("mode_persona_")
 }
 
-const APP_STATE_KEYS: [&str; 7] = ["tabs_v1", "publish_address", "receipts_v1", "claimed_kis_v1", "issued_cards", "donation_receipted", "worn_persona"];
+/// Keys of the contacts store that a bundle carries whole.
+///
+/// `wallet_sends` earns its place twice over (M8). Without it a restored
+/// wallet re-scans the chain, finds its own spends, and can say nothing about
+/// any of them: who they went to, what they were for, or when — the rows come
+/// back undated and unexplained, and a merchant's statement loses its history
+/// exactly where an accountant needs it. And since §9.5 the record is the only
+/// place a send's transaction key survives, so a bundle without it is a wallet
+/// that can never again prove a payment it made.
+const APP_STATE_KEYS: [&str; 8] = ["tabs_v1", "publish_address", "receipts_v1", "claimed_kis_v1", "issued_cards", "donation_receipted", "worn_persona", "wallet_sends"];
 
 /// A table value as the phone keeps it: structures as JSON text.
 fn as_phone(v: &Value) -> Value {
@@ -460,6 +469,24 @@ mod tests {
         a.store("trust")
             .put("vouches_about", &vec![crate::trust::VouchRecord { signer_hex: "ab".repeat(32), subject_hex: "cd".repeat(32), ts: 8, envelope_hex: "00".into() }])
             .unwrap();
+        a.store(crate::contacts::CONTACTS)
+            .put(
+                "wallet_sends",
+                &vec![crate::wallet::SentPayment {
+                    txid_hex: "ff".repeat(32),
+                    amount_pxmr: 5_000_000_000,
+                    fee: 121_000_000,
+                    to_address: "5Aaa".into(),
+                    contact: Some("cd".repeat(32)),
+                    note: Some("for the kayak".into()),
+                    tx_key: Some("ab".repeat(32)),
+                    ts: 1_760_000_000,
+                    donate: false,
+                    recovered: false,
+                    key_images: Vec::new(),
+                }],
+            )
+            .unwrap();
         let bytes = a.export_backup_bytes("correct horse battery staple ocean").unwrap();
         assert!(bytes.len() > 200);
         let path = base.join("bundle.ducat");
@@ -490,6 +517,12 @@ mod tests {
         assert_eq!(b.burn_of(&"cd".repeat(32)).map(|v| (v.amount_pxmr, v.height)), Some((20_000_000_000, 2_207_293)));
         assert_eq!(b.record_of(&"cd".repeat(32)).receipts, 1);
         assert_eq!(b.store("trust").get::<Vec<crate::trust::VouchRecord>>("vouches_about").unwrap().len(), 1);
+        // M8: a spend's story — and its transaction key — survive the bundle.
+        let sends = b.sends();
+        assert_eq!(sends.len(), 1);
+        assert_eq!(sends[0].txid_hex, "ff".repeat(32));
+        assert_eq!(sends[0].tx_key.as_deref(), Some("ab".repeat(32).as_str()));
+        assert_eq!(sends[0].note.as_deref(), Some("for the kayak"));
         assert!(b.import_backup_from(&path, "wrong passphrase").is_err());
     }
 }

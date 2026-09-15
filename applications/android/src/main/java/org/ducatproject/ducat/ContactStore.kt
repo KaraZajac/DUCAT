@@ -1062,6 +1062,14 @@ class ContactStore(context: Context) {
             // primary, which for a shop that lives in its second persona
             // is answering customers as the owner's private self.
             "worn_persona",
+            // Every spend's story (M8). Without it a restored wallet re-scans
+            // the chain, finds its own spends, and can say nothing about any
+            // of them — who they went to, what they were for, when — so a
+            // statement comes back undated and unexplained exactly where an
+            // accountant needs it. And since §9.5 the record is the only
+            // place a send's transaction key survives, so a bundle without it
+            // is a wallet that can never again prove a payment it made.
+            "wallet_sends",
         )
 
     fun backupAppState(): ByteArray {

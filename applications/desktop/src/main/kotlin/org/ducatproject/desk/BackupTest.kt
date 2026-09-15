@@ -188,11 +188,16 @@ private fun appState() {
     // here — so a restore without it leaves somebody holding a card that
     // claims into silence.
     val cards = """[{"inbox":"VLD0:abc","wsec":"c2Vjcg==","uri":"ducat:card","answered_by":null}]"""
+    val sends = """[{"txid":"ff","amt":5000000000,"fee":121000000,"to":"5Aaa","note":"for the kayak","txKey":"abcd","ts":1760000000}]"""
     src.getSharedPreferences("ducat_contacts", 0).edit()
         .putStringSet("claimed_kis_v1", kis)
         .putBoolean("publish_address", true)
         .putString("receipts_v1", "[{\"r\":1}]")
         .putString("issued_cards", cards)
+        // M8: every spend's story, and the only place a transaction key
+        // survives. Lost, a restored wallet re-scans the chain, finds its own
+        // spends and can explain none of them — nor ever prove one again.
+        .putString("wallet_sends", sends)
         // §16.11: which of a contact's one-time ids we already spent.
         // Lost, a restored device re-offers them and seals to keys the
         // other side has burned.
@@ -297,6 +302,8 @@ private fun appState() {
     check(pub) { "BACKUPTEST_FAIL publish_address dropped" }
     check(rec == "[{\"r\":1}]") { "BACKUPTEST_FAIL receipts_v1: got $rec" }
     check(crd == cards) { "BACKUPTEST_FAIL issued_cards: got $crd" }
+    val snd = dst.getSharedPreferences("ducat_contacts", 0).getString("wallet_sends", null)
+    check(snd == sends) { "BACKUPTEST_FAIL wallet_sends: got $snd" }
     val used = dst.getSharedPreferences("ducat_contacts", 0)
         .getString("usedtheirs_ab12", null)
     check(used == "3,7,11") { "BACKUPTEST_FAIL usedtheirs: got $used" }

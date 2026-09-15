@@ -363,9 +363,16 @@ impl App {
                 outbox.key.clone(),
                 prekeys.bundle.clone(),
                 display_name.clone(),
-                // §16.12 makes publishing an address a choice; the desk has
-                // no wallet yet, so the choice is not offered.
-                None,
+                // §16.12 makes publishing an address a choice, and the phone
+                // has always answered it here. The desk answered `None`
+                // because an old comment said it had no wallet — it has one,
+                // and the silence cost a buyer who obeyed a listing's minimum
+                // a Pay button that could never light. Per *card*, never the
+                // main address: what a board reader learns is one address
+                // nobody can tie to another.
+                self.publish_address()
+                    .then(|| self.address_for(&format!("card_{}", inbox.key)))
+                    .flatten(),
                 // §16.9: the profile rides the record, scoped to the purpose.
                 self.profile_wire(&owner_hex, Some(purpose), false),
                 Some(purpose.to_string()),

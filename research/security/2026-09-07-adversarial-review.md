@@ -110,7 +110,7 @@ the fix landed), **open**, **deferred** (design decision recorded, not scheduled
 | M5 | Medium | Ceremony.kt | The joining party adopts the inviter's fare, stakes and funder index unchecked | **fixed** (e2ab23c6) |
 | M6 | Medium | Ledger.kt, ContactStore.kt, ledger.rs | Any contact can relabel, itemise and "tax" a row of the merchant's statement | **open** |
 | M7 | Medium | Donations.kt, donations.rs | A donation receipt is issued for any transaction the wallet received | **open** |
-| M8 | Medium | ContactStore.kt, backup.rs, Ledger.kt | Restore loses send records; spends become epoch-dated "unexplained" rows | **open** |
+| M8 | Medium | ContactStore.kt, backup.rs, Ledger.kt | Restore loses send records; spends become epoch-dated "unexplained" rows | **fixed 2026-09-14** — `wallet_sends` rides the bundle on both clients; round-tripped by the desk test and the shim's backuptest |
 | M9 | Medium | ui/Pay.kt, Pin.kt | Stale-rate rule and payer verification policy not applied | **open** |
 | M10 | Low | Orders.kt, orders.rs | Pool-sighted orders promoted without the second opinion | **fixed** (6f3d4e9c) |
 | M11 | Low | Ceremony.kt | Consent TOCTOU on a superseding proposal | **fixed** (e2ab23c6): the tap carries the displayed figure and a digest |
