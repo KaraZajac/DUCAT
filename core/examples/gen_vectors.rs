@@ -2320,6 +2320,32 @@ fn contact_cases() -> Vec<J> {
             ..call_offer.clone()
         }, None);
 
+    // §16.3's identity coda, kind 17: what a public card does not publish.
+    let introduction = Message {
+        kind: MessageKind::Introduction,
+        // A short label, as a roster's is: the content is the payload, and a
+        // body is required of every message (§16.10).
+        body: "introduction".into(),
+        amount_pxmr: None,
+        payload: Some(vec![0xC0; 96]),
+        ..base_pay.clone()
+    };
+    money("introduction_valid",
+        "A card on a board is read by everyone, so a rider hailing a ride publishes no name. Once it is claimed there are two parties and a sealed thread, and this hands over the half a board never sees: the signed CONTACT_ACCEPT, in the payload.",
+        &introduction, None);
+    money("introduction_without_details",
+        "An introduction that introduces nothing. The payload is the whole content of this kind, as the key is a publication message's and the reference a position's.",
+        &Message { payload: None, ..introduction.clone() },
+        Some((RejectCode::Malformed, "an introduction carries the details it introduces")));
+    money("introduction_with_an_amount",
+        "Saying who you are moves no money. An amount here is a number nothing will honour.",
+        &Message { amount_pxmr: Some(1), ..introduction.clone() },
+        Some((RejectCode::Malformed, "this message kind must not carry an amount")));
+    money("introduction_as_a_ceremony_round",
+        "The ceremony's own fields stay off it, the same rule a roster follows: an introduction is not a round.",
+        &Message { round: Some(0), ceremony_id: Some([0xE5; 32]), ..introduction.clone() },
+        Some((RejectCode::Malformed, "an introduction is not a ceremony round")));
+
     // The half-reference cannot be built from the struct (both fields or none),
     // so it is made by deleting one from the encoding — same trick as the
     // half-attachment below.

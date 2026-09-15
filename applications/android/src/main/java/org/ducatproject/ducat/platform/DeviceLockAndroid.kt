@@ -34,6 +34,72 @@ object DeviceLockAndroid : DeviceLock.Backend {
         BiometricManager.from(context).canAuthenticate(ALLOWED) ==
             BiometricManager.BIOMETRIC_SUCCESS
 
+    /**
+     * The one question Android answers about *when* the owner last proved
+     * themselves: a Keystore key bound to user authentication for a window.
+     * Initialising a cipher with it succeeds while the window holds and
+     * throws `UserNotAuthenticatedException` once it lapses, so the key is
+     * the clock and this process keeps no timestamp of its own to be wrong
+     * about.
+     *
+     * The window is fixed when the key is made, so a changed setting remakes
+     * it. Null when there is no secure lock screen to bind to — the caller
+     * then asks for the app's own secret, which is the honest answer for a
+     * phone with nothing guarding it.
+     */
+    override fun authenticatedWithin(context: Context, withinSecs: Int): Boolean? {
+        val alias = "ducat_spend_window_$withinSecs"
+        return runCatching {
+            val store = java.security.KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
+            if (!store.containsAlias(alias)) {
+                val spec = android.security.keystore.KeyGenParameterSpec.Builder(
+                    alias,
+                    android.security.keystore.KeyProperties.PURPOSE_ENCRYPT,
+                )
+                    .setBlockModes(android.security.keystore.KeyProperties.BLOCK_MODE_GCM)
+                    .setEncryptionPaddings(android.security.keystore.KeyProperties.ENCRYPTION_PADDING_NONE)
+                    .setUserAuthenticationRequired(true)
+                    .also { b ->
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                            b.setUserAuthenticationParameters(
+                                withinSecs,
+                                android.security.keystore.KeyProperties.AUTH_DEVICE_CREDENTIAL or
+                                    android.security.keystore.KeyProperties.AUTH_BIOMETRIC_STRONG,
+                            )
+                        } else {
+                            @Suppress("DEPRECATION")
+                            b.setUserAuthenticationValidityDurationSeconds(withinSecs)
+                        }
+                    }
+                    .build()
+                javax.crypto.KeyGenerator.getInstance(
+                    android.security.keystore.KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore",
+                ).apply { init(spec) }.generateKey()
+            }
+            val key = store.getKey(alias, null) as javax.crypto.SecretKey
+            javax.crypto.Cipher.getInstance("AES/GCM/NoPadding").init(javax.crypto.Cipher.ENCRYPT_MODE, key)
+            true
+        }.getOrElse { e ->
+            when (e) {
+                // The window lapsed. A real answer, not a failure.
+                is android.security.keystore.UserNotAuthenticatedException -> false
+                // The lock screen went away after the key was made; the key
+                // is gone with it. Same answer as never having had one.
+                is android.security.keystore.KeyPermanentlyInvalidatedException -> {
+                    runCatching {
+                        java.security.KeyStore.getInstance("AndroidKeyStore")
+                            .apply { load(null) }.deleteEntry(alias)
+                    }
+                    null
+                }
+                else -> {
+                    DucatLog.i(TAG, "no authentication window available: ${e.message}")
+                    null
+                }
+            }
+        }
+    }
+
     override fun prompt(
         context: Context,
         title: String,

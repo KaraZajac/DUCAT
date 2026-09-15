@@ -2168,7 +2168,7 @@ def parse_message(buf):
             raise Reject("Malformed", "kind is not an integer")
         if kind == 0:
             raise Reject("Malformed", "text is encoded by omitting the kind")
-        if kind not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16):
+        if kind not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17):
             raise Reject("Malformed", "unknown message kind")
     else:
         kind = 0
@@ -2331,7 +2331,7 @@ def parse_message(buf):
     # A FROST round (9) is the exception: a release proposal MAY state the
     # amount the funder gets back — the consent screen shows it beside the
     # signed payload (§15.12's settlement); a statement, not authority.
-    if kind in (0, 4, 5, 8, 10, 12, 13, 14, 15, 16) and out["amount"] is not None:
+    if kind in (0, 4, 5, 8, 10, 12, 13, 14, 15, 16, 17) and out["amount"] is not None:
         raise Reject("Malformed", "this kind must not carry an amount")
     if kind in (1, 2, 3) and out["amount"] is None:
         raise Reject("Malformed", "a payment message must carry an amount")
@@ -2423,7 +2423,7 @@ def parse_message(buf):
         raise Reject("Malformed", "a call message carries its route and id")
     if kind not in (14, 15) and out["call"] is not None:
         raise Reject("Malformed", "only a call message carries a call route")
-    if kind in (0, 5, 6, 7, 8, 9, 10) and (out["items"] or out["tax"] is not None):
+    if kind in (0, 5, 6, 7, 8, 9, 10, 17) and (out["items"] or out["tax"] is not None):
         raise Reject("Malformed", "this message kind has no bill to itemise")
     # An eta is a ride offer's courtesy figure, bounded by honesty: a day.
     if out["eta"] is not None:
@@ -2446,6 +2446,16 @@ def parse_message(buf):
             raise Reject("Malformed", "an abort names the ceremony it ends")
         if out["payload"] is not None:
             raise Reject("Malformed", "an abort withdraws a ceremony; it carries no round payload")
+    elif kind == 17:
+        # §16.3's identity coda: the signed CONTACT_ACCEPT rides the payload,
+        # bounded like a roster's because it carries an avatar and a car's
+        # photograph; the ceremony's own fields stay off it.
+        if not out["payload"]:
+            raise Reject("Malformed", "an introduction carries the details it introduces")
+        if len(out["payload"]) > MAX_ATTACHMENT_BYTES:
+            raise Reject("Malformed", "an introduction is bounded like an attachment")
+        if out["round"] is not None or out["ceremony"] is not None:
+            raise Reject("Malformed", "an introduction is not a ceremony round")
     elif kind == 12:
         # §16.19: the member list rides the payload, bounded like a ceremony
         # round's; the ceremony's own fields stay off it.

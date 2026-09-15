@@ -1404,6 +1404,7 @@ async fn watch_log(outbox_key: &str, their_persona: &[u8]) -> Result<(), Box<dyn
                                 MessageKind::CallOffer => "offers a call",
                                 MessageKind::CallAnswer => "answers a call",
                                 MessageKind::PublicationWanted => "asks to be sold a period",
+                                MessageKind::Introduction => "says who they are",
                                 MessageKind::Text => unreachable!(),
                             },
                             m.amount_pxmr

@@ -48,6 +48,19 @@ object DeviceLock {
             subtitle: String,
             onResult: (Boolean) -> Unit,
         )
+
+        /**
+         * Was the *device* authenticated within the last [withinSecs]?
+         *
+         * Not "is the screen unlocked", which a thief holding the phone also
+         * satisfies and which core names as passive for that reason. This is
+         * the stronger question, and Android answers it in only one place: a
+         * Keystore key bound to user authentication for a window either works
+         * or refuses. Null where the question cannot be asked at all — no
+         * secure lock screen, no keystore — which the caller reads as "ask
+         * for the app's own secret instead".
+         */
+        fun authenticatedWithin(context: Context, withinSecs: Int): Boolean?
     }
 
     @Volatile
@@ -73,4 +86,14 @@ object DeviceLock {
 
     fun remember(context: Context, used: Boolean) =
         prefs(context).edit().putBoolean("prefer_device_lock", used).apply()
+
+    /**
+     * Whether the owner proved themselves to the *phone* within the window.
+     *
+     * Null means the phone cannot say — no secure lock screen — and a caller
+     * that cannot ask this question must fall back to the app's own secret
+     * rather than let the payment through.
+     */
+    fun authenticatedWithin(context: Context, withinSecs: Int): Boolean? =
+        runCatching { backend?.authenticatedWithin(context, withinSecs) }.getOrNull()
 }

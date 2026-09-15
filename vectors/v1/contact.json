@@ -1628,6 +1628,49 @@
     },
     {
       "expect": {
+        "ok": true,
+        "reencodes_to_hex": "a9001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6c696e74726f64756374696f6e18a01a6553f10018b21118d65860c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0"
+      },
+      "kind": "message.payment",
+      "name": "introduction_valid",
+      "payment_hex": "a9001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6c696e74726f64756374696f6e18a01a6553f10018b21118d65860c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0",
+      "why": "A card on a board is read by everyone, so a rider hailing a ride publishes no name. Once it is claimed there are two parties and a sealed thread, and this hands over the half a board never sees: the signed CONTACT_ACCEPT, in the payload."
+    },
+    {
+      "expect": {
+        "hint": "an introduction carries the details it introduces",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "introduction_without_details",
+      "payment_hex": "a8001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6c696e74726f64756374696f6e18a01a6553f10018b211",
+      "why": "An introduction that introduces nothing. The payload is the whole content of this kind, as the key is a publication message's and the reference a position's."
+    },
+    {
+      "expect": {
+        "hint": "this message kind must not carry an amount",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "introduction_with_an_amount",
+      "payment_hex": "aa001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6c696e74726f64756374696f6e18a01a6553f10018b21118b30118d65860c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0",
+      "why": "Saying who you are moves no money. An amount here is a number nothing will honour."
+    },
+    {
+      "expect": {
+        "hint": "an introduction is not a ceremony round",
+        "ok": false,
+        "reject": "MALFORMED"
+      },
+      "kind": "message.payment",
+      "name": "introduction_as_a_ceremony_round",
+      "payment_hex": "ab001701010201189d00189e58200000000000000000000000000000000000000000000000000000000000000000189f6c696e74726f64756374696f6e18a01a6553f10018b21118d65860c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c018d70018d85820e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5",
+      "why": "The ceremony's own fields stay off it, the same rule a roster follows: an introduction is not a round."
+    },
+    {
+      "expect": {
         "hint": "a position reference carries its record and its key together",
         "ok": false,
         "reject": "MALFORMED"

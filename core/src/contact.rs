@@ -866,6 +866,20 @@ pub enum MessageKind {
     /// back is a bill, or the key when the period is free — and either way
     /// the reader can see on their own statement what they asked for.
     PublicationWanted = 16,
+    /// **Who I am, now that we are doing business** (§16.3's identity coda).
+    ///
+    /// A card on a public board is read by everybody, so what it may carry is
+    /// only what a stranger needs in order to *decide*. A rider hailing a ride
+    /// does not have to publish their name to the neighbourhood to get one.
+    /// The rest travels here instead: once a card has been claimed there are
+    /// two parties and a sealed thread, and this is the message that hands
+    /// over the half a board never sees.
+    ///
+    /// The payload is the same signed `CONTACT_ACCEPT` a card's inbox half
+    /// carries (§16.9), so nothing new is invented and nothing is taken on
+    /// faith: it opens under the persona it names, and it names the inbox the
+    /// thread was born from. A reader that cannot tie it to both refuses it.
+    Introduction = 17,
     /// "Pick up — here is the door" (§16.21). The offer carries a fresh
     /// private-route blob and a call id; media flows as app messages on
     /// that route, never through the mailbox. Ringing is a message, so
@@ -896,6 +910,7 @@ impl MessageKind {
             14 => MessageKind::CallOffer,
             15 => MessageKind::CallAnswer,
             16 => MessageKind::PublicationWanted,
+            17 => MessageKind::Introduction,
             _ => return None,
         })
     }
@@ -1543,7 +1558,8 @@ impl Message {
             | (MessageKind::PublicationKey, Some(_))
             | (MessageKind::CallOffer, Some(_))
             | (MessageKind::CallAnswer, Some(_))
-            | (MessageKind::PublicationWanted, Some(_)) => {
+            | (MessageKind::PublicationWanted, Some(_))
+            | (MessageKind::Introduction, Some(_)) => {
                 return Err(Reject::with_detail(
                     RejectCode::Malformed,
                     "this message kind must not carry an amount",
@@ -1594,6 +1610,7 @@ impl Message {
                 | MessageKind::DkgRound
                 | MessageKind::FrostRound
                 | MessageKind::CeremonyAbort
+                | MessageKind::Introduction
         ) && (!out.items.is_empty() || out.tax_pxmr.is_some())
         {
             // The ride's bill comes later, through §15.11's meter; a retract
@@ -1877,6 +1894,30 @@ impl Message {
                 return Err(Reject::with_detail(
                     RejectCode::Malformed,
                     "an abort withdraws a ceremony; it carries no round payload",
+                ));
+            }
+        } else if out.kind == MessageKind::Introduction {
+            // §16.3: the coda's payload is a signed CONTACT_ACCEPT, bounded
+            // like a roster's because it carries an avatar and a car's
+            // photograph. The ceremony's own fields stay off it.
+            if out.payload.as_ref().map(|p| p.is_empty()).unwrap_or(true) {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "an introduction carries the details it introduces",
+                ));
+            }
+            if let Some(p) = &out.payload {
+                if p.len() as u64 > MAX_ATTACHMENT_BYTES {
+                    return Err(Reject::with_detail(
+                        RejectCode::Malformed,
+                        "an introduction is bounded like an attachment",
+                    ));
+                }
+            }
+            if out.round.is_some() || out.ceremony_id.is_some() {
+                return Err(Reject::with_detail(
+                    RejectCode::Malformed,
+                    "an introduction is not a ceremony round",
                 ));
             }
         } else if out.kind == MessageKind::GroupRoster {
