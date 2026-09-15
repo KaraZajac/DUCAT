@@ -718,6 +718,12 @@ internal fun previewOf(context: Context, m: StoredMessage): String = when {
     m.kind == 13 -> context.getString(
         R.string.chatlist_preview_issue, isolate(m.pubPeriodId ?: ""),
     ).trim()
+    // §16.3.1. Its body is a fixed label the *sender* wrote, so it is never
+    // drawn: "introduction" in a preview line would be somebody else's
+    // untranslated word sitting where this phone's own words go.
+    m.kind == 17 -> context.getString(
+        if (m.outgoing) R.string.chat_you_introduced else R.string.chat_introduced_you,
+    )
     // §9.5's links preview as what they are, never as a line of hex.
     m.kind == 0 && Trust.linkIn(m.body) != null ->
         Trust.linkWords(context, m.body, m.outgoing) ?: isolate(m.body)

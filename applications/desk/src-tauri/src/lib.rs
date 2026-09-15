@@ -838,7 +838,11 @@ fn contact_row(a: &App, c: Contact) -> ContactRow {
     let marks = ducat_app::contacts::retractions(&thread);
     let last = thread.iter().rev().find(|r| {
         r.surfaces()
-            && !matches!(r.kind, 4 | 5 | 14 | 15)
+            // §16.3.1's introduction joins the list of rows that are not
+            // the last thing *said*: its body is a fixed label the sender
+            // wrote, and a preview reading "introduction" would be their
+            // untranslated word standing in for this desk's own.
+            && !matches!(r.kind, 4 | 5 | 14 | 15 | 17)
             && !marks.unsent.contains(&(r.seq, r.timestamp))
             && !marks.quiet.contains(&(r.seq, r.timestamp))
     });

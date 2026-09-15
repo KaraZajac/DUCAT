@@ -955,6 +955,12 @@ impl App {
             _ => None,
         };
         let p = theirs.profile.clone();
+        // **Only the name and the profile.** The half also carries an
+        // outbox key and a prekey bundle, and adopting either from here
+        // would let a contact re-point their own thread mid-conversation —
+        // which is W1's shape, authentic signature and all: the chain would
+        // reset and a reader would follow it. Re-establishing a thread is a
+        // card's job, where the counters and the held-address rule are.
         let updated = self.merge_contact(&c.persona_hex, |cur| {
             let base = cur.cloned().unwrap_or_else(|| c.clone());
             Contact {

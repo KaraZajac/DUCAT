@@ -482,6 +482,12 @@ object Mailbox {
         val renamed = theirs.assertedName?.takeIf { c.assertedName != null && c.assertedName != it }
         val store = ContactStore(context)
         val p = theirs.profile
+        // **Only the name and the profile.** The half also carries an
+        // outbox key and a prekey bundle, and adopting either from here
+        // would let a contact re-point their own thread mid-conversation —
+        // which is W1's shape, authentic signature and all: the chain would
+        // reset and a reader would follow it. Re-establishing a thread is a
+        // card's job, where the counters and the held-address rule are.
         store.merge(c.personaHex) { cur0 ->
             val cur = cur0 ?: c
             cur.copy(
