@@ -165,7 +165,14 @@ object Ledger {
         val loose = ArrayList<Loose>()
         for (r in receipts) {
             val rid = r.txidHex?.lowercase()
-            if (rid != null) papered[rid] = r
+            // Ours wins (M6). A receipt is a document its *writer* signs, and
+            // a counterparty's names a transaction they chose — so letting
+            // theirs replace ours by arriving second let any contact relabel,
+            // itemise and "tax" a row of this phone's own statement.
+            if (rid != null) {
+                val have = papered[rid]
+                if (have == null || !(have.mine && !r.mine)) papered[rid] = r
+            }
             // An out-of-band receipt is txid-less because the money took
             // another rail entirely — cash across the bar. There is no chain
             // event for it to match, so it never enters the loose pool, where
@@ -274,8 +281,14 @@ object Ledger {
             val hex = knownHex ?: paper?.contactHex
             if (paper == null && hex == null) e
             else e.copy(
-                items = paper?.items ?: e.items,
-                taxPxmr = paper?.taxPxmr,
+                // Money that came *in* is this phone's own sale: only a
+                // receipt written here may say what was sold and what tax was
+                // collected on it (M6). A counterparty's receipt for money we
+                // received is still shown as receipted and credited to them
+                // by name — it is their word about our sale, and it does not
+                // get to write our books.
+                items = paper?.takeUnless { !it.mine && e.direction == Direction.Received }?.items ?: e.items,
+                taxPxmr = paper?.takeUnless { !it.mine && e.direction == Direction.Received }?.taxPxmr,
                 receipted = paper != null,
                 contactHex = hex,
                 receiptBy = paper?.let { if (it.mine) "you" else it.counterparty },

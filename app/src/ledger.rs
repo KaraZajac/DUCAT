@@ -421,7 +421,17 @@ impl App {
         for r in receipts {
             match r.txid.as_deref().map(|t| t.to_lowercase()) {
                 Some(id) => {
-                    papered.insert(id, r);
+                    // Ours wins (M6). A receipt is a document its *writer*
+                    // signs, and a counterparty's names a transaction they
+                    // chose — so letting theirs replace ours by arriving
+                    // second let any contact relabel, itemise and "tax" a row
+                    // of this desk's own statement.
+                    match papered.get(&id) {
+                        Some(have) if have.mine && !r.mine => {}
+                        _ => {
+                            papered.insert(id, r);
+                        }
+                    }
                 }
                 None if r.amount_pxmr > 0 && !r.oob => loose.push((r, false)),
                 None => {}
@@ -478,8 +488,17 @@ impl App {
                 }
                 let hex = known_hex.or_else(|| paper.as_ref().map(|p| p.contact_hex.clone()));
                 if let Some(p) = &paper {
-                    e.items = p.items.clone();
-                    e.tax_pxmr = p.tax;
+                    // Money that came *in* is this desk's own sale: only a
+                    // receipt this desk wrote may say what was sold and what
+                    // tax was collected on it (M6). A counterparty's receipt
+                    // for money we received is still shown as receipted and
+                    // credited to them by name — it is their word about our
+                    // sale, and it does not get to write our books.
+                    let theirs_about_ours = !p.mine && e.direction == Direction::Received;
+                    if !theirs_about_ours {
+                        e.items = p.items.clone();
+                        e.tax_pxmr = p.tax;
+                    }
                     e.receipted = true;
                     e.receipt_by = Some(if p.mine { "you".to_string() } else { p.counterparty.clone() });
                     e.receipt_at = p.timestamp;
@@ -716,6 +735,48 @@ mod tests {
         assert_eq!(pend.txid, "txp");
         let s = summarize(&ev, 0, u64::MAX);
         assert_eq!(s.out_count, 0);
+    }
+
+    /// M6: a receipt is a document its writer signs. A counterparty's
+    /// receipt for money *we* received is their word about our sale, and it
+    /// does not get to say what we sold or what tax we collected.
+    #[test]
+    fn a_contacts_receipt_cannot_write_our_books() {
+        let mine = ReceiptRecord {
+            txid: Some("aa".repeat(32)),
+            amount_pxmr: 1_000,
+            items: vec![BillItem { description: "Coffee".into(), amount_pxmr: 1_000 }],
+            tax: Some(100),
+            contact_hex: "cd".repeat(32),
+            counterparty: "Pat".into(),
+            mine: true,
+            timestamp: 10,
+            oob: false,
+            seq: 1,
+        };
+        let theirs = ReceiptRecord {
+            items: vec![BillItem { description: "Consulting".into(), amount_pxmr: 1_000 }],
+            tax: Some(900),
+            mine: false,
+            seq: 2,
+            ..mine.clone()
+        };
+        // Whichever order they arrive in, ours is the one kept for the id.
+        for order in [vec![mine.clone(), theirs.clone()], vec![theirs.clone(), mine.clone()]] {
+            let mut papered: HashMap<String, ReceiptRecord> = HashMap::new();
+            for r in order {
+                let id = r.txid.clone().unwrap().to_lowercase();
+                match papered.get(&id) {
+                    Some(have) if have.mine && !r.mine => {}
+                    _ => {
+                        papered.insert(id, r);
+                    }
+                }
+            }
+            let kept = papered.values().next().unwrap();
+            assert!(kept.mine, "a contact's receipt replaced ours");
+            assert_eq!(kept.tax, Some(100));
+        }
     }
 
     #[test]
