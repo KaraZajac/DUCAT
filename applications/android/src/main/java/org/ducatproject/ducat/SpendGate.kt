@@ -133,7 +133,10 @@ object SpendGate {
         if (raw.isNullOrBlank()) return emptyList()
         return raw.split(',').mapNotNull { row ->
             val at = row.substringBefore(':', "").toLongOrNull() ?: return@mapNotNull null
-            val m = row.substringAfter(':', "").toLongOrNull() ?: return@mapNotNull null
+            // Non-negative, for the same reason [minorUnits] is: the sum
+            // crosses the bridge as a `ULong`, and one negative row would
+            // make an hour's spending read as astronomically large.
+            val m = row.substringAfter(':', "").toLongOrNull()?.takeIf { it >= 0 } ?: return@mapNotNull null
             if (at > now + FUTURE_SLACK_SECS || now - at > windowS) null else at to m
         }
     }
@@ -154,7 +157,11 @@ object SpendGate {
         val store = RateStore(context)
         if (!store.enabled() || store.isStale()) return 0L
         val rate = store.cached()?.first ?: return 0L
-        return (pxmr / 1_000_000_000_000.0 * rate * 100.0).toLong()
+        // Never below zero. Every caller hands the result to a `ULong` across
+        // the bridge, where a negative would not be a small number — it would
+        // be an enormous one, and an enormous amount clears every threshold
+        // the wrong way round.
+        return (pxmr / 1_000_000_000_000.0 * rate * 100.0).toLong().coerceAtLeast(0L)
     }
 
     // --- the decision -------------------------------------------------------

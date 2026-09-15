@@ -59,6 +59,18 @@ class SpendWindowTest {
         assertEquals(0L, sum(window((now + 3_600) to 50L), now))
     }
 
+    /**
+     * The sum crosses the bridge as an unsigned number, where a negative
+     * would not be a small value — it would be an enormous one, and an
+     * enormous hour clears every threshold the wrong way round.
+     */
+    @Test
+    fun `a negative amount is dropped rather than wrapping`() {
+        val now = 1_000_000L
+        assertEquals(0L, sum("$now:-5", now))
+        assertEquals(7L, sum("$now:-5,$now:7", now))
+    }
+
     @Test
     fun `rubbish in the store is no spend rather than a crash`() {
         assertEquals(0L, sum("not a window at all", 1_000_000))
